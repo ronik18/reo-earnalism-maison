@@ -69,3 +69,20 @@ class LearningAcceptanceTests(TestCase):
         with self.assertRaises(DomainError): svc.lesson_detail(self.user,self.quiz.lesson_id)
         self.track.access='deny';self.track.save()
         with self.assertRaises(DomainError): svc.quiz_public(self.user,self.quiz.id)
+
+    def test_configured_prerequisite_and_current_quiz_completion_are_enforced(self):
+        from .models import Lesson
+        first=self.quiz.lesson;first.completion_rule='quiz_pass';first.pass_score=100;first.save()
+        later=Lesson.objects.create(track=self.track,title='Next lesson',ordinal=first.ordinal+100,requires_previous=True)
+        with self.assertRaises(DomainError) as error:svc.lesson_detail(self.user,later.id)
+        self.assertEqual(error.exception.code,'prerequisite_unmet')
+        with self.assertRaises(DomainError) as error:svc.complete_lesson(self.user,first.id)
+        self.assertEqual(error.exception.code,'completion_rule_unmet')
+        attempt=svc.start_attempt(self.user,self.quiz.id,self.quiz.version)
+        answers=[{'question_id':q['question_id'],'option_id':q['correct_option_id']} for q in attempt.scoring_snapshot]
+        svc.submit_attempt(self.user,attempt.id,answers,1)
+        svc.complete_lesson(self.user,first.id)
+        self.assertEqual(svc.lesson_detail(self.user,later.id)['lesson_id'],str(later.id))
+        # A changed key requires the current revision's quiz rather than silently carrying mastery.
+        self.quiz.version+=1;self.quiz.save()
+        with self.assertRaises(DomainError):svc.complete_lesson(self.other,first.id)

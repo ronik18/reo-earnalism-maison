@@ -43,12 +43,13 @@ def entitlement_expires_at(user,revision,format='reader',at=None):
 
 
 @transaction.atomic
-def ensure_free_entitlement(user,revision,format='reader'):
+def ensure_free_entitlement(user,revision,format='reader',territory='IN'):
     from library.services import authorize_revision
-    revision=authorize_revision(user,revision,format,action='download')
+    revision=authorize_revision(user,revision,format,action='download',territory=territory)
     if revision.access_policy.get(format)!='free':raise DomainError('free_grant_not_permitted','This format is not explicitly free.',403)
     # Lock actor for two simultaneous first free grants. Durable key survives personal receipt expiry.
-    type(user).objects.select_for_update().get(pk=user.pk)
+    from django.contrib.auth import get_user_model
+    get_user_model().objects.select_for_update().get(pk=user.pk)
     row,created=Entitlement.objects.get_or_create(grant_key=f'free:{user.public_id}:{revision.id}',defaults={
         'user':user,'source':'free','scope':'edition','edition':revision.edition,'revision':revision,'formats':[format],
         'valid_from':timezone.now(),'valid_until':None})
@@ -72,7 +73,19 @@ def order_data(row):
     payment=row.payments.order_by('-captured_at').first()
     return {'order_id':str(row.id),'offer_id':str(row.offer_id),'offer_version':row.offer_snapshot.get('offer_version',row.offer.version),'status':row.status,'fulfillment_status':row.fulfillment_status,
         'amount':{'amount_minor':row.total_minor,'currency':row.currency},'refunded_amount_minor':refunded,'payment_status':payment.status if payment else 'not_started',
-        'created_at':row.created_at.isoformat().replace('+00:00','Z'),'expires_at':row.expires_at.isoformat().replace('+00:00','Z'),'version':row.version,'checkout':None,'entitlement_ids':[str(x) for x in row.entitlements.values_list('id',flat=True)],'return_path':row.return_path}
+        'created_at':row.created_at.isoformat().replace('+00:00','Z'),'expires_at':row.expires_at.isoformat().replace('+00:00','Z'),'version':row.version,'checkout':checkout_data(row),'entitlement_ids':[str(x) for x in row.entitlements.values_list('id',flat=True)],'return_path':row.return_path}
+
+
+def checkout_data(row):
+    if not row.provider_order_id or row.status not in ['created','pending'] or row.expires_at<=timezone.now():return None
+    if row.provider!='razorpay':return None
+    from .checkout import qualified_mode
+    try:mode,key,secret=qualified_mode()
+    except DomainError:return None
+    if not row.test_only:return None
+    return {'provider':'razorpay','public_key_id':key,'provider_order_id':row.provider_order_id,
+        'amount':{'amount_minor':row.total_minor,'currency':row.currency},'name':'Earnalism — Sandbox',
+        'description':row.offer.name[:220]+' (test payment)'}
 
 
 def create_local_order(user,offer,operation_id,return_path='/',offer_version=None,terms_version=None):
@@ -106,8 +119,12 @@ def apply_capture(order_id,facts,event_id=None,territory='IN'):
 
     No public endpoint can construct these facts until a real adapter is qualified.
     """
-    if facts.verification_source!='synthetic_test':raise DomainError('provider_not_enabled','No live merchant verifier has been qualified.',409)
-    if not getattr(settings,'MAISON_LOCAL_FIXTURES',False):raise DomainError('synthetic_payment_forbidden','Synthetic payment facts are local-test only.',403)
+    if facts.verification_source=='razorpay_api_test':
+        from .checkout import qualified_mode
+        qualified_mode()
+        if facts.provider!='razorpay':raise DomainError('invalid_payment_facts','Invalid verifier/provider binding.',422)
+    elif facts.verification_source!='synthetic_test':raise DomainError('provider_not_enabled','No live merchant verifier has been qualified.',409)
+    if facts.verification_source=='synthetic_test' and not getattr(settings,'MAISON_LOCAL_FIXTURES',False):raise DomainError('synthetic_payment_forbidden','Synthetic payment facts are local-test only.',403)
     if (type(facts.amount_minor)!=int or facts.amount_minor<=0 or len(facts.evidence_sha256)!=64
             or any(c not in '0123456789abcdef' for c in facts.evidence_sha256)
             or not facts.provider or len(facts.provider)>20 or not facts.payment_id or len(facts.payment_id)>128):
@@ -125,6 +142,7 @@ def apply_capture(order_id,facts,event_id=None,territory='IN'):
         existing=Payment.objects.select_for_update().filter(provider=facts.provider,provider_payment_id=facts.payment_id).first()
         if existing:
             if existing.order_id!=order.id or existing.amount_minor!=facts.amount_minor or existing.currency!=facts.currency:raise DomainError('payment_identity_mismatch','Payment identity cannot be reassigned.',409)
+            if event_id:PaymentEvent.objects.create(provider=facts.provider,provider_event_id=event_id,body_sha256=facts.evidence_sha256,payment=existing,status='applied')
             return order_data(order)
         now=timezone.now();late=order.status in ['expired','cancelled','failed'] or order.expires_at<=now
         payment=Payment.objects.create(order=order,provider=facts.provider,provider_payment_id=facts.payment_id,amount_minor=facts.amount_minor,currency=facts.currency,
@@ -152,10 +170,10 @@ def apply_capture(order_id,facts,event_id=None,territory='IN'):
                 Entitlement.objects.get_or_create(grant_key=f'order:{order.id}',defaults={'user':order.user,'source':'one_time_order','scope':'edition','order':order,'edition_id':edition_id,'formats':order.offer_snapshot['formats'],
                     'valid_from':now,'valid_until':now+timedelta(seconds=order.offer_snapshot['duration_seconds'])})
                 order.fulfillment_status='granted'
-                snapshot={'order_id':str(order.id),'amount_minor':order.total_minor,'currency':order.currency,'local_test_document':True}
-                inv,_=Invoice.objects.get_or_create(order=order,defaults={'number':f'LOCAL-TEST-{order.id}','amount_minor':order.total_minor,'currency':order.currency,'document_sha256':hashlib.sha256(json.dumps(snapshot,sort_keys=True).encode()).hexdigest(),'line_snapshot':snapshot,'issued_at':now})
+                snapshot={'order_id':str(order.id),'amount_minor':order.total_minor,'currency':order.currency,'local_test_document':True,'sandbox':facts.verification_source=='razorpay_api_test'}
+                inv,_=Invoice.objects.get_or_create(order=order,defaults={'number':f"{'SANDBOX' if facts.verification_source=='razorpay_api_test' else 'LOCAL-TEST'}-{order.id}",'amount_minor':order.total_minor,'currency':order.currency,'document_sha256':hashlib.sha256(json.dumps(snapshot,sort_keys=True).encode()).hexdigest(),'line_snapshot':snapshot,'issued_at':now})
                 PaymentAllocation.objects.get_or_create(payment=payment,invoice=inv,defaults={'amount_minor':order.total_minor})
-        order.save();audit(order.user,'payment.synthetic_capture_applied',order,{'source':facts.verification_source,'fulfillment':order.fulfillment_status})
+        order.save();audit(order.user,'payment.capture_applied',order,{'source':facts.verification_source,'fulfillment':order.fulfillment_status})
         return order_data(order)
 
 

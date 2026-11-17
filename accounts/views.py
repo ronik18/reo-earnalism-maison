@@ -31,7 +31,7 @@ def require_fresh(request):
     raw=request.session.get('reauthenticated_at')
     try: stamp=__import__('datetime').datetime.fromisoformat(raw)
     except (TypeError,ValueError):raise DomainError('reauthentication_required','Confirm your identity before this action.',403)
-    if timezone.now()-stamp>timedelta(minutes=5):raise DomainError('reauthentication_required','Confirm your identity before this action.',403)
+    if timezone.is_naive(stamp) or not timedelta(0)<=timezone.now()-stamp<=timedelta(minutes=5):raise DomainError('reauthentication_required','Confirm your identity before this action.',403)
 
 
 @ensure_csrf_cookie
@@ -137,6 +137,8 @@ def change_password(request):
         user=User.objects.select_for_update().get(pk=request.user.pk);user.set_password(data['new_password']);user.session_epoch+=1;user.version+=1;user.save()
         current=request.session.session_key;keys=list(user.devices.exclude(session_id=current).exclude(session_id=None).values_list('session_id',flat=True));Session.objects.filter(session_key__in=keys).delete()
         user.devices.exclude(session_id=current).filter(revoked_at__isnull=True).update(revoked_at=timezone.now(),version=F('version')+1)
+        from reader.models import DownloadLicense
+        DownloadLicense.objects.filter(user=user,revoked_at=None).exclude(device_id=request.session.get('device_id')).update(revoked_at=timezone.now())
         EmailActionToken.objects.filter(user=user,consumed_at__isnull=True).update(consumed_at=timezone.now())
         update_session_auth_hash(request,user);request.session['session_epoch']=user.session_epoch;request.session['reauthenticated_at']=timezone.now().isoformat()
         # Django rotated the current session key; keep its bound device relationship.
@@ -158,7 +160,10 @@ def revoke_device(request,device_id):
         if not d:raise DomainError('not_found','Device not found.',404)
         if not d.revoked_at:
             if d.session_id:Session.objects.filter(session_key=d.session_id).delete()
-            d.revoked_at=timezone.now();d.version+=1;d.save(update_fields=['revoked_at','version']);audit(request.user,'device.revoked',d)
+            d.revoked_at=timezone.now();d.version+=1;d.save(update_fields=['revoked_at','version'])
+            from reader.models import DownloadLicense
+            DownloadLicense.objects.filter(device=d,revoked_at=None).update(revoked_at=d.revoked_at)
+            audit(request.user,'device.revoked',d)
         return 204,{},d.version
     status,body=apply_operation(request.user,key,'device.revoke',{'device_id':device_id},mutate)
     if request.session.get('device_id')==str(device_id):services.logout_member(request)
@@ -175,12 +180,14 @@ def privacy_data(job):
 @json_endpoint(('GET','POST'))
 def privacy_requests(request):
     if request.method=='GET':
-        return api_response({'items':[privacy_data(x) for x in OutboxJob.objects.filter(actor=request.user,kind__in=['privacy_export','privacy_delete']).order_by('-created_at')[:100]],'next_cursor':None,'has_more':False})
+        from core.pagination import keyset_page
+        rows=OutboxJob.objects.filter(actor=request.user,kind__in=['privacy_export','privacy_delete'])
+        return api_response(keyset_page(rows,request.GET,f'privacy:{request.user.pk}','created_at',privacy_data))
     require_fresh(request);d=json_body(request,{'kind','confirm'},['kind','confirm'])
     if d['kind'] not in ['export','delete'] or d['confirm'] is not True:raise DomainError('validation_error','Explicit confirmation is required.',422)
     key=operation_key(request)
     def mutate():
-        job=OutboxJob.objects.create(kind='privacy_'+d['kind'],actor=request.user,dedupe_key=f'privacy:{request.user.public_id}:{key}',payload={},not_before=timezone.now());audit(request.user,'privacy.requested',job,{'kind':d['kind']})
+        job=OutboxJob.objects.create(kind='privacy_'+d['kind'],actor=request.user,dedupe_key=f'privacy:{request.user.public_id}:{key}',payload={'session_epoch':request.user.session_epoch},not_before=timezone.now());audit(request.user,'privacy.requested',job,{'kind':d['kind']})
         return 202,privacy_data(job),1
     status,body=apply_operation(request.user,key,'privacy.create',d,mutate);return api_response(body,status)
 
@@ -210,17 +217,37 @@ def privacy_download(request,privacy_request_id):
     job=OutboxJob.objects.filter(id=privacy_request_id,actor=request.user,kind='privacy_export',status='done').first()
     if not job:raise DomainError('not_found','A completed export was not found.',404)
     if not job.result.get('expires_at') or timezone.now()>=__import__('datetime').datetime.fromisoformat(job.result['expires_at'].replace('Z','+00:00')):raise DomainError('export_expired','Request a new export.',410)
+    from library import storage
+    artifact_expiry=__import__('datetime').datetime.fromisoformat(job.result['expires_at'].replace('Z','+00:00'))
+    expiry=min(timezone.now()+timedelta(seconds=120),artifact_expiry)
+    seconds=int((expiry-timezone.now()).total_seconds())
+    if seconds<1:raise DomainError('export_expired','Request a new export.',410)
+    if job.result.get('storage_key'):
+        # Upload completion already verified immutable bytes; do not redownload the export to mint a URL.
+        if storage.is_r2():url=storage.private_url(job.result['storage_key'],seconds,'application/json')
+        else:
+            job.result['delivery_until']=services.iso(expiry);job.save(update_fields=['result'])
+            url=request.build_absolute_uri(f'/api/v1/me/privacy/requests/{job.id}/file')
+        return api_response({'url':url,'expires_at':services.iso(expiry),'sha256':job.result['sha256'],'bytes':job.result['bytes'],'content_type':'application/json'})
+    # Retained development exports are usable only in local mode; no production disk fallback.
+    if not settings.LOCAL:raise DomainError('export_unavailable','Request a new export.',410)
     path=Path(settings.BASE_DIR)/'.local'/'privacy'/job.result['artifact_name']
     if not path.exists():raise DomainError('export_unavailable','Request a new export.',410)
-    expiry=timezone.now()+timedelta(seconds=120);job.result['delivery_until']=services.iso(expiry);job.save(update_fields=['result'])
-    return api_response({'url':f'/api/v1/me/privacy/requests/{job.id}/file','expires_at':services.iso(expiry),'sha256':__import__('hashlib').sha256(path.read_bytes()).hexdigest(),'bytes':path.stat().st_size,'mime_type':'application/json'})
+    job.result['delivery_until']=services.iso(expiry);job.save(update_fields=['result'])
+    return api_response({'url':request.build_absolute_uri(f'/api/v1/me/privacy/requests/{job.id}/file'),'expires_at':services.iso(expiry),'sha256':__import__('hashlib').sha256(path.read_bytes()).hexdigest(),'bytes':path.stat().st_size,'content_type':'application/json'})
 
 
 @json_endpoint(('GET',))
 def privacy_file(request,privacy_request_id):
-    require_fresh(request);job=OutboxJob.objects.filter(id=privacy_request_id,actor=request.user,kind='privacy_export',status='done').first()
+    require_fresh(request)
+    if not settings.LOCAL:raise DomainError('export_unavailable','Request a private download grant.',410)
+    job=OutboxJob.objects.filter(id=privacy_request_id,actor=request.user,kind='privacy_export',status='done').first()
     if not job or not job.result.get('delivery_until') or timezone.now()>=__import__('datetime').datetime.fromisoformat(job.result['delivery_until'].replace('Z','+00:00')):raise DomainError('export_expired','Request a new download.',410)
-    path=Path(settings.BASE_DIR)/'.local'/'privacy'/job.result['artifact_name']
+    if job.result.get('storage_key'):
+        from library import storage
+        storage.verify_private(job.result['storage_key'],job.result['bytes'],job.result['sha256'],'application/json')
+        path=storage._local_path(job.result['storage_key'])
+    else:path=Path(settings.BASE_DIR)/'.local'/'privacy'/job.result['artifact_name']
     if not path.exists():raise DomainError('export_unavailable','Request a new export.',410)
     response=FileResponse(path.open('rb'),as_attachment=True,filename='earnalism-personal-data.json',content_type='application/json');response['Cache-Control']='private, no-store';return response
 
@@ -232,3 +259,28 @@ def contact(request):
     if d['locale'] not in ['en','bn'] or d['category'] not in ['account','billing','content','accessibility','privacy','other'] or not isinstance(d['message'],str) or not 10<=len(d['message'])<=5000:raise DomainError('validation_error','Invalid support message.',422)
     OutboxJob.objects.create(kind='contact_support',dedupe_key=f'contact:{__import__("uuid").uuid4()}',actor=request.user if request.user.is_authenticated else None,payload=d,not_before=timezone.now())
     return api_response(acknowledgement(request),202)
+
+
+@json_endpoint(('GET','POST'))
+def mfa_totp(request):
+    from . import mfa
+    if request.method=='GET':return api_response(mfa.status(request))
+    json_body(request,set());return api_response(mfa.enroll(request),201)
+
+
+@json_endpoint(('POST',))
+def mfa_confirm(request):
+    from . import mfa
+    data=json_body(request,{'token'},['token']);return api_response(mfa.confirm(request,data['token']))
+
+
+@json_endpoint(('POST',))
+def mfa_verify(request):
+    from . import mfa
+    data=json_body(request,{'token'},['token']);return api_response(mfa.verify(request,data['token']))
+
+
+@json_endpoint(('POST',))
+def mfa_recover(request):
+    from . import mfa
+    data=json_body(request,{'code'},['code']);return api_response(mfa.recover(request,data['code']))

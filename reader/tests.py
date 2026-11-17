@@ -50,6 +50,32 @@ class ReaderAcceptanceTests(ReaderFixture,TestCase):
         self.assertEqual(vault.json()['finished'][0]['completion']['version'],1)
     def annotation(self):
         return {'annotation_id':str(uuid.uuid4()),'edition_revision_id':str(self.revision.id),'kind':'highlight','range':{'unit_id':str(self.unit.id),'start_anchor_id':str(self.para.anchor_id),'start_offset_chars':0,'end_anchor_id':str(self.para.anchor_id),'end_offset_chars':5,'offset_unit':'unicode_code_point'},'color':'mint','note_text':None}
+    def test_authorized_unpublished_draft_annotations_survive_reload(self):
+        from library.services import clone_revision
+        from .services import annotation_data
+        draft=clone_revision(self.revision.pk);draft.rights.update(approved=True)
+        # Isolated fixture becomes an unpublished draft review target.
+        self.edition.live_revision=None;self.edition.save()
+        staff=User.objects.create_superuser('draft-review@example.test',PASS)
+        self.client.post('/api/v1/auth/login',{'email':staff.email,'password':PASS},content_type='application/json')
+        unit=draft.units.first();paragraph=unit.paragraphs.first()
+        data=self.annotation();data['edition_revision_id']=str(draft.id)
+        data['range'].update(unit_id=str(unit.id),start_anchor_id=str(paragraph.anchor_id),end_anchor_id=str(paragraph.anchor_id))
+        created=self.client.post('/api/v1/me/annotations',data,content_type='application/json',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
+        self.assertEqual(created.status_code,201,created.content);self.assertEqual(created.json()['anchor_status'],'valid')
+        reloaded=self.client.get('/api/v1/me/annotations',{'edition_revision_id':str(draft.id)})
+        self.assertEqual(reloaded.json()['items'][0]['anchor_status'],'valid')
+        row=Annotation.objects.select_related('revision__edition').get(pk=data['annotation_id'])
+        self.assertEqual(annotation_data(row,self.user)['anchor_status'],'orphaned')
+        paragraph.text='Changed draft text invalidates old quote.';paragraph.save()
+        self.assertEqual(annotation_data(row,staff)['anchor_status'],'orphaned')
+        self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json')
+        denied=self.client.post('/api/v1/me/annotations',{**data,'annotation_id':str(uuid.uuid4())},content_type='application/json',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
+        self.assertEqual(denied.status_code,404)
+        # An existing different live revision keeps the old orphan behavior.
+        self.edition.live_revision=self.revision;self.edition.save();row.revision.edition=self.edition
+        self.assertEqual(annotation_data(row,staff)['anchor_status'],'orphaned')
+
     def test_annotation_quote_palette_ownership_and_tombstone_replay(self):
         data=self.annotation();key=str(uuid.uuid4());first=self.client.post('/api/v1/me/annotations',data,content_type='application/json',HTTP_IDEMPOTENCY_KEY=key)
         self.assertEqual(first.status_code,201,first.content);validate_schema(first.json(),'Annotation');self.assertEqual(first.json()['quoted_text'],self.para.text[:5])

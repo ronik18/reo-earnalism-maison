@@ -145,6 +145,8 @@ def confirm_password_reset(token,new_password):
         now=timezone.now();session_keys=list(Device.objects.filter(user=user,revoked_at__isnull=True).exclude(session_id=None).values_list('session_id',flat=True))
         Session.objects.filter(session_key__in=session_keys).delete();Device.objects.filter(user=user,revoked_at__isnull=True).update(revoked_at=now,version=F('version')+1)
         EmailActionToken.objects.filter(user=user,consumed_at__isnull=True).update(consumed_at=now)
+        from reader.models import DownloadLicense
+        DownloadLicense.objects.filter(user=user,revoked_at=None).update(revoked_at=now)
         audit(user,'account.password_reset',user)
 
 
@@ -173,6 +175,9 @@ def login_member(request,email,password):
 def logout_member(request):
     if request.user.is_authenticated:
         Device.objects.filter(user=request.user,session_id=request.session.session_key,revoked_at__isnull=True).update(revoked_at=timezone.now(),version=F('version')+1)
+    if request.user.is_authenticated:
+        from reader.models import DownloadLicense
+        DownloadLicense.objects.filter(user=request.user,device_id=request.session.get('device_id'),revoked_at=None).update(revoked_at=timezone.now())
     logout(request);request._maison_clear_device_cookie=True
 
 
@@ -223,7 +228,7 @@ def update_preferences(user,data,base_version):
     pref.version+=1;pref.save();return preferences_data(pref)
 
 
-def process_outbox_job(job):
+def process_outbox_job(job,max_seconds=45):
     if job.kind=='email_action':
         action=EmailActionToken.objects.get(pk=job.payload['action_id'])
         if action.consumed_at or action.expires_at<=timezone.now():return {'status':'expired_without_send'}
@@ -233,28 +238,16 @@ def process_outbox_job(job):
         send_mail('Earnalism account action',f'Use this link to confirm your requested account action: {link}\nThis link expires at {iso(action.expires_at)}.',getattr(settings,'DEFAULT_FROM_EMAIL','local@localhost'),[action.email_normalized],fail_silently=False)
         return {'status':'sent'}
     if job.kind=='privacy_export':
-        user=job.actor
-        if not user:raise DomainError('account_unavailable','Account unavailable.',409)
-        from reader.services import export_personal_data
-        payload={'schema_version':1,'profile':{'member_id':str(user.public_id),'email':user.email,'display_name':user.display_name},
-            'preferences':preferences_data(Preferences.objects.get_or_create(user=user)[0]),**export_personal_data(user)}
-        directory=Path(settings.BASE_DIR)/'.local'/'privacy';directory.mkdir(parents=True,exist_ok=True)
-        path=directory/f'{job.id}.json';path.write_text(json.dumps(payload,ensure_ascii=False,indent=2))
-        path.chmod(0o600)
-        return {'artifact_name':path.name,'expires_at':iso(timezone.now()+timedelta(days=7))}
+        from .privacy import create_export
+        return create_export(job,max_seconds=max_seconds)
     if job.kind=='privacy_delete':
-        from billing.models import Order,LegacyLiability
-        user=job.actor
-        if Order.objects.filter(user=user,status__in=['creating','created','pending']).exists() or LegacyLiability.objects.filter(user=user,status='unresolved').exists():
-            raise DomainError('awaiting_resolution','Outstanding obligations require resolution.',409)
-        from reader.services import delete_personal_data
-        with transaction.atomic():
-            user=User.objects.select_for_update().get(pk=user.pk);delete_personal_data(user)
-            now=timezone.now();keys=list(user.devices.exclude(session_id=None).values_list('session_id',flat=True))
-            Session.objects.filter(session_key__in=keys).delete();user.devices.filter(revoked_at__isnull=True).update(revoked_at=now)
-            user.email=f'deleted-{user.public_id}@invalid.local';user.display_name='';user.first_name='';user.last_name='';user.is_active=False;user.session_epoch+=1;user.set_unusable_password();user.save()
-            Preferences.objects.filter(user=user).delete();Consent.objects.filter(user=user).delete();EmailActionToken.objects.filter(user=user).delete()
-            audit(user,'privacy.account_anonymised',user)
-        return {'status':'anonymised_financial_records_retained'}
-    if job.kind=='contact_support':return {'status':'recorded_for_local_operator','external_delivery':False}
+        from .privacy import delete_account
+        return delete_account(job)
+    if job.kind=='contact_support':
+        recipient=getattr(settings,'SUPPORT_EMAIL','')
+        if not recipient and not settings.LOCAL:raise DomainError('support_not_configured','Support delivery must be configured.',503)
+        if recipient:
+            send_mail('Earnalism support: '+job.payload['category'],job.payload['message']+'\nReply to: '+job.payload['email'],getattr(settings,'DEFAULT_FROM_EMAIL',''),[recipient],fail_silently=False)
+            return {'status':'delivered','external_delivery':True}
+        return {'status':'recorded_for_local_operator','external_delivery':False}
     raise DomainError('unknown_job_kind','No handler exists for this job.',409)

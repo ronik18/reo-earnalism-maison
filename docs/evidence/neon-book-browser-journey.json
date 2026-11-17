@@ -1,0 +1,52 @@
+{
+  "reviewed_on": "2026-11-18",
+  "scope": "desktop browser + real pooled Neon PostgreSQL18, local private media adapter, staff draft only",
+  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+  "edition_revision_id": "3988156b-2eee-4839-b542-2d3b8b253307",
+  "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+  "paragraphs": 32,
+  "browser_steps_passed": [
+    "actual password sign-in and exact draft destination",
+    "approved front/back cover pair and publisher footer",
+    "all32 canonical paragraphs and first/last passages",
+    "explicit saved position and reload/reopening without false conflict",
+    "gold highlight and note survive reload",
+    "23px sepia preferences persist",
+    "Bengali controls preserve English text and note/completion",
+    "explicit completion persists",
+    "Saved and Finished both reopen draft",
+    "sign-out denies full draft"
+  ],
+  "persisted_progress_version": 6,
+  "persisted_progress_anchor": "d2378984-52b0-49d1-95fa-716e845c1cd4",
+  "persisted_progress_paragraph": 31,
+  "completion": true,
+  "note_color": "gold",
+  "preferences": {
+    "size": 23,
+    "theme": "sepia"
+  },
+  "member_denial": {
+    "reader": 404,
+    "manifest": 404,
+    "draft_cover": 403
+  },
+  "guest_denial": {
+    "reader": 404,
+    "draft_cover": 401,
+    "catalog": 404
+  },
+  "pooled_and_direct_TLS": true,
+  "pending_migrations": 0,
+  "state": "draft",
+  "live_revision_id": null,
+  "paid_resources_created": false,
+  "legacy_changed": false,
+  "not_qualified": [
+    "public production release",
+    "R2/CDN delivery",
+    "physical mobile/offline acceptance",
+    "full47-region publication permissions",
+    "payments/audio/video not offered for this book"
+  ]
+}

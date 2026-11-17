@@ -4,6 +4,8 @@ from . import views
 app_name = "web"
 urlpatterns = [
     path("", views.root, name="root"),
+    path("maison-sw.js",views.service_worker,name="service-worker"),
+    path("<str:locale>/offline/",views.offline_shell,name="offline-shell"),
     path("auth/verify/", views.verify_landing, name="verify-landing"),
     path("auth/reset/", views.reset_landing, name="reset-landing"),
     path("<str:locale>/", views.home, name="home"),
@@ -13,6 +15,7 @@ urlpatterns = [
     path("<str:locale>/titles/<str:identifier>/", views.title, name="title"),
     path("<str:locale>/read/<uuid:edition_id>/", views.reader, name="reader-start"),
     path("<str:locale>/read/<uuid:edition_id>/<uuid:unit_id>/", views.reader, name="reader"),
+    path("<str:locale>/listen/<uuid:edition_id>/", views.player, name="player"),
     path("<str:locale>/sign-in/", views.sign_in, name="sign-in"),
     path("<str:locale>/sign-up/", views.sign_up, name="sign-up"),
     path("<str:locale>/password-reset/", views.password_reset, name="password-reset"),

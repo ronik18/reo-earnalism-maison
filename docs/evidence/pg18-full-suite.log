@@ -1,0 +1,172 @@
+Creating test database for alias 'default' ('test_maison_pg18')...
+Found 101 test(s).
+Operations to perform:
+  Synchronize unmigrated apps: django_otp, messages, operations, staticfiles, web
+  Apply all migrations: accounts, admin, auth, billing, contenttypes, core, learning, library, otp_totp, reader, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying sessions.0001_initial... OK
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying accounts.0002_mfa_recovery_code... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying library.0001_initial... OK
+  Applying library.0002_revision_integrity... OK
+  Applying library.0003_alter_revision_access_policy_and_more... OK
+  Applying library.0004_alter_work_house... OK
+  Applying learning.0001_initial... OK
+  Applying billing.0001_initial... OK
+  Applying billing.0002_alter_refund_options_and_more... OK
+  Applying billing.0003_refund_description_alter_legacyliability_user... OK
+  Applying billing.0004_financial_integrity... OK
+  Applying core.0001_initial... OK
+  Applying learning.0002_lesson_completion_rules... OK
+  Applying otp_totp.0001_initial... OK
+  Applying otp_totp.0002_auto_20190420_0723... OK
+  Applying otp_totp.0003_add_timestamps... OK
+  Applying reader.0001_initial... OK
+  Applying reader.0002_completion_and_more... OK
+  Applying reader.0003_download_license...test_recovery_code_is_single_use_and_requires_recent_password (accounts.test_mfa.StaffMFAAcceptanceTests.test_recovery_code_is_single_use_and_requires_recent_password) ... ok
+test_staff_requires_mfa_and_does_not_corrupt_email_verification (accounts.test_mfa.StaffMFAAcceptanceTests.test_staff_requires_mfa_and_does_not_corrupt_email_verification) ... ok
+test_totp_replay_is_rejected_and_throttle_failure_persists (accounts.test_mfa.StaffMFAAcceptanceTests.test_totp_replay_is_rejected_and_throttle_failure_persists) ... ok
+test_deletion_revokes_account_removes_personal_receipts_and_exports (accounts.test_privacy.PrivacyAcceptanceTests.test_deletion_revokes_account_removes_personal_receipts_and_exports) ... ok
+test_export_is_complete_owned_private_and_short_lived (accounts.test_privacy.PrivacyAcceptanceTests.test_export_is_complete_owned_private_and_short_lived) ... ok
+test_export_unknown_outcome_reuses_verified_prepared_artifact (accounts.test_privacy.PrivacyAcceptanceTests.test_export_unknown_outcome_reuses_verified_prepared_artifact) ... ok
+test_unresolved_refund_blocks_account_deletion (accounts.test_privacy.PrivacyAcceptanceTests.test_unresolved_refund_blocks_account_deletion) ... ok
+test_anonymous_and_authenticated_session_match_contract (accounts.tests.AccountAcceptanceTests.test_anonymous_and_authenticated_session_match_contract) ... ok
+test_csrf_is_required_for_login_and_registration (accounts.tests.AccountAcceptanceTests.test_csrf_is_required_for_login_and_registration) ... ok
+test_device_binding_cookie_is_required_and_revocation_is_durable (accounts.tests.AccountAcceptanceTests.test_device_binding_cookie_is_required_and_revocation_is_durable) ... ok
+test_direct_preference_service_validates_before_creating_state (accounts.tests.AccountAcceptanceTests.test_direct_preference_service_validates_before_creating_state) ... ok
+test_email_normalization_and_password_hash (accounts.tests.AccountAcceptanceTests.test_email_normalization_and_password_hash) ... ok
+test_nested_preference_filters_reject_invalid_payload_without_mutation (accounts.tests.AccountAcceptanceTests.test_nested_preference_filters_reject_invalid_payload_without_mutation) ... ok
+test_password_reset_revokes_every_old_session_and_action_token (accounts.tests.AccountAcceptanceTests.test_password_reset_revokes_every_old_session_and_action_token) ... ok
+test_preferences_full_contract_and_stale_update (accounts.tests.AccountAcceptanceTests.test_preferences_full_contract_and_stale_update) ... ok
+test_privacy_request_is_owned_and_deduplicated (accounts.tests.AccountAcceptanceTests.test_privacy_request_is_owned_and_deduplicated) ... ok
+test_standard_verified_staff_admin_login_binds_device (accounts.tests.AccountAcceptanceTests.test_standard_verified_staff_admin_login_binds_device) ... ok
+test_unknown_provider_never_claims_success (accounts.tests.AccountAcceptanceTests.test_unknown_provider_never_claims_success) ... ok
+test_unverified_registration_queues_and_delivers_real_local_mail (accounts.tests.AccountAcceptanceTests.test_unverified_registration_queues_and_delivers_real_local_mail) ... ok
+test_cancelled_expired_or_past_deadline_capture_records_money_without_access (billing.tests.BillingStateMachineTests.test_cancelled_expired_or_past_deadline_capture_records_money_without_access) ... ok
+test_capture_mismatches_never_grant_and_cannot_reassign_payment (billing.tests.BillingStateMachineTests.test_capture_mismatches_never_grant_and_cannot_reassign_payment) ... ok
+test_database_refund_reservations_and_financial_snapshot_guards (billing.tests.BillingStateMachineTests.test_database_refund_reservations_and_financial_snapshot_guards) ... ok
+test_eligible_capture_exactly_once_with_long_lived_financial_identity (billing.tests.BillingStateMachineTests.test_eligible_capture_exactly_once_with_long_lived_financial_identity) ... ok
+test_free_offline_entitlement_is_durable_explicit_and_exact_revision (billing.tests.BillingStateMachineTests.test_free_offline_entitlement_is_durable_explicit_and_exact_revision) ... ok
+test_hmac_helpers_verify_exact_raw_bytes_but_do_not_grant_access (billing.tests.BillingStateMachineTests.test_hmac_helpers_verify_exact_raw_bytes_but_do_not_grant_access) ... ok
+test_partial_refund_one_approval_ceiling_receipts_and_immutable_amount (billing.tests.BillingStateMachineTests.test_partial_refund_one_approval_ceiling_receipts_and_immutable_amount) ... ok
+test_real_merchant_operations_are_disabled_and_synthetic_facts_cannot_escape_local (billing.tests.BillingStateMachineTests.test_real_merchant_operations_are_disabled_and_synthetic_facts_cannot_escape_local) ... ok
+test_checkout_unknown_outcome_never_repeats_create (billing.test_checkout.HostedSandboxTests.test_checkout_unknown_outcome_never_repeats_create) ... ok
+test_unqualified_live_checkout_stays_disabled (billing.test_checkout.HostedSandboxTests.test_unqualified_live_checkout_stays_disabled) ... ok
+test_preview_verify_read_save_resume_and_logout (integration_tests.test_first_journey.FirstBookJourneyTests.test_preview_verify_read_save_resume_and_logout) ... ok
+test_attempt_ownership_bad_options_stale_version_and_duplicate_submission (learning.tests.LearningAcceptanceTests.test_attempt_ownership_bad_options_stale_version_and_duplicate_submission) ... ok
+test_configured_prerequisite_and_current_quiz_completion_are_enforced (learning.tests.LearningAcceptanceTests.test_configured_prerequisite_and_current_quiz_completion_are_enforced) ... ok
+test_free_deny_paid_and_completion_isolation (learning.tests.LearningAcceptanceTests.test_free_deny_paid_and_completion_isolation) ... ok
+test_idempotent_start_and_submit_are_durable_receipts (learning.tests.LearningAcceptanceTests.test_idempotent_start_and_submit_are_durable_receipts) ... ok
+test_quiz_dto_has_no_answer_key_or_explanation_before_submit (learning.tests.LearningAcceptanceTests.test_quiz_dto_has_no_answer_key_or_explanation_before_submit) ... ok
+test_sde_questions_answers_and_rubrics_are_real_p0_detail (learning.tests.LearningAcceptanceTests.test_sde_questions_answers_and_rubrics_are_real_p0_detail) ... ok
+test_server_grades_attempt_snapshot_and_ignores_later_key_changes (learning.tests.LearningAcceptanceTests.test_server_grades_attempt_snapshot_and_ignores_later_key_changes) ... ok
+test_current_cover_pair_is_private_and_replaces_older_selection (library.test_intake.ClearedDraftJourneyTests.test_current_cover_pair_is_private_and_replaces_older_selection) ... ok
+test_draft_intake_review_integrity_replay_and_member_denial (library.test_intake.ClearedDraftJourneyTests.test_draft_intake_review_integrity_replay_and_member_denial) ... ok
+test_intake_country_review_rejects_changed_text_or_unreviewed_grant (library.test_intake.ClearedDraftJourneyTests.test_intake_country_review_rejects_changed_text_or_unreviewed_grant) ... ok
+test_nonwhitelisted_countries_denied_even_with_accidental_explicit_grant (library.test_intake.ClearedDraftJourneyTests.test_nonwhitelisted_countries_denied_even_with_accidental_explicit_grant) ... ok
+test_publication_checks_entire_whitelist_and_hash_bound_legal_evidence (library.test_intake.ClearedDraftJourneyTests.test_publication_checks_entire_whitelist_and_hash_bound_legal_evidence) ... ok
+test_reviewed_country_rights_enforce_draft_and_format_boundaries (library.test_intake.ClearedDraftJourneyTests.test_reviewed_country_rights_enforce_draft_and_format_boundaries) ... ok
+test_staff_full_reader_keeps_draft_private_and_persisted_pointer_empty (library.test_intake.ClearedDraftJourneyTests.test_staff_full_reader_keeps_draft_private_and_persisted_pointer_empty) ... ok
+test_audio_piece_manifest_has_exact_complete_hash_coverage (library.test_media_providers.MeasuredAudioTests.test_audio_piece_manifest_has_exact_complete_hash_coverage) ... ok
+test_stale_or_gapped_measured_maps_are_rejected (library.test_media_providers.MeasuredAudioTests.test_stale_or_gapped_measured_maps_are_rejected) ... ok
+test_switch_uses_measured_segment_start (library.test_media_providers.MeasuredAudioTests.test_switch_uses_measured_segment_start) ... ok
+test_bound_preview_has_no_full_text_or_package_url (library.tests.LibraryAcceptanceTests.test_bound_preview_has_no_full_text_or_package_url) ... ok
+test_clone_uses_separate_verified_locators_and_fresh_packages (library.tests.LibraryAcceptanceTests.test_clone_uses_separate_verified_locators_and_fresh_packages) ... ok
+test_default_deny_even_with_rights_and_no_offer (library.tests.LibraryAcceptanceTests.test_default_deny_even_with_rights_and_no_offer) ... ok
+test_free_rights_member_and_territory_gates (library.tests.LibraryAcceptanceTests.test_free_rights_member_and_territory_gates) ... ok
+test_grant_and_public_cache_ttl_cap_known_rights_expiry (library.tests.LibraryAcceptanceTests.test_grant_and_public_cache_ttl_cap_known_rights_expiry) ... ok
+test_immutable_database_guards_and_revision_versions (library.tests.LibraryAcceptanceTests.test_immutable_database_guards_and_revision_versions) ... ok
+test_local_grant_bytes_are_verified_private_and_logout_denied (library.tests.LibraryAcceptanceTests.test_local_grant_bytes_are_verified_private_and_logout_denied) ... ok
+test_publication_preparation_is_outside_locked_transition_and_rejects_stale_assets (library.tests.LibraryAcceptanceTests.test_publication_preparation_is_outside_locked_transition_and_rejects_stale_assets) ... ERROR
+test_publication_requires_permission_exact_hash_cas_and_real_browser_evidence (library.tests.LibraryAcceptanceTests.test_publication_requires_permission_exact_hash_cas_and_real_browser_evidence) ... ok
+test_raw_upload_lifecycle_cas_replay_and_narrow_cors_design (library.tests.LibraryAcceptanceTests.test_raw_upload_lifecycle_cas_replay_and_narrow_cors_design) ... ok
+test_readiness_rejects_missing_or_wrong_unit_reader_package (library.tests.LibraryAcceptanceTests.test_readiness_rejects_missing_or_wrong_unit_reader_package) ... ok
+test_real_bilingual_reader_and_exact_manifest_contract (library.tests.LibraryAcceptanceTests.test_real_bilingual_reader_and_exact_manifest_contract) ... ok
+test_requires_real_postgresql (library.tests.LibraryAcceptanceTests.test_requires_real_postgresql) ... ok
+test_seed_is_idempotent_preserves_existing_frozen_content (library.tests.LibraryAcceptanceTests.test_seed_is_idempotent_preserves_existing_frozen_content) ... ok
+test_wrong_revision_units_and_raw_assets_cannot_receive_grants (library.tests.LibraryAcceptanceTests.test_wrong_revision_units_and_raw_assets_cannot_receive_grants) ... ok
+test_csrf_is_enforced_on_authentication_mutation (operations.tests.RuntimeBoundaryTests.test_csrf_is_enforced_on_authentication_mutation) ... ok
+test_invalid_trace_id_is_replaced (operations.tests.RuntimeBoundaryTests.test_invalid_trace_id_is_replaced) ... ok
+test_liveness_request_id_security_headers_and_private_default (operations.tests.RuntimeBoundaryTests.test_liveness_request_id_security_headers_and_private_default) ... ok
+test_origin_boundary_and_health_exception (operations.tests.RuntimeBoundaryTests.test_origin_boundary_and_health_exception) ... ok
+test_readiness_requires_secret_and_current_migrations (operations.tests.RuntimeBoundaryTests.test_readiness_requires_secret_and_current_migrations) ... ok
+test_ready_dependency_failure_fails_closed (operations.tests.RuntimeBoundaryTests.test_ready_dependency_failure_fails_closed) ... ok
+test_real_postgresql_and_no_paid_features (operations.tests.RuntimeBoundaryTests.test_real_postgresql_and_no_paid_features) ... ok
+test_prepared_pieces_bind_the_audio_and_license (reader.test_downloads.AudioDownloadAcceptanceTests.test_prepared_pieces_bind_the_audio_and_license) ... ok
+test_disabled_and_cross_revision_selection_do_not_create_leases (reader.test_downloads.DownloadAcceptanceTests.test_disabled_and_cross_revision_selection_do_not_create_leases) ... ok
+test_lease_is_device_bound_idempotent_bounded_and_revocable (reader.test_downloads.DownloadAcceptanceTests.test_lease_is_device_bound_idempotent_bounded_and_revocable) ... ok
+test_logout_and_password_reset_revoke_offline_authority (reader.test_downloads.DownloadAcceptanceTests.test_logout_and_password_reset_revoke_offline_authority) ... ok
+test_rights_withdrawal_and_database_identity_enforced (reader.test_downloads.DownloadAcceptanceTests.test_rights_withdrawal_and_database_identity_enforced) ... ok
+test_annotation_quote_palette_ownership_and_tombstone_replay (reader.tests.ReaderAcceptanceTests.test_annotation_quote_palette_ownership_and_tombstone_replay) ... ok
+test_completion_is_independent_from_progress_and_seek (reader.tests.ReaderAcceptanceTests.test_completion_is_independent_from_progress_and_seek) ... ok
+test_keyed_actions_reject_missing_idempotency_key (reader.tests.ReaderAcceptanceTests.test_keyed_actions_reject_missing_idempotency_key) ... ok
+test_partial_sync_database_failure_replays_prior_commit (reader.tests.ReaderAcceptanceTests.test_partial_sync_database_failure_replays_prior_commit) ... Database operation unavailable
+ok
+test_progress_first_v0_replay_conflict_and_strict_contract (reader.tests.ReaderAcceptanceTests.test_progress_first_v0_replay_conflict_and_strict_contract) ... ok
+test_saved_and_lists_round_trip_strict_shapes (reader.tests.ReaderAcceptanceTests.test_saved_and_lists_round_trip_strict_shapes) ... ok
+test_accepted_search_facets_and_saved_filter_control_are_exposed (web.tests.ExperienceTests.test_accepted_search_facets_and_saved_filter_control_are_exposed) ... ok
+test_anonymous_reader_is_bounded_preview_not_full_book (web.tests.ExperienceTests.test_anonymous_reader_is_bounded_preview_not_full_book) ... ok
+test_auth_confirmation_get_does_not_consume_action (web.tests.ExperienceTests.test_auth_confirmation_get_does_not_consume_action) ... ok
+test_bengali_login_error_remains_localized_and_preserves_email (web.tests.ExperienceTests.test_bengali_login_error_remains_localized_and_preserves_email) ... ok
+test_browse_and_title_use_actual_fixture (web.tests.ExperienceTests.test_browse_and_title_use_actual_fixture) ... ok
+test_learning_question_stays_in_p0_and_quiz_is_semantic (web.tests.ExperienceTests.test_learning_question_stays_in_p0_and_quiz_is_semantic) ... ok
+test_password_sign_in_preserves_relative_reader_destination (web.tests.ExperienceTests.test_password_sign_in_preserves_relative_reader_destination) ... ok
+test_reader_requests_roundtrip_without_completion_changing_progress_version (web.tests.ExperienceTests.test_reader_requests_roundtrip_without_completion_changing_progress_version) ... ok
+test_saved_filter_and_full_reader_preferences_persist (web.tests.ExperienceTests.test_saved_filter_and_full_reader_preferences_persist) ... ok
+test_sign_in_rejects_external_redirect (web.tests.ExperienceTests.test_sign_in_rejects_external_redirect) ... ok
+test_ui_locale_does_not_change_reader_edition (web.tests.ExperienceTests.test_ui_locale_does_not_change_reader_edition) ... ok
+test_vault_lists_and_saved_have_distinct_views (web.tests.ExperienceTests.test_vault_lists_and_saved_have_distinct_views) ... ok
+test_direct_urls_bind_method_type_size_create_once_and_short_expiry (library.test_media_providers.PrivateStorageContractTests.test_direct_urls_bind_method_type_size_create_once_and_short_expiry) ... ok
+test_streamed_verifier_hashes_all_bytes_and_rejects_corruption (library.test_media_providers.PrivateStorageContractTests.test_streamed_verifier_hashes_all_bytes_and_rejects_corruption) ... ok
+test_distinct_first_writes_yield_one_v1_and_one_conflict (reader.tests.ProgressConcurrencyTests.test_distinct_first_writes_yield_one_v1_and_one_conflict) ... ok
+test_same_operation_concurrent_replay_returns_identical_receipt (reader.tests.ProgressConcurrencyTests.test_same_operation_concurrent_replay_returns_identical_receipt) ... ok
+test_both_ui_catalogues_have_every_key (web.tests.ReturnPathTests.test_both_ui_catalogues_have_every_key) ... ok
+test_every_literal_ui_key_and_format_label_exists (web.tests.ReturnPathTests.test_every_literal_ui_key_and_format_label_exists) ... ok
+test_external_and_auth_loop_destinations_are_rejected (web.tests.ReturnPathTests.test_external_and_auth_loop_destinations_are_rejected) ... ok
+test_production_territory_is_not_inferred_from_query (web.tests.ReturnPathTests.test_production_territory_is_not_inferred_from_query) ... ok
+test_return_path_retains_edition_and_anchor (web.tests.ReturnPathTests.test_return_path_retains_edition_and_anchor) ... ok
+
+======================================================================
+ERROR: test_publication_preparation_is_outside_locked_transition_and_rejects_stale_assets (library.tests.LibraryAcceptanceTests.test_publication_preparation_is_outside_locked_transition_and_rejects_stale_assets)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/ronikbasak/Documents/GitHub/reo-earnalism-maison/library/tests.py", line 162, in test_publication_preparation_is_outside_locked_transition_and_rejects_stale_assets
+    report=svc.transition_revision(self.admin,clone.id,'validate',clone.version,clone.content_sha256,prepared=proof)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ronikbasak/Documents/GitHub/reo-earnalism-maison/library/services.py", line 623, in transition_revision
+    return _transition_revision(user,revision_id,action,expected_version,expected_sha256,reason,publish_at,prepared=prepared)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.13_4/Frameworks/Python.framework/Versions/3.12/lib/python3.12/contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/ronikbasak/Documents/GitHub/reo-earnalism-maison/library/services.py", line 635, in _transition_revision
+    raise DomainError('version_conflict','Revision changed; review the current content.',412,{'current_version':revision.version})
+core.api.DomainError: Revision changed; review the current content.
+
+----------------------------------------------------------------------
+Ran 101 tests in 71.339s
+
+FAILED (errors=1)
+Destroying test database for alias 'default' ('test_maison_pg18')...
+ OK
+System check identified no issues (0 silenced).

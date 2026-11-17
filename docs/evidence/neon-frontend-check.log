@@ -1,0 +1,32 @@
+
+> reo-earnalism-maison@1.0.0 check
+> npm run typecheck && npm test
+
+
+> reo-earnalism-maison@1.0.0 typecheck
+> tsc --noEmit
+
+
+> reo-earnalism-maison@1.0.0 test
+> node client/test.mjs
+
+✔ Unicode selection offsets use code points, including Bengali and astral characters (0.913167ms)
+✔ Intentional rereading is a distinct semantic location (0.122292ms)
+✔ Pagination tolerates an unmeasured viewport and includes the last column (0.103041ms)
+✔ Sleep uses an elapsed monotonic deadline, not wall-clock changes (0.089959ms)
+✔ Exact format switching rejects overlapping or out-of-bounds maps (0.137875ms)
+✔ Player return links remain on a local locale route (0.8635ms)
+✔ Offline queue coalesces only unsent progress and never drops notes or uncertain writes (1.052667ms)
+✔ Offline queue enforces bounds and forbids financial or staff operations (4.63725ms)
+✔ Sync batch skips blocked conflicts and respects the API100-operation boundary (1.744333ms)
+✔ Passage capture rejects blank browser selections but retains Bengali text (0.260583ms)
+✔ A delayed GET cannot regress a confirmed progress PUT snapshot (0.0915ms)
+✔ Progress conflicts distinguish an accepted position, own late writes and another device (0.088791ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 71.209416

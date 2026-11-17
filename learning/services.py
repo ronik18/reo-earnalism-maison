@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
@@ -12,7 +13,7 @@ def _track(user,value,allow_locked=False):
     if track.access=='paid':
         try:
             if not track.edition or not track.edition.live_revision: raise DomainError('access_denied','Track has no access authority.',403)
-            authorize_revision(user,track.edition.live_revision)
+            authorize_revision(user,track.edition.live_revision,territory=getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ'))
         except DomainError:
             if not allow_locked: raise
     return track
@@ -39,6 +40,12 @@ def _lesson(user,value):
     try: lesson=Lesson.objects.select_related('track','track__edition').get(pk=value)
     except (Lesson.DoesNotExist,ValueError,ValidationError): raise DomainError('not_found','Lesson not found.',404)
     _track(user,lesson.track_id)
+    if lesson.requires_previous:
+        previous=lesson.track.lessons.filter(ordinal__lt=lesson.ordinal).order_by('-ordinal').first()
+        if previous and (not getattr(user,'is_authenticated',False) or not LessonCompletion.objects.filter(user=user,lesson=previous).exists()):
+            raise DomainError('prerequisite_unmet','Complete the previous lesson first.',409)
+    if lesson.unit_id:
+        authorize_revision(user,lesson.unit.revision,territory=getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ'))
     return lesson
 
 def lesson_detail(user,lesson_id):
@@ -50,6 +57,9 @@ def lesson_detail(user,lesson_id):
 
 def complete_lesson(user,lesson_id):
     lesson=_lesson(user,lesson_id)
+    if lesson.completion_rule=='quiz_pass':
+        if not hasattr(lesson,'quiz') or not QuizAttempt.objects.filter(user=user,quiz=lesson.quiz,quiz_version=lesson.quiz.version,status='submitted',score__gte=lesson.pass_score).exists():
+            raise DomainError('completion_rule_unmet','Pass the current lesson quiz before completing it.',409)
     record,_=LessonCompletion.objects.get_or_create(user=user,lesson=lesson)
     return {'lesson_id':str(lesson.id),'completed':True,'completed_at':iso(record.completed_at),'version':lesson.version}
 

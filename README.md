@@ -4,7 +4,7 @@ A new, independent application repository for the approved Maison design. The ex
 
 ## Run the local build
 
-Use Python 3.13 (the current macOS verification environment also uses supported Python 3.12) and PostgreSQL 17. Install `requirements.lock` into `.venv`. The existing isolated PostgreSQL container is `earnalism-maison-pg17`, bound only to `127.0.0.1:55432`. Its generated credentials are in ignored, mode-600 `.local/database.json`; never copy this directory into a review package.
+Use Python 3.13 (the current macOS verification environment also uses supported Python 3.12) and PostgreSQL 18. PostgreSQL 17 local data is retained for prior-work compatibility. Install `requirements.lock` into `.venv`. The existing isolated PostgreSQL container is `earnalism-maison-pg17`, bound only to `127.0.0.1:55432`. Its generated credentials are in ignored, mode-600 `.local/database.json`; never copy this directory into a review package.
 
 From this repository:
 
@@ -34,12 +34,26 @@ The private GitHub repository runs disposable PostgreSQL/Python3.13 CI. Refer to
 
 ## Application boundaries
 
-One Django process serves SSR pages, same-origin JSON APIs and small, dependency-free browser interactions. One PostgreSQL database owns business state, operation receipts and outbox jobs. The official logo and licensed self-hosted fonts are preserved; Ford Gold art stays outside the calm Reader text area. Covers use whole, rectangular frames.
+One Django process serves SSR pages, same-origin JSON APIs and React/TypeScript interactive islands. One PostgreSQL database owns business state, operation receipts and outbox jobs. The official logo and licensed self-hosted fonts are preserved; Ford Gold art stays outside the calm Reader text area. Covers use whole, rectangular frames.
 
-Interactive controls currently use plain JavaScript. This remains a gap against the approved React/TypeScript island design; it is not an approved design change. See [binding implementation baseline](docs/APPROVED_BASELINE.md). Large provider-backed media will use direct delivery; the local signed-asset transport is a development adapter, not an R2 implementation or performance claim.
+Interactive Reader, Player, Quiz, account and offline controls use React/TypeScript built with Node24. Run `npm ci`, `npm run check` and `npm run build` before Django web tests or packaging. The Docker image builds these assets in a separate stage; Node is absent from the runtime image. Private R2 and sandbox payment source adapters exist, but real provider qualification is separate from deterministic tests.
 
 Audio/video, offline licensing, magic links, Google/phone sign-in, recurring billing and international checkout remain explicitly disabled until their configured adapters pass acceptance. There is no fake paid checkout, real refund, production publication or HA claim. Production configuration requires real secrets, an HTTPS public base URL and verified database TLS; it cannot fall back to local credentials.
 
 See [implementation status](docs/IMPLEMENTATION_STATUS.md), [workspace provenance](docs/WORKSPACE_PROVENANCE.json) and [evidence](docs/evidence/).
 
 Latest cleared-title draft: [The Selfish Giant handoff](docs/SELFISH_GIANT_HANDOFF.md), including cover/footer assets, staff browser acceptance and the [requested-country assessment](docs/SELFISH_GIANT_TERRITORIES.md). The active whitelist contains47 regions. UAE/Mainland China and all other pending regions are excluded; every published book must be legally compliant across the complete whitelist. See [publication policy](docs/BOOK_PUBLICATION_POLICY.md). Create your own local staff account with `.venv/bin/python manage.py createsuperuser` to review protected drafts; no development credentials are published.
+
+
+## Existing Neon project
+
+PostgreSQL18 was approved by the owner on18November2026. See [Neon setup](docs/NEON_SETUP.md). `.env.local` is ignored and loaded only with `MAISON_ENV_FILE=.env.local`; this prevents parallel local tests from accidentally using the cloud database. Web traffic uses pooled `DATABASE_URL`; migrations and streamed exports use `DATABASE_URL_UNPOOLED`.
+
+Provision timeout defaults before first deployment, using the direct endpoint:
+
+```sh
+MAISON_ENV_FILE=.env.local MAISON_DATABASE_ROLE=direct .venv/bin/python manage.py configure_database_timeouts
+MAISON_ENV_FILE=.env.local MAISON_DATABASE_ROLE=direct .venv/bin/python manage.py migrate --noinput
+```
+
+Pooled startup packets intentionally contain no timeout options. Database-scoped role defaults retain5s statement,2s lock and10s idle-transaction limits. Full certificate/hostname verification uses the platform CA bundle; `DATABASE_SSL_ROOT_CERT` may explicitly select a trusted bundle. Never disable TLS verification to fix a connection error.

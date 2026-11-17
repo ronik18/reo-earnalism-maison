@@ -2,12 +2,17 @@
 import json
 import os
 import secrets
+import ssl
 from pathlib import Path
 from urllib.parse import unquote, urlparse, parse_qs
 
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Opt in so Neon setup never redirects parallel local tests to a cloud database.
+if os.getenv('MAISON_ENV_FILE'):
+    from dotenv import load_dotenv
+    load_dotenv(BASE_DIR / os.environ['MAISON_ENV_FILE'], override=False)
 PUBLICATION_POLICY = json.loads((BASE_DIR / 'contracts/publication-policy.json').read_text())
 MAISON_PUBLICATION_TERRITORIES = tuple(PUBLICATION_POLICY['whitelist'])
 if (not MAISON_PUBLICATION_TERRITORIES or len(set(MAISON_PUBLICATION_TERRITORIES)) != len(MAISON_PUBLICATION_TERRITORIES)
@@ -20,6 +25,7 @@ if ENVIRONMENT not in {'local', 'test', 'production'}:
     raise ImproperlyConfigured('MAISON_ENV must be local, test or production')
 LOCAL = ENVIRONMENT != 'production'
 MAISON_LOCAL_FIXTURES = LOCAL
+STAFF_MFA_REQUIRED = not LOCAL
 DEBUG = LOCAL
 LOCAL_DIR = BASE_DIR / '.local'
 if LOCAL:
@@ -43,6 +49,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 INSTALLED_APPS = [
     'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
     'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
+    'django_otp', 'django_otp.plugins.otp_totp',
     'core', 'accounts', 'library', 'reader', 'billing', 'learning', 'operations', 'web',
 ]
 MIDDLEWARE = [
@@ -54,6 +61,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'accounts.middleware.DeviceSessionMiddleware',
+    'accounts.middleware.StaffMFAMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -82,12 +90,23 @@ USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-if os.getenv('DATABASE_URL'):
-    db = urlparse(os.environ['DATABASE_URL'])
+DATABASE_DIRECT_URL = os.getenv('DATABASE_DIRECT_URL') or os.getenv('DATABASE_URL_UNPOOLED', '')
+if not LOCAL and not DATABASE_DIRECT_URL:
+    raise ImproperlyConfigured('Production requires a direct database URL for streaming exports and migrations')
+DATABASE_CONNECTION_ROLE = os.getenv('MAISON_DATABASE_ROLE', 'pooled')
+if DATABASE_CONNECTION_ROLE not in {'pooled','direct'}:
+    raise ImproperlyConfigured('MAISON_DATABASE_ROLE must be pooled or direct')
+selected_database_url = DATABASE_DIRECT_URL if DATABASE_CONNECTION_ROLE=='direct' else os.getenv('DATABASE_URL','')
+if DATABASE_CONNECTION_ROLE=='direct' and not selected_database_url:
+    raise ImproperlyConfigured('Direct migrations/exports require DATABASE_URL_UNPOOLED or DATABASE_DIRECT_URL')
+if selected_database_url:
+    db = urlparse(selected_database_url)
     if db.scheme not in {'postgres', 'postgresql'}:
         raise ImproperlyConfigured('PostgreSQL is required')
     options = parse_qs(db.query)
     sslmode = options.get('sslmode', ['disable' if LOCAL else 'verify-full'])[0]
+    if db.hostname and db.hostname.endswith('.neon.tech'):
+        sslmode = 'verify-full'
     if not LOCAL and sslmode != 'verify-full':
         raise ImproperlyConfigured('Production database requires sslmode=verify-full')
     db_config = {'NAME': unquote(db.path.lstrip('/')), 'USER': unquote(db.username or ''),
@@ -97,14 +116,56 @@ elif LOCAL and (LOCAL_DIR / 'database.json').exists():
     sslmode = 'disable'
 else:
     raise ImproperlyConfigured('Configure the isolated PostgreSQL database first')
+database_options = {
+    'sslmode': sslmode, 'connect_timeout': 3, 'prepare_threshold': None,
+}
+if sslmode == 'verify-full':
+    # Use the platform trust store explicitly: bundled libpq may not locate it.
+    database_options['sslrootcert'] = os.getenv('DATABASE_SSL_ROOT_CERT') or ssl.get_default_verify_paths().cafile or 'system'
+# PgBouncer rejects timeout startup options. Pooled sessions inherit the role's
+# database-scoped defaults, provisioned over the direct endpoint.
+if DATABASE_CONNECTION_ROLE == 'direct' or '-pooler.' not in db_config['HOST']:
+    database_options['options'] = '-c statement_timeout=5000 -c lock_timeout=2000 -c idle_in_transaction_session_timeout=10000'
 DATABASES = {'default': {
     'ENGINE': 'django.db.backends.postgresql', **db_config,
     'CONN_MAX_AGE': 60, 'CONN_HEALTH_CHECKS': True, 'ATOMIC_REQUESTS': False,
     'DISABLE_SERVER_SIDE_CURSORS': True,
     'TEST': {'NAME': os.getenv('MAISON_TEST_DB_NAME', 'test_maison')},
-    'OPTIONS': {'sslmode': sslmode, 'connect_timeout': 3, 'prepare_threshold': None,
-                'options': '-c statement_timeout=5000 -c lock_timeout=2000 -c idle_in_transaction_session_timeout=10000'},
+    'OPTIONS': database_options,
 }}
+
+# Streaming privacy exports use a separate direct connection, never PgBouncer.
+PRIVACY_EXPORT_DB_ALIAS = 'default'
+if DATABASE_DIRECT_URL:
+    from copy import deepcopy
+    export_url = urlparse(DATABASE_DIRECT_URL)
+    if export_url.scheme not in {'postgres', 'postgresql'} or '-pooler.' in (export_url.hostname or ''):
+        raise ImproperlyConfigured('The maintenance database URL must use a direct PostgreSQL endpoint')
+    normalized_host = lambda host: (host or '').lower().replace('-pooler.', '.')
+    if (unquote(export_url.path.lstrip('/')) != db_config['NAME']
+        or normalized_host(export_url.hostname) != normalized_host(db_config['HOST'])
+        or (export_url.port or 5432) != int(db_config['PORT'])):
+        raise ImproperlyConfigured('Pooled and direct URLs must identify the same database endpoint')
+    export_sslmode = parse_qs(export_url.query).get('sslmode', ['disable' if LOCAL else 'verify-full'])[0]
+    if (export_url.hostname or '').endswith('.neon.tech'):
+        export_sslmode = 'verify-full'
+    if not LOCAL and export_sslmode != 'verify-full':
+        raise ImproperlyConfigured('Production direct database requires sslmode=verify-full')
+    DATABASES['maintenance'] = deepcopy(DATABASES['default'])
+    DATABASES['maintenance'].update({
+        'NAME': unquote(export_url.path.lstrip('/')), 'USER': unquote(export_url.username or ''),
+        'PASSWORD': unquote(export_url.password or ''), 'HOST': export_url.hostname or '',
+        'PORT': export_url.port or 5432, 'CONN_MAX_AGE': 0,
+        'DISABLE_SERVER_SIDE_CURSORS': False, 'TEST': {'MIRROR': 'default'},
+    })
+    # Retain the same TLS policy and bounded read/lock limits on direct exports.
+    DATABASES['maintenance']['OPTIONS'] = dict(database_options)
+    DATABASES['maintenance']['OPTIONS']['sslmode'] = export_sslmode
+    DATABASES['maintenance']['OPTIONS'].pop('sslrootcert', None)
+    if export_sslmode == 'verify-full':
+        DATABASES['maintenance']['OPTIONS']['sslrootcert'] = os.getenv('DATABASE_SSL_ROOT_CERT') or ssl.get_default_verify_paths().cafile or 'system'
+    DATABASES['maintenance']['OPTIONS']['options'] = '-c statement_timeout=5000 -c lock_timeout=2000 -c idle_in_transaction_session_timeout=10000'
+    PRIVACY_EXPORT_DB_ALIAS = 'maintenance'
 
 SESSION_COOKIE_NAME = 'maison_local_session' if LOCAL else '__Host-earnalism_session'
 CSRF_COOKIE_NAME = 'maison_local_csrf' if LOCAL else '__Host-earnalism_csrf'
@@ -170,3 +231,7 @@ LOGGING = {
     'handlers': {'console': {'class': 'logging.StreamHandler', 'filters': ['redact_query']}},
     'loggers': {'django.server': {'handlers': ['console'], 'level': 'INFO', 'propagate': False}},
 }
+
+# Optional, zone-scoped CDN invalidation; unconfigured providers stay disabled.
+CLOUDFLARE_ZONE_ID = os.getenv('CLOUDFLARE_ZONE_ID', '')
+CLOUDFLARE_CACHE_PURGE_TOKEN = os.getenv('CLOUDFLARE_CACHE_PURGE_TOKEN', '')

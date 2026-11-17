@@ -1,0 +1,10 @@
+{
+  "postgresql_version": 180007,
+  "connection": "pooled",
+  "tls": true,
+  "sslmode": "verify-full",
+  "statement_timeout": "5s",
+  "lock_timeout": "2s",
+  "idle_transaction_timeout": "10s",
+  "statement_timeout_enforced": true
+}

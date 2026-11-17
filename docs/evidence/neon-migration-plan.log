@@ -1,0 +1,201 @@
+Planned operations:
+sessions.0001_initial
+    Create model Session
+contenttypes.0001_initial
+    Create model ContentType
+    Alter unique_together for contenttype (1 constraint(s))
+contenttypes.0002_remove_content_type_name
+    Change Meta options on contenttype
+    Alter field name on contenttype
+    Raw Python operation
+    Remove field name from contenttype
+auth.0001_initial
+    Create model Permission
+    Create model Group
+    Create model User
+auth.0002_alter_permission_name_max_length
+    Alter field name on permission
+auth.0003_alter_user_email_max_length
+    Alter field email on user
+auth.0004_alter_user_username_opts
+    Alter field username on user
+auth.0005_alter_user_last_login_null
+    Alter field last_login on user
+auth.0006_require_contenttypes_0002
+auth.0007_alter_validators_add_error_messages
+    Alter field username on user
+auth.0008_alter_user_username_max_length
+    Alter field username on user
+auth.0009_alter_user_last_name_max_length
+    Alter field last_name on user
+auth.0010_alter_group_name_max_length
+    Alter field name on group
+auth.0011_update_proxy_permissions
+    Raw Python operation ->     Update the content_type of prox…
+auth.0012_alter_user_first_name_max_length
+    Alter field first_name on user
+accounts.0001_initial
+    Create model User
+    Create model Consent
+    Create model Device
+    Create model EmailActionToken
+    Create model Preferences
+    Create model RateLimitBucket
+    Create constraint maison_user_normalized_email_uq on model user
+    Create index maison_device_active_idx on field(s) user, revoked_at, last_seen_at of model device
+    Create index maison_email_action_expiry_idx on field(s) expires_at of model emailactiontoken
+    Create constraint maison_pref_font_size on model preferences
+    Create constraint maison_pref_leading on model preferences
+    Create constraint maison_pref_audio_quality on model preferences
+    Create constraint maison_pref_goal on model preferences
+accounts.0002_mfa_recovery_code
+    Create model MFARecoveryCode
+admin.0001_initial
+    Create model LogEntry
+admin.0002_logentry_remove_auto_add
+    Alter field action_time on logentry
+admin.0003_logentry_add_action_flag_choices
+    Alter field action_flag on logentry
+library.0001_initial
+    Create model Edition
+    Create model Work
+    Create model Revision
+    Add field live_revision to edition
+    Create model Asset
+    Create model Rights
+    Create model TimingMap
+    Create model Unit
+    Create model Paragraph
+    Add field unit to asset
+    Add field work to edition
+    Create constraint maison_revision_state on model revision
+    Create constraint maison_rights_valid_window on model rights
+    Create constraint maison_unit_revision_ordinal on model unit
+    Create constraint maison_paragraph_unit_ordinal on model paragraph
+    Create constraint maison_asset_state on model asset
+library.0002_revision_integrity
+    Raw SQL operation -> CREATE FUNCTION maison_revision_gua…
+library.0003_alter_revision_access_policy_and_more
+    Alter field access_policy on revision
+    Alter field download_policy on revision
+    Alter field preview on revision
+    Alter field validation_evidence on revision
+library.0004_alter_work_house
+    Alter field house on work
+learning.0001_initial
+    Create model Lesson
+    Create model Quiz
+    Create model Question
+    Create model QuizAttempt
+    Create model Track
+    Add field track to lesson
+    Create model InterviewQuestion
+    Create model LessonCompletion
+    Create model QuestionOption
+    Create constraint maison_question_quiz_ordinal on model question
+    Create constraint maison_score_range on model quizattempt
+    Create constraint maison_lesson_track_ordinal on model lesson
+billing.0001_initial
+    Create model LegacyLiability
+    Create model Offer
+    Create model Order
+    Create model Invoice
+    Create model Entitlement
+    Create model Payment
+    Create model PaymentAllocation
+    Create model PaymentEvent
+    Create model Refund
+    Create constraint maison_offer_version_uq on model offer
+    Create constraint maison_offer_positive on model offer
+    Create constraint maison_order_operation_uq on model order
+    Create constraint maison_order_positive on model order
+    Create constraint maison_order_state on model order
+    Create index maison_entitlement_access_idx on field(s) user, revoked_at, valid_until of model entitlement
+    Create constraint maison_entitlement_window on model entitlement
+    Create constraint maison_provider_payment_uq on model payment
+    Create constraint maison_payment_positive on model payment
+    Create constraint maison_payment_invoice_uq on model paymentallocation
+    Create constraint maison_provider_event_uq on model paymentevent
+    Create constraint maison_refund_proposal_bound on model refund
+billing.0002_alter_refund_options_and_more
+    Change Meta options on refund
+    Remove constraint maison_entitlement_window from model entitlement
+    Remove constraint maison_refund_proposal_bound from model refund
+    Add field revision to entitlement
+    Add field scope to entitlement
+    Add field source to entitlement
+    Add field status to entitlement
+    Add field track to entitlement
+    Add field kind to legacyliability
+    Add field resolution to legacyliability
+    Add field expires_at to offer
+    Add field kind to offer
+    Add field terms_summary to offer
+    Add field track to offer
+    Add field approved_at to refund
+    Alter field valid_until on entitlement
+    Alter field seconds_balance on legacyliability
+    Alter field status on legacyliability
+    Alter field user on legacyliability
+    Alter field currency on offer
+    Alter field edition on offer
+    Alter field name on offer
+    Alter field return_path on order
+    Alter field status on order
+    Alter field status on payment
+    Alter field amount_minor on refund
+    Alter field reason on refund
+    Create constraint maison_order_entitlement_once on model entitlement
+    Create constraint maison_free_revision_entitlement on model entitlement
+    Create constraint maison_entitlement_window on model entitlement
+    Create constraint maison_entitlement_scope on model entitlement
+    Create constraint maison_refund_proposal_bound on model refund
+billing.0003_refund_description_alter_legacyliability_user
+    Add field description to refund
+    Alter field user on legacyliability
+billing.0004_financial_integrity
+    Raw SQL operation -> CREATE FUNCTION maison_refund_guard…
+core.0001_initial
+    Create model AuditEvent
+    Create model OperationReceipt
+    Create model OutboxJob
+learning.0002_lesson_completion_rules
+    Add field completion_rule to lesson
+    Add field pass_score to lesson
+    Add field requires_previous to lesson
+    Create constraint maison_lesson_score_range on model lesson
+otp_totp.0001_initial
+    Create model TOTPDevice
+otp_totp.0002_auto_20190420_0723
+    Add field throttling_failure_count to totpdevice
+    Add field throttling_failure_timestamp to totpdevice
+otp_totp.0003_add_timestamps
+    Add field created_at to totpdevice
+    Add field last_used_at to totpdevice
+reader.0001_initial
+    Create model PersonalList
+    Create model PersonalListItem
+    Create model Progress
+    Create model SavedItem
+    Create model Annotation
+    Create constraint maison_list_name_uq on model personallist
+    Create constraint maison_list_edition_uq on model personallistitem
+    Create constraint maison_list_order_uq on model personallistitem
+    Create index maison_progress_continue_idx on field(s) user, -updated_at of model progress
+    Create constraint maison_progress_scope_uq on model progress
+    Create constraint maison_progress_fraction on model progress
+    Create constraint maison_progress_completion on model progress
+    Create constraint maison_saved_scope_uq on model saveditem
+reader.0002_completion_and_more
+    Create model Completion
+    Remove constraint maison_progress_completion from model progress
+    Remove field completed_at from progress
+    Remove field is_complete from progress
+    Add field edition to completion
+    Add field revision to completion
+    Add field user to completion
+    Create constraint maison_completion_scope_uq on model completion
+    Create constraint maison_completion_state on model completion
+reader.0003_download_license
+    Create model DownloadLicense
+    Raw SQL operation -> CREATE FUNCTION maison_download_lic…

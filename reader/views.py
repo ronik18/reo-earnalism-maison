@@ -35,7 +35,7 @@ def annotations(request):
     if request.method=='GET':
         rows=Annotation.objects.filter(user=request.user,deleted_at=None).select_related('revision__edition')
         if request.GET.get('edition_revision_id'):rows=rows.filter(revision_id=request.GET['edition_revision_id'])
-        return api_response(page([services.annotation_data(x) for x in rows.order_by('-created_at')[:100]]))
+        return api_response(page([services.annotation_data(x,request.user) for x in rows.order_by('-created_at')[:100]]))
     d=json_body(request,{'annotation_id','edition_revision_id','kind','range','color','note_text'},['annotation_id','edition_revision_id','kind','range','color','note_text'])
     status,result=services.create_annotation(request.user,d,operation_key(request),territory(request));return api_response(result,status,version=result['version'])
 
@@ -45,7 +45,7 @@ def annotation(request,annotation_id):
     if request.method=='GET':
         row=Annotation.objects.filter(pk=annotation_id,user=request.user,deleted_at=None).select_related('revision__edition').first()
         if not row:raise DomainError('not_found','Annotation not found.',404)
-        return api_response(services.annotation_data(row),version=row.version)
+        return api_response(services.annotation_data(row,request.user),version=row.version)
     if request.method=='DELETE':status,result=services.delete_annotation(request.user,annotation_id,key(request),expected_version(request))
     else:status,result=services.patch_annotation(request.user,annotation_id,json_body(request,{'note_text','color'}),key(request),expected_version(request))
     return api_response(result,status,version=result.get('version'))

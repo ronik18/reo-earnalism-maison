@@ -23,12 +23,15 @@ class Lesson(models.Model):
     title=models.CharField(max_length=240)
     ordinal=models.PositiveIntegerField()
     body=models.JSONField(default=list)
+    requires_previous=models.BooleanField(default=False)
+    completion_rule=models.CharField(max_length=20,choices=[('explicit','explicit'),('quiz_pass','quiz_pass')],default='explicit')
+    pass_score=models.PositiveSmallIntegerField(default=100)
     unit=models.ForeignKey('library.Unit',on_delete=models.PROTECT,null=True,blank=True)
     version=models.PositiveIntegerField(default=1)
     class Meta:
         db_table='maison_lesson'
         ordering=['ordinal']
-        constraints=[models.UniqueConstraint(fields=['track','ordinal'],name='maison_lesson_track_ordinal')]
+        constraints=[models.UniqueConstraint(fields=['track','ordinal'],name='maison_lesson_track_ordinal'),models.CheckConstraint(condition=Q(pass_score__gte=0,pass_score__lte=100),name='maison_lesson_score_range')]
 
 class LessonCompletion(models.Model):
     user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)

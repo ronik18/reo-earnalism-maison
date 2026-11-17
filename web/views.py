@@ -48,7 +48,7 @@ def context(request, locale, **extra):
         "reduced_motion": bool(prefs and prefs.reduced_motion),
         "ui_locale": locale, "ui": catalogue(locale), "switch_locale_url": switch,
         "return_to": safe_return(request.POST.get("return_to", request.GET.get("return_to", request.get_full_path())), locale),
-        "active_nav": "home", "focused": False, **extra,
+        "active_nav": "home", "focused": False, "offline_enabled":django_settings.FEATURES.get("offline_text_audio",False), "local_build":django_settings.LOCAL, "allow_index":False, **extra,
     }
 
 
@@ -109,7 +109,7 @@ def root(request):
 def home(request, locale):
     from library.services import catalog_cards
     cards = catalog_cards(locale=request.GET.get("content_locale", locale), territory=trusted_territory(request))
-    return page(request, locale, "web/home.html", cards=cards, featured=cards[0] if cards else None)
+    return page(request, locale, "web/home.html", cards=cards, featured=cards[0] if cards else None, allow_index=not django_settings.LOCAL)
 
 
 @require_GET
@@ -148,7 +148,8 @@ def title(request, locale, identifier):
         revision=Revision.objects.get(pk=edition['edition_revision_id'])
         pair=revision.validation_evidence.get('cover_pair',{})
         if pair.get('back'):back_cover='/api/v1/staff/draft-covers/'+pair['back']['asset_id']
-    return page(request, locale, "web/title.html", edition=edition, units=units, paired_editions=paired, back_cover=back_cover, active_nav="explore")
+    download_bootstrap = {"edition_revision_id":edition["edition_revision_id"],"unit_ids":[u["unit_id"] for u in units],"units":[{"unit_id":u["unit_id"],"title":u["title"]} for u in units],"formats":edition["downloadable_formats"],"title":edition["title"],"locale":edition["locale"]} if django_settings.FEATURES.get("offline_text_audio") and edition["published_at"] and request.user.is_authenticated else None
+    return page(request, locale, "web/title.html", edition=edition, units=units, paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
 
 
 @require_GET
@@ -166,7 +167,12 @@ def reader(request, locale, edition_id, unit_id=None):
         offset = max(0, min(32000, int(request.GET.get("offset", "0"))))
     except (TypeError, ValueError):
         offset = 0
-    bootstrap = {"edition_id": str(edition_id), "edition_revision_id": str(edition["edition_revision_id"]), "unit_id": str(unit_id), "content_locale": edition["locale"], "authenticated": request.user.is_authenticated, "anchor": request.GET.get("anchor", ""), "offset_chars": offset}
+    bootstrap = {"edition_id": str(edition_id), "edition_revision_id": str(edition["edition_revision_id"]), "unit_id": str(unit_id), "content_locale": edition["locale"], "authenticated": request.user.is_authenticated, "anchor": request.GET.get("anchor", ""), "offset_chars": offset,"member_id":str(request.user.public_id) if request.user.is_authenticated else None,"device_id":str(request.device.id) if getattr(request,"device",None) else None}
+    units=edition_units(edition_id,territory=trusted_territory(request),user=request.user)
+    index=next((i for i,u in enumerate(units) if u["unit_id"]==str(unit_id)),0)
+    bootstrap["previous_unit_url"]=reverse("web:reader",args=[locale,edition_id,units[index-1]["unit_id"]]) if index>0 else None
+    bootstrap["next_unit_url"]=reverse("web:reader",args=[locale,edition_id,units[index+1]["unit_id"]]) if index+1<len(units) else None
+    bootstrap["player_url"]=reverse("web:player",args=[locale,edition_id]) if request.user.is_authenticated and django_settings.FEATURES.get("audio") and "audio" in edition["formats"] else None
     destination = request.get_full_path()
     if document.get("preview") and document.get("boundary"):
         boundary = document["boundary"]
@@ -294,14 +300,14 @@ def personal_list(request, locale, list_id):
 @member_required
 @domain_view
 def downloads(request, locale):
-    return page(request, locale, "web/status.html", active_nav="vault", error_key="download_unavailable")
+    return page(request, locale, "web/downloads.html", active_nav="vault", download_bootstrap={})
 
 
 @require_GET
 @member_required
 @domain_view
 def settings(request, locale):
-    return page(request, locale, "web/settings.html", active_nav="vault")
+    return page(request, locale, "web/settings.html", active_nav="vault", account_bootstrap={"staff":request.user.is_staff})
 
 
 @require_GET
@@ -313,6 +319,7 @@ def pass_page(request, locale):
 @require_GET
 @domain_view
 def learn(request, locale):
+    request.user.request_territory = trusted_territory(request)
     from learning.services import list_tracks
     return page(request, locale, "web/learn.html", tracks=list_tracks(request.user, locale), active_nav="learn")
 
@@ -320,6 +327,7 @@ def learn(request, locale):
 @require_GET
 @domain_view
 def track(request, locale, track_id):
+    request.user.request_territory = trusted_territory(request)
     from learning.services import track_detail, interview_questions
     data = track_detail(request.user, track_id)
     questions = interview_questions(request.user, track_id) if data.get("kind") == "sde_interview" else []
@@ -329,6 +337,7 @@ def track(request, locale, track_id):
 @require_GET
 @domain_view
 def lesson(request, locale, lesson_id):
+    request.user.request_territory = trusted_territory(request)
     from learning.services import lesson_detail, quiz_public
     data = lesson_detail(request.user, lesson_id)
     quiz = quiz_public(request.user, data["quiz_id"]) if data.get("quiz_id") else None
@@ -338,6 +347,7 @@ def lesson(request, locale, lesson_id):
 @require_GET
 @domain_view
 def interview(request, locale):
+    request.user.request_territory = trusted_territory(request)
     from learning.services import list_tracks
     tracks = [track for track in list_tracks(request.user, locale) if track.get("kind") == "sde_interview"]
     return page(request, locale, "web/learn.html", tracks=tracks, interview=True, active_nav="learn")
@@ -353,6 +363,7 @@ def series(request, locale):
 @require_GET
 @domain_view
 def question(request, locale, track_id, question_id):
+    request.user.request_territory = trusted_territory(request)
     from learning.services import interview_questions, track_detail
     questions = interview_questions(request.user, track_id)
     question = next((q for q in questions if str(q["question_id"]) == str(question_id)), None)
@@ -365,3 +376,48 @@ def question(request, locale, track_id, question_id):
 @domain_view
 def unavailable(request, locale):
     return page(request, locale, "web/status.html", status=410, error_key="not_available")
+
+
+@require_GET
+@member_required
+@domain_view
+def player(request, locale, edition_id):
+    from library.services import edition_detail,media_chapters
+    if not django_settings.FEATURES.get("audio"):
+        return error_page(request,locale,"not_available",404)
+    edition=edition_detail(edition_id,territory=trusted_territory(request),user=request.user)
+    chapters=media_chapters(request.user,edition["edition_revision_id"],territory=trusted_territory(request))
+    if not chapters:return error_page(request,locale,"not_available",404)
+    bootstrap={"edition_id":str(edition_id),"edition_revision_id":edition["edition_revision_id"],"title":edition["title"],"locale":edition["locale"],"chapters":chapters,"reader_url":reverse("web:reader-start",args=[locale,edition_id])}
+    selected=next((chapter for chapter in chapters if chapter["asset_id"]==request.GET.get("asset") or chapter["unit_id"]==request.GET.get("unit_id")),None)
+    if selected:
+        try:start=max(0,min(selected["duration_ms"],int(request.GET.get("position_ms","0"))))
+        except (TypeError,ValueError):start=0
+        bootstrap.update(start_asset_id=selected["asset_id"],start_ms=start)
+    return page(request,locale,"web/player.html",edition=edition,bootstrap=bootstrap,active_nav="explore",focused=True)
+
+
+@require_GET
+@domain_view
+def offline_shell(request,locale):
+    response=page(request,locale,"web/offline.html",download_bootstrap={"offline":True})
+    response["Cache-Control"]="public,max-age=0,must-revalidate"
+    return response
+
+
+@require_GET
+def service_worker(request):
+    import hashlib,json
+    from pathlib import Path
+    from django.http import HttpResponse
+    root=Path(django_settings.BASE_DIR)/"static/maison"
+    manifest=json.loads((root/"dist/manifest.json").read_text())
+    assets=["/static/maison/app.css","/static/maison/app.js","/static/maison/logo.png","/static/maison/fonts/typography.css","/en/offline/","/bn/offline/"]
+    assets += ["/static/"+path for path in manifest["__assets"]]
+    assets += ["/static/maison/fonts/"+path.name for path in (root/"fonts").glob("*.woff2")]
+    source=(root/"offline-worker.js").read_text()
+    version=hashlib.sha256((json.dumps(assets)+source).encode()).hexdigest()[:16]
+    source=source.replace("__VERSION__",version).replace("__ASSETS__",json.dumps(assets))
+    response=HttpResponse(source,content_type="text/javascript")
+    response["Cache-Control"]="no-cache";response["Service-Worker-Allowed"]="/"
+    return response

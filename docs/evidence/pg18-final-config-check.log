@@ -1,0 +1,14 @@
+Found 6 test(s).
+Skipping setup of unused database(s): default.
+System check identified no issues (0 silenced).
+test_direct_export_cannot_target_another_database_or_endpoint (operations.test_database_setup.DatabaseConfigurationTests.test_direct_export_cannot_target_another_database_or_endpoint) ... ok
+test_neon_pool_omits_startup_options_and_direct_export_verifies_tls (operations.test_database_setup.DatabaseConfigurationTests.test_neon_pool_omits_startup_options_and_direct_export_verifies_tls) ... ok
+test_production_requires_direct_export_configuration (operations.test_database_setup.DatabaseConfigurationTests.test_production_requires_direct_export_configuration) ... ok
+test_admin_setup_rejects_pooled_configuration (operations.test_database_setup.DatabaseTimeoutSetupTests.test_admin_setup_rejects_pooled_configuration) ... ok
+test_admin_setup_rejects_pooler_host_even_when_mislabeled (operations.test_database_setup.DatabaseTimeoutSetupTests.test_admin_setup_rejects_pooler_host_even_when_mislabeled) ... ok
+test_defaults_are_scoped_to_resolved_role_and_database (operations.test_database_setup.DatabaseTimeoutSetupTests.test_defaults_are_scoped_to_resolved_role_and_database) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.733s
+
+OK

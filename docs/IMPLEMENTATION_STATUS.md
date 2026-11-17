@@ -1,5 +1,7 @@
 # Maison implementation milestone
 
+**Latest update,18November2026:** [Neon validation and parallel handoff](NEON_VALIDATION_HANDOFF.md) supersedes the implementation-status paragraphs below where noted. React/TypeScript islands and provider adapter source now exist; the actual protected Selfish Giant journey passes against migrated Neon PostgreSQL18.7. Public release/provider/device qualifications remain open. The17November register below is retained as historical milestone evidence.
+
 17 November 2026. All21 audit findings have a specific resolution. This closes the original proposed-contract/code gaps for the local first slice; it does not certify external providers or the full P0 product.
 
 Four lanes ran in parallel; root Integration owns final contracts, combined tests and commits. The existing platform remains unchanged. No paid resources, customer migration, commercial publication or cutover occurred.

@@ -177,17 +177,20 @@ def local_asset(request,asset_id):
 
 @json_endpoint()
 def mappings(request,revision_id):
-    _,territory=context(request);revision=svc.authorize_revision(request.user,revision_id,territory=territory)
-    # No estimated map, fallback audio, or fake synchronized state.
-    return api_response({'edition_revision_id':str(revision.id),'status':'feature_disabled' if not settings.FEATURES.get('audio') else 'unmapped','maps':[]})
+    _,territory=context(request)
+    from .timing import mappings as mapping_bundle
+    unit_id=request.GET.get('unit_id')
+    if unit_id:
+        from core.api import public_uuid
+        unit_id=public_uuid(unit_id,'unit_id')
+    return api_response(mapping_bundle(request.user,revision_id,territory,unit_id))
 
 @json_endpoint(methods=('POST',))
 def switch(request):
     data=body(request,'SwitchInput');_,territory=context(request)
-    revision=svc.authorize_revision(request.user,data['edition_revision_id'],territory=territory)
-    location=data['from_location']
-    if not revision.units.filter(pk=location['unit_id']).exists(): raise DomainError('unit_revision_mismatch','Location unit is not in this revision.',409)
-    return api_response({'outcome':'feature_disabled','to_location':None,'map_id':None,'precision':None,'reason_code':'media_provider_not_qualified'})
+    from .timing import switch_position
+    return api_response(switch_position(request.user,data,territory))
+
 
 def staff_permission(user):
     if not user.is_active or not user.is_staff or not user.has_perm('library.publish_revision'):
@@ -210,10 +213,13 @@ def staff_action(request,edition_id,action):
     staff_permission(request.user)
     data=body(request,'WithdrawalInput' if action=='withdraw' else 'ScheduleInput' if action=='schedule' else 'PublicationAction')
     version=expected_version(request);operation=operation_key(request)
+    prepared_revision=Revision.objects.filter(edition_id=edition_id,pk=data.get('edition_revision_id')).first() if action!='withdraw' else Revision.objects.filter(edition_id=edition_id,state='live').first()
+    if not prepared_revision:raise DomainError('not_found','Edition revision not found.',404)
+    prepared=svc.prepare_revision_validation(prepared_revision) if action in {'validate','mark-ready','publish','schedule'} else None
     def execute():
         revision=Revision.objects.filter(edition_id=edition_id,pk=data.get('edition_revision_id')).first() if action!='withdraw' else Revision.objects.filter(edition_id=edition_id,state='live').first()
         if not revision: raise DomainError('not_found','Edition revision not found.',404)
-        result=svc.transition_revision(request.user,revision.id,action,version,data.get('expected_sha256',revision.content_sha256),data.get('reason',''),parse_datetime(data['publish_at']) if action=='schedule' else None)
+        result=svc.transition_revision(request.user,revision.id,action,version,data.get('expected_sha256',revision.content_sha256),data.get('reason',''),parse_datetime(data['publish_at']) if action=='schedule' else None,prepared=prepared)
         audit(request.user,'content.'+action,revision,{'reason':data.get('reason',''),'sha256':revision.content_sha256})
         return 200,result,result.get('version',version)
     status,result=apply_operation(request.user,operation,'content.'+action,{**data,'edition_id':str(edition_id),'expected_version':version},execute)
@@ -229,9 +235,16 @@ def staff_asset(request,asset_id):
 @json_endpoint(methods=('POST',))
 def upload(request):
     staff_permission(request.user);data=body(request,'UploadInput')
-    if not getattr(settings,'LOCAL',False): raise DomainError('provider_unconfigured','A qualified direct upload adapter is required.',503)
+    from . import storage
+    remote=storage.is_r2()
     operation=operation_key(request)
-    if data['bytes']>262144: raise DomainError('local_upload_limit','Local acceptance uploads are limited to 256 KiB.',413)
+    if not remote and data['bytes']>262144: raise DomainError('local_upload_limit','Local acceptance uploads are limited to 256 KiB.',413)
+    limits={'cover':2097152,'reader_source':4194304,'reader_package':262144,'timing_map':1048576,'rights_document':4194304,'audio':268435456}
+    if data['kind']=='video':raise DomainError('provider_processing_required','Video requires an approved Stream upload profile.',409)
+    if data['bytes']>limits[data['kind']]:raise DomainError('upload_limit','Split this input before uploading.',413)
+    suffixes={'image/png':{'.png'},'image/jpeg':{'.jpg','.jpeg'},'image/webp':{'.webp'},'text/plain':{'.txt'},'application/json':{'.json'},'application/pdf':{'.pdf'},'audio/mpeg':{'.mp3'}}
+    from pathlib import PurePath
+    if any(c in data['file_name'] for c in '/\\') or any(ord(c)<32 for c in data['file_name']) or PurePath(data['file_name']).suffix.lower() not in suffixes.get(data['content_type'],set()):raise DomainError('invalid_file_name','Use an allowed plain file name and extension.',422)
     mime_types={'cover':{'image/png','image/jpeg','image/webp'},'reader_source':{'text/plain','application/json'},
                 'reader_package':{'application/json'},'timing_map':{'application/json'},'rights_document':{'application/pdf','text/plain'},
                 'audio':{'audio/mpeg'},'video':{'video/mp4'}}
@@ -244,9 +257,9 @@ def upload(request):
         asset=Asset.objects.create(id=asset_id,revision=revision,kind=kind,storage_key=f'revisions/{revision.id}/{asset_id}',sha256=data['sha256'],bytes=data['bytes'],content_type=data['content_type'])
         expiry=timezone.now()+timedelta(seconds=120)
         token=signing.dumps({'asset':str(asset.id),'actor':str(request.user.public_id),'exp':int(expiry.timestamp()),'method':'PUT'},salt='maison-local-upload')
-        result={'asset_id':str(asset.id),'version':asset.version,'protocol':'local_put','method':'PUT',
-                'upload_url':request.build_absolute_uri(f'/api/v1/staff/assets/{asset.id}/local-upload?token={token}'),
-                'required_headers':{'Content-Type':asset.content_type},'expires_at':svc.iso(expiry),'max_bytes':asset.bytes}
+        url,headers=storage.upload_url(asset) if remote else (request.build_absolute_uri(f'/api/v1/staff/assets/{asset.id}/local-upload?token={token}'),{'Content-Type':asset.content_type})
+        result={'asset_id':str(asset.id),'version':asset.version,'protocol':'r2_put' if remote else 'local_put','method':'PUT',
+                'upload_url':url,'required_headers':headers,'expires_at':svc.iso(expiry),'max_bytes':asset.bytes}
         return 201,result,asset.version
     status,result=apply_operation(request.user,operation,'asset.upload',data,execute)
     return api_response(result,status,version=result['version'])
@@ -275,13 +288,23 @@ def local_upload(request,asset_id):
 @json_endpoint(methods=('POST',))
 def complete_upload(request,asset_id):
     staff_permission(request.user);data=body(request,'UploadCompleteInput');version=expected_version(request);operation=operation_key(request)
+    from . import storage
+    remote=storage.is_r2();verified_raw=None
+    candidate=Asset.objects.select_related('revision','revision__edition').filter(pk=asset_id).first()
+    if candidate and remote and candidate.state=='uploading' and candidate.kind not in {'audio_chapter','video'}:
+        if data['bytes']!=candidate.bytes or data['sha256']!=candidate.sha256:raise DomainError('upload_integrity_failed','Completion does not match intent.',422)
+        verified_raw=storage.read_verified(candidate)
     def execute():
         try: asset=Asset.objects.select_for_update().select_related('revision','revision__edition').get(pk=asset_id)
         except Asset.DoesNotExist: raise DomainError('not_found','Asset not found.',404)
         if asset.version!=version: raise DomainError('version_conflict','Asset changed.',412,{'current_version':asset.version})
         if asset.state!='uploading' or asset.revision.state!='draft': raise DomainError('invalid_transition','Only uploading draft assets can complete.',409)
         if data['bytes']!=asset.bytes or data['sha256']!=asset.sha256: raise DomainError('upload_integrity_failed','Completion does not match intent.',422)
-        raw=svc._asset_valid(asset)
+        if asset.kind=='audio_chapter' and remote:
+            asset.state='processing';asset.version+=1;asset.save()
+            audit(request.user,'asset.processing',asset,{'sha256':asset.sha256,'next_command':'verify_media_asset'})
+            return 200,asset_state(asset),asset.version
+        raw=verified_raw if remote else svc._asset_valid(asset)
         if asset.kind=='reader_package':
             try: package=json.loads(raw)
             except (ValueError,UnicodeDecodeError): raise DomainError('invalid_package','Reader package must be valid JSON.',422)

@@ -13,3 +13,5 @@ urlpatterns=[
  path('me/privacy/requests/<uuid:privacy_request_id>/cancel',views.privacy_cancel),path('me/privacy/requests/<uuid:privacy_request_id>/download',views.privacy_download),
  path('me/privacy/requests/<uuid:privacy_request_id>/file',views.privacy_file),path('contact',views.contact),
 ]
+
+urlpatterns += [path("me/mfa/totp",views.mfa_totp),path("me/mfa/totp/confirm",views.mfa_confirm),path("me/mfa/verify",views.mfa_verify),path("me/mfa/recovery",views.mfa_recover)]

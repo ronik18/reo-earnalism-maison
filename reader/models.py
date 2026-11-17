@@ -91,3 +91,28 @@ class PersonalListItem(models.Model):
         ordering=['sort_order']
         constraints=[models.UniqueConstraint(fields=['personal_list','edition'],name='maison_list_edition_uq'),
                      models.UniqueConstraint(fields=['personal_list','sort_order'],name='maison_list_order_uq',deferrable=models.Deferrable.DEFERRED)]
+
+
+class DownloadLicense(models.Model):
+    """Immutable account/device/revision grant; renewal issues a new row."""
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    device=models.ForeignKey('accounts.Device',on_delete=models.CASCADE)
+    entitlement=models.ForeignKey('billing.Entitlement',on_delete=models.PROTECT)
+    revision=models.ForeignKey('library.Revision',on_delete=models.PROTECT)
+    rights_record=models.ForeignKey('library.Rights',on_delete=models.PROTECT)
+    format=models.CharField(max_length=8,choices=[('reader','reader'),('audio','audio')])
+    territory=models.CharField(max_length=2)
+    unit_ids=models.JSONField(default=list)
+    manifest=models.JSONField(default=dict)
+    manifest_sha256=models.CharField(max_length=64)
+    private_manifest_key=models.CharField(max_length=160)
+    issued_at=models.DateTimeField()
+    expires_at=models.DateTimeField()
+    revoked_at=models.DateTimeField(null=True)
+    class Meta:
+        db_table='maison_download_license'
+        constraints=[models.CheckConstraint(condition=models.Q(expires_at__gt=models.F('issued_at')),name='maison_download_window'),
+                     models.CheckConstraint(condition=models.Q(format__in=['reader','audio']),name='maison_download_format')]
+        indexes=[models.Index(fields=['user','-expires_at'],condition=models.Q(revoked_at__isnull=True),name='maison_download_member_idx'),
+                 models.Index(fields=['entitlement'],name='maison_download_ent_idx')]

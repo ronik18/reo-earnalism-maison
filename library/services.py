@@ -98,7 +98,8 @@ def authorize_purchase(user,revision,format='reader',territory='IN'):
 
 def can_review_draft(user, revision):
     return bool(revision and revision.state=='draft' and user and user.is_authenticated and user.is_active
-                and user.is_verified and user.is_staff and user.has_perm('library.publish_revision'))
+                and user.is_verified and user.is_staff and user.has_perm('library.publish_revision')
+                and (not getattr(settings,'STAFF_MFA_REQUIRED',not settings.LOCAL) or getattr(user,'staff_mfa_verified',False)))
 
 
 def reviewable_edition(edition, user):
@@ -343,14 +344,11 @@ def get_reader_manifest(user,revision_id,territory='IN',cursor=None):
 
 
 def _asset_valid(asset):
-    path=asset_path(asset.storage_key)
-    try:
-        raw=path.read_bytes()
-    except OSError:
-        raise DomainError('asset_unavailable','Content bytes are unavailable.',503)
-    if len(raw)!=asset.bytes or digest(raw)!=asset.sha256:
-        raise DomainError('asset_integrity_failed','Content checksum verification failed.',503)
-    return raw
+    from .storage import read_verified
+    try:return read_verified(asset)
+    except DomainError as exc:
+        if exc.code=='asset_integrity_failed':exc.status=503
+        raise
 
 
 def validate_device(user,device_id):
@@ -364,29 +362,39 @@ def validate_device(user,device_id):
     return device
 
 
-def _asset_grant(user,asset,device_id,territory='IN'):
+def _asset_grant(user,asset,device_id,territory='IN',*,purpose='online',license_id=None):
     format=DELIVERABLE_KINDS.get(asset.kind)
     if not format or asset.state!='ready':
         raise DomainError('asset_not_deliverable','This asset is not a deliverable output.',403)
-    revision=authorize_revision(user,asset.revision,format,territory=territory)
+    if purpose not in {'online','offline'}:raise DomainError('invalid_purpose','Unsupported content grant purpose.',422)
+    action='download' if purpose=='offline' else 'read'
+    revision=authorize_revision(user,asset.revision,format,action=action,territory=territory)
     validate_device(user,device_id)
-    _asset_valid(asset)
+    from . import storage
+    remote=storage.is_r2()
+    if asset.kind=='video' and remote:raise DomainError('provider_not_configured','Video requires its qualified Stream adapter.',503)
+    if not remote:_asset_valid(asset)
     now=timezone.now()
-    expiry=min(now+timedelta(seconds=GRANT_SECONDS),authorized_until(user,revision,format,territory=territory))
+    expiry=min(now+timedelta(seconds=GRANT_SECONDS),authorized_until(user,revision,format,action=action,territory=territory))
+    if purpose=='offline':
+        from reader.download_services import validate_delivery_license
+        license=validate_delivery_license(user,license_id,asset,device_id,territory)
+        expiry=min(expiry,license.expires_at)
     if expiry<=now:
         raise DomainError('rights_unavailable','Content rights have expired.',403)
     payload={'asset':str(asset.id),'user':str(user.public_id),'device':str(device_id),'revision':str(revision.id),
-             'purpose':'online','territory':territory,'exp':int(expiry.timestamp())}
+             'purpose':purpose,'license_id':str(license_id) if license_id else None,'territory':territory,'exp':int(expiry.timestamp())}
+    seconds=math.floor((expiry-timezone.now()).total_seconds())
+    if seconds<1:raise DomainError('rights_unavailable','Content authorization is expiring.',403)
     token=signing.dumps(payload,salt='maison-private-asset',compress=True)
+    url=storage.private_url(asset.storage_key,seconds,asset.content_type) if remote else f'/api/v1/content/local-assets/{asset.id}?token={token}'
     return {'asset_id':str(asset.id),'unit_id':str(asset.unit_id) if asset.unit_id else None,
             'chunk_id':str(asset.id) if asset.kind=='reader_package' else None,'sha256':asset.sha256,'bytes':asset.bytes,
-            'content_type':asset.content_type,'url':f'/api/v1/content/local-assets/{asset.id}?token={token}',
+            'content_type':asset.content_type,'url':url,
             'range_supported':asset.kind=='audio_chapter'},expiry
 
 
 def package_grant(user,data,territory='IN'):
-    if not getattr(settings,'LOCAL',False):
-        raise DomainError('provider_not_configured','A qualified private-storage delivery adapter is required.',503)
     if data.get('purpose')!='online':
         raise DomainError('invalid_purpose','Use a download license for offline access.',400)
     revision=authorize_revision(user,data.get('edition_revision_id'),territory=territory)
@@ -412,20 +420,26 @@ def package_grant(user,data,territory='IN'):
 
 
 def media_grant(user,data,territory='IN'):
-    if not getattr(settings,'LOCAL',False):
-        raise DomainError('provider_not_configured','A qualified private-media delivery adapter is required.',503)
     try:
         asset=Asset.objects.select_related('revision','revision__edition').get(pk=data.get('asset_id'))
     except (Asset.DoesNotExist,ValueError,ValidationError):
         raise DomainError('not_found','Asset not found.',404)
     if asset.kind not in {'audio_chapter','video'} or data.get('purpose')!='online':
         raise DomainError('asset_not_deliverable','Only online processed media can be granted.',403)
+    if asset.kind=='audio_chapter':
+        if not settings.FEATURES.get('audio'):raise DomainError('feature_disabled','Audio is unavailable.',503)
+        prepared=prepared_audio(asset)
+        if data.get('quality_kbps',prepared['quality_kbps'])!=prepared['quality_kbps']:
+            raise DomainError('quality_unavailable','The requested prepared audio rendition is unavailable.',409)
+    else:
+        raise DomainError('feature_disabled','Video requires an approved Stream rendition.',503)
     descriptor,expiry=_asset_grant(user,asset,data.get('device_id'),territory)
+    from .storage import is_r2
     return {'grant_id':str(uuid.uuid4()),'asset_id':str(asset.id),'edition_revision_id':str(asset.revision_id),
-            'transport':'local_signed','url':descriptor['url'],'issued_at':iso(timezone.now()),'expires_at':iso(expiry),
+            'transport':'r2_s3_presigned' if is_r2() else 'local_signed','url':descriptor['url'],'issued_at':iso(timezone.now()),'expires_at':iso(expiry),
             'content_type':asset.content_type,'sha256':asset.sha256,'range_supported':descriptor['range_supported'],
-            'quality_kbps':data.get('quality_kbps',96) if asset.kind=='audio_chapter' else None,
-            'duration_ms':asset.unit.duration_ms if asset.unit and asset.unit.duration_ms else 1}
+            'quality_kbps':prepared['quality_kbps'],
+            'duration_ms':prepared['duration_ms']}
 
 
 def resolve_signed_asset(user,asset_id,token):
@@ -434,7 +448,7 @@ def resolve_signed_asset(user,asset_id,token):
     except signing.BadSignature:
         raise DomainError('invalid_grant','Content grant is invalid or expired.',403)
     if (data.get('asset')!=str(asset_id) or data.get('user')!=str(getattr(user,'public_id',None))
-            or data.get('purpose')!='online' or data.get('exp',0)<=timezone.now().timestamp()):
+            or data.get('purpose') not in {'online','offline'} or data.get('exp',0)<=timezone.now().timestamp()):
         raise DomainError('invalid_grant','Content grant is invalid or expired.',403)
     validate_device(user,data.get('device'))
     try:
@@ -444,7 +458,11 @@ def resolve_signed_asset(user,asset_id,token):
     format=DELIVERABLE_KINDS.get(asset.kind)
     if not format:
         raise DomainError('asset_not_deliverable','Private source assets cannot be delivered.',403)
-    authorize_revision(user,asset.revision,format,territory=data.get('territory','IN'))
+    territory=data.get('territory','ZZ')
+    authorize_revision(user,asset.revision,format,action='download' if data['purpose']=='offline' else 'read',territory=territory)
+    if data['purpose']=='offline':
+        from reader.download_services import validate_delivery_license
+        validate_delivery_license(user,data.get('license_id'),asset,data.get('device'),territory)
     return asset,_asset_valid(asset)
 
 
@@ -454,25 +472,26 @@ def revision_hash(revision):
                                   for u in revision.units.all()]))
 
 
-def write_reader_package(unit):
+def prepare_reader_package(unit,paragraphs):
     revision=unit.revision
-    if revision.state!='draft':
-        raise DomainError('revision_frozen','Create a draft revision to rebuild content.',409)
+    if revision.state!='draft':raise DomainError('revision_frozen','Create a draft revision to rebuild content.',409)
     asset_id=uuid.uuid4()
     body={'schema_version':1,'edition_revision_id':str(revision.id),'unit_id':str(unit.id),
           'chunk_id':str(asset_id),'anchor_revision':revision.anchor_revision,'locale':revision.edition.locale,
-          'paragraphs':[paragraph_dto(p) for p in unit.paragraphs.all()]}
+          'paragraphs':[paragraph_dto(p) for p in paragraphs]}
     raw=canonical_bytes(body)
     import gzip
     compressed=gzip.compress(raw,mtime=0)
-    if len(raw)>262144 or len(compressed)>65536:
-        raise DomainError('chunk_too_large','Split this unit at paragraph boundaries before packaging.',413)
+    if len(raw)>262144 or len(compressed)>65536:raise DomainError('chunk_too_large','Split this unit at paragraph boundaries before packaging.',413)
     key=f'revisions/{revision.id}/{asset_id}.json'
-    path=asset_path(key)
-    path.parent.mkdir(parents=True,exist_ok=True)
-    path.write_bytes(raw)
-    return Asset.objects.create(id=asset_id,revision=revision,unit=unit,kind='reader_package',state='ready',
-                                storage_key=key,sha256=digest(raw),bytes=len(raw),compressed_bytes=len(compressed),content_type='application/json')
+    from .storage import put_private
+    put_private(key,raw,'application/json')
+    return Asset(id=asset_id,revision=revision,unit=unit,kind='reader_package',state='ready',storage_key=key,
+                 sha256=digest(raw),bytes=len(raw),compressed_bytes=len(compressed),content_type='application/json')
+
+
+def write_reader_package(unit):
+    asset=prepare_reader_package(unit,list(unit.paragraphs.all()));asset.save();return asset
 
 
 def staff_state(revision):
@@ -509,8 +528,31 @@ def _reader_package_coverage(revision,ready_assets):
     return assembled==expected
 
 
-def validate_revision(revision,territory='IN'):
+def prepare_revision_validation(revision):
+    """Verify private bytes before any publication row lock; bind the immutable DB snapshot."""
     revision=_revision(revision)
+    before=revision.version
+    assets=list(revision.assets.order_by('id'))
+    identity=[(str(a.id),a.version,a.state,a.sha256,a.bytes,a.storage_key,a.content_type) for a in assets]
+    integrity=True
+    try:
+        from .storage import verify_asset
+        for asset in assets:
+            if asset.state=='ready':verify_asset(asset,max_seconds=8)
+    except DomainError:integrity=False
+    coverage=_reader_package_coverage(revision,[a for a in assets if a.state=='ready']) if revision.access_policy.get('reader','deny')!='deny' else True
+    current=Revision.objects.only('version','content_sha256').get(pk=revision.pk)
+    if current.version!=before or current.content_sha256!=revision.content_sha256:
+        raise DomainError('version_conflict','Revision changed during private asset verification.',412,{'current_version':current.version})
+    return {'revision_id':str(revision.id),'version':before,'sha256':revision.content_sha256,'assets':identity,'integrity':integrity,'coverage':coverage}
+
+
+def validate_revision(revision,territory='IN',*,prepared=None):
+    revision=_revision(revision)
+    prepared=prepared if prepared is not None else prepare_revision_validation(revision)
+    identity=[(str(a.id),a.version,a.state,a.sha256,a.bytes,a.storage_key,a.content_type) for a in revision.assets.order_by('id')]
+    if prepared.get('revision_id')!=str(revision.id) or prepared.get('version')!=revision.version or prepared.get('sha256')!=revision.content_sha256 or prepared.get('assets')!=identity:
+        raise DomainError('version_conflict','Revision/assets changed after private verification.',412,{'current_version':revision.version})
     checks=[]
     def add(code,ok,message): checks.append({'code':code,'status':'pass' if ok else 'fail','message':message})
     formats=[f for f in FORMATS if revision.access_policy.get(f,'deny')!='deny']
@@ -544,21 +586,25 @@ def validate_revision(revision,territory='IN'):
             and clearance.get('asset_sha256')=={str(a.id):a.sha256 for a in ready_assets}
             and isinstance(clearance.get('evidence_ref'),str) and bool(clearance['evidence_ref'].strip()))
         add('publication_clearance',clearance_ok,'Private exact-text/asset legal evidence must cover all whitelisted regions and offered formats, including applicable distribution permissions; draft term research is insufficient.')
-    integrity=True
-    try:
-        for asset in ready_assets: _asset_valid(asset)
-    except DomainError:
-        integrity=False
+    integrity=prepared['integrity']
     for fmt in formats:
         kind={'reader':'reader_package','audio':'audio_chapter','video':'video'}[fmt]
         if not any(a.kind==kind for a in ready_assets): integrity=False
-    if 'reader' in formats and not _reader_package_coverage(revision,ready_assets):
+    if 'reader' in formats and not prepared['coverage']:
         integrity=False
     add('media',integrity and all(a.state=='ready' for a in revision.assets.all()),
         'All assets require verified bytes/checksums; every Reader unit requires complete ordered canonical packages bound to this revision, unit, chunk and anchor revision.')
     audio=revision.assets.filter(kind='audio_chapter',state='ready')
     if audio.exists():
-        add('timing_map',all(revision.timing_maps.filter(asset=a,measured=True,text_sha256=revision.content_sha256,asset_sha256=a.sha256).exists() for a in audio),'Every offered audio output requires a measured hash-bound map.')
+        from .timing import validated_segments
+        mapped=True
+        for asset in audio:
+            valid=False
+            for mapping in revision.timing_maps.filter(asset=asset,measured=True,text_sha256=revision.content_sha256,asset_sha256=asset.sha256).select_related('asset','asset__unit','asset__revision','revision'):
+                try:validated_segments(mapping);valid=True;break
+                except DomainError:continue
+            if not valid:mapped=False
+        add('timing_map',mapped,'Every offered audio output requires exact prepared rendition evidence and a complete measured hash-bound map.')
     else:
         checks.append({'code':'timing_map','status':'not_applicable','message':'Reader-only revision; no audio release implied.'})
     browser=revision.validation_evidence.get('browser',{})
@@ -569,8 +615,16 @@ def validate_revision(revision,territory='IN'):
             'checks':checks,'validated_at':iso(timezone.now())}
 
 
+def transition_revision(user,revision_id,action,expected_version,expected_sha256,reason='',publish_at=None,*,prepared=None):
+    if not user.is_active or not user.is_staff or not user.has_perm('library.publish_revision'):
+        raise DomainError('permission_denied','Content publisher permission is required.',403)
+    if action in {'validate','mark-ready','publish','schedule'} and prepared is None:
+        prepared=prepare_revision_validation(revision_id)
+    return _transition_revision(user,revision_id,action,expected_version,expected_sha256,reason,publish_at,prepared=prepared)
+
+
 @transaction.atomic
-def transition_revision(user,revision_id,action,expected_version,expected_sha256,reason='',publish_at=None):
+def _transition_revision(user,revision_id,action,expected_version,expected_sha256,reason='',publish_at=None,*,prepared=None):
     if not user.is_active or not user.is_staff or not user.has_perm('library.publish_revision'):
         raise DomainError('permission_denied','Content publisher permission is required.',403)
     entry=Revision.objects.only('edition_id').get(pk=revision_id)
@@ -580,11 +634,11 @@ def transition_revision(user,revision_id,action,expected_version,expected_sha256
     if revision.version!=expected_version or revision.content_sha256!=expected_sha256:
         raise DomainError('version_conflict','Revision changed; review the current content.',412,{'current_version':revision.version})
     if action=='validate':
-        return validate_revision(revision)
+        return validate_revision(revision,prepared=prepared)
     if not reason.strip():
         raise DomainError('reason_required','Record a reason for this publication action.',400)
     if action in {'mark-ready','publish','schedule'}:
-        report=validate_revision(revision)
+        report=validate_revision(revision,prepared=prepared)
         if report['status']!='pass':
             raise DomainError('publication_not_ready','Required publication checks have not passed.',409,report)
     if action=='mark-ready':
@@ -603,6 +657,7 @@ def transition_revision(user,revision_id,action,expected_version,expected_sha256
             # The cross-row FK guard requires the pointed-to revision to be live in this transaction.
             revision.version+=1;revision.save()
             edition.live_revision=revision;edition.version+=1;edition.full_clean();edition.save()
+            queue_catalog_purge(revision)
             return staff_state(revision)
     elif action=='withdraw':
         if revision.state!='live': raise DomainError('invalid_transition','Only live revisions can be withdrawn.',409)
@@ -612,39 +667,77 @@ def transition_revision(user,revision_id,action,expected_version,expected_sha256
     else:
         raise DomainError('invalid_action','Unknown publication action.',400)
     revision.version+=1;revision.save()
+    if action=='withdraw':queue_catalog_purge(revision)
     return staff_state(revision)
 
 
-@transaction.atomic
 def clone_revision(source_id):
-    """Fork frozen content. Each locator is new; byte copies are rehashed, packages rebuilt."""
-    source=Revision.objects.select_for_update().select_related('edition').get(pk=source_id)
-    clone=Revision.objects.create(edition=source.edition,title=source.title,description=source.description,
-                                  anchor_revision=source.anchor_revision+1,access_policy=source.access_policy.copy(),
-                                  download_policy=source.download_policy.copy(),preview=source.preview.copy())
-    unit_map={};anchor_map={};asset_map={}
-    for old in source.units.all():
-        unit=Unit.objects.create(revision=clone,title=old.title,ordinal=old.ordinal,kind=old.kind,duration_ms=old.duration_ms,preview=old.preview)
-        unit_map[old.id]=unit
-        for p in old.paragraphs.all():
-            new=Paragraph.objects.create(unit=unit,ordinal=p.ordinal,kind=p.kind,text=p.text)
-            anchor_map[str(p.anchor_id)]=str(new.anchor_id)
-    for right in source.rights.all():
-        Rights.objects.create(revision=clone,format=right.format,action=right.action,territories=right.territories.copy(),
-                              starts_at=right.starts_at,ends_at=right.ends_at,approved=False,test_only=right.test_only,
-                              evidence='Copied for re-review; approval intentionally reset. '+right.evidence)
+    """Prepare copies outside locks, then atomically persist the exact unchanged source snapshot."""
+    source=Revision.objects.select_related('edition').get(pk=source_id)
+    source_version=source.version
+    clone=Revision(id=uuid.uuid4(),edition=source.edition,title=source.title,description=source.description,
+                   anchor_revision=source.anchor_revision+1,access_policy=source.access_policy.copy(),
+                   download_policy=source.download_policy.copy())
+    unit_map={};anchor_map={};asset_map={};paragraphs=[];assets=[];units=[];content=[]
+    for old in source.units.prefetch_related('paragraphs').all():
+        unit=Unit(id=uuid.uuid4(),revision=clone,title=old.title,ordinal=old.ordinal,kind=old.kind,duration_ms=old.duration_ms,preview=old.preview)
+        units.append(unit);unit_map[old.id]=unit;unit_paragraphs=[]
+        for original in old.paragraphs.all():
+            paragraph=Paragraph(id=uuid.uuid4(),anchor_id=uuid.uuid4(),unit=unit,ordinal=original.ordinal,kind=original.kind,text=original.text)
+            paragraphs.append(paragraph);unit_paragraphs.append(paragraph);anchor_map[str(original.anchor_id)]=str(paragraph.anchor_id)
+        assets.append(prepare_reader_package(unit,unit_paragraphs))
+        content.append({'unit_id':str(unit.id),'title':unit.title,'ordinal':unit.ordinal,'paragraphs':[paragraph_dto(p) for p in unit_paragraphs]})
+    from .storage import copy_verified
     for old in source.assets.exclude(kind__in=['reader_package','timing_map']):
-        raw=_asset_valid(old)
+        if old.state!='ready':raise DomainError('source_asset_not_ready','Finish source uploads before cloning this revision.',409)
         aid=uuid.uuid4();key=f'revisions/{clone.id}/{aid}';asset_map[str(old.id)]=str(aid)
-        destination=asset_path(key);destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(raw)
-        if digest(destination.read_bytes())!=old.sha256: raise DomainError('copy_integrity_failed','Clone copy failed checksum verification.',503)
-        Asset.objects.create(id=aid,revision=clone,unit=unit_map.get(old.unit_id),kind=old.kind,state=old.state,
-                             storage_key=key,sha256=old.sha256,bytes=old.bytes,content_type=old.content_type,copy_verified_bytes=len(raw))
+        copy_verified(old,key)
+        assets.append(Asset(id=aid,revision=clone,unit=unit_map.get(old.unit_id),kind=old.kind,state='ready',storage_key=key,
+                            sha256=old.sha256,bytes=old.bytes,content_type=old.content_type,copy_verified_bytes=old.bytes))
     selected=source.validation_evidence.get('cover_pair',{})
     pair={side:{**item,'asset_id':asset_map[item['asset_id']]} for side,item in selected.items()
           if isinstance(item,dict) and item.get('asset_id') in asset_map}
-    if pair:clone.validation_evidence={'cover_pair':pair}
-    for unit in unit_map.values(): write_reader_package(unit)
+    clone.validation_evidence={'cover_pair':pair} if pair else {}
     clone.preview=[{**p,'anchor_id':anchor_map[p['anchor_id']]} for p in source.preview if p.get('anchor_id') in anchor_map]
-    clone.content_sha256=revision_hash(clone);clone.save()
+    clone.content_sha256=digest(canonical_bytes(content))
+    rights=list(source.rights.all())
+    with transaction.atomic():
+        Edition.objects.select_for_update().get(pk=source.edition_id)
+        current=Revision.objects.select_for_update().get(pk=source.id)
+        if current.version!=source_version or current.state!=source.state:
+            raise DomainError('version_conflict','Source changed while preparing private copies. Review the current revision.',412)
+        clone.save();Unit.objects.bulk_create(units);Paragraph.objects.bulk_create(paragraphs);Asset.objects.bulk_create(assets)
+        Rights.objects.bulk_create([Rights(revision=clone,format=right.format,action=right.action,territories=right.territories.copy(),
+            starts_at=right.starts_at,ends_at=right.ends_at,approved=False,test_only=right.test_only,
+            evidence='Copied for re-review; approval intentionally reset. '+right.evidence) for right in rights])
+    clone.refresh_from_db()
     return clone
+
+
+def queue_catalog_purge(revision):
+    from core.models import OutboxJob
+    OutboxJob.objects.get_or_create(dedupe_key=f'catalog-purge:{revision.id}:{revision.version}:{revision.state}',defaults={
+        'kind':'catalog_cache_purge','payload':{'edition_id':str(revision.edition_id),'revision_id':str(revision.id)},'not_before':timezone.now()})
+
+
+def prepared_audio(asset):
+    data=asset.revision.validation_evidence.get('media_assets',{}).get(str(asset.id),{})
+    if (asset.kind!='audio_chapter' or asset.state!='ready' or not asset.unit_id or not isinstance(data,dict)
+        or data.get('sha256')!=asset.sha256 or data.get('unit_id')!=str(asset.unit_id)
+        or data.get('prepared') is not True or not data.get('measurement_evidence')
+        or type(data.get('duration_ms'))!=int or data['duration_ms']<1 or data['duration_ms']!=asset.unit.duration_ms
+        or data.get('quality_kbps') not in {48,96}):
+        raise DomainError('media_not_ready','Audio requires exact prepared rendition and measured duration evidence.',409)
+    return data
+
+
+def media_chapters(user,revision_id,territory='IN'):
+    if not settings.FEATURES.get('audio'):return []
+    revision=authorize_revision(user,revision_id,'audio',territory=territory)
+    result=[]
+    for asset in revision.assets.filter(kind='audio_chapter',state='ready').select_related('unit','revision').order_by('unit__ordinal','id'):
+        try:data=prepared_audio(asset)
+        except DomainError:continue
+        result.append({'asset_id':str(asset.id),'unit_id':str(asset.unit_id),'duration_ms':data['duration_ms'],
+                       'sha256':asset.sha256,'quality_kbps':data['quality_kbps'],'title':asset.unit.title})
+    return result

@@ -1,0 +1,1 @@
+{% extends 'web/base.html' %}{% load maison %}{% block content %}<h1>{% ui 'downloads' %}</h1><p>{% ui 'offline_revoke_limit' %}</p><div id="downloads-island"><p>{% ui 'loading' %}</p></div>{% endblock %}{% block bootstrap %}{{ download_bootstrap|json_script:'downloads-bootstrap' }}{% island_script 'downloads' %}{% endblock %}

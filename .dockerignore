@@ -3,4 +3,10 @@
 .local
 __pycache__
 *.pyc
-docs/evidence
+docs/evidence/*
+!docs/evidence/selfish-giant-global-rights.json
+
+node_modules
+.env
+.env.*
+.neon

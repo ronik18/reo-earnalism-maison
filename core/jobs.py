@@ -21,7 +21,13 @@ def run_due_jobs(limit=25,max_seconds=45):
         try:
             if job.kind in ['email_action','privacy_export','privacy_delete','contact_support']:
                 from accounts.services import process_outbox_job
-                result=process_outbox_job(job)
+                result=process_outbox_job(job,max_seconds=max(1,max_seconds-(time.monotonic()-started)))
+            elif job.kind=='checkout_reconcile':
+                from billing.checkout import process_checkout
+                result=process_checkout(job)
+            elif job.kind=='catalog_cache_purge':
+                from operations.providers import purge_catalog_cache
+                result=purge_catalog_cache(job.payload)
             elif job.kind in ['refund_review','refund_reconcile']:
                 raise DomainError('provider_not_enabled','Refund remains a durable review obligation; no provider call is configured.',409)
             else:

@@ -42,7 +42,7 @@ class LibraryAcceptanceTests(TestCase):
 
     def test_requires_real_postgresql(self):
         self.assertEqual(connection.vendor,'postgresql')
-        self.assertEqual(connection.pg_version//10000,17)
+        self.assertIn(connection.pg_version//10000,(17,18))
 
     def test_default_deny_even_with_rights_and_no_offer(self):
         clone=svc.clone_revision(self.revision.id)
@@ -153,6 +153,18 @@ class LibraryAcceptanceTests(TestCase):
         published=svc.transition_revision(self.admin,clone.id,'publish',state['version'],clone.content_sha256,'Synthetic service acceptance only')
         self.assertEqual(published['state'],'live');self.edition.refresh_from_db();self.assertEqual(self.edition.live_revision_id,clone.id)
         self.revision.refresh_from_db();self.assertEqual(self.revision.state,'retired')
+
+    def test_publication_preparation_is_outside_locked_transition_and_rejects_stale_assets(self):
+        from unittest.mock import patch
+        clone=svc.clone_revision(self.revision.id)
+        proof=svc.prepare_revision_validation(clone);clone.refresh_from_db()
+        with patch('library.storage.verify_asset',side_effect=AssertionError('No provider I/O in transition')),patch('library.services._reader_package_coverage',side_effect=AssertionError('No package I/O in transition')):
+            report=svc.transition_revision(self.admin,clone.id,'validate',clone.version,clone.content_sha256,prepared=proof)
+            self.assertIn(report['status'],['pass','fail'])
+        asset=clone.assets.first();asset.bytes+=1;asset.save();clone.refresh_from_db()
+        with self.assertRaises(DomainError) as error:
+            svc.transition_revision(self.admin,clone.id,'validate',clone.version,clone.content_sha256,prepared=proof)
+        self.assertEqual(error.exception.code,'version_conflict')
 
     def test_readiness_rejects_missing_or_wrong_unit_reader_package(self):
         clone=svc.clone_revision(self.revision.id)

@@ -1,7 +1,50 @@
 {
   "status": "DESIGN_FIXTURE_NOT_PROVIDER_ACCEPTANCE",
   "note": "Replace exact local test origin with the approved production origin at qualification. Never use a wildcard with credentialed app requests. Upload credentials and private source/evidence URLs are not public delivery grants.",
-  "delivery_bucket": [{"AllowedOrigins": ["http://127.0.0.1:8008"], "AllowedMethods": ["GET", "HEAD"], "AllowedHeaders": ["Range"], "ExposeHeaders": ["Accept-Ranges", "Content-Length", "Content-Range", "ETag"], "MaxAgeSeconds": 120}],
-  "private_staff_upload_bucket": [{"AllowedOrigins": ["http://127.0.0.1:8008"], "AllowedMethods": ["PUT"], "AllowedHeaders": ["Content-Type"], "ExposeHeaders": ["ETag"], "MaxAgeSeconds": 120}],
-  "acceptance_required": ["Preflight PUT from exact approved origin succeeds", "PUT from any other origin fails browser CORS", "Method and content type are signed", "Hash/size/completion state validated on server", "Reader source, timing-map input and rights-document input cannot receive member delivery grants"]
+  "delivery_bucket": [
+    {
+      "AllowedOrigins": [
+        "http://127.0.0.1:8008"
+      ],
+      "AllowedMethods": [
+        "GET",
+        "HEAD"
+      ],
+      "AllowedHeaders": [
+        "Range"
+      ],
+      "ExposeHeaders": [
+        "Accept-Ranges",
+        "Content-Length",
+        "Content-Range",
+        "ETag"
+      ],
+      "MaxAgeSeconds": 120
+    }
+  ],
+  "private_staff_upload_bucket": [
+    {
+      "AllowedOrigins": [
+        "http://127.0.0.1:8008"
+      ],
+      "AllowedMethods": [
+        "PUT"
+      ],
+      "AllowedHeaders": [
+        "Content-Type",
+        "If-None-Match"
+      ],
+      "ExposeHeaders": [
+        "ETag"
+      ],
+      "MaxAgeSeconds": 120
+    }
+  ],
+  "acceptance_required": [
+    "Preflight PUT from exact approved origin succeeds",
+    "PUT from any other origin fails browser CORS",
+    "Method and content type are signed",
+    "Hash/size/completion state validated on server",
+    "Reader source, timing-map input and rights-document input cannot receive member delivery grants"
+  ]
 }

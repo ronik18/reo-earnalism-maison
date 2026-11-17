@@ -3,3 +3,6 @@ psycopg[binary]>=3.2,<4
 gunicorn>=23,<28
 jsonschema>=4.26,<5
 regex==2026.11.15
+boto3==1.44.4
+django-otp==1.7.5
+python-dotenv==1.2.4

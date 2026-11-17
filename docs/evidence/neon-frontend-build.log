@@ -1,0 +1,16 @@
+
+> reo-earnalism-maison@1.0.0 build
+> node client/build.mjs
+
+static/maison/dist/reader-K3A7IAW4.js: 17905 bytes
+static/maison/dist/quiz-PUEX4WSR.js: 2397 bytes
+static/maison/dist/player-XI6LT6OK.js: 6248 bytes
+static/maison/dist/shared-3A6WA22C.js: 805 bytes
+static/maison/dist/downloads-5LOGYOJI.js: 5572 bytes
+static/maison/dist/account-E4BCKTDE.js: 7623 bytes
+static/maison/dist/shared-BVWZHPSY.js.LEGAL.txt: 1528 bytes
+static/maison/dist/shared-BVWZHPSY.js: 221384 bytes
+static/maison/dist/shell-DUWUJGYP.js: 1020 bytes
+static/maison/dist/shared-T4XPFWUI.js: 3062 bytes
+static/maison/dist/shared-IHYJ6RDV.js: 5006 bytes
+static/maison/dist/shared-RQLKNBFG.js: 1992 bytes

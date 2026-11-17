@@ -121,3 +121,12 @@ class RateLimitBucket(models.Model):
     class Meta:
         db_table='maison_rate_limit_bucket'
         constraints=[models.UniqueConstraint(fields=['key_hash','purpose','window'],name='maison_rate_bucket_uq')]
+
+
+class MFARecoveryCode(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name='mfa_recovery_codes')
+    code_sha256=models.CharField(max_length=64,unique=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+    used_at=models.DateTimeField(null=True)
+    class Meta:
+        db_table='maison_mfa_recovery_code'

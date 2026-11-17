@@ -1,4 +1,4 @@
--- Earnalism Maison: PostgreSQL 17 design contract, 17 November 2026.
+-- Earnalism Maison: PostgreSQL 18 design contract, 17 November 2026.
 -- Draft revision 1.1.0: findings C01-C15 reconciled; local validation is not production acceptance.
 -- NOT deployed. Run once on a fresh application DB AFTER Django auth/session migrations.
 -- auth_user(id) and django_session(session_key) remain Django-owned; do not recreate them here.

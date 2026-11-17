@@ -1,0 +1,79 @@
+{
+  "environment": "loopback app against dedicated Neon production branch; local private storage adapter; not a public launch",
+  "postgresql_major": 18,
+  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+  "edition_revision_id": "3988156b-2eee-4839-b542-2d3b8b253307",
+  "unit_id": "463e87aa-967c-4763-b815-1c9d926f514f",
+  "slug": "the-selfish-giant-en",
+  "state": "draft",
+  "live_revision_id": null,
+  "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+  "paragraphs": 32,
+  "cover_pair": {
+    "front": {
+      "asset_id": "29bc02fb-7f23-49cd-9215-1e371e6e77fc",
+      "sha256": "ccc7923a5dc0d52b2b684a6a0be99de4140849e7a13ca2ebe3618590e13ac32d",
+      "bytes": 120336
+    },
+    "back": {
+      "asset_id": "e13e5534-6deb-4197-85ed-fa2274faad4e",
+      "sha256": "04fbc420d4db3f51b14955d01d957e2991bd2b78dc8fa15ffeb31f9245b99366",
+      "bytes": 116697
+    }
+  },
+  "publication_checks": [
+    {
+      "code": "rights",
+      "status": "pass",
+      "message": "Every offered format requires current approved rights; local-only rights require local mode."
+    },
+    {
+      "code": "publication_regions",
+      "status": "pass",
+      "message": "Every offered format/action requires current rights across the complete active whitelist; synthetic fixtures prove only their local test scope."
+    },
+    {
+      "code": "metadata",
+      "status": "pass",
+      "message": "Title, description and supported edition locale required."
+    },
+    {
+      "code": "text",
+      "status": "pass",
+      "message": "Immutable text root must match the ordered semantic paragraphs."
+    },
+    {
+      "code": "anchors",
+      "status": "pass",
+      "message": "Stable paragraph anchors are required."
+    },
+    {
+      "code": "cover",
+      "status": "pass",
+      "message": "A ready original cover is required."
+    },
+    {
+      "code": "publication_clearance",
+      "status": "fail",
+      "message": "Private exact-text/asset legal evidence must cover all whitelisted regions and offered formats, including applicable distribution permissions; draft term research is insufficient."
+    },
+    {
+      "code": "media",
+      "status": "pass",
+      "message": "All assets require verified bytes/checksums; every Reader unit requires complete ordered canonical packages bound to this revision, unit, chunk and anchor revision."
+    },
+    {
+      "code": "timing_map",
+      "status": "not_applicable",
+      "message": "Reader-only revision; no audio release implied."
+    },
+    {
+      "code": "browser",
+      "status": "fail",
+      "message": "Browser acceptance must bind this exact text hash and release scope."
+    }
+  ],
+  "pending_migrations": false,
+  "legacy_changed": false,
+  "paid_resources_created": false
+}

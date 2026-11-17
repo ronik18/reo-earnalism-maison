@@ -1,3 +1,4 @@
+from django.conf import settings
 from core.api import json_endpoint,api_response,operation_key,expected_version
 from core.services import apply_operation,audit
 from library.views import context,page
@@ -6,20 +7,24 @@ from . import services as svc
 
 @json_endpoint(auth=False)
 def tracks(request):
+    request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
     locale,_=context(request)
     return api_response(page(request,svc.list_tracks(request.user,locale),'tracks'))
 
 @json_endpoint()
 def track(request,track_id):
+    request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
     return api_response(svc.track_detail(request.user,track_id))
 
 @json_endpoint()
 def lesson(request,lesson_id):
+    request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
     data=svc.lesson_detail(request.user,lesson_id)
     return api_response(data,version=data['version'])
 
 @json_endpoint(methods=('POST',))
 def complete(request,lesson_id):
+    request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
     key=operation_key(request)
     def execute():
         data=svc.complete_lesson(request.user,lesson_id)
@@ -29,16 +34,19 @@ def complete(request,lesson_id):
 
 @json_endpoint()
 def questions(request,track_id):
+    request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
     data=svc.interview_questions(request.user,track_id,**{k:request.GET.get(k,'') for k in ('topic','difficulty','company_style')})
     return api_response(page(request,data,'interview:'+str(track_id)))
 
 @json_endpoint()
 def quiz(request,quiz_id):
+    request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
     data=svc.quiz_public(request.user,quiz_id)
     return api_response(data,version=data['version'])
 
 @json_endpoint(methods=('POST',))
 def start(request,quiz_id):
+    request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
     data=body(request,'QuizAttemptInput');key=operation_key(request)
     def execute():
         attempt=svc.start_attempt(request.user,quiz_id,data['quiz_version'])
@@ -48,11 +56,13 @@ def start(request,quiz_id):
 
 @json_endpoint()
 def attempt(request,attempt_id):
+    request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
     result=svc.attempt_dto(svc.own_attempt(request.user,attempt_id))
     return api_response(result,version=result['version'])
 
 @json_endpoint(methods=('POST',))
 def submit(request,attempt_id):
+    request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
     data=body(request,'QuizSubmission');key=operation_key(request);version=expected_version(request)
     def execute():
         attempt=svc.submit_attempt(request.user,attempt_id,data['answers'],version)

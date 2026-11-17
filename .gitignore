@@ -6,3 +6,9 @@ __pycache__/
 .coverage
 node_modules/
 .pytest_cache/
+
+.env.local
+.env.*
+!.env.example
+static/maison/dist/
+.neon

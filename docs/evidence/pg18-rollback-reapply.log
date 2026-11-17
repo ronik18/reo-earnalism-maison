@@ -1,0 +1,23 @@
+Operations to perform:
+  Target specific migration: 0002_completion_and_more, from reader
+Running migrations:
+  Rendering model states... DONE
+  Unapplying reader.0003_download_license... OK
+Operations to perform:
+  Target specific migration: 0001_initial, from accounts
+Running migrations:
+  Rendering model states... DONE
+  Unapplying accounts.0002_mfa_recovery_code... OK
+Operations to perform:
+  Target specific migration: 0001_initial, from learning
+Running migrations:
+  Rendering model states... DONE
+  Unapplying learning.0002_lesson_completion_rules... OK
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, billing, contenttypes, core, learning, library, otp_totp, reader, sessions
+Running migrations:
+  Applying accounts.0002_mfa_recovery_code... OK
+  Applying learning.0002_lesson_completion_rules... OK
+  Applying reader.0003_download_license... OK
+No changes detected
+PASS: three new application migrations reversed/reapplied on empty isolated PostgreSQL18; Neon and legacy untouched.

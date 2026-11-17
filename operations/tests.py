@@ -8,7 +8,7 @@ from django.test import Client, TestCase, override_settings
 class RuntimeBoundaryTests(TestCase):
     def test_real_postgresql_and_no_paid_features(self):
         self.assertEqual(connection.vendor, 'postgresql')
-        self.assertEqual(connection.pg_version // 10000, 17)
+        self.assertIn(connection.pg_version // 10000, [17, 18])
         self.assertTrue(all(isinstance(v, bool) for v in settings.FEATURES.values()))
         self.assertFalse(any(settings.FEATURES[k] for k in ['audio','video','offline_text_audio','recurring_billing','google_oauth','phone_otp']))
 

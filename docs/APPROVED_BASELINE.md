@@ -4,7 +4,7 @@ Owner direction,17November2026: do not deviate from the proposed HLD, technical 
 
 ## Target to preserve
 
-- One Python3.13/Django5.2LTS application on Render; one PostgreSQL17 database on Neon Scale Singapore.
+- One Python3.13/Django5.2LTS application on Render; one PostgreSQL18 database (owner-approved18November2026) on Neon Scale Singapore.
 - Django templates and same-origin APIs, with React/TypeScript interactive islands and Node24LTS as a build tool only.
 - Cloudflare CDN/R2 for the specified public/private assets and direct authorized delivery; gated Stream video when approved assets exist.
 - Existing reviewed OpenAPI, SQL/model/index, cache/CDN, runtime and screen contracts. Django migrations own implemented runtime schema; reference-SQL execution alone is not parity.
@@ -32,3 +32,6 @@ Next exact engineering prompt: implement the approved React/TypeScript interacti
 ## Owner-approved region amendment,17November2026
 
 The active47-region whitelist is contracts/publication-policy.json. UAE/Mainland China and all pending jurisdictions are excluded. This is an explicit owner scope change; the technical stack, design and implementation sequence remain unchanged. Every published title must be legally compliant in all active regions; excluded-country research is historical, not a blocker for active-scope preparation.
+
+
+Owner-approved database amendment,18November2026: retain the existing Neon PostgreSQL18 project. This is the only database-version baseline change; hosting, HA, scaling, pricing authority and publication requirements remain as approved.

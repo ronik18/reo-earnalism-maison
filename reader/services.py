@@ -128,8 +128,16 @@ def _range(revision,value,kind):
     return value,bounded,bounded!=quote
 
 
-def annotation_data(row):
-    return {'annotation_id':str(row.id),'edition_revision_id':str(row.revision_id),'kind':row.kind,'range':row.range,'color':row.color,'note_text':row.note_text,'quoted_text':row.quoted_text,'quoted_text_truncated':row.quoted_text_truncated,'version':row.version,'created_at':iso(row.created_at),'updated_at':iso(row.updated_at),'anchor_status':'valid' if row.revision.edition.live_revision_id==row.revision_id else 'orphaned'}
+def annotation_data(row,user=None):
+    valid=row.revision.edition.live_revision_id==row.revision_id
+    if not row.revision.edition.live_revision_id:
+        from library.services import can_review_draft
+        if can_review_draft(user,row.revision):
+            try:
+                _,quote,truncated=_range(row.revision,row.range,row.kind)
+                valid=quote==row.quoted_text and truncated==row.quoted_text_truncated
+            except DomainError:valid=False
+    return {'annotation_id':str(row.id),'edition_revision_id':str(row.revision_id),'kind':row.kind,'range':row.range,'color':row.color,'note_text':row.note_text,'quoted_text':row.quoted_text,'quoted_text_truncated':row.quoted_text_truncated,'version':row.version,'created_at':iso(row.created_at),'updated_at':iso(row.updated_at),'anchor_status':'valid' if valid else 'orphaned'}
 
 
 def _note(value):
@@ -145,7 +153,7 @@ def create_annotation(user,data,operation_id,territory='IN'):
         location,quote,truncated=_range(revision,data['range'],kind);identifier=public_uuid(data['annotation_id'])
         if Annotation.objects.filter(pk=identifier).exists():raise DomainError('annotation_exists','This annotation ID is already used.',409)
         row=Annotation.objects.create(id=identifier,user=user,revision=revision,kind=kind,range=location,color=color,note_text=note,quoted_text=quote,quoted_text_truncated=truncated)
-        return 201,annotation_data(row),row.version
+        return 201,annotation_data(row,user),row.version
     return apply_operation(user,operation_id,'annotation.create',data,mutate)
 
 
@@ -153,13 +161,13 @@ def patch_annotation(user,annotation_id,data,operation_id,base_version):
     def mutate():
         row=Annotation.objects.select_for_update().select_related('revision__edition').filter(pk=annotation_id,user=user,deleted_at=None).first()
         if not row:raise DomainError('not_found','Annotation not found.',404)
-        if row.version!=base_version:raise DomainError('version_conflict','Annotation changed.',412,annotation_data(row))
+        if row.version!=base_version:raise DomainError('version_conflict','Annotation changed.',412,annotation_data(row,user))
         if not data or set(data)-{'color','note_text'}:raise DomainError('validation_error','Invalid annotation change.',422)
         if 'color' in data:
             if data['color'] not in [None,'gold','mint','rose','lavender'] or (row.kind=='highlight' and data['color'] is None):raise DomainError('validation_error','Invalid highlight color.',422)
             row.color=data['color']
         if 'note_text' in data:row.note_text=_note(data['note_text'])
-        row.version+=1;row.save();return 200,annotation_data(row),row.version
+        row.version+=1;row.save();return 200,annotation_data(row,user),row.version
     return apply_operation(user,operation_id,'annotation.patch',{'annotation_id':str(annotation_id),'base_version':base_version,'patch':data},mutate)
 
 
@@ -168,7 +176,7 @@ def delete_annotation(user,annotation_id,operation_id,base_version):
         row=Annotation.objects.select_for_update().filter(pk=annotation_id,user=user).first()
         if not row:raise DomainError('not_found','Annotation not found.',404)
         if row.deleted_at:return 204,{},row.version
-        if row.version!=base_version:raise DomainError('version_conflict','Annotation changed.',412,annotation_data(row))
+        if row.version!=base_version:raise DomainError('version_conflict','Annotation changed.',412,annotation_data(row,user))
         row.deleted_at=timezone.now();row.version+=1;row.save();return 204,{},row.version
     return apply_operation(user,operation_id,'annotation.delete',{'annotation_id':str(annotation_id),'base_version':base_version},mutate)
 
@@ -249,7 +257,7 @@ def vault_data(user):
 
 
 def export_personal_data(user):
-    return {'reader':vault_data(user),'completion':[completion_data(x) for x in Completion.objects.filter(user=user)],'annotations':[annotation_data(x) for x in Annotation.objects.filter(user=user,deleted_at=None).select_related('revision__edition')]}
+    return {'reader':vault_data(user),'completion':[completion_data(x) for x in Completion.objects.filter(user=user)],'annotations':[annotation_data(x,user) for x in Annotation.objects.filter(user=user,deleted_at=None).select_related('revision__edition')]}
 
 
 def delete_personal_data(user):
