@@ -17,7 +17,7 @@ The first technical journey passes: bounded guest preview -> signup -> queued lo
 
 The full54-table reference SQL executes in a separate audit database. Actual application migrations own49 database tables including framework tables. These counts describe different scopes; they are not a claim of full ORM parity.
 
-The target remains one Django application, PostgreSQL and direct object delivery. The local first slice uses dependency-free JavaScript instead of adding a React build. Real R2/CDN/Stream, email/merchant adapters, trusted production territory, offline devices, production restore/failover/load and commercial launch content remain pending. Mobile emulation did not produce reliable acceptance evidence; physical/mobile and assistive-technology checks stay open.
+The target remains one Django application, PostgreSQL and direct object delivery. The local first slice currently uses dependency-free JavaScript. This is a known gap against the approved React/TypeScript islands, not an approved substitution; see APPROVED_BASELINE.md. Real R2/CDN/Stream, email/merchant adapters, trusted production territory, offline devices, production restore/failover/load and commercial launch content remain pending. Mobile emulation did not produce reliable acceptance evidence; physical/mobile and assistive-technology checks stay open.
 
 ## Finding resolution register
 
@@ -47,4 +47,4 @@ The target remains one Django application, PostgreSQL and direct object delivery
 
 ## Next integration action
 
-Select the first genuinely cleared launch edition packet, import it in draft through the supported admin/upload API, and repeat this journey against its exact text/asset hashes before activating paid infrastructure. Retain the existing platform throughout staged provider qualification and cutover.
+The Selfish Giant is now imported in draft with retained cover/browser evidence and named-country rights; see SELFISH_GIANT_HANDOFF.md. Continue the approved LLD sequence and close the baseline/provider/device gaps before production activation. Retain the existing platform throughout qualification and cutover.

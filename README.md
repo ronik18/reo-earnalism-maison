@@ -30,13 +30,13 @@ Open http://127.0.0.1:8008/en/ or `/bn/`. Sign-up is real; confirmation mail is 
 
 PostgreSQL is required; SQLite is intentionally unsupported. The raw SQL audit creates a separate local database and executes the complete reference contract after real Django auth/session migrations. The running application's schema is owned by its Django migrations. Never execute `contracts/database.sql` on the application database or an existing database. The backup check creates a new local restore database, compares each table's row count and content hash, and leaves the private dump in `.local/backups`.
 
-The GitHub Actions file defines a disposable PostgreSQL/Python 3.13 check. Authoring the workflow does not mean a remote run has passed. No remote repository or deployment is configured by this local milestone.
+The private GitHub repository runs disposable PostgreSQL/Python3.13 CI. Refer to the exact commit run for current evidence. The Maison application has not been deployed to production.
 
 ## Application boundaries
 
 One Django process serves SSR pages, same-origin JSON APIs and small, dependency-free browser interactions. One PostgreSQL database owns business state, operation receipts and outbox jobs. The official logo and licensed self-hosted fonts are preserved; Ford Gold art stays outside the calm Reader text area. Covers use whole, rectangular frames.
 
-Interactive controls currently use plain JavaScript rather than introducing a React build for the first journey. This deliberate simplification retains the reviewed API contracts and accessible HTML. Large provider-backed media will use direct delivery; the local signed-asset transport is a development adapter, not an R2 implementation or performance claim.
+Interactive controls currently use plain JavaScript. This remains a gap against the approved React/TypeScript island design; it is not an approved design change. See [binding implementation baseline](docs/APPROVED_BASELINE.md). Large provider-backed media will use direct delivery; the local signed-asset transport is a development adapter, not an R2 implementation or performance claim.
 
 Audio/video, offline licensing, magic links, Google/phone sign-in, recurring billing and international checkout remain explicitly disabled until their configured adapters pass acceptance. There is no fake paid checkout, real refund, production publication or HA claim. Production configuration requires real secrets, an HTTPS public base URL and verified database TLS; it cannot fall back to local credentials.
 

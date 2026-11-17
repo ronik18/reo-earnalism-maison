@@ -147,7 +147,7 @@
     "contracts/cache-policy.json": "ea189da87b4cafb1d3de2162fe26d88a5e4c0b4e4c36dc81f4a66f72d117e948",
     "contracts/VALIDATION.md": "568d658138bd66830fb46ab4ccea15819cff3fca62546c717fab5cc9ec74a044",
     "contracts/database-model.md": "3c3ef7e52ba8a30184a0e2c1f20717dd331a23f45a9b57235d25f02527ee789e",
-    "contracts/LLD.md": "1e9c7af6523a38b8e5974e7e696c5ad3e344e151d2e4f55fa66e2bb682145c8b",
+    "contracts/LLD.md": "2f42529976af74e4ed2d23300c4187e65b5de52965bf0a25ec87e15534d572dd",
     "contracts/screen-contract-matrix.csv": "ddba0c5f7625caad88d6f2ee2931da1dfbeb8dca20417cbce75c36344dd4f671",
     "contracts/payload-examples.json": "3522adb33c5e4d362406cdbf92408873e3c44606f37edd7814d6416abfd83396",
     "contracts/openapi.yaml": "5df5118ab82e5cd7b32be5308c3efd645e0bea5969710f897ded63f643a227cc",
@@ -176,6 +176,7 @@
     "docs/SELFISH_GIANT_TERRITORIES_14_MARKETS.md": "9c2093b77d1e371af28e5ee5ba1c5b1fa5abe080a5a6afad2b8e2e543e5b5e1f",
     "docs/evidence/selfish-giant-rights-review-14-markets.json": "46fa4287ae759b3144e6f71f559c6887c8a5a5b98b976b3458c792f95a6c8416",
     "docs/evidence/selfish-giant-brazil-asia-application.json": "897a3dff425138951d734ee972aabbf37a584e738cd071ea1adf59328899eea5",
-    "docs/evidence/selfish-giant-brazil-asia-suite.log": "354be8cc6def1f1d27c643cfbd9e60e15c1eac29a395a2d6ce86c8868ecdd5ec"
+    "docs/evidence/selfish-giant-brazil-asia-suite.log": "354be8cc6def1f1d27c643cfbd9e60e15c1eac29a395a2d6ce86c8868ecdd5ec",
+    "docs/APPROVED_BASELINE.md": "578cad4591d7df8246dda34a37cf157c21f0b4afca3a299192947be9c3ce67b0"
   }
 }
