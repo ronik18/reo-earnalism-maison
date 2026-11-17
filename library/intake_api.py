@@ -7,13 +7,28 @@ from django.utils import timezone
 from core.api import json_endpoint,json_body,api_response,operation_key,DomainError
 from core.services import apply_operation,audit
 from .models import Work,Edition,Revision,Unit,Paragraph,Rights
-from .services import write_reader_package,revision_hash,paragraph_dto,staff_state
+from .services import write_reader_package,revision_hash,paragraph_dto,staff_state,digest,canonical_bytes
 
 def staff_permission(user):
     if not user.is_active or not user.is_staff or not user.has_perm("library.publish_revision"):
         raise DomainError("permission_denied","Content publisher permission is required.",403)
 
 PACKET=Path(__file__).parent/'intake/selfish-giant-en.json'
+RIGHTS_REVIEW=Path(__file__).resolve().parent.parent/'docs/evidence/selfish-giant-global-rights.json'
+
+def reviewed_territories(packet, paragraphs_sha256):
+    """Bind this fixed intake packet to its reviewed text and explicit country decisions."""
+    review=json.loads(RIGHTS_REVIEW.read_text())
+    countries=packet['rights']['territories']
+    decisions={row['territory'] for row in review['research'] if row['internal_reader_decision']=='approved_content_scope'}
+    if (paragraphs_sha256!=review['paragraphs_sha256'] or digest(canonical_bytes(packet['paragraphs']))!=review['paragraphs_sha256'] or packet['rights'].get('review_id')!=review['review_id']
+        or not isinstance(countries,list) or not countries or len(set(countries))!=len(countries)
+        or set(countries)!=decisions or countries!=review['runtime_approved_territories']
+        or any(not isinstance(c,str) or len(c)!=2 or not c.isascii() or not c.isupper() or not c.isalpha() for c in countries)
+        or set(countries)&set(review['held_territories']) or packet['rights'].get('commercial_use_allowed') is not True):
+        raise DomainError('rights_review_mismatch','Intake text or territories differ from the private rights review.',409)
+    return countries
+
 
 @json_endpoint(('POST',))
 def intake(request):
@@ -29,10 +44,11 @@ def intake(request):
         unit=Unit.objects.create(revision=revision,title=packet['title'],ordinal=1)
         for n,text in enumerate(packet['paragraphs'],1):Paragraph.objects.create(unit=unit,ordinal=n,text=text)
         revision.content_sha256=revision_hash(revision);revision.save()
+        countries=reviewed_territories(packet,digest(canonical_bytes(list(unit.paragraphs.values_list('text',flat=True)))))
         write_reader_package(unit)
         now=timezone.now()
         for action in ['read','preview']:
-            Rights.objects.create(revision=revision,format='reader',action=action,territories=['IN'],starts_at=now,ends_at=now+timedelta(days=3650),approved=True,test_only=False,evidence=json.dumps(packet['rights']))
+            Rights.objects.create(revision=revision,format='reader',action=action,territories=countries,starts_at=now,ends_at=now+timedelta(days=3650),approved=True,test_only=False,evidence=json.dumps(packet['rights']))
         revision.preview=[{'anchor_id':str(unit.paragraphs.first().anchor_id),'text':packet['paragraphs'][0][:130]}];revision.save()
         audit(request.user,'book.draft_import',revision,{'manifest_id':'EN-071'})
         return 201,{'edition_id':str(edition.id),'edition_revision_id':str(revision.id),'slug':edition.slug,'state':'draft','sha256':revision.content_sha256,'paragraph_count':len(packet['paragraphs'])},revision.version

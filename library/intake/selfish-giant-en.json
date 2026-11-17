@@ -42,15 +42,28 @@
   ],
   "rights": {
     "territories": [
-      "IN"
+      "IN",
+      "US",
+      "NZ",
+      "GB",
+      "FR",
+      "RU",
+      "DE",
+      "NL",
+      "DK",
+      "CA",
+      "SG",
+      "MY"
     ],
     "commercial_use_allowed": true,
     "format": "reader",
-    "basis": "Oscar Wilde died 1900; first published 1888. Public domain in India and the U.S.",
+    "basis": "Original English text published1888; Oscar Wilde died1900. Named-country original-text economic terms assessed from primary sources; see bound private review. AE/CN distribution held.",
     "source_url": "https://www.gutenberg.org/ebooks/902",
     "legacy_approved_at": "2026-07-03T20:07:49Z",
     "legacy_sanitized_sha256": "3171ffecd2481ba039f1ebc6d4075260f70c30334df012567eed355a1f55aeaf",
     "retained_source_sha256": "b759028402c88285d6539becb0895e25b3fe33e80a7a7af63b5b807f7d1e3878",
-    "clearance_scope": "Original English text only; no illustrations, audio or worldwide claim."
+    "clearance_scope": "Original English Reader read/preview in12 named countries; internal content decision, not production/compliance certification. No audio, video, downloads, translations or worldwide grant.",
+    "review_id": "EN-071-territories-2026-11-17",
+    "review_path": "docs/evidence/selfish-giant-global-rights.json"
   }
 }

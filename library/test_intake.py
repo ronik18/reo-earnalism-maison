@@ -77,3 +77,44 @@ class ClearedDraftJourneyTests(TestCase):
         self.assertEqual(clone.assets.get(pk=selected).sha256,images[1].sha256)
         self.assertNotIn('browser',clone.validation_evidence)
         self.assertFalse(clone.rights.filter(approved=True).exists())
+
+    def test_reviewed_country_rights_enforce_draft_and_format_boundaries(self):
+        self.test_draft_intake_review_integrity_replay_and_member_denial()
+        from .services import current_right,authorize_revision
+        from core.api import DomainError
+        r=Revision.objects.get()
+        approved={'IN','US','NZ','GB','FR','RU','DE','NL','DK','CA','SG','MY'}
+        self.assertEqual(r.rights.count(),2)
+        for right in r.rights.all():
+            self.assertEqual(set(right.territories),approved)
+            self.assertFalse(right.test_only)
+        member=get_user_model().objects.create_user('country-member@example.test','Local-Member-47',is_verified=True)
+        for country in approved:
+            with self.subTest(country=country):
+                self.assertIsNotNone(current_right(r,action='preview',territory=country))
+                self.assertEqual(authorize_revision(self.staff,r,territory=country).pk,r.pk)
+                with self.assertRaises(DomainError):authorize_revision(member,r,territory=country)
+                for fmt,action in [('reader','download'),('audio','read'),('video','read')]:
+                    self.assertIsNone(current_right(r,format=fmt,action=action,territory=country))
+                    with self.assertRaises(DomainError):authorize_revision(self.staff,r,format=fmt,action=action,territory=country)
+        for country in ['AE','CN','ZZ','SN','HK','MO','FO','GL','*','London','Scotland']:
+            with self.subTest(denied=country):
+                self.assertIsNone(current_right(r,territory=country))
+                with self.assertRaises(DomainError):authorize_revision(self.staff,r,territory=country)
+        r.refresh_from_db();r.edition.refresh_from_db()
+        self.assertEqual(r.state,'draft');self.assertIsNone(r.edition.live_revision_id)
+
+    def test_intake_country_review_rejects_changed_text_or_unreviewed_grant(self):
+        import copy
+        from .intake_api import reviewed_territories,RIGHTS_REVIEW
+        from core.api import DomainError
+        packet=json.loads(PACKET.read_text());review=json.loads(RIGHTS_REVIEW.read_text())
+        expected=review['paragraphs_sha256']
+        self.assertEqual(reviewed_territories(packet,expected),packet['rights']['territories'])
+        self.assertEqual(review['requested_place_aliases'],{'London':'GB','Scotland':'GB'})
+        with self.assertRaises(DomainError):reviewed_territories(packet,'0'*64)
+        changed=copy.deepcopy(packet);changed['paragraphs'][0]+=' Changed.'
+        with self.assertRaises(DomainError):reviewed_territories(changed,expected)
+        for grant in [['*'],['IN','CN'],['IN'],['IN','IN']]:
+            altered=copy.deepcopy(packet);altered['rights']['territories']=grant
+            with self.subTest(grant=grant),self.assertRaises(DomainError):reviewed_territories(altered,expected)

@@ -10,3 +10,8 @@ GET /api/v1/staff/drafts/{revision_id}/document requires the same staff permissi
 Staff review now reuses the real SSR title/Reader, private progress/annotation/completion, Saved and Finished flows for the latest draft of an unpublished edition. Verified active staff with content-publisher permission are required; ordinary members and guests remain denied. The live revision pointer is changed only in memory for that staff rendering/service request, never saved. Publishing requires the existing separate transition operation and is not invoked by review.
 
 GET /api/v1/staff/draft-editions/{edition_id} returns DraftEdition, including published_at:null. GET /api/v1/staff/draft-covers/{asset_id} returns only verified ready cover bytes belonging to a draft. Both require publisher permission and private/no-store. Public catalog endpoints continue to exclude drafts. Current cover_pair.front/back IDs select the attached pair; older uploads are retained rather than silently served or deleted.
+
+
+### Requested-country review (17 November 2026)
+
+EN-071 remains server-selected and always draft. Intake countries come from the private packet and must match the exact-text rights assessment and its approved decisions. The current Reader read/preview content scope is IN,US,NZ,GB,FR,RU,DE,NL,DK,CA,SG,MY. AE/CN remain held. A changed text hash or territory/review mismatch returns409 `rights_review_mismatch`; it never silently grants a wildcard or publishes. Existing idempotent import receipts remain unchanged; a repeated import is not an existing-draft rights mutation. Use the existing staff rights admin to reconcile the imported draft. Public response shape is unchanged and never exposes source URLs or evidence.

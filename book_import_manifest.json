@@ -7,9 +7,21 @@
       "packet": "library/intake/selfish-giant-en.json",
       "availability": "draft",
       "territories": [
-        "IN"
+        "IN",
+        "US",
+        "NZ",
+        "GB",
+        "FR",
+        "RU",
+        "DE",
+        "NL",
+        "DK",
+        "CA",
+        "SG",
+        "MY"
       ],
-      "commercialuseallowed": true
+      "commercialuseallowed": true,
+      "rights_review": "docs/evidence/selfish-giant-global-rights.json"
     }
   ]
 }

@@ -1,0 +1,10 @@
+Creating test database for alias 'default'...
+........................................................Database operation unavailable
+......................
+----------------------------------------------------------------------
+Ran 78 tests in 39.140s
+
+OK
+Destroying test database for alias 'default'...
+Found 78 test(s).
+System check identified no issues (0 silenced).

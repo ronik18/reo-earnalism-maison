@@ -1,0 +1,53 @@
+{
+  "review_id": "EN-071-territories-2026-11-17",
+  "applied_at": "2026-11-17T17:32:56.469913+00:00",
+  "environment": "isolated local PostgreSQL only",
+  "method": "Existing authenticated staff Django rights admin, CSRF enforced; no new endpoint",
+  "edition_id": "f8b6c701-b3ec-47fb-890d-7e7ac2575c7a",
+  "revision_id": "2efd60b4-7127-45ed-9844-3967c31e44fd",
+  "state": "draft",
+  "live_revision_id": null,
+  "text_sha256": "ae3a7af9675f35161915748730093a2101c17222363c330a8eff44804097bb39",
+  "paragraphs_sha256": "9de3beb099e2fcfc1bcd29570509d1fc9aa8ebf54ccaee6cf8014652d0b03386",
+  "approved_reader_territories": [
+    "IN",
+    "US",
+    "NZ",
+    "GB",
+    "FR",
+    "RU",
+    "DE",
+    "NL",
+    "DK",
+    "CA",
+    "SG",
+    "MY"
+  ],
+  "held_territories": [
+    "AE",
+    "CN"
+  ],
+  "rights_records": [
+    {
+      "right_id": "ab562dd3-f52d-4bb5-9305-c2e416b2f38b",
+      "action": "read",
+      "version": 2,
+      "admin_log_id": 1,
+      "previous_territories": [
+        "IN"
+      ]
+    },
+    {
+      "right_id": "f6dbc60f-f699-43d7-be8e-e29daa218aaf",
+      "action": "preview",
+      "version": 2,
+      "admin_log_id": 2,
+      "previous_territories": [
+        "IN"
+      ]
+    }
+  ],
+  "production_activated": false,
+  "paid_resources_created": false,
+  "legacy_mutated": false
+}

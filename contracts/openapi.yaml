@@ -13509,7 +13509,7 @@
             "csrfToken": []
           }
         ],
-        "description": "Uses a server-selected manifest packet, publisher permission and durable input-hash receipt. Does not accept client source URLs or rights flags. Never assigns a live revision. Same-key replay returns the same result; existing imported slug conflicts without overwrite.",
+        "description": "Uses a server-selected manifest packet, publisher permission and durable input-hash receipt. Does not accept client source URLs or rights flags. Never assigns a live revision. Same-key replay returns the same result; existing imported slug conflicts without overwrite. Ordered text fingerprint, review ID and explicit countries must match the private assessment; a mismatch returns409 rights_review_mismatch. Current draft Reader scope excludes held AE/CN. No production activation or broader format rights are implied.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -13570,7 +13570,7 @@
           }
         },
         "x-required-permissions": [
-          "catalog.upload_asset"
+          "library.publish_revision"
         ]
       }
     },
@@ -13634,7 +13634,7 @@
           }
         ],
         "x-required-permissions": [
-          "catalog.view_asset"
+          "library.publish_revision"
         ]
       }
     },
@@ -13698,7 +13698,7 @@
           }
         ],
         "x-required-permissions": [
-          "catalog.view_asset"
+          "library.publish_revision"
         ]
       }
     },
@@ -13775,7 +13775,7 @@
           }
         ],
         "x-required-permissions": [
-          "catalog.view_asset"
+          "library.publish_revision"
         ]
       }
     }
