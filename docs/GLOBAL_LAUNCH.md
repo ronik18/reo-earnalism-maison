@@ -11,3 +11,8 @@ Before enabling countries, record an explicit supported-country list and review 
 Keep data collection minimal, necessary session cookies, optional analytics/marketing off by default, documented retention and tested export/deletion/account security. Qualify subprocessors, data-processing terms and international-transfer arrangements before production personal-data processing. Preserve the existing no-child-directed-service scope; a fairy tale does not authorize minor profiles or child-data collection. Publish clear privacy, terms, seller/contact, cancellation/refund and accessibility information reviewed for the actual launch scope.
 
 This is an engineering readiness plan, not completed legal sign-off. Owner/counsel reviews the enabled-country/content/commerce matrix before activation. Source evidence: https://copyright.gov.in/Copyright_Act_1957/chapter_v.html ; retained internal source-rights and approval records included in the intake packet. No paid provider, commercial publication or legacy changes are authorized by this document.
+
+
+## The Selfish Giant review,17November2026
+
+The exact text/art review is in `docs/evidence/selfish-giant-global-rights.json`. Original English text has retained India clearance; UK/EU ordinary terms and US term evidence were researched from primary sources. These findings do not justify claiming every country is cleared. No worldwide wildcard was added and runtime rights remain IN-only. New cover artwork has recorded generation provenance and the owner-specified publisher footer; output ownership does not guarantee exclusive copyright or eliminate local-law/third-party-rights review. The global-clearance request remains unfulfilled until the remaining territorial evidence is established.

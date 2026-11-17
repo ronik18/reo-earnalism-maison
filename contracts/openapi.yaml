@@ -3,7 +3,7 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "Earnalism Maison API",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Implementation contract,17Nov2026. One Django application, same-origin /api/v1. Design only, no deployed endpoint claims. PublicUUID4,UTC timestamps,snake_case,en/bn. Session cookie+CSRF, not app bearerJWT. Monetary values exclusively server-owned approved terms. Examples use fictional IDs/example domains, never productiondata or approved prices."
   },
   "servers": [
@@ -13495,6 +13495,289 @@
           }
         }
       }
+    },
+    "/staff/books/imports": {
+      "post": {
+        "operationId": "importClearedDraftBook",
+        "summary": "Import a retained cleared packet as draft",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "description": "Uses a server-selected manifest packet, publisher permission and durable input-hash receipt. Does not accept client source URLs or rights flags. Never assigns a live revision. Same-key replay returns the same result; existing imported slug conflicts without overwrite.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_write"
+        },
+        "responses": {
+          "201": {
+            "description": "Draft imported or replayed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftImportResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftImportInput"
+              }
+            }
+          }
+        },
+        "x-required-permissions": [
+          "catalog.upload_asset"
+        ]
+      }
+    },
+    "/staff/drafts/{revision_id}/document": {
+      "get": {
+        "operationId": "getDraftDocument",
+        "summary": "getDraftDocument",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "description": "Verified active staff with library.publish_revision only. Private, no-store. Never publishes or grants ordinary-member access.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_read"
+        },
+        "responses": {
+          "200": {
+            "description": "Private draft response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftDocument"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "revision_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "x-required-permissions": [
+          "catalog.view_asset"
+        ]
+      }
+    },
+    "/staff/draft-editions/{edition_id}": {
+      "get": {
+        "operationId": "getDraftEdition",
+        "summary": "getDraftEdition",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "description": "Verified active staff with library.publish_revision only. Private, no-store. Never publishes or grants ordinary-member access.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_read"
+        },
+        "responses": {
+          "200": {
+            "description": "Private draft response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftEdition"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "edition_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "x-required-permissions": [
+          "catalog.view_asset"
+        ]
+      }
+    },
+    "/staff/draft-covers/{asset_id}": {
+      "get": {
+        "operationId": "getPrivateDraftCover",
+        "summary": "getPrivateDraftCover",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "description": "Verified active staff with library.publish_revision only. Private, no-store. Never publishes or grants ordinary-member access.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_read"
+        },
+        "responses": {
+          "200": {
+            "description": "Exact verified cover bytes; private, no-store",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "x-required-permissions": [
+          "catalog.view_asset"
+        ]
+      }
     }
   },
   "components": {
@@ -20687,6 +20970,214 @@
           "edition_revision_id",
           "is_complete"
         ]
+      },
+      "DraftImportInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "manifest_id": {
+            "type": "string",
+            "const": "EN-071"
+          }
+        },
+        "required": [
+          "manifest_id"
+        ]
+      },
+      "DraftImportResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "edition_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "edition_revision_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "state": {
+            "const": "draft"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "paragraph_count": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "edition_id",
+          "edition_revision_id",
+          "slug",
+          "state",
+          "sha256",
+          "paragraph_count"
+        ]
+      },
+      "DraftDocument": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "state": {
+            "const": "draft"
+          },
+          "edition_revision_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "unit_id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "paragraphs": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Paragraph"
+                  },
+                  "maxItems": 100
+                }
+              },
+              "required": [
+                "unit_id",
+                "title",
+                "paragraphs"
+              ]
+            }
+          }
+        },
+        "required": [
+          "title",
+          "state",
+          "edition_revision_id",
+          "sha256",
+          "units"
+        ]
+      },
+      "DraftEdition": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "edition_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "work_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "edition_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 240
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 12000
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "bn"
+            ]
+          },
+          "formats": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "reader",
+                "audio",
+                "video"
+              ]
+            },
+            "maxItems": 3
+          },
+          "content_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "anchor_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "cover": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PublicImage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "preview_available": {
+            "type": "boolean"
+          },
+          "downloadable_formats": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "reader",
+                "audio"
+              ]
+            },
+            "maxItems": 2
+          },
+          "published_at": {
+            "type": "null"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "edition_id",
+          "work_id",
+          "edition_revision_id",
+          "title",
+          "description",
+          "locale",
+          "formats",
+          "content_sha256",
+          "anchor_revision",
+          "cover",
+          "preview_available",
+          "downloadable_formats",
+          "published_at",
+          "version"
+        ],
+        "description": "Staff-only latest-draft metadata; never included in public catalogue. Current rights and content-publisher permission required."
       }
     },
     "parameters": {

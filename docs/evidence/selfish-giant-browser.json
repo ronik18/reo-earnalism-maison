@@ -1,0 +1,106 @@
+{
+  "reviewed_on": "2026-11-17",
+  "scope": "desktop staff draft review, not production/member publication",
+  "edition_id": "f8b6c701-b3ec-47fb-890d-7e7ac2575c7a",
+  "edition_revision_id": "2efd60b4-7127-45ed-9844-3967c31e44fd",
+  "state": "draft",
+  "persisted_live_revision_id": null,
+  "text_sha256": "ae3a7af9675f35161915748730093a2101c17222363c330a8eff44804097bb39",
+  "cover_pair": {
+    "back": {
+      "bytes": 116697,
+      "sha256": "04fbc420d4db3f51b14955d01d957e2991bd2b78dc8fa15ffeb31f9245b99366",
+      "asset_id": "8972189e-e840-4b77-8044-52ad100469d9"
+    },
+    "front": {
+      "bytes": 120336,
+      "sha256": "ccc7923a5dc0d52b2b684a6a0be99de4140849e7a13ca2ebe3618590e13ac32d",
+      "asset_id": "9a61f454-24f1-4809-b470-1f49e5d9c39b"
+    }
+  },
+  "publisher_footer": "Earnalism - A Reo Enterprise Venture",
+  "steps_passed": [
+    "password login returns to exact draft",
+    "front and back cover visible with owner-specified footer",
+    "all32 canonical paragraphs including first/last passage",
+    "save/resume reading position",
+    "gold highlight and note persist across reload",
+    "explicit completion survives reload",
+    "account reading size23 and sepia preferences persisted",
+    "English edition/notes/completion preserved under Bengali interface",
+    "Saved and Finished reopen the private draft correctly",
+    "logout denies full draft Reader",
+    "ordinary-member denial checked by PostgreSQL integration suite"
+  ],
+  "private_cover_endpoint": "verified exact bytes/no-store; guest401 and ordinary member403 tested",
+  "current_IN_draft_readiness": {
+    "edition_id": "f8b6c701-b3ec-47fb-890d-7e7ac2575c7a",
+    "edition_revision_id": "2efd60b4-7127-45ed-9844-3967c31e44fd",
+    "sha256": "ae3a7af9675f35161915748730093a2101c17222363c330a8eff44804097bb39",
+    "status": "pass",
+    "checks": [
+      {
+        "code": "rights",
+        "status": "pass",
+        "message": "Every offered format requires current approved rights; local-only rights require local mode."
+      },
+      {
+        "code": "metadata",
+        "status": "pass",
+        "message": "Title, description and supported edition locale required."
+      },
+      {
+        "code": "text",
+        "status": "pass",
+        "message": "Immutable text root must match the ordered semantic paragraphs."
+      },
+      {
+        "code": "anchors",
+        "status": "pass",
+        "message": "Stable paragraph anchors are required."
+      },
+      {
+        "code": "cover",
+        "status": "pass",
+        "message": "A ready original cover is required."
+      },
+      {
+        "code": "media",
+        "status": "pass",
+        "message": "All assets require verified bytes/checksums; every Reader unit requires complete ordered canonical packages bound to this revision, unit, chunk and anchor revision."
+      },
+      {
+        "code": "timing_map",
+        "status": "not_applicable",
+        "message": "Reader-only revision; no audio release implied."
+      },
+      {
+        "code": "browser",
+        "status": "pass",
+        "message": "Browser acceptance must bind this exact text hash and release scope."
+      }
+    ],
+    "validated_at": "2026-11-17T17:08:18.430804Z"
+  },
+  "global_clearance_achieved": false,
+  "remaining": [
+    "remaining-territory rights/applicability review including public-domain royalty regimes",
+    "physical/mobile and assistive-technology acceptance before broad release"
+  ],
+  "publication_performed": false,
+  "paid_infrastructure_provisioned": false,
+  "legacy_platform_changes": false,
+  "tests": {
+    "full_local_suite": {
+      "tests": 76,
+      "pass": true,
+      "seconds": 39.042
+    },
+    "affected_after_final_adjustments": {
+      "tests": 42,
+      "pass": true,
+      "seconds": 23.934
+    },
+    "final_draft_api": "3/3 pass"
+  }
+}

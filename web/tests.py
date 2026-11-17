@@ -82,7 +82,7 @@ class ExperienceTests(TestCase):
         response = self.client.get("/en/")
         self.assertContains(response, "The River Notebook")
         self.assertNotIn("We could not complete that action.", response.content.decode().split("<main",1)[1].split("</main>",1)[0])
-        self.assertContains(response, "original test editions")
+        self.assertContains(response, "draft and test editions")
         response = self.client.get("/en/titles/river-notebook-en/")
         self.assertContains(response, self.unit)
         self.assertContains(response, "20000000-0000-4000-8000-000000000002")

@@ -12,3 +12,12 @@ def ui(context, key):
 @register.filter
 def item(value, key):
     return value.get(key, "") if isinstance(value, dict) else ""
+
+
+@register.simple_tag
+def asset_version(name):
+    """Content version prevents a browser from retaining an older UI client."""
+    import hashlib
+    from pathlib import Path
+    from django.conf import settings
+    return hashlib.sha256((Path(settings.BASE_DIR)/'static'/name).read_bytes()).hexdigest()[:12]

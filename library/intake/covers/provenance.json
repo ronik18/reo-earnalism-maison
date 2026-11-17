@@ -1,0 +1,36 @@
+{
+  "title": "The Selfish Giant",
+  "created_on": "2026-11-17",
+  "publisher_footer": "Earnalism - A Reo Enterprise Venture",
+  "footer_reference": "Owner-supplied footer screenshot,17November2026",
+  "method": "Original OpenAI image-generation designs and requested footer edit; web JPEG exports from retained PNGmasters. No historical/source illustration reused.",
+  "copyright_claim": "No claim of exclusive copyright or universal legal clearance in AI output. Ownership/usage subject to applicable terms and law.",
+  "dimensions": {
+    "masters": [
+      1024,
+      1536
+    ],
+    "web": [
+      800,
+      1200
+    ]
+  },
+  "files": {
+    "back.jpg": {
+      "sha256": "04fbc420d4db3f51b14955d01d957e2991bd2b78dc8fa15ffeb31f9245b99366",
+      "bytes": 116697
+    },
+    "back.png": {
+      "sha256": "fba614b2a2ff122aee4bdc44c43094bdc974044db5e36e215a727f6e4225c1ed",
+      "bytes": 2589128
+    },
+    "front.png": {
+      "sha256": "1af0bf661f23bda8cf99c420855dce6eb573cdd4c475e519f89510feb6ef0290",
+      "bytes": 3030848
+    },
+    "front.jpg": {
+      "sha256": "ccc7923a5dc0d52b2b684a6a0be99de4140849e7a13ca2ebe3618590e13ac32d",
+      "bytes": 120336
+    }
+  }
+}

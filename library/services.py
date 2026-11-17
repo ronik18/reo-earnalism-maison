@@ -94,6 +94,20 @@ def authorize_purchase(user,revision,format='reader',territory='IN'):
     return check_revision_rights(revision,format,territory=territory)
 
 
+def can_review_draft(user, revision):
+    return bool(revision and revision.state=='draft' and user and user.is_authenticated and user.is_active
+                and user.is_verified and user.is_staff and user.has_perm('library.publish_revision'))
+
+
+def reviewable_edition(edition, user):
+    if not edition.live_revision_id:
+        revision=edition.revisions.filter(state='draft').order_by('-created_at').first()
+        if can_review_draft(user,revision):
+            # Private in-memory preview only. Never save/assign the persisted live pointer.
+            edition.live_revision=revision
+    return edition
+
+
 def authorize_revision(user, revision, format='reader', action='read', territory='IN'):
     revision = _revision(revision)
     if not getattr(user, 'is_authenticated', False) or not getattr(user, 'is_active', False):
@@ -102,7 +116,7 @@ def authorize_revision(user, revision, format='reader', action='read', territory
         raise DomainError('verification_required', 'Verify your email before opening this edition.', 403)
     if format not in FORMATS or action not in {'read','download'}:
         raise DomainError('access_denied', 'This content action is not available.', 403)
-    if not _live(revision):
+    if not _live(revision) and not (format=='reader' and action=='read' and can_review_draft(user,revision)):
         raise DomainError('content_unavailable', 'This revision is not currently published.', 404)
     if not current_right(revision, format, 'read', territory):
         raise DomainError('rights_unavailable', 'This format is unavailable in this territory or rights window.', 403)
@@ -151,12 +165,14 @@ def available_formats(revision, territory='IN'):
 
 
 def _cover(revision):
-    asset = revision.assets.filter(kind='cover',state='ready').first()
+    selected=revision.validation_evidence.get('cover_pair',{}).get('front',{}).get('asset_id')
+    asset = revision.assets.filter(kind='cover',state='ready',pk=selected).first() if selected else revision.assets.filter(kind='cover',state='ready').first()
     if not asset:
         return None
     base=getattr(settings,'PUBLIC_BASE_URL','http://127.0.0.1:8008' if getattr(settings,'LOCAL',False) else '').rstrip('/')
     if not base: raise DomainError('configuration_required','Public application origin is not configured.',503)
-    return {'url':f'{base}/api/v1/content/covers/{asset.id}', 'width':600, 'height':900, 'alt':revision.title+' — cover'}
+    meta=revision.validation_evidence.get('cover_pair',{}).get('front',{})
+    return {'url':f'{base}/api/v1/content/covers/{asset.id}', 'width':meta.get('width',600), 'height':meta.get('height',900), 'alt':revision.title+' — cover'}
 
 
 def catalog_cards(locale='en', territory='IN', query='', house='', format='', **filters):
@@ -211,27 +227,42 @@ def get_edition_by_slug(slug, locale=None):
         raise DomainError('not_found','Edition not found.',404)
 
 
-def catalog_card(edition,territory='IN'):
+def catalog_card(edition,territory='IN',user=None):
     if not isinstance(edition,Edition):
         try: edition=Edition.objects.get(pk=edition)
         except (Edition.DoesNotExist,ValueError,ValidationError): raise DomainError('not_found','Edition not found.',404)
+    if not edition.live_revision_id and user:
+        row=reviewable_edition(edition,user)
+        if can_review_draft(user,row.live_revision):
+            detail=edition_detail(row.id,territory,user=user)
+            return {'work_id':str(row.work_id),'edition_id':str(row.id),'title':detail['title'],'subtitle':None,
+                    'creators':row.work.creators,'locale':row.locale,'house':row.work.house,'formats':['reader'],
+                    'cover':detail['cover'],'access_label':'free','availability':'available'}
     for card in catalog_cards(edition.locale,territory):
         if card['edition_id']==str(edition.id): return card
     raise DomainError('content_unavailable','Edition is not currently available.',404)
 
 
-def edition_detail(edition_id, territory='IN'):
+def edition_detail(edition_id, territory='IN', user=None):
     try:
         edition = Edition.objects.select_related('live_revision','work').get(pk=edition_id)
     except (Edition.DoesNotExist,ValueError,ValidationError):
         raise DomainError('not_found','Edition not found.',404)
+    edition=reviewable_edition(edition,user)
     revision = edition.live_revision
-    if not revision or not _live(revision) or not available_formats(revision,territory):
+    reviewing=can_review_draft(user,revision)
+    if not revision or (not reviewing and (not _live(revision) or not available_formats(revision,territory))):
         raise DomainError('content_unavailable','Edition is not available.',404)
-    formats = available_formats(revision,territory)
+    formats = ['reader'] if reviewing and current_right(revision,'reader','read',territory) else available_formats(revision,territory)
+    if reviewing and not formats: raise DomainError('rights_unavailable','Draft rights are unavailable.',403)
+    cover=_cover(revision)
+    if reviewing and cover:
+        selected=revision.validation_evidence.get('cover_pair',{}).get('front',{}).get('asset_id')
+        a=revision.assets.filter(kind='cover',state='ready',pk=selected).first() if selected else revision.assets.filter(kind='cover',state='ready').first()
+        cover={**cover,'url':f'/api/v1/staff/draft-covers/{a.id}'}
     return {'edition_id':str(edition.id),'work_id':str(edition.work_id),'edition_revision_id':str(revision.id),
             'title':revision.title,'description':revision.description,'locale':edition.locale,'formats':formats,
-            'content_sha256':revision.content_sha256,'anchor_revision':revision.anchor_revision,'cover':_cover(revision),
+            'content_sha256':revision.content_sha256,'anchor_revision':revision.anchor_revision,'cover':cover,
             'preview_available':bool(revision.preview and current_right(revision,'reader','preview',territory)),
             'downloadable_formats':[f for f in formats if revision.download_policy.get(f) is True and current_right(revision,f,'download',territory)],
             'published_at':iso(revision.published_at),'version':edition.version}
@@ -245,8 +276,8 @@ def unit_dto(unit,territory='IN'):
             'duration_ms':unit.duration_ms,'preview':unit.preview}
 
 
-def edition_units(edition_id,territory='IN'):
-    detail = edition_detail(edition_id,territory)
+def edition_units(edition_id,territory='IN',user=None):
+    detail = edition_detail(edition_id,territory,user=user)
     return [unit_dto(u,territory) for u in Unit.objects.filter(revision_id=detail['edition_revision_id']).select_related('revision','revision__edition')]
 
 
@@ -255,7 +286,7 @@ def paragraph_dto(paragraph):
 
 
 def get_reader_document(user,edition_id,unit_id,territory='IN'):
-    detail = edition_detail(edition_id,territory)
+    detail = edition_detail(edition_id,territory,user=user)
     revision = authorize_revision(user,detail['edition_revision_id'],territory=territory)
     try:
         unit = revision.units.get(pk=unit_id)
@@ -565,7 +596,7 @@ def clone_revision(source_id):
     clone=Revision.objects.create(edition=source.edition,title=source.title,description=source.description,
                                   anchor_revision=source.anchor_revision+1,access_policy=source.access_policy.copy(),
                                   download_policy=source.download_policy.copy(),preview=source.preview.copy())
-    unit_map={};anchor_map={}
+    unit_map={};anchor_map={};asset_map={}
     for old in source.units.all():
         unit=Unit.objects.create(revision=clone,title=old.title,ordinal=old.ordinal,kind=old.kind,duration_ms=old.duration_ms,preview=old.preview)
         unit_map[old.id]=unit
@@ -578,11 +609,15 @@ def clone_revision(source_id):
                               evidence='Copied for re-review; approval intentionally reset. '+right.evidence)
     for old in source.assets.exclude(kind__in=['reader_package','timing_map']):
         raw=_asset_valid(old)
-        aid=uuid.uuid4();key=f'revisions/{clone.id}/{aid}'
+        aid=uuid.uuid4();key=f'revisions/{clone.id}/{aid}';asset_map[str(old.id)]=str(aid)
         destination=asset_path(key);destination.parent.mkdir(parents=True,exist_ok=True);destination.write_bytes(raw)
         if digest(destination.read_bytes())!=old.sha256: raise DomainError('copy_integrity_failed','Clone copy failed checksum verification.',503)
         Asset.objects.create(id=aid,revision=clone,unit=unit_map.get(old.unit_id),kind=old.kind,state=old.state,
                              storage_key=key,sha256=old.sha256,bytes=old.bytes,content_type=old.content_type,copy_verified_bytes=len(raw))
+    selected=source.validation_evidence.get('cover_pair',{})
+    pair={side:{**item,'asset_id':asset_map[item['asset_id']]} for side,item in selected.items()
+          if isinstance(item,dict) and item.get('asset_id') in asset_map}
+    if pair:clone.validation_evidence={'cover_pair':pair}
     for unit in unit_map.values(): write_reader_package(unit)
     clone.preview=[{**p,'anchor_id':anchor_map[p['anchor_id']]} for p in source.preview if p.get('anchor_id') in anchor_map]
     clone.content_sha256=revision_hash(clone);clone.save()

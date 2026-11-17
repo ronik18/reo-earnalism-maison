@@ -138,11 +138,17 @@ def title(request, locale, identifier):
         edition_id = UUID(identifier)
     except ValueError:
         edition_id = get_edition_by_slug(identifier, locale=request.GET.get("content_locale") or None).pk
-    edition = edition_detail(edition_id, territory=trusted_territory(request))
-    units = edition_units(edition_id, territory=trusted_territory(request))
+    edition = edition_detail(edition_id, territory=trusted_territory(request), user=request.user)
+    units = edition_units(edition_id, territory=trusted_territory(request), user=request.user)
     other_locale = "bn" if edition["locale"] == "en" else "en"
     paired = [card for card in catalog_cards(locale=other_locale, territory=trusted_territory(request)) if card["work_id"] == edition["work_id"]]
-    return page(request, locale, "web/title.html", edition=edition, units=units, paired_editions=paired, active_nav="explore")
+    back_cover=None
+    if not edition['published_at']:
+        from library.models import Revision
+        revision=Revision.objects.get(pk=edition['edition_revision_id'])
+        pair=revision.validation_evidence.get('cover_pair',{})
+        if pair.get('back'):back_cover='/api/v1/staff/draft-covers/'+pair['back']['asset_id']
+    return page(request, locale, "web/title.html", edition=edition, units=units, paired_editions=paired, back_cover=back_cover, active_nav="explore")
 
 
 @require_GET
@@ -150,7 +156,7 @@ def title(request, locale, identifier):
 def reader(request, locale, edition_id, unit_id=None):
     from library.services import get_reader_document, get_preview_document, edition_units
     if unit_id is None:
-        units = edition_units(edition_id, territory=trusted_territory(request))
+        units = edition_units(edition_id, territory=trusted_territory(request), user=request.user)
         if not units:
             raise Http404
         return HttpResponseRedirect(reverse("web:reader", args=[locale, edition_id, units[0]["unit_id"]]))

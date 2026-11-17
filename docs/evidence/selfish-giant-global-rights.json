@@ -1,0 +1,62 @@
+{
+  "reviewed_on": "2026-11-17",
+  "work": "The Selfish Giant",
+  "author": "Oscar Wilde",
+  "original_publication_year": 1888,
+  "author_death_year": 1900,
+  "text_sha256": "ae3a7af9675f35161915748730093a2101c17222363c330a8eff44804097bb39",
+  "global_clearance_achieved": false,
+  "runtime_approved_territories": [
+    "IN"
+  ],
+  "research": [
+    {
+      "territory": "IN",
+      "status": "retained approved original-text clearance; current statute checked",
+      "source": "https://copyright.gov.in/Copyright_Act_1957/chapter_v.html",
+      "reason": "Published original literary work; ordinary term life plus60, author died1900."
+    },
+    {
+      "territory": "GB",
+      "status": "original-text economic term appears expired; research inference, not activated",
+      "source": "https://www.legislation.gov.uk/ukpga/1988/48/section/12",
+      "reason": "Ordinary literary term life plus70; Wilde died1900. New artwork and other obligations assessed separately."
+    },
+    {
+      "territory": "EU",
+      "status": "ordinary original-text term appears expired; national exceptions/moral-rights review pending",
+      "source": "https://eur-lex.europa.eu/eli/dir/2006/116/oj/eng",
+      "reason": "Directive establishes ordinary life-plus70; this is not a country-by-country legal clearance."
+    },
+    {
+      "territory": "US",
+      "status": "retained India/US source evidence; cross-border publication/formalities confirmation before activation",
+      "source": "https://www.copyright.gov/circs/circ15a.pdf",
+      "reason": "Original1888 publication is old enough for economic-term expiry; foreign-publication specifics must not be silently ignored."
+    },
+    {
+      "territory": "remaining_world",
+      "status": "not cleared",
+      "source": "https://www.wipo.int/edocs/pubdocs/en/wipo_pub_223.pdf",
+      "reason": "Berne Article7(8) applies law of territory of protection; treaties do not supply universal zero-risk clearance."
+    },
+    {
+      "territory": "SN",
+      "status": "not cleared; public-domain royalty/declaration applicability requires review",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/5764",
+      "reason": "WIPO-hosted Senegal Law2008-09 describes declarations and royalties for exploitation of works entering public domain. Scope/applicability to this platform and foreign original text must be resolved; economic-term expiry alone is insufficient."
+    }
+  ],
+  "cover_provenance": {
+    "method": "New original OpenAI image generation from story description; no imported third-party illustration. Footer follows owner-supplied brand sample.",
+    "ownership_source": "https://openai.com/policies/terms-of-use/",
+    "qualification": "Output ownership is subject to applicable law; it is not a blanket third-party-rights or exclusivity guarantee. No claim of universal copyright registration."
+  },
+  "excluded": [
+    "modern translations/adaptations",
+    "source illustrations",
+    "audiobook/voice",
+    "international commerce/tax/privacy compliance certification"
+  ],
+  "next_action": "Qualified rights review of named launch territories and the exact text/art package; add approved territory records only after that evidence. Keep all other territories denied."
+}

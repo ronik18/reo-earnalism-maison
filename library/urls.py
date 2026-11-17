@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views, intake_api
 urlpatterns=[
+    path("staff/draft-editions/<uuid:edition_id>",intake_api.draft_edition),
+    path("staff/draft-covers/<uuid:asset_id>",intake_api.draft_cover),
     path("staff/books/imports",intake_api.intake),
     path("staff/drafts/<uuid:revision_id>/document",intake_api.draft_document),
     path('home',views.home),path('catalog',views.catalog),path('search',views.catalog),

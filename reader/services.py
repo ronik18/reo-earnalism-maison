@@ -17,8 +17,11 @@ from .models import Progress,Completion,Annotation,SavedItem,PersonalList,Person
 def iso(value):return value.isoformat().replace('+00:00','Z') if value else None
 
 
-def _edition(value):
+def _edition(value,user=None):
     row=Edition.objects.select_related('live_revision').filter(pk=public_uuid(value)).first()
+    if row:
+        from library.services import reviewable_edition
+        row=reviewable_edition(row,user)
     if not row or not row.live_revision_id:raise DomainError('not_found','Published edition not found.',404)
     return row
 
@@ -58,7 +61,7 @@ def progress_data(row,edition=None,format='reader'):
 
 
 def get_progress(user,edition_id,format='reader',territory='IN'):
-    edition=_edition(edition_id);authorize_revision(user,edition.live_revision,format,territory=territory)
+    edition=_edition(edition_id,user);authorize_revision(user,edition.live_revision,format,territory=territory)
     row=Progress.objects.filter(user=user,edition=edition,format=format).first()
     return progress_data(row,edition,format)
 
@@ -66,7 +69,7 @@ def get_progress(user,edition_id,format='reader',territory='IN'):
 def set_progress(user,edition_id,format,data,base_version,territory='IN'):
     payload={'edition_id':str(edition_id),'format':format,'base_version':base_version,**data}
     def mutate():
-        edition=_edition(edition_id)
+        edition=_edition(edition_id,user)
         if str(data.get('edition_revision_id'))!=str(edition.live_revision_id):raise DomainError('edition_revision_changed','Reload this edition revision before choosing a position.',409)
         revision=authorize_revision(user,edition.live_revision,format,territory=territory)
         loc,fraction=_location(revision,format,data.get('location'))
@@ -89,7 +92,7 @@ def completion_data(row,edition=None,format='reader'):
 
 
 def get_completion(user,edition_id,format='reader',territory='IN'):
-    edition=_edition(edition_id);authorize_revision(user,edition.live_revision,format,territory=territory)
+    edition=_edition(edition_id,user);authorize_revision(user,edition.live_revision,format,territory=territory)
     return completion_data(Completion.objects.filter(user=user,edition=edition,format=format).first(),edition,format)
 
 
@@ -97,7 +100,7 @@ def set_completion(user,edition_id,format,data,base_version,territory='IN'):
     if type(data.get('is_complete'))!=bool:raise DomainError('validation_error','is_complete must be a boolean.',422)
     payload={'edition_id':str(edition_id),'format':format,'base_version':base_version,**data}
     def mutate():
-        edition=_edition(edition_id);revision=authorize_revision(user,edition.live_revision,format,territory=territory)
+        edition=_edition(edition_id,user);revision=authorize_revision(user,edition.live_revision,format,territory=territory)
         row=Completion.objects.select_for_update().filter(user=user,edition=edition,format=format).first()
         current=completion_data(row,edition,format)
         if current['version']!=base_version:raise DomainError('version_conflict','Completion changed on another device.',412,current)
@@ -233,11 +236,11 @@ def vault_data(user):
     progress=Progress.objects.filter(user=user).annotate(finished=Exists(Completion.objects.filter(user=user,edition_id=OuterRef('edition_id'),format=OuterRef('format'),is_complete=True))).filter(finished=False).select_related('edition__work','edition__live_revision').order_by('-updated_at')[:20]
     continuing=[];finished=[]
     for p in progress:
-        try:card=catalog_card(p.edition)
+        try:card=catalog_card(p.edition,user=user)
         except DomainError:continue
         continuing.append({'card':card,'progress':progress_data(p)})
     for c in Completion.objects.filter(user=user,is_complete=True).select_related('edition__work','edition__live_revision').order_by('-updated_at')[:20]:
-        try:card=catalog_card(c.edition)
+        try:card=catalog_card(c.edition,user=user)
         except DomainError:continue
         finished.append({'card':card,'completion':completion_data(c)})
     return {'continue':continuing,'saved_count':SavedItem.objects.filter(user=user).count(),'download_count':0,

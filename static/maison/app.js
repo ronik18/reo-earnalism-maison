@@ -128,7 +128,7 @@
     }
   }
 
-  async function editionCard(editionId, extraAction) {let edition; try {edition = await api('/catalog/editions/' + editionId + '?locale=' + locale + '&territory=IN');} catch (_) {edition = {title:ui.not_available};} const article = make('article'); const link = make('a',edition.title); link.href = `/${locale}/titles/${editionId}/`; const heading = make('h2'); heading.append(link); article.append(heading); if (extraAction) article.append(extraAction); return article;}
+  async function editionCard(editionId, extraAction) {let edition; try {edition = await api('/catalog/editions/' + editionId + '?locale=' + locale + '&territory=IN');} catch (_) {try {edition=await api('/staff/draft-editions/'+editionId);} catch (_) {edition = {title:ui.not_available};}} const article = make('article'); const link = make('a',edition.title); link.href = `/${locale}/titles/${editionId}/`; const heading = make('h2'); heading.append(link); article.append(heading); if (extraAction) article.append(extraAction); return article;}
   const vault = $('#vault-content');
   if (vault) {
     const tab = vault.dataset.tab, target = $('#vault-items');

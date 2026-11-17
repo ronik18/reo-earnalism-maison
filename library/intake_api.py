@@ -45,3 +45,25 @@ def draft_document(request,revision_id):
     revision=Revision.objects.filter(pk=revision_id,state='draft').first()
     if not revision:raise DomainError('not_found','Draft not found.',404)
     return api_response({'title':revision.title,'state':'draft','edition_revision_id':str(revision.id),'sha256':revision.content_sha256,'units':[{'unit_id':str(u.id),'title':u.title,'paragraphs':[paragraph_dto(p) for p in u.paragraphs.all()]} for u in revision.units.all()]})
+
+
+@json_endpoint(('GET',))
+def draft_cover(request,asset_id):
+    from django.http import HttpResponse
+    from .models import Asset
+    from .services import _asset_valid
+    staff_permission(request.user)
+    asset=Asset.objects.filter(pk=asset_id,kind='cover',state='ready',revision__state='draft').first()
+    if not asset: raise DomainError('not_found','Draft cover not found.',404)
+    response=HttpResponse(_asset_valid(asset),content_type=asset.content_type)
+    response['Cache-Control']='private, no-store'
+    return response
+
+
+@json_endpoint(('GET',))
+def draft_edition(request,edition_id):
+    from .services import edition_detail
+    staff_permission(request.user)
+    if not Edition.objects.filter(pk=edition_id,live_revision__isnull=True).exists():
+        raise DomainError('not_found','Unpublished draft edition not found.',404)
+    return api_response(edition_detail(edition_id,territory=getattr(request,'territory','ZZ'),user=request.user))

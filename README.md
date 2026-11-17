@@ -41,3 +41,5 @@ Interactive controls currently use plain JavaScript rather than introducing a Re
 Audio/video, offline licensing, magic links, Google/phone sign-in, recurring billing and international checkout remain explicitly disabled until their configured adapters pass acceptance. There is no fake paid checkout, real refund, production publication or HA claim. Production configuration requires real secrets, an HTTPS public base URL and verified database TLS; it cannot fall back to local credentials.
 
 See [implementation status](docs/IMPLEMENTATION_STATUS.md), [workspace provenance](docs/WORKSPACE_PROVENANCE.json) and [evidence](docs/evidence/).
+
+Latest cleared-title draft: [The Selfish Giant handoff](docs/SELFISH_GIANT_HANDOFF.md), including cover/footer assets, staff browser acceptance and remaining global-rights limitations. Create your own local staff account with `.venv/bin/python manage.py createsuperuser` to review protected drafts; no development credentials are published.

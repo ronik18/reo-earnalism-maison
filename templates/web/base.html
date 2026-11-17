@@ -2,8 +2,8 @@
 <html lang="{{ ui_locale }}" data-ui-locale="{{ ui_locale }}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>{% block title %}{% ui 'site_name' %}{% endblock %}</title>
-<link rel="stylesheet" href="{% static 'maison/fonts/typography.css' %}"><link rel="stylesheet" href="{% static 'maison/app.css' %}">
-<script src="{% static 'maison/app.js' %}" defer></script>{% block scripts %}{% endblock %}</head>
+<link rel="stylesheet" href="{% static 'maison/fonts/typography.css' %}"><link rel="stylesheet" href="{% static 'maison/app.css' %}?v={% asset_version 'maison/app.css' %}">
+<script src="{% static 'maison/app.js' %}?v={% asset_version 'maison/app.js' %}" defer></script>{% block scripts %}{% endblock %}</head>
 <body class="maison theme-{{ app_theme }}{% if reduced_motion %} reduced-motion{% endif %}" lang="{{ ui_locale }}">
 <a class="skip-link" href="#main">{% ui 'skip_content' %}</a>
 <header class="brand-header"><a class="brand-link" href="{% url 'web:home' ui_locale %}"><img src="{% static 'maison/logo.png' %}" alt="Earnalism · Where Learning Becomes Earning · A REO Enterprise Venture" width="1400" height="500"></a>

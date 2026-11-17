@@ -1,0 +1,70 @@
+{
+  "edition_id": "f8b6c701-b3ec-47fb-890d-7e7ac2575c7a",
+  "revision_id": "2efd60b4-7127-45ed-9844-3967c31e44fd",
+  "state": "draft",
+  "text_sha256": "ae3a7af9675f35161915748730093a2101c17222363c330a8eff44804097bb39",
+  "covers": {
+    "front": {
+      "asset_id": "9a61f454-24f1-4809-b470-1f49e5d9c39b",
+      "sha256": "ccc7923a5dc0d52b2b684a6a0be99de4140849e7a13ca2ebe3618590e13ac32d",
+      "bytes": 120336
+    },
+    "back": {
+      "asset_id": "8972189e-e840-4b77-8044-52ad100469d9",
+      "sha256": "04fbc420d4db3f51b14955d01d957e2991bd2b78dc8fa15ffeb31f9245b99366",
+      "bytes": 116697
+    }
+  },
+  "provenance": "New original OpenAI image-generation designs, 17 November2026; prior legacy pair rejected for visible defects. Masters retained; web derivatives JPEG800x1200. No third-party illustration imported.",
+  "review_url": "http://127.0.0.1:8008/en/titles/f8b6c701-b3ec-47fb-890d-7e7ac2575c7a/",
+  "validation": {
+    "edition_id": "f8b6c701-b3ec-47fb-890d-7e7ac2575c7a",
+    "edition_revision_id": "2efd60b4-7127-45ed-9844-3967c31e44fd",
+    "sha256": "ae3a7af9675f35161915748730093a2101c17222363c330a8eff44804097bb39",
+    "status": "fail",
+    "checks": [
+      {
+        "code": "rights",
+        "status": "pass",
+        "message": "Every offered format requires current approved rights; local-only rights require local mode."
+      },
+      {
+        "code": "metadata",
+        "status": "pass",
+        "message": "Title, description and supported edition locale required."
+      },
+      {
+        "code": "text",
+        "status": "pass",
+        "message": "Immutable text root must match the ordered semantic paragraphs."
+      },
+      {
+        "code": "anchors",
+        "status": "pass",
+        "message": "Stable paragraph anchors are required."
+      },
+      {
+        "code": "cover",
+        "status": "pass",
+        "message": "A ready original cover is required."
+      },
+      {
+        "code": "media",
+        "status": "pass",
+        "message": "All assets require verified bytes/checksums; every Reader unit requires complete ordered canonical packages bound to this revision, unit, chunk and anchor revision."
+      },
+      {
+        "code": "timing_map",
+        "status": "not_applicable",
+        "message": "Reader-only revision; no audio release implied."
+      },
+      {
+        "code": "browser",
+        "status": "fail",
+        "message": "Browser acceptance must bind this exact text hash and release scope."
+      }
+    ],
+    "validated_at": "2026-11-17T16:54:00.136195Z"
+  },
+  "public_release": false
+}
