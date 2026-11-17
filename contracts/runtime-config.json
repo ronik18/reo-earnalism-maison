@@ -309,5 +309,11 @@
     "media": "local_signed",
     "upload": "local_put",
     "enabled_in_production": false
+  },
+  "publication_policy": {
+    "authority": "publication-policy.json",
+    "require_all_whitelisted_regions": true,
+    "pending_or_out_of_scope_delivery": false,
+    "legal_evidence": "revision.validation_evidence.publication_clearance; private, exact text/assets, offered formats and complete whitelist"
   }
 }

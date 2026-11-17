@@ -115,7 +115,12 @@ class ClearedDraftJourneyTests(TestCase):
         asia={row['territory'] for row in review['geographic_scope']['asian_jurisdictions']}
         self.assertEqual(len(asia),53)
         self.assertTrue({'CN','HK','MO','TW','RU','EG','PS','TL','KP'}.issubset(asia))
-        self.assertEqual(set(review['requested_territories']),asia|{'BR','US','NZ','GB','FR','DE','NL','DK','CA'})
+        self.assertEqual(set(review['historical_requested_territories']),asia|{'BR','US','NZ','GB','FR','DE','NL','DK','CA'})
+        from django.conf import settings
+        self.assertEqual(set(review['requested_territories']),set(settings.MAISON_PUBLICATION_TERRITORIES))
+        self.assertEqual(review['held_territories'],[])
+        self.assertEqual(set(review['out_of_scope_territories']),{'AE','CN'})
+        self.assertFalse(set(review['requested_territories']) & set(review['excluded_pending_territories']))
         self.assertEqual(set(review['runtime_approved_territories'])|set(review['held_territories']),set(review['requested_territories']))
         self.assertTrue({'BR','HK','MO','TW','JP','KR','BD'}.issubset(review['runtime_approved_territories']))
         with self.assertRaises(DomainError):reviewed_territories(packet,'0'*64)
@@ -124,3 +129,42 @@ class ClearedDraftJourneyTests(TestCase):
         for grant in [['*'],['IN','CN'],['IN'],['IN','IN']]:
             altered=copy.deepcopy(packet);altered['rights']['territories']=grant
             with self.subTest(grant=grant),self.assertRaises(DomainError):reviewed_territories(altered,expected)
+
+    def test_publication_checks_entire_whitelist_and_hash_bound_legal_evidence(self):
+        self.test_draft_intake_review_integrity_replay_and_member_denial()
+        from django.conf import settings
+        r=Revision.objects.get()
+        def checks():return {c['code']:c['status'] for c in validate_revision(r)['checks']}
+        self.assertEqual(checks()['publication_regions'],'pass')
+        self.assertEqual(checks()['publication_clearance'],'fail')
+        # Synthetic evidence tests the boundary; it is never applied to the actual draft.
+        r.validation_evidence={'publication_clearance':{'status':'pass','sha256':r.content_sha256,
+            'territories':list(settings.MAISON_PUBLICATION_TERRITORIES),'formats':['reader'],
+            'asset_sha256':{str(a.id):a.sha256 for a in r.assets.filter(state='ready')},
+            'evidence_ref':'synthetic-test-only/legal-review'}};r.save()
+        self.assertEqual(checks()['publication_clearance'],'pass')
+        right=r.rights.get(action='read');original=right.territories
+        right.territories=[c for c in original if c!='BR'];right.save()
+        current=checks();self.assertEqual(current['rights'],'pass');self.assertEqual(current['publication_regions'],'fail')
+        right.territories=original;right.save()
+        for field,value in [('territories',['IN']),('formats',['reader','audio']),('sha256','0'*64),('asset_sha256',{}),('evidence_ref','')]:
+            original_value=r.validation_evidence['publication_clearance'][field]
+            r.validation_evidence['publication_clearance'][field]=value;r.save()
+            with self.subTest(field=field):self.assertEqual(checks()['publication_clearance'],'fail')
+            r.validation_evidence['publication_clearance'][field]=original_value
+        r.save();self.assertEqual(checks()['publication_clearance'],'pass')
+        r.refresh_from_db();self.assertEqual(r.state,'draft');self.assertIsNone(r.edition.live_revision_id)
+
+    def test_nonwhitelisted_countries_denied_even_with_accidental_explicit_grant(self):
+        self.test_draft_intake_review_integrity_replay_and_member_denial()
+        from .services import current_right
+        from .intake_api import RIGHTS_REVIEW
+        r=Revision.objects.get();review=json.loads(RIGHTS_REVIEW.read_text())
+        excluded=review['out_of_scope_territories']+review['excluded_pending_territories']
+        right=r.rights.get(action='read');right.territories=excluded+['IN'];right.save()
+        self.assertIsNotNone(current_right(r,territory='IN'))
+        for country in excluded:
+            with self.subTest(country=country):self.assertIsNone(current_right(r,territory=country))
+        right.territories=['*'];right.save()
+        for country in excluded+['ZZ']:
+            with self.subTest(wildcard_country=country):self.assertIsNone(current_right(r,territory=country))

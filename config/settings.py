@@ -8,6 +8,13 @@ from urllib.parse import unquote, urlparse, parse_qs
 from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+PUBLICATION_POLICY = json.loads((BASE_DIR / 'contracts/publication-policy.json').read_text())
+MAISON_PUBLICATION_TERRITORIES = tuple(PUBLICATION_POLICY['whitelist'])
+if (not MAISON_PUBLICATION_TERRITORIES or len(set(MAISON_PUBLICATION_TERRITORIES)) != len(MAISON_PUBLICATION_TERRITORIES)
+    or any(not isinstance(c,str) or len(c)!=2 or not c.isascii() or not c.isupper() or not c.isalpha() for c in MAISON_PUBLICATION_TERRITORIES)
+    or set(MAISON_PUBLICATION_TERRITORIES) & set(PUBLICATION_POLICY['out_of_scope'] + PUBLICATION_POLICY['excluded_pending'])):
+    raise ImproperlyConfigured('Publication whitelist must contain only explicit passed region codes')
+
 ENVIRONMENT = os.getenv('MAISON_ENV', 'local')
 if ENVIRONMENT not in {'local', 'test', 'production'}:
     raise ImproperlyConfigured('MAISON_ENV must be local, test or production')

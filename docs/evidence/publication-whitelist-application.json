@@ -1,0 +1,38 @@
+{
+  "verified_at": "2026-11-17T18:06:16.262361+00:00",
+  "environment": "isolated local Maison only",
+  "policy_sha256": "86eb3486667b22569bb23eeb6b7c7fc0d94ac29a194e9b3d2cb9d0f0c7795605",
+  "active_whitelist_count": 47,
+  "out_of_scope": [
+    "AE",
+    "CN"
+  ],
+  "excluded_pending": [
+    "AF",
+    "EG",
+    "IR",
+    "KG",
+    "KP",
+    "KW",
+    "MN",
+    "PS",
+    "SY",
+    "TJ",
+    "TL",
+    "TM",
+    "VN"
+  ],
+  "excluded_delivery": "denied",
+  "edition_id": "f8b6c701-b3ec-47fb-890d-7e7ac2575c7a",
+  "revision_id": "2efd60b4-7127-45ed-9844-3967c31e44fd",
+  "state": "draft",
+  "live_revision_id": null,
+  "publication_regions": "pass",
+  "publication_clearance": "fail",
+  "reason": "Existing draft content/term research is not complete all-region legal publication evidence; no pass was fabricated.",
+  "local_health_http": 200,
+  "installed_skill_matches_tracked_source": true,
+  "memory_note": "2026-11-17T18-01-51Z-maison-whitelisted-book-publication.md",
+  "production_mutated": false,
+  "paid_infrastructure_provisioned": false
+}

@@ -59,6 +59,8 @@ def _revision(value):
 
 
 def current_right(revision, format='reader', action='read', territory='IN', at=None):
+    if territory.upper() not in settings.MAISON_PUBLICATION_TERRITORIES:
+        return None
     at = at or timezone.now()
     grants = Rights.objects.filter(revision=revision, format=format, action=action, approved=True,
                                    starts_at__lte=at, ends_at__gt=at).order_by('-ends_at')
@@ -513,11 +515,35 @@ def validate_revision(revision,territory='IN'):
     def add(code,ok,message): checks.append({'code':code,'status':'pass' if ok else 'fail','message':message})
     formats=[f for f in FORMATS if revision.access_policy.get(f,'deny')!='deny']
     add('rights',bool(formats) and all(current_right(revision,f,'read',territory) for f in formats),'Every offered format requires current approved rights; local-only rights require local mode.')
+    fixture_only = (local_fixtures_enabled() and revision.rights.filter(approved=True).exists()
+                    and not revision.rights.filter(approved=True,test_only=False).exists())
+    regions = [territory] if fixture_only else list(settings.MAISON_PUBLICATION_TERRITORIES)
+    region_rights = bool(formats) and bool(regions)
+    for fmt in formats:
+        actions = ['read'] + (['preview'] if fmt=='reader' and revision.preview else [])
+        if revision.download_policy.get(fmt) is True: actions.append('download')
+        for region in regions:
+            for action in actions:
+                right = current_right(revision,fmt,action,region)
+                if not right or (not fixture_only and right.test_only): region_rights = False
+    add('publication_regions',region_rights,'Every offered format/action requires current rights across the complete active whitelist; synthetic fixtures prove only their local test scope.')
     add('metadata',bool(revision.title and revision.description and revision.edition.locale in {'en','bn'}),'Title, description and supported edition locale required.')
     add('text',bool(revision.units.exists()) and revision.content_sha256==revision_hash(revision),'Immutable text root must match the ordered semantic paragraphs.')
     add('anchors',bool(Paragraph.objects.filter(unit__revision=revision).exists()),'Stable paragraph anchors are required.')
     ready_assets=list(revision.assets.filter(state='ready'))
     add('cover',any(a.kind=='cover' for a in ready_assets),'A ready original cover is required.')
+    clearance = revision.validation_evidence.get('publication_clearance',{})
+    if fixture_only:
+        checks.append({'code':'publication_clearance','status':'not_applicable','message':'Synthetic local fixture only; no commercial legal clearance is implied.'})
+    else:
+        clearance_ok = (isinstance(clearance,dict) and clearance.get('status')=='pass'
+            and clearance.get('sha256')==revision.content_sha256
+            and isinstance(clearance.get('territories'),list) and set(clearance['territories'])==set(regions)
+            and len(clearance['territories'])==len(regions)
+            and isinstance(clearance.get('formats'),list) and set(clearance['formats'])==set(formats)
+            and clearance.get('asset_sha256')=={str(a.id):a.sha256 for a in ready_assets}
+            and isinstance(clearance.get('evidence_ref'),str) and bool(clearance['evidence_ref'].strip()))
+        add('publication_clearance',clearance_ok,'Private exact-text/asset legal evidence must cover all whitelisted regions and offered formats, including applicable distribution permissions; draft term research is insufficient.')
     integrity=True
     try:
         for asset in ready_assets: _asset_valid(asset)

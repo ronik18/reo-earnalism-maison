@@ -58,5 +58,6 @@
       "commercialuseallowed": true,
       "rights_review": "docs/evidence/selfish-giant-global-rights.json"
     }
-  ]
+  ],
+  "publication_policy": "contracts/publication-policy.json"
 }

@@ -65,7 +65,8 @@
       "source": "https://uaelegislation.gov.ae/en/legislations/1534/download",
       "reason": "Original-text economic term expired. Electronic-book circulation/content approval applicability to this overseas service remains unresolved; no permit recorded.",
       "internal_reader_decision": "hold_distribution",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "owner_out_of_scope"
     },
     {
       "territory": "AF",
@@ -77,7 +78,8 @@
       "reason": "Historical2008 law term evidence exists; current operative legal/content-publishing position under the de facto authorities is not established. Do not infer present distribution approval from the historical statute.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "AM",
@@ -89,7 +91,8 @@
       "reason": "Original lifetime publication. Preserve attribution/integrity; no modern edition reproduced.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "AZ",
@@ -101,7 +104,8 @@
       "reason": "Article27 permits free use subject to moral rights; its folklore/traditional-knowledge exception is not applied to this identified Wilde literary original.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "BD",
@@ -113,7 +117,8 @@
       "reason": "Current Bengali statute specifies lifetime plus60 for works published during lifetime. Original English text only, not a modern Bengali translation.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "BH",
@@ -125,7 +130,8 @@
       "reason": "Original literary text ordinary term expired; no new translation/layout rights inferred.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "BN",
@@ -137,7 +143,8 @@
       "reason": "Identified-author original literary text; no unknown-authorship/computer-generated-text term relied on.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "BR",
@@ -149,7 +156,8 @@
       "reason": "Life-plus70 expired; article112 does not revive works already out of term. Preserve author attribution/integrity. No Portuguese translation added.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "BT",
@@ -161,7 +169,8 @@
       "reason": "Ministry-hosted statutory text, identified author; no protected source illustrations.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "CA",
@@ -172,7 +181,8 @@
       "source": "https://www.ised-isde.canada.ca/site/canadian-intellectual-property-office/en/copyright",
       "reason": "2022 extension from50 to70 does not revive already-public-domain works. Wilde original was already out of term.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "CN",
@@ -183,7 +193,8 @@
       "source": "https://www.ncac.gov.cn/xxfb/flfg/flfg_532/202103/t20210309_50530.html",
       "reason": "Original-text economic term expired; online publishing licence/foreign-operator rules require a qualified route or applicability determination before Mainland distribution.",
       "internal_reader_decision": "hold_distribution",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "owner_out_of_scope"
     },
     {
       "territory": "CY",
@@ -195,7 +206,8 @@
       "reason": "Literary work ordinary term expired; no claim to settlement of territorial or regulatory disputes.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "DE",
@@ -206,7 +218,8 @@
       "source": "https://www.gesetze-im-internet.de/urhg/__64.html",
       "reason": "Original text only, no modern critical/scientific edition or first posthumous publication.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "DK",
@@ -217,7 +230,8 @@
       "source": "https://www.retsinformation.dk/eli/lta/2023/1093",
       "reason": "Identified individual author. No first publication of a previously unpublished work. DK does not grant separate FO/GL territory codes.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "EG",
@@ -229,7 +243,8 @@
       "reason": "Included because Sinai is geographically Asian. Article183 provides a fee-based licence for commercial/professional exploitation of public-domain works; applicability and any licence must be resolved, not waived as public-domain text.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "FR",
@@ -240,7 +255,8 @@
       "source": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006278937",
       "reason": "Ordinary term expired. Even adding both wartime extensions and a hypothetical30-year mort-pour-la-France extension to70 years after1900 would end before2026; that special status is not claimed. Perpetual attribution/integrity obligations are treated separately.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "GB",
@@ -251,7 +267,8 @@
       "source": "https://www.legislation.gov.uk/ukpga/1988/48/section/12",
       "reason": "Both requested places use GB. Original work published during author lifetime, not an unpublished manuscript.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "GE",
@@ -263,7 +280,8 @@
       "reason": "Original published during lifetime; no new first posthumous publication.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "HK",
@@ -275,7 +293,8 @@
       "reason": "Separate HK decision; Mainland CN hold is not extended automatically to this jurisdiction.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "ID",
@@ -287,7 +306,8 @@
       "reason": "Books by an identified individual; local traditional-cultural-expression rules are not a basis for claiming this authored Wilde story as Indonesian folklore.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "IL",
@@ -299,7 +319,8 @@
       "reason": "Life-plus70 ordinary term; preserve author credit, no endorsement implied.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "IN",
@@ -310,7 +331,8 @@
       "source": "https://copyright.gov.in/Copyright_Act_1957/chapter_v.html",
       "reason": "Retained India approval; original published during author lifetime.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "IQ",
@@ -322,7 +344,8 @@
       "reason": "Indexed amended text specifies lifetime plus50; new edition/corporate/posthumous terms not invoked.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "IR",
@@ -334,7 +357,8 @@
       "reason": "1970 base law/foreign-publication rules and subsequent amendments need current consolidated assessment; local publishing/content and actual provider applicability are unverified. No blanket sanctions ban or permission is asserted.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "JO",
@@ -346,7 +370,8 @@
       "reason": "Original previously published text; public-domain clause allows printing/publishing previously published works. No new translation used.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "JP",
@@ -358,7 +383,8 @@
       "reason": "Ordinary term expired. Even adding the wartime prolongation to70 years after1900 cannot carry this original into2026; no new unpublished material.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "KG",
@@ -370,7 +396,8 @@
       "reason": "2023 consolidation identified; attached older English/French life-plus50 evidence must be reconciled with current operative text before activation.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "KH",
@@ -382,7 +409,8 @@
       "reason": "Lifetime-published authored literary work; special anonymous/collective/posthumous terms not used.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "KP",
@@ -394,7 +422,8 @@
       "reason": "Historical2006 copyright text located; present lawful service/distribution/provider scope and any relevant exemptions require a current determination. Do not infer all informational reading is prohibited, or that it is approved.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "KR",
@@ -406,7 +435,8 @@
       "reason": "Identified-author original text, no Korean translation or modern edition copied.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "KW",
@@ -418,7 +448,8 @@
       "reason": "Current2019 Arabic law located; operative text and electronic publishing applicability not sufficiently reviewed to activate.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "KZ",
@@ -430,7 +461,8 @@
       "reason": "Government current-text service; original lifetime publication. No posthumous rehabilitation extension applied to Wilde.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "LA",
@@ -442,7 +474,8 @@
       "reason": "Law effectiveJanuary2024: original identified-author term50 years after death.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "LB",
@@ -454,7 +487,8 @@
       "reason": "Economic term50, moral rights perpetual: retain faithful text and Oscar Wilde attribution.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "LK",
@@ -466,7 +500,8 @@
       "reason": "Original identified-author literary text; economic-term inference only.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "MM",
@@ -478,7 +513,8 @@
       "reason": "Current indexed law replaces reliance on1911 law; lifetime plus50, moral rights unlimited. No provider/commerce eligibility claim.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "MN",
@@ -490,7 +526,8 @@
       "reason": "2021 law and later amendments identified; WIPO explicitly lacks a consolidated version. Older life-plus50 evidence alone is not marked current approval.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "MO",
@@ -502,7 +539,8 @@
       "reason": "Separate Macao regime; identified-author original, no modern typography or artwork copied.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "MV",
@@ -514,7 +552,8 @@
       "reason": "Current indexed version provides full50 years after author death.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "MY",
@@ -525,7 +564,8 @@
       "source": "https://www.myipo.gov.my/faq/",
       "reason": "Original identified-author literary text; no source edition typography or illustrations reused.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "NL",
@@ -536,7 +576,8 @@
       "source": "https://zoek.officielebekendmakingen.nl/ah-tk-20222023-2924.html",
       "reason": "Government answer expressly describes Article37 life-plus70 for books. Current2026 act also indexed by WIPO; direct statute endpoint rate-limited. European Netherlands only; no separate Caribbean territory grant.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "NP",
@@ -548,7 +589,8 @@
       "reason": "Life-plus50 for original lifetime publication; section15 first posthumous publication is inapplicable.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "NZ",
@@ -559,7 +601,8 @@
       "source": "https://www.iponz.govt.nz/get-ip/copyright/duration/",
       "reason": "Original identified-author literary text. No modern publisher layout reused.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "OM",
@@ -571,7 +614,8 @@
       "reason": "Ordinary original-text term expired. No Omani folklore or traditional heritage asset imported.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "PH",
@@ -583,7 +627,8 @@
       "reason": "Original literary work; no new recording or adaptation.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "PK",
@@ -595,7 +640,8 @@
       "reason": "Original published during lifetime; no new edition rights inferred.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "PS",
@@ -607,7 +653,8 @@
       "reason": "Applicable copyright/publishing regimes and territorial administration need separate assessment; do not borrow Israel or Jordan grants for PS.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "QA",
@@ -619,7 +666,8 @@
       "reason": "Original identified-author text; no Qatari national folklore claim.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "RU",
@@ -630,7 +678,8 @@
       "source": "https://rospatent.gov.ru/en/documents/grazhdanskiy-kodeks-rossiyskoy-federacii-chast-chetvertaya",
       "reason": "Original published during lifetime. Even a hypothetical four-year wartime extension would have expired decades ago. Author credit/integrity retained. No payment/provider/sanctions eligibility is inferred.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "SA",
@@ -642,7 +691,8 @@
       "reason": "Life-plus50 economic-term finding only; media/e-publishing requirements are not certified by this content decision.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "SG",
@@ -653,7 +703,8 @@
       "source": "https://sso.agc.gov.sg/Act/CA2021?ProvIds=P13-&ViewType=Advance&WiAl=1",
       "reason": "Identified author, work originally published within50 years of creation. Original lifetime publication; no unpublished-work issue.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "SY",
@@ -665,7 +716,8 @@
       "reason": "2001 text is explicitly repealed by2013 decree62; current operative text/distribution requirements need assessment. Repealed text is not approval evidence.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "TH",
@@ -677,7 +729,8 @@
       "reason": "Department of Intellectual Property translation; lifetime-published original text.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "TJ",
@@ -689,7 +742,8 @@
       "reason": "Historical WTO life-plus50 text located; current2025 publishing-law and operative copyright provisions need reconciliation before activation.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "TL",
@@ -701,7 +755,8 @@
       "reason": "Historical2019 WIPO study says no copyright statute; current2026 transitional framework/continuing law needs determination. Absence of an indexed statute is not a free-use licence.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "TM",
@@ -713,7 +768,8 @@
       "reason": "Current2017 law located; original-text term/public-domain provisions still require full operative-text review.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "TR",
@@ -725,7 +781,8 @@
       "reason": "Ministry states expired economic rights may be used without author permission. Existing1888 lifetime publication, no new first disclosure.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "TW",
@@ -737,7 +794,8 @@
       "reason": "Separate TW rights code; lifetime publication, no special late first-release rule applies.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "US",
@@ -748,7 +806,8 @@
       "source": "https://www.copyright.gov/circs/circ15a.pdf",
       "reason": "Original published1888. Even a95-year publication term has expired. Foreign restoration provides only the otherwise remaining term, not a new term. The2047 unpublished-work rule does not apply to this originally published text.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "UZ",
@@ -760,7 +819,8 @@
       "reason": "Government-hosted unofficial English translation: public-domain works freely usable without remuneration; preserve personal rights.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     },
     {
       "territory": "VN",
@@ -772,7 +832,8 @@
       "reason": "Original lifetime-plus50 term evidence exists, but electronic publishing approval/cross-border application remains unresolved. Current criminal publishing provisions show this is separate from term expiry.",
       "internal_reader_decision": "hold_distribution",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "pending_excluded_from_whitelist"
     },
     {
       "territory": "YE",
@@ -784,7 +845,8 @@
       "reason": "Arabic statutory article31 gives lifetime plus50. No new translation, local folklore or market operating licence inferred.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true,
-      "production_distribution_certified": false
+      "production_distribution_certified": false,
+      "scope_status": "active_whitelist"
     }
   ],
   "cover_provenance": {
@@ -803,12 +865,10 @@
     "audiobook/voice",
     "international commerce/tax/privacy compliance certification"
   ],
-  "next_action": "Complete the15 named pending jurisdiction reviews/permissions in the existing matrix; no new services, paid infrastructure, public publication or automatic commerce activation.",
-  "review_id": "EN-071-brazil-asia-2026-11-17",
-  "scope": "Original English Reader read/preview content decision for47 explicit codes; all62 requested jurisdictions tracked,15 held. Draft only. No full Asian or production clearance.",
+  "next_action": "Continue the approved implementation/go-live sequence for the47-region whitelist. Before publishing any book, complete exact-edition legal evidence for every whitelisted region; excluded jurisdictions do not block active-scope implementation and are not re-enabled automatically.",
+  "review_id": "EN-071-whitelist-2026-11-17",
+  "scope": "47-code active whitelist; UAE/Mainland China out of scope,13 other pending codes excluded. Original English Reader draft content decisions only; publication requires complete legal evidence across all47 regions.",
   "requested_territories": [
-    "AE",
-    "AF",
     "AM",
     "AZ",
     "BD",
@@ -817,11 +877,9 @@
     "BR",
     "BT",
     "CA",
-    "CN",
     "CY",
     "DE",
     "DK",
-    "EG",
     "FR",
     "GB",
     "GE",
@@ -830,20 +888,15 @@
     "IL",
     "IN",
     "IQ",
-    "IR",
     "JO",
     "JP",
-    "KG",
     "KH",
-    "KP",
     "KR",
-    "KW",
     "KZ",
     "LA",
     "LB",
     "LK",
     "MM",
-    "MN",
     "MO",
     "MV",
     "MY",
@@ -853,44 +906,22 @@
     "OM",
     "PH",
     "PK",
-    "PS",
     "QA",
     "RU",
     "SA",
     "SG",
-    "SY",
     "TH",
-    "TJ",
-    "TL",
-    "TM",
     "TR",
     "TW",
     "US",
     "UZ",
-    "VN",
     "YE"
   ],
   "requested_place_aliases": {
     "London": "GB",
     "Scotland": "GB"
   },
-  "held_territories": [
-    "AE",
-    "AF",
-    "CN",
-    "EG",
-    "IR",
-    "KG",
-    "KP",
-    "KW",
-    "MN",
-    "PS",
-    "SY",
-    "TJ",
-    "TL",
-    "TM",
-    "VN"
-  ],
+  "held_territories": [],
   "requested_markets_fully_cleared": false,
   "assessment_type": "Primary-source desk assessment and scoped internal content decision; not a regulator permit or legal opinion.",
   "additional_primary_sources": {
@@ -917,7 +948,7 @@
       "territories": [
         "AE"
       ],
-      "status": "external_requirement_unresolved",
+      "status": "out_of_scope",
       "reason": "Official guidance includes electronic-book circulation/content permits and electronic book selling licences. Applicability to the actual overseas free Reader model and any required permit are not established.",
       "simplest_resolution": "Keep AE denied; determine applicability with actual operator particulars, then use existing permit/licensed distribution route only if required. No automatic new UAE entity or infrastructure.",
       "cannot_autonomously_supply": [
@@ -931,7 +962,7 @@
       "territories": [
         "CN"
       ],
-      "status": "external_requirement_unresolved",
+      "status": "out_of_scope",
       "reason": "Online Publishing Service Rules articles2,7-10 cover digital publication, licences and foreign-operator/cooperation restrictions. Exact cross-border applicability and a permitted route are unverified.",
       "simplest_resolution": "Keep Mainland CN denied. Obtain applicability determination or an already licensed eligible local partner and any required cooperation approval; do not build a separate China stack first.",
       "cannot_autonomously_supply": [
@@ -944,7 +975,7 @@
       "territories": [
         "AF"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "Historical2008 law term evidence exists; current operative legal/content-publishing position under the de facto authorities is not established. Do not infer present distribution approval from the historical statute.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -953,7 +984,7 @@
       "territories": [
         "IR"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "1970 base law/foreign-publication rules and subsequent amendments need current consolidated assessment; local publishing/content and actual provider applicability are unverified. No blanket sanctions ban or permission is asserted.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -962,7 +993,7 @@
       "territories": [
         "KP"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "Historical2006 copyright text located; present lawful service/distribution/provider scope and any relevant exemptions require a current determination. Do not infer all informational reading is prohibited, or that it is approved.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -971,7 +1002,7 @@
       "territories": [
         "KW"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "Current2019 Arabic law located; operative text and electronic publishing applicability not sufficiently reviewed to activate.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -980,7 +1011,7 @@
       "territories": [
         "KG"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "2023 consolidation identified; attached older English/French life-plus50 evidence must be reconciled with current operative text before activation.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -989,7 +1020,7 @@
       "territories": [
         "MN"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "2021 law and later amendments identified; WIPO explicitly lacks a consolidated version. Older life-plus50 evidence alone is not marked current approval.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -998,7 +1029,7 @@
       "territories": [
         "PS"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "Applicable copyright/publishing regimes and territorial administration need separate assessment; do not borrow Israel or Jordan grants for PS.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -1007,7 +1038,7 @@
       "territories": [
         "SY"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "2001 text is explicitly repealed by2013 decree62; current operative text/distribution requirements need assessment. Repealed text is not approval evidence.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -1016,7 +1047,7 @@
       "territories": [
         "TJ"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "Historical WTO life-plus50 text located; current2025 publishing-law and operative copyright provisions need reconciliation before activation.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -1025,7 +1056,7 @@
       "territories": [
         "TM"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "Current2017 law located; original-text term/public-domain provisions still require full operative-text review.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -1034,7 +1065,7 @@
       "territories": [
         "TL"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "Historical2019 WIPO study says no copyright statute; current2026 transitional framework/continuing law needs determination. Absence of an indexed statute is not a free-use licence.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -1043,7 +1074,7 @@
       "territories": [
         "VN"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "Original lifetime-plus50 term evidence exists, but electronic publishing approval/cross-border application remains unresolved. Current criminal publishing provisions show this is separate from term expiry.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     },
@@ -1052,7 +1083,7 @@
       "territories": [
         "EG"
       ],
-      "status": "assessment_pending",
+      "status": "excluded_from_active_scope",
       "reason": "Included because Sinai is geographically Asian. Article183 provides a fee-based licence for commercial/professional exploitation of public-domain works; applicability and any licence must be resolved, not waived as public-domain text.",
       "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     }
@@ -1076,9 +1107,9 @@
   ],
   "paragraphs_sha256": "9de3beb099e2fcfc1bcd29570509d1fc9aa8ebf54ccaee6cf8014652d0b03386",
   "hash_scope": "text_sha256 binds the existing revision including UUID anchors; paragraphs_sha256 binds ordered NFC canonical JSON paragraph text independent of newly allocated IDs.",
-  "previous_review_path": "docs/evidence/selfish-giant-rights-review-14-markets.json",
+  "previous_review_path": "docs/evidence/selfish-giant-rights-review-brazil-asia.json",
   "geographic_scope": {
-    "definition": "UN M49 Asia50 countries/areas, plus separately assessed Taiwan and transcontinental Russia/Egypt. Brazil added separately. Prior requested non-Asian countries retained. A service coverage list, not a statement about sovereignty.",
+    "definition": "Active owner-approved review scope is the47-code whitelist in contracts/publication-policy.json. The wider Asian inventory below is historical research only, not an active scope or grant.",
     "source": "https://unstats.un.org/unsd/methodology/m49/overview/",
     "asian_jurisdictions": [
       {
@@ -1350,10 +1381,96 @@
     "brazil_included": true,
     "language_boundary": "Original English only. Bengali interface is not a Bengali translation. No Portuguese or other translation rights are implied.",
     "counts": {
-      "asian_jurisdictions": 53,
-      "total_requested": 62,
-      "internal_content_approved": 47,
-      "held": 15
+      "historical_asian_inventory": 53,
+      "historical_requested": 62,
+      "active_whitelist": 47,
+      "out_of_scope": 2,
+      "excluded_pending": 13
     }
-  }
+  },
+  "historical_requested_territories": [
+    "AE",
+    "AF",
+    "AM",
+    "AZ",
+    "BD",
+    "BH",
+    "BN",
+    "BR",
+    "BT",
+    "CA",
+    "CN",
+    "CY",
+    "DE",
+    "DK",
+    "EG",
+    "FR",
+    "GB",
+    "GE",
+    "HK",
+    "ID",
+    "IL",
+    "IN",
+    "IQ",
+    "IR",
+    "JO",
+    "JP",
+    "KG",
+    "KH",
+    "KP",
+    "KR",
+    "KW",
+    "KZ",
+    "LA",
+    "LB",
+    "LK",
+    "MM",
+    "MN",
+    "MO",
+    "MV",
+    "MY",
+    "NL",
+    "NP",
+    "NZ",
+    "OM",
+    "PH",
+    "PK",
+    "PS",
+    "QA",
+    "RU",
+    "SA",
+    "SG",
+    "SY",
+    "TH",
+    "TJ",
+    "TL",
+    "TM",
+    "TR",
+    "TW",
+    "US",
+    "UZ",
+    "VN",
+    "YE"
+  ],
+  "out_of_scope_territories": [
+    "AE",
+    "CN"
+  ],
+  "excluded_pending_territories": [
+    "AF",
+    "EG",
+    "IR",
+    "KG",
+    "KP",
+    "KW",
+    "MN",
+    "PS",
+    "SY",
+    "TJ",
+    "TL",
+    "TM",
+    "VN"
+  ],
+  "active_scope_jurisdiction_blockers": [],
+  "publication_policy": "contracts/publication-policy.json"
 }
