@@ -27,3 +27,8 @@ The public review handoff is https://earnalism-maison-review.icy-bell-7022.chatg
 Ordinary fixes that implement the approved design proceed autonomously. Before a deviation, present the precise affected requirement, proposed change, reason and material design/operational/cost effect, then wait for explicit approval. Silence and an agent's preferred simplification are not approval. No new review layers or approval requests are needed for conforming implementation work.
 
 Next exact engineering prompt: implement the approved React/TypeScript interactive-island build under client/, preserving current Reader/Quiz API contracts, accepted typography/logo/artwork and the protected draft journey; add frontend build/type checks to CI and the Node24 build stage to the existing image, then run the affected browser/API checks. Do not substitute the hosting/database/media plan, reduce P0 scope, publish the draft or provision paid infrastructure as part of that change.
+
+
+## Owner-approved region amendment,17November2026
+
+The active47-region whitelist is contracts/publication-policy.json. UAE/Mainland China and all pending jurisdictions are excluded. This is an explicit owner scope change; the technical stack, design and implementation sequence remain unchanged. Every published title must be legally compliant in all active regions; excluded-country research is historical, not a blocker for active-scope preparation.

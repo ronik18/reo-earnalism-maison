@@ -16,3 +16,6 @@ Use the reviewed OpenAPI shapes; root reconciles its 21 findings. SQL/ORM constr
 ## Owner instruction,17 November2026: approved design is binding
 
 Follow the approved HLD, technical solution, LLD, API/DB/cache contracts and Maison visual design. Obtain explicit owner approval before any deviation in architecture, technology, design behavior, scope, availability or cost assumptions. An implementation shortcut or an agent-written milestone note does not amend the approved design. Fix gaps toward that baseline; do not rewrite the baseline to declare an incomplete implementation compliant. Continue the fastest qualified go-live work using the approved implementation sequence and retain the running legacy platform. New spending still requires the applicable budget authority.
+
+
+Owner publication-scope amendment,17November2026: use contracts/publication-policy.json as the47-region whitelist. UAE/Mainland China are out of scope and pending jurisdictions are excluded. Publish a book only with exact-edition legal compliance across every active region and offered format/action. Keep incomplete titles draft/held; do not silently shrink or expand the whitelist. The corresponding book-production skill and BOOK_PUBLICATION_POLICY.md carry this standing rule.
