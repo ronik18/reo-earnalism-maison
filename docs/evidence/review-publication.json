@@ -1,0 +1,11 @@
+{
+  "review_version": 10,
+  "public_handoff": "https://earnalism-maison-review.icy-bell-7022.chatgpt.site/go-live/",
+  "review_source_commit": "d16e5e1a8b9703be9cae82e3304bdbbdac5fd648",
+  "application_source_commit": "2d3839b",
+  "deployment_id": "appgdep_6afc7d8caca88191b2ad0f6eb047dbdb",
+  "deployment_status": "succeeded",
+  "scope": "existing public review documents only; Maison backend remains local",
+  "production_application_deployed": false,
+  "paid_resources_provisioned": false
+}
