@@ -19,3 +19,19 @@ Follow the approved HLD, technical solution, LLD, API/DB/cache contracts and Mai
 
 
 Owner publication-scope amendment,17November2026: use contracts/publication-policy.json as the47-region whitelist. UAE/Mainland China are out of scope and pending jurisdictions are excluded. Publish a book only with exact-edition legal compliance across every active region and offered format/action. Keep incomplete titles draft/held; do not silently shrink or expand the whitelist. The corresponding book-production skill and BOOK_PUBLICATION_POLICY.md carry this standing rule.
+
+
+## Owner-authorized parallel completion and zero-customer cutover,17November2026
+
+The owner explicitly requests parallel sub-agents to complete Maison and GO LIVE, confirms the current production has no customers, and authorizes root to perform cutover when qualified. This supersedes the initial local-only preparation restriction for authorized staging/production and cutover work. Keep the approved architecture/design and47-region publication policy. No customer/wallet dual-write or migration bridge is needed; use a fresh Maison database, cleared content and necessary operator configuration. Root alone owns integration/release, provider mutations and cutover. Prepare the exact paid resource/cost package before requesting indispensable spending authority; no paid provisioning is implied without that authority. Preserve legacy code/data/backup for recovery; stop legacy services only after verified cutover, and do not delete historical assets or repositories.
+
+Current active file ownership replaces the initial lane allocation for this completion run:
+- Frontend agent: client/, package/build files, web/, templates/, static/.
+- Backend agent: accounts/, reader/, core/.
+- Media/commerce agent: library/, billing/, learning/.
+- Root Integration: config/, operations/, deployment, dependencies, Docker/CI, contracts/, documentation and final commits.
+
+Coordinate interfaces directly between lanes. Do not edit another lane's files or commit/push independently. Use separate MAISON_TEST_DB_NAME values for concurrent tests. Only actual feature rights, real adapter/device acceptance, authentication/spending facts and failing applicable checks may stop the affected release; avoid new services, wrappers and redundant approvals.
+
+
+Owner database amendment,18November2026: retain the existing Neon PostgreSQL18 project and update the version baseline after compatibility verification. For the current Neon migration and first-book acceptance task, leave the existing platform unchanged; no cutover or paid provisioning is included.
