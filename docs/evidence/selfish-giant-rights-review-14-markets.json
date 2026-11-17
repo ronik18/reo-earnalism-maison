@@ -1,0 +1,287 @@
+{
+  "reviewed_on": "2026-11-17",
+  "work": "The Selfish Giant",
+  "author": "Oscar Wilde",
+  "original_publication_year": 1888,
+  "author_death_year": 1900,
+  "text_sha256": "ae3a7af9675f35161915748730093a2101c17222363c330a8eff44804097bb39",
+  "global_clearance_achieved": false,
+  "runtime_approved_territories": [
+    "IN",
+    "US",
+    "NZ",
+    "GB",
+    "FR",
+    "RU",
+    "DE",
+    "NL",
+    "DK",
+    "CA",
+    "SG",
+    "MY"
+  ],
+  "research": [
+    {
+      "territory": "IN",
+      "name": "India",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 60,
+      "provision": "Copyright Act 1957 section22",
+      "source": "https://copyright.gov.in/Copyright_Act_1957/chapter_v.html",
+      "reason": "Retained India approval; original published during author lifetime.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "US",
+      "name": "USA",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": null,
+      "provision": "17 USC304 and104A(a)(1)(B)",
+      "source": "https://www.copyright.gov/circs/circ15a.pdf",
+      "reason": "Original published1888. Even a95-year publication term has expired. Foreign restoration provides only the otherwise remaining term, not a new term. The2047 unpublished-work rule does not apply to this originally published text.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "AE",
+      "name": "UAE",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Federal Decree-Law38/2021 articles3,20",
+      "source": "https://uaelegislation.gov.ae/en/legislations/1534/download",
+      "reason": "Original-text economic term expired. Electronic-book circulation/content approval applicability to this overseas service remains unresolved; no permit recorded.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "NZ",
+      "name": "New Zealand",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Act1994 section22 / IPONZ duration guidance",
+      "source": "https://www.iponz.govt.nz/get-ip/copyright/duration/",
+      "reason": "Original identified-author literary text. No modern publisher layout reused.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "GB",
+      "name": "UK (London and Scotland)",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "CDPA1988 section12",
+      "source": "https://www.legislation.gov.uk/ukpga/1988/48/section/12",
+      "reason": "Both requested places use GB. Original work published during author lifetime, not an unpublished manuscript.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "FR",
+      "name": "France",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "CPI L123-1, L123-8 to L123-10; L121-1",
+      "source": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006278937",
+      "reason": "Ordinary term expired. Even adding both wartime extensions and a hypothetical30-year mort-pour-la-France extension to70 years after1900 would end before2026; that special status is not claimed. Perpetual attribution/integrity obligations are treated separately.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "RU",
+      "name": "Russia",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Civil Code1281,1282,1267",
+      "source": "https://rospatent.gov.ru/en/documents/grazhdanskiy-kodeks-rossiyskoy-federacii-chast-chetvertaya",
+      "reason": "Original published during lifetime. Even a hypothetical four-year wartime extension would have expired decades ago. Author credit/integrity retained. No payment/provider/sanctions eligibility is inferred.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "CN",
+      "name": "Mainland China",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Law2020 article23",
+      "source": "https://www.ncac.gov.cn/xxfb/flfg/flfg_532/202103/t20210309_50530.html",
+      "reason": "Original-text economic term expired; online publishing licence/foreign-operator rules require a qualified route or applicability determination before Mainland distribution.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "DE",
+      "name": "Germany",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "UrhG64",
+      "source": "https://www.gesetze-im-internet.de/urhg/__64.html",
+      "reason": "Original text only, no modern critical/scientific edition or first posthumous publication.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "NL",
+      "name": "Netherlands",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Auteurswet37; Dutch government explanation",
+      "source": "https://zoek.officielebekendmakingen.nl/ah-tk-20222023-2924.html",
+      "reason": "Government answer expressly describes Article37 life-plus70 for books. Current2026 act also indexed by WIPO; direct statute endpoint rate-limited. European Netherlands only; no separate Caribbean territory grant.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "DK",
+      "name": "Denmark",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Ophavsretsloven63",
+      "source": "https://www.retsinformation.dk/eli/lta/2023/1093",
+      "reason": "Identified individual author. No first publication of a previously unpublished work. DK does not grant separate FO/GL territory codes.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "CA",
+      "name": "Canada",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Copyright Act6 and2022 non-revival / CIPO guidance",
+      "source": "https://www.ised-isde.canada.ca/site/canadian-intellectual-property-office/en/copyright",
+      "reason": "2022 extension from50 to70 does not revive already-public-domain works. Wilde original was already out of term.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "SG",
+      "name": "Singapore",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Copyright Act2021 section114",
+      "source": "https://sso.agc.gov.sg/Act/CA2021?ProvIds=P13-&ViewType=Advance&WiAl=1",
+      "reason": "Identified author, work originally published within50 years of creation. Original lifetime publication; no unpublished-work issue.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "MY",
+      "name": "Malaysia",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Act1987 section17; MyIPO guidance",
+      "source": "https://www.myipo.gov.my/faq/",
+      "reason": "Original identified-author literary text; no source edition typography or illustrations reused.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    }
+  ],
+  "cover_provenance": {
+    "method": "New original OpenAI image generation from story description; no imported third-party illustration. Footer follows owner-supplied brand sample.",
+    "ownership_source": "https://openai.com/policies/terms-of-use/",
+    "qualification": "Output ownership is subject to applicable law; it is not a blanket third-party-rights or exclusivity guarantee. No claim of universal copyright registration.",
+    "decision": "Use own retained generated output and owner-supplied publisher wording; no exclusive copyright, registration or third-party warranty claim. No source illustration copied.",
+    "bound_assets": {
+      "front_sha256": "ccc7923a5dc0d52b2b684a6a0be99de4140849e7a13ca2ebe3618590e13ac32d",
+      "back_sha256": "04fbc420d4db3f51b14955d01d957e2991bd2b78dc8fa15ffeb31f9245b99366"
+    }
+  },
+  "excluded": [
+    "modern translations/adaptations",
+    "source illustrations",
+    "audiobook/voice",
+    "international commerce/tax/privacy compliance certification"
+  ],
+  "next_action": "Resolve AE/CN applicability with actual operator documents; retain holds until supported. Continue local draft acceptance for the12 content-approved territories. No paid setup or publication.",
+  "review_id": "EN-071-territories-2026-11-17",
+  "scope": "Original English text, Reader read/preview only; internal draft review. Not production launch certification.",
+  "requested_territories": [
+    "IN",
+    "US",
+    "AE",
+    "NZ",
+    "GB",
+    "FR",
+    "RU",
+    "CN",
+    "DE",
+    "NL",
+    "DK",
+    "CA",
+    "SG",
+    "MY"
+  ],
+  "requested_place_aliases": {
+    "London": "GB",
+    "Scotland": "GB"
+  },
+  "held_territories": [
+    "AE",
+    "CN"
+  ],
+  "requested_markets_fully_cleared": false,
+  "assessment_type": "Primary-source desk assessment and scoped internal content decision; not a regulator permit or legal opinion.",
+  "additional_primary_sources": {
+    "US_restoration": "https://www.copyright.gov/title17/92chap1.html#104a",
+    "FR_wartime_and_moral_rights": "https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006069414/",
+    "NL_current_2026_statute_index": "https://www.wipo.int/wipolex/en/legislation/details/23781",
+    "SG_IPOS": "https://www.ipos.gov.sg/docs/default-source/resources-library/copyright/copyright-act-factsheet.pdf",
+    "MY_Act332": "https://lom.agc.gov.my/ilims/upload/portal/akta/LOM/EN/010113_Act%20332_final.pdf",
+    "RU_current_code": "https://rospatent.gov.ru/content/uploadfiles/1/Civil%20Code%20of%20the%20RussianFederation_current%20wording%2021-04-2025.pdf",
+    "AE_book_circulation_guide": "https://www.nma.gov.ae/en/api?url=%2Fuploads%2Fmedia_services_guide_281dd22a01.pdf",
+    "AE_electronic_book_licensing": "https://www.cma.gov.ae/media-services-detail/importing-and-distributing-books-license-2",
+    "AE_fee_schedule": "https://uaelegislation.gov.ae/en/legislations/2869/regulations/1093/download",
+    "CN_online_publishing_rules": "https://www.nppa.gov.cn/xxgk/fdzdgknr/zcfg_210/bmgz_213/202112/t20211209_442163.html",
+    "CN_licence_conditions": "https://www.nppa.gov.cn/bsfw/xksx/cbfxl/wlcbfwspsx/202210/t20221013_600726.html"
+  },
+  "moral_rights_measures": [
+    "Credit Oscar Wilde on title metadata and front cover.",
+    "Retain faithful original32-paragraph English text; no abridgement, translation, modern adaptation or invented author endorsement.",
+    "Separate new publisher/cover credit from authorship; do not claim ownership of public-domain original text."
+  ],
+  "blockers": [
+    {
+      "id": "AE-DISTRIBUTION",
+      "territories": [
+        "AE"
+      ],
+      "status": "external_requirement_unresolved",
+      "reason": "Official guidance includes electronic-book circulation/content permits and electronic book selling licences. Applicability to the actual overseas free Reader model and any required permit are not established.",
+      "simplest_resolution": "Keep AE denied; determine applicability with actual operator particulars, then use existing permit/licensed distribution route only if required. No automatic new UAE entity or infrastructure.",
+      "cannot_autonomously_supply": [
+        "Actual operator registration/authority and any existing UAE licence/permit",
+        "Regulator applicability response or qualified determination; actual approval if required",
+        "Any mandatory fee authorization"
+      ]
+    },
+    {
+      "id": "CN-DISTRIBUTION",
+      "territories": [
+        "CN"
+      ],
+      "status": "external_requirement_unresolved",
+      "reason": "Online Publishing Service Rules articles2,7-10 cover digital publication, licences and foreign-operator/cooperation restrictions. Exact cross-border applicability and a permitted route are unverified.",
+      "simplest_resolution": "Keep Mainland CN denied. Obtain applicability determination or an already licensed eligible local partner and any required cooperation approval; do not build a separate China stack first.",
+      "cannot_autonomously_supply": [
+        "Actual operator structure and authorised eligible partner if needed",
+        "Publishing licence/cooperation approvals or qualified non-applicability determination"
+      ]
+    }
+  ],
+  "resolved_gaps": [
+    "Named14-country scope replaces vague worldwide request; London and Scotland map to GB.",
+    "Country-specific original-text term evidence recorded, including US foreign restoration and Canadian non-revival.",
+    "French/Russian possible term extensions cannot extend this1900 author text into2026.",
+    "Faithful text, author credit, cover provenance and exact hashes bound; no new translation/audio/image rights inferred.",
+    "Senegal is outside requested scope and is not a blocker for these14 markets.",
+    "New AI art need not be exclusively copyrightable to use retained own output; no false exclusivity claim."
+  ],
+  "production_activation_requirements": [
+    "Trusted edge territory adapter qualification, unknown-country denial and rights-aware delivery/cache checks.",
+    "Actual operator privacy/contact/terms and processor/transfer configuration before real personal-data processing.",
+    "Any market-specific mandatory distribution permits. Commerce/tax/payment checks only before enabling commerce.",
+    "Separate owner release authorization; this task keeps the edition draft."
+  ],
+  "paragraphs_sha256": "9de3beb099e2fcfc1bcd29570509d1fc9aa8ebf54ccaee6cf8014652d0b03386",
+  "hash_scope": "text_sha256 binds the existing revision including UUID anchors; paragraphs_sha256 binds ordered NFC canonical JSON paragraph text independent of newly allocated IDs."
+}

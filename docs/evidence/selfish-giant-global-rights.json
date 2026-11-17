@@ -7,42 +7,55 @@
   "text_sha256": "ae3a7af9675f35161915748730093a2101c17222363c330a8eff44804097bb39",
   "global_clearance_achieved": false,
   "runtime_approved_territories": [
-    "IN",
-    "US",
-    "NZ",
-    "GB",
-    "FR",
-    "RU",
-    "DE",
-    "NL",
-    "DK",
+    "AM",
+    "AZ",
+    "BD",
+    "BH",
+    "BN",
+    "BR",
+    "BT",
     "CA",
+    "CY",
+    "DE",
+    "DK",
+    "FR",
+    "GB",
+    "GE",
+    "HK",
+    "ID",
+    "IL",
+    "IN",
+    "IQ",
+    "JO",
+    "JP",
+    "KH",
+    "KR",
+    "KZ",
+    "LA",
+    "LB",
+    "LK",
+    "MM",
+    "MO",
+    "MV",
+    "MY",
+    "NL",
+    "NP",
+    "NZ",
+    "OM",
+    "PH",
+    "PK",
+    "QA",
+    "RU",
+    "SA",
     "SG",
-    "MY"
+    "TH",
+    "TR",
+    "TW",
+    "US",
+    "UZ",
+    "YE"
   ],
   "research": [
-    {
-      "territory": "IN",
-      "name": "India",
-      "original_text_economic_term": "expired_supported",
-      "ordinary_life_plus_years": 60,
-      "provision": "Copyright Act 1957 section22",
-      "source": "https://copyright.gov.in/Copyright_Act_1957/chapter_v.html",
-      "reason": "Retained India approval; original published during author lifetime.",
-      "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
-    },
-    {
-      "territory": "US",
-      "name": "USA",
-      "original_text_economic_term": "expired_supported",
-      "ordinary_life_plus_years": null,
-      "provision": "17 USC304 and104A(a)(1)(B)",
-      "source": "https://www.copyright.gov/circs/circ15a.pdf",
-      "reason": "Original published1888. Even a95-year publication term has expired. Foreign restoration provides only the otherwise remaining term, not a new term. The2047 unpublished-work rule does not apply to this originally published text.",
-      "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
-    },
     {
       "territory": "AE",
       "name": "UAE",
@@ -55,46 +68,109 @@
       "reasoning_is_inference": true
     },
     {
-      "territory": "NZ",
-      "name": "New Zealand",
+      "territory": "AF",
+      "name": "Afghanistan",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/10197",
+      "reason": "Historical2008 law term evidence exists; current operative legal/content-publishing position under the de facto authorities is not established. Do not infer present distribution approval from the historical statute.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "AM",
+      "name": "Armenia",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Copyright and Related Rights Law2006 article37",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/63",
+      "reason": "Original lifetime publication. Preserve attribution/integrity; no modern edition reproduced.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "AZ",
+      "name": "Azerbaijan",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Copyright Law25,27",
+      "source": "https://www.wipo.int/wipolex/en/text/490250",
+      "reason": "Article27 permits free use subject to moral rights; its folklore/traditional-knowledge exception is not applied to this identified Wilde literary original.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "BD",
+      "name": "Bangladesh",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 60,
+      "provision": "Copyright Act2023 section22",
+      "source": "https://bdlaws.minlaw.gov.bd/act-1452/section-52648.html?lang=bn",
+      "reason": "Current Bengali statute specifies lifetime plus60 for works published during lifetime. Original English text only, not a modern Bengali translation.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "BH",
+      "name": "Bahrain",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Law22/2006, amended2014, economic term",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/19867",
+      "reason": "Original literary text ordinary term expired; no new translation/layout rights inferred.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "BN",
+      "name": "Brunei",
       "original_text_economic_term": "expired_supported",
       "ordinary_life_plus_years": 50,
-      "provision": "Copyright Act1994 section22 / IPONZ duration guidance",
-      "source": "https://www.iponz.govt.nz/get-ip/copyright/duration/",
-      "reason": "Original identified-author literary text. No modern publisher layout reused.",
+      "provision": "Emergency Copyright Order1999 section14",
+      "source": "https://wipolex-res.wipo.int/edocs/lexdocs/laws/en/bn/bn002en.pdf",
+      "reason": "Identified-author original literary text; no unknown-authorship/computer-generated-text term relied on.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
     },
     {
-      "territory": "GB",
-      "name": "UK (London and Scotland)",
+      "territory": "BR",
+      "name": "Brazil",
       "original_text_economic_term": "expired_supported",
       "ordinary_life_plus_years": 70,
-      "provision": "CDPA1988 section12",
-      "source": "https://www.legislation.gov.uk/ukpga/1988/48/section/12",
-      "reason": "Both requested places use GB. Original work published during author lifetime, not an unpublished manuscript.",
+      "provision": "Law9610/1998 articles41,45,112; attribution/integrity article24",
+      "source": "https://www.planalto.gov.br/ccivil_03/leis/l9610.htm",
+      "reason": "Life-plus70 expired; article112 does not revive works already out of term. Preserve author attribution/integrity. No Portuguese translation added.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
     },
     {
-      "territory": "FR",
-      "name": "France",
+      "territory": "BT",
+      "name": "Bhutan",
       "original_text_economic_term": "expired_supported",
-      "ordinary_life_plus_years": 70,
-      "provision": "CPI L123-1, L123-8 to L123-10; L121-1",
-      "source": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006278937",
-      "reason": "Ordinary term expired. Even adding both wartime extensions and a hypothetical30-year mort-pour-la-France extension to70 years after1900 would end before2026; that special status is not claimed. Perpetual attribution/integrity obligations are treated separately.",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Act2001 section21",
+      "source": "https://www.moice.gov.bt/wp-content/uploads/2023/03/2.-Copyright-Act-of-the-Kingdom-of-Bhutan-2001-English-Version.pdf",
+      "reason": "Ministry-hosted statutory text, identified author; no protected source illustrations.",
       "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
     },
     {
-      "territory": "RU",
-      "name": "Russia",
+      "territory": "CA",
+      "name": "Canada",
       "original_text_economic_term": "expired_supported",
       "ordinary_life_plus_years": 70,
-      "provision": "Civil Code1281,1282,1267",
-      "source": "https://rospatent.gov.ru/en/documents/grazhdanskiy-kodeks-rossiyskoy-federacii-chast-chetvertaya",
-      "reason": "Original published during lifetime. Even a hypothetical four-year wartime extension would have expired decades ago. Author credit/integrity retained. No payment/provider/sanctions eligibility is inferred.",
+      "provision": "Copyright Act6 and2022 non-revival / CIPO guidance",
+      "source": "https://www.ised-isde.canada.ca/site/canadian-intellectual-property-office/en/copyright",
+      "reason": "2022 extension from50 to70 does not revive already-public-domain works. Wilde original was already out of term.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true
     },
@@ -110,6 +186,18 @@
       "reasoning_is_inference": true
     },
     {
+      "territory": "CY",
+      "name": "Cyprus",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Registrar of Companies/IP duration guidance",
+      "source": "https://www.intellectualproperty.gov.cy/en/intellectual-property-rights/copyright/3-lifecycle/1-managing-a-copyright/9-guidance/duration-of-copyright-protection",
+      "reason": "Literary work ordinary term expired; no claim to settlement of territorial or regulatory disputes.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
       "territory": "DE",
       "name": "Germany",
       "original_text_economic_term": "expired_supported",
@@ -117,17 +205,6 @@
       "provision": "UrhG64",
       "source": "https://www.gesetze-im-internet.de/urhg/__64.html",
       "reason": "Original text only, no modern critical/scientific edition or first posthumous publication.",
-      "internal_reader_decision": "approved_content_scope",
-      "reasoning_is_inference": true
-    },
-    {
-      "territory": "NL",
-      "name": "Netherlands",
-      "original_text_economic_term": "expired_supported",
-      "ordinary_life_plus_years": 70,
-      "provision": "Auteurswet37; Dutch government explanation",
-      "source": "https://zoek.officielebekendmakingen.nl/ah-tk-20222023-2924.html",
-      "reason": "Government answer expressly describes Article37 life-plus70 for books. Current2026 act also indexed by WIPO; direct statute endpoint rate-limited. European Netherlands only; no separate Caribbean territory grant.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true
     },
@@ -143,15 +220,429 @@
       "reasoning_is_inference": true
     },
     {
-      "territory": "CA",
-      "name": "Canada",
+      "territory": "EG",
+      "name": "Egypt",
+      "original_text_economic_term": "historical_term_expiry_supported_distribution_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/text/590460",
+      "reason": "Included because Sinai is geographically Asian. Article183 provides a fee-based licence for commercial/professional exploitation of public-domain works; applicability and any licence must be resolved, not waived as public-domain text.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "FR",
+      "name": "France",
       "original_text_economic_term": "expired_supported",
       "ordinary_life_plus_years": 70,
-      "provision": "Copyright Act6 and2022 non-revival / CIPO guidance",
-      "source": "https://www.ised-isde.canada.ca/site/canadian-intellectual-property-office/en/copyright",
-      "reason": "2022 extension from50 to70 does not revive already-public-domain works. Wilde original was already out of term.",
+      "provision": "CPI L123-1, L123-8 to L123-10; L121-1",
+      "source": "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006278937",
+      "reason": "Ordinary term expired. Even adding both wartime extensions and a hypothetical30-year mort-pour-la-France extension to70 years after1900 would end before2026; that special status is not claimed. Perpetual attribution/integrity obligations are treated separately.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true
+    },
+    {
+      "territory": "GB",
+      "name": "UK (London and Scotland)",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "CDPA1988 section12",
+      "source": "https://www.legislation.gov.uk/ukpga/1988/48/section/12",
+      "reason": "Both requested places use GB. Original work published during author lifetime, not an unpublished manuscript.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "GE",
+      "name": "Georgia",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Copyright and Neighboring Rights Law31",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/8740",
+      "reason": "Original published during lifetime; no new first posthumous publication.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "HK",
+      "name": "Hong Kong SAR",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Ordinance17 / IPD duration guidance",
+      "source": "https://www.ip.gov.hk/en/types-of-ip/copyright/duration-of-copyright/index.html",
+      "reason": "Separate HK decision; Mainland CN hold is not extended automatically to this jurisdiction.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "ID",
+      "name": "Indonesia",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Law28/2014 article58",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/15600",
+      "reason": "Books by an identified individual; local traditional-cultural-expression rules are not a basis for claiming this authored Wilde story as Indonesian folklore.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "IL",
+      "name": "Israel",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Copyright Act2007 section38",
+      "source": "https://wipolex-res.wipo.int/edocs/lexdocs/laws/en/il/il033en.pdf",
+      "reason": "Life-plus70 ordinary term; preserve author credit, no endorsement implied.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "IN",
+      "name": "India",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 60,
+      "provision": "Copyright Act 1957 section22",
+      "source": "https://copyright.gov.in/Copyright_Act_1957/chapter_v.html",
+      "reason": "Retained India approval; original published during author lifetime.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "IQ",
+      "name": "Iraq",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Law3/1971 as amended, article20",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/10345",
+      "reason": "Indexed amended text specifies lifetime plus50; new edition/corporate/posthumous terms not invoked.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "IR",
+      "name": "Iran",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/7708",
+      "reason": "1970 base law/foreign-publication rules and subsequent amendments need current consolidated assessment; local publishing/content and actual provider applicability are unverified. No blanket sanctions ban or permission is asserted.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "JO",
+      "name": "Jordan",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Protection Law30,34",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/2597",
+      "reason": "Original previously published text; public-domain clause allows printing/publishing previously published works. No new translation used.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "JP",
+      "name": "Japan",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Copyright Act51; Cultural Affairs term/war extension guidance",
+      "source": "https://www.bunka.go.jp/english/policy/copyright/system/",
+      "reason": "Ordinary term expired. Even adding the wartime prolongation to70 years after1900 cannot carry this original into2026; no new unpublished material.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "KG",
+      "name": "Kyrgyzstan",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/22616",
+      "reason": "2023 consolidation identified; attached older English/French life-plus50 evidence must be reconciled with current operative text before activation.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "KH",
+      "name": "Cambodia",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright and Related Rights Law2003 article30",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/5782",
+      "reason": "Lifetime-published authored literary work; special anonymous/collective/posthumous terms not used.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "KP",
+      "name": "North Korea",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/text/492176",
+      "reason": "Historical2006 copyright text located; present lawful service/distribution/provider scope and any relevant exemptions require a current determination. Do not infer all informational reading is prohibited, or that it is approved.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "KR",
+      "name": "South Korea",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Copyright Act39 / Korea Copyright Commission",
+      "source": "https://www.copyright.or.kr/eng/laws-and-treaties/copyright-law/chapter02/section04.do",
+      "reason": "Identified-author original text, no Korean translation or modern edition copied.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "KW",
+      "name": "Kuwait",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/19908",
+      "reason": "Current2019 Arabic law located; operative text and electronic publishing applicability not sufficiently reviewed to activate.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "KZ",
+      "name": "Kazakhstan",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Copyright and Related Rights Law28,29",
+      "source": "https://old.adilet.zan.kz/eng/docs/Z960000006_",
+      "reason": "Government current-text service; original lifetime publication. No posthumous rehabilitation extension applied to Wilde.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "LA",
+      "name": "Laos",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "IP Law50/NA2023 article111",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/22624",
+      "reason": "Law effectiveJanuary2024: original identified-author term50 years after death.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "LB",
+      "name": "Lebanon",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Law75/1999; WIPO economic-contribution statutory account",
+      "source": "https://www.wipo.int/documents/d/copyright/docs-en-performance-econ_contribution_lb.pdf",
+      "reason": "Economic term50, moral rights perpetual: retain faithful text and Oscar Wilde attribution.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "LK",
+      "name": "Sri Lanka",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "IP Act36/2003 section13 / NIPO guidance",
+      "source": "https://www.nipo.gov.lk/web/images/IPDAY_2019/COPYRIGHT_AND_RELATED_RIGHTS.pdf",
+      "reason": "Original identified-author literary text; economic-term inference only.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "MM",
+      "name": "Myanmar",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Law15/2019 section17",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/22939",
+      "reason": "Current indexed law replaces reliance on1911 law; lifetime plus50, moral rights unlimited. No provider/commerce eligibility claim.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "MN",
+      "name": "Mongolia",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/22459",
+      "reason": "2021 law and later amendments identified; WIPO explicitly lacks a consolidated version. Older life-plus50 evidence alone is not marked current approval.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "MO",
+      "name": "Macao SAR",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Decree-Law43/99/M, amended5/2012, article21",
+      "source": "https://www.dsedt.gov.mo/public/docs/LR/legislation/en/DL05-2012-e.pdf",
+      "reason": "Separate Macao regime; identified-author original, no modern typography or artwork copied.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "MV",
+      "name": "Maldives",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyrights and Related Rights Act section20,2024 version",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/22831",
+      "reason": "Current indexed version provides full50 years after author death.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "MY",
+      "name": "Malaysia",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Act1987 section17; MyIPO guidance",
+      "source": "https://www.myipo.gov.my/faq/",
+      "reason": "Original identified-author literary text; no source edition typography or illustrations reused.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "NL",
+      "name": "Netherlands",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Auteurswet37; Dutch government explanation",
+      "source": "https://zoek.officielebekendmakingen.nl/ah-tk-20222023-2924.html",
+      "reason": "Government answer expressly describes Article37 life-plus70 for books. Current2026 act also indexed by WIPO; direct statute endpoint rate-limited. European Netherlands only; no separate Caribbean territory grant.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "NP",
+      "name": "Nepal",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Act2002 section14",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/7230",
+      "reason": "Life-plus50 for original lifetime publication; section15 first posthumous publication is inapplicable.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "NZ",
+      "name": "New Zealand",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Act1994 section22 / IPONZ duration guidance",
+      "source": "https://www.iponz.govt.nz/get-ip/copyright/duration/",
+      "reason": "Original identified-author literary text. No modern publisher layout reused.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "OM",
+      "name": "Oman",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Royal Decree65/2008 copyright term",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/5832",
+      "reason": "Ordinary original-text term expired. No Omani folklore or traditional heritage asset imported.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "PH",
+      "name": "Philippines",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "IP Code213.1",
+      "source": "https://ilaw.ipophil.gov.ph/pluginfile.php/146/mod_resource/content/2/Philippine%20IP%20Code.pdf",
+      "reason": "Original literary work; no new recording or adaptation.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "PK",
+      "name": "Pakistan",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Ordinance1962 section18",
+      "source": "https://pakistancode.gov.pk/pdffiles/administrator5d255d1f44b50b65d6a3e87a2e0d3fee.pdf",
+      "reason": "Original published during lifetime; no new edition rights inferred.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "PS",
+      "name": "State of Palestine",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/legislation/members/profile/PS",
+      "reason": "Applicable copyright/publishing regimes and territorial administration need separate assessment; do not borrow Israel or Jordan grants for PS.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "QA",
+      "name": "Qatar",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Law7/2002 article15",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/3567",
+      "reason": "Original identified-author text; no Qatari national folklore claim.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "RU",
+      "name": "Russia",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Civil Code1281,1282,1267",
+      "source": "https://rospatent.gov.ru/en/documents/grazhdanskiy-kodeks-rossiyskoy-federacii-chast-chetvertaya",
+      "reason": "Original published during lifetime. Even a hypothetical four-year wartime extension would have expired decades ago. Author credit/integrity retained. No payment/provider/sanctions eligibility is inferred.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true
+    },
+    {
+      "territory": "SA",
+      "name": "Saudi Arabia",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Law article19 / SAIP laws compilation",
+      "source": "https://externalportal-backend-production.saip.gov.sa/sites/default/files/2025-06/%D8%A3%D9%86%D8%B8%D9%85%D8%A9%20%D9%88%D9%84%D9%88%D8%A7%D8%A6%D8%AD%20%D8%A7%D9%84%D9%85%D9%84%D9%83%D9%8A%D8%A9%20%D8%A7%D9%84%D9%81%D9%83%D8%B1%D9%8A%D8%A9.pdf",
+      "reason": "Life-plus50 economic-term finding only; media/e-publishing requirements are not certified by this content decision.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
     },
     {
       "territory": "SG",
@@ -165,15 +656,135 @@
       "reasoning_is_inference": true
     },
     {
-      "territory": "MY",
-      "name": "Malaysia",
+      "territory": "SY",
+      "name": "Syria",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/6648",
+      "reason": "2001 text is explicitly repealed by2013 decree62; current operative text/distribution requirements need assessment. Repealed text is not approval evidence.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "TH",
+      "name": "Thailand",
       "original_text_economic_term": "expired_supported",
       "ordinary_life_plus_years": 50,
-      "provision": "Copyright Act1987 section17; MyIPO guidance",
-      "source": "https://www.myipo.gov.my/faq/",
-      "reason": "Original identified-author literary text; no source edition typography or illustrations reused.",
+      "provision": "Copyright ActBE2537 section19",
+      "source": "https://web2026.ipthailand.go.th/wp-content/uploads/2025/05/COPYRIGHT-ACT-B.E.-2537-1994.pdf",
+      "reason": "Department of Intellectual Property translation; lifetime-published original text.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "TJ",
+      "name": "Tajikistan",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/legislation/members/profile/TJ",
+      "reason": "Historical WTO life-plus50 text located; current2025 publishing-law and operative copyright provisions need reconciliation before activation.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "TL",
+      "name": "Timor-Leste",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/members/profile/TL",
+      "reason": "Historical2019 WIPO study says no copyright statute; current2026 transitional framework/continuing law needs determination. Absence of an indexed statute is not a free-use licence.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "TM",
+      "name": "Turkmenistan",
+      "original_text_economic_term": "current_assessment_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/20204",
+      "reason": "Current2017 law located; original-text term/public-domain provisions still require full operative-text review.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "TR",
+      "name": "Türkiye",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Law5846 term; Ministry copyright directorate guidance",
+      "source": "https://telifhaklari.ktb.gov.tr/TR-332373/telif-hakki-kac-yil-sureyle-korunur.html",
+      "reason": "Ministry states expired economic rights may be used without author permission. Existing1888 lifetime publication, no new first disclosure.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "TW",
+      "name": "Taiwan",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Copyright Act30",
+      "source": "https://law.moea.gov.tw/EngLawContent.aspx?id=10502",
+      "reason": "Separate TW rights code; lifetime publication, no special late first-release rule applies.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "US",
+      "name": "USA",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": null,
+      "provision": "17 USC304 and104A(a)(1)(B)",
+      "source": "https://www.copyright.gov/circs/circ15a.pdf",
+      "reason": "Original published1888. Even a95-year publication term has expired. Foreign restoration provides only the otherwise remaining term, not a new term. The2047 unpublished-work rule does not apply to this originally published text.",
       "internal_reader_decision": "approved_content_scope",
       "reasoning_is_inference": true
+    },
+    {
+      "territory": "UZ",
+      "name": "Uzbekistan",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 70,
+      "provision": "Copyright Law35,37",
+      "source": "https://test.lex.uz/en/docs/6123336",
+      "reason": "Government-hosted unofficial English translation: public-domain works freely usable without remuneration; preserve personal rights.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "VN",
+      "name": "Vietnam",
+      "original_text_economic_term": "historical_term_expiry_supported_distribution_pending",
+      "ordinary_life_plus_years": null,
+      "provision": "See explicit unresolved evidence",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/20940",
+      "reason": "Original lifetime-plus50 term evidence exists, but electronic publishing approval/cross-border application remains unresolved. Current criminal publishing provisions show this is separate from term expiry.",
+      "internal_reader_decision": "hold_distribution",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
+    },
+    {
+      "territory": "YE",
+      "name": "Yemen",
+      "original_text_economic_term": "expired_supported",
+      "ordinary_life_plus_years": 50,
+      "provision": "Law15/2012 article31",
+      "source": "https://www.wipo.int/wipolex/en/legislation/details/19994",
+      "reason": "Arabic statutory article31 gives lifetime plus50. No new translation, local folklore or market operating licence inferred.",
+      "internal_reader_decision": "approved_content_scope",
+      "reasoning_is_inference": true,
+      "production_distribution_certified": false
     }
   ],
   "cover_provenance": {
@@ -192,24 +803,72 @@
     "audiobook/voice",
     "international commerce/tax/privacy compliance certification"
   ],
-  "next_action": "Resolve AE/CN applicability with actual operator documents; retain holds until supported. Continue local draft acceptance for the12 content-approved territories. No paid setup or publication.",
-  "review_id": "EN-071-territories-2026-11-17",
-  "scope": "Original English text, Reader read/preview only; internal draft review. Not production launch certification.",
+  "next_action": "Complete the15 named pending jurisdiction reviews/permissions in the existing matrix; no new services, paid infrastructure, public publication or automatic commerce activation.",
+  "review_id": "EN-071-brazil-asia-2026-11-17",
+  "scope": "Original English Reader read/preview content decision for47 explicit codes; all62 requested jurisdictions tracked,15 held. Draft only. No full Asian or production clearance.",
   "requested_territories": [
-    "IN",
-    "US",
     "AE",
-    "NZ",
-    "GB",
-    "FR",
-    "RU",
-    "CN",
-    "DE",
-    "NL",
-    "DK",
+    "AF",
+    "AM",
+    "AZ",
+    "BD",
+    "BH",
+    "BN",
+    "BR",
+    "BT",
     "CA",
+    "CN",
+    "CY",
+    "DE",
+    "DK",
+    "EG",
+    "FR",
+    "GB",
+    "GE",
+    "HK",
+    "ID",
+    "IL",
+    "IN",
+    "IQ",
+    "IR",
+    "JO",
+    "JP",
+    "KG",
+    "KH",
+    "KP",
+    "KR",
+    "KW",
+    "KZ",
+    "LA",
+    "LB",
+    "LK",
+    "MM",
+    "MN",
+    "MO",
+    "MV",
+    "MY",
+    "NL",
+    "NP",
+    "NZ",
+    "OM",
+    "PH",
+    "PK",
+    "PS",
+    "QA",
+    "RU",
+    "SA",
     "SG",
-    "MY"
+    "SY",
+    "TH",
+    "TJ",
+    "TL",
+    "TM",
+    "TR",
+    "TW",
+    "US",
+    "UZ",
+    "VN",
+    "YE"
   ],
   "requested_place_aliases": {
     "London": "GB",
@@ -217,7 +876,20 @@
   },
   "held_territories": [
     "AE",
-    "CN"
+    "AF",
+    "CN",
+    "EG",
+    "IR",
+    "KG",
+    "KP",
+    "KW",
+    "MN",
+    "PS",
+    "SY",
+    "TJ",
+    "TL",
+    "TM",
+    "VN"
   ],
   "requested_markets_fully_cleared": false,
   "assessment_type": "Primary-source desk assessment and scoped internal content decision; not a regulator permit or legal opinion.",
@@ -266,6 +938,123 @@
         "Actual operator structure and authorised eligible partner if needed",
         "Publishing licence/cooperation approvals or qualified non-applicability determination"
       ]
+    },
+    {
+      "id": "AF-REVIEW",
+      "territories": [
+        "AF"
+      ],
+      "status": "assessment_pending",
+      "reason": "Historical2008 law term evidence exists; current operative legal/content-publishing position under the de facto authorities is not established. Do not infer present distribution approval from the historical statute.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "IR-REVIEW",
+      "territories": [
+        "IR"
+      ],
+      "status": "assessment_pending",
+      "reason": "1970 base law/foreign-publication rules and subsequent amendments need current consolidated assessment; local publishing/content and actual provider applicability are unverified. No blanket sanctions ban or permission is asserted.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "KP-REVIEW",
+      "territories": [
+        "KP"
+      ],
+      "status": "assessment_pending",
+      "reason": "Historical2006 copyright text located; present lawful service/distribution/provider scope and any relevant exemptions require a current determination. Do not infer all informational reading is prohibited, or that it is approved.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "KW-REVIEW",
+      "territories": [
+        "KW"
+      ],
+      "status": "assessment_pending",
+      "reason": "Current2019 Arabic law located; operative text and electronic publishing applicability not sufficiently reviewed to activate.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "KG-REVIEW",
+      "territories": [
+        "KG"
+      ],
+      "status": "assessment_pending",
+      "reason": "2023 consolidation identified; attached older English/French life-plus50 evidence must be reconciled with current operative text before activation.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "MN-REVIEW",
+      "territories": [
+        "MN"
+      ],
+      "status": "assessment_pending",
+      "reason": "2021 law and later amendments identified; WIPO explicitly lacks a consolidated version. Older life-plus50 evidence alone is not marked current approval.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "PS-REVIEW",
+      "territories": [
+        "PS"
+      ],
+      "status": "assessment_pending",
+      "reason": "Applicable copyright/publishing regimes and territorial administration need separate assessment; do not borrow Israel or Jordan grants for PS.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "SY-REVIEW",
+      "territories": [
+        "SY"
+      ],
+      "status": "assessment_pending",
+      "reason": "2001 text is explicitly repealed by2013 decree62; current operative text/distribution requirements need assessment. Repealed text is not approval evidence.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "TJ-REVIEW",
+      "territories": [
+        "TJ"
+      ],
+      "status": "assessment_pending",
+      "reason": "Historical WTO life-plus50 text located; current2025 publishing-law and operative copyright provisions need reconciliation before activation.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "TM-REVIEW",
+      "territories": [
+        "TM"
+      ],
+      "status": "assessment_pending",
+      "reason": "Current2017 law located; original-text term/public-domain provisions still require full operative-text review.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "TL-REVIEW",
+      "territories": [
+        "TL"
+      ],
+      "status": "assessment_pending",
+      "reason": "Historical2019 WIPO study says no copyright statute; current2026 transitional framework/continuing law needs determination. Absence of an indexed statute is not a free-use licence.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "VN-REVIEW",
+      "territories": [
+        "VN"
+      ],
+      "status": "assessment_pending",
+      "reason": "Original lifetime-plus50 term evidence exists, but electronic publishing approval/cross-border application remains unresolved. Current criminal publishing provisions show this is separate from term expiry.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
+    },
+    {
+      "id": "EG-REVIEW",
+      "territories": [
+        "EG"
+      ],
+      "status": "assessment_pending",
+      "reason": "Included because Sinai is geographically Asian. Article183 provides a fee-based licence for commercial/professional exploitation of public-domain works; applicability and any licence must be resolved, not waived as public-domain text.",
+      "simplest_resolution": "Complete the identified operative-law/applicability review. Reuse the exact text/art packet and existing rights table; obtain an actual permit only where applicable. Keep this code denied until supported."
     }
   ],
   "resolved_gaps": [
@@ -274,7 +1063,10 @@
     "French/Russian possible term extensions cannot extend this1900 author text into2026.",
     "Faithful text, author credit, cover provenance and exact hashes bound; no new translation/audio/image rights inferred.",
     "Senegal is outside requested scope and is not a blocker for these14 markets.",
-    "New AI art need not be exclusively copyrightable to use retained own output; no false exclusivity claim."
+    "New AI art need not be exclusively copyrightable to use retained own output; no false exclusivity claim.",
+    "Brazil and the full explicit Asian jurisdiction inventory added; HK/MO/TW are separate from CN.",
+    "No Asian-region wildcard; pending/repealed/unconsolidated-law evidence cannot silently become an approved grant.",
+    "Brazil is original English only, without Portuguese translation rights."
   ],
   "production_activation_requirements": [
     "Trusted edge territory adapter qualification, unknown-country denial and rights-aware delivery/cache checks.",
@@ -283,5 +1075,285 @@
     "Separate owner release authorization; this task keeps the edition draft."
   ],
   "paragraphs_sha256": "9de3beb099e2fcfc1bcd29570509d1fc9aa8ebf54ccaee6cf8014652d0b03386",
-  "hash_scope": "text_sha256 binds the existing revision including UUID anchors; paragraphs_sha256 binds ordered NFC canonical JSON paragraph text independent of newly allocated IDs."
+  "hash_scope": "text_sha256 binds the existing revision including UUID anchors; paragraphs_sha256 binds ordered NFC canonical JSON paragraph text independent of newly allocated IDs.",
+  "previous_review_path": "docs/evidence/selfish-giant-rights-review-14-markets.json",
+  "geographic_scope": {
+    "definition": "UN M49 Asia50 countries/areas, plus separately assessed Taiwan and transcontinental Russia/Egypt. Brazil added separately. Prior requested non-Asian countries retained. A service coverage list, not a statement about sovereignty.",
+    "source": "https://unstats.un.org/unsd/methodology/m49/overview/",
+    "asian_jurisdictions": [
+      {
+        "territory": "AE",
+        "name": "UAE",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "AF",
+        "name": "Afghanistan",
+        "region": "Southern Asia"
+      },
+      {
+        "territory": "AM",
+        "name": "Armenia",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "AZ",
+        "name": "Azerbaijan",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "BD",
+        "name": "Bangladesh",
+        "region": "Southern Asia"
+      },
+      {
+        "territory": "BH",
+        "name": "Bahrain",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "BN",
+        "name": "Brunei",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "BT",
+        "name": "Bhutan",
+        "region": "Southern Asia"
+      },
+      {
+        "territory": "CN",
+        "name": "Mainland China",
+        "region": "Eastern Asia"
+      },
+      {
+        "territory": "CY",
+        "name": "Cyprus",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "EG",
+        "name": "Egypt",
+        "region": "Additional separate/transcontinental scope"
+      },
+      {
+        "territory": "GE",
+        "name": "Georgia",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "HK",
+        "name": "Hong Kong SAR",
+        "region": "Eastern Asia"
+      },
+      {
+        "territory": "ID",
+        "name": "Indonesia",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "IL",
+        "name": "Israel",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "IN",
+        "name": "India",
+        "region": "Southern Asia"
+      },
+      {
+        "territory": "IQ",
+        "name": "Iraq",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "IR",
+        "name": "Iran",
+        "region": "Southern Asia"
+      },
+      {
+        "territory": "JO",
+        "name": "Jordan",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "JP",
+        "name": "Japan",
+        "region": "Eastern Asia"
+      },
+      {
+        "territory": "KG",
+        "name": "Kyrgyzstan",
+        "region": "Central Asia"
+      },
+      {
+        "territory": "KH",
+        "name": "Cambodia",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "KP",
+        "name": "North Korea",
+        "region": "Eastern Asia"
+      },
+      {
+        "territory": "KR",
+        "name": "South Korea",
+        "region": "Eastern Asia"
+      },
+      {
+        "territory": "KW",
+        "name": "Kuwait",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "KZ",
+        "name": "Kazakhstan",
+        "region": "Central Asia"
+      },
+      {
+        "territory": "LA",
+        "name": "Laos",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "LB",
+        "name": "Lebanon",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "LK",
+        "name": "Sri Lanka",
+        "region": "Southern Asia"
+      },
+      {
+        "territory": "MM",
+        "name": "Myanmar",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "MN",
+        "name": "Mongolia",
+        "region": "Eastern Asia"
+      },
+      {
+        "territory": "MO",
+        "name": "Macao SAR",
+        "region": "Eastern Asia"
+      },
+      {
+        "territory": "MV",
+        "name": "Maldives",
+        "region": "Southern Asia"
+      },
+      {
+        "territory": "MY",
+        "name": "Malaysia",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "NP",
+        "name": "Nepal",
+        "region": "Southern Asia"
+      },
+      {
+        "territory": "OM",
+        "name": "Oman",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "PH",
+        "name": "Philippines",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "PK",
+        "name": "Pakistan",
+        "region": "Southern Asia"
+      },
+      {
+        "territory": "PS",
+        "name": "State of Palestine",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "QA",
+        "name": "Qatar",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "RU",
+        "name": "Russia",
+        "region": "Additional separate/transcontinental scope"
+      },
+      {
+        "territory": "SA",
+        "name": "Saudi Arabia",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "SG",
+        "name": "Singapore",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "SY",
+        "name": "Syria",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "TH",
+        "name": "Thailand",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "TJ",
+        "name": "Tajikistan",
+        "region": "Central Asia"
+      },
+      {
+        "territory": "TL",
+        "name": "Timor-Leste",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "TM",
+        "name": "Turkmenistan",
+        "region": "Central Asia"
+      },
+      {
+        "territory": "TR",
+        "name": "Türkiye",
+        "region": "Western Asia"
+      },
+      {
+        "territory": "TW",
+        "name": "Taiwan",
+        "region": "Additional separate/transcontinental scope"
+      },
+      {
+        "territory": "UZ",
+        "name": "Uzbekistan",
+        "region": "Central Asia"
+      },
+      {
+        "territory": "VN",
+        "name": "Vietnam",
+        "region": "Southeastern Asia"
+      },
+      {
+        "territory": "YE",
+        "name": "Yemen",
+        "region": "Western Asia"
+      }
+    ],
+    "brazil_included": true,
+    "language_boundary": "Original English only. Bengali interface is not a Bengali translation. No Portuguese or other translation rights are implied.",
+    "counts": {
+      "asian_jurisdictions": 53,
+      "total_requested": 62,
+      "internal_content_approved": 47,
+      "held": 15
+    }
+  }
 }

@@ -83,7 +83,7 @@ class ClearedDraftJourneyTests(TestCase):
         from .services import current_right,authorize_revision
         from core.api import DomainError
         r=Revision.objects.get()
-        approved={'IN','US','NZ','GB','FR','RU','DE','NL','DK','CA','SG','MY'}
+        approved={'TW', 'LK', 'FR', 'OM', 'AM', 'MV', 'KZ', 'ID', 'QA', 'MM', 'US', 'JP', 'IQ', 'AZ', 'LA', 'NP', 'TH', 'BT', 'GB', 'NL', 'SG', 'BD', 'MY', 'KH', 'BR', 'IL', 'SA', 'BN', 'TR', 'CY', 'DK', 'PH', 'IN', 'MO', 'CA', 'GE', 'DE', 'YE', 'JO', 'HK', 'PK', 'UZ', 'NZ', 'KR', 'BH', 'RU', 'LB'}
         self.assertEqual(r.rights.count(),2)
         for right in r.rights.all():
             self.assertEqual(set(right.territories),approved)
@@ -97,7 +97,7 @@ class ClearedDraftJourneyTests(TestCase):
                 for fmt,action in [('reader','download'),('audio','read'),('video','read')]:
                     self.assertIsNone(current_right(r,format=fmt,action=action,territory=country))
                     with self.assertRaises(DomainError):authorize_revision(self.staff,r,format=fmt,action=action,territory=country)
-        for country in ['AE','CN','ZZ','SN','HK','MO','FO','GL','*','London','Scotland']:
+        for country in ['AE', 'AF', 'CN', 'EG', 'IR', 'KG', 'KP', 'KW', 'MN', 'PS', 'SY', 'TJ', 'TL', 'TM', 'VN', 'ZZ', 'SN', 'FO', 'GL', '*', 'London', 'Scotland']:
             with self.subTest(denied=country):
                 self.assertIsNone(current_right(r,territory=country))
                 with self.assertRaises(DomainError):authorize_revision(self.staff,r,territory=country)
@@ -112,6 +112,12 @@ class ClearedDraftJourneyTests(TestCase):
         expected=review['paragraphs_sha256']
         self.assertEqual(reviewed_territories(packet,expected),packet['rights']['territories'])
         self.assertEqual(review['requested_place_aliases'],{'London':'GB','Scotland':'GB'})
+        asia={row['territory'] for row in review['geographic_scope']['asian_jurisdictions']}
+        self.assertEqual(len(asia),53)
+        self.assertTrue({'CN','HK','MO','TW','RU','EG','PS','TL','KP'}.issubset(asia))
+        self.assertEqual(set(review['requested_territories']),asia|{'BR','US','NZ','GB','FR','DE','NL','DK','CA'})
+        self.assertEqual(set(review['runtime_approved_territories'])|set(review['held_territories']),set(review['requested_territories']))
+        self.assertTrue({'BR','HK','MO','TW','JP','KR','BD'}.issubset(review['runtime_approved_territories']))
         with self.assertRaises(DomainError):reviewed_territories(packet,'0'*64)
         changed=copy.deepcopy(packet);changed['paragraphs'][0]+=' Changed.'
         with self.assertRaises(DomainError):reviewed_territories(changed,expected)
