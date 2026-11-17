@@ -1,0 +1,22 @@
+{% load static maison %}<!doctype html>
+<html lang="{{ ui_locale }}" data-ui-locale="{{ ui_locale }}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>{% block title %}{% ui 'site_name' %}{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'maison/fonts/typography.css' %}"><link rel="stylesheet" href="{% static 'maison/app.css' %}">
+<script src="{% static 'maison/app.js' %}" defer></script>{% block scripts %}{% endblock %}</head>
+<body class="maison theme-{{ app_theme }}{% if reduced_motion %} reduced-motion{% endif %}" lang="{{ ui_locale }}">
+<a class="skip-link" href="#main">{% ui 'skip_content' %}</a>
+<header class="brand-header"><a class="brand-link" href="{% url 'web:home' ui_locale %}"><img src="{% static 'maison/logo.png' %}" alt="Earnalism · Where Learning Becomes Earning · A REO Enterprise Venture" width="1400" height="500"></a>
+<div class="header-tools"><a href="{{ switch_locale_url }}" lang="{% if ui_locale == 'en' %}bn{% else %}en{% endif %}" aria-label="{% ui 'interface_language' %}">{% if ui_locale == 'en' %}বাংলা{% else %}English{% endif %}</a><a href="{% url 'web:search' ui_locale %}">{% ui 'search' %}</a>{% if request.user.is_authenticated %}<a href="{% url 'web:vault' ui_locale %}">{% ui 'vault' %}</a>{% else %}<a href="{% url 'web:sign-in' ui_locale %}?return_to={{ return_to|urlencode }}">{% ui 'sign_in' %}</a>{% endif %}</div></header>
+<nav class="side-nav" aria-label="{% ui 'site_name' %}">
+<a {% if active_nav == 'home' %}aria-current="page"{% endif %} href="{% url 'web:home' ui_locale %}">{% ui 'home' %}</a>
+<a {% if active_nav == 'explore' %}aria-current="page"{% endif %} href="{% url 'web:explore' ui_locale %}">{% ui 'explore' %}</a>
+<a {% if active_nav == 'learn' %}aria-current="page"{% endif %} href="{% url 'web:learn' ui_locale %}">{% ui 'learn' %}</a>
+<a {% if active_nav == 'series' %}aria-current="page"{% endif %} href="{% url 'web:series' ui_locale %}">{% ui 'series' %}</a>
+<a {% if active_nav == 'vault' %}aria-current="page"{% endif %} href="{% url 'web:vault' ui_locale %}">{% ui 'vault' %}</a>
+</nav>
+<div class="web-stage {% if focused %}focused-stage{% endif %}"><main id="main" tabindex="-1">{% block content %}{% endblock %}</main>
+<footer><p>{% ui 'local_notice' %}</p><a href="{% url 'web:settings' ui_locale %}">{% ui 'settings' %}</a></footer></div>
+<div id="connection-status" class="connection-status" role="status" hidden>{% ui 'offline' %}</div>
+{{ ui|json_script:'ui-catalogue' }}{% block bootstrap %}{% endblock %}
+</body></html>

@@ -1,0 +1,54 @@
+{
+  "scope": "isolated local raw contract database, distinct from app ORM migrations",
+  "database": "maison_contract_37697632a251",
+  "postgres_major": 17,
+  "paid_infrastructure": false,
+  "checks": [
+    {
+      "check": "full_handoff_sql_executes_after_real_auth_session_migrations",
+      "pass": true,
+      "tables": 54
+    },
+    {
+      "check": "new_revision_access_defaults_deny",
+      "pass": true
+    },
+    {
+      "check": "access_policy_rejects_json_null",
+      "pass": true
+    },
+    {
+      "check": "access_policy_rejects_missing_format",
+      "pass": true
+    },
+    {
+      "check": "maison_edition_version_positive",
+      "pass": true
+    },
+    {
+      "check": "maison_edition_revision_version_positive",
+      "pass": true
+    },
+    {
+      "check": "partial_refund_approval_can_reduce_once",
+      "pass": true
+    },
+    {
+      "check": "approved_refund_amount_frozen",
+      "pass": true
+    },
+    {
+      "check": "refund_reservations_cannot_exceed_capture",
+      "pass": true
+    },
+    {
+      "check": "approval_cannot_increase_proposal",
+      "pass": true
+    },
+    {
+      "check": "device_asset_order_refund_versions_persisted",
+      "pass": true
+    }
+  ],
+  "pass": true
+}

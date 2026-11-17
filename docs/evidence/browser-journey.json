@@ -1,0 +1,17 @@
+{
+  "scope": "local desktop browser using preverified synthetic account; signup/mail confirmation separately verified by actual end-to-end API suite",
+  "observed": [
+    "bounded EN guest preview",
+    "password sign-in returns to exact Reader",
+    "full original EN text",
+    "saved progress and gold note",
+    "explicit Finished persists in Vault",
+    "Saved BN edition visible",
+    "interface language switch retains EN edition and note",
+    "full BN text rendered in premium Bengali font",
+    "logout removes personal controls and restores bounded preview"
+  ],
+  "screenshot": "bengali-reader-desktop.jpg",
+  "mobile": "inconclusive, not accepted",
+  "production": false
+}

@@ -1,0 +1,4 @@
+{% extends 'web/base.html' %}{% load static maison %}{% block content %}
+<section class="home-hero"><div class="hero-copy"><p class="eyebrow">{% ui 'room_kicker' %}</p><h1>{% ui 'home_title' %}</h1><p class="lead">{% ui 'home_intro' %}</p>{% if featured %}<h2 lang="{{ featured.locale }}">{{ featured.title }}</h2><div class="actions"><a class="button" href="{% url 'web:title' ui_locale featured.edition_id %}">{% ui 'read_edition' %}</a><a class="button secondary" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a></div>{% else %}<a class="button" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a>{% endif %}</div>
+<figure class="hero-art"><img src="{% static 'maison/art/hero.png' %}" alt="" width="1480" height="1063"></figure></section>
+<section><h2>{% ui 'new_titles' %}</h2>{% include 'web/includes/cards.html' %}</section>{% endblock %}

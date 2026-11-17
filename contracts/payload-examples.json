@@ -1,0 +1,911 @@
+{
+  "schema_version": 1,
+  "status": "inert contract fixtures; not live content, credentials, entitlement, price or measured-media evidence",
+  "checked_on": "2026-11-17",
+  "authoritative_schema": "openapi.yaml and api-contracts.md; reject incompatible examples before implementation",
+  "fixture_notes": [
+    "All IDs and URLs are invented. .invalid hosts deliberately cannot deliver content.",
+    "English and Bengali text were written for this fixture. No public-domain import or commercial rights clearance is implied.",
+    "Hash examples are reproducible from canonical_utf8, not provider ETags. Audio fixture is deliberately not playable.",
+    "content_sha256 fixture hashes a complete canonical index: edition_revision_id, anchor_revision, locale, units[].unit_id/chunks[]. This full index is separate from paginated descriptor transport; root hash is excluded from its own input.",
+    "Media durations/timing numbers illustrate shape only; they are not measured release evidence.",
+    "All prices come from actual approved server offers; this example intentionally contains no numerical offer.",
+    "Public preview and cover examples assume explicit global public-delivery clearance. Territory query is not access control. Restricted media uses private grants.",
+    "Reader chunk_id equals its asset_id, both the Reader asset UUID. The fixture compressed_bytes uses deterministic gzip mtime=0. Piece manifest files enforce encoded<=1MiB and<=5000pieces beforeReady."
+  ],
+  "public_home": {
+    "request": {
+      "method": "GET",
+      "path": "/api/v1/home?locale=bn&territory=IN",
+      "credentials": "omit"
+    },
+    "cache_class": "public_catalog",
+    "response": {
+      "locale": "bn",
+      "territory": "IN",
+      "hero": {
+        "work_id": "10000000-0000-4000-8000-000000000001",
+        "edition_id": "10000000-0000-4000-8000-000000000003",
+        "title": "নদীর ধারে এক সন্ধ্যা",
+        "subtitle": null,
+        "creators": [
+          "Earnalism concept fixture"
+        ],
+        "locale": "bn",
+        "house": "golpo",
+        "formats": [
+          "reader"
+        ],
+        "cover": {
+          "url": "https://assets.example.invalid/covers/76b47b5068beb65ac8f3a7b422a06807ef804e5b61132ca2b37168058b25b6a1/w480.webp",
+          "width": 480,
+          "height": 640,
+          "alt": "Concept cover"
+        },
+        "access_label": "preview",
+        "availability": "available"
+      },
+      "shelves": [],
+      "catalog_version": "17"
+    }
+  },
+  "reader_chunk_fixtures": {
+    "en": {
+      "payload": {
+        "schema_version": 1,
+        "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+        "unit_id": "10000000-0000-4000-8000-000000000006",
+        "chunk_id": "10000000-0000-4000-8000-000000000008",
+        "anchor_revision": 1,
+        "locale": "en",
+        "paragraphs": [
+          {
+            "anchor_id": "10000000-0000-4000-8000-000000000021",
+            "text": "At dusk, the river held the last light.",
+            "kind": "paragraph",
+            "ordinal": 1
+          }
+        ]
+      },
+      "sha256": "d714d221ff967b5fb58c1f81ae01c3f9833a592159047b711e56a93ad3a13e2f",
+      "bytes": 362,
+      "compressed_bytes": 185,
+      "canonical_utf8": "{\"anchor_revision\":1,\"chunk_id\":\"10000000-0000-4000-8000-000000000008\",\"edition_revision_id\":\"10000000-0000-4000-8000-000000000004\",\"locale\":\"en\",\"paragraphs\":[{\"anchor_id\":\"10000000-0000-4000-8000-000000000021\",\"kind\":\"paragraph\",\"ordinal\":1,\"text\":\"At dusk, the river held the last light.\"}],\"schema_version\":1,\"unit_id\":\"10000000-0000-4000-8000-000000000006\"}"
+    },
+    "bn": {
+      "payload": {
+        "schema_version": 1,
+        "edition_revision_id": "10000000-0000-4000-8000-000000000005",
+        "unit_id": "10000000-0000-4000-8000-000000000007",
+        "chunk_id": "10000000-0000-4000-8000-000000000009",
+        "anchor_revision": 1,
+        "locale": "bn",
+        "paragraphs": [
+          {
+            "anchor_id": "10000000-0000-4000-8000-000000000022",
+            "text": "সন্ধ্যায় নদীর জলে শেষ আলোটুকু রয়ে গেল।",
+            "kind": "paragraph",
+            "ordinal": 1
+          }
+        ]
+      },
+      "sha256": "c66ad8ad6e00ea1ccc2007d5fc1597f1ac2cd3b7d82e3ce9aac48a3fa2af723b",
+      "bytes": 431,
+      "compressed_bytes": 246,
+      "canonical_utf8": "{\"anchor_revision\":1,\"chunk_id\":\"10000000-0000-4000-8000-000000000009\",\"edition_revision_id\":\"10000000-0000-4000-8000-000000000005\",\"locale\":\"bn\",\"paragraphs\":[{\"anchor_id\":\"10000000-0000-4000-8000-000000000022\",\"kind\":\"paragraph\",\"ordinal\":1,\"text\":\"সন্ধ্যায় নদীর জলে শেষ আলোটুকু রয়ে গেল।\"}],\"schema_version\":1,\"unit_id\":\"10000000-0000-4000-8000-000000000007\"}"
+    }
+  },
+  "reader_manifests": {
+    "en": {
+      "schema_version": 1,
+      "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+      "content_sha256": "a1470375ac773fbb3342522acf7512f7d77ec59d17fdbb567ed4d02d9ee80dcd",
+      "anchor_revision": 1,
+      "locale": "en",
+      "units": [
+        {
+          "unit_id": "10000000-0000-4000-8000-000000000006",
+          "title": "A quiet evening",
+          "chunks": [
+            {
+              "chunk_id": "10000000-0000-4000-8000-000000000008",
+              "asset_id": "10000000-0000-4000-8000-000000000008",
+              "sha256": "d714d221ff967b5fb58c1f81ae01c3f9833a592159047b711e56a93ad3a13e2f",
+              "bytes": 362,
+              "compressed_bytes": 185,
+              "content_type": "application/json"
+            }
+          ]
+        }
+      ],
+      "next_cursor": null,
+      "available_formats": [
+        "reader"
+      ],
+      "published_at": "2026-11-17T00:00:00Z",
+      "offline_policy": {
+        "permitted": true,
+        "max_lease_seconds": 86400
+      }
+    },
+    "bn": {
+      "schema_version": 1,
+      "edition_revision_id": "10000000-0000-4000-8000-000000000005",
+      "content_sha256": "d069f47cd6d2973db52bd8e9a0975a98af01d52cb2153726f98cd0b60c4029ad",
+      "anchor_revision": 1,
+      "locale": "bn",
+      "units": [
+        {
+          "unit_id": "10000000-0000-4000-8000-000000000007",
+          "title": "শান্ত এক সন্ধ্যা",
+          "chunks": [
+            {
+              "chunk_id": "10000000-0000-4000-8000-000000000009",
+              "asset_id": "10000000-0000-4000-8000-000000000009",
+              "sha256": "c66ad8ad6e00ea1ccc2007d5fc1597f1ac2cd3b7d82e3ce9aac48a3fa2af723b",
+              "bytes": 431,
+              "compressed_bytes": 246,
+              "content_type": "application/json"
+            }
+          ]
+        }
+      ],
+      "next_cursor": null,
+      "available_formats": [
+        "reader"
+      ],
+      "published_at": "2026-11-17T00:00:00Z",
+      "offline_policy": {
+        "permitted": true,
+        "max_lease_seconds": 86400
+      }
+    }
+  },
+  "online_package_grant": {
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/content/packages/grants",
+      "body": {
+        "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+        "unit_ids": [
+          "10000000-0000-4000-8000-000000000006"
+        ],
+        "chunk_ids": [
+          "10000000-0000-4000-8000-000000000008"
+        ],
+        "device_id": "10000000-0000-4000-8000-000000000010",
+        "purpose": "online"
+      }
+    },
+    "response": {
+      "grant_id": "10000000-0000-4000-8000-000000000019",
+      "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+      "issued_at": "2026-11-17T00:00:00Z",
+      "expires_at": "2026-11-17T00:02:00Z",
+      "purpose": "online",
+      "assets": [
+        {
+          "asset_id": "10000000-0000-4000-8000-000000000008",
+          "unit_id": "10000000-0000-4000-8000-000000000006",
+          "chunk_id": "10000000-0000-4000-8000-000000000008",
+          "sha256": "d714d221ff967b5fb58c1f81ae01c3f9833a592159047b711e56a93ad3a13e2f",
+          "bytes": 362,
+          "content_type": "application/json",
+          "url": "https://account.example.invalid/private/opaque-object?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=120&X-Amz-Signature=INERT_EXAMPLE",
+          "range_supported": false
+        }
+      ]
+    },
+    "headers": {
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    }
+  },
+  "public_reader_preview": {
+    "request": {
+      "method": "GET",
+      "path": "/api/v1/content/previews/10000000-0000-4000-8000-000000000004?locale=en&territory=IN"
+    },
+    "response": {
+      "schema_version": 1,
+      "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+      "locale": "en",
+      "preview_sha256": "ad888dd95f27a6d028cf41c45d1d12cbc108c9d663d6bbd1e1f5fa3d0d477e8f",
+      "units": [
+        {
+          "unit_id": "10000000-0000-4000-8000-000000000006",
+          "title": "A quiet evening",
+          "paragraphs": [
+            {
+              "anchor_id": "10000000-0000-4000-8000-000000000021",
+              "text": "At dusk, the river held the last light.",
+              "kind": "paragraph",
+              "ordinal": 1
+            }
+          ]
+        }
+      ],
+      "boundary": {
+        "end_anchor_id": "10000000-0000-4000-8000-000000000021",
+        "end_offset_chars": 39,
+        "audio_end_ms": null,
+        "video_end_ms": null
+      },
+      "full_content_included": false
+    },
+    "cache_class": "public_previews",
+    "protected_next_chunk_present": false
+  },
+  "audio_preview_metadata": {
+    "schema_version": 1,
+    "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+    "format": "audio",
+    "preview_revision": 1,
+    "url": "https://assets.example.invalid/previews/fb7033f6b5aa31d126c05466e790a466ec61bb2c973649efda25a1d53ca16a6e/sample.mp3",
+    "duration_ms": 3000,
+    "end": {
+      "unit_id": "10000000-0000-4000-8000-000000000006",
+      "position_ms": 3000,
+      "reason": "preview_limit"
+    },
+    "note": "Concept metadata for separately prepared bounded sample, not a getPreview response or universal preview policy."
+  },
+  "audio_media_grant": {
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/media/grants",
+      "body": {
+        "asset_id": "10000000-0000-4000-8000-000000000011",
+        "device_id": "10000000-0000-4000-8000-000000000010",
+        "purpose": "online",
+        "quality_kbps": 48
+      }
+    },
+    "response": {
+      "grant_id": "10000000-0000-4000-8000-000000000019",
+      "asset_id": "10000000-0000-4000-8000-000000000011",
+      "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+      "transport": "r2_s3_presigned",
+      "url": "https://account.example.invalid/private/opaque-object?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=120&X-Amz-Signature=INERT_EXAMPLE",
+      "content_type": "audio/mpeg",
+      "sha256": "1b75731d7050c2a2cdc695fd1456b7099dd825e1ef8262fb3b4fa913d87fcd58",
+      "issued_at": "2026-11-17T00:00:00Z",
+      "expires_at": "2026-11-17T00:02:00Z",
+      "range_supported": true,
+      "quality_kbps": 48,
+      "duration_ms": 3000
+    },
+    "headers": {
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    }
+  },
+  "stream_media_grant": {
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/media/grants",
+      "body": {
+        "asset_id": "10000000-0000-4000-8000-000000000012",
+        "device_id": "10000000-0000-4000-8000-000000000010",
+        "purpose": "online"
+      }
+    },
+    "response": {
+      "grant_id": "10000000-0000-4000-8000-000000000019",
+      "asset_id": "10000000-0000-4000-8000-000000000012",
+      "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+      "transport": "stream_signed",
+      "url": "https://customer-example.cloudflarestream.com/INERT_SIGNED_TOKEN/manifest/video.m3u8",
+      "content_type": "application/vnd.apple.mpegurl",
+      "sha256": null,
+      "issued_at": "2026-11-17T00:00:00Z",
+      "expires_at": "2026-11-17T00:02:00Z",
+      "range_supported": false,
+      "quality_kbps": null,
+      "duration_ms": 3000
+    },
+    "headers": {
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    },
+    "service_worker_cache": false
+  },
+  "measured_mapping_shape": {
+    "map_id": "10000000-0000-4000-8000-000000000018",
+    "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+    "asset_id": "10000000-0000-4000-8000-000000000011",
+    "asset_sha256": "1b75731d7050c2a2cdc695fd1456b7099dd825e1ef8262fb3b4fa913d87fcd58",
+    "text_sha256": "a1470375ac773fbb3342522acf7512f7d77ec59d17fdbb567ed4d02d9ee80dcd",
+    "anchor_revision": 1,
+    "format": "audio",
+    "precision": "sentence",
+    "measured": true,
+    "segments": [
+      {
+        "anchor_id": "10000000-0000-4000-8000-000000000021",
+        "start_offset_chars": 0,
+        "end_offset_chars": 39,
+        "start_ms": 0,
+        "end_ms": 3000
+      }
+    ],
+    "next_cursor": null
+  },
+  "switch_position": {
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/content/switch-position",
+      "body": {
+        "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+        "from_location": {
+          "format": "reader",
+          "unit_id": "10000000-0000-4000-8000-000000000006",
+          "anchor_id": "10000000-0000-4000-8000-000000000021",
+          "offset_chars": 0
+        },
+        "to_format": "audio"
+      }
+    },
+    "response": {
+      "outcome": "mapped",
+      "to_location": {
+        "format": "audio",
+        "unit_id": "10000000-0000-4000-8000-000000000006",
+        "position_ms": 0
+      },
+      "map_id": "10000000-0000-4000-8000-000000000018",
+      "precision": "sentence",
+      "reason_code": null
+    },
+    "unmapped_response": {
+      "outcome": "unmapped",
+      "to_location": null,
+      "map_id": null,
+      "precision": null,
+      "reason_code": "mapping_unavailable"
+    }
+  },
+  "offline_reader_download": {
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/me/downloads",
+      "body": {
+        "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+        "format": "reader",
+        "unit_ids": [
+          "10000000-0000-4000-8000-000000000006"
+        ],
+        "device_id": "10000000-0000-4000-8000-000000000010"
+      }
+    },
+    "response": {
+      "license_id": "10000000-0000-4000-8000-000000000013",
+      "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+      "content_sha256": "a1470375ac773fbb3342522acf7512f7d77ec59d17fdbb567ed4d02d9ee80dcd",
+      "anchor_revision": 1,
+      "device_id": "10000000-0000-4000-8000-000000000010",
+      "format": "reader",
+      "unit_ids": [
+        "10000000-0000-4000-8000-000000000006"
+      ],
+      "status": "active",
+      "issued_at": "2026-11-17T00:00:00Z",
+      "valid_until": "2026-11-18T00:00:00Z",
+      "last_validated_at": "2026-11-17T00:00:00Z",
+      "assets": [
+        {
+          "asset_id": "10000000-0000-4000-8000-000000000008",
+          "unit_id": "10000000-0000-4000-8000-000000000006",
+          "sha256": "d714d221ff967b5fb58c1f81ae01c3f9833a592159047b711e56a93ad3a13e2f",
+          "bytes": 362,
+          "content_type": "application/json",
+          "url": "https://account.example.invalid/private/opaque-object?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=120&X-Amz-Signature=INERT_EXAMPLE",
+          "url_expires_at": "2026-11-17T00:02:00Z",
+          "piece_manifest": null
+        }
+      ],
+      "bytes_total": 362
+    },
+    "headers": {
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    }
+  },
+  "offline_audio_piece_descriptor": {
+    "asset_id": "10000000-0000-4000-8000-000000000011",
+    "asset_sha256": "1b75731d7050c2a2cdc695fd1456b7099dd825e1ef8262fb3b4fa913d87fcd58",
+    "piece_bytes": 1048576,
+    "pieces": [
+      {
+        "piece_index": 0,
+        "offset_bytes": 0,
+        "bytes": 40,
+        "sha256": "1b75731d7050c2a2cdc695fd1456b7099dd825e1ef8262fb3b4fa913d87fcd58"
+      }
+    ]
+  },
+  "local_download_metadata": {
+    "schema_version": 1,
+    "account_namespace": "local-random-namespace",
+    "device_id": "10000000-0000-4000-8000-000000000010",
+    "license_id": "10000000-0000-4000-8000-000000000013",
+    "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+    "state": "ready",
+    "required_asset_count": 1,
+    "verified_asset_count": 1,
+    "valid_until": "2026-11-18T00:00:00Z",
+    "last_validated_at": "2026-11-17T00:00:00Z",
+    "server_time_at_validation": "2026-11-17T00:00:00Z",
+    "wall_time_at_validation": "2026-11-17T00:00:00Z",
+    "monotonic_ms_at_validation": 10000,
+    "cache_key": "/__offline/local-random-namespace/10000000-0000-4000-8000-000000000010/10000000-0000-4000-8000-000000000004/10000000-0000-4000-8000-000000000008/d714d221ff967b5fb58c1f81ae01c3f9833a592159047b711e56a93ad3a13e2f/0",
+    "signed_url_stored": false
+  },
+  "local_sync_operation": {
+    "operation_id": "10000000-0000-4000-8000-000000000014",
+    "kind": "progress.set",
+    "base_version": 4,
+    "edition_id": "10000000-0000-4000-8000-000000000002",
+    "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+    "location": {
+      "format": "reader",
+      "unit_id": "10000000-0000-4000-8000-000000000006",
+      "anchor_id": "10000000-0000-4000-8000-000000000021",
+      "offset_chars": 0
+    },
+    "occurred_at": "2026-11-17T00:00:00Z"
+  },
+  "sync_batch": {
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/me/sync",
+      "body": {
+        "device_id": "10000000-0000-4000-8000-000000000010",
+        "operations": [
+          {
+            "operation_id": "10000000-0000-4000-8000-000000000014",
+            "kind": "progress.set",
+            "base_version": 4,
+            "edition_id": "10000000-0000-4000-8000-000000000002",
+            "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+            "location": {
+              "format": "reader",
+              "unit_id": "10000000-0000-4000-8000-000000000006",
+              "anchor_id": "10000000-0000-4000-8000-000000000021",
+              "offset_chars": 0
+            },
+            "occurred_at": "2026-11-17T00:00:00Z"
+          }
+        ]
+      }
+    },
+    "response": {
+      "results": [
+        {
+          "operation_id": "10000000-0000-4000-8000-000000000014",
+          "outcome": "applied",
+          "http_status": 200,
+          "resource_id": "10000000-0000-4000-8000-000000000032",
+          "version": 5,
+          "problem": null
+        }
+      ],
+      "server_time": "2026-11-17T00:00:00Z"
+    },
+    "conflict_result": {
+      "operation_id": "10000000-0000-4000-8000-000000000014",
+      "outcome": "conflict",
+      "http_status": 412,
+      "resource_id": "10000000-0000-4000-8000-000000000032",
+      "version": 6,
+      "problem": {
+        "type": "https://app.example.invalid/problems/version_conflict",
+        "title": "Access or state requires attention",
+        "status": 412,
+        "code": "version_conflict",
+        "detail": "Choose the current server position or apply the local position against its new version.",
+        "request_id": "10000000-0000-4000-8000-000000000020",
+        "retryable": false,
+        "current_version": 6,
+        "current_resource": {
+          "location": {
+            "format": "reader",
+            "unit_id": "10000000-0000-4000-8000-000000000006",
+            "anchor_id": "10000000-0000-4000-8000-000000000021",
+            "offset_chars": 3
+          }
+        }
+      }
+    },
+    "limits": {
+      "operations": 100,
+      "raw_json_bytes": 262144
+    }
+  },
+  "online_progress_precondition": {
+    "request": {
+      "method": "PUT",
+      "path": "/api/v1/me/progress/10000000-0000-4000-8000-000000000002/reader",
+      "headers": {
+        "If-Match": "\"v4\""
+      },
+      "body": {
+        "operation_id": "10000000-0000-4000-8000-000000000014",
+        "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+        "location": {
+          "format": "reader",
+          "unit_id": "10000000-0000-4000-8000-000000000006",
+          "anchor_id": "10000000-0000-4000-8000-000000000021",
+          "offset_chars": 0
+        },
+        "occurred_at": "2026-11-17T00:00:00Z"
+      }
+    },
+    "response_headers": {
+      "ETag": "\"v5\"",
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    }
+  },
+  "custom_list_order": {
+    "request": {
+      "method": "PUT",
+      "path": "/api/v1/me/lists/10000000-0000-4000-8000-000000000017/order",
+      "headers": {
+        "If-Match": "\"v2\""
+      },
+      "body": {
+        "edition_ids": [
+          "10000000-0000-4000-8000-000000000002",
+          "10000000-0000-4000-8000-000000000003"
+        ]
+      }
+    },
+    "max_items": 500,
+    "offline_mutation_supported": false
+  },
+  "access_denied": {
+    "status": 403,
+    "headers": {
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    },
+    "body": {
+      "type": "https://app.example.invalid/problems/region_unavailable",
+      "title": "Access or state requires attention",
+      "status": 403,
+      "code": "region_unavailable",
+      "detail": "This format is not available in your region.",
+      "request_id": "10000000-0000-4000-8000-000000000020",
+      "retryable": false
+    }
+  },
+  "private_conditional": {
+    "status": 304,
+    "headers": {
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    },
+    "precondition": "Only after successful current authorization. A denied request instead returns403/410 and never304."
+  },
+  "private_expiry": {
+    "status": 403,
+    "headers": {
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    },
+    "body": {
+      "type": "https://app.example.invalid/problems/grant_expired",
+      "title": "Access or state requires attention",
+      "status": 403,
+      "code": "grant_expired",
+      "detail": "Reconnect to refresh access.",
+      "request_id": "10000000-0000-4000-8000-000000000020",
+      "retryable": true
+    }
+  },
+  "range_response": {
+    "status": 206,
+    "headers": {
+      "Content-Type": "audio/mpeg",
+      "Content-Range": "bytes 1048576-2097151/5242880",
+      "Content-Length": "1048576",
+      "Accept-Ranges": "bytes",
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    },
+    "cache_storage_put_directly": false
+  },
+  "range_unsatisfiable": {
+    "status": 416,
+    "headers": {
+      "Content-Range": "bytes */5242880",
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    }
+  },
+  "private_r2_cors": {
+    "CORSRules": [
+      {
+        "AllowedOrigins": [
+          "https://app.example.invalid"
+        ],
+        "AllowedMethods": [
+          "GET",
+          "HEAD"
+        ],
+        "AllowedHeaders": [
+          "Range",
+          "If-Match"
+        ],
+        "ExposeHeaders": [
+          "ETag",
+          "Content-Length",
+          "Content-Range",
+          "Accept-Ranges"
+        ],
+        "MaxAgeSeconds": 600
+      }
+    ]
+  },
+  "build_version_map": {
+    "schema_version": 1,
+    "build_id": "maison-ui-example-1",
+    "minimum_payload_schema": 1,
+    "assets": [
+      {
+        "path": "/assets/app.060f79c99c7d.js",
+        "sha256": "060f79c99c7dcf878388c8d82067332319197a75275582adf731782edfec8255",
+        "bytes": 9
+      }
+    ],
+    "reader_content_revision_not_rewritten": true
+  },
+  "purge_outbox_event": {
+    "event_id": "10000000-0000-4000-8000-000000000016",
+    "schema_version": 1,
+    "event_type": "edition.withdrawn",
+    "aggregate_id": "10000000-0000-4000-8000-000000000002",
+    "revision": 18,
+    "occurred_at": "2026-11-17T00:00:00Z",
+    "dedupe_key": "edition:10000000-0000-4000-8000-000000000002:18:withdrawn",
+    "urls": [
+      "https://app.example.invalid/en/titles/river-example?territory=IN",
+      "https://app.example.invalid/api/v1/home?locale=en&territory=IN",
+      "https://assets.example.invalid/previews/fb7033f6b5aa31d126c05466e790a466ec61bb2c973649efda25a1d53ca16a6e/sample.mp3"
+    ],
+    "attempt_count": 0,
+    "next_attempt_at": "2026-11-17T00:00:00Z",
+    "delivered_at": null,
+    "contains_rights_evidence": false
+  },
+  "cloudflare_purge_body": {
+    "files": [
+      "https://app.example.invalid/api/v1/home?locale=en&territory=IN"
+    ]
+  },
+  "commerce_cache_boundary": {
+    "request": "GET /api/v1/commerce/offers",
+    "headers": {
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    },
+    "response": {
+      "items": [],
+      "next_cursor": null,
+      "has_more": false
+    },
+    "offline_checkout": false,
+    "legacy_wallet_auto_conversion": false,
+    "recurring_enabled": false
+  },
+  "mapping_hash_fixture": {
+    "sha256": "e535d3297bb5ecf24955ab9ccdb353e12c40f12fd66488ef184727aff26e68e0",
+    "canonical_utf8": "{\"anchor_revision\":1,\"asset_id\":\"10000000-0000-4000-8000-000000000011\",\"asset_sha256\":\"1b75731d7050c2a2cdc695fd1456b7099dd825e1ef8262fb3b4fa913d87fcd58\",\"edition_revision_id\":\"10000000-0000-4000-8000-000000000004\",\"format\":\"audio\",\"map_id\":\"10000000-0000-4000-8000-000000000018\",\"measured\":true,\"next_cursor\":null,\"precision\":\"sentence\",\"segments\":[{\"anchor_id\":\"10000000-0000-4000-8000-000000000021\",\"end_ms\":3000,\"end_offset_chars\":39,\"start_ms\":0,\"start_offset_chars\":0}],\"text_sha256\":\"a1470375ac773fbb3342522acf7512f7d77ec59d17fdbb567ed4d02d9ee80dcd\"}",
+    "note": "Hash covers prepared mapping artifact. measured=true here is inert shape, not release evidence."
+  },
+  "offline_audio_asset": {
+    "asset_id": "10000000-0000-4000-8000-000000000011",
+    "unit_id": "10000000-0000-4000-8000-000000000006",
+    "sha256": "1b75731d7050c2a2cdc695fd1456b7099dd825e1ef8262fb3b4fa913d87fcd58",
+    "bytes": 40,
+    "content_type": "audio/mpeg",
+    "url": "https://account.example.invalid/private/opaque-object?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=120&X-Amz-Signature=INERT_EXAMPLE",
+    "url_expires_at": "2026-11-17T00:02:00Z",
+    "piece_manifest": {
+      "url": "https://account.example.invalid/private/opaque-piece-manifest?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=120&X-Amz-Signature=INERT_EXAMPLE",
+      "url_expires_at": "2026-11-17T00:02:00Z",
+      "sha256": "c3299869441e908f3b8e858ed05b97f4522145770774b8cb0a0d2a6e84b111b7",
+      "bytes": 288
+    }
+  },
+  "schema_validation": [
+    {
+      "json_pointer": "/public_home/response",
+      "schema": "Home"
+    },
+    {
+      "json_pointer": "/reader_manifests/en",
+      "schema": "ReaderManifest"
+    },
+    {
+      "json_pointer": "/reader_manifests/bn",
+      "schema": "ReaderManifest"
+    },
+    {
+      "json_pointer": "/online_package_grant/request/body",
+      "schema": "PackageGrantInput"
+    },
+    {
+      "json_pointer": "/online_package_grant/response",
+      "schema": "PackageGrant"
+    },
+    {
+      "json_pointer": "/public_reader_preview/response",
+      "schema": "PreviewPackage"
+    },
+    {
+      "json_pointer": "/audio_media_grant/request/body",
+      "schema": "MediaGrantInput"
+    },
+    {
+      "json_pointer": "/audio_media_grant/response",
+      "schema": "MediaGrant"
+    },
+    {
+      "json_pointer": "/stream_media_grant/request/body",
+      "schema": "MediaGrantInput"
+    },
+    {
+      "json_pointer": "/stream_media_grant/response",
+      "schema": "MediaGrant"
+    },
+    {
+      "json_pointer": "/measured_mapping_shape",
+      "schema": "TimingMap"
+    },
+    {
+      "json_pointer": "/switch_position/request/body",
+      "schema": "SwitchInput"
+    },
+    {
+      "json_pointer": "/switch_position/response",
+      "schema": "SwitchResult"
+    },
+    {
+      "json_pointer": "/switch_position/unmapped_response",
+      "schema": "SwitchResult"
+    },
+    {
+      "json_pointer": "/offline_reader_download/request/body",
+      "schema": "DownloadInput"
+    },
+    {
+      "json_pointer": "/offline_reader_download/response",
+      "schema": "DownloadLicense"
+    },
+    {
+      "json_pointer": "/offline_audio_piece_descriptor",
+      "schema": "OfflinePiecePage"
+    },
+    {
+      "json_pointer": "/offline_audio_asset",
+      "schema": "OfflineAsset"
+    },
+    {
+      "json_pointer": "/local_sync_operation",
+      "schema": "ProgressSyncOperation"
+    },
+    {
+      "json_pointer": "/sync_batch/request/body",
+      "schema": "SyncInput"
+    },
+    {
+      "json_pointer": "/sync_batch/response",
+      "schema": "SyncResponse"
+    },
+    {
+      "json_pointer": "/sync_batch/conflict_result",
+      "schema": "SyncResult"
+    },
+    {
+      "json_pointer": "/online_progress_precondition/request/body",
+      "schema": "ProgressInput"
+    },
+    {
+      "json_pointer": "/custom_list_order/request/body",
+      "schema": "ListOrderInput"
+    },
+    {
+      "json_pointer": "/access_denied/body",
+      "schema": "Problem"
+    },
+    {
+      "json_pointer": "/private_expiry/body",
+      "schema": "Problem"
+    },
+    {
+      "json_pointer": "/commerce_cache_boundary/response",
+      "schema": "OfferPage"
+    },
+    {
+      "json_pointer": "/reader_chunk_fixtures/en/payload",
+      "schema": "ReaderChunk"
+    },
+    {
+      "json_pointer": "/reader_chunk_fixtures/bn/payload",
+      "schema": "ReaderChunk"
+    }
+  ],
+  "private_object_request": {
+    "method": "GET",
+    "range": "bytes=0-1048575",
+    "credentials": "omit",
+    "note": "GET-presigned capability is not a HEAD signature; known metadata comes from manifest."
+  },
+  "staff_upload_cors": {
+    "scope": "Separate private raw upload bucket; consumption policy stays read-only",
+    "AllowedOrigins": [
+      "https://staff.example.invalid"
+    ],
+    "AllowedMethods": [
+      "PUT"
+    ],
+    "AllowedHeaders": [
+      "Content-Type",
+      "If-Match",
+      "x-amz-checksum-sha256"
+    ],
+    "ExposeHeaders": [
+      "ETag",
+      "x-amz-checksum-sha256"
+    ],
+    "MaxAgeSeconds": 300,
+    "configuration_required": true,
+    "no_wildcard_origins": true
+  }
+}

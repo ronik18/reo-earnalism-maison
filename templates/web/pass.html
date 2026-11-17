@@ -1,0 +1,1 @@
+{% extends 'web/base.html' %}{% load maison %}{% block content %}<section class="narrow"><p class="eyebrow">{% ui 'pass' %}</p><h1>{% ui 'no_offer' %}</h1><p>{% ui 'legacy_notice' %}</p><a class="button" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a></section>{% endblock %}

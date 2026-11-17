@@ -1,0 +1,234 @@
+import json
+from datetime import timedelta
+from pathlib import Path
+from django.conf import settings
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.sessions.models import Session
+from django.db import transaction
+from django.db.models import F
+from django.http import FileResponse
+from django.utils import timezone
+from django.views.decorators.csrf import ensure_csrf_cookie
+from core.api import json_endpoint,json_body,api_response,DomainError,expected_version,operation_key,public_uuid
+from core.models import OutboxJob
+from core.services import apply_operation,audit
+from .models import User,Preferences,Device,Consent,EmailActionToken
+from . import services
+
+
+def acknowledgement(request):
+    return {'status':'accepted','request_id':str(getattr(request,'request_id',__import__('uuid').uuid4())),
+            'message':'If the request is eligible, it will be processed shortly.'}
+
+
+def profile_data(user):
+    p,_=Preferences.objects.get_or_create(user=user)
+    return {'member_id':str(user.public_id),'display_name':user.display_name,'email':user.email,
+        'email_verified':user.is_verified,'locale':p.locale,'created_at':services.iso(user.date_joined),'version':user.version}
+
+
+def require_fresh(request):
+    raw=request.session.get('reauthenticated_at')
+    try: stamp=__import__('datetime').datetime.fromisoformat(raw)
+    except (TypeError,ValueError):raise DomainError('reauthentication_required','Confirm your identity before this action.',403)
+    if timezone.now()-stamp>timedelta(minutes=5):raise DomainError('reauthentication_required','Confirm your identity before this action.',403)
+
+
+@ensure_csrf_cookie
+@json_endpoint(('GET','DELETE'),auth=False)
+def session_view(request):
+    if request.method=='DELETE':
+        if not request.user.is_authenticated:raise DomainError('authentication_required','Sign in to continue.',401)
+        services.logout_member(request);return api_response({},204)
+    return api_response(services.session_data(request))
+
+
+@json_endpoint(('POST',),auth=False)
+def register_view(request):
+    d=json_body(request,{'email','password','display_name','locale','return_path'},['email','password','display_name'])
+    services.register_member(**d);return api_response(acknowledgement(request),202)
+
+
+@json_endpoint(('POST',),auth=False)
+def login_view(request):
+    d=json_body(request,{'email','password'},['email','password']);services.login_member(request,**d)
+    return api_response(services.session_data(request))
+
+
+@json_endpoint(('POST',),auth=False)
+def request_action(request,purpose):
+    if purpose=='email-links':raise DomainError('feature_disabled','Email magic sign-in is not enabled.',409)
+    d=json_body(request,{'email','return_path'},['email'])
+    fn=services.request_password_reset if purpose=='password-resets' else services.request_email_verification
+    fn(**d);return api_response(acknowledgement(request),202)
+
+
+@json_endpoint(('POST',),auth=False)
+def consume_action(request,purpose):
+    if purpose=='email-links':raise DomainError('feature_disabled','Email magic sign-in is not enabled.',409)
+    d=json_body(request,{'token','new_password'} if purpose=='password-resets' else {'token'},['token','new_password'] if purpose=='password-resets' else ['token'])
+    if purpose=='password-resets':services.confirm_password_reset(**d);return api_response({},204)
+    services.confirm_email_verification(d['token']);return api_response(services.session_data(request))
+
+
+@json_endpoint(('GET','POST'),auth=False)
+def provider_disabled(request,**kwargs):
+    raise DomainError('feature_disabled','This provider is not configured and qualified.',409)
+
+
+@json_endpoint(('GET','PATCH'))
+def profile(request):
+    if request.method=='GET':return api_response(profile_data(request.user),version=request.user.version)
+    data=json_body(request,{'display_name','locale'});base=expected_version(request)
+    if not data:raise DomainError('validation_error','Provide a profile change.',422)
+    with transaction.atomic():
+        user=User.objects.select_for_update().get(pk=request.user.pk)
+        if user.version!=base:raise DomainError('version_conflict','Profile changed.',412,profile_data(user))
+        if 'display_name' in data:
+            if not isinstance(data['display_name'],str) or len(data['display_name'])>100:raise DomainError('validation_error','Invalid display name.',422)
+            user.display_name=data['display_name']
+        if 'locale' in data:
+            if data['locale'] not in ['en','bn']:raise DomainError('validation_error','Invalid locale.',422)
+            p,_=Preferences.objects.get_or_create(user=user);p.locale=data['locale'];p.version+=1;p.save()
+        user.version+=1;user.save(update_fields=['display_name','version'])
+    return api_response(profile_data(user),version=user.version)
+
+
+@json_endpoint(('GET','PATCH'))
+def preferences(request):
+    if request.method=='GET':
+        p,_=Preferences.objects.get_or_create(user=request.user);return api_response(services.preferences_data(p),version=p.version)
+    data=json_body(request);base=expected_version(request)
+    with transaction.atomic():
+        User.objects.select_for_update().get(pk=request.user.pk)
+        result=services.update_preferences(request.user,data,base)
+    return api_response(result,version=result['version'])
+
+
+@json_endpoint(('GET','PUT'))
+def consents(request):
+    def serialize(c):return {k:getattr(c,k) for k in ['necessary_notice_version','analytics_opt_in','marketing_email_opt_in','version']}|{'updated_at':services.iso(c.updated_at)}
+    if request.method=='GET':
+        c,_=Consent.objects.get_or_create(user=request.user);return api_response(serialize(c),version=c.version)
+    data=json_body(request,{'necessary_notice_version','analytics_opt_in','marketing_email_opt_in'},['necessary_notice_version','analytics_opt_in','marketing_email_opt_in']);base=expected_version(request)
+    if not isinstance(data['necessary_notice_version'],str) or not 1<=len(data['necessary_notice_version'])<=64 or any(type(data[k])!=bool for k in ['analytics_opt_in','marketing_email_opt_in']):raise DomainError('validation_error','Invalid consent value.',422)
+    with transaction.atomic():
+        User.objects.select_for_update().get(pk=request.user.pk);c,_=Consent.objects.get_or_create(user=request.user)
+        if c.version!=base:raise DomainError('version_conflict','Consent choices changed.',412,serialize(c))
+        for k,v in data.items():setattr(c,k,v)
+        c.version+=1;c.save();audit(request.user,'consent.changed',c,{k:v for k,v in data.items()})
+    return api_response(serialize(c),version=c.version)
+
+
+@json_endpoint(('POST',))
+def reauthenticate(request):
+    data=json_body(request,{'password'},['password']);services.check_rate('reauth',str(request.user.public_id),5,600)
+    if not request.user.check_password(data['password']):raise DomainError('invalid_credentials','Authentication could not be confirmed.',403)
+    now=timezone.now();request.session['reauthenticated_at']=now.isoformat()
+    return api_response({'reauthenticated_at':services.iso(now),'valid_until':services.iso(now+timedelta(minutes=5))})
+
+
+@json_endpoint(('POST',))
+def change_password(request):
+    data=json_body(request,{'current_password','new_password'},['current_password','new_password'])
+    if not request.user.check_password(data['current_password']):raise DomainError('invalid_credentials','Authentication could not be confirmed.',403)
+    services._password(data['new_password'],request.user)
+    with transaction.atomic():
+        user=User.objects.select_for_update().get(pk=request.user.pk);user.set_password(data['new_password']);user.session_epoch+=1;user.version+=1;user.save()
+        current=request.session.session_key;keys=list(user.devices.exclude(session_id=current).exclude(session_id=None).values_list('session_id',flat=True));Session.objects.filter(session_key__in=keys).delete()
+        user.devices.exclude(session_id=current).filter(revoked_at__isnull=True).update(revoked_at=timezone.now(),version=F('version')+1)
+        EmailActionToken.objects.filter(user=user,consumed_at__isnull=True).update(consumed_at=timezone.now())
+        update_session_auth_hash(request,user);request.session['session_epoch']=user.session_epoch;request.session['reauthenticated_at']=timezone.now().isoformat()
+        # Django rotated the current session key; keep its bound device relationship.
+        Device.objects.filter(pk=request.session.get('device_id')).update(session_id=request.session.session_key)
+    return api_response({},204)
+
+
+@json_endpoint(('GET',))
+def devices(request):
+    rows=Device.objects.filter(user=request.user).order_by('-last_seen_at')[:100]
+    return api_response({'items':[{'device_id':str(d.id),'label':d.label,'current':str(d.id)==request.session.get('device_id'),'created_at':services.iso(d.created_at),'last_seen_at':services.iso(d.last_seen_at),'revoked_at':services.iso(d.revoked_at)} for d in rows],'next_cursor':None,'has_more':False})
+
+
+@json_endpoint(('DELETE',))
+def revoke_device(request,device_id):
+    key=operation_key(request)
+    def mutate():
+        d=Device.objects.select_for_update().filter(pk=device_id,user=request.user).first()
+        if not d:raise DomainError('not_found','Device not found.',404)
+        if not d.revoked_at:
+            if d.session_id:Session.objects.filter(session_key=d.session_id).delete()
+            d.revoked_at=timezone.now();d.version+=1;d.save(update_fields=['revoked_at','version']);audit(request.user,'device.revoked',d)
+        return 204,{},d.version
+    status,body=apply_operation(request.user,key,'device.revoke',{'device_id':device_id},mutate)
+    if request.session.get('device_id')==str(device_id):services.logout_member(request)
+    return api_response(body,status)
+
+
+def privacy_data(job):
+    status={'pending':'queued','claimed':'processing','done':'completed','blocked':'awaiting_resolution','dead':'failed','cancelled':'cancelled'}[job.status]
+    return {'privacy_request_id':str(job.id),'kind':job.kind.removeprefix('privacy_'),'status':status,
+        'requested_at':services.iso(job.created_at),'completed_at':services.iso(job.completed_at),
+        'download_expires_at':job.result.get('expires_at'),'retained_categories':['financial_obligations'] if job.kind=='privacy_delete' else []}
+
+
+@json_endpoint(('GET','POST'))
+def privacy_requests(request):
+    if request.method=='GET':
+        return api_response({'items':[privacy_data(x) for x in OutboxJob.objects.filter(actor=request.user,kind__in=['privacy_export','privacy_delete']).order_by('-created_at')[:100]],'next_cursor':None,'has_more':False})
+    require_fresh(request);d=json_body(request,{'kind','confirm'},['kind','confirm'])
+    if d['kind'] not in ['export','delete'] or d['confirm'] is not True:raise DomainError('validation_error','Explicit confirmation is required.',422)
+    key=operation_key(request)
+    def mutate():
+        job=OutboxJob.objects.create(kind='privacy_'+d['kind'],actor=request.user,dedupe_key=f'privacy:{request.user.public_id}:{key}',payload={},not_before=timezone.now());audit(request.user,'privacy.requested',job,{'kind':d['kind']})
+        return 202,privacy_data(job),1
+    status,body=apply_operation(request.user,key,'privacy.create',d,mutate);return api_response(body,status)
+
+
+@json_endpoint(('GET',))
+def privacy_request(request,privacy_request_id):
+    job=OutboxJob.objects.filter(id=privacy_request_id,actor=request.user,kind__in=['privacy_export','privacy_delete']).first()
+    if not job:raise DomainError('not_found','Request not found.',404)
+    return api_response(privacy_data(job))
+
+
+@json_endpoint(('POST',))
+def privacy_cancel(request,privacy_request_id):
+    require_fresh(request);key=operation_key(request)
+    def mutate():
+        job=OutboxJob.objects.select_for_update().filter(id=privacy_request_id,actor=request.user,kind__in=['privacy_export','privacy_delete']).first()
+        if not job:raise DomainError('not_found','Request not found.',404)
+        if job.status=='pending':job.status='cancelled';job.save(update_fields=['status'])
+        elif job.status!='cancelled':raise DomainError('already_processing','This request can no longer be cancelled.',409)
+        return 200,privacy_data(job),1
+    status,body=apply_operation(request.user,key,'privacy.cancel',{'id':privacy_request_id},mutate);return api_response(body,status)
+
+
+@json_endpoint(('POST',))
+def privacy_download(request,privacy_request_id):
+    require_fresh(request)
+    job=OutboxJob.objects.filter(id=privacy_request_id,actor=request.user,kind='privacy_export',status='done').first()
+    if not job:raise DomainError('not_found','A completed export was not found.',404)
+    if not job.result.get('expires_at') or timezone.now()>=__import__('datetime').datetime.fromisoformat(job.result['expires_at'].replace('Z','+00:00')):raise DomainError('export_expired','Request a new export.',410)
+    path=Path(settings.BASE_DIR)/'.local'/'privacy'/job.result['artifact_name']
+    if not path.exists():raise DomainError('export_unavailable','Request a new export.',410)
+    expiry=timezone.now()+timedelta(seconds=120);job.result['delivery_until']=services.iso(expiry);job.save(update_fields=['result'])
+    return api_response({'url':f'/api/v1/me/privacy/requests/{job.id}/file','expires_at':services.iso(expiry),'sha256':__import__('hashlib').sha256(path.read_bytes()).hexdigest(),'bytes':path.stat().st_size,'mime_type':'application/json'})
+
+
+@json_endpoint(('GET',))
+def privacy_file(request,privacy_request_id):
+    require_fresh(request);job=OutboxJob.objects.filter(id=privacy_request_id,actor=request.user,kind='privacy_export',status='done').first()
+    if not job or not job.result.get('delivery_until') or timezone.now()>=__import__('datetime').datetime.fromisoformat(job.result['delivery_until'].replace('Z','+00:00')):raise DomainError('export_expired','Request a new download.',410)
+    path=Path(settings.BASE_DIR)/'.local'/'privacy'/job.result['artifact_name']
+    if not path.exists():raise DomainError('export_unavailable','Request a new export.',410)
+    response=FileResponse(path.open('rb'),as_attachment=True,filename='earnalism-personal-data.json',content_type='application/json');response['Cache-Control']='private, no-store';return response
+
+
+@json_endpoint(('POST',),auth=False)
+def contact(request):
+    d=json_body(request,{'email','locale','category','message','order_id'},['email','locale','category','message'])
+    services._email(d['email']);services.check_rate('contact',d['email'],5,3600)
+    if d['locale'] not in ['en','bn'] or d['category'] not in ['account','billing','content','accessibility','privacy','other'] or not isinstance(d['message'],str) or not 10<=len(d['message'])<=5000:raise DomainError('validation_error','Invalid support message.',422)
+    OutboxJob.objects.create(kind='contact_support',dedupe_key=f'contact:{__import__("uuid").uuid4()}',actor=request.user if request.user.is_authenticated else None,payload=d,not_before=timezone.now())
+    return api_response(acknowledgement(request),202)

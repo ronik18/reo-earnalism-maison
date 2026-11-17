@@ -1,0 +1,223 @@
+# Maison database model and transaction contract
+
+**Design for implementation, 17 November 2026. Not deployed.** The companion [database.sql](database.sql) specifies PostgreSQL 17 tables, constraints, indexes and the small set of cross-row guards. This document explains how the Django models and API use them. It follows the selected single Django application, Neon PostgreSQL, R2 and Stream architecture; the schema does not depend on a Neon-specific API.
+
+## Authority, identifiers and prerequisites
+
+The application supplies cryptographically random UUID4 identifiers for public entities and operations. All `id` UUID columns and API identifiers are opaque; possession grants no authorization. No UUID extension or sequential public identifier is needed. Join/receipt/bucket tables use internal bigint identity primary keys plus unique business tuples; those internal IDs are not public API identifiers. All timestamps are `timestamptz`; Django uses `USE_TZ=True`, aware UTC datetimes and an UTC database connection. Store integer currency minor units in `bigint`, never floating point. ISO currency codes have three uppercase characters; valid supported currencies and their exponent come from server configuration. Only `en` and `bn` are publication/UI locales initially.
+
+Run the custom Django User, auth, contenttypes, sessions and allauth migrations before this application DDL. The custom User maps to `auth_user`, with a Django-owned internal bigint ID, a normalized email and a password hash managed by Django. User IDs never leave the server. `maison_member_profile.id` is the API `member_id`. The SQL adds an explicit unique index on `lower(auth_user.email)` for nonblank email; the custom User migration/model must declare its equivalent so migration state and database state agree. New live accounts require a nonblank validated email. Temporary blanks are permitted only during a controlled legacy migration. Normalize whitespace/domain/case consistently; do not invent provider-specific dot/plus equivalence. Preserve supported existing password hashes rather than treating migration as a password reset.
+
+Use allauth `account_emailaddress` for verification and `socialaccount_socialaccount` for the unique `(provider, uid)` Google subject. These framework tables are deliberately not recreated here. Configure unique normalized email and mandatory verification; disable email-match social authentication/autoconnection. An existing verified email match is an account-link prompt, not permission to merge. Linking Google requires an existing authenticated session, explicit link intent, OAuth state/PKCE as supported, and the verified callback. allauth owns identity/protocol persistence; Maison owns the email-action capability below and must not create parallel allauth confirmation or magic-login tokens for the same action. There is no custom Google password/token table or mandatory phone identity. Optional phone OTP remains disabled and requires its separately qualified adapter; this schema does not create an SMS service. Before enabling the optional phone contract, add a reviewed auth-challenge migration for hashed codes, provider challenge reference, member/phone binding, expiry, resend/attempt limits (maximum five), atomic consume and retention; the disabled contract does not imply a live challenge store.
+
+Django's database session backend owns `django_session`. Device records point to a session and a hashed random binding capability; they do not replace the session. Session expiration/deletion may null the link. Every private request still validates the session, member state, device binding and revocation. Session cookies rotate on login and privilege change; member absolute lifetime is 14 days, staff eight hours with a 30-minute idle limit. Revoking a device deletes its server session and marks its downloads revoked in one transaction. Write `last_seen_at` at most every 30 minutes, not on each player heartbeat. Staff use MFA and separately granted business roles. These lifetimes match `runtime-config.json`.
+
+The schema uses ordinary `uuid`, `jsonb`, arrays, generated `tsvector`, foreign keys and `pg_trgm`. All Django models have one ordinary primary-key field; do not use Django 5.2 CompositePrimaryKey or internal ForeignObject. Ordinary ORM ForeignKey fields provide model/admin relationships; the extra composite foreign keys are explicit RunSQL guards with matching unique constraints. Django models declare `db_table`, `UniqueConstraint`, `CheckConstraint`, expression/partial/GIN indexes and generated columns; database triggers become explicit reversible `RunSQL` migrations with model state kept in sync. Do not apply this file on top of migrations that already created the same tables. This is a reviewable initial schema contract, not a second migration runner. Official references checked for this design: [Django auth](https://docs.djangoproject.com/en/5.2/ref/contrib/auth/), [sessions](https://docs.djangoproject.com/en/5.2/topics/http/sessions/), [database configuration](https://docs.djangoproject.com/en/5.2/ref/databases/), [allauth account settings](https://docs.allauth.org/en/latest/account/configuration.html) and [social account settings](https://docs.allauth.org/en/latest/socialaccount/configuration.html).
+
+## Relational model
+
+Every name below has the `maison_` prefix. The SQL is the field-level source of truth; JSON shapes are restricted to their stated purposes, validated by typed application schemas and bounded by the API body limit. JSON does not replace financial totals, access windows or relational ownership.
+
+| Records | Relationship and purpose |
+|---|---|
+| `member_profile`, `member_role` | One profile per Django user. Multiple staff/member roles. `guest` is an anonymous request context, never a stored role. Profile preferences hold bounded language/interests/goals, reader typography/theme and notification UI choices; consent is separate. |
+| `device`, `email_action_token`, `rate_limit_bucket` | Member/session binding and revocation; hashed single-use email capabilities; short-lived HMAC-keyed issuance/attempt buckets. No raw token or IP address is stored in these rows. |
+| `work`, `slug_redirect`, `edition`, `edition_revision` | A work can have English/Bengali editions and explicit paired editions. Slug redirects hold a previous public slug and the same internal work, never an external destination. An edition points to one live immutable revision. Revision number/hash and Draft → Ready → Live → Retired state are separate from work identity. |
+| `edition_metadata`, `search_alias` | Localized display metadata and generated metadata-only search vector; reviewed Banglish aliases. `search_text` contains approved title/creator/topics/summary metadata, never paid full text or private source evidence. |
+| `unit`, `paragraph_anchor` | Ordered chapter/episode/lesson/section and ordered paragraph/stanza/heading anchors. Composite FKs bind every anchor to its unit and revision. `safe_html` is sanitized server-side before storage. Character offsets are Unicode code points, not UTF-16 indices, bytes or visual page numbers. |
+| `anchor_mapping` | Human-reviewed same-edition old/new anchor mapping; explicit Orphaned entries have no target. Frozen with the destination revision. |
+| `asset`, `rights_record` | Immutable revision-bound media/package identity, source checksum and internal object/Stream key. Rights per format include commercial use, territories, validity and download permission. Evidence keys and source URLs are staff-only. |
+| `publication_check` | Five compact evidence rows—rights, content, assets, metadata, browser—bound to the exact candidate hash, rather than a production pipeline subsystem. |
+| `timing_map`, `timing_segment` | Human-verified map binding text revision hash, audio checksum and actual anchor/time segments. Granularity is explicit. Draft/estimated maps never appear as verified. |
+| `catalog_collection`, `catalog_item` | Editor-curated bilingual shelves and unique ordered editions. Reordering uses one transaction/version. Items whose edition has no live revision do not appear publicly. |
+| `progress`, `operation_receipt` | One current position per member/edition/format; versioned CAS and 35-day operation receipts for safe offline retries. The most recently updated eligible format supplies Continue. |
+| `annotation`, `saved_item` | Revision-anchored bookmark/highlight/note, bounded private quoted text (2,048 code points and 8 KiB) and note (8 KiB), soft deletion; saved editions are separate and idempotent. |
+| `personal_list`, `personal_list_item` | Member-owned Vault lists. Unique normalized list names and unique item/order positions; replace/reorder the bounded full item list against `list.version`. |
+| `track`, `lesson`, `lesson_progress` | Ordered learning plan and lessons referencing existing publication units. Generic tracks support the specified learning paths without a parallel content store. |
+| `quiz`, `question`, `question_option` | Versioned reviewed quizzes and public prompts/options; correctness and explanations are staff/server data until a permitted graded response. |
+| `quiz_attempt`, `quiz_answer` | Member attempt, immutable question/answer-key snapshot and submitted choices. Score is server-derived against the snapshot, unaffected by later quiz edits. |
+| `offer`, `billing_plan` | Versioned server-owned fixed or recurring access terms. Plans add interval/cycles and approved provider plan identity; no client-supplied amount. |
+| `mandate`, `subscription` | Provider authorization and subscription lifecycle, current paid period, cancel-at-period-end, bounded dunning and pre-debit evidence. A mandate authorizes a future debit; it does not grant paid access. |
+| `order`, `payment`, `payment_event`, `refund` | Price/tax/currency snapshot; verified provider payment; durable uniquely identified event receipt; idempotent refund reservation. Persist unknown outcomes and reconcile. |
+| `invoice`, `invoice_revision`, `payment_allocation` | Invoice/cycle identity and current issued revision; append-only tax/line/document snapshots; append-only allocation of captured funds. Refund-linked credit-note documents are not a replacement payable invoice. |
+| `entitlement`, `legacy_liability` | Time-bounded access with source/business dedupe key; compact exact legacy seconds/money/provider-reference obligation and evidence of resolution. Legacy balances do not silently become a new pass. |
+| `download_license` | Member/device/entitlement/revision/format-specific offline grant with hash-bound manifest. Server expiry is at most 24 hours and no later than rights, device or entitlement expiry. |
+| `consent`, `outbox`, `audit` | Append-history choices; idempotently leased email/reconciliation/privacy/publication work; redacted staff/business action evidence. |
+| `activity_interval` | Idempotent bounded active intervals for weekly active learning minutes (WALM). Union overlaps per member so concurrent devices/read-along do not double-count. This is not a prepaid financial meter. |
+
+No gifting, child/family profiles, recordings, timed interview practice, dictionary, experiments or recommendation-service tables are created. Future additions use migrations after their product scope is enabled. Editorial track/question-bank/model-answer content can use published units; recorded practice/readiness assessments require their later model.
+
+
+## API object to relational mapping
+
+API names may describe a product object while SQL uses a more precise storage name. This is an explicit adapter mapping, not a second model:
+
+| API identity/field | Database source and handling |
+|---|---|
+| `member_id` / member `id` | `member_profile.id`, never `auth_user.id`; profile preferences and roles are joined for the current member. |
+| Title `work_id`, `edition_id`, `edition_revision_id` | `work.id`, `edition.id`, `edition_revision.id`; public edition points to its Live revision. Interface `locale` selects `edition_metadata.locale`; edition content language comes from `edition.locale`. |
+| `unit_id`, `anchor_id`, semantic offset | `unit.id`, `paragraph_anchor.id`, Unicode-code-point offsets in `progress`/`annotation`. Old/new recovery reads `anchor_mapping`. |
+| Reader `chunk_id` / asset `asset_id` | `asset.id` with `kind=reader_package` or `preview_reader_package`, scoped to its immutable revision/unit. The bounded reader payload's `unit_id` identifies content inside the chunk. No object key is returned. |
+| Position `version`, `operation_id` | `progress.version` and `last_operation_id`; canonical request/result in `operation_receipt` unique member/operation tuple. |
+| Bookmark/highlight/note | One `annotation` with the respective `kind`; quote/note fields are private and omitted from aggregate events. |
+| Vault saved/list IDs | `saved_item.id`, `personal_list.id`; list item identity is `(list_id,edition_id)`, internal identity PK never exposed. |
+| Pass/membership | Project currently effective `entitlement` plus related `subscription` when relevant. There is no independent membership table or mutable member `is_paid` authority. |
+| `offer_id`, `order_id`, payment/refund IDs | Corresponding public UUID row IDs; provider IDs remain separate verified references. Order `payment_status` and invoice `refund_status` are derived projections, not alternate stored lifecycle state. |
+| Subscription `provider_status`, mandate `revocation_pending` | `provider_status` stores the bounded provider state; outstanding cancel outbox work projects `revocation_pending`; local canonical `status` remains the declared checked value. Never grant from these projections alone. |
+| Invoice current document | `invoice.current_revision_id` → `invoice_revision` invoice-kind document; PDFs delivered only through private authorization. Refund/credit-note history remains separate. |
+| Quiz/attempt IDs | `quiz.id`, `quiz_attempt.id`; public question/option IDs omit the answer key; start snapshot stays server-only. |
+| Download `license_id` | `download_license.id`; response contains the bound manifest/capability and expiry, not internal object keys or bucket credentials. |
+| Privacy `request_id` and status | `outbox.id` where kind is `privacy_export` or `privacy_delete`, session member matched. API maps Pending/Claimed/Done/Dead to its public job state, with a private result-key reference in validated payload and redacted audit. |
+| Device ID / consent operation | `device.id`; `consent` event unique member/operation, latest purpose/channel choice selected explicitly. |
+
+Local stored statuses are checked in SQL: orders Creating/Created/Pending/Paid/Failed/Cancelled/Expired; payments Authorized/Captured/Failed/Partially refunded/Refunded; refunds Requested/Approved/Submitted/Pending/Processed/Failed/Rejected; invoices Draft/Issued/Paid/Void/Uncollectible; subscriptions Pending/Active/Past due/Paused/Cancelled/Completed/Expired; mandates Pending/Authorized/Paused/Cancelled/Failed/Expired. API uses lowercase underscore spellings. `created` means a provider order ID is known; order `failed` is a final creation/policy outcome, not a failed individual payment attempt. Financial resource/idempotency/provider uniqueness is retained with the financial records after generic personal-operation receipts expire.
+
+## Content revision and publication contract
+
+Build a canonical content manifest before Ready: normalized metadata, ordered unit/anchor IDs and text hashes, asset IDs/original checksums, public preview boundaries and any human-verified timing-map hashes. Encode it deterministically, hash SHA256 and store `revision_sha256`; object manifests contain this exact revision ID/hash. SHA256 detects identity/corruption; it does not establish legal rights or listening quality. Changing content creates a new revision and new anchors; do not mutate an existing published edition behind stable URLs. Keep the old revision for existing annotations/progress; a reviewed `anchor_mapping` can explicitly map an old anchor to the new revision or mark it Orphaned. When a map cannot safely relocate an anchor, retain the original quote/revision and return explicit recovery instead of silently resetting. Never infer a correspondence from similar text.
+
+Both Ready and published content rows are frozen by the revision-child triggers. They acquire a transaction row lock on the parent, preventing a content write racing a state transition. Ready is a frozen candidate, not a published state. Corrections clone the revision. Rights remain independently revocable so withdrawal is immediate even for immutable content. Evidence files are private R2 objects; their checksum and reviewed identity are recorded locally. Editorial pairing never implies that the paired language has matching rights, audio or completeness.
+
+A single `publish_revision` service handles manual and scheduled releases. In one `transaction.atomic()`:
+
+1. Lock the edition and target revision; confirm caller role and Ready state and due time. Lock the old live revision if any.
+2. Verify all five checks passed against the current exact hash. Verify metadata and bounded preview exist; required assets are Ready; every advertised format has currently approved commercial/territorial rights; approved audio timing is required only for advertised synchronized playback. Check timing text/audio hashes, segment monotonicity/bounds and anchor offsets. These media/territory/content rules require application validation and are not implied by a checksum.
+3. Retire the old live revision, set the new revision Live and timestamps, update `edition.live_revision_id`, and write audit/outbox invalidation in the same transaction. The partial unique index allows only one Live revision. Deferrable pointer FK permits this atomic replacement.
+4. After commit, purge changed public HTML/metadata/preview URLs, leaving private paid text uncached. A cache-purge retry is idempotent. Public queries always join `edition.live_revision_id` and require `revision.state='live'`; a pointer to a Ready row can never make it public.
+
+Withdrawal locks the same records, clears the live pointer/retires the revision or revokes the affected format's rights, records the reason and revokes relevant download licenses. Rights expiration is checked at request/grant time even before a scheduled housekeeping job runs. Ordinary asset grants are short-lived and are bounded by entitlement/rights end; full Reader packages and chapter audio remain private. Public previews are distinct physically bounded assets. Never serialize `private_object_key`, provider credentials, evidence keys or paid next-chapter content into catalog responses.
+
+`parent_unit_id` supports season/section grouping; import validates acyclic parents in the same revision. The FK/check stops cross-revision/self-parent errors; a depth-first import validation stops longer cycles. `paired_edition_id` is managed symmetrically in one transaction with work/locale validation. Timing validates actual audio kind/duration and exact hashes; composite FKs alone cannot prove those semantic facts.
+
+## Progress, annotation and offline transactions
+
+The endpoint authorizes the member from the session, not a body-supplied member ID. Every mutable personal-state operation has a UUID4 `operation_id` and canonical request hash. Receipts are scoped `(member_id, operation_id)` across mutation kinds: replaying one ID with a different body/kind is a conflict. Receipts survive 35 days, longer than the bounded offline queue. Expired queues require a fresh fetch and explicit reconciliation; the server does not promise eternal deduplication.
+
+For progress, read the receipt first and return its private response snapshot when the request hash matches. Otherwise in one atomic transaction, insert/check the operation reservation, authorize the revision and validate semantic offsets, then run:
+
+```sql
+UPDATE maison_progress
+SET edition_revision_id = :revision_id, unit_id = :unit_id,
+    anchor_id = :anchor_id, offset_chars = :offset_chars,
+    position_ms = :position_ms, fraction_complete = :fraction,
+    version = version + 1, last_operation_id = :operation_id,
+    client_occurred_at = :client_time, updated_at = now()
+WHERE id = :progress_id AND member_id = :member_id AND version = :if_match
+RETURNING id, version, updated_at;
+```
+
+Zero updated rows means 412 with the current authorized representation; the client explicitly chooses the new server position or reapplies its intended position against that version. Client clocks never win automatically. For absent-resource If-Match v0, INSERT the final intended row directly at version1 together with its receipt; do not perform an update against v0 after inserting version1. A conflicting insert replays the winning operation or returns412. Only existing rows use UPDATE/CAS. Insert the successful receipt and final response in the same transaction; a duplicate operation unique violation rolls back that attempt and fetches the winning receipt. Do not commit an empty reservation separately from its state change.
+
+A retry after an ambiguous connection failure first queries the receipt. Use the same transaction pattern for annotations, list reorder, lesson completion and quiz submission. Annotation tombstones remain through the offline reconciliation window, then are deleted by retention. The server derives the bounded quote and `quoted_text_truncated`; the browser cannot overwrite quoted source content. Bound selections within ordered anchors; `end_anchor_id` must follow the start, with both offsets within character counts. Those cross-row range rules are service validations. Save/delete is idempotent; CAS applies when changing note text or a list. List requests have a small bounded size, distinct edition IDs and contiguous nonnegative order positions; deferrable ordering uniqueness permits an atomic swap.
+
+Download issuance locks entitlement, rights and device, checks geographic rights and current publication/asset availability, validates the exact private manifest, then inserts the license. The DB trigger independently checks expiry windows, ownership, revocation, permitted format and track/edition scope. Licenses are immutable except the first revocation; renewal requires a new server grant after authorization. An honest offline client cannot extend a license or invent server time. A 24-hour license does not imply perfect revocation/DRM: an already copied file is not remotely erasable. Logout clears account-scoped storage and revokes the server session/licenses. Privacy exports exclude another account's cache and signed media capabilities.
+
+## Commerce and recurring lifecycle
+
+Fixed passes and recurring contracts are fully modeled. At initial rollout, `recurring_billing=false`; no mandate creation, renewal charge or subscription activation is allowed until merchant/provider readiness, commercial prices/terms and applicable tax/privacy decisions are accepted. This is a runtime/provider capability gate, not a promise that a disabled feature is absent from the design. Phone OTP and international checkout are similarly off initially. No live prices are seeded by this schema.
+
+Offers are immutable commercial versions once referenced by an order/plan. New prices, terms, currency, formats, duration or scope create a new offer. The service only changes an old offer's availability/active status. A fixed offer requires duration; a recurring offer references a plan with interval. Store the exact accepted terms hash/version in the order snapshot. `price_minor` on an order means net subtotal; `tax_minor` is added to reach `total_minor`. For a tax-inclusive offer, derive those components server-side so `order.total_minor = offer.price_minor`; for an exclusive offer it is offer price plus calculated tax. The offer label is not a billing authority.
+
+### Create and reconcile an order
+
+Reserve an order using `(member_id,idempotency_key)` and a canonical request hash, validating the currently approved offer and merchant capability. Commit the local order before a provider HTTP call. Use the local UUID as the provider receipt/reference and the provider's supported idempotency mechanism; if a response is lost, reconcile that reference before creating another charge/order. A repeated key with a different request is 409. Never hold a DB transaction open for the provider/network. Persist the provider order ID once known. A pending/authorized order or a client Checkout success callback is not access.
+
+Validate webhook HMAC on raw bounded bytes before inserting `payment_event`, with its unique provider event ID and raw-body SHA. Store raw payload only in a restricted encrypted object when necessary, not in general logs. Duplicate event IDs acknowledge the receipt. Different event IDs about the same payment still hit unique `(provider,provider_payment_id)` and `entitlement.grant_key`. A body hash mismatch for the same provider event ID is an investigation, not a second transition.
+
+Apply a verified capture in one short transaction: lock order, then payment, then subscription/invoice where applicable; check expected member/reference, provider, amount, currency and captured status; insert/update payment, allocate captured funds to the immutable issued invoice revision, mark order paid, create the entitlement with its deterministic business grant key, mark event Applied and enqueue receipt. A failure rolls back the business transition. Payment trigger independently checks order amount/currency/provider. Never downgrade a captured payment from an older failed/authorized event. A genuine second captured payment is retained and reconciled/refunded, not granted twice or discarded as an event duplicate.
+
+Financial locks follow a consistent application order: order → payment → subscription → invoice → entitlement/refund rows. Allocation locks payment then invoice; refund locks payment. Sort multiple IDs before locking them. Cross-row triggers serialize allocation/refund sums and reject over-allocation or excess reserved/processed refunds. Keep the total transaction below the configured lock/statement timeout. Retry bounded deadlocks/serialization failures only for local idempotent work; do not retry a remote charge blindly. PostgreSQL documents the distinction between [CHECK/foreign-key constraints](https://www.postgresql.org/docs/17/ddl-constraints.html) and [transaction row locks](https://www.postgresql.org/docs/17/explicit-locking.html).
+
+### Recurring periods, cancellation, dunning and refunds
+
+A recurring signup creates a Pending mandate/subscription and a provider plan/subscription reference under the enabled merchant capability. Only a verified authorized mandate sets Authorized. Only a confirmed paid invoice cycle advances `current_period_start/end` and grants a `recurring_period` entitlement. Its deterministic key includes subscription and provider billing period; the invoice's unique `(subscription_id,period_start)` prevents another local cycle identity. Verify the plan's current provider reference and invoice amount/currency; do not derive billing periods by adding 30 days.
+
+The provider performs supported mandate collection/pre-debit behavior. Persist notice evidence/time and reconcile missing callbacks. Dunning uses configured/provider-approved retries, `next_retry_at` and bounded attempt count; Past due is explicit and grants no new unearned period. Any grace access must be an explicit approved entitlement, not an accidental subscription-status allowance. A periodic reconciliation resolves pending events, unknown results and paid invoices missing grants.
+
+Cancel-at-period-end sets the cancellation request timestamp and version and reconciles the corresponding provider cancellation. Keep current paid access until its entitlement end. Confirm the effective date to the member only when the supported provider state is known; an unknown result is Pending cancellation. Immediate cancellation/refund is a separately authorized support action. Neither cancellation nor mandate cancellation automatically rewrites the prior paid period or legacy seconds balance.
+
+Refunds reserve the available captured amount before calling the provider, using unique local idempotency/provider references. Requested/Approved/Submitted/Pending/Processed amounts count against the payment; Failed/Rejected reservations can release capacity only after a known failure. Reconcile ambiguous outcomes, then mark Processed and adjust/revoke access according to the accepted refund policy in the same transaction as the local state transition. Produce an immutable refund-linked credit-note document where required. `invoice.current_revision_id` always refers to an invoice-kind document; credit-note rows are separate immutable documents in the history and never silently reduce a payable invoice by replacing that pointer. After allocation, monetary corrections use refunds/credit documents; nonmonetary invoice reissues retain financial totals. The finance adapter validates invoice/order/subscription/member/currency consistency and legal numbering; SQL uniqueness alone cannot establish tax compliance.
+
+Legacy liability import is an evidence-backed initial condition, not a reconstructed wallet service. Preserve exact seconds/money, pending provider references and export checksum. Match a member by verified stable identity. `migrated`, `refunded`, `settled` or `waived_with_consent` requires recorded evidence; a consent-based alternative also stores explicit consent evidence. Do not grant a new expiring pass as an assumed value conversion. If exact ongoing wallet semantics are retained, the old metering system remains the authority until its separate migration is designed; unresolved liability must not be labeled settled. Paid/legacy records use restrictive deletion and are anonymized/minimized under the accepted retention policy rather than cascaded away.
+
+## Quiz and learning integrity
+
+At start, lock/read the Published quiz and snapshot question prompts, option IDs/labels, correctness, reviewed explanation, points and passing threshold into the attempt. Public quiz serialization uses an explicit allowlist of prompts/options and omits `is_correct`, explanations, solution hashes and `question_snapshot`. Neither API/catalog cache nor offline lesson package includes the answer key. The private snapshot is necessary for stable grading; database access to it is limited to the grading/staff path.
+
+Submission validates each question/option belongs to the snapshot, choices are distinct, and Single choice has exactly one selected option. Lock the attempt, reject mutation after Submitted, compute server score from that immutable snapshot, persist answers/score/Passed and receipt atomically. Repeated submission with the same operation returns the same result; another operation cannot change a final grade. Return only permitted post-submission explanation fields. `quiz_answer.selected_option_ids` is an array for a bounded question, so membership/cardinality against the snapshot is a service invariant, not an array FK. Published quiz/question/options cannot be edited through the editorial service; create a new quiz version. Submitted answers/snapshots are not copied into analytics. Lesson completion references the exact lesson and has its own version, independent of whether the learner got a passing quiz score.
+
+## Query-to-index catalog
+
+Primary/unique constraints create their own B-tree indexes. Explicit indexes below serve known access patterns; no index is added just because a column exists. Foreign keys protect consistency but do not automatically index every referencing column. Validate actual plans on realistic English/Bengali and mixed entitlement data before claiming latency targets. Add an FK-side index only when the join/deletion/retirement plan or measured query needs it.
+
+| Query shape | Index/constraint used |
+|---|---|
+| User by normalized email; Google by subject | `maison_auth_user_email_normalized_uq`; framework SocialAccount provider/uid unique |
+| Session by cookie; active device list | Django session PK; `maison_device_member_active_idx` |
+| Email action consumption; expired actions/buckets | token SHA unique; `maison_email_action_expiry_idx`, `maison_rate_limit_expiry_idx` |
+| Work slug → edition/live revision | work slug unique; `maison_edition_work_idx`; edition/revision PK and `maison_revision_one_live_idx` |
+| Ordered chapters and anchor fetch | unit revision/ordinal unique; anchor unit/ordinal unique; anchor PK/composite unique |
+| Metadata exact/prefix search | `maison_metadata_title_prefix` over `lower(title)` with escaped bounded prefix |
+| Metadata full-text search | `maison_metadata_search_gin` with explicit English/simple query configs |
+| Title typo fallback; topics | `maison_metadata_title_trgm`; `maison_metadata_topics_gin` |
+| Reviewed Banglish lookup | search alias `(locale,alias_normalized)` unique |
+| Ready release schedule | `maison_revision_schedule_idx` |
+| Formats/assets for a title; chapter media | `maison_asset_revision_kind_idx`, `maison_asset_unit_idx` |
+| Old anchor → destination revision | anchor mapping source-anchor/destination unique; `maison_anchor_mapping_target_idx` |
+| Rights for revision/format; timing seek | rights unique revision/format; timing map audio/hash unique; `maison_timing_seek_idx` |
+| Curated shelf order | collection slug unique; catalog item collection/order unique |
+| Position by member/edition/format; Continue | progress unique scope; `maison_progress_continue_idx` |
+| Duplicate personal mutation / expiry cleanup | operation receipt member/operation unique; `maison_operation_expiry_idx` |
+| Annotation page and notes Vault | `maison_annotation_reader_idx`, `maison_annotation_notes_idx` |
+| Saved and custom lists | `maison_saved_recent_idx`, personal list member/name unique, list item list/order unique |
+| Track/lesson and active quiz | track slug unique; lesson track/ordinal unique; `maison_quiz_published_uq` |
+| Quiz attempt history; lesson completion | `maison_quiz_attempt_history_idx`; lesson progress member/lesson unique |
+| Offers currently available | `maison_offer_available_idx` plus approval/time filtering |
+| Order/payment/provider dedupe and pending reconcile | order member/key unique; payment provider/payment unique; event provider/event unique; `maison_order_reconcile_idx`, `maison_payment_event_pending_idx` |
+| Member purchase/invoice/subscription history | `maison_order_history_idx`, `maison_invoice_member_idx`, `maison_subscription_member_idx` |
+| Due renewals/reconciliation; one invoice per cycle | `maison_subscription_due_idx`; `maison_invoice_cycle_uq` |
+| Refund reservation/payment allocations | `maison_refund_payment_idx`; allocation payment/revision unique, `maison_allocation_invoice_idx` |
+| Current entitlement check | `maison_entitlement_access_idx` filtered revoked-null, then time/scope/formats check |
+| Download list/revoke by entitlement | `maison_download_member_idx`, `maison_download_entitlement_idx` |
+| Latest consent; outbox due work | `maison_consent_latest_idx`, `maison_outbox_due_idx` |
+| Audit entity/history; retention | `maison_audit_entity_idx`, `maison_audit_age_idx` |
+| WALM interval union and age cleanup | `maison_activity_week_idx`, `maison_activity_age_idx` |
+
+Search normalizes metadata/query to Unicode NFC without removing Bengali signs/joiners. The generated vector contains `simple` title/creator/metadata and extra English lexemes for English metadata. Exact/prefix ranking precedes reviewed aliases, then bounded trigram fallback for sufficiently long input. Join against Live revisions in all branches, apply locale/house/format/rights filters, return at most the bounded page size. Query placeholders are parameters; never interpolate a tsquery, SQL sort key or wildcard from the browser. Trigram behavior and operator classes are documented by [PostgreSQL](https://www.postgresql.org/docs/17/pgtrgm.html). No index guarantees sub-200ms without workload qualification.
+
+## Jobs, isolation, access and deletion policy
+
+Use `READ COMMITTED` and explicit `transaction.atomic()` around the transitions above; do not wrap every SSR/media request in a long transaction. Managed transaction pooling must not carry session state or session advisory locks. Job claim uses `SELECT ... FOR UPDATE SKIP LOCKED` over due Pending work and expired Claimed leases, updates a 120-second lease/attempt, then commits before the external call. Finish/retry by lease owner; backoff and seven total attempts (the initial attempt plus six retries at the configured delays) lead to Dead with an operator-visible error code. The same dedupe key survives a lost provider response. The export schedule uses its separate credential/direct connection; it does not wait behind the email batch.
+
+Application SQL permissions are least privilege, with no DDL, superuser or unrestricted bucket access. Normal app code may append audit/consent and invoice/allocation history; only the maintenance/finance procedure has the specific retention/compensation permissions. The SQL installs append-only UPDATE/DELETE guards for invoice revisions and allocations. Audit retention intentionally has no unconditional delete trigger so approved minimization remains possible. Do not expose direct browser database access; row-level security is unnecessary for this same-origin Django-only access pattern. Every query includes session-derived ownership/role checks. Support cannot read arbitrary private notes/quiz answers merely because it can reconcile an order; publisher cannot approve rights unless separately granted that role.
+
+`ON DELETE CASCADE` is limited to member-owned ephemeral/private state and subordinate owned list/attempt rows. Published content, rights, orders, payments, invoices, entitlements and liabilities use RESTRICT to prevent accidental loss. Staff attribution uses SET NULL where loss of a staff account should not erase the record. Member hard deletion is therefore an orchestrated privacy job, not `profile.delete()`: revoke access/sessions; delete notes/progress/lists/attempts/download manifests/consent when appropriate; anonymize the account; retain only finance/rights/liability records required by the accepted policy, with private identity minimized. Audit stores redacted IDs/reason categories, not copies of private text. Allauth and session data are included in export/delete handling.
+
+Proposed retention to finalize with the owner/privacy/finance schedule before launch:
+
+| Data | Proposed bounded handling |
+|---|---|
+| Email action token | Delete consumed/expired rows after 24 hours; validity is purpose-specific and checked before consumption. |
+| Rate-limit buckets | Delete after expiry plus one hour; store only keyed hashes. |
+| Sessions/device bindings | Django clears expired sessions daily; active device display follows policy, revoked records purged after 30 days. |
+| Operation receipts and annotation tombstones | 35 days; personal response snapshots are private and minimized. |
+| Completed outbox / rejected payload objects | 30 days; remove secret/PII delivery payload after send; Dead work retains minimal actionable metadata until resolved. |
+| Privacy export | Private object, seven-day maximum download window, one-use/short signed access; delete export object after seven days. Request status/result object reference lives in outbox plus a redacted audit record. |
+| Raw verified webhook body | Up to 30 days only if reconciliation needs it; keep body hash/provider IDs and essential financial evidence under finance retention. |
+| WALM active intervals | 90 days, then only nonidentifying aggregate counts if still useful; subtract/union overlap before aggregation. |
+| Audit | 180 days proposed for ordinary actions; rights/finance evidence follows its separate accepted legal schedule. |
+| Orders/payments/invoice/legacy evidence | Finance/legal retention decision required; no guessed universal deletion period. Retain minimal necessary records, not every historic meter heartbeat. |
+| Independent encrypted exports | 30 daily and 12 monthly proposed; restored exports rerun deletion tombstones/current restrictions before public service. Old personal data ages out through the backup policy. |
+
+Do not use this retention proposal as a statement of law. Privacy requests are authenticated and recorded as `privacy_export`/`privacy_delete` outbox work with a stable operation/dedupe key, status and restricted result key. Provider deletion/export calls are retried idempotently. A request cannot erase an unsettled financial obligation or make a private audit export public. General analytics events outside WALM use a separately typed, consent-aware collector and bounded object aggregates; they do not need an unbounded general-purpose event table here.
+
+## Migrations, validation and limits
+
+Initial migration order: custom User/auth/session/allauth → profile/identity support → content/search → personal/learning → offers/commerce → downloads/ops → triggers/indexes. The SQL is one transaction for a fresh database. Its two circular pointers are deferrable composite FKs; all other references name previously declared tables. Provision `pg_trgm` with the database migration credential. No production role, account, row, secret, price or provider object is provisioned by this document.
+
+Before implementation, translate the DDL into Django-managed migrations and compare generated schema/constraints to this contract. Use a disposable PostgreSQL 17 database with UTF-8 to apply framework migrations, then schema, fixtures and rollback/reapply. Exercise duplicate/out-of-order payment events, concurrent refund/allocation reservations, first-progress races, CAS/replay collisions, publication/edit race, wrong revision anchors, cross-account device grants, expiry/rights withdrawal, quiz snapshot grading and deletion/export. Inspect `EXPLAIN (ANALYZE, BUFFERS)` on a realistic multilingual catalog and entitlement set; tune index count/GIN write load from evidence. On populated migrations use expand/backfill/validate/contract and `CREATE INDEX CONCURRENTLY` outside a transaction as appropriate; a fresh-schema transaction is not a recipe for online large-table index creation.
+
+Current local checks: PostgreSQL SQL and PL/pgSQL grammar parsed with `pglast` v7.23 (PostgreSQL 17.7 grammar) installed in a temporary validation folder (129 statements, 53 tables, 48 explicit indexes, seven functions and 15 triggers); static AST checks validate declared FK columns/unique targets and index column references. No PostgreSQL server is installed/running in this environment, and no production database was contacted. Grammar/static validation does not prove extension availability, generated-column immutability, trigger execution, query plans, concurrency behavior or Django migration equivalence. Those are the explicit disposable-database implementation checks above; they are not reported as passing runtime tests.
+
+
+Draft1.1 adds persistent aggregate versions, explicit per-format access/download policy, free authorization source, completion state and extended receipt kinds. Refund amount assignment is permitted once during bounded requested-to-approved; approved amounts then freeze. Revision clones deliberately copy verified objects to new revision-scoped keys; global object-key uniqueness remains.

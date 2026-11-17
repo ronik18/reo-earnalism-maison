@@ -1,0 +1,14 @@
+{
+  "owner": "root integration lane",
+  "date": "2026-11-17",
+  "scope": "independent new platform; local implementation only",
+  "new_repository": "maison-platform",
+  "branch": "codex/maison-first-journey-20261117",
+  "legacy_checkout_branch": "codex/new-enhancements-20260817-000549",
+  "legacy_checkout_head": "20aa0a0200ba9ae914572e53fbde7525974f501f",
+  "remote_main_observed": "9db64071e7092bd43059a3a76444c0244fbec264",
+  "legacy_fetch_status": "failed due to missing pre-existing local Git objects; no history rewritten",
+  "canonical_integration_checkout": "unavailable; existing registration preserved",
+  "production_changes": false,
+  "paid_resources": false
+}

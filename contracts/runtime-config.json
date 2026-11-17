@@ -1,0 +1,313 @@
+{
+  "contract_version": "1.1.0",
+  "checked_on": "2026-11-17",
+  "status": "proposed_initial_settings_require_load_and_provider_qualification",
+  "runtime": {
+    "python": "3.13 current security patch",
+    "django": "5.2 LTS current security patch",
+    "postgresql": "17 provider-supported current minor",
+    "node_build_only": "24 LTS current security patch",
+    "server": "gunicorn WSGI gthread",
+    "workers_per_instance": 2,
+    "threads_per_worker": 2,
+    "graceful_timeout_seconds": 30,
+    "max_requests_per_worker": 2000,
+    "max_requests_jitter": 200,
+    "worker_timeout_seconds": 30,
+    "handler_budget_seconds_proposed": 20,
+    "timeout_semantics": "gthread worker timeout is heartbeat-based; independently bound provider/query/body/handler work and qualify saturation."
+  },
+  "capacity": {
+    "app_region": "Singapore",
+    "database_region": "AWS Singapore",
+    "app_min_instances": 2,
+    "app_max_instances": 6,
+    "app_cpu_target_percent": 65,
+    "neon_plan": "Scale",
+    "neon_min_CU": 0.5,
+    "neon_max_CU": 2,
+    "neon_autosuspend": false,
+    "db_clients_per_instance_max": 4,
+    "normal_app_db_clients_max": 24,
+    "rolling_overlap_app_db_clients_max": 48,
+    "maintenance_direct_connections_max": 2,
+    "operator_headroom_clients": 4,
+    "backend_active_query_limit": "qualify at minimum CU; frontend client limits are not active-query capacity"
+  },
+  "database": {
+    "application_connection": "Neon managed transaction pool with sslmode=verify-full",
+    "maintenance_connection": "direct endpoint with sslmode=verify-full",
+    "conn_max_age_seconds": 60,
+    "conn_health_checks": true,
+    "disable_server_side_cursors": true,
+    "psycopg_prepare_threshold": null,
+    "connect_timeout_seconds": 3,
+    "normal_statement_timeout_ms": 5000,
+    "lock_timeout_ms": 2000,
+    "idle_in_transaction_session_timeout_ms": 10000,
+    "atomic_requests": false,
+    "transaction_isolation": "READ COMMITTED",
+    "timeout_application": "qualify provider-supported role defaults; SET LOCAL overrides only inside explicit maintenance transactions",
+    "session_state": "no session advisory locks, LISTEN or session temporary-state dependency through transaction pooling"
+  },
+  "http": {
+    "json_body_max_bytes": 262144,
+    "webhook_body_max_bytes": 1048576,
+    "provider_connect_timeout_seconds": 3,
+    "provider_total_timeout_seconds": 8,
+    "default_page_size": 20,
+    "max_page_size": 100,
+    "search_query_max_characters": 120,
+    "request_id_max_characters": 64,
+    "origin_header_value": "secret managed separately",
+    "api_cors": "same-origin only",
+    "direct_origin_exception": "minimal liveness only"
+  },
+  "sessions": {
+    "session_cookie": "__Host-earnalism_session",
+    "csrf_cookie": "__Host-earnalism_csrf",
+    "secure": true,
+    "http_only_session": true,
+    "same_site": "Lax",
+    "cookie_path": "/",
+    "cookie_domain": null,
+    "member_session_absolute_seconds": 1209600,
+    "staff_session_absolute_seconds": 28800,
+    "staff_idle_seconds": 1800,
+    "device_last_seen_write_min_interval_seconds": 1800,
+    "magic_link_ttl_seconds": 600,
+    "password_reset_ttl_seconds": 1800,
+    "verification_link_ttl_seconds": 86400,
+    "recovery_code_storage": "single-use keyed hash",
+    "privileged_mfa_required": true
+  },
+  "personal_state": {
+    "active_progress_debounce_seconds": 15,
+    "offline_operation_receipt_retention_days": 35,
+    "offline_queue_max_operations": 500,
+    "offline_queue_max_bytes": 2097152,
+    "conflict_policy": "explicit user choice against new server revision; client time never silently wins",
+    "progress_coalescing": "only unsent operations for same edition and format; preserve latest intentional position"
+  },
+  "media": {
+    "online_capability_max_seconds": 120,
+    "offline_license_proposed_max_seconds": 86400,
+    "offline_license_bound": "minimum of configured maximum, entitlement end and rights end",
+    "offline_revocation_limit": "next successful connection or previously issued license expiry in an honest client; not DRM",
+    "audio_bitrates_kbps_proposed": [
+      48,
+      96
+    ],
+    "audio_automatic_ABR": false,
+    "automatic_ABR_status": "owner decision if PRD requirement retained",
+    "full_video_offline": false,
+    "private_media_CDN_cache": false
+  },
+  "features": {
+    "reader": true,
+    "audio": false,
+    "video": false,
+    "offline_text_audio": false,
+    "email_password": true,
+    "email_link": false,
+    "google_oauth": false,
+    "phone_otp": false,
+    "recurring_billing": false,
+    "international_checkout": false,
+    "gift": false,
+    "family": false,
+    "minor_profiles": false,
+    "timed_recorded_practice": false,
+    "clips": false,
+    "word_read_along": false,
+    "dictionary": false,
+    "video_trinity": false,
+    "video_download": false
+  },
+  "scheduled_commands": [
+    {
+      "name": "maintenance",
+      "cron_UTC": "* * * * *",
+      "command": "python manage.py run_maintenance --max-seconds 45 --batch-size 25",
+      "lease_seconds": 120,
+      "batch_size": 25,
+      "max_runtime_seconds": 45,
+      "includes": [
+        "due outbox",
+        "scheduled publishing",
+        "bounded payment reconciliation",
+        "expired session/token cleanup"
+      ],
+      "proposed_management_command": true
+    },
+    {
+      "name": "independent_export",
+      "cron_UTC": "0 3 * * *",
+      "command": "python manage.py export_database --encrypted --manifest",
+      "direct_connection": true,
+      "separate_credential": true,
+      "proposed_management_command": true
+    }
+  ],
+  "jobs": {
+    "delivery_semantics": "at-least-once external effects with durable local deduplication",
+    "claim_query": "SELECT FOR UPDATE SKIP LOCKED then lease and commit before provider call",
+    "retry_delays_seconds": [
+      30,
+      120,
+      600,
+      1800,
+      7200,
+      21600
+    ],
+    "jitter": "uniform 0.8 to 1.2 multiplier",
+    "max_concurrent_external_calls": 2,
+    "honor_retry_after": true,
+    "financial_unknown_outcome": "reconcile before retry; never create a replacement charge blindly",
+    "max_attempts": 7,
+    "attempt_definition": "initial attempt plus six scheduled retries; seventh failure is terminal until operator retry"
+  },
+  "backups": {
+    "neon_restore_history_days": 7,
+    "independent_export_interval_hours": 24,
+    "daily_export_retention_days_proposed": 30,
+    "monthly_snapshot_count_proposed": 12,
+    "retention_approval_status": "owner/privacy/finance schedule required before launch",
+    "restore_drill_interval_days": 90,
+    "regional_restore_target_hours_untested": 4,
+    "export_RPO_hours_untested": 24,
+    "zonal_recovery_design_allowance_minutes_untested": 10,
+    "node_recovery_target_minutes_untested": 5
+  },
+  "alarms": [
+    {
+      "signal": "private_api_5xx",
+      "threshold": "more than 1 percent over 5 minutes with at least 50 requests",
+      "action": "operator alert and inspect dependency health"
+    },
+    {
+      "signal": "synthetic_preview_failure",
+      "threshold": "3 consecutive one-minute probes",
+      "action": "operator alert; separate edge versus origin"
+    },
+    {
+      "signal": "payment_mismatch",
+      "threshold": "any verified amount/currency/ownership mismatch",
+      "action": "immediate operator review; do not grant access"
+    },
+    {
+      "signal": "captured_payment_without_grant",
+      "threshold": "older than 2 minutes",
+      "action": "immediate reconciliation alert"
+    },
+    {
+      "signal": "outbox_oldest_due_age",
+      "threshold": "more than 5 minutes",
+      "action": "inspect scheduler and provider failures"
+    },
+    {
+      "signal": "export_age",
+      "threshold": "more than 26 hours",
+      "action": "backup alert and bounded retry"
+    },
+    {
+      "signal": "database_at_max_CU",
+      "threshold": "more than 15 minutes with p95 query latency above qualified budget",
+      "action": "inspect plans and hot working set; cost review before raising cap"
+    },
+    {
+      "signal": "db_connection_wait",
+      "threshold": "p95 above 250 milliseconds for 5 minutes",
+      "action": "inspect concurrency and slow queries; do not increase pools blindly"
+    },
+    {
+      "signal": "monthly_cost_forecast",
+      "threshold": "more than 20 percent above approved scenario",
+      "action": "owner cost alert; no automatic outage-inducing shutdown"
+    }
+  ],
+  "required_environment_names": [
+    "DJANGO_SECRET_KEY",
+    "ALLOWED_HOSTS",
+    "CSRF_TRUSTED_ORIGINS",
+    "DATABASE_URL",
+    "DATABASE_DIRECT_URL",
+    "ORIGIN_SHARED_SECRET",
+    "EMAIL_ACTION_HASH_KEY",
+    "EMAIL_PROVIDER_API_KEY",
+    "EMAIL_FROM_ADDRESS",
+    "R2_ACCOUNT_ID",
+    "R2_PRIVATE_BUCKET",
+    "R2_PUBLIC_ASSET_HOST",
+    "R2_APPLICATION_KEY_ID",
+    "R2_APPLICATION_SECRET",
+    "R2_UPLOAD_KEY_ID",
+    "R2_UPLOAD_SECRET",
+    "BACKUP_BUCKET",
+    "BACKUP_KEY_ID",
+    "BACKUP_SECRET",
+    "BACKUP_ENCRYPTION_RECIPIENT"
+  ],
+  "conditional_environment_names": {
+    "google_oauth": [
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET"
+    ],
+    "razorpay": [
+      "RAZORPAY_KEY_ID",
+      "RAZORPAY_KEY_SECRET",
+      "RAZORPAY_WEBHOOK_SECRET",
+      "MERCHANT_ENTITY_CONFIG_VERSION"
+    ],
+    "stream": [
+      "STREAM_ACCOUNT_ID",
+      "STREAM_API_TOKEN",
+      "STREAM_SIGNING_KEY_ID",
+      "STREAM_SIGNING_PRIVATE_KEY"
+    ],
+    "cache_purge": [
+      "CLOUDFLARE_ZONE_ID",
+      "CLOUDFLARE_SCOPED_PURGE_TOKEN"
+    ],
+    "phone_otp": [
+      "SMS_PROVIDER_CONFIG",
+      "SMS_APPROVED_MONTHLY_SPEND_LIMIT"
+    ],
+    "operator_readiness": [
+      "HEALTH_PROBE_SECRET"
+    ]
+  },
+  "release_checks": [
+    "schema and OpenAPI examples validated",
+    "Django migrations equivalent to reviewed SQL",
+    "PostgreSQL transaction/concurrency tests",
+    "same-origin CSRF and cross-account authorization tests",
+    "minimum and peak CU load measurements",
+    "cache isolation and withdrawal drill",
+    "offline text/audio device spike",
+    "provider sandbox duplicate/out-of-order payment tests",
+    "independent export restore",
+    "commercial rights and privacy decision register resolved for enabled features"
+  ],
+  "activation_requirements": {
+    "audio": "only released and cleared assets",
+    "video": "only when an approved video exists",
+    "offline_text_audio": "only with per-format download rights and successful device spike",
+    "email_link": "requires verified email provider and action-token tests",
+    "google_oauth": "requires configured verified client",
+    "recurring_contracts": "designed; activation requires merchant and commercial acceptance"
+  },
+  "rollout_gate_map": {
+    "EMAIL_MAGIC_LINK_ENABLED": "email_link",
+    "PHONE_OTP_ENABLED_AND_VERIFIED_PROVIDER": "phone_otp",
+    "RECURRING_PASS_ENABLED": "recurring_billing",
+    "RECURRING_PASS_ENABLED_AND_MERCHANT_APPROVED": "recurring_billing",
+    "GOOGLE_OAUTH_ENABLED_AND_CONFIGURED": "google_oauth",
+    "OFFLINE_TEXT_AUDIO_ENABLED": "offline_text_audio"
+  },
+  "local_only_transports": {
+    "media": "local_signed",
+    "upload": "local_put",
+    "enabled_in_production": false
+  }
+}

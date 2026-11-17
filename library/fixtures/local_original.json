@@ -1,0 +1,37 @@
+{
+  "notice": "Original fictional technical acceptance content composed for this local build. Not an imported book or a commercially cleared release. No audio, production customer data, pricing or external provider is included.",
+  "editions": [
+    {
+      "suffix": "001",
+      "locale": "en",
+      "slug": "river-notebook-en",
+      "title": "The River Notebook",
+      "description": "An original local test story about observing a river and keeping careful notes. Technical fixture only; not a commercially released title.",
+      "unit_title": "A page beside the water",
+      "paragraphs": [
+        "Mira placed a blue notebook on the windowsill. Beyond the rain, a small boat crossed the river. She wrote the time at the top of a clean page and waited for one detail worth remembering.",
+        "A leaf turned slowly in a shallow puddle. Every few seconds a drop pushed it toward the steps. Mira drew a circle beside her sentence. The circle meant that she had seen something, but had not yet understood it.",
+        "Her grandfather brought two cups of tea. He asked what the river was doing. Mira said it was carrying the boat east. He pointed to the rope at the landing: the boat was tied in place, while the water moved beneath it.",
+        "Mira read her first sentence again. She crossed out the part she could not support and wrote a better one below it. Changing a note did not spoil the page. It made the page more useful.",
+        "When the rain stopped, they walked down to the landing. The rope was wet, the steps were slippery, and a green kingfisher waited on a branch. They watched without trying to fill the silence.",
+        "At dusk Mira added one final line: a careful observation can begin with a mistake, provided we return to what is actually there. She closed the notebook. The last page was still blank, ready for tomorrow."
+      ]
+    },
+    {
+      "suffix": "002",
+      "locale": "bn",
+      "slug": "river-notebook-bn",
+      "title": "নদীর খাতা",
+      "description": "নদীর ধারে বসে দেখা আর নিজের ভুল ঠিক করার একটি মৌলিক স্থানীয় পরীক্ষামূলক গল্প। এটি বাণিজ্যিকভাবে প্রকাশিত বই নয়।",
+      "unit_title": "জলের পাশে এক পাতা",
+      "paragraphs": [
+        "মীরা জানালার ধারে নীল খাতাটা রাখল। বৃষ্টির আড়ালে নদীর উপর একটি ছোট নৌকা দেখা যাচ্ছিল। সাদা পাতার মাথায় সময় লিখে সে অপেক্ষা করল, মনে রাখার মতো কিছু চোখে পড়বে বলে।",
+        "সিঁড়ির কাছে জমা জলে একটা পাতা আস্তে আস্তে ঘুরছিল। কয়েক মুহূর্ত পরপর বৃষ্টির ফোঁটা তাকে আর একটু এগিয়ে দিচ্ছিল। মীরা নিজের বাক্যের পাশে একটি গোল দাগ দিল। দাগের মানে, সে কিছু দেখেছে, কিন্তু এখনও পুরোটা বোঝেনি।",
+        "দাদু দু কাপ চা নিয়ে এলেন। নদী কী করছে, তিনি জানতে চাইলেন। মীরা বলল, নৌকাটাকে পুব দিকে নিয়ে যাচ্ছে। দাদু ঘাটের দড়িটা দেখালেন। নৌকা বাঁধা ছিল একই জায়গায়, তার নীচ দিয়ে জল বয়ে যাচ্ছিল।",
+        "মীরা প্রথম বাক্যটা আবার পড়ল। যে কথার প্রমাণ তার কাছে ছিল না, সেটুকু কেটে নীচে নতুন বাক্য লিখল। ভুল ঠিক করলে পাতা নষ্ট হয় না। বরং সেই পাতার উপর একটু বেশি ভরসা করা যায়।",
+        "বৃষ্টি থামলে দুজনে ঘাটে নামল। দড়ি ভেজা, সিঁড়ি পিছল। ডালের উপর একটি মাছরাঙা চুপ করে বসে ছিল। তারাও চুপ করে দেখল। সব নীরবতার মধ্যে কথা ভরে দেওয়ার দরকার নেই।",
+        "সন্ধ্যায় মীরা শেষ লাইনটি লিখল: মন দিয়ে দেখা কখনও ভুল দিয়ে শুরু হতে পারে, যদি আমরা আবার ফিরে এসে সত্যিটা দেখি। খাতা বন্ধ করল সে। শেষ পাতাটা তখনও সাদা, আগামী দিনের জন্য অপেক্ষা করছে।"
+      ]
+    }
+  ]
+}

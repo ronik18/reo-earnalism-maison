@@ -1,0 +1,36 @@
+from django.urls import path
+from . import views
+
+app_name = "web"
+urlpatterns = [
+    path("", views.root, name="root"),
+    path("auth/verify/", views.verify_landing, name="verify-landing"),
+    path("auth/reset/", views.reset_landing, name="reset-landing"),
+    path("<str:locale>/", views.home, name="home"),
+    path("<str:locale>/welcome/", views.welcome, name="welcome"),
+    path("<str:locale>/explore/", views.search, name="explore"),
+    path("<str:locale>/search/", views.search, name="search"),
+    path("<str:locale>/titles/<str:identifier>/", views.title, name="title"),
+    path("<str:locale>/read/<uuid:edition_id>/", views.reader, name="reader-start"),
+    path("<str:locale>/read/<uuid:edition_id>/<uuid:unit_id>/", views.reader, name="reader"),
+    path("<str:locale>/sign-in/", views.sign_in, name="sign-in"),
+    path("<str:locale>/sign-up/", views.sign_up, name="sign-up"),
+    path("<str:locale>/password-reset/", views.password_reset, name="password-reset"),
+    path("<str:locale>/password-reset/<str:token>/", views.password_reset_confirm, name="password-reset-confirm"),
+    path("<str:locale>/verify-email/<str:token>/", views.verify_email, name="verify-email"),
+    path("<str:locale>/sign-out/", views.sign_out, name="sign-out"),
+    path("<str:locale>/vault/", views.vault, name="vault"),
+    path("<str:locale>/vault/lists/<uuid:list_id>/", views.personal_list, name="personal-list"),
+    path("<str:locale>/vault/downloads/", views.downloads, name="downloads"),
+    path("<str:locale>/settings/", views.settings, name="settings"),
+    path("<str:locale>/pass/", views.pass_page, name="pass"),
+    path("<str:locale>/learn/", views.learn, name="learn"),
+    path("<str:locale>/tracks/<uuid:track_id>/", views.track, name="track"),
+    path("<str:locale>/lessons/<uuid:lesson_id>/", views.lesson, name="lesson"),
+    path("<str:locale>/interview/sde/", views.interview, name="interview"),
+    path("<str:locale>/interview/sde/<uuid:track_id>/questions/<uuid:question_id>/", views.question, name="question"),
+    path("<str:locale>/series/", views.series, name="series"),
+    path("<str:locale>/clips/", views.unavailable, name="clips"),
+    path("<str:locale>/practice/", views.unavailable, name="practice"),
+    path("<str:locale>/gifts/", views.unavailable, name="gifts"),
+]

@@ -1,0 +1,115 @@
+import uuid
+from django.conf import settings
+from django.db import models,transaction
+from django.db.models import Q,F
+
+class Track(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    title=models.CharField(max_length=240)
+    locale=models.CharField(max_length=2,choices=[('en','English'),('bn','Bengali')])
+    kind=models.CharField(max_length=20,choices=[('learning','learning'),('sde_interview','sde_interview')],default='learning')
+    description=models.TextField()
+    duration_days=models.PositiveIntegerField(null=True,blank=True)
+    company_style=models.CharField(max_length=80,blank=True)
+    access=models.CharField(max_length=8,choices=[('free','free'),('paid','paid'),('deny','deny')],default='deny')
+    edition=models.ForeignKey('library.Edition',on_delete=models.PROTECT,null=True,blank=True)
+    published=models.BooleanField(default=False)
+    class Meta:
+        db_table='maison_track'
+
+class Lesson(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    track=models.ForeignKey(Track,on_delete=models.PROTECT,related_name='lessons')
+    title=models.CharField(max_length=240)
+    ordinal=models.PositiveIntegerField()
+    body=models.JSONField(default=list)
+    unit=models.ForeignKey('library.Unit',on_delete=models.PROTECT,null=True,blank=True)
+    version=models.PositiveIntegerField(default=1)
+    class Meta:
+        db_table='maison_lesson'
+        ordering=['ordinal']
+        constraints=[models.UniqueConstraint(fields=['track','ordinal'],name='maison_lesson_track_ordinal')]
+
+class LessonCompletion(models.Model):
+    user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    lesson=models.ForeignKey(Lesson,on_delete=models.PROTECT)
+    completed_at=models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table='maison_lesson_completion'
+        constraints=[models.UniqueConstraint(fields=['user','lesson'],name='maison_completion_user_lesson')]
+
+class InterviewQuestion(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    track=models.ForeignKey(Track,on_delete=models.PROTECT,related_name='interview_questions')
+    topic=models.CharField(max_length=80)
+    difficulty=models.CharField(max_length=16,choices=[(s,s) for s in ('foundation','intermediate','advanced')])
+    company_style=models.CharField(max_length=80,blank=True)
+    prompt=models.TextField()
+    model_answer=models.TextField()
+    rubric=models.JSONField(default=list)
+    class Meta:
+        db_table='maison_interview_question'
+
+class Quiz(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    lesson=models.OneToOneField(Lesson,on_delete=models.PROTECT,related_name='quiz')
+    version=models.PositiveIntegerField(default=1)
+    max_attempts=models.PositiveIntegerField(null=True,blank=True)
+    class Meta:
+        db_table='maison_quiz'
+
+class Question(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    quiz=models.ForeignKey(Quiz,on_delete=models.PROTECT,related_name='questions')
+    ordinal=models.PositiveIntegerField()
+    prompt=models.TextField()
+    explanation=models.TextField()
+    class Meta:
+        db_table='maison_question'
+        ordering=['ordinal']
+        constraints=[models.UniqueConstraint(fields=['quiz','ordinal'],name='maison_question_quiz_ordinal')]
+
+    @transaction.atomic
+    def save(self,*args,**kwargs):
+        ids={self.quiz_id}
+        old=type(self).objects.filter(pk=self.pk).values_list('quiz_id',flat=True).first()
+        if old:ids.add(old)
+        list(Quiz.objects.select_for_update().filter(pk__in=ids).order_by('id'))
+        super().save(*args,**kwargs)
+        Quiz.objects.filter(pk__in=ids).update(version=F('version')+1)
+
+class QuestionOption(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    question=models.ForeignKey(Question,on_delete=models.PROTECT,related_name='options')
+    text=models.CharField(max_length=1000)
+    is_correct=models.BooleanField(default=False)
+    class Meta:
+        db_table='maison_question_option'
+        constraints=[models.UniqueConstraint(fields=['question'],condition=Q(is_correct=True),name='maison_one_correct_option')]
+
+    @transaction.atomic
+    def save(self,*args,**kwargs):
+        ids={self.question.quiz_id}
+        old=type(self).objects.filter(pk=self.pk).values_list('question__quiz_id',flat=True).first()
+        if old:ids.add(old)
+        list(Quiz.objects.select_for_update().filter(pk__in=ids).order_by('id'))
+        super().save(*args,**kwargs)
+        Quiz.objects.filter(pk__in=ids).update(version=F('version')+1)
+
+class QuizAttempt(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    quiz=models.ForeignKey(Quiz,on_delete=models.PROTECT,related_name='attempts')
+    quiz_version=models.PositiveIntegerField()
+    # Server-only immutable scoring snapshot; DTO never exposes it before submission.
+    scoring_snapshot=models.JSONField(default=list)
+    status=models.CharField(max_length=12,default='in_progress',choices=[('in_progress','in_progress'),('submitted','submitted')])
+    answers=models.JSONField(default=list)
+    score=models.PositiveIntegerField(null=True,blank=True)
+    result=models.JSONField(null=True,blank=True)
+    version=models.PositiveIntegerField(default=1)
+    started_at=models.DateTimeField(auto_now_add=True)
+    submitted_at=models.DateTimeField(null=True,blank=True)
+    class Meta:
+        db_table='maison_quiz_attempt'
+        constraints=[models.CheckConstraint(condition=Q(score__isnull=True)|Q(score__lte=100),name='maison_score_range')]

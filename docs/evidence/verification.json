@@ -1,0 +1,138 @@
+{
+  "checked_on": "2026-11-17",
+  "status": "LOCAL_FIRST_JOURNEY_PASS_NOT_PRODUCTION_ACCEPTED",
+  "original_audit_findings": 21,
+  "original_audit_findings_reconciled": 21,
+  "local_postgresql_suite": {
+    "tests": 73,
+    "pass": true,
+    "seconds": 35.852,
+    "python": "3.12.13",
+    "django": "5.2.19",
+    "postgresql_major": 17,
+    "module_counts": {
+      "accounts": 12,
+      "billing": 8,
+      "integration_tests": 1,
+      "learning": 6,
+      "library": 14,
+      "operations": 7,
+      "reader": 8,
+      "web": 17
+    }
+  },
+  "container_postgresql_suite": {
+    "tests": 73,
+    "pass": true,
+    "seconds": 53.135,
+    "python_family": "3.13",
+    "postgresql_major": 17,
+    "image_id": "sha256:f4d16a64d8315cc2b9b3f13f0c2d762a96e65b4256a6e385fe6dfdf0dadce506",
+    "python": "3.13.18"
+  },
+  "contract_structure": {
+    "openapi_version": "3.1.0",
+    "operations": 116,
+    "schemas": 154,
+    "examples_schema_validated": 963,
+    "unique_schema_example_cases": 59,
+    "SQL_statements_parsed": 131,
+    "application_tables": 54,
+    "PLpgSQL_grammar": "PASS",
+    "declared_indexes": 49,
+    "foreign_keys_target_checked": 108,
+    "screens": 26,
+    "screen_operation_references_checked": 171,
+    "json_files_parsed": [
+      "cache-policy.json",
+      "payload-examples.json",
+      "runtime-config.json"
+    ],
+    "cache_and_delivery_examples_schema_validated": 29,
+    "limits": [
+      "No PostgreSQL engine execution",
+      "No application implementation or provider calls",
+      "No load, browser offline, failover or restore acceptance"
+    ]
+  },
+  "raw_contract_postgresql": {
+    "scope": "isolated local raw contract database, distinct from app ORM migrations",
+    "database": "maison_contract_37697632a251",
+    "postgres_major": 17,
+    "paid_infrastructure": false,
+    "checks": [
+      {
+        "check": "full_handoff_sql_executes_after_real_auth_session_migrations",
+        "pass": true,
+        "tables": 54
+      },
+      {
+        "check": "new_revision_access_defaults_deny",
+        "pass": true
+      },
+      {
+        "check": "access_policy_rejects_json_null",
+        "pass": true
+      },
+      {
+        "check": "access_policy_rejects_missing_format",
+        "pass": true
+      },
+      {
+        "check": "maison_edition_version_positive",
+        "pass": true
+      },
+      {
+        "check": "maison_edition_revision_version_positive",
+        "pass": true
+      },
+      {
+        "check": "partial_refund_approval_can_reduce_once",
+        "pass": true
+      },
+      {
+        "check": "approved_refund_amount_frozen",
+        "pass": true
+      },
+      {
+        "check": "refund_reservations_cannot_exceed_capture",
+        "pass": true
+      },
+      {
+        "check": "approval_cannot_increase_proposal",
+        "pass": true
+      },
+      {
+        "check": "device_asset_order_refund_versions_persisted",
+        "pass": true
+      }
+    ],
+    "pass": true
+  },
+  "local_backup_restore": {
+    "scope": "local logical backup/restore only; production PITR/HA not qualified",
+    "source_database": "maison",
+    "restored_database": "maison_restore_5afbe5104510",
+    "backup_sha256": "9ecfe6466ca47c5a327149a324b091444e49c0e067e02a56f18abd0bc2dbaae6",
+    "backup_bytes": 186474,
+    "tables_compared": 49,
+    "row_counts_and_content_hashes_match": true,
+    "paid_infrastructure": false,
+    "pass": true
+  },
+  "desktop_browser_journey": "pass: local signed-in original fixture, note/progress/completion/Vault and logout preview boundary",
+  "mobile_and_assistive_technology": "not_accepted: emulation inconclusive; physical devices and screen readers not run",
+  "production_acceptance_passed": false,
+  "paid_resources_provisioned": false,
+  "real_customer_data_migrated": false,
+  "commercial_book_published": false,
+  "existing_platform_changed": false,
+  "four_lanes_started": true,
+  "external_gates": [
+    "cleared exact launch title packets",
+    "R2/CDN/Stream and trusted territory adapter",
+    "external email and merchant qualification",
+    "offline/device/editorial/accessibility acceptance",
+    "production load, recovery/failover and cutover rehearsal"
+  ]
+}

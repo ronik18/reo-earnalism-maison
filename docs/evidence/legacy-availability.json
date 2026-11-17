@@ -1,0 +1,18 @@
+{
+  "checked_at": "2026-11-17T16:10:11.440675+00:00",
+  "scope": "read-only availability check, no platform changes",
+  "checks": [
+    {
+      "service": "legacy_frontend",
+      "url": "https://theearnalism.com",
+      "http_status": 200,
+      "pass": true
+    },
+    {
+      "service": "legacy_backend_health",
+      "url": "https://api.theearnalism.com/healthz",
+      "http_status": 200,
+      "pass": true
+    }
+  ]
+}

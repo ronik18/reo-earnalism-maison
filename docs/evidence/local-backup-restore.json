@@ -1,0 +1,11 @@
+{
+  "scope": "local logical backup/restore only; production PITR/HA not qualified",
+  "source_database": "maison",
+  "restored_database": "maison_restore_5afbe5104510",
+  "backup_sha256": "9ecfe6466ca47c5a327149a324b091444e49c0e067e02a56f18abd0bc2dbaae6",
+  "backup_bytes": 186474,
+  "tables_compared": 49,
+  "row_counts_and_content_hashes_match": true,
+  "paid_infrastructure": false,
+  "pass": true
+}

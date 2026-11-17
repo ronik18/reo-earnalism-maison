@@ -1,0 +1,118 @@
+{
+  "status": "Owner-selected final prototype typography; supersedes prior Fraunces/Literata/Manrope direction; actual brand logo unchanged",
+  "version": "2.0.0",
+  "date": "2026-11-16",
+  "fonts": {
+    "display": {
+      "latin": "Cormorant Garamond",
+      "bengali": "Noto Serif Bengali",
+      "weights": [
+        500,
+        600
+      ],
+      "variationSettings": "normal"
+    },
+    "reading": {
+      "latin": "Source Serif 4",
+      "bengali": "Noto Serif Bengali",
+      "weight": 400,
+      "sizePx": 20,
+      "lineHeight": 1.65,
+      "bengaliLineHeight": 1.8,
+      "measureCh": 65,
+      "opticalSizing": "auto"
+    },
+    "ui": {
+      "latin": "DM Sans",
+      "bengali": "Noto Sans Bengali",
+      "weights": [
+        450,
+        500,
+        600
+      ],
+      "bodySizePx": 16,
+      "lineHeight": 1.5
+    },
+    "accent": {
+      "alias": "ui",
+      "uses": [
+        "buttons",
+        "navigation",
+        "metadata",
+        "labels",
+        "controls"
+      ]
+    }
+  },
+  "scale": {
+    "hero": {
+      "sizePx": 40,
+      "lineHeight": 1.05,
+      "weight": 500
+    },
+    "h1": {
+      "sizePx": 38,
+      "lineHeight": 1.12,
+      "weight": 500
+    },
+    "h2": {
+      "sizePx": 28,
+      "lineHeight": 1.2,
+      "weight": 600
+    },
+    "h3": {
+      "sizePx": 22,
+      "lineHeight": 1.3,
+      "weight": 600
+    },
+    "body": {
+      "sizePx": 16,
+      "lineHeight": 1.5,
+      "weight": 450
+    },
+    "label": {
+      "sizePx": 14,
+      "lineHeight": 1.4,
+      "weight": 500
+    },
+    "caption": {
+      "sizePx": 12,
+      "lineHeight": 1.5,
+      "weight": 500
+    }
+  },
+  "readerSizesPx": [
+    16,
+    20,
+    23,
+    26,
+    30
+  ],
+  "layout": {
+    "mobileBrowsingHeaderPx": 100,
+    "mobileFocusedToolbarPx": 52,
+    "mobileNavContentPx": 64,
+    "deviceSafeArea": "runtime-owned; added separately",
+    "minimumTargetPx": 44,
+    "visibleLogoWidthPx": 276,
+    "logoCrop": "CSS empty-alpha-margin trim only; original image bytes retained"
+  },
+  "bengali": {
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "nativeReaderReview": "pending"
+  },
+  "delivery": {
+    "selfHosted": true,
+    "license": "OFL-1.1",
+    "packages": {
+      "@fontsource-variable/cormorant-garamond": "5.3.0",
+      "@fontsource-variable/dm-sans": "5.3.0",
+      "@fontsource-variable/source-serif-4": "5.3.1",
+      "@fontsource/noto-serif-bengali": "5.3.0",
+      "@fontsource/noto-sans-bengali": "5.3.0"
+    },
+    "fontSynthesis": "none",
+    "fontDisplay": "swap"
+  }
+}

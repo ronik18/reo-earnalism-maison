@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "unit": "CSS px",
+  "breakpoints": {
+    "tabletMin": 768,
+    "desktopMin": 1200
+  },
+  "mobileApp": {
+    "browsingHeader": 100,
+    "focusedToolbar": 52,
+    "navigationContent": 64,
+    "safeArea": "runtime-owned, added once",
+    "logoVisibleWidth": 276
+  },
+  "website": {
+    "header": 72,
+    "desktopRail": 200,
+    "tabletRail": 80,
+    "narrowNavigationContent": 68,
+    "desktopGutter": 36,
+    "narrowGutter": 18,
+    "maxContentWidth": 1180,
+    "readerMaxWidth": 760,
+    "contextRowDesktop": 60,
+    "contextRowNarrow": 50,
+    "footer": "content-flow, no reserved persistent band"
+  },
+  "controls": {
+    "minWidth": 44,
+    "minHeight": 44
+  },
+  "reading": {
+    "defaultSize": 20,
+    "sizes": [
+      16,
+      20,
+      23,
+      26,
+      30
+    ],
+    "englishLineHeight": 1.65,
+    "bengaliLineHeight": 1.8,
+    "measure": "55 to 65 Latin characters, native-reviewed Bengali equivalent"
+  },
+  "logo": {
+    "preserveVisibleContent": true,
+    "crop": "transparent padding only",
+    "originalSHA256": "a9513b9c17a4e9e303ea5b9483546366f9648a9dfb11bb8691d1fbb297d48da8"
+  },
+  "status": "Implemented in isolated design prototypes; Figma revision pending service quota"
+}

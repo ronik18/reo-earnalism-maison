@@ -1,0 +1,59 @@
+{
+  "fetched": "2026-11-16",
+  "registry": "https://registry.npmjs.org",
+  "packages": {
+    "@fontsource-variable/cormorant-garamond": "5.3.0",
+    "@fontsource-variable/dm-sans": "5.3.0",
+    "@fontsource-variable/source-serif-4": "5.3.1",
+    "@fontsource/noto-serif-bengali": "5.3.0",
+    "@fontsource/noto-sans-bengali": "5.3.0"
+  },
+  "files": [
+    {
+      "file": "cormorant-garamond-latin-wght-normal.woff2",
+      "sha256": "d80df8ff5aecd299a61549f9e29ab1ed0b9b05f4ea71d50fe978e07d5240b235",
+      "bytes": 37640
+    },
+    {
+      "file": "dm-sans-latin-standard-normal.woff2",
+      "sha256": "ca72d2bcea8f4daa783dbdfa2d9b46068c3ce38168e05918fb867aa453b4f890",
+      "bytes": 62724
+    },
+    {
+      "file": "noto-sans-bengali-bengali-400-normal.woff2",
+      "sha256": "adb805ae2eb639cc5d7276ee0e3798a8092fbfe02a6e5a0e19d82587680b528c",
+      "bytes": 44352
+    },
+    {
+      "file": "noto-sans-bengali-bengali-500-normal.woff2",
+      "sha256": "3af14da23cfcdafc5f812a797e34abbf698b596ae0ab3c595165e68ee4ad2cef",
+      "bytes": 47192
+    },
+    {
+      "file": "noto-sans-bengali-bengali-600-normal.woff2",
+      "sha256": "abfa65f4f73d0fab61667ad7a29ed1f96d143c2c7a8323ab04d0697d858a4d90",
+      "bytes": 47636
+    },
+    {
+      "file": "noto-serif-bengali-bengali-400-normal.woff2",
+      "sha256": "b2526e720328996ce10e17f7db2eb2b6a305a68cb9fea6c719d1ade18404c2c5",
+      "bytes": 58720
+    },
+    {
+      "file": "noto-serif-bengali-bengali-500-normal.woff2",
+      "sha256": "d0f1a7611e7ec04b8d15248b393c787583fc960242166d16c4e0909614d0b830",
+      "bytes": 69816
+    },
+    {
+      "file": "noto-serif-bengali-bengali-600-normal.woff2",
+      "sha256": "c494ff3edf5fb25102e2add0bfdb491d873e2f2a4d944fce0b4798a6e3e6168a",
+      "bytes": 70824
+    },
+    {
+      "file": "source-serif-4-latin-standard-normal.woff2",
+      "sha256": "f2ea9c12d2fe9bd3a9589b02ad2c0909da88f30938c91adc838c4f4098f9f9e0",
+      "bytes": 122360
+    }
+  ],
+  "totalWoff2Bytes": 561264
+}

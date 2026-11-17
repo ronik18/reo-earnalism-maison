@@ -1,0 +1,115 @@
+{
+  "source": "Approved Maison review assets; copied unchanged except typography.css static URL prefix. Font licenses and source manifest included.",
+  "files": [
+    {
+      "file": "fonts/fontsource-noto-sans-bengali-5.3.0-OFL.txt",
+      "sha256": "c0d17a4a6f928d78749dbebfa9d2953b6086c2a1f64cdd1e450cc77fb8199b32",
+      "bytes": 4381
+    },
+    {
+      "file": "fonts/fontsource-noto-serif-bengali-5.3.0-OFL.txt",
+      "sha256": "c0d17a4a6f928d78749dbebfa9d2953b6086c2a1f64cdd1e450cc77fb8199b32",
+      "bytes": 4381
+    },
+    {
+      "file": "fonts/noto-serif-bengali-bengali-600-normal.woff2",
+      "sha256": "c494ff3edf5fb25102e2add0bfdb491d873e2f2a4d944fce0b4798a6e3e6168a",
+      "bytes": 70824
+    },
+    {
+      "file": "fonts/noto-serif-bengali-bengali-400-normal.woff2",
+      "sha256": "b2526e720328996ce10e17f7db2eb2b6a305a68cb9fea6c719d1ade18404c2c5",
+      "bytes": 58720
+    },
+    {
+      "file": "fonts/noto-serif-bengali-bengali-500-normal.woff2",
+      "sha256": "d0f1a7611e7ec04b8d15248b393c787583fc960242166d16c4e0909614d0b830",
+      "bytes": 69816
+    },
+    {
+      "file": "fonts/noto-sans-bengali-bengali-400-normal.woff2",
+      "sha256": "adb805ae2eb639cc5d7276ee0e3798a8092fbfe02a6e5a0e19d82587680b528c",
+      "bytes": 44352
+    },
+    {
+      "file": "fonts/cormorant-garamond-latin-wght-normal.woff2",
+      "sha256": "d80df8ff5aecd299a61549f9e29ab1ed0b9b05f4ea71d50fe978e07d5240b235",
+      "bytes": 37640
+    },
+    {
+      "file": "fonts/fontsource-variable-dm-sans-5.3.0-OFL.txt",
+      "sha256": "6fbd040a29c2037a765dfb9f2561e9965b5c95c6dcb5dce516089d63d5f17af7",
+      "bytes": 4502
+    },
+    {
+      "file": "fonts/noto-sans-bengali-bengali-500-normal.woff2",
+      "sha256": "3af14da23cfcdafc5f812a797e34abbf698b596ae0ab3c595165e68ee4ad2cef",
+      "bytes": 47192
+    },
+    {
+      "file": "fonts/layout.tokens.json",
+      "sha256": "57dc821e2b3ae52ad61e44264fbbeca432bd1dfd29d6392ac5fb85cb4c4efefa",
+      "bytes": 1222
+    },
+    {
+      "file": "fonts/source-serif-4-latin-standard-normal.woff2",
+      "sha256": "f2ea9c12d2fe9bd3a9589b02ad2c0909da88f30938c91adc838c4f4098f9f9e0",
+      "bytes": 122360
+    },
+    {
+      "file": "fonts/dm-sans-latin-standard-normal.woff2",
+      "sha256": "ca72d2bcea8f4daa783dbdfa2d9b46068c3ce38168e05918fb867aa453b4f890",
+      "bytes": 62724
+    },
+    {
+      "file": "fonts/fontsource-variable-source-serif-4-5.3.1-OFL.txt",
+      "sha256": "18aabf190848725e2576eefb5c29ba06aac1029d02132252a7f312eac2e50cf3",
+      "bytes": 4314
+    },
+    {
+      "file": "fonts/font-manifest.json",
+      "sha256": "268de4f9f12687b7337866d697984a6b27d36ebe45f34caba1f728e849d8d28d",
+      "bytes": 1985
+    },
+    {
+      "file": "fonts/typography.tokens.json",
+      "sha256": "1b4fbfa846ecb5443b7970125ce96c86e5c3b1682e69723a721f6962864a91b2",
+      "bytes": 2527
+    },
+    {
+      "file": "fonts/fontsource-variable-cormorant-garamond-5.3.0-OFL.txt",
+      "sha256": "732f37009943e7f4378cf37113c9bcc4716af002a8583511aa91ed5d37683e73",
+      "bytes": 4504
+    },
+    {
+      "file": "fonts/noto-sans-bengali-bengali-600-normal.woff2",
+      "sha256": "abfa65f4f73d0fab61667ad7a29ed1f96d143c2c7a8323ab04d0697d858a4d90",
+      "bytes": 47636
+    },
+    {
+      "file": "logo.png",
+      "sha256": "a9513b9c17a4e9e303ea5b9483546366f9648a9dfb11bb8691d1fbb297d48da8",
+      "bytes": 218020
+    },
+    {
+      "file": "art/hero.png",
+      "sha256": "c2133204a1575120b33d057b1566ea107e76bc46a75f79238cb1afd3ad92685e",
+      "bytes": 2824803
+    },
+    {
+      "file": "art/river.png",
+      "sha256": "f76d6c92c4a6f464008f238dfd9994127e776859b4721fcb91be18dea6c2a61e",
+      "bytes": 2605103
+    },
+    {
+      "file": "art/ford-gold-column.webp",
+      "sha256": "ae461035db947236311f51fb6661f3d7ce6e2de704b9cefcee33b23ca6a4ff5a",
+      "bytes": 280478
+    },
+    {
+      "file": "art/ford-gold-wash.webp",
+      "sha256": "08446c9f43d2d9397098a165d848b559d1f3acc52728e12021406c1fc1c0e428",
+      "bytes": 136396
+    }
+  ]
+}

@@ -1,0 +1,357 @@
+{
+  "schema_version": 1,
+  "policy_id": "maison-cache-v1",
+  "status": "implementation specification; not deployed",
+  "checked_on": "2026-11-17",
+  "contract_owner": "implementation/api-contracts.md and openapi.yaml are authoritative for API field/path definitions",
+  "deployment": {
+    "app_origin": "${APP_ORIGIN}",
+    "public_asset_origin": "${PUBLIC_ASSET_ORIGIN}",
+    "private_storage": "R2 S3 endpoint; no public custom domain/r2.dev",
+    "application": "Render Singapore 2\u20136 instances",
+    "database": "Neon Scale Singapore 0.5\u20132 CU; warm; autosuspend disabled",
+    "extra_required_services": []
+  },
+  "canonical_request": {
+    "locales": [
+      "en",
+      "bn"
+    ],
+    "territory": "explicit validated ISO3166-1 alpha2 uppercase catalog query; storefront context only, not rights authority",
+    "currency": "not present in public cached representations; authenticated offers only",
+    "query_order": [
+      "locale",
+      "territory"
+    ],
+    "cacheable_catalog_page": "unfiltered first page only; cursor/filter/search requests bypass",
+    "unknown_or_duplicate_query": "reject400 or canonicalize with no-store redirect; never ignore parameters at CDN",
+    "locale_source": "URL; Accept-Language and cookies never change a cached representation",
+    "theme_source": "local CSS preference; same response bytes",
+    "key": "https://{allowed_host}{normalized_path}?locale={locale}&territory={territory}; full URL default Cloudflare key; no custom key needed",
+    "never_key_on": [
+      "email",
+      "user_id",
+      "session",
+      "token",
+      "raw search query",
+      "Authorization",
+      "arbitrary Origin",
+      "untrusted forwarded headers"
+    ]
+  },
+  "cache_admission": {
+    "methods": [
+      "GET",
+      "HEAD"
+    ],
+    "admit_statuses": [
+      200
+    ],
+    "revalidate_status": 304,
+    "bypass_if": [
+      "request Authorization present",
+      "request Cookie present",
+      "unknown route/query/format",
+      "response Set-Cookie present",
+      "response Vary contains Cookie or Authorization",
+      "private response class",
+      "untrusted forwarded host or format suffix",
+      "any response without explicit policy"
+    ],
+    "private_statuses": [
+      200,
+      206,
+      304,
+      400,
+      401,
+      403,
+      404,
+      409,
+      410,
+      412,
+      413,
+      422,
+      429,
+      500,
+      502,
+      503,
+      504
+    ],
+    "private_headers": {
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    },
+    "private_conditional_rule": "authorization/rights/device validation precedes conditional evaluation; do not emit304 for denied access",
+    "public_object_rights": "Only globally cleared public cover/preview objects and previews API representations; territory query is not public-object authorization. Territorial restricted samples use authorized private delivery, not shared public cache."
+  },
+  "classes": [
+    {
+      "id": "public_editorial_html",
+      "scope": "anonymous noncatalog editorial/help/about HTML only",
+      "browser_ttl_seconds": 0,
+      "edge_ttl_seconds": 300,
+      "swr_seconds": 30,
+      "stale_if_error_seconds": 300,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Cloudflare-CDN-Cache-Control": "public, max-age=300, stale-while-revalidate=30, stale-if-error=300"
+      },
+      "sw": "network-first; generic offline shell only; no personalized HTML"
+    },
+    {
+      "id": "public_catalog",
+      "scope": "anonymous home/explore/title/series/track metadata and admitted first-page JSON; no entitlements/progress/prices",
+      "browser_ttl_seconds": 0,
+      "edge_ttl_seconds": 30,
+      "swr_seconds": 0,
+      "stale_if_error_seconds": 0,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Cloudflare-CDN-Cache-Control": "public, max-age=30, stale-while-revalidate=0, stale-if-error=0"
+      },
+      "sw": "online network-first; explicitly stored metadata snapshot <=24h shown offline with last_updated_at and no access authority"
+    },
+    {
+      "id": "public_previews",
+      "scope": "Globally cleared for public delivery only. physically bounded text/audio preview objects only; versioned path",
+      "browser_ttl_seconds": 0,
+      "edge_ttl_seconds": 60,
+      "swr_seconds": 0,
+      "stale_if_error_seconds": 0,
+      "headers": {
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "Cloudflare-CDN-Cache-Control": "public, max-age=60, stale-while-revalidate=0, stale-if-error=0"
+      },
+      "sw": "no background precache; explicit permitted preview save only; never fetch full paid object"
+    },
+    {
+      "id": "public_covers",
+      "scope": "Globally cleared for public delivery only. reviewed cover sizes on content-hashed paths; no arbitrary resize service",
+      "browser_ttl_seconds": 300,
+      "edge_ttl_seconds": 3600,
+      "swr_seconds": 0,
+      "stale_if_error_seconds": 0,
+      "headers": {
+        "Cache-Control": "public, max-age=300",
+        "Cloudflare-CDN-Cache-Control": "public, max-age=3600, stale-if-error=0"
+      },
+      "sw": "bounded public UI cache; purge locally on online withdrawal notice; already copied bytes cannot be recalled"
+    },
+    {
+      "id": "immutable_build_assets",
+      "scope": "content-hashed JS/CSS/WOFF2/logo assets only",
+      "browser_ttl_seconds": 31536000,
+      "edge_ttl_seconds": 31536000,
+      "swr_seconds": 0,
+      "stale_if_error_seconds": 0,
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cloudflare-CDN-Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "*"
+      },
+      "sw": "cache-first with build manifest hashes; retain current+previous shell release only"
+    },
+    {
+      "id": "bootstrap_control",
+      "scope": "/service-worker.js, /manifest.webmanifest, current version pointer",
+      "browser_ttl_seconds": 0,
+      "edge_ttl_seconds": 0,
+      "swr_seconds": 0,
+      "stale_if_error_seconds": 0,
+      "headers": {
+        "Cache-Control": "no-cache, max-age=0, must-revalidate",
+        "Cloudflare-CDN-Cache-Control": "no-store"
+      },
+      "sw": "network revalidate; activate only after compatible payload migration"
+    },
+    {
+      "id": "private_api",
+      "scope": "all auth/me/commerce/staff/webhooks/grants/Reader manifests/mappings/search/status including errors",
+      "browser_ttl_seconds": 0,
+      "edge_ttl_seconds": 0,
+      "swr_seconds": 0,
+      "stale_if_error_seconds": 0,
+      "headers_ref": "cache_admission.private_headers",
+      "sw": "network-only; explicitly authorized offline data stored separately, never generic runtime cache"
+    },
+    {
+      "id": "private_r2_objects",
+      "scope": "paid Reader chunks/audio/captions/timing maps from signed S3 endpoint",
+      "browser_ttl_seconds": 0,
+      "edge_ttl_seconds": 0,
+      "swr_seconds": 0,
+      "stale_if_error_seconds": 0,
+      "headers": {
+        "Cache-Control": "private, no-store, max-age=0"
+      },
+      "sw": "only explicit download manager writes verified bytes under synthetic account/device keys; not signed URL key"
+    },
+    {
+      "id": "stream_playback",
+      "scope": "provider-signed HLS/DASH; no app CDN proxy/cache",
+      "browser_ttl_seconds": 0,
+      "edge_ttl_seconds": 0,
+      "swr_seconds": 0,
+      "stale_if_error_seconds": 0,
+      "headers_ref": "cache_admission.private_headers applies to grant response; provider controls its own segments",
+      "sw": "never intercept/cache video manifest/segments/tokens in P0"
+    }
+  ],
+  "cdn_configuration": {
+    "format": "semantic settings; convert to exact current Cloudflare API schema during provisioning",
+    "origin_cache_control": "enabled; respect origin directives",
+    "always_online": false,
+    "cache_deception_armor": true,
+    "edge_ttl_override": "none; do not ignore private/no-store or strip Set-Cookie",
+    "custom_cache_keys": false,
+    "tiered_cache": "optional within available plan; not required for correctness",
+    "cache_tags_prefix_purge": "optional; P0 uses exact URL purge, no paid-plan dependency",
+    "request_rules_in_order": [
+      {
+        "name": "public build/assets allowlist",
+        "action": "eligible only for exact public prefixes and admitted MIME/response headers"
+      },
+      {
+        "name": "public anonymous catalog/editorial allowlist",
+        "action": "eligible for named SSR/API routes with exact canonical query and no cookies/auth"
+      },
+      {
+        "name": "private override last",
+        "action": "bypass all auth/me/commerce/staff/webhooks/search/grants/Reader routes and all Cookie/Authorization requests"
+      }
+    ]
+  },
+  "grants": {
+    "online_ttl_seconds": 120,
+    "refresh_before_expiry_seconds": 30,
+    "offline_download_url_ttl_seconds": 120,
+    "offline_license_max_seconds": 86400,
+    "license_deadline": "min(now+24h, entitlement_end, rights_end, policy_end); no recurring renewal while offline",
+    "tokens_in_logs": false,
+    "public_asset_data_in_grants": false,
+    "revoke_semantics": "deny new grants immediately in authoritative DB; issued bearer URLs remain usable until expiry and in-flight/buffered bytes persist; disconnected copies not immediately revocable",
+    "presigned_method": "Signed GET supports requested Range; do not use GET signature for HEAD. HEAD separately signed only if explicitly needed; use known manifest metadata otherwise."
+  },
+  "budgets": {
+    "public_list_page_items": 20,
+    "public_json_gzip_bytes": 49152,
+    "ssr_html_gzip_bytes": 49152,
+    "reader_manifest_raw_bytes": 65536,
+    "reader_chunk_raw_bytes": 262144,
+    "reader_chunk_gzip_bytes": 65536,
+    "max_reader_grant_units": 10,
+    "max_grant_response_raw_bytes": 65536,
+    "audio_download_piece_bytes": 1048576,
+    "download_parallel_requests": 2,
+    "sync_batch_operations": 100,
+    "sync_batch_raw_bytes": 262144,
+    "sync_queue_operations": 500,
+    "sync_queue_raw_bytes": 2097152,
+    "note_utf8_bytes": 8192,
+    "offline_default_device_bytes": 268435456,
+    "offline_application_ceiling_bytes": 1073741824,
+    "quota_reserve_fraction": 0.2,
+    "offline_preflight": "estimate()+persist() best effort; stay below min(user limit, app ceiling, 80% available estimate); estimate not guarantee",
+    "audio_piece_manifest_raw_bytes": 1048576,
+    "audio_piece_manifest_max_pieces": 5000,
+    "max_reader_grant_chunks": 100
+  },
+  "offline": {
+    "db": "IndexedDB maison-v1 metadata/licenses/operation queue",
+    "cache_names": [
+      "maison-shell-{build_id}",
+      "maison-public-v1",
+      "maison-private-v1-{account_namespace}-{device_id}"
+    ],
+    "account_namespace": "opaque local namespace; never authorization; never analytics identifier",
+    "synthetic_path": "/__offline/{account_namespace}/{device_id}/{edition_revision_id}/{asset_id}/{sha256}/{piece_index}",
+    "synthetic_route": "service-worker-only; origin returns404 no-store; bypass CDN",
+    "cache_206": false,
+    "audio_piece_storage": "verify Range206 bytes against publication piece hash; wrap as synthetic200; reconstruct validated single byte ranges for offline media",
+    "mark_complete": "all required chunks/pieces + manifest hash verified, then atomic IDB transition; never play partial chapter offline",
+    "clock": "record server time and monotonic anchor; suspicious rollback/unknown expired lease requires online renewal; browser is not tamperproof",
+    "logout": "immediately lock local account namespace, stop media, purge its IDB/cache/queues, notify tabs; server logout afterward/retry if offline",
+    "device_revoke": "server session+license revocation now; reachable app purges next check; offline device learns at next connection or local lease expiry",
+    "never_queue": [
+      "auth",
+      "billing",
+      "orders",
+      "cancel",
+      "refund",
+      "grant refresh",
+      "gift redemption",
+      "device revoke",
+      "staff mutation",
+      "custom list reorder"
+    ],
+    "queue_types": [
+      "progress",
+      "annotation",
+      "saved_item"
+    ],
+    "overflow": "coalesce unsent progress; never discard annotations silently; block new durable writes and offer local export/reconnect when bound reached",
+    "quiz_offline": "retain draft answers locally; create/submit idempotent attempt only online; no authoritative grade/completion offline"
+  },
+  "purge": {
+    "source": "transactional PostgreSQL outbox in same publish/withdraw transaction",
+    "worker": "existing frequent scheduled command; no Redis/queue broker",
+    "scope": "exact URL variants recorded with emitted references and locale/territory; remove/bypass cursor/search from CDN admission",
+    "success": "API acknowledgement + sampled origin/CDN readback; not claimed instantaneous global recall",
+    "retry_seconds": [
+      30,
+      120,
+      600,
+      1800,
+      7200,
+      21600
+    ],
+    "max_attempts": 7,
+    "critical_oldest_pending_alert_seconds": 60,
+    "batch_urls": 30,
+    "provider_rate_limit": "respect current plan rate and Retry-After; batch30 is application bound, not quoted vendor limit",
+    "idempotency": "event_id and per-zone batch digest; repeat safe purge",
+    "withdraw_order": [
+      "DB publication/access deny transaction",
+      "tombstone mutable origin routes; deny grants",
+      "hide public preview objects and enqueue public object URL purge",
+      "purge all recorded listing/title/preview variants",
+      "verify target URLs no longer expose withdrawn public sample",
+      "publish staff audit status"
+    ]
+  },
+  "invalidation_events": [
+    "edition.published",
+    "edition.replaced",
+    "edition.withdrawn",
+    "rights.changed",
+    "public_metadata.changed",
+    "preview.replaced",
+    "cover.replaced",
+    "build.released"
+  ],
+  "references": [
+    "https://developers.cloudflare.com/r2/api/s3/presigned-urls/",
+    "https://developers.cloudflare.com/r2/buckets/public-buckets/",
+    "https://developers.cloudflare.com/cache/concepts/cache-control/",
+    "https://developers.cloudflare.com/cache/concepts/cdn-cache-control/",
+    "https://developers.cloudflare.com/cache/how-to/purge-cache/purge-by-single-file/",
+    "https://developers.cloudflare.com/r2/buckets/cors/",
+    "https://developers.cloudflare.com/stream/viewing-videos/securing-your-stream/",
+    "https://w3c.github.io/ServiceWorker/#cache-put",
+    "https://datatracker.ietf.org/doc/html/rfc9110#section-14"
+  ],
+  "known_rights_expiry": {
+    "rule": "min(configured freshness, max(0,floor(rights_valid_until-server_now)))",
+    "applies_to": [
+      "public_catalog",
+      "public_preview",
+      "public_cover"
+    ],
+    "at_zero": "private,no-store or unavailable; no stale-while-revalidate or stale-if-error beyond deadline",
+    "condition": "Finite public clearance; durable prior copies cannot be recalled."
+  }
+}
