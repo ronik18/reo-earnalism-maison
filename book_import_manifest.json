@@ -1,0 +1,15 @@
+{
+  "books": [
+    {
+      "id": "EN-071",
+      "title": "The Selfish Giant",
+      "language": "en",
+      "packet": "library/intake/selfish-giant-en.json",
+      "availability": "draft",
+      "territories": [
+        "IN"
+      ],
+      "commercialuseallowed": true
+    }
+  ]
+}

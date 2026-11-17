@@ -1,0 +1,69 @@
+{
+  "edition_id": "f8b6c701-b3ec-47fb-890d-7e7ac2575c7a",
+  "edition_revision_id": "2efd60b4-7127-45ed-9844-3967c31e44fd",
+  "slug": "the-selfish-giant-en",
+  "state": "draft",
+  "sha256": "ae3a7af9675f35161915748730093a2101c17222363c330a8eff44804097bb39",
+  "paragraph_count": 32,
+  "scope": "local Maison only",
+  "staff_document_review": "pass",
+  "customer_access_denied": true,
+  "global_clearance": "pending country-specific review; approved IN reader only",
+  "publication_review": {
+    "edition_id": "f8b6c701-b3ec-47fb-890d-7e7ac2575c7a",
+    "edition_revision_id": "2efd60b4-7127-45ed-9844-3967c31e44fd",
+    "sha256": "ae3a7af9675f35161915748730093a2101c17222363c330a8eff44804097bb39",
+    "status": "fail",
+    "checks": [
+      {
+        "code": "rights",
+        "status": "pass",
+        "message": "Every offered format requires current approved rights; local-only rights require local mode."
+      },
+      {
+        "code": "metadata",
+        "status": "pass",
+        "message": "Title, description and supported edition locale required."
+      },
+      {
+        "code": "text",
+        "status": "pass",
+        "message": "Immutable text root must match the ordered semantic paragraphs."
+      },
+      {
+        "code": "anchors",
+        "status": "pass",
+        "message": "Stable paragraph anchors are required."
+      },
+      {
+        "code": "cover",
+        "status": "fail",
+        "message": "A ready original cover is required."
+      },
+      {
+        "code": "media",
+        "status": "pass",
+        "message": "All assets require verified bytes/checksums; every Reader unit requires complete ordered canonical packages bound to this revision, unit, chunk and anchor revision."
+      },
+      {
+        "code": "timing_map",
+        "status": "not_applicable",
+        "message": "Reader-only revision; no audio release implied."
+      },
+      {
+        "code": "browser",
+        "status": "fail",
+        "message": "Browser acceptance must bind this exact text hash and release scope."
+      }
+    ],
+    "validated_at": "2026-11-17T16:30:45.906148Z"
+  },
+  "paid_infrastructure": false,
+  "legacy_changes": false,
+  "local_test_suite": {
+    "tests": 74,
+    "pass": true,
+    "seconds": 50.337
+  },
+  "journey_scope": "draft intake, exact text/package, staff-only review, replay and denied customer access; full published Reader/browser acceptance pending"
+}

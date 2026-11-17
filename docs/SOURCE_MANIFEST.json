@@ -56,7 +56,7 @@
     "library/apps.py": "d13d470821a66e3ade4f819555cd68042efcc8ae3c464b1a81a82867d04b7e83",
     "library/admin.py": "8159df1dcd32c9772d3b79390e427fa88047438eaf071a55842064d17acb5558",
     "library/tests.py": "e239ee3bd7e055849f306a83b21c00d2811483c25c4bfc218690701fded0c9f9",
-    "library/urls.py": "5f6f2c266cb90c514aed048fe0c7ea48c229e1d1149f8e08d618edce8bbd6a96",
+    "library/urls.py": "9921d2e35a10422f3e4f44a281483989c28fb7324a6fa5ef1032be4f6d01fa76",
     "library/views.py": "fa72f49d79a725fe6fcd6377589d922e04bd3cc53f5262a4d02ad811534ca25a",
     "library/validation.py": "1c1ec3057915af0ab26aefa596fbca08e61d1892f8448d669ddab0877f0c1ba8",
     "library/migrations/0002_revision_integrity.py": "2903785d20fe90f7bb1f15c228f59ddc60165f216af65dcbd321546b40ddc737",
@@ -157,6 +157,11 @@
     "requirements.in": "e584a28d36ceafb0a94642f62e51be0a3c85995350d6d44988c245f2d14e6eaf",
     "requirements.lock": "15a119e2804c651ab2e7e5297e1d336548ab835d0529b7b62a19f72f0663eb29",
     "Dockerfile": "ea9842481b81783bf9922e067ef3ea3ee14bb68e8b5f1170bd6ae10ed7cb6a42",
-    ".github/workflows/checks.yml": "c84b7ef15c853cdae305109acca8d6a33aa9da4e52b0059fad3b2c07e71690db"
+    ".github/workflows/checks.yml": "c84b7ef15c853cdae305109acca8d6a33aa9da4e52b0059fad3b2c07e71690db",
+    "library/intake_api.py": "1eb52a750025c4e6464fb9494a0a677d555c57e215f64a3102b370b277ec12ec",
+    "library/test_intake.py": "98ee6c221fd3dd50110ed32067dcf44691b557ca2b99d7e77ae6185bca4f0264",
+    "library/intake/selfish-giant-en.json": "57304df0836e5f7efe6a2365fa4a04a7e79abe03a74646648f33492f5f876320",
+    "book_import_manifest.json": "2cd5a7e683f2769be429451bf04d799f8a8994b346dfab9cb078818c2b2aa391",
+    "contracts/draft-intake.md": "66344837fcae96ceb4db26e3c657d43852d9a733a8c01fa6549349810e0dd8a9"
   }
 }
