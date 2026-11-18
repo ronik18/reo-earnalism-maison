@@ -343,3 +343,9 @@ STRINGS.update({"close_player":("Close player","প্লেয়ার বন�
 STRINGS.update({"continue_checkout":("Continue to checkout","পেমেন্টে এগিয়ে যান"),"pay_securely":("Pay securely","নিরাপদে পেমেন্ট করুন"),"order_status":("Order status","অর্ডারের অবস্থা"),"order_reference":("Order reference","অর্ডার নম্বর"),"refresh_status":("Refresh status","অবস্থা হালনাগাদ করুন"),"payment_pending":("Payment is not confirmed yet. Access appears only after server verification.","পেমেন্ট এখনও নিশ্চিত নয়। সার্ভারে যাচাইয়ের পরেই প্রবেশাধিকার মিলবে।"),"payment_confirmed":("Payment verified and access granted.","পেমেন্ট যাচাই হয়েছে এবং প্রবেশাধিকার দেওয়া হয়েছে।"),"payment_not_completed":("Payment was not completed. Check the order status before retrying.","পেমেন্ট সম্পূর্ণ হয়নি। আবার চেষ্টা করার আগে অর্ডারের অবস্থা দেখুন।"),"checkout_unavailable":("Secure checkout could not load. Please retry.","নিরাপদ পেমেন্ট পাতা খোলা যায়নি। আবার চেষ্টা করুন।")})
 
 STRINGS["choose_another_offer"] = ("Return to available offers", "উপলব্ধ অফারে ফিরুন")
+
+# Account security failures must not fall back to edition-access messaging.
+STRINGS.update({
+    "invalid_mfa_code": ("The authenticator code is invalid or expired. Use a fresh six-digit code from the existing setup.", "অথেনটিকেটরের কোডটি ভুল বা মেয়াদোত্তীর্ণ। বর্তমান সেটআপ থেকে নতুন ছয় অঙ্কের কোড দিন।"),
+    "mfa_already_configured": ("An authenticator is already configured. Use the existing authenticator or a recovery code.", "অথেনটিকেটর আগে থেকেই যুক্ত আছে। সেটি অথবা পুনরুদ্ধারের কোড ব্যবহার করুন।"),
+})

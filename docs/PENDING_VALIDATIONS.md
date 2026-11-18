@@ -171,3 +171,7 @@ Owner explicitly approved pending-zone corrections. Saved9existing A/CNAME recor
 - **Still pending:** owner completes authenticator enrollment, then the real HTTPS staff Reader/private R2 journey (covers, complete manuscript, saved place/note/preferences, finish/reopen and access-boundary checks). This is not marked PASS. Earlier loopback evidence remains supporting evidence only.
 - **Small UX follow-up:** replace the stale success message on confirmation expiry and provide a nearby link back to password confirmation beside disabled MFA setup. Keep the server-side five-minute rule unchanged; qualify the matching asset release before deploying.
 - No book publication, live-pointer change, legacy application change, DNS change or paid provisioning was performed in this retry.
+
+### MFA confirmation diagnostic follow-up
+
+The live Settings page displayed the unrelated edition-access error after the owner submitted an authenticator code. `errorText` falls back to the generic403 edition message when `invalid_mfa_code` has no translation. Added explicit English/Bengali messages for invalid/expired MFA codes and an already-configured authenticator. This source correction is not yet deployed and does not prove which backend error occurred in the owner's attempt. A response-status/error-code-only browser diagnostic is prepared; no submitted code or setup secret is emitted. Owner enrollment and the live staff Reader journey remain pending. Existing enrollment was preserved, and no new setup was generated during this diagnostic.
