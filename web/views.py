@@ -400,7 +400,11 @@ def player(request, locale, edition_id):
 @require_GET
 @domain_view
 def offline_shell(request,locale):
-    response=page(request,locale,"web/offline.html",download_bootstrap={"offline":True})
+    from copy import copy
+    from django.contrib.auth.models import AnonymousUser
+    public_request=copy(request)
+    public_request.user=AnonymousUser()
+    response=page(public_request,locale,"web/offline.html",download_bootstrap={"offline":True})
     response["Cache-Control"]="public,max-age=0,must-revalidate"
     return response
 
@@ -412,12 +416,27 @@ def service_worker(request):
     from django.http import HttpResponse
     root=Path(django_settings.BASE_DIR)/"static/maison"
     manifest=json.loads((root/"dist/manifest.json").read_text())
-    assets=["/static/maison/app.css","/static/maison/app.js","/static/maison/logo.png","/static/maison/fonts/typography.css","/en/offline/","/bn/offline/"]
-    assets += ["/static/"+path for path in manifest["__assets"]]
-    assets += ["/static/maison/fonts/"+path.name for path in (root/"fonts").glob("*.woff2")]
+    from django.templatetags.static import static
+    names=["maison/app.css","maison/app.js","maison/logo.png","maison/fonts/typography.css"]
+    names += manifest["__assets"]
+    names += ["maison/fonts/"+path.name for path in (root/"fonts").glob("*.woff2")]
+    names += ["maison/art/"+path.name for path in (root/"art").glob("*.webp")]
+    digest=hashlib.sha256(str(getattr(django_settings,"STATIC_RELEASE_ID","")).encode())
+    assets=[]
+    for name in sorted(set(names)):
+        if not name.startswith("maison/") or ".." in name.split("/"):
+            raise ValueError("Unknown public offline asset")
+        raw=(Path(django_settings.BASE_DIR)/"static"/name).read_bytes()
+        content_hash=hashlib.sha256(raw).hexdigest()
+        digest.update(name.encode());digest.update(content_hash.encode())
+        url=static(name)
+        if name in {"maison/app.css","maison/app.js"}:url+="?v="+content_hash[:12]
+        assets.append(url)
+    assets += ["/en/offline/","/bn/offline/"]
     source=(root/"offline-worker.js").read_text()
-    version=hashlib.sha256((json.dumps(assets)+source).encode()).hexdigest()[:16]
-    source=source.replace("__VERSION__",version).replace("__ASSETS__",json.dumps(assets))
+    digest.update(json.dumps(assets).encode());digest.update(source.encode())
+    version=digest.hexdigest()[:16]
+    source=source.replace("__VERSION__",version).replace("__ASSETS__",json.dumps(assets)).replace("__ASSET_BASE__",json.dumps(static("")))
     response=HttpResponse(source,content_type="text/javascript")
     response["Cache-Control"]="no-cache";response["Service-Worker-Allowed"]="/"
     return response

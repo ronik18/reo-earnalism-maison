@@ -78,6 +78,14 @@ class ExperienceTests(TestCase):
             data["csrfmiddlewaretoken"] = client.cookies[settings.CSRF_COOKIE_NAME].value
         return client.post(reverse("web:sign-in", args=["en"]), data)
 
+    def test_offline_shell_remains_anonymous_for_signed_in_member(self):
+        self.login()
+        response=self.client.get("/en/offline/")
+        self.assertContains(response,'data-member="false"')
+        self.assertNotContains(response,str(self.user.public_id))
+        self.assertNotContains(response,self.user.email)
+        self.assertContains(response,'"offline": true')
+
     def test_browse_and_title_use_actual_fixture(self):
         response = self.client.get("/en/")
         self.assertContains(response, "The River Notebook")
@@ -220,3 +228,29 @@ class ExperienceTests(TestCase):
         for key, value in change.items():
             self.assertEqual(saved[key], value)
         self.assertGreater(saved["version"], old["version"])
+
+class OfflineAssetBuildTests(SimpleTestCase):
+    def test_release_prefixed_cdn_urls_and_content_changes_version_worker(self):
+        from django.test import RequestFactory
+        from .views import service_worker
+        from shutil import copyfile
+        original=Path(settings.BASE_DIR)/"static/maison/offline-worker.js"
+        with TemporaryDirectory() as directory:
+            root=Path(directory);public=root/"static/maison";public.mkdir(parents=True)
+            copyfile(original,public/"offline-worker.js")
+            names=["app.css","app.js","logo.png","fonts/typography.css","fonts/example.woff2","art/ford-gold.webp","dist/reader-test.js"]
+            for name in names:
+                path=public/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(b"public build fixture")
+            (public/"dist/manifest.json").write_text(json.dumps({"__assets":["maison/dist/reader-test.js"]}))
+            base="https://assets.example.test/static/"+"a"*64+"/"
+            with override_settings(BASE_DIR=root,STATIC_URL=base,STATIC_RELEASE_ID="a"*64):
+                request=RequestFactory().get("/maison-sw.js")
+                first=service_worker(request).content.decode()
+                self.assertIn(base+"maison/dist/reader-test.js",first)
+                self.assertIn(base+"maison/fonts/example.woff2",first)
+                self.assertIn(base+"maison/app.css?v=",first)
+                self.assertNotIn("__ASSET_BASE__",first)
+                self.assertIn('"/en/offline/"',first)
+                (public/"app.css").write_bytes(b"updated public CSS")
+                second=service_worker(request).content.decode()
+                self.assertNotEqual(re.search(r'maison-shell-([a-f0-9]+)',first).group(1),re.search(r'maison-shell-([a-f0-9]+)',second).group(1))

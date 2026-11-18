@@ -234,6 +234,8 @@ R2_ACCOUNT_ID = os.getenv('R2_ACCOUNT_ID', '')
 R2_ENDPOINT_URL = os.getenv('R2_ENDPOINT_URL', f'https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com' if R2_ACCOUNT_ID else '')
 R2_PRIVATE_BUCKET = os.getenv('R2_PRIVATE_BUCKET', '')
 R2_PUBLIC_BUCKET = os.getenv('R2_PUBLIC_BUCKET', '')
+R2_PUBLIC_UPLOAD_KEY_ID = os.getenv('R2_PUBLIC_UPLOAD_KEY_ID', '')
+R2_PUBLIC_UPLOAD_SECRET = os.getenv('R2_PUBLIC_UPLOAD_SECRET', '')
 R2_PUBLIC_ASSET_HOST = os.getenv('R2_PUBLIC_ASSET_HOST', '')
 for _credential_name in ('R2_APPLICATION_KEY_ID','R2_APPLICATION_SECRET','R2_UPLOAD_KEY_ID','R2_UPLOAD_SECRET'):
     globals()[_credential_name] = os.getenv(_credential_name, '')
@@ -254,6 +256,18 @@ if R2_PUBLIC_ASSET_HOST:
         or _public_host.path not in {'','/'} or _public_host.query or _public_host.fragment
         or _asset_hostname.endswith('.r2.dev') or _asset_hostname.endswith('.r2.cloudflarestorage.com')):
         raise ImproperlyConfigured('Public assets require a dedicated HTTPS CDN hostname; no private S3/r2.dev endpoint')
+
+
+# Public assets use an immutable release namespace; never serve private storage.
+STATIC_RELEASE_ID = os.getenv('STATIC_RELEASE_ID', '')
+if STATIC_RELEASE_ID:
+    import re
+    if not re.fullmatch('[a-f0-9]{64}', STATIC_RELEASE_ID):
+        raise ImproperlyConfigured('STATIC_RELEASE_ID must be the prepared public tree SHA256')
+if not LOCAL and (not R2_PUBLIC_ASSET_HOST or not STATIC_RELEASE_ID):
+    raise ImproperlyConfigured('Production requires the qualified public CDN host and static release ID')
+if R2_PUBLIC_ASSET_HOST and STATIC_RELEASE_ID:
+    STATIC_URL = R2_PUBLIC_ASSET_HOST.rstrip('/') + '/static/' + STATIC_RELEASE_ID + '/'
 
 FEATURES = {
     'reader': True, 'email_password': True,

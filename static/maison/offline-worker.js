@@ -1,9 +1,34 @@
 /* Public shell only. API/account/checkout/grant responses are never shared-cached. */
 const CACHE = "maison-shell-__VERSION__";
 const ASSETS = __ASSETS__;
-self.addEventListener("install", (event) =>
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS))),
+const ASSET_BASE = new URL(__ASSET_BASE__, self.location.origin);
+const ASSET_URLS = new Set(
+  ASSETS.map((value) => new URL(value, self.location.origin).href),
 );
+function publicAsset(url) {
+  return (
+    url.origin === ASSET_BASE.origin &&
+    url.pathname.startsWith(ASSET_BASE.pathname) &&
+    ASSET_URLS.has(url.href)
+  );
+}
+async function precache() {
+  const cache = await caches.open(CACHE);
+  await Promise.all(
+    ASSETS.map(async (value) => {
+      const request = new Request(new URL(value, self.location.origin), {
+        credentials: "omit",
+        mode: "cors",
+        cache: "reload",
+      });
+      const response = await fetch(request);
+      if (!response.ok || response.type === "opaque")
+        throw new Error("Public offline shell could not be verified");
+      await cache.put(request, response);
+    }),
+  );
+}
+self.addEventListener("install", (event) => event.waitUntil(precache()));
 self.addEventListener("activate", (event) =>
   event.waitUntil(
     caches
@@ -113,6 +138,27 @@ async function privateAsset(request, url) {
 }
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
+  if (publicAsset(url)) {
+    event.respondWith(
+      caches
+        .open(CACHE)
+        .then((cache) =>
+          cache
+            .match(url.href, { ignoreVary: true })
+            .then(
+              (response) =>
+                response ||
+                fetch(
+                  new Request(event.request, {
+                    credentials: "omit",
+                    mode: "cors",
+                  }),
+                ),
+            ),
+        ),
+    );
+    return;
+  }
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/maison-offline-assets/")) {
     event.respondWith(privateAsset(event.request, url));
@@ -129,10 +175,4 @@ self.addEventListener("fetch", (event) => {
     );
     return;
   }
-  if (ASSETS.includes(url.pathname))
-    event.respondWith(
-      caches
-        .match(event.request)
-        .then((response) => response || fetch(event.request)),
-    );
 });

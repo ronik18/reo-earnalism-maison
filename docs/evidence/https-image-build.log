@@ -1,0 +1,84 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.13kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 195B done
+#4 DONE 0.0s
+
+#5 [stage-1 1/7] FROM docker.io/library/python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72
+#5 resolve docker.io/library/python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72 0.0s done
+#5 DONE 0.0s
+
+#6 [frontend 1/9] FROM docker.io/library/node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5
+#6 resolve docker.io/library/node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5 0.0s done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 45.95kB 0.0s done
+#7 DONE 0.0s
+
+#8 [stage-1 2/7] WORKDIR /app
+#8 CACHED
+
+#9 [stage-1 3/7] COPY requirements.lock ./
+#9 CACHED
+
+#10 [frontend 3/9] COPY package.json package-lock.json ./
+#10 CACHED
+
+#11 [frontend 2/9] WORKDIR /build
+#11 CACHED
+
+#12 [frontend 5/9] COPY client ./client
+#12 CACHED
+
+#13 [frontend 6/9] COPY tsconfig.json ./
+#13 CACHED
+
+#14 [frontend 7/9] COPY contracts/openapi.yaml ./contracts/openapi.yaml
+#14 CACHED
+
+#15 [frontend 8/9] COPY static/maison/offline-worker.js ./static/maison/offline-worker.js
+#15 CACHED
+
+#16 [frontend 4/9] RUN npm ci
+#16 CACHED
+
+#17 [stage-1 4/7] RUN pip install --no-cache-dir -r requirements.lock
+#17 CACHED
+
+#18 [frontend 9/9] RUN npm run check && npm run build
+#18 CACHED
+
+#19 [stage-1 5/7] COPY . .
+#19 DONE 0.1s
+
+#20 [stage-1 6/7] COPY --from=frontend /build/static/maison/dist ./static/maison/dist
+#20 DONE 0.0s
+
+#21 [stage-1 7/7] RUN useradd --system --uid 10001 --create-home maison && mkdir -p /app/.local && chown maison:maison /app/.local
+#21 0.207 useradd warning: maison's uid 10001 is greater than SYS_UID_MAX 999
+#21 DONE 0.2s
+
+#22 exporting to image
+#22 exporting layers
+#22 exporting layers 0.6s done
+#22 exporting manifest sha256:adb2f2e6832bad8d79148f8256d3ac9a9aada0a6a0c0e4647501bca128c282e0 0.1s done
+#22 exporting config sha256:2663e162aed06d6341b8c3296d6b3e56592643dc1e4c2b383c518a20b4984a05
+#22 exporting config sha256:2663e162aed06d6341b8c3296d6b3e56592643dc1e4c2b383c518a20b4984a05 0.2s done
+#22 exporting attestation manifest sha256:d961b4dcf4e3e55268f92d5909dbb24b0d0e9f7a7b6a0989c35bab31a9ab6ed9 0.0s done
+#22 exporting manifest list sha256:d12cf668edf3abf5c9f5175ad48ccb730f957e561b9f1e58d8d6d5399f0ee3aa 0.0s done
+#22 naming to docker.io/library/earnalism-maison:https-ready
+#22 naming to docker.io/library/earnalism-maison:https-ready done
+#22 unpacking to docker.io/library/earnalism-maison:https-ready
+#22 unpacking to docker.io/library/earnalism-maison:https-ready 0.2s done
+#22 DONE 1.2s

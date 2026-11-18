@@ -4,6 +4,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY client ./client
 COPY tsconfig.json ./
+COPY contracts/openapi.yaml ./contracts/openapi.yaml
+COPY static/maison/offline-worker.js ./static/maison/offline-worker.js
 RUN npm run check && npm run build
 
 FROM python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72

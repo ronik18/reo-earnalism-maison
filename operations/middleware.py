@@ -53,7 +53,7 @@ def content_security_policy():
     private=[]
     if getattr(settings,'MEDIA_STORAGE_BACKEND','local')=='r2' and getattr(settings,'R2_ENDPOINT_URL',''):
         private.append(settings.R2_ENDPOINT_URL.rstrip('/'))
-    scripts=["'self'",*assets];connect=["'self'",*private];frames=["'none'"]
+    scripts=["'self'",*assets];connect=["'self'",*private,*assets];frames=["'none'"]
     if getattr(settings,'RAZORPAY_ENABLED',False):
         scripts.append('https://checkout.razorpay.com')
         connect.append('https://api.razorpay.com')

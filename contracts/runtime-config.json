@@ -253,7 +253,8 @@
     "EMAIL_HOST_PASSWORD",
     "EMAIL_USE_SSL",
     "EMAIL_USE_TLS",
-    "EMAIL_TIMEOUT"
+    "EMAIL_TIMEOUT",
+    "STATIC_RELEASE_ID"
   ],
   "conditional_environment_names": {
     "google_oauth": [
@@ -274,7 +275,7 @@
     ],
     "cache_purge": [
       "CLOUDFLARE_ZONE_ID",
-      "CLOUDFLARE_SCOPED_PURGE_TOKEN"
+      "CLOUDFLARE_CACHE_PURGE_TOKEN"
     ],
     "phone_otp": [
       "SMS_PROVIDER_CONFIG",
@@ -282,6 +283,11 @@
     ],
     "operator_readiness": [
       "HEALTH_PROBE_SECRET"
+    ],
+    "public_asset_publish": [
+      "R2_PUBLIC_BUCKET",
+      "R2_PUBLIC_UPLOAD_KEY_ID",
+      "R2_PUBLIC_UPLOAD_SECRET"
     ]
   },
   "release_checks": [

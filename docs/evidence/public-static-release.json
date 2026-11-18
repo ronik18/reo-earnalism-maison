@@ -1,0 +1,14 @@
+{
+  "status": "uploaded_and_verified",
+  "release_id": "da698efa96c4f0e595edfa3310fd0f522548d8d1152bd7f563e069406cce8477",
+  "file_count": 45,
+  "bytes_total": 6989538,
+  "key_prefix": "static/da698efa96c4f0e595edfa3310fd0f522548d8d1152bd7f563e069406cce8477/",
+  "uploaded": 45,
+  "verified_existing": 0,
+  "public_http_verified": false,
+  "date": "2026-11-18",
+  "provider": "existing_public_R2_bucket",
+  "public_bucket_http_exposure_changed": false,
+  "public_DNS_changed": false
+}

@@ -12,7 +12,12 @@ await build({
 });
 const result = spawnSync(
   process.execPath,
-  ["--test", ".local/client-tests.cjs", "client/contracts.test.mjs"],
+  [
+    "--test",
+    ".local/client-tests.cjs",
+    "client/contracts.test.mjs",
+    "client/worker.test.mjs",
+  ],
   { stdio: "inherit" },
 );
 process.exitCode = result.status ?? 1;
