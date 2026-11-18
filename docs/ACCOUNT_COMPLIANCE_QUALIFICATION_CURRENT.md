@@ -18,7 +18,7 @@ Review Authentication-Results on the next actual messages for SPF/DKIM domain al
 
 ## Operating compliance: concrete implementation gaps
 
-No dedicated public privacy-notice or terms routes/templates were found in the initial audited source. Additive qualification drafts are now prepared in web/legal.py and templates/web/privacy.html, terms.html and contact.html; they are not final accepted disclosures. Backend contact, preferences/consent, export and deletion APIs exist; these do not supply the missing public disclosures. `contracts/runtime-config.json` explicitly leaves retention approval pending. Export artifacts have a seven-day default expiry and cleanup logic, but that is not a complete approved schedule for account records, email/outbox, audit/rate data, support, backups or retained financial obligations.
+No dedicated public privacy-notice or terms routes/templates were found in the initial audited source. Additive qualification drafts are now prepared in web/legal.py and templates/web/privacy.html, terms.html and contact.html; they are not final accepted disclosures. Backend contact, preferences/consent, export and deletion APIs exist; these do not supply the missing public disclosures. The runtime contract historically left retention approval pending; the owner explicitly approved the proposed cleanup windows on 19 November 2026. Approval is not proof of actual cleanup execution. Export artifacts have a seven-day default expiry and cleanup logic, but expiry alone does not prove physical cleanup or complete enforcement across account records, email/outbox, audit/rate data, support, backups or retained financial obligations.
 
 Prepare simple public EN/BN privacy/terms pages and discoverable contact using the existing template approach. Before final copy, obtain or verify actual controller details for Reo Enterprise, India; valid correspondence/grievance contact, purpose/legal bases, necessary versus optional processing, provider recipients/regions, transfer arrangements, retention/deletion criteria, account rights/request route, age/children scope and effective/version dates. Do not invent an address, claim an executed provider DPA/SCC or promise immediate erasure from immutable backups. GDPR Article13 is a concrete disclosure reference for applicable European activity, and ChapterV governs applicable international transfers; this audit does not assert the law is identical across all regions. [Official GDPR text](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng/)
 
@@ -33,7 +33,7 @@ Reader-only qualification does not amend approved P0. Payments, audio and offlin
 ## Integration priorities
 
 1. Reuse the completed production HTTPS verification/reset receipt and explicit action evidence; do not send repeat tests unnecessarily.
-2. Implement accurate public privacy/terms/contact disclosure and approve the actual retention schedule; the prepared additive pages explicitly identify remaining facts rather than invent them.
+2. Keep accurate public privacy/terms/contact disclosure and implement the now owner-approved cleanup windows; the prepared additive pages explicitly identify remaining facts rather than invent them.
 3. Verify processor/transfer arrangements and applicable operating requirements against actual enabled collection and the47-region target. Keep exact-title publication evidence as a separate gate.
 4. Retain remaining approved P0/operational/device work in the consolidated checklist. DMARC enforcement escalation, marketing/bulk-mail tooling and optional third-party compliance products are not prerequisites invented by this review.
 
@@ -50,3 +50,14 @@ The optional support outbox destination was not exposed through Django settings.
 ## Support configuration follow-up
 
 Five focused local notice tests pass (0.101s, clean system checks), including the form absent when SUPPORT_EMAIL is unset and present when configured, while the approved mailbox mailto remains available. No support test email was sent. Runtime support destination/configuration and any actual support-submission acceptance remain pending; the qualification contact page does not pretend that an unconfigured form works. This does not reopen the completed account-email gate.
+
+
+## Owner retention/account decision, 19 November 2026
+
+The owner approved the cleanup windows in [the schedule](RETENTION_AND_AGE_POLICY_REVIEW.md) and declined the proposed guardian/independent-child-account additions (“Not needed at all”). No new child-account flow or age restriction is authorized. This is not a waiver of applicable obligations or a global child-data compliance claim, and the declined feature choice is not an isolated-rollout blocker.
+
+Use existing bounded maintenance for eligible account/action/session/replay cleanup, with PostgreSQL tests and separate actual execution/scheduling evidence. Do not describe token expiry as physical erasure. Preserve pending/uncertain submissions, used accounts, active sessions, valid35-day receipts, financial/legal obligations and the approved backup design.
+
+The 30-day ordinary-log,90-day security/audit and90-day-after-resolution support windows are approved policy but not automatically implemented by their approval. App logs are provider stdout; provider retention requires readback. The contact outbox has no case-resolution lifecycle, and SMTP `done` is not resolution. AuditEvent combines routine security outcomes with publication, rights, commerce, consent and privacy evidence and has no incident/hold lifecycle; no blanket audit-table deletion is qualified. Avoid a new support/logging service merely to represent these remaining operator/provider facts. Keep their actual acceptance in the consolidated checklist without claiming it is complete.
+
+This documentation update performs no live deletion, email send, provider/DNS change, paid provisioning, book publication or legacy-platform modification.
