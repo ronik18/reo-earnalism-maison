@@ -1,0 +1,54 @@
+{
+  "runtime": {
+    "uid": 10001,
+    "pg_dump": "pg_dump (PostgreSQL) 18.7 (Debian 18.7-1.pgdg12+2)",
+    "age": "1.1.1",
+    "gunicorn": "/usr/local/bin/python3.13 /usr/local/bin/gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --worker-class gthread --threads 2 --timeout 30 --graceful-timeout 30 --max-requests 2000 --max-requests-jitter 200 --access-logfile - --access-logformat %(h)s %(m)s %(U)s %(s)s %(L)s ",
+    "ready_https": 200,
+    "applied_migrations": 43,
+    "pending_migrations": 0,
+    "state": "draft",
+    "live_revision_id": null,
+    "manuscript_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4"
+  },
+  "readonly_staff_reader": {
+    "paragraphs": 32,
+    "first_last": true,
+    "overflow": false
+  },
+  "covers": [
+    {
+      "alt": "The Selfish Giant — cover",
+      "complete": true,
+      "fit": "contain",
+      "height": 1200,
+      "radius": "0px",
+      "width": 800
+    },
+    {
+      "alt": "The Selfish Giant — back cover",
+      "complete": true,
+      "fit": "contain",
+      "height": 1200,
+      "radius": "0px",
+      "width": 800
+    }
+  ],
+  "public_http": [
+    {
+      "url": "https://maison.theearnalism.com/en/terms/",
+      "status": 200,
+      "cache": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://maison.theearnalism.com/bn/privacy/",
+      "status": 200,
+      "cache": "private, no-store, max-age=0"
+    },
+    {
+      "url": "https://maison.theearnalism.com/en/contact/",
+      "status": 200,
+      "cache": "private, no-store, max-age=0"
+    }
+  ]
+}

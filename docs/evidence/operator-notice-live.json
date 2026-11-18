@@ -1,0 +1,16 @@
+{
+  "source": "6c37a5ec58af4c08d3d3239002d7cf58779e1f80",
+  "render_deploy": "dep-dbuvh18m7kps73ea3430",
+  "static_release": "bd1b698d20686491c15be7332b0cf0d03352c72108f23c663bfbdfe200f4fefb",
+  "status": "live and notice smoke accepted",
+  "en_contact_address_role": true,
+  "bn_privacy_address_role": true,
+  "all_ages_reading_intent": true,
+  "no_blanket_child_consent_exemption_claim": true,
+  "retention_proposal_applied": false,
+  "physical_uat": "deferred/non-blocking",
+  "additional_paid_resource": false,
+  "dns_changed": false,
+  "book_published": false,
+  "legacy_changed": false
+}

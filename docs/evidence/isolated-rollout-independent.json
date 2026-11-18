@@ -1,0 +1,48 @@
+{
+  "status": "ACCEPTED_ISOLATED_ROLLOUT",
+  "source": "3b0c7fea92ee7ec5f63c32e321ac238b1b540db0",
+  "static_release": "bd1b698d20686491c15be7332b0cf0d03352c72108f23c663bfbdfe200f4fefb",
+  "target": "https://maison.theearnalism.com",
+  "deploy": "dep-dbuv83ec6qcc73cqu7f0",
+  "checks": {
+    "public_routes": {
+      "pass": 34,
+      "total": 34
+    },
+    "public_asset_hash_bytes_mime_immutable": {
+      "pass": 55,
+      "total": 55
+    },
+    "guest_browser_checks": {
+      "pass": 36,
+      "total": 36
+    },
+    "existing_synthetic_member_UI_workflows": {
+      "pass": 10,
+      "total": 10
+    },
+    "direct_origin": "PASS",
+    "legacy_read_only_https": "PASS"
+  },
+  "page_errors": [],
+  "server_errors": [],
+  "physical_uat": {
+    "status": "DEFERRED_BY_OWNER",
+    "blocking": false,
+    "note": "Not a blocker or guardrail for this rollout or further work."
+  },
+  "cleanup": "Only test-created lists deleted; original preferences restored; current test sessions signed out; existing fixture account, other devices and owner sessions preserved; copied credential file removed.",
+  "integration_runtime_receipt": "integration-receipt.json",
+  "artifact": {
+    "path": "/Users/ronikbasak/Documents/Codex/2026-11-18/maison-frontend-audit/outputs/isolated-rollout/index.html",
+    "sha256": "8594420140491051470158e9d673e0fd072fbc26498ca0fce6428b6ea4bdb1c5"
+  },
+  "evidence_sha256": {
+    "summary.json": "9ceac6740558114be9e070cce312190dc368f8f2b331cbf0678aa421ed0db992",
+    "http-acceptance.json": "b3f0784be729f258e2318f967e5ebd9e77326e61a06d9fb95355fcfecb833285",
+    "deployed-ui-results.json": "2e856a066124110b05849e06355d08db26c4ac540f3cbbadf3ba69cd9d26940e",
+    "deployed-member-results.json": "e1632059c06493c565d296237b03f830b05380530e7924b75fbf1d388bb69953",
+    "integration-receipt.json": "ff808e3fadc0153f169aeb45f4f1d7ca0bedfaaaef754edf6757ffb65446e190",
+    "release-acceptance.json": "2e5b03f7661aff89d92154def5289a6273b9ff489ac78162e6e6e5a64d301f65"
+  }
+}
