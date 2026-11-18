@@ -1,0 +1,88 @@
+{
+  "updated_utc": "2026-11-18T18:36:43.458629+00:00",
+  "status": "VIRTUAL_BROWSER_PASS_PHYSICAL_PENDING",
+  "virtual_workflow_groups": {
+    "pass": 32,
+    "total": 32
+  },
+  "offline_cold_context_checks": [
+    {
+      "profile": "iPhone 15",
+      "run": 1,
+      "paragraphs": 6,
+      "layout": {
+        "bannerPosition": "static",
+        "bannerVisible": true,
+        "paragraphs": 6,
+        "overlap": false,
+        "overflow": false
+      },
+      "screenshot": "iPhone-15-offline-bottom-1.png",
+      "status": "PASS"
+    },
+    {
+      "profile": "iPhone 15",
+      "run": 2,
+      "paragraphs": 6,
+      "layout": {
+        "bannerPosition": "static",
+        "bannerVisible": true,
+        "paragraphs": 6,
+        "overlap": false,
+        "overflow": false
+      },
+      "screenshot": "iPhone-15-offline-bottom-2.png",
+      "status": "PASS"
+    },
+    {
+      "profile": "iPhone 15",
+      "run": 3,
+      "paragraphs": 6,
+      "layout": {
+        "bannerPosition": "static",
+        "bannerVisible": true,
+        "paragraphs": 6,
+        "overlap": false,
+        "overflow": false
+      },
+      "screenshot": "iPhone-15-offline-bottom-3.png",
+      "status": "PASS"
+    },
+    {
+      "profile": "Pixel 7",
+      "run": 1,
+      "paragraphs": 6,
+      "layout": {
+        "bannerPosition": "static",
+        "bannerVisible": true,
+        "paragraphs": 6,
+        "overlap": false,
+        "overflow": false
+      },
+      "screenshot": "Pixel-7-offline-bottom-1.png",
+      "status": "PASS"
+    }
+  ],
+  "base_runtime": "dd903d3fdd11ae125640fd45a61b97aa67c924b6",
+  "tested_changes": {
+    "webkit-offline-storage.patch": "377e9c40fe4d24c5905fd74add36303040165a93cd27e714f58c3b270537d52d",
+    "offline-banner-layout.patch": "34d1defd4f401f610e7b738c85f5566eecaf39de406aed2baed42b921a28beec"
+  },
+  "environment": "Local Django/PostgreSQL, isolated synthetic fixtures; Pixel7 Chromium159/iPhone15 WebKit27.2 touch+mobile profiles. Neither full OS emulators nor physical phones.",
+  "physical_Android": "NOT RUN",
+  "physical_iOS": "NOT RUN",
+  "not_certified": [
+    "Android OS / iOS Simulator behavior",
+    "Native text-selection handles, software keyboard, safe-area hardware cutouts",
+    "Lock-screen/background audio, headset/Bluetooth controls and OS interruptions",
+    "Physical accessibility, storage eviction, poor-network transitions",
+    "Real payment/subscription lifecycle or real-customer actions",
+    "Live authenticated mobile flows; public browser network could not complete on this Mac"
+  ],
+  "platform_preservation": "No deployment, legacy-platform writes, DNS changes, publication or actual book content mutation performed by this lane.",
+  "live_target": "https://maison.theearnalism.com",
+  "live_network_note": "System resolver returned no address. Fresh DNS lookup plus curl --resolve returned HTTPS200 with TLS verification0 for /en/. Virtual Chromium live smoke later encountered local ERR_NETWORK_CHANGED/ADDRESS_UNREACHABLE/INTERNET_DISCONNECTED; it is not accepted as app-health evidence.",
+  "push_status": "Integration lane owns push; receipt pending.",
+  "source_report_sha256": "2a5b9d955d686d833e1bd3ec812c3c1d5ae13ce728f6a1a90f0bf3fc876c0382",
+  "integration_note": "Offline storage and banner patches imported; legal/footer additions and operations changes checked separately. Not deployed."
+}

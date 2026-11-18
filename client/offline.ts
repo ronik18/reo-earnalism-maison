@@ -248,12 +248,14 @@ export async function download(
         done += asset.bytes;
         onProgress(done, license.bytes_total);
       }
+      // ArrayBuffer avoids WebKit's intermittent IndexedDB Blob preparation failure.
+      const data = await blob.arrayBuffer();
       await store(
         "assets",
         (s) =>
           s.put({
             key: key + ":" + asset.asset_id,
-            blob,
+            data,
             sha256: asset.sha256,
             bytes: asset.bytes,
             content_type: asset.content_type,
@@ -284,16 +286,18 @@ export async function openReader(
     throw new Error("download_expired");
   const paragraphs: { text: string; kind: string; anchor_id: string }[] = [];
   for (const asset of book.license.assets) {
-    const saved = await store<{ blob: Blob; sha256: string }>("assets", (s) =>
+    const saved = await store<{ data?: ArrayBuffer; blob?: Blob; sha256: string }>("assets", (s) =>
       s.get(book.key + ":" + asset.asset_id),
     );
+    // Continue to read downloads saved by versions that persisted Blob records.
+    const data = saved?.data || await saved?.blob?.arrayBuffer();
     if (
-      !saved ||
+      !saved || !data ||
       saved.sha256 !== asset.sha256 ||
-      (await hash(await saved.blob.arrayBuffer())) !== asset.sha256
+      (await hash(data)) !== asset.sha256
     )
       throw new Error("download_integrity");
-    const document = JSON.parse(await saved.blob.text());
+    const document = JSON.parse(new TextDecoder().decode(data));
     if (
       document.schema_version !== 1 ||
       document.chunk_id !== asset.asset_id ||

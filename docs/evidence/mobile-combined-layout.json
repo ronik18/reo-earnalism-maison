@@ -1,0 +1,374 @@
+[
+  {
+    "name": "iphone390",
+    "checks": [
+      {
+        "id": "en-privacy",
+        "status": "PASS",
+        "width": 390,
+        "scrollWidth": 390,
+        "links": [
+          {
+            "text": "Privacy",
+            "href": "/en/privacy/",
+            "x": 20,
+            "y": 703.3125,
+            "width": 47.671875,
+            "height": 44,
+            "top": 703.3125,
+            "right": 67.671875,
+            "bottom": 747.3125,
+            "left": 20
+          },
+          {
+            "text": "Terms",
+            "href": "/en/terms/",
+            "x": 85.671875,
+            "y": 703.3125,
+            "width": 39.65625,
+            "height": 44,
+            "top": 703.3125,
+            "right": 125.328125,
+            "bottom": 747.3125,
+            "left": 85.671875
+          },
+          {
+            "text": "Contact",
+            "href": "/en/contact/",
+            "x": 143.328125,
+            "y": 703.3125,
+            "width": 53.328125,
+            "height": 44,
+            "top": 703.3125,
+            "right": 196.65625,
+            "bottom": 747.3125,
+            "left": 143.328125
+          },
+          {
+            "text": "Settings",
+            "href": "/en/settings/",
+            "x": 214.65625,
+            "y": 703.3125,
+            "width": 53.6875,
+            "height": 44,
+            "top": 703.3125,
+            "right": 268.34375,
+            "bottom": 747.3125,
+            "left": 214.65625
+          }
+        ],
+        "navTop": 781,
+        "bannerPosition": "static",
+        "screenshot": "iphone390-combined-en-privacy.png"
+      },
+      {
+        "id": "bn-privacy",
+        "status": "PASS",
+        "width": 390,
+        "scrollWidth": 390,
+        "links": [
+          {
+            "text": "\u0997\u09cb\u09aa\u09a8\u09c0\u09af\u09bc\u09a4\u09be",
+            "href": "/bn/privacy/",
+            "x": 20,
+            "y": 703.453125,
+            "width": 62.515625,
+            "height": 44,
+            "top": 703.453125,
+            "right": 82.515625,
+            "bottom": 747.453125,
+            "left": 20
+          },
+          {
+            "text": "\u09b6\u09b0\u09cd\u09a4\u09be\u09ac\u09b2\u09bf",
+            "href": "/bn/terms/",
+            "x": 100.515625,
+            "y": 703.453125,
+            "width": 45.90625,
+            "height": 44,
+            "top": 703.453125,
+            "right": 146.421875,
+            "bottom": 747.453125,
+            "left": 100.515625
+          },
+          {
+            "text": "\u09af\u09cb\u0997\u09be\u09af\u09cb\u0997",
+            "href": "/bn/contact/",
+            "x": 164.421875,
+            "y": 703.453125,
+            "width": 57.671875,
+            "height": 44,
+            "top": 703.453125,
+            "right": 222.09375,
+            "bottom": 747.453125,
+            "left": 164.421875
+          },
+          {
+            "text": "\u09aa\u099b\u09a8\u09cd\u09a6 \u0993 \u0985\u09cd\u09af\u09be\u0995\u09be\u0989\u09a8\u09cd\u099f",
+            "href": "/bn/settings/",
+            "x": 240.09375,
+            "y": 703.453125,
+            "width": 105.734375,
+            "height": 44,
+            "top": 703.453125,
+            "right": 345.828125,
+            "bottom": 747.453125,
+            "left": 240.09375
+          }
+        ],
+        "navTop": 781,
+        "bannerPosition": "static",
+        "screenshot": "iphone390-combined-bn-privacy.png"
+      },
+      {
+        "id": "offline-footer",
+        "status": "PASS",
+        "width": 390,
+        "scrollWidth": 390,
+        "links": [
+          {
+            "text": "Privacy",
+            "href": "/en/privacy/",
+            "x": 20,
+            "y": 703.328125,
+            "width": 47.671875,
+            "height": 44,
+            "top": 703.328125,
+            "right": 67.671875,
+            "bottom": 747.328125,
+            "left": 20
+          },
+          {
+            "text": "Terms",
+            "href": "/en/terms/",
+            "x": 85.671875,
+            "y": 703.328125,
+            "width": 39.65625,
+            "height": 44,
+            "top": 703.328125,
+            "right": 125.328125,
+            "bottom": 747.328125,
+            "left": 85.671875
+          },
+          {
+            "text": "Contact",
+            "href": "/en/contact/",
+            "x": 143.328125,
+            "y": 703.328125,
+            "width": 53.328125,
+            "height": 44,
+            "top": 703.328125,
+            "right": 196.65625,
+            "bottom": 747.328125,
+            "left": 143.328125
+          },
+          {
+            "text": "Settings",
+            "href": "/en/settings/",
+            "x": 214.65625,
+            "y": 703.328125,
+            "width": 53.6875,
+            "height": 44,
+            "top": 703.328125,
+            "right": 268.34375,
+            "bottom": 747.328125,
+            "left": 214.65625
+          }
+        ],
+        "navTop": 781,
+        "bannerPosition": "static",
+        "screenshot": "iphone390-combined-offline-footer.png",
+        "paragraphs": 6
+      }
+    ],
+    "pageErrors": [],
+    "serverErrors": [],
+    "status": "PASS"
+  },
+  {
+    "name": "pixel412",
+    "checks": [
+      {
+        "id": "en-privacy",
+        "status": "PASS",
+        "width": 412,
+        "scrollWidth": 412,
+        "links": [
+          {
+            "text": "Privacy",
+            "href": "/en/privacy/",
+            "x": 20,
+            "y": 697.78125,
+            "width": 47.671875,
+            "height": 44,
+            "top": 697.78125,
+            "right": 67.671875,
+            "bottom": 741.78125,
+            "left": 20
+          },
+          {
+            "text": "Terms",
+            "href": "/en/terms/",
+            "x": 85.671875,
+            "y": 697.78125,
+            "width": 39.65625,
+            "height": 44,
+            "top": 697.78125,
+            "right": 125.328125,
+            "bottom": 741.78125,
+            "left": 85.671875
+          },
+          {
+            "text": "Contact",
+            "href": "/en/contact/",
+            "x": 143.328125,
+            "y": 697.78125,
+            "width": 53.328125,
+            "height": 44,
+            "top": 697.78125,
+            "right": 196.65625,
+            "bottom": 741.78125,
+            "left": 143.328125
+          },
+          {
+            "text": "Settings",
+            "href": "/en/settings/",
+            "x": 214.65625,
+            "y": 697.78125,
+            "width": 53.6875,
+            "height": 44,
+            "top": 697.78125,
+            "right": 268.34375,
+            "bottom": 741.78125,
+            "left": 214.65625
+          }
+        ],
+        "navTop": 776,
+        "bannerPosition": "static",
+        "screenshot": "pixel412-combined-en-privacy.png"
+      },
+      {
+        "id": "bn-privacy",
+        "status": "PASS",
+        "width": 412,
+        "scrollWidth": 412,
+        "links": [
+          {
+            "text": "\u0997\u09cb\u09aa\u09a8\u09c0\u09af\u09bc\u09a4\u09be",
+            "href": "/bn/privacy/",
+            "x": 20,
+            "y": 698.484375,
+            "width": 62.515625,
+            "height": 44,
+            "top": 698.484375,
+            "right": 82.515625,
+            "bottom": 742.484375,
+            "left": 20
+          },
+          {
+            "text": "\u09b6\u09b0\u09cd\u09a4\u09be\u09ac\u09b2\u09bf",
+            "href": "/bn/terms/",
+            "x": 100.515625,
+            "y": 698.484375,
+            "width": 45.90625,
+            "height": 44,
+            "top": 698.484375,
+            "right": 146.421875,
+            "bottom": 742.484375,
+            "left": 100.515625
+          },
+          {
+            "text": "\u09af\u09cb\u0997\u09be\u09af\u09cb\u0997",
+            "href": "/bn/contact/",
+            "x": 164.421875,
+            "y": 698.484375,
+            "width": 57.671875,
+            "height": 44,
+            "top": 698.484375,
+            "right": 222.09375,
+            "bottom": 742.484375,
+            "left": 164.421875
+          },
+          {
+            "text": "\u09aa\u099b\u09a8\u09cd\u09a6 \u0993 \u0985\u09cd\u09af\u09be\u0995\u09be\u0989\u09a8\u09cd\u099f",
+            "href": "/bn/settings/",
+            "x": 240.09375,
+            "y": 698.484375,
+            "width": 105.734375,
+            "height": 44,
+            "top": 698.484375,
+            "right": 345.828125,
+            "bottom": 742.484375,
+            "left": 240.09375
+          }
+        ],
+        "navTop": 776,
+        "bannerPosition": "static",
+        "screenshot": "pixel412-combined-bn-privacy.png"
+      },
+      {
+        "id": "offline-footer",
+        "status": "PASS",
+        "width": 412,
+        "scrollWidth": 412,
+        "links": [
+          {
+            "text": "Privacy",
+            "href": "/en/privacy/",
+            "x": 20,
+            "y": 697.734375,
+            "width": 47.671875,
+            "height": 44,
+            "top": 697.734375,
+            "right": 67.671875,
+            "bottom": 741.734375,
+            "left": 20
+          },
+          {
+            "text": "Terms",
+            "href": "/en/terms/",
+            "x": 85.671875,
+            "y": 697.734375,
+            "width": 39.65625,
+            "height": 44,
+            "top": 697.734375,
+            "right": 125.328125,
+            "bottom": 741.734375,
+            "left": 85.671875
+          },
+          {
+            "text": "Contact",
+            "href": "/en/contact/",
+            "x": 143.328125,
+            "y": 697.734375,
+            "width": 53.328125,
+            "height": 44,
+            "top": 697.734375,
+            "right": 196.65625,
+            "bottom": 741.734375,
+            "left": 143.328125
+          },
+          {
+            "text": "Settings",
+            "href": "/en/settings/",
+            "x": 214.65625,
+            "y": 697.734375,
+            "width": 53.6875,
+            "height": 44,
+            "top": 697.734375,
+            "right": 268.34375,
+            "bottom": 741.734375,
+            "left": 214.65625
+          }
+        ],
+        "navTop": 776,
+        "bannerPosition": "static",
+        "screenshot": "pixel412-combined-offline-footer.png",
+        "paragraphs": 6
+      }
+    ],
+    "pageErrors": [],
+    "serverErrors": [],
+    "status": "PASS"
+  }
+]

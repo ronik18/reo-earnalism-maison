@@ -16,9 +16,8 @@
 <a {% if active_nav == 'vault' %}aria-current="page"{% endif %} href="{% url 'web:vault' ui_locale %}">{% ui 'vault' %}</a>
 <a class="pass-nav" {% if active_nav == 'pass' %}aria-current="page"{% endif %} href="{% url 'web:pass' ui_locale %}">{% ui 'pass' %}</a>
 </nav>
-<div class="web-stage {% if focused %}focused-stage{% endif %}"><main id="main" tabindex="-1">{% block content %}{% endblock %}</main>
-<footer><p>{% if local_build %}{% ui 'local_notice' %}{% else %}{% ui 'platform_footer' %}{% endif %}</p><a href="{% url 'web:settings' ui_locale %}">{% ui 'settings' %}</a></footer></div>
-<div id="connection-status" class="connection-status" role="status" hidden>{% ui 'offline' %}</div>
+<div class="web-stage {% if focused %}focused-stage{% endif %}"><div id="connection-status" class="connection-status" role="status" hidden>{% ui 'offline' %}</div><main id="main" tabindex="-1">{% block content %}{% endblock %}</main>
+<footer><p>{% if local_build %}{% ui 'local_notice' %}{% else %}{% ui 'platform_footer' %}{% endif %}</p><nav class="footer-links" aria-label="{% ui 'footer_links' %}"><a href="{% url 'web:privacy' ui_locale %}">{% ui 'privacy_notice' %}</a><a href="{% url 'web:terms' ui_locale %}">{% ui 'service_terms' %}</a><a href="{% url 'web:contact' ui_locale %}">{% ui 'contact' %}</a><a href="{% url 'web:settings' ui_locale %}">{% ui 'settings' %}</a></nav></footer></div>
 <div id="persistent-media" aria-label="{% ui 'audio' %}"></div>
 {{ ui|json_script:'ui-catalogue' }}{% island_script 'shell' %}{% block bootstrap %}{% endblock %}
 </body></html>

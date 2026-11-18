@@ -1,223 +1,44 @@
-# Pending validation register
+# Maison current acceptance checklist
 
-Updated 18 November 2026. Integration Lane owns this single checklist for final acceptance. Keep implementation progressing in parallel; run dependent provider/device checks together once their prerequisites are ready. A source change or local test does not close a real-provider check. Only checks applicable to the enabled launch scope block that scope; optional formats and payments stay disabled until qualified.
+One current register. Integration Lane owns final source, provider changes and release decisions. [Prior milestones and resolved failures](evidence/validation-history-through-live-book.md) are preserved as history rather than repeated as current blockers.
 
-**Current snapshot, 18 November 2026:** dedicated Neon has 43 applied migrations and zero pending. Isolated Singapore Render is live on qualified MFA source `dd903d3` with public static release `686e2afe…`; Cloudflare activation and the two isolated hostnames are approved and active. Public assets and anonymous English/Bengali Home have actual cache HITs and exact-URL purge readback. Cookie/Authorization, malformed/country-mismatched requests and draft denial pass. The four-line browser CSS source `36b771d` is included in the current qualified MFA release, whose55 public assets were uploaded and verified. Existing apex/www/API destinations are preserved. Chrome DNS resolution now works after the owner selected Cloudflare Secure DNS. Owner MFA enrollment and the live staff draft Reader journey now pass; physical devices and operational HA/load/recovery remain open. Historical paragraphs below are evidence history, not current provider state.
+**Preserved:** The Selfish Giant stays draft with null live revision; current legacy platform and apex/www/API destinations stay unchanged. No new spending or DNS changes without approval. Approved HLD/LLD, full P0 scope and47-region policy remain binding; a disabled P0 feature is not automatically waived.
 
-Current constraints: The Selfish Giant stays draft. Approved Cloudflare nameserver/isolated-host activation has occurred; legacy application, apex/www/API destinations and mail remain unchanged. The final public product URL stays https://theearnalism.com. No additional paid infrastructure without owner approval. Preserve the approved HLD/LLD and 47-region publication policy.
+**Live qualification:** Render `dd903d3`, static `686e2afe…`. Actual staff MFA/32-paragraph draft Reader/covers/note/preferences/progress/Saved/Finished pass; manuscript hash unchanged. Later fixes below are source candidates until explicitly marked deployed.
 
-| ID | Pending validation | Prerequisite / simplest next action | Acceptance evidence |
-| --- | --- | --- | --- |
-| V01 | R2 private delivery and intake | Finish the approved private-bucket upload credential and exact-origin CORS; run the bounded synthetic qualification. Delivery credential replaced with bucket-only read-only, 24-hour access. | Actual conditional upload/replay, immutable copy, SHA/byte integrity, GET/Range, unsigned/expired denial, allowed/foreign-origin CORS and cleanup; private access remains disabled publicly. Stay within 10 MB, 50 writes, 200 reads. |
-| V02 | Browser-to-R2 delivery | V01; use loopback-only qualification harness and a fresh synthetic signed object. | Browser GET/Range and integrity pass; no secret/signed URL in logs or handoff; exact canary cleaned. |
-| V03 | PASS for public static assets and exact anonymous Home route | Active Free zone; default private bypass then separate EN/BN canonical Home rules, preserving full URL keys. | [HTTP matrix](evidence/cdn-activation-http.json), [asset hashes/MIME/CORS](evidence/cdn-public-assets-http.json). Mixed-case/empty Cookie and Authorization bypass; other routes remain uncached. |
-| V04 | PASS for exact app and Origin-specific asset purge; rights withdrawal remains scoped | Existing zone-only purge adapter and non-expiring Cache Purge token are configured. | [Actual adapter plus independent MISS/HIT](evidence/cdn-app-provider-adapter.json), [asset Origin purge](evidence/cdn-asset-origin-purge.json). No live-title withdrawal or global recall is claimed. |
-| V05 | PASS for configured exact-host transform and observed IN probe context | SET origin credential and dynamic country; Full (strict) origin TLS; real country/query binding before lookup. | Direct Render origin403; mismatched query403; private/draft bypass in actual HTTP matrix. Real probes were IN/MRS, not all47 physical geographies. |
-| V06 | SMTP authentication and account email journey | SMTP authentication, verification/reset receipt/actions already pass; qualify production HTTPS links and sender policy without changing DNS unless approved. | App verification and reset messages submitted and received at approved ronik18@gmail.com; action links complete, expire/replay safely, reset revokes sessions; no credentials in evidence. SMTP acceptance and inbox receipt recorded separately. |
-| V07 | Persistent Player and recovery UI | Isolated PostgreSQL18 synthetic audio fixture and current frontend build. | Real browser playback survives eligible internal navigation/history; close/account changes stop correctly; rejected queued notes can retry/edit/export/delete without duplicate effects. Synthetic audio does not certify a book audiobook. |
-| V08 | Physical mobile, offline and accessibility | Stable build; actual supported Android/iOS devices and applicable offline scope. | Responsive full-cover frames, EN/BN typography, keyboard/focus/screen-reader checks; applicable download/license/expiry, offline read/play and reconnect synchronization. Unsupported formats remain disabled. |
-| V09 | Integrated PostgreSQL18 and release-source checks | Dedicated Neon43 migrations applied with zero pending; exact-source qualification CI and deployment acceptance are tracked separately. | Combined affected backend/frontend tests, build, no migration drift, pinned Python3.13 packaging and exact-head CI; pooled/direct TLS/timeouts and book draft/null live pointer preserved. Historical37/38-migration evidence is superseded by the latest43-migration readback. |
-| V10 | Production operations, load and recovery | Authorized deployment/resource configuration and any indispensable spending approval. | Health/readiness, bounded provider/database failures and retries, rate-limit headers, saturation/autoscaling behavior, observed cost limits, backup restore and rollback rehearsal on the actual deployment. Local restore is supporting evidence only. |
-| V11 | Launch content and compliance | Exact-edition rights/permissions and applicable operating documents for every active region. | All 47 active regions and each offered format/action supported by retained evidence; privacy/terms/contact/retention and data-processing requirements match enabled scope. UAE/Mainland China and pending regions stay excluded. Draft acceptance does not authorize publication. |
-| V12 | Payments, refunds, tax and invoices — only if enabled | Qualified merchant/test credentials, country/tax/seller facts and permitted provider operations. | Actual sandbox checkout/webhook/replay/late-capture/refund reconciliation and invoice cases; live activation requires applicable approvals. Remains disabled; do not block a launch scope that excludes payments. |
-| V13 | Audio/video and learning content — only if offered | Cleared final media/editorial content; approved adapters and any spending authority. | Applicable rights, real media preparation/playback/timing, device delivery and editorial acceptance. Synthetic fixtures do not establish content or provider readiness. |
+## Completed checks — reuse unless affected
 
-## Latest qualification results,18November2026
-
-| Item | Current result | Evidence / remaining work |
+| ID | Acceptance and scope | Evidence |
 | --- | --- | --- |
-| V01 | PASS for private synthetic HTTP transport; PARTIAL for production integration | [18 HTTP checks and three successful cleanups](evidence/r2-http-qualification.json). Conditional PUT, immutable copy, SHA/bytes/type/method binding,412 replay rejection, allowed/foreign CORS, GET/Range, unsigned denial and expired grant passed. Separate exact-origin delivery/upload rules saved. Private bucket has no public development URL/custom domain. Actual retained draft assets and protected R2-backed browser/API journey now pass; see the latest milestone below. Production HTTPS origin and production backup/recovery remain pending; superseding90-day credential and actual-Neon backup results are recorded below. |
-| V02 | PASS for the loopback browser scope | [Browser GET/Range/SHA/private-cache result](evidence/r2-browser-qualification.json), [screenshot](evidence/r2-browser-qualification.png).64KiB synthetic object; exact canary cleaned. Production CDN is not qualified. |
-| V03–V05 | PASS for the isolated qualification scope, superseding prior blockers | [Current CDN handoff](HTTPS_CDN_DEPLOYMENT_HANDOFF.md). Retains resolved initial rule/purge failures as history; broader route/rights/device acceptance remains explicit. |
-| V06 | PARTIAL: TLS/EHLO pass; SMTP authentication/submission/inbox pending | Superseded by the actual verification/reset receipt and action milestone below. Both requested emails were sent once and received in the approved inbox; production HTTPS links and sender DMARC policy review remain pending. |
-| V07 | PARTIAL: synthetic desktop playback continuity passed | [Observed journey](evidence/player-browser-continuity.json), [screenshot](evidence/player-browser-continuity.png). Explore/EN–BN/history/Reader navigation preserved advancing playback and1.25x speed;5minute timer selection survived; close removed audio. Exact DOM identity, timer elapse, auth/account boundary and queued-note browser recovery remain pending. Fixed an actual Player grant-route404 and added a frontend/OpenAPI route audit. |
-| V09 | PASS for source CI and dedicated Neon migration; production acceptance remains separate |171 backend tests,20 frontend tests, production build, seven focused configuration tests and no migration drift. New cache migration applied to existing Neon; [book readback](evidence/provider-book-draft-check.json) confirms draft/null live pointer. Pinned Python3.13 also passed171 combined tests. [Exact-source CI passed](https://github.com/ronik18/reo-earnalism-maison/actions/runs/44233552612) at `8236663`:172 backend tests,20 frontend tests and build; [record](evidence/provider-source-ci.json). |
-| V08,V10–V13 | Remain pending or disabled as scoped above | No physical-device, production resilience, legal/publication, payment or real-media readiness is inferred from this milestone. |
-
-The R2 probe exposed and fixed a real exhausted-stream socket error; another check was narrowed to the actual R2 unsigned400 `InvalidArgument` error without accepting arbitrary400 or leaked object bytes. Earlier failed runs remain private with successful cleanup. Final full probe passes. No paid infrastructure was provisioned and the real title remains draft.
-
-## Final acceptance sequence
-
-1. Complete source integration and V09; run V01–V02 and V06 independently when credentials are ready.
-2. Once an authorized host is available, qualify V03–V05 together against the same deployment; perform V07–V08 on that build.
-3. Close V10–V11 for the actual launch scope and V12–V13 only where enabled. Root reviews one release candidate, performs applicable final smoke checks and records cutover readiness.
-
-## Closing an item
-
-Update this table with PASS plus the dated evidence path, exact source/build, environment and enabled scope. Use PARTIAL or BLOCKED with the concrete dependency where appropriate. Keep historical evidence in its existing handoff; link it rather than duplicating checks. Never mark PASS from code presence, mocks, or a provider acknowledgement alone.
-
-Next integration action: run grouped production edge/HTTPS, durable credential, backup and device checks when their prerequisites are available. Keep the book draft and current platform unchanged.
-
-
-## Latest email and actual-book acceptance,18November2026
-
-- **V06 PASS for configured SMTP and isolated account actions:** TLS/authentication, exactly one verification email and one reset email, actual Gmail inbox receipt, SPF/DKIM pass, received-link confirmation and410replay rejection. Reset revoked the old session/device, rejected the old password and accepted the new test password. No existing Neon or legacy account was reset. [Evidence](evidence/smtp-account-journeys.json). The test links point to loopback8012; production HTTPS links remain pending. DMARC was not reported in received authentication results; review the sender policy before production (no DNS change made).
-- **V01/V02 PASS for this protected R2-backed draft scope:** the exact approved front/back JPEGs and Reader JSON total248,973bytes, uploaded to the private bucket and independently hash-verified. Browser covers load800×1200 without cuts;32paragraphs, progress, persisted gold note, EN/BN interface, completion and Saved/Finished reopening pass. Actual browser fetch of a staff-issued R2 package verifies11,940bytes, SHA256 and private/no-store. Reader SSR text itself comes from Neon; do not equate that SSR render with package transport. [Assets](evidence/r2-book-assets.json), [package browser](evidence/r2-book-package-browser.json), [journey](evidence/r2-book-journey.json).
-- Existing R2 credential fields were blank when qualification resumed. With explicit owner approval, revoked the two prior tokens and created same-scope24hour private-bucket-only read and read/write replacements; restored only their four env fields while preserving SMTP/DB settings. These qualification credentials still require a durable production credential decision; no extra service or paid plan was provisioned.
-- **Still pending together:** V03–V05 actual CDN HIT/MISS, trusted edge headers/cache-key isolation and purge/expiry readback; production HTTPS email links/DMARC review; physical devices/offline/accessibility; deployment load/recovery/backup; all applicable rights/operating requirements and any optional payment/media scope. The book remains draft with null live pointer; current platform/DNS unchanged.
-
-
-## HTTPS/CDN preparation milestone,18November2026
-
-- Production-image gap fixed: frontend test inputs included in Docker build; stale host bundles excluded. The exact Python3.13 image passes181 backend tests;22 frontend tests/typecheck/build pass. The initial host-native run had five subprocess-import timeouts; no check was weakened. An iCloud dataless Git exclusion file was hydrated without rewriting its contents/history. Canonical container execution passes; native recheck remains diagnostic.
-- Approved public R2 static path now implemented: deterministic45-file6,989,538byte release, content-hashed namespace, separate public-only credential, conditional immutable puts and complete hash/MIME/cache-header readback. [Uploaded release](evidence/public-static-release.json). Public HTTP/CORS/CDN remain unqualified until the approved domain is active; no r2.dev/Worker substitution.
-- Fonts use relative URLs; STATIC_RELEASE_ID selects the immutable CDN prefix; service-worker assets use that exact public release and credential-free CORS fetches. Offline shell is anonymous even when requested by a signed-in member; private routes are never admitted to public shell caching.
-- Three owner-approved90day account credentials now expire16February2027. Actual private read/write/denied-write/cross-bucket boundaries passed; [credential evidence](evidence/durable-credential-qualification.json). Existing24hour tokens are unchanged; no backup permissions were granted.
-- Production-mode check passes without errors and retains two explicit Django warnings: HSTS subdomain inclusion and preload remain disabled until the complete domain scope is reviewed. This check used reserved example hosts with networking disabled; it is not production HTTPS evidence.
-- Owner approved one isolated Singapore Render service at$7/month plus applicable tax/usage, no workspace upgrade; this qualifies the HTTPS stage only, not the approved2–6replica HA/autoscaling target. Deployment connection/secrets and pending Free Cloudflare zone preparation are authorized; public DNS/nameservers require a separate exact-diff approval. The book remains draft/current platform unchanged.
-
-
-## Deployment handoff status,18November2026
-
-- Exact-head CI passed for `3fdd7426c02eb6c8b540cbc53e23120b45d7d404`: [run44251719606](https://github.com/ronik18/reo-earnalism-maison/actions/runs/44251719606).
-- Render form prepared for `reo-earnalism-maison-qa`, Docker/main, Singapore, $7/month, health `/api/v1/health/live`, auto-deploy Off. Private provider variables imported; public deployment credential excluded. Final creation requires the owner's Add Card step ($1 temporary verification authorization). No web service has been created; HTTPS qualification remains pending.
-- Cloudflare Free-zone preparation reached domain onboarding only. The default Bot Preference Sync would prepend robots.txt rules; disabling it was rejected by automatic approval review as outside zone-only approval. Requested explicit setting approval; zone creation and DNS record review remain pending. No public nameserver/DNS/traffic changes.
-- Independent frontend chat found incomplete P0 screen/state coverage. Owner authorized that chat to complete missing screens in an isolated checkout based on3fdd742; root retains final integration. Backend/provider-dependent controls remain truthfully gated. Physical Android/iOS acceptance remains pending.
-
-Next integration action: complete approved provider prerequisites, verify actual deployed HTTPS, prepare the exact DNS diff for separate approval, then run V03–V05 together.
-
-
-## Cloudflare pending-zone preparation,18November2026
-
-Owner explicitly approved disabling Bot Preference Sync; the onboarding switch was verified Off before proceeding. The $0 Free zone for theearnalism.com is now prepared and awaiting nameserver activation. Assigned nameservers: cesar.ns.cloudflare.com and ligia.ns.cloudflare.com. Existing authoritative ns1.dns-parking.com/ns2.dns-parking.com remain unchanged; no registrar, public DNS or traffic changes were made.
-
-Automatic scan found13records:2A,7CNAME,2MX,2TXT. The scan is not a complete Hostinger zone export. All9 scanned A/CNAME records default to Proxied, including FTP, mail discovery and DKIM aliases; these pending defaults require review/correction before any activation. Current apex/Vercel and api/Railway targets must be preserved. Obtain full existing-zone parity (including uncommon records, mail, verification, CAA and DNSSEC/DS status), prepare the exact diff and seek separate DNS approval. Do not activate from the scan alone.
-
-V03–V05 remain pending: no active Maison app/assets host, real CDN HIT/MISS, cache isolation or purge readback. Render Add Card is still pending; no qualification web service has been created.
-
-
-## P0 frontend integration,18November2026
-
-The owner-authorized frontend lane supplied a43-file patch based on3fdd742 plus availability follow-up. Root integrated it with actual403/404/500 handlers. Public gold artwork, onboarding, personal Home, collection/Series destinations, gated Video, owned Checkout, Reader preview/format dialogs, Settings, Vault and download recovery now have source implementation. [Browser evidence](evidence/frontend-browser-validation.json) covers Chromium desktop1440/mobile390 and Bengali360 widths; original synthetic fixture flows only. Physical Android/iOS, Safari/WebKit and assistive-technology/offline-device acceptance remain V08. Do not claim26fully accepted native screens.
-
-Retained backend dependencies: bounded audio preview object, qualified Stream, real Series/episode data, pagination beyond Saved/Lists100 and Continue/Finished20, existing subscription cancellation/mandate/invoice delivery APIs. Payments/media remain disabled until applicable qualification. Vault territory projection must be reviewed before international acceptance. These are consolidated dependencies, not evidence of production readiness.
-
-New frontend bundles/art require a new immutable static release; the earlier45-file uploaded release does not contain this patch. No additional upload is implied by source integration. Root will prepare the new manifest and reconcile any upload budget before provider writes. The Selfish Giant remains draft/current platform unchanged.
-
-Final support follow-up adds an online-only contact form in Settings and system errors, using the existing/contact API and accepted-for-processing wording. Root fixed its missing Settings mount. Final local static summary:54files,7,258,380bytes, release088fe0650e532f527289e68c2ac8c8ac9fcdf32a37f6274f01312b837298ad56. No support messages or additional provider uploads were sent.
-
-Integration continuity: iCloud hydration blocked the original checkout's Git ignore/index operations. Root preserved all57scoped files in two durable SHA256-verified exports (archive ba0bd42433f680032be95c90ad0f5cbcdf88ee57e93e56d9c115b389ac3c1211), then continued in /tmp/maison-frontend-integration-20261118 from3fdd742. Every copied file was hash-verified. Original checkout and unrelated contracts.test.mjs formatting are preserved; no lock deletion/reset/stash. Root is the sole writer. Canonical Docker checks passed; exact-head CI remains authoritative for the final committed test set.
-
-
-## Remaining P0 backend integration,18November2026
-
-- **Source gaps implemented:** persistent bilingual editorial collections/Series with canonical slugs and ordered eligible episodes; existing admin management; catalog invalidation queue. Publishing a collection never publishes a draft edition. Commercial Series content and actual CDN purge remain separate acceptance items.
-- **Pagination implemented:** deterministic signed actor/query/trusted-territory keysets and supporting indexes for Saved, Lists, progress, annotations and billing history. Vault default arrays remain maximum20, with a bounded500-row summary scan. Explicit continue/finished/lists sections provide full cursor traversal, including empty scanned pages with later rows; clients follow those cursors. Saved/Vault availability now uses trusted territory, and malformed annotation filters return422.
-- **Existing agreements implemented:** owned subscription/mandate history, fresh-auth review/confirmation, versioned cancellation, durable deduplicated pending intents and aligned Subscription-to-Mandate lock order. Paid-through access and provider status remain intact. External execution stays blocked while the recurring provider is unqualified; no cancellation/revocation confirmation is invented.
-- **Invoice source implemented:** immutable owned history, a separately approved/hash-verified retained PDF artifact,120-second private grants and database allocation bounds. Missing artifacts409; inconsistent or ambiguous payment attribution503. A same-member/same-offer order does not identify a subscription/cycle: subscription-invoice payment allocation is denied until exact retained linkage exists. Issued subscription invoice history/documents remain available. No tax document or payment confirmation is fabricated.
-- **Visual correction:** removed overlapping column/wash/card layers; one separated desktop ornament, plain mobile and reading surfaces. [Lane browser evidence](evidence/backend-p0-validation.json) uses original synthetic local fixtures, desktop1440/mobile390 Chromium. Physical Android/iOS, Safari/WebKit and device/offline/accessibility acceptance remain V08.
-- **Five new migrations are local/CI scope only:** library0005, billing0005/0006/0007 and reader0004. Dedicated Neon has not been migrated by this milestone. Apply/recheck there only as part of authorized deployment; the actual book stays draft with no live pointer changes.
-- **Deployment assets remain pending:** locally prepared54-file7,265,871byte release607c609cde0ae0c3052af238cee475acf344409810310308a1ca258b8807f71a has not been uploaded. The earlier45-file uploaded release is unchanged. Reconcile asset-write authority before further provider writes.
-
-Qualification sequence: final combined pinned-image tests and migration parity, scoped-branch exact-head CI, then normal main promotion of the identical tested commit. [Qualification branch CI](https://github.com/ronik18/reo-earnalism-maison/actions?query=branch%3Acodex%2Fmaison-backend-p0-20261118). Root remains sole integration writer. No provider, DNS, book publication or legacy change occurred.
-
-**Remaining grouped validations:** V03–V05 production HTTPS/CDN HIT/MISS/cache-key isolation/purge/expiry/origin protection; production email links and sender-policy review; V08 physical devices/Safari/offline/accessibility; V10 actual deployment load/HA/autoscaling/backup/restore/rollback; V11 exact-edition47-region clearance and operating documents. V12 real merchant/mandate execution, exact subscription-cycle payment linkage and invoice issuance qualification remain gated; V13 real media/editorial content and bounded audio previews remain gated. Render card setup and the separately approved DNS diff remain prerequisites, not completed checks.
-
-Root final validation:222 backend tests pass in the pinned Python3.13/PostgreSQL18 image;26 frontend tests, strict TypeScript, production build and migration parity pass. Independent review confirmed both root fixes: bounded default summary scanning and rejection of unsupported subscription-cycle payment attribution. [Root evidence](evidence/backend-root-validation.json), [backend output](evidence/backend-integration-tests.log). Exact-head branch CI must pass before main promotion; the linked qualification workflow records that final gate.
-
-Final Series follow-up: Work detail now returns real published memberships (maximum20) from eligible locale/territory editions instead of an empty placeholder. Per-card lookups no longer rescan the complete catalog for each Vault/Saved item. Fourteen affected PostgreSQL tests pass; final exact-head CI covers the complete223-test source. Main remains unchanged until that CI passes.
-
-
-## Dedicated Neon migration and actual-book revalidation,18November2026
-
-- **V09 dedicated database PASS:** direct verify-full TLS backup retained mode0600 with a hash-verified durable copy; populated local restore rehearsed all five migrations first. Dedicated Neon then applied billing0005/0006/0007, library0005 and reader0004: **43 applied, zero pending**. Four guard triggers/nine keyset indexes match the restored rehearsal schema fingerprint. Direct and pooled client TLS pass; role timeout defaults remain5s/2s/10s. [Preflight](evidence/neon-five-preflight.json), [backup metadata](evidence/neon-five-backup.json), [migration output](evidence/neon-five-migrations.log), [direct readback](evidence/neon-five-dedicated-neon.json), [pooled readback](evidence/neon-five-pooled-neon.json). No backup or credentials are committed.
-- **V01/V02 actual draft scope PASS:** fresh manifest/package grant, exact11,940byte R2 package SHA/CORS and both complete cover hashes pass. Actual Chrome journey renders32 paragraphs including opening/ending; gold note, saved anchor,23px sepia preferences, EN/BN controls, explicit unfinish/finish, Saved/Finished reopening and logout denial pass. Ordinary member/guest remain denied. [API/R2 evidence](evidence/neon-five-book-api.json), [persisted state](evidence/neon-five-persisted-state.json), [browser record](evidence/neon-five-browser-journey.json). This is staff-only loopback review against actual Neon/privateR2, not production HTTPS/MFA/CDN acceptance.
-- **Fixed during the real journey:** premature live-only query filtering hid authorized staff draft completion from Finished. The projection now uses existing review permissions, MFA and territory checks before including an item, preserving the500-row summary bound and denying ordinary/foreign-territory access. Thirty-two focused PostgreSQL reader/web tests pass. Concurrent local UI reviews used separate cookie hosts/browser profiles; localhost ports alone do not isolate host-scoped cookies.
-- **P0 design follow-up integrated:** frozen340a68… patch plus3f345a… invoice-spacing follow-up; fixes responsive video/player artwork overlap, recovery/format-sheet/button spacing, actual-theme onboarding selection and Pass/Checkout navigation. [Review matrix](evidence/p0-clean-design-review.json). Desktop/mobile-width Chromium and Bengali stress checks do not replace physical iOS/Android/Safari/accessibility acceptance.
-- **Approved current static release uploaded:** `19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142`,54files/7,266,812bytes,54 conditional writes and54 complete verification reads. Exact bytes/MIME/immutable cache headers pass; old releases preserved. [Upload evidence](evidence/neon-current-static-release.json). Public HTTP/CDN remains unqualified; no public bucket exposure or DNS change. The ignored prepared Render profile now selects this release and excludes public deployment credentials.
-- **Deployment prerequisites still open:** Render Add Card was checked and remains pending; no qualification web service exists. Pending Cloudflare Free zone exists, authoritative Hostinger nameservers remain unchanged, and proposed Maison app/asset hosts are NXDOMAIN. Exact DNS preservation/destination review and separate approval are required before activation. A current image must use the matching uploaded release; do not deploy the earlier45-file ID.
-- Network-disabled production configuration check has no errors; HSTS subdomain/preload warnings remain explicit pending complete domain scope review. Actual HTTPS/liveness/readiness, CDN MISS/HIT/cache isolation/purge, trusted edge/origin, production email links/DMARC, physical devices/offline/accessibility, deployment HA/load/cost/restore/failover,47-region rights/operating requirements and gated merchant/media remain grouped above. The$7approved service is qualification-only, never HA acceptance.
-
-Next integration action: exact-head CI on this focused validation/design patch, then identical-commit main promotion. Next deployment action after source qualification: finish the existing Render card prerequisite and review the exact DNS diff; ask before public DNS changes or additional paid infrastructure. **The Selfish Giant remains draft, null live pointer and unchanged content hash; legacy platform is untouched.**
-
-
-## Parallel HTTPS and DNS/CDN lanes, 18 November 2026
-
-- Lane 1 attempted creation of the approved Singapore $7 qualification service; Render requires owner Add Card completion. No service was created. Existing approval is sufficient once billing is ready; no workspace upgrade is authorized.
-- Lane 2 completed read-only public DNS preservation review. Full Hostinger export requires owner sign-in; quick scan is not complete and its default proxy settings must not be activated unchanged. Actual Render hostname is also pending.
-- [Concrete DNS/CDN qualification plan](DNS_CDN_QUALIFICATION_PLAN.md) records preservation, isolated additions and grouped HTTPS/cache/purge checks. [Public DNS snapshot](evidence/parallel-deployment-dns-snapshot.json) is bounded evidence only.
-- Next: finish billing/sign-in prerequisites, qualify Render and prepare the exact DNS diff. Ask separately before public DNS changes or additional paid infrastructure. Book stays draft; legacy Vercel/Railway/DNS remain unchanged.
-
-
-## Authenticated provider follow-up
-
-Hostinger latest Chrome session now exposes the correct domain. All16 displayed DNS records captured read-only: Cloudflare quick scan missed reach-a/reach-b DKIM and Railway verification TXT. Preserve these in the proposed diff. Export was requested, but its downloaded file has not been located; the structured authenticated table inventory is retained. No DNS changes. Render earnalism Billing still explicitly says No card on file; deployment retry reopened Add Card, and no service was created. Owner asked to finish saving the card. See evidence/hostinger-authoritative-dns-inventory.json. Book remains draft; current platform unchanged.
-
-
-## Render qualification deployed, 18 November 2026
-
-- Approved Singapore $7/month 0.5CPU/512MB Docker service `srv-dbunbd8jo6nc73akbng0` is live at https://reo-earnalism-maison-qa.onrender.com on exact source5ecc5ca94a0f1d6691c1c296c29a4a2a76babf54. Auto-deploy Off verified. No workspace upgrade or additional service. This single instance remains qualification-only, not HA/autoscaling acceptance.
-- Eight read-only HTTP checks pass: certificate-valid HTTPS live200; HTTP301 to HTTPS; originless session403; originless readiness403; origin-only readiness without probe403; origin+probe readiness200 including DB and migration plan; actual UUID draft reader guest404; authenticated-origin anonymous home200. HTTPS responses carry HSTS max-age31536000 and protected responses private/no-store. [Evidence](evidence/render-https-qualification.json). No origin secret is exposed in evidence. The bare Render home is intentionally protected and is not a public review link.
-- [Exact DNS proposal](DNS_CHANGE_PROPOSAL.md) preserves16 Hostinger records, three missing scan records and legacy DNS-only behavior; includes exact Maison CNAME, official public R2 attachment and proposed Cloudflare nameservers. No public DNS or pending-zone records modified in this step.
-- Still pending together: reviewed pending-zone reconciliation/readback and explicit DNS approval; custom-domain TLS and R2 public asset browser/CORS/MIME; trusted edge transformations, cache isolation, actual MISS/HIT and purge/readback; canonical HTTPS account/email/browser journey; load/HA/autoscaling, restore/failover and physical-device/accessibility checks. The Selfish Giant remains draft and current production unchanged.
-
-Next command: review docs/DNS_CHANGE_PROPOSAL.md and reconcile the pending-zone inventory before requesting the exact public DNS activation approval.
-
-
-## Parallel follow-up and explicit DNS approval boundary
-
-Render follow-up adds8 passing expected-status checks: security headers, wrong/oversized-origin rejection and anonymous actual-draft Reader/catalog/cover denial; evidence/render-https-followup.json. No account/book changes. Pending Cloudflare still13records with9proxied A/CNAMEs;3source records missing. Automatic review rejected the attempted FTP correction because DNS changes require explicit approval; the unsaved editor was cancelled. Owner asked to approve pending-zone-only corrections, separately from public nameserver/hostname activation. No DNS record save, nameserver change or additional paid infrastructure occurred. HIT/MISS/purge/canonical browser validations remain pending activation; do not call both lanes complete.
-
-
-## Approved pending-zone correction completed
-
-Owner explicitly approved pending-zone corrections. Saved9existing A/CNAME records DNS-only; added2Reach DKIM CNAMEs and RailwayverificationTXT. Reloaded and read all16rows including virtualizedSPF: values/types/names/MXpriorities matchHostinger, allDNS-only.12TTLs matchexactly. Four source14400secondTTLs remainAuto: apiCNAME, MX1/MX2, RailwayverificationTXT; dashboardoffersno4houroption. Do not claimexactTTLparity. Evidence: evidence/cloudflare-pending-zone-readback.json. Zone remainspending; Hostingerrecords/nameservers/traffic unchanged. No newpaidinfra; bookdraft. Publicactivation andCDN acceptance stillrequireseparateapproval.
-
-## Live draft Reader retry — 18 November 2026
-
-- Chrome now reaches Maison Settings over HTTPS. Local DNS is no longer the immediate browser blocker.
-- The owner reported the authenticator setup button disabled. Source inspection confirms that setup requires a fresh five-minute password confirmation (`client/account.tsx`); the timeout resets `fresh` but leaves the earlier success status visible. A stale success message can therefore be misleading. No authentication protection was changed.
-- Integration Lane renewed the existing review account password confirmation and directly observed both “Password confirmed for the next five minutes” and an enabled “Set up an authenticator” button. Enrollment was handed to the owner; no setup secret, one-time code or recovery code was collected.
-- **Still pending:** owner completes authenticator enrollment, then the real HTTPS staff Reader/private R2 journey (covers, complete manuscript, saved place/note/preferences, finish/reopen and access-boundary checks). This is not marked PASS. Earlier loopback evidence remains supporting evidence only.
-- **Small UX follow-up:** replace the stale success message on confirmation expiry and provide a nearby link back to password confirmation beside disabled MFA setup. Keep the server-side five-minute rule unchanged; qualify the matching asset release before deploying.
-- No book publication, live-pointer change, legacy application change, DNS change or paid provisioning was performed in this retry.
-
-### MFA confirmation diagnostic follow-up
-
-The live Settings page displayed the unrelated edition-access error after the owner submitted an authenticator code. `errorText` falls back to the generic403 edition message when `invalid_mfa_code` has no translation. Added explicit English/Bengali messages for invalid/expired MFA codes and an already-configured authenticator. This source correction is not yet deployed and does not prove which backend error occurred in the owner's attempt. A response-status/error-code-only browser diagnostic is prepared; no submitted code or setup secret is emitted. Owner enrollment and the live staff Reader journey remain pending. Existing enrollment was preserved, and no new setup was generated during this diagnostic.
-
-Read-only live diagnostics subsequently confirmed HTTP403 `invalid_mfa_code` for the owner-submitted confirmation. The displayed setup was compared with the pending server enrollment using a SHA256 digest: exactly one pending device, no confirmed device, and a match. No secret, submitted code or digest is retained in this checklist. This rules out a replaced server setup for this attempt. Authenticator entry/clock settings still need owner verification; no MFA tolerance, credentials or access rules were changed.
-
-### MFA remediation candidate — not yet deployed
-
-- Live runtime readback: standard SHA1/6-digit/30-second TOTP parameters, tolerance1, drift0, no prior accepted timestep. Four failures were recorded; verification was allowed at diagnostic time. Active cooldown is therefore not established as the cause of the latest invalid code.
-- Added local-only QR rendering from the existing setup URI, with manual setup retained; no external QR endpoint receives the secret. The enrollment action is hidden while a setup is displayed, preventing accidental replacement.
-- The confirmation timer now restarts after each successful password confirmation and reports expiry instead of leaving a stale success message. The code submission button requires fresh confirmation, with a nearby link to the password section.
-- Invalid/expired codes and already-configured MFA have explicit English/Bengali messages. Hidden django-otp cooldowns now return `mfa_retry_later`429 with an accurate Retry-After, without resetting counters, relaxing tolerance, or bypassing MFA.
-- Frontend strict typecheck,26 tests and production build pass; focused backend MFA5 tests pass. Full backend/exact-source CI remain to be checked.
-- Prepared release `7d9c5d531fda3f14e16d35fa275dcbed58bc4f07d90b52126e51316fa7caee33`:54 public UI files,7,289,040bytes. Upload/isolated deployment approval requested. Not uploaded/deployed yet. Owner enrollment and live draft Reader acceptance remain open.
-
-The final prepared MFA asset release supersedes the initial candidate by including the QR encoder MIT notice: `686e2afe5a9faa95b98a0a8779ee214980dd0c6ee0a0e0aaac7eff63bb6899c6`,55files,7,290,134bytes. Final bounded upload/deployment approval requested; no upload yet. QR renders inside the account page and never calls an external encoding service.
-
-Final local remediation validation:229 backend tests pass (146.627seconds), migration drift check reports no changes, and frontend26 tests/typecheck/build pass. [Sanitized result](evidence/mfa-remediation-tests.json). A fresh read-only query on the actual Render/Neon runtime confirms The Selfish Giant remains draft, null live revision, and manuscript SHA256 `8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4`. No content or access-policy mutation occurred. Exact-head CI and final isolated upload/deployment approval remain pending; live staff Reader is not marked PASS.
-
-### Approved isolated MFA rollout completed — owner enrollment pending
-
-- Exact-source [CI44343532873 passed](https://github.com/ronik18/reo-earnalism-maison/actions/runs/44343532873); normal fast-forward promoted `dd903d3` to Maison main.
-- Approved55-file release `686e2afe5a9faa95b98a0a8779ee214980dd0c6ee0a0e0aaac7eff63bb6899c6` uploaded using55 conditional writes and55 object verification GETs; all bytes/MIME/cache metadata matched. Old releases preserved.
-- First Render rebuild used new code but retained the old static prefix because the masked dashboard value had not finished loading before edit. Browser verification caught account-script404. Corrected the field after loading, visibly verified the new value, and used Save and deploy. Final deploy `dep-dbuua9mk1f9s73an6tng` succeeded on `dd903d3`; health returned200.
-- Actual Chrome HTTPS Settings loads the correct43,729byte account script with SHA256 `ddbf4ab595594c48ca826b64961dd681c1303528775686cc716a53862fdef170` and CDN MISS200. Frontend rendered, staff sign-in/password confirmation succeeded, and local QR setup rendered. No QR/secret/code/recovery-code screenshot or payload is included in evidence.
-- OS resolver still could not resolve the asset hostname during a CLI probe; Chrome Secure DNS provided the successful real browser readback. The CLI failure is retained as a limitation, not reported as HTTP success.
-- Owner must scan the newly displayed QR and submit its code. The earlier manual entry is not the new QR entry. Live staff draft Reader/private-package acceptance remains pending; no MFA bypass or false PASS.
-- Existing $7 qualification service only: no additional paid infrastructure, DNS changes, legacy changes or book publication.
-
-### Live HTTPS draft-book journey passed after owner MFA — 18 November 2026
-
-The owner completed authenticator confirmation. Actual Settings showed “Authenticator verified for this session.” Recovery codes remain owner-only; none are retained in evidence.
-
-| Check | Observed result |
-| --- | --- |
-| Staff draft Reader | PASS: actual HTTPS browser opens edition55a3f5e3…/unit463e87aa… with the explicit staff-only draft banner. |
-| Manuscript | PASS:32 paragraphs, exact first and last text, English content retained under Bengali interface, no horizontal overflow. |
-| Front/back covers | PASS: both actual protected images complete800×1200, object-fit contain, border-radius0px; correct enterprise footer and full artwork. |
-| Preferences | PASS:23→26px saved and read back, then restored23px; existing Sepia/Source Serif4 preference preserved. |
-| Annotation | PASS: new gold first-paragraph note “HTTPS draft qualification: kindness opens the garden. 18 November 2026.” saved and retained after reload. Prior notes preserved. |
-| Reading state | PASS: Keep this position; finished→unfinished→finished round trip saved; completion retained after reload. |
-| Collections | PASS: Saved remove/re-add round trip and actual Saved/Finished Vault entries verified, including Bengali navigation. |
-| Private package | PASS for actual deployed server-to-R2:11,940bytes,32 paragraphs, stored SHA256 match. This is not a claim that the SSR Reader fetched its manuscript directly from R2 in the browser; it renders DB text. |
-| Draft/customer boundary | PASS: final deployed service denies guest/member edition access404; prior actual browser guest/member denial remains supporting evidence. No privileged session logout was performed while the owner saved recovery codes. |
-| Publication state | PASS: revision draft, live pointer null, manuscript SHA2568431612b… unchanged after validation. |
-
-[Sanitized evidence](evidence/live-draft-book-final.json) and [cover screenshot](evidence/live-draft-book-covers.jpg).
-
-**Still consolidated and open:** production browser direct signed-package GET/Range/SHA if that delivery path is enabled (separate from the completed SSR Reader journey); physical Android/iOS/offline/accessibility acceptance; production HTTPS email action links/sender policy; broader operational HA/load/restore/rollback and applicable launch/compliance gates. Audio/video/payments remain disabled as scoped. Minor copy cleanup: the disabled offline notice still says “local build” on the qualification host; this is not evidence that offline delivery is qualified. No apex cutover, legacy application change, paid expansion or publication occurred.
+| V01 | Private R2 synthetic transport/integrity/CORS and actual stored draft package verified;11,940bytes/32paragraphs. Not a browser-direct-delivery claim. | [Book](evidence/live-draft-book-final.json), [R2](evidence/r2-http-qualification.json) |
+| V03–V05 | Isolated HTTPS; public assets/canonical EN/BN Home HIT/MISS and exact purge; origin/country/header/private/draft boundaries. Observed probe geography only. | [CDN handoff](HTTPS_CDN_DEPLOYMENT_HANDOFF.md) |
+| V09 | PostgreSQL18 compatibility,43 applied migrations/no pending; deployed MFA exact-source CI and live staff Reader. | [Book](evidence/live-draft-book-final.json), [CI](https://github.com/ronik18/reo-earnalism-maison/actions/runs/44365283044) |
+| V06 supporting | Existing Google SMTP authentication, actual inbox receipts/SPF/DKIM, isolated local verification/reset replay and session revocation. Production HTTPS qualification tracked below. | [Previous mail evidence](evidence/smtp-account-journeys.json) |
+
+## Remaining work — each item has one next action
+
+| ID | Current status / scope | Next action / owner |
+| --- | --- | --- |
+| V06 | PASS: production HTTPS verification/reset; two actual inbox messages, SPF/DKIM pass. DMARC not reported; no DNS change. | [Actual HTTPS/inbox evidence](evidence/https-email-qualification.json): verification200/reset204; replay410; old-session401/old-password403/new-login200; owned synthetic account deactivated. |
+| V08 |32/32 virtual mobile groups,4cold offline contexts and6combined footer/privacy/Reader geometry checks pass. WebKit storage and offline-banner fixes imported; physical hardware/accessibility still unverified. | Integration: final combined image built;28 frontend tests pass,238 full backend tests plus final5 notice tests pass. Exact-head CI/isolated rollout next; then physical Android/iPhone when available. [Virtual evidence](evidence/mobile-virtual-current.json). |
+| V10 local | Encrypted pg_dump18→age export/restore all54table hashes match; bounded health/load/restart/DB-failure tests pass. Gunicorn aligned to approved settings. Local evidence only. | Integration: exact-head combined build/CI; [operations report](OPERATIONS_QUALIFICATION_CURRENT.md). |
+| V10 production | Current$7single instance is qualification, not accepted HA/autoscaling.2–6replicas, NeonScale/7dayhistory, independent archive upload/readback, scheduled maintenance/export, monitoring and real deployment recovery/load remain unqualified. | Prepare one exact minimal resource/cost package and execution plan; obtain spending approval before provisioning. Keep contract recovery targets unchanged. |
+| V11 operating | Privacy/terms/contact bilingual qualification drafts prepared; no invented seller, retention or global-clearance claims. | Confirm controller/correspondence/grievance contact, age/children policy, applicable retention and provider/transfer arrangements. [Account/compliance report](ACCOUNT_COMPLIANCE_QUALIFICATION_CURRENT.md). |
+| V11 publication | Exact edition/assets/formats/actions across all47active regions; draft browser success does not authorize publication. | Retain/reconcile rights evidence and applicable publication approval; keep this title draft throughout current work. |
+| V02, V07, V12–V13 / full P0 | Direct browser package/Range, applicable offline/device recovery, actual audio/format switching, learning and merchant sandbox/provider acceptance remain governed by approved P0 contracts. Synthetic virtual/local passes do not certify real media/merchant providers. | Reconcile existing evidence against screen-contract matrix; qualify actual required providers. Keep unqualified paths disabled; any P0 scope reduction needs explicit approval. |
+| Credentials | Current private/public R2 credentials expire16February2027; purge-only token is durable. | Renew scoped R2 credentials with overlap before expiry; no routine token recreation during unaffected tests. |
+| Final release | No apex cutover or public book launch in this task. | One qualified candidate, applicable acceptance, exact DNS/cutover+rollback proposal, then approved release action. |
+
+## Conditional features, not extra blockers
+
+Features explicitly conditional/later in the approved plan remain disabled until their own evidence exists. Do not add optional studies, services or repeated approvals to the current path. Do not confuse this with removing required P0 acceptance.
+
+## Working rules
+
+- Operations, account/compliance and mobile lanes own separate files/evidence; root alone integrates and deploys.
+- Reuse unchanged receipts. Run affected checks for small fixes and one combined suite/CI at integration.
+- Archive history; update these rows instead of appending competing snapshots.
+- Keep exact-source test results distinct from deployment, synthetic from real-provider, virtual from physical, and submission from inbox receipt.
+- No force push, legacy modification, public draft exposure, additional spending or DNS change is implied.
+
+Current integrated UI artifact prepared from the clean image:55files,7,290,646bytes, release `bd1b698d20686491c15be7332b0cf0d03352c72108f23c663bfbdfe200f4fefb`. Not uploaded or deployed at this checkpoint. Existing qualification infrastructure only; no spending/DNS expansion.

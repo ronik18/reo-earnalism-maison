@@ -353,3 +353,10 @@ STRINGS.update({
 STRINGS["mfa_scan_qr"] = ("Scan this QR code with your authenticator app. Use automatic date and time on your phone.", "অথেনটিকেটর অ্যাপ দিয়ে এই QR কোড স্ক্যান করুন। ফোনে স্বয়ংক্রিয় তারিখ ও সময় চালু রাখুন।")
 
 STRINGS["mfa_retry_later"] = ("Too many authenticator attempts. Wait for the cooldown to finish, then use a fresh code from the same setup.", "অথেনটিকেটরের কোড অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ অপেক্ষা করে একই সেটআপ থেকে নতুন কোড দিন।")
+
+STRINGS.update({
+    "privacy_notice": ("Privacy", "গোপনীয়তা"),
+    "service_terms": ("Terms", "শর্তাবলি"),
+    "contact": ("Contact", "যোগাযোগ"),
+    "footer_links": ("Service information", "পরিষেবার তথ্য"),
+})

@@ -1,0 +1,131 @@
+{
+  "date": "2026-11-18",
+  "scope": "existing local Docker/Python3.13/PostgreSQL18 only; not production capacity, HA, autoscaling, recovery or RPO acceptance",
+  "provider_writes": false,
+  "paid_provisioning": false,
+  "dns_changes": false,
+  "book_mutations": false,
+  "logical_restore": {
+    "pass": true,
+    "source_postgresql": "18.7 (Debian 18.7-1.pgdg13+2)",
+    "tables_compared": 54,
+    "row_counts_and_content_hashes_match": true,
+    "dump_bytes": 208627,
+    "dump_sha256": "de9c788ad830d11355150c8616c1263d09e0734a7ca130d841eb38be672ceb6d",
+    "dump_mode": "0o600",
+    "dump_seconds": 0.154,
+    "restore_seconds": 0.397,
+    "private_dump_retained_locally": true,
+    "disposable_restore_target_removed": true,
+    "production_restore_history_verified": false
+  },
+  "local_initial_readiness_failure": {
+    "status": 503,
+    "cause": "schema_not_ready",
+    "pending_migrations": 5,
+    "existing_development_database_preserved": true,
+    "resolution": "owned disposable restore target migrated; source development database unchanged"
+  },
+  "gunicorn_contract": {
+    "pass": true,
+    "--workers": "2",
+    "--threads": "2",
+    "--worker-class": "gthread",
+    "--timeout": "30",
+    "--graceful-timeout": "30",
+    "--max-requests": "2000",
+    "--max-requests-jitter": "200",
+    "configuration_check_exit_code": 0,
+    "applied_locally_only": true
+  },
+  "bounded_local_health_load": {
+    "pass": true,
+    "samples": [
+      {
+        "route": "/api/v1/health/live",
+        "requests": 120,
+        "concurrency": 8,
+        "all_status_200": true,
+        "all_private_no_store": true,
+        "elapsed_seconds": 0.358,
+        "p50_ms": 10.23,
+        "p95_ms": 143.37,
+        "max_ms": 148.67
+      },
+      {
+        "route": "/api/v1/health/ready",
+        "requests": 24,
+        "concurrency": 4,
+        "all_status_200": true,
+        "all_private_no_store": true,
+        "elapsed_seconds": 0.265,
+        "p50_ms": 20.12,
+        "p95_ms": 153.99,
+        "max_ms": 156.4
+      }
+    ],
+    "not_a_user_journey_load_test": true,
+    "not_production_capacity_or_SLO": true
+  },
+  "local_instance_restart": {
+    "pass": true,
+    "seconds_until_liveness_200": 1.832,
+    "production_rollback_or_HA": false
+  },
+  "local_database_failure": {
+    "pass": true,
+    "readiness_status": 503,
+    "error_code": "dependency_unavailable",
+    "readiness_ms": 4.23,
+    "liveness_status": 200,
+    "recovery_action": "dependency corrected by restarting separate healthy local instance; no auth bypass"
+  },
+  "disposable_health_database_removed": true,
+  "source_revision_observed": "49091712b5ae93eeb584b194db10182aaf96005b",
+  "encrypted_export": {
+    "pass": true,
+    "local_only": true,
+    "command": "python manage.py export_database --encrypted --manifest",
+    "standard_format": "age v1; PostgreSQL custom dump",
+    "source_server_version_num": 180007,
+    "migration_count": 38,
+    "ciphertext_bytes": 208875,
+    "ciphertext_sha256": "44da2087a2c842ba04ff7473110757fbfe2260e467392a6f13f789c208b33c42",
+    "manifest_hash_matches": true,
+    "ciphertext_and_manifest_mode": "0600",
+    "no_plaintext_dump_written_by_export_or_restore": true,
+    "streaming_decrypt_restore_pass": true,
+    "tables_compared": 54,
+    "row_counts_and_content_hashes_match": true,
+    "corrupted_ciphertext_rejected": true,
+    "synthetic_private_identity_kept_only_in_ignored_local_fixture": true,
+    "provider_upload_performed": false,
+    "production_key_or_archive_configured": false,
+    "elapsed_seconds_including_hash_drill": 11.782,
+    "tool_packages": [
+      "age 1.1.1-1+b3",
+      "libpq5 18.7-1.pgdg12+2",
+      "postgresql-client-18 18.7-1.pgdg12+2"
+    ]
+  },
+  "export_unit_tests": {
+    "tests": 5,
+    "pass": true,
+    "scope": "control-flow fakes; real crypto validated separately by the decrypt/restore drill"
+  },
+  "combined_backend_checks": {
+    "date": "2026-11-19",
+    "tests": 238,
+    "seconds": 182.48,
+    "pass": true,
+    "migration_drift": "No changes detected",
+    "non_root_uid": 10001,
+    "age_version": "1.1.1",
+    "pg_dump_version": "18.7 (Debian 18.7-1.pgdg12+2)",
+    "gunicorn_check_config_exit_code": 0,
+    "test_database": "owned disposable local PostgreSQL18 target, removed after test",
+    "provider_access": false,
+    "log_sha256": "b5a17b1c09bc17fcd2c8b03fa69344e40aaa2573c3d22c8f4945128d98182faa",
+    "exact_head_ci_required": true
+  }
+}

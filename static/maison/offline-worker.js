@@ -93,8 +93,12 @@ async function privateAsset(request, url) {
       saved.bytes !== descriptor.bytes
     )
       return new Response("", { status: 404 });
-    const blob = saved.blob,
-      headers = {
+    const blob = saved.data
+      ? new Blob([saved.data], { type: saved.content_type })
+      : saved.blob;
+    if (!(blob instanceof Blob) || blob.size !== descriptor.bytes)
+      return new Response("", { status: 404 });
+    const headers = {
         "Content-Type": saved.content_type,
         "Cache-Control": "private, no-store",
         "Accept-Ranges": "bytes",

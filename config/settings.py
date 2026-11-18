@@ -220,6 +220,7 @@ PUBLIC_BASE_URL = os.getenv('PUBLIC_BASE_URL', 'http://127.0.0.1:8008' if LOCAL 
 if not LOCAL and (urlparse(PUBLIC_BASE_URL).scheme != 'https' or not urlparse(PUBLIC_BASE_URL).hostname or urlparse(PUBLIC_BASE_URL).username):
     raise ImproperlyConfigured('A canonical HTTPS PUBLIC_BASE_URL is required')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_FROM_ADDRESS', 'maison@localhost.test' if LOCAL else '')
+SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', '')
 if not LOCAL and (not EMAIL_BACKEND or not DEFAULT_FROM_EMAIL):
     raise ImproperlyConfigured('Production email configuration is required')
 ORIGIN_SHARED_SECRET = os.getenv('ORIGIN_SHARED_SECRET', '')

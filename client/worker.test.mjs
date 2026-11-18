@@ -21,6 +21,7 @@ function worker() {
     Set,
     Request,
     Response,
+    Blob,
     Promise,
     self: {
       location: { origin: "https://app.example.test" },
@@ -71,3 +72,28 @@ test("Worker precache omits credentials and requires readable CORS responses", a
   context.fetch = async () => ({ ok: true, type: "opaque" });
   await assert.rejects(() => context.precache(), /could not be verified/);
 });
+
+for (const legacy of [false, true]) {
+  test(`Private offline bytes and ranges survive ${legacy ? "legacy Blob" : "ArrayBuffer"} storage`, async () => {
+    const { context } = worker();
+    const payload = new TextEncoder().encode("offline-audio");
+    const descriptor = { asset_id: "asset", sha256: "verified", bytes: payload.byteLength };
+    context.database = async () => ({ close() {} });
+    context.get = async (_, store) => store === "meta"
+      ? { member: "member", device_id: "device" }
+      : store === "books" ? {
+        member: "member", state: "ready", last_seen: Date.now(),
+        license: { device_id: "device", status: "active", valid_until: new Date(Date.now()+60000).toISOString(), assets: [descriptor] },
+      } : { ...descriptor, content_type: "audio/mpeg", ...(legacy ? { blob: new Blob([payload]) } : { data: payload.buffer }) };
+    const url = new URL("https://app.example.test/maison-offline-assets/license/asset");
+    const full = await context.privateAsset(new Request(url), url);
+    assert.equal(full.status, 200);
+    assert.equal(await full.text(), "offline-audio");
+    const partial = await context.privateAsset(new Request(url, { headers: { Range: "bytes=2-5" } }), url);
+    assert.equal(partial.status, 206);
+    assert.equal(partial.headers.get("Content-Range"), "bytes 2-5/13");
+    assert.equal(await partial.text(), "flin");
+    const invalid = await context.privateAsset(new Request(url, { headers: { Range: "bytes=99-" } }), url);
+    assert.equal(invalid.status, 416);
+  });
+}

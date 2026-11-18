@@ -1,0 +1,174 @@
+{
+  "date": "2026-11-19",
+  "scope": "read-only account configuration and operating-document audit; no new email sent",
+  "approved_sender": "sales@reoenterprise.org",
+  "approved_test_recipient": "ronik18@gmail.com",
+  "configuration": {
+    "public_base_url": "https://maison.theearnalism.com",
+    "smtp_host": "smtp.gmail.com",
+    "port": 465,
+    "ssl": true,
+    "tls": false,
+    "secrets_recorded": false,
+    "source": "existing ignored Render qualification profile; dashboard runtime independently owned by Integration Lane"
+  },
+  "email_links": {
+    "fixed_base_not_request_host": true,
+    "verify_path": "/auth/verify/",
+    "reset_path": "/auth/reset/",
+    "safe_return_path": true,
+    "ttl_seconds": {
+      "verify": 86400,
+      "reset": 1800
+    },
+    "production_receipt_and_action_check": "pass; docs/evidence/https-email-qualification.json",
+    "reusable_evidence": "docs/evidence/smtp-account-journeys.json",
+    "production_checks_passed": 36,
+    "smtp_messages": 2,
+    "inbox_receipt": true,
+    "spf": "pass",
+    "dkim": "pass",
+    "dmarc": "not reported",
+    "owned_test_account_deactivated_sessions_revoked": true
+  },
+  "sender_public_dns": {
+    "reoenterprise.org TXT": "; <<>> DiG 9.10.6 <<>> reoenterprise.org TXT +noall +answer +time=4 +tries=1\n;; global options: +cmd\nreoenterprise.org.\t3600\tIN\tTXT\t\"v=spf1 include:_spf.google.com ~all\"",
+    "_dmarc.reoenterprise.org TXT": "; <<>> DiG 9.10.6 <<>> _dmarc.reoenterprise.org TXT +noall +answer +time=4 +tries=1\n;; global options: +cmd",
+    "reoenterprise.org MX": "; <<>> DiG 9.10.6 <<>> reoenterprise.org MX +noall +answer +time=4 +tries=1\n;; global options: +cmd\nreoenterprise.org.\t3600\tIN\tMX\t1 smtp.google.com."
+  },
+  "sender_policy": {
+    "spf_google_include_present": true,
+    "dmarc_txt_answer_present": false,
+    "prior_received_spf_dkim_pass": true,
+    "prior_dmarc": "not reported",
+    "dkim_selector_not_guessed": true
+  },
+  "operating_documents": {
+    "public_privacy_notice_route_found": true,
+    "public_terms_route_found": true,
+    "backend_contact_api_present": true,
+    "backend_export_delete_present": true,
+    "approved_retention_schedule_found": false,
+    "runtime_retention_approval_status": "owner/privacy/finance schedule required before launch",
+    "public_notice_templates_prepared": true
+  },
+  "publication_policy": {
+    "active_regions": [
+      "AM",
+      "AZ",
+      "BD",
+      "BH",
+      "BN",
+      "BR",
+      "BT",
+      "CA",
+      "CY",
+      "DE",
+      "DK",
+      "FR",
+      "GB",
+      "GE",
+      "HK",
+      "ID",
+      "IL",
+      "IN",
+      "IQ",
+      "JO",
+      "JP",
+      "KH",
+      "KR",
+      "KZ",
+      "LA",
+      "LB",
+      "LK",
+      "MM",
+      "MO",
+      "MV",
+      "MY",
+      "NL",
+      "NP",
+      "NZ",
+      "OM",
+      "PH",
+      "PK",
+      "QA",
+      "RU",
+      "SA",
+      "SG",
+      "TH",
+      "TR",
+      "TW",
+      "US",
+      "UZ",
+      "YE"
+    ],
+    "active_region_count": 47,
+    "out_of_scope": [
+      "AE",
+      "CN"
+    ],
+    "excluded_pending": [
+      "AF",
+      "EG",
+      "IR",
+      "KG",
+      "KP",
+      "KW",
+      "MN",
+      "PS",
+      "SY",
+      "TJ",
+      "TL",
+      "TM",
+      "VN"
+    ],
+    "edition_rights_not_equal_operating_compliance": true,
+    "book_kept_draft": true
+  },
+  "approved_scope": "Reader-only qualification is not full P0 acceptance; disabled payments/audio/offline are not waived",
+  "blockers": [
+    "Qualification privacy/terms/contact drafts implemented; controller correspondence/grievance details, age scope, legal bases/transfer arrangements and approved retention schedule still need confirmed final facts before launch.",
+    "Operating data-processing/transfer and applicable-region requirements need actual provider/entity evidence; no global compliance claim.",
+    "Exact edition/format rights and publication evidence remain separate and not supplied by this audit."
+  ],
+  "nonblocking_policy_improvement": [
+    "Sender DMARC TXT absent in bounded lookup; review actual received alignment and propose DNS separately; no automatic p=reject or bulk-email infrastructure."
+  ],
+  "no_messages_sent": true,
+  "no_provider_changes": true,
+  "no_source_edits": false,
+  "additive_notice_preparation": {
+    "files": [
+      "web/legal.py",
+      "templates/web/privacy.html",
+      "templates/web/terms.html",
+      "templates/web/contact.html",
+      "web/test_legal.py"
+    ],
+    "status": "bilingual qualification drafts integrated locally; not publicly deployed or legally accepted",
+    "python_syntax": "pass",
+    "focused_tests": {
+      "harness": "existing local Docker image earnalism-maison:cdn-validation; owned PostgreSQL18 network, no cloud connection",
+      "tests": 5,
+      "result": "OK",
+      "duration_seconds": 0.101,
+      "system_checks": "no issues",
+      "scope": [
+        "EN/BN rendered copy",
+        "unverified facts disclosed",
+        "private/no-store",
+        "invalid locale404",
+        "POST405",
+        "all six integrated routes200 with discoverable footerlinks",
+        "support form withheld when unset and rendered only when configured; mailto retained"
+      ]
+    },
+    "production_documents_qualified": false
+  },
+  "support_configuration": {
+    "runtime_destination_pending": true,
+    "contact_form_hidden_without_destination": true,
+    "mailto_fallback_available": true,
+    "support_message_test_sent": false
+  }
+}

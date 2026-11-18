@@ -1,0 +1,166 @@
+{
+  "checks": [
+    {
+      "name": "runtime_scope",
+      "passed": true
+    },
+    {
+      "name": "recipient_account_absent",
+      "passed": true
+    },
+    {
+      "name": "owned_job_unattempted",
+      "passed": true
+    },
+    {
+      "name": "two_message_limit",
+      "passed": true
+    },
+    {
+      "name": "owned_job_lease",
+      "passed": true
+    },
+    {
+      "name": "smtp_submission_accepted",
+      "passed": true
+    },
+    {
+      "name": "session_csrf_bootstrap",
+      "passed": true
+    },
+    {
+      "name": "verification_landing_https",
+      "passed": true
+    },
+    {
+      "name": "verification_get_nonconsuming",
+      "passed": true
+    },
+    {
+      "name": "csrf_available",
+      "passed": true
+    },
+    {
+      "name": "verification_confirm200",
+      "passed": true
+    },
+    {
+      "name": "csrf_available",
+      "passed": true
+    },
+    {
+      "name": "verification_replay410",
+      "passed": true
+    },
+    {
+      "name": "csrf_available",
+      "passed": true
+    },
+    {
+      "name": "verified_login200",
+      "passed": true
+    },
+    {
+      "name": "authenticated_profile200",
+      "passed": true
+    },
+    {
+      "name": "csrf_available",
+      "passed": true
+    },
+    {
+      "name": "reset_request202",
+      "passed": true
+    },
+    {
+      "name": "new_owned_reset_action",
+      "passed": true
+    },
+    {
+      "name": "owned_job_unattempted",
+      "passed": true
+    },
+    {
+      "name": "two_message_limit",
+      "passed": true
+    },
+    {
+      "name": "owned_job_lease",
+      "passed": true
+    },
+    {
+      "name": "smtp_submission_accepted",
+      "passed": true
+    },
+    {
+      "name": "reset_csrf_bootstrap",
+      "passed": true
+    },
+    {
+      "name": "reset_landing_https",
+      "passed": true
+    },
+    {
+      "name": "reset_get_nonconsuming",
+      "passed": true
+    },
+    {
+      "name": "csrf_available",
+      "passed": true
+    },
+    {
+      "name": "reset_confirm204",
+      "passed": true
+    },
+    {
+      "name": "csrf_available",
+      "passed": true
+    },
+    {
+      "name": "reset_replay410",
+      "passed": true
+    },
+    {
+      "name": "old_session401",
+      "passed": true
+    },
+    {
+      "name": "fresh_csrf",
+      "passed": true
+    },
+    {
+      "name": "csrf_available",
+      "passed": true
+    },
+    {
+      "name": "old_password403",
+      "passed": true
+    },
+    {
+      "name": "csrf_available",
+      "passed": true
+    },
+    {
+      "name": "new_password_login200",
+      "passed": true
+    }
+  ],
+  "draft_or_legacy_changed": false,
+  "inbox_authentication_results": {
+    "both_messages_inbox": true,
+    "spf": "pass",
+    "dkim": "pass",
+    "dmarc": "not reported"
+  },
+  "journey_status": "pass",
+  "message_ids": [
+    "<maison-action-c02bb411-1c9f-4a89-a73a-0242178ac624@maison.theearnalism.com>",
+    "<maison-action-3590ece0-b628-4223-8128-f7cd3b00605b@maison.theearnalism.com>"
+  ],
+  "messages_attempted": 2,
+  "owned_account_deactivated_sessions_revoked": true,
+  "owned_member_id": "0091adcd-cb0b-46c4-97e9-664bc94f0cb8",
+  "receipt_confirmed": true,
+  "scope": "isolated owned production HTTPS account qualification",
+  "tokens_passwords_recorded": false
+}
