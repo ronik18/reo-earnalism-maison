@@ -1,5 +1,5 @@
 /* Maison progressive enhancement. All saved/finished/result states require server acknowledgement. */
-(() => {
+window.maisonEnhance = () => {
   'use strict';
   const ui = JSON.parse(document.getElementById('ui-catalogue')?.textContent || '{}');
   const locale = document.documentElement.dataset.uiLocale || 'en';
@@ -35,7 +35,8 @@
   function failure(id, error) {status(id, navigator.onLine ? (error.message || ui.error) : ui.offline);}
   async function busy(button, action, id) {if (button) button.disabled = true; try {return await action();} catch (error) {failure(id, error);} finally {if (button) button.disabled = false;}}
   const showConnection = () => {const node = $('#connection-status'); if (node) node.hidden = navigator.onLine;};
-  window.addEventListener('online', showConnection); window.addEventListener('offline', showConnection); showConnection();
+  window.maisonConnectionController?.abort(); window.maisonConnectionController=new AbortController();
+  window.addEventListener('online', showConnection,{signal:window.maisonConnectionController.signal}); window.addEventListener('offline', showConnection,{signal:window.maisonConnectionController.signal}); showConnection();
   $$('form').forEach(form => {form.addEventListener('invalid', event => {if (event.target.setCustomValidity) event.target.setCustomValidity(ui.invalid_input);}, true); form.addEventListener('input', event => event.target.setCustomValidity?.(''));});
 
   const dialogTriggers = new WeakMap();
@@ -81,4 +82,5 @@
     filterForm.addEventListener('submit',event => {event.preventDefault();busy($('button',filterForm),async () => {const prefs = await preferences(), values = new URLSearchParams(window.location.search), filters = {}; for (const key of ['house','format','level','topic','access','duration_min','duration_max','recency_days']) {const value=values.get(key);if(value)filters[key]=['duration_min','duration_max','recency_days'].includes(key)?Number(value):value;} filters.locale=values.get('content_locale') || locale; if ((prefs.saved_filters || []).length>=20) throw new Error(ui.invalid_input); await savePreferences({saved_filters:[...(prefs.saved_filters || []),{name:new FormData(filterForm).get('name'),query:values.get('q')||'',filters}]}); filterForm.reset(); await showFilters();status('filter-status',ui.saved_server);},'filter-status');});
   }
 
-})();
+};
+window.maisonEnhance();

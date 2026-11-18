@@ -1,17 +1,44 @@
 from django.contrib import admin,messages
+from django.db import transaction
+from django.db.models import F
 from core.api import DomainError
 from .models import Work,Edition,Revision,Unit,Paragraph,Asset,Rights,TimingMap
-from .services import transition_revision,clone_revision
+from .services import transition_revision,clone_revision,queue_catalog_purge
+
+def _queue_live_revisions(identifiers):
+    # One call per affected live revision; bulk rights actions do not enqueue once per grant.
+    for revision in Revision.objects.filter(pk__in=set(identifiers),state='live',edition__live_revision_id=F('id')).select_related('edition').order_by('id'):
+        queue_catalog_purge(revision)
+
 
 @admin.register(Work)
 class WorkAdmin(admin.ModelAdmin):
     list_display=('title','house','slug')
     search_fields=('title','slug')
 
+    @transaction.atomic
+    def save_model(self,request,obj,form,change):
+        fields=('slug','title','creators','house','topic','level')
+        old=Work.objects.select_for_update().filter(pk=obj.pk).values(*fields).first() if change else None
+        super().save_model(request,obj,form,change)
+        if old and all(old[field]==getattr(obj,field) for field in fields):return
+        # The existing helper includes work dependencies, so one live representative
+        # invalidates every recorded edition/listing reference for this work.
+        revision=Revision.objects.filter(edition__work=obj,state='live',edition__live_revision_id=F('id')).order_by('id').first()
+        if revision:_queue_live_revisions([revision.id])
+
 @admin.register(Edition)
 class EditionAdmin(admin.ModelAdmin):
     list_display=('slug','locale','live_revision','version')
     readonly_fields=('live_revision','version')
+
+    @transaction.atomic
+    def save_model(self,request,obj,form,change):
+        fields=('work_id','slug','locale')
+        old=Edition.objects.select_for_update().filter(pk=obj.pk).values(*fields).first() if change else None
+        super().save_model(request,obj,form,change)
+        if old and all(old[field]==getattr(obj,field) for field in fields):return
+        _queue_live_revisions(Revision.objects.filter(edition=obj).values_list('id',flat=True))
 
 @admin.register(Revision)
 class RevisionAdmin(admin.ModelAdmin):
@@ -62,6 +89,23 @@ admin.site.register(TimingMap,ContentAdmin)
 class RightsAdmin(admin.ModelAdmin):
     list_display=('revision','format','action','approved','test_only','ends_at','version')
     readonly_fields=('version',)
+    @transaction.atomic
     def save_model(self,request,obj,form,change):
-        if change: obj.version+=1
+        fields=('revision_id','format','action','territories','starts_at','ends_at','approved','test_only','evidence')
+        old=Rights.objects.select_for_update().filter(pk=obj.pk).values(*fields).first() if change else None
+        if change:obj.version+=1
         super().save_model(request,obj,form,change)
+        if old and all(old[field]==getattr(obj,field) for field in fields):return
+        _queue_live_revisions([obj.revision_id]+([old['revision_id']] if old else []))
+
+    @transaction.atomic
+    def delete_model(self,request,obj):
+        revision_id=Rights.objects.select_for_update().get(pk=obj.pk).revision_id
+        super().delete_model(request,obj)
+        _queue_live_revisions([revision_id])
+
+    @transaction.atomic
+    def delete_queryset(self,request,queryset):
+        rows=list(queryset.select_for_update().order_by('pk').values_list('pk','revision_id'))
+        super().delete_queryset(request,queryset.filter(pk__in=[row[0] for row in rows]))
+        _queue_live_revisions([row[1] for row in rows])

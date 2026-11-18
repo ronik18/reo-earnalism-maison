@@ -2,7 +2,7 @@
 import hashlib
 import re
 import time
-from io import BytesIO
+import tempfile
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -91,25 +91,32 @@ def _open(key):
     except OSError as exc:raise DomainError('asset_unavailable','Private object bytes are unavailable.',503) from exc
 
 
-def verify_private(key,expected_bytes,expected_sha256,content_type=None,max_seconds=300,return_bytes=False):
+def verify_private(key,expected_bytes,expected_sha256,content_type=None,max_seconds=8,return_bytes=False):
     if type(expected_bytes)!=int or expected_bytes<1 or not re.fullmatch('[a-f0-9]{64}',expected_sha256 or ''):
         raise DomainError('invalid_asset','Expected object size/hash are invalid.',422)
     if return_bytes and expected_bytes>MAX_INLINE_BYTES:
         raise DomainError('asset_too_large','This object requires streaming verification.',413)
-    stream,size,mime=_open(key);started=time.monotonic();hasher=hashlib.sha256();total=0;chunks=[]
+    started=time.monotonic();stream,size,mime=_open(key);hasher=hashlib.sha256();total=0;chunks=[]
     try:
         if size!=expected_bytes or (mime and content_type and mime.split(';')[0]!=content_type):
             raise DomainError('asset_integrity_failed','Private object size/type differs from its intent.',422)
         while True:
             if time.monotonic()-started>max_seconds:raise DomainError('asset_verification_timeout','Object verification exceeded its budget.',503)
+            remaining=max_seconds-(time.monotonic()-started)
+            if hasattr(stream,'set_socket_timeout'):stream.set_socket_timeout(max(.01,min(5,remaining)))
             block=stream.read(min(CHUNK_BYTES,expected_bytes-total+1))
             if not block:break
             total+=len(block)
             if total>expected_bytes:raise DomainError('asset_integrity_failed','Private object exceeds its expected size.',422)
             hasher.update(block)
             if return_bytes:chunks.append(block)
+            # HTTP ContentLength was checked above. urllib3 can close its socket
+            # immediately after these final bytes; never reset that exhausted socket.
+            if total==expected_bytes:break
         if total!=expected_bytes or hasher.hexdigest()!=expected_sha256:
             raise DomainError('asset_integrity_failed','Private object bytes fail their SHA256 verification.',422)
+    except DomainError:raise
+    except Exception as exc:raise DomainError('storage_unavailable','Private object read was interrupted.',503) from exc
     finally:stream.close()
     return b''.join(chunks) if return_bytes else {'bytes':total,'sha256':hasher.hexdigest()}
 
@@ -118,7 +125,7 @@ def read_verified(asset):
     return verify_private(asset.storage_key,asset.bytes,asset.sha256,asset.content_type,return_bytes=True)
 
 
-def verify_asset(asset,max_seconds=300):
+def verify_asset(asset,max_seconds=8):
     return verify_private(asset.storage_key,asset.bytes,asset.sha256,asset.content_type,max_seconds=max_seconds)
 
 
@@ -127,7 +134,13 @@ def put_private(key,raw,content_type='application/octet-stream'):
     if not isinstance(raw,bytes) or not raw or len(raw)>MAX_INLINE_BYTES:
         raise DomainError('invalid_object','Server-produced private objects are limited to4MiB.',422)
     if is_r2():
-        _provider_call(_client(upload=True).put_object,**_params(key),Body=raw,ContentLength=len(raw),ContentType=content_type,IfNoneMatch='*')
+        try:_provider_call(_client(upload=True).put_object,**_params(key),Body=raw,ContentLength=len(raw),ContentType=content_type,IfNoneMatch='*')
+        except DomainError:
+            # Conditional conflict or ambiguous timeout: accept only the exact independently read bytes.
+            # An absent object retains the original failure; retry can safely use the same immutable key.
+            if not private_exists(key):raise
+            return verify_private(key,len(raw),hashlib.sha256(raw).hexdigest(),content_type)
+        return verify_private(key,len(raw),hashlib.sha256(raw).hexdigest(),content_type)
     else:
         path=_local_path(key);path.parent.mkdir(parents=True,exist_ok=True)
         try:
@@ -144,19 +157,42 @@ def delete_private(key):
     else:_local_path(key).unlink(missing_ok=True)
 
 
-def copy_verified(source,destination_key):
-    _key(destination_key)
-    if is_r2():
-        _provider_call(_client(upload=True).copy_object,**_params(destination_key),CopySource=_params(source.storage_key))
-        result=verify_private(destination_key,source.bytes,source.sha256,source.content_type)
-    else:
-        original=_local_path(source.storage_key);destination=_local_path(destination_key);destination.parent.mkdir(parents=True,exist_ok=True)
-        try:
-            with original.open('rb') as src,destination.open('xb') as dst:
-                while block:=src.read(CHUNK_BYTES):dst.write(block)
-        except OSError as exc:raise DomainError('copy_unavailable','Private object copy failed.',503) from exc
-        result=verify_private(destination_key,source.bytes,source.sha256,source.content_type)
-    return result
+def copy_verified(source,destination_key,*,max_seconds=8):
+    """Conditional destination creation, never S3 CopyObject overwrite.
+
+    Request callers default to8seconds; maintenance explicitly supplies a larger budget.
+
+    Download to bounded-memory temporary scratch, verify source before upload, then
+    complete a create-once multipart destination. Replayed/unknown writes reconcile
+    through exact stored bytes. The private object remains the durable copy.
+    """
+    _key(destination_key);started=time.monotonic()
+    if private_exists(destination_key):
+        return verify_private(destination_key,source.bytes,source.sha256,source.content_type,max_seconds=max_seconds)
+    stream,size,mime=_open(source.storage_key)
+    try:
+        if size!=source.bytes or mime and mime.split(';')[0]!=source.content_type:
+            raise DomainError('asset_integrity_failed','Copy source differs from its expected size/type.',422)
+        with tempfile.TemporaryFile(mode='w+b') as scratch:
+            hasher=hashlib.sha256();count=0
+            while True:
+                remaining=max_seconds-(time.monotonic()-started)
+                if remaining<=0:raise DomainError('asset_verification_timeout','Private copy exceeded its maintenance budget.',503)
+                if hasattr(stream,'set_socket_timeout'):stream.set_socket_timeout(max(.01,min(5,remaining)))
+                block=stream.read(min(CHUNK_BYTES,source.bytes-count+1))
+                if not block:break
+                count+=len(block)
+                if count>source.bytes:raise DomainError('asset_integrity_failed','Copy source exceeds its expected size.',422)
+                hasher.update(block);scratch.write(block)
+                if count==source.bytes:break
+            if count!=source.bytes or hasher.hexdigest()!=source.sha256:
+                raise DomainError('asset_integrity_failed','Copy source SHA256 verification failed.',422)
+            scratch.seek(0)
+            return put_private_file(destination_key,scratch,source.content_type,source.bytes,source.sha256,
+                max_seconds=max(.01,max_seconds-(time.monotonic()-started)))
+    except DomainError:raise
+    except Exception as exc:raise DomainError('copy_unavailable','Private object copy failed.',503) from exc
+    finally:stream.close()
 
 
 def put_private_file(key,fileobj,content_type,bytes,sha256,max_seconds=300):
@@ -193,9 +229,14 @@ def put_private_file(key,fileobj,content_type,bytes,sha256,max_seconds=300):
                 result=_provider_call(client.upload_part,**_params(key),UploadId=upload_id,PartNumber=len(parts)+1,Body=block,ContentLength=len(block))
                 parts.append({'ETag':result['ETag'],'PartNumber':len(parts)+1})
             if count!=bytes or hasher.hexdigest()!=sha256:raise DomainError('asset_integrity_failed','Generated export differs from its hash.',422)
-            _provider_call(client.complete_multipart_upload,**_params(key),UploadId=upload_id,MultipartUpload={'Parts':parts},IfNoneMatch='*')
+            try:_provider_call(client.complete_multipart_upload,**_params(key),UploadId=upload_id,MultipartUpload={'Parts':parts},IfNoneMatch='*')
+            except DomainError:
+                if not private_exists(key):raise
+                result=verify_private(key,bytes,sha256,content_type,max_seconds=max(.01,max_seconds-(time.monotonic()-start)))
+                # Abort any still-open losing multipart below; completed ambiguous sessions are harmless.
+                return result
             upload_id=None
-        return verify_private(key,bytes,sha256,content_type,max_seconds=max(1,max_seconds-(time.monotonic()-start)))
+        return verify_private(key,bytes,sha256,content_type,max_seconds=max(.01,max_seconds-(time.monotonic()-start)))
     finally:
         if upload_id is not None:
             try:client.abort_multipart_upload(**_params(key),UploadId=upload_id)

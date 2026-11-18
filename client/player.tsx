@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
+import { mountIsland, closePlayer } from "./lifecycle";
 import { api, ApiError, errorText, readBootstrap, session, t } from "./api";
 import { sleepDeadline, timerExpired, validReturnPath } from "./state";
 interface Chapter {
@@ -32,7 +32,7 @@ interface Grant {
 }
 interface Progress {
   version: number;
-  location?: { asset_id: string; position_ms: number };
+  location?: { unit_id: string; position_ms: number };
 }
 function Player({ boot }: { boot: Boot }) {
   const audio = useRef<HTMLAudioElement>(null);
@@ -42,6 +42,7 @@ function Player({ boot }: { boot: Boot }) {
   const [status, setStatus] = useState("");
   const [speed, setSpeed] = useState(1);
   const [mini, setMini] = useState(false);
+  const [, setLocaleVersion] = useState(0);
   const [position, setPosition] = useState(0);
   const [sleep, setSleep] = useState("off");
   const grant = useRef<Grant | undefined>(undefined);
@@ -54,35 +55,87 @@ function Player({ boot }: { boot: Boot }) {
   const lastSaved = useRef(0);
   const renewal = useRef(false);
   const activeChapter = useRef(0);
+  const saving = useRef(false);
+  const conflictRef = useRef(false);
+  const [conflict, setConflict] = useState(false);
   const chapter = boot.chapters[index];
   const path = `/me/progress/${boot.edition_id}/audio`;
   async function persist(keepalive = false) {
     const element = audio.current,
       c = boot.chapters[activeChapter.current];
-    if (!element || !c || !progress.current) return;
-    const at = Math.min(
-      c.duration_ms,
-      Math.max(0, Math.round(element.currentTime * 1000)),
-    );
-    pending.current ??= {
-      key: crypto.randomUUID(),
-      version: progress.current.version,
-      body: null,
-    };
-    if (pending.current.body === null)
-      pending.current.body = {
-        operation_id: pending.current.key,
-        edition_revision_id: boot.edition_revision_id,
-        location: { format: "audio", asset_id: c.asset_id, position_ms: at },
-        occurred_at: new Date().toISOString(),
+    if (
+      !element ||
+      !c ||
+      !progress.current ||
+      saving.current ||
+      conflictRef.current
+    )
+      return;
+    saving.current = true;
+    try {
+      const at = Math.min(
+        c.duration_ms,
+        Math.max(0, Math.round(element.currentTime * 1000)),
+      );
+      pending.current ??= {
+        key: crypto.randomUUID(),
+        version: progress.current.version,
+        body: null,
       };
-    progress.current = await api<Progress>(path, {
-      method: "PUT",
-      ...pending.current,
-      keepalive,
-    });
-    pending.current = undefined;
-    lastSaved.current = performance.now();
+      if (pending.current.body === null)
+        pending.current.body = {
+          operation_id: pending.current.key,
+          edition_revision_id: boot.edition_revision_id,
+          location: { format: "audio", unit_id: c.unit_id, position_ms: at },
+          occurred_at: new Date().toISOString(),
+        };
+      progress.current = await api<Progress>(path, {
+        method: "PUT",
+        ...pending.current,
+        keepalive,
+      });
+      pending.current = undefined;
+      lastSaved.current = performance.now();
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 412) {
+        conflictRef.current = true;
+        setConflict(true);
+      }
+      throw error;
+    } finally {
+      saving.current = false;
+    }
+  }
+  async function resolveProgress(useLocal: boolean) {
+    setBusy(true);
+    try {
+      const latest = await api<Progress>(path);
+      progress.current = latest;
+      pending.current = undefined;
+      if (useLocal) {
+        conflictRef.current = false;
+        await persist();
+      } else {
+        const at = boot.chapters.findIndex(
+          (chapter) => chapter.unit_id === latest.location?.unit_id,
+        );
+        if (
+          !(await load(
+            Math.max(0, at),
+            latest.location?.position_ms || 0,
+            false,
+          ))
+        )
+          return;
+        conflictRef.current = false;
+      }
+      setConflict(false);
+      setStatus(t("saved_server"));
+    } catch (error) {
+      setStatus(errorText(error));
+    } finally {
+      setBusy(false);
+    }
   }
   async function load(i: number, at = 0, autoplay = false) {
     const c = boot.chapters[i];
@@ -90,7 +143,7 @@ function Player({ boot }: { boot: Boot }) {
     setBusy(true);
     try {
       const identity = await session();
-      const next = await api<Grant>("/content/media-grants", {
+      const next = await api<Grant>("/media/grants", {
         method: "POST",
         key: crypto.randomUUID(),
         body: {
@@ -104,7 +157,8 @@ function Player({ boot }: { boot: Boot }) {
         next.asset_id !== c.asset_id ||
         next.edition_revision_id !== boot.edition_revision_id ||
         next.sha256 !== c.sha256 ||
-        next.duration_ms !== c.duration_ms
+        next.duration_ms !== c.duration_ms ||
+        next.quality_kbps !== c.quality_kbps
       )
         throw new Error(t("media_changed"));
       const el = audio.current!;
@@ -116,21 +170,30 @@ function Player({ boot }: { boot: Boot }) {
       el.currentTime = Math.max(0, Math.min(at / 1000, c.duration_ms / 1000));
       if (autoplay) await el.play();
       setStatus("");
+      return true;
     } catch (e) {
       setStatus(errorText(e));
       audio.current?.pause();
+      return false;
     } finally {
       setBusy(false);
     }
   }
   useEffect(() => {
+    const navigated = () => {
+      setMini(true);
+      setLocaleVersion((value) => value + 1);
+    };
+    window.addEventListener("maison:navigated", navigated);
     let cancelled = false;
     api<Progress>(path)
       .then((p) => {
         if (cancelled) return;
         progress.current = p;
-        const found = boot.chapters.findIndex(
-          (c) => c.asset_id === (boot.start_asset_id || p.location?.asset_id),
+        const found = boot.chapters.findIndex((c) =>
+          boot.start_asset_id
+            ? c.asset_id === boot.start_asset_id
+            : c.unit_id === p.location?.unit_id,
         );
         void load(
           Math.max(0, found),
@@ -184,6 +247,7 @@ function Player({ boot }: { boot: Boot }) {
     }
     return () => {
       cancelled = true;
+      window.removeEventListener("maison:navigated", navigated);
       clearInterval(timer);
       document.removeEventListener("visibilitychange", hidden);
       audio.current?.pause();
@@ -281,6 +345,15 @@ function Player({ boot }: { boot: Boot }) {
           {t(mini ? "expand_player" : "minimize_player")}
         </button>
       </header>
+      <button
+        onClick={() => {
+          void persist(true)
+            .catch(() => {})
+            .finally(() => closePlayer());
+        }}
+      >
+        {t("close_player")}
+      </button>
       <audio
         ref={audio}
         controls
@@ -314,6 +387,21 @@ function Player({ boot }: { boot: Boot }) {
       <p role="status" aria-live="polite">
         {status}
       </p>
+      {conflict ? (
+        <div className="notice">
+          <p>{t("conflict")}</p>
+          <button disabled={busy} onClick={() => void resolveProgress(false)}>
+            {t("use_server")}
+          </button>
+          <button
+            disabled={busy}
+            onClick={() => void resolveProgress(true)}
+            aria-label={t("resolve_keep_local")}
+          >
+            {t("use_local")}
+          </button>
+        </div>
+      ) : null}
       <div className="player-options" hidden={mini}>
         <label>
           {t("playback_speed")}
@@ -373,8 +461,35 @@ function Player({ boot }: { boot: Boot }) {
     </section>
   );
 }
-const host = document.getElementById("player-island");
-if (host)
-  createRoot(host).render(
-    <Player boot={readBootstrap<Boot>("player-bootstrap")} />,
+export function mount() {
+  const host = document.getElementById("player-island");
+  if (!host) return;
+  const current = document.querySelector<HTMLElement>(
+    "[data-persistent-player]",
   );
+  const boot = readBootstrap<Boot>("player-bootstrap");
+  if (
+    current &&
+    current !== host &&
+    current.dataset.editionId !== boot.edition_id
+  )
+    closePlayer();
+  else if (current && current !== host) {
+    host.replaceWith(
+      Object.assign(document.createElement("p"), {
+        textContent: t("player_continues"),
+      }),
+    );
+    return;
+  }
+  host.dataset.persistentPlayer = "true";
+  host.dataset.editionId = boot.edition_id;
+  document.getElementById("persistent-media")!.append(host);
+  document.body.classList.add("has-persistent-player");
+  mountIsland(
+    host,
+    () => <Player boot={readBootstrap<Boot>("player-bootstrap")} />,
+    true,
+  );
+}
+mount();

@@ -1,6 +1,7 @@
 import { api, session } from "./api";
 import { activeMember, database, store } from "./offline";
 import {
+  recoverNote,
   planEnqueue,
   nextBatch,
   type QueuedOperation,
@@ -151,4 +152,28 @@ export async function flushQueue() {
   } finally {
     flushing = false;
   }
+}
+
+export async function recoverQueuedNote(
+  member: string,
+  id: string,
+  action: "retry" | "delete" | "replace",
+  note?: string,
+) {
+  await change(member, (rows) =>
+    recoverNote(
+      rows,
+      id,
+      action,
+      action === "replace"
+        ? {
+            operation_id: crypto.randomUUID(),
+            annotation_id: crypto.randomUUID(),
+            note_text: note || "",
+            occurred_at: new Date().toISOString(),
+          }
+        : undefined,
+    ),
+  );
+  window.dispatchEvent(new CustomEvent("maison:queue-change"));
 }

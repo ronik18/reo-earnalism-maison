@@ -62,6 +62,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'accounts.middleware.DeviceSessionMiddleware',
     'accounts.middleware.StaffMFAMiddleware',
+    'core.rate_limits.MemberRateLimitMiddleware',
+    'operations.middleware.PublicCacheStartMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -190,8 +192,30 @@ STATIC_ROOT = LOCAL_DIR / 'static'
 MEDIA_ROOT = LOCAL_DIR / 'private-media'
 BACKUP_ROOT = LOCAL_DIR / 'backups'
 
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend' if LOCAL else os.getenv('EMAIL_BACKEND', '')
+def bool_setting(name, default=False):
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    if raw.lower() not in {'true', 'false'}:
+        raise ImproperlyConfigured(f'{name} must be true or false')
+    return raw.lower() == 'true'
+
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.filebased.EmailBackend' if LOCAL else '')
 EMAIL_FILE_PATH = LOCAL_DIR / 'mail'
+EMAIL_HOST = os.getenv('EMAIL_HOST', '')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '465'))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_SSL = bool_setting('EMAIL_USE_SSL', True)
+EMAIL_USE_TLS = bool_setting('EMAIL_USE_TLS', False)
+EMAIL_TIMEOUT = float(os.getenv('EMAIL_TIMEOUT', '8'))
+if not 0 < EMAIL_TIMEOUT <= 8 or EMAIL_USE_SSL and EMAIL_USE_TLS:
+    raise ImproperlyConfigured('Email timeout must be<=8 seconds; choose SSL or STARTTLS, not both')
+if EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
+    if not EMAIL_HOST or (not LOCAL and (not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD)) or EMAIL_PORT not in {465, 587} or not (EMAIL_USE_SSL or EMAIL_USE_TLS):
+        raise ImproperlyConfigured('SMTP requires an authenticated TLS sender on465/587')
+if not LOCAL and EMAIL_BACKEND != 'django.core.mail.backends.smtp.EmailBackend':
+    raise ImproperlyConfigured('Production email must use the configured SMTP transport')
 PUBLIC_BASE_URL = os.getenv('PUBLIC_BASE_URL', 'http://127.0.0.1:8008' if LOCAL else '')
 if not LOCAL and (urlparse(PUBLIC_BASE_URL).scheme != 'https' or not urlparse(PUBLIC_BASE_URL).hostname or urlparse(PUBLIC_BASE_URL).username):
     raise ImproperlyConfigured('A canonical HTTPS PUBLIC_BASE_URL is required')
@@ -203,13 +227,33 @@ HEALTH_PROBE_SECRET = os.getenv('HEALTH_PROBE_SECRET', SECRET_KEY if LOCAL else 
 if not LOCAL and (len(ORIGIN_SHARED_SECRET) < 32 or len(HEALTH_PROBE_SECRET) < 32):
     raise ImproperlyConfigured('Production origin and readiness secrets are required')
 
-def bool_setting(name, default=False):
-    raw = os.environ.get(name)
-    if raw is None:
-        return default
-    if raw.lower() not in {'true', 'false'}:
-        raise ImproperlyConfigured(f'{name} must be true or false')
-    return raw.lower() == 'true'
+MEDIA_STORAGE_BACKEND = os.getenv('MEDIA_STORAGE_BACKEND', 'local' if LOCAL else 'r2')
+if MEDIA_STORAGE_BACKEND not in {'local', 'r2'} or not LOCAL and MEDIA_STORAGE_BACKEND != 'r2':
+    raise ImproperlyConfigured('Production private media requires R2; local transport is development-only')
+R2_ACCOUNT_ID = os.getenv('R2_ACCOUNT_ID', '')
+R2_ENDPOINT_URL = os.getenv('R2_ENDPOINT_URL', f'https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com' if R2_ACCOUNT_ID else '')
+R2_PRIVATE_BUCKET = os.getenv('R2_PRIVATE_BUCKET', '')
+R2_PUBLIC_BUCKET = os.getenv('R2_PUBLIC_BUCKET', '')
+R2_PUBLIC_ASSET_HOST = os.getenv('R2_PUBLIC_ASSET_HOST', '')
+for _credential_name in ('R2_APPLICATION_KEY_ID','R2_APPLICATION_SECRET','R2_UPLOAD_KEY_ID','R2_UPLOAD_SECRET'):
+    globals()[_credential_name] = os.getenv(_credential_name, '')
+if MEDIA_STORAGE_BACKEND == 'r2':
+    import re
+    _endpoint = urlparse(R2_ENDPOINT_URL)
+    if (not re.fullmatch(r'[a-f0-9]{32}', R2_ACCOUNT_ID) or _endpoint.scheme != 'https'
+        or _endpoint.netloc != f'{R2_ACCOUNT_ID}.r2.cloudflarestorage.com'
+        or _endpoint.path not in {'','/'} or _endpoint.query or _endpoint.fragment
+        or not R2_PRIVATE_BUCKET or not all(globals()[key] for key in ('R2_APPLICATION_KEY_ID','R2_APPLICATION_SECRET','R2_UPLOAD_KEY_ID','R2_UPLOAD_SECRET'))):
+        raise ImproperlyConfigured('R2 requires the exact account endpoint, private bucket and scoped read/upload credentials')
+if R2_PUBLIC_ASSET_HOST:
+    import re
+    _public_host = urlparse(R2_PUBLIC_ASSET_HOST)
+    _asset_hostname = _public_host.hostname or ''
+    if (_public_host.scheme != 'https' or not re.fullmatch(r'(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}', _asset_hostname)
+        or _public_host.netloc != _asset_hostname or _public_host.username or _public_host.password
+        or _public_host.path not in {'','/'} or _public_host.query or _public_host.fragment
+        or _asset_hostname.endswith('.r2.dev') or _asset_hostname.endswith('.r2.cloudflarestorage.com')):
+        raise ImproperlyConfigured('Public assets require a dedicated HTTPS CDN hostname; no private S3/r2.dev endpoint')
 
 FEATURES = {
     'reader': True, 'email_password': True,
@@ -220,8 +264,10 @@ FEATURES = {
     ]},
 }
 FEATURE_FLAGS = FEATURES
-if not LOCAL and (FEATURES['audio'] or FEATURES['video'] or FEATURES['offline_text_audio']):
-    raise ImproperlyConfigured('Provider-backed media requires a separately qualified production settings profile')
+if not LOCAL and FEATURES['video']:
+    raise ImproperlyConfigured('Video requires its separately qualified Stream adapter')
+if not LOCAL and (FEATURES['audio'] or FEATURES['offline_text_audio']) and MEDIA_STORAGE_BACKEND != 'r2':
+    raise ImproperlyConfigured('Production audio/offline delivery requires configured private R2 storage')
 if not LOCAL and any(FEATURES[n] for n in ['google_oauth', 'email_link', 'phone_otp', 'recurring_billing', 'international_checkout']):
     raise ImproperlyConfigured('Enabled provider features require their qualified production adapter/configuration')
 
@@ -235,3 +281,18 @@ LOGGING = {
 # Optional, zone-scoped CDN invalidation; unconfigured providers stay disabled.
 CLOUDFLARE_ZONE_ID = os.getenv('CLOUDFLARE_ZONE_ID', '')
 CLOUDFLARE_CACHE_PURGE_TOKEN = os.getenv('CLOUDFLARE_CACHE_PURGE_TOKEN', '')
+
+RAZORPAY_ENABLED = bool_setting('RAZORPAY_ENABLED', False)
+RAZORPAY_MODE = os.getenv('RAZORPAY_MODE', 'test')
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
+RAZORPAY_WEBHOOK_SECRETS = tuple(v for v in [os.getenv('RAZORPAY_WEBHOOK_SECRET',''),os.getenv('RAZORPAY_PREVIOUS_WEBHOOK_SECRET','')] if v)
+MERCHANT_ENTITY_CONFIG_VERSION = os.getenv('MERCHANT_ENTITY_CONFIG_VERSION', '')
+RAZORPAY_LIVE_APPROVED = bool_setting('RAZORPAY_LIVE_APPROVED', False)
+if RAZORPAY_MODE not in {'test','live'}:
+    raise ImproperlyConfigured('Razorpay mode must be test/live')
+if RAZORPAY_ENABLED:
+    if not RAZORPAY_KEY_ID.startswith('rzp_'+RAZORPAY_MODE+'_') or not RAZORPAY_KEY_SECRET or not RAZORPAY_WEBHOOK_SECRETS or not MERCHANT_ENTITY_CONFIG_VERSION:
+        raise ImproperlyConfigured('Enabled Razorpay requires matching keys, webhook secret and merchant configuration')
+    if RAZORPAY_MODE=='live' and not RAZORPAY_LIVE_APPROVED:
+        raise ImproperlyConfigured('Live Razorpay requires explicit merchant qualification and approval')

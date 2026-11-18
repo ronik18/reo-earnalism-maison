@@ -1,0 +1,35 @@
+{
+  "date": "2026-11-18",
+  "scope": "isolated_local_postgresql18_original_synthetic_180s_mp3",
+  "status": "partial",
+  "passed": [
+    "password_sign_in",
+    "actual_media_grant_and_audio_loaded",
+    "playback_current_time_advances",
+    "Explore_navigation_continuity",
+    "EN_BN_interface_switch_continuity",
+    "history_navigation_continuity",
+    "Reader_navigation_continuity",
+    "1.25x_speed_preserved",
+    "5minute_timer_selection_preserved",
+    "explicit_close_removes_audio",
+    "history_after_close_no_audio"
+  ],
+  "observations_seconds": [
+    9.41666,
+    15.329349,
+    24.379612,
+    68.310933
+  ],
+  "not_qualified": [
+    "exact_DOM_node_identity",
+    "timer_elapses",
+    "physical_devices",
+    "airplane_mode",
+    "production_media",
+    "account_switch",
+    "rejected_note_browser_recovery"
+  ],
+  "actual_selfish_giant": "unchanged_draft",
+  "gap_fixed": "Player POST now uses contract /api/v1/media/grants; frontend contract regression audit added"
+}

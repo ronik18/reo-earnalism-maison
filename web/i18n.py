@@ -159,3 +159,11 @@ STRINGS.update({"saved_on_device":("Saved on this device; waiting to sync", "এ
 STRINGS["passage"] = ("Passage", "পাঠাংশ")
 
 STRINGS["resolve_keep_local"] = ("Resolve conflict using this reading position", "এই পড়ার অবস্থান দিয়ে দ্বন্দ্ব মেটান")
+
+STRINGS.update({"pending_notes":("Notes waiting to sync","সিঙ্কের অপেক্ষায় নোট"),"note_needs_review":("This note needs review before it can sync.","সিঙ্ক করার আগে এই নোটটি দেখুন।"),"retry":("Retry","আবার চেষ্টা করুন"),"export_note":("Export note","নোট রপ্তানি করুন"),"edit_note":("Edit note","নোট সম্পাদনা করুন"),"delete_local_note":("Remove local note","যন্ত্রের নোট সরান"),"delete_local_note_confirm":("Remove this queued note from this device? Export it first if you need a copy.","এই যন্ত্রের অপেক্ষমান নোটটি সরাবেন? কপি দরকার হলে আগে রপ্তানি করুন।"),"replace_note_help":("Your edited note will be submitted as a new note. The rejected original is replaced only on this device.","সম্পাদিত নোটটি নতুন নোট হিসেবে পাঠানো হবে। প্রত্যাখ্যাত মূল নোটটি শুধু এই যন্ত্রে প্রতিস্থাপিত হবে।"),"replace_note":("Save replacement note","নতুন নোট সংরক্ষণ করুন")})
+
+STRINGS.update({"close_player":("Close player","প্লেয়ার বন্ধ করুন"),"player_continues":("Your listening continues in the player below.","নিচের প্লেয়ারে শোনা চলছে।")})
+
+STRINGS.update({"continue_checkout":("Continue to checkout","পেমেন্টে এগিয়ে যান"),"pay_securely":("Pay securely","নিরাপদে পেমেন্ট করুন"),"order_status":("Order status","অর্ডারের অবস্থা"),"order_reference":("Order reference","অর্ডার নম্বর"),"refresh_status":("Refresh status","অবস্থা হালনাগাদ করুন"),"payment_pending":("Payment is not confirmed yet. Access appears only after server verification.","পেমেন্ট এখনও নিশ্চিত নয়। সার্ভারে যাচাইয়ের পরেই প্রবেশাধিকার মিলবে।"),"payment_confirmed":("Payment verified and access granted.","পেমেন্ট যাচাই হয়েছে এবং প্রবেশাধিকার দেওয়া হয়েছে।"),"payment_not_completed":("Payment was not completed. Check the order status before retrying.","পেমেন্ট সম্পূর্ণ হয়নি। আবার চেষ্টা করার আগে অর্ডারের অবস্থা দেখুন।"),"checkout_unavailable":("Secure checkout could not load. Please retry.","নিরাপদ পেমেন্ট পাতা খোলা যায়নি। আবার চেষ্টা করুন।")})
+
+STRINGS["choose_another_offer"] = ("Return to available offers", "উপলব্ধ অফারে ফিরুন")

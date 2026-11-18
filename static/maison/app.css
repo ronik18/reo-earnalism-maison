@@ -21,3 +21,5 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.15;margin:0 0 
 .maison .reader.sans .reading-text[lang=en]{font-family:'DM Sans',sans-serif}
 .maison .reader.sans .reading-text[lang=bn]{font-family:'Noto Sans Bengali',sans-serif}
 @media(max-width:767px){.header-tools a{min-height:44px}.side-nav a,.maison[lang=bn] .side-nav a{font-size:14px}}
+
+#persistent-media:empty{display:none}#persistent-media{position:fixed;z-index:90;bottom:12px;right:18px;left:220px;max-height:80dvh;overflow:auto;border:1px solid var(--gold);background:var(--surface);padding:16px;box-shadow:0 8px 30px #0005}#persistent-media h1{font-size:26px}#persistent-media audio{width:100%}.has-persistent-player .web-stage{padding-bottom:260px}@media(max-width:760px){#persistent-media{left:12px;right:12px;bottom:76px;max-height:70dvh}}

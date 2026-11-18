@@ -234,7 +234,6 @@
     "DATABASE_DIRECT_URL",
     "ORIGIN_SHARED_SECRET",
     "EMAIL_ACTION_HASH_KEY",
-    "EMAIL_PROVIDER_API_KEY",
     "EMAIL_FROM_ADDRESS",
     "R2_ACCOUNT_ID",
     "R2_PRIVATE_BUCKET",
@@ -246,7 +245,15 @@
     "BACKUP_BUCKET",
     "BACKUP_KEY_ID",
     "BACKUP_SECRET",
-    "BACKUP_ENCRYPTION_RECIPIENT"
+    "BACKUP_ENCRYPTION_RECIPIENT",
+    "EMAIL_BACKEND",
+    "EMAIL_HOST",
+    "EMAIL_PORT",
+    "EMAIL_HOST_USER",
+    "EMAIL_HOST_PASSWORD",
+    "EMAIL_USE_SSL",
+    "EMAIL_USE_TLS",
+    "EMAIL_TIMEOUT"
   ],
   "conditional_environment_names": {
     "google_oauth": [
@@ -315,5 +322,10 @@
     "require_all_whitelisted_regions": true,
     "pending_or_out_of_scope_delivery": false,
     "legal_evidence": "revision.validation_evidence.publication_clearance; private, exact text/assets, offered formats and complete whitelist"
+  },
+  "qualified_transport_notes": {
+    "smtp": "Existing Google Workspace sender;465 SSL;timeout<=8s;credentials server-only. TLS/EHLO qualified; authentication/inbox pending owner app password.",
+    "r2": "Private HTTP+loopback browser qualified18November2026. Exact production HTTPS CORS/CDN and permanent runtime credentials remain pending;24-hour qualification tokens are not production credentials.",
+    "pending_validations": "docs/PENDING_VALIDATIONS.md"
   }
 }

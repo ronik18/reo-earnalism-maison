@@ -1,5 +1,10 @@
 # Neon PostgreSQL18 and first-book acceptance
 
+**Latest provider/source milestone:** see [provider qualification handoff](PROVIDER_QUALIFICATION_HANDOFF.md). The historical37-migration result below predates the added cache-ledger migration.
+
+**Pending acceptance checks:** use the [central pending validation register](PENDING_VALIDATIONS.md) for provider, CDN HIT/MISS/purge, email, device and final release dependencies. Earlier milestone gaps below are historical; close items only with actual evidence.
+
+
 18 November2026. Integration Lane owns this record. The owner approved PostgreSQL18 in the existing dedicated project. Hosting, HA/scaling, publication scope and spending authority are unchanged.
 
 ## Result

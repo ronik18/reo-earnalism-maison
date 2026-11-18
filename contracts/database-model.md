@@ -221,3 +221,10 @@ Current local checks: PostgreSQL SQL and PL/pgSQL grammar parsed with `pglast` v
 
 
 Draft1.1 adds persistent aggregate versions, explicit per-format access/download policy, free authorization source, completion state and extended receipt kinds. Refund amount assignment is permitted once during bounded requested-to-approved; approved amounts then freeze. Revision clones deliberately copy verified objects to new revision-scoped keys; global object-key uniqueness remains.
+
+
+## Implemented emitted-cache ledger,18November2026
+
+The Django migration `operations.0001_initial` owns two small PostgreSQL tables for the existing exact-URL purge design; no additional cache service is introduced. `maison_public_cache_reference` has UUID primary key, URL varchar(2048), unique SHA256 varchar(64), JSONB dependency list with GIN index `maison_cache_deps_idx`, indexed `expires_at` and `emitted_at`. `maison_public_cache_generation` has singleton smallint primary key constrained to1 and positive bigint epoch, seeded at1.
+
+Capture begins before the view and finalizes after cookie middleware. Only actual eligible anonymous200 emissions with canonical locale/territory queries and current live rights are recorded. Concurrent capture takes a shared generation-row lock; invalidation increments the epoch under an exclusive lock in the same publication/rights transaction and queues existing outbox jobs in30-URL batches. A changed epoch fails cache admission closed. Dependencies identify global catalog/work/edition/revision; no territory variants are guessed. Expired references are removed in bounded maintenance batches. Purge deduplication includes invalidation epoch so a repeated rights edit cannot reuse an already completed job. Actual CDN readback remains a separate pending acceptance item. This migration supplements the design SQL; do not run the reference SQL over the migrated application database.

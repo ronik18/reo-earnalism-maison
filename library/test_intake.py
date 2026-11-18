@@ -168,3 +168,31 @@ class ClearedDraftJourneyTests(TestCase):
         right.territories=['*'];right.save()
         for country in excluded+['ZZ']:
             with self.subTest(wildcard_country=country):self.assertIsNone(current_right(r,territory=country))
+
+    def test_preparation_never_writes_storage_inside_receipt_and_replay_needs_no_provider(self):
+        from unittest.mock import patch
+        from . import intake_api,storage
+        original=intake_api.apply_operation;put=storage.put_private;inside=False
+        def operation(user,key,kind,data,callback):
+            def local_mutation():
+                nonlocal inside
+                inside=True
+                try:return callback()
+                finally:inside=False
+            return original(user,key,kind,data,local_mutation)
+        def write(*args,**kwargs):
+            self.assertFalse(inside,'Storage IO must finish before the mutation receipt transaction')
+            return put(*args,**kwargs)
+        key=str(uuid.uuid4());body=json.dumps({'manifest_id':'EN-071'})
+        def send():return self.client.post('/api/v1/staff/books/imports',body,content_type='application/json',HTTP_X_CSRFTOKEN=self.csrf,HTTP_IDEMPOTENCY_KEY=key)
+        with patch('library.intake_api.apply_operation',side_effect=operation),patch('library.storage.put_private',side_effect=write):
+            first=send();self.assertEqual(first.status_code,201,first.content)
+        with patch('library.intake_api.prepare_reader_package',side_effect=AssertionError('Replay must not call provider')):
+            replay=send();self.assertEqual(replay.json(),first.json())
+
+    def test_changed_packet_after_object_preparation_cannot_create_draft_rows(self):
+        from unittest.mock import patch,Mock
+        packet=PACKET.read_bytes();changed=Mock();changed.read_bytes.side_effect=[packet,packet+b' ']
+        with patch('library.intake_api.PACKET',changed):
+            result=self.client.post('/api/v1/staff/books/imports',json.dumps({'manifest_id':'EN-071'}),content_type='application/json',HTTP_X_CSRFTOKEN=self.csrf,HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
+        self.assertEqual(result.status_code,412,result.content);self.assertFalse(Edition.objects.exists())

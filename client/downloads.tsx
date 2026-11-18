@@ -1,5 +1,6 @@
+import { QueueRecovery } from "./recovery";
 import { useEffect, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
+import { mountIsland } from "./lifecycle";
 import { api, errorText, locale, readBootstrap, session, t } from "./api";
 import {
   activeMember,
@@ -23,6 +24,7 @@ interface Boot {
   offline?: boolean;
 }
 function Downloads({ boot }: { boot: Boot }) {
+  const [queueMember, setQueueMember] = useState("");
   const [items, setItems] = useState<LocalBook[]>([]);
   const [licenses, setLicenses] = useState<License[]>([]);
   const [status, setStatus] = useState("");
@@ -76,6 +78,7 @@ function Downloads({ boot }: { boot: Boot }) {
         setStatus(t("sign_in_save"));
         return;
       }
+      setQueueMember(identity.member.member_id);
       await setIdentity(identity.member.member_id, identity.device_id);
       const response = await api<{ items: License[] }>("/me/downloads");
       setLicenses(response.items);
@@ -104,6 +107,7 @@ function Downloads({ boot }: { boot: Boot }) {
       setItems(await books(identity.member.member_id));
     } else {
       const member = await activeMember();
+      setQueueMember(member || "");
       setItems(member ? await books(member) : []);
     }
   }
@@ -208,6 +212,7 @@ function Downloads({ boot }: { boot: Boot }) {
           </div>
         </div>
       ) : null}
+      {queueMember ? <QueueRecovery member={queueMember} /> : null}
       {items.length ? (
         <div className="stack">
           {items.map((book) => (
@@ -342,8 +347,9 @@ function Downloads({ boot }: { boot: Boot }) {
     </section>
   );
 }
-const host = document.getElementById("downloads-island");
-if (host)
-  createRoot(host).render(
-    <Downloads boot={readBootstrap<Boot>("downloads-bootstrap")} />,
-  );
+export function mount() {
+  mountIsland(document.getElementById("downloads-island"), () => (
+    <Downloads boot={readBootstrap<Boot>("downloads-bootstrap")} />
+  ));
+}
+mount();

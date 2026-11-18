@@ -18,4 +18,8 @@ class Command(BaseCommand):
         if remaining > 0:
             from accounts.privacy import cleanup_expired_exports
             result['expired_exports'] = cleanup_expired_exports(limit=20, max_seconds=min(10, remaining))
+        from accounts.services import cleanup_rate_buckets
+        result['rate_counters'] = cleanup_rate_buckets(limit=1000)
+        from operations.cache import cleanup_expired_references
+        result['cache_references'] = cleanup_expired_references(limit=1000)
         self.stdout.write(str(result))

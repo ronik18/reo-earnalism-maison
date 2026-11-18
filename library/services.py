@@ -472,10 +472,10 @@ def revision_hash(revision):
                                   for u in revision.units.all()]))
 
 
-def prepare_reader_package(unit,paragraphs):
+def prepare_reader_package(unit,paragraphs,*,asset_id=None):
     revision=unit.revision
     if revision.state!='draft':raise DomainError('revision_frozen','Create a draft revision to rebuild content.',409)
-    asset_id=uuid.uuid4()
+    asset_id=asset_id or uuid.uuid4()
     body={'schema_version':1,'edition_revision_id':str(revision.id),'unit_id':str(unit.id),
           'chunk_id':str(asset_id),'anchor_revision':revision.anchor_revision,'locale':revision.edition.locale,
           'paragraphs':[paragraph_dto(p) for p in paragraphs]}
@@ -715,9 +715,8 @@ def clone_revision(source_id):
 
 
 def queue_catalog_purge(revision):
-    from core.models import OutboxJob
-    OutboxJob.objects.get_or_create(dedupe_key=f'catalog-purge:{revision.id}:{revision.version}:{revision.state}',defaults={
-        'kind':'catalog_cache_purge','payload':{'edition_id':str(revision.edition_id),'revision_id':str(revision.id)},'not_before':timezone.now()})
+    from operations.cache import queue_catalog_purge as enqueue_recorded_urls
+    return enqueue_recorded_urls(revision)
 
 
 def prepared_audio(asset):

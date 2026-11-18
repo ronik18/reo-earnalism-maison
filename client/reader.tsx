@@ -1,3 +1,4 @@
+import { QueueRecovery } from "./recovery";
 import { enqueue, queued, discardQueuedProgress } from "./queue";
 import { setIdentity } from "./offline";
 import {
@@ -7,7 +8,7 @@ import {
   type CSSProperties,
   type FormEvent,
 } from "react";
-import { createRoot } from "react-dom/client";
+import { mountIsland } from "./lifecycle";
 import {
   api,
   ApiError,
@@ -783,6 +784,7 @@ function Reader({ boot }: { boot: Boot }) {
               </span>
             ))}
           </p>
+          {boot.member_id ? <QueueRecovery member={boot.member_id} /> : null}
           <div id="progress-conflict" className="notice" hidden={!conflict}>
             <p>{t("conflict")}</p>
             <button
@@ -1107,8 +1109,9 @@ function Reader({ boot }: { boot: Boot }) {
     </>
   );
 }
-const host = document.getElementById("reader-controls");
-if (host)
-  createRoot(host).render(
-    <Reader boot={readBootstrap<Boot>("reader-bootstrap")} />,
-  );
+export function mount() {
+  mountIsland(document.getElementById("reader-controls"), () => (
+    <Reader boot={readBootstrap<Boot>("reader-bootstrap")} />
+  ));
+}
+mount();

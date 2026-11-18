@@ -61,3 +61,47 @@ export function nextBatch(rows: QueuedWrite[]): QueuedWrite[] {
   }
   return result;
 }
+
+export function recoverNote(
+  rows: QueuedWrite[],
+  id: string,
+  action: "retry" | "delete" | "replace",
+  replacement?: {
+    operation_id: string;
+    annotation_id: string;
+    note_text: string;
+    occurred_at: string;
+  },
+): QueuedWrite[] {
+  const row = rows.find((row) => row.operation.operation_id === id);
+  if (!row || row.operation.kind !== "annotation.create")
+    throw new Error("invalid_input");
+  if (action === "delete") return rows.filter((item) => item !== row);
+  if (action === "retry")
+    return rows.map((item) =>
+      item === row ? { ...item, blocked: false, problem: undefined } : item,
+    );
+  if (
+    !row.blocked ||
+    !replacement ||
+    !replacement.note_text.trim() ||
+    new TextEncoder().encode(replacement.note_text).length > 8192
+  )
+    throw new Error("invalid_input");
+  const annotation = row.operation.annotation as Record<string, unknown>;
+  const operation = {
+    ...row.operation,
+    operation_id: replacement.operation_id,
+    occurred_at: replacement.occurred_at,
+    annotation: {
+      ...annotation,
+      annotation_id: replacement.annotation_id,
+      kind: "note",
+      note_text: replacement.note_text,
+    },
+  };
+  return planEnqueue(
+    rows.filter((item) => item !== row),
+    operation,
+  );
+}

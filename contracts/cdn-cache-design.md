@@ -177,3 +177,10 @@ Test publication/withdrawal across listing variants, outbox retry after process 
 ## Draft1.1 finite expiry and upload correction
 
 For known finite public rights, browser/edge freshness is min(configuredTTL, max(0, floor(valid_until-now))). At zero, deny/newgrantunavailable or use private,no-store; stale serving cannot cross that deadline. Unexpected revocation retains its already disclosed residual exposure. Private media is still not CDN-cached. Staff raw uploads use a separate exact-origin PUT CORS rule with required signed headers; the consumption GET/HEAD rule is not reused as an upload policy. Local development may use gated local_put/local_signed; this is not R2 transport evidence.
+
+
+## Implementation evidence and pending edge acceptance,18November2026
+
+The app now captures eligible emitted URLs in the PostgreSQL ledger described in database-model.md, uses generation locking for publication/capture races, and queues exact30-URL outbox batches. Live Rights and public Work/Edition admin edits invalidate atomically; rollback leaves no committed purge event. Member/error/cookie responses receive private browser and CDN policies. Trusted client IP is accepted only after the origin secret validates; raw forwarded headers cannot select a rate-limit identity. These source/local checks do not certify an actual edge configuration.
+
+R2 private synthetic HTTP and loopback browser GET/Range/integrity qualification passed. The private bucket has no custom domain or public development URL. Production CDN HIT/MISS, territory/cache-key isolation, header transforms, exact-URL eviction readback and expiry remain together in ../docs/PENDING_VALIDATIONS.md (V03–V05); they require an authorized Cloudflare-managed host. Current DNS and platform are unchanged.

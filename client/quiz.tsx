@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from "react";
-import { createRoot } from "react-dom/client";
+import { mountIsland } from "./lifecycle";
 import { api, errorText, readBootstrap, t } from "./api";
 interface Quiz {
   quiz_id: string;
@@ -138,8 +138,9 @@ function QuizIsland({ quiz }: { quiz: Quiz }) {
     </>
   );
 }
-const host = document.getElementById("quiz-island");
-if (host)
-  createRoot(host).render(
-    <QuizIsland quiz={readBootstrap<Quiz>("quiz-bootstrap")} />,
-  );
+export function mount() {
+  mountIsland(document.getElementById("quiz-island"), () => (
+    <QuizIsland quiz={readBootstrap<Quiz>("quiz-bootstrap")} />
+  ));
+}
+mount();

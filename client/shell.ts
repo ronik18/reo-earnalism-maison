@@ -1,3 +1,4 @@
+import "./navigation";
 import { flushQueue } from "./queue";
 import { api, session } from "./api";
 import { books, purge, removeBook, setIdentity, type License } from "./offline";
@@ -32,13 +33,13 @@ if (document.body.dataset.member === "true") void validate();
 window.addEventListener("online", () => {
   void validate();
 });
-for (const form of document.querySelectorAll<HTMLFormElement>(
-  "form[data-sign-out]",
-))
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    void purge().finally(() => form.submit());
-  });
+document.addEventListener("submit", (event) => {
+  const form = event.target;
+  if (!(form instanceof HTMLFormElement) || !form.matches("[data-sign-out]"))
+    return;
+  event.preventDefault();
+  void purge().finally(() => form.submit());
+});
 if (
   "serviceWorker" in navigator &&
   document.body.dataset.offlineEnabled === "true"

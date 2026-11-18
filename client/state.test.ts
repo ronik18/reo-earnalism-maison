@@ -185,3 +185,205 @@ test("Progress conflicts distinguish an accepted position, own late writes and a
     "already_saved",
   );
 });
+
+import { recoverNote } from "./queue-state";
+import { IslandLifetime } from "./lifetime-state";
+import { internalPageURL, preservePlayer } from "./navigation-state";
+import { validCheckout, accessGranted } from "./commerce-state";
+test("Queued note retry preserves uncertain payload and IDs; explicit edit creates new IDs", () => {
+  const original = {
+    operation: {
+      operation_id: "old-op",
+      kind: "annotation.create",
+      occurred_at: "2026-11-18T00:00:00Z",
+      annotation: {
+        annotation_id: "old-note",
+        kind: "note",
+        note_text: "original",
+      },
+    },
+    attempted: true,
+    blocked: true,
+    problem: "invalid_anchor",
+  };
+  const other = {
+    operation: { operation_id: "other", kind: "progress.set" },
+    attempted: false,
+  };
+  const retried = recoverNote([original, other], "old-op", "retry");
+  assert.equal(retried[0].operation, original.operation);
+  assert.equal(retried[0].attempted, true);
+  assert.equal(retried[0].blocked, false);
+  assert.equal(retried[1], other);
+  const edited = recoverNote([original, other], "old-op", "replace", {
+    operation_id: "new-op",
+    annotation_id: "new-note",
+    note_text: "edited",
+    occurred_at: "2026-11-18T01:00:00Z",
+  });
+  assert.equal(edited[1].operation.operation_id, "new-op");
+  assert.equal(
+    (edited[1].operation.annotation as { annotation_id: string }).annotation_id,
+    "new-note",
+  );
+  assert.equal(edited[1].attempted, false);
+  assert.equal(original.operation.annotation.note_text, "original");
+  assert.deepEqual(recoverNote([original, other], "old-op", "delete"), [other]);
+  assert.throws(() =>
+    recoverNote([{ ...original, blocked: false }], "old-op", "replace", {
+      operation_id: "x",
+      annotation_id: "y",
+      note_text: "edited",
+      occurred_at: "now",
+    }),
+  );
+});
+test("SSR page disposal retains exactly the live audio island until explicit close", () => {
+  let pageStops = 0,
+    audioStops = 0,
+    removed = "";
+  const lifetime = new IslandLifetime<string, { unmount: () => void }>();
+  const audio = { unmount: () => audioStops++ };
+  lifetime.add("page", { unmount: () => pageStops++ });
+  lifetime.add("audio", audio, true);
+  lifetime.disposePage();
+  assert.equal(pageStops, 1);
+  assert.equal(audioStops, 0);
+  assert.equal(lifetime.roots.get("audio")?.root, audio);
+  lifetime.disposePage();
+  assert.equal(audioStops, 0);
+  lifetime.closePersistent((host) => (removed = host));
+  assert.equal(audioStops, 1);
+  assert.equal(removed, "audio");
+  assert.equal(lifetime.roots.size, 0);
+});
+test("Persistent navigation preserves auth boundaries and native hash/external links", () => {
+  const base = "https://example.test/en/listen/book/";
+  assert.equal(internalPageURL("/bn/explore/", base)?.pathname, "/bn/explore/");
+  for (const path of [
+    "https://other.test/en/",
+    "/admin/",
+    "/api/v1/session",
+    "/en/sign-out/",
+    "#chapter",
+  ]) {
+    assert.equal(internalPageURL(path, base), undefined);
+  }
+  assert.equal(
+    preservePlayer("true", "true", 200, "text/html; charset=utf-8"),
+    true,
+  );
+  assert.equal(preservePlayer("true", "false", 200, "text/html"), false);
+  assert.equal(preservePlayer("true", "true", 403, "text/html"), false);
+});
+test("Checkout cannot claim access from a callback or mismatched descriptor", () => {
+  const amount = { amount_minor: 500, currency: "INR" };
+  const checkout = {
+    provider: "razorpay",
+    public_key_id: "rzp_test_abc123",
+    provider_order_id: "order_abc123",
+    amount,
+    name: "Earnalism",
+    description: "Test",
+  };
+  assert.equal(validCheckout(checkout, amount), true);
+  assert.equal(
+    validCheckout(
+      { ...checkout, amount: { ...amount, amount_minor: 1 } },
+      amount,
+    ),
+    false,
+  );
+  assert.equal(validCheckout(null, amount), false);
+  assert.equal(
+    accessGranted({ status: "paid", fulfillment_status: "pending" }),
+    false,
+  );
+  assert.equal(
+    accessGranted({ status: "paid", fulfillment_status: "fulfilled" }),
+    true,
+  );
+});
+
+import { trustedIslandModule, sameShellBuild } from "./navigation-state";
+test("Island modules follow the trusted bundle CDN directory and deployment shell", () => {
+  const cdn =
+    "https://assets.example.test/releases/maison/dist/shell-ABC123.js";
+  assert.equal(
+    trustedIslandModule(
+      "https://assets.example.test/releases/maison/dist/reader-XYZ789.js",
+      cdn,
+    ),
+    true,
+  );
+  assert.equal(
+    trustedIslandModule(
+      "https://app.example.test/static/maison/dist/reader-XYZ789.js",
+      cdn,
+    ),
+    false,
+  );
+  for (const src of [
+    "https://evil.test/releases/maison/dist/reader.js",
+    "https://assets.example.test/releases/other/reader.js",
+    "https://assets.example.test/releases/maison/dist/nested/reader.js",
+    "https://assets.example.test/releases/maison/dist/%2e%2e/reader.js",
+    "https://user:password@assets.example.test/releases/maison/dist/reader.js",
+    "https://assets.example.test/releases/maison/dist/reader.js?redirect=evil",
+  ]) {
+    assert.equal(trustedIslandModule(src, cdn), false);
+  }
+  assert.equal(sameShellBuild(cdn, cdn), true);
+  assert.equal(
+    sameShellBuild(
+      "https://assets.example.test/releases/maison/dist/shell-NEW123.js",
+      cdn,
+    ),
+    false,
+  );
+  assert.equal(
+    sameShellBuild(
+      "https://assets.example.test/releases/new/dist/shell-ABC123.js",
+      cdn,
+    ),
+    false,
+  );
+  assert.equal(
+    trustedIslandModule(
+      "http://localhost:8009/static/maison/dist/reader-XYZ789.js",
+      "http://localhost:8009/static/maison/dist/shell-ABC123.js",
+    ),
+    true,
+  );
+});
+
+import { LatestNavigation } from "./navigation-state";
+import { offerSnapshotKey } from "./commerce-state";
+test("A later navigation aborts the stale fetch without cancelling the new page", () => {
+  const navigation = new LatestNavigation();
+  const first = navigation.begin(),
+    second = navigation.begin();
+  assert.equal(first.signal.aborted, true);
+  assert.equal(navigation.current(first), false);
+  assert.equal(navigation.current(second), true);
+  navigation.finish(first);
+  assert.equal(navigation.current(second), true);
+  navigation.finish(second);
+  assert.equal(navigation.current(second), false);
+});
+test("Checkout retry identity is scoped to the immutable offer and terms snapshot", () => {
+  const offer = { offer_id: "book", version: 1, terms_version: "terms1" };
+  assert.equal(offerSnapshotKey(offer), offerSnapshotKey({ ...offer }));
+  assert.notEqual(
+    offerSnapshotKey(offer),
+    offerSnapshotKey({ ...offer, offer_id: "other" }),
+  );
+  assert.notEqual(
+    offerSnapshotKey(offer),
+    offerSnapshotKey({ ...offer, version: 2 }),
+  );
+  assert.notEqual(
+    offerSnapshotKey(offer),
+    offerSnapshotKey({ ...offer, terms_version: "terms2" }),
+  );
+});

@@ -1,0 +1,15 @@
+{
+  "check": "range",
+  "status": "pass",
+  "browser_get_readable": true,
+  "exact_sha256_verified": true,
+  "private_no_store": true,
+  "range_verified": true,
+  "bytes": 65536,
+  "local_origin_only": true,
+  "production_cdn_qualified": false,
+  "cleanup": "pass",
+  "unsigned_status": 400,
+  "unsigned_error_code": "InvalidArgument",
+  "unsigned_returned_object": false
+}

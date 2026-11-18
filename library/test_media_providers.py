@@ -92,3 +92,67 @@ class MeasuredAudioTests(TestCase):
         self.assertEqual(doc['pieces'][0]['offset_bytes'],0)
         self.revision.validation_evidence['media_assets'][str(self.asset.id)]['duration_ms']=1;self.revision.save()
         with self.assertRaises(DomainError):svc.prepared_audio(self.asset)
+
+class ImmutableWriteRecoveryTests(SimpleTestCase):
+    @override_settings(MEDIA_STORAGE_BACKEND='r2',R2_PRIVATE_BUCKET='private-test')
+    def test_unknown_small_write_reconciles_exact_bytes_without_overwrite(self):
+        raw=b'canary';expected={'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+        client=Mock();client.put_object.side_effect=TimeoutError('do not expose signed request')
+        with patch('library.storage._client',return_value=client),patch('library.storage.private_exists',return_value=True),patch('library.storage.verify_private',return_value=expected) as verify:
+            self.assertEqual(storage.put_private('exports/test/object',raw),expected)
+            self.assertEqual(client.put_object.call_args.kwargs['IfNoneMatch'],'*')
+            verify.assert_called_once_with('exports/test/object',len(raw),expected['sha256'],'application/octet-stream')
+        with patch('library.storage._client',return_value=client),patch('library.storage.private_exists',return_value=False):
+            with self.assertRaises(DomainError) as error:storage.put_private('exports/test/object',raw)
+            self.assertEqual(error.exception.code,'storage_unavailable')
+
+    @override_settings(MEDIA_STORAGE_BACKEND='r2',R2_PRIVATE_BUCKET='private-test')
+    def test_unknown_multipart_completion_reconciles_and_never_uses_overwriting_copy(self):
+        raw=b'private canary';sha=hashlib.sha256(raw).hexdigest();client=Mock()
+        class Missing(Exception):response={'Error':{'Code':'404'}}
+        client.head_object.side_effect=Missing();client.create_multipart_upload.return_value={'UploadId':'test'}
+        client.upload_part.return_value={'ETag':'not-used-as-content-hash'};client.complete_multipart_upload.side_effect=TimeoutError()
+        expected={'bytes':len(raw),'sha256':sha}
+        with patch('library.storage._client',return_value=client),patch('library.storage.private_exists',return_value=True),patch('library.storage.verify_private',return_value=expected):
+            self.assertEqual(storage.put_private_file('exports/test/object',io.BytesIO(raw),'application/octet-stream',len(raw),sha),expected)
+        self.assertEqual(client.complete_multipart_upload.call_args.kwargs['IfNoneMatch'],'*');client.copy_object.assert_not_called()
+
+    def test_copy_existing_destination_is_verified_and_never_replaced(self):
+        raw=b'original';source=Mock(storage_key='revisions/test/source',bytes=len(raw),sha256=hashlib.sha256(raw).hexdigest(),content_type='application/octet-stream')
+        with tempfile.TemporaryDirectory() as directory,override_settings(LOCAL=True,MEDIA_STORAGE_BACKEND='local',MEDIA_ROOT=directory):
+            storage.put_private(source.storage_key,raw)
+            storage.put_private('revisions/test/destination',b'different')
+            with self.assertRaises(DomainError):storage.copy_verified(source,'revisions/test/destination')
+            self.assertEqual(storage._local_path('revisions/test/destination').read_bytes(),b'different')
+            result=storage.copy_verified(source,'revisions/test/new-destination')
+            self.assertEqual(result['sha256'],source.sha256)
+
+
+class ExhaustedSocketRegressionTests(SimpleTestCase):
+    class ClosedAfterBody(io.BytesIO):
+        def __init__(self,raw):super().__init__(raw);self.socket_open=True;self.timeout_calls=0;self.length=len(raw)
+        def set_socket_timeout(self,value):
+            if not self.socket_open:raise AttributeError('exhausted HTTPResponse has no socket')
+            self.timeout_calls+=1
+        def read(self,size=-1):
+            value=super().read(size)
+            if self.tell()==self.length:self.socket_open=False
+            return value
+
+    def test_verify_does_not_touch_socket_after_exact_content_length(self):
+        for size in [65536,storage.CHUNK_BYTES,storage.CHUNK_BYTES+7]:
+            raw=b'x'*size;stream=self.ClosedAfterBody(raw);sha=hashlib.sha256(raw).hexdigest()
+            with self.subTest(size=size),patch('library.storage._open',return_value=(stream,size,'application/octet-stream')):
+                result=storage.verify_private('exports/test/object',size,sha,'application/octet-stream')
+            self.assertEqual(result['sha256'],sha);self.assertTrue(stream.closed)
+            self.assertEqual(stream.timeout_calls,(size+storage.CHUNK_BYTES-1)//storage.CHUNK_BYTES)
+
+    def test_copy_does_not_touch_exhausted_source_socket(self):
+        raw=b'x'*65536;stream=self.ClosedAfterBody(raw);sha=hashlib.sha256(raw).hexdigest()
+        source=Mock(storage_key='exports/test/source',bytes=len(raw),sha256=sha,content_type='application/octet-stream')
+        def upload(key,fileobj,content_type,size,expected_sha,**kwargs):
+            self.assertEqual(fileobj.read(),raw);self.assertEqual(expected_sha,sha)
+            return {'bytes':size,'sha256':sha}
+        with patch('library.storage.private_exists',return_value=False),patch('library.storage._open',return_value=(stream,len(raw),'application/octet-stream')),patch('library.storage.put_private_file',side_effect=upload):
+            self.assertEqual(storage.copy_verified(source,'exports/test/copy')['sha256'],sha)
+        self.assertEqual(stream.timeout_calls,1);self.assertTrue(stream.closed)

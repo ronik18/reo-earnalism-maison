@@ -1,0 +1,40 @@
+
+> reo-earnalism-maison@1.0.0 check
+> npm run typecheck && npm test
+
+
+> reo-earnalism-maison@1.0.0 typecheck
+> tsc --noEmit
+
+
+> reo-earnalism-maison@1.0.0 test
+> node client/test.mjs
+
+✔ Unicode selection offsets use code points, including Bengali and astral characters (0.641416ms)
+✔ Intentional rereading is a distinct semantic location (0.095958ms)
+✔ Pagination tolerates an unmeasured viewport and includes the last column (0.0935ms)
+✔ Sleep uses an elapsed monotonic deadline, not wall-clock changes (0.078416ms)
+✔ Exact format switching rejects overlapping or out-of-bounds maps (0.130125ms)
+✔ Player return links remain on a local locale route (0.390292ms)
+✔ Offline queue coalesces only unsent progress and never drops notes or uncertain writes (1.065541ms)
+✔ Offline queue enforces bounds and forbids financial or staff operations (4.38475ms)
+✔ Sync batch skips blocked conflicts and respects the API100-operation boundary (1.71925ms)
+✔ Passage capture rejects blank browser selections but retains Bengali text (0.254833ms)
+✔ A delayed GET cannot regress a confirmed progress PUT snapshot (0.095542ms)
+✔ Progress conflicts distinguish an accepted position, own late writes and another device (0.104959ms)
+✔ Queued note retry preserves uncertain payload and IDs; explicit edit creates new IDs (0.373958ms)
+✔ SSR page disposal retains exactly the live audio island until explicit close (0.202333ms)
+✔ Persistent navigation preserves auth boundaries and native hash/external links (0.363667ms)
+✔ Checkout cannot claim access from a callback or mismatched descriptor (0.177375ms)
+✔ Island modules follow the trusted bundle CDN directory and deployment shell (0.403458ms)
+✔ A later navigation aborts the stale fetch without cancelling the new page (0.095208ms)
+✔ Checkout retry identity is scoped to the immutable offer and terms snapshot (0.084625ms)
+✔ Frontend literal and locally declared API routes/methods exist in OpenAPI (67.2615ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 134.097917

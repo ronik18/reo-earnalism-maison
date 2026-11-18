@@ -69,3 +69,12 @@ class DatabaseConfigurationTests(SimpleTestCase):
             ALLOWED_HOSTS='maison.example')
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('Production requires a direct database URL', result.stderr)
+
+
+    def test_public_asset_host_is_one_exact_https_hostname(self):
+        self.assertEqual(self.settings_process(R2_PUBLIC_ASSET_HOST='https://assets.maison.example').returncode,0)
+        for host in ['https://assets.example;script-src *','https://assets.example:443','https://assets.example/path','https://test.r2.dev','https://bad_host.example','https://assets.example?x=1']:
+            with self.subTest(host=host):
+                result=self.settings_process(R2_PUBLIC_ASSET_HOST=host)
+                self.assertNotEqual(result.returncode,0)
+                self.assertIn('dedicated HTTPS CDN hostname',result.stderr)

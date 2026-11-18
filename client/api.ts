@@ -1,8 +1,8 @@
 export type UI = Record<string, string>;
-export const ui: UI = JSON.parse(
+export let ui: UI = JSON.parse(
   document.getElementById("ui-catalogue")?.textContent || "{}",
 );
-export const locale = document.documentElement.dataset.uiLocale || "en";
+export let locale = document.documentElement.dataset.uiLocale || "en";
 export const t = (key: string) => ui[key] || key.replaceAll("_", " ");
 export interface Session {
   authenticated: boolean;
@@ -103,4 +103,9 @@ export interface Preferences {
 }
 export function readBootstrap<T>(id: string): T {
   return JSON.parse(document.getElementById(id)?.textContent || "{}") as T;
+}
+
+export function refreshCatalogue() {
+  ui = JSON.parse(document.getElementById("ui-catalogue")?.textContent || "{}");
+  locale = document.documentElement.dataset.uiLocale || "en";
 }

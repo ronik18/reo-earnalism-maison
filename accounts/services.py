@@ -14,7 +14,6 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.sessions.models import Session
 from django.core import signing
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.db import transaction,IntegrityError
 from django.db.models import F
@@ -59,13 +58,25 @@ def _password(password,user=None):
 
 
 def check_rate(purpose,identifier,limit=10,seconds=600):
-    stamp=int(time.time())//seconds;now=timezone.now()
+    current=time.time();stamp=int(current)//seconds;now=timezone.now()
     with transaction.atomic():
         row,_=RateLimitBucket.objects.get_or_create(key_hash=_digest(identifier),purpose=purpose,window=stamp,
             defaults={'expires_at':now+timedelta(seconds=seconds*2)})
         RateLimitBucket.objects.filter(pk=row.pk).update(count=F('count')+1)
         row.refresh_from_db()
-        if row.count>limit:raise DomainError('rate_limited','Please wait before trying again.',429)
+        count=row.count
+    metadata={'limit':limit,'remaining':max(0,limit-count),'reset':max(1,int((stamp+1)*seconds-current+0.999))}
+    if count>limit:
+        error=DomainError('rate_limited','Please wait before trying again.',429);error.rate_limit=metadata;raise error
+    return metadata
+
+
+def cleanup_rate_buckets(limit=1000):
+    """Maintenance removes only expired windows in a bounded primary-key batch."""
+    if type(limit)!=int or not 1<=limit<=10000:raise ValueError('limit must be1–10000')
+    identifiers=list(RateLimitBucket.objects.filter(expires_at__lte=timezone.now()).order_by('pk').values_list('pk',flat=True)[:limit])
+    count,_=RateLimitBucket.objects.filter(pk__in=identifiers,expires_at__lte=timezone.now()).delete()
+    return {'deleted':count}
 
 
 def _token_value(action):
@@ -124,7 +135,7 @@ def consume_action(token,purpose):
     initial=EmailActionToken.objects.filter(pk=token_id,purpose=purpose).first()
     if initial:User.objects.select_for_update().get(pk=initial.user_id)
     action=EmailActionToken.objects.select_for_update().filter(pk=token_id,purpose=purpose).first()
-    if not action or action.consumed_at or action.expires_at<=timezone.now() or not hmac.compare_digest(action.token_sha256,_digest(token)):
+    if not action or action.consumed_at or action.expires_at<=timezone.now() or not action.user.is_active or action.user.email!=action.email_normalized or not hmac.compare_digest(action.token_sha256,_digest(token)):
         raise DomainError('action_token_invalid','This link is expired or already used.',410)
     return action
 
@@ -230,13 +241,8 @@ def update_preferences(user,data,base_version):
 
 def process_outbox_job(job,max_seconds=45):
     if job.kind=='email_action':
-        action=EmailActionToken.objects.get(pk=job.payload['action_id'])
-        if action.consumed_at or action.expires_at<=timezone.now():return {'status':'expired_without_send'}
-        base=getattr(settings,'PUBLIC_BASE_URL','http://127.0.0.1:8008').rstrip('/')
-        route='/auth/reset/' if action.purpose=='password_reset' else '/auth/verify/'
-        link=f'{base}{route}?token={quote(_token_value(action))}&return_to={quote(safe_return_path(action.return_path),safe="")}'
-        send_mail('Earnalism account action',f'Use this link to confirm your requested account action: {link}\nThis link expires at {iso(action.expires_at)}.',getattr(settings,'DEFAULT_FROM_EMAIL','local@localhost'),[action.email_normalized],fail_silently=False)
-        return {'status':'sent'}
+        from .email_delivery import deliver_action
+        return deliver_action(job,max_seconds=max_seconds)
     if job.kind=='privacy_export':
         from .privacy import create_export
         return create_export(job,max_seconds=max_seconds)
@@ -247,7 +253,7 @@ def process_outbox_job(job,max_seconds=45):
         recipient=getattr(settings,'SUPPORT_EMAIL','')
         if not recipient and not settings.LOCAL:raise DomainError('support_not_configured','Support delivery must be configured.',503)
         if recipient:
-            send_mail('Earnalism support: '+job.payload['category'],job.payload['message']+'\nReply to: '+job.payload['email'],getattr(settings,'DEFAULT_FROM_EMAIL',''),[recipient],fail_silently=False)
-            return {'status':'delivered','external_delivery':True}
+            from .email_delivery import submit_message
+            return submit_message(job,'Earnalism support: '+job.payload['category'],job.payload['message']+'\nReply to: '+job.payload['email'],[recipient],max_seconds=max_seconds)
         return {'status':'recorded_for_local_operator','external_delivery':False}
     raise DomainError('unknown_job_kind','No handler exists for this job.',409)

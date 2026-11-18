@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-maison-canary'; style-src 'nonce-maison-canary'; connect-src https://*.r2.cloudflarestorage.com; base-uri 'none'; form-action 'none'">
+<title>Maison private R2 browser qualification</title>
+<style nonce="maison-canary">
+body{max-width:740px;margin:48px auto;padding:0 24px;background:#faf8f2;color:#252027;font:17px/1.6 system-ui,sans-serif}h1{font-size:27px}label{display:block;margin-top:20px}input{box-sizing:border-box;width:100%;padding:12px;font:inherit;border:1px solid #8e8271;border-radius:4px;background:#fff}button{margin:18px 8px 0 0;padding:10px 15px;font:inherit;cursor:pointer}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#eee8df;padding:20px;min-height:100px}.note{font-size:15px}button:disabled{cursor:wait}
+</style>
+<h1>Private R2 browser qualification</h1>
+<p>QA only: serve on <strong>http://127.0.0.1:8010</strong>. Use a private synthetic canary, never a book or customer object. This proves only the current local browser origin; production CDN qualification remains separate.</p>
+<p class="note">The signed URL stays in memory, is masked, and clears after each check. This page uses no storage, analytics, console logging or URL navigation. Browser network tooling can still observe its own requests; do not export network traces containing signed URLs.</p>
+<label for="grant">Short-lived signed canary URL</label>
+<input id="grant" type="password" autocomplete="off" spellcheck="false" autocapitalize="off" aria-describedby="scope">
+<label for="sha">Expected SHA-256</label>
+<input id="sha" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" maxlength="64">
+<div id="scope" class="note">GET/Range responses are bounded to 1 MiB and eight seconds each. No upload or delete operations occur here.</div>
+<button id="get" type="button">Verify GET</button>
+<button id="range" type="button">Verify Range</button>
+<button id="integrity" type="button">Verify integrity</button>
+<button id="clear" type="button">Clear</button>
+<pre id="result" role="status" aria-live="polite">No requests made.</pre>
+<script nonce="maison-canary">
+'use strict';
+(() => {
+  const grant = document.getElementById('grant');
+  const sha = document.getElementById('sha');
+  const output = document.getElementById('result');
+  const buttons = [...document.querySelectorAll('button')];
+  const limit = 1024 * 1024;
+  const local = location.protocol === 'http:' && location.hostname === '127.0.0.1';
+  function show(value) { output.textContent = JSON.stringify(value, null, 2); }
+  function clear() { grant.value = ''; sha.value = ''; output.textContent = 'Inputs cleared. No requests made.'; }
+  async function read(url, headers = {}) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const response = await fetch(url, {headers, method:'GET', mode:'cors', credentials:'omit', cache:'no-store', redirect:'error', referrerPolicy:'no-referrer', signal:controller.signal});
+      if (![200,206].includes(response.status) || !response.body) throw new Error('response');
+      const reader = response.body.getReader();
+      const chunks = []; let length = 0;
+      try {
+        while (true) {
+          const {done, value} = await reader.read();
+          if (done) break;
+          length += value.byteLength;
+          if (length > limit) { await reader.cancel(); throw new Error('size'); }
+          chunks.push(value);
+        }
+      } finally { reader.releaseLock(); }
+      const bytes = new Uint8Array(length); let offset = 0;
+      for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+      return {response, bytes};
+    } finally { clearTimeout(timeout); }
+  }
+  async function run(kind) {
+    for (const button of buttons) button.disabled = true;
+    try {
+      if (!local || !crypto.subtle) throw new Error('context');
+      const url = new URL(grant.value.trim());
+      const expected = sha.value.trim().toLowerCase();
+      if (url.protocol !== 'https:' || !/^[a-z0-9.-]+\.r2\.cloudflarestorage\.com$/.test(url.hostname) || (url.port && url.port !== '443') || url.username || url.password || url.hash || !url.searchParams.has('X-Amz-Signature') || !/^[a-f0-9]{64}$/.test(expected)) throw new Error('input');
+      const whole = await read(url.href);
+      const actual = [...new Uint8Array(await crypto.subtle.digest('SHA-256', whole.bytes))].map(byte => byte.toString(16).padStart(2,'0')).join('');
+      const verified = whole.response.status === 200 && whole.bytes.length >= 32 && actual === expected;
+      let rangeVerified = null;
+      if (kind === 'range') {
+        const part = await read(url.href, {Range:'bytes=5-31'});
+        rangeVerified = part.response.status === 206 && part.response.headers.get('Content-Range') === `bytes 5-31/${whole.bytes.length}` && part.bytes.length === 27 && part.bytes.every((byte,index) => byte === whole.bytes[index + 5]);
+      }
+      const cache = whole.response.headers.get('Cache-Control') || '';
+      const privateNoStore = cache.toLowerCase().includes('private') && cache.toLowerCase().includes('no-store');
+      const passed = verified && privateNoStore && (kind !== 'range' || rangeVerified);
+      show({check:kind, status:passed?'pass':'fail', browser_get_readable:true, exact_sha256_verified:verified, private_no_store:privateNoStore, range_verified:rangeVerified, bytes:whole.bytes.length, local_origin_only:true, production_cdn_qualified:false});
+    } catch (_) {
+      show({check:kind, status:'fail', reason:'Input, expiry, network, CORS or integrity check failed. Generate a fresh canary URL and inspect private provider evidence.', local_origin_only:true, production_cdn_qualified:false});
+    } finally {
+      grant.value = '';
+      for (const button of buttons) button.disabled = false;
+    }
+  }
+  for (const kind of ['get','range','integrity']) document.getElementById(kind).addEventListener('click', () => run(kind));
+  document.getElementById('clear').addEventListener('click', clear);
+  window.addEventListener('pagehide', clear);
+  if (!local) { for (const button of buttons) button.disabled = true; output.textContent = 'Disabled: serve this QA harness on http://127.0.0.1 with an explicit local port.'; }
+})();
+</script>
+</html>

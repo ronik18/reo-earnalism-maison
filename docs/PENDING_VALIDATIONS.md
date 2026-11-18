@@ -1,0 +1,47 @@
+# Pending validation register
+
+Updated 18 November 2026. Integration Lane owns this single checklist for final acceptance. Keep implementation progressing in parallel; run dependent provider/device checks together once their prerequisites are ready. A source change or local test does not close a real-provider check. Only checks applicable to the enabled launch scope block that scope; optional formats and payments stay disabled until qualified.
+
+Current constraints: The Selfish Giant stays draft; the existing platform and DNS stay unchanged. No additional paid infrastructure without owner approval. Preserve the approved HLD/LLD and 47-region publication policy.
+
+| ID | Pending validation | Prerequisite / simplest next action | Acceptance evidence |
+| --- | --- | --- | --- |
+| V01 | R2 private delivery and intake | Finish the approved private-bucket upload credential and exact-origin CORS; run the bounded synthetic qualification. Delivery credential replaced with bucket-only read-only, 24-hour access. | Actual conditional upload/replay, immutable copy, SHA/byte integrity, GET/Range, unsigned/expired denial, allowed/foreign-origin CORS and cleanup; private access remains disabled publicly. Stay within 10 MB, 50 writes, 200 reads. |
+| V02 | Browser-to-R2 delivery | V01; use loopback-only qualification harness and a fresh synthetic signed object. | Browser GET/Range and integrity pass; no secret/signed URL in logs or handoff; exact canary cleaned. |
+| V03 | CDN HIT/MISS and cache separation | An authorized Cloudflare-managed Maison host/zone; none currently available. Prepare native rules now; do not change legacy DNS or substitute infrastructure. | Actual first MISS then HIT for eligible anonymous responses; correct browser/edge TTL; locale and trusted territory separation; Cookie/Authorization/Set-Cookie/private/error responses never shared. |
+| V04 | CDN eviction and rights expiry | V03 and deployed emitted-URL capture/purge configuration. | Actual exact-URL purge followed by uncached fresh/withdrawn response; rights expiry caps freshness and grants; no stale serving after expiry. Provider acknowledgement alone is insufficient. |
+| V05 | Trusted edge country and origin protection | V03; configured edge-overwritten country/origin headers. | Forged client headers/query cannot authorize; unknown country denied; direct origin protected; edge cache lookup cannot reuse another territory's response. |
+| V06 | SMTP authentication and account email journey | Owner adds Workspace app password privately to EMAIL_HOST_PASSWORD. TLS/EHLO already passed. | App verification and reset messages submitted and received at approved ronik18@gmail.com; action links complete, expire/replay safely, reset revokes sessions; no credentials in evidence. SMTP acceptance and inbox receipt recorded separately. |
+| V07 | Persistent Player and recovery UI | Isolated PostgreSQL18 synthetic audio fixture and current frontend build. | Real browser playback survives eligible internal navigation/history; close/account changes stop correctly; rejected queued notes can retry/edit/export/delete without duplicate effects. Synthetic audio does not certify a book audiobook. |
+| V08 | Physical mobile, offline and accessibility | Stable build; actual supported Android/iOS devices and applicable offline scope. | Responsive full-cover frames, EN/BN typography, keyboard/focus/screen-reader checks; applicable download/license/expiry, offline read/play and reconnect synchronization. Unsupported formats remain disabled. |
+| V09 | Integrated PostgreSQL18 and release-source checks | Finish parallel integration; review/apply new cache migration to dedicated Neon after checks. | Combined affected backend/frontend tests, build, no migration drift, pinned Python3.13 packaging and exact-head CI; pooled/direct TLS/timeouts and book draft/null live pointer preserved. Historical 37-migration evidence predates the new cache migration. |
+| V10 | Production operations, load and recovery | Authorized deployment/resource configuration and any indispensable spending approval. | Health/readiness, bounded provider/database failures and retries, rate-limit headers, saturation/autoscaling behavior, observed cost limits, backup restore and rollback rehearsal on the actual deployment. Local restore is supporting evidence only. |
+| V11 | Launch content and compliance | Exact-edition rights/permissions and applicable operating documents for every active region. | All 47 active regions and each offered format/action supported by retained evidence; privacy/terms/contact/retention and data-processing requirements match enabled scope. UAE/Mainland China and pending regions stay excluded. Draft acceptance does not authorize publication. |
+| V12 | Payments, refunds, tax and invoices — only if enabled | Qualified merchant/test credentials, country/tax/seller facts and permitted provider operations. | Actual sandbox checkout/webhook/replay/late-capture/refund reconciliation and invoice cases; live activation requires applicable approvals. Remains disabled; do not block a launch scope that excludes payments. |
+| V13 | Audio/video and learning content — only if offered | Cleared final media/editorial content; approved adapters and any spending authority. | Applicable rights, real media preparation/playback/timing, device delivery and editorial acceptance. Synthetic fixtures do not establish content or provider readiness. |
+
+## Latest qualification results,18November2026
+
+| Item | Current result | Evidence / remaining work |
+| --- | --- | --- |
+| V01 | PASS for private synthetic HTTP transport; PARTIAL for production integration | [18 HTTP checks and three successful cleanups](evidence/r2-http-qualification.json). Conditional PUT, immutable copy, SHA/bytes/type/method binding,412 replay rejection, allowed/foreign CORS, GET/Range, unsigned denial and expired grant passed. Separate exact-origin delivery/upload rules saved. Private bucket has no public development URL/custom domain. Real draft intake/browser journey using R2, production HTTPS origin, backup scope and durable runtime credential configuration remain pending;24-hour qualification tokens are temporary. |
+| V02 | PASS for the loopback browser scope | [Browser GET/Range/SHA/private-cache result](evidence/r2-browser-qualification.json), [screenshot](evidence/r2-browser-qualification.png).64KiB synthetic object; exact canary cleaned. Production CDN is not qualified. |
+| V03–V05 | BLOCKED on an authorized Cloudflare-managed host | CDN HIT/MISS, cache-key isolation, trusted edge headers, rate-limit identity and purge/expiry readback stay grouped here. Current platform/DNS unchanged. |
+| V06 | PARTIAL: TLS/EHLO pass; SMTP authentication/submission/inbox pending | Owner app password not configured as of this update. Sender sales@reoenterprise.org; only approved test recipient ronik18@gmail.com. No new test message sent in this milestone. |
+| V07 | PARTIAL: synthetic desktop playback continuity passed | [Observed journey](evidence/player-browser-continuity.json), [screenshot](evidence/player-browser-continuity.png). Explore/EN–BN/history/Reader navigation preserved advancing playback and1.25x speed;5minute timer selection survived; close removed audio. Exact DOM identity, timer elapse, auth/account boundary and queued-note browser recovery remain pending. Fixed an actual Player grant-route404 and added a frontend/OpenAPI route audit. |
+| V09 | Local combined source checks and dedicated Neon migration pass; final source CI pending |171 backend tests,20 frontend tests, production build, seven focused configuration tests and no migration drift. New cache migration applied to existing Neon; [book readback](evidence/provider-book-draft-check.json) confirms draft/null live pointer. Pinned Python3.13 also passed171 combined tests. Exact-head CI remains pending until source push. |
+| V08,V10–V13 | Remain pending or disabled as scoped above | No physical-device, production resilience, legal/publication, payment or real-media readiness is inferred from this milestone. |
+
+The R2 probe exposed and fixed a real exhausted-stream socket error; another check was narrowed to the actual R2 unsigned400 `InvalidArgument` error without accepting arbitrary400 or leaked object bytes. Earlier failed runs remain private with successful cleanup. Final full probe passes. No paid infrastructure was provisioned and the real title remains draft.
+
+## Final acceptance sequence
+
+1. Complete source integration and V09; run V01–V02 and V06 independently when credentials are ready.
+2. Once an authorized host is available, qualify V03–V05 together against the same deployment; perform V07–V08 on that build.
+3. Close V10–V11 for the actual launch scope and V12–V13 only where enabled. Root reviews one release candidate, performs applicable final smoke checks and records cutover readiness.
+
+## Closing an item
+
+Update this table with PASS plus the dated evidence path, exact source/build, environment and enabled scope. Use PARTIAL or BLOCKED with the concrete dependency where appropriate. Keep historical evidence in its existing handoff; link it rather than duplicating checks. Never mark PASS from code presence, mocks, or a provider acknowledgement alone.
+
+Next integration action: complete source CI and R2-backed draft intake; then run grouped edge/email/device checks when their prerequisites are available. Keep the book draft and current platform unchanged.

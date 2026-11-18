@@ -10,6 +10,7 @@ const result = await build({
     downloads: "client/downloads.tsx",
     account: "client/account.tsx",
     shell: "client/shell.ts",
+    commerce: "client/commerce.tsx",
   },
   outdir,
   bundle: true,

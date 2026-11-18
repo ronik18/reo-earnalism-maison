@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "probe_id": "eee78157-9d25-4a82-a06a-873779702c34",
+  "scope": "synthetic_private_r2_http_only",
+  "sha256": "06929c7267f47aff047317ca9179234e79f54f8c67017781d870e02bd572581b",
+  "bytes": 65536,
+  "local_origin_only": true,
+  "browser_qualified": false,
+  "public_cdn_qualified": false,
+  "public_bucket_exposure_verified": false,
+  "checks": [
+    {
+      "check": "server_upload_exact_sha256",
+      "status": "pass"
+    },
+    {
+      "check": "immutable_copy_exact_sha256",
+      "status": "pass"
+    },
+    {
+      "check": "staff_upload_preflight_exact_origin",
+      "status": "pass"
+    },
+    {
+      "check": "foreign_staff_upload_origin_not_cors_authorized",
+      "status": "pass"
+    },
+    {
+      "check": "upload_signature_method_bound",
+      "status": "pass"
+    },
+    {
+      "check": "upload_signature_content_type_bound",
+      "status": "pass"
+    },
+    {
+      "check": "direct_signed_put",
+      "status": "pass"
+    },
+    {
+      "check": "direct_upload_exact_sha256",
+      "status": "pass"
+    },
+    {
+      "check": "create_once_overwrite_rejected",
+      "status": "pass"
+    },
+    {
+      "check": "signed_get_exact_sha256",
+      "status": "pass"
+    },
+    {
+      "check": "delivery_cors_exact_origin",
+      "status": "pass"
+    },
+    {
+      "check": "delivery_private_no_store",
+      "status": "pass"
+    },
+    {
+      "check": "delivery_exposes_range_headers",
+      "status": "pass"
+    },
+    {
+      "check": "signed_get_range_exact",
+      "status": "pass"
+    },
+    {
+      "check": "delivery_range_preflight",
+      "status": "pass"
+    },
+    {
+      "check": "foreign_origin_not_cors_authorized",
+      "status": "pass"
+    },
+    {
+      "check": "unsigned_private_object_denied",
+      "status": "pass"
+    },
+    {
+      "check": "expired_signed_get_denied",
+      "status": "pass"
+    }
+  ],
+  "cleanup": [
+    {
+      "status": "pass"
+    },
+    {
+      "status": "pass"
+    },
+    {
+      "status": "pass"
+    }
+  ],
+  "status": "pass",
+  "budget_plan": {
+    "max_write_requests": 16,
+    "max_read_or_options_requests": 40,
+    "max_transfer_bytes": 3145728,
+    "basis": "conservative source-derived per-run ceiling with SDK total_max_attempts1; not measured provider billing telemetry"
+  },
+  "unsigned_response": {
+    "status": 400,
+    "code": "InvalidArgument"
+  },
+  "recorded_date": "2026-11-18",
+  "private_bucket_public_access": "disabled_verified_dashboard",
+  "credentials": "separate private-bucket-only read and upload credentials;24-hour TTL",
+  "prior_attempts": "Retained privately: two stopped on exhausted streaming socket; third passed17checks but rejected R2 unsigned400 InvalidArgument. Code corrected with focused regressions; final full run passes."
+}

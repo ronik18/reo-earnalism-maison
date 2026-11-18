@@ -1,5 +1,6 @@
+import { QueueRecovery } from "./recovery";
 import { useEffect, useState, type FormEvent } from "react";
-import { createRoot } from "react-dom/client";
+import { mountIsland } from "./lifecycle";
 import { api, errorText, readBootstrap, t, type Preferences } from "./api";
 interface Device {
   device_id: string;
@@ -86,6 +87,9 @@ function Account({ staff }: { staff: boolean }) {
   }
   return (
     <>
+      {document.body.dataset.memberId ? (
+        <QueueRecovery member={document.body.dataset.memberId} />
+      ) : null}
       <p id="account-status" role="status" aria-live="polite">
         {status}
       </p>
@@ -424,10 +428,11 @@ function Account({ staff }: { staff: boolean }) {
     </>
   );
 }
-const host = document.getElementById("account-island");
-if (host)
-  createRoot(host).render(
+export function mount() {
+  mountIsland(document.getElementById("account-island"), () => (
     <Account
       staff={readBootstrap<{ staff: boolean }>("account-bootstrap").staff}
-    />,
-  );
+    />
+  ));
+}
+mount();
