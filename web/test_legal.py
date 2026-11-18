@@ -13,6 +13,8 @@ class LegalNoticeTests(SimpleTestCase):
             self.assertContains(response,'sales@reoenterprise.org')
             self.assertContains(response,'Qualification draft')
             self.assertContains(response,'Reo Enterprise')
+            self.assertContains(response,'Kolkata - 700083')
+            self.assertContains(response,'Chief of Operations / Grievance Officer')
             self.assertIn('no-store',response['Cache-Control'])
     def test_bengali_copy_and_invalid_locale(self):
         response=legal.privacy(self.request('/bn/privacy/'),'bn')
