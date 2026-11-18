@@ -100,10 +100,21 @@ def work(request,work_id):
     locale,territory=context(request)
     try: obj=Work.objects.get(pk=work_id)
     except Work.DoesNotExist: raise DomainError('not_found','Work not found.',404)
-    cards=[c for c in svc.catalog_cards(locale,territory) if c['work_id']==str(work_id)]
+    cards=[];descriptions={}
+    for edition in obj.editions.filter(locale=locale,live_revision__state='live').select_related('work','live_revision').order_by('id')[:500]:
+        try:
+            cards.append(svc.catalog_card(edition,territory=territory))
+            descriptions[str(edition.id)]=edition.live_revision.description
+        except DomainError:continue
+        if len(cards)>=30:break
     if not cards: raise DomainError('not_found','Work not found.',404)
-    return public_response({'work_id':str(obj.id),'title':obj.title,'description':obj.editions.filter(live_revision__isnull=False).first().live_revision.description,
-                            'creators':obj.creators,'editions':cards,'related_collections':[]},_catalog_ttl(cards,territory))
+    from .collection_models import CatalogCollection
+    from .collections import collection_summary
+    memberships=CatalogCollection.objects.filter(published=True,items__edition_id__in=[card['edition_id'] for card in cards]).distinct().order_by('slug','id')[:20]
+    related=[collection_summary(row,locale,territory) for row in memberships]
+    description=descriptions[cards[0]['edition_id']]
+    return public_response({'work_id':str(obj.id),'title':obj.title,'description':description,
+                            'creators':obj.creators,'editions':cards,'related_collections':related},_catalog_ttl(cards,territory))
 
 @json_endpoint(auth=False)
 def edition(request,edition_id):

@@ -115,3 +115,22 @@ class CollectionTests(TestCase):
         second=collection_detail(self.request(limit=100,cursor=first['next_cursor']),series.id,'en','IN')
         self.assertEqual([x['edition_id'] for x in second['items']],[str(self.en.id)])
         self.assertIsNone(second['next_cursor'])
+
+    def test_work_related_collections_use_published_eligible_memberships_without_global_scan(self):
+        import json
+        from unittest.mock import patch
+        from library.views import work
+        from library.services import catalog_card
+        hidden=CatalogCollection.objects.create(slug='hidden-series',title_en='Hidden',title_bn='অপ্রকাশিত',kind='series',published=False)
+        CatalogItem.objects.create(collection=hidden,edition=self.en,sort_order=0)
+        with patch('library.services.catalog_cards',side_effect=AssertionError('Whole-catalog scan forbidden for a single card/work')):
+            self.assertEqual(catalog_card(self.en,territory='IN')['edition_id'],str(self.en.id))
+            response=work(self.request(locale='en'),self.en.work_id)
+        self.assertEqual(response.status_code,200)
+        data=json.loads(response.content)
+        ids={row['collection_id'] for row in data['related_collections']}
+        self.assertIn(str(self.series.id),ids)
+        self.assertNotIn(str(hidden.id),ids)
+        self.assertLessEqual(len(data['related_collections']),20)
+        self.series.published=False;self.series.save()
+        self.assertNotIn(str(self.series.id),{row['collection_id'] for row in json.loads(work(self.request(locale='en'),self.en.work_id).content)['related_collections']})

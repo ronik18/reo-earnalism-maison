@@ -241,8 +241,15 @@ def catalog_card(edition,territory='IN',user=None):
             return {'work_id':str(row.work_id),'edition_id':str(row.id),'title':detail['title'],'subtitle':None,
                     'creators':row.work.creators,'locale':row.locale,'house':row.work.house,'formats':['reader'],
                     'cover':detail['cover'],'access_label':'free','availability':'available'}
-    for card in catalog_cards(edition.locale,territory):
-        if card['edition_id']==str(edition.id): return card
+    revision=edition.live_revision
+    if revision and _live(revision):
+        formats=available_formats(revision,territory)
+        if formats:
+            return {'work_id':str(edition.work_id),'edition_id':str(edition.id),'title':revision.title,
+                    'subtitle':None,'creators':edition.work.creators,'locale':edition.locale,'house':edition.work.house,
+                    'formats':formats,'cover':_cover(revision),
+                    'access_label':'free' if any(revision.access_policy.get(fmt)=='free' for fmt in formats) else 'pass_required',
+                    'availability':'available'}
     raise DomainError('content_unavailable','Edition is not currently available.',404)
 
 
