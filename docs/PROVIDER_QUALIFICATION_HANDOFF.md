@@ -8,7 +8,7 @@ Private R2 synthetic HTTP qualification passes all18checks plus cleanup. Real de
 
 A real SDK exhausted-socket error was fixed in object verification/copying: stop after the validated ContentLength, retain exact hash/type/size checks and close the stream. Unsigned R2 requests return400 with InvalidArgument; qualification accepts only the bounded expected XML denial and no canary bytes, never arbitrary400. All test canaries were cleaned; no book content was uploaded to public storage.
 
-SMTP TLS/EHLO passes for the existing Google Workspace sender. Authentication, test account verification/reset submission and actual inbox receipt await the owner-provided app password in the ignored provider env. No mail/DNS settings were changed.
+SMTP TLS/EHLO passes for the existing Google Workspace sender. Authentication and actual verification/reset emails now pass: two approved messages reached the Gmail inbox with SPF/DKIM pass, and their received links completed single-use verification/reset with prior-session/device revocation. The tests used a separate local database, not an existing Neon/legacy account. See evidence/smtp-account-journeys.json; production HTTPS links and DMARC policy review remain pending. No mail/DNS settings were changed.
 
 ## Parallel source integration
 
@@ -20,4 +20,6 @@ Synthetic Player browser acceptance proves advancing180second original generated
 
 171 combined backend tests passed on isolated PostgreSQL18/Python3.12;20 frontend tests, strict TypeScript and production build pass. Seven focused configuration tests pass; no migration drift. The cache-ledger migration applied to the existing dedicated Neon project via direct TLS connection; the actual title retains draft/null live pointer. Logs are retained under evidence/provider-*. The existing pinned Python3.13 image also passed all171 combined tests on isolated PostgreSQL18 (evidence/provider-python313-suite.log); the final CDN-host configuration test passed separately in the seven-test configuration run. Exact-source CI passes at `8236663`:172 backend tests,20 frontend tests, build and migrations/no drift; [run](https://github.com/ronik18/reo-earnalism-maison/actions/runs/44233552612), evidence/provider-source-ci.json.
 
-Next integration action: qualify the protected draft intake/Reader using R2, and continue the remaining grouped checks from PENDING_VALIDATIONS.md without changing the current platform or provisioning paid resources.
+The actual Selfish Giant draft now has its exact three assets in private R2 and passes protected cover/Reader/progress/note/completion/Vault and denied guest/member access checks; see evidence/r2-book-journey.json and evidence/r2-book-package-browser.json. The package was separately fetched/hash-verified in a real browser; SSR text uses Neon paragraphs. The title remains draft, null live pointer.
+
+Next integration action: continue the remaining grouped checks from PENDING_VALIDATIONS.md without changing the current platform or provisioning paid resources.

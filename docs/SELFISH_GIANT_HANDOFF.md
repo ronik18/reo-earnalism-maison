@@ -1,5 +1,8 @@
 # The Selfish Giant — Maison draft review
 
+**Latest protected R2 acceptance,18November2026:** the existing Neon draft now uses its exact private R2 cover pair and Reader package; [journey evidence](evidence/r2-book-journey.json) and [consolidated pending validations](PENDING_VALIDATIONS.md). Draft/null live pointer and edition hash are unchanged. Earlier local IDs below are historical.
+
+
 17 November2026. The English Reader edition remains draft with no persisted live revision pointer. The existing platform is unchanged. No paid infrastructure or commercial publication occurred.
 
 The new front/back artwork includes the owner-requested gold ornamental footer, “Earnalism - A Reo Enterprise Venture”. PNG masters, lightweight JPEG derivatives and generation/footer provenance are under library/intake/covers/. Both web files fit the existing256KiB staff upload limit. Uploads used the existing staff asset intent/PUT/completion API; old objects were retained. Current pair IDs/checksums are in docs/evidence/selfish-giant-cover-review.json and selfish-giant-browser.json.

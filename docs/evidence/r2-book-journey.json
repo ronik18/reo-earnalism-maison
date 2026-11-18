@@ -1,0 +1,54 @@
+{
+  "date": "2026-11-18",
+  "scope": "loopback8009_actual_Neon_PostgreSQL18_private_R2",
+  "status": "pass",
+  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+  "revision_id": "3988156b-2eee-4839-b542-2d3b8b253307",
+  "package_integrity": true,
+  "package_paragraphs": 32,
+  "actual_app_origin_CORS": true,
+  "covers": [
+    {
+      "asset_id": "29bc02fb-7f23-49cd-9215-1e371e6e77fc",
+      "http": 200,
+      "exact_sha256": true,
+      "private_no_store": true
+    },
+    {
+      "asset_id": "e13e5534-6deb-4197-85ed-fa2274faad4e",
+      "http": 200,
+      "exact_sha256": true,
+      "private_no_store": true
+    }
+  ],
+  "guest_denial_statuses": {
+    "reader": 404,
+    "manifest": 401,
+    "staff_cover": 401,
+    "public_cover": 404
+  },
+  "ordinary_member_denial_statuses": {
+    "reader": 404,
+    "manifest": 404,
+    "staff_cover": 403,
+    "public_cover": 404
+  },
+  "browser_checks": [
+    "both_complete_800x1200_covers",
+    "32canonical_paragraphs",
+    "saved_position",
+    "gold_note_persists_after_reload",
+    "EN_BN_interface_preserves_EN_edition",
+    "explicit_finish_unfinish",
+    "Saved_and_Finished_reopen",
+    "logout_denies_draft"
+  ],
+  "ssr_text_source": "Neon paragraphs;separate actual browser signed-R2-package SHA proof retained",
+  "book_state": "draft",
+  "live_revision_id": null,
+  "production_CDN_qualified": false,
+  "legacy_changed": false,
+  "final_draft_readback": "pass",
+  "revision_content_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+  "source_commit": "da9d5fbd0b070cc9ec6c9504cfb51f36805e12a7"
+}

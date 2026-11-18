@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-18",
+  "scope": "actual_Google_Workspace_SMTP_to_approved_Gmail_isolated_local_account",
+  "status": "pass",
+  "verification": {
+    "smtp_submission_accepted": true,
+    "inbox": true,
+    "spf_pass": true,
+    "dkim_pass": true,
+    "landing_get_did_not_consume": true,
+    "confirm_status": 200,
+    "replay_status": 410,
+    "verified_login": true,
+    "dmarc_status": "not_reported"
+  },
+  "password_reset": {
+    "smtp_submission_accepted": true,
+    "inbox": true,
+    "spf_pass": true,
+    "dkim_pass": true,
+    "dmarc_status": "not_reported",
+    "landing_get_did_not_consume": true,
+    "confirm_status": 204,
+    "replay_status": 410,
+    "old_session_status": 401,
+    "old_password_status": 403,
+    "new_password_login_status": 200,
+    "prior_device_revoked": true
+  },
+  "external_messages_sent": 2,
+  "real_Neon_or_legacy_account_changed": false,
+  "production_HTTPS_links_qualified": false,
+  "pending": [
+    "production_HTTPS_origin_links",
+    "sender_DMARC_policy_review"
+  ],
+  "source_commit": "da9d5fbd0b070cc9ec6c9504cfb51f36805e12a7"
+}

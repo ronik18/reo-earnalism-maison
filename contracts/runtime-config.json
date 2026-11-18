@@ -324,8 +324,8 @@
     "legal_evidence": "revision.validation_evidence.publication_clearance; private, exact text/assets, offered formats and complete whitelist"
   },
   "qualified_transport_notes": {
-    "smtp": "Existing Google Workspace sender;465 SSL;timeout<=8s;credentials server-only. TLS/EHLO qualified; authentication/inbox pending owner app password.",
-    "r2": "Private HTTP+loopback browser qualified18November2026. Exact production HTTPS CORS/CDN and permanent runtime credentials remain pending;24-hour qualification tokens are not production credentials.",
+    "smtp": "Existing Google Workspace sender;465 SSL;socket timeout<=8s. Actual authentication, verification/reset submission and Gmail inbox receipt qualified18November2026 using an isolated local account. Production HTTPS links and DMARC policy review remain pending.",
+    "r2": "Private HTTP,loopback browser and exact protected Selfish Giant draft cover/package journey qualified18November2026. Dedicated provider env selects R2. Production HTTPS/CDN,backup and durable credentials remain pending;24-hour qualification tokens are not production credentials.",
     "pending_validations": "docs/PENDING_VALIDATIONS.md"
   }
 }

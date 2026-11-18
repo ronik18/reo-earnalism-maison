@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-18",
+  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+  "revision_id": "3988156b-2eee-4839-b542-2d3b8b253307",
+  "slug": "the-selfish-giant-en",
+  "storage": "private_R2",
+  "total_bytes": 248973,
+  "objects": [
+    {
+      "asset_id": "1c81d508-f673-4d20-b857-fbe0adc850b5",
+      "kind": "reader_package",
+      "bytes": 11940,
+      "sha256": "4b8f41cc244027047785904cd5d93a2249b9cadcfbc0f2a2060914c536d224c1",
+      "r2_exact_integrity": "pass"
+    },
+    {
+      "asset_id": "29bc02fb-7f23-49cd-9215-1e371e6e77fc",
+      "kind": "cover",
+      "bytes": 120336,
+      "sha256": "ccc7923a5dc0d52b2b684a6a0be99de4140849e7a13ca2ebe3618590e13ac32d",
+      "r2_exact_integrity": "pass"
+    },
+    {
+      "asset_id": "e13e5534-6deb-4197-85ed-fa2274faad4e",
+      "kind": "cover",
+      "bytes": 116697,
+      "sha256": "04fbc420d4db3f51b14955d01d957e2991bd2b78dc8fa15ffeb31f9245b99366",
+      "r2_exact_integrity": "pass"
+    }
+  ],
+  "book_state": "draft",
+  "live_revision_id": null,
+  "public_exposure": false,
+  "legacy_changed": false,
+  "new_paid_infrastructure": false,
+  "source_commit": "da9d5fbd0b070cc9ec6c9504cfb51f36805e12a7"
+}

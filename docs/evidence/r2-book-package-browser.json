@@ -1,0 +1,12 @@
+{
+  "check": "integrity",
+  "status": "pass",
+  "browser_get_readable": true,
+  "exact_sha256_verified": true,
+  "private_no_store": true,
+  "range_verified": null,
+  "bytes": 11940,
+  "local_origin_only": true,
+  "production_cdn_qualified": false,
+  "source_commit": "da9d5fbd0b070cc9ec6c9504cfb51f36805e12a7"
+}
