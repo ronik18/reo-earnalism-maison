@@ -35,3 +35,7 @@ The active47-region whitelist is contracts/publication-policy.json. UAE/Mainland
 
 
 Owner-approved database amendment,18November2026: retain the existing Neon PostgreSQL18 project. This is the only database-version baseline change; hosting, HA, scaling, pricing authority and publication requirements remain as approved.
+
+## Owner physical-device UAT deferral,18November2026
+
+The owner explicitly instructed in the frontend/mobile chat: “We will do the UAT on Physical Android/iOS and OS-specific behavior later. Do not make it a blocker/guardrail.” The subsequent owner instruction confirms completing the isolated Maison rollout while physical UAT remains deferred and non-blocking. Integration Lane verified the original user messages. Keep these checks truthfully labelled not run; do not make them an integration/rollout/release blocker. Virtual browser, actual enabled-flow security/functionality and other applicable requirements remain separate. No new device claim, paid resource, public book publication or legacy cutover is authorized by this amendment.
