@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-18",
+  "scope": "isolated Maison HTTPS staff draft Reader qualification",
+  "dns": "Chrome reaches Settings after owner selected Cloudflare Secure DNS",
+  "observed": [
+    "existing password confirmation succeeded",
+    "authenticator setup button enabled after confirmation"
+  ],
+  "diagnosis": "Frontend five-minute confirmation timeout disables setup while retaining previous success status.",
+  "owner_enrollment": "pending; owner handoff required",
+  "live_staff_reader": "pending; not passed",
+  "security_changed": false,
+  "publication_performed": false,
+  "legacy_changed": false
+}
