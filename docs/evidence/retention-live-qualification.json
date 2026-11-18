@@ -1,0 +1,69 @@
+{
+  "additional_infrastructure": false,
+  "applied": {
+    "dry_run": false,
+    "eligible": {
+      "abandoned_signups": 0,
+      "action_tokens": 0,
+      "devices": 12,
+      "mail_payloads": 0,
+      "receipts": 0,
+      "sessions": 5
+    },
+    "time_budget_exhausted": false
+  },
+  "book": {
+    "live_revision_id": null,
+    "manuscript_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+    "paragraphs": 32,
+    "state": "draft"
+  },
+  "dns_changed": false,
+  "emails_sent": 0,
+  "new_accounts_created": 0,
+  "preserved": {
+    "active_devices": true,
+    "active_sessions": true,
+    "audit": true,
+    "billing": true,
+    "book": true,
+    "members": true,
+    "preferences": true
+  },
+  "preview": {
+    "dry_run": true,
+    "eligible": {
+      "abandoned_signups": 0,
+      "action_tokens": 0,
+      "devices": 12,
+      "mail_payloads": 0,
+      "receipts": 0,
+      "sessions": 5
+    },
+    "time_budget_exhausted": false
+  },
+  "provider_logs_support_audit_backup_cleanup": false,
+  "recurring_schedule_configured": false,
+  "repeat": {
+    "dry_run": false,
+    "eligible": {
+      "abandoned_signups": 0,
+      "action_tokens": 0,
+      "devices": 0,
+      "mail_payloads": 0,
+      "receipts": 0,
+      "sessions": 0
+    },
+    "time_budget_exhausted": false
+  },
+  "source": "539957a65c9ad4f7bec3eb0b937398854374c1ea",
+  "render_deploy": "dep-dbuvvcp5efls73aino5g",
+  "static_release": "bd1b698d20686491c15be7332b0cf0d03352c72108f23c663bfbdfe200f4fefb",
+  "exact_source_ci": {
+    "run": 44381897065,
+    "status": "success",
+    "backend_tests": 256,
+    "frontend_tests": 28
+  },
+  "qualification_date": "2026-11-19"
+}
