@@ -60,18 +60,18 @@
 #18 DONE 0.0s
 
 #19 [frontend 9/9] RUN npm run check && npm run build
-#19 0.271 
+#19 0.271
 #19 0.271 > reo-earnalism-maison@1.0.0 check
 #19 0.271 > npm run typecheck && npm test
-#19 0.271 
-#19 0.375 
+#19 0.271
+#19 0.375
 #19 0.375 > reo-earnalism-maison@1.0.0 typecheck
 #19 0.375 > tsc --noEmit
-#19 0.375 
-#19 0.699 
+#19 0.375
+#19 0.699
 #19 0.699 > reo-earnalism-maison@1.0.0 test
 #19 0.699 > node client/test.mjs
-#19 0.699 
+#19 0.699
 #19 0.872 ✔ Video accepts only current exact-revision short-lived approved Stream grants (2.989625ms)
 #19 0.873 ✔ Audio rejects wrong-format, wrong-revision, stale or inconsistent grants (0.346416ms)
 #19 0.873 ✔ Unicode selection offsets use code points, including Bengali and astral characters (0.10225ms)
@@ -106,10 +106,10 @@
 #19 0.962 ℹ skipped 0
 #19 0.962 ℹ todo 0
 #19 0.962 ℹ duration_ms 179.719791
-#19 1.067 
+#19 1.067
 #19 1.067 > reo-earnalism-maison@1.0.0 build
 #19 1.067 > node client/build.mjs
-#19 1.067 
+#19 1.067
 #19 1.160 static/maison/dist/support-YAEKVTPJ.js: 2055 bytes
 #19 1.160 static/maison/dist/account-LKZR362Q.js: 15741 bytes
 #19 1.160 static/maison/dist/shell-27KNP466.js: 6321 bytes
