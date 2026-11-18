@@ -1,0 +1,22 @@
+{
+  "status": "uploaded_and_verified",
+  "release_id": "686e2afe5a9faa95b98a0a8779ee214980dd0c6ee0a0e0aaac7eff63bb6899c6",
+  "file_count": 55,
+  "bytes_total": 7290134,
+  "key_prefix": "static/686e2afe5a9faa95b98a0a8779ee214980dd0c6ee0a0e0aaac7eff63bb6899c6/",
+  "uploaded": 55,
+  "verified_existing": 0,
+  "public_http_verified": false,
+  "browser_account_script": {
+    "status": 200,
+    "bytes": 43729,
+    "sha256": "ddbf4ab595594c48ca826b64961dd681c1303528775686cc716a53862fdef170",
+    "matches_manifest": true,
+    "cache": "MISS"
+  },
+  "runtime_source": "dd903d3fdd11ae125640fd45a61b97aa67c924b6",
+  "render_deploy": "dep-dbuua9mk1f9s73an6tng",
+  "live_staff_reader": "pending owner MFA",
+  "initial_static_prefix_mismatch": "caught and corrected before acceptance",
+  "cli_dns_probe": "OS hostname resolution failed; actual Chrome Secure DNS browser readback succeeded"
+}
