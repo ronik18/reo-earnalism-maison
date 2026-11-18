@@ -2,7 +2,7 @@
 
 Updated 18 November 2026. Integration Lane owns this single checklist for final acceptance. Keep implementation progressing in parallel; run dependent provider/device checks together once their prerequisites are ready. A source change or local test does not close a real-provider check. Only checks applicable to the enabled launch scope block that scope; optional formats and payments stay disabled until qualified.
 
-**Current snapshot, 18 November 2026:** dedicated Neon has 43 applied migrations and zero pending. Isolated Singapore Render is live on qualified MFA source `dd903d3` with public static release `686e2afe…`; Cloudflare activation and the two isolated hostnames are approved and active. Public assets and anonymous English/Bengali Home have actual cache HITs and exact-URL purge readback. Cookie/Authorization, malformed/country-mismatched requests and draft denial pass. The four-line browser CSS source `36b771d` is included in the current qualified MFA release, whose55 public assets were uploaded and verified. Existing apex/www/API destinations are preserved. Chrome DNS resolution now works after the owner selected Cloudflare Secure DNS. Live staff Reader validation still needs owner MFA enrollment; physical devices and operational HA/load/recovery remain open. Historical paragraphs below are evidence history, not current provider state.
+**Current snapshot, 18 November 2026:** dedicated Neon has 43 applied migrations and zero pending. Isolated Singapore Render is live on qualified MFA source `dd903d3` with public static release `686e2afe…`; Cloudflare activation and the two isolated hostnames are approved and active. Public assets and anonymous English/Bengali Home have actual cache HITs and exact-URL purge readback. Cookie/Authorization, malformed/country-mismatched requests and draft denial pass. The four-line browser CSS source `36b771d` is included in the current qualified MFA release, whose55 public assets were uploaded and verified. Existing apex/www/API destinations are preserved. Chrome DNS resolution now works after the owner selected Cloudflare Secure DNS. Owner MFA enrollment and the live staff draft Reader journey now pass; physical devices and operational HA/load/recovery remain open. Historical paragraphs below are evidence history, not current provider state.
 
 Current constraints: The Selfish Giant stays draft. Approved Cloudflare nameserver/isolated-host activation has occurred; legacy application, apex/www/API destinations and mail remain unchanged. The final public product URL stays https://theearnalism.com. No additional paid infrastructure without owner approval. Preserve the approved HLD/LLD and 47-region publication policy.
 
@@ -200,3 +200,24 @@ Final local remediation validation:229 backend tests pass (146.627seconds), migr
 - OS resolver still could not resolve the asset hostname during a CLI probe; Chrome Secure DNS provided the successful real browser readback. The CLI failure is retained as a limitation, not reported as HTTP success.
 - Owner must scan the newly displayed QR and submit its code. The earlier manual entry is not the new QR entry. Live staff draft Reader/private-package acceptance remains pending; no MFA bypass or false PASS.
 - Existing $7 qualification service only: no additional paid infrastructure, DNS changes, legacy changes or book publication.
+
+### Live HTTPS draft-book journey passed after owner MFA — 18 November 2026
+
+The owner completed authenticator confirmation. Actual Settings showed “Authenticator verified for this session.” Recovery codes remain owner-only; none are retained in evidence.
+
+| Check | Observed result |
+| --- | --- |
+| Staff draft Reader | PASS: actual HTTPS browser opens edition55a3f5e3…/unit463e87aa… with the explicit staff-only draft banner. |
+| Manuscript | PASS:32 paragraphs, exact first and last text, English content retained under Bengali interface, no horizontal overflow. |
+| Front/back covers | PASS: both actual protected images complete800×1200, object-fit contain, border-radius0px; correct enterprise footer and full artwork. |
+| Preferences | PASS:23→26px saved and read back, then restored23px; existing Sepia/Source Serif4 preference preserved. |
+| Annotation | PASS: new gold first-paragraph note “HTTPS draft qualification: kindness opens the garden. 18 November 2026.” saved and retained after reload. Prior notes preserved. |
+| Reading state | PASS: Keep this position; finished→unfinished→finished round trip saved; completion retained after reload. |
+| Collections | PASS: Saved remove/re-add round trip and actual Saved/Finished Vault entries verified, including Bengali navigation. |
+| Private package | PASS for actual deployed server-to-R2:11,940bytes,32 paragraphs, stored SHA256 match. This is not a claim that the SSR Reader fetched its manuscript directly from R2 in the browser; it renders DB text. |
+| Draft/customer boundary | PASS: final deployed service denies guest/member edition access404; prior actual browser guest/member denial remains supporting evidence. No privileged session logout was performed while the owner saved recovery codes. |
+| Publication state | PASS: revision draft, live pointer null, manuscript SHA2568431612b… unchanged after validation. |
+
+[Sanitized evidence](evidence/live-draft-book-final.json) and [cover screenshot](evidence/live-draft-book-covers.jpg).
+
+**Still consolidated and open:** production browser direct signed-package GET/Range/SHA if that delivery path is enabled (separate from the completed SSR Reader journey); physical Android/iOS/offline/accessibility acceptance; production HTTPS email action links/sender policy; broader operational HA/load/restore/rollback and applicable launch/compliance gates. Audio/video/payments remain disabled as scoped. Minor copy cleanup: the disabled offline notice still says “local build” on the qualification host; this is not evidence that offline delivery is qualified. No apex cutover, legacy application change, paid expansion or publication occurred.

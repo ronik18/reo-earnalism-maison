@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-18",
+  "runtime_source": "dd903d3fdd11ae125640fd45a61b97aa67c924b6",
+  "static_release": "686e2afe5a9faa95b98a0a8779ee214980dd0c6ee0a0e0aaac7eff63bb6899c6",
+  "owner_mfa": "actual Settings session verified",
+  "browser_scope": "Chrome HTTPS isolated Maison, staff draft SSR Reader",
+  "paragraphs": 32,
+  "first_last_verified": true,
+  "covers": {
+    "front_and_back": [
+      800,
+      1200
+    ],
+    "fit": "contain",
+    "border_radius": "0px",
+    "complete": true
+  },
+  "preferences": "26px saved/readback; restored23px Sepia Source Serif4",
+  "gold_note_retained_after_reload": true,
+  "finished_round_trip_and_reload": true,
+  "saved_and_finished_vault_entries": true,
+  "en_bn_interface_keeps_english_edition": true,
+  "horizontal_overflow": false,
+  "server_private_package": {
+    "storage": "r2",
+    "bytes": 11940,
+    "paragraphs": 32,
+    "stored_sha256_match": true
+  },
+  "guest_member_actual_service_denial": 404,
+  "draft_state": {
+    "state": "draft",
+    "live_revision_id": null,
+    "manuscript_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4"
+  },
+  "direct_browser_r2_package": "separate pending path, not inferred from SSR",
+  "legacy_changed": false,
+  "published": false,
+  "additional_paid_infrastructure": false
+}
