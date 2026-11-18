@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-18",
+  "source_commit": "8236663800c3370958d0e5bed543a5f29ed0e881",
+  "conclusion": "success",
+  "url": "https://github.com/ronik18/reo-earnalism-maison/actions/runs/44233552612",
+  "python": "3.13",
+  "postgresql": "18",
+  "backend_tests": 172,
+  "frontend_tests": 20,
+  "build": "pass",
+  "migration_drift": "none",
+  "qualification_scope": "source_only_not_public_release"
+}
