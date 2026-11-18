@@ -4,6 +4,7 @@
 
 ## Actual provider readback
 
+- Actual Neon organization inventory contains only thisoneproject andonecompute endpoint across its branches; organization-wide plan changes are therefore scoped to the observed Maison-only inventory. Recheck immediately before activation.
 - Render workspace `earnalism`: Hobby, one member; current isolated web service0.5CPU/512MiB. Native application-log retention is7days. No recurring Maison service is configured.
 - Neon organization `org-misty-dew-00335964`: Free. Project `quiet-cloud-63128335`: Singapore, PostgreSQL18, actual restore history21600seconds(6hours). Current endpoint min0.25/max2CU, suspend_timeout_seconds0 (provider default300seconds), not the approved production capacity.
 - Approved production contract remains NeonScale min0.5/max2CU, autosuspendoff and7-day restore history. App2–6replica/HA acceptance is separate from this existing single-instance qualification service; this package does not claim it.
@@ -14,13 +15,19 @@
 
 | Resource | Exact change | Cost/authority boundary |
 |---|---|---|
-| Maintenance | One new Singapore Render Docker Starter cron, `* * * * *`, existing CI-approved source, autodeployoff, `python manage.py run_maintenance --apply-retention --run-source scheduled --max-seconds 45 --batch-size 25` | At least$1/month, active-second compute plus applicable tax/usage. The minimum is not a cap. Copy only required existing Maison app/SMTP/privateR2/purge settings into its encrypted environment; no DNS/admin/publicasset-upload access. |
+| Maintenance | One new Singapore Render Docker Starter cron, `* * * * *`, existing CI-approved source, autodeployoff, `python manage.py run_maintenance --apply-retention --run-source scheduled --max-seconds 45 --batch-size 25` | At least$1/month, $0.00016/minute for the0.5CPU/512MiB cron SKU prorated by active seconds, plus applicable tax/usage. Continuous30-day running would be$6.912 for this SKU; actual bounded job runtime determines billing. The minimum is not a cap. Copy only required existing Maison app/SMTP/privateR2/purge settings into its encrypted environment; no DNS/admin/publicasset-upload access. |
 | Database | Upgrade existing Neon organization to Scale; set endpoint0.5–2CU, autosuspendoff and history7days, preserving database/roles/data | At current$0.222/CUh:360CUh/30days×$0.222=$79.92 compute floor; continuous2CU=$319.68. Add$0.35/GB-month DB storage and$0.20/GB-month history, plus applicable usage/taxes. Autoscaling spend depends on actual load. Free100CUh cannot support a fullmonth of constant minute polling even at0.25CU. |
 | Independent export | Separate Singapore Docker Starter cron at03:00UTC; `python -m operations.scheduled_export --apply-retention`; no webapp startup/SMTP/ageprivateidentity | At least another$1/month plus active-second usage. Preserve the approved independent export lane instead of placing exports behind email work. Standalone entrypoint is proposed explicitly to avoid copying full webapp secrets into backups. |
 | Private archive | Dedicated `reo-earnalism-maison-backups` R2 Standard private bucket, archive-only object read/write token, separate direct read-only DB role, public age recipient on export host | No new logging/storage vendor. R2 existing allowance is shared, not guaranteedfree: storage beyond free allowance$0.015/GB-month, request usage applies. About30daily+12monthly full encrypted snapshots after steady state; actualbytes determine cost. No manuscript/content/static prefix or existing lifecycle-rule mutation. |
 | Key custody | Generate production age identity into an ignored mode600 owner-held local custody file, back it up privately via owner-chosen recovery custody; send only public recipient to Render | Private restore identity never goes to Render/R2/GitHub/chat. Do not reuse synthetic qualification identities. New scoped credential access needs explicit approval before creation/transmission. |
 
 Illustrative quiet qualification total on a30-day month: existingweb$7 + Neonminimum$79.92 + two cronminimums$2 = **$88.92 before storage/history/runtime/tax**. This is not a hardbudget or production HA quote. A one-minute poll defeats normal5-minute autosuspend; do not advertise idle scale-to-zero savings while that poll is enabled. Read actual cron instance rate and selected provider plan before activation; do not accept a higher tier or workspace upgrade under this estimate.
+
+## Optional isolated-qualification exception, not production-baseline conformity
+
+The owner may explicitly choose NeonLaunch at the already qualified current0.25–2CU range, with7-day history and the same PostgreSQL/driver/regions/archive architecture, instead of activating the productionScale/min0.5CU baseline now. This changes the plan/minimum-capacity acceptance for isolated qualification only; production SLA/capacity/HA are not certified by it. No such exception is currently approved or applied.
+
+At currentLaunch$0.106/CUh, continuousminimum0.25CU×720hours costs$19.08/30days; continuous2CU costs$152.64, plus storage/history/tax. Existingweb$7 + minimumtwo cron$2 gives an illustrative **$28.08 quiet30-day floor** before runtime/storage/history/tax, not a hardcap. Minute polling still prevents normal idle scale-to-zero. Source and existing isolated browser/database acceptance already run on0.25CU; this is not a substitute for provider-plan activation/load/recovery acceptance. The approved productionScale0.5–2CU baseline remains intact unless separately amended.
 
 ## Log-retention choice requiring explicit owner decision
 
@@ -59,3 +66,9 @@ No resource, plan, credential, native retention rule, public DNS or legacy deplo
 ## Prepared source qualification
 
 55 affected tests pass against PostgreSQL18 and bounded transport fixtures: routine audit/support resolution/holds/ownership, concurrent maintenance lease expiry/completion, immutable archive readback, daily/monthly/orphan retention, corrupt/missing references and unrelatedkey preservation. Both prepared RenderBlueprints pass the official schema SHA256 `6c6721a602ef6d368d5c9384c473cefaae99980e43dd4b1adcf8a2f258fc54f4`. No new dependency, database migration or public API is introduced. These tests do not substitute for the automatic provider trigger, actual backup upload/restore, mailbox authority or paid-plan acceptance.
+
+## Safe rollout completed before activation approval
+
+Implementation source `77901394188da771e92d5bf4baf3e176cb08135b` passed [exact-source CI44388432433](https://github.com/ronik18/reo-earnalism-maison/actions/runs/44388432433):294backend tests,28frontend tests, build and migration/no-drift checks. It is normal-pushed to main and deployed Live to the existing$7 isolated webservice (`dep-dbv0fjjrjlhs73agjt30`), staticreleaseunchanged.7/7 independent HTTPS checks pass. Fresh directNeon read-only verification preserves draft/nullpointer/32paragraphs/manuscriptSHA and shows no dueoutbox, scheduledrevisions or supportcases. No recurring run is claimed: maintenance receipt count0.
+
+[Actual deployed/read-only receipt](evidence/provider-retention-safe-deployment.json), [independent HTTPS receipt](evidence/provider-retention-independent-smoke.json). All new billable resources, scoped archive/backup credentials, provider-log exception and optionalLaunch qualification exception remain unactivated pending explicit owner approval. No additional spending, DNS or legacy changes occurred.

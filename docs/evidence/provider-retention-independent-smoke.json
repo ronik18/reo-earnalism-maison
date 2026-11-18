@@ -1,0 +1,69 @@
+{
+  "checked_utc": "2026-11-18T20:22:16.251759+00:00",
+  "source": "77901394188da771e92d5bf4baf3e176cb08135b",
+  "deploy": "dep-dbv0fjjrjlhs73agjt30",
+  "checks": [
+    {
+      "url": "https://maison.theearnalism.com/api/v1/health/live",
+      "http": 200,
+      "tls": 0,
+      "expected": 200,
+      "status": "PASS"
+    },
+    {
+      "url": "https://maison.theearnalism.com/api/v1/health/ready",
+      "http": 403,
+      "tls": 0,
+      "expected": 403,
+      "status": "PASS"
+    },
+    {
+      "url": "https://maison.theearnalism.com/en/contact/",
+      "http": 200,
+      "tls": 0,
+      "expected": 200,
+      "status": "PASS",
+      "mailbox": true,
+      "business_details": true,
+      "no_store": true
+    },
+    {
+      "url": "https://maison.theearnalism.com/bn/privacy/",
+      "http": 200,
+      "tls": 0,
+      "expected": 200,
+      "status": "PASS",
+      "mailbox": true,
+      "business_details": true,
+      "no_store": true
+    },
+    {
+      "url": "https://theearnalism.com/",
+      "http": 200,
+      "tls": 0,
+      "expected": 200,
+      "status": "PASS"
+    },
+    {
+      "url": "https://maison.theearnalism.com/api/v1/catalog/editions/55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+      "http": 404,
+      "tls": 0,
+      "expected": 404,
+      "status": "PASS",
+      "draft_text_leak": false
+    },
+    {
+      "url": "https://maison.theearnalism.com/en/read/55a3f5e3-f713-40b2-a873-942cd97bb1b7/",
+      "http": 404,
+      "tls": 0,
+      "expected": 404,
+      "status": "PASS",
+      "draft_text_leak": false
+    }
+  ],
+  "mutations": "None; read-only HTTPS only",
+  "physical_UAT": "Deferred and non-blocking",
+  "activation_status": "Safe code deployed; no recurring/provider setup activated pending owner approval",
+  "harness_note": "Public mailbox wire-format validation supports the existing Cloudflare email-obfuscation encoding; protection remains enabled.",
+  "tls_field_semantics": "curl ssl_verify_result0 means certificate verification succeeded; normal TLS verification retained"
+}

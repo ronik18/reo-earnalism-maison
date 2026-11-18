@@ -21,7 +21,9 @@
     "min_cu": 0.25,
     "max_cu": 2,
     "suspend_timeout_seconds_raw": 0,
-    "suspend_interpretation": "provider default300seconds"
+    "suspend_interpretation": "provider default300seconds",
+    "observed_org_project_count": 1,
+    "observed_all_branch_endpoint_count": 1
   },
   "approved_production_baseline": {
     "neon_plan": "Scale",

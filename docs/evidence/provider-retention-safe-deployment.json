@@ -1,0 +1,28 @@
+{
+  "book": {
+    "live_revision_id": null,
+    "manuscript_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+    "paragraphs": 32,
+    "state": "draft"
+  },
+  "due_queue": [],
+  "maintenance_receipt_rows": 0,
+  "read_only": true,
+  "render_deploy": "dep-dbv0fjjrjlhs73agjt30",
+  "resolved_support_cases": 0,
+  "scheduled_revisions": [],
+  "source": "77901394188da771e92d5bf4baf3e176cb08135b",
+  "support_job_statuses": [],
+  "exact_source_ci": {
+    "run": 44388432433,
+    "status": "success",
+    "backend_tests": 294,
+    "frontend_tests": 28
+  },
+  "static_release": "bd1b698d20686491c15be7332b0cf0d03352c72108f23c663bfbdfe200f4fefb",
+  "provider_activation": false,
+  "provenance": {
+    "source_and_deploy": "observed Render dashboard exact-source Live status",
+    "data_and_queue": "direct Neon verified-TLS read-only query, fresh per-process IPv4 DNS; no global DNS change"
+  }
+}
