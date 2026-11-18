@@ -189,3 +189,5 @@ class TimingMap(RevisionContent):
         if not self.measured:
             raise ValidationError('Estimated timing maps cannot be accepted.')
 
+
+from .collection_models import CatalogCollection,CatalogItem

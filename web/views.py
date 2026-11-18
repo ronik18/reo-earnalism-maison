@@ -51,12 +51,17 @@ def context(request, locale, **extra):
         "reduced_motion": bool(prefs and prefs.reduced_motion),
         "ui_locale": locale, "ui": catalogue(locale), "switch_locale_url": switch,
         "return_to": safe_return(request.POST.get("return_to", request.GET.get("return_to", request.get_full_path())), locale),
+        "next_page_url":None,
         "safe_request_id":str(getattr(request,"request_id","")), "retry_url":safe_return(request.get_full_path(),locale) if request.method=="GET" else "",
         "active_nav": "home", "focused": False, "offline_enabled":django_settings.FEATURES.get("offline_text_audio",False), "local_build":django_settings.LOCAL, "allow_index":False, **extra,
     }
 
 
 def page(request, locale, template, status=200, **extra):
+    next_cursor=extra.get('next_cursor') or extra.get('collection',{}).get('next_cursor')
+    if next_cursor:
+        query=request.GET.copy();query['cursor']=next_cursor
+        extra['next_page_url']=request.path+'?'+query.urlencode()
     response = render(request, template, context(request, locale, **extra), status=status)
     # Local first implementation. Shared caching is qualified separately by Lane D.
     response["Cache-Control"] = "private, no-store, max-age=0"
@@ -405,12 +410,33 @@ def collection(request, locale, collection_id):
 def series(request, locale, slug=None):
     from library.views import collections as index, collection as detail
     if slug:
-        data=catalog_payload(request,locale,detail,collection_id=UUID(slug))
+        from library.collections import collection_detail,series_member_state,get_collection,canonical_series_slug
+        from urllib.parse import urlencode
+        collection=get_collection(slug,series_only=True)
+        if slug!=collection.slug:
+            destination=reverse("web:series-detail",args=[locale,collection.slug])
+            if request.GET:destination+="?"+request.GET.urlencode()
+            return HttpResponseRedirect(destination)
+        data=collection_detail(request,slug,locale,trusted_territory(request),series_only=True)
         if data.get("kind")!="series":
             raise Http404
-        return page(request,locale,"web/series.html",collection=data,cards=data["items"],content_locale=locale,active_nav="series")
-    data=catalog_payload(request,locale,index)
-    return page(request,locale,"web/series.html",collections=[item for item in data["items"] if item.get("kind")=="series"],active_nav="series")
+        state=series_member_state(request.user,collection,locale,trusted_territory(request),cards=data["items"])
+        states={}
+        for item in (state or {}).get('items',[]):
+            item['resume_url']=None
+            for progress in item['progress']:
+                loc=progress.get('location') or {}
+                if not loc.get('unit_id'):continue
+                if progress['format']=='reader':
+                    item['resume_url']=reverse('web:reader',args=[locale,item['edition_id'],loc['unit_id']])+'?'+urlencode({'anchor':loc.get('anchor_id',''),'offset':loc.get('offset_chars',0)})
+                elif progress['format']=='audio' and django_settings.FEATURES.get('audio'):
+                    item['resume_url']=reverse('web:player',args=[locale,item['edition_id']])+'?'+urlencode({'unit_id':loc['unit_id'],'position_ms':loc.get('position_ms',0)})
+                if item['resume_url']:break
+            states[item['edition_id']]=item
+        return page(request,locale,"web/series.html",collection=data,cards=data["items"],series_progress=states,content_locale=locale,active_nav="series")
+    from library.collections import list_collections
+    data=list_collections(request,locale,trusted_territory(request),kind="series")
+    return page(request,locale,"web/series.html",collections=[item for item in data["items"] if item.get("kind")=="series"],next_cursor=data["next_cursor"],active_nav="series")
 
 
 @require_GET

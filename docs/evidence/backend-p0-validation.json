@@ -1,0 +1,47 @@
+{
+  "date": "2026-11-18",
+  "base_sha": "91464769c741b0f6bfbbba56062e56c23f691b3d",
+  "patch_sha256": "bba1190e09041514949caff27abf542374c6825daa7ba4e6eb3017a078baeec5",
+  "scope": [
+    "Series persistence, canonical slug, rights-filtered ordered episodes, private progress, normal Django admin",
+    "bounded signed actor/query/territory keyset pagination, Vault explicit sections and clients, supporting indexes",
+    "existing subscription/mandate history, fresh-auth two-step cancellation intents and DB/concurrency guards",
+    "owned immutable invoice history, retained PDF artifacts, allocation guards, private expiring grants",
+    "removal of overlapping global column/washes; one separated desktop ornament and plain mobile"
+  ],
+  "tests": {
+    "combined_postgres_python313": 217,
+    "final_reader_web": 30,
+    "invoice_existing_billing": 21,
+    "subscription_including_concurrency": 10,
+    "series_including_denied_prefix": 6,
+    "frontend": 26,
+    "typescript": "pass",
+    "build": "pass",
+    "migration_parity": "pass",
+    "diff_whitespace": "pass"
+  },
+  "browser": {
+    "engine": "IAB Chromium",
+    "desktop_width": 1440,
+    "mobile_width": 390,
+    "observed": [
+      "persisted Series slug/episode outline",
+      "25 personal lists traversed20+5",
+      "fresh-auth cancellation request creates pending intent; provider state unchanged; paid-through date retained",
+      "owned invoice details and expiring local PDF grant link",
+      "no horizontal overflow at390",
+      "no captured console errors"
+    ],
+    "physical_android_ios": "pending",
+    "safari_webkit": "unverified"
+  },
+  "limits": [
+    "no real provider calls or confirmation",
+    "no real tax invoice fabricated; PDF transport fixture only",
+    "new recurring creation remains disabled",
+    "actual launch Series content remains separate",
+    "no Neon migration, book mutation, production deployment, platform/DNS change"
+  ],
+  "integration": "awaiting root review, qualification-branch CI, main promotion"
+}

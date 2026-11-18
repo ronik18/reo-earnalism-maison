@@ -1,4 +1,5 @@
 from django.conf import settings
+from core.pagination import paginate_queryset
 from core.api import json_endpoint,api_response,DomainError,json_body,operation_key,expected_version
 from .models import Order,Entitlement,Offer,Refund,Invoice
 from .services import order_data,request_refund,refund_data,approve_refund
@@ -28,7 +29,9 @@ def orders(request):
         from .checkout import create_order
         status,body=create_order(request.user,validated_body(request,'OrderInput'),operation_key(request),getattr(request,'territory','IN' if settings.LOCAL else 'ZZ'))
         return api_response(body,status,version=body['version'])
-    return api_response(page([order_data(x) for x in Order.objects.filter(user=request.user).select_related('offer').order_by('-created_at')[:100]]))
+    result=paginate_queryset(request,Order.objects.filter(user=request.user).select_related('offer'),'orders')
+    result['items']=[order_data(x) for x in result['items']]
+    return api_response(result)
 
 
 @json_endpoint(('GET',))
@@ -40,13 +43,17 @@ def order(request,order_id):
 
 @json_endpoint(('GET',))
 def entitlements(request):
-    rows=Entitlement.objects.filter(user=request.user).order_by('-valid_until')[:100]
-    return api_response(page([entitlement_data(e) for e in rows]))
+    result=paginate_queryset(request,Entitlement.objects.filter(user=request.user),'entitlements',ordering='id')
+    result['items']=[entitlement_data(e) for e in result['items']]
+    return api_response(result)
 
 
 @json_endpoint(('GET','POST'))
 def refunds(request):
-    if request.method=='GET':return api_response(page([refund_data(x) for x in Refund.objects.filter(payment__order__user=request.user).select_related('payment').order_by('-created_at')[:100]]))
+    if request.method=='GET':
+        result=paginate_queryset(request,Refund.objects.filter(payment__order__user=request.user).select_related('payment'),'refunds')
+        result['items']=[refund_data(x) for x in result['items']]
+        return api_response(result)
     d=validated_body(request,'RefundRequestInput')
     status,body=request_refund(request.user,d['order_id'],operation_key(request),d['reason'],d['description']);return api_response(body,status,version=body['version'])
 

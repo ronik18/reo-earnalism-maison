@@ -81,7 +81,7 @@ window.maisonEnhance = () => {
     if(edition.unavailable)content.append(make('p',say('This title may have been withdrawn or is unavailable here. Your list membership is preserved.','বইটি প্রত্যাহৃত হয়েছে অথবা এখানে পাওয়া যাচ্ছে না। তালিকায় বইটি রাখা আছে।')));
     if(extraAction)content.append(extraAction);article.append(content);return article;
   }
-  function nextPage(path,cursor) {const query=new URLSearchParams();if(cursor)query.set('cursor',cursor);return path+(query.size?'?'+query:'');}
+  function nextPage(path,cursor) {const url=new URL(path,location.origin);if(cursor)url.searchParams.set('cursor',cursor);return url.pathname+url.search;}
   const vault = $('#vault-content');
   if (vault) {
     const tab = vault.dataset.tab, target = $('#vault-items'), retry=$('#vault-retry'), more=$('#vault-more');
@@ -89,7 +89,7 @@ window.maisonEnhance = () => {
     async function loadVault(append=false) {
       if(pending)return;pending=true;vault.setAttribute('aria-busy','true');retry.hidden=true;more.disabled=true;status('vault-status',ui.loading);
       try {
-        const path=tab==='lists'?'/me/lists':tab==='finished'?'/me/vault':'/me/saved-items';
+        const path=tab==='lists'?'/me/lists':tab==='finished'?'/me/vault?section=finished':'/me/saved-items';
         const data=await api(nextPage(path,append?cursor:null));
         if(!append){target.replaceChildren();seen=new Set();}
         const items=tab==='finished'?(data.finished||[]):(data.items||[]);

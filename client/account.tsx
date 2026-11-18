@@ -1,3 +1,4 @@
+import {BillingHistory} from "./billing-history";
 import { QueueRecovery } from "./recovery";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { mountIsland } from "./lifecycle";
@@ -212,7 +213,7 @@ function Account({ staff }: { staff: boolean }) {
         </div>
       </section>
       <section>
-        <h2>{t("sensitive_actions")}</h2>
+        <h2 id="sensitive-actions" tabIndex={-1}>{t("sensitive_actions")}</h2>
         <form className="narrow" onSubmit={reauthenticate}>
           <label>
             {t("password")}
@@ -229,7 +230,7 @@ function Account({ staff }: { staff: boolean }) {
       </section>
       <section><h2>{t("change_password")}</h2><p>{t("password_session_notice")}</p><form className="narrow" onSubmit={e => {e.preventDefault(); const form=e.currentTarget; const data=new FormData(form); if(data.get("new_password") !== data.get("repeat_password")){setStatus(t("password_mismatch"));return;} void act(async()=>{await api("/me/password",{method:"POST",key:crypto.randomUUID(),body:{current_password:data.get("current_password"),new_password:data.get("new_password")}});form.reset();await load();setStatus(t("password_changed_settings"));});}}><label>{t("password")}<input name="current_password" type="password" autoComplete="current-password" required /></label><label>{t("new_password")}<input name="new_password" type="password" autoComplete="new-password" required /></label><p className="fine">{t("password_hint")}</p><label>{t("repeat_password")}<input name="repeat_password" type="password" autoComplete="new-password" required /></label><button disabled={busy || !online}>{t("change_password")}</button></form></section>
       {consents ? <section><h2>{t("consent_choices")}</h2><p>{t("consent_help")}</p><form className="narrow" onSubmit={e=>{e.preventDefault();const data=new FormData(e.currentTarget);void act(async()=>{const next=await api<Consents>("/me/consents",{method:"PUT",version:consents.version,key:crypto.randomUUID(),body:{necessary_notice_version:consents.necessary_notice_version,analytics_opt_in:data.get("analytics") === "on",marketing_email_opt_in:data.get("marketing") === "on"}});setConsents(next);setStatus(t("saved_server"));});}}><label className="check-label"><input type="checkbox" name="analytics" defaultChecked={consents.analytics_opt_in} />{t("analytics_choice")}</label><label className="check-label"><input type="checkbox" name="marketing" defaultChecked={consents.marketing_email_opt_in} />{t("marketing_choice")}</label><button disabled={busy || !online}>{t("save")}</button></form></section> : null}
-      <Billing online={online} />
+      <BillingHistory online={online} fresh={fresh} onFreshRequired={()=>setFresh(false)} />
       {staff ? (
         <section id="mfa-settings">
           <h2>{t("staff_security")}</h2>
@@ -463,36 +464,6 @@ function Account({ staff }: { staff: boolean }) {
     </>
   );
 }
-interface BillingOrder { order_id: string; status: string; fulfillment_status: string; amount: {amount_minor:number;currency:string}; created_at:string; }
-interface Refund {refund_id:string;order_id:string;status:string;amount:{amount_minor:number;currency:string}|null;}
-function Billing({online}:{online:boolean}) {
-  const [orders,setOrders]=useState<BillingOrder[]>();
-  const [refunds,setRefunds]=useState<Refund[]>();
-  const [invoices,setInvoices]=useState<{invoice_id:string;status:string}[]>();
-  const [status,setStatus]=useState("");
-  const [busy,setBusy]=useState(false);
-  const [selected,setSelected]=useState("");
-  const refundKeys=useRef(new Map<string,string>());
-  async function load() {
-    setStatus("");
-    const results=await Promise.allSettled([api<{items:BillingOrder[]}>("/commerce/orders"),api<{items:Refund[]}>("/commerce/refunds"),api<{items:{invoice_id:string;status:string}[]}>("/commerce/invoices")]);
-    if(results[0].status==="fulfilled")setOrders(results[0].value.items);
-    if(results[1].status==="fulfilled")setRefunds(results[1].value.items);
-    if(results[2].status==="fulfilled")setInvoices(results[2].value.items);
-    const failure=results.find(r=>r.status==="rejected");
-    if(failure?.status==="rejected")setStatus(errorText(failure.reason));
-  }
-  useEffect(()=>{void load();},[]);
-  function money(value:{amount_minor:number;currency:string}){return new Intl.NumberFormat(locale,{style:"currency",currency:value.currency}).format(value.amount_minor/100);}
-  return <section className="billing-settings"><h2>{t("billing_heading")}</h2><p className="notice">{t("recurring_not_enabled")}</p><p>{t("legacy_notice")}</p><p role="status">{status}</p><button disabled={busy || !online} onClick={()=>void load()}>{t("refresh_status")}</button>
-    <h3>{t("orders_heading")}</h3>{orders === undefined ? <p>{status ? t("billing_unavailable") : t("loading")}</p> : !orders.length ? <p>{t("no_orders")}</p> : <ul className="unit-list">{orders.map(order=><li key={order.order_id}><a href={`/${locale}/checkout/${order.order_id}/`}>{t("order_reference")}: {order.order_id}</a><p>{money(order.amount)} · {t("order_"+order.status)}</p>{order.status==="paid" ? <button disabled={busy || !online} onClick={()=>setSelected(order.order_id)}>{t("request_refund")}</button>:null}</li>)}</ul>}
-    {selected ? <form className="narrow" onSubmit={e=>{e.preventDefault();if(!online)return;const data=new FormData(e.currentTarget);const body={order_id:selected,reason:data.get("reason"),description:data.get("description")};const snapshot=JSON.stringify(body);const key=refundKeys.current.get(snapshot) || crypto.randomUUID();refundKeys.current.set(snapshot,key);setBusy(true);void api("/commerce/refunds",{method:"POST",key,body}).then(async()=>{setSelected("");await load();setStatus(t("refund_requested"));}).catch(e=>setStatus(errorText(e))).finally(()=>setBusy(false));}}><h3>{t("request_refund")}</h3><p>{t("refund_review_help")}</p><label>{t("refund_reason")}<select name="reason">{["duplicate_charge","technical_failure","content_unavailable","other"].map(reason=><option key={reason} value={reason}>{t(reason)}</option>)}</select></label><label>{t("refund_description")}<textarea name="description" maxLength={2000} required /></label><div className="actions"><button disabled={busy || !online}>{t("send_request")}</button><button type="button" disabled={busy} onClick={()=>setSelected("")}>{t("cancel")}</button></div></form>:null}
-    <h3>{t("refunds_heading")}</h3>{refunds===undefined ? <p>{status?t("billing_unavailable"):t("loading")}</p>:!refunds.length?<p>{t("no_refunds")}</p>:<ul className="unit-list">{refunds.map(refund=><li key={refund.refund_id}>{refund.order_id}<p>{t("refund_"+refund.status)}{refund.amount?" · "+money(refund.amount):""}</p></li>)}</ul>}
-    <h3>{t("invoices_heading")}</h3>{invoices===undefined ? <p>{status?t("billing_unavailable"):t("loading")}</p>:!invoices.length?<p>{t("no_invoices")}</p>:<ul>{invoices.map(invoice=><li key={invoice.invoice_id}>{invoice.invoice_id} · {invoice.status}</li>)}</ul>}
-    <p className="fine">{t("billing_record_help")}</p>
-  </section>;
-}
-
 export function mount() {
   mountIsland(document.getElementById("account-island"), () => (
     <Account

@@ -94,3 +94,6 @@ class Command(BaseCommand):
                 'explanation':'FIFO means first in, first out.' if locale=='en' else 'ফিফো মানে আগে প্রবেশ, আগে প্রস্থান।'})
             QuestionOption.objects.get_or_create(id=uid('85',suffix),defaults={'question':question,'text':'The oldest item' if locale=='en' else 'সবচেয়ে আগে আসা উপাদান','is_correct':True})
             QuestionOption.objects.get_or_create(id=uid('86',suffix),defaults={'question':question,'text':'The newest item' if locale=='en' else 'সবচেয়ে পরে আসা উপাদান','is_correct':False})
+
+        from library.collections import seed_local_collection
+        seed_local_collection()

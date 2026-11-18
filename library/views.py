@@ -53,15 +53,21 @@ def _catalog_ttl(cards,territory):
     revisions=Revision.objects.filter(edition__id__in=ids,edition__live_revision_id=__import__('django.db.models',fromlist=['F']).F('id'))
     return min([svc.public_ttl(r,30,territory=territory) for r in revisions] or [0])
 
-def _summary(locale):
-    return {'collection_id':'90000000-0000-4000-8000-000000000001','title':'Local original stories' if locale=='en' else 'স্থানীয় মৌলিক গল্প',
-            'kind':'shelf','description':'Original technical acceptance fixtures; not commercially released.','cover':None}
-
 @json_endpoint(auth=False)
 def home(request):
     locale,territory=context(request);cards=svc.catalog_cards(locale,territory)
+    from .collections import list_collections,eligible_items
+    from .collection_models import CatalogCollection
+    shelves=[]
+    for collection in CatalogCollection.objects.filter(published=True).order_by('slug','id')[:6]:
+        from .collections import collection_summary
+        from copy import copy
+        from .collections import collection_detail
+        shelf_request=copy(request);shelf_request.GET=request.GET.copy();shelf_request.GET.pop('cursor',None);shelf_request.GET['limit']='12'
+        shelf_cards=collection_detail(shelf_request,collection.id,locale,territory)['items']
+        shelves.append({'collection':collection_summary(collection,locale,territory,cards=shelf_cards),'items':shelf_cards})
     data={'locale':locale,'territory':territory,'hero':cards[0] if cards else None,
-          'shelves':[{'collection':_summary(locale),'items':cards[:12]}] if cards else [],
+          'shelves':shelves,
           'catalog_version':svc.digest(svc.canonical_bytes(cards))}
     return public_response(data,_catalog_ttl(cards,territory))
 
@@ -78,16 +84,16 @@ def catalog(request):
 
 @json_endpoint(auth=False)
 def collections(request):
+    from .collections import list_collections
     locale,territory=context(request)
-    return public_response(page(request,[_summary(locale)],'collections'),0)
+    return public_response(list_collections(request,locale,territory,kind=request.GET.get('kind') or None),0)
 
 @json_endpoint(auth=False)
 def collection(request,collection_id):
+    from .collections import collection_detail
     locale,territory=context(request)
-    if str(collection_id)!='90000000-0000-4000-8000-000000000001': raise DomainError('not_found','Collection not found.',404)
-    cards=svc.catalog_cards(locale,territory)
-    summary=_summary(locale);summary.pop('cover')
-    return public_response({**summary,'items':cards[:100],'next_cursor':None},_catalog_ttl(cards,territory))
+    data=collection_detail(request,collection_id,locale,territory)
+    return public_response(data,_catalog_ttl(data['items'],territory))
 
 @json_endpoint(auth=False)
 def work(request,work_id):
@@ -97,7 +103,7 @@ def work(request,work_id):
     cards=[c for c in svc.catalog_cards(locale,territory) if c['work_id']==str(work_id)]
     if not cards: raise DomainError('not_found','Work not found.',404)
     return public_response({'work_id':str(obj.id),'title':obj.title,'description':obj.editions.filter(live_revision__isnull=False).first().live_revision.description,
-                            'creators':obj.creators,'editions':cards,'related_collections':[_summary(locale)]},_catalog_ttl(cards,territory))
+                            'creators':obj.creators,'editions':cards,'related_collections':[]},_catalog_ttl(cards,territory))
 
 @json_endpoint(auth=False)
 def edition(request,edition_id):

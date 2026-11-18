@@ -55,6 +55,7 @@ class Order(models.Model):
     version=models.PositiveBigIntegerField(default=1)
     class Meta:
         db_table='maison_order'
+        indexes=[models.Index(fields=['user','-created_at','-id'],name='maison_order_keyset_idx')]
         constraints=[models.UniqueConstraint(fields=['user','operation_id'],name='maison_order_operation_uq'),
                      models.CheckConstraint(condition=Q(total_minor__gt=0),name='maison_order_positive'),
                      models.CheckConstraint(condition=Q(status__in=['creating','created','pending','paid','failed','expired','cancelled']),name='maison_order_state')]
@@ -156,7 +157,11 @@ class LegacyLiability(models.Model):
 
 class Invoice(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
-    order=models.OneToOneField(Order,on_delete=models.PROTECT)
+    order=models.OneToOneField(Order,on_delete=models.PROTECT,null=True,blank=True)
+    subscription=models.ForeignKey('billing.Subscription',on_delete=models.PROTECT,null=True,blank=True,related_name='invoices')
+    period_start=models.DateTimeField(null=True,blank=True)
+    period_end=models.DateTimeField(null=True,blank=True)
+    revision=models.PositiveIntegerField(default=1)
     number=models.CharField(max_length=100,unique=True)
     amount_minor=models.PositiveBigIntegerField()
     currency=models.CharField(max_length=3)
@@ -165,6 +170,8 @@ class Invoice(models.Model):
     issued_at=models.DateTimeField()
     class Meta:
         db_table='maison_invoice'
+        indexes=[models.Index(fields=['-issued_at','-id'],name='maison_invoice_keyset_idx')]
+        constraints=[models.CheckConstraint(condition=Q(order__isnull=False,subscription__isnull=True)|Q(order__isnull=True,subscription__isnull=False),name='maison_invoice_one_source'),models.CheckConstraint(condition=Q(revision__gte=1),name='maison_invoice_revision_positive'),models.CheckConstraint(condition=Q(period_start__isnull=True,period_end__isnull=True)|Q(period_start__isnull=False,period_end__isnull=False,period_end__gt=F('period_start')),name='maison_invoice_period')]
     def save(self,*args,**kwargs):
         if type(self).objects.filter(pk=self.pk).exists(): raise ValidationError('Issued financial snapshots are immutable.')
         super().save(*args,**kwargs)
@@ -176,3 +183,6 @@ class PaymentAllocation(models.Model):
     class Meta:
         db_table='maison_payment_allocation'
         constraints=[models.UniqueConstraint(fields=['payment','invoice'],name='maison_payment_invoice_uq')]
+
+from .subscription_models import BillingPlan,Subscription,Mandate
+from .invoice_models import InvoiceArtifact

@@ -239,21 +239,41 @@ def mutate_list(user,list_id,operation_id,base_version,action,payload):
     return apply_operation(user,operation_id,'list.'+action,{'list_id':str(list_id),'base_version':base_version,**payload},mutate)
 
 
-def vault_data(user):
+VAULT_SUMMARY_SCAN_LIMIT=500
+
+
+def vault_data(user,territory='IN',request=None):
     from library.services import catalog_card
-    progress=Progress.objects.filter(user=user).annotate(finished=Exists(Completion.objects.filter(user=user,edition_id=OuterRef('edition_id'),format=OuterRef('format'),is_complete=True))).filter(finished=False).select_related('edition__work','edition__live_revision').order_by('-updated_at')[:20]
-    continuing=[];finished=[]
-    for p in progress:
-        try:card=catalog_card(p.edition,user=user)
-        except DomainError:continue
-        continuing.append({'card':card,'progress':progress_data(p)})
-    for c in Completion.objects.filter(user=user,is_complete=True).select_related('edition__work','edition__live_revision').order_by('-updated_at')[:20]:
-        try:card=catalog_card(c.edition,user=user)
-        except DomainError:continue
-        finished.append({'card':card,'completion':completion_data(c)})
-    return {'continue':continuing,'saved_count':SavedItem.objects.filter(user=user).count(),'download_count':0,
-        'finished_count':Completion.objects.filter(user=user,is_complete=True).count(),'finished':finished,
-        'lists':[list_data(x) for x in PersonalList.objects.filter(user=user).order_by('name')[:20]],'legacy_obligations':[]}
+    from core.pagination import paginate_queryset
+    from .models import DownloadLicense
+    section=request.GET.get('section','summary') if request else 'summary'
+    if section not in ('summary','continue','finished','lists'):raise DomainError('validation_error','Invalid Vault section.',422)
+    if section=='summary' and request and any(k in request.GET for k in ('cursor','limit')):raise DomainError('validation_error','Choose an explicit Vault section to paginate.',422)
+    progress=Progress.objects.filter(user=user).annotate(finished=Exists(Completion.objects.filter(user=user,edition_id=OuterRef('edition_id'),format=OuterRef('format'),is_complete=True))).filter(finished=False,edition__live_revision__state='live').select_related('edition__work','edition__live_revision').order_by('-updated_at','-id')
+    completions=Completion.objects.filter(user=user,is_complete=True,edition__live_revision__state='live').select_related('edition__work','edition__live_revision').order_by('-updated_at','-id')
+    def serialize(row,kind):
+        try:card=catalog_card(row.edition,user=user,territory=territory)
+        except DomainError:return None
+        if row.revision_id!=row.edition.live_revision_id:return None
+        return {'card':card,kind:progress_data(row) if kind=='progress' else completion_data(row)}
+    def eligible(rows,kind,bound=20):
+        values=[]
+        for row in rows[:VAULT_SUMMARY_SCAN_LIMIT].iterator(chunk_size=100):
+            value=serialize(row,kind)
+            if value is not None:values.append(value)
+            if len(values)>=bound:break
+        return values
+    result={'continue':[],'saved_count':SavedItem.objects.filter(user=user).count(),'download_count':DownloadLicense.objects.filter(user=user,revoked_at=None,expires_at__gt=timezone.now()).count(),'finished_count':Completion.objects.filter(user=user,is_complete=True).count(),'finished':[],'lists':[],'legacy_obligations':[]}
+    if section=='summary':
+        result.update({'continue':eligible(progress,'progress',20),'finished':eligible(completions,'completion',20),'lists':[list_data(x) for x in PersonalList.objects.filter(user=user).order_by('name','id')[:20]]})
+    else:
+        if section=='lists':
+            page=paginate_queryset(request,PersonalList.objects.filter(user=user),'vault:lists',ordering='name',maximum=20)
+            page['items']=[list_data(x) for x in page['items']]
+        else:page=paginate_queryset(request,progress if section=='continue' else completions,'vault:'+section+':'+territory,ordering='-updated_at',maximum=20,serialize=lambda row:serialize(row,'progress' if section=='continue' else 'completion'))
+        result[section]=page['items']
+        result.update(section=section,next_cursor=page['next_cursor'],has_more=page['has_more'])
+    return result
 
 
 def export_personal_data(user):

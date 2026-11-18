@@ -1,6 +1,7 @@
 import uuid
 from django.conf import settings
 from core.api import json_endpoint,json_body,api_response,DomainError,expected_version,operation_key,problem_data
+from core.pagination import paginate_queryset
 from . import services
 from .models import Progress,Completion,Annotation,SavedItem,PersonalList
 
@@ -19,7 +20,17 @@ def progress(request,edition_id,format):
 
 
 @json_endpoint(('GET',))
-def list_progress(request):return api_response(page([services.progress_data(x) for x in Progress.objects.filter(user=request.user).order_by('-updated_at')[:100]]))
+def list_progress(request):
+    rows=Progress.objects.filter(user=request.user)
+    if request.GET.get('edition_id'):
+        from core.api import public_uuid
+        rows=rows.filter(edition_id=public_uuid(request.GET['edition_id'],'edition_id'))
+    if request.GET.get('format'):
+        if request.GET['format'] not in ('reader','audio','video'):raise DomainError('validation_error','Invalid format.',422)
+        rows=rows.filter(format=request.GET['format'])
+    result=paginate_queryset(request,rows,'progress',ordering='-updated_at')
+    result['items']=[services.progress_data(x) for x in result['items']]
+    return api_response(result)
 
 
 @json_endpoint(('GET','PUT'))
@@ -34,8 +45,12 @@ def completion(request,edition_id,format):
 def annotations(request):
     if request.method=='GET':
         rows=Annotation.objects.filter(user=request.user,deleted_at=None).select_related('revision__edition')
-        if request.GET.get('edition_revision_id'):rows=rows.filter(revision_id=request.GET['edition_revision_id'])
-        return api_response(page([services.annotation_data(x,request.user) for x in rows.order_by('-created_at')[:100]]))
+        if request.GET.get('edition_revision_id'):
+            from core.api import public_uuid
+            rows=rows.filter(revision_id=public_uuid(request.GET['edition_revision_id'],'edition_revision_id'))
+        result=paginate_queryset(request,rows,'annotations')
+        result['items']=[services.annotation_data(x,request.user) for x in result['items']]
+        return api_response(result)
     d=json_body(request,{'annotation_id','edition_revision_id','kind','range','color','note_text'},['annotation_id','edition_revision_id','kind','range','color','note_text'])
     status,result=services.create_annotation(request.user,d,operation_key(request),territory(request));return api_response(result,status,version=result['version'])
 
@@ -53,7 +68,15 @@ def annotation(request,annotation_id):
 
 @json_endpoint(('GET',))
 def saved_items(request):
-    return api_response(page([{'edition_id':str(x.edition_id),'saved_at':services.iso(x.created_at),'available':bool(x.edition.live_revision_id)} for x in SavedItem.objects.filter(user=request.user).select_related('edition__work','edition__live_revision').order_by('-created_at')[:100]]))
+    from library.services import catalog_card
+    result=paginate_queryset(request,SavedItem.objects.filter(user=request.user).select_related('edition__work','edition__live_revision'),'saved-items')
+    values=[]
+    for row in result['items']:
+        try:catalog_card(row.edition,user=request.user,territory=territory(request));available=True
+        except DomainError:available=False
+        values.append({'edition_id':str(row.edition_id),'saved_at':services.iso(row.created_at),'available':available})
+    result['items']=values
+    return api_response(result)
 
 
 @json_endpoint(('PUT','DELETE'))
@@ -63,7 +86,10 @@ def saved_item(request,edition_id):
 
 @json_endpoint(('GET','POST'))
 def lists(request):
-    if request.method=='GET':return api_response(page([services.list_data(x) for x in PersonalList.objects.filter(user=request.user).order_by('name')[:100]]))
+    if request.method=='GET':
+        result=paginate_queryset(request,PersonalList.objects.filter(user=request.user),'personal-lists',ordering='name')
+        result['items']=[services.list_data(x) for x in result['items']]
+        return api_response(result)
     d=json_body(request,{'name'},['name']);status,result=services.create_list(request.user,d['name'],operation_key(request));return api_response(result,status,version=result['version'])
 
 
@@ -91,7 +117,7 @@ def list_order(request,list_id):
 
 
 @json_endpoint(('GET',))
-def vault(request):return api_response(services.vault_data(request.user))
+def vault(request):return api_response(services.vault_data(request.user,territory=territory(request),request=request))
 
 
 @json_endpoint(('POST',))

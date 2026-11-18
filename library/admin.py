@@ -29,6 +29,7 @@ class WorkAdmin(admin.ModelAdmin):
 
 @admin.register(Edition)
 class EditionAdmin(admin.ModelAdmin):
+    search_fields=('slug','work__title')
     list_display=('slug','locale','live_revision','version')
     readonly_fields=('live_revision','version')
 
@@ -109,3 +110,41 @@ class RightsAdmin(admin.ModelAdmin):
         rows=list(queryset.select_for_update().order_by('pk').values_list('pk','revision_id'))
         super().delete_queryset(request,queryset.filter(pk__in=[row[0] for row in rows]))
         _queue_live_revisions([row[1] for row in rows])
+
+
+from .collection_models import CatalogCollection,CatalogItem
+
+class CatalogItemInline(admin.TabularInline):
+    model=CatalogItem
+    extra=0
+    autocomplete_fields=('edition',)
+    ordering=('sort_order','id')
+
+
+@admin.register(CatalogCollection)
+class CatalogCollectionAdmin(admin.ModelAdmin):
+    list_display=('slug','kind','house','published','version')
+    search_fields=('slug','title_en','title_bn')
+    list_filter=('kind','house','published')
+    readonly_fields=('version','updated_at')
+    inlines=(CatalogItemInline,)
+
+    def _invalidate_editorial_catalog(self):
+        # Existing catalog:global URL dependencies cover editorial index/details.
+        # If there are no live revisions there is no eligible shared catalog body.
+        revision=Revision.objects.filter(state='live',edition__live_revision_id=F('id')).select_related('edition').order_by('id').first()
+        if revision:queue_catalog_purge(revision)
+
+    def save_related(self,request,form,formsets,change):
+        super().save_related(request,form,formsets,change)
+        self._invalidate_editorial_catalog()
+
+    @transaction.atomic
+    def delete_model(self,request,obj):
+        super().delete_model(request,obj)
+        self._invalidate_editorial_catalog()
+
+    @transaction.atomic
+    def delete_queryset(self,request,queryset):
+        super().delete_queryset(request,queryset)
+        self._invalidate_editorial_catalog()

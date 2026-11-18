@@ -20,7 +20,7 @@ class Progress(models.Model):
         db_table='maison_progress'
         constraints=[models.UniqueConstraint(fields=['user','edition','format'],name='maison_progress_scope_uq'),
                      models.CheckConstraint(condition=models.Q(fraction_complete__gte=0,fraction_complete__lte=1),name='maison_progress_fraction')]
-        indexes=[models.Index(fields=['user','-updated_at'],name='maison_progress_continue_idx')]
+        indexes=[models.Index(fields=['user','-updated_at'],name='maison_progress_continue_idx'),models.Index(fields=['user','-updated_at','-id'],name='maison_progress_keyset_idx')]
 
 
 class Completion(models.Model):
@@ -35,6 +35,7 @@ class Completion(models.Model):
     updated_at=models.DateTimeField(auto_now=True)
     class Meta:
         db_table='maison_completion'
+        indexes=[models.Index(fields=['user', '-updated_at', '-id'],name='maison_completion_keyset_idx')]
         constraints=[models.UniqueConstraint(fields=['user','edition','format'],name='maison_completion_scope_uq'),
                      models.CheckConstraint(condition=models.Q(is_complete=False,completed_at__isnull=True)|models.Q(is_complete=True,completed_at__isnull=False),name='maison_completion_state')]
 
@@ -56,7 +57,7 @@ class Annotation(models.Model):
     class Meta:
         db_table='maison_annotation'
         constraints=[models.CheckConstraint(condition=models.Q(color__isnull=True)|models.Q(color__in=['gold','mint','rose','lavender']),name='maison_annotation_palette')]
-        indexes=[models.Index(fields=['user','revision','deleted_at'],name='maison_annotation_reader_idx')]
+        indexes=[models.Index(fields=['user','revision','deleted_at'],name='maison_annotation_reader_idx'),models.Index(fields=['user','-created_at','-id'],name='maison_annotation_keyset_idx')]
 
 
 class SavedItem(models.Model):
@@ -66,6 +67,7 @@ class SavedItem(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table='maison_saved_item'
+        indexes=[models.Index(fields=['user', '-created_at', '-id'],name='maison_saved_keyset_idx')]
         constraints=[models.UniqueConstraint(fields=['user','edition'],name='maison_saved_scope_uq')]
 
 
@@ -78,6 +80,7 @@ class PersonalList(models.Model):
     updated_at=models.DateTimeField(auto_now=True)
     class Meta:
         db_table='maison_personal_list'
+        indexes=[models.Index(fields=['user', 'name', 'id'],name='maison_list_keyset_idx')]
         constraints=[models.UniqueConstraint('user',Lower('name'),name='maison_list_name_uq')]
 
 

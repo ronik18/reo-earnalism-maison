@@ -6809,7 +6809,7 @@
             "sessionCookie": []
           }
         ],
-        "description": "Read member resume and library summary",
+        "description": "Default bounded summary (maximum20 per section). An explicit section returns only that section page; other arrays are empty. Paging is account, trusted-territory, section and query bound; an empty scanned page may still have a next cursor.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -6880,7 +6880,34 @@
           "503": {
             "$ref": "#/components/responses/503"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "section",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "continue",
+                "finished",
+                "lists"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 20
+            }
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ]
       }
     },
     "/me/entitlements": {
@@ -14441,7 +14468,7 @@
           "request_id",
           "retryable"
         ],
-        "description": "RFC9457-shaped error. current_resource is an authorized current representation only; never another member’s object. No secrets, private notes or provider raw payloads."
+        "description": "RFC9457-shaped error. current_resource is an authorized current representation only; never another member\u2019s object. No secrets, private notes or provider raw payloads."
       },
       "Acknowledgement": {
         "type": "object",
@@ -17929,6 +17956,28 @@
               ]
             },
             "description": "Explicit personal completions with currently available edition card; no automatic inference from scroll fraction."
+          },
+          "section": {
+            "type": "string",
+            "enum": [
+              "continue",
+              "finished",
+              "lists"
+            ]
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1024
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "has_more": {
+            "type": "boolean"
           }
         },
         "required": [

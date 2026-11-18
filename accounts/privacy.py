@@ -48,7 +48,7 @@ def _write_export(user,file,deadline):
         'quiz_attempts':QuizAttempt.objects.filter(user=user).values('id','quiz_id','quiz_version','status','answers','score','result','started_at','submitted_at'),
         'orders':Order.objects.filter(user=user).values('id','total_minor','currency','status','fulfillment_status','created_at','paid_at'),
         'entitlements':Entitlement.objects.filter(user=user).values('id','source','scope','edition_id','track_id','formats','valid_from','valid_until','status','revoked_at'),
-        'invoices':Invoice.objects.filter(order__user=user).values('id','number','amount_minor','currency','line_snapshot','issued_at'),
+        'invoices':Invoice.objects.filter(Q(order__user=user)|Q(subscription__user=user)).values('id','order_id','subscription_id','number','amount_minor','currency','line_snapshot','period_start','period_end','revision','issued_at'),
         'refunds':Refund.objects.filter(payment__order__user=user).values('id','amount_minor','proposed_amount_minor','currency','status','created_at','processed_at'),
     }
     raw('{');first=True

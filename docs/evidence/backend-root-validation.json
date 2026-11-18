@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-18",
+  "base": "91464769c741b0f6bfbbba56062e56c23f691b3d",
+  "backend_tests": 222,
+  "frontend_tests": 26,
+  "typecheck": "PASS",
+  "build": "PASS",
+  "migration_parity": "PASS",
+  "review": "Two findings fixed and independently rechecked",
+  "scope": "Local pinned Python3.13/PostgreSQL18 production-image checks; real provider acceptance remains pending",
+  "book_changed": false,
+  "legacy_changed": false,
+  "providers_changed": false,
+  "dns_changed": false
+}
