@@ -7,6 +7,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--max-seconds', type=int, default=45)
         parser.add_argument('--batch-size', type=int, default=25)
+        parser.add_argument('--apply-retention', action='store_true', help='Apply approved bounded retention cleanup; otherwise report candidates only.')
 
     def handle(self, *args, **options):
         from core.jobs import run_due_jobs
@@ -22,4 +23,10 @@ class Command(BaseCommand):
         result['rate_counters'] = cleanup_rate_buckets(limit=1000)
         from operations.cache import cleanup_expired_references
         result['cache_references'] = cleanup_expired_references(limit=1000)
+        remaining = budget - (time.monotonic() - started)
+        if remaining > 0:
+            from accounts.retention import cleanup_account_retention
+            result['retention'] = cleanup_account_retention(
+                limit=max(1, min(100, options['batch_size'])), max_seconds=min(5, remaining),
+                dry_run=not options['apply_retention'])
         self.stdout.write(str(result))
