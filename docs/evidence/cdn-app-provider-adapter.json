@@ -1,0 +1,32 @@
+{
+  "scope": "actual repository purge_catalog_cache adapter with production config, exact public home URL",
+  "provider_result": {
+    "status": "acknowledged",
+    "url_count": 1,
+    "batch_sha256": "ff1403e958cd618127fa22e7bd7a0a174c518074bea241f945f1fb623f583215",
+    "readback_verified": false
+  },
+  "before": {
+    "name": "before",
+    "status": 200,
+    "cache": "HIT",
+    "ray": "a5c77adffae91b3e-MRS",
+    "sha256": "e5493a7e2e260328f04debc3aa053eebbbb7a20f0a16525d3c1f90fbb6a8c8b2"
+  },
+  "after": {
+    "name": "after",
+    "status": 200,
+    "cache": "MISS",
+    "ray": "a5c77af7f8d6e1e4-MRS",
+    "sha256": "e5493a7e2e260328f04debc3aa053eebbbb7a20f0a16525d3c1f90fbb6a8c8b2"
+  },
+  "repeat": {
+    "name": "repeat",
+    "status": 200,
+    "cache": "HIT",
+    "ray": "a5c77afd6d10406b-MRS",
+    "sha256": "e5493a7e2e260328f04debc3aa053eebbbb7a20f0a16525d3c1f90fbb6a8c8b2"
+  },
+  "passed": true,
+  "book_changed": false
+}

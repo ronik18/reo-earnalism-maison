@@ -1,0 +1,338 @@
+{
+  "release_id": "19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142",
+  "manifest_file_count": 54,
+  "manifest_path": ".local/neon-static-artifacts/public-assets/manifest.json",
+  "https_certificate_validation": true,
+  "http_reads_this_lane": 17,
+  "r2_s3_reads": 0,
+  "checks": [
+    {
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/app.css",
+      "attempt": 1,
+      "status": 403,
+      "expected_content_type": "text/css",
+      "expected_bytes": 26388,
+      "bytes": 17,
+      "sha256_matches_manifest": false,
+      "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "headers": {
+        "CF-Cache-Status": null,
+        "CF-Ray": "a5c6af85dc4783cc-MRS",
+        "Server": "cloudflare",
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+        "Access-Control-Allow-Origin": null,
+        "ETag": null,
+        "Age": null,
+        "Vary": null
+      }
+    },
+    {
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/app.css",
+      "attempt": 2,
+      "status": 403,
+      "expected_content_type": "text/css",
+      "expected_bytes": 26388,
+      "bytes": 17,
+      "sha256_matches_manifest": false,
+      "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "headers": {
+        "CF-Cache-Status": null,
+        "CF-Ray": "a5c6af99a8930cd2-MRS",
+        "Server": "cloudflare",
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+        "Access-Control-Allow-Origin": null,
+        "ETag": null,
+        "Age": null,
+        "Vary": null
+      }
+    },
+    {
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/app.js",
+      "attempt": 1,
+      "status": 403,
+      "expected_content_type": "text/javascript",
+      "expected_bytes": 18138,
+      "bytes": 17,
+      "sha256_matches_manifest": false,
+      "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "headers": {
+        "CF-Cache-Status": null,
+        "CF-Ray": "a5c6afa4ce6f4329-MRS",
+        "Server": "cloudflare",
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+        "Access-Control-Allow-Origin": null,
+        "ETag": null,
+        "Age": null,
+        "Vary": null
+      }
+    },
+    {
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/app.js",
+      "attempt": 2,
+      "status": 403,
+      "expected_content_type": "text/javascript",
+      "expected_bytes": 18138,
+      "bytes": 17,
+      "sha256_matches_manifest": false,
+      "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "headers": {
+        "CF-Cache-Status": null,
+        "CF-Ray": "a5c6afb0fa5de224-MRS",
+        "Server": "cloudflare",
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+        "Access-Control-Allow-Origin": null,
+        "ETag": null,
+        "Age": null,
+        "Vary": null
+      }
+    },
+    {
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/fonts/cormorant-garamond-latin-wght-normal.woff2",
+      "attempt": 1,
+      "status": 403,
+      "expected_content_type": "font/woff2",
+      "expected_bytes": 37640,
+      "bytes": 17,
+      "sha256_matches_manifest": false,
+      "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "headers": {
+        "CF-Cache-Status": null,
+        "CF-Ray": "a5c6afbc580e50f2-MRS",
+        "Server": "cloudflare",
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+        "Access-Control-Allow-Origin": null,
+        "ETag": null,
+        "Age": null,
+        "Vary": null
+      }
+    },
+    {
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/fonts/cormorant-garamond-latin-wght-normal.woff2",
+      "attempt": 2,
+      "status": 403,
+      "expected_content_type": "font/woff2",
+      "expected_bytes": 37640,
+      "bytes": 17,
+      "sha256_matches_manifest": false,
+      "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "headers": {
+        "CF-Cache-Status": null,
+        "CF-Ray": "a5c6afca99e2dc31-MRS",
+        "Server": "cloudflare",
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+        "Access-Control-Allow-Origin": null,
+        "ETag": null,
+        "Age": null,
+        "Vary": null
+      }
+    },
+    {
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/art/ford-gold-column.webp",
+      "attempt": 1,
+      "status": 403,
+      "expected_content_type": "image/webp",
+      "expected_bytes": 280478,
+      "bytes": 17,
+      "sha256_matches_manifest": false,
+      "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "headers": {
+        "CF-Cache-Status": null,
+        "CF-Ray": "a5c6afe9a9c8e278-MRS",
+        "Server": "cloudflare",
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+        "Access-Control-Allow-Origin": null,
+        "ETag": null,
+        "Age": null,
+        "Vary": null
+      }
+    },
+    {
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/art/ford-gold-column.webp",
+      "attempt": 2,
+      "status": 403,
+      "expected_content_type": "image/webp",
+      "expected_bytes": 280478,
+      "bytes": 17,
+      "sha256_matches_manifest": false,
+      "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "headers": {
+        "CF-Cache-Status": null,
+        "CF-Ray": "a5c6aff86995ebe8-MRS",
+        "Server": "cloudflare",
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+        "Access-Control-Allow-Origin": null,
+        "ETag": null,
+        "Age": null,
+        "Vary": null
+      }
+    }
+  ],
+  "public_http_qualified": true,
+  "no_provider_mutations": true,
+  "book_remains_draft": true,
+  "note": "Initial failures preserved; qualification based on browser-style legitimate client retries. Review CDN hit progression separately.",
+  "initial_probe_diagnosis": "Default Python urllib User-Agent returned Cloudflare error1010; root confirmed separately. Browser-style user agent retry does not disable provider security.",
+  "browser_user_agent_retry_checks": [
+    {
+      "asset_type": "css",
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/app.css",
+      "attempt": 1,
+      "status": 200,
+      "sha256_matches_manifest": true,
+      "bytes_match_manifest": true,
+      "expected_content_type": "text/css",
+      "headers": {
+        "Content-Type": "text/css",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "https://maison.theearnalism.com",
+        "CF-Cache-Status": "MISS",
+        "CF-Ray": "a5c6b2f8fde0078b-MRS",
+        "Age": null,
+        "ETag": "\"8ff8330232d0e348999e620c9fa95295\"",
+        "Vary": "Origin"
+      }
+    },
+    {
+      "asset_type": "css",
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/app.css",
+      "attempt": 2,
+      "status": 200,
+      "sha256_matches_manifest": true,
+      "bytes_match_manifest": true,
+      "expected_content_type": "text/css",
+      "headers": {
+        "Content-Type": "text/css",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "https://maison.theearnalism.com",
+        "CF-Cache-Status": "HIT",
+        "CF-Ray": "a5c6b307692fe175-MRS",
+        "Age": "2",
+        "ETag": "\"8ff8330232d0e348999e620c9fa95295\"",
+        "Vary": "Origin"
+      }
+    },
+    {
+      "asset_type": "js",
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/app.js",
+      "attempt": 1,
+      "status": 200,
+      "sha256_matches_manifest": true,
+      "bytes_match_manifest": true,
+      "expected_content_type": "text/javascript",
+      "headers": {
+        "Content-Type": "text/javascript",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "https://maison.theearnalism.com",
+        "CF-Cache-Status": "MISS",
+        "CF-Ray": "a5c6b3137bdf3f09-MRS",
+        "Age": null,
+        "ETag": "\"9e91018cbe6f84a5c819e92489873166\"",
+        "Vary": "Origin"
+      }
+    },
+    {
+      "asset_type": "js",
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/app.js",
+      "attempt": 2,
+      "status": 200,
+      "sha256_matches_manifest": true,
+      "bytes_match_manifest": true,
+      "expected_content_type": "text/javascript",
+      "headers": {
+        "Content-Type": "text/javascript",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "https://maison.theearnalism.com",
+        "CF-Cache-Status": "HIT",
+        "CF-Ray": "a5c6b326cf35d2ad-MRS",
+        "Age": "2",
+        "ETag": "\"9e91018cbe6f84a5c819e92489873166\"",
+        "Vary": "Origin"
+      }
+    },
+    {
+      "asset_type": "woff2",
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/fonts/cormorant-garamond-latin-wght-normal.woff2",
+      "attempt": 1,
+      "status": 200,
+      "sha256_matches_manifest": true,
+      "bytes_match_manifest": true,
+      "expected_content_type": "font/woff2",
+      "headers": {
+        "Content-Type": "font/woff2",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "https://maison.theearnalism.com",
+        "CF-Cache-Status": "HIT",
+        "CF-Ray": "a5c6b331fffcc611-MRS",
+        "Age": "114",
+        "ETag": "\"c47ff12887a36dac62f887a6fdb51066\"",
+        "Vary": "Origin"
+      }
+    },
+    {
+      "asset_type": "woff2",
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/fonts/cormorant-garamond-latin-wght-normal.woff2",
+      "attempt": 2,
+      "status": 200,
+      "sha256_matches_manifest": true,
+      "bytes_match_manifest": true,
+      "expected_content_type": "font/woff2",
+      "headers": {
+        "Content-Type": "font/woff2",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "https://maison.theearnalism.com",
+        "CF-Cache-Status": "HIT",
+        "CF-Ray": "a5c6b340d83bfc1f-MRS",
+        "Age": "117",
+        "ETag": "\"c47ff12887a36dac62f887a6fdb51066\"",
+        "Vary": "Origin"
+      }
+    },
+    {
+      "asset_type": "webp",
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/art/ford-gold-column.webp",
+      "attempt": 1,
+      "status": 200,
+      "sha256_matches_manifest": true,
+      "bytes_match_manifest": true,
+      "expected_content_type": "image/webp",
+      "headers": {
+        "Content-Type": "image/webp",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "https://maison.theearnalism.com",
+        "CF-Cache-Status": "MISS",
+        "CF-Ray": "a5c6b34c9ea8e21d-MRS",
+        "Age": null,
+        "ETag": "\"1e183d8ff4326453892c60c39c58fcb2\"",
+        "Vary": "Origin"
+      }
+    },
+    {
+      "asset_type": "webp",
+      "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/art/ford-gold-column.webp",
+      "attempt": 2,
+      "status": 200,
+      "sha256_matches_manifest": true,
+      "bytes_match_manifest": true,
+      "expected_content_type": "image/webp",
+      "headers": {
+        "Content-Type": "image/webp",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Access-Control-Allow-Origin": "https://maison.theearnalism.com",
+        "CF-Cache-Status": "HIT",
+        "CF-Ray": "a5c6b3608a74ac32-MRS",
+        "Age": "2",
+        "ETag": "\"1e183d8ff4326453892c60c39c58fcb2\"",
+        "Vary": "Origin"
+      }
+    }
+  ],
+  "browser_user_agent_retry_reads": 8
+}

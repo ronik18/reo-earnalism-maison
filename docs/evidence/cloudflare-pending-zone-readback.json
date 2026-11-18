@@ -1,0 +1,154 @@
+{
+  "date": "2026-11-18",
+  "zone_status": "pending",
+  "record_count": 16,
+  "all_values_names_types_and_mx_priorities_match": true,
+  "all_records_dns_only": true,
+  "ttl_exact_matches": 12,
+  "ttl_exceptions": [
+    {
+      "name": "_railway-verify.api",
+      "type": "TXT",
+      "source_ttl": 14400,
+      "pending_ttl": "Auto"
+    },
+    {
+      "name": "api",
+      "type": "CNAME",
+      "source_ttl": 14400,
+      "pending_ttl": "Auto"
+    },
+    {
+      "name": "@",
+      "type": "MX",
+      "source_ttl": 14400,
+      "pending_ttl": "Auto"
+    },
+    {
+      "name": "@",
+      "type": "MX",
+      "source_ttl": 14400,
+      "pending_ttl": "Auto"
+    }
+  ],
+  "dashboard_limitation": "TTL menu has no14400-second/4-hour option; did not substitute a different fixed value. API/MX retain priorAuto; newly restoredRailwayTXT usesAuto.",
+  "public_dns_changed": false,
+  "nameservers_changed": false,
+  "book_remains_draft": true,
+  "records": [
+    {
+      "type": "A",
+      "fqdn": "ftp.theearnalism.com",
+      "content": "145.79.210.127",
+      "proxy": "DNS only",
+      "ttl_display": "30 min"
+    },
+    {
+      "type": "A",
+      "fqdn": "theearnalism.com",
+      "content": "76.76.21.21",
+      "proxy": "DNS only",
+      "ttl_display": "1 hr"
+    },
+    {
+      "type": "CNAME",
+      "fqdn": "api.theearnalism.com",
+      "content": "zg6cgit5.up.railway.app",
+      "proxy": "DNS only",
+      "ttl_display": "Auto"
+    },
+    {
+      "type": "CNAME",
+      "fqdn": "autoconfig.theearnalism.com",
+      "content": "autoconfig.mail.hostinger.com",
+      "proxy": "DNS only",
+      "ttl_display": "5 min"
+    },
+    {
+      "type": "CNAME",
+      "fqdn": "autodiscover.theearnalism.com",
+      "content": "autodiscover.mail.hostinger.com",
+      "proxy": "DNS only",
+      "ttl_display": "5 min"
+    },
+    {
+      "type": "CNAME",
+      "fqdn": "hostingermail-a._domainkey.theearnalism.com",
+      "content": "hostingermail-a.dkim.mail.hostinger.com",
+      "proxy": "DNS only",
+      "ttl_display": "5 min"
+    },
+    {
+      "type": "CNAME",
+      "fqdn": "hostingermail-b._domainkey.theearnalism.com",
+      "content": "hostingermail-b.dkim.mail.hostinger.com",
+      "proxy": "DNS only",
+      "ttl_display": "5 min"
+    },
+    {
+      "type": "CNAME",
+      "fqdn": "hostingermail-c._domainkey.theearnalism.com",
+      "content": "hostingermail-c.dkim.mail.hostinger.com",
+      "proxy": "DNS only",
+      "ttl_display": "5 min"
+    },
+    {
+      "type": "CNAME",
+      "fqdn": "reach-a._domainkey.theearnalism.com",
+      "content": "reach-a.dkim.reach.hostinger.com",
+      "proxy": "DNS only",
+      "ttl_display": "5 min"
+    },
+    {
+      "type": "CNAME",
+      "fqdn": "reach-b._domainkey.theearnalism.com",
+      "content": "reach-b.dkim.reach.hostinger.com",
+      "proxy": "DNS only",
+      "ttl_display": "5 min"
+    },
+    {
+      "type": "CNAME",
+      "fqdn": "www.theearnalism.com",
+      "content": "cname.vercel-dns.com",
+      "proxy": "DNS only",
+      "ttl_display": "1 hr"
+    },
+    {
+      "type": "MX",
+      "fqdn": "theearnalism.com",
+      "content": "mx2.hostinger.com",
+      "proxy": "DNS only",
+      "ttl_display": "Auto",
+      "priority": "10"
+    },
+    {
+      "type": "MX",
+      "fqdn": "theearnalism.com",
+      "content": "mx1.hostinger.com",
+      "proxy": "DNS only",
+      "ttl_display": "Auto",
+      "priority": "5"
+    },
+    {
+      "type": "TXT",
+      "fqdn": "_dmarc.theearnalism.com",
+      "content": "v=DMARC1; p=none",
+      "proxy": "DNS only",
+      "ttl_display": "1 hr"
+    },
+    {
+      "type": "TXT",
+      "fqdn": "_railway-verify.api.theearnalism.com",
+      "content": "railway-verify=728bb5d747a223a5f324dcb0d23971004844e329f892205092f50ddf01240893",
+      "proxy": "DNS only",
+      "ttl_display": "Auto"
+    },
+    {
+      "type": "TXT",
+      "fqdn": "theearnalism.com",
+      "content": "v=spf1 include:_spf.mail.hostinger.com include:_spf.reach.hostinger.com ~all",
+      "proxy": "DNS only",
+      "ttl_display": "1 hr"
+    }
+  ]
+}

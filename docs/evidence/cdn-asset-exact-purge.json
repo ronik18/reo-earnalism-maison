@@ -1,0 +1,27 @@
+{
+  "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/app.css",
+  "scope": "singleURL only via approved Cloudflare dashboard",
+  "pre_purge": "200HIT MRS",
+  "time": "2026-11-18T11:44:51.599137+00:00",
+  "readback": [
+    {
+      "name": "after_exact_purge",
+      "status": 200,
+      "cache": "HIT",
+      "ray": "a5c6b9bdbfd8a65d-MRS",
+      "age": "277",
+      "sha256": "983e8b0dc3242f5addcd2d4fcb86e8198e6e214f11cfa982d758f135fd2a79a3",
+      "bytes": 26388
+    },
+    {
+      "name": "repeat",
+      "status": 200,
+      "cache": "HIT",
+      "ray": "a5c6b9c288e8bccd-MRS",
+      "age": "277",
+      "sha256": "983e8b0dc3242f5addcd2d4fcb86e8198e6e214f11cfa982d758f135fd2a79a3",
+      "bytes": 26388
+    }
+  ],
+  "book_changed": false
+}

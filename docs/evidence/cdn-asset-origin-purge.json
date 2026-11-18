@@ -1,0 +1,43 @@
+{
+  "url": "https://assets-maison.theearnalism.com/static/19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142/maison/app.css",
+  "purge_scope": "exact URL plus Origin cache variant, no global purge",
+  "time": "2026-11-18T13:50:00.960636+00:00",
+  "pre": {
+    "name": "before_purge",
+    "status": 200,
+    "cache": "HIT",
+    "age": "7784",
+    "ray": "a5c771087f1683cc-MRS",
+    "sha256": "983e8b0dc3242f5addcd2d4fcb86e8198e6e214f11cfa982d758f135fd2a79a3",
+    "bytes": 26388,
+    "cors": "https://maison.theearnalism.com"
+  },
+  "ack": {
+    "status": 200,
+    "success": true,
+    "errors": [],
+    "messages": []
+  },
+  "post": {
+    "name": "after_purge",
+    "status": 200,
+    "cache": "MISS",
+    "age": null,
+    "ray": "a5c771110f2ee1f8-MRS",
+    "sha256": "983e8b0dc3242f5addcd2d4fcb86e8198e6e214f11cfa982d758f135fd2a79a3",
+    "bytes": 26388,
+    "cors": "https://maison.theearnalism.com"
+  },
+  "repeat": {
+    "name": "repeat",
+    "status": 200,
+    "cache": "HIT",
+    "age": "0",
+    "ray": "a5c771180b7fe214-MRS",
+    "sha256": "983e8b0dc3242f5addcd2d4fcb86e8198e6e214f11cfa982d758f135fd2a79a3",
+    "bytes": 26388,
+    "cors": "https://maison.theearnalism.com"
+  },
+  "passed": true,
+  "book_changed": false
+}

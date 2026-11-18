@@ -1,0 +1,31 @@
+{
+  "source": "b588d4c6176acd9e74477cae9ed2ba5928060e12",
+  "branch_ci": "https://github.com/ronik18/reo-earnalism-maison/actions/runs/44298969664",
+  "main_ci": "https://github.com/ronik18/reo-earnalism-maison/actions/runs/44306964748",
+  "render_service": "srv-dbunbd8jo6nc73akbng0",
+  "render_runtime_purge_adapter": {
+    "status": "acknowledged",
+    "url_count": 1,
+    "readback_verified_by_adapter": false,
+    "independent_readback": "cdn-app-provider-adapter.json"
+  },
+  "readiness": {
+    "status": 200,
+    "response": {
+      "status": "ok",
+      "request_id": "ec0f4105-8ad5-4e89-aac6-7658e377eb84"
+    }
+  },
+  "token": {
+    "permission": "Cache Purge only",
+    "zone": "theearnalism.com",
+    "expiration": null,
+    "storage": "ignored mode600 provider and Render profiles; encrypted Render environment",
+    "secret_committed_or_printed": false
+  },
+  "canonical_final_url": "https://theearnalism.com",
+  "qualification_url": "https://maison.theearnalism.com",
+  "legacy_cutover": false,
+  "book_published": false,
+  "time": "2026-11-18T14:01:45.036583+00:00"
+}

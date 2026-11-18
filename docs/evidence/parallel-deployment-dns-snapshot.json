@@ -1,0 +1,92 @@
+{
+  "date": "2026-11-18",
+  "scope": "bounded public DNS lookup; NOT a complete zone export",
+  "records": [
+    {
+      "name": "theearnalism.com",
+      "type": "NS",
+      "answers": [
+        "ns2.dns-parking.com.",
+        "ns1.dns-parking.com."
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "theearnalism.com",
+      "type": "A",
+      "answers": [
+        "76.76.21.21"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "www.theearnalism.com",
+      "type": "CNAME",
+      "answers": [
+        "cname.vercel-dns.com."
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "api.theearnalism.com",
+      "type": "CNAME",
+      "answers": [
+        "zg6cgit5.up.railway.app."
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "theearnalism.com",
+      "type": "MX",
+      "answers": [
+        "10 mx2.hostinger.com.",
+        "5 mx1.hostinger.com."
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "theearnalism.com",
+      "type": "TXT",
+      "answers": [
+        "\"v=spf1 include:_spf.mail.hostinger.com include:_spf.reach.hostinger.com ~all\""
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "_dmarc.theearnalism.com",
+      "type": "TXT",
+      "answers": [
+        "\"v=DMARC1; p=none\""
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "theearnalism.com",
+      "type": "CAA",
+      "answers": [],
+      "exit_code": 0
+    },
+    {
+      "name": "theearnalism.com",
+      "type": "DS",
+      "answers": [],
+      "exit_code": 0
+    },
+    {
+      "name": "maison.theearnalism.com",
+      "type": "A",
+      "answers": [],
+      "exit_code": 0
+    },
+    {
+      "name": "assets-maison.theearnalism.com",
+      "type": "A",
+      "answers": [],
+      "exit_code": 0
+    }
+  ],
+  "DNS_changed": false,
+  "legacy_changed": false,
+  "Hostinger_export": "requires existing account sign-in",
+  "Render": "approved service form remains blocked by Add Card"
+}

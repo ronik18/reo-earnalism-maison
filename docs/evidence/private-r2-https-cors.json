@@ -1,0 +1,33 @@
+{
+  "scope": "nonexistent-key preflight and unsigned denial only; not authenticated package journey",
+  "checks": [
+    {
+      "name": "allowed_preflight",
+      "status": 204,
+      "allow_origin": "https://maison.theearnalism.com",
+      "allow_methods": "GET, HEAD",
+      "allow_headers": "Range"
+    },
+    {
+      "name": "foreign_preflight",
+      "status": 403,
+      "allow_origin": null,
+      "allow_methods": null,
+      "allow_headers": null
+    },
+    {
+      "name": "unsigned_denied",
+      "status": 400,
+      "allow_origin": null,
+      "allow_methods": null,
+      "allow_headers": null
+    }
+  ],
+  "private_bucket_public_domain": false,
+  "existing_local_origins_preserved": true,
+  "maison_added_methods": [
+    "GET",
+    "HEAD"
+  ],
+  "book_changed": false
+}

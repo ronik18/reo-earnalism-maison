@@ -1,0 +1,417 @@
+{
+  "checked_unix": 1795001659.579984,
+  "authoritative_server_queried": "cesar.ns.cloudflare.com",
+  "nameservers": {
+    "answer": "; <<>> DiG 9.10.6 <<>> theearnalism.com NS +noall +answer +time=4 +tries=1\n;; global options: +cmd\ntheearnalism.com.\t86317\tIN\tNS\tcesar.ns.cloudflare.com.\ntheearnalism.com.\t86317\tIN\tNS\tligia.ns.cloudflare.com.",
+    "error": "",
+    "returncode": 0
+  },
+  "preserved_records": [
+    {
+      "type": "CNAME",
+      "name": "hostingermail-c._domainkey.theearnalism.com",
+      "expected": "hostingermail-c.dkim.mail.hostinger.com",
+      "inventory_ttl": "300",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com hostingermail-c._domainkey.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\nhostingermail-c._domainkey.theearnalism.com. 300 IN CNAME hostingermail-c.dkim.mail.hostinger.com.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "CNAME",
+      "name": "hostingermail-b._domainkey.theearnalism.com",
+      "expected": "hostingermail-b.dkim.mail.hostinger.com",
+      "inventory_ttl": "300",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com hostingermail-b._domainkey.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\nhostingermail-b._domainkey.theearnalism.com. 300 IN CNAME hostingermail-b.dkim.mail.hostinger.com.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "CNAME",
+      "name": "reach-b._domainkey.theearnalism.com",
+      "expected": "reach-b.dkim.reach.hostinger.com",
+      "inventory_ttl": "300",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com reach-b._domainkey.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\nreach-b._domainkey.theearnalism.com. 300 IN CNAME reach-b.dkim.reach.hostinger.com.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "CNAME",
+      "name": "hostingermail-a._domainkey.theearnalism.com",
+      "expected": "hostingermail-a.dkim.mail.hostinger.com",
+      "inventory_ttl": "300",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com hostingermail-a._domainkey.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\nhostingermail-a._domainkey.theearnalism.com. 300 IN CNAME hostingermail-a.dkim.mail.hostinger.com.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "CNAME",
+      "name": "reach-a._domainkey.theearnalism.com",
+      "expected": "reach-a.dkim.reach.hostinger.com",
+      "inventory_ttl": "300",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com reach-a._domainkey.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\nreach-a._domainkey.theearnalism.com. 300 IN CNAME reach-a.dkim.reach.hostinger.com.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "CNAME",
+      "name": "www.theearnalism.com",
+      "expected": "cname.vercel-dns.com",
+      "inventory_ttl": "3600",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com www.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\nwww.theearnalism.com.\t3600\tIN\tCNAME\tcname.vercel-dns.com.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        3600
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "CNAME",
+      "name": "autodiscover.theearnalism.com",
+      "expected": "autodiscover.mail.hostinger.com",
+      "inventory_ttl": "300",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com autodiscover.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\nautodiscover.theearnalism.com. 300 IN\tCNAME\tautodiscover.mail.hostinger.com.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "A",
+      "name": "ftp.theearnalism.com",
+      "expected": "145.79.210.127",
+      "inventory_ttl": "1800",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com ftp.theearnalism.com A +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\nftp.theearnalism.com.\t1800\tIN\tA\t145.79.210.127",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        1800
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "TXT",
+      "name": "_railway-verify.api.theearnalism.com",
+      "expected": "\"railway-verify=728bb5d747a223a5f324dcb0d23971004844e329f892205092f50ddf01240893\"",
+      "inventory_ttl": "14400",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com _railway-verify.api.theearnalism.com TXT +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\n_railway-verify.api.theearnalism.com. 300 IN TXT \"railway-verify=728bb5d747a223a5f324dcb0d23971004844e329f892205092f50ddf01240893\"",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": false
+    },
+    {
+      "type": "CNAME",
+      "name": "api.theearnalism.com",
+      "expected": "zg6cgit5.up.railway.app",
+      "inventory_ttl": "14400",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com api.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\napi.theearnalism.com.\t300\tIN\tCNAME\tzg6cgit5.up.railway.app.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": false
+    },
+    {
+      "type": "CNAME",
+      "name": "autoconfig.theearnalism.com",
+      "expected": "autoconfig.mail.hostinger.com",
+      "inventory_ttl": "300",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com autoconfig.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\nautoconfig.theearnalism.com. 300 IN\tCNAME\tautoconfig.mail.hostinger.com.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "TXT",
+      "name": "_dmarc.theearnalism.com",
+      "expected": "\"v=DMARC1; p=none\"",
+      "inventory_ttl": "3600",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com _dmarc.theearnalism.com TXT +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\n_dmarc.theearnalism.com. 3600\tIN\tTXT\t\"v=DMARC1; p=none\"",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        3600
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "TXT",
+      "name": "theearnalism.com",
+      "expected": "\"v=spf1 include:_spf.mail.hostinger.com include:_spf.reach.hostinger.com ~all\"",
+      "inventory_ttl": "3600",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com theearnalism.com TXT +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\ntheearnalism.com.\t3600\tIN\tTXT\t\"v=spf1 include:_spf.mail.hostinger.com include:_spf.reach.hostinger.com ~all\"",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        3600
+      ],
+      "ttl_matches_inventory": true
+    },
+    {
+      "type": "MX",
+      "name": "theearnalism.com",
+      "expected": "mx1.hostinger.com",
+      "inventory_ttl": "14400",
+      "expected_mx_priority": "5",
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com theearnalism.com MX +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\ntheearnalism.com.\t300\tIN\tMX\t10 mx2.hostinger.com.\ntheearnalism.com.\t300\tIN\tMX\t5 mx1.hostinger.com.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": false
+    },
+    {
+      "type": "MX",
+      "name": "theearnalism.com",
+      "expected": "mx2.hostinger.com",
+      "inventory_ttl": "14400",
+      "expected_mx_priority": "10",
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com theearnalism.com MX +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\ntheearnalism.com.\t300\tIN\tMX\t10 mx2.hostinger.com.\ntheearnalism.com.\t300\tIN\tMX\t5 mx1.hostinger.com.",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        300
+      ],
+      "ttl_matches_inventory": false
+    },
+    {
+      "type": "A",
+      "name": "theearnalism.com",
+      "expected": "76.76.21.21",
+      "inventory_ttl": "3600",
+      "expected_mx_priority": null,
+      "destination_present": true,
+      "answer": "; <<>> DiG 9.10.6 <<>> @cesar.ns.cloudflare.com theearnalism.com A +noall +answer +time=4 +tries=1\n; (6 servers found)\n;; global options: +cmd\ntheearnalism.com.\t3600\tIN\tA\t76.76.21.21",
+      "error": "",
+      "returncode": 0,
+      "authoritative_ttls": [
+        3600
+      ],
+      "ttl_matches_inventory": true
+    }
+  ],
+  "all_16_destinations_preserved": true,
+  "https": [
+    {
+      "host": "theearnalism.com",
+      "status": 200,
+      "final_url": "https://theearnalism.com/",
+      "error": null,
+      "headers": {
+        "Server": "Vercel",
+        "CF-Ray": null,
+        "Location": null,
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=0, must-revalidate"
+      },
+      "body_sha256": "235cef82c385fcdf9baaa2ae17212f4f6e4a62283f2ffc61e2f6cc5d15a0cc77",
+      "sample_bytes": 6973
+    },
+    {
+      "host": "www.theearnalism.com",
+      "status": 200,
+      "final_url": "https://www.theearnalism.com/",
+      "error": null,
+      "headers": {
+        "Server": "Vercel",
+        "CF-Ray": null,
+        "Location": null,
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "public, max-age=0, must-revalidate"
+      },
+      "body_sha256": "235cef82c385fcdf9baaa2ae17212f4f6e4a62283f2ffc61e2f6cc5d15a0cc77",
+      "sample_bytes": 6973
+    },
+    {
+      "host": "api.theearnalism.com",
+      "status": 404,
+      "final_url": "https://api.theearnalism.com/",
+      "error": null,
+      "headers": {
+        "Server": "railway-hikari",
+        "CF-Ray": null,
+        "Location": null,
+        "Content-Type": "application/json",
+        "Cache-Control": null
+      },
+      "body_sha256": "37ec4665a8102d115ffd1ac20dae94c98b4dac64b0c1a68228aa2a531caeb35d",
+      "sample_bytes": 22
+    },
+    {
+      "host": "maison.theearnalism.com",
+      "status": 403,
+      "final_url": "https://maison.theearnalism.com/",
+      "error": null,
+      "headers": {
+        "Server": "cloudflare",
+        "CF-Ray": "a5c6aa45e8b6b0fd-MRS",
+        "Location": null,
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+      },
+      "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "sample_bytes": 17
+    },
+    {
+      "host": "assets-maison.theearnalism.com",
+      "status": 403,
+      "final_url": "https://assets-maison.theearnalism.com/",
+      "error": null,
+      "headers": {
+        "Server": "cloudflare",
+        "CF-Ray": "a5c6aa51fe1a73ab-MRS",
+        "Location": null,
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0"
+      },
+      "body_sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "sample_bytes": 17
+    }
+  ],
+  "new_host_dns": {
+    "maison.theearnalism.com": {
+      "A": {
+        "answer": "; <<>> DiG 9.10.6 <<>> maison.theearnalism.com A +noall +answer +time=4 +tries=1\n;; global options: +cmd\nmaison.theearnalism.com. 206\tIN\tA\t104.21.25.226\nmaison.theearnalism.com. 206\tIN\tA\t172.67.134.208",
+        "error": "",
+        "returncode": 0
+      },
+      "AAAA": {
+        "answer": "; <<>> DiG 9.10.6 <<>> maison.theearnalism.com AAAA +noall +answer +time=4 +tries=1\n;; global options: +cmd\nmaison.theearnalism.com. 296\tIN\tAAAA\t2606:4700:3037::6815:19e2\nmaison.theearnalism.com. 296\tIN\tAAAA\t2606:4700:3034::ac43:86d0",
+        "error": "",
+        "returncode": 0
+      },
+      "CNAME": {
+        "answer": "; <<>> DiG 9.10.6 <<>> maison.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n;; global options: +cmd",
+        "error": "",
+        "returncode": 0
+      }
+    },
+    "assets-maison.theearnalism.com": {
+      "A": {
+        "answer": "; <<>> DiG 9.10.6 <<>> assets-maison.theearnalism.com A +noall +answer +time=4 +tries=1\n;; global options: +cmd\nassets-maison.theearnalism.com.\t297 IN\tA\t172.67.134.208\nassets-maison.theearnalism.com.\t297 IN\tA\t104.21.25.226",
+        "error": "",
+        "returncode": 0
+      },
+      "AAAA": {
+        "answer": "; <<>> DiG 9.10.6 <<>> assets-maison.theearnalism.com AAAA +noall +answer +time=4 +tries=1\n;; global options: +cmd\nassets-maison.theearnalism.com.\t297 IN\tAAAA\t2606:4700:3034::ac43:86d0\nassets-maison.theearnalism.com.\t297 IN\tAAAA\t2606:4700:3037::6815:19e2",
+        "error": "",
+        "returncode": 0
+      },
+      "CNAME": {
+        "answer": "; <<>> DiG 9.10.6 <<>> assets-maison.theearnalism.com CNAME +noall +answer +time=4 +tries=1\n;; global options: +cmd",
+        "error": "",
+        "returncode": 0
+      }
+    }
+  },
+  "dns_mutated_by_probe": false,
+  "book_mutated": false,
+  "ttl_note": "Raw authoritative answers retained. Owner accepted four AutoTTL exceptions; exact exception mapping requires pending-zone readback, not inferred here.",
+  "ttl_exceptions": [
+    {
+      "name": "_railway-verify.api.theearnalism.com",
+      "type": "TXT",
+      "from": 14400,
+      "to": [
+        300
+      ]
+    },
+    {
+      "name": "api.theearnalism.com",
+      "type": "CNAME",
+      "from": 14400,
+      "to": [
+        300
+      ]
+    },
+    {
+      "name": "theearnalism.com",
+      "type": "MX",
+      "from": 14400,
+      "to": [
+        300
+      ]
+    },
+    {
+      "name": "theearnalism.com",
+      "type": "MX",
+      "from": 14400,
+      "to": [
+        300
+      ]
+    }
+  ],
+  "all_ttl_changes_are_four_approved_14400_to_auto300": true,
+  "legacy_api_additional": [
+    {
+      "url": "https://api.theearnalism.com/health",
+      "status": 200,
+      "content_type": "application/json; charset=utf-8",
+      "sample_sha256": "f8c798c729c92a0b0f46db35794cca035fe8ec91a0a538bf29eab39559905c1b"
+    },
+    {
+      "url": "https://api.theearnalism.com/api/books/",
+      "status": 451,
+      "content_type": "application/json",
+      "sample_sha256": "5bd12895d0e28a46a25258d9d68b6f76b4612e10acec60fe6289a72f13f0cda2"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-18",
+  "scope": "actual Chrome on isolated HTTPS host with existing dedicated-Neon accounts",
+  "observed": [
+    "English home with real CDN assets",
+    "Bengali navigation and text",
+    "member sign-in succeeded",
+    "member settings loaded",
+    "signed-in member actual UUID draft Reader denied",
+    "member logout returned guest home",
+    "staff sign-in succeeded",
+    "staff MFA setup remains required"
+  ],
+  "reader_authenticated_package": "pending owner MFA; not claimed complete",
+  "book_stays_draft": true,
+  "canonical_final_url": "https://theearnalism.com",
+  "local_dns_retry": "fresh Chrome open NXDOMAIN on local stale Hostinger DNS; independent HTTPS DNS answers correct",
+  "no_security_bypass": true
+}

@@ -1,0 +1,43 @@
+{
+  "scope": "read-only HTTPS DNS checks after ChromeNXDOMAIN; no local DNS setting changes",
+  "checks": [
+    {
+      "endpoint": "https://cloudflare-dns.com/dns-query?name=theearnalism.com&type=NS",
+      "status": 0,
+      "answers": [
+        {
+          "name": "theearnalism.com",
+          "type": 2,
+          "TTL": 86400,
+          "data": "cesar.ns.cloudflare.com."
+        },
+        {
+          "name": "theearnalism.com",
+          "type": 2,
+          "TTL": 86400,
+          "data": "ligia.ns.cloudflare.com."
+        }
+      ],
+      "authority": null
+    },
+    {
+      "endpoint": "https://dns.google/resolve?name=maison.theearnalism.com&type=A",
+      "status": 0,
+      "answers": [
+        {
+          "name": "maison.theearnalism.com.",
+          "type": 1,
+          "TTL": 300,
+          "data": "104.21.25.226"
+        },
+        {
+          "name": "maison.theearnalism.com.",
+          "type": 1,
+          "TTL": 300,
+          "data": "172.67.134.208"
+        }
+      ],
+      "authority": null
+    }
+  ]
+}

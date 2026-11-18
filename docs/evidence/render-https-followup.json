@@ -1,0 +1,167 @@
+{
+  "base_url": "https://reo-earnalism-maison-qa.onrender.com",
+  "https_certificate_validation": true,
+  "checks": [
+    {
+      "name": "live_security",
+      "path": "/api/v1/health/live",
+      "status": 200,
+      "expected": 200,
+      "passed": true,
+      "headers": {
+        "Cache-Control": "private, no-store",
+        "CDN-Cache-Control": "no-store",
+        "Cloudflare-CDN-Cache-Control": null,
+        "Strict-Transport-Security": "max-age=31536000",
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'self'; img-src 'self' data: https://assets-maison.theearnalism.com; style-src 'self' https://assets-maison.theearnalism.com; script-src 'self' https://assets-maison.theearnalism.com; font-src 'self' https://assets-maison.theearnalism.com; connect-src 'self' https://9a524b17e84b2df55933527db876b69a.r2.cloudflarestorage.com https://assets-maison.theearnalism.com; media-src 'self' blob: https://9a524b17e84b2df55933527db876b69a.r2.cloudflarestorage.com; frame-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Content-Type": "application/json",
+        "Vary": "Accept-Language, Authorization, Cookie",
+        "Set-Cookie": null
+      },
+      "body_sha256": "71a73fe34dc974d3a012184378e828a31011a27fd89631def0245bc616625d21",
+      "bytes": 70
+    },
+    {
+      "name": "wrong_origin_session",
+      "path": "/api/v1/session",
+      "status": 403,
+      "expected": 403,
+      "passed": true,
+      "headers": {
+        "Cache-Control": "private, no-store",
+        "CDN-Cache-Control": "no-store",
+        "Cloudflare-CDN-Cache-Control": null,
+        "Strict-Transport-Security": "max-age=31536000",
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'self'; img-src 'self' data: https://assets-maison.theearnalism.com; style-src 'self' https://assets-maison.theearnalism.com; script-src 'self' https://assets-maison.theearnalism.com; font-src 'self' https://assets-maison.theearnalism.com; connect-src 'self' https://9a524b17e84b2df55933527db876b69a.r2.cloudflarestorage.com https://assets-maison.theearnalism.com; media-src 'self' blob: https://9a524b17e84b2df55933527db876b69a.r2.cloudflarestorage.com; frame-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Content-Type": "application/problem+json",
+        "Vary": "Authorization, Cookie",
+        "Set-Cookie": null
+      },
+      "body_sha256": "89070ea40fc71203ed3dd9f5176fc4a15a2a1103208d55fe7a596a6d11efc2d4",
+      "bytes": 214
+    },
+    {
+      "name": "oversized_origin",
+      "path": "/api/v1/session",
+      "status": 403,
+      "expected": 403,
+      "passed": true,
+      "headers": {
+        "Cache-Control": "private, no-store",
+        "CDN-Cache-Control": "no-store",
+        "Cloudflare-CDN-Cache-Control": null,
+        "Strict-Transport-Security": "max-age=31536000",
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'self'; img-src 'self' data: https://assets-maison.theearnalism.com; style-src 'self' https://assets-maison.theearnalism.com; script-src 'self' https://assets-maison.theearnalism.com; font-src 'self' https://assets-maison.theearnalism.com; connect-src 'self' https://9a524b17e84b2df55933527db876b69a.r2.cloudflarestorage.com https://assets-maison.theearnalism.com; media-src 'self' blob: https://9a524b17e84b2df55933527db876b69a.r2.cloudflarestorage.com; frame-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Content-Type": "application/problem+json",
+        "Vary": "Authorization, Cookie",
+        "Set-Cookie": null
+      },
+      "body_sha256": "a990d56850670ea858bc6412500756e87ac84a10c6e73f254f9bcbbd222c48f1",
+      "bytes": 214
+    },
+    {
+      "name": "spoofed_country_without_origin",
+      "path": "/api/v1/home?locale=en&territory=IN",
+      "status": 403,
+      "expected": 403,
+      "passed": true,
+      "headers": {
+        "Cache-Control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+        "CDN-Cache-Control": null,
+        "Cloudflare-CDN-Cache-Control": null,
+        "Strict-Transport-Security": null,
+        "X-Content-Type-Options": null,
+        "Content-Security-Policy": null,
+        "Referrer-Policy": "same-origin",
+        "Content-Type": "text/plain; charset=UTF-8",
+        "Vary": "accept-encoding",
+        "Set-Cookie": null
+      },
+      "body_sha256": "dc0c6785aa92ab46bea7162d2b2e8702f60d93f35850cf8a2ea1ba6d842ac6c2",
+      "bytes": 17,
+      "limitation": "Request included CF-Connecting-IP; upstream proxy may reject reserved-header spoofing. Status proves denial only, not application-specific country handling."
+    },
+    {
+      "name": "draft_path_without_origin",
+      "path": "/en/titles/the-selfish-giant/",
+      "status": 403,
+      "expected": 403,
+      "passed": true,
+      "headers": {
+        "Cache-Control": "private, no-store",
+        "CDN-Cache-Control": "no-store",
+        "Cloudflare-CDN-Cache-Control": null,
+        "Strict-Transport-Security": "max-age=31536000",
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'self'; img-src 'self' data: https://assets-maison.theearnalism.com; style-src 'self' https://assets-maison.theearnalism.com; script-src 'self' https://assets-maison.theearnalism.com; font-src 'self' https://assets-maison.theearnalism.com; connect-src 'self' https://9a524b17e84b2df55933527db876b69a.r2.cloudflarestorage.com https://assets-maison.theearnalism.com; media-src 'self' blob: https://9a524b17e84b2df55933527db876b69a.r2.cloudflarestorage.com; frame-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Content-Type": "application/problem+json",
+        "Vary": "Authorization, Cookie",
+        "Set-Cookie": null
+      },
+      "body_sha256": "d8fc9392a7a9ee5f31060c478829a33557f94e5425403ace893550af882a0cd4",
+      "bytes": 214
+    },
+    {
+      "name": "draft_reader_denied",
+      "path": "/en/read/55a3f5e3-f713-40b2-a873-942cd97bb1b7/",
+      "origin_authenticated": true,
+      "anonymous": true,
+      "status": 404,
+      "expected": [
+        302,
+        401,
+        403,
+        404
+      ],
+      "passed": true,
+      "cache_control": "private, no-store, max-age=0",
+      "cdn_cache_control": null,
+      "body_sha256": "de7f96f250b8bd2e446fa1725fc5d94412f2b25ff3bae86fbc6e49975a068d45",
+      "bytes": 27214,
+      "set_cookie_present": false
+    },
+    {
+      "name": "draft_catalog_denied",
+      "path": "/api/v1/catalog/editions/55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+      "origin_authenticated": true,
+      "anonymous": true,
+      "status": 404,
+      "expected": [
+        404
+      ],
+      "passed": true,
+      "cache_control": "private, no-store",
+      "cdn_cache_control": null,
+      "body_sha256": "a47d1ff8b43f4ddf67240b1f67ddb6e190a6f3ea741b7d317e27532be9b996af",
+      "bytes": 241,
+      "set_cookie_present": false
+    },
+    {
+      "name": "draft_cover_denied",
+      "path": "/api/v1/content/covers/55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+      "origin_authenticated": true,
+      "anonymous": true,
+      "status": 404,
+      "expected": [
+        404
+      ],
+      "passed": true,
+      "cache_control": "private, no-store",
+      "cdn_cache_control": null,
+      "body_sha256": "6008a4944abc96b551f862116ed78b47a46e832f6f0da895e50e29290e0fc169",
+      "bytes": 202,
+      "set_cookie_present": false
+    }
+  ],
+  "dns_changed": false,
+  "book_publication_changed": false,
+  "qualification_scope": "direct-origin rejection and security headers; no CDN acceptance inferred",
+  "all_expected_statuses_passed": true
+}

@@ -1,0 +1,116 @@
+{
+  "source_commit": "5ecc5ca94a0f1d6691c1c296c29a4a2a76babf54",
+  "service_id": "srv-dbunbd8jo6nc73akbng0",
+  "base_url": "https://reo-earnalism-maison-qa.onrender.com",
+  "https_certificate_validation": true,
+  "checks": [
+    {
+      "name": "live",
+      "path": "/api/v1/health/live",
+      "status": 200,
+      "expected": 200,
+      "passed": true,
+      "cache_control": "private, no-store",
+      "hsts": "max-age=31536000",
+      "content_type": "application/json",
+      "response": {
+        "status": "ok",
+        "request_id": "4622fadd-0fd2-418e-8486-faea382f1346"
+      }
+    },
+    {
+      "name": "origin_denied",
+      "path": "/api/v1/session",
+      "status": 403,
+      "expected": 403,
+      "passed": true,
+      "cache_control": "private, no-store",
+      "hsts": "max-age=31536000",
+      "content_type": "application/problem+json",
+      "response": {
+        "type": "about:blank",
+        "title": "Forbidden",
+        "status": 403,
+        "code": "origin_forbidden",
+        "detail": "Use the configured application origin.",
+        "request_id": "6b20b4cf-5ad8-4f11-a36f-3f257a2829bf",
+        "retryable": false
+      }
+    },
+    {
+      "name": "ready_denied",
+      "path": "/api/v1/health/ready",
+      "status": 403,
+      "expected": 403,
+      "passed": true,
+      "cache_control": "private, no-store",
+      "hsts": "max-age=31536000",
+      "content_type": "application/problem+json",
+      "response": {
+        "type": "about:blank",
+        "title": "Forbidden",
+        "status": 403,
+        "code": "origin_forbidden",
+        "detail": "Use the configured application origin.",
+        "request_id": "b2c1a327-99c6-4d39-8257-0ac13db7579f",
+        "retryable": false
+      }
+    },
+    {
+      "name": "ready_authenticated",
+      "path": "/api/v1/health/ready",
+      "status": 200,
+      "expected": 200,
+      "passed": true,
+      "cache_control": "private, no-store",
+      "hsts": "max-age=31536000",
+      "content_type": "application/json",
+      "response": {
+        "status": "ok",
+        "request_id": "f8a853e4-1d03-4072-8543-9ad335f56056"
+      }
+    },
+    {
+      "name": "http_redirect",
+      "status": 301,
+      "expected": 301,
+      "passed": true,
+      "cache_control": null,
+      "hsts": null,
+      "location": "https://reo-earnalism-maison-qa.onrender.com/api/v1/health/live",
+      "body_sha256": "3f4e62dbd07f0a0415d1ac89d14bc863283903c1fb7b730489e6525dad892561"
+    },
+    {
+      "name": "ready_without_probe",
+      "status": 403,
+      "expected": 403,
+      "passed": true,
+      "cache_control": "private, no-store",
+      "hsts": "max-age=31536000",
+      "location": null,
+      "body_sha256": "8dd1cbf02f4d8139a014515a586a9470319fa5869137b9baf841e5a10e4e3508"
+    },
+    {
+      "name": "draft_guest_denied",
+      "status": 404,
+      "expected": 404,
+      "passed": true,
+      "cache_control": "private, no-store, max-age=0",
+      "hsts": "max-age=31536000",
+      "location": null,
+      "body_sha256": "594bfdfa3be402da2dfb9f8293e9088535d535587e294024ab9235447ee57885"
+    },
+    {
+      "name": "anonymous_home",
+      "status": 200,
+      "expected": 200,
+      "passed": true,
+      "cache_control": "private, no-store, max-age=0",
+      "hsts": "max-age=31536000",
+      "location": null,
+      "body_sha256": "19d8ffd19314408a39ba7bbdc6f09ddee2ab0a4e341078224f5a38627436d8ab"
+    }
+  ],
+  "dns_changed": false,
+  "book_publication_changed": false
+}
