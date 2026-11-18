@@ -127,6 +127,48 @@ class RetentionTests(TestCase):
         self.assertTrue(User.objects.filter(pk=held.pk).exists())
         self.assertFalse(User.objects.filter(pk=eligible.pk).exists())
 
+    def test_checkpoint_advances_past_referenced_device_without_deleting_license(self):
+        from billing.models import Entitlement
+        from library.models import Work, Edition, Revision, Rights
+        from reader.models import DownloadLicense
+        import io, tempfile
+        from django.core.management import call_command
+        from django.test import override_settings
+        directory=tempfile.TemporaryDirectory();self.addCleanup(directory.cleanup)
+        config=override_settings(MEDIA_ROOT=directory.name,LOCAL=True,MAISON_LOCAL_FIXTURES=True)
+        config.enable();self.addCleanup(config.disable)
+        call_command('seed_local_pilot',stdout=io.StringIO())
+        edition=Edition.objects.select_related('live_revision').get(slug='river-notebook-en')
+        revision=edition.live_revision
+        right=revision.rights.get(format='reader',action='download')
+        entitlement=Entitlement.objects.create(grant_key='retention-test',user=self.member,source='free',scope='edition',edition=edition,revision=revision,formats=['reader'],valid_from=self.now-timedelta(days=2))
+        held=Device.objects.create(id=uuid.UUID(int=1),user=self.member,token_binding_sha256='h'*64,expires_at=self.now-timedelta(hours=1))
+        removable=Device.objects.create(id=uuid.UUID(int=2),user=self.member,token_binding_sha256='r'*64,expires_at=self.now-timedelta(days=1))
+        license=DownloadLicense.objects.create(user=self.member,device=held,entitlement=entitlement,revision=revision,rights_record=right,format='reader',territory='IN',manifest_sha256='a'*64,private_manifest_key='synthetic-retention-only',unit_ids=[str(revision.units.first().pk)],manifest={'edition_revision_id':str(revision.pk),'content_sha256':revision.content_sha256},issued_at=self.now-timedelta(hours=12),expires_at=self.now-timedelta(hours=1))
+        self.assertEqual(cleanup_account_retention(limit=1,dry_run=False)['eligible']['devices'],0)
+        self.assertEqual(cleanup_account_retention(limit=1,dry_run=False)['eligible']['devices'],1)
+        self.assertTrue(Device.objects.filter(pk=held.pk).exists())
+        self.assertFalse(Device.objects.filter(pk=removable.pk).exists())
+        license.refresh_from_db();self.assertEqual(license.device_id,held.pk)
+        checkpoint=OutboxJob.objects.get(dedupe_key='retention:v1')
+        self.assertIsNone(checkpoint.payload['cursors']['devices'])
+
+    def test_recorded_account_hold_preserves_tokens_mail_sessions_devices_receipts(self):
+        AuditEvent.objects.create(actor=self.member,action='retention.hold',entity_kind='User',entity_id=str(self.member.pk))
+        action,job=self.action()
+        orphan=OutboxJob.objects.create(kind='email_action',actor=self.member,dedupe_key=uuid.uuid4().hex,payload={'action_id':str(uuid.uuid4())},status='done',completed_at=self.now-timedelta(days=9),not_before=self.now)
+        session=Session.objects.create(session_key='held-session',session_data='private',expire_date=self.now-timedelta(days=1))
+        device=Device.objects.create(user=self.member,session=session,token_binding_sha256='h'*64,expires_at=self.now-timedelta(days=1))
+        receipt=OperationReceipt.objects.create(actor=self.member,operation_id=uuid.uuid4(),kind='progress.update',request_sha256='h'*64,http_status=200,response={},expires_at=self.now-timedelta(days=1))
+        OperationReceipt.objects.filter(pk=receipt.pk).update(created_at=self.now-timedelta(days=36))
+        result=cleanup_account_retention(dry_run=False)
+        self.assertTrue(all(count==0 for count in result['eligible'].values()))
+        self.assertTrue(EmailActionToken.objects.filter(pk=action.pk).exists())
+        self.assertTrue(Session.objects.filter(pk=session.pk).exists());self.assertTrue(Device.objects.filter(pk=device.pk).exists())
+        self.assertTrue(OperationReceipt.objects.filter(pk=receipt.pk).exists())
+        job.refresh_from_db();orphan.refresh_from_db()
+        self.assertIn('action_id',job.payload);self.assertIn('action_id',orphan.payload)
+
 
 from threading import Event, Thread
 from django.db import close_old_connections, connection, connections, transaction
@@ -158,3 +200,29 @@ class RetentionConcurrencyTests(TransactionTestCase):
         finally:release.set();worker.join(timeout=10)
         self.assertFalse(worker.is_alive());self.assertEqual(errors,[])
         self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['action_tokens'],1)
+
+
+    def test_concurrent_apply_checkpoint_is_busy_then_resumes(self):
+        now=timezone.now();user=User.objects.create_user('busy@example.test',is_verified=True)
+        checkpoint=OutboxJob.objects.create(kind='retention_checkpoint',dedupe_key='retention:v1',status='done',not_before=now,payload={'cursors':{}})
+        action=EmailActionToken.objects.create(user=user,email_normalized=user.email,purpose='verify_email',token_sha256=uuid.uuid4().hex,expires_at=now-timedelta(days=9))
+        locked=Event();release=Event();errors=[]
+        def hold():
+            close_old_connections()
+            try:
+                with transaction.atomic():
+                    OutboxJob.objects.select_for_update().get(pk=checkpoint.pk)
+                    locked.set();release.wait(timeout=10)
+            except Exception as error:errors.append(error);locked.set()
+            finally:connections.close_all()
+        worker=Thread(target=hold);worker.start()
+        try:
+            self.assertTrue(locked.wait(timeout=5));self.assertEqual(errors,[])
+            report=cleanup_account_retention(dry_run=False)
+            self.assertTrue(report['busy']);self.assertEqual(report['eligible'],{})
+            self.assertTrue(EmailActionToken.objects.filter(pk=action.pk).exists())
+            checkpoint.refresh_from_db();self.assertEqual(checkpoint.payload,{'cursors':{}})
+        finally:release.set();worker.join(timeout=10)
+        self.assertFalse(worker.is_alive());self.assertEqual(errors,[])
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['action_tokens'],1)
+        self.assertFalse(EmailActionToken.objects.filter(pk=action.pk).exists())

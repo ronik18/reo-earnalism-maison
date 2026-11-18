@@ -13,8 +13,17 @@ from core.models import AuditEvent, OperationReceipt, OutboxJob
 from .models import User, Preferences, Consent, Device, EmailActionToken
 
 
+def _held(user_id):
+    # Conservative compatibility with recorded internal audit markers; this is
+    # not a hold creation/release API and markers are never auto-released.
+    return bool(user_id) and AuditEvent.objects.filter(
+        actor_id=user_id, action__in=['legal.hold', 'retention.hold']).exists()
+
+
 def _terminal_mail(job):
     # SMTP timeout after DATA is uncertain even when retries eventually stop.
+    if _held(job.actor_id):
+        return False
     if job.status not in ('done', 'cancelled'):
         return False
     if job.payload.get('retention_hold') or job.payload.get('legal_hold'):
@@ -101,7 +110,7 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
         if not remaining(): break
         with transaction.atomic():
             action = EmailActionToken.objects.select_for_update(skip_locked=True).filter(pk=pk).filter(old_action).first()
-            if not action: continue
+            if not action or _held(action.user_id): continue
             jobs = list(OutboxJob.objects.select_for_update(skip_locked=True).filter(kind='email_action', payload__action_id=str(action.pk)))
             # Don't race a worker holding a job lock; compare before accepting.
             if len(jobs) != OutboxJob.objects.filter(kind='email_action', payload__action_id=str(action.pk)).count(): continue
@@ -157,13 +166,14 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
         with transaction.atomic():
             session = Session.objects.select_for_update(skip_locked=True).filter(pk=pk, expire_date__lte=now).first()
             if not session: continue
+            if any(_held(user_id) for user_id in Device.objects.filter(session=session).values_list('user_id', flat=True)): continue
             counts['sessions'] += 1
             if not dry_run: session.delete()
     for pk in ids(Device.objects.filter(expires_at__lte=now), 'devices'):
         if not remaining(): break
         with transaction.atomic():
             device = Device.objects.select_for_update(skip_locked=True).filter(pk=pk, expires_at__lte=now).first()
-            if not device: continue
+            if not device or _held(device.user_id): continue
             # Preserve downloads/security references instead of cascading them.
             if any(rel.related_model._default_manager.filter(**{rel.field.name: device}).exists() for rel in Device._meta.related_objects): continue
             counts['devices'] += 1
@@ -174,7 +184,7 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
         if not remaining(): break
         with transaction.atomic():
             row = OperationReceipt.objects.select_for_update(skip_locked=True).filter(pk=pk, expires_at__lte=now, created_at__lte=receipt_cutoff).first()
-            if not row: continue
+            if not row or _held(row.actor_id): continue
             counts['receipts'] += 1
             if not dry_run: row.delete()
     return report
