@@ -1,0 +1,20 @@
+{
+  "source": "f14736f0e602b111b60d728f939478453f87c6fd",
+  "scope": "local-restored",
+  "remaining_migrations": 0,
+  "TLS": false,
+  "migration_count": 43,
+  "guard_trigger_count": 4,
+  "keyset_index_count": 9,
+  "schema_fingerprint": "9dae7a9765ca7bae22633c414d9d0022ee317dc34084d23506196ce985c57b0b",
+  "new_model_counts": {
+    "Subscription": 0,
+    "Mandate": 0,
+    "InvoiceArtifact": 0,
+    "CatalogCollection": 0
+  },
+  "book_state": "draft",
+  "live_revision_id": null,
+  "paragraph_count": 32,
+  "content_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4"
+}

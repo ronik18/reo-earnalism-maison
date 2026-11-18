@@ -1,0 +1,23 @@
+{
+  "database_identity_sha256": "d815a87676e16b28ea6d36ead327421e2d19584e472be528e726f5fb60d27a58",
+  "postgres_version": "18.7 (a21afb5)",
+  "TLS": true,
+  "backend_pg_stat_ssl": false,
+  "connection_role": "direct",
+  "timeouts": {
+    "statement_timeout": "5s",
+    "lock_timeout": "2s",
+    "idle_in_transaction_session_timeout": "10s"
+  },
+  "pending_migrations": [
+    "billing.0005_subscription_lifecycle",
+    "billing.0006_invoice_artifact",
+    "billing.0007_history_keyset_indexes",
+    "library.0005_catalog_collections",
+    "reader.0004_private_keyset_indexes"
+  ],
+  "book_state": "draft",
+  "live_revision_id": null,
+  "paragraph_count": 32,
+  "content_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4"
+}

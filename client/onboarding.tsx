@@ -13,7 +13,7 @@ function destination(boot: Boot, preferredLocale?: string) {
 }
 function Onboarding({ boot }: { boot: Boot }) {
   const [step, setStep] = useState(0);
-  const [choice, setChoice] = useState<Choice>({ locale, theme: "light", interests: [], goal: "relax" });
+  const [choice, setChoice] = useState<Choice>(() => ({ locale, theme: ["light", "dark", "true_black"].find(value => document.body.classList.contains("theme-" + value)) || "dark", interests: [], goal: "relax" }));
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [finished, setFinished] = useState(false);

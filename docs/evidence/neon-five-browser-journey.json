@@ -1,0 +1,26 @@
+{
+  "source_base": "f14736f",
+  "scope": "loopback8009 on actual dedicated Neon18/privateR2; reviewed staff only",
+  "migrations_applied": 5,
+  "total_applied": 43,
+  "pending": 0,
+  "browser": "Chrome, isolated from parallel local UI cookie hosts",
+  "checks": {
+    "front_and_back_covers": true,
+    "publisher_footer_unchanged": true,
+    "32_paragraphs_opening_ending": true,
+    "gold_note_saved_and_restored": true,
+    "progress_saved": true,
+    "23px_sepia_preferences_persisted": true,
+    "BN_controls_keep_EN_edition": true,
+    "explicit_unfinish_then_finish": true,
+    "Saved_and_Finished_reopen_draft": true,
+    "logout_denies_draft": true
+  },
+  "fixed_gap": "Premature live-only Vault prefilter hid authorized staff draft completion; existing permissions/MFA/territory checks retained and regression denies ordinary/foreign-region access.",
+  "book_state": "draft",
+  "live_revision_id": null,
+  "public_release": false,
+  "production_HTTPS_CDN_qualified": false,
+  "physical_devices_qualified": false
+}

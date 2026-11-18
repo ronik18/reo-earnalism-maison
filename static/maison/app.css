@@ -44,3 +44,14 @@ main{min-width:0}h1,h2,h3,p,a,button{overflow-wrap:break-word}img{max-width:100%
 .theme-light .page-title::after,.theme-light .collection-header::after,.theme-light .ornamental-panel::after,.theme-light .auth-panel::after,.theme-light .onboarding-panel::after,.theme-true_black .page-title::after,.theme-true_black .collection-header::after{display:none}
 @media(max-width:900px){.page-title,.collection-header{padding-right:170px}.page-title::after,.collection-header::after{width:150px;height:135px;opacity:.3}}
 @media(max-width:767px){.page-title,.collection-header{padding-right:0;min-height:0}.page-title::after,.collection-header::after{display:none}.ornamental-panel::after,.auth-panel::after,.onboarding-panel::after{display:none}}
+
+/* P0 review: keep recovery copy and mobile controls free of decoration. */
+.media-unavailable{padding-right:clamp(280px,40%,480px);background-size:clamp(220px,38%,420px) auto}
+.theme-true_black .media-unavailable{background-image:none;padding-right:clamp(24px,5vw,64px)}
+@media(max-width:900px){.media-unavailable{background-image:none;padding-right:clamp(24px,5vw,64px)}}
+@media(max-width:767px){.status-panel .actions{align-items:stretch}.status-panel .actions>*{flex:1 1 130px;text-align:center;justify-content:center}.status-panel .actions>.text-link{flex-basis:100%}}
+
+.player-panel>header{padding-right:0;background:none}
+#commerce-island{margin-bottom:24px}
+
+.notice[aria-labelledby="invoice-detail-heading"]>button,.notice[aria-labelledby="invoice-detail-heading"]>a{margin:6px 12px 6px 0}

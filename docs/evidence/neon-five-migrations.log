@@ -1,0 +1,8 @@
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, billing, contenttypes, core, learning, library, operations, otp_totp, reader, sessions
+Running migrations:
+  Applying billing.0005_subscription_lifecycle... OK
+  Applying billing.0006_invoice_artifact... OK
+  Applying billing.0007_history_keyset_indexes... OK
+  Applying library.0005_catalog_collections... OK
+  Applying reader.0004_private_keyset_indexes... OK

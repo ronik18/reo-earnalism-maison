@@ -1,0 +1,212 @@
+{
+  "base_commit": "f14736f0e602b111b60d728f939478453f87c6fd",
+  "date": "2026-11-18",
+  "browser": "IAB Chromium",
+  "viewport_coverage": [
+    "1440x1000 desktop",
+    "1280x720 desktop",
+    "390x844 mobile",
+    "360x800 Bengali stress sample"
+  ],
+  "checks": {
+    "frontend_tests": 26,
+    "web_tests": 24,
+    "typecheck": "pass",
+    "build": "pass",
+    "diff_check": "pass"
+  },
+  "scope": "Visual/layout review of 23 P0 screen families and selected key states, not exhaustive state or release acceptance. S14/S19/S25 deferred. Synthetic local PostgreSQL/media; no real book or live platform mutations.",
+  "pending": [
+    "Physical Android Chrome",
+    "Physical iPhone/iPad Safari",
+    "Safari/WebKit and Firefox cross-engine review",
+    "External auth providers, active Stream, recurring purchase and public audio sample qualification",
+    "All offline/storage/error/result permutations and full accessibility audit"
+  ],
+  "screens": [
+    {
+      "id": "S01",
+      "name": "Onboarding",
+      "health": "Refined",
+      "notes": "Theme selection now starts from the displayed theme. Comfort, Interests, Purpose; Light and True Black sampled.",
+      "desktop": "S01-desktop.jpg",
+      "mobile": "S01-mobile.jpg"
+    },
+    {
+      "id": "S02",
+      "name": "Authentication",
+      "health": "Clear",
+      "notes": "Sign-in form and recovery disclosure fit narrow screens. External auth providers remain gated.",
+      "desktop": "S02-desktop.jpg",
+      "mobile": "S02-mobile.jpg"
+    },
+    {
+      "id": "S03",
+      "name": "Guest home",
+      "health": "Clear",
+      "notes": "Hero, original fixture covers and primary actions remain separated.",
+      "desktop": "S03-desktop.jpg",
+      "mobile": "S03-mobile.jpg"
+    },
+    {
+      "id": "S04",
+      "name": "Member home",
+      "health": "Clear",
+      "notes": "Settled Continue card preserves complete cover and readable title.",
+      "desktop": "S04-desktop.jpg",
+      "mobile": "S04-mobile.jpg"
+    },
+    {
+      "id": "S05",
+      "name": "Explore",
+      "health": "Clear",
+      "notes": "Filters reflow to one column; library and collection routes inspected.",
+      "desktop": "S05-desktop.jpg",
+      "mobile": "S05-mobile.jpg"
+    },
+    {
+      "id": "S06",
+      "name": "Search",
+      "health": "Clear",
+      "notes": "Expanded and collapsed filters, results, Bengali query and lower content inspected.",
+      "desktop": "S06-desktop.jpg",
+      "mobile": "S06-mobile.jpg"
+    },
+    {
+      "id": "S07",
+      "name": "Title detail",
+      "health": "Clear",
+      "notes": "Complete cover, title, description, contents and format actions fit desktop/mobile.",
+      "desktop": "S07-desktop.jpg",
+      "mobile": "S07-mobile.jpg"
+    },
+    {
+      "id": "S08",
+      "name": "Reader",
+      "health": "Clear",
+      "notes": "Plain reading field; bounded guest and full member routes; comfort sheet scrolls within viewport.",
+      "desktop": "S08-desktop.jpg",
+      "mobile": "S08-mobile.jpg"
+    },
+    {
+      "id": "S09",
+      "name": "Reader preview boundary",
+      "health": "Clear",
+      "notes": "Actual boundary dialog; dismiss restores control; no ornament behind copy.",
+      "desktop": "S09-desktop.jpg",
+      "mobile": "S09-mobile.jpg"
+    },
+    {
+      "id": "S10",
+      "name": "Audio player",
+      "health": "Refined",
+      "notes": "Removed desktop artwork under Minimize control; full/mini mobile panels stay above navigation. Synthetic audio only.",
+      "desktop": "S10-desktop.jpg",
+      "mobile": "S10-mobile.jpg"
+    },
+    {
+      "id": "S11",
+      "name": "Audio preview boundary",
+      "health": "Clear / harness",
+      "notes": "Actual Player component uses isolated physically bounded 6-second synthetic MP3. Public sample backend remains unqualified.",
+      "desktop": "S11-desktop.jpg",
+      "mobile": "S11-mobile.jpg"
+    },
+    {
+      "id": "S12",
+      "name": "Video unavailable",
+      "health": "Refined / gated",
+      "notes": "Removed artwork behind mobile copy; desktop reserves artwork space. Active provider playback remains disabled.",
+      "desktop": "S12-desktop.jpg",
+      "mobile": "S12-mobile.jpg"
+    },
+    {
+      "id": "S13",
+      "name": "Series",
+      "health": "Clear",
+      "notes": "Index and episode detail use one separated desktop motif; mobile has no decorative layers.",
+      "desktop": "S13-desktop.jpg",
+      "mobile": "S13-mobile.jpg"
+    },
+    {
+      "id": "S15",
+      "name": "Format switch",
+      "health": "Refined",
+      "notes": "Added spacing between chapter-start and Cancel actions; real full Reader sheet inspected.",
+      "desktop": "S15-desktop.jpg",
+      "mobile": "S15-mobile.jpg"
+    },
+    {
+      "id": "S16",
+      "name": "Learn and track",
+      "health": "Clear",
+      "notes": "Track card and lesson/question outline fit desktop/mobile.",
+      "desktop": "S16-desktop.jpg",
+      "mobile": "S16-mobile.jpg"
+    },
+    {
+      "id": "S17",
+      "name": "Lesson and quiz",
+      "health": "Clear",
+      "notes": "Question, radios and submit form reflow cleanly; existing regression tests passed. All result/error permutations not visually exhausted.",
+      "desktop": "S17-desktop.jpg",
+      "mobile": "S17-mobile.jpg"
+    },
+    {
+      "id": "S18",
+      "name": "Interview question",
+      "health": "Clear",
+      "notes": "Long question and model-answer expansion preserve hierarchy and rubric spacing.",
+      "desktop": "S18-desktop.jpg",
+      "mobile": "S18-mobile.jpg"
+    },
+    {
+      "id": "S20",
+      "name": "Pass",
+      "health": "Refined / gated",
+      "notes": "Corrected current navigation and guest block spacing. Guest and no-approved-offer states; recurring purchase unavailable.",
+      "desktop": "S20-desktop.jpg",
+      "mobile": "S20-mobile.jpg"
+    },
+    {
+      "id": "S21",
+      "name": "Checkout",
+      "health": "Refined / gated",
+      "notes": "Owned synthetic pending order settles with status, amount, reference and Refresh action; Pass navigation corrected. No provider charge.",
+      "desktop": "S21-desktop.jpg",
+      "mobile": "S21-mobile.jpg"
+    },
+    {
+      "id": "S22",
+      "name": "Vault and lists",
+      "health": "Clear",
+      "notes": "25 synthetic lists; Show more loads remaining five; personal-list controls reflow.",
+      "desktop": "S22-desktop.jpg",
+      "mobile": "S22-mobile.jpg"
+    },
+    {
+      "id": "S23",
+      "name": "Downloads",
+      "health": "Clear / partial",
+      "notes": "Actual empty local-device state inspected. Physical storage/eviction/download permutations pending.",
+      "desktop": "S23-desktop.jpg",
+      "mobile": "S23-mobile.jpg"
+    },
+    {
+      "id": "S24",
+      "name": "Settings and billing",
+      "health": "Refined",
+      "notes": "Profile, agreement review, invoice history/detail and synthetic PDF-request response inspected; invoice actions spaced.",
+      "desktop": "S24-desktop.jpg",
+      "mobile": "S24-mobile.jpg"
+    },
+    {
+      "id": "S26",
+      "name": "System recovery",
+      "health": "Refined",
+      "notes": "Recovery buttons wrap consistently; English/Bengali maintenance, shared recovery shell reviewed.",
+      "desktop": "S26-desktop.jpg",
+      "mobile": "S26-mobile.jpg"
+    }
+  ]
+}

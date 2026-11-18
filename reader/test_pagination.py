@@ -95,3 +95,23 @@ class PrivatePaginationTests(TestCase):
             self.assertEqual(cards.call_count,25)
             explicit=vault_data(self.user,territory='GB',request=self.request({'section':'finished'},territory='GB'))
             self.assertEqual([x['card']['edition_id'] for x in explicit['finished']],[str(target)])
+
+    def test_private_staff_draft_completion_survives_vault_without_customer_exposure(self):
+        from django.contrib.auth.models import Permission
+        from library.models import Rights
+        self.user.is_staff=True;self.user.save(update_fields=['is_staff'])
+        self.user.user_permissions.add(Permission.objects.get(content_type__app_label='library',codename='publish_revision'))
+        edition=self.editions[0]
+        revision=Revision.objects.create(edition=edition,title='Private original draft',content_sha256='a'*64)
+        now=timezone.now()
+        Rights.objects.create(revision=revision,format='reader',action='read',territories=['IN'],starts_at=now-timedelta(days=1),ends_at=now+timedelta(days=1),approved=True,test_only=True)
+        for user in (self.user,self.other):
+            Completion.objects.create(user=user,edition=edition,revision=revision,format='reader',is_complete=True,completed_at=now)
+        staff=vault_data(self.user,territory='IN',request=self.request({'section':'finished'}))
+        self.assertEqual([row['card']['edition_id'] for row in staff['finished']],[str(edition.id)])
+        ordinary=vault_data(self.other,territory='IN',request=self.request({'section':'finished'},user=self.other))
+        self.assertEqual(ordinary['finished'],[])
+        foreign=vault_data(self.user,territory='GB',request=self.request({'section':'finished'},territory='GB'))
+        self.assertEqual(foreign['finished'],[])
+        edition.refresh_from_db();self.assertIsNone(edition.live_revision_id)
+        revision.refresh_from_db();self.assertEqual(revision.state,'draft')

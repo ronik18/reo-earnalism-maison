@@ -1,0 +1,14 @@
+{
+  "scope": "actual dedicated Neon,pooled TLS",
+  "note_gold_persisted": true,
+  "reader_font_size": 23,
+  "reader_theme": "sepia",
+  "progress_version": 6,
+  "progress_anchor_id": "d2378984-52b0-49d1-95fa-716e845c1cd4",
+  "completion_version": 5,
+  "complete": true,
+  "saved": true,
+  "book_state": "draft",
+  "live_revision_id": null,
+  "content_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4"
+}

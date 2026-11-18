@@ -1,0 +1,36 @@
+{
+  "source_base": "f14736f",
+  "candidate": "draft-Vault fix and reviewed UI refinements",
+  "scope": "actual migrated Neon18/privateR2,loopback8009",
+  "package_sha_verified": true,
+  "paragraph_count": 32,
+  "CORS_actual_origin": true,
+  "covers": [
+    {
+      "asset_id": "29bc02fb-7f23-49cd-9215-1e371e6e77fc",
+      "http": 200,
+      "sha_verified": true,
+      "bytes": 120336
+    },
+    {
+      "asset_id": "e13e5534-6deb-4197-85ed-fa2274faad4e",
+      "http": 200,
+      "sha_verified": true,
+      "bytes": 116697
+    }
+  ],
+  "guest_denial": {
+    "reader": 404,
+    "manifest": 401,
+    "cover": 401,
+    "public_catalog": 404
+  },
+  "member_denial": {
+    "reader": 404,
+    "manifest": 404,
+    "cover": 403,
+    "public_catalog": 404
+  },
+  "book_state": "draft",
+  "public_release": false
+}

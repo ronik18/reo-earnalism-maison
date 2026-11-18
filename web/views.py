@@ -343,7 +343,7 @@ def settings(request, locale):
 @require_GET
 @domain_view
 def pass_page(request, locale):
-    return page(request, locale, "web/pass.html", commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
+    return page(request, locale, "web/pass.html", active_nav="pass", commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
 
 
 @require_GET
@@ -460,7 +460,7 @@ def checkout(request,locale,order_id):
     order=Order.objects.filter(pk=order_id,user=request.user).first()
     if not order:
         raise Http404
-    return page(request,locale,"web/checkout.html",commerce_bootstrap={"order_id":str(order_id),"return_path":safe_return(order.return_path,locale)})
+    return page(request,locale,"web/checkout.html",active_nav="pass",commerce_bootstrap={"order_id":str(order_id),"return_path":safe_return(order.return_path,locale)})
 
 
 @require_GET

@@ -79,7 +79,7 @@ export function FormatSwitch({open, onClose, busy, status, onExact, chapterUrl, 
     <p>{t("switch_format_help")}</p>
     {!online ? <p className="notice">{t("switch_offline_unavailable")}</p> : <button disabled={busy} onClick={onExact}>{t(target === "reader" ? "switch_to_read" : "switch_to_listen")}</button>}
     <p role="status" aria-live="polite">{status}</p>
-    <p>{t("switch_chapter_choice")}</p><a className="button secondary" href={validReturnPath(chapterUrl)}>{t(target === "reader" ? "read_from_chapter" : "listen_from_start")}</a>
-    <button onClick={onClose}>{t("cancel")}</button>
+    <p>{t("switch_chapter_choice")}</p><div className="actions"><a className="button secondary" href={validReturnPath(chapterUrl)}>{t(target === "reader" ? "read_from_chapter" : "listen_from_start")}</a>
+    <button onClick={onClose}>{t("cancel")}</button></div>
   </MediaSheet>;
 }

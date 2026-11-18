@@ -1,5 +1,7 @@
 # HTTPS/CDN qualification handoff
 
+**Current,18November2026:** approved54-file7,266,812byte release `19e40009002433e09db905c865b34d85da4c8d457b5630431e135dfc71b40142` uploaded and completely verified, preserving prior releases. The prepared ignored Render profile now matches this ID. The pending Free zone exists with Bot Preference Sync disabled; Hostinger nameservers/DNS are unchanged. Render still requires owner card entry; no service has been provisioned. Production HTTPS/CDN HIT/MISS/purge remain pending. [Current evidence](evidence/neon-current-static-release.json). The older image/release below is retained as history, not the next deployment target.
+
 18November2026. See PENDING_VALIDATIONS.md for the single acceptance register. The Selfish Giant stays draft. Existing platform, nameservers and public DNS must remain unchanged pending separate approval.
 
 ## Prepared release
@@ -12,7 +14,7 @@ Use prepare_public_assets for local manifest generation. publish_public_assets i
 
 Owner approved one separate Render Docker web service, Singapore,$7/month plus tax/usage, no workspace upgrade/higher tier. It is qualification only, not HA acceptance. Bind only reo-earnalism-maison; automatic deployment OFF; exact qualified merged-main source. Existing Google Workspace SMTP and Neon/R2 secrets belong only in that service encrypted environment, never logs or browser screenshots. Health path /api/v1/health/live; port8000; maintain direct-origin deny and staff MFA. No additional DB/Redis/disk/service. RenderFree cannot qualify currentSMTP465/587.
 
-Owner approved pending CloudflareFreezone preparation for theearnalism.com and proposed isolated app/asset hosts. Do not change authoritative nameservers/public DNS or production routing until a complete record export, preservation diff, rollback and exact destinations are reviewed and explicitly approved. Account currently has no domain. Partial/CNAME Cloudflare setups have separate paid-plan requirements; no unapproved paid workaround.
+Owner approved pending CloudflareFreezone preparation for theearnalism.com and proposed isolated app/asset hosts. Do not change authoritative nameservers/public DNS or production routing until a complete record export, preservation diff, rollback and exact destinations are reviewed and explicitly approved. The zone is pending activation; no public nameserver/DNS change is approved yet. Partial/CNAME Cloudflare setups have separate paid-plan requirements; no unapproved paid workaround.
 
 Three scoped90day account credentials expire16February2027: private read, private upload, public deployment; all actual least-privilege checks pass. Keep public deployment key out of web runtime after deployment; backup credentials/bucket remain separate and unqualified. Zone-specific cache-purge credential will use CLOUDFLARE_CACHE_PURGE_TOKEN only after an exactzone exists/permission is approved. No DNS/admin key in runtime.
 

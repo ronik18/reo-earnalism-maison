@@ -1,5 +1,7 @@
 # Neon PostgreSQL18 and first-book acceptance
 
+**Latest,18November2026:** all five follow-up migrations are now applied to dedicated Neon:43total,zero pending. Direct/pooled TLS, protected backup plus populated restore rehearsal, unchanged draft identity/content and the actual32-paragraph R2/browser journey pass. The staff-draft Finished projection was corrected without exposing drafts to customers. See the [central register](PENDING_VALIDATIONS.md) and [fresh browser record](evidence/neon-five-browser-journey.json); historical counts below are superseded.
+
 **Latest provider/source milestone:** see [provider qualification handoff](PROVIDER_QUALIFICATION_HANDOFF.md). The historical37-migration result below predates the added cache-ledger migration.
 
 **Pending acceptance checks:** use the [central pending validation register](PENDING_VALIDATIONS.md) for provider, CDN HIT/MISS/purge, email, device and final release dependencies. Earlier milestone gaps below are historical; close items only with actual evidence.

@@ -249,8 +249,8 @@ def vault_data(user,territory='IN',request=None):
     section=request.GET.get('section','summary') if request else 'summary'
     if section not in ('summary','continue','finished','lists'):raise DomainError('validation_error','Invalid Vault section.',422)
     if section=='summary' and request and any(k in request.GET for k in ('cursor','limit')):raise DomainError('validation_error','Choose an explicit Vault section to paginate.',422)
-    progress=Progress.objects.filter(user=user).annotate(finished=Exists(Completion.objects.filter(user=user,edition_id=OuterRef('edition_id'),format=OuterRef('format'),is_complete=True))).filter(finished=False,edition__live_revision__state='live').select_related('edition__work','edition__live_revision').order_by('-updated_at','-id')
-    completions=Completion.objects.filter(user=user,is_complete=True,edition__live_revision__state='live').select_related('edition__work','edition__live_revision').order_by('-updated_at','-id')
+    progress=Progress.objects.filter(user=user).annotate(finished=Exists(Completion.objects.filter(user=user,edition_id=OuterRef('edition_id'),format=OuterRef('format'),is_complete=True))).filter(finished=False).select_related('edition__work','edition__live_revision').order_by('-updated_at','-id')
+    completions=Completion.objects.filter(user=user,is_complete=True).select_related('edition__work','edition__live_revision').order_by('-updated_at','-id')
     def serialize(row,kind):
         try:card=catalog_card(row.edition,user=user,territory=territory)
         except DomainError:return None
