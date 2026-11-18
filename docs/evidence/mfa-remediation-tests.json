@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-18",
+  "backend_tests": 229,
+  "backend_result": "PASS",
+  "backend_seconds": 146.627,
+  "runtime": "Python3.13 and isolated local PostgreSQL18",
+  "migration_drift": "No changes detected",
+  "frontend_tests": 26,
+  "typecheck": "PASS",
+  "production_build": "PASS",
+  "npm_audit_vulnerabilities": 0,
+  "live_draft_readback": {
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "state": "draft",
+    "live_revision_id": null,
+    "content_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4"
+  },
+  "live_staff_reader": "PENDING owner MFA",
+  "deployed": false
+}
