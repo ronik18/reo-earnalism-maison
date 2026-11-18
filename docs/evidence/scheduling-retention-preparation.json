@@ -1,0 +1,21 @@
+{
+  "status": "source_prepared_not_activated",
+  "checked_on": "2026-11-19",
+  "affected_tests": 55,
+  "affected_tests_result": "pass",
+  "render_blueprints": [
+    "deployment/maintenance.render.yaml",
+    "deployment/export.render.yaml"
+  ],
+  "official_schema_sha256": "6c6721a602ef6d368d5c9384c473cefaae99980e43dd4b1adcf8a2f258fc54f4",
+  "schema_result": "pass",
+  "new_dependency": false,
+  "new_schema_migration": false,
+  "paid_resources_created": false,
+  "credentials_created": false,
+  "provider_retention_configured": false,
+  "recurring_trigger_verified": false,
+  "book_published": false,
+  "legacy_changed": false,
+  "dns_changed": false
+}

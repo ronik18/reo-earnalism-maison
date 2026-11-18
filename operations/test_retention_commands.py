@@ -22,7 +22,7 @@ class RetentionCommandTests(SimpleTestCase):
 
     def test_maintenance_previews_unless_apply_switch_is_provided(self):
         for apply in (False, True):
-            with self.subTest(apply=apply), patch('core.jobs.run_due_jobs', return_value={'processed': 0}), patch('accounts.privacy.cleanup_expired_exports', return_value={}), patch('accounts.services.cleanup_rate_buckets', return_value={}), patch('operations.cache.cleanup_expired_references', return_value={}), patch('accounts.retention.cleanup_account_retention', return_value={}) as cleanup:
+            with self.subTest(apply=apply), patch('operations.scheduled_runs.start_run', return_value='synthetic-run'), patch('operations.scheduled_runs.finish_run'), patch('core.jobs.run_due_jobs', return_value={'processed': 0}), patch('accounts.privacy.cleanup_expired_exports', return_value={}), patch('accounts.services.cleanup_rate_buckets', return_value={}), patch('operations.cache.cleanup_expired_references', return_value={}), patch('accounts.retention.cleanup_account_retention', return_value={}) as cleanup:
                 call_command('run_maintenance', apply_retention=apply, stdout=io.StringIO())
                 self.assertEqual(cleanup.call_args.kwargs['dry_run'], not apply)
                 self.assertLessEqual(cleanup.call_args.kwargs['max_seconds'], 5)

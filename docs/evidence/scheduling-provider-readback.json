@@ -1,0 +1,36 @@
+{
+  "checked_on": "2026-11-19",
+  "read_only": true,
+  "render": {
+    "workspace": "earnalism",
+    "plan": "Hobby",
+    "members": 1,
+    "service": "reo-earnalism-maison-qa",
+    "instance": "0.5CPU/512MiB",
+    "native_log_retention_days": 7,
+    "new_cron_created": false
+  },
+  "neon": {
+    "org_id": "org-misty-dew-00335964",
+    "plan": "free",
+    "project_id": "quiet-cloud-63128335",
+    "region": "aws-ap-southeast-1",
+    "postgresql": 18,
+    "history_retention_seconds": 21600,
+    "endpoint_id": "ep-wispy-wildflower-aotla8gh",
+    "min_cu": 0.25,
+    "max_cu": 2,
+    "suspend_timeout_seconds_raw": 0,
+    "suspend_interpretation": "provider default300seconds"
+  },
+  "approved_production_baseline": {
+    "neon_plan": "Scale",
+    "min_cu": 0.5,
+    "max_cu": 2,
+    "autosuspend": false,
+    "restore_history_days": 7
+  },
+  "provider_settings_changed": false,
+  "paid_resources_provisioned": false,
+  "dns_changed": false
+}

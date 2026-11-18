@@ -1,6 +1,6 @@
 """Bounded, preview-first housekeeping for the owner-approved retention windows.
 
-No provider calls, financial/audit deletion, or blanket inactive-account purge.
+No provider calls, financial/publication audit deletion, or blanket account purge.
 """
 import time
 from datetime import timedelta
@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from core.models import AuditEvent, OperationReceipt, OutboxJob
 from .models import User, Preferences, Consent, Device, EmailActionToken
 
@@ -16,8 +17,67 @@ from .models import User, Preferences, Consent, Device, EmailActionToken
 def _held(user_id):
     # Conservative compatibility with recorded internal audit markers; this is
     # not a hold creation/release API and markers are never auto-released.
-    return bool(user_id) and AuditEvent.objects.filter(
-        actor_id=user_id, action__in=['legal.hold', 'retention.hold']).exists()
+    if not user_id:
+        return False
+    return AuditEvent.objects.filter(action__in=['legal.hold', 'retention.hold']).filter(
+        Q(actor_id=user_id) | Q(entity_kind='User', entity_id=str(user_id))).exists()
+
+
+# Only existing routine authentication outcomes are eligible. New actions do not
+# silently inherit a deletion policy; publication/rights/finance/privacy/consent
+# records and hold markers are deliberately outside this allowlist.
+ROUTINE_SECURITY_ACTIONS = frozenset({
+    'account.registered', 'account.email_verified', 'account.password_reset',
+    'device.revoked', 'staff.mfa_enrolled', 'staff.mfa_recovery_used',
+})
+
+
+def _row_held(row):
+    if _held(row.actor_id):
+        return True
+    for field in ('payload', 'result', 'detail'):
+        value = getattr(row, field, {})
+        if not isinstance(value, dict) or value.get('retention_hold') or value.get('legal_hold'):
+            return True
+    targets = Q(entity_kind=type(row).__name__, entity_id=str(row.pk))
+    if isinstance(row, AuditEvent):
+        targets |= Q(entity_kind=row.entity_kind, entity_id=row.entity_id)
+    return AuditEvent.objects.filter(action__in=['legal.hold', 'retention.hold']).filter(targets).exists()
+
+
+def _support_case(job):
+    """Return validated operator resolution metadata, never infer it from SMTP."""
+    import re
+    import uuid
+    if not isinstance(job.result, dict):
+        return None
+    case = job.result.get('retention_case')
+    if (not isinstance(case, dict) or set(case) != {'schema_version', 'resolved_at', 'resolved_by', 'resolution_ref', 'obligations_reviewed'}
+            or type(case.get('schema_version')) is not int or case.get('schema_version') != 1
+            or case.get('obligations_reviewed') is not True):
+        return None
+    stamp = case.get('resolved_at')
+    if not isinstance(stamp, str):
+        return None
+    try:
+        resolved_at = parse_datetime(stamp)
+        uuid.UUID(str(case.get('resolved_by')))
+    except (ValueError, TypeError):
+        return None
+    if not resolved_at or timezone.is_naive(resolved_at):
+        return None
+    reference = case.get('resolution_ref')
+    if not isinstance(reference, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,79}', reference):
+        return None
+    return case, resolved_at
+
+
+def _support_submitted(job):
+    return (job.kind == 'contact_support' and job.status == 'done'
+            and isinstance(job.payload, dict) and isinstance(job.result, dict)
+            and job.payload.get('email_outcome') != 'unknown'
+            and job.result.get('status') == 'submitted'
+            and job.result.get('smtp_submission_accepted') is True)
 
 
 def _terminal_mail(job):
@@ -79,7 +139,7 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
         raise ValueError('require a positive time budget<=30 and boolean dry_run')
     now = timezone.now(); cutoff = now - timedelta(days=7)
     deadline = time.monotonic() + max_seconds
-    counts = dict(action_tokens=0, mail_payloads=0, sessions=0, devices=0, receipts=0, abandoned_signups=0)
+    counts = dict(action_tokens=0, mail_payloads=0, sessions=0, devices=0, receipts=0, abandoned_signups=0, audit_outcomes=0, support_payloads=0)
     report = {'dry_run': dry_run, 'eligible': counts, 'time_budget_exhausted': False}
 
     cursors = cursors if cursors is not None else {}
@@ -187,6 +247,43 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
             if not row or _held(row.actor_id): continue
             counts['receipts'] += 1
             if not dry_run: row.delete()
+    security_cutoff = now - timedelta(days=90)
+    for pk in ids(AuditEvent.objects.filter(action__in=ROUTINE_SECURITY_ACTIONS, actor__isnull=False, created_at__lte=security_cutoff), 'security_audit'):
+        if not remaining(): break
+        with transaction.atomic():
+            row = AuditEvent.objects.select_for_update(skip_locked=True).filter(
+                pk=pk, action__in=ROUTINE_SECURITY_ACTIONS,
+                actor__isnull=False, created_at__lte=security_cutoff).first()
+            if not row or _row_held(row): continue
+            expected_kind = 'Device' if row.action == 'device.revoked' else 'User'
+            # Unexpected entity/detail can carry incident evidence; preserve it.
+            if row.entity_kind != expected_kind or row.detail != {}: continue
+            if expected_kind == 'User':
+                if row.entity_id != str(row.actor_id): continue
+            else:
+                try:
+                    if not Device.objects.filter(pk=row.entity_id, user_id=row.actor_id).exists(): continue
+                except (ValueError, ValidationError):
+                    continue
+            counts['audit_outcomes'] += 1
+            if not dry_run: row.delete()
+
+    # Scan only explicitly resolved support cases; SMTP submission alone never
+    # starts the90-day clock. Keyset checkpointing advances past held prefixes.
+    support = OutboxJob.objects.filter(kind='contact_support', status='done', result__retention_case__isnull=False).exclude(result__status='retention_cleaned')
+    for pk in ids(support, 'support_cases'):
+        if not remaining(): break
+        with transaction.atomic():
+            row = OutboxJob.objects.select_for_update(skip_locked=True).filter(pk=pk, kind='contact_support', status='done').first()
+            if not row or _row_held(row) or not _support_submitted(row): continue
+            metadata = _support_case(row)
+            if not metadata or metadata[1] > security_cutoff: continue
+            case, _ = metadata
+            counts['support_payloads'] += 1
+            if not dry_run:
+                row.payload = {'retention_cleaned': True}
+                row.result = {'status': 'retention_cleaned', 'retention_case': case}
+                row.error_code = ''; row.save(update_fields=['payload', 'result', 'error_code'])
     return report
 
 

@@ -1,0 +1,39 @@
+"""03:00UTC entrypoint: separate backup credentials, no Django web startup.
+
+Run with ``python -m operations.scheduled_export``. Retention previews unless
+--apply-retention is explicitly configured after provider approval.
+"""
+import argparse
+import json
+import os
+import tempfile
+from .database_archive import Archive, ArchiveConfig, ArchiveError
+from .database_export import export_database, ExportError
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--apply-retention', action='store_true')
+    args = parser.parse_args(argv)
+    try:
+        config = ArchiveConfig(endpoint=os.getenv('BACKUP_R2_ENDPOINT', ''), bucket=os.getenv('BACKUP_R2_BUCKET', ''),
+                               key_id=os.getenv('BACKUP_R2_KEY_ID', ''), secret=os.getenv('BACKUP_R2_SECRET', ''),
+                               held_prefixes=tuple(json.loads(os.getenv('BACKUP_HELD_PREFIXES', '[]'))))
+        # Validate isolated archive configuration before producing an export.
+        config.validate()
+        with tempfile.TemporaryDirectory(prefix='maison-encrypted-archive-') as directory:
+            report = export_database(os.getenv('MAISON_BACKUP_DATABASE_URL', ''), os.getenv('BACKUP_AGE_RECIPIENT', ''), directory)
+            archive = Archive(config)
+            uploaded = archive.upload(report, directory)
+            retention = archive.retention(apply=args.apply_retention)
+        print(json.dumps({'status': 'verified_archive', 'ciphertext_bytes': report['ciphertext_bytes'],
+                          'ciphertext_sha256': report['ciphertext_sha256'], 'archives': uploaded,
+                          'retention': retention, 'restore_verified': False}, sort_keys=True))
+        return 0
+    except (ArchiveError, ExportError, ValueError, TypeError, OSError):
+        print(json.dumps({'status': 'failed', 'code': 'backup_archive_failed'}))
+        return 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

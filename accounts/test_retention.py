@@ -226,3 +226,165 @@ class RetentionConcurrencyTests(TransactionTestCase):
         self.assertFalse(worker.is_alive());self.assertEqual(errors,[])
         self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['action_tokens'],1)
         self.assertFalse(EmailActionToken.objects.filter(pk=action.pk).exists())
+
+
+class SecurityAndSupportRetentionTests(TestCase):
+    def setUp(self):
+        self.now = timezone.now()
+        self.user = User.objects.create_user('security-retention@example.test', is_verified=True)
+        self.operator = User.objects.create_user('operator-retention@example.test', is_staff=True, is_verified=True)
+
+    def audit(self, action='account.password_reset', days=91, actor=True, detail=None, kind='User'):
+        target = str(self.user.pk)
+        if kind == 'Device':
+            target = str(Device.objects.create(user=self.user, token_binding_sha256=uuid.uuid4().hex,
+                                               expires_at=self.now+timedelta(days=1)).pk)
+        row = AuditEvent.objects.create(actor=self.user if actor else None, action=action,
+                                       entity_kind=kind, entity_id=target, detail=detail or {})
+        AuditEvent.objects.filter(pk=row.pk).update(created_at=self.now-timedelta(days=days))
+        return row
+
+    def support(self, days=91, resolved=True, status='done', outcome='submitting', **changes):
+        case = {'schema_version':1, 'resolved_at':(self.now-timedelta(days=days)).isoformat(),
+                'resolved_by':str(self.operator.public_id), 'resolution_ref':'CASE-123', 'obligations_reviewed':True}
+        result = {'status':'submitted', 'smtp_submission_accepted':True, 'delivery_confirmed':False,
+                  'message_id':'private-message-id'}
+        if resolved: result['retention_case'] = case
+        row = OutboxJob.objects.create(kind='contact_support', actor=self.user, dedupe_key=uuid.uuid4().hex,
+                                       status=status, not_before=self.now, completed_at=self.now-timedelta(days=120),
+                                       payload={'email':'private@example.test', 'message':'private message',
+                                                'category':'account', 'email_outcome':outcome}, result=result)
+        for field, value in changes.items(): setattr(row, field, value)
+        if changes: row.save()
+        return row
+
+    def test_exact_allowlist_cutoff_preview_and_other_evidence_preserved(self):
+        from .retention import ROUTINE_SECURITY_ACTIONS
+        eligible = [self.audit(action=action, kind='Device' if action=='device.revoked' else 'User') for action in ROUTINE_SECURITY_ACTIONS]
+        preserve = [self.audit(action=action) for action in [
+            'content.publish', 'book.draft_import', 'asset.complete', 'payment.capture_applied',
+            'consent.changed', 'privacy.account_anonymised', 'unknown.future_security_action']]
+        preserve += [self.audit(days=89), self.audit(actor=False), self.audit(detail={'incident':'open'}), self.audit(kind='Unexpected')]
+        before = AuditEvent.objects.count()
+        preview = cleanup_account_retention()
+        self.assertEqual(preview['eligible']['audit_outcomes'], len(eligible))
+        self.assertEqual(AuditEvent.objects.count(), before)
+        result = cleanup_account_retention(dry_run=False)
+        self.assertEqual(result['eligible']['audit_outcomes'], len(eligible))
+        self.assertFalse(AuditEvent.objects.filter(pk__in=[row.pk for row in eligible]).exists())
+        self.assertEqual(AuditEvent.objects.filter(pk__in=[row.pk for row in preserve]).count(), len(preserve))
+
+    def test_user_subject_mismatch_and_missing_mismatched_or_held_device_preserved(self):
+        subject=User.objects.create_user('held-subject@example.test',is_verified=True)
+        AuditEvent.objects.create(action='legal.hold',entity_kind='User',entity_id=str(subject.pk))
+        mismatch=self.audit();mismatch.entity_id=str(subject.pk);mismatch.save()
+        wrong_device=self.audit(action='device.revoked',kind='Device')
+        Device.objects.filter(pk=wrong_device.entity_id).update(user=subject)
+        missing=self.audit(action='device.revoked',kind='Device')
+        Device.objects.filter(pk=missing.entity_id).delete()
+        malformed=self.audit(action='device.revoked',kind='Device');malformed.entity_id='not-a-device';malformed.save()
+        held=self.audit(action='device.revoked',kind='Device')
+        AuditEvent.objects.create(action='retention.hold',entity_kind='Device',entity_id=held.entity_id)
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['audit_outcomes'],0)
+        for row in [mismatch,wrong_device,missing,malformed,held]:
+            self.assertTrue(AuditEvent.objects.filter(pk=row.pk).exists())
+
+    def test_actor_row_and_exact_entity_holds_are_never_expired(self):
+        row = self.audit(detail={'retention_hold':True, 'review_at':'2000-01-01T00:00:00Z'})
+        targeted = self.audit()
+        marker = AuditEvent.objects.create(action='legal.hold', entity_kind='AuditEvent', entity_id=str(targeted.pk),
+                                          detail={'review_at':'2000-01-01T00:00:00Z'})
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['audit_outcomes'], 0)
+        row.detail = {}; row.save()
+        AuditEvent.objects.create(action='retention.hold', entity_kind='User', entity_id=str(self.user.pk))
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['audit_outcomes'], 0)
+        self.assertTrue(AuditEvent.objects.filter(pk=marker.pk).exists())
+
+    def test_support_requires_actual_resolution_and_90days_then_scrubs_only_content(self):
+        old = self.support(); recent = self.support(days=89); unresolved = self.support(resolved=False)
+        preview = cleanup_account_retention()
+        self.assertEqual(preview['eligible']['support_payloads'], 1)
+        old.refresh_from_db(); self.assertIn('message',old.payload)
+        result = cleanup_account_retention(dry_run=False)
+        self.assertEqual(result['eligible']['support_payloads'], 1)
+        old.refresh_from_db(); recent.refresh_from_db(); unresolved.refresh_from_db()
+        self.assertEqual(old.payload, {'retention_cleaned':True})
+        self.assertEqual(set(old.result), {'status','retention_case'})
+        self.assertEqual(old.result['retention_case']['resolution_ref'], 'CASE-123')
+        self.assertIn('message',recent.payload); self.assertIn('message',unresolved.payload)
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['support_payloads'], 0)
+
+    def test_support_preserves_unknown_malformed_unreviewed_and_held_cases(self):
+        rows = [self.support(status='pending'), self.support(outcome='unknown'), self.support(days=-1)]
+        unreviewed = self.support(); unreviewed.result['retention_case']['obligations_reviewed']=False; unreviewed.save(); rows.append(unreviewed)
+        malformed = self.support(); malformed.result['retention_case']['resolved_at']='bad'; malformed.save(); rows.append(malformed)
+        naive = self.support(); naive.result['retention_case']['resolved_at']='2020-01-01T00:00:00'; naive.save(); rows.append(naive)
+        held = self.support(); held.payload['legal_hold']=True; held.save(); rows.append(held)
+        exact = self.support(); AuditEvent.objects.create(action='retention.hold',entity_kind='OutboxJob',entity_id=str(exact.pk)); rows.append(exact)
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['support_payloads'], 0)
+        for row in rows:
+            row.refresh_from_db(); self.assertIn('message',row.payload)
+
+    def test_actor_hold_and_result_hold_preserve_support_until_explicit_review(self):
+        actor_held=self.support()
+        AuditEvent.objects.create(actor=self.user,action='legal.hold',entity_kind='User',entity_id=str(self.user.pk),
+                                  detail={'review_at':'2000-01-01T00:00:00Z'})
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['support_payloads'],0)
+        actor_held.refresh_from_db();self.assertIn('message',actor_held.payload)
+        other=User.objects.create_user('other-held@example.test',is_verified=True)
+        result_held=self.support(actor=other)
+        result_held.result['retention_hold']=True;result_held.save()
+        extra=self.support(actor=other)
+        extra.result['retention_case']['unexpected_private_detail']='preserve unknown resolution metadata';extra.save()
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['support_payloads'],0)
+        for row in [result_held,extra]:
+            row.refresh_from_db();self.assertIn('message',row.payload)
+
+    def test_held_prefix_does_not_starve_eligible_audit_or_support(self):
+        held_audit=self.audit(); eligible_audit=self.audit()
+        AuditEvent.objects.filter(pk=held_audit.pk).update(id=uuid.UUID(int=100))
+        AuditEvent.objects.filter(pk=eligible_audit.pk).update(id=uuid.UUID(int=101))
+        AuditEvent.objects.create(action='retention.hold',entity_kind='AuditEvent',entity_id=str(uuid.UUID(int=100)))
+        held_support=self.support(); eligible_support=self.support()
+        OutboxJob.objects.filter(pk=held_support.pk).update(id=uuid.UUID(int=200))
+        OutboxJob.objects.filter(pk=eligible_support.pk).update(id=uuid.UUID(int=201))
+        AuditEvent.objects.create(action='retention.hold',entity_kind='OutboxJob',entity_id=str(uuid.UUID(int=200)))
+        first=cleanup_account_retention(limit=1,dry_run=False)['eligible']
+        second=cleanup_account_retention(limit=1,dry_run=False)['eligible']
+        self.assertEqual((first['audit_outcomes'],first['support_payloads']),(0,0))
+        self.assertEqual((second['audit_outcomes'],second['support_payloads']),(1,1))
+
+    def test_exact_90day_boundary(self):
+        from unittest.mock import patch
+        audit=self.audit(days=90); support=self.support(days=90)
+        with patch('accounts.retention.timezone.now',return_value=self.now):
+            report=cleanup_account_retention(dry_run=False)['eligible']
+        self.assertEqual((report['audit_outcomes'],report['support_payloads']),(1,1))
+
+
+@skipUnless(connection.vendor == 'postgresql', 'PostgreSQL row locking required')
+class SupportRetentionConcurrencyTests(TransactionTestCase):
+    def test_support_cleanup_skips_operator_locked_case_then_resumes(self):
+        now=timezone.now();user=User.objects.create_user('support-locking@example.test',is_verified=True)
+        case={'schema_version':1,'resolved_at':(now-timedelta(days=91)).isoformat(),
+              'resolved_by':str(user.public_id),'resolution_ref':'CASE-LOCK','obligations_reviewed':True}
+        job=OutboxJob.objects.create(kind='contact_support',actor=user,dedupe_key=uuid.uuid4().hex,status='done',
+            not_before=now,payload={'message':'private','email_outcome':'submitting'},
+            result={'status':'submitted','smtp_submission_accepted':True,'retention_case':case})
+        locked=Event();release=Event();errors=[]
+        def hold():
+            close_old_connections()
+            try:
+                with transaction.atomic():
+                    OutboxJob.objects.select_for_update().get(pk=job.pk)
+                    locked.set();release.wait(timeout=10)
+            except Exception as error:errors.append(error);locked.set()
+            finally:connections.close_all()
+        worker=Thread(target=hold);worker.start()
+        try:
+            self.assertTrue(locked.wait(timeout=5));self.assertEqual(errors,[])
+            self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['support_payloads'],0)
+            job.refresh_from_db();self.assertIn('message',job.payload)
+        finally:release.set();worker.join(timeout=10)
+        self.assertFalse(worker.is_alive());self.assertEqual(errors,[])
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['support_payloads'],1)

@@ -1,0 +1,30 @@
+# Prepared only: new billable job and backup credentials require owner approval.
+# Existing web service, content buckets, DNS and private restore identity are untouched.
+services:
+  - type: cron
+    name: reo-earnalism-maison-independent-export
+    runtime: docker
+    region: singapore
+    plan: starter
+    repo: https://github.com/ronik18/reo-earnalism-maison
+    branch: main
+    autoDeployTrigger: 'off'
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    schedule: '0 3 * * *'
+    dockerCommand: python -m operations.scheduled_export --apply-retention
+    envVars:
+      - key: MAISON_BACKUP_DATABASE_URL
+        sync: false
+      - key: BACKUP_AGE_RECIPIENT
+        sync: false
+      - key: BACKUP_R2_ENDPOINT
+        sync: false
+      - key: BACKUP_R2_BUCKET
+        sync: false
+      - key: BACKUP_R2_KEY_ID
+        sync: false
+      - key: BACKUP_R2_SECRET
+        sync: false
+      - key: BACKUP_HELD_PREFIXES
+        value: '[]'

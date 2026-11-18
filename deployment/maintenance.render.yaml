@@ -1,0 +1,83 @@
+# Prepared only: syncing creates a new billable cron service. Obtain approval first.
+# Official schema: https://render.com/schema/render.yaml.json
+# Blueprint docs: https://render.com/docs/blueprint-spec
+# Cron docs: https://render.com/docs/cronjobs
+# Cost: >=$1/month cron fee, active-second usage, tax and provider usage extra.
+# A one-minute DB poll prevents Neon's normal5-minute suspend. At the approved
+# minimum.5CU this is360CUh/30days, beyond100CUh Free; Scale.222/CUh gives
+# $79.92 compute baseline, up to$319.68 at continuous2CU, before storage/history. Read back the actual project plan/rate before activation.
+# No existing web service, DNS record, public URL or backup schedule is modified.
+services:
+  - type: cron
+    name: reo-earnalism-maison-maintenance
+    runtime: docker
+    region: singapore
+    plan: starter
+    repo: https://github.com/ronik18/reo-earnalism-maison
+    branch: main
+    autoDeployTrigger: 'off'
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    schedule: '* * * * *'
+    dockerCommand: python manage.py run_maintenance --apply-retention --run-source scheduled --max-seconds 45 --batch-size 25
+    envVars:
+      - key: MAISON_ENV
+        value: production
+      - key: MAISON_DATABASE_ROLE
+        value: direct
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_DIRECT_URL
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: ORIGIN_SHARED_SECRET
+        sync: false
+      - key: HEALTH_PROBE_SECRET
+        sync: false
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.smtp.EmailBackend
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: EMAIL_FROM_ADDRESS
+        sync: false
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: EMAIL_PORT
+        value: '465'
+      - key: EMAIL_USE_SSL
+        value: 'true'
+      - key: EMAIL_USE_TLS
+        value: 'false'
+      - key: MEDIA_STORAGE_BACKEND
+        value: r2
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_PRIVATE_BUCKET
+        sync: false
+      - key: R2_APPLICATION_KEY_ID
+        sync: false
+      - key: R2_APPLICATION_SECRET
+        sync: false
+      - key: R2_UPLOAD_KEY_ID
+        sync: false
+      - key: R2_UPLOAD_SECRET
+        sync: false
+      - key: R2_PUBLIC_ASSET_HOST
+        sync: false
+      - key: STATIC_RELEASE_ID
+        sync: false
+      - key: CLOUDFLARE_ZONE_ID
+        sync: false
+      - key: CLOUDFLARE_CACHE_PURGE_TOKEN
+        sync: false
