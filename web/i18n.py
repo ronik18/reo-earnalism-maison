@@ -196,7 +196,7 @@ STRINGS = {
     "local_notice": ("Local development · draft and test editions · no commercial release or live payments", "স্থানীয় উন্নয়ন সংস্করণ · খসড়া ও পরীক্ষার বই · বাণিজ্যিক প্রকাশ বা আসল পেমেন্ট নয়"),
     "room_kicker": ("A quieter kind of discovery", "আবিষ্কারের শান্ত ঠিকানা"),
     "home_title": ("Carry a world of stories.", "গল্পের জগৎ সঙ্গে নিন।"),
-    "home_intro": ("Read, discover and keep your place. Start with an original local test edition.", "পড়ুন, আবিষ্কার করুন, নিজের জায়গা মনে রাখুন। শুরু করুন একটি মৌলিক পরীক্ষার বই দিয়ে।"),
+    "home_intro": ("Read, discover and keep your place. Find stories to return to.", "পড়ুন, আবিষ্কার করুন, নিজের জায়গা মনে রাখুন। খুঁজে নিন বারবার ফিরে আসার মতো গল্প।"),
     "browse": ("Browse the library", "বইয়ের সংগ্রহ দেখুন"),
     "your_place": ("Your place is waiting.", "আপনার পড়ার জায়গা অপেক্ষায়।"),
     "new_titles": ("Find your next chapter", "পরের অধ্যায় খুঁজুন"),

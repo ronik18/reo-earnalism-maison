@@ -220,3 +220,65 @@ class LibraryAcceptanceTests(TestCase):
         before=(Revision.objects.count(),Asset.objects.count(),self.revision.content_sha256)
         call_command('seed_local_pilot',stdout=io.StringIO())
         self.assertEqual(before,(Revision.objects.count(),Asset.objects.count(),Revision.objects.get(pk=self.revision.pk).content_sha256))
+
+
+@override_settings(PUBLIC_BASE_URL='https://maison.example',ALLOWED_HOSTS=['maison.example'],MAISON_PUBLICATION_TERRITORIES=['IN'],LOCAL=True)
+class EmptyCatalogCacheTests(TestCase):
+    def setUp(self):
+        from django.test import RequestFactory
+        self.factory=RequestFactory()
+        work=Work.objects.create(slug='unreleased-cache-fixture',title='Unreleased cache fixture')
+        self.edition=Edition.objects.create(work=work,slug='unreleased-cache-fixture-en',locale='en')
+        self.draft=Revision.objects.create(edition=self.edition,title='Unreleased cache fixture')
+
+    def request(self,**headers):
+        request=self.factory.get('/api/v1/home?locale=en&territory=IN',HTTP_HOST='maison.example',secure=True,**headers)
+        request.user=AnonymousUser();request.territory='IN'
+        return request
+
+    def test_empty_home_is_public_and_first_publication_purge_includes_it(self):
+        from .views import home
+        from operations.cache import begin_public_response,queue_catalog_purge
+        from operations.middleware import cache_headers
+        from operations.models import PublicCacheReference,PublicCacheGeneration
+        from core.models import OutboxJob
+        request=self.request();begin_public_response(request)
+        response=cache_headers(request,home(request))
+        self.assertEqual(response.status_code,200)
+        data=json.loads(response.content)
+        self.assertIsNone(data['hero']);self.assertEqual(data['shelves'],[])
+        self.assertNotIn(self.draft.title,response.content.decode())
+        self.assertEqual(response['Cache-Control'],'public, max-age=0, must-revalidate')
+        self.assertIn('max-age=30',response['Cloudflare-CDN-Cache-Control'])
+        reference=PublicCacheReference.objects.get()
+        self.assertEqual(reference.dependencies,['catalog:global'])
+        epoch=PublicCacheGeneration.objects.get(pk=1).epoch
+        # This is the exact hook transition_revision calls on first publication;
+        # testing it does not publish even this synthetic draft.
+        result=queue_catalog_purge(self.draft)
+        self.assertEqual(result['url_count'],1)
+        self.assertEqual(OutboxJob.objects.get(kind='catalog_cache_purge').payload['urls'],[reference.url])
+        self.assertEqual(PublicCacheGeneration.objects.get(pk=1).epoch,epoch+1)
+        self.edition.refresh_from_db();self.draft.refresh_from_db()
+        self.assertIsNone(self.edition.live_revision_id);self.assertEqual(self.draft.state,'draft')
+
+    def test_empty_home_still_bypasses_cookie_and_unknown_territory(self):
+        from .views import home
+        from operations.cache import begin_public_response
+        from operations.middleware import cache_headers
+        request=self.request(HTTP_COOKIE='existing-session=opaque');begin_public_response(request)
+        response=cache_headers(request,home(request))
+        self.assertEqual(response['Cloudflare-CDN-Cache-Control'],'no-store')
+        request=self.request();request.territory='ZZ';begin_public_response(request)
+        response=cache_headers(request,home(request))
+        self.assertEqual(response.status_code,403)
+        self.assertEqual(response['Cloudflare-CDN-Cache-Control'],'no-store')
+
+    def test_empty_response_cannot_cross_publication_epoch_and_nonempty_fails_closed(self):
+        from .views import home,_catalog_ttl
+        from operations.cache import begin_public_response,queue_catalog_purge
+        from operations.middleware import cache_headers
+        request=self.request();begin_public_response(request);response=home(request)
+        queue_catalog_purge(self.draft)
+        self.assertEqual(cache_headers(request,response)['Cloudflare-CDN-Cache-Control'],'no-store')
+        self.assertEqual(_catalog_ttl([{'edition_id':str(self.edition.id)}],'IN'),0)

@@ -50,6 +50,10 @@ def public_response(data,ttl=0):
 
 def _catalog_ttl(cards,territory):
     ids=[c['edition_id'] for c in cards]
+    # Empty listings contain no protected edition data. Their exact emitted URL
+    # is recorded under catalog:global by the existing epoch/purge boundary, so
+    # the first publication invalidates it just like a populated listing.
+    if not ids:return 30
     revisions=Revision.objects.filter(edition__id__in=ids,edition__live_revision_id=__import__('django.db.models',fromlist=['F']).F('id'))
     return min([svc.public_ttl(r,30,territory=territory) for r in revisions] or [0])
 
