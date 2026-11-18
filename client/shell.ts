@@ -53,3 +53,18 @@ setInterval(() => {
   if (document.visibilityState === "visible" && navigator.onLine)
     void flushQueue().catch(() => {});
 }, 30000);
+
+// Appearance is the only local Settings fallback; server mutations are never queued here.
+function localAppearance() {
+  try {
+    const guest = document.body.dataset.member !== "true" ? JSON.parse(localStorage.getItem("maison.guest.preferences") || "null") : null;
+    const saved = JSON.parse(localStorage.getItem("maison.local-appearance") || "null") || guest;
+    if (saved && ["light", "dark", "true_black"].includes(saved.theme)) {
+      document.body.classList.remove("theme-light", "theme-dark", "theme-true_black");
+      document.body.classList.add("theme-" + saved.theme);
+      if (typeof saved.reduced_motion === "boolean") document.body.classList.toggle("reduced-motion", saved.reduced_motion);
+    }
+  } catch { /* Browsing remains available when local storage is unavailable. */ }
+}
+localAppearance();
+window.addEventListener("maison:navigated", localAppearance);

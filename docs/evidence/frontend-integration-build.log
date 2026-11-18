@@ -1,0 +1,156 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.13kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72
+#3 DONE 0.0s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 195B done
+#4 DONE 0.0s
+
+#5 [frontend 1/9] FROM docker.io/library/node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5
+#5 resolve docker.io/library/node:24-alpine@sha256:116b800c3754b440ee0aa3ed2f20f5bf3d99a554bfd9adeea09ea8017f6e85f5 0.0s done
+#5 DONE 0.0s
+
+#6 [stage-1 1/7] FROM docker.io/library/python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72
+#6 resolve docker.io/library/python:3.13-slim-bookworm@sha256:a5a7017efc5969e00ae2b91c8eb0631049a569652aa4ffc4501769049ae45c72 0.0s done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 119.31kB 0.0s done
+#7 DONE 0.0s
+
+#8 [stage-1 2/7] WORKDIR /app
+#8 CACHED
+
+#9 [stage-1 3/7] COPY requirements.lock ./
+#9 CACHED
+
+#10 [frontend 2/9] WORKDIR /build
+#10 CACHED
+
+#11 [frontend 3/9] COPY package.json package-lock.json ./
+#11 CACHED
+
+#12 [stage-1 4/7] RUN pip install --no-cache-dir -r requirements.lock
+#12 CACHED
+
+#13 [frontend 4/9] RUN npm ci
+#13 CACHED
+
+#14 [frontend 5/9] COPY client ./client
+#14 DONE 0.0s
+
+#15 [stage-1 5/7] COPY . .
+#15 DONE 0.1s
+
+#16 [frontend 6/9] COPY tsconfig.json ./
+#16 DONE 0.0s
+
+#17 [frontend 7/9] COPY contracts/openapi.yaml ./contracts/openapi.yaml
+#17 DONE 0.0s
+
+#18 [frontend 8/9] COPY static/maison/offline-worker.js ./static/maison/offline-worker.js
+#18 DONE 0.0s
+
+#19 [frontend 9/9] RUN npm run check && npm run build
+#19 0.271 
+#19 0.271 > reo-earnalism-maison@1.0.0 check
+#19 0.271 > npm run typecheck && npm test
+#19 0.271 
+#19 0.375 
+#19 0.375 > reo-earnalism-maison@1.0.0 typecheck
+#19 0.375 > tsc --noEmit
+#19 0.375 
+#19 0.699 
+#19 0.699 > reo-earnalism-maison@1.0.0 test
+#19 0.699 > node client/test.mjs
+#19 0.699 
+#19 0.872 ✔ Video accepts only current exact-revision short-lived approved Stream grants (2.989625ms)
+#19 0.873 ✔ Audio rejects wrong-format, wrong-revision, stale or inconsistent grants (0.346416ms)
+#19 0.873 ✔ Unicode selection offsets use code points, including Bengali and astral characters (0.10225ms)
+#19 0.873 ✔ Intentional rereading is a distinct semantic location (0.106208ms)
+#19 0.873 ✔ Pagination tolerates an unmeasured viewport and includes the last column (0.378875ms)
+#19 0.873 ✔ Sleep uses an elapsed monotonic deadline, not wall-clock changes (0.57675ms)
+#19 0.873 ✔ Exact format switching rejects overlapping or out-of-bounds maps (0.223333ms)
+#19 0.875 ✔ Player return links remain on a local locale route (0.212167ms)
+#19 0.875 ✔ Offline queue coalesces only unsent progress and never drops notes or uncertain writes (1.268958ms)
+#19 0.875 ✔ Offline queue enforces bounds and forbids financial or staff operations (9.018542ms)
+#19 0.875 ✔ Sync batch skips blocked conflicts and respects the API100-operation boundary (3.788834ms)
+#19 0.875 ✔ Passage capture rejects blank browser selections but retains Bengali text (0.209084ms)
+#19 0.875 ✔ A delayed GET cannot regress a confirmed progress PUT snapshot (0.08175ms)
+#19 0.876 ✔ Progress conflicts distinguish an accepted position, own late writes and another device (0.161084ms)
+#19 0.876 ✔ Queued note retry preserves uncertain payload and IDs; explicit edit creates new IDs (0.434375ms)
+#19 0.876 ✔ SSR page disposal retains exactly the live audio island until explicit close (0.425834ms)
+#19 0.876 ✔ Persistent navigation preserves auth boundaries and native hash/external links (0.530458ms)
+#19 0.878 ✔ Checkout cannot claim access from a callback or mismatched descriptor (0.193041ms)
+#19 0.878 ✔ Island modules follow the trusted bundle CDN directory and deployment shell (0.541ms)
+#19 0.879 ✔ A later navigation aborts the stale fetch without cancelling the new page (0.288292ms)
+#19 0.879 ✔ Checkout retry identity is scoped to the immutable offer and terms snapshot (0.109292ms)
+#19 0.879 ✔ Checkout reflects server terminal states without granting pending or refunded access (0.132709ms)
+#19 0.880 ✔ Checkout retains the exact content return across interface locale changes (0.325708ms)
+#19 0.954 ✔ Frontend literal and locally declared API routes/methods exist in OpenAPI (88.82225ms)
+#19 0.961 ✔ Worker caches only exact configured public CDN objects, never private capabilities (33.335791ms)
+#19 0.961 ✔ Worker precache omits credentials and requires readable CORS responses (5.269125ms)
+#19 0.962 ℹ tests 26
+#19 0.962 ℹ suites 0
+#19 0.962 ℹ pass 26
+#19 0.962 ℹ fail 0
+#19 0.962 ℹ cancelled 0
+#19 0.962 ℹ skipped 0
+#19 0.962 ℹ todo 0
+#19 0.962 ℹ duration_ms 179.719791
+#19 1.067 
+#19 1.067 > reo-earnalism-maison@1.0.0 build
+#19 1.067 > node client/build.mjs
+#19 1.067 
+#19 1.160 static/maison/dist/support-YAEKVTPJ.js: 2055 bytes
+#19 1.160 static/maison/dist/account-LKZR362Q.js: 15741 bytes
+#19 1.160 static/maison/dist/shell-27KNP466.js: 6321 bytes
+#19 1.160 static/maison/dist/commerce-EIXVEKM6.js: 6799 bytes
+#19 1.160 static/maison/dist/shared-5LQAVZYG.js: 144 bytes
+#19 1.160 static/maison/dist/onboarding-WEIXEZDQ.js: 9147 bytes
+#19 1.160 static/maison/dist/home-WNCVWRSG.js: 5103 bytes
+#19 1.160 static/maison/dist/video-GDWGHTOM.js: 2343 bytes
+#19 1.160 static/maison/dist/reader-5QJN63UY.js: 19101 bytes
+#19 1.160 static/maison/dist/quiz-QK4SOCDQ.js: 4555 bytes
+#19 1.160 static/maison/dist/player-SVU4XY7V.js: 11615 bytes
+#19 1.160 static/maison/dist/shared-UKUUVXRM.js: 1079 bytes
+#19 1.160 static/maison/dist/shared-7HWGSLWE.js: 4245 bytes
+#19 1.160 static/maison/dist/shared-3A6WA22C.js: 805 bytes
+#19 1.160 static/maison/dist/downloads-3R5BQNMK.js: 10415 bytes
+#19 1.160 static/maison/dist/shared-CKF7C5V6.js: 2328 bytes
+#19 1.160 static/maison/dist/shared-Q3DFP7BR.js: 3920 bytes
+#19 1.160 static/maison/dist/shared-IHYJ6RDV.js: 5006 bytes
+#19 1.160 static/maison/dist/auth-A3PIXWVU.js: 2670 bytes
+#19 1.160 static/maison/dist/shared-LMHERZFN.js.LEGAL.txt: 338 bytes
+#19 1.160 static/maison/dist/shared-LMHERZFN.js: 524 bytes
+#19 1.160 static/maison/dist/shared-CAOOZUV2.js: 1567 bytes
+#19 1.160 static/maison/dist/shared-FGAYQ3CA.js.LEGAL.txt: 1219 bytes
+#19 1.160 static/maison/dist/shared-FGAYQ3CA.js: 221571 bytes
+#19 1.160 static/maison/dist/shared-6BQSIVVD.js: 577 bytes
+#19 DONE 1.2s
+
+#20 [stage-1 6/7] COPY --from=frontend /build/static/maison/dist ./static/maison/dist
+#20 DONE 0.0s
+
+#21 [stage-1 7/7] RUN useradd --system --uid 10001 --create-home maison && mkdir -p /app/.local && chown maison:maison /app/.local
+#21 0.109 useradd warning: maison's uid 10001 is greater than SYS_UID_MAX 999
+#21 DONE 0.1s
+
+#22 exporting to image
+#22 exporting layers
+#22 exporting layers 0.5s done
+#22 exporting manifest sha256:e928d8549e812548ddb47d5f79896f653095dd1e05f8403ffcd4c5a1ce93c4f6 done
+#22 exporting config sha256:32847301db8d998bbead1f4237d7c84653d392d18619cf3584aedafc83a9ee20 done
+#22 exporting attestation manifest sha256:7c230a9e1338889656c70b83bb6ff9d2a0901d7320d13a799ddc1f23441a9bc2 done
+#22 exporting manifest list sha256:a007fee627e34f3bfc6cf8a76c4090208858d8c66327717a0c56b089b6db2780 done
+#22 naming to docker.io/library/earnalism-maison:frontend-ready done
+#22 unpacking to docker.io/library/earnalism-maison:frontend-ready 0.1s done
+#22 DONE 0.7s

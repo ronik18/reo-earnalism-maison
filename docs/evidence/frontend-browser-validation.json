@@ -1,0 +1,202 @@
+{
+  "date": "2026-11-18",
+  "base_source": "3fdd7426c02eb6c8b540cbc53e23120b45d7d404",
+  "environment": "isolated local PostgreSQL18 / Python3.13 container / original synthetic fixtures / loopback8021",
+  "browser": "IAB Chromium",
+  "mobile_390": [
+    {
+      "broken": 0,
+      "heading": "Find a familiar voice.",
+      "path": "/en/explore/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "Find a familiar voice.",
+      "path": "/en/search/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "Local original stories",
+      "path": "/en/collections/90000000-0000-4000-8000-000000000001/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "The River Notebook",
+      "path": "/en/titles/20000000-0000-4000-8000-000000000001/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "One story. Many doors.",
+      "path": "/en/series/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "Learn a little. See more.",
+      "path": "/en/learn/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "A clearer path to your next role.",
+      "path": "/en/interview/sde/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "The River Notebook",
+      "path": "/en/watch/20000000-0000-4000-8000-000000000001/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "Make room for possibility.",
+      "path": "/en/pass/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "Keep what matters.",
+      "path": "/en/vault/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "Downloads",
+      "path": "/en/vault/downloads/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "Make the room yours.",
+      "path": "/en/settings/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "We could not find that page.",
+      "path": "/en/404/",
+      "scroll": 390,
+      "width": 390
+    },
+    {
+      "broken": 0,
+      "heading": "নিজের মতো সাজিয়ে নিন।",
+      "path": "/bn/welcome/",
+      "scroll": 390,
+      "width": 390
+    }
+  ],
+  "mobile_360": [
+    {
+      "heading": "নিজের মতো সাজিয়ে নিন।",
+      "path": "/bn/welcome/",
+      "scroll": 360,
+      "width": 360
+    },
+    {
+      "heading": "চেনা কণ্ঠ খুঁজুন।",
+      "path": "/bn/search/",
+      "scroll": 360,
+      "width": 360
+    },
+    {
+      "heading": "জলের পাশে এক পাতা",
+      "path": "/bn/read/20000000-0000-4000-8000-000000000002/40000000-0000-4000-8000-000000000002/",
+      "scroll": 360,
+      "width": 360
+    },
+    {
+      "heading": "ঘরটি নিজের মতো সাজান।",
+      "path": "/bn/settings/",
+      "scroll": 360,
+      "width": 360
+    },
+    {
+      "heading": "Downloads",
+      "path": "/en/vault/downloads/",
+      "scroll": 360,
+      "width": 360
+    }
+  ],
+  "desktop_1440": [
+    {
+      "heading": "Make yourself at home.",
+      "path": "/en/welcome/",
+      "scroll": 1440,
+      "width": 1440
+    },
+    {
+      "heading": "Find a familiar voice.",
+      "path": "/en/explore/",
+      "scroll": 1440,
+      "width": 1440
+    },
+    {
+      "heading": "Local original stories",
+      "path": "/en/collections/90000000-0000-4000-8000-000000000001/",
+      "scroll": 1440,
+      "width": 1440
+    },
+    {
+      "heading": "The River Notebook",
+      "path": "/en/watch/20000000-0000-4000-8000-000000000001/",
+      "scroll": 1440,
+      "width": 1440
+    },
+    {
+      "heading": "Downloads",
+      "path": "/en/vault/downloads/",
+      "scroll": 1440,
+      "width": 1440
+    },
+    {
+      "heading": "Make the room yours.",
+      "path": "/en/settings/",
+      "scroll": 1440,
+      "width": 1440
+    }
+  ],
+  "observed": [
+    "onboarding Back/Continue preserves selected interests",
+    "guest choices saved and Home navigation works",
+    "guest Reader physically bounded preview",
+    "preview sheet dismiss restores opener focus",
+    "member sign-in returns exact Reader anchor and offset",
+    "personal Home uses real saved semantic resume location",
+    "quiz draft survives reload; server result score100; explicit completion confirmed",
+    "Settings offline blocks account/security/billing/privacy writes; local appearance available",
+    "synthetic 30second audio loads; one audio element; playback advances across Explore and EN/BN navigation;1.25x retained;close removes audio",
+    "dedicated pending Checkout restores order after reload; no provider success inferred",
+    "no captured console errors in inspected tab"
+  ],
+  "pending": [
+    "physical Android Chrome and iOS Safari",
+    "Safari/WebKit engine acceptance",
+    "real device offline relaunch/license expiry/storage eviction and assistive technology",
+    "no actual book audiobook/media acceptance from synthetic MP3",
+    "audio preview provider has no bounded sample object; S11 remains unenabled",
+    "Stream provider not qualified; S12 unavailable state only",
+    "actual merchant checkout/refund/subscription cancellation/invoice delivery",
+    "real Series/episode data and complete server pagination"
+  ],
+  "production": false,
+  "legacy_changed": false,
+  "book_changed": false
+}

@@ -63,3 +63,35 @@ Next integration action: run grouped production edge/HTTPS, durable credential, 
 - Three owner-approved90day account credentials now expire16February2027. Actual private read/write/denied-write/cross-bucket boundaries passed; [credential evidence](evidence/durable-credential-qualification.json). Existing24hour tokens are unchanged; no backup permissions were granted.
 - Production-mode check passes without errors and retains two explicit Django warnings: HSTS subdomain inclusion and preload remain disabled until the complete domain scope is reviewed. This check used reserved example hosts with networking disabled; it is not production HTTPS evidence.
 - Owner approved one isolated Singapore Render service at$7/month plus applicable tax/usage, no workspace upgrade; this qualifies the HTTPS stage only, not the approved2–6replica HA/autoscaling target. Deployment connection/secrets and pending Free Cloudflare zone preparation are authorized; public DNS/nameservers require a separate exact-diff approval. The book remains draft/current platform unchanged.
+
+
+## Deployment handoff status,18November2026
+
+- Exact-head CI passed for `3fdd7426c02eb6c8b540cbc53e23120b45d7d404`: [run44251719606](https://github.com/ronik18/reo-earnalism-maison/actions/runs/44251719606).
+- Render form prepared for `reo-earnalism-maison-qa`, Docker/main, Singapore, $7/month, health `/api/v1/health/live`, auto-deploy Off. Private provider variables imported; public deployment credential excluded. Final creation requires the owner's Add Card step ($1 temporary verification authorization). No web service has been created; HTTPS qualification remains pending.
+- Cloudflare Free-zone preparation reached domain onboarding only. The default Bot Preference Sync would prepend robots.txt rules; disabling it was rejected by automatic approval review as outside zone-only approval. Requested explicit setting approval; zone creation and DNS record review remain pending. No public nameserver/DNS/traffic changes.
+- Independent frontend chat found incomplete P0 screen/state coverage. Owner authorized that chat to complete missing screens in an isolated checkout based on3fdd742; root retains final integration. Backend/provider-dependent controls remain truthfully gated. Physical Android/iOS acceptance remains pending.
+
+Next integration action: complete approved provider prerequisites, verify actual deployed HTTPS, prepare the exact DNS diff for separate approval, then run V03–V05 together.
+
+
+## Cloudflare pending-zone preparation,18November2026
+
+Owner explicitly approved disabling Bot Preference Sync; the onboarding switch was verified Off before proceeding. The $0 Free zone for theearnalism.com is now prepared and awaiting nameserver activation. Assigned nameservers: cesar.ns.cloudflare.com and ligia.ns.cloudflare.com. Existing authoritative ns1.dns-parking.com/ns2.dns-parking.com remain unchanged; no registrar, public DNS or traffic changes were made.
+
+Automatic scan found13records:2A,7CNAME,2MX,2TXT. The scan is not a complete Hostinger zone export. All9 scanned A/CNAME records default to Proxied, including FTP, mail discovery and DKIM aliases; these pending defaults require review/correction before any activation. Current apex/Vercel and api/Railway targets must be preserved. Obtain full existing-zone parity (including uncommon records, mail, verification, CAA and DNSSEC/DS status), prepare the exact diff and seek separate DNS approval. Do not activate from the scan alone.
+
+V03–V05 remain pending: no active Maison app/assets host, real CDN HIT/MISS, cache isolation or purge readback. Render Add Card is still pending; no qualification web service has been created.
+
+
+## P0 frontend integration,18November2026
+
+The owner-authorized frontend lane supplied a43-file patch based on3fdd742 plus availability follow-up. Root integrated it with actual403/404/500 handlers. Public gold artwork, onboarding, personal Home, collection/Series destinations, gated Video, owned Checkout, Reader preview/format dialogs, Settings, Vault and download recovery now have source implementation. [Browser evidence](evidence/frontend-browser-validation.json) covers Chromium desktop1440/mobile390 and Bengali360 widths; original synthetic fixture flows only. Physical Android/iOS, Safari/WebKit and assistive-technology/offline-device acceptance remain V08. Do not claim26fully accepted native screens.
+
+Retained backend dependencies: bounded audio preview object, qualified Stream, real Series/episode data, pagination beyond Saved/Lists100 and Continue/Finished20, existing subscription cancellation/mandate/invoice delivery APIs. Payments/media remain disabled until applicable qualification. Vault territory projection must be reviewed before international acceptance. These are consolidated dependencies, not evidence of production readiness.
+
+New frontend bundles/art require a new immutable static release; the earlier45-file uploaded release does not contain this patch. No additional upload is implied by source integration. Root will prepare the new manifest and reconcile any upload budget before provider writes. The Selfish Giant remains draft/current platform unchanged.
+
+Final support follow-up adds an online-only contact form in Settings and system errors, using the existing/contact API and accepted-for-processing wording. Root fixed its missing Settings mount. Final local static summary:54files,7,258,380bytes, release088fe0650e532f527289e68c2ac8c8ac9fcdf32a37f6274f01312b837298ad56. No support messages or additional provider uploads were sent.
+
+Integration continuity: iCloud hydration blocked the original checkout's Git ignore/index operations. Root preserved all57scoped files in two durable SHA256-verified exports (archive ba0bd42433f680032be95c90ad0f5cbcdf88ee57e93e56d9c115b389ac3c1211), then continued in /tmp/maison-frontend-integration-20261118 from3fdd742. Every copied file was hash-verified. Original checkout and unrelated contracts.test.mjs formatting are preserved; no lock deletion/reset/stash. Root is the sole writer. Canonical Docker checks passed; exact-head CI remains authoritative for the final committed test set.

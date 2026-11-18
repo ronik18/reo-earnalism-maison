@@ -14,6 +14,7 @@
 <a {% if active_nav == 'learn' %}aria-current="page"{% endif %} href="{% url 'web:learn' ui_locale %}">{% ui 'learn' %}</a>
 <a {% if active_nav == 'series' %}aria-current="page"{% endif %} href="{% url 'web:series' ui_locale %}">{% ui 'series' %}</a>
 <a {% if active_nav == 'vault' %}aria-current="page"{% endif %} href="{% url 'web:vault' ui_locale %}">{% ui 'vault' %}</a>
+<a class="pass-nav" href="{% url 'web:pass' ui_locale %}">{% ui 'pass' %}</a>
 </nav>
 <div class="web-stage {% if focused %}focused-stage{% endif %}"><main id="main" tabindex="-1">{% block content %}{% endblock %}</main>
 <footer><p>{% if local_build %}{% ui 'local_notice' %}{% else %}{% ui 'platform_footer' %}{% endif %}</p><a href="{% url 'web:settings' ui_locale %}">{% ui 'settings' %}</a></footer></div>

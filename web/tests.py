@@ -229,6 +229,55 @@ class ExperienceTests(TestCase):
             self.assertEqual(saved[key], value)
         self.assertGreater(saved["version"], old["version"])
 
+
+    def test_welcome_and_new_destinations_preserve_safe_state(self):
+        response=self.client.get("/en/welcome/?return_to=//foreign.invalid/")
+        self.assertContains(response,'"return_to": "/en/"')
+        self.assertContains(response,'onboarding-island')
+        collection=self.client.get("/en/collections/90000000-0000-4000-8000-000000000001/")
+        self.assertContains(collection,'The River Notebook')
+        series=self.client.get("/en/series/")
+        self.assertContains(series,'There are no released series')
+        self.assertNotContains(series,'Local original stories')
+        video=self.client.get(f"/en/watch/{self.edition}/")
+        self.assertContains(video,'"enabled": false')
+        self.assertNotContains(video,'<iframe')
+
+    def test_member_home_is_private_and_preview_cannot_bootstrap_protected_navigation(self):
+        self.login()
+        home=self.client.get("/en/")
+        self.assertContains(home,'home-island')
+        self.assertIn('no-store',home['Cache-Control'])
+        from library.models import Revision
+        from unittest.mock import patch
+        revision=Revision.objects.get(edition_id=self.edition)
+        # Access policy is immutable after publication; simulate the service access denial.
+        from core.api import DomainError
+        with patch('library.services.get_reader_document',side_effect=DomainError('entitlement_required','Access required.',403)):
+            response=self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        self.assertContains(response,'"preview": true')
+        self.assertContains(response,'"next_unit_url": null')
+        self.assertContains(response,'"player_url": null')
+        self.assertNotContains(response,'The complete notebook')
+
+    def test_checkout_owner_scope_and_system_errors(self):
+        from billing.models import Offer,Order
+        from datetime import timedelta
+        offer=Offer.objects.create(code='ui-checkout',name='UI fixture offer',price_minor=100,duration_seconds=86400,formats=['reader'])
+        order=Order.objects.create(user=self.user,offer=offer,total_minor=100,currency='INR',offer_snapshot={},operation_id=uuid.uuid4(),request_sha256='0'*64,expires_at=timezone.now()+timedelta(hours=1),return_path=f"/bn/read/{self.edition}/{self.unit}/?anchor=exact")
+        path=f"/en/checkout/{order.id}/"
+        self.assertEqual(self.client.get(path).status_code,302)
+        self.login()
+        response=self.client.get(path)
+        self.assertContains(response,str(order.id))
+        self.assertContains(response,'anchor=exact')
+        other=get_user_model().objects.create_user('other-ui@example.test','A-strong-local-password-47',is_verified=True)
+        foreign=Order.objects.create(user=other,offer=offer,total_minor=100,currency='INR',offer_snapshot={},operation_id=uuid.uuid4(),request_sha256='1'*64,expires_at=timezone.now()+timedelta(hours=1))
+        self.assertEqual(self.client.get(f'/en/checkout/{foreign.id}/').status_code,404)
+        self.assertEqual(self.client.get('/en/404/').status_code,404)
+        self.assertEqual(self.client.get('/bn/maintenance/').status_code,503)
+
+
 class OfflineAssetBuildTests(SimpleTestCase):
     def test_release_prefixed_cdn_urls_and_content_changes_version_worker(self):
         from django.test import RequestFactory
@@ -254,3 +303,37 @@ class OfflineAssetBuildTests(SimpleTestCase):
                 (public/"app.css").write_bytes(b"updated public CSS")
                 second=service_worker(request).content.decode()
                 self.assertNotEqual(re.search(r'maison-shell-([a-f0-9]+)',first).group(1),re.search(r'maison-shell-([a-f0-9]+)',second).group(1))
+
+
+@override_settings(DEBUG=False,ROOT_URLCONF='web.error_test_urls')
+class ActualErrorHandlerTests(SimpleTestCase):
+    def test_actual_handlers_preserve_locale_status_and_private_cache(self):
+        client=Client(raise_request_exception=False)
+        for locale in ('en','bn'):
+            for path,status,key in [('missing/nested/path/',404,'not_found'),('test-denied/',403,'not_authorized'),('test-failed/',500,'error')]:
+                with self.subTest(locale=locale,status=status):
+                    response=client.get(f'/{locale}/{path}')
+                    self.assertEqual(response.status_code,status)
+                    self.assertEqual(response['Content-Language'],locale)
+                    self.assertIn('private',response['Cache-Control'])
+                    self.assertIn('no-store',response['Cache-Control'])
+                    self.assertContains(response,catalogue(locale)[key],status_code=status)
+                    self.assertNotContains(response,'Synthetic frontend error-handler fixture',status_code=status)
+
+
+class DatabaseFailureErrorPageTests(SimpleTestCase):
+    def test_server_error_does_not_resolve_failed_authentication(self):
+        from django.db import OperationalError
+        from django.test import RequestFactory
+        from django.utils.functional import SimpleLazyObject
+        from .views import server_error
+        def failed_user():
+            raise OperationalError("Synthetic database unavailable")
+        request=RequestFactory().get('/bn/unavailable/')
+        request.user=SimpleLazyObject(failed_user)
+        response=server_error(request)
+        self.assertEqual(response.status_code,500)
+        self.assertEqual(response['Content-Language'],'bn')
+        self.assertIn('private',response['Cache-Control'])
+        self.assertIn('no-store',response['Cache-Control'])
+        self.assertNotIn(b'Synthetic database unavailable',response.content)

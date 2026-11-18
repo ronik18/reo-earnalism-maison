@@ -1,3 +1,4 @@
+import { PreviewBoundary, FormatSwitch } from "./media-sheets";
 import { QueueRecovery } from "./recovery";
 import { enqueue, queued, discardQueuedProgress } from "./queue";
 import { setIdentity } from "./offline";
@@ -38,6 +39,10 @@ interface Boot {
   next_unit_url?: string;
   previous_unit_url?: string;
   player_url?: string;
+  preview?: boolean;
+  title_url?: string;
+  sign_in_url?: string;
+  pass_url?: string;
 }
 interface Progress {
   version: number;
@@ -76,6 +81,7 @@ const defaultPreferences = {
   reader_layout: "scroll",
 };
 function Reader({ boot }: { boot: Boot }) {
+  const fullReader = boot.authenticated && !boot.preview;
   const reading = document.getElementById("reading-text")!;
   const reader = document.getElementById("reader")!;
   const paragraphs = useRef(
@@ -122,6 +128,8 @@ function Reader({ boot }: { boot: Boot }) {
   const hydrated = useRef(false);
   const interacted = useRef(false);
   const [status, setStatus] = useState("");
+  const [boundaryOpen, setBoundaryOpen] = useState(false);
+  const [switchOpen, setSwitchOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [completion, setCompletion] = useState<Completion>();
   const pendingCompletion = useRef<
@@ -172,6 +180,7 @@ function Reader({ boot }: { boot: Boot }) {
     }
   }
   async function loadNotes() {
+    if (!fullReader) return;
     const response = await api<{ items: Annotation[] }>(
       `/me/annotations?edition_revision_id=${boot.edition_revision_id}`,
     );
@@ -183,7 +192,7 @@ function Reader({ boot }: { boot: Boot }) {
   }
   async function savePosition(keepalive = false) {
     if (
-      !boot.authenticated ||
+      !fullReader ||
       !position.current.anchor_id ||
       saving.current ||
       !hydrated.current
@@ -298,7 +307,7 @@ function Reader({ boot }: { boot: Boot }) {
     }
   }
   useEffect(() => {
-    if (!boot.member_id || !boot.device_id) return;
+    if (!fullReader || !boot.member_id || !boot.device_id) return;
     let alive = true;
     const refresh = () => {
       void queued(boot.member_id!).then((rows) => {
@@ -390,7 +399,7 @@ function Reader({ boot }: { boot: Boot }) {
         anchor_id: boot.anchor,
         offset_chars: boot.offset_chars || 0,
       });
-    if (boot.authenticated) {
+    if (fullReader) {
       Promise.all([
         api<Progress>(progressPath),
         api<Completion>(completePath),
@@ -416,7 +425,7 @@ function Reader({ boot }: { boot: Boot }) {
     }
     const timer = window.setInterval(() => {
       if (
-        boot.authenticated &&
+        fullReader &&
         !document.hidden &&
         navigator.onLine &&
         progress.current &&
@@ -601,7 +610,7 @@ function Reader({ boot }: { boot: Boot }) {
     e.preventDefault();
     setSettingsStatus("");
     try {
-      if (boot.authenticated) {
+      if (fullReader) {
         const currentVersion =
           preferenceVersion.current ??
           (await api<Preferences>("/me/preferences")).version;
@@ -657,7 +666,7 @@ function Reader({ boot }: { boot: Boot }) {
   return (
     <>
       <nav className="unit-navigation" aria-label={t("contents")}>
-        {boot.previous_unit_url ? (
+        {!boot.preview && boot.previous_unit_url ? (
           <a
             href={boot.previous_unit_url}
             onClick={() => {
@@ -667,7 +676,7 @@ function Reader({ boot }: { boot: Boot }) {
             {t("previous_chapter")}
           </a>
         ) : null}
-        {boot.next_unit_url ? (
+        {!boot.preview && boot.next_unit_url ? (
           <a
             href={boot.next_unit_url}
             onClick={() => {
@@ -677,8 +686,8 @@ function Reader({ boot }: { boot: Boot }) {
             {t("next_chapter")}
           </a>
         ) : null}
-        {boot.player_url ? (
-          <button disabled={busy} onClick={() => void switchToListen()}>
+        {fullReader && boot.player_url ? (
+          <button disabled={busy} onClick={() => { setStatus(""); setSwitchOpen(true); }}>
             {t("switch_to_listen")}
           </button>
         ) : null}
@@ -716,7 +725,7 @@ function Reader({ boot }: { boot: Boot }) {
           {t("continue")}
         </button>
       </div>
-      {boot.authenticated ? (
+      {fullReader ? (
         <>
           <div className="reader-actions">
             <button
@@ -876,6 +885,8 @@ function Reader({ boot }: { boot: Boot }) {
           </section>
         </>
       ) : null}
+      {boot.preview ? <section className="preview-boundary" aria-label={t("preview_end")}><p>{t("preview_end")}</p><button onClick={() => setBoundaryOpen(true)}>{t("continue_beyond_preview")}</button><PreviewBoundary editionId={boot.edition_id} format="reader" authenticated={boot.authenticated} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.reload()} /></section> : null}
+      {fullReader && boot.player_url ? <FormatSwitch open={switchOpen} onClose={() => setSwitchOpen(false)} busy={busy} status={status} onExact={() => void switchToListen()} chapterUrl={boot.player_url + `?unit_id=${boot.unit_id}`} target="audio" /> : null}
       <dialog
         ref={settings}
         id="reading-settings"
@@ -987,7 +998,7 @@ function Reader({ boot }: { boot: Boot }) {
             })}
           </div>
           <p className="fine" id="preference-ownership">
-            {t(boot.authenticated ? "preferences_account" : "local_settings")}
+            {t(fullReader ? "preferences_account" : "local_settings")}
           </p>
           <button className="button" type="submit">
             {t("keep_settings")}
@@ -997,7 +1008,7 @@ function Reader({ boot }: { boot: Boot }) {
           </p>
         </form>
       </dialog>
-      {boot.authenticated ? (
+      {fullReader ? (
         <dialog
           ref={noteDialog}
           id="annotation-dialog"
@@ -1110,6 +1121,7 @@ function Reader({ boot }: { boot: Boot }) {
   );
 }
 export function mount() {
+  document.querySelector<HTMLElement>("[data-preview-fallback]")?.setAttribute("hidden", "");
   mountIsland(document.getElementById("reader-controls"), () => (
     <Reader boot={readBootstrap<Boot>("reader-bootstrap")} />
   ));

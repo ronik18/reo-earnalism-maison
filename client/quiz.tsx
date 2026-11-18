@@ -1,8 +1,9 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { mountIsland } from "./lifecycle";
-import { api, errorText, readBootstrap, t } from "./api";
+import { api, errorText, readBootstrap, t, locale } from "./api";
 interface Quiz {
   quiz_id: string;
+  lesson_id: string;
   version: number;
   questions: {
     question_id: string;
@@ -20,7 +21,17 @@ interface Result {
   result: { question_id: string; correct: boolean; explanation: string }[];
 }
 function QuizIsland({ quiz }: { quiz: Quiz }) {
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const draftKey = "maison.quiz:" + (document.body.dataset.memberId || "guest") + ":" + quiz.quiz_id + ":" + quiz.version;
+  const [answers, setAnswers] = useState<Record<string, string>>(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(draftKey) || "{}");
+      return Object.fromEntries(quiz.questions.filter(q=>q.options.some(o=>o.option_id===saved[q.question_id])).map(q=>[q.question_id,saved[q.question_id]]));
+    } catch { return {}; }
+  });
+  const [online,setOnline]=useState(navigator.onLine);
+  const [draftFailed,setDraftFailed]=useState(false);
+  useEffect(()=>{const update=()=>setOnline(navigator.onLine);window.addEventListener("online",update);window.addEventListener("offline",update);return()=>{window.removeEventListener("online",update);window.removeEventListener("offline",update);};},[]);
+  useEffect(()=>{try {sessionStorage.setItem(draftKey,JSON.stringify(answers));} catch {setDraftFailed(true);}},[draftKey,answers]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result>();
@@ -34,6 +45,7 @@ function QuizIsland({ quiz }: { quiz: Quiz }) {
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy || result) return;
+    if (!navigator.onLine) {setError(t("quiz_draft_pending"));return;}
     if (quiz.questions.some((q) => !answers[q.question_id])) {
       setError(t("invalid_input"));
       return;
@@ -67,6 +79,7 @@ function QuizIsland({ quiz }: { quiz: Quiz }) {
           },
         ),
       );
+      try {sessionStorage.removeItem(draftKey);} catch { /* Server result remains authoritative. */ }
       requestAnimationFrame(() => output.current?.focus());
     } catch (e) {
       setError(errorText(e));
@@ -78,6 +91,8 @@ function QuizIsland({ quiz }: { quiz: Quiz }) {
     return <p className="notice">{t("not_available")}</p>;
   return (
     <>
+      {!online ? <p className="notice" role="status">{t("quiz_draft_pending")}</p> : null}
+      {draftFailed ? <p role="status">{t("quiz_draft_failed")}</p> : null}
       <form
         id="quiz-form"
         data-quiz-id={quiz.quiz_id}
@@ -113,13 +128,14 @@ function QuizIsland({ quiz }: { quiz: Quiz }) {
             ))}
           </fieldset>
         ))}
-        <button className="button" type="submit" disabled={busy || !!result}>
+        <button className="button" type="submit" disabled={busy || !!result || !online}>
           {t(busy ? "saving" : "submit_quiz")}
         </button>
       </form>
       <p className="notice" role="alert" hidden={!error}>
         {error}
       </p>
+      {error ? <a className="text-link" href={location.pathname}>{t("reload_review")}</a> : null}
       <div id="quiz-result" ref={output} role="status" tabIndex={-1}>
         {result ? (
           <>
@@ -132,13 +148,30 @@ function QuizIsland({ quiz }: { quiz: Quiz }) {
                 {t(item.correct ? "correct" : "incorrect")} · {item.explanation}
               </p>
             ))}
+            <LessonCompletion lessonId={quiz.lesson_id} />
           </>
         ) : null}
       </div>
     </>
   );
 }
+
+function LessonCompletion({lessonId, completed=false}:{lessonId:string;completed?:boolean}) {
+ const [done,setDone]=useState(completed),[busy,setBusy]=useState(false),[message,setMessage]=useState("");
+ const key=useRef(crypto.randomUUID());
+ async function complete() {
+  if(busy||done)return;
+  if(!navigator.onLine){setMessage(t("quiz_online"));return;}
+  setBusy(true);setMessage("");
+  try {const value=await api<{completed:boolean}>(`/learning/lessons/${lessonId}/complete`,{method:"POST",key:key.current,body:{}});setDone(value.completed);}catch(e){setMessage(errorText(e));}finally{setBusy(false);}
+ }
+ if(document.body.dataset.member!=="true")return <a className="text-link" href={`/${locale}/sign-in/?return_to=${encodeURIComponent(location.pathname)}`}>{t("sign_in_save")}</a>;
+ return <section className="lesson-completion"><button disabled={busy||done} onClick={()=>void complete()}>{t(done?"finished":busy?"saving":"complete_lesson")}</button><p role="status">{message}</p><a className="text-link" href={`/${locale}/learn/`}>{t("learn")}</a></section>;
+}
+
 export function mount() {
+  const lesson=readBootstrap<{lesson_id?:string;completed?:boolean}>("lesson-bootstrap");
+  if(lesson.lesson_id)mountIsland(document.getElementById("lesson-completion"),()=> <LessonCompletion lessonId={lesson.lesson_id!} completed={lesson.completed}/>);
   mountIsland(document.getElementById("quiz-island"), () => (
     <QuizIsland quiz={readBootstrap<Quiz>("quiz-bootstrap")} />
   ));

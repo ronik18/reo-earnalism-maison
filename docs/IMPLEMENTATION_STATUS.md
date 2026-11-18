@@ -1,5 +1,7 @@
 # Maison implementation milestone
 
+**P0 frontend integration,18November2026:** root integrated the owner-authorized frontend lane against3fdd742, including onboarding/member Home, collections/Series, gated Video, owned Checkout, preview/format dialogs, recovery states and premium gold artwork. Desktop/mobile-width Chromium evidence is retained in [frontend browser validation](evidence/frontend-browser-validation.json).The initial185 combined backend tests and26 frontend tests/typecheck/build pass; final source CI will additionally cover the database-outage regression. a separate failed-database regression validates the database-independent500page. Physical devices/Safari, real media/payment/Series data and backend pagination remain pending in the central register. Updated static release54files/7,258,380bytes is prepared locally only; the previously uploaded45-file release remains unchanged.
+
 **Pending acceptance checks:** use the [central pending validation register](PENDING_VALIDATIONS.md) for provider, CDN HIT/MISS/purge, email, device and final release dependencies. Earlier milestone gaps below are historical; close items only with actual evidence.
 
 

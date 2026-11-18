@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { mountIsland } from "./lifecycle";
-import { api, t, errorText, locale } from "./api";
+import { api, t, errorText, locale, readBootstrap } from "./api";
 import {
   offerSnapshotKey,
   validCheckout,
   accessGranted,
+  orderStatusKey,
+  checkoutReturnPath,
   type Money,
   type Checkout,
 } from "./commerce-state";
@@ -23,6 +25,8 @@ interface Order {
   fulfillment_status: string;
   amount: Money;
   checkout: Checkout | null;
+  return_path?: string;
+  expires_at?: string;
 }
 interface Callback {
   razorpay_order_id: string;
@@ -66,6 +70,10 @@ function loadSDK() {
   }));
 }
 function Commerce() {
+  const bootstrap = readBootstrap<{order_id?: string; return_path?: string}>("commerce-bootstrap");
+  const checkoutPage = !!bootstrap.order_id;
+  const [online, setOnline] = useState(navigator.onLine);
+  const authenticated = !!document.body.dataset.memberId;
   const [offers, setOffers] = useState<Offer[] | undefined>(),
     [status, setStatus] = useState(""),
     [order, setOrder] = useState<Order>(),
@@ -75,9 +83,15 @@ function Commerce() {
   const keys = useRef(new Map<string, string>()),
     active = useRef(true);
   useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
+  }, []);
+  useEffect(() => {
     active.current = true;
     try {
-      const pending = sessionStorage.getItem(pendingOrderKey);
+      const pending = bootstrap.order_id || sessionStorage.getItem(pendingOrderKey);
       if (pending && /^[a-f0-9-]{36}$/i.test(pending)) {
         setBusy(true);
         void api<Order>("/commerce/orders/" + pending)
@@ -99,7 +113,7 @@ function Commerce() {
       }
     } catch {}
 
-    api<{ items: Offer[] }>("/commerce/offers")
+    if (authenticated && !checkoutPage) api<{ items: Offer[] }>("/commerce/offers")
       .then((data) => {
         if (active.current) setOffers(data.items);
       })
@@ -116,7 +130,7 @@ function Commerce() {
   useEffect(() => {
     if (
       !order ||
-      !["creating", "pending", "paid"].includes(order.status) ||
+      !["creating", "created", "pending", "paid"].includes(order.status) ||
       accessGranted(order)
     )
       return;
@@ -124,6 +138,7 @@ function Commerce() {
       attempts = 0;
     const timer = setInterval(() => {
       if (++attempts >= 20) clearInterval(timer);
+      if (!navigator.onLine) return;
       void api<Order>("/commerce/orders/" + order.order_id)
         .then((value) => {
           if (!cancelled) setOrder(value);
@@ -151,7 +166,7 @@ function Commerce() {
         stored = sessionStorage.getItem(storageKey);
       } catch {}
       const key = keys.current.get(snapshot) || stored || crypto.randomUUID();
-      sessionStorage.setItem(storageKey, key);
+      try { sessionStorage.setItem(storageKey, key); } catch {}
       keys.current.set(snapshot, key);
       const result = await api<Order>("/commerce/orders", {
         method: "POST",
@@ -160,14 +175,14 @@ function Commerce() {
           offer_id: offer.offer_id,
           offer_version: offer.version,
           terms_version: offer.terms_version,
-          return_path: `/${locale}/pass/`,
+          return_path: checkoutReturnPath(bootstrap.return_path,locale),
         },
       });
       setOrder(result);
-      sessionStorage.setItem(pendingOrderKey, result.order_id);
-      sessionStorage.removeItem(storageKey);
+      try { sessionStorage.setItem(pendingOrderKey, result.order_id); sessionStorage.removeItem(storageKey); } catch {}
       keys.current.delete(snapshot);
       setStatus("");
+      window.location.assign(`/${locale}/checkout/${result.order_id}/`);
     } catch (error) {
       setStatus(errorText(error));
     } finally {
@@ -175,7 +190,7 @@ function Commerce() {
     }
   }
   async function pay() {
-    if (!order || !validCheckout(order.checkout, order.amount)) return;
+    if (!online || !order || !validCheckout(order.checkout, order.amount)) return;
     setBusy(true);
     try {
       await loadSDK();
@@ -199,38 +214,42 @@ function Commerce() {
                 setStatus(
                   accessGranted(result)
                     ? t("payment_confirmed")
-                    : t("payment_pending"),
+                    : t(orderStatusKey(result)),
                 );
               }
             })
-            .catch((error) => setStatus(errorText(error)));
+            .catch((error) => setStatus(errorText(error)))
+            .finally(() => { if (active.current) setBusy(false); });
         },
         modal: {
           ondismiss: () => {
-            if (active.current) setStatus(t("payment_pending"));
+            if (active.current) {setStatus(t("payment_pending"));setBusy(false);}
           },
         },
       });
-      widget.on("payment.failed", () => setStatus(t("payment_not_completed")));
+      widget.on("payment.failed", () => {if (active.current) {setStatus(t("payment_not_completed"));setBusy(false);}});
       widget.open();
     } catch (error) {
       setStatus(errorText(error));
-    } finally {
       setBusy(false);
     }
   }
   return (
-    <section>
-      <p role="status">{status}</p>
-      {offers === undefined ? (
+    <section aria-busy={busy}>
+      <p role="status" aria-live="polite">{status}</p>
+      {!online ? <p className="notice">{t("purchase_online_only")}</p> : null}
+      {!authenticated ? <div className="empty-state"><h2>{t("pass_guest_title")}</h2><p>{t("pass_guest_help")}</p><a className="button" href={`/${locale}/sign-in/?return_to=${encodeURIComponent(`/${locale}/pass/`)}`}>{t("sign_in")}</a></div> : null}
+      {checkoutPage && !order && !busy ? <div className="empty-state"><p>{t("order_unavailable")}</p><button onClick={() => window.location.reload()}>{t("retry")}</button><a href={`/${locale}/pass/`}>{t("choose_another_offer")}</a></div> : null}
+      {!authenticated || checkoutPage ? null : offers === undefined ? (
         <p>{t("loading")}</p>
       ) : !offers.length ? (
         <p>{t("no_offer")}</p>
       ) : (
         offers.map((offer) => (
-          <article key={offer.offer_id}>
+          <article className="offer-card" key={offer.offer_id}>
             <h2>{offer.name}</h2>
             <p>{offer.terms_summary}</p>
+            <p className="fine">{t("fixed_duration_notice")}</p>
             {offer.price ? (
               <p>
                 {new Intl.NumberFormat(locale, {
@@ -241,7 +260,7 @@ function Commerce() {
             ) : null}
             <button
               disabled={
-                busy ||
+                busy || !online ||
                 !!order ||
                 offer.availability !== "available" ||
                 !offer.price
@@ -256,21 +275,19 @@ function Commerce() {
       {order ? (
         <section>
           <h2>{t("order_status")}</h2>
-          <p>
-            {accessGranted(order)
-              ? t("payment_confirmed")
-              : t("payment_pending")}
-          </p>
+          <p role="status">{t(orderStatusKey(order))}</p>
+          <p>{new Intl.NumberFormat(locale, {style:"currency", currency:order.amount.currency}).format(order.amount.amount_minor / 100)}</p>
+          {accessGranted(order) ? <a className="button" href={checkoutReturnPath(order.return_path,locale)}>{t("return_to_content")}</a> : null}
           <p>
             {t("order_reference")}: {order.order_id}
           </p>
           {validCheckout(order.checkout, order.amount) ? (
-            <button disabled={busy} onClick={() => void pay()}>
+            <button disabled={busy || !online} onClick={() => void pay()}>
               {t("pay_securely")}
             </button>
           ) : null}
           <button
-            disabled={busy}
+            disabled={busy || !online}
             onClick={() =>
               void api<Order>("/commerce/orders/" + order.order_id)
                 .then(setOrder)
@@ -279,7 +296,8 @@ function Commerce() {
           >
             {t("refresh_status")}
           </button>
-          {accessGranted(order)||["failed","cancelled","expired","refunded"].includes(order.status)?<button onClick={()=>{sessionStorage.removeItem(pendingOrderKey);setOrder(undefined)}}>{t("choose_another_offer")}</button>:null}
+          {!validCheckout(order.checkout, order.amount) && !accessGranted(order) && !["failed","cancelled","expired","refunded"].includes(order.status) ? <p className="fine">{t("checkout_provider_unavailable")}</p> : null}
+          {accessGranted(order)||["failed","cancelled","expired","refunded"].includes(order.status)?<a href={`/${locale}/pass/`} onClick={()=>{try { sessionStorage.removeItem(pendingOrderKey); } catch {}}}>{t("choose_another_offer")}</a>:null}
         </section>
       ) : null}
     </section>

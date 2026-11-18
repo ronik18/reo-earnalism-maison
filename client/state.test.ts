@@ -300,7 +300,7 @@ test("Checkout cannot claim access from a callback or mismatched descriptor", ()
     false,
   );
   assert.equal(
-    accessGranted({ status: "paid", fulfillment_status: "fulfilled" }),
+    accessGranted({ status: "paid", fulfillment_status: "granted" }),
     true,
   );
 });
@@ -386,4 +386,25 @@ test("Checkout retry identity is scoped to the immutable offer and terms snapsho
     offerSnapshotKey(offer),
     offerSnapshotKey({ ...offer, terms_version: "terms2" }),
   );
+});
+
+import {orderStatusKey} from "./commerce-state";
+test("Checkout reflects server terminal states without granting pending or refunded access", () => {
+  assert.equal(orderStatusKey({status:"paid",fulfillment_status:"granted"}),"payment_confirmed");
+  for (const fulfillment_status of ["pending","refund_pending","refunded","review","fulfilled"]) {
+    assert.equal(accessGranted({status:"paid",fulfillment_status}),false);
+    assert.equal(orderStatusKey({status:"paid",fulfillment_status}),fulfillment_status === "refund_pending" ? "payment_refund_pending" : fulfillment_status === "refunded" ? "order_refunded" : "payment_access_pending");
+  }
+  for (const status of ["failed","cancelled","expired","refunded"]) {
+    assert.equal(orderStatusKey({status,fulfillment_status:"pending"}),"order_"+status);
+  }
+});
+
+// Media capabilities remain bound to their actual format and exact edition revision.
+import "./media-state.test.ts";
+
+import {checkoutReturnPath} from "./commerce-state";
+test("Checkout retains the exact content return across interface locale changes",()=>{
+  assert.equal(checkoutReturnPath("/en/read/book/unit/?anchor=p1&offset=12","bn"),"/en/read/book/unit/?anchor=p1&offset=12");
+  for (const path of ["https://other.test/en/read/book/","//other.test/en/read/book/","/en/sign-out/","/en/checkout/order/"]) assert.equal(checkoutReturnPath(path,"bn"),"/bn/vault/");
 });

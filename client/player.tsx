@@ -1,3 +1,5 @@
+import { approvedAudioURL } from "./media-state";
+import { PreviewBoundary, FormatSwitch } from "./media-sheets";
 import { useEffect, useRef, useState } from "react";
 import { mountIsland, closePlayer } from "./lifecycle";
 import { api, ApiError, errorText, readBootstrap, session, t } from "./api";
@@ -17,11 +19,19 @@ interface Boot {
   locale: string;
   chapters: Chapter[];
   reader_url: string;
+  reader_available?: boolean;
   anchor_id?: string;
   start_asset_id?: string;
   start_ms?: number;
+  authenticated?: boolean;
+  preview?: { url: string; duration_ms: number };
+  title_url?: string;
+  sign_in_url?: string;
+  pass_url?: string;
 }
 interface Grant {
+  transport: string;
+  content_type: string;
   asset_id: string;
   edition_revision_id: string;
   url: string;
@@ -44,6 +54,11 @@ function Player({ boot }: { boot: Boot }) {
   const [mini, setMini] = useState(false);
   const [, setLocaleVersion] = useState(0);
   const [position, setPosition] = useState(0);
+  const [boundaryOpen, setBoundaryOpen] = useState(false);
+  const [switchOpen, setSwitchOpen] = useState(false);
+  const [buffering, setBuffering] = useState(false);
+  const [completion, setCompletion] = useState<{ version: number; is_complete: boolean }>();
+  const pendingCompletion = useRef<{key:string;version:number;body:{operation_id:string;edition_revision_id:string;is_complete:boolean}} | undefined>(undefined);
   const [sleep, setSleep] = useState("off");
   const grant = useRef<Grant | undefined>(undefined);
   const progress = useRef<Progress | undefined>(undefined);
@@ -60,9 +75,14 @@ function Player({ boot }: { boot: Boot }) {
   const [conflict, setConflict] = useState(false);
   const chapter = boot.chapters[index];
   const path = `/me/progress/${boot.edition_id}/audio`;
+  const fullPlayerPath = useRef(location.pathname);
+  const mounted = useRef(true);
+  const loadGeneration = useRef(0);
+  const previewEnded = useRef(false);
   async function persist(keepalive = false) {
     const element = audio.current,
       c = boot.chapters[activeChapter.current];
+    if (boot.preview || boot.authenticated === false) return;
     if (
       !element ||
       !c ||
@@ -140,8 +160,19 @@ function Player({ boot }: { boot: Boot }) {
   async function load(i: number, at = 0, autoplay = false) {
     const c = boot.chapters[i];
     if (!c) return;
+    const generation = ++loadGeneration.current;
     setBusy(true);
     try {
+      if (boot.preview) {
+        if (i !== 0 || boot.preview.duration_ms <= 0 || boot.preview.duration_ms !== c.duration_ms) throw new Error("media_changed");
+        const el = audio.current!;
+        previewEnded.current = false;
+        el.src = boot.preview.url;
+        el.currentTime = Math.max(0, Math.min(at, boot.preview.duration_ms) / 1000);
+        el.playbackRate = speed;
+        if (autoplay) await el.play();
+        return true;
+      }
       const identity = await session();
       const next = await api<Grant>("/media/grants", {
         method: "POST",
@@ -153,40 +184,40 @@ function Player({ boot }: { boot: Boot }) {
           quality_kbps: c.quality_kbps,
         },
       });
-      if (
-        next.asset_id !== c.asset_id ||
-        next.edition_revision_id !== boot.edition_revision_id ||
-        next.sha256 !== c.sha256 ||
-        next.duration_ms !== c.duration_ms ||
-        next.quality_kbps !== c.quality_kbps
-      )
-        throw new Error(t("media_changed"));
+      if (!mounted.current || generation !== loadGeneration.current) return false;
+      const source = approvedAudioURL(next, c, boot.edition_revision_id, location.origin);
+      if (!source) throw new Error("media_changed");
       const el = audio.current!;
       grant.current = next;
       activeChapter.current = i;
       setIndex(i);
-      el.src = next.url;
+      el.src = source;
       el.playbackRate = speed;
       el.currentTime = Math.max(0, Math.min(at / 1000, c.duration_ms / 1000));
       if (autoplay) await el.play();
       setStatus("");
       return true;
     } catch (e) {
+      if (!mounted.current || generation !== loadGeneration.current) return false;
       setStatus(errorText(e));
       audio.current?.pause();
       return false;
     } finally {
-      setBusy(false);
+      if (mounted.current && generation === loadGeneration.current) setBusy(false);
     }
   }
   useEffect(() => {
+    mounted.current = true;
     const navigated = () => {
-      setMini(true);
+      setMini(location.pathname !== fullPlayerPath.current);
+      setBoundaryOpen(false);
+      setSwitchOpen(false);
       setLocaleVersion((value) => value + 1);
     };
     window.addEventListener("maison:navigated", navigated);
     let cancelled = false;
-    api<Progress>(path)
+    if (!boot.preview && boot.authenticated !== false) void api<{version:number;is_complete:boolean}>(`/me/completion/${boot.edition_id}/audio`).then(value => {if(!cancelled) setCompletion(value);}).catch(error => setStatus(errorText(error)));
+    (boot.preview ? Promise.resolve<Progress>({version: 0}) : boot.authenticated === false ? Promise.reject(new Error("not_authorized")) : api<Progress>(path))
       .then((p) => {
         if (cancelled) return;
         progress.current = p;
@@ -221,9 +252,7 @@ function Player({ boot }: { boot: Boot }) {
     };
     document.addEventListener("visibilitychange", hidden);
     if ("mediaSession" in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: boot.title,
-      });
+      if ("MediaMetadata" in window) navigator.mediaSession.metadata = new MediaMetadata({title: boot.title});
       navigator.mediaSession.setActionHandler("play", () => {
         void audio.current?.play().catch((e) => setStatus(errorText(e)));
       });
@@ -240,13 +269,15 @@ function Player({ boot }: { boot: Boot }) {
       navigator.mediaSession.setActionHandler("seekforward", () => {
         if (audio.current)
           audio.current.currentTime = Math.min(
-            audio.current.duration,
+            boot.preview ? boot.preview.duration_ms / 1000 : audio.current.duration,
             audio.current.currentTime + 15,
           );
       });
     }
     return () => {
       cancelled = true;
+      mounted.current = false;
+      loadGeneration.current++;
       window.removeEventListener("maison:navigated", navigated);
       clearInterval(timer);
       document.removeEventListener("visibilitychange", hidden);
@@ -264,6 +295,32 @@ function Player({ boot }: { boot: Boot }) {
   useEffect(() => {
     if (audio.current) audio.current.playbackRate = speed;
   }, [speed]);
+  async function toggleCompletion() {
+    if (!completion || busy || boot.preview) return;
+    setBusy(true);
+    if (!pendingCompletion.current) {
+      const key = crypto.randomUUID();
+      pendingCompletion.current = {key, version:completion.version, body:{operation_id:key,edition_revision_id:boot.edition_revision_id,is_complete:!completion.is_complete}};
+    }
+    try {
+      setCompletion(await api<{version:number;is_complete:boolean}>(`/me/completion/${boot.edition_id}/audio`, {method:"PUT",...pendingCompletion.current}));
+      pendingCompletion.current = undefined;
+      setStatus(t("saved_server"));
+    } catch(error) {
+      if (error instanceof ApiError && error.status === 412) {
+        pendingCompletion.current = undefined;
+        setCompletion(await api<{version:number;is_complete:boolean}>(`/me/completion/${boot.edition_id}/audio`).catch(() => completion));
+      }
+      setStatus(errorText(error));
+    }
+    finally {setBusy(false);}
+  }
+  async function chooseQuality(value: number) {
+    const target = boot.chapters.findIndex(candidate => candidate.unit_id === chapter.unit_id && candidate.quality_kbps === value);
+    if (target < 0 || busy) return;
+    try { await persist(); await load(target, Math.round((audio.current?.currentTime || 0) * 1000), playing); }
+    catch(error) {setStatus(errorText(error));}
+  }
   async function nextChapter(i: number) {
     if (busy) return;
     try {
@@ -294,6 +351,7 @@ function Player({ boot }: { boot: Boot }) {
     }
   }
   async function switchToRead() {
+    setBusy(true);
     try {
       const mapped = await api<{
         outcome: string;
@@ -315,9 +373,9 @@ function Player({ boot }: { boot: Boot }) {
           to_format: "reader",
         },
       });
-      await persist();
-      audio.current?.pause();
       if (mapped.outcome === "mapped" && mapped.to_location) {
+        await persist();
+        audio.current?.pause();
         const p = mapped.to_location;
         window.location.assign(
           validReturnPath(
@@ -327,7 +385,7 @@ function Player({ boot }: { boot: Boot }) {
       } else setStatus(t("switch_unmapped"));
     } catch (e) {
       setStatus(errorText(e));
-    }
+    } finally { setBusy(false); }
   }
   if (!chapter) return <p className="notice">{t("not_available")}</p>;
   return (
@@ -360,23 +418,40 @@ function Player({ boot }: { boot: Boot }) {
         preload="metadata"
         aria-label={chapter.title}
         onPlay={() => setPlaying(true)}
+        onWaiting={() => setBuffering(true)}
+        onCanPlay={() => setBuffering(false)}
+        onPlaying={() => setBuffering(false)}
         onPause={() => {
           setPlaying(false);
           void persist().catch((e) => setStatus(errorText(e)));
         }}
+        onSeeking={() => {
+          const el = audio.current;
+          if (el && boot.preview && el.currentTime * 1000 > boot.preview.duration_ms) el.currentTime = boot.preview.duration_ms / 1000;
+        }}
         onTimeUpdate={() => {
           const el = audio.current;
-          if (el) setPosition(el.currentTime);
+          if (el) {
+            setPosition(el.currentTime);
+            if (boot.preview && el.currentTime * 1000 >= boot.preview.duration_ms) {
+              el.pause();
+              if (el.currentTime * 1000 > boot.preview.duration_ms) el.currentTime = boot.preview.duration_ms / 1000;
+              if (!previewEnded.current) { previewEnded.current = true; setBoundaryOpen(true); }
+            }
+          }
         }}
         onEnded={() => {
+          if (boot.preview) { if (!previewEnded.current) { previewEnded.current = true; setBoundaryOpen(true); } return; }
           void persist()
             .then(() => {
               if (endChapter.current) {
                 endChapter.current = false;
                 setSleep("off");
                 setStatus(t("sleep_finished"));
-              } else if (index + 1 < boot.chapters.length)
-                void load(index + 1, 0, true);
+              } else {
+                const next = boot.chapters.findIndex((candidate, at) => at > index && candidate.unit_id !== chapter.unit_id && candidate.quality_kbps === chapter.quality_kbps);
+                if (next >= 0) void load(next, 0, true);
+              }
             })
             .catch((e) => setStatus(errorText(e)));
         }}
@@ -385,7 +460,7 @@ function Player({ boot }: { boot: Boot }) {
         }}
       />
       <p role="status" aria-live="polite">
-        {status}
+        {buffering ? t("buffering") : status}
       </p>
       {conflict ? (
         <div className="notice">
@@ -403,6 +478,8 @@ function Player({ boot }: { boot: Boot }) {
         </div>
       ) : null}
       <div className="player-options" hidden={mini}>
+        {!boot.preview ? <label>{t("audio_quality")}<select value={chapter.quality_kbps} disabled={busy} onChange={e => void chooseQuality(Number(e.target.value))}>{boot.chapters.filter(candidate => candidate.unit_id === chapter.unit_id).map(candidate => <option key={candidate.asset_id} value={candidate.quality_kbps}>{candidate.quality_kbps} kbps</option>)}</select></label> : null}
+        {completion && !boot.preview ? <button disabled={busy} aria-pressed={completion.is_complete} onClick={() => void toggleCompletion()}>{t(completion.is_complete ? "uncomplete" : "complete")}</button> : null}
         <label>
           {t("playback_speed")}
           <select
@@ -438,18 +515,20 @@ function Player({ boot }: { boot: Boot }) {
             <option value="chapter">{t("end_of_chapter")}</option>
           </select>
         </label>
-        <button disabled={busy} onClick={() => void switchToRead()}>
+        {boot.reader_available !== false ? <><button disabled={busy || !!boot.preview} onClick={() => { setStatus(""); setSwitchOpen(true); }}>
           {t("switch_to_read")}
         </button>
         <a href={validReturnPath(boot.reader_url + chapter.unit_id + "/")}>
           {t("read_from_chapter")}
-        </a>
+        </a></> : null}
       </div>
+      <FormatSwitch open={switchOpen} onClose={() => setSwitchOpen(false)} busy={busy} status={status} onExact={() => void switchToRead()} chapterUrl={boot.reader_url + chapter.unit_id + "/"} target="reader" />
+      {boot.preview ? <><button onClick={() => setBoundaryOpen(true)}>{t("preview_end_options")}</button><PreviewBoundary editionId={boot.edition_id} format="audio" authenticated={boot.authenticated === true} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.reload()} /></> : null}
       <ol className="unit-list" hidden={mini}>
         {boot.chapters.map((c, i) => (
           <li key={c.asset_id}>
             <button
-              disabled={busy}
+              disabled={busy || (!!boot.preview && i !== 0)}
               aria-current={i === index ? "true" : undefined}
               onClick={() => void nextChapter(i)}
             >
@@ -471,7 +550,7 @@ export function mount() {
   if (
     current &&
     current !== host &&
-    current.dataset.editionId !== boot.edition_id
+    (current.dataset.editionId !== boot.edition_id || current.dataset.revisionId !== boot.edition_revision_id || current.dataset.preview !== String(!!boot.preview))
   )
     closePlayer();
   else if (current && current !== host) {
@@ -484,6 +563,8 @@ export function mount() {
   }
   host.dataset.persistentPlayer = "true";
   host.dataset.editionId = boot.edition_id;
+  host.dataset.revisionId = boot.edition_revision_id;
+  host.dataset.preview = String(!!boot.preview);
   document.getElementById("persistent-media")!.append(host);
   document.body.classList.add("has-persistent-player");
   mountIsland(

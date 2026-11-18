@@ -29,6 +29,15 @@ function Downloads({ boot }: { boot: Boot }) {
   const [licenses, setLicenses] = useState<License[]>([]);
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const [loading, setLoading] = useState(true);
+  const [online, setOnline] = useState(navigator.onLine);
+  const say = (en: string, bn: string) => locale === "bn" ? bn : en;
+  useEffect(() => {
+    const change = () => setOnline(navigator.onLine);
+    window.addEventListener("online", change); window.addEventListener("offline", change);
+    return () => { window.removeEventListener("online", change); window.removeEventListener("offline", change); };
+  }, []);
   const [selectedUnits, setSelectedUnits] = useState<string[]>(
     (boot.unit_ids || []).slice(0, 10),
   );
@@ -89,8 +98,7 @@ function Downloads({ boot }: { boot: Boot }) {
         );
         if (
           !remote ||
-          remote.status !== "active" ||
-          Date.parse(remote.valid_until) <= Date.now()
+          remote.status !== "active"
         ) {
           await removeBook(book);
           if (
@@ -112,22 +120,28 @@ function Downloads({ boot }: { boot: Boot }) {
     }
   }
   useEffect(() => {
-    refresh().catch((e) => setStatus(errorText(e)));
+    refresh().catch((e) => setStatus(errorText(e))).finally(() => setLoading(false));
   }, []);
   useEffect(() => {
-    const reconnect = () =>
-      void refresh().catch((e) => setStatus(errorText(e)));
+    const reconnect = () => {
+      setStatus(""); void refresh().catch((e) => setStatus(errorText(e)));
+    };
     window.addEventListener("online", reconnect);
     return () => window.removeEventListener("online", reconnect);
   }, [reading, listening]);
   async function act(action: () => Promise<void>) {
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
     setStatus("");
     try {
       await action();
     } catch (e) {
       setStatus(errorText(e));
+      const member = await activeMember().catch(() => undefined);
+      if (member) setItems(await books(member).catch(() => []));
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   }
@@ -165,7 +179,10 @@ function Downloads({ boot }: { boot: Boot }) {
     setStatus(t("offline_ready"));
   }
   return (
-    <section className="downloads-panel">
+    <section className="downloads-panel" aria-busy={busy || loading}>
+      <div className="actions"><button disabled={busy || loading} onClick={() => void act(refresh)}>{t("retry")}</button><a href={`/${locale}/explore/`}>{t("browse")}</a></div>
+      {!online && <p className="notice">{say("Offline. Complete local downloads remain available until their licenses expire. Renewal and new transfers need a connection.", "অফলাইন। সম্পূর্ণ স্থানীয় ডাউনলোড অনুমতির মেয়াদ পর্যন্ত খোলা যাবে। নবীকরণ ও নতুন ডাউনলোডে ইন্টারনেট দরকার।")}</p>}
+      <p className="muted">{say("Removing a local file preserves your Saved titles, lists, highlights and notes. Device storage may be reclaimed by your browser.", "স্থানীয় ফাইল সরালেও সংরক্ষিত বই, তালিকা, দাগ ও নোট থাকে। ব্রাউজার যন্ত্রের জায়গা খালি করতে ফাইল সরাতে পারে।")}</p>
       <p role="status" aria-live="polite">
         {status}
       </p>
@@ -203,7 +220,7 @@ function Downloads({ boot }: { boot: Boot }) {
               .map((f) => (
                 <button
                   key={f}
-                  disabled={busy || !navigator.onLine || !selectedUnits.length}
+                  disabled={busy || !online || !selectedUnits.length}
                   onClick={() => void act(() => save(f as "reader" | "audio"))}
                 >
                   {t("download")} · {t(f)}
@@ -220,7 +237,7 @@ function Downloads({ boot }: { boot: Boot }) {
               <h2 lang={book.locale}>{book.title}</h2>
               <p>
                 {t(
-                  book.state === "ready"
+                  Date.parse(book.license.valid_until) <= Date.now() ? "download_expired" : book.state === "ready"
                     ? "offline_ready"
                     : book.state === "failed"
                       ? "download_failed"
@@ -231,7 +248,7 @@ function Downloads({ boot }: { boot: Boot }) {
               </p>
               {book.license.format === "reader" ? (
                 <button
-                  disabled={busy || book.state !== "ready"}
+                  disabled={busy || book.state !== "ready" || Date.parse(book.license.valid_until) <= Date.now()}
                   onClick={() =>
                     void act(async () =>
                       setReading({ book, paragraphs: await openReader(book) }),
@@ -243,7 +260,7 @@ function Downloads({ boot }: { boot: Boot }) {
               ) : null}
               {book.license.format === "audio" && book.state === "ready" ? (
                 <button
-                  disabled={busy}
+                  disabled={busy || Date.parse(book.license.valid_until) <= Date.now()}
                   onClick={() =>
                     void act(async () =>
                       setListening({
@@ -264,6 +281,7 @@ function Downloads({ boot }: { boot: Boot }) {
                 onClick={() =>
                   void act(async () => {
                     await removeBook(book);
+                    setItems(current => current.filter(item => item.key !== book.key));
                     setReading(undefined);
                     setListening(undefined);
                     if (navigator.onLine)
@@ -277,7 +295,12 @@ function Downloads({ boot }: { boot: Boot }) {
               >
                 {t("remove")}
               </button>
-              {navigator.onLine ? (
+              {online && book.state !== "ready" && Date.parse(book.license.valid_until) > Date.now() ? <button disabled={busy} onClick={() => void act(async () => {
+                const license = await api<License>("/me/downloads/" + book.license.license_id + "/refresh", { method:"POST", key:crypto.randomUUID(), body:{} });
+                await download(book.member, license, book.title, book.locale, (done,total) => setStatus(`${t("downloading")} ${Math.floor(done/total*100)}%`));
+                await refresh(); setStatus(t("offline_ready"));
+              })}>{t("retry")}</button> : null}
+              {online ? (
                 <button
                   disabled={busy}
                   onClick={() =>
@@ -298,11 +321,12 @@ function Downloads({ boot }: { boot: Boot }) {
           ))}
         </div>
       ) : (
-        <p>{t("empty")}</p>
+        loading ? <p role="status">{t("loading")}</p> : <div className="empty-state"><h2>{t("empty")}</h2><p>{say("No complete download is stored on this device. Choose an available format from a title page when online.", "এই যন্ত্রে সম্পূর্ণ ডাউনলোড নেই। অনলাইনে বইয়ের পাতা থেকে উপলব্ধ মাধ্যম বেছে নিন।")}</p></div>
       )}
+      {licenses.some(license => !items.some(book => book.license.license_id === license.license_id)) && <section><h2>{say("Other device licenses", "যন্ত্রের অন্যান্য অনুমতি")}</h2><p>{say("A license alone is not a complete local download. Open its title online to download again.", "শুধু অনুমতি থাকলেই সম্পূর্ণ স্থানীয় ডাউনলোড হয় না। আবার ডাউনলোড করতে অনলাইনে বইয়ের পাতা খুলুন।")}</p><ul>{licenses.filter(license => !items.some(book => book.license.license_id === license.license_id)).map(license => <li key={license.license_id}>{t(license.format)} · {license.status === "active" && Date.parse(license.valid_until)>Date.now() ? t("download_again") : t("download_expired")}</li>)}</ul></section>}
       {listening ? (
         <section className="player-panel">
-          <h2>{listening.book.title}</h2>
+          <button onClick={() => { audio.current?.pause(); setListening(undefined); }}>{t("close")}</button><h2>{listening.book.title}</h2>
           <audio ref={audio} src={listening.url} controls preload="metadata" />
           <ol className="unit-list">
             {listening.book.license.assets.map((asset, index) => (

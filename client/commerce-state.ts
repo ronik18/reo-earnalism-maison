@@ -1,3 +1,4 @@
+import { validReturnPath } from "./state";
 export interface Money {
   amount_minor: number;
   currency: string;
@@ -29,7 +30,7 @@ export function accessGranted(order: {
   status: string;
   fulfillment_status: string;
 }): boolean {
-  return order.status === "paid" && order.fulfillment_status === "fulfilled";
+  return order.status === "paid" && order.fulfillment_status === "granted";
 }
 
 export function offerSnapshotKey(offer: {
@@ -38,4 +39,18 @@ export function offerSnapshotKey(offer: {
   terms_version: string;
 }): string {
   return JSON.stringify([offer.offer_id, offer.version, offer.terms_version]);
+}
+
+export function orderStatusKey(order: {status:string;fulfillment_status:string}): string {
+  if (accessGranted(order)) return "payment_confirmed";
+  if (order.fulfillment_status === "refund_pending") return "payment_refund_pending";
+  if (order.fulfillment_status === "refunded" || order.status === "refunded") return "order_refunded";
+  if (order.status === "paid") return "payment_access_pending";
+  return ["failed", "cancelled", "expired"].includes(order.status) ? "order_" + order.status : "payment_pending";
+}
+
+export function checkoutReturnPath(value: string | undefined, locale="en"):string {
+  if (!value) return `/${locale}/vault/`;
+  const path=validReturnPath(value,locale);
+  return /^\/(en|bn)\/(checkout|sign-in|sign-up|sign-out|password-reset)(\/|\?|$)/.test(path) || path===`/${locale}/` ? `/${locale}/vault/` : path;
 }

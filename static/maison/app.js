@@ -53,27 +53,95 @@ window.maisonEnhance = () => {
   const saveButton = $('[data-save-edition]');
   if (saveButton) {
     let isSaved = false;
-    api('/me/saved-items').then(page => {isSaved = (page.items || []).some(item => (item.edition_id || item.edition?.edition_id) === saveButton.dataset.saveEdition); saveButton.textContent = isSaved ? ui.remove_saved : ui.save; saveButton.setAttribute('aria-pressed', String(isSaved));}).catch(error => failure('save-status', error));
+    const saveRetry=make('button',ui.retry);saveRetry.type='button';saveRetry.hidden=true;saveButton.after(saveRetry);
+    async function loadSaved(){saveButton.disabled=true;saveRetry.hidden=true;try {let cursor=null;const visited=new Set();isSaved=false;do{const page=await api('/me/saved-items'+(cursor?'?cursor='+encodeURIComponent(cursor):''));isSaved ||= (page.items||[]).some(item=>(item.edition_id||item.edition?.edition_id)===saveButton.dataset.saveEdition);cursor=page.next_cursor||null;if(cursor&&visited.has(cursor))throw new Error(ui.service_unavailable);if(cursor)visited.add(cursor);}while(cursor&&!isSaved);saveButton.textContent=isSaved?ui.remove_saved:ui.save;saveButton.setAttribute('aria-pressed',String(isSaved));saveButton.disabled=false;status('save-status','');}catch(error){failure('save-status',error);saveRetry.hidden=false;}}
+    saveRetry.addEventListener('click',()=>void loadSaved());void loadSaved();
     saveButton.addEventListener('click', () => busy(saveButton, async () => {await api('/me/saved-items/' + saveButton.dataset.saveEdition, {method:isSaved ? 'DELETE' : 'PUT', body:isSaved ? undefined : {}}); isSaved = !isSaved; saveButton.textContent = isSaved ? ui.remove_saved : ui.save; saveButton.setAttribute('aria-pressed', String(isSaved)); status('save-status', ui.saved_server);}, 'save-status'));
   }
 
-  async function editionCard(editionId, extraAction) {let edition; try {edition = await api('/catalog/editions/' + editionId + '?locale=' + locale + '&territory=IN');} catch (_) {try {edition=await api('/staff/draft-editions/'+editionId);} catch (_) {edition = {title:ui.not_available};}} const article = make('article'); const link = make('a',edition.title); link.href = `/${locale}/titles/${editionId}/`; const heading = make('h2'); heading.append(link); article.append(heading); if (extraAction) article.append(extraAction); return article;}
+  const say = (en, bn) => locale === 'bn' ? bn : en;
+  const editionCache = new Map();
+  async function editionCard(editionId, extraAction, knownCard) {
+    let edition = knownCard;
+    if (!edition) {
+      if (!editionCache.has(editionId)) editionCache.set(editionId, api('/catalog/editions/' + editionId + '?locale=' + locale).catch(async error => {
+        if(error.status===404) {try{return await api('/staff/draft-editions/'+editionId);}catch(staffError){if(![403,404].includes(staffError.status))throw staffError;}}
+        else if(error.status!==403)throw error;
+        return {title:ui.not_available,unavailable:true};
+      }).catch(error=>{editionCache.delete(editionId);throw error;}));
+      edition = await editionCache.get(editionId);
+    }
+    const article = make('article',null,'book-row'), content=make('div');
+    if(edition.cover) {const cover=make('img');cover.src=edition.cover.url;cover.alt=edition.cover.alt;cover.width=100;cover.height=150;cover.loading='lazy';article.append(cover);}
+    const heading = make('h2');
+    if(edition.unavailable) heading.textContent=ui.not_available;
+    else {const link=make('a',edition.title);link.href=`/${locale}/titles/${editionId}/`;heading.append(link);}
+    if(edition.locale)heading.lang=edition.locale;
+    content.append(heading);if(edition.creators)content.append(make('p',edition.creators.join(', ')));
+    if(edition.unavailable)content.append(make('p',say('This title may have been withdrawn or is unavailable here. Your list membership is preserved.','বইটি প্রত্যাহৃত হয়েছে অথবা এখানে পাওয়া যাচ্ছে না। তালিকায় বইটি রাখা আছে।')));
+    if(extraAction)content.append(extraAction);article.append(content);return article;
+  }
+  function nextPage(path,cursor) {const query=new URLSearchParams();if(cursor)query.set('cursor',cursor);return path+(query.size?'?'+query:'');}
   const vault = $('#vault-content');
   if (vault) {
-    const tab = vault.dataset.tab, target = $('#vault-items');
-    async function loadVault() {target.replaceChildren(); if (tab === 'lists') {const data = await api('/me/lists'); for (const list of data.items || []) {const article = make('article'), link = make('a',list.name); link.href = `/${locale}/vault/lists/${list.list_id}/`; article.append(link); target.append(article);} status('vault-status',data.items?.length ? '' : ui.empty);} else {const data = await api(tab === 'finished' ? '/me/vault' : '/me/saved-items'); const items = tab === 'finished' ? (data.finished || []) : (data.items || []); for (const item of items.slice(0,20)) target.append(await editionCard(item.edition_id || item.edition?.edition_id || item.card?.edition_id)); status('vault-status',items.length ? '' : tab === 'finished' ? ui.no_finished : ui.no_saved);}}
-    loadVault().catch(error => failure('vault-status',error));
-    $('#create-list-form')?.addEventListener('submit',event => {event.preventDefault(); const form = event.currentTarget; form.dataset.pendingKey ||= crypto.randomUUID(); busy($('button',form),async () => {await api('/me/lists',{method:'POST',key:form.dataset.pendingKey,body:{name:new FormData(form).get('name')}}); delete form.dataset.pendingKey; form.reset(); await loadVault(); status('vault-status',ui.saved_server);},'vault-status');});
+    const tab = vault.dataset.tab, target = $('#vault-items'), retry=$('#vault-retry'), more=$('#vault-more');
+    let pending=false, cursor=null, seen=new Set();
+    async function loadVault(append=false) {
+      if(pending)return;pending=true;vault.setAttribute('aria-busy','true');retry.hidden=true;more.disabled=true;status('vault-status',ui.loading);
+      try {
+        const path=tab==='lists'?'/me/lists':tab==='finished'?'/me/vault':'/me/saved-items';
+        const data=await api(nextPage(path,append?cursor:null));
+        if(!append){target.replaceChildren();seen=new Set();}
+        const items=tab==='finished'?(data.finished||[]):(data.items||[]);
+        for(const item of items){
+          const id=tab==='lists'?item.list_id:(item.edition_id||item.edition?.edition_id||item.card?.edition_id);
+          if(!id||seen.has(id))continue;seen.add(id);
+          if(tab==='lists') {const article=make('article',null,'book-row'),link=make('a',item.name);link.href=`/${locale}/vault/lists/${id}/`;article.append(link);target.append(article);}
+          else {
+            const actions=make('div',null,'actions');
+            if(tab==='saved') {const remove=make('button',ui.remove_saved);remove.addEventListener('click',()=>busy(remove,async()=>{await api('/me/saved-items/'+id,{method:'DELETE'});seen.delete(id);remove.closest('article')?.remove();status('vault-status',seen.size?ui.saved_server:ui.no_saved);},'vault-status'));actions.append(remove);}
+            target.append(await editionCard(id,actions,item.card));
+          }
+        }
+        const previous=cursor;cursor=data.next_cursor||null;more.hidden=!cursor||(append&&previous===cursor);
+        status('vault-status',seen.size?'':tab==='finished'?ui.no_finished:tab==='saved'?ui.no_saved:ui.empty);
+      } catch(error){failure('vault-status',error);retry.hidden=false;}
+      finally{pending=false;vault.setAttribute('aria-busy','false');more.disabled=false;}
+    }
+    retry.addEventListener('click',()=>void loadVault());more.addEventListener('click',()=>void loadVault(true));void loadVault();
+    $('#create-list-form')?.addEventListener('submit',event => {event.preventDefault();const form=event.currentTarget;if(form.dataset.busy)return;form.dataset.busy='true';form.dataset.pendingKey ||= crypto.randomUUID();busy($('button',form),async()=>{if(!navigator.onLine)throw new Error(ui.offline);await api('/me/lists',{method:'POST',key:form.dataset.pendingKey,body:{name:new FormData(form).get('name')}});delete form.dataset.pendingKey;form.reset();await loadVault();status('vault-status',ui.saved_server);},'vault-status').finally(()=>delete form.dataset.busy);});
   }
   const listNode = $('#personal-list');
   if (listNode) {
-    const path = '/me/lists/' + listNode.dataset.listId; let list;
-    async function loadList() {list = await api(path); $('#list-title').textContent = list.name; $('#rename-list-form input').value = list.name; const target = $('#list-items'); target.replaceChildren(); for (const [index, id] of list.edition_ids.entries()) {const actions = make('div',null,'actions'); for (const [label,delta] of [[ui.move_up,-1],[ui.move_down,1]]) {const button = make('button',label); button.disabled = index+delta<0 || index+delta>=list.edition_ids.length; button.addEventListener('click',() => busy(button,async () => {const order = [...list.edition_ids]; [order[index],order[index+delta]]=[order[index+delta],order[index]]; await api(path+'/order',{method:'PUT',version:list.version,body:{edition_ids:order}}); await loadList();},'list-status')); actions.append(button);} const remove = make('button',ui.remove); remove.addEventListener('click',() => busy(remove,async () => {await api(path+'/items/'+id,{method:'DELETE',version:list.version}); await loadList();},'list-status')); actions.append(remove); target.append(await editionCard(id,actions));} status('list-status',list.edition_ids.length ? '' : ui.empty_list);}
-    loadList().catch(error => failure('list-status',error));
-    $('#rename-list-form').addEventListener('submit',event => {event.preventDefault();busy($('button',event.currentTarget),async () => {await api(path,{method:'PATCH',version:list.version,body:{name:new FormData(event.currentTarget).get('name')}});await loadList();},'list-status');});
-    $('#add-list-item-form').addEventListener('submit',event => {event.preventDefault();busy($('button',event.currentTarget),async () => {await api(path+'/items/'+new FormData(event.currentTarget).get('edition_id'),{method:'PUT',version:list.version,body:{}});await loadList();},'list-status');});
-    $('#delete-list').addEventListener('click',event => busy(event.currentTarget,async () => {await api(path,{method:'DELETE',version:list.version});window.location.assign(`/${locale}/vault/?tab=lists`);},'list-status'));
+    const path='/me/lists/'+listNode.dataset.listId, retry=$('#list-retry'), more=$('#list-more'), controls=$('#list-controls');let list,pending=false,visible=20;
+    async function renderList(){
+      $('#list-title').textContent=list.name;$('#rename-list-form input').value=list.name;
+      const target=$('#list-items');target.replaceChildren();
+      for(const [index,id] of list.edition_ids.slice(0,visible).entries()) {
+        const actions=make('div',null,'actions');
+        for(const [label,delta] of [[ui.move_up,-1],[ui.move_down,1]]) {const button=make('button',label);button.type='button';button.disabled=index+delta<0||index+delta>=list.edition_ids.length;button.setAttribute('aria-label',label+' · '+(index+1));button.addEventListener('click',()=>void mutate(async()=>{const order=[...list.edition_ids];[order[index],order[index+delta]]=[order[index+delta],order[index]];await api(path+'/order',{method:'PUT',version:list.version,body:{edition_ids:order}});},index+delta));actions.append(button);}
+        const remove=make('button',ui.remove);remove.type='button';remove.addEventListener('click',()=>void mutate(()=>api(path+'/items/'+id,{method:'DELETE',version:list.version}),Math.min(index,list.edition_ids.length-2)));actions.append(remove);
+        target.append(await editionCard(id,actions));
+      }
+      more.hidden=visible>=list.edition_ids.length;status('list-status',list.edition_ids.length?'':ui.empty_list);
+    }
+    async function loadList(){list=await api(path);await renderList();}
+    async function mutate(action,focusIndex){
+      if(pending)return;pending=true;controls.disabled=true;retry.hidden=true;listNode.setAttribute('aria-busy','true');status('list-status',ui.saving);
+      try{if(!navigator.onLine)throw new Error(ui.offline);const result=await action();if(result===false)return;await loadList();status('list-status',ui.saved_server);}
+      catch(error){if(error.status===412){await loadList().catch(()=>{});status('list-status',ui.version_conflict);}else failure('list-status',error);retry.hidden=false;}
+      finally{pending=false;controls.disabled=false;listNode.setAttribute('aria-busy','false');if(Number.isInteger(focusIndex))$$('#list-items article')[Math.max(0,focusIndex)]?.querySelector('button:not(:disabled)')?.focus();}
+    }
+    async function refresh(){if(pending)return;pending=true;controls.disabled=true;listNode.setAttribute('aria-busy','true');status('list-status',ui.loading);try{await loadList();retry.hidden=true;}catch(error){failure('list-status',error);retry.hidden=false;}finally{pending=false;controls.disabled=!list;listNode.setAttribute('aria-busy','false');}}
+    retry.addEventListener('click',()=>void refresh());more.addEventListener('click',async()=>{if(pending)return;pending=true;controls.disabled=true;visible+=20;try{await renderList();}catch(error){failure('list-status',error);}finally{pending=false;controls.disabled=false;}});void refresh();
+    $('#rename-list-form').addEventListener('submit',event=>{event.preventDefault();const name=new FormData(event.currentTarget).get('name');void mutate(()=>api(path,{method:'PATCH',version:list.version,body:{name}}));});
+    $('#add-list-item-form').addEventListener('submit',event=>{event.preventDefault();const id=new FormData(event.currentTarget).get('edition_id');void mutate(()=>api(path+'/items/'+id,{method:'PUT',version:list.version,body:{}}));});
+    $('#delete-list').addEventListener('click',()=>void mutate(async()=>{await api(path,{method:'DELETE',version:list.version});window.location.assign(`/${locale}/vault/?tab=lists`);return false;}));
   }
+  const share=$('[data-share-title]');
+  if(share)share.addEventListener('click',()=>busy(share,async()=>{const url=new URL(location.pathname,location.origin).href;try{if(navigator.share){await navigator.share({title:share.dataset.shareTitle,url});status('share-status',ui.shared_title);}else if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(url);status('share-status',ui.link_copied);}else{const output=$('#share-status');output.replaceChildren();const link=make('a',url);link.href=url;output.append(link);}}catch(error){if(error.name!=='AbortError')throw error;}},'share-status'));
+  const search=$('.search-form');
+  if(search){let composing=false;const query=$('input[name=q]',search);query?.addEventListener('compositionstart',()=>composing=true);query?.addEventListener('compositionend',()=>composing=false);search.addEventListener('submit',event=>{if(composing){event.preventDefault();event.stopImmediatePropagation();}},true);}
 
   const filterForm = $('#save-filter-form');
   if (filterForm) {
