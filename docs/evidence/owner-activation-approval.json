@@ -1,0 +1,46 @@
+{
+  "received_utc": "2026-11-18T20:29:27.017651+00:00",
+  "authority": "Explicit owner answers in this chat,19November2026",
+  "review_package_commit": "01fda1078176bc34e9bc050e81b47bb405c75d07",
+  "package_choice": "Approve isolated Launch +7-day logs",
+  "database": {
+    "plan": "Launch",
+    "min_CU": 0.25,
+    "max_CU": 2,
+    "history_days": 7,
+    "scope": "Isolated qualification exception; not productionScale capacity/HA acceptance"
+  },
+  "logs": {
+    "days": 7,
+    "explicit_exception_to_prior30_days": true,
+    "RenderScale_upgrade_authorized": false
+  },
+  "runners": {
+    "maintenance": "* * * * * UTC",
+    "independent_export": "0 3 * * * UTC",
+    "region": "Singapore",
+    "compute": "0.5CPU/512MB each",
+    "billing": "$1minimum/job/month plus active runtime$0.00016/minute; usage/tax extra; no hard spending cap implied"
+  },
+  "backup": {
+    "private_R2_bucket": true,
+    "daily_retention_days": 30,
+    "monthly_snapshots": 12,
+    "scoped_archive_credentials": true,
+    "separate_direct_readonly_database_role": true,
+    "age_identity": "Owner-held ignoredmode600localfile; privatekey never Render/R2/GitHub/chat; publicrecipientonly onexporthost"
+  },
+  "mailbox_choice": "Keep existing Reo business mail operator-managed",
+  "mailbox_inventory_authorized": false,
+  "mailbox_deletion_authorized": false,
+  "preserved": [
+    "Current$7webqualification",
+    "Draft book/content/null-live pointer",
+    "Legacy platform",
+    "DNS"
+  ],
+  "physical_UAT": {
+    "status": "DEFERRED",
+    "blocking": false
+  }
+}

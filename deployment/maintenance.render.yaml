@@ -4,8 +4,9 @@
 # Cron docs: https://render.com/docs/cronjobs
 # Cost: >=$1/month cron fee, active-second usage, tax and provider usage extra.
 # A one-minute DB poll prevents Neon's normal5-minute suspend. At the approved
-# minimum.5CU this is360CUh/30days, beyond100CUh Free; Scale.222/CUh gives
-# $79.92 compute baseline, up to$319.68 at continuous2CU, before storage/history. Read back the actual project plan/rate before activation.
+# owner-approved isolatedminimum.25CU this is180CUh/30days, beyond100CUh Free.
+# Launch.106/CUh gives$19.08 compute floor/up to$152.64 at continuous2CU,
+# before storage/history. ProductionScale baseline is unchanged.
 # No existing web service, DNS record, public URL or backup schedule is modified.
 services:
   - type: cron

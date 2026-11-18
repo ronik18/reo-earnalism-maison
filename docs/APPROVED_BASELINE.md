@@ -39,3 +39,10 @@ Owner-approved database amendment,18November2026: retain the existing Neon Postg
 ## Owner physical-device UAT deferral,18November2026
 
 The owner explicitly instructed in the frontend/mobile chat: “We will do the UAT on Physical Android/iOS and OS-specific behavior later. Do not make it a blocker/guardrail.” The subsequent owner instruction confirms completing the isolated Maison rollout while physical UAT remains deferred and non-blocking. Integration Lane verified the original user messages. Keep these checks truthfully labelled not run; do not make them an integration/rollout/release blocker. Virtual browser, actual enabled-flow security/functionality and other applicable requirements remain separate. No new device claim, paid resource, public book publication or legacy cutover is authorized by this amendment.
+
+
+## Owner-approved isolated activation exception,19November2026
+
+The owner explicitly selected the01fda10 review package's **isolated Launch +7-day logs** option and **existing business mail operator-managed**. For this isolated qualification use NeonLaunch0.25–2CU with7-day history, existing$7singlewebservice/Hobby7-day native logs, and two Singapore0.5CPU/512MiB cron jobs for minute maintenance and independent03:00UTC encrypted export. Authorizes the dedicated privateR2backupbucket/scoped archive credential, separate directreadOnlyDBrole and owner-heldlocalageidentity/publicrecipientonlyonexporthost. Metered pricing/ranges are approved as disclosed, not hard spending caps. No Render$499upgrade, mailbox inventory/purge, publication, legacy or DNS change.
+
+This is an explicit qualification-only plan/capacity/log-window exception; the productionScale0.5–2CU/availability and prior30-day productionlog baseline are not silently marked conforming. Actual provider activation, automatic occurrence, archive/restore and retention checks remain required. [Scoped configuration](../contracts/isolated-qualification-config.json), [owner decision receipt](evidence/owner-activation-approval.json).

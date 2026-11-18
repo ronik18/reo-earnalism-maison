@@ -1,0 +1,34 @@
+{
+  "scope": "isolated qualification only",
+  "owner_approved_on": "2026-11-19",
+  "review_package_commit": "01fda1078176bc34e9bc050e81b47bb405c75d07",
+  "database": {
+    "plan": "Launch",
+    "region": "aws-ap-southeast-1",
+    "min_cu": 0.25,
+    "max_cu": 2,
+    "restore_history_days": 7
+  },
+  "render": {
+    "workspace_plan": "Hobby",
+    "existing_web_instances": 1,
+    "native_log_retention_days": 7,
+    "maintenance_utc": "* * * * *",
+    "export_utc": "0 3 * * *",
+    "cron_cpu": 0.5,
+    "cron_memory_mib": 512
+  },
+  "backup": {
+    "r2_bucket": "reo-earnalism-maison-backups",
+    "private": true,
+    "daily_retention_days": 30,
+    "monthly_snapshots": 12,
+    "separate_readonly_database_role": true,
+    "private_age_identity_on_export_host": false
+  },
+  "business_mail": "existing operator-managed process; no mailbox access or deletion authorized",
+  "production_baseline_unchanged": true,
+  "production_ha_qualified": false,
+  "book_publication_authorized": false,
+  "legacy_or_dns_change_authorized": false
+}

@@ -1,6 +1,6 @@
 # Recurring operations and provider retention: activation package
 
-19 November2026. **Prepared for owner review, not provisioned.** Keep the existing$7 isolated web service, The Selfish Giant draft and all legacy/apex/DNS routes unchanged. Source/configuration can be tested/deployed without activating new billable runners.
+19 November2026. **Owner approved the isolated Launch +7-day-log option; activation in progress.** Keep the existing$7 isolated web service, The Selfish Giant draft and all legacy/apex/DNS routes unchanged. Source/configuration can be tested/deployed without activating new billable runners.
 
 ## Actual provider readback
 
@@ -25,7 +25,7 @@ Illustrative quiet qualification total on a30-day month: existingweb$7 + Neonmin
 
 ## Optional isolated-qualification exception, not production-baseline conformity
 
-The owner may explicitly choose NeonLaunch at the already qualified current0.25–2CU range, with7-day history and the same PostgreSQL/driver/regions/archive architecture, instead of activating the productionScale/min0.5CU baseline now. This changes the plan/minimum-capacity acceptance for isolated qualification only; production SLA/capacity/HA are not certified by it. No such exception is currently approved or applied.
+The owner may explicitly choose NeonLaunch at the already qualified current0.25–2CU range, with7-day history and the same PostgreSQL/driver/regions/archive architecture, instead of activating the productionScale/min0.5CU baseline now. This changes the plan/minimum-capacity acceptance for isolated qualification only; production SLA/capacity/HA are not certified by it. The owner explicitly approved this isolated exception on19November2026; actual provider application/readback is tracked separately.
 
 At currentLaunch$0.106/CUh, continuousminimum0.25CU×720hours costs$19.08/30days; continuous2CU costs$152.64, plus storage/history/tax. Existingweb$7 + minimumtwo cron$2 gives an illustrative **$28.08 quiet30-day floor** before runtime/storage/history/tax, not a hardcap. Minute polling still prevents normal idle scale-to-zero. Source and existing isolated browser/database acceptance already run on0.25CU; this is not a substitute for provider-plan activation/load/recovery acceptance. The approved productionScale0.5–2CU baseline remains intact unless separately amended.
 
@@ -33,7 +33,7 @@ At currentLaunch$0.106/CUh, continuousminimum0.25CU×720hours costs$19.08/30days
 
 The approved ordinary-log window is30days. Native Render retention is Hobby7days, Pro14days, Scale/Enterprise30days. Current RenderScale workspace/organization price is$499/month, before compute; Pro does not supply30days. Do not upgrade just to satisfy a checkbox.
 
-**Economical recommendation for this isolated scope:** explicitly amend ordinary provider-log retention to the existing native7days, while retaining90-day eligible application security outcomes and the separately approved backup schedule. This is an approval request, not an implemented policy reinterpretation.
+**Economical recommendation for this isolated scope:** explicitly amend ordinary provider-log retention to the existing native7days, while retaining90-day eligible application security outcomes and the separately approved backup schedule. The owner explicitly approved this isolated7-day exception on19November2026; existing nativeHobby retention already provides7days.
 
 If30-day log lookback remains required, choose a separately approved nativeScale upgrade or review a Maison-only encrypted archive adapter. The latter requires additional Render API access/new retained log destination, scope review, gap detection/redaction and actual automatic archive evidence; no broad API key or collector is silently introduced. No existing authorized log sink has been verified.
 
@@ -71,4 +71,4 @@ No resource, plan, credential, native retention rule, public DNS or legacy deplo
 
 Implementation source `77901394188da771e92d5bf4baf3e176cb08135b` passed [exact-source CI44388432433](https://github.com/ronik18/reo-earnalism-maison/actions/runs/44388432433):294backend tests,28frontend tests, build and migration/no-drift checks. It is normal-pushed to main and deployed Live to the existing$7 isolated webservice (`dep-dbv0fjjrjlhs73agjt30`), staticreleaseunchanged.7/7 independent HTTPS checks pass. Fresh directNeon read-only verification preserves draft/nullpointer/32paragraphs/manuscriptSHA and shows no dueoutbox, scheduledrevisions or supportcases. No recurring run is claimed: maintenance receipt count0.
 
-[Actual deployed/read-only receipt](evidence/provider-retention-safe-deployment.json), [independent HTTPS receipt](evidence/provider-retention-independent-smoke.json). All new billable resources, scoped archive/backup credentials, provider-log exception and optionalLaunch qualification exception remain unactivated pending explicit owner approval. No additional spending, DNS or legacy changes occurred.
+[Actual deployed/read-only receipt](evidence/provider-retention-safe-deployment.json), [independent HTTPS receipt](evidence/provider-retention-independent-smoke.json). The owner has now explicitly approved the isolatedLaunch package, scoped backup access and7-daylog exception. Activation and actual provider acceptance remain in progress; business mail stays operator-managed. No additional spending, DNS or legacy changes occurred.
