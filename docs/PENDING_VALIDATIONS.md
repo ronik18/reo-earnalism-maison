@@ -186,3 +186,5 @@ Read-only live diagnostics subsequently confirmed HTTP403 `invalid_mfa_code` for
 - Invalid/expired codes and already-configured MFA have explicit English/Bengali messages. Hidden django-otp cooldowns now return `mfa_retry_later`429 with an accurate Retry-After, without resetting counters, relaxing tolerance, or bypassing MFA.
 - Frontend strict typecheck,26 tests and production build pass; focused backend MFA5 tests pass. Full backend/exact-source CI remain to be checked.
 - Prepared release `7d9c5d531fda3f14e16d35fa275dcbed58bc4f07d90b52126e51316fa7caee33`:54 public UI files,7,289,040bytes. Upload/isolated deployment approval requested. Not uploaded/deployed yet. Owner enrollment and live draft Reader acceptance remain open.
+
+The final prepared MFA asset release supersedes the initial candidate by including the QR encoder MIT notice: `686e2afe5a9faa95b98a0a8779ee214980dd0c6ee0a0e0aaac7eff63bb6899c6`,55files,7,290,134bytes. Final bounded upload/deployment approval requested; no upload yet. QR renders inside the account page and never calls an external encoding service.
