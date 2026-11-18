@@ -1,6 +1,7 @@
 """Staff TOTP uses django-otp; recovery codes are hashed and single use."""
 import secrets
 import re
+from math import ceil
 from datetime import timedelta
 from django.db import transaction
 from django.utils import timezone
@@ -34,6 +35,16 @@ def verified_device(request):
     return device if device and device.user_id==request.user.pk and device.confirmed else None
 
 
+def _verify_token(device,token):
+    if device is None:return False
+    allowed,reason=device.verify_is_allowed()
+    if not allowed:
+        locked_until=(reason or {}).get('locked_until')
+        retry_after=max(1,ceil((locked_until-timezone.now()).total_seconds())) if locked_until else 2
+        raise DomainError('mfa_retry_later','Wait for the authenticator retry cooldown, then enter a fresh code.',429,retry_after=retry_after)
+    return device.verify_token(str(token))
+
+
 def status(request):
     _staff(request)
     from django_otp.plugins.otp_totp.models import TOTPDevice
@@ -61,7 +72,7 @@ def confirm(request,token):
     with transaction.atomic():
         User.objects.select_for_update().get(pk=request.user.pk)
         device=TOTPDevice.objects.select_for_update().filter(user=request.user,confirmed=False).first()
-        valid=bool(device and device.verify_token(str(token)))
+        valid=_verify_token(device,token)
         if valid:
             device.confirmed=True;device.save(update_fields=['confirmed'])
             MFARecoveryCode.objects.filter(user=request.user).delete()
@@ -80,7 +91,7 @@ def verify(request,token):
     # django-otp persists its own throttling and replay counter under the row lock.
     with transaction.atomic():
         device=TOTPDevice.objects.select_for_update().filter(user=request.user,confirmed=True).first()
-        valid=bool(device and device.verify_token(str(token)))
+        valid=_verify_token(device,token)
     if not valid:raise DomainError('invalid_mfa_code','Authenticator code is invalid or expired.',403)
     django_otp.login(request,device)
     return {'session_verified':True}

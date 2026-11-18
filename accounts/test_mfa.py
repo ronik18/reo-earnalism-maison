@@ -51,3 +51,47 @@ class StaffMFAAcceptanceTests(TestCase):
         response=self.post('/api/v1/me/mfa/recovery',{'code':codes[0]});self.assertEqual(response.status_code,200,response.content);self.assertEqual(response.json()['recovery_codes_remaining'],9)
         self.assertEqual(self.post('/api/v1/me/mfa/recovery',{'code':codes[0]}).status_code,403)
         self.assertEqual(MFARecoveryCode.objects.filter(user=self.staff,used_at__isnull=False).count(),1)
+
+    def test_enrollment_cooldown_reports_retry_after_and_preserves_setup(self):
+        response=self.post('/api/v1/me/mfa/totp',{})
+        self.assertEqual(response.status_code,201,response.content)
+        device=TOTPDevice.objects.get(user=self.staff,confirmed=False)
+        original_key=device.key
+        now=timezone.now()
+        device.throttling_failure_count=5
+        device.throttling_failure_timestamp=now
+        device.save(update_fields=['throttling_failure_count','throttling_failure_timestamp'])
+        with patch('django_otp.models.timezone.now',return_value=now):
+            code=str(totp(device.bin_key,device.step,device.t0,device.digits,device.drift)).zfill(6)
+            response=self.post('/api/v1/me/mfa/totp/confirm',{'token':code})
+        self.assertEqual(response.status_code,429,response.content)
+        self.assertEqual(response.json()['code'],'mfa_retry_later')
+        self.assertEqual(response['Retry-After'],'16')
+        device.refresh_from_db()
+        self.assertFalse(device.confirmed)
+        self.assertEqual(device.key,original_key)
+        self.assertEqual(device.throttling_failure_count,5)
+        self.assertEqual(device.last_t,-1)
+        later=now+timedelta(seconds=17)
+        with patch('time.time',return_value=later.timestamp()),patch('django_otp.oath.time',return_value=later.timestamp()),patch('django_otp.models.timezone.now',return_value=later):
+            code=str(totp(device.bin_key,device.step,device.t0,device.digits,device.drift)).zfill(6)
+            response=self.post('/api/v1/me/mfa/totp/confirm',{'token':code})
+        self.assertEqual(response.status_code,200,response.content)
+        device.refresh_from_db()
+        self.assertTrue(device.confirmed)
+        self.assertEqual(device.key,original_key)
+        self.assertEqual(device.throttling_failure_count,0)
+
+    def test_existing_authenticator_cooldown_is_not_reported_as_invalid_code(self):
+        device,_,_=self.enroll()
+        now=timezone.now()
+        device.throttling_failure_count=6
+        device.throttling_failure_timestamp=now
+        device.save(update_fields=['throttling_failure_count','throttling_failure_timestamp'])
+        with patch('django_otp.models.timezone.now',return_value=now):
+            response=self.post('/api/v1/me/mfa/verify',{'token':'000000'})
+        self.assertEqual(response.status_code,429,response.content)
+        self.assertEqual(response.json()['code'],'mfa_retry_later')
+        self.assertEqual(response['Retry-After'],'32')
+        device.refresh_from_db()
+        self.assertEqual(device.throttling_failure_count,6)

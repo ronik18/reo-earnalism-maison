@@ -1,3 +1,4 @@
+import qrcode from "qrcode-generator";
 import {BillingHistory} from "./billing-history";
 import { QueueRecovery } from "./recovery";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -22,6 +23,27 @@ interface MFA {
   session_verified: boolean;
   recovery_codes_remaining: number;
 }
+function AuthenticatorQR({ uri }: { uri: string }) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const element = canvas.current;
+    const context = element?.getContext("2d");
+    if (!element || !context) return;
+    const qr = qrcode(0, "M");
+    qr.addData(uri);
+    qr.make();
+    const scale = 4, quiet = 4, size = qr.getModuleCount();
+    element.width = element.height = (size + quiet * 2) * scale;
+    context.fillStyle = "#fff";
+    context.fillRect(0, 0, element.width, element.height);
+    context.fillStyle = "#000";
+    for (let row = 0; row < size; row++)
+      for (let col = 0; col < size; col++)
+        if (qr.isDark(row, col)) context.fillRect((col + quiet) * scale, (row + quiet) * scale, scale, scale);
+    return () => context.clearRect(0, 0, element.width, element.height);
+  }, [uri]);
+  return <canvas ref={canvas} role="img" aria-label={t("mfa_scan_qr")} style={{maxWidth:"100%",height:"auto"}} />;
+}
 function Account({ staff }: { staff: boolean }) {
   const [profile, setProfile] = useState<Profile>();
   const [consents, setConsents] = useState<Consents>();
@@ -35,7 +57,9 @@ function Account({ staff }: { staff: boolean }) {
   const [codes, setCodes] = useState<string[]>([]);
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
-  const [fresh, setFresh] = useState(false);
+  const [freshUntil, setFreshUntil] = useState(0);
+  const fresh = freshUntil > Date.now();
+  const setFresh = (value: boolean) => setFreshUntil(value ? Date.now() + 300000 : 0);
   const [deleting, setDeleting] = useState(false);
   async function load() {
     if (staff) {
@@ -71,10 +95,13 @@ function Account({ staff }: { staff: boolean }) {
     return () => {clearInterval(timer); window.removeEventListener("online", update); window.removeEventListener("offline", update);};
   }, []);
   useEffect(() => {
-    if (!fresh) return;
-    const timer = setTimeout(() => setFresh(false), 300000);
+    if (!freshUntil) return;
+    const timer = setTimeout(() => {
+      setFreshUntil(0);
+      setStatus(t("reauthentication_required"));
+    }, Math.max(0, freshUntil - Date.now()));
     return () => clearTimeout(timer);
-  }, [fresh]);
+  }, [freshUntil]);
   async function act(action: () => Promise<void>) {
     if (!navigator.onLine) { setStatus(t("account_online_only")); return; }
     if (busy) return;
@@ -235,7 +262,7 @@ function Account({ staff }: { staff: boolean }) {
         <section id="mfa-settings">
           <h2>{t("staff_security")}</h2>
           <p>{t(mfa?.session_verified ? "mfa_verified" : "mfa_required")}</p>
-          {!mfa?.configured ? (
+          {!mfa?.configured && !setup ? (
             <button
               disabled={busy || !fresh}
               onClick={() =>
@@ -251,8 +278,11 @@ function Account({ staff }: { staff: boolean }) {
               {t("mfa_setup")}
             </button>
           ) : null}
+          {!fresh ? <p><a href="#sensitive-actions">{t("reauthentication_required")}</a></p> : null}
           {setup ? (
             <div className="narrow">
+              <p>{t("mfa_scan_qr")}</p>
+              <AuthenticatorQR uri={setup} />
               <p>{t("mfa_setup_help")}</p>
               <a href={setup}>{t("open_authenticator")}</a>
               <label>
@@ -293,7 +323,7 @@ function Account({ staff }: { staff: boolean }) {
                     required
                   />
                 </label>
-                <button disabled={busy}>{t("confirm")}</button>
+                <button disabled={busy || !fresh}>{t("confirm")}</button>
               </form>
             </div>
           ) : null}

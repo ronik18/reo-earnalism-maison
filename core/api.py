@@ -11,9 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 class DomainError(Exception):
-    def __init__(self, code, message, status=403, details=None):
+    def __init__(self, code, message, status=403, details=None, retry_after=None):
         super().__init__(message)
         self.code, self.message, self.status, self.details = code, message, status, details
+        self.retry_after = retry_after
 
 
 def public_uuid(value, field='id'):
@@ -84,7 +85,7 @@ def problem(error,request=None):
     data=problem_data(error,request)
     response = api_response(data, error.status)
     response['Content-Type'] = 'application/problem+json'
-    if error.status in (429,503): response['Retry-After'] = '2'
+    if error.status in (429,503): response['Retry-After'] = str(error.retry_after if error.retry_after is not None else 2)
     return response
 
 

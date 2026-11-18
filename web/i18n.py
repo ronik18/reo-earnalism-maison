@@ -349,3 +349,7 @@ STRINGS.update({
     "invalid_mfa_code": ("The authenticator code is invalid or expired. Use a fresh six-digit code from the existing setup.", "অথেনটিকেটরের কোডটি ভুল বা মেয়াদোত্তীর্ণ। বর্তমান সেটআপ থেকে নতুন ছয় অঙ্কের কোড দিন।"),
     "mfa_already_configured": ("An authenticator is already configured. Use the existing authenticator or a recovery code.", "অথেনটিকেটর আগে থেকেই যুক্ত আছে। সেটি অথবা পুনরুদ্ধারের কোড ব্যবহার করুন।"),
 })
+
+STRINGS["mfa_scan_qr"] = ("Scan this QR code with your authenticator app. Use automatic date and time on your phone.", "অথেনটিকেটর অ্যাপ দিয়ে এই QR কোড স্ক্যান করুন। ফোনে স্বয়ংক্রিয় তারিখ ও সময় চালু রাখুন।")
+
+STRINGS["mfa_retry_later"] = ("Too many authenticator attempts. Wait for the cooldown to finish, then use a fresh code from the same setup.", "অথেনটিকেটরের কোড অনেকবার চেষ্টা করা হয়েছে। কিছুক্ষণ অপেক্ষা করে একই সেটআপ থেকে নতুন কোড দিন।")
