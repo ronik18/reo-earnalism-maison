@@ -1,0 +1,157 @@
+{
+  "expected_static_release": "3cec3a985cd2c4a93c9994d1fdf4a6669597ef11807678f4c03ff97563a98108",
+  "scope": "Independent public desktop/mobile browser checks of exact isolated deployment; no actual book publication, mail or financial mutation; physical UAT deferred and non-blocking",
+  "transport": "Fresh DNS, process-local allowlisted CONNECT, normal end-to-end browser TLS",
+  "results": [
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/explore/?limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/search/?q=river&author=Maison&limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/email-sign-in/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "page-errors",
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/explore/?limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/search/?q=river&author=Maison&limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/bn/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/bn/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/email-sign-in/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "page-errors",
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/explore/?limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/search/?q=river&author=Maison&limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/sign-in/?google_error=identity_link_required",
+      "status": "PASS",
+      "initial_result": {
+        "engine": "firefox-desktop",
+        "path": "/bn/sign-in/?google_error=identity_link_required",
+        "status": "FAIL",
+        "error": "page.waitForLoadState: Timeout 30000ms exceeded."
+      },
+      "resolution": "Same exact deployment passed in a fresh focused browser context; initial network-idle timeout retained for transparency."
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/email-sign-in/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "page-errors",
+      "status": "PASS",
+      "errors": []
+    }
+  ],
+  "status": "PASS_WITH_FOCUSED_RECHECK",
+  "initial_receipt": "deployed-candidate-browser.json",
+  "focused_receipt": "deployed-candidate-focused.json",
+  "checked_commit": "e3f27a92f1f3b3354eb2110db0e293f25fcb42a8",
+  "deferred_physical_UAT_nonblocking": true
+}

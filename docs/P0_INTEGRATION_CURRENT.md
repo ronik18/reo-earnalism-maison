@@ -13,3 +13,9 @@ Merchant LIVE credentials were reused with explicit approval. GET-only qualifica
 Existing subscription cancellation binds actor, merchant mode and exact provider reference to durable intent. An uncertain POST is never blindly repeated and an active provider state does not prove a cancellation schedule was accepted. Mandate revocation remains an explicit pending obligation until verified provider customer/token identity is available; cancellation does not establish token revocation. Paid-through access remains intact.
 
 The consolidated [checklist](PENDING_VALIDATIONS.md) remains authoritative. No book publication, apex cutover, additional infrastructure spending or DNS change is implied. The Selfish Giant remains draft; the legacy platform remains unchanged.
+
+## Deployed candidate
+
+Commit `e3f27a92f1f3b3354eb2110db0e293f25fcb42a8` passed exact-head CI44470671418 with426 backend tests, frontend check/build, migration execution and no drift. It is deployed on all three existing Maison services. Twenty Neon migrations preserved the exact draft/version42/32paragraphs/hash; the SELECT-only backup role reads67tables including new allauth/search tables. Actual automatic maintenance succeeded on the same commit. The archive worker retains its03:00UTC schedule; the earlier actual archive/restore proof remains historical and has not been relabeled as a new67-table restore.
+
+Static release `3cec3a985cd2c4a93c9994d1fdf4a6669597ef11807678f4c03ff97563a98108` has55files/7,298,682bytes; upload/readback and HTTPS checksum/MISS→HIT passed. Independent deployed-browser acceptance passed27/27 checks. Actual Google business-account sign-in and reauthentication completed, with aggregate database audit proof; audience remains Testing. Protected readiness and draft exclusion passed; legacy apex remained HTTPS200.

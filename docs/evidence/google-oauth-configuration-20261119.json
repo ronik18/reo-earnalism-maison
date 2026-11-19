@@ -1,5 +1,5 @@
 {
-  "status": "configured_not_yet_live_qualified",
+  "status": "LIVE_SIGNIN_REAUTHENTICATION_PASS",
   "scope": "isolated_maison",
   "approved_credentials": [
     "GOOGLE_CLIENT_ID",
@@ -13,9 +13,12 @@
   "publishing_status": "Testing",
   "audience_changed": false,
   "remaining": [
-    "Deploy tested matching source and enable qualified Google profile",
-    "Perform Google browser sign-in/link acceptance with an authorized test user"
+    "Google client remains Testing; any public audience expansion requires separate approved action",
+    "Existing-account explicit-link regression covered locally; live existing-account linking not repeated"
   ],
   "book_published": false,
-  "legacy_platform_changed": false
+  "legacy_platform_changed": false,
+  "actual_business_account_signin": true,
+  "actual_google_reauthentication": true,
+  "aggregate_audit_evidence": "p0-worker-google-live-20261119.json"
 }

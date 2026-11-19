@@ -17,13 +17,44 @@
     "prepared_from_clean_image": true,
     "uploaded": true,
     "origin_readback_verified": true,
-    "cdn_http_verified": false
+    "cdn_http_verified": true,
+    "checksum_miss_hit": "PASS"
   },
-  "deployment": "pending",
+  "deployment": {
+    "web": "LIVE",
+    "commit": "e3f27a92f1f3b3354eb2110db0e293f25fcb42a8",
+    "deploy_id": "dep-dbv9cl9srm7s73bqs4vg",
+    "static_release": "3cec3a985cd2c4a93c9994d1fdf4a6669597ef11807678f4c03ff97563a98108",
+    "health_readiness_draft_legacy_https": "PASS",
+    "workers": {
+      "maintenance": {
+        "status": "LIVE",
+        "deploy_id": "dep-dbv9djl6e07s73b5k2l0",
+        "automatic_run": "PASS"
+      },
+      "archive": {
+        "status": "LIVE",
+        "deploy_id": "dep-dbv9dqmtlv9c7387ja10",
+        "normal_schedule": "03:00 UTC",
+        "post_migration_archive_run": "not yet repeated; prior export/restore evidence reused"
+      }
+    }
+  },
   "final_followups": {
     "google_and_maintenance_tests": 20,
     "subscription_mode_identity_tests": 16,
     "status": "PASS",
     "independent_review": "both confirmed findings closed"
-  }
+  },
+  "exact_head_ci": {
+    "commit": "e3f27a92f1f3b3354eb2110db0e293f25fcb42a8",
+    "run_id": 44470671418,
+    "status": "SUCCESS",
+    "backend_tests": 426,
+    "seconds": 141.449,
+    "frontend_check_build": "PASS",
+    "migrations": "PASS"
+  },
+  "independent_live_browser_checks": 27,
+  "google_signin_reauth": "PASS"
 }

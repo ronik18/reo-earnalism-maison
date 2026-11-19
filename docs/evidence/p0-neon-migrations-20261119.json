@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "postgres_version": "18.7 (84da7d8)",
+  "migrations_applied": [
+    "account.0001_initial",
+    "account.0002_email_max_length",
+    "account.0003_alter_emailaddress_create_unique_verified_email",
+    "account.0004_alter_emailaddress_drop_unique_email",
+    "account.0005_emailaddress_idx_upper_email",
+    "account.0006_emailaddress_lower",
+    "account.0007_emailaddress_idx_email",
+    "account.0008_emailaddress_unique_primary_email_fixup",
+    "account.0009_emailaddress_unique_primary_email",
+    "accounts.0003_allauth_email_authority",
+    "billing.0008_alter_order_options",
+    "learning.0003_lessoncompletion_lesson_version_and_more",
+    "library.0006_searchdocument_searchalias",
+    "library.0007_asset_duration_ms_asset_provider_alter_asset_kind_and_more",
+    "socialaccount.0001_initial",
+    "socialaccount.0002_token_max_lengths",
+    "socialaccount.0003_extra_data_default_dict",
+    "socialaccount.0004_app_provider_id_settings",
+    "socialaccount.0005_socialtoken_nullable_app",
+    "socialaccount.0006_alter_socialaccount_extra_data"
+  ],
+  "count": 20,
+  "book_before": {
+    "state": "draft",
+    "live_revision_id": null,
+    "paragraphs": 32,
+    "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+    "version": 42
+  },
+  "book_after": {
+    "state": "draft",
+    "live_revision_id": null,
+    "paragraphs": 32,
+    "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+    "version": 42
+  },
+  "backup_select_verified_tables": 67,
+  "backup_select_extended_tables": [],
+  "legacy_changed": false
+}

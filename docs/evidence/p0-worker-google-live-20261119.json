@@ -1,0 +1,101 @@
+{
+  "book": {
+    "live_revision_id": null,
+    "manuscript_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+    "paragraphs": 32,
+    "state": "draft"
+  },
+  "due_queue": [],
+  "google_actions": [
+    {
+      "action": "account.google_reauthenticated",
+      "count": 1,
+      "latest_at": "2026-11-19 06:33:59.086237+00:00"
+    },
+    {
+      "action": "account.google_registered",
+      "count": 1,
+      "latest_at": "2026-11-19 06:32:55.813594+00:00"
+    }
+  ],
+  "maintenance_last_success": {
+    "commit": "e3f27a92f1f3b3354eb2110db0e293f25fcb42a8",
+    "counts": {
+      "cache_references": {
+        "deleted": 0
+      },
+      "expired_exports": {
+        "cleaned": 0,
+        "failed": 0
+      },
+      "processed": 0,
+      "rate_counters": {
+        "deleted": 0
+      },
+      "retention": {
+        "dry_run": false,
+        "eligible": {
+          "abandoned_signups": 0,
+          "action_tokens": 0,
+          "audit_outcomes": 0,
+          "devices": 0,
+          "mail_payloads": 0,
+          "receipts": 0,
+          "sessions": 0,
+          "support_payloads": 0
+        },
+        "time_budget_exhausted": false
+      }
+    },
+    "error_code": "",
+    "finished_at": "2026-11-19T06:34:08.103606Z",
+    "outcome": "success",
+    "run_id": "4b672c30-41cb-40e0-873b-8f3a8d782bf3",
+    "source": "scheduled",
+    "started_at": "2026-11-19T06:34:08.017059Z"
+  },
+  "maintenance_latest": {
+    "commit": "e3f27a92f1f3b3354eb2110db0e293f25fcb42a8",
+    "counts": {
+      "cache_references": {
+        "deleted": 0
+      },
+      "expired_exports": {
+        "cleaned": 0,
+        "failed": 0
+      },
+      "processed": 0,
+      "rate_counters": {
+        "deleted": 0
+      },
+      "retention": {
+        "dry_run": false,
+        "eligible": {
+          "abandoned_signups": 0,
+          "action_tokens": 0,
+          "audit_outcomes": 0,
+          "devices": 0,
+          "mail_payloads": 0,
+          "receipts": 0,
+          "sessions": 0,
+          "support_payloads": 0
+        },
+        "time_budget_exhausted": false
+      }
+    },
+    "error_code": "",
+    "finished_at": "2026-11-19T06:34:08.103606Z",
+    "outcome": "success",
+    "run_id": "4b672c30-41cb-40e0-873b-8f3a8d782bf3",
+    "source": "scheduled",
+    "started_at": "2026-11-19T06:34:08.017059Z"
+  },
+  "new_tables_readable_by_backup": {
+    "account_emailaddress": 4,
+    "maison_search_alias": 0,
+    "maison_search_document": 0,
+    "socialaccount_socialaccount": 1
+  },
+  "read_only": true,
+  "status": "PASS"
+}
