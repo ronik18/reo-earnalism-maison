@@ -191,9 +191,10 @@ class DatabaseArchiveTests(TestCase):
                'BACKUP_R2_KEY_ID': 'fixture-key', 'BACKUP_R2_SECRET': 'fixture-secret',
                'MAISON_BACKUP_DATABASE_URL': 'postgresql://backup-only@example.test/db?sslmode=verify-full',
                'BACKUP_AGE_RECIPIENT': 'age1' + 'q' * 58}
-        def export(url, recipient, directory):
+        def export(url, recipient, directory, **options):
             self.assertEqual(url, env['MAISON_BACKUP_DATABASE_URL'])
             self.assertEqual(recipient, env['BACKUP_AGE_RECIPIENT'])
+            self.assertFalse(options['with_reference'])
             return self.bundle(directory, datetime.now(timezone.utc) - timedelta(seconds=1))
         with patch.dict('os.environ', env, clear=True), patch('operations.database_archive.archive_client', return_value=self.client), patch('operations.scheduled_export.export_database', side_effect=export), patch('builtins.print') as output:
             self.assertEqual(main([]), 0)

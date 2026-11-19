@@ -1,10 +1,10 @@
-import json,os,tempfile
+import json,os,tempfile,time
 from pathlib import Path
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import patch,MagicMock
 from django.core.management.base import CommandError
 from operations.management.commands.export_database import Command
-from operations.database_export import ExportError,database_environment,export_database
+from operations.database_export import ExportError,database_environment,export_database,export_reference_snapshot,database_reference
 
 RECIPIENT='age1'+'q'*58
 FACTS={'server_version_num':180007,'migration_count':43,'migration_sha256':'synthetic-test-only'}
@@ -65,3 +65,77 @@ class DatabaseExportTests(TestCase):
                 with self.assertRaises(ExportError):
                     export_database('postgresql://backup:pass@127.0.0.1/maison?sslmode=disable',RECIPIENT,output,local=True,max_seconds=.1 if mode=='timeout' else 10,max_bytes=100,**programs)
                 self.assertEqual(list(output.iterdir()),[])
+
+    def test_snapshot_reference_is_opt_in_and_passed_to_dump_without_reporting_id(self):
+        from contextlib import contextmanager
+        reference={'format':'fixture-reference','tables':{'fixture':{'rows':1,'sha256':'a'*64}}}
+        @contextmanager
+        def snapshot(env,deadline,enabled):
+            self.assertTrue(enabled)
+            yield '00000001-00000002-1',reference
+        with tempfile.TemporaryDirectory() as directory,patch('operations.database_export.database_facts',return_value=FACTS),patch('operations.database_export.export_reference_snapshot',side_effect=snapshot):
+            programs=self._pipeline(directory,dump='import sys;assert "--snapshot=00000001-00000002-1" in sys.argv;sys.stdout.buffer.write(b"snapshot-bytes")')
+            report=export_database('postgresql://backup:pass@127.0.0.1/maison?sslmode=disable',RECIPIENT,Path(directory)/'out',local=True,with_reference=True,**programs)
+            self.assertEqual(report['table_reference'],reference)
+            self.assertNotIn('00000001-00000002-1',json.dumps(report))
+
+    def test_snapshot_connection_rolls_back_and_closes_on_failure(self):
+        env=database_environment('postgresql://backup:pass@127.0.0.1/maison?sslmode=disable',local=True)
+        connection=MagicMock();connection.execute.return_value.fetchone.return_value=('00000001-00000002-1',)
+        with patch('psycopg.connect',return_value=connection) as connect,patch('operations.database_export.database_reference',return_value={'tables':{}}):
+            with self.assertRaises(ExportError):
+                with export_reference_snapshot(env,time.monotonic()+10,True):
+                    raise ExportError('pipeline failed')
+        self.assertTrue(connect.call_args.kwargs['autocommit'])
+        connection.execute.assert_any_call('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY')
+        connection.rollback.assert_called_once();connection.close.assert_called_once()
+
+    def test_expired_snapshot_deadline_never_connects(self):
+        with patch('psycopg.connect') as connect,self.assertRaises(ExportError):
+            with export_reference_snapshot({},time.monotonic()-1,True):pass
+        connect.assert_not_called()
+
+    def test_manifest_bound_checks_exact_indented_bytes_not_compact_estimate(self):
+        from contextlib import contextmanager
+        # Many compact small keys cause indentation to dominate the stored size.
+        reference={'format':'fixture-reference','tables':{f'table_{i}':{'rows':0,'sha256':'a'*64,'columns_sha256':'b'*64} for i in range(310)}}
+        self.assertLess(len(json.dumps(reference,separators=(',',':')).encode())+1024,65536)
+        self.assertGreater(len((json.dumps(reference,indent=2)+'\n').encode()),65536)
+        @contextmanager
+        def snapshot(*args):yield '00000001-00000002-1',reference
+        with tempfile.TemporaryDirectory() as directory,patch('operations.database_export.database_facts',return_value=FACTS),patch('operations.database_export.export_reference_snapshot',side_effect=snapshot):
+            output=Path(directory)/'out'
+            with self.assertRaisesRegex(ExportError,'manifest exceeds'):
+                export_database('postgresql://backup:pass@127.0.0.1/maison?sslmode=disable',RECIPIENT,output,local=True,with_reference=True,**self._pipeline(directory))
+            self.assertEqual(list(output.iterdir()),[])
+
+
+from django.test import TransactionTestCase
+from django.db import connection
+from unittest import skipUnless
+
+
+@skipUnless(connection.vendor=='postgresql','PostgreSQL snapshot qualification')
+class ConsistentReferenceTests(TransactionTestCase):
+    def test_reference_snapshot_survives_concurrent_volatile_row_insert(self):
+        import psycopg
+        from psycopg import sql
+        from core.models import OutboxJob
+        from django.utils import timezone
+        config=connection.settings_dict
+        env={'PGHOST':config.get('HOST') or '127.0.0.1','PGPORT':str(config.get('PORT') or 5432),'PGUSER':config['USER'],
+             'PGPASSWORD':config['PASSWORD'],'PGDATABASE':connection.connection.info.dbname,'PGSSLMODE':'disable'}
+        deadline=time.monotonic()+30
+        with export_reference_snapshot(env,deadline,True) as (snapshot,reference):
+            OutboxJob.objects.create(kind='fixture_reference',dedupe_key='snapshot-fixture',status='done',not_before=timezone.now())
+            params=connection.get_connection_params();params['autocommit']=True
+            with psycopg.connect(**params) as imported:
+                imported.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY')
+                imported.execute(sql.SQL('SET TRANSACTION SNAPSHOT {}').format(sql.Literal(snapshot)))
+                self.assertEqual(database_reference(imported,deadline),reference)
+                imported.rollback()
+        with psycopg.connect(**params) as current:
+            current.execute('BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY')
+            actual=database_reference(current,deadline);current.rollback()
+        self.assertEqual(actual['tables']['maison_outbox']['rows'],reference['tables']['maison_outbox']['rows']+1)
+        self.assertNotEqual(actual['tables']['maison_outbox']['sha256'],reference['tables']['maison_outbox']['sha256'])

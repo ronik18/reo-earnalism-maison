@@ -14,6 +14,7 @@ from .database_export import export_database, ExportError
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--apply-retention', action='store_true')
+    parser.add_argument('--with-reference', action='store_true', help='Qualification only: fingerprint the exact export snapshot; adds a full table read.')
     args = parser.parse_args(argv)
     try:
         config = ArchiveConfig(endpoint=os.getenv('BACKUP_R2_ENDPOINT', ''), bucket=os.getenv('BACKUP_R2_BUCKET', ''),
@@ -22,7 +23,8 @@ def main(argv=None):
         # Validate isolated archive configuration before producing an export.
         config.validate()
         with tempfile.TemporaryDirectory(prefix='maison-encrypted-archive-') as directory:
-            report = export_database(os.getenv('MAISON_BACKUP_DATABASE_URL', ''), os.getenv('BACKUP_AGE_RECIPIENT', ''), directory)
+            report = export_database(os.getenv('MAISON_BACKUP_DATABASE_URL', ''), os.getenv('BACKUP_AGE_RECIPIENT', ''), directory,
+                                     with_reference=args.with_reference)
             archive = Archive(config)
             uploaded = archive.upload(report, directory)
             retention = archive.retention(apply=args.apply_retention)
