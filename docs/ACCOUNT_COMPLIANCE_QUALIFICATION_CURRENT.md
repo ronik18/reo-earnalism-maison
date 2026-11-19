@@ -26,6 +26,10 @@ The simplest completion is one accurate disclosure/data map/retention schedule u
 
 ## Region policy and launch scope
 
+Owner clarification,19 November2026: **global compliance means compliance across every active jurisdiction in `contracts/publication-policy.json`, and only that approved geographic launch scope.** It does not mean every country or an entire continent. The current list has47 jurisdictions; UAE/Mainland China and all excluded-pending entries remain out of scope. Hong Kong, Macao and Taiwan retain separate entries. This common scope applies to platform/account privacy, consumer and operating qualification as well as the separate exact-edition publication assessment. A country passing book-rights assessment does not by itself establish platform/account compliance there. Do not silently add or remove jurisdictions.
+
+Implementation completion and legal qualification are separate: notices/retention tests, recurring cleanup and archive restore prove their stated technical behavior. Processor/transfer terms, applicable all-ages handling and other region-specific operating obligations require supported qualification for this same47-jurisdiction scope before claiming complete compliance. No additional child-account flow is introduced or approved by this clarification.
+
 `contracts/publication-policy.json` is the authority:47 active regions; AE/Mainland CN and pending jurisdictions excluded. Every offered exact edition/format/action must pass the complete active whitelist. Original-text public-domain analysis alone does not clear cover artwork, edition materials or distribution obligations, and copyright clearance does not establish platform privacy/consumer compliance. The Selfish Giant remains draft; this audit grants no publication clearance.
 
 Reader-only qualification does not amend approved P0. Payments, audio and offline remaining disabled prevents unsupported claims while their approved acceptance work remains open. A smaller launch scope requires owner approval under `docs/APPROVED_BASELINE.md`; it is not automatically waived by this audit.
