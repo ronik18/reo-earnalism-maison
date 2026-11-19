@@ -56,7 +56,23 @@ def run_due_jobs(limit=25,max_seconds=45):
                 elif current.attempts>=7:current.status='dead'
                 else:
                     current.status='pending';delays=[30,120,600,1800,7200,21600];current.not_before=timezone.now()+timedelta(seconds=delays[min(current.attempts-1,5)])
-            else:current.status='done';current.completed_at=timezone.now();current.result=result or {}
+            elif isinstance(result,dict) and result.get('awaiting_provider_confirmation') is True and (job.kind=='subscription_reconcile' or (job.kind in ['refund_reconcile','refund_review'] and job.payload.get('refund_id'))):
+                # Authoritative provider pending state is not a delivery failure.
+                # Keep the same durable obligation and mutation marker for GET-only
+                # reconciliation; no extra worker or unbounded immediate retry.
+                now=timezone.now();delay=result.get('confirmation_poll_seconds',300)
+                delay=max(60,min(900,delay)) if type(delay) is int else 300
+                due=now+timedelta(seconds=delay)
+                if job.payload.get('action')=='subscription.cancel':
+                    from django.utils.dateparse import parse_datetime
+                    value=result.get('confirmation_not_before')
+                    try:known_due=parse_datetime(value) if isinstance(value,str) and len(value)<=64 else None
+                    except ValueError:known_due=None
+                    if known_due is not None and timezone.is_aware(known_due) and known_due>due:due=known_due
+                current.status='pending';current.completed_at=None;current.error_code='provider_confirmation_pending'
+                current.not_before=due;current.attempts=0;current.result=result
+            else:
+                current.status='done';current.completed_at=timezone.now();current.error_code='';current.result=result or {}
             current.save()
         done+=1
     return {'processed':done}

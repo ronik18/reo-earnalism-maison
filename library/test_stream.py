@@ -232,3 +232,138 @@ class StreamAuthorityIntegrationTests(TestCase):
             Device.objects.filter(pk=device).update(revoked_at=timezone.now())
             self.assertIn(issue().status_code,(401,403))
             provider.assert_not_called()
+
+
+class StreamPreparationTests(TestCase):
+    """Draft-only operator intake with local source bytes and mocked metadata."""
+    def setUp(self):
+        import hashlib,tempfile
+        from pathlib import Path
+        self.directory=tempfile.TemporaryDirectory();self.addCleanup(self.directory.cleanup)
+        self.source=Path(self.directory.name)/'synthetic-source.mp4'
+        self.raw=b'Original synthetic source bytes for metadata acceptance only.'
+        self.source.write_bytes(self.raw)
+        self.actor=get_user_model().objects.create_superuser('stream-preparer@example.test','Synthetic-Preparation-Passphrase-47')
+        self.work=Work.objects.create(slug='synthetic-private-stream-preparation',title='Synthetic private Stream preparation')
+        self.edition=Edition.objects.create(work=self.work,slug=self.work.slug,locale='en')
+        self.revision=Revision.objects.create(edition=self.edition,title=self.work.title,access_policy={'video':'free'})
+        self.unit=Unit.objects.create(revision=self.revision,ordinal=1,title='Private preparation unit',duration_ms=65432)
+        self.revision.refresh_from_db()
+        self.manifest={'operation_id':str(uuid.uuid4()),'edition_revision_id':str(self.revision.id),
+            'expected_revision_version':self.revision.version,'unit_id':str(self.unit.id),'video_uid':UID,
+            'duration_ms':65432,'source_sha256':hashlib.sha256(self.raw).hexdigest(),'source_bytes':len(self.raw),
+            'source_evidence_ref':'internal:synthetic-original-upload-association-and-duration'}
+        self.metadata={'uid':UID,'duration':65.432,'readyToStream':True,'requireSignedURLs':True,
+            'status':{'state':'ready'},'playback':{'hls':f'https://{CUSTOMER}/{UID}/manifest/video.m3u8'}}
+        self.override=override_settings(LOCAL=True,STREAM_ACCOUNT_ID=ACCOUNT,STREAM_API_TOKEN='synthetic-read-token',STREAM_CUSTOMER_HOST=CUSTOMER)
+        self.override.enable();self.addCleanup(self.override.disable)
+
+    def prepare(self,manifest=None,source=None):
+        return stream.prepare_stream_asset(self.actor,manifest or self.manifest,source or self.source)
+
+    def test_verified_intake_is_draft_only_atomic_and_durably_replayable_without_io(self):
+        from core.models import OperationReceipt
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+        with CaptureQueriesContext(connection) as queries:
+            def metadata(*args):
+                self.assertFalse(any('FOR UPDATE' in query['sql'] for query in queries))
+                return self.metadata
+            with patch('library.stream._metadata_request',side_effect=metadata) as provider:
+                status,result=self.prepare()
+        self.assertEqual(status,201);provider.assert_called_once()
+        asset=Asset.objects.get(pk=result['asset_id']);self.assertEqual(asset.provider,'stream');self.assertEqual(asset.state,'ready')
+        self.assertEqual(asset.unit_id,self.unit.id);self.assertEqual(asset.sha256,self.manifest['source_sha256'])
+        self.revision.refresh_from_db();self.edition.refresh_from_db()
+        self.assertEqual(self.revision.state,'draft');self.assertIsNone(self.edition.live_revision_id)
+        self.assertEqual(self.revision.access_policy,{'video':'free'})
+        self.assertEqual(self.revision.rights.count(),0)
+        proof=self.revision.validation_evidence['media_assets'][str(asset.id)]
+        self.assertTrue(proof['prepared']);self.assertEqual(proof['source_bytes'],len(self.raw))
+        self.assertNotIn(str(self.source),json.dumps(proof))
+        with patch('library.stream._metadata_request',side_effect=AssertionError('Replay must not contact provider')):
+            self.assertEqual(self.prepare(source='/missing-source-after-success'),(201,result))
+            OperationReceipt.objects.filter(actor=self.actor,operation_id=self.manifest['operation_id']).delete()
+            self.assertEqual(self.prepare(source='/missing-source-after-success'),(201,result))
+        self.assertEqual(Asset.objects.count(),1)
+        changed={**self.manifest,'source_evidence_ref':'changed input'}
+        with self.assertRaises(DomainError) as error:self.prepare(changed)
+        self.assertEqual(error.exception.code,'idempotency_key_reused')
+
+    def test_bad_source_stale_draft_wrong_unit_or_nonpublisher_never_calls_provider(self):
+        cases=[({'source_sha256':'f'*64},'asset_integrity_failed'),({'expected_revision_version':self.revision.version-1},'version_conflict'),
+               ({'duration_ms':65433},'unit_revision_mismatch')]
+        for change,expected in cases:
+            with self.subTest(change=change),patch('library.stream._metadata_request') as provider,self.assertRaises(DomainError) as error:
+                self.prepare({**self.manifest,**change})
+            self.assertEqual(error.exception.code,expected);provider.assert_not_called()
+        member=get_user_model().objects.create_user('nonpublisher@example.test','Synthetic-Member-Passphrase-47',is_verified=True)
+        with patch('library.stream._metadata_request') as provider,self.assertRaises(DomainError) as error:
+            stream.prepare_stream_asset(member,self.manifest,self.source)
+        self.assertEqual(error.exception.status,403);provider.assert_not_called()
+        self.assertFalse(Asset.objects.exists())
+
+    def test_provider_failure_and_post_verification_cas_do_not_mutate_draft(self):
+        from core.models import OperationReceipt
+        with patch('library.stream._metadata_request',return_value={**self.metadata,'requireSignedURLs':False}),self.assertRaises(DomainError):self.prepare()
+        self.assertFalse(Asset.objects.exists());self.assertFalse(OperationReceipt.objects.exists())
+        before=self.revision.version
+        def changed(*args):
+            self.revision.description='A concurrent draft correction';self.revision.save()
+            return self.metadata
+        with patch('library.stream._metadata_request',side_effect=changed),self.assertRaises(DomainError) as error:self.prepare()
+        self.assertEqual(error.exception.code,'version_conflict');self.assertFalse(Asset.objects.exists())
+        self.revision.refresh_from_db();self.assertGreater(self.revision.version,before)
+        self.assertNotIn('media_assets',self.revision.validation_evidence)
+
+    def test_publisher_revocation_during_provider_verification_prevents_local_commit(self):
+        def demoted(*args):
+            get_user_model().objects.filter(pk=self.actor.pk).update(is_staff=False)
+            return self.metadata
+        with patch('library.stream._metadata_request',side_effect=demoted),self.assertRaises(DomainError) as error:
+            self.prepare()
+        self.assertEqual(error.exception.code,'permission_denied')
+        self.assertFalse(Asset.objects.exists())
+
+    def test_management_manifest_prepares_existing_uid_without_upload_or_publish(self):
+        from pathlib import Path
+        from django.core.management import call_command
+        from django.core.management.base import CommandError
+        packet=Path(self.directory.name)/'private-manifest.json'
+        packet.write_text(json.dumps({**self.manifest,'source_file':self.source.name}))
+        output=io.StringIO()
+        with patch('library.stream._metadata_request',return_value=self.metadata):
+            call_command('verify_media_asset',stream_manifest=str(packet),actor_email=self.actor.email,stdout=output)
+        result=json.loads(output.getvalue());self.assertEqual(result['revision_state'],'draft')
+        self.assertEqual(result['asset_id'],self.manifest['operation_id'])
+        self.assertEqual(Asset.objects.get(pk=result['asset_id']).storage_key,UID)
+        with self.assertRaises(CommandError):
+            call_command('verify_media_asset',stream_manifest=str(packet),stdout=io.StringIO())
+
+    def test_private_draft_video_review_requires_publisher_mfa_rights_and_device(self):
+        from . import services as svc
+        from .catalog_query import catalog_queryset
+        with patch('library.stream._metadata_request',return_value=self.metadata):_,result=self.prepare()
+        asset=Asset.objects.get(pk=result['asset_id'])
+        now=timezone.now()
+        right=Rights.objects.create(revision=self.revision,format='video',action='read',territories=['IN'],
+            starts_at=now-timedelta(days=1),ends_at=now+timedelta(minutes=5),approved=True,test_only=False)
+        login=self.client.post('/api/v1/auth/login',{'email':self.actor.email,'password':'Synthetic-Preparation-Passphrase-47'},content_type='application/json')
+        self.assertEqual(login.status_code,200,login.content);device=login.json()['device_id']
+        key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
+        pem=key.private_bytes(serialization.Encoding.PEM,serialization.PrivateFormat.PKCS8,serialization.NoEncryption()).decode()
+        with override_settings(FEATURES={'video':True},STAFF_MFA_REQUIRED=True,STREAM_SIGNING_KEY_ID=KEY_ID,STREAM_SIGNING_PRIVATE_KEY=pem):
+            with self.assertRaises(DomainError):svc.authorize_revision(self.actor,self.revision,'video')
+            self.actor.staff_mfa_verified=True
+            self.assertEqual(svc.authorize_revision(self.actor,self.revision,'video').pk,self.revision.pk)
+            self.assertIn('video',svc.edition_detail(self.edition.pk,user=self.actor)['formats'])
+            with patch('library.stream.http.client.HTTPSConnection') as provider:
+                validate_schema(stream.grant(self.actor,asset,device),'MediaGrant');provider.assert_not_called()
+            member=get_user_model().objects.create_user('draft-viewer@example.test','Synthetic-Member-Passphrase-47',is_verified=True)
+            with self.assertRaises(DomainError):svc.authorize_revision(member,self.revision,'video')
+            with self.assertRaises(DomainError):svc.edition_detail(self.edition.pk)
+            self.assertFalse(catalog_queryset('en','IN').filter(pk=self.edition.pk).exists())
+            right.approved=False;right.save()
+            with self.assertRaises(DomainError):stream.grant(self.actor,asset,device)
+        self.edition.refresh_from_db();self.revision.refresh_from_db()
+        self.assertIsNone(self.edition.live_revision_id);self.assertEqual(self.revision.state,'draft')

@@ -158,6 +158,7 @@ class LegacyLiability(models.Model):
 
 class Invoice(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    current_revision=models.ForeignKey('billing.InvoiceRevision',null=True,on_delete=models.PROTECT,related_name='+')
     order=models.OneToOneField(Order,on_delete=models.PROTECT,null=True,blank=True)
     subscription=models.ForeignKey('billing.Subscription',on_delete=models.PROTECT,null=True,blank=True,related_name='invoices')
     period_start=models.DateTimeField(null=True,blank=True)
@@ -186,4 +187,4 @@ class PaymentAllocation(models.Model):
         constraints=[models.UniqueConstraint(fields=['payment','invoice'],name='maison_payment_invoice_uq')]
 
 from .subscription_models import BillingPlan,Subscription,Mandate
-from .invoice_models import InvoiceArtifact
+from .invoice_models import InvoiceArtifact,InvoiceRevision,FinanceNumberSequence

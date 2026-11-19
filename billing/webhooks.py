@@ -1,5 +1,6 @@
 """Durable authenticated webhook receipts; no raw provider payload retention."""
 from django.db import transaction
+from django.conf import settings
 from django.utils import timezone
 from core.api import DomainError
 from core.models import OutboxJob
@@ -21,6 +22,12 @@ def receive_event(data,event_id,body_sha256):
         try:
             payment=data['payload']['payment']['entity']
             payload.update(payment_id=provider_id(payment['id'],'pay'),provider_order_id=provider_id(payment['order_id'],'order'))
+            error=''
+        except (KeyError,TypeError,DomainError):error='event_incomplete'
+    if name=='token.cancelled':
+        try:
+            token=data['payload']['token']['entity']
+            payload.update(provider_token_id=provider_id(token['id'],'token'),provider_customer_id=provider_id(token['customer_id'],'cust'),provider_mode=settings.RAZORPAY_MODE)
             error=''
         except (KeyError,TypeError,DomainError):error='event_incomplete'
     OutboxJob.objects.get_or_create(dedupe_key=f'payment-event:{event.id}',defaults={'kind':'payment_event_reconcile','payload':payload,

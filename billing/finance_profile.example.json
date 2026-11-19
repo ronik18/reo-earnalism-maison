@@ -1,0 +1,46 @@
+{
+  "approved": false,
+  "version": "",
+  "issuer": {
+    "legal_name": "Reo Enterprise",
+    "country": "IN",
+    "address": "73, Nandan Nagar, Belghoria, District - North 24 Parganas, Kolkata - 700083, India",
+    "tax_id": "",
+    "gst_registration_status": "not_registered"
+  },
+  "numbering": {
+    "scheme": "fy_sequence",
+    "version": "",
+    "prefix": "",
+    "credit_note_prefix": "",
+    "fiscal_year_start_month": null,
+    "time_zone": "",
+    "width": null
+  },
+  "offer_tax": {},
+  "_required_finance_decisions": [
+    "Issuer address is the owner-provided business correspondence address; confirm its financial-document applicability and actual GST registration/status. A blank tax_id is not an exemption decision.",
+    "Approve invoice and credit-note numbering prefixes, fiscal year, time zone and width; fy_sequence legal serials are capped at16 characters.",
+    "For each exact offer UUID/version approve territory, currency, inclusive total price, exact tax_minor, tax label/components and internal evidence_ref.",
+    "Determine required recipient billing identity, address, tax identifiers and place-of-supply data before enabling the affected checkout; account display_name/email alone is not asserted to be a tax-compliant buyer profile.",
+    "Approve credit-note tax amounts/evidence for each exact processed refund; no proportional tax, exemption or registration is inferred.",
+    "Approve issuer-version, statutory document wording, retention and any required signature before commercial finance acceptance.",
+    "A prefix_uuid scheme is supported only with explicit reviewed_non_gst applicability and evidence; it does not establish GST-compliant numbering."
+  ],
+  "_offer_tax_entry_shape": {
+    "offer_version": null,
+    "territory": "",
+    "currency": "",
+    "price_minor": null,
+    "basis": "inclusive",
+    "tax_minor": null,
+    "label": "",
+    "evidence_ref": "",
+    "components": []
+  },
+  "_owner_confirmed_facts": {
+    "gst_registration_status": "not_registered",
+    "confirmed_on": "2026-11-19",
+    "source": "Explicit owner reply"
+  }
+}

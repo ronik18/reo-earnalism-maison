@@ -139,7 +139,7 @@ def authorize_revision(user, revision, format='reader', action='read', territory
         raise DomainError('verification_required', 'Verify your email before opening this edition.', 403)
     if format not in FORMATS or action not in {'read','download'}:
         raise DomainError('access_denied', 'This content action is not available.', 403)
-    if not _live(revision) and not (format=='reader' and action=='read' and can_review_draft(user,revision)):
+    if not _live(revision) and not (format in {'reader','video'} and action=='read' and can_review_draft(user,revision)):
         raise DomainError('content_unavailable', 'This revision is not currently published.', 404)
     if not current_right(revision, format, 'read', territory):
         raise DomainError('rights_unavailable', 'This format is unavailable in this territory or rights window.', 403)
@@ -246,7 +246,11 @@ def edition_detail(edition_id, territory='IN', user=None):
     reviewing=can_review_draft(user,revision)
     if not revision or (not reviewing and (not _live(revision) or not available_formats(revision,territory))):
         raise DomainError('content_unavailable','Edition is not available.',404)
-    formats = ['reader'] if reviewing and current_right(revision,'reader','read',territory) else available_formats(revision,territory)
+    if reviewing:
+        formats = ['reader'] if current_right(revision,'reader','read',territory) else []
+        if 'video' in available_formats(revision,territory): formats.append('video')
+    else:
+        formats = available_formats(revision,territory)
     if reviewing and not formats: raise DomainError('rights_unavailable','Draft rights are unavailable.',403)
     cover=_cover(revision)
     if reviewing and cover:

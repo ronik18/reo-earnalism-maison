@@ -1,0 +1,151 @@
+{
+  "scope": "Geometry-only review against approved Peacock Crest assets and genuine local finance data; no document issue, refund or provider call",
+  "results": [
+    {
+      "engine": "chromium-desktop",
+      "locale": "en",
+      "status": "PASS",
+      "focusedHeading": {
+        "top": 535.953125,
+        "bottom": 565.84375,
+        "headerBottom": 72,
+        "dockTop": 1000
+      },
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "left": 236,
+        "right": 1404,
+        "buttons": [
+          {
+            "x": 257,
+            "y": 887.34375,
+            "right": 470.421875,
+            "bottom": 935.34375,
+            "width": 213.421875,
+            "height": 48
+          },
+          {
+            "x": 482.421875,
+            "y": 887.34375,
+            "right": 560.171875,
+            "bottom": 935.34375,
+            "width": 77.75,
+            "height": 48
+          }
+        ]
+      }
+    },
+    {
+      "engine": "webkit-tablet",
+      "locale": "en",
+      "status": "PASS",
+      "focusedHeading": {
+        "top": 591.453125,
+        "bottom": 621.34375,
+        "headerBottom": 72,
+        "dockTop": 1112
+      },
+      "metrics": {
+        "width": 834,
+        "scrollWidth": 834,
+        "left": 104,
+        "right": 802,
+        "buttons": [
+          {
+            "x": 125,
+            "y": 942.84375,
+            "right": 338.421875,
+            "bottom": 990.84375,
+            "width": 213.421875,
+            "height": 48
+          },
+          {
+            "x": 350.421875,
+            "y": 942.84375,
+            "right": 428.171875,
+            "bottom": 990.84375,
+            "width": 77.75,
+            "height": 48
+          }
+        ]
+      }
+    },
+    {
+      "engine": "webkit-mobile",
+      "locale": "bn",
+      "status": "PASS",
+      "focusedHeading": {
+        "top": 408.390625,
+        "bottom": 447.390625,
+        "headerBottom": 64,
+        "dockTop": 762
+      },
+      "metrics": {
+        "width": 390,
+        "scrollWidth": 390,
+        "left": 18,
+        "right": 372,
+        "buttons": [
+          {
+            "x": 39,
+            "y": 403.390625,
+            "right": 246.40625,
+            "bottom": 451.390625,
+            "width": 207.40625,
+            "height": 48
+          },
+          {
+            "x": 256.40625,
+            "y": 403.390625,
+            "right": 350.859375,
+            "bottom": 451.390625,
+            "width": 94.453125,
+            "height": 48
+          }
+        ]
+      }
+    },
+    {
+      "engine": "firefox-desktop",
+      "locale": "en",
+      "status": "PASS",
+      "focusedHeading": {
+        "top": 535.5499877929688,
+        "bottom": 565.4499816894531,
+        "headerBottom": 72,
+        "dockTop": 1000
+      },
+      "metrics": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "left": 236,
+        "right": 1404,
+        "buttons": [
+          {
+            "x": 257,
+            "y": 886.9500122070312,
+            "right": 470.3999938964844,
+            "bottom": 934.9500122070312,
+            "width": 213.39999389648438,
+            "height": 48
+          },
+          {
+            "x": 482.3999938964844,
+            "y": 886.9500122070312,
+            "right": 560.1333312988281,
+            "bottom": 934.9500122070312,
+            "width": 77.73333740234375,
+            "height": 48
+          }
+        ]
+      }
+    }
+  ],
+  "source_sha256": {
+    "templates/web/base.html": "493bf502ab5c313c97b09002e695a659b70a1ac792927cd08618f8b378dda624",
+    "static/maison/peacock/tokens.css": "ec442a9e29b2722101170074700621aaa27d7f160edf212a2b0de3d358d5b411",
+    "static/maison/peacock/maison-theme.css": "2824a2aef29d0e239470cae81c82df15ebaf729b897ef1ebfe6ce43f8b0c0e4d"
+  },
+  "matches_current_shared_theme": true
+}

@@ -65,8 +65,11 @@ def process_refund_job(job):
         if state=='processed':
             total=payment.refunds.filter(status='processed').aggregate(n=Sum('amount_minor'))['n'] or 0
             payment.status='refunded' if total==payment.amount_minor else 'partially_refunded';payment.version+=1;payment.save()
+            allocation=PaymentAllocation.objects.filter(payment=payment,invoice__order=order).first()
+            if allocation:
+                OutboxJob.objects.get_or_create(dedupe_key=f'credit-note:{row.id}',defaults={'kind':'financial_document_review','actor':row.approved_by,'payload':{'invoice_id':str(allocation.invoice_id),'refund_id':str(row.id)},'not_before':timezone.now(),'status':'blocked','error_code':'finance_document_required'})
             if total==payment.amount_minor and PaymentAllocation.objects.filter(payment=payment,invoice__order=order).exists():
                 Entitlement.objects.filter(order=order,revoked_at=None).update(revoked_at=timezone.now())
                 order.fulfillment_status='refunded';order.version+=1;order.save()
-    if state=='pending':raise DomainError('refund_pending','Provider refund processing is pending.',503)
+    if state=='pending':return {'refund_id':str(row.id),'status':state,'awaiting_provider_confirmation':True,'confirmation_poll_seconds':300}
     return {'refund_id':str(row.id),'status':state}

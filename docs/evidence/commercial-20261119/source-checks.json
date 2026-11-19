@@ -1,0 +1,38 @@
+{
+  "scope": "Local isolated PostgreSQL18 and original fixtures; not live provider transactions",
+  "combined_before_last_privacy_fix": {
+    "tests": 471,
+    "passed": 471,
+    "seconds": 237.132
+  },
+  "privacy_final": {
+    "tests": 13,
+    "passed": 13
+  },
+  "confirmation_protocol": {
+    "tests": 21,
+    "passed": 21
+  },
+  "existing_worker_regressions": {
+    "tests": 14,
+    "passed": 14
+  },
+  "invoice_history_replay": {
+    "tests": 25,
+    "passed": 25
+  },
+  "frontend_tests": 31,
+  "theme_shell_tests": 28,
+  "theme_final_qa_fixes_tests": 4,
+  "offline_theme_pre_cache_tests": 1,
+  "migration_drift": "No changes detected; finalCI required",
+  "source_freeze": true,
+  "actual_financial_provider_mutations": false,
+  "book_published": false,
+  "legacy_changed": false,
+  "refund_confirmation_final": {
+    "tests": 18,
+    "passed": 18
+  },
+  "stream_plan": "Active owner-approved$5Starter; oneoriginal180s signed-onlyfixture uploaded; runtime credential/application playback qualification pending"
+}

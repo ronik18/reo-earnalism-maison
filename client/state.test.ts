@@ -409,3 +409,13 @@ test("Checkout retains the exact content return across interface locale changes"
   assert.equal(checkoutReturnPath("/en/read/book/unit/?anchor=p1&offset=12","bn"),"/en/read/book/unit/?anchor=p1&offset=12");
   for (const path of ["https://other.test/en/read/book/","//other.test/en/read/book/","/en/sign-out/","/en/checkout/order/"]) assert.equal(checkoutReturnPath(path,"bn"),"/bn/vault/");
 });
+
+import {approvedFinancialPDFURL} from "./billing-state.ts";
+test("Financial PDF grants remain fresh and bound to their local document route",()=>{
+ const now=Date.now(),origin="https://maison.example",path="/api/v1/commerce/credit-notes/note/file";
+ const grant={url:origin+path+"?token=fixture",expires_at:new Date(now+120000).toISOString(),content_type:"application/pdf",sha256:"a".repeat(64),bytes:100};
+ assert.equal(approvedFinancialPDFURL(grant,path,origin,now),grant.url);
+ assert.equal(approvedFinancialPDFURL(grant,"/api/v1/commerce/invoices/invoice/file",origin,now),undefined);
+ for(const override of [{url:origin+"/en/sign-in/"},{url:"http://private.example/document"},{url:"https://user:secret@private.example/document"},{url:grant.url+"#token"},{expires_at:new Date(now).toISOString()},{expires_at:new Date(now+126000).toISOString()},{sha256:"bad"},{content_type:"text/html"}])assert.equal(approvedFinancialPDFURL({...grant,...override},path,origin,now),undefined);
+ assert.equal(approvedFinancialPDFURL({...grant,url:"https://private.example/retained.pdf?signed=fixture"},path,origin,now),"https://private.example/retained.pdf?signed=fixture");
+});

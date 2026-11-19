@@ -1,0 +1,71 @@
+{
+  "method": "WCAG sRGB contrast from exact supplied hex values; browser composite/state checks still required",
+  "pairs": [
+    {
+      "foreground": "ivory",
+      "background": "plum-900",
+      "ratio": 16.575,
+      "small_text_AA": true
+    },
+    {
+      "foreground": "rose-grey",
+      "background": "plum-900",
+      "ratio": 10.664,
+      "small_text_AA": true
+    },
+    {
+      "foreground": "rose-grey",
+      "background": "plum-800",
+      "ratio": 9.106,
+      "small_text_AA": true
+    },
+    {
+      "foreground": "brass",
+      "background": "plum-900",
+      "ratio": 9.86,
+      "small_text_AA": true
+    },
+    {
+      "foreground": "ivory",
+      "background": "rose",
+      "ratio": 6.313,
+      "small_text_AA": true
+    },
+    {
+      "foreground": "ivory",
+      "background": "hover-top",
+      "ratio": 4.534,
+      "small_text_AA": true
+    },
+    {
+      "foreground": "ivory",
+      "background": "pressed",
+      "ratio": 7.209,
+      "small_text_AA": true
+    },
+    {
+      "foreground": "rose",
+      "background": "ivory",
+      "ratio": 6.313,
+      "small_text_AA": true
+    },
+    {
+      "foreground": "plum-grey",
+      "background": "ivory",
+      "ratio": 8.271,
+      "small_text_AA": true
+    },
+    {
+      "foreground": "ink",
+      "background": "parchment",
+      "ratio": 13.527,
+      "small_text_AA": true
+    },
+    {
+      "foreground": "brass",
+      "background": "ivory",
+      "ratio": 1.681,
+      "small_text_AA": false
+    }
+  ]
+}

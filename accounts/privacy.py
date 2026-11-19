@@ -20,10 +20,39 @@ from .models import User,Preferences,Consent,EmailActionToken,Device,MFARecovery
 def _iso(value):return value.isoformat().replace('+00:00','Z')
 
 
+def _public_financial_details(snapshot):
+    """Copy only member-facing document facts, never operator JSON or capabilities."""
+    if not isinstance(snapshot,dict):return {}
+    def pick(source,names):
+        if not isinstance(source,dict):return {}
+        return {name:source[name] for name in names if name in source and (source[name] is None or type(source[name]) in (str,int,bool,float))}
+    result=pick(snapshot,('order_id','invoice_id','invoice_number','refund_id','amount_minor','currency','net_minor','tax_minor','issued_at','reason','local_test_document','sandbox'))
+    recipient=pick(snapshot.get('recipient'),('member_id','name','display_name','email','address','city','state','postal_code','country','tax_id'))
+    if recipient:result['recipient']=recipient
+    finance=snapshot.get('finance')
+    if isinstance(finance,dict):
+        public=pick(finance,('net_minor','tax_minor','total_minor','currency'))
+        issuer=pick(finance.get('issuer'),('legal_name','address','country','tax_id','gst_registration_status'))
+        if issuer:public['issuer']=issuer
+        tax=pick(finance.get('tax'),('label','basis','price_minor','tax_minor','currency','territory'))
+        components=finance.get('tax',{}).get('components') if isinstance(finance.get('tax'),dict) else None
+        if isinstance(components,list):tax['components']=[pick(item,('label','tax_minor','rate_bps')) for item in components if isinstance(item,dict)]
+        if tax:public['tax']=tax
+        if public:result['finance']=public
+    return result
+
+
+def _export_financial_row(row):
+    row=dict(row)
+    if 'line_snapshot' in row:row['line_snapshot']=_public_financial_details(row['line_snapshot'])
+    if 'snapshot' in row:row['financial_details']=_public_financial_details(row.pop('snapshot'))
+    return row
+
+
 def _write_export(user,file,deadline):
     from reader.models import Progress,Completion,Annotation,SavedItem,PersonalList,PersonalListItem,DownloadLicense
     from learning.models import LessonCompletion,QuizAttempt
-    from billing.models import Order,Entitlement,Invoice,Refund
+    from billing.models import Order,Entitlement,Invoice,Refund,InvoiceRevision,Subscription,Mandate
     from .services import preferences_data
     encoder=DjangoJSONEncoder(ensure_ascii=False,separators=(',',':'))
     digest=hashlib.sha256();size=0
@@ -48,7 +77,10 @@ def _write_export(user,file,deadline):
         'quiz_attempts':QuizAttempt.objects.filter(user=user).values('id','quiz_id','quiz_version','status','answers','score','result','started_at','submitted_at'),
         'orders':Order.objects.filter(user=user).values('id','total_minor','currency','status','fulfillment_status','created_at','paid_at'),
         'entitlements':Entitlement.objects.filter(user=user).values('id','source','scope','edition_id','track_id','formats','valid_from','valid_until','status','revoked_at'),
-        'invoices':Invoice.objects.filter(Q(order__user=user)|Q(subscription__user=user)).values('id','order_id','subscription_id','number','amount_minor','currency','line_snapshot','period_start','period_end','revision','issued_at'),
+        'invoices':Invoice.objects.filter(Q(order__user=user)|Q(subscription__user=user)).values('id','order_id','subscription_id','current_revision_id','number','amount_minor','currency','line_snapshot','period_start','period_end','revision','issued_at'),
+        'invoice_revisions':InvoiceRevision.objects.filter(Q(invoice__order__user=user)|Q(invoice__subscription__user=user)).values('id','invoice_id','refund_id','kind','sequence','number','amount_minor','currency','created_at','snapshot'),
+        'subscriptions':Subscription.objects.filter(user=user).values('id','plan_id','status','provider_status','cancel_at_period_end','current_period_start','current_period_end','paid_through','next_charge_at','mandate_id','version'),
+        'mandates':Mandate.objects.filter(user=user,subscription__user=user).values('id','status','revocation_pending','method','created_at','revoked_at','version',subscription_id=F('subscription__id')),
         'refunds':Refund.objects.filter(payment__order__user=user).values('id','amount_minor','proposed_amount_minor','currency','status','created_at','processed_at'),
     }
     from django.apps import apps
@@ -65,7 +97,7 @@ def _write_export(user,file,deadline):
         raw(',');value(name);raw(':[');first=True
         for row in rows.using(alias).iterator(chunk_size=200):
             if not first:raw(',')
-            first=False;value(row)
+            first=False;value(_export_financial_row(row) if name in ('invoices','invoice_revisions') else row)
         raw(']')
     raw('}');file.flush();file.seek(0)
     return size,digest.hexdigest()
@@ -105,7 +137,7 @@ def create_export(job,max_seconds=45):
 
 
 def delete_account(job):
-    from billing.models import Order,LegacyLiability,Refund
+    from billing.models import Order,LegacyLiability,Refund,Subscription,Mandate
     from reader.services import delete_personal_data
     from reader.models import DownloadLicense
     from learning.models import LessonCompletion,QuizAttempt
@@ -117,6 +149,9 @@ def delete_account(job):
             or LegacyLiability.objects.filter(user=user,status='unresolved').exists()
             or Refund.objects.filter(payment__order__user=user,status__in=['requested','approved','submitted','pending']).exists()):
             raise DomainError('awaiting_resolution','Outstanding payments or refunds require resolution before deletion.',409)
+        future_billing=Subscription.objects.filter(user=user,provider_subscription_id__isnull=False).exclude(provider_subscription_id='').exclude(provider__in=['unconfigured','local_test']).exclude(status__in=['cancelled','completed','expired']).exclude(mandate__status__in=['cancelled','expired'],mandate__revocation_pending=False).exists()
+        if future_billing or Mandate.objects.filter(user=user,revocation_pending=True).exists():
+            raise DomainError('awaiting_resolution','Open Settings > Billing to resolve subscription cancellation or pending mandate revocation before deleting this account.',409)
         # An already-claimed export completes/cancels before deletion; don't race an upload of erased data.
         if OutboxJob.objects.filter(actor=user,kind='privacy_export',status='claimed',locked_until__gt=timezone.now()).exists():
             raise DomainError('export_in_progress','The current export is finishing; deletion will retry.',503)

@@ -63,7 +63,7 @@ class FinancialMaintenanceDispatchTests(TestCase):
                     self.maintain();self.maintain();provider.assert_called_once()
                 job.refresh_from_db();self.assertEqual(job.status,'blocked');self.assertEqual(job.error_code,code);self.assertEqual(job.attempts,1)
     def test_actual_maintenance_retries_pending_refund_without_reclaiming_early(self):
-        job=self.job('refund_reconcile');before=timezone.now()
-        with patch('billing.refunds.process_refund_job',side_effect=DomainError('refund_pending','Synthetic pending provider result.',503)) as provider:
+        job=self.job('refund_reconcile');job.payload={'refund_id':str(uuid.uuid4())};job.save(update_fields=['payload']);before=timezone.now()
+        with patch('billing.refunds.process_refund_job',return_value={'status':'pending','awaiting_provider_confirmation':True}) as provider:
             self.maintain();self.maintain();provider.assert_called_once()
-        job.refresh_from_db();self.assertEqual(job.status,'pending');self.assertEqual(job.error_code,'refund_pending');self.assertGreater(job.not_before,before);self.assertEqual(job.attempts,1)
+        job.refresh_from_db();self.assertEqual(job.status,'pending');self.assertEqual(job.error_code,'provider_confirmation_pending');self.assertGreater(job.not_before,before);self.assertEqual(job.attempts,0)

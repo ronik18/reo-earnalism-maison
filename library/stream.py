@@ -209,3 +209,124 @@ def grant(user, asset, device_id, territory='IN'):
             'transport':'stream_signed', 'url':f"https://{config['customer_host']}/{token}/iframe",
             'content_type':'application/vnd.apple.mpegurl', 'sha256':None, 'issued_at':iso(now),
             'expires_at':iso(expires_at), 'range_supported':False, 'quality_kbps':None, 'duration_ms':duration_ms}
+
+
+def prepare_stream_asset(actor, manifest, source_file, *, max_seconds=300):
+    """Register one already-uploaded private UID on a draft, without uploading.
+
+    Operator-only preparation: verify the retained source bytes locally and the
+    provider's identity/privacy/duration metadata, then atomically bind the exact
+    draft/unit/proof. The source SHA is NOT a hash of adaptive Stream renditions;
+    the operator's private evidence reference retains the upload association.
+    No rights, access policy, publication pointer or provider settings change.
+    """
+    import hashlib
+    from pathlib import Path
+    from django.contrib.auth import get_user_model
+    from core.api import public_uuid
+    from core.models import OperationReceipt
+    from core.services import apply_operation, audit, payload_hash
+    from .models import Asset, Revision, Unit
+
+    if (not actor.is_active or not actor.is_staff or not actor.is_verified
+            or not actor.has_perm('library.publish_revision')):
+        raise DomainError('permission_denied', 'Verified content publisher permission is required.', 403)
+    fields={'operation_id','edition_revision_id','expected_revision_version','unit_id','video_uid',
+            'duration_ms','source_sha256','source_bytes','source_evidence_ref'}
+    if not isinstance(manifest,dict) or set(manifest)!=fields:
+        raise DomainError('validation_error', 'Use the complete private Stream intake manifest.', 422)
+    payload=dict(manifest)
+    for field in ['operation_id','edition_revision_id','unit_id']:
+        payload[field]=str(public_uuid(payload[field],field))
+    if (type(payload['expected_revision_version']) is not int or payload['expected_revision_version']<1
+            or type(payload['duration_ms']) is not int or not 1<=payload['duration_ms']<=9223372036854775807
+            or type(payload['source_bytes']) is not int or not 1<=payload['source_bytes']<=10*1024**3
+            or not isinstance(payload['video_uid'],str) or not UID.fullmatch(payload['video_uid'])
+            or not isinstance(payload['source_sha256'],str) or not re.fullmatch('[a-f0-9]{64}',payload['source_sha256'])
+            or not isinstance(payload['source_evidence_ref'],str) or not 1<=len(payload['source_evidence_ref'].strip())<=500
+            or type(max_seconds) not in (int,float) or not 0<max_seconds<=900):
+        raise DomainError('validation_error', 'Stream source identity, size, duration or verification budget is invalid.', 422)
+    operation=uuid.UUID(payload['operation_id']);request_hash=payload_hash('asset.stream_prepare',payload)
+    proof=None
+
+    def persist():
+        # This callback performs DB work only. Provider/source I/O precedes locks.
+        current_actor=get_user_model().objects.get(pk=actor.pk)
+        if not current_actor.is_active or not current_actor.is_staff or not current_actor.is_verified or not current_actor.has_perm('library.publish_revision'):
+            raise DomainError('permission_denied','Publisher authority changed during preparation.',403)
+        revision=Revision.objects.select_for_update().filter(pk=payload['edition_revision_id']).first()
+        if not revision:
+            raise DomainError('not_found','Draft revision not found.',404)
+        old=Asset.objects.filter(pk=operation).first()
+        previous=revision.validation_evidence.get('media_assets',{}).get(str(operation),{})
+        if old:
+            if (old.provider!='stream' or old.revision_id!=revision.id or old.unit_id!=uuid.UUID(payload['unit_id'])
+                    or old.storage_key!=payload['video_uid'] or previous.get('intake_actor_id')!=str(actor.pk)
+                    or previous.get('intake_request_sha256')!=request_hash
+                    or not isinstance(previous.get('intake_result'),dict)):
+                raise DomainError('idempotency_key_reused','Stream intake operation already has different input.',409)
+            return 201,previous['intake_result'],previous['intake_result']['version']
+        if proof is None:
+            raise DomainError('operation_reconciliation_required','Retry this same verified intake operation.',409)
+        if revision.state!='draft':
+            raise DomainError('revision_frozen','Prepare video only on a draft revision.',409)
+        if revision.version!=payload['expected_revision_version']:
+            raise DomainError('version_conflict','Draft changed during source verification.',412,{'current_version':revision.version})
+        unit=Unit.objects.select_for_update().filter(pk=payload['unit_id'],revision=revision).first()
+        if not unit or unit.duration_ms!=payload['duration_ms']:
+            raise DomainError('unit_revision_mismatch','The bound draft unit and measured duration must match.',409)
+        if Asset.objects.filter(storage_key=payload['video_uid']).exists():
+            raise DomainError('stream_identity_conflict','This provider video already belongs to another asset.',409)
+        asset=Asset.objects.create(id=operation,revision=revision,unit=unit,kind='video',provider='stream',state='ready',
+            storage_key=payload['video_uid'],sha256=payload['source_sha256'],bytes=payload['source_bytes'],
+            duration_ms=payload['duration_ms'],content_type='application/vnd.apple.mpegurl')
+        result={'asset_id':str(asset.id),'edition_revision_id':str(revision.id),'unit_id':str(unit.id),
+                'state':'ready','revision_state':'draft','version':asset.version,'provider':'stream'}
+        evidence=dict(revision.validation_evidence);media=dict(evidence.get('media_assets',{}))
+        media[str(asset.id)]={**proof,'provider':'stream','source_sha256':asset.sha256,'source_bytes':asset.bytes,
+            'source_evidence_ref':payload['source_evidence_ref'],'unit_id':str(unit.id),'prepared':True,
+            'verified_at':timezone.now().isoformat().replace('+00:00','Z'),
+            'intake_actor_id':str(actor.pk),'intake_request_sha256':request_hash,'intake_result':result}
+        evidence['media_assets']=media;revision.validation_evidence=evidence;revision.save()
+        audit(actor,'asset.stream_prepared',asset,{'source_sha256':asset.sha256,'unit_id':str(unit.id)})
+        return 201,result,asset.version
+
+    # Receipts and the durable asset linkage replay without source/provider reads,
+    # including after personal-operation receipt retention has elapsed.
+    if (OperationReceipt.objects.filter(actor=actor,operation_id=operation).exists()
+            or Asset.objects.filter(pk=operation).exists()):
+        return apply_operation(actor,operation,'asset.stream_prepare',payload,persist)
+    revision=Revision.objects.filter(pk=payload['edition_revision_id'],state='draft').first()
+    unit=Unit.objects.filter(pk=payload['unit_id'],revision=revision).first() if revision else None
+    if not revision or not unit or unit.duration_ms!=payload['duration_ms']:
+        raise DomainError('unit_revision_mismatch','Select the exact draft unit and measured duration.',409)
+    if revision.version!=payload['expected_revision_version']:
+        raise DomainError('version_conflict','Draft changed before source verification.',412,{'current_version':revision.version})
+    deadline=time.monotonic()+max_seconds
+    try:
+        path=Path(source_file)
+        if not path.is_file() or path.stat().st_size!=payload['source_bytes']:
+            raise ValueError
+        digest=hashlib.sha256();total=0
+        with path.open('rb') as source:
+            while True:
+                if time.monotonic()>=deadline:
+                    raise DomainError('asset_verification_timeout','Source verification exceeded its budget.',503)
+                block=source.read(min(1024**2,payload['source_bytes']-total+1))
+                if not block:break
+                total+=len(block)
+                if total>payload['source_bytes']:raise ValueError
+                digest.update(block)
+        if total!=payload['source_bytes'] or digest.hexdigest()!=payload['source_sha256']:
+            raise ValueError
+    except DomainError:
+        raise
+    except (OSError,TypeError,ValueError) as exc:
+        raise DomainError('asset_integrity_failed','Retained source bytes do not match this intake.',422) from exc
+    candidate=Asset(id=operation,revision=revision,unit=unit,kind='video',provider='stream',state='processing',
+        storage_key=payload['video_uid'],sha256=payload['source_sha256'],bytes=payload['source_bytes'],duration_ms=payload['duration_ms'])
+    remaining=deadline-time.monotonic()
+    if remaining<=0:
+        raise DomainError('asset_verification_timeout','Source verification exceeded its budget.',503)
+    proof=verify_video_metadata(candidate,max_seconds=min(8,remaining))
+    return apply_operation(actor,operation,'asset.stream_prepare',payload,persist)

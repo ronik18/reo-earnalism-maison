@@ -24,6 +24,15 @@ class Mandate(models.Model):
     user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT)
     provider=models.CharField(max_length=16,default='razorpay')
     provider_mandate_id=models.CharField(max_length=128,null=True,blank=True)
+    provider_customer_id=models.CharField(max_length=128,blank=True,default='')
+    provider_token_id=models.CharField(max_length=128,blank=True,default='')
+    provider_payment_id=models.CharField(max_length=128,blank=True,default='')
+    provider_invoice_id=models.CharField(max_length=128,blank=True,default='')
+    provider_mode=models.CharField(max_length=4,blank=True,default='')
+    identity_verified_at=models.DateTimeField(null=True,blank=True)
+    identity_verified_by=models.ForeignKey(settings.AUTH_USER_MODEL,null=True,blank=True,on_delete=models.PROTECT,related_name='verified_mandate_identities')
+    identity_evidence_ref=models.CharField(max_length=160,blank=True,default='')
+    identity_verification_job_id=models.UUIDField(null=True,blank=True)
     provider_status=models.CharField(max_length=64,blank=True)
     status=models.CharField(max_length=16,default='pending')
     method=models.CharField(max_length=12,default='other')
@@ -38,7 +47,7 @@ class Mandate(models.Model):
     class Meta:
         db_table='maison_mandate'
         indexes=[models.Index(fields=['user','-created_at','-id'],name='maison_mandate_keyset_idx')]
-        constraints=[models.UniqueConstraint(fields=['provider','provider_mandate_id'],name='maison_mandate_provider_uq'),models.CheckConstraint(condition=Q(status__in=['pending','authorized','paused','cancelled','failed','expired']),name='maison_mandate_state'),models.CheckConstraint(condition=Q(method__in=['card','upi','emandate','other']),name='maison_mandate_method'),models.CheckConstraint(condition=Q(max_amount_minor__gt=0),name='maison_mandate_amount'),models.CheckConstraint(condition=~Q(status='authorized')|Q(authorized_at__isnull=False,provider_mandate_id__isnull=False),name='maison_mandate_authority'),models.CheckConstraint(condition=Q(version__gt=0),name='maison_mandate_version')]
+        constraints=[models.UniqueConstraint(fields=['provider','provider_mode','provider_token_id'],condition=~Q(provider_token_id=''),name='maison_mandate_token_uq'),models.CheckConstraint(condition=Q(identity_verified_at__isnull=True)|(Q(provider_mode__in=['test','live'],identity_verified_by__isnull=False)&~Q(provider_customer_id='')&~Q(provider_token_id='')&~Q(provider_payment_id='')&~Q(provider_invoice_id='')&~Q(identity_evidence_ref='')),name='maison_mandate_verified_ids'),models.UniqueConstraint(fields=['provider','provider_mandate_id'],name='maison_mandate_provider_uq'),models.CheckConstraint(condition=Q(status__in=['pending','authorized','paused','cancelled','failed','expired']),name='maison_mandate_state'),models.CheckConstraint(condition=Q(method__in=['card','upi','emandate','other']),name='maison_mandate_method'),models.CheckConstraint(condition=Q(max_amount_minor__gt=0),name='maison_mandate_amount'),models.CheckConstraint(condition=~Q(status='authorized')|Q(authorized_at__isnull=False,provider_mandate_id__isnull=False),name='maison_mandate_authority'),models.CheckConstraint(condition=Q(version__gt=0),name='maison_mandate_version')]
 
 class Subscription(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)

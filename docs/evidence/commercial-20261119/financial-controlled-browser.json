@@ -1,0 +1,47 @@
+{
+  "scope": "Original controlled financial DTO/provider responses with actual local member/reauth session; no real provider call, tax document qualification, charge, refund or mandate mutation",
+  "results": [
+    {
+      "engine": "chromium-desktop",
+      "locale": "en",
+      "status": "PASS",
+      "creditNotePagination": true,
+      "separateDocuments": true,
+      "invalidPDFLinkRejected": true,
+      "expiredLinkRemoved": true,
+      "notReadyMessage": true,
+      "changedInvoiceRequiresReview": true,
+      "freshIdentityRequired": true,
+      "pendingAndConfirmedMandateDistinct": true,
+      "offlineFinancialControlsDisabled": true
+    },
+    {
+      "engine": "webkit-mobile",
+      "locale": "bn",
+      "status": "PASS",
+      "creditNotePagination": true,
+      "separateDocuments": true,
+      "invalidPDFLinkRejected": true,
+      "expiredLinkRemoved": true,
+      "notReadyMessage": true,
+      "changedInvoiceRequiresReview": true,
+      "freshIdentityRequired": true,
+      "pendingAndConfirmedMandateDistinct": true,
+      "offlineFinancialControlsDisabled": true
+    },
+    {
+      "engine": "firefox-desktop",
+      "locale": "en",
+      "status": "PASS",
+      "creditNotePagination": true,
+      "separateDocuments": true,
+      "invalidPDFLinkRejected": true,
+      "expiredLinkRemoved": true,
+      "notReadyMessage": true,
+      "changedInvoiceRequiresReview": true,
+      "freshIdentityRequired": true,
+      "pendingAndConfirmedMandateDistinct": true,
+      "offlineFinancialControlsDisabled": true
+    }
+  ]
+}

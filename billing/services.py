@@ -168,7 +168,7 @@ def apply_capture(order_id,facts,event_id=None,territory='IN'):
                 live_invoice=None
                 if facts.verification_source=='razorpay_api_live':
                     from .finance import invoice_snapshot
-                    live_invoice=invoice_snapshot(order)
+                    live_invoice=invoice_snapshot(order,now)
                 from library.services import authorize_purchase
                 edition_id=order.offer_snapshot.get('edition_id')
                 from library.models import Edition
@@ -183,8 +183,13 @@ def apply_capture(order_id,facts,event_id=None,territory='IN'):
                 order.fulfillment_status='granted'
                 snapshot={'order_id':str(order.id),'amount_minor':order.total_minor,'currency':order.currency,'local_test_document':True,'sandbox':facts.verification_source=='razorpay_api_test'}
                 number=f"{'SANDBOX' if facts.verification_source=='razorpay_api_test' else 'LOCAL-TEST'}-{order.id}"
-                if live_invoice:snapshot,number=live_invoice
+                if live_invoice:
+                    snapshot,number=live_invoice
+                    from .numbering import reserve
+                    number=reserve(snapshot['finance'],'invoice',order.id,now)
                 inv,_=Invoice.objects.get_or_create(order=order,defaults={'number':number,'amount_minor':order.total_minor,'currency':order.currency,'document_sha256':hashlib.sha256(json.dumps(snapshot,sort_keys=True).encode()).hexdigest(),'line_snapshot':snapshot,'issued_at':now})
+                from .documents import initialize_invoice
+                initialize_invoice(inv)
                 PaymentAllocation.objects.get_or_create(payment=payment,invoice=inv,defaults={'amount_minor':order.total_minor})
         order.save();audit(order.user,'payment.capture_applied',order,{'source':facts.verification_source,'fulfillment':order.fulfillment_status})
         return order_data(order)

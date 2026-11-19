@@ -1,0 +1,43 @@
+{
+  "status": "LOCAL_FINANCIAL_API_AND_BROWSER_PASS_INTEGRATION_PENDING",
+  "base_commit": "9e3b802",
+  "scope": "Additive financial member UI for isolated Maison; not live finance/provider acceptance",
+  "files_sha256": {
+    "client/billing-history.tsx": "8a668f230a4090ebbacc4d1445c6ae90f535d8d16fa21127429c7472a6f60602",
+    "client/billing-state.ts": "783a91d6490920e8e1303fc2f2b1ee2762dcf47c67e3132ad9b36c2a29c0b009",
+    "client/state.test.ts": "f9be507b6329286a6e18424e9eca74eb9352c95775d6e7187e167462ba542d43",
+    "web/i18n.py": "6589ed95a5574ed8cfc8a85ea1c79eb01179b656dfe5b2da42d8ba33b0016637"
+  },
+  "checks": {
+    "client_tests": 31,
+    "typecheck": "PASS",
+    "build": "PASS",
+    "controlled_browser_groups": 3,
+    "selected_revision_race": "PASS controlled412 explicit review; optional response revision/associated number final real API check pending",
+    "actual_financial_browser_groups": 3,
+    "real_PDF_hash_size_type_no_store": "PASS",
+    "actual_selected_revision_race": "PASS",
+    "identical_bytes_distinct_immutable_paths": "PASS",
+    "cross_owner_detail_and_download": "404 PASS",
+    "cross_owner_cursor": "422 PASS",
+    "approved_theme_geometry_groups": 4,
+    "focused_financial_heading_visibility": "PASS phone y430..470 between header64 and dock762; desktop/tablet also pass"
+  },
+  "controlled_evidence": "financial-controlled-browser.json",
+  "preserved": [
+    "Actual book draft",
+    "Legacy platform",
+    "Provider financial state"
+  ],
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "remaining": [
+    "Final skin geometry check, integrated source/CI/push/deployment",
+    "Actual Stream provider qualification within owner authority",
+    "Exact approved commercial finance policy and genuine eligible provider mandate identity"
+  ],
+  "actual_API_evidence": "financial-api-browser.json",
+  "theme_evidence": "financial-theme-geometry.json"
+}

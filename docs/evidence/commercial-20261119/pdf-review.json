@@ -1,0 +1,15 @@
+{
+  "scope": "Read-only inspection of original synthetic finance PDFs, never a tax-document approval",
+  "rendering": "PASS both root QA fixtures and actual member API PDFs, Poppler A4 images inspected; Latin/Bengali shaped and no clipping/overlap",
+  "text_extraction": "pypdf recovers recipient text; some shaped Bengali reason glyphs extract as private-use codes. Standard ActualText contains original Unicode; universal parser copy/search is not claimed.",
+  "actual_API_documents": {
+    "invoice": {
+      "sha256": "2bd06f3ab25d0a30263e4adeab24324c33775956d59d56a07c16595d5480b708",
+      "bytes": 14626
+    },
+    "credit-note": {
+      "sha256": "fcfded90d9b1f9fcc70bcab10ec85b71044b1a3966feabc45ffbeb30d0a34ae5",
+      "bytes": 15559
+    }
+  }
+}
