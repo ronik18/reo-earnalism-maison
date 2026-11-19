@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "application_commit": "e67fb042685b38cf86414dfbf30a012fa107ec6c",
+  "source_PR": "https://github.com/ronik18/reo-earnalism-maison/pull/9",
+  "exact_main_CI": {
+    "url": "https://github.com/ronik18/reo-earnalism-maison/actions/runs/44613260554",
+    "status": "success",
+    "backend_tests": 531,
+    "client_tests": 35
+  },
+  "static_release": "e31440ee8489bc05da9f9d1b1c30350ca38ec3a9bb9e8af3ae228200e08789e3",
+  "assets": 72,
+  "bytes": 7374761,
+  "asset_readback": "all checksums/types/immutable metadata PASS; repeat cache HIT",
+  "services": {
+    "web": {
+      "id": "srv-dbunbd8jo6nc73akbng0",
+      "deployment": "dep-dbvm637lk1mc73e5k6r0",
+      "status": "Live"
+    },
+    "maintenance": {
+      "id": "crn-dbv7bte7bikc73fpso3g",
+      "deployment": "dep-dbvm6cmc6qcc739sir8g",
+      "status": "Live"
+    },
+    "archive": {
+      "id": "crn-dbv7agetlv9c7381is10",
+      "deployment": "dep-dbvm6oo8v5cc73b3l76g",
+      "status": "Live"
+    }
+  },
+  "live_browser_checks": 81,
+  "live_browser_passed": 81,
+  "live_private_export": "Actual existing business identity Google reconfirmation,scheduled worker,private R2 download/hash/schema PASS; no new account or saved personal export",
+  "new_migrations": false,
+  "changes_excluded": [
+    "book publication/manuscript",
+    "legacy application/data/DNS",
+    "plans/spending/schedules/credentials",
+    "paid activation",
+    "mailbox inventory/deletion",
+    "age/guardian flow",
+    "regional whitelist"
+  ],
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "legal_limit": "Owner-confirmed adult testers only. Exact47-region triage is conditional applicability evidence, not blanket future public/all-ages clearance."
+}

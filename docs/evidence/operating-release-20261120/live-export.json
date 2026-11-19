@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "grant_http": 200,
+  "private_R2_http": 200,
+  "bytes": 1736,
+  "sha256": "e77423f10178e81563bbcb4256c917e26a59fed99df07ea3fd92ced82f262700",
+  "schema_version": 1,
+  "devices": 2,
+  "support_requests": 0,
+  "identity_matched": true,
+  "credentials_excluded": true,
+  "download_cache_control": "private, no-store",
+  "private_data_saved": false,
+  "new_account": false,
+  "application_commit": "e67fb042685b38cf86414dfbf30a012fa107ec6c",
+  "processing": "Actual scheduled maintenance; no manual trigger",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

@@ -1,0 +1,516 @@
+{
+  "release": "e31440ee8489bc05da9f9d1b1c30350ca38ec3a9bb9e8af3ae228200e08789e3",
+  "files": 72,
+  "bytes": 7374761,
+  "all_public_HTTPS_checksums": "PASS",
+  "cache_states": [
+    "HIT",
+    "HIT"
+  ],
+  "rows": [
+    {
+      "path": "maison/app.css",
+      "status": "PASS",
+      "bytes": 27149,
+      "sha256": "2039d2285edd78190fe762fa6350aea3b03e3ab855355b6dac3d9ac0ff1afaf7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/app.js",
+      "status": "PASS",
+      "bytes": 18138,
+      "sha256": "d1e32d1cf34280cbdd7ab852563ec755bce85d1a7cb66a3c9c87752b8bd47f5a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/art/ford-gold-column.webp",
+      "status": "PASS",
+      "bytes": 280478,
+      "sha256": "ae461035db947236311f51fb6661f3d7ce6e2de704b9cefcee33b23ca6a4ff5a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/art/ford-gold-wash.webp",
+      "status": "PASS",
+      "bytes": 136396,
+      "sha256": "08446c9f43d2d9397098a165d848b559d1f3acc52728e12021406c1fc1c0e428",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/art/gold-pages.jpg",
+      "status": "PASS",
+      "bytes": 205384,
+      "sha256": "e75129d2e422c9f73dff8933701ebc6206e6d56850b0897f5b612d359b1f9c9d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/art/hero.png",
+      "status": "PASS",
+      "bytes": 2824803,
+      "sha256": "c2133204a1575120b33d057b1566ea107e76bc46a75f79238cb1afd3ad92685e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/art/river.png",
+      "status": "PASS",
+      "bytes": 2605103,
+      "sha256": "f76d6c92c4a6f464008f238dfd9994127e776859b4721fcb91be18dea6c2a61e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/asset-manifest.json",
+      "status": "PASS",
+      "bytes": 4001,
+      "sha256": "d081fad31dd02b872d1d33916fb1351bcc1e4d8e10ce5365c8dd84b7878276df",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/account-2WP46OBB.js",
+      "status": "PASS",
+      "bytes": 48066,
+      "sha256": "48e164c0809506e5d14cf5294f0e16f37d76f5d0e4d8013e9fd715e19a54eedf",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/auth-JHDH72XD.js",
+      "status": "PASS",
+      "bytes": 2798,
+      "sha256": "7f62ff38f5be63dd009a795f0baabc189b91d4e2014398938e6c4ca0d0944e13",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/commerce-ZIRDDQHI.js",
+      "status": "PASS",
+      "bytes": 6894,
+      "sha256": "3d6d0a5c73bbd7e61b0354dc32d53f8e611cca5d05f4f69cc4676b8aae763b5e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/downloads-BWP4UQO7.js",
+      "status": "PASS",
+      "bytes": 10438,
+      "sha256": "cf347e3080c2db1bfe0fb9d8199eed120580b6b33b4d6c4417dea696c834d4a9",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/home-M3GYYGYL.js",
+      "status": "PASS",
+      "bytes": 5103,
+      "sha256": "39ab55dccc8c70adda9497ead3f801ef3e888b255bdc1bc4efdb395188133217",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/manifest.json",
+      "status": "PASS",
+      "bytes": 1545,
+      "sha256": "f0a125b312fe8f21c94f2b5e9f52be34bccb9dcb0bde27ea78364703f8a415f6",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/onboarding-4NXLREEA.js",
+      "status": "PASS",
+      "bytes": 9237,
+      "sha256": "76ad14c8f968ba9824dacb282f423bb60635ad314a5a1bfa555bf5ee3966c84e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/player-CAOHXUUV.js",
+      "status": "PASS",
+      "bytes": 12028,
+      "sha256": "ce6c42cdbc472a8ac6e65d1f908cb018958f9595814a368e8ff63a6861b4302a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/quiz-QK4SOCDQ.js",
+      "status": "PASS",
+      "bytes": 4555,
+      "sha256": "61a11a70340c5ab124c0720faee86be71a475f690db8169044065b1e672d4099",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/reader-AVEGUQ76.js",
+      "status": "PASS",
+      "bytes": 19150,
+      "sha256": "a906e4d9aafa6c0c35f65ec5893b1d526cb06c711e0de7d6481bab5fceaa0a5f",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-3A6WA22C.js",
+      "status": "PASS",
+      "bytes": 805,
+      "sha256": "32d97c9ece49167eb0872d77230b20f9fa2966b3644f9625bad14c6987d15c78",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-5LQAVZYG.js",
+      "status": "PASS",
+      "bytes": 144,
+      "sha256": "87e036d7c1bc8ca63c8468fa646c307723a5f4d932aa1287acd27d1ae8205112",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-6BQSIVVD.js",
+      "status": "PASS",
+      "bytes": 577,
+      "sha256": "11247d28c5c2fb3d976002c2b55fecb6ba19fd88153e11d2c7af5832fd6ff331",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-CAOOZUV2.js",
+      "status": "PASS",
+      "bytes": 1567,
+      "sha256": "bc2cb8b2fc36a7286be0e024be742c3c6f9d11a294359d11a71582806f113df9",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-FGAYQ3CA.js",
+      "status": "PASS",
+      "bytes": 221571,
+      "sha256": "996657229d869e7b7f28d7ea270a6514d1fab93cdf068577629fcc5f8907450e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-FGAYQ3CA.js.LEGAL.txt",
+      "status": "PASS",
+      "bytes": 1219,
+      "sha256": "c05b7fcb24f8e53417eaa2c075d12b11913d4e79aa79a3ddc5f3364332b67d61",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-H7ECUXTH.js",
+      "status": "PASS",
+      "bytes": 355,
+      "sha256": "2b40f6dab25ad6a7b6b19a18b909204117f2f9ca874bf71dd904165cb64a22d8",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-KPKIPHCA.js",
+      "status": "PASS",
+      "bytes": 5066,
+      "sha256": "658cbf393ca3a8927e52388e77389c454a98e0ac04a833e25a6d6564b8e6ab36",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-LMHERZFN.js",
+      "status": "PASS",
+      "bytes": 524,
+      "sha256": "90f95a5dc5459c026dd8852453eb5c313bc57779a03a03ccaf76440eedb2d065",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-LMHERZFN.js.LEGAL.txt",
+      "status": "PASS",
+      "bytes": 338,
+      "sha256": "13d20c1ebb2ef3d0dd5222cf202d91b580a7cb733249161582e7b43c8ac7a9d4",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-OMDJIW2J.js",
+      "status": "PASS",
+      "bytes": 4501,
+      "sha256": "0ce7827092ed6ee7ed80351227fdf4297c5895f0e9dbb647270a03ec4c884469",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-PLBWFTBM.js",
+      "status": "PASS",
+      "bytes": 1659,
+      "sha256": "12f8d399829c396f4a950bfa1609ed2a37b3d301177f096bac17825c62e88cd7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-XNMO4WM4.js",
+      "status": "PASS",
+      "bytes": 3920,
+      "sha256": "7efaa9c69d2442b607b3a568f766ef4572cbb6951b7d05a46caf5e23c09cf8cd",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-Z6T6ZCEI.js",
+      "status": "PASS",
+      "bytes": 2328,
+      "sha256": "2560a5c5d40eb00e470ada7be9e7a04dbc7251020e56a338b28b8ddc4fb5a5ce",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shell-PLUXPGTG.js",
+      "status": "PASS",
+      "bytes": 6362,
+      "sha256": "756c91d6b3e05e3258b06c458d31930366b2d7ba42a9bcc945c2e3624d3280c9",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/support-YAEKVTPJ.js",
+      "status": "PASS",
+      "bytes": 2055,
+      "sha256": "172bfbfd9f387ef49cb346e83718abf9881cff18d2c82db3267e6e1f7c907002",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/video-D7OE2PGA.js",
+      "status": "PASS",
+      "bytes": 8762,
+      "sha256": "b26f357adef5b277d9bb7d3ddf9e3b31609afc872eda5e384a2384d734da6a83",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/cormorant-garamond-latin-wght-normal.woff2",
+      "status": "PASS",
+      "bytes": 37640,
+      "sha256": "d80df8ff5aecd299a61549f9e29ab1ed0b9b05f4ea71d50fe978e07d5240b235",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/dm-sans-latin-standard-normal.woff2",
+      "status": "PASS",
+      "bytes": 62724,
+      "sha256": "ca72d2bcea8f4daa783dbdfa2d9b46068c3ce38168e05918fb867aa453b4f890",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/font-manifest.json",
+      "status": "PASS",
+      "bytes": 1985,
+      "sha256": "268de4f9f12687b7337866d697984a6b27d36ebe45f34caba1f728e849d8d28d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/fontsource-noto-sans-bengali-5.3.0-OFL.txt",
+      "status": "PASS",
+      "bytes": 4381,
+      "sha256": "c0d17a4a6f928d78749dbebfa9d2953b6086c2a1f64cdd1e450cc77fb8199b32",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/fontsource-noto-serif-bengali-5.3.0-OFL.txt",
+      "status": "PASS",
+      "bytes": 4381,
+      "sha256": "c0d17a4a6f928d78749dbebfa9d2953b6086c2a1f64cdd1e450cc77fb8199b32",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/fontsource-variable-cormorant-garamond-5.3.0-OFL.txt",
+      "status": "PASS",
+      "bytes": 4504,
+      "sha256": "732f37009943e7f4378cf37113c9bcc4716af002a8583511aa91ed5d37683e73",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/fontsource-variable-dm-sans-5.3.0-OFL.txt",
+      "status": "PASS",
+      "bytes": 4502,
+      "sha256": "6fbd040a29c2037a765dfb9f2561e9965b5c95c6dcb5dce516089d63d5f17af7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/fontsource-variable-source-serif-4-5.3.1-OFL.txt",
+      "status": "PASS",
+      "bytes": 4314,
+      "sha256": "18aabf190848725e2576eefb5c29ba06aac1029d02132252a7f312eac2e50cf3",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/layout.tokens.json",
+      "status": "PASS",
+      "bytes": 1222,
+      "sha256": "57dc821e2b3ae52ad61e44264fbbeca432bd1dfd29d6392ac5fb85cb4c4efefa",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-sans-bengali-bengali-400-normal.woff2",
+      "status": "PASS",
+      "bytes": 44352,
+      "sha256": "adb805ae2eb639cc5d7276ee0e3798a8092fbfe02a6e5a0e19d82587680b528c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-sans-bengali-bengali-500-normal.woff2",
+      "status": "PASS",
+      "bytes": 47192,
+      "sha256": "3af14da23cfcdafc5f812a797e34abbf698b596ae0ab3c595165e68ee4ad2cef",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-sans-bengali-bengali-600-normal.woff2",
+      "status": "PASS",
+      "bytes": 47636,
+      "sha256": "abfa65f4f73d0fab61667ad7a29ed1f96d143c2c7a8323ab04d0697d858a4d90",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-serif-bengali-bengali-400-normal.woff2",
+      "status": "PASS",
+      "bytes": 58720,
+      "sha256": "b2526e720328996ce10e17f7db2eb2b6a305a68cb9fea6c719d1ade18404c2c5",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-serif-bengali-bengali-500-normal.woff2",
+      "status": "PASS",
+      "bytes": 69816,
+      "sha256": "d0f1a7611e7ec04b8d15248b393c787583fc960242166d16c4e0909614d0b830",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-serif-bengali-bengali-600-normal.woff2",
+      "status": "PASS",
+      "bytes": 70824,
+      "sha256": "c494ff3edf5fb25102e2add0bfdb491d873e2f2a4d944fce0b4798a6e3e6168a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/source-serif-4-latin-standard-normal.woff2",
+      "status": "PASS",
+      "bytes": 122360,
+      "sha256": "f2ea9c12d2fe9bd3a9589b02ad2c0909da88f30938c91adc838c4f4098f9f9e0",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/typography.css",
+      "status": "PASS",
+      "bytes": 6238,
+      "sha256": "714e5e9c7b751508b9cd5bb3864546bac342225b42ca3cf1064936e3aeff7af5",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/typography.tokens.json",
+      "status": "PASS",
+      "bytes": 2527,
+      "sha256": "1b4fbfa846ecb5443b7970125ce96c86e5c3b1682e69723a721f6962864a91b2",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/logo.png",
+      "status": "PASS",
+      "bytes": 218020,
+      "sha256": "a9513b9c17a4e9e303ea5b9483546366f9648a9dfb11bb8691d1fbb297d48da8",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/offline-worker.js",
+      "status": "PASS",
+      "bytes": 5878,
+      "sha256": "76c7ae798e96a7bb7f7d58e885dc78633cc611dcfa7ee7afb8373a579728239e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/LICENSE.txt",
+      "status": "PASS",
+      "bytes": 1071,
+      "sha256": "b5b1f1da112d18ea2147decfd48ddc1bf2b5aeb6c265381579340e95b15a2bb2",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/SOURCE.json",
+      "status": "PASS",
+      "bytes": 1020,
+      "sha256": "14d0e168454fb9ab31be9b76b36035e803138a407fbe94f3dfca148ec7dffead",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/archive.svg",
+      "status": "PASS",
+      "bytes": 339,
+      "sha256": "bde81c0c44e80a7b8bf97f29ec11488c1b48998f2f74b2eb29e13ef8c1975e75",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/book-open.svg",
+      "status": "PASS",
+      "bytes": 396,
+      "sha256": "b38cdb3a15dcf00cfa4811e318b021e25c6a87b47acbb11888e16d107a5642da",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/compass.svg",
+      "status": "PASS",
+      "bytes": 402,
+      "sha256": "00c7e42415f795fcea90bd9dc0b2c8266b4e9601d2937cb122cd03b7e9e9e198",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/gear.svg",
+      "status": "PASS",
+      "bytes": 1977,
+      "sha256": "5c0cb3ba307c72babf78d952d9140c682ff30307fedc7fbb87c9a293c1e2fd64",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/house.svg",
+      "status": "PASS",
+      "bytes": 356,
+      "sha256": "180e9259e99e23da197b59b19394d006d6a5d33e384cc2b9c8381cb0214a5716",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/stack.svg",
+      "status": "PASS",
+      "bytes": 483,
+      "sha256": "ee9eaaeb345e8a28c9662cf8a59147cb86080bd922e41f143444189e0116ea7e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/star.svg",
+      "status": "PASS",
+      "bytes": 810,
+      "sha256": "165cd96e51d60442fb9c7aa89592fa6ef28f22d18368c85771be302c2e977101",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/maison-theme.css",
+      "status": "PASS",
+      "bytes": 14647,
+      "sha256": "6ed8acd85b9447f72c3ae8f5734b9d86463c6f3762136c0923134a307b6d9eff",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/svg/alpana-halo.svg",
+      "status": "PASS",
+      "bytes": 11826,
+      "sha256": "b1acf5437f39b7dddb47bbc22de9457aca230c907428e59859261327192b5ca9",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/svg/jali-panel.svg",
+      "status": "PASS",
+      "bytes": 11926,
+      "sha256": "d6845867ec0bf8ca876288ebd212fcdd146167442bcddf9ed9cdaaa89efbca6c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/svg/kantha-tile.svg",
+      "status": "PASS",
+      "bytes": 510,
+      "sha256": "f3932a2dabedc4783ef234a84f9fbde8caba92ee55c81c13584c6dbaba9d2188",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/svg/peacock-crest.svg",
+      "status": "PASS",
+      "bytes": 20511,
+      "sha256": "7b9e0598b0887853e8d36f827f555a6416bf1f69bbb419d0c2dcccaba0fe35d4",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/tokens.css",
+      "status": "PASS",
+      "bytes": 1274,
+      "sha256": "ec442a9e29b2722101170074700621aaa27d7f160edf212a2b0de3d358d5b411",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/tokens.json",
+      "status": "PASS",
+      "bytes": 3884,
+      "sha256": "2d331f41ad922e8875ffa6eeb1dd034c4b656f42226f9d3b63bd4fc74f36fd7c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/qrcode-generator-LICENSE.txt",
+      "status": "PASS",
+      "bytes": 1094,
+      "sha256": "50999ee9974fa6c9cad0c4215252fafabeba4948bc4ac13982ade086406d8fc2",
+      "immutable_cache": true
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "maintenance": {
+    "maintenance_last_success": {
+      "commit": "e67fb042685b38cf86414dfbf30a012fa107ec6c",
+      "counts": {
+        "processed": 0,
+        "retention": {
+          "dry_run": false,
+          "eligible": {
+            "devices": 0,
+            "receipts": 0,
+            "sessions": 0,
+            "action_tokens": 0,
+            "mail_payloads": 0,
+            "audit_outcomes": 0,
+            "support_payloads": 0,
+            "abandoned_signups": 0
+          },
+          "time_budget_exhausted": false
+        },
+        "rate_counters": {
+          "deleted": 1
+        },
+        "expired_exports": {
+          "failed": 0,
+          "cleaned": 0
+        },
+        "cache_references": {
+          "deleted": 0
+        }
+      },
+      "run_id": "dc17f735-2582-4923-b558-1426a248402b",
+      "source": "scheduled",
+      "outcome": "success",
+      "error_code": "",
+      "started_at": "2026-11-19T21:05:14.766440Z",
+      "finished_at": "2026-11-19T21:05:14.860236Z"
+    },
+    "lease_clear": true,
+    "read_only": true
+  },
+  "invariants": {
+    "status": "PASS",
+    "read_only": true,
+    "book": {
+      "state": "draft",
+      "live_revision_id": null,
+      "version": 42,
+      "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+      "paragraphs": 32
+    },
+    "counts": {
+      "maison_invoice": 0,
+      "maison_invoice_revision": 0,
+      "maison_finance_number_sequence": 0,
+      "maison_offer": 0
+    },
+    "credential_copy": false
+  },
+  "legacy_https": 200,
+  "legacy_mutations": false
+}
