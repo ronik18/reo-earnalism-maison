@@ -712,7 +712,7 @@ def service_worker(request):
         url=static(name)
         if name in {"maison/app.css","maison/app.js","maison/peacock/maison-theme.css"}:url+="?v="+content_hash[:12]
         assets.append(url)
-    assets += ["/en/offline/","/bn/offline/"]
+    assets += ["/en/offline/"]
     source=(root/"offline-worker.js").read_text()
     digest.update(json.dumps(assets).encode());digest.update(source.encode())
     version=digest.hexdigest()[:16]

@@ -25,5 +25,9 @@
     "result": "PASS",
     "run": 44618212875,
     "commit": "fdec6ad43e84f70b3c0e942cef304fd2a0fabb45"
+  },
+  "unified_offline_shell_tests": {
+    "tests": 6,
+    "result": "PASS"
   }
 }

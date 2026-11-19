@@ -23,3 +23,7 @@ class UnifiedLibraryJourneyTests(TestCase):
  def test_old_bengali_signin_and_notices_use_same_english_journey(self):
   for route in ['sign-in','sign-up','privacy','terms','contact','settings','series']:
    r=self.client.get('/bn/'+route+'/',follow=True);self.assertEqual(r.status_code,200);self.assertEqual(r['Content-Language'],'en');self.assertContains(r,'data-ui-locale="en"');self.assertNotContains(r,'aria-label="Interface language"')
+
+ def test_service_worker_precaches_only_the_shared_english_shell(self):
+  response=self.client.get('/maison-sw.js');self.assertEqual(response.status_code,200)
+  source=response.content.decode();self.assertIn('/en/offline/',source);self.assertNotIn('/bn/offline/',source)

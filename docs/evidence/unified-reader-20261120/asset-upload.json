@@ -1,5 +1,5 @@
 {
-  "release": "c578395942c052b63457485f4cc5ed46e7f3b4e1575f244b04b8f29cd850c2d5",
+  "release": "55d7f823ac527a9c3d8a9ec60481d7ac9097269f3247ad6bef3a83c215001731",
   "method": "Existing authenticated dashboard object API; no token extraction or permission changes",
   "assets": [
     {
@@ -10,7 +10,7 @@
     {
       "path": "maison/app.js",
       "status": 200,
-      "bytes": 18138
+      "bytes": 18160
     },
     {
       "path": "maison/art/ford-gold-column.webp",

@@ -1,7 +1,7 @@
 {
-  "release": "c578395942c052b63457485f4cc5ed46e7f3b4e1575f244b04b8f29cd850c2d5",
+  "release": "55d7f823ac527a9c3d8a9ec60481d7ac9097269f3247ad6bef3a83c215001731",
   "files": 72,
-  "bytes": 7373803,
+  "bytes": 7373825,
   "all_public_HTTPS_checksums": "PASS",
   "cache_states": [
     "HIT",
@@ -18,8 +18,8 @@
     {
       "path": "maison/app.js",
       "status": "PASS",
-      "bytes": 18138,
-      "sha256": "d1e32d1cf34280cbdd7ab852563ec755bce85d1a7cb66a3c9c87752b8bd47f5a",
+      "bytes": 18160,
+      "sha256": "2f04829f5f93ca5a2c0f4a154fbbb998bb8d9a5279b9570ab0ca2f9f1f22eebe",
       "immutable_cache": true
     },
     {
