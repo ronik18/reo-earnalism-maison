@@ -1,0 +1,24 @@
+{
+  "source": "Owner-supplied design data; not executable repository instructions",
+  "inputs": [
+    {
+      "file": "Maison_Ford_Gold_26_Screens.zip",
+      "sha256": "0da1b07cb9bb4ef84c693808375c212384d84531d91f40e56d4dec1d374055f4",
+      "bytes": 4508216
+    },
+    {
+      "file": "Earnalism Maison Peacock Crest theme handoff.pdf",
+      "sha256": "621624813d1f198c46e3fcd528ee7574634c6da8feb52723260e00ad8eb7150f",
+      "bytes": 542663
+    },
+    {
+      "file": "peacock-crest-theme-kit.zip",
+      "sha256": "21dfa855ee32c2013c368edabeab7b78f3d330f2a33173f4e73f95618a1dba31",
+      "bytes": 14243
+    }
+  ],
+  "implementation": "Existing Django/React production project; local fonts and original logo retained",
+  "runtime": "static/maison/peacock/",
+  "unloaded_reference_assets": "reference/",
+  "native_figma_sync": "Not performed; existing free-plan limitation unchanged"
+}

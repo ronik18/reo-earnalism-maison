@@ -1,0 +1,19 @@
+{
+  "scope": "PDF-only static TrueType instances derived offline from existing licensed platform fonts; no external download",
+  "fonts": [
+    {
+      "source": "dm-sans-latin-standard-normal.woff2",
+      "target": "MaisonSansLatin.ttf",
+      "sha256": "45e21f889193388df976d4759ee82b3fa68834ad0befd358d480aff10b6745e5",
+      "bytes": 33084,
+      "glyphs": 222
+    },
+    {
+      "source": "noto-sans-bengali-bengali-400-normal.woff2",
+      "target": "MaisonSansBengali.ttf",
+      "sha256": "5fd63034364315aa616bbc78cab1d313cc785de0ab81181bbffa8a08f02df463",
+      "bytes": 111048,
+      "glyphs": 123
+    }
+  ]
+}

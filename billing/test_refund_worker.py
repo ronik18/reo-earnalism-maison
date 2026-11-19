@@ -38,8 +38,8 @@ class RefundWorkerTests(TestCase):
         order,row,job=self.approved(3000)
         with patch('billing.refunds.RazorpayClient') as provider:
             provider.return_value.create_refund.return_value=self.response(row,'pending')
-            with self.assertRaises(DomainError) as error:process_refund_job(job)
-            self.assertEqual(error.exception.code,'refund_pending')
+            pending=process_refund_job(job)
+            self.assertTrue(pending['awaiting_provider_confirmation']);self.assertEqual(pending['status'],'pending')
             provider.return_value.fetch_refund.return_value=self.response(row)
             process_refund_job(job)
             provider.return_value.create_refund.assert_called_once();provider.return_value.fetch_refund.assert_called_once()

@@ -25,14 +25,19 @@ def own_subscription(user,subscription_id,lock=False):
 
 def queue_intent(user,row,action):
     status='blocked';error='provider_token_identity_missing' if action=='mandate.revoke' else 'provider_not_qualified'
-    if action=='subscription.cancel':
+    if action in ['subscription.cancel','mandate.revoke']:
         try:
             from .checkout import qualified_mode
             mode,_,_=qualified_mode()
-            if row.provider=='razorpay' and row.provider_subscription_id and row.plan.offer.test_only==(mode=='test'):
+            if action=='subscription.cancel' and row.provider=='razorpay' and row.provider_subscription_id and row.plan.offer.test_only==(mode=='test'):
+                status='pending';error=''
+            if action=='mandate.revoke' and row.provider=='razorpay' and row.identity_verified_at and row.provider_mode==mode and row.provider_customer_id and row.provider_token_id:
                 status='pending';error=''
         except DomainError:pass
-    OutboxJob.objects.get_or_create(dedupe_key=f'{action}:{row.pk}',defaults={'kind':'subscription_reconcile','actor':user,'payload':{'action':action,'resource_id':str(row.pk),'provider_mode':getattr(settings,'RAZORPAY_MODE','test'),'provider':row.provider,'provider_resource_id':row.provider_subscription_id if action=='subscription.cancel' else row.provider_mandate_id},'not_before':timezone.now(),'status':status,'error_code':error})
+    job,created=OutboxJob.objects.get_or_create(dedupe_key=f'{action}:{row.pk}',defaults={'kind':'subscription_reconcile','actor':user,'payload':{'action':action,'resource_id':str(row.pk),'provider_mode':getattr(settings,'RAZORPAY_MODE','test'),'provider':row.provider,'provider_resource_id':row.provider_subscription_id if action=='subscription.cancel' else row.provider_mandate_id},'not_before':timezone.now(),'status':status,'error_code':error})
+    if not created and action=='mandate.revoke' and status=='pending' and job.status=='blocked' and job.error_code=='provider_token_identity_missing' and not job.payload.get('provider_revoke_attempted'):
+        job.status='pending';job.error_code='';job.not_before=timezone.now();job.save(update_fields=['status','error_code','not_before'])
+    return job
 
 def cancel_existing(user,subscription_id,data,base,key):
     if data.get('at_period_end') is not True:
@@ -110,3 +115,59 @@ def revoke(request,mandate_id):
 def verify(request,subscription_id):
     own_subscription(request.user,subscription_id)
     raise DomainError('feature_disabled','Subscription provider verification is not qualified.',409)
+
+
+def mandate_identity_data(row):
+    job=OutboxJob.objects.filter(pk=row.identity_verification_job_id).first() if row.identity_verification_job_id else None
+    return {'mandate_id':str(row.pk),'version':row.version,'verified':bool(row.identity_verified_at),
+        'provider_customer_id':row.provider_customer_id or None,'provider_token_id':row.provider_token_id or None,
+        'provider_payment_id':row.provider_payment_id or None,'provider_invoice_id':row.provider_invoice_id or None,
+        'provider_mode':row.provider_mode or None,'identity_verified_at':iso(row.identity_verified_at),
+        'evidence_ref':row.identity_evidence_ref or None,'pending_job_id':str(job.pk) if job else None,'pending':bool(job and job.status in ['pending','claimed'])}
+
+
+def request_mandate_identity(actor,mandate_id,data,base,key):
+    from .razorpay import provider_id
+    from .checkout import qualified_mode
+    from django.db import transaction
+    from core.api import public_uuid
+    if not actor.is_active or not actor.is_staff or not actor.has_perm('billing.change_mandate'):
+        raise DomainError('permission_denied','Mandate administration permission is required.',403)
+    for field,prefix in [('provider_customer_id','cust'),('provider_token_id','token'),('provider_payment_id','pay')]:provider_id(data.get(field),prefix)
+    import re
+    if not isinstance(data.get('evidence_ref'),str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_./:-]{0,159}',data['evidence_ref']):
+        raise DomainError('validation_error','Use a bounded private evidence reference.',422)
+    mode,_,_=qualified_mode()
+    def execute():
+        sub=Subscription.objects.select_for_update().select_related('plan__offer').filter(mandate_id=public_uuid(mandate_id)).first()
+        if not sub:raise DomainError('not_found','Owned subscription association is required.',404)
+        row=Mandate.objects.select_for_update().get(pk=sub.mandate_id)
+        if row.version!=base:raise DomainError('version_conflict','Mandate identity changed.',412,mandate_identity_data(row))
+        if row.provider!='razorpay' or sub.provider!='razorpay' or sub.plan.offer.test_only!=(mode=='test') or not sub.provider_subscription_id:
+            raise DomainError('provider_not_qualified','The existing agreement must match the configured provider mode.',409)
+        if row.identity_verified_at:
+            if (row.provider_customer_id,row.provider_token_id,row.provider_payment_id,row.provider_mode)!=(data['provider_customer_id'],data['provider_token_id'],data['provider_payment_id'],mode):
+                raise DomainError('provider_identity_immutable','A verified mandate identity cannot be reassigned.',409)
+            return 202,mandate_identity_data(row),row.version
+        job=OutboxJob.objects.create(kind='subscription_reconcile',actor=actor,dedupe_key=f'mandate.bind:{row.pk}:{key}',not_before=timezone.now(),payload={
+            'action':'mandate.bind','resource_id':str(row.pk),'subscription_id':str(sub.pk),'member_id':str(row.user.public_id),
+            'provider_subscription_id':sub.provider_subscription_id,'provider_mode':mode,**data})
+        row.identity_verification_job_id=job.pk;row.version+=1;row.save(update_fields=['identity_verification_job_id','version'])
+        audit(actor,'mandate.identity_verification_requested',row,{'job_id':str(job.pk),'evidence_ref':data['evidence_ref']})
+        return 202,mandate_identity_data(row),row.version
+    return apply_operation(actor,key,'mandate.identity_intake',{'mandate_id':str(mandate_id),'version':base,**data},execute)
+
+
+@json_endpoint(('GET','POST'))
+def provider_identity(request,mandate_id):
+    require_fresh(request)
+    if not request.user.is_staff or not request.user.has_perm('billing.change_mandate'):
+        raise DomainError('permission_denied','Mandate administration permission is required.',403)
+    if getattr(settings,'STAFF_MFA_REQUIRED',not settings.LOCAL) and not getattr(request.user,'staff_mfa_verified',False):
+        raise DomainError('mfa_required','Verify staff MFA before viewing provider identities.',403)
+    if request.method=='GET':
+        row=Mandate.objects.filter(pk=mandate_id).first()
+        if not row:raise DomainError('not_found','Mandate not found.',404)
+        return api_response(mandate_identity_data(row),version=row.version)
+    status,result=request_mandate_identity(request.user,mandate_id,body(request,'MandateProviderIdentityInput'),expected_version(request),operation_key(request))
+    return api_response(result,status,version=result['version'])

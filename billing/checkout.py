@@ -106,6 +106,9 @@ def process_payment_event(job):
     if event.body_sha256!=job.payload.get('body_sha256'):
         raise DomainError('event_payload_mismatch','Event receipt identity changed.',409)
     if event.status=='applied':return {'event_id':str(event.id),'status':'applied'}
+    if job.payload.get('event_name')=='token.cancelled':
+        from .subscription_worker import process_token_cancelled_event
+        return process_token_cancelled_event(event,job.payload)
     order=Order.objects.filter(provider='razorpay',provider_order_id=job.payload.get('provider_order_id')).select_related('offer').first()
     if not order:raise DomainError('payment_order_pending','The merchant order must be reconciled before its event.',503)
     reconcile_payment(order,job.payload['payment_id'],event_id=event.provider_event_id,event_hash=event.body_sha256)

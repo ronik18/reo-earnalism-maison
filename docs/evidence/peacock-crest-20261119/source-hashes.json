@@ -1,0 +1,8 @@
+{
+  "templates/web/base.html": "493bf502ab5c313c97b09002e695a659b70a1ac792927cd08618f8b378dda624",
+  "static/maison/peacock/tokens.css": "ec442a9e29b2722101170074700621aaa27d7f160edf212a2b0de3d358d5b411",
+  "static/maison/peacock/maison-theme.css": "2824a2aef29d0e239470cae81c82df15ebaf729b897ef1ebfe6ce43f8b0c0e4d",
+  "static/maison/app.css": "2039d2285edd78190fe762fa6350aea3b03e3ab855355b6dac3d9ac0ff1afaf7",
+  "static/maison/fonts/typography.css": "714e5e9c7b751508b9cd5bb3864546bac342225b42ca3cf1064936e3aeff7af5",
+  "static/maison/logo.png": "a9513b9c17a4e9e303ea5b9483546366f9648a9dfb11bb8691d1fbb297d48da8"
+}

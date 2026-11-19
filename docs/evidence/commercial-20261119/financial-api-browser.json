@@ -1,0 +1,107 @@
+{
+  "scope": "Actual local finance API using a reused qualified local member session across engines, immutable documents, original synthetic capture/refunds and retained PDF byte delivery; no real provider, tax approval, charge/refund/mandate or book mutation",
+  "results": [
+    {
+      "engine": "chromium-desktop",
+      "locale": "en",
+      "creditPDF": {
+        "status": 200,
+        "bytes": 15559,
+        "sha256": "fcfded90d9b1f9fcc70bcab10ec85b71044b1a3966feabc45ffbeb30d0a34ae5",
+        "type": "application/pdf",
+        "cache": "private, no-store",
+        "prefix": "%PDF-"
+      },
+      "invoicePDF": {
+        "status": 200,
+        "bytes": 14626,
+        "sha256": "2bd06f3ab25d0a30263e4adeab24324c33775956d59d56a07c16595d5480b708",
+        "type": "application/pdf",
+        "cache": "private, no-store",
+        "prefix": "%PDF-"
+      },
+      "reissue": {
+        "revision": 5,
+        "distinct_private_path": true,
+        "identical_pdf_bytes": true,
+        "amount_unchanged": true
+      },
+      "status": "PASS",
+      "realOwnedCursorPages": true,
+      "invoiceReference": true,
+      "historicalPaidTotalsPreserved": true,
+      "staleRevisionRejected": true,
+      "explicitReviewBeforeDownload": true,
+      "crossOwnerDetailsAndDownloadsDenied": true,
+      "crossOwnerCursorDenied": true
+    },
+    {
+      "engine": "webkit-mobile",
+      "locale": "bn",
+      "creditPDF": {
+        "status": 200,
+        "bytes": 15559,
+        "sha256": "fcfded90d9b1f9fcc70bcab10ec85b71044b1a3966feabc45ffbeb30d0a34ae5",
+        "type": "application/pdf",
+        "cache": "private, no-store",
+        "prefix": "%PDF-"
+      },
+      "invoicePDF": {
+        "status": 200,
+        "bytes": 14626,
+        "sha256": "2bd06f3ab25d0a30263e4adeab24324c33775956d59d56a07c16595d5480b708",
+        "type": "application/pdf",
+        "cache": "private, no-store",
+        "prefix": "%PDF-"
+      },
+      "reissue": {
+        "revision": 6,
+        "distinct_private_path": true,
+        "identical_pdf_bytes": true,
+        "amount_unchanged": true
+      },
+      "status": "PASS",
+      "realOwnedCursorPages": true,
+      "invoiceReference": true,
+      "historicalPaidTotalsPreserved": true,
+      "staleRevisionRejected": true,
+      "explicitReviewBeforeDownload": true,
+      "crossOwnerDetailsAndDownloadsDenied": true,
+      "crossOwnerCursorDenied": true
+    },
+    {
+      "engine": "firefox-desktop",
+      "locale": "en",
+      "creditPDF": {
+        "status": 200,
+        "bytes": 15559,
+        "sha256": "fcfded90d9b1f9fcc70bcab10ec85b71044b1a3966feabc45ffbeb30d0a34ae5",
+        "type": "application/pdf",
+        "cache": "private, no-store",
+        "prefix": "%PDF-"
+      },
+      "invoicePDF": {
+        "status": 200,
+        "bytes": 14626,
+        "sha256": "2bd06f3ab25d0a30263e4adeab24324c33775956d59d56a07c16595d5480b708",
+        "type": "application/pdf",
+        "cache": "private, no-store",
+        "prefix": "%PDF-"
+      },
+      "reissue": {
+        "revision": 7,
+        "distinct_private_path": true,
+        "identical_pdf_bytes": true,
+        "amount_unchanged": true
+      },
+      "status": "PASS",
+      "realOwnedCursorPages": true,
+      "invoiceReference": true,
+      "historicalPaidTotalsPreserved": true,
+      "staleRevisionRejected": true,
+      "explicitReviewBeforeDownload": true,
+      "crossOwnerDetailsAndDownloadsDenied": true,
+      "crossOwnerCursorDenied": true
+    }
+  ]
+}

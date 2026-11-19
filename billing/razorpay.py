@@ -33,7 +33,7 @@ def provider_id(value,prefix):
 class RazorpayClient:
     def __init__(self):self.mode,self.key_id,self.secret=configuration()
     def request(self,method,path,payload=None):
-        if method not in {'GET','POST'} or not path.startswith('/') or '\n' in path or '\r' in path:
+        if method not in {'GET','POST','PUT','DELETE'} or not path.startswith('/') or '\n' in path or '\r' in path:
             raise DomainError('invalid_provider_request','Invalid provider operation.',422)
         raw=json.dumps(payload,separators=(',',':')).encode() if payload is not None else None
         headers={'Authorization':'Basic '+base64.b64encode((self.key_id+':'+self.secret).encode()).decode(),'Accept':'application/json','Content-Type':'application/json'}
@@ -52,7 +52,9 @@ class RazorpayClient:
                 if size>1048576:raise ValueError('provider response too large')
                 parts.append(block)
             if not 200<=response.status<300:
-                raise DomainError('provider_request_failed','Merchant request was not accepted; reconcile before retrying mutations.',503 if response.status>=500 or response.status==429 else 422)
+                error=DomainError('provider_request_failed','Merchant request was not accepted; reconcile before retrying mutations.',503 if response.status>=500 or response.status==429 else 422)
+                error.provider_http_status=response.status
+                raise error
             data=json.loads(b''.join(parts))
             if not isinstance(data,dict):raise ValueError('not an object')
             return data
@@ -76,6 +78,10 @@ class RazorpayClient:
         else:raise DomainError('provider_search_incomplete','Merchant search exceeded its safe bound; reconciliation requires review.',503)
         if len(found)>1:raise DomainError('provider_identity_ambiguous','Multiple merchant orders require review.',409)
         return found[0] if found else None
+    def delete_customer_token(self,customer_id,token_id):return self.request('DELETE','/customers/'+provider_id(customer_id,'cust')+'/tokens/'+provider_id(token_id,'token'))
+    def fetch_customer_token(self,customer_id,token_id):return self.request('GET','/customers/'+provider_id(customer_id,'cust')+'/tokens/'+provider_id(token_id,'token'))
+    def cancel_customer_token(self,customer_id,token_id):return self.request('PUT','/customers/'+provider_id(customer_id,'cust')+'/tokens/'+provider_id(token_id,'token')+'/cancel',{})
+    def fetch_invoice(self,invoice_id):return self.request('GET','/invoices/'+provider_id(invoice_id,'inv'))
     def fetch_subscription(self,subscription_id):return self.request('GET','/subscriptions/'+provider_id(subscription_id,'sub'))
     def cancel_subscription(self,subscription_id):return self.request('POST','/subscriptions/'+provider_id(subscription_id,'sub')+'/cancel',{'cancel_at_cycle_end':True})
     def fetch_payment(self,payment_id):return self.request('GET','/payments/'+provider_id(payment_id,'pay'))

@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.models import Q,Prefetch
 from django.http import FileResponse
 from django.utils import timezone
-from core.api import DomainError,api_response,json_endpoint,json_body
+from core.api import DomainError,api_response,json_endpoint,json_body,expected_version
 from core.services import audit
 from .models import Invoice,PaymentAllocation
 from .invoice_models import InvoiceArtifact
@@ -27,7 +27,7 @@ def iso(value):
 def owned_queryset(user):
     if not user.is_active:
         raise DomainError('authentication_required','Sign in to continue.',401)
-    return Invoice.objects.filter(Q(order__user=user)|Q(subscription__user=user)).select_related('order','subscription','subscription__plan').prefetch_related(
+    return Invoice.objects.filter(Q(order__user=user)|Q(subscription__user=user)).select_related('order','subscription','subscription__plan','current_revision').prefetch_related(
         Prefetch('paymentallocation_set',queryset=PaymentAllocation.objects.select_related('payment','payment__order').prefetch_related('payment__refunds').order_by('payment__captured_at','id')))
 
 
@@ -67,7 +67,7 @@ def invoice_data(row):
             'refund_status':'full' if paid and refunded>=paid else ('partial' if refunded else 'none'),
             'amount':{'amount_minor':row.amount_minor,'currency':row.currency},'paid_amount_minor':paid,
             'period_start':iso(row.period_start),'period_end':iso(row.period_end),'issued_at':iso(row.issued_at),
-            'paid_at':iso(paid_at),'revision':row.revision}
+            'paid_at':iso(paid_at),'revision':row.current_revision.sequence if row.current_revision_id else row.revision,'number':row.current_revision.number if row.current_revision_id else row.number}
 
 
 def bind_artifact(actor,invoice_id,*,storage_key,sha256,bytes,issuer_version):
@@ -104,6 +104,11 @@ def bind_artifact(actor,invoice_id,*,storage_key,sha256,bytes,issuer_version):
 
 
 def ready_artifact(row):
+    if row.current_revision_id and row.current_revision.storage_key:
+        from types import SimpleNamespace
+        doc=row.current_revision
+        return SimpleNamespace(storage_key=doc.storage_key,sha256=doc.document_sha256,bytes=doc.bytes,snapshot_sha256=doc.snapshot_sha256)
+    if row.current_revision_id and (row.current_revision.sequence!=row.revision or row.current_revision.approved_by_id is not None):raise DomainError('invoice_not_ready','Current invoice revision has no approved PDF.',409)
     artifact=InvoiceArtifact.objects.filter(invoice=row).first()
     if not artifact or artifact.snapshot_sha256!=row.document_sha256:
         raise DomainError('invoice_not_ready','This invoice has no approved rendered document yet.',409)
@@ -128,6 +133,8 @@ def download_invoice(request,invoice_id):
     if request.body:
         json_body(request,set())
     row=own_invoice(request.user,invoice_id)
+    selected_revision=row.current_revision.sequence if row.current_revision_id else row.revision
+    if request.headers.get('If-Match') and expected_version(request)!=selected_revision:raise DomainError('version_conflict','Invoice document changed.',412)
     artifact=ready_artifact(row)
     from library import storage
     now=timezone.now()
@@ -140,7 +147,7 @@ def download_invoice(request,invoice_id):
             'device':str(getattr(getattr(request,'device',None),'id','')),'sha256':artifact.sha256},salt=GRANT_SALT,compress=True)
         url=request.build_absolute_uri(f'/api/v1/commerce/invoices/{row.id}/file?token={token}')
     response=api_response({'url':url,'expires_at':iso(now+timedelta(seconds=GRANT_SECONDS)),
-        'sha256':artifact.sha256,'bytes':artifact.bytes,'content_type':'application/pdf'})
+        'sha256':artifact.sha256,'bytes':artifact.bytes,'content_type':'application/pdf','revision':selected_revision,**({'document_id':str(row.current_revision_id)} if row.current_revision_id else {})})
     response['Referrer-Policy']='no-referrer'
     return response
 

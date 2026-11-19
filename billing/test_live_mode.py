@@ -15,7 +15,7 @@ from .refunds import process_refund_job
 class LiveModeTests(TestCase):
     setUp=fixtures.BillingStateMachineTests.setUp
     def policy(self):
-        return {'approved':True,'version':'fixture-finance-v1','issuer':{'legal_name':'Fixture entity','address':'Fixture address','country':'IN'},'numbering':{'scheme':'prefix_uuid','prefix':'FIXTURE'},'offer_tax':{str(self.offer.id):{'offer_version':self.offer.version,'territory':'IN','currency':'INR','price_minor':self.offer.price_minor,'basis':'inclusive','tax_minor':1000,'label':'Fixture approved tax','evidence_ref':'internal:test-only-finance-decision'}}}
+        return {'approved':True,'version':'fixture-finance-v1','issuer':{'legal_name':'Fixture entity','address':'Fixture address','country':'IN'},'numbering':{'scheme':'prefix_uuid','prefix':'FIXTURE','applicability':'reviewed_non_gst','evidence_ref':'internal:fixture-numbering-decision'},'offer_tax':{str(self.offer.id):{'offer_version':self.offer.version,'territory':'IN','currency':'INR','price_minor':self.offer.price_minor,'basis':'inclusive','tax_minor':1000,'label':'Fixture approved tax','evidence_ref':'internal:test-only-finance-decision'}}}
     def create(self):
         self.offer.test_only=False;self.offer.save()
         with override_settings(MERCHANT_FINANCE_POLICY=self.policy()):

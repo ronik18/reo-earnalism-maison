@@ -1,0 +1,27 @@
+/* Earnalism Maison · Peacock Crest theme tokens */
+:root{
+  /* colour */
+  --plum-900:#191216; --plum-800:#2A2027; --plum-700:#352831; --plum-grey:#57424A;
+  --ivory:#FAF2E4; --rose-grey:#D0C2BF; --brass:#D7BA82; --rose:#894353;
+  --ford-gold:#B99A57; --parchment:#F5EDE0; --ink:#2B2025;
+  --rose-light:#E3A6B2;      /* error text and borders on dark */
+  --muted:#8A7A7E;           /* disabled text on dark */
+  --rose-hover-top:#A05A6A; --rose-hover-bottom:#94505F; --rose-pressed:#7D3C4B;
+  --divider-gold:rgba(185,154,87,.35);
+  /* type */
+  --font-display:'Cormorant Garamond',Georgia,serif;
+  --font-ui:'DM Sans',system-ui,sans-serif;
+  --font-reading:'Source Serif 4',Georgia,serif;
+  --font-bengali-display:'Noto Serif Bengali',serif;
+  --font-bengali-ui:'Noto Sans Bengali',sans-serif;
+  /* spacing */
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:36px; --s-7:52px;
+  /* radii */
+  --r-input:6px; --r-nav:8px; --r-card:10px; --r-pill:999px;
+  /* chrome */
+  --header-h:72px; --header-h-phone:64px; --task-h-phone:56px;
+  --sidebar-w:200px; --rail-w:72px; --tabbar-h:82px;
+  /* focus */
+  --focus-dark:2px solid var(--brass);   /* on plum surfaces */
+  --focus-light:2px solid var(--rose);   /* on ivory surfaces: brass on ivory is 1.68:1 */
+}

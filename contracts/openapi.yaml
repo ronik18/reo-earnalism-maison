@@ -10794,6 +10794,17 @@
               "format": "uuid",
               "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
             }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^\"v[0-9]+\"$"
+            },
+            "description": "If provided, require the displayed immutable document revision; stale revision returns412."
           }
         ]
       }
@@ -14486,6 +14497,851 @@
               "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
             }
           }
+        ]
+      }
+    },
+    "/commerce/credit-notes": {
+      "get": {
+        "operationId": "listCreditNotes",
+        "summary": "listCreditNotes",
+        "tags": [
+          "Commerce"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "description": "Private memberbilling data. Existing history stays readable even when recurringcreation/charge flag isoff.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_read"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditNotePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ]
+      }
+    },
+    "/commerce/credit-notes/{credit_note_id}": {
+      "get": {
+        "operationId": "getCreditNote",
+        "summary": "getCreditNote",
+        "tags": [
+          "Commerce"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "description": "Read own immutable invoice revision",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_read"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditNote"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "credit_note_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ]
+      }
+    },
+    "/commerce/credit-notes/{credit_note_id}/download": {
+      "post": {
+        "operationId": "downloadCreditNote",
+        "summary": "Authorize private credit-note PDF download",
+        "tags": [
+          "Commerce"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "description": "Boundto currentmember; approved issuer/taxfields only. SignedURL<=120s. Missingartifact202 isnotdefined: returns409 invoice_not_ready untilrendered; no fabricatedinvoice.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_write"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivateFileGrant"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "credit_note_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ]
+      }
+    },
+    "/staff/invoices/{invoice_id}/issue": {
+      "post": {
+        "operationId": "issueInvoiceDocument",
+        "summary": "issueInvoiceDocument",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "description": "Permissioned finance/staff action with recent identity confirmation and staff MFA. Immutable identity and document history are retained.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_write"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "412": {
+            "$ref": "#/components/responses/412"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "428": {
+            "$ref": "#/components/responses/428"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "example": "\"v3\"",
+                "description": "Strong current version; repeat as If-Match on mutation."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invoice"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          },
+          {
+            "name": "invoice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinancialDocumentIssueInput"
+              }
+            }
+          }
+        },
+        "x-required-permissions": [
+          "billing.issue_financial_document"
+        ]
+      }
+    },
+    "/staff/refunds/{refund_id}/credit-note": {
+      "post": {
+        "operationId": "issueCreditNote",
+        "summary": "issueCreditNote",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "description": "Permissioned finance/staff action with recent identity confirmation and staff MFA. Immutable identity and document history are retained.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_write"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "412": {
+            "$ref": "#/components/responses/412"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "428": {
+            "$ref": "#/components/responses/428"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "201": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "example": "\"v3\"",
+                "description": "Strong current version; repeat as If-Match on mutation."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditNote"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          },
+          {
+            "name": "refund_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreditNoteIssueInput"
+              }
+            }
+          }
+        },
+        "x-required-permissions": [
+          "billing.issue_financial_document"
+        ]
+      }
+    },
+    "/staff/mandates/{mandate_id}/provider-identity": {
+      "post": {
+        "operationId": "verifyMandateProviderIdentity",
+        "summary": "verifyMandateProviderIdentity",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "description": "Permissioned finance/staff action with recent identity confirmation and staff MFA. Immutable identity and document history are retained.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_write"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "412": {
+            "$ref": "#/components/responses/412"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "428": {
+            "$ref": "#/components/responses/428"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "202": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "example": "\"v3\"",
+                "description": "Strong current version; repeat as If-Match on mutation."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MandateProviderIdentity"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          },
+          {
+            "name": "mandate_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MandateProviderIdentityInput"
+              }
+            }
+          }
+        },
+        "x-required-permissions": [
+          "billing.change_mandate"
+        ]
+      },
+      "get": {
+        "operationId": "getMandateProviderIdentity",
+        "summary": "Inspect staff-only verified mandate provider identity",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "description": "Permissioned finance/staff action with recent identity confirmation and staff MFA. Immutable identity and document history are retained.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_write"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "412": {
+            "$ref": "#/components/responses/412"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "428": {
+            "$ref": "#/components/responses/428"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "example": "\"v3\"",
+                "description": "Strong current version; repeat as If-Match on mutation."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MandateProviderIdentity"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "mandate_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "x-required-permissions": [
+          "billing.change_mandate"
         ]
       }
     }
@@ -20331,6 +21187,11 @@
           "revision": {
             "type": "integer",
             "minimum": 1
+          },
+          "number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
           }
         },
         "required": [
@@ -20345,7 +21206,8 @@
           "period_end",
           "issued_at",
           "paid_at",
-          "revision"
+          "revision",
+          "number"
         ],
         "description": "Immutable numbered financial revision with provider allocations. refund_status is derived from linked refunds/credit notes without rewriting historical paid totals; issuer/tax fields are approved configuration, not client input."
       },
@@ -20406,6 +21268,15 @@
           "content_type": {
             "type": "string",
             "maxLength": 120
+          },
+          "document_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
           }
         },
         "required": [
@@ -22138,6 +23009,312 @@
           "content_type",
           "duration_ms",
           "quality_kbps"
+        ]
+      },
+      "CreditNote": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "credit_note_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "invoice_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "refund_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "status": {
+            "type": "string",
+            "const": "issued"
+          },
+          "amount": {
+            "$ref": "#/components/schemas/Money"
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "Z$"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "invoice_number": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "credit_note_id",
+          "invoice_id",
+          "refund_id",
+          "number",
+          "status",
+          "amount",
+          "issued_at",
+          "revision",
+          "reason",
+          "invoice_number"
+        ]
+      },
+      "CreditNotePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreditNote"
+            },
+            "maxItems": 100
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1024
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "has_more": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor",
+          "has_more"
+        ]
+      },
+      "FinancialDocumentIssueInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3
+          },
+          "issuer_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "reason",
+          "issuer_version"
+        ]
+      },
+      "CreditNoteIssueInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3
+          },
+          "issuer_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "tax_minor": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9223372036854775807
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "reason",
+          "issuer_version",
+          "tax_minor",
+          "evidence_ref"
+        ]
+      },
+      "MandateProviderIdentityInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "provider_customer_id": {
+            "type": "string",
+            "pattern": "^cust_[A-Za-z0-9]{1,110}$"
+          },
+          "provider_token_id": {
+            "type": "string",
+            "pattern": "^token_[A-Za-z0-9]{1,110}$"
+          },
+          "provider_payment_id": {
+            "type": "string",
+            "pattern": "^pay_[A-Za-z0-9]{1,110}$"
+          },
+          "evidence_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_./:-]{0,159}$"
+          }
+        },
+        "required": [
+          "provider_customer_id",
+          "provider_token_id",
+          "provider_payment_id",
+          "evidence_ref"
+        ]
+      },
+      "MandateProviderIdentity": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "mandate_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "provider_customer_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provider_token_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provider_payment_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provider_invoice_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provider_mode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "test",
+                  "live"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "identity_verified_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pending_job_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pending": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "mandate_id",
+          "version",
+          "verified",
+          "provider_customer_id",
+          "provider_token_id",
+          "provider_payment_id",
+          "provider_invoice_id",
+          "provider_mode",
+          "identity_verified_at",
+          "evidence_ref",
+          "pending_job_id",
+          "pending"
         ]
       }
     },

@@ -694,6 +694,10 @@ def service_worker(request):
     from django.templatetags.static import static
     names=["maison/app.css","maison/app.js","maison/logo.png","maison/fonts/typography.css"]
     names += manifest["__assets"]
+    theme=root/"peacock"
+    if theme.is_dir():
+        names += ["maison/peacock/"+path.relative_to(theme).as_posix() for path in theme.rglob("*.svg")]
+        names += ["maison/peacock/tokens.css","maison/peacock/maison-theme.css"]
     names += ["maison/fonts/"+path.name for path in (root/"fonts").glob("*.woff2")]
     names += ["maison/art/"+path.name for path in (root/"art").iterdir() if path.suffix in {".webp",".jpg"}]
     digest=hashlib.sha256(str(getattr(django_settings,"STATIC_RELEASE_ID","")).encode())
@@ -705,7 +709,7 @@ def service_worker(request):
         content_hash=hashlib.sha256(raw).hexdigest()
         digest.update(name.encode());digest.update(content_hash.encode())
         url=static(name)
-        if name in {"maison/app.css","maison/app.js"}:url+="?v="+content_hash[:12]
+        if name in {"maison/app.css","maison/app.js","maison/peacock/maison-theme.css"}:url+="?v="+content_hash[:12]
         assets.append(url)
     assets += ["/en/offline/","/bn/offline/"]
     source=(root/"offline-worker.js").read_text()
