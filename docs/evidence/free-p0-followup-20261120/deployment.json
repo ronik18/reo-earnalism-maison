@@ -1,0 +1,75 @@
+{
+  "status": "DEPLOYED_AND_VALIDATED",
+  "application_commit": "f27d10145a284eb16f7fec19bcea6e621ac732e8",
+  "source_PR": "https://github.com/ronik18/reo-earnalism-maison/pull/8",
+  "main_CI": {
+    "run": 44592685163,
+    "conclusion": "success",
+    "backend_tests": 512,
+    "client_tests": 35
+  },
+  "services": {
+    "web": {
+      "id": "srv-dbunbd8jo6nc73akbng0",
+      "deployment": "dep-dbvkdcm0tbcc738pi4u0",
+      "status": "LIVE"
+    },
+    "maintenance": {
+      "id": "crn-dbv7bte7bikc73fpso3g",
+      "deployment": "dep-dbvkdqcipgvc73dfvt2g",
+      "status": "LIVE"
+    },
+    "archive": {
+      "id": "crn-dbv7agetlv9c7381is10",
+      "deployment": "dep-dbvke6t9el5s73a1tb5g",
+      "status": "LIVE"
+    }
+  },
+  "static_release": "ff1b3d2c1a5d59013883e94d0124e12f3a0bd5ec8daf85020dd15839cb531b8c",
+  "public_assets": {
+    "files": 72,
+    "bytes": 7374272,
+    "all_HTTPS_checksums": "PASS",
+    "all_content_types_and_immutable_cache_headers": "PASS",
+    "app_js": "MISS then HIT"
+  },
+  "asset_custody": "Prior local publisher file was unavailable. Used existing authenticated Cloudflare object upload API; no token extraction/replacement, profile import or permission changes. New public namespace only. Initial dashboard CSS upload received unchanged-byte cache metadata correction before activation.",
+  "local_changed_browser": {
+    "checks": 15,
+    "passed": 15,
+    "scope": "Actual local login/preview/full player/logout; controlled paginated responses with actual IndexedDB"
+  },
+  "live_browser": {
+    "checks": 60,
+    "passed": 60,
+    "engines": [
+      "Chromium desktop",
+      "Firefox desktop",
+      "phone WebKit"
+    ],
+    "scope": "Actual EN/BN public pages, asset binding, free destination preservation, bounded learning filters/cursors, anonymous invoice/credit-note/mandate denial and draft404"
+  },
+  "new_migrations": false,
+  "book": {
+    "state": "draft",
+    "live_revision_id": null,
+    "version": 42,
+    "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+    "paragraphs": 32
+  },
+  "book_changed": false,
+  "legacy_changed": false,
+  "legacy_HTTPS": 200,
+  "financial_provider_mutations": false,
+  "schedules_plans_backup_credentials_changed": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "limits": [
+    "Physical Android/iOS and OS-specific UAT not run; non-blocking.",
+    "No production book publication or paid merchant activation; all production financial tables read back empty.",
+    "Existing automatic cleanup/archive/restore evidence reused; no new retention run or restore drill claimed.",
+    "Broader jurisdiction operating/legal qualification,Google audience expansion,productionHA,exact-title publication and future paid acceptance remain separately tracked in PENDING_VALIDATIONS."
+  ]
+}

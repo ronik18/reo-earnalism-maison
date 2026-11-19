@@ -6,4 +6,9 @@ Local PostgreSQL suite512/512 PASS (281.540s); client35/35, TypeScript/build, Do
 
 No schema migration. Both download orders share the existing unique user/revision free row. Historic free:/platform-free: keys remain provenance; exact stored format policy determines intrinsic-free grant eligibility after rollback, while real paid grants retain authority. No finance records or provider payment operations are fabricated. New assets use immutable release `ff1b3d2c1a5d59013883e94d0124e12f3a0bd5ec8daf85020dd15839cb531b8c` (72files/7,374,272bytes).
 
-Live deployment and final public checks are recorded in the follow-up deployment receipt when complete. Protected draft,47-region policy,legacy and schedules/plans remain unchanged. Physical Android/iOS and OS-specific UAT are deferred/non-blocking. Future paid/provider activation, public book rights and broader operating qualifications remain distinct; this is not a blanket global legal or productionHA certification.
+**Live:** web,maintenance and archive all run `f27d10145a284eb16f7fec19bcea6e621ac732e8`; merged-headCI44592685163 PASS. [Deployment](deployment.json). All72 asset HTTPS hashes/types/immutable cache headers PASS; actual MISS→HIT. [60/60 live browser checks](live-browser.json) passed across Chromium desktop,Firefox desktop and phone WebKit. Final SELECT-only draft/hash/version/paragraph/financial readback unchanged; legacyHTTPS200. Only exact Maison EN/BN HTML URLs were cache-refreshed. Protected draft,47-region policy,legacy and schedules/plans remain unchanged. Physical Android/iOS and OS-specific UAT are deferred/non-blocking. Future paid/provider activation, public book rights and broader operating qualifications remain distinct; this is not a blanket global legal or productionHA certification.
+
+
+![Live desktop](live-desktop.png)
+
+![Live phone](live-phone.png)
