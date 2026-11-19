@@ -1,0 +1,2 @@
+{"status": "FAIL", "stage": "native_stream_intake", "error_code": "provider_not_configured"}
+{"temporary_permissions_added": 5, "temporary_permissions_removed": 5, "original_permissions_restored": true, "no_administrator_role_granted": true}

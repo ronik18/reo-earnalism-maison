@@ -1,0 +1,37 @@
+{
+  "status": "FAIL_RENEWAL_STALL",
+  "scope": "authenticated private technical draft, runtime4c2a4f0",
+  "mfa": "actual owner verification confirmed on refreshed Settings",
+  "initial_grant": {
+    "lifetime_seconds": 120,
+    "country": [
+      "IN"
+    ],
+    "downloadable": false
+  },
+  "initial_playback": {
+    "seconds": 21.551515,
+    "duration_seconds": 180,
+    "paused": false,
+    "ready_state": 4,
+    "media_error": null
+  },
+  "first_renewal": {
+    "grant_changed": true,
+    "playback_seconds": 66.742002,
+    "paused": false,
+    "media_error": null
+  },
+  "second_renewal": {
+    "expiry_extended_seconds": 210,
+    "current_time": 0,
+    "paused": true,
+    "ready_state": 0,
+    "media_error": null
+  },
+  "saved_progress_ms": 163260,
+  "temporary_permissions_restored": true,
+  "book_unchanged": true,
+  "source_fix": "Prime resume playback independently of metadata, seek only on actual metadata/canplay, preserve progress while warming up",
+  "fixed_runtime_acceptance": "pending"
+}
