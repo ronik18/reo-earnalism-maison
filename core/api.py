@@ -4,7 +4,7 @@ import logging
 import re
 import uuid
 from functools import wraps
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
 from django.db import DatabaseError
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,8 @@ def operation_key(request):
 
 
 def api_response(body, status=200, version=None):
-    response = JsonResponse(body, status=status, safe=isinstance(body, dict)) if status != 204 else JsonResponse({}, status=204)
+    response = JsonResponse(body, status=status, safe=isinstance(body, dict)) if status != 204 else HttpResponse(status=204)
+    if status == 204:del response["Content-Type"]
     response['Cache-Control'] = 'private, no-store'
     response['X-Request-ID'] = str(uuid.uuid4())
     if version is not None:

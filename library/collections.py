@@ -33,7 +33,7 @@ def _item_card(item,locale,territory):
     if not revision or edition.locale!=locale or not svc._live(revision):return None
     formats=svc.available_formats(revision,territory)
     if not formats:return None
-    return {'work_id':str(edition.work_id),'edition_id':str(edition.id),'title':revision.title,'subtitle':None,'creators':edition.work.creators,'locale':edition.locale,'house':edition.work.house,'formats':formats,'cover':svc._cover(revision),'access_label':'free' if any(revision.access_policy.get(fmt)=='free' for fmt in formats) else 'pass_required','availability':'available'}
+    return {'work_id':str(edition.work_id),'edition_id':str(edition.id),'title':revision.title,'subtitle':None,'creators':edition.work.creators,'locale':edition.locale,'house':edition.work.house,'formats':formats,'cover':svc._cover(revision),'access_label':'free' if svc.free_access_for_revision(revision) or any(revision.access_policy.get(fmt)=='free' for fmt in formats) else 'pass_required','availability':'available'}
 
 
 def eligible_items(collection,locale,territory):

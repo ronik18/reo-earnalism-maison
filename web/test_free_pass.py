@@ -3,6 +3,7 @@ import json
 import uuid
 from datetime import timedelta
 from types import SimpleNamespace
+from urllib.parse import urlencode, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.http import Http404
@@ -25,6 +26,17 @@ class FreePassPresentationTests(SimpleTestCase):
             self.assertIn('not charged' if locale=='en' else 'নেওয়া হচ্ছে না',html)
             self.assertNotIn('id="commerce-island"',html);self.assertNotIn('id="commerce-bootstrap"',html)
             self.assertNotIn('checkout.razorpay.com',html)
+    def test_free_signin_and_signup_preserve_safe_reader_destination(self):
+        destination='/bn/read/20000000-0000-4000-8000-000000000001/?anchor=sample&offset=3'
+        for locale in ('en','bn'):
+            html=pass_page(self.request(f'/{locale}/pass/?'+urlencode({'return_to':destination})),locale).content.decode()
+            encoded=quote(destination,safe='/')
+            self.assertIn(f'/{locale}/sign-in/?return_to={encoded}',html)
+            self.assertIn(f'/{locale}/sign-up/?return_to={encoded}',html)
+        html=pass_page(self.request('/bn/pass/?return_to=https://foreign.invalid/'),'bn').content.decode()
+        self.assertNotIn('href="https://foreign.invalid/',html)
+        self.assertIn('/bn/sign-in/?return_to=/bn/',html)
+
     def test_excluded_or_untrusted_territory_gets_no_free_offer_or_price(self):
         for territory in ('AE','CN','ZZ'):
             html=pass_page(self.request('/en/pass/',territory),'en').content.decode()

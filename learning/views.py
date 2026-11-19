@@ -1,7 +1,7 @@
 from django.conf import settings
 from core.api import json_endpoint,api_response,operation_key,expected_version
 from core.services import apply_operation,audit
-from library.views import context,page
+from library.views import context
 from library.validation import body
 from . import services as svc
 
@@ -9,7 +9,7 @@ from . import services as svc
 def tracks(request):
     request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
     locale,_=context(request)
-    return api_response(page(request,svc.list_tracks(request.user,locale),'tracks'))
+    return api_response(svc.tracks_page(request,request.user,locale,request.GET.get('kind','')))
 
 @json_endpoint()
 def track(request,track_id):
@@ -35,8 +35,8 @@ def complete(request,lesson_id):
 @json_endpoint()
 def questions(request,track_id):
     request.user.request_territory=getattr(request,'territory','IN' if settings.LOCAL else 'ZZ')
-    data=svc.interview_questions(request.user,track_id,**{k:request.GET.get(k,'') for k in ('topic','difficulty','company_style')})
-    return api_response(page(request,data,'interview:'+str(track_id)))
+    data=svc.interview_questions_page(request,request.user,track_id,**{k:request.GET.get(k,'') for k in ('topic','difficulty','company_style')})
+    return api_response(data)
 
 @json_endpoint()
 def quiz(request,quiz_id):

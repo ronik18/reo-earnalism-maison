@@ -426,3 +426,9 @@ STRINGS.update({
 })
 
 STRINGS['free_protected_learning'] = ('A free verified account is needed for protected lessons. Regional availability and learning prerequisites still apply.', 'সংরক্ষিত পাঠের জন্য বিনামূল্যের যাচাইকৃত অ্যাকাউন্ট দরকার। আঞ্চলিক প্রাপ্যতা ও শেখার পূর্বশর্ত প্রযোজ্য থাকবে।')
+
+STRINGS.update({
+    'continue_free_access': ('Continue for free', 'বিনামূল্যে এগিয়ে যান'),
+    'free_preview_help': ('Continue to check free access to this released edition. A verified account and the edition’s regional and format permissions are still required.', 'এই প্রকাশিত সংস্করণে বিনামূল্যে প্রবেশাধিকার যাচাই করতে এগিয়ে যান। যাচাইকৃত অ্যাকাউন্ট এবং সংস্করণের আঞ্চলিক ও মাধ্যমের অনুমতি প্রয়োজন।'),
+    'free_preview_offline': ('Reconnect to check free access. This preview remains available at its boundary.', 'বিনামূল্যে প্রবেশাধিকার যাচাই করতে সংযোগ ফিরিয়ে আনুন। নমুনার শেষ জায়গা বদলাবে না।'),
+})

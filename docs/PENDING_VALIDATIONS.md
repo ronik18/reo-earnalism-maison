@@ -30,6 +30,12 @@ Access is FREE for eligible released content within existing publication/territo
 
 Protected book remains draft/null live pointer/version42/32paragraphs/original SHA; actual catalog404. Legacy unchanged/HTTPS200. Physical Android/iOS and OS-specific UAT remain deferred and non-blocking. Prior native Safari evidence is reused; current phone WebKit checks are virtual. [Receipt and recovery limits](evidence/free-access-20261119/README.md), [deployment](evidence/free-access-20261119/deployment.json).
 
+## Free-path P0 engineering follow-up — 20 November 2026
+
+Implemented preview continuation without commerce queries; Pass destinations; server-side historical checkout suppression; effective Series labels; mixed-format durable grants and safe rollback; complete license pagination in Downloads and shared shell; bounded signed learning/question pagination in APIs/SSR; exact question lookup; and correct empty HTTP204 responses. **512 PostgreSQL backend tests,35 client tests,TypeScript/build and production Docker build PASS**. Fifteen changed-area desktop/phone Chromium/Firefox/WebKit browser checks passed, including actual local member login/free preview/full-player/logout and real IndexedDB preservation across controlled page2/failure responses. [Scoped evidence](evidence/free-p0-followup-20261120/README.md). No new migrations. Source promotion/deployment receipt follows the same application candidate.
+
+These fixes complete the reviewed enabled free-path engineering defects; they do not convert the remaining operating/legal facts, future paid acceptance,productionHA,Google audience expansion or exact-title publication into PASS. Physical device UAT remains deferred/non-blocking; the protected draft and legacy remain unchanged.
+
 ## Remaining — one next action each
 
 | Item | Scope and next action |

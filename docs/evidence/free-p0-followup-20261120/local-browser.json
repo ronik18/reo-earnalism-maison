@@ -1,0 +1,96 @@
+{
+  "scope": "Actual local PostgreSQL login/free preview/full player plus controlled multi-page license responses with real IndexedDB reconciliation",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "engine": "chromium",
+      "viewport": "desktop",
+      "id": "free-preview-continuation-and-destination",
+      "status": "PASS",
+      "commerceRequests": 0
+    },
+    {
+      "engine": "chromium",
+      "viewport": "phone",
+      "id": "free-preview-continuation-and-destination",
+      "status": "PASS",
+      "commerceRequests": 0
+    },
+    {
+      "engine": "chromium",
+      "id": "page-two-offline-book-retained",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "id": "partial-pagination-failure-retains-local-data",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "id": "page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "viewport": "desktop",
+      "id": "free-preview-continuation-and-destination",
+      "status": "PASS",
+      "commerceRequests": 0
+    },
+    {
+      "engine": "firefox",
+      "viewport": "phone",
+      "id": "free-preview-continuation-and-destination",
+      "status": "PASS",
+      "commerceRequests": 0
+    },
+    {
+      "engine": "firefox",
+      "id": "page-two-offline-book-retained",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "id": "partial-pagination-failure-retains-local-data",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "id": "page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "viewport": "desktop",
+      "id": "free-preview-continuation-and-destination",
+      "status": "PASS",
+      "commerceRequests": 0
+    },
+    {
+      "engine": "webkit",
+      "viewport": "phone",
+      "id": "free-preview-continuation-and-destination",
+      "status": "PASS",
+      "commerceRequests": 0
+    },
+    {
+      "engine": "webkit",
+      "id": "page-two-offline-book-retained",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "id": "partial-pagination-failure-retains-local-data",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "id": "page-errors",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import "./navigation";
+import { downloadLicensePages } from "./download-pages";
 import { flushQueue } from "./queue";
 import { api, session } from "./api";
 import { books, purge, removeBook, setIdentity, type License } from "./offline";
@@ -13,10 +14,10 @@ async function validate() {
     await flushQueue().catch(() => {});
     const local = await books(identity.member.member_id);
     if (local.length) {
-      const response = await api<{ items: License[] }>("/me/downloads");
+      const licenses = await downloadLicensePages<License>(path => api(path));
       for (const item of local)
         if (
-          !response.items.some(
+          !licenses.some(
             (l) =>
               l.license_id === item.license.license_id &&
               l.status === "active" &&

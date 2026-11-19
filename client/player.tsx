@@ -23,6 +23,7 @@ interface Boot {
   anchor_id?: string;
   start_asset_id?: string;
   start_ms?: number;
+  free_access?: boolean;
   authenticated?: boolean;
   preview?: AudioPreviewDescriptor;
   title_url?: string;
@@ -536,7 +537,7 @@ function Player({ boot }: { boot: Boot }) {
         </a></> : null}
       </div>
       <FormatSwitch open={switchOpen} onClose={() => setSwitchOpen(false)} busy={busy} status={status} onExact={() => void switchToRead()} chapterUrl={boot.reader_url + chapter.unit_id + "/"} target="reader" />
-      {boot.preview ? <><button onClick={() => setBoundaryOpen(true)}>{t("preview_end_options")}</button><PreviewBoundary editionId={boot.edition_id} format="audio" authenticated={boot.authenticated === true} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.assign(validReturnPath(boot.full_player_url || location.pathname + location.search))} /></> : null}
+      {boot.preview ? <><button onClick={() => setBoundaryOpen(true)}>{t("preview_end_options")}</button><PreviewBoundary editionId={boot.edition_id} format="audio" freeAccess={boot.free_access === true} authenticated={boot.authenticated === true} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.assign(validReturnPath(boot.full_player_url || location.pathname + location.search))} /></> : null}
       <ol className="unit-list" hidden={mini}>
         {boot.chapters.map((c, i) => (
           <li key={c.asset_id}>

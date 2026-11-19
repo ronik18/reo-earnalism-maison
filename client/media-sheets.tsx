@@ -34,8 +34,8 @@ export function MediaSheet({ open, title, onClose, children }: { open: boolean; 
 }
 
 interface Offer { offer_id: string; name: string; availability: string; price: { amount_minor: number; currency: string } | null; terms_summary: string }
-export function PreviewBoundary({ editionId, format, authenticated, titleUrl, signInUrl, passUrl, open, onClose, onRetry }: {
-  editionId: string; format: "reader" | "audio"; authenticated: boolean; titleUrl: string; signInUrl: string; passUrl: string; open: boolean; onClose: () => void; onRetry: () => void;
+export function PreviewBoundary({ editionId, format, authenticated, freeAccess = false, titleUrl, signInUrl, passUrl, open, onClose, onRetry }: {
+  editionId: string; format: "reader" | "audio"; authenticated: boolean; freeAccess?: boolean; titleUrl: string; signInUrl: string; passUrl: string; open: boolean; onClose: () => void; onRetry: () => void;
 }) {
   const [offers, setOffers] = useState<Offer[] | undefined>();
   const [status, setStatus] = useState("");
@@ -49,7 +49,7 @@ export function PreviewBoundary({ editionId, format, authenticated, titleUrl, si
   }, []);
   useEffect(() => {
     setEntitled(false);
-    if (!open || !authenticated || !online) return;
+    if (!open || !authenticated || !online || freeAccess) return;
     let active = true;
     setOffers(undefined); setStatus("");
     void Promise.all([
@@ -61,10 +61,10 @@ export function PreviewBoundary({ editionId, format, authenticated, titleUrl, si
       setEntitled(access.items.some(item => item.status === "active" && Date.parse(item.valid_from) <= Date.now() && item.formats.includes(format) && (item.edition_id === editionId || item.scope === "platform")));
     }).catch(error => { if (active) { setStatus(errorText(error)); setOffers([]); } });
     return () => { active = false; };
-  }, [open, authenticated, online, editionId, format, attempt]);
+  }, [open, authenticated, online, freeAccess, editionId, format, attempt]);
   return <MediaSheet open={open} title={t("preview_end")} onClose={onClose}>
     <p>{t("preview_boundary_help")}</p>
-    {!online ? <p className="notice">{t("preview_offline")}</p> : !authenticated ? <a className="button" href={validReturnPath(signInUrl)}>{t("sign_in")}</a> : <>
+    {!online ? <p className="notice">{t(freeAccess ? "free_preview_offline" : "preview_offline")}</p> : !authenticated ? <a className="button" href={validReturnPath(signInUrl)}>{t("sign_in")}</a> : freeAccess ? <><p>{t("free_preview_help")}</p><button onClick={onRetry}>{t("continue_free_access")}</button></> : <>
       {entitled ? <><p>{t("preview_access_retry")}</p><button onClick={onRetry}>{t("retry")}</button></> : offers === undefined ? <p role="status">{t("loading")}</p> : offers.length ? <><p>{t("preview_offer_help")}</p><ul>{offers.map(offer => <li key={offer.offer_id}><strong>{offer.name}</strong><p>{offer.terms_summary}</p></li>)}</ul><a className="button" href={validReturnPath(passUrl)}>{t("view_available_offers")}</a></> : <p>{t("preview_no_offer")}</p>}
       <p role="status">{status}</p>{status ? <button type="button" onClick={() => setAttempt(value => value + 1)}>{t("retry")}</button> : null}
     </>}

@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Count
+from core.pagination import paginate_queryset
 from django.utils import timezone
 from core.api import DomainError
 from library.services import authorize_revision, iso
@@ -28,11 +30,26 @@ def track_dto(user,track):
         try: _track(user,track.id);access='included'
         except DomainError: pass
     return {'track_id':str(track.id),'title':track.title,'locale':track.locale,'kind':track.kind,'description':track.description,
-            'duration_days':track.duration_days,'company_style':track.company_style or None,'access':access,'lesson_count':track.lessons.count()}
+            'duration_days':track.duration_days,'company_style':track.company_style or None,'access':access,
+            'lesson_count':track.page_lesson_count if hasattr(track,'page_lesson_count') else track.lessons.count()}
+
+def _track_rows(user,locale='en',kind=''):
+    if locale not in ('en','bn') or kind not in ('','learning','sde_interview'):
+        raise DomainError('invalid_filter','Choose a supported track locale and kind.',422)
+    rows=Track.objects.filter(published=True,locale=locale).exclude(access='deny').annotate(page_lesson_count=Count('lessons'))
+    if kind:rows=rows.filter(kind=kind)
+    if getattr(settings,'FREE_ACCESS_ENABLED',False) and getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ') not in settings.MAISON_PUBLICATION_TERRITORIES:return rows.none()
+    return rows
+
 
 def list_tracks(user,locale='en'):
-    if getattr(settings,'FREE_ACCESS_ENABLED',False) and getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ') not in settings.MAISON_PUBLICATION_TERRITORIES:return []
-    return [track_dto(user,t) for t in Track.objects.filter(published=True,locale=locale).exclude(access='deny').order_by('title','id')]
+    return [track_dto(user,t) for t in _track_rows(user,locale).order_by('title','id')]
+
+
+def tracks_page(request,user,locale='en',kind=''):
+    result=paginate_queryset(request,_track_rows(user,locale,kind),f'tracks:{locale}:{kind}',ordering='title')
+    result['items']=[track_dto(user,row) for row in result['items']]
+    return result
 
 def completion_is_current(record,lesson):
     if not record or record.lesson_version!=lesson.version:return False
@@ -88,14 +105,39 @@ def complete_lesson(user,lesson_id):
         record.save(update_fields=['lesson_version','quiz_version','completed_at'])
     return {'lesson_id':str(lesson.id),'completed':True,'completed_at':iso(record.completed_at),'version':lesson.version}
 
-def interview_questions(user,track_id,topic='',difficulty='',company_style=''):
+def _question_rows(user,track_id,topic='',difficulty='',company_style=''):
     track=_track(user,track_id)
+    if (not isinstance(topic,str) or len(topic)>120 or not isinstance(company_style,str) or len(company_style)>120
+        or difficulty not in ('','foundation','intermediate','advanced')):
+        raise DomainError('invalid_filter','Choose bounded supported interview filters.',422)
     qs=track.interview_questions.all()
     if topic: qs=qs.filter(topic=topic)
     if difficulty: qs=qs.filter(difficulty=difficulty)
     if company_style: qs=qs.filter(company_style=company_style)
-    return [{'question_id':str(q.id),'track_id':str(track.id),'topic':q.topic,'difficulty':q.difficulty,
-             'company_style':q.company_style or None,'prompt':q.prompt,'model_answer':q.model_answer,'rubric':q.rubric} for q in qs.order_by('id')]
+    return qs
+
+
+def _question_dto(q):
+    return {'question_id':str(q.id),'track_id':str(q.track_id),'topic':q.topic,'difficulty':q.difficulty,
+            'company_style':q.company_style or None,'prompt':q.prompt,'model_answer':q.model_answer,'rubric':q.rubric}
+
+
+def interview_questions(user,track_id,topic='',difficulty='',company_style=''):
+    return [_question_dto(q) for q in _question_rows(user,track_id,topic,difficulty,company_style).order_by('id')]
+
+
+def interview_question(user,track_id,question_id):
+    rows=_question_rows(user,track_id)
+    try:question=rows.filter(pk=question_id).first()
+    except (ValueError,ValidationError):question=None
+    if not question:raise DomainError('not_found','Question not found in this track.',404)
+    return _question_dto(question)
+
+
+def interview_questions_page(request,user,track_id,topic='',difficulty='',company_style=''):
+    result=paginate_queryset(request,_question_rows(user,track_id,topic,difficulty,company_style),f'interview:{track_id}',ordering='id')
+    result['items']=[_question_dto(row) for row in result['items']]
+    return result
 
 def quiz_public(user,quiz_id):
     try: quiz=Quiz.objects.select_related('lesson').get(pk=quiz_id)

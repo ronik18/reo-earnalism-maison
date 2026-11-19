@@ -1,4 +1,5 @@
 import { QueueRecovery } from "./recovery";
+import { downloadLicensePages } from "./download-pages";
 import { useEffect, useRef, useState } from "react";
 import { mountIsland } from "./lifecycle";
 import { api, errorText, locale, readBootstrap, session, t } from "./api";
@@ -89,11 +90,11 @@ function Downloads({ boot }: { boot: Boot }) {
       }
       setQueueMember(identity.member.member_id);
       await setIdentity(identity.member.member_id, identity.device_id);
-      const response = await api<{ items: License[] }>("/me/downloads");
-      setLicenses(response.items);
+      const remoteLicenses = await downloadLicensePages<License>(path => api(path));
+      setLicenses(remoteLicenses);
       const local = await books(identity.member.member_id);
       for (const book of local) {
-        const remote = response.items.find(
+        const remote = remoteLicenses.find(
           (l) => l.license_id === book.license.license_id,
         );
         if (
