@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "scope": "Disposable local PostgreSQL18 and original synthetic fixtures only; existing async export/delete/hold services",
+  "run_id": "5c8b8aa6",
+  "local_databases": [
+    "maison_restore_src_5c8b8aa6",
+    "maison_restore_dst_5c8b8aa6"
+  ],
+  "snapshot_sha256": "02be6ba2efba9e7426761a3cc76ef1eeaff0f86d1b8a871982d3e5979ec113fd",
+  "private_instruction_file_mode": "0600",
+  "private_instructions_sha256": "efc857fdb1174fe2e81745f15581891aa7378f0d5228ea2092268428aa3d1be8",
+  "stages": [
+    {
+      "stage": "pre_snapshot",
+      "local_only": true,
+      "manuscript": {
+        "paragraphs": 12,
+        "sha256": "a3a608e51961ac2b5df2a67080bd528f3b0b4be7f113a14f5f9ab97073e954df",
+        "revisions": [
+          "a4be4db048d31b586cf893f6c7f5c3037d6900ccdf4c798b50ba57718da10c1a",
+          "dad8145021f44634059bcb4b8955b7202746c432eb8c04d66e88d1ff2a67a204"
+        ]
+      },
+      "synthetic_accounts": 2,
+      "personal_rows_per_account": 4,
+      "private_exports": 2
+    },
+    {
+      "stage": "source_after_snapshot",
+      "completed_deletions": 1,
+      "held_deletions_blocked": 1,
+      "deleted_personal_rows": 4,
+      "deleted_export_objects": 1,
+      "held_personal_rows_preserved": 4,
+      "held_export_objects_preserved": 1,
+      "manuscript_unchanged": true,
+      "instruction_sha256": "efc857fdb1174fe2e81745f15581891aa7378f0d5228ea2092268428aa3d1be8"
+    },
+    {
+      "stage": "restored_target_after_reapplication",
+      "snapshot_reintroduced_personal_rows": 8,
+      "snapshot_reintroduced_private_exports": 2,
+      "re_erased_personal_rows": 4,
+      "re_erased_export_objects": 1,
+      "held_personal_rows_preserved": 4,
+      "held_export_objects_preserved": 1,
+      "held_deletion_status": "blocked",
+      "held_error_code": "privacy_hold",
+      "account_tombstones": 1,
+      "second_reapplication_idempotent": true,
+      "manuscript_unchanged": true,
+      "external_http_server_opened": false,
+      "writes_may_reopen_only_after_operator_review": true
+    }
+  ],
+  "production_db_dumped": false,
+  "production_mutations": false,
+  "book_draft_changed": false,
+  "legacy_changed": false,
+  "provider_calls": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "limits": [
+    "Operator must retain and authenticate applicable deletion/hold instructions across restore; this private synthetic manifest is not an automatic off-database erasure journal.",
+    "An older snapshot alone cannot identify later deletions or holds. Do not reopen writes until qualified reconciliation and operator review finish.",
+    "This does not qualify provider PITR,HA,disaster loss,mailbox erasure,aged production retention or a live restore.",
+    "Private snapshot,manifest,original fixture media and disposable local DBs retained for review; no production content or credentials copied."
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "status": "ACCEPTED_AND_VERIFIED_AFTER_RELOAD",
+  "characters": 103812,
+  "agreement_HTML_sha256": "dc2386de041c6364016a09386b883cdb70e7a5e4177f80891fcf01bfc56ab083",
+  "agreement": "Cloud Data Processing Addendum (Customers)",
+  "path": "/terms/apps/8/2/en/dpa_terms.html",
+  "owner_authority": "Approve CDPA acceptance only",
+  "tenant": "Reo Enterprise (reoenterprise.org)",
+  "provider_record": "Accepted by sales@reoenterprise.org on Nov 19, 2026.",
+  "client_review_date": "2026-11-20",
+  "exact_offered_document": "https://admin.google.com/terms/apps/8/2/en/dpa_terms.html",
+  "other_declarations_changed": false,
+  "mailbox_accessed": false,
+  "plans_changed": false,
+  "scope": "Owner-approved shared Workspace legal acceptance; no legacy application/data/DNS changes"
+}

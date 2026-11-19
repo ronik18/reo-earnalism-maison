@@ -432,3 +432,15 @@ STRINGS.update({
     'free_preview_help': ('Continue to check free access to this released edition. A verified account and the edition’s regional and format permissions are still required.', 'এই প্রকাশিত সংস্করণে বিনামূল্যে প্রবেশাধিকার যাচাই করতে এগিয়ে যান। যাচাইকৃত অ্যাকাউন্ট এবং সংস্করণের আঞ্চলিক ও মাধ্যমের অনুমতি প্রয়োজন।'),
     'free_preview_offline': ('Reconnect to check free access. This preview remains available at its boundary.', 'বিনামূল্যে প্রবেশাধিকার যাচাই করতে সংযোগ ফিরিয়ে আনুন। নমুনার শেষ জায়গা বদলাবে না।'),
 })
+
+
+STRINGS.update({
+ 'privacy_legal_hold': ('Deletion is awaiting review of a legal or retention hold. Contact the privacy team for the reason and next steps.', 'আইনি বা তথ্য সংরক্ষণের বাধ্যবাধকতা পর্যালোচনা না হওয়া পর্যন্ত মোছার অনুরোধ অপেক্ষায় আছে। কারণ ও পরের পদক্ষেপ জানতে গোপনীয়তা দলের সঙ্গে যোগাযোগ করুন।'),
+ 'privacy_financial_retained': ('This request involves financial obligations or necessary retained financial records. Contact the privacy team for details.', 'এই অনুরোধে আর্থিক বাধ্যবাধকতা বা প্রয়োজনীয় সংরক্ষিত আর্থিক তথ্য রয়েছে। বিস্তারিত জানতে গোপনীয়তা দলের সঙ্গে যোগাযোগ করুন।'),
+ 'privacy_security_retained': ('Limited pseudonymous account and security records remain; personal reading data has been removed.', 'সীমিত ছদ্মপরিচয়ভিত্তিক অ্যাকাউন্ট ও নিরাপত্তার তথ্য আছে; ব্যক্তিগত পড়ার তথ্য সরানো হয়েছে।'),
+ 'privacy_retention_unknown': ('Contact the privacy team for the retained-record details for this request.', 'এই অনুরোধে কোন তথ্য রাখা হয়েছে তা জানতে গোপনীয়তা দলের সঙ্গে যোগাযোগ করুন।'),
+ 'privacy_hold': ('A legal or retention hold needs review. Contact sales@reoenterprise.org.', 'আইনি বা তথ্য সংরক্ষণের বাধ্যবাধকতা পর্যালোচনা করা দরকার। sales@reoenterprise.org-এ যোগাযোগ করুন।'),
+ 'support_not_configured': ('The contact form is unavailable. Please email sales@reoenterprise.org.', 'যোগাযোগের ফর্ম এখন উপলব্ধ নয়। sales@reoenterprise.org-এ ইমেল করুন।'),
+})
+
+STRINGS.update({'account_notice_help': ('Read how we use your account details before creating an account. Optional marketing is a separate choice.', 'অ্যাকাউন্ট খোলার আগে আপনার তথ্য কীভাবে ব্যবহার হয় পড়ুন। ঐচ্ছিক বিপণনের পছন্দ আলাদা।')})

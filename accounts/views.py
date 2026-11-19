@@ -177,10 +177,17 @@ def revoke_device(request,device_id):
 
 
 def privacy_data(job):
+    retained=[]
+    if job.kind=='privacy_delete':
+        if job.status=='blocked' and job.error_code=='privacy_hold':retained=['legal_or_retention_hold']
+        elif job.status=='blocked' and job.error_code=='awaiting_resolution':retained=['financial_obligations']
+        elif job.status=='done':
+            recorded=job.result.get('retained_categories')
+            retained=[x for x in recorded if isinstance(x,str) and x in {'financial_obligations','account_security_records'}] if isinstance(recorded,list) else ['retention_details_unavailable']
     status={'pending':'queued','claimed':'processing','done':'completed','blocked':'awaiting_resolution','dead':'failed','cancelled':'cancelled'}[job.status]
     return {'privacy_request_id':str(job.id),'kind':job.kind.removeprefix('privacy_'),'status':status,
         'requested_at':services.iso(job.created_at),'completed_at':services.iso(job.completed_at),
-        'download_expires_at':job.result.get('expires_at'),'retained_categories':['financial_obligations'] if job.kind=='privacy_delete' else []}
+        'download_expires_at':job.result.get('expires_at'),'retained_categories':retained}
 
 
 @json_endpoint(('GET','POST'))
@@ -260,6 +267,8 @@ def privacy_file(request,privacy_request_id):
 
 @json_endpoint(('POST',),auth=False)
 def contact(request):
+    if not settings.LOCAL and not getattr(settings,'SUPPORT_EMAIL',''):
+        raise DomainError('support_not_configured','The support form is unavailable. Contact sales@reoenterprise.org directly; no message was collected.',503)
     d=json_body(request,{'email','locale','category','message','order_id'},['email','locale','category','message'])
     services._email(d['email']);services.check_rate('contact',d['email'],5,3600)
     if d['locale'] not in ['en','bn'] or d['category'] not in ['account','billing','content','accessibility','privacy','other'] or not isinstance(d['message'],str) or not 10<=len(d['message'])<=5000:raise DomainError('validation_error','Invalid support message.',422)

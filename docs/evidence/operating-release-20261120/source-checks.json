@@ -1,0 +1,17 @@
+{
+  "backend_tests": 531,
+  "backend_seconds": 297.202,
+  "backend": "PASS",
+  "client_tests": 35,
+  "typecheck_build": "PASS",
+  "Docker_build": "PASS",
+  "local_browser_checks": 54,
+  "local_browser_passed": 54,
+  "privacy_retention_support_regressions": 56,
+  "restore_privacy_reapplication": "PASS",
+  "new_migrations": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

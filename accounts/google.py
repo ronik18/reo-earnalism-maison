@@ -156,7 +156,7 @@ class MaisonSocialAccountAdapter(DefaultSocialAccountAdapter):
             with transaction.atomic():
                 sociallogin.user.email=sociallogin.account.extra_data['email'];sociallogin.user.is_verified=True
                 user=super().save_user(request,sociallogin,form)
-                Preferences.objects.get_or_create(user=user);Consent.objects.get_or_create(user=user)
+                Preferences.objects.get_or_create(user=user);Consent.objects.get_or_create(user=user,defaults={'necessary_notice_version':settings.PRIVACY_NOTICE_VERSION})
                 audit(user,'account.google_registered',user)
                 return user
         except IntegrityError:
