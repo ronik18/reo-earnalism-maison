@@ -173,7 +173,7 @@ self.addEventListener("fetch", (event) => {
       fetch(event.request).catch(
         async () =>
           (await caches.match(
-            url.pathname.startsWith("/bn/") ? "/bn/offline/" : "/en/offline/",
+            "/en/offline/",
           )) || new Response("Offline", { status: 503 }),
       ),
     );

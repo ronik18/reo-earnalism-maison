@@ -18,7 +18,7 @@ class LegalNoticeTests(SimpleTestCase):
             self.assertIn('no-store',response['Cache-Control'])
     def test_bengali_copy_and_invalid_locale(self):
         response=legal.privacy(self.request('/bn/privacy/'),'bn')
-        self.assertContains(response,'গোপনীয়তার বিজ্ঞপ্তি')
+        self.assertContains(response,'Privacy notice')
         with self.assertRaises(Http404):legal.privacy(self.request('/xx/privacy/'),'xx')
     def test_notices_cannot_submit_mutations(self):
         self.assertEqual(legal.privacy(self.request('/en/privacy/','post'),'en').status_code,405)
@@ -26,11 +26,11 @@ class LegalNoticeTests(SimpleTestCase):
     def test_integrated_routes_and_footer_discovery(self):
         for locale in ["en","bn"]:
             for route in ["privacy","terms","contact"]:
-                response=self.client.get(f"/{locale}/{route}/")
+                response=self.client.get(f"/{locale}/{route}/",follow=True)
                 self.assertEqual(response.status_code,200)
-                self.assertContains(response,f'href="/{locale}/privacy/"')
-                self.assertContains(response,f'href="/{locale}/terms/"')
-                self.assertContains(response,f'href="/{locale}/contact/"')
+                self.assertContains(response,'href="/en/privacy/"')
+                self.assertContains(response,'href="/en/terms/"')
+                self.assertContains(response,'href="/en/contact/"')
                 self.assertContains(response,"sales@reoenterprise.org")
 
     def test_contact_form_requires_configured_support_destination(self):
@@ -52,11 +52,12 @@ class LegalNoticeTests(SimpleTestCase):
         self.assertContains(response,'Existing business-mail copies remain operator-managed')
         self.assertContains(response,'Applicable regional operating and age-appropriate requirements remain under review')
 
-    def test_bengali_notice_discloses_matching_windows_and_provider_scope(self):
+    def test_legacy_locale_uses_current_english_notice(self):
         response=legal.privacy(self.request('/bn/privacy/'),'bn')
-        for fact in ['২০ নভেম্বর ২০২৬','৩৫ দিন','৯০ দিন','৩০ দিন','১২টি ক্যালেন্ডার-মাস','Google','Stream','সিঙ্গাপুর','আইনি বা সংরক্ষণের বাধা','আন্তর্জাতিকভাবে']:
+        for fact in ['20 November 2026','35-day window','90 days','30 days','12 calendar-month snapshots','Google','Stream','Singapore','Recorded legal/retention holds','internationally']:
             self.assertContains(response,fact)
-        self.assertNotContains(response,'সম্পূর্ণ সংরক্ষণের সময়সূচি ও প্রযোজ্য অনুরোধের সময়সীমা নিশ্চিত করা বাকি')
+        self.assertContains(response,'lang="en" data-ui-locale="en"')
+        self.assertNotContains(response,'awaiting confirmation')
 
     @override_settings(FREE_ACCESS_ENABLED=True)
     def test_free_terms_preserve_reading_audience_and_no_future_payment_commitment(self):

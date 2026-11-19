@@ -61,12 +61,14 @@ def _numeric_filters(filters):
     return values
 
 
-def catalog_queryset(locale='en', territory='IN', query='', house='', format='', **filters):
+def catalog_queryset(locale=None, territory='IN', query='', house='', format='', **filters):
+    from .services import content_locale
+    locale=content_locale(locale)
     query = normalize_search_text(query)
     if len(query) > 120:
         raise DomainError('invalid_query', 'Search query is limited to 120 characters.', 422)
     filters = _numeric_filters(filters)
-    if locale not in {'en', 'bn'} or format not in {'', *FORMATS} or (house and house not in {'classics','golpo','learn','interview','series','collections'}):
+    if format not in {'', *FORMATS} or (house and house not in {'classics','golpo','learn','interview','series','collections'}):
         raise DomainError('invalid_filter', 'Invalid locale, format or House.', 422)
     access = filters.get('access')
     if access not in (None, '', 'all', 'free', 'paid', 'pass_required'):
@@ -74,7 +76,8 @@ def catalog_queryset(locale='en', territory='IN', query='', house='', format='',
     territory = territory.upper()
     at = timezone.now()
     rights = _rights_query(territory, at)
-    editions = Edition.objects.filter(locale=locale, live_revision__state='live').select_related('work', 'live_revision').annotate(catalog_title=F('work__title'))
+    editions = Edition.objects.filter(live_revision__state='live').select_related('work', 'live_revision').annotate(catalog_title=F('work__title'))
+    if locale is not None:editions=editions.filter(locale=locale)
     if territory not in settings.MAISON_PUBLICATION_TERRITORIES:
         return editions.none()
     if query:
@@ -162,13 +165,15 @@ def page_ttl(editions, class_seconds=30):
     return max(0, min(class_seconds, math.floor((min(ends)-now).total_seconds()))) if ends else class_seconds
 
 
-def catalog_page(request, locale='en', territory='IN', query='', house='', format='', **filters):
+def catalog_page(request, locale=None, territory='IN', query='', house='', format='', **filters):
     """Return (public pagination DTO, cache TTL); SQL candidates capped limit+1."""
+    from .services import content_locale
+    locale=content_locale(locale)
     query = normalize_search_text(query)
     rows = catalog_queryset(locale, territory, query, house, format, **filters)
     ordering = '-search_score' if query else 'catalog_title'
     is_search = request.path.endswith('/search')
-    page = paginate_queryset(request, rows, 'public-catalog:'+locale+':'+territory, ordering=ordering, maximum=50 if is_search else 100)
+    page = paginate_queryset(request, rows, 'public-catalog:'+(locale or 'all')+':'+territory, ordering=ordering, maximum=50 if is_search else 100)
     ttl = page_ttl(page['items'])
     score = getattr(page['items'][0], 'search_score', None) if page['items'] else None
     mode = 'none' if not page['items'] else ('prefix' if score is None else 'exact' if score >= 5 else 'prefix' if score >= 4 else 'alias' if score >= 3 else 'full_text' if score >= 2 else 'fuzzy')
@@ -178,7 +183,7 @@ def catalog_page(request, locale='en', territory='IN', query='', house='', forma
     return page, ttl
 
 
-def catalog_cards_bounded(locale='en', territory='IN', query='', house='', format='', *, limit=100, **filters):
+def catalog_cards_bounded(locale=None, territory='IN', query='', house='', format='', *, limit=100, **filters):
     """Small SSR/Home candidate list, never an unbounded catalog scan."""
     if type(limit) is not int or not 1 <= limit <= 500:
         raise ValueError('Catalog candidate limit must be 1–500.')

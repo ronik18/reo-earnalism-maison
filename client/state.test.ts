@@ -50,12 +50,12 @@ test("Exact format switching rejects overlapping or out-of-bounds maps", () => {
   );
   assert.equal(measuredSeek(rows, "missing", 500), undefined);
 });
-test("Player return links remain on a local locale route", () => {
+test("Player return links canonicalize legacy UI paths without changing the edition", () => {
   assert.equal(validReturnPath("https://evil.invalid/"), " /en/".trim());
   assert.equal(validReturnPath("//evil.invalid/"), "/en/");
   assert.equal(
     validReturnPath("/bn/read/book/?anchor=a"),
-    "/bn/read/book/?anchor=a",
+    "/en/read/book/?anchor=a",
   );
 });
 import { planEnqueue, nextBatch } from "./queue-state.ts";
@@ -405,9 +405,9 @@ test("Checkout reflects server terminal states without granting pending or refun
 import "./media-state.test.ts";
 
 import {checkoutReturnPath} from "./commerce-state";
-test("Checkout retains the exact content return across interface locale changes",()=>{
+test("Checkout retains exact content return in the shared English journey",()=>{
   assert.equal(checkoutReturnPath("/en/read/book/unit/?anchor=p1&offset=12","bn"),"/en/read/book/unit/?anchor=p1&offset=12");
-  for (const path of ["https://other.test/en/read/book/","//other.test/en/read/book/","/en/sign-out/","/en/checkout/order/"]) assert.equal(checkoutReturnPath(path,"bn"),"/bn/vault/");
+  for (const path of ["https://other.test/en/read/book/","//other.test/en/read/book/","/en/sign-out/","/en/checkout/order/"]) assert.equal(checkoutReturnPath(path,"bn"),"/en/vault/");
 });
 
 import {approvedFinancialPDFURL} from "./billing-state.ts";
@@ -465,4 +465,11 @@ test("Download-license pagination rejects a repeated cursor before reconciliatio
     calls++;return {items:[],next_cursor:"same"};
   }),/download_failed/);
   assert.equal(calls,2);
+});
+
+
+test("Legacy UI return links preserve content language, query and anchor in the English journey",()=>{
+ assert.equal(validReturnPath("/bn/read/book/unit/?content_locale=bn&anchor=p1#selection","bn"),"/en/read/book/unit/?content_locale=bn&anchor=p1#selection");
+ assert.equal(checkoutReturnPath("/bn/read/book/unit/?anchor=p1","bn"),"/en/read/book/unit/?anchor=p1");
+ assert.equal(validReturnPath("//other.test/bn/read/book/","bn"),"/en/");
 });

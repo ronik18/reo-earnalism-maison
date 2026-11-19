@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'operations.middleware.RequestContextMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'web.middleware.UnifiedJourneyMiddleware',
     'operations.middleware.OriginMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',

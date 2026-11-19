@@ -1,6 +1,6 @@
 {% extends 'web/base.html' %}{% load maison %}{% block content %}
 <a class="text-link" href="{% url 'web:explore' ui_locale %}">{% ui 'back' %}</a>
-<header class="collection-header"><p class="eyebrow">{% ui 'collections' %}</p><h1 lang="{{ content_locale }}">{{ collection.title }}</h1><p class="lead" lang="{{ content_locale }}">{{ collection.description }}</p><div class="actions"><a href="{% url 'web:search' ui_locale %}?content_locale={{ content_locale }}">{% ui 'search' %}</a><a href="{{ switch_locale_url }}">{% ui 'interface_language' %}</a></div></header>
+<header class="collection-header"><p class="eyebrow">{% ui 'collections' %}</p><h1 lang="{{ content_locale }}">{{ collection.title }}</h1><p class="lead" lang="{{ content_locale }}">{{ collection.description }}</p><div class="actions"><a href="{% url 'web:search' ui_locale %}?content_locale={{ content_locale }}">{% ui 'search' %}</a></div></header>
 {% if catalog_updated_at %}<p class="muted">{% if ui_locale == 'bn' %}সর্বশেষ হালনাগাদ{% else %}Last updated{% endif %}: <time datetime="{{ catalog_updated_at|date:'c' }}">{{ catalog_updated_at }}</time></p>{% endif %}
 {% include 'web/includes/cards.html' %}
 {% if next_page_url %}<a class="button secondary" href="{{ next_page_url }}">{% ui 'show_more' %}</a>{% endif %}{% endblock %}

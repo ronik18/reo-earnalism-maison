@@ -35,7 +35,7 @@ class CatalogPaginationScreensTests(TestCase):
     def test_search_and_explore_follow_cursor_preserving_locale_and_filters(self):
         for path in ['/en/search/', '/bn/explore/']:
             with self.subTest(path=path):
-                first = self.client.get(path, {'content_locale': 'en', 'house': 'golpo', 'limit': '1'})
+                first = self.client.get(path, {'content_locale': 'en', 'house': 'golpo', 'limit': '1'},follow=True)
                 self.assertEqual(first.status_code, 200)
                 self.assertEqual(len(first.context['cards']), 1)
                 next_url = first.context['next_page_url']
@@ -50,11 +50,11 @@ class CatalogPaginationScreensTests(TestCase):
                 self.assertEqual(len(second.context['cards']), 1)
                 self.assertNotEqual(first.context['cards'][0]['edition_id'], second.context['cards'][0]['edition_id'])
                 self.assertIsNone(second.context['next_page_url'])
-                changed = self.client.get(path, {**{k: v[0] for k, v in query.items()}, 'house': 'classics'})
+                changed = self.client.get(path, {**{k: v[0] for k, v in query.items()}, 'house': 'classics'},follow=True)
                 self.assertEqual(changed.status_code, 422)
 
     def test_author_control_and_search_page_limit_match_contract(self):
-        response = self.client.get('/bn/search/', {'content_locale': 'en', 'author': 'Maison'})
+        response = self.client.get('/bn/search/', {'content_locale': 'en', 'author': 'Maison'}, follow=True)
         self.assertContains(response, 'name="author"')
         self.assertContains(response, 'value="Maison"')
         self.assertContains(response, 'max="3650"')

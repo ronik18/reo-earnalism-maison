@@ -64,16 +64,16 @@ export function measuredSeek(
   }
   return segments.find((s) => s.anchor_id === anchor)?.start_ms;
 }
-export function validReturnPath(path: string, locale = "en"): string {
+export function validReturnPath(path: string, _locale = "en"): string {
   try {
     const u = new URL(path, "https://maison.invalid");
     return u.origin === "https://maison.invalid" &&
       /^\/(en|bn)\//.test(u.pathname) &&
       !/[\\\r\n]/.test(path)
-      ? u.pathname + u.search + u.hash
-      : `/${locale}/`;
+      ? u.pathname.replace(/^\/bn(?=\/)/,"/en") + u.search + u.hash
+      : "/en/";
   } catch {
-    return `/${locale}/`;
+    return "/en/";
   }
 }
 

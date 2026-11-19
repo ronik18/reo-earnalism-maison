@@ -1,0 +1,21 @@
+{
+  "local_backend_suite": {
+    "tests": 546,
+    "passed": 545,
+    "obsolete_expectation": "Legacy bn Reader now302; integration test updated to follow canonicalEnglish redirect",
+    "final_affected_regressions": 12,
+    "final_affected_result": "PASS",
+    "additional_final_library_focused": 29
+  },
+  "client_tests": 37,
+  "TypeScript": "PASS",
+  "client_build": "PASS",
+  "production_Docker_build": "PASS",
+  "local_browser_checks": 63,
+  "local_browser_passed": 63,
+  "new_migrations": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

@@ -64,8 +64,8 @@ class FirstBookJourneyTests(TestCase):
         self.assertStatus(self.send('/api/v1/auth/login',{'email':'journey@example.test','password':'Journey-Original-Passphrase-47'}),200,'Session')
         self.csrf=self.client.get('/api/v1/session').json()['csrf_token']
         session=self.client.get('/api/v1/session').json()
-        # Bengali controls around the unchanged English edition.
-        reader=self.client.get(f'/bn/read/{EN}/{unit.id}/')
+        # Historic Bengali account/link reaches the shared English controls and unchanged edition.
+        reader=self.client.get(f'/bn/read/{EN}/{unit.id}/',follow=True)
         self.assertEqual(reader.status_code,200,reader.content[:1000])
         self.assertContains(reader,unit.paragraphs.order_by('ordinal').last().text)
         self.assertContains(reader,'lang="en"')

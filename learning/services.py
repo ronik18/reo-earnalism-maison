@@ -5,7 +5,7 @@ from django.db.models import Count
 from core.pagination import paginate_queryset
 from django.utils import timezone
 from core.api import DomainError
-from library.services import authorize_revision, iso
+from library.services import authorize_revision, iso, content_locale
 from .models import Track,Lesson,LessonCompletion,InterviewQuestion,Quiz,QuizAttempt
 
 def _track(user,value,allow_locked=False):
@@ -33,21 +33,24 @@ def track_dto(user,track):
             'duration_days':track.duration_days,'company_style':track.company_style or None,'access':access,
             'lesson_count':track.page_lesson_count if hasattr(track,'page_lesson_count') else track.lessons.count()}
 
-def _track_rows(user,locale='en',kind=''):
-    if locale not in ('en','bn') or kind not in ('','learning','sde_interview'):
-        raise DomainError('invalid_filter','Choose a supported track locale and kind.',422)
-    rows=Track.objects.filter(published=True,locale=locale).exclude(access='deny').annotate(page_lesson_count=Count('lessons'))
+def _track_rows(user,locale=None,kind=''):
+    locale=content_locale(locale)
+    if kind not in ('','learning','sde_interview'):
+        raise DomainError('invalid_filter','Choose a supported track kind.',422)
+    rows=Track.objects.filter(published=True).exclude(access='deny').annotate(page_lesson_count=Count('lessons'))
+    if locale:rows=rows.filter(locale=locale)
     if kind:rows=rows.filter(kind=kind)
     if getattr(settings,'FREE_ACCESS_ENABLED',False) and getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ') not in settings.MAISON_PUBLICATION_TERRITORIES:return rows.none()
     return rows
 
 
-def list_tracks(user,locale='en'):
+def list_tracks(user,locale=None):
     return [track_dto(user,t) for t in _track_rows(user,locale).order_by('title','id')]
 
 
-def tracks_page(request,user,locale='en',kind=''):
-    result=paginate_queryset(request,_track_rows(user,locale,kind),f'tracks:{locale}:{kind}',ordering='title')
+def tracks_page(request,user,locale=None,kind=''):
+    locale=content_locale(locale)
+    result=paginate_queryset(request,_track_rows(user,locale,kind),f'tracks:{locale or "all"}:{kind}',ordering='title')
     result['items']=[track_dto(user,row) for row in result['items']]
     return result
 

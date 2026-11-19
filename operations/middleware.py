@@ -36,7 +36,8 @@ def cache_headers(request,response):
     # no cookie or personal session was emitted. Capture has already verified
     # this exact response is anonymous and its actual public dependencies.
     response['Vary']=', '.join(sorted(p.strip() for p in response.get('Vary','').split(',') if p.strip() and p.strip().lower()!='cookie')) or 'Accept-Encoding'
-    if request.GET.get('locale') in {'en','bn'}:response['Content-Language']=request.GET['locale']
+    if response.get('Content-Type','').startswith('text/html'):response['Content-Language']='en'
+    elif re.fullmatch('[a-z]{2}',request.GET.get('locale','')):response['Content-Language']=request.GET['locale']
     if response.get('Content-Type','').split(';')[0] in {'application/json','text/html'}:
         etag='W/"'+hashlib.sha256(response.content).hexdigest()+'"'
         response['ETag']=etag

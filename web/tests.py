@@ -21,12 +21,12 @@ from .views import safe_return, trusted_territory
 class ReturnPathTests(SimpleTestCase):
     def test_return_path_retains_edition_and_anchor(self):
         value = "/bn/read/20000000-0000-4000-8000-000000000001/?anchor=example"
-        self.assertEqual(safe_return(value, "en"), value)
+        self.assertEqual(safe_return(value, "en"), value.replace("/bn/","/en/",1))
 
     def test_external_and_auth_loop_destinations_are_rejected(self):
         for value in ("https://example.invalid/", "//example.invalid/", "/en/sign-in/", "/en/password-reset/", "/\\example.invalid/", "/en/\r\nX-Header:test", "/admin/"):
             with self.subTest(value=value):
-                self.assertEqual(safe_return(value, "bn"), "/bn/")
+                self.assertEqual(safe_return(value, "bn"), "/en/")
 
     @override_settings(LOCAL=False)
     def test_production_territory_is_not_inferred_from_query(self):
@@ -95,7 +95,7 @@ class ExperienceTests(TestCase):
         self.assertContains(response, self.unit)
         self.assertContains(response, "20000000-0000-4000-8000-000000000002")
         self.assertEqual(response["Cache-Control"], "private, no-store, max-age=0")
-        response = self.client.get("/bn/titles/river-notebook-en/")
+        response = self.client.get("/bn/titles/river-notebook-en/", follow=True)
         self.assertContains(response, "The River Notebook")
 
     def test_anonymous_reader_is_bounded_preview_not_full_book(self):
@@ -113,7 +113,7 @@ class ExperienceTests(TestCase):
         client = Client(enforce_csrf_checks=True)
         response = self.login(client, destination)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], destination)
+        self.assertEqual(response["Location"], destination.replace("/bn/","/en/",1))
         self.assertEqual(client.get("/api/v1/session").json()["authenticated"], True)
 
     def test_sign_in_rejects_external_redirect(self):
@@ -124,15 +124,28 @@ class ExperienceTests(TestCase):
         self.login()
         from library.models import Paragraph
         english = Paragraph.objects.filter(unit_id=self.unit).first().text
-        response = self.client.get(f"/bn/read/{self.edition}/{self.unit}/")
-        self.assertContains(response, 'lang="bn" data-ui-locale="bn"')
+        response = self.client.get(f"/bn/read/{self.edition}/{self.unit}/", follow=True)
+        self.assertContains(response, 'lang="en" data-ui-locale="en"')
         self.assertContains(response, 'id="reading-text" lang="en"')
         self.assertContains(response, english)
-        self.assertContains(response, "পড়া শেষ চিহ্নিত করুন")
+        self.assertContains(response, "Mark finished")
 
-    def test_bengali_login_error_remains_localized_and_preserves_email(self):
-        response = self.client.post("/bn/sign-in/", {"email":self.user.email,"password":"wrong","return_to":"/bn/vault/"})
-        self.assertContains(response, "ইমেল বা পাসওয়ার্ড যাচাই করা যায়নি।", status_code=403)
+    def test_bengali_book_keeps_its_text_and_language_in_the_english_reader(self):
+        self.login()
+        from library.models import Paragraph
+        edition="20000000-0000-4000-8000-000000000002"
+        unit="40000000-0000-4000-8000-000000000002"
+        original=Paragraph.objects.filter(unit_id=unit).first().text
+        response=self.client.get(f"/en/read/{edition}/{unit}/")
+        self.assertContains(response,'lang="en" data-ui-locale="en"')
+        self.assertContains(response,'id="reading-text" lang="bn"')
+        self.assertContains(response,original)
+        self.assertContains(response,"Mark finished")
+        self.assertNotContains(response,'aria-label="Interface language"')
+
+    def test_legacy_login_error_uses_english_and_preserves_email(self):
+        response = self.client.post("/bn/sign-in/", {"email":self.user.email,"password":"wrong","return_to":"/bn/vault/"}, follow=True)
+        self.assertContains(response, "The email or password could not be verified.", status_code=403)
         self.assertContains(response, self.user.email, status_code=403)
         self.assertNotContains(response, 'value="wrong"', status_code=403)
 
@@ -174,7 +187,7 @@ class ExperienceTests(TestCase):
 
     def test_accepted_search_facets_and_saved_filter_control_are_exposed(self):
         self.login()
-        response = self.client.get("/bn/search/?content_locale=en&house=golpo&duration_max=100&recency_days=7")
+        response = self.client.get("/bn/search/?content_locale=en&house=golpo&duration_max=100&recency_days=7", follow=True)
         self.assertContains(response, 'name="duration_min"')
         self.assertContains(response, 'name="duration_max"')
         self.assertContains(response, 'name="recency_days"')
@@ -275,7 +288,7 @@ class ExperienceTests(TestCase):
         foreign=Order.objects.create(user=other,offer=offer,total_minor=100,currency='INR',offer_snapshot={},operation_id=uuid.uuid4(),request_sha256='1'*64,expires_at=timezone.now()+timedelta(hours=1))
         self.assertEqual(self.client.get(f'/en/checkout/{foreign.id}/').status_code,404)
         self.assertEqual(self.client.get('/en/404/').status_code,404)
-        self.assertEqual(self.client.get('/bn/maintenance/').status_code,503)
+        self.assertEqual(self.client.get('/bn/maintenance/', follow=True).status_code,503)
 
 
 class OfflineAssetBuildTests(SimpleTestCase):
@@ -312,12 +325,12 @@ class ActualErrorHandlerTests(SimpleTestCase):
         for locale in ('en','bn'):
             for path,status,key in [('missing/nested/path/',404,'not_found'),('test-denied/',403,'not_authorized'),('test-failed/',500,'error')]:
                 with self.subTest(locale=locale,status=status):
-                    response=client.get(f'/{locale}/{path}')
+                    response=client.get(f'/{locale}/{path}',follow=True)
                     self.assertEqual(response.status_code,status)
-                    self.assertEqual(response['Content-Language'],locale)
+                    self.assertEqual(response['Content-Language'],'en')
                     self.assertIn('private',response['Cache-Control'])
                     self.assertIn('no-store',response['Cache-Control'])
-                    self.assertContains(response,catalogue(locale)[key],status_code=status)
+                    self.assertContains(response,catalogue("en")[key],status_code=status)
                     self.assertNotContains(response,'Synthetic frontend error-handler fixture',status_code=status)
 
 
@@ -333,7 +346,7 @@ class DatabaseFailureErrorPageTests(SimpleTestCase):
         request.user=SimpleLazyObject(failed_user)
         response=server_error(request)
         self.assertEqual(response.status_code,500)
-        self.assertEqual(response['Content-Language'],'bn')
+        self.assertEqual(response['Content-Language'],'en')
         self.assertIn('private',response['Cache-Control'])
         self.assertIn('no-store',response['Cache-Control'])
         self.assertNotIn(b'Synthetic database unavailable',response.content)
