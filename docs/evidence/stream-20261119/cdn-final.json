@@ -1,0 +1,1 @@
+{"status": "PASS", "release_id": "84bc2473c6df3e83dd8584d341282c7ba7e06e0c0f7ab49b3b53b36aae367365", "checks": [{"request": 1, "cache_status": "MISS", "checksum": "PASS", "bytes": 8762}, {"request": 2, "cache_status": "HIT", "checksum": "PASS", "bytes": 8762}]}
