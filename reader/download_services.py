@@ -11,7 +11,7 @@ from django.utils import timezone
 from core.api import DomainError,public_uuid
 from core.services import apply_operation,audit
 from library.models import Asset,Revision
-from library.services import authorize_revision,current_right,validate_device,canonical_bytes
+from library.services import authorize_revision,current_right,validate_device,canonical_bytes,free_access_for_revision
 from .models import DownloadLicense
 from .services import iso
 
@@ -106,7 +106,7 @@ def _create(user,device_id,data,territory):
     if len(set(units))!=len(units) or revision.units.filter(pk__in=units).count()!=len(units):raise DomainError('unit_revision_mismatch','Choose distinct units from this revision.',409)
     right=current_right(revision,fmt,'download',territory)
     right=type(right).objects.select_for_update().get(pk=right.pk)
-    if revision.access_policy.get(fmt)=='free':entitlement=ensure_free_entitlement(user,revision,fmt,territory=territory)
+    if revision.access_policy.get(fmt)=='free' or free_access_for_revision(revision):entitlement=ensure_free_entitlement(user,revision,fmt,territory=territory)
     else:
         candidates=[e for e in _eligible(user,revision,fmt,timezone.now()).select_for_update() if fmt in e.formats]
         if not candidates:raise DomainError('entitlement_required','An active entitlement is required.',403)

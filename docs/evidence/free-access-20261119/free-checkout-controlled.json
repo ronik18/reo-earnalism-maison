@@ -1,0 +1,21 @@
+{
+  "scope": "Controlled original historical order DTO and member-marked shell, real built Commerce island; complements actual Django checkout ownership/template tests; no real provider or financial mutation",
+  "results": [
+    {
+      "engine": "chromium-desktop",
+      "status": "PASS",
+      "ownedHistoricalReads": 2,
+      "newWrites": 0,
+      "providerRequests": 0,
+      "validHistoricalCheckoutDescriptorDidNotEnablePayment": true
+    },
+    {
+      "engine": "webkit-phone",
+      "status": "PASS",
+      "ownedHistoricalReads": 2,
+      "newWrites": 0,
+      "providerRequests": 0,
+      "validHistoricalCheckoutDescriptorDidNotEnablePayment": true
+    }
+  ]
+}

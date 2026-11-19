@@ -98,6 +98,11 @@ def _live(revision):
     return revision.state == 'live' and revision.edition.live_revision_id == revision.id
 
 
+def free_access_for_revision(revision):
+    """The free rollout changes price access only, never publication or rights."""
+    return bool(getattr(settings,'FREE_ACCESS_ENABLED',False) and _live(revision))
+
+
 def check_revision_rights(revision,format='reader',action='read',territory='IN'):
     """Internal billing pre-fulfilment boundary. Does not itself grant member access."""
     revision=_revision(revision)
@@ -146,11 +151,11 @@ def authorize_revision(user, revision, format='reader', action='read', territory
     policy = revision.access_policy.get(format, 'deny')
     if policy == 'deny':
         raise DomainError('access_denied', 'This format is not offered.', 403)
-    if policy == 'paid':
+    if policy == 'paid' and not free_access_for_revision(revision):
         from billing.services import has_entitlement
         if not has_entitlement(user, revision, format, at=timezone.now()):
             raise DomainError('entitlement_required', 'An active entitlement is required.', 403)
-    elif policy != 'free':
+    elif policy not in {'free','paid'}:
         raise DomainError('access_denied', 'No explicit access policy exists for this format.', 403)
     if action == 'download':
         if format == 'video' or revision.download_policy.get(format) is not True or not current_right(revision, format, 'download', territory):
@@ -163,7 +168,7 @@ def authorized_until(user, revision, format='reader', action='read', territory='
     ends = [current_right(revision, format, 'read', territory).ends_at]
     if action == 'download':
         ends.append(current_right(revision, format, 'download', territory).ends_at)
-    if revision.access_policy.get(format) == 'paid':
+    if revision.access_policy.get(format) == 'paid' and not free_access_for_revision(revision):
         # Billing exposes the actual entitlement end; never mint beyond a known paid expiry.
         from billing.services import entitlement_expires_at
         expiry = entitlement_expires_at(user, revision, format)
@@ -231,7 +236,7 @@ def catalog_card(edition,territory='IN',user=None):
             return {'work_id':str(edition.work_id),'edition_id':str(edition.id),'title':revision.title,
                     'subtitle':None,'creators':edition.work.creators,'locale':edition.locale,'house':edition.work.house,
                     'formats':formats,'cover':_cover(revision),
-                    'access_label':'free' if any(revision.access_policy.get(fmt)=='free' for fmt in formats) else 'pass_required',
+                    'access_label':'free' if free_access_for_revision(revision) or any(revision.access_policy.get(fmt)=='free' for fmt in formats) else 'pass_required',
                     'availability':'available'}
     raise DomainError('content_unavailable','Edition is not currently available.',404)
 

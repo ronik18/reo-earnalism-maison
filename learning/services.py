@@ -10,6 +10,10 @@ def _track(user,value,allow_locked=False):
     try: track=Track.objects.select_related('edition','edition__live_revision').get(pk=value,published=True)
     except (Track.DoesNotExist,ValueError,ValidationError): raise DomainError('not_found','Track not found.',404)
     if track.access=='deny': raise DomainError('access_denied','This track is not offered.',403)
+    if getattr(settings,'FREE_ACCESS_ENABLED',False):
+        if not getattr(user,'is_authenticated',False) or not getattr(user,'is_active',False):raise DomainError('authentication_required','Sign in to continue.',401)
+        if not getattr(user,'is_verified',False):raise DomainError('verification_required','Verify your account.',403)
+        if getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ') not in settings.MAISON_PUBLICATION_TERRITORIES:raise DomainError('region_unavailable','Learning is unavailable in this territory.',403)
     if track.access=='paid':
         try:
             if not track.edition or not track.edition.live_revision: raise DomainError('access_denied','Track has no access authority.',403)
@@ -27,6 +31,7 @@ def track_dto(user,track):
             'duration_days':track.duration_days,'company_style':track.company_style or None,'access':access,'lesson_count':track.lessons.count()}
 
 def list_tracks(user,locale='en'):
+    if getattr(settings,'FREE_ACCESS_ENABLED',False) and getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ') not in settings.MAISON_PUBLICATION_TERRITORIES:return []
     return [track_dto(user,t) for t in Track.objects.filter(published=True,locale=locale).exclude(access='deny').order_by('title','id')]
 
 def completion_is_current(record,lesson):

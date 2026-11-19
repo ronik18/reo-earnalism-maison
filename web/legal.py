@@ -7,7 +7,7 @@ OPERATOR_ADDRESS = "Reo Enterprise, 73, Nandan Nagar, Belghoria, District - Nort
 GRIEVANCE_ROLE = "Chief of Operations / Grievance Officer"
 
 COPY = {
- 'draft': ('Qualification draft · Updated 18 November 2026', 'যোগ্যতা যাচাইয়ের খসড়া · হালনাগাদ ১৮ নভেম্বর ২০২৬'),
+ 'draft': ('Qualification draft · Updated 19 November 2026', 'যোগ্যতা যাচাইয়ের খসড়া · হালনাগাদ ১৯ নভেম্বর ২০২৬'),
  'review': ('These notices describe the current Maison qualification service. Retention, age-appropriate account safeguards and applicable regional requirements remain under review; this is not a declaration of launch or worldwide legal clearance.', 'এই বিজ্ঞপ্তি মেজঁর বর্তমান যাচাই পরিষেবার বিবরণ। তথ্য সংরক্ষণের সময়সূচি, বয়স অনুযায়ী অ্যাকাউন্টের সুরক্ষা ও প্রযোজ্য আঞ্চলিক বিষয় পর্যালোচনাধীন; এটি উদ্বোধন বা বিশ্বব্যাপী আইনি ছাড়পত্রের ঘোষণা নয়।'),
  'privacy_title': ('Privacy notice', 'গোপনীয়তার বিজ্ঞপ্তি'),
  'terms_title': ('Service terms', 'পরিষেবার শর্ত'),
@@ -27,6 +27,8 @@ TERMS = [
 ]
 
 def _notice(request, locale, kind, sections):
+    if kind=='terms' and getattr(settings,'FREE_ACCESS_ENABLED',False):
+        sections=[('Free access', 'বিনামূল্যে প্রবেশাধিকার', 'Eligible released content is free in approved territories. No payment details or automatic subscription are required. Struck-through INR values on the Pass page are planned reference prices, not previous selling prices or discounts. Any future paid plan requires a separate explicit choice. Existing provider agreements, financial history and cancellation controls are retained; free access alone does not cancel an existing agreement.', 'অনুমোদিত অঞ্চলে প্রকাশিত ও উপলব্ধ বিষয়বস্তুতে বিনামূল্যে প্রবেশাধিকার রয়েছে। পেমেন্টের তথ্য বা স্বয়ংক্রিয় সাবস্ক্রিপশন লাগবে না। পাস পাতায় কাটা ভারতীয় রুপির মূল্যগুলি প্রস্তাবিত নির্দেশক মূল্য, আগের বিক্রয়মূল্য বা ছাড় নয়। ভবিষ্যতে অর্থপ্রদত্ত পরিকল্পনার জন্য পৃথক স্পষ্ট সম্মতি লাগবে। বিদ্যমান পেমেন্ট-প্রদানকারীর চুক্তি, আর্থিক ইতিহাস ও বাতিলের নিয়ন্ত্রণ থাকবে; বিনামূল্যে প্রবেশাধিকার কোনো বিদ্যমান চুক্তি নিজে থেকে বাতিল করে না।'),*sections]
     i=1 if locale=='bn' else 0
     return page(request,locale,f'web/{kind}.html',legal_title=COPY[kind+'_title'][i],legal_draft=COPY['draft'][i],legal_review=COPY['review'][i],legal_sections=[{'heading':r[i],'body':r[2+i]} for r in sections],support_configured=bool(getattr(settings,'SUPPORT_EMAIL','')),operator_address=OPERATOR_ADDRESS,grievance_role=GRIEVANCE_ROLE)
 

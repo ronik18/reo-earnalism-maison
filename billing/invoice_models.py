@@ -60,9 +60,10 @@ class InvoiceRevision(models.Model):
 class FinanceNumberSequence(models.Model):
     issuer_key=models.CharField(max_length=64)
     policy_version=models.CharField(max_length=120)
+    series_prefix=models.CharField(max_length=12,null=True)
     kind=models.CharField(max_length=12)
     fiscal_year=models.CharField(max_length=16)
     next_number=models.PositiveBigIntegerField(default=1)
     class Meta:
         db_table='maison_finance_number_sequence'
-        constraints=[models.UniqueConstraint(fields=['issuer_key','policy_version','kind','fiscal_year'],name='maison_finance_sequence_identity'),models.CheckConstraint(condition=Q(next_number__gt=0),name='maison_finance_sequence_positive')]
+        constraints=[models.UniqueConstraint(fields=['issuer_key','policy_version','kind','fiscal_year'],condition=Q(series_prefix__isnull=True),name='maison_finance_sequence_identity'),models.UniqueConstraint(fields=['issuer_key','series_prefix','kind','fiscal_year'],condition=Q(series_prefix__isnull=False),name='maison_finance_visible_series'),models.CheckConstraint(condition=Q(next_number__gt=0),name='maison_finance_sequence_positive')]

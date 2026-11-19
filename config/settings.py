@@ -290,6 +290,9 @@ if not LOCAL and (not R2_PUBLIC_ASSET_HOST or not STATIC_RELEASE_ID):
 if R2_PUBLIC_ASSET_HOST and STATIC_RELEASE_ID:
     STATIC_URL = R2_PUBLIC_ASSET_HOST.rstrip('/') + '/static/' + STATIC_RELEASE_ID + '/'
 
+# Owner-approved free rollout; authorization still enforces publication and rights.
+FREE_ACCESS_ENABLED = bool_setting('MAISON_FREE_ACCESS', False)
+
 FEATURES = {
     'reader': True, 'email_password': True,
     **{name: bool_setting('MAISON_' + name.upper(), False) for name in [

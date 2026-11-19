@@ -23,6 +23,41 @@ class LegalNumberingTests(TestCase):
         reserve(policy,'invoice','x',expected=1)
         with self.assertRaises(DomainError):reserve(policy,'invoice','x',expected=1)
         self.assertEqual(FinanceNumberSequence.objects.get().next_number,2)
+    def test_approval_version_rotation_keeps_visible_invoice_and_credit_series(self):
+        from copy import deepcopy
+        policy=self.policy();at=datetime(2026,11,19,tzinfo=timezone.utc)
+        self.assertEqual(reserve(policy,'invoice','first',at),'INV2627000001')
+        self.assertEqual(reserve(policy,'credit_note','first',at),'CN2627000001')
+        changed=deepcopy(policy);changed['version']='new-issuer-approval';changed['numbering']['version']='new-numbering-approval'
+        self.assertEqual(forecast(changed,'invoice','second',at),('INV2627000002',2))
+        self.assertEqual(reserve(changed,'invoice','second',at,expected=2),'INV2627000002')
+        self.assertEqual(reserve(changed,'credit_note','second',at),'CN2627000002')
+        self.assertEqual(FinanceNumberSequence.objects.count(),2)
+    def test_unknown_legacy_prefix_history_is_retained_and_sets_high_water(self):
+        from .numbering import parameters
+        policy=self.policy();at=datetime(2026,11,19,tzinfo=timezone.utc)
+        _,_,key=parameters(policy,'invoice',at)
+        old=FinanceNumberSequence.objects.create(**key,next_number=8)
+        changed={**policy,'numbering':{**policy['numbering'],'version':'replacement-approval'}}
+        self.assertEqual(forecast(changed,'invoice','first',at),('INV2627000008',8))
+        self.assertEqual(reserve(changed,'invoice','first',at,expected=8),'INV2627000008')
+        old.refresh_from_db();self.assertIsNone(old.series_prefix);self.assertEqual(old.next_number,8)
+        self.assertEqual(reserve(policy,'invoice','second',at),'INV2627000009')
+    def test_distinct_visible_prefixes_with_same_approval_are_independent(self):
+        policy=self.policy();at=datetime(2026,11,19,tzinfo=timezone.utc)
+        self.assertEqual(reserve(policy,'invoice','first',at),'INV2627000001')
+        changed={**policy,'numbering':{**policy['numbering'],'prefix':'OTHER'}}
+        self.assertEqual(reserve(changed,'invoice','first',at),'OTHER2627000001')
+        self.assertEqual(reserve(policy,'invoice','second',at),'INV2627000002')
+    def test_invalid_numbering_version_fails_before_counter_write(self):
+        policy=self.policy()
+        for version in [None,'',True,'x'*121]:
+            with self.subTest(version=version),self.assertRaises(DomainError) as error:
+                reserve({**policy,'numbering':{**policy['numbering'],'version':version}},'invoice','fixture')
+            self.assertEqual(error.exception.code,'finance_policy_required')
+        self.assertFalse(FinanceNumberSequence.objects.exists())
+        del policy['numbering']['version']
+        self.assertTrue(reserve(policy,'invoice','fixture').startswith('INV'))
     def test_uuid_scheme_requires_explicit_non_gst_review_and_length_limit(self):
         policy=self.policy();policy['numbering']={'scheme':'prefix_uuid','prefix':'INV'}
         with self.assertRaises(DomainError):reserve(policy,'invoice','uuid')
@@ -44,3 +79,15 @@ class ConcurrentLegalNumberingTests(TransactionTestCase):
             finally:connections['default'].close()
         with ThreadPoolExecutor(max_workers=3) as pool:numbers=list(pool.map(allocate,range(3)))
         self.assertEqual(sorted(numbers),['INV2627000001','INV2627000002','INV2627000003'])
+
+    def test_concurrent_different_approvals_share_one_visible_series(self):
+        from concurrent.futures import ThreadPoolExecutor
+        def allocate(index):
+            close_old_connections()
+            try:
+                policy=LegalNumberingTests.policy(self);policy['numbering']['version']=f'approval-{index}'
+                return reserve(policy,'invoice','fixture',datetime(2026,11,19,tzinfo=timezone.utc))
+            finally:connections['default'].close()
+        with ThreadPoolExecutor(max_workers=3) as pool:numbers=list(pool.map(allocate,range(3)))
+        self.assertEqual(sorted(numbers),['INV2627000001','INV2627000002','INV2627000003'])
+        self.assertEqual(FinanceNumberSequence.objects.count(),1)

@@ -59,6 +59,8 @@ def context(request, locale, **extra):
         "return_to": safe_return(request.POST.get("return_to", request.GET.get("return_to", request.get_full_path())), locale),
         "next_page_url":None,
         "safe_request_id":str(getattr(request,"request_id","")), "retry_url":safe_return(request.get_full_path(),locale) if request.method=="GET" else "",
+        "free_access":getattr(django_settings,"FREE_ACCESS_ENABLED",False),
+        "free_access_available":getattr(django_settings,"FREE_ACCESS_ENABLED",False) and trusted_territory(request) in django_settings.MAISON_PUBLICATION_TERRITORIES,
         "active_nav": "home", "focused": False, "offline_enabled":django_settings.FEATURES.get("offline_text_audio",False), "local_build":django_settings.LOCAL, "allow_index":False, **extra,
     }
 
@@ -597,7 +599,7 @@ def checkout(request,locale,order_id):
     order=Order.objects.filter(pk=order_id,user=request.user).first()
     if not order:
         raise Http404
-    return page(request,locale,"web/checkout.html",active_nav="pass",commerce_bootstrap={"order_id":str(order_id),"return_path":safe_return(order.return_path,locale)})
+    return page(request,locale,"web/checkout.html",active_nav="pass",commerce_bootstrap={"order_id":str(order_id),"return_path":safe_return(order.return_path,locale),"free_access":getattr(django_settings,"FREE_ACCESS_ENABLED",False)})
 
 
 @require_GET

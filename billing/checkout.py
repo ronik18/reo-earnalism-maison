@@ -14,7 +14,13 @@ def qualified_mode():
     return configuration()
 
 
-def eligible(user,offer,territory):
+def free_purchase_guard():
+    if getattr(settings,'FREE_ACCESS_ENABLED',False):
+        raise DomainError('free_access_enabled','Maison access is free; new purchases are disabled.',409)
+
+
+def eligible(user,offer,territory,allow_existing=False):
+    if not allow_existing:free_purchase_guard()
     mode,_,_=qualified_mode()
     if territory!='IN' or offer.currency!='INR':raise DomainError('region_unavailable','This merchant offer is not qualified for this region.',403)
     if not user.is_active or not user.is_verified:raise DomainError('verification_required','An active verified member is required.',403)
@@ -37,6 +43,7 @@ def offer_data(offer):
 
 
 def create_order(user,data,operation_id,territory):
+    free_purchase_guard()
     from accounts.services import safe_return_path
     from .services import order_data
     offer=Offer.objects.select_related('edition__live_revision').filter(pk=data['offer_id']).first()
@@ -63,18 +70,20 @@ def create_order(user,data,operation_id,territory):
 
 
 def process_checkout(job):
-    mode,_,_=qualified_mode();client=RazorpayClient()
     # Mark attempt BEFORE network I/O. An unknown result is reconciled, never blindly retried.
     with transaction.atomic():
         current=OutboxJob.objects.select_for_update().get(pk=job.pk)
         order=Order.objects.select_for_update(of=('self',)).select_related('offer','user','offer__edition__live_revision').get(pk=current.payload['order_id'])
+        attempted=current.payload.get('provider_create_attempted',False)
+        if not order.provider_order_id and not attempted:free_purchase_guard()
+        mode,_,_=qualified_mode()
         if order.test_only!=(mode=='test'):raise DomainError('provider_mode_mismatch','Order belongs to another merchant mode.',409)
         if order.provider_order_id:return {'order_id':str(order.id)}
-        eligible(order.user,order.offer,order.offer_snapshot['territory'])
+        eligible(order.user,order.offer,order.offer_snapshot['territory'],allow_existing=attempted)
         if order.expires_at<=timezone.now():order.status='expired';order.version+=1;order.save();return {'expired':True}
-        attempted=current.payload.get('provider_create_attempted',False)
         if not attempted:
             current.payload={**current.payload,'provider_create_attempted':True};current.save(update_fields=['payload'])
+    client=RazorpayClient()
     response=client.find_order(order) if attempted else client.create_order(order)
     if not response:raise DomainError('awaiting_resolution','Merchant creation outcome requires reconciliation; no repeated order was created.',409)
     identity=provider_id(response.get('id'),'order')

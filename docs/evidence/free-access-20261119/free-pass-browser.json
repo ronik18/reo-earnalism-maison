@@ -1,0 +1,220 @@
+{
+  "scope": "Actual local anonymous free Pass SSR and real built client across desktop/phone browsers; no synthetic payment success, provider writes, book edits or legacy changes",
+  "results": [
+    {
+      "name": "chromium-desktop-en",
+      "locale": "en",
+      "status": "PASS",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "stageScrollWidth": 1240,
+        "stageWidth": 1240,
+        "brokenImages": 0,
+        "cards": [
+          {
+            "left": 236,
+            "right": 886,
+            "width": 650
+          },
+          {
+            "left": 236,
+            "right": 553,
+            "width": 317
+          },
+          {
+            "left": 569,
+            "right": 886,
+            "width": 317
+          }
+        ],
+        "buttons": [
+          {
+            "height": 48.5,
+            "left": 265,
+            "right": 446.15625
+          },
+          {
+            "height": 48.5,
+            "left": 458.15625,
+            "right": 665.796875
+          }
+        ]
+      },
+      "noCommerceOrProviderRequests": true,
+      "pageErrors": []
+    },
+    {
+      "name": "chromium-desktop-bn",
+      "locale": "bn",
+      "status": "PASS",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "stageScrollWidth": 1240,
+        "stageWidth": 1240,
+        "brokenImages": 0,
+        "cards": [
+          {
+            "left": 236,
+            "right": 886,
+            "width": 650
+          },
+          {
+            "left": 236,
+            "right": 553,
+            "width": 317
+          },
+          {
+            "left": 569,
+            "right": 886,
+            "width": 317
+          }
+        ],
+        "buttons": [
+          {
+            "height": 48.5,
+            "left": 265,
+            "right": 432.46875
+          },
+          {
+            "height": 48.5,
+            "left": 444.46875,
+            "right": 651.296875
+          }
+        ]
+      },
+      "noCommerceOrProviderRequests": true,
+      "pageErrors": []
+    },
+    {
+      "name": "firefox-desktop-en",
+      "locale": "en",
+      "status": "PASS",
+      "geometry": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "stageScrollWidth": 1240,
+        "stageWidth": 1240,
+        "brokenImages": 0,
+        "cards": [
+          {
+            "left": 236,
+            "right": 886,
+            "width": 650
+          },
+          {
+            "left": 236,
+            "right": 553,
+            "width": 317
+          },
+          {
+            "left": 569,
+            "right": 886,
+            "width": 317
+          }
+        ],
+        "buttons": [
+          {
+            "height": 48.5,
+            "left": 265,
+            "right": 446.1666717529297
+          },
+          {
+            "height": 48.5,
+            "left": 458.16668701171875,
+            "right": 665.8000183105469
+          }
+        ]
+      },
+      "noCommerceOrProviderRequests": true,
+      "pageErrors": []
+    },
+    {
+      "name": "webkit-phone-en",
+      "locale": "en",
+      "status": "PASS",
+      "geometry": {
+        "width": 390,
+        "scrollWidth": 390,
+        "stageScrollWidth": 390,
+        "stageWidth": 390,
+        "brokenImages": 0,
+        "cards": [
+          {
+            "left": 18,
+            "right": 372,
+            "width": 354
+          },
+          {
+            "left": 18,
+            "right": 372,
+            "width": 354
+          },
+          {
+            "left": 18,
+            "right": 372,
+            "width": 354
+          }
+        ],
+        "buttons": [
+          {
+            "height": 68,
+            "left": 41,
+            "right": 190
+          },
+          {
+            "height": 68,
+            "left": 200,
+            "right": 349
+          }
+        ]
+      },
+      "noCommerceOrProviderRequests": true,
+      "pageErrors": []
+    },
+    {
+      "name": "webkit-phone-bn",
+      "locale": "bn",
+      "status": "PASS",
+      "geometry": {
+        "width": 390,
+        "scrollWidth": 390,
+        "stageScrollWidth": 390,
+        "stageWidth": 390,
+        "brokenImages": 0,
+        "cards": [
+          {
+            "left": 18,
+            "right": 372,
+            "width": 354
+          },
+          {
+            "left": 18,
+            "right": 372,
+            "width": 354
+          },
+          {
+            "left": 18,
+            "right": 372,
+            "width": 354
+          }
+        ],
+        "buttons": [
+          {
+            "height": 68,
+            "left": 41,
+            "right": 190
+          },
+          {
+            "height": 68,
+            "left": 200,
+            "right": 349
+          }
+        ]
+      },
+      "noCommerceOrProviderRequests": true,
+      "pageErrors": []
+    }
+  ]
+}

@@ -70,8 +70,9 @@ function loadSDK() {
   }));
 }
 function Commerce() {
-  const bootstrap = readBootstrap<{order_id?: string; return_path?: string}>("commerce-bootstrap");
+  const bootstrap = readBootstrap<{order_id?: string; return_path?: string; free_access?: boolean}>("commerce-bootstrap");
   const checkoutPage = !!bootstrap.order_id;
+  const freeAccess = bootstrap.free_access === true;
   const [online, setOnline] = useState(navigator.onLine);
   const authenticated = !!document.body.dataset.memberId;
   const [offers, setOffers] = useState<Offer[] | undefined>(),
@@ -113,7 +114,7 @@ function Commerce() {
       }
     } catch {}
 
-    if (authenticated && !checkoutPage) api<{ items: Offer[] }>("/commerce/offers")
+    if (authenticated && !checkoutPage && !freeAccess) api<{ items: Offer[] }>("/commerce/offers")
       .then((data) => {
         if (active.current) setOffers(data.items);
       })
@@ -153,6 +154,7 @@ function Commerce() {
     };
   }, [order?.order_id, order?.status, order?.fulfillment_status]);
   async function create(offer: Offer) {
+    if (freeAccess) return;
     setBusy(true);
     try {
       const snapshot = offerSnapshotKey(offer);
@@ -190,7 +192,7 @@ function Commerce() {
     }
   }
   async function pay() {
-    if (!online || !order || !validCheckout(order.checkout, order.amount)) return;
+    if (freeAccess || !online || !order || !validCheckout(order.checkout, order.amount)) return;
     setBusy(true);
     try {
       await loadSDK();
@@ -239,8 +241,8 @@ function Commerce() {
       <p role="status" aria-live="polite">{status}</p>
       {!online ? <p className="notice">{t("purchase_online_only")}</p> : null}
       {!authenticated ? <div className="empty-state"><h2>{t("pass_guest_title")}</h2><p>{t("pass_guest_help")}</p><a className="button" href={`/${locale}/sign-in/?return_to=${encodeURIComponent(`/${locale}/pass/`)}`}>{t("sign_in")}</a></div> : null}
-      {checkoutPage && !order && !busy ? <div className="empty-state"><p>{t("order_unavailable")}</p><button onClick={() => window.location.reload()}>{t("retry")}</button><a href={`/${locale}/pass/`}>{t("choose_another_offer")}</a></div> : null}
-      {!authenticated || checkoutPage ? null : offers === undefined ? (
+      {checkoutPage && !order && !busy ? <div className="empty-state"><p>{t("order_unavailable")}</p><button onClick={() => window.location.reload()}>{t("retry")}</button><a href={`/${locale}/pass/`}>{t(freeAccess?"back_to_free_access":"choose_another_offer")}</a></div> : null}
+      {freeAccess || !authenticated || checkoutPage ? null : offers === undefined ? (
         <p>{t("loading")}</p>
       ) : !offers.length ? (
         <p>{t("no_offer")}</p>
@@ -281,7 +283,7 @@ function Commerce() {
           <p>
             {t("order_reference")}: {order.order_id}
           </p>
-          {validCheckout(order.checkout, order.amount) ? (
+          {!freeAccess && validCheckout(order.checkout, order.amount) ? (
             <button disabled={busy || !online} onClick={() => void pay()}>
               {t("pay_securely")}
             </button>
@@ -296,8 +298,8 @@ function Commerce() {
           >
             {t("refresh_status")}
           </button>
-          {!validCheckout(order.checkout, order.amount) && !accessGranted(order) && !["failed","cancelled","expired","refunded"].includes(order.status) ? <p className="fine">{t("checkout_provider_unavailable")}</p> : null}
-          {accessGranted(order)||["failed","cancelled","expired","refunded"].includes(order.status)?<a href={`/${locale}/pass/`} onClick={()=>{try { sessionStorage.removeItem(pendingOrderKey); } catch {}}}>{t("choose_another_offer")}</a>:null}
+          {!freeAccess && !validCheckout(order.checkout, order.amount) && !accessGranted(order) && !["failed","cancelled","expired","refunded"].includes(order.status) ? <p className="fine">{t("checkout_provider_unavailable")}</p> : null}
+          {accessGranted(order)||["failed","cancelled","expired","refunded"].includes(order.status)?<a href={`/${locale}/pass/`} onClick={()=>{try { sessionStorage.removeItem(pendingOrderKey); } catch {}}}>{t(freeAccess?"back_to_free_access":"choose_another_offer")}</a>:null}
         </section>
       ) : null}
     </section>

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "scope": "SELECT-only isolated Maison financial aggregate preflight; no customer records or writes",
+  "query_role": "maison_backup",
+  "tls": "verify-full; system CA bundle",
+  "counts": {
+    "live_active_offers": 0,
+    "live_pending_orders": 0,
+    "live_nonterminal_subscriptions": 0,
+    "live_authorized_or_pending_mandates": 0,
+    "finance_sequences": 0,
+    "invoices": 0,
+    "credit_notes": 0
+  },
+  "live_financial_mutations": false
+}

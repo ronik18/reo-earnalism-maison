@@ -103,6 +103,7 @@ def catalog_queryset(locale='en', territory='IN', query='', house='', format='',
         free |= fmt_offered & Q(**{'live_revision__access_policy__'+fmt: 'free'})
         if fmt == format:
             editions = editions.filter(fmt_offered)
+    if getattr(settings,'FREE_ACCESS_ENABLED',False):free=offered
     editions = editions.filter(offered).annotate(catalog_free=free)
     if access == 'free':
         editions = editions.filter(catalog_free=True)
