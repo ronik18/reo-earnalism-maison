@@ -19,3 +19,7 @@ The owner confirmed Reo Enterprise is not GST-registered. The disabled finance p
 The owner approved the$5/month Cloudflare Starter bundle, its terms and recurring overage authorization. It is active with1,000stored and5,000delivered minutes included. Exactly one original180-second technical fixture was uploaded and configured to require signed URLs. Qualification is capped at20delivered minutes. Stream runtime credential/signing-key qualification and actual application playback are separate acceptance steps; do not infer them from activation or source tests. No actual book was uploaded to Stream or published.
 
 The Selfish Giant remains draft. Legacy application/data/DNS are unchanged. Deployment uses only the existing Maison web/maintenance/archive services plus the explicitly approved Stream plan. The consolidated [acceptance checklist](PENDING_VALIDATIONS.md) remains authoritative for productionHA, actual provider/finance qualification and the47-region legal scope.
+
+## Static release binding
+
+Before accepting a rollout, read back the saved `STATIC_RELEASE_ID` from the provider, restart/deploy the matching source, and inspect the emitted HTML asset URLs. A dashboard Save response alone does not prove a controlled input persisted. The first browser probe caught old-release URLs for new theme files; the corrected saved binding and fresh deployment then passed emitted-asset checks and36/36 independent live browser checks, including phone geometry. Preserve the initial failure receipt alongside the final result.

@@ -1,0 +1,200 @@
+{
+  "expected_static_release": "4228c816e3ce0e4c59d4832ed5fb15441394bc79b984af2912f3f3af7f8fc066",
+  "expected_commit": "4c2a4f0333fd56ad7b58b7bed50b4b4c353e7924",
+  "scope": "Independent public desktop/mobile browser checks of exact isolated deployment; no actual book publication, mail or financial mutation; physical UAT deferred and non-blocking",
+  "transport": "Fresh DNS, process-local allowlisted CONNECT, normal end-to-end browser TLS",
+  "results": [
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/explore/?limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/search/?q=river&author=Maison&limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/email-sign-in/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/commerce/credit-notes",
+      "status": "PASS",
+      "anonymousFinancialAccessDenied": true
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/commerce/invoices",
+      "status": "PASS",
+      "anonymousFinancialAccessDenied": true
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/commerce/mandates",
+      "status": "PASS",
+      "anonymousFinancialAccessDenied": true
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "page-errors",
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/explore/?limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/search/?q=river&author=Maison&limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/bn/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/bn/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/en/email-sign-in/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/commerce/credit-notes",
+      "status": "PASS",
+      "anonymousFinancialAccessDenied": true
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/commerce/invoices",
+      "status": "PASS",
+      "anonymousFinancialAccessDenied": true
+    },
+    {
+      "engine": "webkit-mobile",
+      "path": "/commerce/mandates",
+      "status": "PASS",
+      "anonymousFinancialAccessDenied": true
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "page-errors",
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/explore/?limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/search/?q=river&author=Maison&limit=1",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/sign-in/?google_error=identity_link_required",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/email-sign-in/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/commerce/credit-notes",
+      "status": "PASS",
+      "anonymousFinancialAccessDenied": true
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/commerce/invoices",
+      "status": "PASS",
+      "anonymousFinancialAccessDenied": true
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/commerce/mandates",
+      "status": "PASS",
+      "anonymousFinancialAccessDenied": true
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "page-errors",
+      "status": "PASS",
+      "errors": []
+    }
+  ]
+}

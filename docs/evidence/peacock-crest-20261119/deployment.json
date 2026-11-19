@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "scope": "isolated deployment; not public book or full production acceptance",
+  "commit": "4c2a4f0333fd56ad7b58b7bed50b4b4c353e7924",
+  "ci_run": 44489239000,
+  "backend_tests": 480,
+  "static_release": "4228c816e3ce0e4c59d4832ed5fb15441394bc79b984af2912f3f3af7f8fc066",
+  "public_files": 71,
+  "public_bytes": 7372001,
+  "deploys": {
+    "web": "dep-dbvbfre7bikc73851aag",
+    "maintenance": "dep-dbvbcsss728c73dnati0",
+    "archive": "dep-dbvbd6rm8hqs739h4nng",
+    "web_initial": "dep-dbvbd0s9v7es7398i2ag"
+  },
+  "book": "draft, unchanged",
+  "legacy_changed": false,
+  "stream_playback_qualified": false,
+  "live_financial_mutations": false,
+  "initial_browser_finding": "Resolved: corrected persisted STATIC_RELEASE_ID and deployed same approved source; repeat36/36PASS",
+  "static_configuration_readback": "PASS: new release persisted before final fresh deployment",
+  "live_asset_dom": {
+    "release_matches": true,
+    "broken_images": 0,
+    "viewport_width": 958,
+    "scroll_width": 958
+  },
+  "independent_browser_checks": 36
+}

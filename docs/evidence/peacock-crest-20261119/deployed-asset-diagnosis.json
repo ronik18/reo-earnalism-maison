@@ -1,0 +1,23 @@
+{
+  "commit": "4c2a4f0333fd56ad7b58b7bed50b4b4c353e7924",
+  "expected_release": "4228c816e3ce0e4c59d4832ed5fb15441394bc79b984af2912f3f3af7f8fc066",
+  "observed_release": "3cec3a985cd2c4a93c9994d1fdf4a6669597ef11807678f4c03ff97563a98108",
+  "route": "/en/series/",
+  "engine": "webkit-mobile",
+  "viewport_width": 390,
+  "document_scroll_width": 459,
+  "http_404": [
+    "maison/peacock/tokens.css",
+    "maison/peacock/maison-theme.css",
+    "maison/peacock/icons/house.svg",
+    "maison/peacock/icons/compass.svg",
+    "maison/peacock/icons/book-open.svg",
+    "maison/peacock/icons/stack.svg",
+    "maison/peacock/icons/archive.svg",
+    "maison/peacock/icons/star.svg",
+    "maison/peacock/icons/gear.svg"
+  ],
+  "classification": "Application/runtime static release mismatch; root environment verification requested",
+  "screenshot": "live-diagnostic-webkit.png",
+  "initial_receipt": "deployed-commercial-browser.initial-failure.json"
+}
