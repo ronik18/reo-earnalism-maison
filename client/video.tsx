@@ -84,7 +84,7 @@ function Video({boot}: {boot: Boot}) {
       renewAt.current = performance.now()+Math.max(250,remaining-Math.min(15000,remaining/3));
       if (resume && player.current && chapters[active.current]?.asset_id === c.asset_id) at = point(c).position_ms;
       active.current = i; setIndex(i); position.current = Math.max(0,Math.min(c.duration_ms,at || 0));
-      setSource({url,chapter:c,generation:run,at:position.current,resume});
+      setSource({url,chapter:c,generation:run,at:position.current,resume:resume && playing.current});
     } catch(error) {
       if (!mounted.current || run !== generation.current || abort.signal.aborted) return;
       playing.current = false; renewAt.current = Infinity; setSource(undefined); setStatus(errorText(error));
@@ -105,7 +105,7 @@ function Video({boot}: {boot: Boot}) {
       ()=>setStatus(t("media_retry")),()=>{restorationPending.current=false;});
     const store = () => {position.current = Math.max(0,Math.min(source.chapter.duration_ms,Math.round((sdk.currentTime || 0)*1000)));};
     const update = () => {if(!restoration.ready())return;store();if(performance.now()-lastSaved.current>=15000)void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
-    const paused = () => {if(!restoration.ready())return;playing.current=false;store();void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
+    const paused = () => {playing.current=false;if(!restoration.ready())return;store();void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
     const play = () => {playing.current=true;if(performance.now()>=renewAt.current)void load(active.current,point().position_ms,true);};
     const error = () => {void recover();};
     const handlers: [string,()=>void][] = [["loadedmetadata",restoration.metadata],["canplay",restoration.metadata],["timeupdate",update],["play",play],["pause",paused],["ended",paused],["error",error]];
