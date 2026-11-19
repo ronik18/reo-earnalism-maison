@@ -17,7 +17,7 @@ One current register. Integration Lane alone owns integration, provider changes 
 | Source integration | Reviewed backup-reference/restore code on main171c794; exact-head CI44456409856 passed304backend tests,frontend check/build,migrations/no drift;29focused backup tests passed. UI/static release unchanged. | [CI](https://github.com/ronik18/reo-earnalism-maison/actions/runs/44456409856) |
 | Maintenance / V11 technical | Bounded cleanup plus actual provider Scheduled runs,distinct successful DB receipts,cleared leases; empty repeat. Narrow audit/support cleanup and hold/lease safeguards tested. | [Activation](evidence/isolated-provider-activation.json), [first](evidence/maintenance-automatic-first.json), [second](evidence/maintenance-automatic-second.json) |
 | Database/archive / V10 isolated | Approved Launch0.25–2CU/7day history active. SELECT-only backup role; private bucket-only token tested. Actual automatic daily/monthly encrypted archive/readback; same archive restored locally,all60table counts/content/column hashes match. Normal export03UTC restored. | [Activation](evidence/isolated-provider-activation.json), [restore](evidence/scheduled-archive-restore-result.json), [scope](evidence/archive-scope-qualification.json) |
-| HTTPS after activation | Liveness200,protected DB/schema readiness200,draft catalog404,legacy apex200; verified TLS. | [Actual checks](evidence/activation-https-result.json) |
+| HTTPS after activation | Liveness200,protected DB/schema readiness200,draft catalog404,legacy apex200; verified TLS. | [Protected actual checks](evidence/activation-https-result.json), [independent7/7](evidence/activation-independent-final.json) |
 
 ## Remaining — one next action each
 

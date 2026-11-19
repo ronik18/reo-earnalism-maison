@@ -116,5 +116,11 @@
     "deploy": "dep-dbv0fjjrjlhs73agjt30",
     "unchanged_by_activation": true,
     "observed": "Existing Render web Environment page Last successfully deployed commit and Live links"
+  },
+  "independent_final_https": {
+    "receipt": "activation-independent-final.json",
+    "passed": 7,
+    "total": 7,
+    "mutations": false
   }
 }
