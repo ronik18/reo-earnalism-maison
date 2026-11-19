@@ -1,0 +1,33 @@
+{
+  "status": "PARTIAL",
+  "scope": "original technical fixture provider qualification, not full authenticated Maison journey",
+  "runtime_commit": "4c2a4f0333fd56ad7b58b7bed50b4b4c353e7924",
+  "render_deploy": "dep-dbvbvv9srm7s73c1pelg",
+  "runtime_fields_saved_and_privately_readback_verified": 5,
+  "feature_flag": "enabled for isolated qualification; draft and rights guards unchanged",
+  "read_token": "Stream Read only, no expiry",
+  "bootstrap_token": "Stream Write only, expires2026-11-20",
+  "signing_key": "durable, private custody",
+  "private_custody_mode": "0600, gitignored; runtime fields in existing encrypted Render environment",
+  "browser": {
+    "engine": "actual Chrome",
+    "source_duration_seconds": 180,
+    "decoded_playback_seconds": 20.778092,
+    "ready_state": 4,
+    "media_error": null,
+    "playback_stopped": true,
+    "unsigned_player": "401 unauthorized",
+    "expired_player": "401 unauthorized signature expired",
+    "signed_urls_or_credentials_in_receipt": false
+  },
+  "terminal_probe": "Cloudflare1010 prevents urllib transport qualification; not treated as token-denial proof",
+  "pending": [
+    "owner existing staff MFA verification",
+    "approval for five temporary content-create permissions to prepare separate technical draft, removed after intake",
+    "authenticated Maison technical-draft playback, renewal, progress/resume"
+  ],
+  "book_published": false,
+  "legacy_changed": false,
+  "new_paid_plan": false,
+  "account_authority_changed": false
+}
