@@ -1,0 +1,375 @@
+{
+  "scope": "Actual original local PostgreSQL login/held-request API+UI/export worker/private download; EN/BN notices/signup disclosure desktop+phone",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "locale": "en",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "locale": "en",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "locale": "en",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "locale": "en",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "locale": "bn",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "locale": "bn",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "locale": "bn",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "locale": "bn",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "locale": "en",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "locale": "en",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "locale": "en",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "locale": "en",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "locale": "bn",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "locale": "bn",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "locale": "bn",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "locale": "bn",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "id": "actual-local-export-worker-private-download-and-safe-owned-records",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "id": "no-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "locale": "en",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "locale": "en",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "locale": "en",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "locale": "en",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "locale": "bn",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "locale": "bn",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "locale": "bn",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "locale": "bn",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "locale": "en",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "locale": "en",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "locale": "en",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "locale": "en",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "locale": "bn",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "locale": "bn",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "locale": "bn",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "locale": "bn",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "id": "actual-local-export-worker-private-download-and-safe-owned-records",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "id": "no-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "locale": "en",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "locale": "en",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "locale": "en",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "locale": "en",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "locale": "bn",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "locale": "bn",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "locale": "bn",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "locale": "bn",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "locale": "en",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "locale": "en",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "locale": "en",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "locale": "en",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "locale": "bn",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "locale": "bn",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "locale": "bn",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "locale": "bn",
+      "id": "signup-disclosure-and-held-request-reason",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "id": "actual-local-export-worker-private-download-and-safe-owned-records",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "id": "no-page-errors",
+      "status": "PASS"
+    }
+  ]
+}

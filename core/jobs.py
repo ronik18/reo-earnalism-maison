@@ -52,7 +52,7 @@ def run_due_jobs(limit=25,max_seconds=45):
             current.locked_until=None;current.lease_owner=''
             if error:
                 current.error_code=error
-                if error in ['awaiting_resolution','provider_not_enabled','handler_not_enabled','scheduled_publication_invalid','scheduled_publication_held','refund_review_required','provider_not_qualified','provider_token_identity_missing']:current.status='blocked'
+                if error in ['awaiting_resolution','privacy_hold','provider_not_enabled','handler_not_enabled','scheduled_publication_invalid','scheduled_publication_held','refund_review_required','provider_not_qualified','provider_token_identity_missing']:current.status='blocked'
                 elif current.attempts>=7:current.status='dead'
                 else:
                     current.status='pending';delays=[30,120,600,1800,7200,21600];current.not_before=timezone.now()+timedelta(seconds=delays[min(current.attempts-1,5)])

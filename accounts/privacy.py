@@ -49,6 +49,13 @@ def _export_financial_row(row):
     return row
 
 
+def _export_support_row(row):
+    row=dict(row)
+    for field in ('email','locale','category','message','order_id'):
+        if not isinstance(row.get(field),str):row[field]=None
+    return row
+
+
 def _write_export(user,file,deadline):
     from reader.models import Progress,Completion,Annotation,SavedItem,PersonalList,PersonalListItem,DownloadLicense
     from learning.models import LessonCompletion,QuizAttempt
@@ -72,6 +79,8 @@ def _write_export(user,file,deadline):
         'saved_items':SavedItem.objects.filter(user=user).values('edition_id','created_at'),
         'lists':PersonalList.objects.filter(user=user).values('id','name','created_at','updated_at'),
         'list_items':PersonalListItem.objects.filter(personal_list__user=user).values('personal_list_id','edition_id','sort_order','added_at'),
+        'devices':Device.objects.filter(user=user).values('id','label','created_at','last_seen_at','expires_at','revoked_at'),
+        'support_requests':OutboxJob.objects.filter(actor=user,kind='contact_support').values('id','created_at','completed_at','status',email=F('payload__email'),locale=F('payload__locale'),category=F('payload__category'),message=F('payload__message'),order_id=F('payload__order_id')),
         'downloads':DownloadLicense.objects.filter(user=user).values('id','device_id','revision_id','format','unit_ids','issued_at','expires_at','revoked_at'),
         'learning_completion':LessonCompletion.objects.filter(user=user).values('lesson_id','completed_at'),
         'quiz_attempts':QuizAttempt.objects.filter(user=user).values('id','quiz_id','quiz_version','status','answers','score','result','started_at','submitted_at'),
@@ -97,7 +106,7 @@ def _write_export(user,file,deadline):
         raw(',');value(name);raw(':[');first=True
         for row in rows.using(alias).iterator(chunk_size=200):
             if not first:raw(',')
-            first=False;value(_export_financial_row(row) if name in ('invoices','invoice_revisions') else row)
+            first=False;value(_export_financial_row(row) if name in ('invoices','invoice_revisions') else _export_support_row(row) if name=='support_requests' else row)
         raw(']')
     raw('}');file.flush();file.seek(0)
     return size,digest.hexdigest()
@@ -144,7 +153,22 @@ def delete_account(job):
     from library import storage
     with transaction.atomic():
         user=User.objects.select_for_update().filter(pk=job.actor_id).first()
-        if not user:return {'status':'already_removed'}
+        if not user:return {'status':'already_removed','retained_categories':[]}
+        from .retention import _held,_row_held
+        current=OutboxJob.objects.select_for_update().get(pk=job.pk)
+        # Existing recorded holds apply equally to explicit deletion and routine
+        # retention. Never erase held support/export material by deleting its actor.
+        if _held(user.pk) or _row_held(current):
+            raise DomainError('privacy_hold','A recorded legal or retention hold requires review before deletion. Contact sales@reoenterprise.org; deletion is not complete.',409)
+        # Reuse the same hold rules with bounded-memory batches and one marker
+        # query per batch, rather than querying actor/target holds for every job.
+        from itertools import islice
+        from core.models import AuditEvent
+        related_rows=OutboxJob.objects.select_for_update().filter(actor=user).exclude(pk=current.pk).only('id','actor_id','payload','result').iterator(chunk_size=100)
+        while batch:=list(islice(related_rows,100)):
+            markers=set(AuditEvent.objects.filter(action__in=['legal.hold','retention.hold'],entity_kind='OutboxJob',entity_id__in=[str(row.pk) for row in batch]).values_list('entity_kind','entity_id'))
+            if any(_row_held(row,actor_held=False,held_targets=markers) for row in batch):
+                raise DomainError('privacy_hold','A recorded hold on account material requires review before deletion. Contact sales@reoenterprise.org; deletion is not complete.',409)
         if (Order.objects.filter(user=user).filter(Q(status__in=['creating','created','pending'])|Q(fulfillment_status__in=['refund_pending','review'])).exists()
             or LegacyLiability.objects.filter(user=user,status='unresolved').exists()
             or Refund.objects.filter(payment__order__user=user,status__in=['requested','approved','submitted','pending']).exists()):
@@ -155,7 +179,10 @@ def delete_account(job):
         # An already-claimed export completes/cancels before deletion; don't race an upload of erased data.
         if OutboxJob.objects.filter(actor=user,kind='privacy_export',status='claimed',locked_until__gt=timezone.now()).exists():
             raise DomainError('export_in_progress','The current export is finishing; deletion will retry.',503)
-        current=OutboxJob.objects.select_for_update().get(pk=job.pk)
+        retained_categories=['account_security_records']
+        if (Order.objects.filter(user=user).exists() or LegacyLiability.objects.filter(user=user).exists()
+            or Subscription.objects.filter(user=user).exists() or Mandate.objects.filter(user=user).exists()):
+            retained_categories.append('financial_obligations')
         keys=set(current.payload.get('delete_export_keys',[]))
         for artifact in OutboxJob.objects.filter(actor=user,kind='privacy_export').values('payload','result'):
             if artifact['result'].get('storage_key'):keys.add(artifact['result']['storage_key'])
@@ -184,7 +211,7 @@ def delete_account(job):
         audit(user,'privacy.account_anonymised',user)
     # Exact export keys survive provider failures in the deletion job payload; retries are idempotent.
     for key in keys:storage.delete_private(key)
-    return {'status':'anonymised_financial_records_retained'}
+    return {'status':'anonymised','retained_categories':retained_categories}
 
 
 def cleanup_expired_exports(limit=20,max_seconds=20):
@@ -195,13 +222,32 @@ def cleanup_expired_exports(limit=20,max_seconds=20):
     deadline=time.monotonic()+max_seconds;now=timezone.now();stamp=_iso(now)
     candidates=OutboxJob.objects.filter(kind='privacy_export').exclude(status='claimed').filter(
         Q(payload__export_cleanup_pending=True)|Q(result__expires_at__lte=stamp)|Q(payload__prepared_export__expires_at__lte=stamp)
-    ).filter(Q(payload__export_cleanup_completed__isnull=True)|Q(payload__export_cleanup_completed=False)).order_by('created_at','id').values_list('id',flat=True)[:limit]
-    identifiers=list(candidates);cleaned=failed=0
+    ).filter(Q(payload__export_cleanup_completed__isnull=True)|Q(payload__export_cleanup_completed=False))
+    # Reserve a bounded scan using the existing actorless checkpoint pattern.
+    # Advance across held/failed prefixes; external deletion never holds its lock.
+    checkpoint_key='retention:privacy-exports:v1'
+    OutboxJob.objects.get_or_create(dedupe_key=checkpoint_key,defaults={
+        'kind':'retention_checkpoint','status':'done','not_before':now,'completed_at':now,'payload':{'after':None}})
+    with transaction.atomic():
+        checkpoint=OutboxJob.objects.select_for_update(skip_locked=True).filter(dedupe_key=checkpoint_key,kind='retention_checkpoint').first()
+        if checkpoint is None:return {'cleaned':0,'failed':0,'busy':True}
+        cursor=checkpoint.payload.get('after') if isinstance(checkpoint.payload,dict) else None
+        if cursor:
+            import uuid
+            try:cursor=uuid.UUID(cursor)
+            except (ValueError,TypeError,AttributeError):cursor=None
+        if cursor:candidates=candidates.filter(pk__gt=cursor)
+        batch=list(candidates.order_by('pk').values_list('id',flat=True)[:limit+1])
+        identifiers=batch[:limit]
+        checkpoint.payload={'after':str(identifiers[-1]) if len(batch)>limit else None}
+        checkpoint.completed_at=now;checkpoint.save(update_fields=['payload','completed_at'])
+    cleaned=failed=0
     for identifier in identifiers:
         if time.monotonic()>=deadline:break
         with transaction.atomic():
-            job=OutboxJob.objects.select_for_update().get(pk=identifier)
-            if job.status=='claimed' or job.payload.get('export_cleanup_completed'):continue
+            job=OutboxJob.objects.select_for_update(skip_locked=True).filter(pk=identifier).first()
+            from .retention import _row_held
+            if job is None or job.status=='claimed' or _row_held(job) or job.payload.get('export_cleanup_completed'):continue
             payload=dict(job.payload);result=dict(job.result)
             keys=set(payload.get('export_cleanup_keys',[]))|set(payload.get('export_keys',[]))
             for source in [result,payload.get('prepared_export',{})]:

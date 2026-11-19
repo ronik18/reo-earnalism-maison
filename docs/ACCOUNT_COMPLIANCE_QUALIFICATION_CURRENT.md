@@ -1,3 +1,5 @@
+> Current20November2026 status: [operating qualification](OPERATING_LEGAL_QUALIFICATION_20261120.md) and [acceptance register](PENDING_VALIDATIONS.md) supersede historical implementation-pending statements below. Holds, resolution-aware retention, notices, restore reconciliation and CDPA acceptance now have scoped evidence; no global legal PASS is implied.
+
 # Current account and operating-compliance qualification
 
 18 November 2026. The account lane began with a read-only source/configuration audit; Integration Lane subsequently completed the explicitly authorized two-message HTTPS test on an owned synthetic account. No DNS modification or book publication occurred. This lane prepared additive bilingual notice views/templates and focused tests, alongside this document and its [sanitized evidence](evidence/account-compliance-current.json). Integration Lane owns shared route/footer wiring and deployment.

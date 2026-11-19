@@ -110,7 +110,7 @@ def register_member(email,password,display_name='',locale='en',return_path='/'):
         try:
             with transaction.atomic():user=User.objects.create_user(email,password,display_name=display_name)
         except IntegrityError:return {'status':'delivery_pending'}
-        Preferences.objects.create(user=user,locale=locale);Consent.objects.create(user=user)
+        Preferences.objects.create(user=user,locale=locale);Consent.objects.create(user=user,necessary_notice_version=settings.PRIVACY_NOTICE_VERSION)
         _create_action(user,'verify_email',return_path,locale);audit(user,'account.registered',user)
     return {'status':'delivery_pending'}
 

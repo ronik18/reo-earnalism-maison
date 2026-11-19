@@ -32,16 +32,19 @@ ROUTINE_SECURITY_ACTIONS = frozenset({
 })
 
 
-def _row_held(row):
-    if _held(row.actor_id):
+def _row_held(row, *, actor_held=None, held_targets=None):
+    if (_held(row.actor_id) if actor_held is None else actor_held):
         return True
     for field in ('payload', 'result', 'detail'):
         value = getattr(row, field, {})
         if not isinstance(value, dict) or value.get('retention_hold') or value.get('legal_hold'):
             return True
+    identities={(type(row).__name__,str(row.pk))}
     targets = Q(entity_kind=type(row).__name__, entity_id=str(row.pk))
     if isinstance(row, AuditEvent):
+        identities.add((row.entity_kind,row.entity_id))
         targets |= Q(entity_kind=row.entity_kind, entity_id=row.entity_id)
+    if held_targets is not None:return bool(identities & held_targets)
     return AuditEvent.objects.filter(action__in=['legal.hold', 'retention.hold']).filter(targets).exists()
 
 
