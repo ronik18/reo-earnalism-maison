@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "application_commit": "284ae36086ac6f2f5b79d5869cd4033a5deb0ecf",
+  "source_PR": "https://github.com/ronik18/reo-earnalism-maison/pull/10",
+  "qualified_candidate": "57e64028d8fe65ab51b6fd3445a9d17b6b06e958",
+  "merged_tree_identical_to_passed_candidate": true,
+  "main_CI": {
+    "url": "https://github.com/ronik18/reo-earnalism-maison/actions/runs/44620774837",
+    "status": "success",
+    "backend_tests": 548,
+    "client_tests": 37
+  },
+  "static_release": "55d7f823ac527a9c3d8a9ec60481d7ac9097269f3247ad6bef3a83c215001731",
+  "assets": 72,
+  "asset_bytes": 7373825,
+  "assets_independent_HTTPS_checksum_type_immutable_cache": "PASS",
+  "services": {
+    "web": {
+      "service": "srv-dbunbd8jo6nc73akbng0",
+      "deployment": "dep-dbvmp68n74is73a2drv0",
+      "status": "Live"
+    },
+    "maintenance": {
+      "service": "crn-dbv7bte7bikc73fpso3g",
+      "deployment": "dep-dbvmpfkipgvc73dmeg60",
+      "status": "Live"
+    },
+    "archive": {
+      "service": "crn-dbv7agetlv9c7381is10",
+      "deployment": "dep-dbvmpq88v5cc73b5b8pg",
+      "status": "Live"
+    }
+  },
+  "local_browser": {
+    "passed": 66,
+    "scope": "Original local mixed EN/BN published fixtures,existing Bengali preference,actual login/filter/reader/save-filter/canonical links in all3 engines desktop+phone"
+  },
+  "cached_fallback_paths": 3,
+  "live_browser": {
+    "passed": 93,
+    "scope": "Actual public deployed English UI and legacyBN redirects,optionalall/en/bn filters,freepass,notices,disabledsupport and private/draft/learning boundaries in Chromium/Firefox/phoneWebKit"
+  },
+  "new_migrations": false,
+  "profile_rewrite": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "book_draft_changed": false,
+  "legacy_changed": false,
+  "plans_schedules_credentials_DNS_changed": false
+}

@@ -7,3 +7,7 @@ Existing Bengali interface URLs redirect to their matching English destinations,
 Home,Explore,search,collections,Series and learning discovery default to all languages. Explicit content filters remain separate and bind pagination cursors. Mixed-language search applies the appropriate per-edition search configuration. Language choices are derived from published content with current English/Bengali options. Additional publication-language validation/index/model changes remain necessary when introducing a new language; this amendment does not itself publish another language.
 
 Legacy locale API fields and dormant translation resources remain compatibility data, not active alternate screens. Existing security/financial/retention/publication policies and the protected draft are unchanged. Physical Android/iOS UAT remains deferred and non-blocking.
+
+## Deployed acceptance
+
+PR#10/main284ae36 is Live on all three existing isolated services. Exact-mainCI passed548backend/37client tests;66mixed-language localbrowser,3cachedfallback and93livebrowserchecks passed. [Receipt and previews](evidence/unified-reader-20261120/README.md). Protected draft and legacy unchanged.

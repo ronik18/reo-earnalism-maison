@@ -44,6 +44,12 @@ PR#9 merged and exact-main CI44613260554 passed; all three existing services are
 
 The owner confirmed Indian registered proprietorship, authorized adult testers only/no customers or known child accounts, and Chief of Operations / Grievance Officer mailbox responsibility. Owner-approved shared Workspace CDPA acceptance persisted after reload; no other declaration or mailbox change. Exact47-region assessment records current connections separately from future public/all-ages obligations, with unknowns explicit. Current Google basic openid/email/profile scopes have the documented Testing audience exception; Testing alone is not an audience-expansion blocker. Physical UAT stays deferred/non-blocking.
 
+## Owner-approved unified reader journey — 20 November 2026
+
+Supersedes earlier bilingual-interface assumptions: one English UI, all eligible published content languages shown by default, and an optional explicit content-language filter. Historic Bengali links preserve queries, tokens, POSTs and reading identity through the shared English journey. Bengali book text, metadata and fonts remain intact. No profile rewrite or migration. Catalog, search, collections, Series, learning and saved filters separate content language from interface language; offline uses one English shell.
+
+PR #10/main `284ae36` is deployed to the existing web, maintenance and archive services. Exact-main CI 44620774837 passed **548 backend / 37 client tests**; 66 local mixed-language browser checks, three cached-fallback paths and 93 live browser checks passed. All 72 immutable assets qualified. The protected draft, empty financial records and legacy HTTPS 200 are unchanged. Physical UAT remains deferred and non-blocking. [Evidence and previews](evidence/unified-reader-20261120/README.md).
+
 ## Remaining — one next action each
 
 | Item | Scope and next action |

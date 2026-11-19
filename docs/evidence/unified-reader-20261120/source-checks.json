@@ -29,5 +29,14 @@
   "unified_offline_shell_tests": {
     "tests": 6,
     "result": "PASS"
-  }
+  },
+  "final_main_CI": {
+    "url": "https://github.com/ronik18/reo-earnalism-maison/actions/runs/44620774837",
+    "backend_tests": 548,
+    "client_tests": 37,
+    "result": "PASS"
+  },
+  "cached_fallback_browser_paths": 3,
+  "live_browser_checks": 93,
+  "live_browser_passed": 93
 }

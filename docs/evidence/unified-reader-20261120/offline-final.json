@@ -1,0 +1,32 @@
+{
+  "scope": "Actual fresh service worker install, cache readback and cold offline legacy-Bengali navigation using disposable local public shell",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "engine": "chromium",
+      "status": "PASS",
+      "singleEnglishShell": true,
+      "legacyBengaliOfflineLink": true
+    },
+    {
+      "engine": "firefox",
+      "status": "PASS",
+      "singleEnglishShell": true,
+      "legacyBengaliOfflineLink": true
+    },
+    {
+      "engine": "webkit",
+      "status": "PASS",
+      "method": "Actual disposable loopback origin stopped; service worker cached English shell served for legacy Bengali navigation",
+      "OS_network_changed": false,
+      "physical_UAT": {
+        "deferred": true,
+        "blocking": false
+      }
+    }
+  ],
+  "limitations": "Playwright WebKit setOffline navigation returned an internal error; actual local origin outage successfully qualified the cached English fallback. No physical-device acceptance claimed."
+}

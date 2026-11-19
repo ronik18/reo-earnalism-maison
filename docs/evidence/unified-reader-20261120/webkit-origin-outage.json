@@ -1,0 +1,10 @@
+{
+  "engine": "webkit",
+  "status": "PASS",
+  "method": "Actual disposable loopback origin stopped; service worker cached English shell served for legacy Bengali navigation",
+  "OS_network_changed": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}
