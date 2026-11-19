@@ -1,0 +1,120 @@
+{
+  "recorded_at": "2026-11-19T04:08:00.676626+00:00",
+  "scope": "owner-approved isolated qualification only",
+  "neon": {
+    "plan": "launch",
+    "min_cu": 0.25,
+    "max_cu": 2,
+    "history_retention_seconds": 604800,
+    "retroactive_history_claimed": false
+  },
+  "backup_database_role": {
+    "name": "maison_backup",
+    "qualification": "backup-role-qualification.json"
+  },
+  "archive": {
+    "bucket": "reo-earnalism-maison-backups",
+    "public_access": false,
+    "credential_scope": "single backup bucket Object Read and Write",
+    "credential_expiry": "2027-02-16",
+    "qualification": "archive-scope-qualification.json",
+    "automatic_export_restore": "pass; actual scheduled archive downloaded and all60 exact-snapshot table fingerprints match after local PG18 restore",
+    "ciphertext_bytes": 262499,
+    "ciphertext_sha256": "4be249b95c6dc804daa0e1fd3670af927af92012480ac283b00783ccea6e0e2a",
+    "restore_receipt": "scheduled-archive-restore-result.json",
+    "retention_actual": {
+      "eligible_pairs": 0,
+      "removed_pairs": 0,
+      "eligible_orphans": 0,
+      "removed_orphans": 0,
+      "hold_behavior": "tested; no claim of observing aged real archives"
+    }
+  },
+  "render": {
+    "workspace_upgrade": false,
+    "web_service_unchanged": true,
+    "maintenance": {
+      "id": "crn-dbv7bte7bikc73fpso3g",
+      "region": "singapore",
+      "cpu": 0.5,
+      "memory_mb": 512,
+      "schedule": "* * * * *",
+      "source": "171c794da9243fc7ffe9f16854e033bb16a3f229",
+      "automatic_success": "pass; two distinct successful receipts correlated with Scheduled provider runs",
+      "receipt_files": [
+        "maintenance-automatic-first.json",
+        "maintenance-automatic-second.json"
+      ],
+      "provider_runs": [
+        {
+          "trigger": "Scheduled",
+          "duration_seconds": 12.2,
+          "log_url": "https://dashboard.render.com/cron/crn-dbv7bte7bikc73fpso3g/logs?r=2026-11-19%4004%3A08%3A02%7E2026-11-19%4004%3A10%3A14",
+          "observed_start_utc": "2026-11-19T04:09:08Z",
+          "observed_finish_utc": "2026-11-19T04:09:14Z"
+        },
+        {
+          "trigger": "Scheduled",
+          "duration_seconds": 22.8,
+          "log_url": "https://dashboard.render.com/cron/crn-dbv7bte7bikc73fpso3g/logs?r=2026-11-19%4004%3A09%3A04%7E2026-11-19%4004%3A11%3A26",
+          "observed_start_utc": "2026-11-19T04:10:11Z",
+          "application_finish_utc": "2026-11-19T04:10:13.549679Z"
+        }
+      ],
+      "provider_identifier_note": "Dashboard exposes timestamp-range run links, not an opaque run ID; application UUIDs are not provider IDs.",
+      "screenshot": "maintenance-recurring.png",
+      "paused_for_reference_export": true,
+      "resumed": true,
+      "deploy": "dep-dbv7jf49v7es738u70dg",
+      "named_configuration_correction": "Three named variables corrected after asynchronous clipboard timing mismatch; web unchanged; no due jobs processed during qualification",
+      "final_receipt": "maintenance-final-readback.json",
+      "final_screenshot": "maintenance-final.png",
+      "final_provider_run": {
+        "trigger": "Scheduled",
+        "duration_seconds": 12.8,
+        "log_url": "https://dashboard.render.com/cron/crn-dbv7bte7bikc73fpso3g/logs?r=2026-11-19%4004%3A25%3A03%7E2026-11-19%4004%3A27%3A15"
+      }
+    },
+    "independent_export": {
+      "id": "crn-dbv7agetlv9c7381is10",
+      "region": "singapore",
+      "cpu": 0.5,
+      "memory_mb": 512,
+      "schedule": "0 3 * * *",
+      "source": "171c794da9243fc7ffe9f16854e033bb16a3f229",
+      "automatic_success": "pass",
+      "deploy": "dep-dbv7f9mtlv9c7381vk0g",
+      "qualification_schedule": "17 4 19 11 *",
+      "final_schedule": "0 3 * * *",
+      "final_command": "python -m operations.scheduled_export --apply-retention",
+      "reference_flag_removed": true,
+      "trigger": "Scheduled",
+      "run_log_url": "https://dashboard.render.com/cron/crn-dbv7agetlv9c7381is10/logs?r=2026-11-19%4004%3A16%3A03%7E2026-11-19%4004%3A18%3A16",
+      "provider_started_utc": "2026-11-19T04:17:09Z",
+      "provider_finished_utc": "2026-11-19T04:17:16Z",
+      "duration_seconds": 13.8,
+      "screenshot": "scheduled-archive.png"
+    }
+  },
+  "book": "draft; not published",
+  "legacy": "unchanged",
+  "dns_changes": false,
+  "production_ha_acceptance": false,
+  "mailboxes": "operator-managed; no access or deletion",
+  "https": "activation-https-result.json",
+  "test_source": {
+    "commit": "171c794da9243fc7ffe9f16854e033bb16a3f229",
+    "ci": 44456409856,
+    "conclusion": "success",
+    "backend_tests": 304,
+    "build": "passed",
+    "migrations": "passed/no drift",
+    "focused_backup_tests": 29
+  },
+  "web": {
+    "source": "77901394188da771e92d5bf4baf3e176cb08135b",
+    "deploy": "dep-dbv0fjjrjlhs73agjt30",
+    "unchanged_by_activation": true,
+    "observed": "Existing Render web Environment page Last successfully deployed commit and Live links"
+  }
+}

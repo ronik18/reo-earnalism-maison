@@ -1,0 +1,1 @@
+{"archive_bucket": "reo-earnalism-maison-backups", "archive_list_status": 200, "archive_objects_seen": 0, "content_bucket_read_denials": {"reo-earnalism-maison-private": 403, "reo-earnalism-maison-public": 403}, "objects_deleted": 0, "objects_written": 0, "secrets_emitted": false, "status": "pass"}

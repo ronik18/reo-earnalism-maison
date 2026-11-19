@@ -1,0 +1,78 @@
+{
+  "lease_clear": true,
+  "read_only": true,
+  "receipt": {
+    "last_success": {
+      "commit": "01fda1078176bc34e9bc050e81b47bb405c75d07",
+      "counts": {
+        "cache_references": {
+          "deleted": 0
+        },
+        "expired_exports": {
+          "cleaned": 0,
+          "failed": 0
+        },
+        "processed": 0,
+        "rate_counters": {
+          "deleted": 0
+        },
+        "retention": {
+          "dry_run": false,
+          "eligible": {
+            "abandoned_signups": 0,
+            "action_tokens": 0,
+            "audit_outcomes": 0,
+            "devices": 0,
+            "mail_payloads": 0,
+            "receipts": 0,
+            "sessions": 0,
+            "support_payloads": 0
+          },
+          "time_budget_exhausted": false
+        }
+      },
+      "error_code": "",
+      "finished_at": "2026-11-19T04:10:13.549679Z",
+      "outcome": "success",
+      "run_id": "90d64809-5fca-47b3-a0bb-b031de694c9b",
+      "source": "scheduled",
+      "started_at": "2026-11-19T04:10:13.469072Z"
+    },
+    "latest": {
+      "commit": "01fda1078176bc34e9bc050e81b47bb405c75d07",
+      "counts": {
+        "cache_references": {
+          "deleted": 0
+        },
+        "expired_exports": {
+          "cleaned": 0,
+          "failed": 0
+        },
+        "processed": 0,
+        "rate_counters": {
+          "deleted": 0
+        },
+        "retention": {
+          "dry_run": false,
+          "eligible": {
+            "abandoned_signups": 0,
+            "action_tokens": 0,
+            "audit_outcomes": 0,
+            "devices": 0,
+            "mail_payloads": 0,
+            "receipts": 0,
+            "sessions": 0,
+            "support_payloads": 0
+          },
+          "time_budget_exhausted": false
+        }
+      },
+      "error_code": "",
+      "finished_at": "2026-11-19T04:10:13.549679Z",
+      "outcome": "success",
+      "run_id": "90d64809-5fca-47b3-a0bb-b031de694c9b",
+      "source": "scheduled",
+      "started_at": "2026-11-19T04:10:13.469072Z"
+    }
+  }
+}

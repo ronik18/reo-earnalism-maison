@@ -1,0 +1,20 @@
+{
+  "role": "maison_backup",
+  "created_new": true,
+  "direct_verified_tls": true,
+  "default_read_only": true,
+  "migrations_readable": 43,
+  "select_granted": true,
+  "table_write_denied": true,
+  "schema_create": false,
+  "database_create": false,
+  "superuser": false,
+  "create_role": false,
+  "replication": false,
+  "bypass_rls": false,
+  "privileged_memberships": [],
+  "connection_limit": 2,
+  "future_public_objects_select": true,
+  "password_emitted": false,
+  "other_roles_passwords_changed": false
+}

@@ -58,3 +58,10 @@ For a bad application release, select the previous healthy image **and its match
 5. Retain the recovery target labels as **untested** until actual drills: up to24-hour export RPO, four-hour regional restore target, ten-minute zonal allowance. Physical devices, full P0 provider/content/compliance gates and final apex cutover remain owned by their corresponding lanes and the Integration Lane.
 
 Sources for the added standard tools: [official PostgreSQL Debian repository and signing-key instructions](https://www.postgresql.org/download/linux/debian/), [age's upstream stream-encryption/decryption usage](https://github.com/FiloSottile/age#readme).
+
+
+## Actual isolated activation,19November2026
+
+The owner-approved NeonLaunch0.25–2CU/7day history and existingRenderHobby/native7day-log exception are active. Separate Singapore0.5CPU/512MB maintenance and03:00UTC encrypted-export cron jobs are live on reviewed source171c794. Provider Scheduled runs and cleared-lease receipts passed. The one-time reference export uploaded/checksummed daily/monthly copies; its downloaded262499-byte ciphertext restored locally with all60table counts/content/column hashes matching the exported snapshot. No plaintext dump was written,private identity stayed local,and only the generated restore target was removed. Qualification hashing was removed from the normal daily command; maintenance resumed and passed again after named configuration correction. Protected readiness,liveness,draft denial and unchanged legacy HTTPS all pass.
+
+See [actual activation](evidence/isolated-provider-activation.json), [restore](evidence/scheduled-archive-restore-result.json), [current checklist](PENDING_VALIDATIONS.md). This proves the stated logical archive/isolated scheduling behavior,not productionHA/autoscaling,nativePITR,retroactive7-day history or actual aged-object deletion. Web source7790139 and staticreleasebd1b698d remain unchanged. No DNS/publication/mailbox/legacy changes.
