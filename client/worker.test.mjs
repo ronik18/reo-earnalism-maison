@@ -8,10 +8,10 @@ function worker() {
     prefix + "maison/reader-ABC.js",
     prefix + "maison/app.css?v=123",
     "/en/offline/",
-    "/bn/offline/",
   ];
   const requests = [],
     stored = [];
+  const handlers = {};
   const source = readFileSync("static/maison/offline-worker.js", "utf8")
     .replaceAll("__VERSION__", "test")
     .replace("__ASSETS__", JSON.stringify(assets))
@@ -25,7 +25,7 @@ function worker() {
     Promise,
     self: {
       location: { origin: "https://app.example.test" },
-      addEventListener() {},
+      addEventListener(name, handler) { handlers[name] = handler; },
     },
     caches: {
       open: async () => ({ put: async (request) => stored.push(request.url) }),
@@ -37,7 +37,7 @@ function worker() {
   };
   vm.createContext(context);
   vm.runInContext(source, context);
-  return { context, prefix, assets, requests, stored };
+  return { context, prefix, assets, requests, stored, handlers };
 }
 test("Worker caches only exact configured public CDN objects, never private capabilities", () => {
   const { context, prefix } = worker();
@@ -97,3 +97,15 @@ for (const legacy of [false, true]) {
     assert.equal(invalid.status, 416);
   });
 }
+
+
+test("Legacy and current offline navigation use the same English shell", async()=>{
+ for (const path of ["/en/read/book/","/bn/read/book/"]) {
+  const {context,handlers}=worker();let cachedPath;let pending;
+  context.fetch=async()=>{throw new Error("offline fixture")};
+  context.caches.match=async value=>{cachedPath=value;return new Response("English offline shell")};
+  handlers.fetch({request:{url:"https://app.example.test"+path,mode:"navigate"},respondWith(value){pending=value}});
+  assert.equal(await (await pending).text(),"English offline shell");
+  assert.equal(cachedPath,"/en/offline/");
+ }
+});

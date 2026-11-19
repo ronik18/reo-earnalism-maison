@@ -38,8 +38,6 @@ def _candidate(request):
     if getattr(request,'territory',None) not in settings.MAISON_PUBLICATION_TERRITORIES:return None
     if query:
         if request.GET.get('territory')!=request.territory:return None
-        if request.path.startswith('/en/') and request.GET.get('locale')!='en':return None
-        if request.path.startswith('/bn/') and request.GET.get('locale')!='bn':return None
     return url
 
 

@@ -5,11 +5,11 @@ from accounts.models import Consent
 from accounts.services import register_member
 
 class NoticeAtCollectionTests(TestCase):
- def test_signup_discloses_both_notices_before_collection_in_both_languages(self):
+ def test_signup_discloses_both_notices_before_collection_in_the_shared_english_journey(self):
   for locale in ['en','bn']:
-   html=self.client.get(f'/{locale}/sign-up/').content.decode()
+   html=self.client.get(f'/{locale}/sign-up/',follow=True).content.decode()
    self.assertIn('data-account-notice',html)
-   self.assertIn(f'href="/{locale}/privacy/"',html);self.assertIn(f'href="/{locale}/terms/"',html)
+   self.assertIn('href="/en/privacy/"',html);self.assertIn('href="/en/terms/"',html)
    self.assertLess(html.index('data-account-notice'),html.index('name="email"'))
  def test_new_registration_records_current_notice_without_marketing_or_rewriting_existing_choice(self):
   register_member('current-notice-original@example.test','Original-Notice-Collection-47')

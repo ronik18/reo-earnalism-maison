@@ -24,6 +24,11 @@ class CatalogPurgeProviderTests(SimpleTestCase):
         self.assertEqual(result['status'],'acknowledged');self.assertFalse(result['readback_verified'])
         self.assertNotIn('secret',str(result));connection.close.assert_called_once()
 
+    def test_all_language_and_explicit_content_variants_keep_exact_purge_scope(self):
+        from operations.providers import _urls
+        urls=['https://maison.example/api/v1/catalog?territory=IN','https://maison.example/api/v1/catalog?locale=all&territory=IN','https://maison.example/api/v1/catalog?locale=bn&territory=IN']
+        self.assertEqual(_urls({'urls':urls},'maison.example'),urls)
+
     def test_missing_emitted_urls_fails_closed_before_network(self):
         with patch('operations.providers.http.client.HTTPSConnection') as factory:
             with self.assertRaises(DomainError) as error:purge_catalog_cache({'edition_id':'unused'})

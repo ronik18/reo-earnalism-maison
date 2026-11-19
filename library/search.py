@@ -54,7 +54,7 @@ def refresh_revision_search(revision):
     return row
 
 
-def search_editions(queryset, query, locale='en'):
+def search_editions(queryset, query, locale=None):
     """Rank live editions exact > prefix > reviewed alias > FTS > title typo.
 
     Candidate predicates use the GIN text/vector and trigram indexes. Fuzzy
@@ -62,11 +62,13 @@ def search_editions(queryset, query, locale='en'):
     are made, which keeps pooled Postgres connections safe. Score+UUID supports
     a deterministic keyset cursor (no COUNT or full catalog materialization).
     """
+    from .services import content_locale
+    locale=content_locale(locale)
     query = normalize_search_text(query)
-    if locale not in {'en', 'bn'} or len(query) > 120:
-        raise DomainError('invalid_query', 'Search supports en/bn and at most 120 characters.', 422)
-    queryset = queryset.filter(locale=locale, live_revision__state='live',
-                               live_revision__search_index__locale=locale)
+    if len(query) > 120:
+        raise DomainError('invalid_query', 'Search supports at most 120 characters.', 422)
+    queryset = queryset.filter(live_revision__state='live',live_revision__search_index__locale=F('locale'))
+    if locale is not None:queryset=queryset.filter(locale=locale)
     if not query:
         return queryset.order_by('work__title', 'id')
     title = INDEX + 'title_normalized'
@@ -81,19 +83,26 @@ def search_editions(queryset, query, locale='en'):
     # Only explicitly reviewed, currently active aliases participate. One bounded
     # lookup covers a whole query and its first 12 tokens; no recursive expansion.
     alias_keys = list(dict.fromkeys([query, *query.split()[:12]]))
-    targets = list(SearchAlias.objects.filter(
-        locale=locale, active=True, reviewed_at__lte=timezone.now(),
-        alias_normalized__in=alias_keys,
-    ).order_by('alias_normalized').values_list('target_normalized', flat=True)[:16])
-    config = 'english' if locale == 'en' else 'simple'
-    vector_query = SearchQuery(query, config=config, search_type='plain')
-    alias_match = Q(pk__in=[])
-    for target in targets:
-        alias_match |= Q(**{title: target}) | Q(**{title + '__startswith': target})
-        vector_query |= SearchQuery(target, config=config, search_type='plain')
-    fts = Q(**{INDEX + 'document': vector_query})
+    aliases=SearchAlias.objects.filter(active=True,reviewed_at__lte=timezone.now(),alias_normalized__in=alias_keys)
+    if locale is not None:aliases=aliases.filter(locale=locale)
+    targets=list(aliases.order_by('locale','alias_normalized').values_list('locale','target_normalized')[:16])
+    simple_query=SearchQuery(query,config='simple',search_type='plain')
+    languages={locale} if locale is not None else {'en'}
+    languages.update(language for language,_ in targets)
+    per_language={language:SearchQuery(query,config='english' if language=='en' else 'simple',search_type='plain') for language in languages}
+    alias_match=Q(pk__in=[])
+    for language,target in targets:
+        alias_match |= Q(locale=language) & (Q(**{title:target}) | Q(**{title+'__startswith':target}))
+        per_language[language] |= SearchQuery(target,config='english' if language=='en' else 'simple',search_type='plain')
+    # Keep every @@ RHS a real SearchQuery: Django otherwise wraps a Case tsquery
+    # in plainto_tsquery(tsquery). Each language branch also retains alias scope.
+    fts=~Q(locale__in=list(per_language)) & Q(**{INDEX+'document':simple_query})
+    ranking=[]
+    for language,vector_query in sorted(per_language.items()):
+        fts |= Q(locale=language) & Q(**{INDEX+'document':vector_query})
+        ranking.append(When(locale=language,then=SearchRank(F(INDEX+'document'),vector_query,normalization=32)))
     fuzzy = Q(TrigramSimilar(F(title), Value(query)))
-    rank = Coalesce(SearchRank(F(INDEX + 'document'), vector_query, normalization=32), Value(0.0))
+    rank = Coalesce(Case(*ranking,default=SearchRank(F(INDEX+'document'),simple_query,normalization=32),output_field=FloatField()),Value(0.0))
     similarity = TrigramSimilarity(F(title), Value(query))
     return queryset.filter(exact | prefix | alias_match | fts | fuzzy).annotate(
         search_score=Case(

@@ -1,0 +1,33 @@
+{
+  "local_backend_suite": {
+    "tests": 546,
+    "passed": 545,
+    "obsolete_expectation": "Legacy bn Reader now302; integration test updated to follow canonicalEnglish redirect",
+    "final_affected_regressions": 12,
+    "final_affected_result": "PASS",
+    "additional_final_library_focused": 29
+  },
+  "client_tests": 37,
+  "TypeScript": "PASS",
+  "client_build": "PASS",
+  "production_Docker_build": "PASS",
+  "local_browser_checks": 66,
+  "local_browser_passed": 66,
+  "new_migrations": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "saved_all_language_filter": "Actual browser save does not introduce implicit English filter",
+  "full_CI_baseline": {
+    "tests": 547,
+    "client_tests": 37,
+    "result": "PASS",
+    "run": 44618212875,
+    "commit": "fdec6ad43e84f70b3c0e942cef304fd2a0fabb45"
+  },
+  "unified_offline_shell_tests": {
+    "tests": 6,
+    "result": "PASS"
+  }
+}

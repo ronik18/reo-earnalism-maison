@@ -113,7 +113,7 @@ class CacheReferenceTests(TestCase):
         response._maison_cache_dependencies=['revision:'+str(self.revision.id)]
         self.assertEqual(self.capture(self.request('/en/'),response)['Cache-Control'],'private, no-store')
         response['Cache-Control']='public, s-maxage=30'
-        self.assertEqual(self.capture(self.request('/en/?locale=bn&territory=IN'),response)['Cache-Control'],'private, no-store')
+        self.assertIn('public',self.capture(self.request('/en/?locale=bn&territory=IN'),response)['Cache-Control'])
         response['Cache-Control']='public, s-maxage=30'
         self.assertEqual(self.capture(self.request('/en/?locale=en&territory=US'),response)['Cache-Control'],'private, no-store')
         response['Cache-Control']='public, s-maxage=30'

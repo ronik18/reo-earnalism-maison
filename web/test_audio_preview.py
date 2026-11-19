@@ -46,11 +46,11 @@ class PublicAudioPreviewScreensTests(TestCase):
         self.revision.validation_evidence['audio_preview']['sha256'] = '0'*64
         self.revision.save()
         path = f'/bn/listen/{self.revision.edition_id}/preview/'
-        self.assertEqual(self.client.get(path).status_code, 404)
-        self.assertNotContains(self.client.get(f'/bn/titles/{self.revision.edition_id}/'), path)
+        self.assertEqual(self.client.get(path,follow=True).status_code, 404)
+        self.assertNotContains(self.client.get(f'/bn/titles/{self.revision.edition_id}/', follow=True), path.replace('/bn/','/en/',1))
 
     def test_disabled_audio_does_not_expose_a_sample_route(self):
         with override_settings(FEATURES={**settings.FEATURES, 'audio': False}):
             path = f'/en/listen/{self.revision.edition_id}/preview/'
-            self.assertEqual(self.client.get(path).status_code, 404)
+            self.assertEqual(self.client.get(path,follow=True).status_code, 404)
             self.assertNotContains(self.client.get(f'/en/titles/{self.revision.edition_id}/'), path)

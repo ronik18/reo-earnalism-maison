@@ -50,7 +50,7 @@ export function orderStatusKey(order: {status:string;fulfillment_status:string})
 }
 
 export function checkoutReturnPath(value: string | undefined, locale="en"):string {
-  if (!value) return `/${locale}/vault/`;
+  if (!value) return "/en/vault/";
   const path=validReturnPath(value,locale);
-  return /^\/(en|bn)\/(checkout|sign-in|sign-up|sign-out|password-reset)(\/|\?|$)/.test(path) || path===`/${locale}/` ? `/${locale}/vault/` : path;
+  return /^\/(en|bn)\/(checkout|sign-in|sign-up|sign-out|password-reset)(\/|\?|$)/.test(path) || path==="/en/" ? "/en/vault/" : path;
 }

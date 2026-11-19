@@ -7723,15 +7723,12 @@
           {
             "name": "locale",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string",
-              "enum": [
-                "en",
-                "bn"
-              ]
+              "pattern": "^(?:[a-z]{2}|all)$"
             },
-            "description": ""
+            "description": "Optional content-language filter; omission shows all eligible published languages independently of interface/account language."
           },
           {
             "name": "kind",
@@ -15364,10 +15361,8 @@
       },
       "Locale": {
         "type": "string",
-        "enum": [
-          "en",
-          "bn"
-        ]
+        "pattern": "^[a-z]{2}$",
+        "description": "Content language code; published language support remains subject to publication validation."
       },
       "Format": {
         "type": "string",
@@ -16700,10 +16695,9 @@
         "properties": {
           "locale": {
             "type": "string",
-            "enum": [
-              "en",
-              "bn"
-            ]
+            "nullable": true,
+            "description": "Content-language filter; null means all languages.",
+            "pattern": "^[a-z]{2}$"
           },
           "territory": {
             "type": "string",
@@ -17022,10 +17016,8 @@
           },
           "locale": {
             "type": "string",
-            "enum": [
-              "en",
-              "bn"
-            ]
+            "nullable": true,
+            "pattern": "^[a-z]{2}$"
           },
           "territory": {
             "type": "string",
@@ -23341,14 +23333,12 @@
       "Locale": {
         "name": "locale",
         "in": "query",
-        "required": true,
+        "required": false,
         "schema": {
           "type": "string",
-          "enum": [
-            "en",
-            "bn"
-          ]
-        }
+          "pattern": "^(?:[a-z]{2}|all)$"
+        },
+        "description": "Optional content-language filter; omit for all eligible published languages. Independent of the single English interface."
       },
       "Territory": {
         "name": "territory",

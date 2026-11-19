@@ -23,7 +23,7 @@ def trusted_territory(request):
 
 def safe_return(value, locale="en"):
     """Only local product paths, never auth loops or external/token destinations."""
-    fallback = f"/{locale}/"
+    fallback = "/en/"
     if not isinstance(value, str) or len(value) > 2048 or any(c in value for c in "\r\n\\"):
         return fallback
     parsed = urlsplit(value)
@@ -31,18 +31,18 @@ def safe_return(value, locale="en"):
         return fallback
     if any(part in parsed.path for part in ("sign-in", "sign-up", "sign-out", "email-sign-in", "password-reset", "verify-email")):
         return fallback
-    return value
+    return re.sub(r"^/bn/", "/en/", value, count=1)
+
+
+def content_languages(request):
+    from library.services import published_content_languages
+    return published_content_languages(trusted_territory(request))
 
 
 def context(request, locale, **extra):
     if locale not in ("en", "bn"):
         raise Http404
-    other = "bn" if locale == "en" else "en"
-    switch = re.sub(r"^/(en|bn)/", f"/{other}/", request.get_full_path(), count=1)
-    if request.path.startswith("/auth/"):
-        query = request.GET.copy()
-        query["locale"] = other
-        switch = request.path + "?" + query.urlencode()
+    locale = "en"
     prefs = None
     if request.user.is_authenticated:
         try:
@@ -55,7 +55,8 @@ def context(request, locale, **extra):
         "google_oauth_enabled": django_settings.FEATURES.get("google_oauth", False),
         "app_theme": prefs.theme if prefs and prefs.theme in ("light", "dark", "true_black") else "dark",
         "reduced_motion": bool(prefs and prefs.reduced_motion),
-        "ui_locale": locale, "ui": catalogue(locale), "switch_locale_url": switch,
+        "ui_locale": "en", "ui": catalogue("en"),
+        "content_languages": [{"code":"en","label":"English"},{"code":"bn","label":"Bengali"}],
         "return_to": safe_return(request.POST.get("return_to", request.GET.get("return_to", request.get_full_path())), locale),
         "next_page_url":None,
         "safe_request_id":str(getattr(request,"request_id","")), "retry_url":safe_return(request.get_full_path(),locale) if request.method=="GET" else "",
@@ -74,7 +75,7 @@ def page(request, locale, template, status=200, **extra):
     # Local first implementation. Shared caching is qualified separately by Lane D.
     response["Cache-Control"] = "private, no-store, max-age=0"
     response["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response["Content-Language"] = locale
+    response["Content-Language"] = "en"
     return response
 
 
@@ -90,7 +91,7 @@ def domain_view(fn):
         try:
             if locale not in ("en", "bn"):
                 raise Http404
-            return fn(request, locale=locale, **kwargs)
+            return fn(request, locale="en", **kwargs)
         except DomainError as exc:
             return error_page(request, locale, getattr(exc, "code", "error"), getattr(exc, "status", 400))
         except (ObjectDoesNotExist, ValueError):
@@ -126,7 +127,7 @@ def root(request):
 @domain_view
 def home(request, locale):
     from library.services import catalog_cards
-    cards = catalog_cards(locale=request.GET.get("content_locale", locale), territory=trusted_territory(request))
+    cards = catalog_cards(locale=request.GET.get("content_locale") or None, territory=trusted_territory(request))
     featured = cards[0] if cards else None
     sample = public_preview_data(request, featured) if featured else {}
     return page(request, locale, "web/home.html", cards=cards, featured=featured, reader_sample_available=bool(sample.get("units")), audio_sample=sample.get("audio") if django_settings.FEATURES.get("audio") else None, allow_index=not django_settings.LOCAL)
@@ -142,9 +143,7 @@ def welcome(request, locale):
 @domain_view
 def search(request, locale):
     selected = {key: request.GET.get(key, "") for key in ("q", "format", "house", "author", "duration_min", "duration_max", "level", "topic", "access", "recency_days")}
-    content_locale = request.GET.get("content_locale", locale)
-    if content_locale not in ("en", "bn"):
-        return error_page(request, locale, "invalid_input")
+    content_locale = request.GET.get("content_locale", "")
     from library.views import catalog, collections as collection_index
     api_path = "/api/v1/catalog" if request.path.endswith("/explore/") else "/api/v1/search"
     data = catalog_payload(request, content_locale, catalog, api_path=api_path)
@@ -155,7 +154,7 @@ def search(request, locale):
     shelf_request.GET.pop("cursor", None)
     shelf_request.GET.pop("limit", None)
     shelves = catalog_payload(shelf_request, content_locale, collection_index)["items"]
-    return page(request, locale, "web/search.html", collections=shelves, cards=data["items"], next_cursor=data["next_cursor"], selected=selected, content_locale=content_locale, active_nav="explore")
+    return page(request, locale, "web/search.html", collections=shelves, cards=data["items"], next_cursor=data["next_cursor"], selected=selected, content_locale=content_locale, content_languages=content_languages(request), active_nav="explore")
 
 
 @require_GET
@@ -432,7 +431,7 @@ def pass_page(request, locale):
 def learn(request, locale):
     request.user.request_territory = trusted_territory(request)
     from learning.services import tracks_page
-    result=tracks_page(request,request.user,locale)
+    result=tracks_page(request,request.user,request.GET.get("content_locale") or None)
     return page(request, locale, "web/learn.html", tracks=result["items"], next_cursor=result["next_cursor"], active_nav="learn")
 
 
@@ -461,7 +460,7 @@ def lesson(request, locale, lesson_id):
 def interview(request, locale):
     request.user.request_territory = trusted_territory(request)
     from learning.services import tracks_page
-    result = tracks_page(request,request.user,locale,kind="sde_interview")
+    result = tracks_page(request,request.user,request.GET.get("content_locale") or None,kind="sde_interview")
     return page(request, locale, "web/learn.html", tracks=result["items"], next_cursor=result["next_cursor"], interview=True, active_nav="learn")
 
 
@@ -470,7 +469,8 @@ def catalog_payload(request, locale, endpoint, api_path=None, **kwargs):
     from core.api import DomainError
     catalog_request=copy(request)
     catalog_request.GET=request.GET.copy()
-    catalog_request.GET["locale"]=locale
+    if locale:catalog_request.GET["locale"]=locale
+    else:catalog_request.GET.pop("locale",None)
     catalog_request.GET["territory"]=trusted_territory(request)
     if api_path:
         catalog_request.path = catalog_request.path_info = api_path
@@ -505,8 +505,8 @@ def public_preview_data(request, edition, *, required=False):
 @domain_view
 def collection(request, locale, collection_id):
     from library.views import collection as endpoint
-    data=catalog_payload(request,locale,endpoint,collection_id=collection_id)
-    return page(request,locale,"web/collection.html",collection=data,cards=data["items"],content_locale=locale,active_nav="explore")
+    data=catalog_payload(request,request.GET.get("content_locale"),endpoint,collection_id=collection_id)
+    return page(request,locale,"web/collection.html",collection=data,cards=data["items"],content_locale=request.GET.get("content_locale", ""),active_nav="explore")
 
 
 @require_GET
@@ -521,10 +521,10 @@ def series(request, locale, slug=None):
             destination=reverse("web:series-detail",args=[locale,collection.slug])
             if request.GET:destination+="?"+request.GET.urlencode()
             return HttpResponseRedirect(destination)
-        data=collection_detail(request,slug,locale,trusted_territory(request),series_only=True)
+        data=collection_detail(request,slug,request.GET.get("content_locale") or None,trusted_territory(request),series_only=True)
         if data.get("kind")!="series":
             raise Http404
-        state=series_member_state(request.user,collection,locale,trusted_territory(request),cards=data["items"])
+        state=series_member_state(request.user,collection,request.GET.get("content_locale") or None,trusted_territory(request),cards=data["items"])
         states={}
         for item in (state or {}).get('items',[]):
             item['resume_url']=None
@@ -537,9 +537,9 @@ def series(request, locale, slug=None):
                     item['resume_url']=reverse('web:player',args=[locale,item['edition_id']])+'?'+urlencode({'unit_id':loc['unit_id'],'position_ms':loc.get('position_ms',0)})
                 if item['resume_url']:break
             states[item['edition_id']]=item
-        return page(request,locale,"web/series.html",collection=data,cards=data["items"],series_progress=states,content_locale=locale,active_nav="series")
+        return page(request,locale,"web/series.html",collection=data,cards=data["items"],series_progress=states,content_locale=request.GET.get("content_locale", ""),active_nav="series")
     from library.collections import list_collections
-    data=list_collections(request,locale,trusted_territory(request),kind="series")
+    data=list_collections(request,request.GET.get("content_locale") or None,trusted_territory(request),kind="series")
     return page(request,locale,"web/series.html",collections=[item for item in data["items"] if item.get("kind")=="series"],next_cursor=data["next_cursor"],active_nav="series")
 
 
@@ -712,7 +712,7 @@ def service_worker(request):
         url=static(name)
         if name in {"maison/app.css","maison/app.js","maison/peacock/maison-theme.css"}:url+="?v="+content_hash[:12]
         assets.append(url)
-    assets += ["/en/offline/","/bn/offline/"]
+    assets += ["/en/offline/"]
     source=(root/"offline-worker.js").read_text()
     digest.update(json.dumps(assets).encode());digest.update(source.encode())
     version=digest.hexdigest()[:16]

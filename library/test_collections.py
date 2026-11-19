@@ -47,7 +47,7 @@ class CollectionTests(TestCase):
         data=collection_detail(self.request(),'observations','en','IN')
         self.assertEqual([x['edition_id'] for x in data['items']],[str(self.en.id)])
         bn=collection_detail(self.request(),self.series.id,'bn','IN')
-        self.assertEqual(bn['title'],'পর্যবেক্ষণ');self.assertEqual(bn['items'][0]['edition_id'],str(self.bn.id))
+        self.assertEqual(bn['title'],'Observations');self.assertEqual(bn['items'][0]['edition_id'],str(self.bn.id))
         empty=collection_detail(self.request(),self.series.id,'en','US')
         self.assertEqual(empty['items'],[])
         self.series.published=False;self.series.save()

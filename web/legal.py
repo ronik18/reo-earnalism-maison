@@ -1,4 +1,5 @@
 """Reviewable operating notices; qualification drafts are not legal clearance."""
+from django.http import Http404
 from django.views.decorators.http import require_GET
 from django.conf import settings
 from .views import page
@@ -30,9 +31,11 @@ TERMS = [
 ]
 
 def _notice(request, locale, kind, sections):
+    if locale not in ("en","bn"):raise Http404
     if kind=='terms' and getattr(settings,'FREE_ACCESS_ENABLED',False):
         sections=[('Free access', 'বিনামূল্যে প্রবেশাধিকার', 'Eligible released content is free in approved territories. No payment details or automatic subscription are required. Struck-through INR values on the Pass page are planned reference prices, not previous selling prices or discounts. Any future paid plan requires a separate explicit choice. Existing provider agreements, financial history and cancellation controls are retained; free access alone does not cancel an existing agreement.', 'অনুমোদিত অঞ্চলে প্রকাশিত ও উপলব্ধ বিষয়বস্তুতে বিনামূল্যে প্রবেশাধিকার রয়েছে। পেমেন্টের তথ্য বা স্বয়ংক্রিয় সাবস্ক্রিপশন লাগবে না। পাস পাতায় কাটা ভারতীয় রুপির মূল্যগুলি প্রস্তাবিত নির্দেশক মূল্য, আগের বিক্রয়মূল্য বা ছাড় নয়। ভবিষ্যতে অর্থপ্রদত্ত পরিকল্পনার জন্য পৃথক স্পষ্ট সম্মতি লাগবে। বিদ্যমান পেমেন্ট-প্রদানকারীর চুক্তি, আর্থিক ইতিহাস ও বাতিলের নিয়ন্ত্রণ থাকবে; বিনামূল্যে প্রবেশাধিকার কোনো বিদ্যমান চুক্তি নিজে থেকে বাতিল করে না।'),*sections]
-    i=1 if locale=='bn' else 0
+    locale='en'
+    i=0
     return page(request,locale,f'web/{kind}.html',legal_title=COPY[kind+'_title'][i],legal_draft=COPY['draft'][i],legal_review=COPY['review'][i],legal_sections=[{'heading':r[i],'body':r[2+i]} for r in sections],support_configured=bool(getattr(settings,'SUPPORT_EMAIL','')),operator_address=OPERATOR_ADDRESS,grievance_role=GRIEVANCE_ROLE)
 
 @require_GET

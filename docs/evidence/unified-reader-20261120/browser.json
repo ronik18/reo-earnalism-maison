@@ -1,0 +1,399 @@
+{
+  "scope": "Original local live EN/BN fixtures with existing Bengali preference; actual login/filter/reader/legacy links; desktop and phone in 3 engines",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "historic-bengali-account-shared-EnglishUI-all-books",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "id": "saved-all-languages-does-not-become-English-filter",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "explicit-content-filter-bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "explicit-content-filter-en",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "Bengali-reader-text-English-controls-same-journey",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "canonical-settings",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "canonical-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "canonical-sign-in",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "canonical-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "canonical-series",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "canonical-learn",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "historic-bengali-account-shared-EnglishUI-all-books",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "explicit-content-filter-bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "explicit-content-filter-en",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "Bengali-reader-text-English-controls-same-journey",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "canonical-settings",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "canonical-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "canonical-sign-in",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "canonical-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "canonical-series",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "canonical-learn",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "id": "no-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "historic-bengali-account-shared-EnglishUI-all-books",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "id": "saved-all-languages-does-not-become-English-filter",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "explicit-content-filter-bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "explicit-content-filter-en",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "Bengali-reader-text-English-controls-same-journey",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "canonical-settings",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "canonical-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "canonical-sign-in",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "canonical-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "canonical-series",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "canonical-learn",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "historic-bengali-account-shared-EnglishUI-all-books",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "explicit-content-filter-bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "explicit-content-filter-en",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "Bengali-reader-text-English-controls-same-journey",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "canonical-settings",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "canonical-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "canonical-sign-in",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "canonical-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "canonical-series",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "canonical-learn",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "id": "no-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "historic-bengali-account-shared-EnglishUI-all-books",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "id": "saved-all-languages-does-not-become-English-filter",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "explicit-content-filter-bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "explicit-content-filter-en",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "Bengali-reader-text-English-controls-same-journey",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "canonical-settings",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "canonical-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "canonical-sign-in",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "canonical-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "canonical-series",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "canonical-learn",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "historic-bengali-account-shared-EnglishUI-all-books",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "explicit-content-filter-bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "explicit-content-filter-en",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "Bengali-reader-text-English-controls-same-journey",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "canonical-settings",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "canonical-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "canonical-sign-in",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "canonical-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "canonical-series",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "canonical-learn",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "id": "no-page-errors",
+      "status": "PASS"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ from django.test import RequestFactory,SimpleTestCase
 from .views import context
 
 class PeacockShellTests(SimpleTestCase):
-    def test_existing_bilingual_shell_keeps_real_navigation_and_local_assets(self):
+    def test_legacy_routes_share_one_english_shell_keeps_real_navigation_and_local_assets(self):
         for locale in ('en','bn'):
             request=RequestFactory().get(f'/{locale}/')
             request.user=AnonymousUser();request.resolver_match=SimpleNamespace(url_name='home')
@@ -19,11 +19,13 @@ class PeacockShellTests(SimpleTestCase):
             self.assertIn('maison/peacock/maison-theme.css',html)
             self.assertIn('maison/fonts/typography.css',html)
             self.assertIn('maison/logo.png',html)
-            self.assertIn(f'/{locale}/explore/',html)
-            self.assertIn(f'/{locale}/settings/',html)
+            self.assertIn('/en/explore/',html)
+            self.assertIn('/en/settings/',html)
             self.assertIn('class="pc-halo" aria-hidden="true"',html)
             self.assertIn('class="pc-jali" aria-hidden="true"',html)
             self.assertIn('data-route="home"',html)
+            self.assertIn('lang="en" data-ui-locale="en"',html)
+            self.assertNotIn('aria-label="Interface language"',html)
             self.assertNotIn('fonts.googleapis',html)
             self.assertNotIn('atelier.js',html)
     def test_ornament_assets_are_inert_and_local_references_resolve(self):
@@ -51,4 +53,4 @@ class PeacockShellTests(SimpleTestCase):
         request.user=AnonymousUser();request.resolver_match=SimpleNamespace(url_name='settings')
         html=render_to_string('web/base.html',context(request,'bn'),request=request)
         main=html.split('<main',1)[1].split('</main>',1)[0]
-        for route in ('privacy','terms','contact'):self.assertIn('/bn/'+route+'/',main)
+        for route in ('privacy','terms','contact'):self.assertIn('/en/'+route+'/',main)

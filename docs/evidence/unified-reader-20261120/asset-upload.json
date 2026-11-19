@@ -1,0 +1,366 @@
+{
+  "release": "55d7f823ac527a9c3d8a9ec60481d7ac9097269f3247ad6bef3a83c215001731",
+  "method": "Existing authenticated dashboard object API; no token extraction or permission changes",
+  "assets": [
+    {
+      "path": "maison/app.css",
+      "status": 200,
+      "bytes": 27149
+    },
+    {
+      "path": "maison/app.js",
+      "status": 200,
+      "bytes": 18160
+    },
+    {
+      "path": "maison/art/ford-gold-column.webp",
+      "status": 200,
+      "bytes": 280478
+    },
+    {
+      "path": "maison/art/ford-gold-wash.webp",
+      "status": 200,
+      "bytes": 136396
+    },
+    {
+      "path": "maison/art/gold-pages.jpg",
+      "status": 200,
+      "bytes": 205384
+    },
+    {
+      "path": "maison/art/hero.png",
+      "status": 200,
+      "bytes": 2824803
+    },
+    {
+      "path": "maison/art/river.png",
+      "status": 200,
+      "bytes": 2605103
+    },
+    {
+      "path": "maison/asset-manifest.json",
+      "status": 200,
+      "bytes": 4001
+    },
+    {
+      "path": "maison/dist/account-BASDQEQK.js",
+      "status": 200,
+      "bytes": 47789
+    },
+    {
+      "path": "maison/dist/auth-OKHJF4V6.js",
+      "status": 200,
+      "bytes": 2798
+    },
+    {
+      "path": "maison/dist/commerce-6XZH52BU.js",
+      "status": 200,
+      "bytes": 6888
+    },
+    {
+      "path": "maison/dist/downloads-GXZMW34Y.js",
+      "status": 200,
+      "bytes": 10438
+    },
+    {
+      "path": "maison/dist/home-R6P2GZFS.js",
+      "status": 200,
+      "bytes": 5103
+    },
+    {
+      "path": "maison/dist/manifest.json",
+      "status": 200,
+      "bytes": 1545
+    },
+    {
+      "path": "maison/dist/onboarding-S6DKZPHA.js",
+      "status": 200,
+      "bytes": 8681
+    },
+    {
+      "path": "maison/dist/player-7YIWJXZM.js",
+      "status": 200,
+      "bytes": 12028
+    },
+    {
+      "path": "maison/dist/quiz-6RK54DLN.js",
+      "status": 200,
+      "bytes": 4555
+    },
+    {
+      "path": "maison/dist/reader-ZYKBQE6N.js",
+      "status": 200,
+      "bytes": 19150
+    },
+    {
+      "path": "maison/dist/shared-5LQAVZYG.js",
+      "status": 200,
+      "bytes": 144
+    },
+    {
+      "path": "maison/dist/shared-6BQSIVVD.js",
+      "status": 200,
+      "bytes": 577
+    },
+    {
+      "path": "maison/dist/shared-FGAYQ3CA.js",
+      "status": 200,
+      "bytes": 221571
+    },
+    {
+      "path": "maison/dist/shared-FGAYQ3CA.js.LEGAL.txt",
+      "status": 200,
+      "bytes": 1219
+    },
+    {
+      "path": "maison/dist/shared-FS6FJSVP.js",
+      "status": 200,
+      "bytes": 1474
+    },
+    {
+      "path": "maison/dist/shared-H7ECUXTH.js",
+      "status": 200,
+      "bytes": 355
+    },
+    {
+      "path": "maison/dist/shared-HNVLYHTX.js",
+      "status": 200,
+      "bytes": 830
+    },
+    {
+      "path": "maison/dist/shared-KPKIPHCA.js",
+      "status": 200,
+      "bytes": 5066
+    },
+    {
+      "path": "maison/dist/shared-LMHERZFN.js",
+      "status": 200,
+      "bytes": 524
+    },
+    {
+      "path": "maison/dist/shared-LMHERZFN.js.LEGAL.txt",
+      "status": 200,
+      "bytes": 338
+    },
+    {
+      "path": "maison/dist/shared-LP5VOVSZ.js",
+      "status": 200,
+      "bytes": 4501
+    },
+    {
+      "path": "maison/dist/shared-PLBWFTBM.js",
+      "status": 200,
+      "bytes": 1659
+    },
+    {
+      "path": "maison/dist/shared-QGIBMLAL.js",
+      "status": 200,
+      "bytes": 3920
+    },
+    {
+      "path": "maison/dist/shared-YXHLZRW7.js",
+      "status": 200,
+      "bytes": 2328
+    },
+    {
+      "path": "maison/dist/shell-JFGIWKBI.js",
+      "status": 200,
+      "bytes": 6362
+    },
+    {
+      "path": "maison/dist/support-TUYMIORC.js",
+      "status": 200,
+      "bytes": 2055
+    },
+    {
+      "path": "maison/dist/video-K6BQXRAV.js",
+      "status": 200,
+      "bytes": 8762
+    },
+    {
+      "path": "maison/fonts/cormorant-garamond-latin-wght-normal.woff2",
+      "status": 200,
+      "bytes": 37640
+    },
+    {
+      "path": "maison/fonts/dm-sans-latin-standard-normal.woff2",
+      "status": 200,
+      "bytes": 62724
+    },
+    {
+      "path": "maison/fonts/font-manifest.json",
+      "status": 200,
+      "bytes": 1985
+    },
+    {
+      "path": "maison/fonts/fontsource-noto-sans-bengali-5.3.0-OFL.txt",
+      "status": 200,
+      "bytes": 4381
+    },
+    {
+      "path": "maison/fonts/fontsource-noto-serif-bengali-5.3.0-OFL.txt",
+      "status": 200,
+      "bytes": 4381
+    },
+    {
+      "path": "maison/fonts/fontsource-variable-cormorant-garamond-5.3.0-OFL.txt",
+      "status": 200,
+      "bytes": 4504
+    },
+    {
+      "path": "maison/fonts/fontsource-variable-dm-sans-5.3.0-OFL.txt",
+      "status": 200,
+      "bytes": 4502
+    },
+    {
+      "path": "maison/fonts/fontsource-variable-source-serif-4-5.3.1-OFL.txt",
+      "status": 200,
+      "bytes": 4314
+    },
+    {
+      "path": "maison/fonts/layout.tokens.json",
+      "status": 200,
+      "bytes": 1222
+    },
+    {
+      "path": "maison/fonts/noto-sans-bengali-bengali-400-normal.woff2",
+      "status": 200,
+      "bytes": 44352
+    },
+    {
+      "path": "maison/fonts/noto-sans-bengali-bengali-500-normal.woff2",
+      "status": 200,
+      "bytes": 47192
+    },
+    {
+      "path": "maison/fonts/noto-sans-bengali-bengali-600-normal.woff2",
+      "status": 200,
+      "bytes": 47636
+    },
+    {
+      "path": "maison/fonts/noto-serif-bengali-bengali-400-normal.woff2",
+      "status": 200,
+      "bytes": 58720
+    },
+    {
+      "path": "maison/fonts/noto-serif-bengali-bengali-500-normal.woff2",
+      "status": 200,
+      "bytes": 69816
+    },
+    {
+      "path": "maison/fonts/noto-serif-bengali-bengali-600-normal.woff2",
+      "status": 200,
+      "bytes": 70824
+    },
+    {
+      "path": "maison/fonts/source-serif-4-latin-standard-normal.woff2",
+      "status": 200,
+      "bytes": 122360
+    },
+    {
+      "path": "maison/fonts/typography.css",
+      "status": 200,
+      "bytes": 6238
+    },
+    {
+      "path": "maison/fonts/typography.tokens.json",
+      "status": 200,
+      "bytes": 2527
+    },
+    {
+      "path": "maison/logo.png",
+      "status": 200,
+      "bytes": 218020
+    },
+    {
+      "path": "maison/offline-worker.js",
+      "status": 200,
+      "bytes": 5827
+    },
+    {
+      "path": "maison/peacock/icons/LICENSE.txt",
+      "status": 200,
+      "bytes": 1071
+    },
+    {
+      "path": "maison/peacock/icons/SOURCE.json",
+      "status": 200,
+      "bytes": 1020
+    },
+    {
+      "path": "maison/peacock/icons/archive.svg",
+      "status": 200,
+      "bytes": 339
+    },
+    {
+      "path": "maison/peacock/icons/book-open.svg",
+      "status": 200,
+      "bytes": 396
+    },
+    {
+      "path": "maison/peacock/icons/compass.svg",
+      "status": 200,
+      "bytes": 402
+    },
+    {
+      "path": "maison/peacock/icons/gear.svg",
+      "status": 200,
+      "bytes": 1977
+    },
+    {
+      "path": "maison/peacock/icons/house.svg",
+      "status": 200,
+      "bytes": 356
+    },
+    {
+      "path": "maison/peacock/icons/stack.svg",
+      "status": 200,
+      "bytes": 483
+    },
+    {
+      "path": "maison/peacock/icons/star.svg",
+      "status": 200,
+      "bytes": 810
+    },
+    {
+      "path": "maison/peacock/maison-theme.css",
+      "status": 200,
+      "bytes": 14647
+    },
+    {
+      "path": "maison/peacock/svg/alpana-halo.svg",
+      "status": 200,
+      "bytes": 11826
+    },
+    {
+      "path": "maison/peacock/svg/jali-panel.svg",
+      "status": 200,
+      "bytes": 11926
+    },
+    {
+      "path": "maison/peacock/svg/kantha-tile.svg",
+      "status": 200,
+      "bytes": 510
+    },
+    {
+      "path": "maison/peacock/svg/peacock-crest.svg",
+      "status": 200,
+      "bytes": 20511
+    },
+    {
+      "path": "maison/peacock/tokens.css",
+      "status": 200,
+      "bytes": 1274
+    },
+    {
+      "path": "maison/peacock/tokens.json",
+      "status": 200,
+      "bytes": 3884
+    },
+    {
+      "path": "maison/qrcode-generator-LICENSE.txt",
+      "status": 200,
+      "bytes": 1094
+    }
+  ]
+}

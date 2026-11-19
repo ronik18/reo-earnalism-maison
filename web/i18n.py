@@ -361,7 +361,7 @@ STRINGS.update({'previous_chapter':('Previous chapter','আগের অধ্�
 
 def text(key, locale="en"):
     values = STRINGS.get(key, STRINGS["error"])
-    return values[1 if locale == "bn" else 0]
+    return values[0]
 
 
 def catalogue(locale):

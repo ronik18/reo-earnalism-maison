@@ -9,8 +9,10 @@ from . import services as svc
 
 
 def _context(locale,territory):
-    if locale not in ('en','bn') or not isinstance(territory,str) or not re.fullmatch('[A-Z]{2}',territory) or territory=='ZZ':
-        raise DomainError('invalid_context','A supported locale and trusted territory are required.',422)
+    locale=svc.content_locale(locale)
+    if not isinstance(territory,str) or not re.fullmatch('[A-Z]{2}',territory) or territory=='ZZ':
+        raise DomainError('invalid_context','An optional content language and trusted territory are required.',422)
+    return locale
 
 
 def get_collection(identifier,*,series_only=False):
@@ -25,45 +27,47 @@ def get_collection(identifier,*,series_only=False):
 
 
 def _item_rows(collection,locale):
-    return collection.items.filter(edition__locale=locale).select_related('edition__live_revision','edition__work').order_by('sort_order','id')
+    rows=collection.items.all()
+    if locale is not None:rows=rows.filter(edition__locale=locale)
+    return rows.select_related('edition__live_revision','edition__work').order_by('sort_order','id')
 
 
 def _item_card(item,locale,territory):
     edition=item.edition;revision=edition.live_revision
-    if not revision or edition.locale!=locale or not svc._live(revision):return None
+    if not revision or (locale is not None and edition.locale!=locale) or not svc._live(revision):return None
     formats=svc.available_formats(revision,territory)
     if not formats:return None
     return {'work_id':str(edition.work_id),'edition_id':str(edition.id),'title':revision.title,'subtitle':None,'creators':edition.work.creators,'locale':edition.locale,'house':edition.work.house,'formats':formats,'cover':svc._cover(revision),'access_label':'free' if svc.free_access_for_revision(revision) or any(revision.access_policy.get(fmt)=='free' for fmt in formats) else 'pass_required','availability':'available'}
 
 
 def eligible_items(collection,locale,territory):
-    _context(locale,territory)
+    locale=_context(locale,territory)
     return [card for item in _item_rows(collection,locale) if (card:=_item_card(item,locale,territory)) is not None]
 
 
 def collection_summary(collection,locale,territory,*,cards=None):
-    _context(locale,territory)
+    locale=_context(locale,territory)
     cards=[] if cards is None else cards
-    return {'collection_id':str(collection.id),'kind':collection.kind,'title':getattr(collection,'title_'+locale),'description':getattr(collection,'description_'+locale)[:2000],'cover':next((c['cover'] for c in cards if c['cover']),None)}
+    return {'collection_id':str(collection.id),'kind':collection.kind,'title':collection.title_en,'description':collection.description_en[:2000],'cover':next((c['cover'] for c in cards if c['cover']),None)}
 
 
 def list_collections(request,locale,territory,*,kind=None):
-    _context(locale,territory)
+    locale=_context(locale,territory)
     rows=CatalogCollection.objects.filter(published=True)
     if kind:
         if kind not in ('shelf','series','author','topic'):raise DomainError('invalid_filter','Unsupported collection kind.',422)
         rows=rows.filter(kind=kind)
-    return paginate_queryset(request,rows,f'collections:{locale}:{territory}:{kind or "all"}',ordering='slug',serialize=lambda row:collection_summary(row,locale,territory),maximum=100,scan_limit=500)
+    return paginate_queryset(request,rows,f'collections:{locale or "all"}:{territory}:{kind or "all"}',ordering='slug',serialize=lambda row:collection_summary(row,locale,territory),maximum=100,scan_limit=500)
 
 
 def collection_detail(request,identifier,locale,territory,*,series_only=False):
     collection=get_collection(identifier,series_only=series_only)
-    _context(locale,territory)
+    locale=_context(locale,territory)
     from django.db.models import F
     from .catalog_query import catalog_queryset,card_from_edition
     rows=catalog_queryset(locale,territory).filter(catalog_items__collection=collection).annotate(catalog_item_order=F('catalog_items__sort_order'))
-    result=paginate_queryset(request,rows,f'collection:{collection.id}:{collection.version}:{locale}:{territory}',ordering='catalog_item_order',maximum=100)
-    return {'collection_id':str(collection.id),'kind':collection.kind,'title':getattr(collection,'title_'+locale),'description':getattr(collection,'description_'+locale),'items':[card_from_edition(row) for row in result['items']],'next_cursor':result['next_cursor']}
+    result=paginate_queryset(request,rows,f'collection:{collection.id}:{collection.version}:{locale or "all"}:{territory}',ordering='catalog_item_order',maximum=100)
+    return {'collection_id':str(collection.id),'kind':collection.kind,'title':collection.title_en,'description':collection.description_en,'items':[card_from_edition(row) for row in result['items']],'next_cursor':result['next_cursor']}
 
 
 def series_member_state(user,collection,locale,territory,*,cards=None):

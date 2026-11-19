@@ -51,10 +51,13 @@ def _urls(payload,host):
             or '%' in parsed.path or not PUBLIC_PATH.fullmatch(parsed.path)):
             raise DomainError('invalid_purge_urls','Only configured-origin public catalog/preview/cover URLs may be purged.',422)
         query=parse_qsl(parsed.query,keep_blank_values=True)
-        if query and (len(query)!=2 or [key for key,value in query]!=['locale','territory']
-            or query[0][1] not in {'en','bn'} or query[1][1] not in territories
-            or parsed.query!=f'locale={query[0][1]}&territory={query[1][1]}'):
-            raise DomainError('invalid_purge_urls','Only canonical locale/territory cache variants are permitted.',422)
+        canonical=False
+        if len(query)==1 and query[0][0]=='territory' and query[0][1] in territories:
+            canonical=parsed.query==f'territory={query[0][1]}'
+        elif len(query)==2 and [key for key,value in query]==['locale','territory']:
+            canonical=bool(re.fullmatch(r'(?:[a-z]{2}|all)',query[0][1])) and query[1][1] in territories and parsed.query==f'locale={query[0][1]}&territory={query[1][1]}'
+        if query and not canonical:
+            raise DomainError('invalid_purge_urls','Only canonical content-language/territory cache variants are permitted.',422)
         # Catalog JSON variants always carry explicit storefront context.
         if parsed.path.startswith('/api/v1/') and not query:
             raise DomainError('invalid_purge_urls','API public cache URLs require explicit locale/territory.',422)

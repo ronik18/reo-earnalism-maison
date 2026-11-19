@@ -2,6 +2,7 @@
 import hashlib
 import json
 import math
+import re
 import unicodedata
 import uuid
 from pathlib import Path
@@ -203,7 +204,23 @@ def _cover(revision):
     return {'url':f'{base}/api/v1/content/covers/{asset.id}', 'width':meta.get('width',600), 'height':meta.get('height',900), 'alt':revision.title+' — cover'}
 
 
-def catalog_cards(locale='en', territory='IN', query='', house='', format='', **filters):
+def content_locale(value=None):
+    """Optional content language is independent of the English interface."""
+    if value in (None,'','all'):return None
+    if not isinstance(value,str) or not re.fullmatch('[a-z]{2}',value):
+        raise DomainError('invalid_filter','Choose a two-letter content language or all languages.',422)
+    return value
+
+
+def published_content_languages(territory='IN'):
+    if territory not in settings.MAISON_PUBLICATION_TERRITORIES:return []
+    from .catalog_query import catalog_queryset
+    published=set(catalog_queryset(None,territory).order_by().values_list('locale',flat=True).distinct())
+    labels={'en':'English','bn':'Bengali'}
+    return [{'code':code,'label':labels.get(code,code.upper())} for code in ['en','bn',*sorted(published-set(labels))]]
+
+
+def catalog_cards(locale=None, territory='IN', query='', house='', format='', **filters):
     """Bounded Home/SSR candidates; public listing APIs use catalog_page cursors."""
     from .catalog_query import catalog_cards_bounded
     return catalog_cards_bounded(locale,territory,query,house,format,**filters)

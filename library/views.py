@@ -17,9 +17,9 @@ from .validation import body,validate_schema
 
 def context(request):
     trusted=getattr(request,'territory','IN' if getattr(settings,'LOCAL',False) else 'ZZ')
-    locale=request.GET.get('locale','en');territory=request.GET.get('territory',trusted)
-    if locale not in {'en','bn'} or not re.fullmatch('[A-Z]{2}',territory):
-        raise DomainError('invalid_context','Use locale en/bn and a two-letter territory.',422)
+    locale=svc.content_locale(request.GET.get('locale'));territory=request.GET.get('territory',trusted)
+    if not isinstance(territory,str) or not re.fullmatch('[A-Z]{2}',territory):
+        raise DomainError('invalid_context','Use an optional two-letter content language and a trusted two-letter territory.',422)
     # Client query controls cache context, never the authorization territory authority.
     if territory!=trusted or trusted=='ZZ':
         raise DomainError('territory_unavailable','A qualified trusted territory context is required.',403)
@@ -73,7 +73,7 @@ def home(request):
     data={'locale':locale,'territory':territory,'hero':cards[0] if cards else None,
           'shelves':shelves,
           'catalog_version':svc.digest(svc.canonical_bytes(cards))}
-    return public_response(data,_catalog_ttl(cards,territory))
+    return public_response(data,_catalog_ttl([*cards,*[card for shelf in shelves for card in shelf['items']]],territory))
 
 @json_endpoint(auth=False)
 def catalog(request):
@@ -103,7 +103,9 @@ def work(request,work_id):
     try: obj=Work.objects.get(pk=work_id)
     except Work.DoesNotExist: raise DomainError('not_found','Work not found.',404)
     cards=[];descriptions={}
-    for edition in obj.editions.filter(locale=locale,live_revision__state='live').select_related('work','live_revision').order_by('id')[:500]:
+    editions=obj.editions.filter(live_revision__state='live')
+    if locale is not None:editions=editions.filter(locale=locale)
+    for edition in editions.select_related('work','live_revision').order_by('id')[:500]:
         try:
             cards.append(svc.catalog_card(edition,territory=territory))
             descriptions[str(edition.id)]=edition.live_revision.description
