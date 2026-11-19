@@ -1,0 +1,1 @@
+{"existing_staff_verified": true, "required_permissions": 6, "missing_permissions": ["library.add_work", "library.add_edition", "library.add_revision", "library.add_unit", "library.add_rights"], "authority_changed": false}
