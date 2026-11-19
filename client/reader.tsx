@@ -31,6 +31,7 @@ interface Boot {
   edition_revision_id: string;
   unit_id: string;
   content_locale: string;
+  free_access?: boolean;
   authenticated: boolean;
   member_id?: string;
   device_id?: string;
@@ -885,7 +886,7 @@ function Reader({ boot }: { boot: Boot }) {
           </section>
         </>
       ) : null}
-      {boot.preview ? <section className="preview-boundary" aria-label={t("preview_end")}><p>{t("preview_end")}</p><button onClick={() => setBoundaryOpen(true)}>{t("continue_beyond_preview")}</button><PreviewBoundary editionId={boot.edition_id} format="reader" authenticated={boot.authenticated} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.reload()} /></section> : null}
+      {boot.preview ? <section className="preview-boundary" aria-label={t("preview_end")}><p>{t("preview_end")}</p><button onClick={() => setBoundaryOpen(true)}>{t("continue_beyond_preview")}</button><PreviewBoundary editionId={boot.edition_id} format="reader" freeAccess={boot.free_access === true} authenticated={boot.authenticated} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.reload()} /></section> : null}
       {fullReader && boot.player_url ? <FormatSwitch open={switchOpen} onClose={() => setSwitchOpen(false)} busy={busy} status={status} onExact={() => void switchToListen()} chapterUrl={boot.player_url + `?unit_id=${boot.unit_id}`} target="audio" /> : null}
       <dialog
         ref={settings}

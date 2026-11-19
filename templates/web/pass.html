@@ -5,7 +5,7 @@
 {% if free_access_available %}
 <p class="lead">{% ui 'free_pass_intro' %}</p>
 <div class="free-pass-card"><p class="eyebrow">{% ui 'free_pass_now' %}</p><p class="free-pass-price">{% ui 'free_price' %}</p><p>{% ui 'free_no_payment' %}</p>
-<div class="actions"><a class="button" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a>{% if not request.user.is_authenticated %}<a class="button secondary" href="{% url 'web:sign-up' ui_locale %}?return_to={% url 'web:explore' ui_locale %}">{% ui 'create_free_account' %}</a>{% endif %}</div></div>
+<div class="actions">{% if request.user.is_authenticated %}<a class="button" href="{{ free_return_path }}">{% ui 'continue_free_access' %}</a>{% else %}<a class="button" href="{% url 'web:sign-in' ui_locale %}?return_to={{ free_return_path|urlencode }}">{% ui 'sign_in' %}</a><a class="button secondary" href="{% url 'web:sign-up' ui_locale %}?return_to={{ free_return_path|urlencode }}">{% ui 'create_free_account' %}</a>{% endif %}<a class="text-link" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a></div></div>
 <div class="pass-reference-grid" aria-label="{% ui 'planned_reference_prices' %}">
 <article class="pass-reference"><h2>{% ui 'monthly_reference' %}</h2><p class="reference-amount"><s>₹99</s> <span>{% ui 'per_month' %}</span></p><p class="fine">{% ui 'planned_reference_label' %}</p></article>
 <article class="pass-reference"><h2>{% ui 'annual_reference' %}</h2><p class="reference-amount"><s>₹999</s> <span>{% ui 'per_year' %}</span></p><p class="fine">{% ui 'planned_reference_label' %}</p></article>

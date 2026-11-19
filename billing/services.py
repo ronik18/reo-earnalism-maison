@@ -28,7 +28,10 @@ class CaptureFacts:
 
 def _eligible(user,revision,format,at):
     rows=Entitlement.objects.filter(user=user,status='active',revoked_at=None,valid_from__lte=at)
-    if not getattr(settings,'FREE_ACCESS_ENABLED',False):rows=rows.exclude(grant_key__startswith='platform-free:')
+    if not getattr(settings,'FREE_ACCESS_ENABLED',False):
+        # One durable free row can contain intrinsic-free and rollout-only formats.
+        # On rollback, only the exact revision's explicit free format remains a grant.
+        rows=rows.filter(~Q(source='free')|Q(revision__access_policy__contains={format:'free'}))
     return rows.filter(
         Q(valid_until__isnull=True)|Q(valid_until__gt=at)).filter(
         Q(scope='edition',edition_id=revision.edition_id)|Q(scope='platform')).filter(Q(revision__isnull=True)|Q(revision=revision))
@@ -54,8 +57,8 @@ def ensure_free_entitlement(user,revision,format='reader',territory='IN'):
     from django.contrib.auth import get_user_model
     get_user_model().objects.select_for_update().get(pk=user.pk)
     prefix='platform-free' if platform_free else 'free'
-    row,created=Entitlement.objects.get_or_create(grant_key=f'{prefix}:{user.public_id}:{revision.id}',defaults={
-        'user':user,'source':'free','scope':'edition','edition':revision.edition,'revision':revision,'formats':[format],
+    row,created=Entitlement.objects.get_or_create(user=user,revision=revision,source='free',defaults={
+        'grant_key':f'{prefix}:{user.public_id}:{revision.id}','scope':'edition','edition':revision.edition,'formats':[format],
         'valid_from':timezone.now(),'valid_until':None})
     if row.revoked_at or row.status!='active':raise DomainError('entitlement_revoked','This free offline grant has been revoked.',403)
     if format not in row.formats:
@@ -81,6 +84,9 @@ def order_data(row):
 
 
 def checkout_data(row):
+    # History remains readable; no historical order can advertise a new payment
+    # action while the owner-approved free rollout is enabled.
+    if getattr(settings,'FREE_ACCESS_ENABLED',False):return None
     if not row.provider_order_id or row.status not in ['created','pending'] or row.expires_at<=timezone.now():return None
     if row.provider!='razorpay':return None
     from .checkout import qualified_mode

@@ -1,0 +1,15 @@
+{
+  "backend_tests": 512,
+  "backend_status": "PASS",
+  "backend_seconds": 281.54,
+  "client_tests": 35,
+  "typescript": "PASS",
+  "build": "PASS",
+  "docker_build": "PASS",
+  "new_migrations": false,
+  "changed_area_browser_checks": 15,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

@@ -1,0 +1,1 @@
+{"status": "PASS", "read_only": true, "book": {"state": "draft", "live_revision_id": null, "version": 42, "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4", "paragraphs": 32}, "counts": {"maison_invoice": 0, "maison_invoice_revision": 0, "maison_finance_number_sequence": 0, "maison_offer": 0}, "credential_copy": false}

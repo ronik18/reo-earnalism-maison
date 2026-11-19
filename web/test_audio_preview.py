@@ -26,6 +26,22 @@ class PublicAudioPreviewScreensTests(TestCase):
         self.assertIn('no-store', response['Cache-Control'])
         self.assertEqual(self.client.get(f'/en/listen/{self.revision.edition_id}/').status_code, 302)
 
+    @override_settings(FREE_ACCESS_ENABLED=True)
+    def test_free_member_sample_can_continue_without_financial_entitlement(self):
+        from django.contrib.auth import get_user_model
+        from billing.models import Entitlement
+        user=get_user_model().objects.create_user('free-sample-member@example.test','Local-Free-Sample-2026',is_verified=True)
+        login=self.client.post('/en/sign-in/', {'email':user.email,'password':'Local-Free-Sample-2026','return_to':'/en/'})
+        self.assertEqual(login.status_code,302)
+        self.assertFalse(Entitlement.objects.filter(user=user).exists())
+        response=self.client.get(f'/en/listen/{self.revision.edition_id}/preview/')
+        self.assertEqual(response.status_code,200)
+        boot=response.context['bootstrap']
+        self.assertTrue(boot['free_access']);self.assertTrue(boot['authenticated'])
+        self.assertEqual(boot['full_player_url'],f'/en/listen/{self.revision.edition_id}/?unit_id={self.unit.id}')
+        self.assertNotIn(str(self.asset.id),response.content.decode())
+        self.assertNotIn(self.asset.storage_key,response.content.decode())
+
     def test_unprepared_clip_has_no_sample_control_or_full_asset_fallback(self):
         self.revision.validation_evidence['audio_preview']['sha256'] = '0'*64
         self.revision.save()

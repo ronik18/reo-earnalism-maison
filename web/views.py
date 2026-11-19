@@ -221,7 +221,7 @@ def reader(request, locale, edition_id, unit_id=None):
     if document.get("preview") and document.get("boundary"):
         boundary = document["boundary"]
         destination = reverse("web:reader", args=[locale, edition_id, unit_id]) + "?" + urlencode({"anchor":boundary["end_anchor_id"],"offset":boundary["end_offset_chars"]})
-    bootstrap.update(preview=bool(document.get("preview")),title_url=reverse("web:title",args=[locale,edition_id]),sign_in_url=reverse("web:sign-in",args=[locale])+"?"+urlencode({"return_to":destination}),pass_url=reverse("web:pass",args=[locale])+"?"+urlencode({"return_to":destination}))
+    bootstrap.update(free_access=getattr(django_settings,"FREE_ACCESS_ENABLED",False),preview=bool(document.get("preview")),title_url=reverse("web:title",args=[locale,edition_id]),sign_in_url=reverse("web:sign-in",args=[locale])+"?"+urlencode({"return_to":destination}),pass_url=reverse("web:pass",args=[locale])+"?"+urlencode({"return_to":destination}))
     if document.get("preview"):
         bootstrap["next_unit_url"]=None
         bootstrap["player_url"]=None
@@ -423,25 +423,27 @@ def settings(request, locale):
 @require_GET
 @domain_view
 def pass_page(request, locale):
-    return page(request, locale, "web/pass.html", active_nav="pass", commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
+    destination = safe_return(request.GET.get("return_to"),locale) if request.GET.get("return_to") else reverse("web:explore",args=[locale])
+    return page(request, locale, "web/pass.html", active_nav="pass", free_return_path=destination, commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
 
 
 @require_GET
 @domain_view
 def learn(request, locale):
     request.user.request_territory = trusted_territory(request)
-    from learning.services import list_tracks
-    return page(request, locale, "web/learn.html", tracks=list_tracks(request.user, locale), active_nav="learn")
+    from learning.services import tracks_page
+    result=tracks_page(request,request.user,locale)
+    return page(request, locale, "web/learn.html", tracks=result["items"], next_cursor=result["next_cursor"], active_nav="learn")
 
 
 @require_GET
 @domain_view
 def track(request, locale, track_id):
     request.user.request_territory = trusted_territory(request)
-    from learning.services import track_detail, interview_questions
+    from learning.services import track_detail, interview_questions_page
     data = track_detail(request.user, track_id)
-    questions = interview_questions(request.user, track_id) if data.get("kind") == "sde_interview" and data.get("access") != "locked" else []
-    return page(request, locale, "web/track.html", track=data, questions=questions, active_nav="learn")
+    result = interview_questions_page(request,request.user,track_id) if data.get("kind") == "sde_interview" and data.get("access") != "locked" else {"items":[],"next_cursor":None}
+    return page(request, locale, "web/track.html", track=data, questions=result["items"], next_cursor=result["next_cursor"], active_nav="learn")
 
 
 @require_GET
@@ -458,9 +460,9 @@ def lesson(request, locale, lesson_id):
 @domain_view
 def interview(request, locale):
     request.user.request_territory = trusted_territory(request)
-    from learning.services import list_tracks
-    tracks = [track for track in list_tracks(request.user, locale) if track.get("kind") == "sde_interview"]
-    return page(request, locale, "web/learn.html", tracks=tracks, interview=True, active_nav="learn")
+    from learning.services import tracks_page
+    result = tracks_page(request,request.user,locale,kind="sde_interview")
+    return page(request, locale, "web/learn.html", tracks=result["items"], next_cursor=result["next_cursor"], interview=True, active_nav="learn")
 
 
 def catalog_payload(request, locale, endpoint, api_path=None, **kwargs):
@@ -616,11 +618,8 @@ def system_state(request,locale,state):
 @domain_view
 def question(request, locale, track_id, question_id):
     request.user.request_territory = trusted_territory(request)
-    from learning.services import interview_questions, track_detail
-    questions = interview_questions(request.user, track_id)
-    question = next((q for q in questions if str(q["question_id"]) == str(question_id)), None)
-    if question is None:
-        raise Http404
+    from learning.services import interview_question, track_detail
+    question = interview_question(request.user, track_id, question_id)
     return page(request, locale, "web/question.html", question=question, track=track_detail(request.user, track_id), active_nav="learn")
 
 
@@ -647,7 +646,7 @@ def audio_preview(request, locale, edition_id):
                  "title": edition["title"], "locale": edition["locale"], "preview": clip,
                  "chapters": [{key: clip[key] for key in ("asset_id", "unit_id", "duration_ms", "sha256", "quality_kbps")} | {"title": text("listen_sample", locale)}],
                  "reader_url": reverse("web:reader-start", args=[locale, edition_id]), "reader_available": False,
-                 "authenticated": request.user.is_authenticated, "full_player_url": full_player_url,
+                 "authenticated": request.user.is_authenticated, "free_access":getattr(django_settings,"FREE_ACCESS_ENABLED",False), "full_player_url": full_player_url,
                  "title_url": reverse("web:title", args=[locale, edition_id]),
                  "sign_in_url": reverse("web:sign-in", args=[locale]) + "?" + urlencode({"return_to": full_player_url}),
                  "pass_url": reverse("web:pass", args=[locale]) + "?" + urlencode({"return_to": full_player_url})}

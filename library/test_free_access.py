@@ -128,3 +128,69 @@ class FreeAccessBoundaryTests(TestCase):
         self.assertEqual(learning.list_tracks(self.user),[])
         self.user.request_territory='IN';track.published=False;track.save()
         with self.assertRaises(DomainError):learning._track(self.user,track.pk)
+
+
+    def test_historical_checkout_is_readonly_in_free_mode_without_provider_configuration(self):
+        from billing.services import checkout_data,order_data
+        offer=Offer.objects.create(code='original-historical-free-boundary',name='Original historical fixture',price_minor=100,currency='INR',duration_seconds=3600,formats=['reader'],terms_version='original',approved=True,active=True,test_only=True,edition=self.edition)
+        order=Order.objects.create(user=self.user,offer=offer,operation_id=uuid.uuid4(),request_sha256='c'*64,total_minor=100,currency='INR',test_only=True,provider='razorpay',provider_order_id='order_OriginalHistory',status='pending',offer_snapshot={'offer_version':offer.version},expires_at=timezone.now()+timedelta(minutes=30))
+        with patch('billing.checkout.qualified_mode') as mode:
+            self.assertIsNone(checkout_data(order))
+            data=order_data(order)
+            self.assertIsNone(data['checkout']);self.assertEqual(data['status'],'pending')
+            self.assertEqual(data['amount'],{'amount_minor':100,'currency':'INR'})
+            mode.assert_not_called()
+        with override_settings(FREE_ACCESS_ENABLED=False),patch('billing.checkout.qualified_mode',return_value=('test','rzp_test_fixture','unused')):
+            self.assertEqual(checkout_data(order)['provider_order_id'],'order_OriginalHistory')
+
+    def test_collection_cards_use_effective_free_label_without_widening_rights(self):
+        from .collection_models import CatalogCollection,CatalogItem
+        from .collections import eligible_items
+        collection=CatalogCollection.objects.create(slug='original-free-series',title_en='Original free series',title_bn='মৌলিক ধারাবাহিক',kind='series',house='series',published=True)
+        CatalogItem.objects.create(collection=collection,edition=self.edition,sort_order=1)
+        self.assertEqual(eligible_items(collection,'en','IN')[0]['access_label'],'free')
+        with override_settings(FREE_ACCESS_ENABLED=False):
+            self.assertEqual(eligible_items(collection,'en','IN')[0]['access_label'],'pass_required')
+        self.assertEqual(eligible_items(collection,'en','AE'),[])
+        self.revision.rights.filter(format='reader',action='read').update(approved=False)
+        self.assertEqual(eligible_items(collection,'en','IN'),[])
+
+    def test_mixed_intrinsic_and_rollout_free_downloads_share_durable_grant_in_either_order(self):
+        import hashlib
+        from .models import Asset,Rights
+        from . import storage
+        revision=services.clone_revision(self.revision.pk)
+        revision.rights.update(approved=True)
+        revision.access_policy={'reader':'free','audio':'paid','video':'deny'}
+        revision.download_policy={'reader':True,'audio':True}
+        unit=revision.units.first();raw=b'Original synthetic audio for mixed-free offline boundary only'
+        asset=Asset.objects.create(revision=revision,unit=unit,kind='audio_chapter',state='ready',storage_key=f'revisions/{revision.id}/{uuid.uuid4()}',sha256=hashlib.sha256(raw).hexdigest(),bytes=len(raw),content_type='audio/mpeg')
+        storage.put_private(asset.storage_key,raw,'audio/mpeg')
+        proof=storage.prepare_audio_pieces(asset)
+        revision.validation_evidence={'offline_piece_manifests':{str(asset.id):proof}}
+        revision.state='live';revision.published_at=timezone.now();revision.save()
+        self.edition.live_revision=revision;self.edition.save()
+        for action in ('read','download'):
+            Rights.objects.create(revision=revision,format='audio',action=action,territories=['IN'],starts_at=timezone.now()-timedelta(days=1),ends_at=timezone.now()+timedelta(hours=2),approved=True,test_only=True)
+        with override_settings(FEATURES={**settings.FEATURES,'audio':True,'offline_text_audio':True}):
+            for index,formats in enumerate((('reader','audio'),('audio','reader'))):
+                with self.subTest(first_format=formats[0]):
+                    user=get_user_model().objects.create_user(f'original-mixed-{index}@example.test','Original-Free-Fixture-47',is_verified=True)
+                    self.assertEqual(self.client.post('/api/v1/auth/login',{'email':user.email,'password':'Original-Free-Fixture-47'},content_type='application/json').status_code,200)
+                    device=self.client.get('/api/v1/session').json()['device_id'];licenses={}
+                    for fmt in formats:
+                        body={'edition_revision_id':str(revision.pk),'format':fmt,'unit_ids':[str(unit.pk)],'device_id':device}
+                        response=self.client.post('/api/v1/me/downloads',body,content_type='application/json',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
+                        self.assertEqual(response.status_code,201,response.content)
+                        licenses[fmt]=DownloadLicense.objects.get(pk=response.json()['license_id'])
+                    self.assertEqual(licenses['reader'].entitlement_id,licenses['audio'].entitlement_id)
+                    self.assertEqual(Entitlement.objects.filter(user=user,revision=revision,source='free').count(),1)
+                    for row in licenses.values():self.assertEqual(download_services._status(row),'active')
+                    with override_settings(FREE_ACCESS_ENABLED=False):
+                        self.assertEqual(download_services._status(licenses['reader']),'active')
+                        self.assertEqual(download_services._status(licenses['audio']),'revoked')
+                        with self.assertRaises(DomainError) as denied:services.authorize_revision(user,revision,'audio')
+                        self.assertEqual(denied.exception.code,'entitlement_required')
+                        Entitlement.objects.create(grant_key=f'original-existing-paid-{index}',user=user,source='one_time_order',scope='edition',edition=self.edition,formats=['audio'],valid_from=timezone.now(),valid_until=timezone.now()+timedelta(hours=1))
+                        self.assertEqual(services.authorize_revision(user,revision,'audio').pk,revision.pk)
+        self.assertFalse(Order.objects.exists());self.assertFalse(Payment.objects.exists());self.assertFalse(Invoice.objects.exists())

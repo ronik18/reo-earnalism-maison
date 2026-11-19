@@ -436,3 +436,33 @@ test("Stream renewal primes playback before real metadata and seeks once after l
     const paused=streamRestoration(sdk,80000,false,()=>true,()=>{},()=>{});paused.prime();assert.equal(plays,1);paused.metadata();assert.equal(position,80);
   } finally {globalThis.document=original;}
 });
+
+import { downloadLicensePages } from "./download-pages.ts";
+test("Download reconciliation includes licenses after the first page", async () => {
+  const calls: string[] = [];
+  const local = [{license_id:"older-saved-book"}];
+  const remote = await downloadLicensePages<{license_id:string}>(async path => {
+    calls.push(path);
+    return calls.length === 1 ? {items:[{license_id:"new-book"}],next_cursor:"older+page/="} : {items:local,next_cursor:null};
+  });
+  assert.deepEqual(calls,["/me/downloads","/me/downloads?cursor=older%2Bpage%2F%3D"]);
+  assert.equal(local.filter(book => !remote.some(row => row.license_id === book.license_id)).length,0);
+});
+test("A failed later download-license page yields no partial reconciliation snapshot", async () => {
+  let calls=0, reconciled=false;
+  await assert.rejects(async()=>{
+    await downloadLicensePages(async()=>{
+      if(++calls===2)throw new Error("connection lost");
+      return {items:[{license_id:"new-book"}],next_cursor:"next"};
+    });
+    reconciled=true;
+  },/connection lost/);
+  assert.equal(calls,2);assert.equal(reconciled,false);
+});
+test("Download-license pagination rejects a repeated cursor before reconciliation", async () => {
+  let calls=0;
+  await assert.rejects(downloadLicensePages(async()=>{
+    calls++;return {items:[],next_cursor:"same"};
+  }),/download_failed/);
+  assert.equal(calls,2);
+});
