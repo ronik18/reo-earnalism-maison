@@ -399,3 +399,30 @@ STRINGS.update({
     "contact": ("Contact", "যোগাযোগ"),
     "footer_links": ("Service information", "পরিষেবার তথ্য"),
 })
+
+STRINGS.update({
+    'free_pass_title': ('An open door to discovery.', 'আবিষ্কারের দরজা সবার জন্য।'),
+    'free_pass_intro': ('Read, listen and learn for free from eligible released content in approved territories. Sign in to keep your progress.', 'অনুমোদিত অঞ্চলে প্রকাশিত ও উপলব্ধ বিষয়বস্তু বিনামূল্যে পড়ুন, শুনুন ও শিখুন। অগ্রগতি সংরক্ষণ করতে প্রবেশ করুন।'),
+    'free_pass_now': ('Earnalism Pass · access now', 'Earnalism Pass · এখনই প্রবেশাধিকার'),
+    'free_price': ('FREE', 'বিনামূল্যে'),
+    'free_no_payment': ('No payment details. No automatic subscription.', 'পেমেন্টের তথ্য লাগবে না। স্বয়ংক্রিয় সাবস্ক্রিপশন নেই।'),
+    'create_free_account': ('Create a free account', 'বিনামূল্যে অ্যাকাউন্ট খুলুন'),
+    'planned_reference_prices': ('Planned reference prices', 'প্রস্তাবিত মূল্য নির্দেশিকা'),
+    'monthly_reference': ('Monthly reference', 'মাসিক নির্দেশক মূল্য'),
+    'annual_reference': ('Yearly reference', 'বার্ষিক নির্দেশক মূল্য'),
+    'per_month': ('/ month', '/ মাস'),
+    'per_year': ('/ year', '/ বছর'),
+    'planned_reference_label': ('Planned reference · not charged', 'প্রস্তাবিত নির্দেশক মূল্য · নেওয়া হচ্ছে না'),
+    'free_reference_explanation': ('These INR reference values describe a proposed future plan. They are not previous selling prices or a discount. Access is free now.', 'ভারতীয় রুপিতে এই নির্দেশক মূল্য ভবিষ্যতের একটি প্রস্তাবিত পরিকল্পনার জন্য। এগুলি আগের বিক্রয়মূল্য বা ছাড় নয়। এখন প্রবেশাধিকার বিনামূল্যে।'),
+    'free_future_choice': ('Any future paid plan will require a separate, explicit choice from you.', 'ভবিষ্যতে কোনো অর্থপ্রদত্ত পরিকল্পনায় যোগ দিতে আপনার পৃথক ও স্পষ্ট সম্মতি লাগবে।'),
+    'free_region_title': ('Access is not available in this region.', 'এই অঞ্চলে প্রবেশাধিকার উপলব্ধ নয়।'),
+    'free_region_help': ('Free access follows the approved territories and each release’s rights. Payment cannot unlock unavailable content.', 'বিনামূল্যে প্রবেশাধিকার অনুমোদিত অঞ্চল ও প্রতিটি প্রকাশনার অধিকারের শর্ত মেনে চলে। পেমেন্ট করে অনুপলব্ধ বিষয়বস্তু খোলা যায় না।'),
+    'historical_billing_link': ('Billing history and existing agreements', 'আগের বিল ও বিদ্যমান চুক্তি'),
+    'free_historical_billing': ('Existing orders, invoices, refunds and mandate controls remain in Settings. Free access does not cancel an existing provider agreement.', 'আগের অর্ডার, ইনভয়েস, ফেরত ও ম্যান্ডেট নিয়ন্ত্রণ সেটিংসে থাকবে। বিনামূল্যে প্রবেশাধিকার বিদ্যমান পেমেন্ট-প্রদানকারীর চুক্তি বাতিল করে না।'),
+    'free_checkout_title': ('Review your existing order.', 'আগের অর্ডারটি দেখুন।'),
+    'free_checkout_help': ('New purchases are turned off. Access follows regional availability. Your existing order status remains below; no payment can be started from this screen.', 'নতুন কেনাকাটা বন্ধ রয়েছে। প্রবেশাধিকার আঞ্চলিক প্রাপ্যতার উপর নির্ভর করে। আগের অর্ডারের অবস্থা নিচে রয়েছে; এই পাতা থেকে পেমেন্ট শুরু করা যাবে না।'),
+    'free_access_enabled': ('Maison access is free. New purchases are disabled.', 'Maison-এ প্রবেশাধিকার বিনামূল্যে। নতুন কেনাকাটা বন্ধ রয়েছে।'),
+    'back_to_free_access': ('Back to free access', 'বিনামূল্যে প্রবেশাধিকারে ফিরুন'),
+})
+
+STRINGS['free_protected_learning'] = ('A free verified account is needed for protected lessons. Regional availability and learning prerequisites still apply.', 'সংরক্ষিত পাঠের জন্য বিনামূল্যের যাচাইকৃত অ্যাকাউন্ট দরকার। আঞ্চলিক প্রাপ্যতা ও শেখার পূর্বশর্ত প্রযোজ্য থাকবে।')

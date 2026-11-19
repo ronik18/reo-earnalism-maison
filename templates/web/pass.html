@@ -1,2 +1,19 @@
-{% extends 'web/base.html' %}{% load maison %}{% block content %}<section class="narrow"><p class="eyebrow">{% ui 'pass' %}</p><h1>{% ui 'pass_title' %}</h1><p class="lead">{% ui 'pass_intro' %}</p><div id="commerce-island"><p>{% ui 'loading' %}</p></div><p>{% ui 'legacy_notice' %}</p><a class="button" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a></section>{% endblock %}
-{% block bootstrap %}{{ commerce_bootstrap|json_script:'commerce-bootstrap' }}{% island_script 'commerce' %}{% endblock %}
+{% extends 'web/base.html' %}{% load maison %}{% block content %}
+{% if free_access %}
+<section class="pass-free narrow" aria-labelledby="pass-title">
+<p class="eyebrow">{% ui 'pass' %}</p><h1 id="pass-title">{% ui 'free_pass_title' %}</h1>
+{% if free_access_available %}
+<p class="lead">{% ui 'free_pass_intro' %}</p>
+<div class="free-pass-card"><p class="eyebrow">{% ui 'free_pass_now' %}</p><p class="free-pass-price">{% ui 'free_price' %}</p><p>{% ui 'free_no_payment' %}</p>
+<div class="actions"><a class="button" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a>{% if not request.user.is_authenticated %}<a class="button secondary" href="{% url 'web:sign-up' ui_locale %}?return_to={% url 'web:explore' ui_locale %}">{% ui 'create_free_account' %}</a>{% endif %}</div></div>
+<div class="pass-reference-grid" aria-label="{% ui 'planned_reference_prices' %}">
+<article class="pass-reference"><h2>{% ui 'monthly_reference' %}</h2><p class="reference-amount"><s>₹99</s> <span>{% ui 'per_month' %}</span></p><p class="fine">{% ui 'planned_reference_label' %}</p></article>
+<article class="pass-reference"><h2>{% ui 'annual_reference' %}</h2><p class="reference-amount"><s>₹999</s> <span>{% ui 'per_year' %}</span></p><p class="fine">{% ui 'planned_reference_label' %}</p></article>
+</div>
+<p class="fine">{% ui 'free_reference_explanation' %}</p><p>{% ui 'free_future_choice' %}</p>
+{% else %}<div class="empty-state"><h2>{% ui 'free_region_title' %}</h2><p>{% ui 'free_region_help' %}</p></div>{% endif %}
+{% if request.user.is_authenticated %}<p class="free-billing-link"><a href="{% url 'web:settings' ui_locale %}">{% ui 'historical_billing_link' %}</a></p><p class="fine">{% ui 'free_historical_billing' %}</p>{% endif %}
+</section>
+{% else %}<section class="narrow"><p class="eyebrow">{% ui 'pass' %}</p><h1>{% ui 'pass_title' %}</h1><p class="lead">{% ui 'pass_intro' %}</p><div id="commerce-island"><p>{% ui 'loading' %}</p></div><p>{% ui 'legacy_notice' %}</p><a class="button" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a></section>{% endif %}
+{% endblock %}
+{% block bootstrap %}{% if not free_access %}{{ commerce_bootstrap|json_script:'commerce-bootstrap' }}{% island_script 'commerce' %}{% endif %}{% endblock %}

@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "combined_backend_tests": 498,
+  "client_tests": 32,
+  "typecheck": "PASS",
+  "frontend_build": "PASS",
+  "production_Docker_build": "PASS",
+  "focused_numbering_document_tests": 26,
+  "free_boundary_tests": 8,
+  "UI_checks": 10,
+  "browser_groups": 5,
+  "historical_checkout_groups": 2,
+  "secret_scan": "No current provider-secret value matches in candidate text files",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "static_release": "7f55a7940999c4c1567bf119d49086b939bfbb68294f176eff74b7b72b3fa72e",
+  "static_files": 71,
+  "static_bytes": 7373564
+}

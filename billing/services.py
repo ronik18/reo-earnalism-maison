@@ -27,7 +27,9 @@ class CaptureFacts:
 
 
 def _eligible(user,revision,format,at):
-    return Entitlement.objects.filter(user=user,status='active',revoked_at=None,valid_from__lte=at).filter(
+    rows=Entitlement.objects.filter(user=user,status='active',revoked_at=None,valid_from__lte=at)
+    if not getattr(settings,'FREE_ACCESS_ENABLED',False):rows=rows.exclude(grant_key__startswith='platform-free:')
+    return rows.filter(
         Q(valid_until__isnull=True)|Q(valid_until__gt=at)).filter(
         Q(scope='edition',edition_id=revision.edition_id)|Q(scope='platform')).filter(Q(revision__isnull=True)|Q(revision=revision))
 
@@ -44,13 +46,15 @@ def entitlement_expires_at(user,revision,format='reader',at=None):
 
 @transaction.atomic
 def ensure_free_entitlement(user,revision,format='reader',territory='IN'):
-    from library.services import authorize_revision
+    from library.services import authorize_revision,free_access_for_revision
     revision=authorize_revision(user,revision,format,action='download',territory=territory)
-    if revision.access_policy.get(format)!='free':raise DomainError('free_grant_not_permitted','This format is not explicitly free.',403)
+    platform_free=revision.access_policy.get(format)=='paid' and free_access_for_revision(revision)
+    if revision.access_policy.get(format)!='free' and not platform_free:raise DomainError('free_grant_not_permitted','This format is not explicitly free.',403)
     # Lock actor for two simultaneous first free grants. Durable key survives personal receipt expiry.
     from django.contrib.auth import get_user_model
     get_user_model().objects.select_for_update().get(pk=user.pk)
-    row,created=Entitlement.objects.get_or_create(grant_key=f'free:{user.public_id}:{revision.id}',defaults={
+    prefix='platform-free' if platform_free else 'free'
+    row,created=Entitlement.objects.get_or_create(grant_key=f'{prefix}:{user.public_id}:{revision.id}',defaults={
         'user':user,'source':'free','scope':'edition','edition':revision.edition,'revision':revision,'formats':[format],
         'valid_from':timezone.now(),'valid_until':None})
     if row.revoked_at or row.status!='active':raise DomainError('entitlement_revoked','This free offline grant has been revoked.',403)

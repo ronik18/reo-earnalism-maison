@@ -1,0 +1,46 @@
+{
+  "status": "FROZEN_LOCAL_PASS_INTEGRATION_PENDING",
+  "scope": "Free Pass EN/BN and readonly historical checkout; no real financial/provider mutation or book/legacy edits",
+  "files_sha256": {
+    "client/commerce.tsx": "d2b15475dfc2f4aa383b8d7543b25427166c509e9ccab96bac17415179b15a55",
+    "web/views.py": "9bef4f11a587a78c9520f904930c1c19300367e82dee1d977d03c9d4ec567524",
+    "web/i18n.py": "ba6ad0f15bbc97f10f596392a21ab8b2ca4d0695ccffb04be851ca314918757e",
+    "web/legal.py": "b20eb79054bb0d3016e971b99dce4514873d3c71202fa8fa4dc67bdadaf558ca",
+    "web/test_free_pass.py": "1729c83d31fbc57217e34d62df2ee270c382527b837e3803bb37bbab1d8cb538",
+    "templates/web/pass.html": "94d640468daf0c863713f9f4a74fb02594bf0cec93aac323d3186fc6b890fe57",
+    "templates/web/checkout.html": "372cc533cb490831c631f8ad548990046b9702c3d3c834ead9ca9f2e99731cd1",
+    "templates/web/search.html": "a173a8931bd7de0be2ed3366b13901be67f821c5c95335fbf89d894b02685159",
+    "templates/web/track.html": "e5d00cda1bf042fd0ee4477839a299439c8ab7bb5e4c547a37893922508a4e52",
+    "static/maison/peacock/maison-theme.css": "6ed8acd85b9447f72c3ae8f5734b9d86463c6f3762136c0923134a307b6d9eff"
+  },
+  "checks": {
+    "typecheck": "PASS",
+    "client_tests": 32,
+    "build": "PASS",
+    "Django_UI_and_return_path_tests": 10,
+    "actual_local_free_pass_browser_groups": 5,
+    "controlled_historical_checkout_browser_groups": 2,
+    "page_errors": 0,
+    "horizontal_overflow": false,
+    "new_payment_writes": 0,
+    "provider_requests": 0
+  },
+  "reference_values": {
+    "currency": "INR",
+    "monthly": 99,
+    "annual": 999,
+    "label": "Planned reference; never charged; no discount claim"
+  },
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "evidence": [
+    "free-pass-browser.json",
+    "free-checkout-controlled.json"
+  ],
+  "remaining": [
+    "Parent combined tests/exact-head CI/push/deploy/live acceptance"
+  ],
+  "historical_checkout_copy": "Neutral order review heading; new purchases off and regional availability explicit in EN/BN"
+}

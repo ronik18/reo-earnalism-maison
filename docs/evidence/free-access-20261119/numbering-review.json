@@ -1,0 +1,30 @@
+{
+  "status": "PASS_CANDIDATE_FROZEN",
+  "scope": "Local PostgreSQL synthetic historical financial-numbering integrity; no commercial/production qualification",
+  "checks": {
+    "focused_tests": 26,
+    "seconds": 22.077,
+    "test_modules": [
+      "billing.test_numbering",
+      "billing.test_documents",
+      "billing.test_live_mode",
+      "finance_rotation_test"
+    ],
+    "model_migration_drift": "PASS No changes detected",
+    "git_diff_check": "PASS",
+    "original_policy_rotation_repro": "FAIL before correction; PASS after correction"
+  },
+  "files_sha256": {
+    "billing/numbering.py": "dd814250457207defa27640dd04736bacfa7abbea49aa856124374151127e9a6",
+    "billing/invoice_models.py": "fba44f13996d0d5caf8007aa88f5f09cdec18a75ed4d845b329e0f9c62aed476",
+    "billing/test_numbering.py": "879411180982d42a39c6cd4bfc31fb1a663fe715111af8600651cb480e3082e4",
+    "billing/migrations/0011_finance_visible_series.py": "f564f8400e23075a163655579e57efa5560fac4a39388195095bbd59c7397971"
+  },
+  "rollout": [
+    "Keep financial writes disabled/free until all writers use the new schema/code; legacy code cannot identify explicit prefix rows correctly",
+    "Legacy counters retain policy-version identity and values; no guessed prefix/backfill, reset or deletion",
+    "New counters use explicit issuer/kind/FY/prefix identity and honor maximum unknown-prefix legacy next_number as a conservative floor",
+    "Rollback migration can refuse if new rows would violate the legacy policy-version uniqueness; do not remove financial history to force rollback"
+  ],
+  "book_legacy_provider_credentials_changed": false
+}

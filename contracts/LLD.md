@@ -247,3 +247,7 @@ Django migrations own the actual implemented schema. The full 54-table SQL remai
 ## Owner-approved publication scope amendment,17November2026
 
 Use publication-policy.json for the active47-region whitelist; UAE/Mainland China and all pending jurisdictions are excluded. A book must satisfy existing per-format/action rights and exact-text/asset legal evidence across every active region before publication. This reuses Rights records, revision validation_evidence and existing staff transitions. It does not introduce a new service, amend the approved stack, waive external permission requirements or relabel draft content research as publication clearance.
+
+## Owner amendment — isolated free rollout,19November2026
+
+The owner now requires isolated Maison to be free for users in the active approved territories. Free mode removes the price/entitlement requirement only for eligible released content; publication, format/territory rights, verified identity, device and offline boundaries remain. It blocks new monetary order/provider creation, preserving historical financial and cancellation/revocation obligations. Planned INR99/month and INR999/year reference amounts may be struck through with truthful planned-price labels; they are not prior charged prices, discounts or approved live finance terms. Any future paid activation requires explicit opt-in and the exact commercial/provider acceptance originally specified. Physical-device UAT is deferred and non-blocking; the actual book and legacy remain unchanged.
