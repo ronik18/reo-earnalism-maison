@@ -47,7 +47,7 @@ class SubscriptionLifecycleTests(TestCase):
         self.assertTrue(result['revocation_pending']);self.assertEqual(result['status'],'authorized');self.assertIsNone(result['revoked_at'])
         self.assertEqual(svc.revoke_existing(self.user,self.mandate.pk,key)[1],result)
         self.subscription.refresh_from_db();self.assertTrue(self.subscription.cancel_at_period_end)
-        self.entitlement.refresh_from_db();self.assertEqual(self.entitlement.status,'active');self.assertEqual(OutboxJob.objects.count(),1)
+        self.entitlement.refresh_from_db();self.assertEqual(self.entitlement.status,'active');self.assertEqual(OutboxJob.objects.count(),2)
     def test_routes_require_fresh_reauthentication_and_creation_remains_disabled(self):
         response=svc.cancel(self.request('post','/',{'at_period_end':True},fresh=False),self.subscription.pk)
         self.assertEqual(response.status_code,403)
@@ -110,5 +110,5 @@ class ConcurrentSubscriptionIntentTests(TransactionTestCase):
         self.assertEqual(self.subscription.provider_status,'active')
         self.assertEqual(self.entitlement.valid_until,paid_until);self.assertEqual(self.entitlement.status,'active')
         self.assertEqual(OutboxJob.objects.filter(dedupe_key=f'mandate.revoke:{mandate_id}').count(),1)
-        self.assertEqual(OutboxJob.objects.filter(dedupe_key=f'subscription.cancel:{subscription_id}').count(),int(results[0]==200))
+        self.assertEqual(OutboxJob.objects.filter(dedupe_key=f'subscription.cancel:{subscription_id}').count(),1)
         self.assertFalse(OutboxJob.objects.exclude(status='blocked').exists())

@@ -4,7 +4,7 @@ urlpatterns=[
  path('session',views.session_view),path('auth/register',views.register_view),path('auth/login',views.login_view),
  path('auth/<str:purpose>/request',views.request_action),path('auth/<str:purpose>/confirm',views.consume_action),
  path('auth/email-links/consume',views.consume_action,{'purpose':'email-links'}),
- path('auth/google',views.provider_disabled),path('auth/google/callback',views.provider_disabled),
+ path('auth/google',views.google_start,name='google_login'),path('auth/google/callback',views.google_callback,name='google_callback'),
  path('auth/phone-challenges',views.provider_disabled),path('auth/phone-challenges/<uuid:challenge_id>/verify',views.provider_disabled),
  path('me/profile',views.profile),path('me/preferences',views.preferences),path('me/consents',views.consents),
  path('me/password',views.change_password),path('me/reauthenticate',views.reauthenticate),

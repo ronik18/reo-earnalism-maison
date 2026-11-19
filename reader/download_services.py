@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 from datetime import timedelta
 from django.conf import settings
 from django.db import transaction
+from django.core import signing
 from django.utils import timezone
 from core.api import DomainError,public_uuid
 from core.services import apply_operation,audit
@@ -46,7 +47,10 @@ def _status(row):
 
 def validate_delivery_license(user,license_id,asset,device_id,territory):
     """Called again by the media adapter when minting/resolving a URL."""
+    _enabled()
     row=_owned(user,device_id,license_id)
+    if row.format=='audio' and not getattr(settings,'FEATURES',{}).get('audio',False):
+        raise DomainError('feature_disabled','Audio is not enabled.',409)
     if _status(row)!='active' or row.territory!=territory or row.revision_id!=asset.revision_id:
         raise DomainError('license_inactive','This offline license is no longer active.',403)
     if hashlib.sha256(canonical_bytes(row.manifest)).hexdigest()!=row.manifest_sha256:
@@ -73,7 +77,8 @@ def _serialize(row,urls=True):
                 from library import storage
                 prepared=bound['piece_manifest'];seconds=min(120,int((row.expires_at-timezone.now()).total_seconds()))
                 if seconds<1:raise DomainError('license_inactive','Renew this expired license.',409)
-                piece={'url':storage.private_url(prepared['storage_key'],seconds,'application/json'),'url_expires_at':iso(min(expiry,row.expires_at)),
+                piece_url=storage.private_url(prepared['storage_key'],seconds,'application/json') if storage.is_r2() else _local_piece_url(row,asset,seconds)
+                piece={'url':piece_url,'url_expires_at':iso(min(expiry,row.expires_at)),
                        'sha256':prepared['sha256'],'bytes':prepared['bytes']}
             assets.append({'asset_id':str(asset.id),'unit_id':str(asset.unit_id),'sha256':asset.sha256,'bytes':asset.bytes,
                 'content_type':asset.content_type,'url':urljoin(getattr(settings,'PUBLIC_BASE_URL','http://127.0.0.1:8008'),descriptor['url']),'url_expires_at':iso(min(expiry,row.expires_at)),'piece_manifest':piece})
@@ -193,3 +198,30 @@ def renew_license(user,device_id,license_id,key,territory):
         return 200,{'license_id':str(row.id)},1
     status,result=apply_operation(user,key,'download.renew',{'license_id':str(license_id)},mutate)
     return status,_serialize(_owned(user,device_id,result['license_id']))
+
+
+def _local_piece_url(row,asset,seconds):
+    if not settings.LOCAL:raise DomainError('feature_disabled','Local manifest delivery is unavailable.',404)
+    expiry=min(timezone.now()+timedelta(seconds=seconds),row.expires_at)
+    token=signing.dumps({'license':str(row.id),'asset':str(asset.id),'user':str(row.user.public_id),'device':str(row.device_id),
+        'territory':row.territory,'exp':int(expiry.timestamp())},salt='maison-local-offline-pieces')
+    return urljoin(settings.PUBLIC_BASE_URL,f'/api/v1/me/downloads/{row.id}/pieces/{asset.id}?token={token}')
+
+
+def local_piece_manifest(user,device_id,license_id,asset_id,token,territory):
+    from library import storage
+    if not settings.LOCAL or storage.is_r2():raise DomainError('feature_disabled','Local manifest delivery is unavailable.',404)
+    _enabled()
+    try:data=signing.loads(token,salt='maison-local-offline-pieces',max_age=120)
+    except (signing.BadSignature,TypeError,ValueError):raise DomainError('invalid_grant','Manifest grant is invalid or expired.',403)
+    expected={'license':str(license_id),'asset':str(asset_id),'user':str(user.public_id),'device':str(device_id),'territory':territory}
+    if any(data.get(key)!=value for key,value in expected.items()) or data.get('exp',0)<=timezone.now().timestamp():
+        raise DomainError('invalid_grant','Manifest grant is invalid or expired.',403)
+    row=_owned(user,device_id,license_id)
+    asset=Asset.objects.filter(pk=asset_id,revision=row.revision,state='ready').first()
+    if not asset:raise DomainError('not_found','Manifest asset is unavailable.',404)
+    validate_delivery_license(user,license_id,asset,device_id,territory)
+    bound=next((item for item in row.manifest['assets'] if item['asset_id']==str(asset.id)),{})
+    prepared=bound.get('piece_manifest')
+    if not prepared or not 1<=prepared.get('bytes',0)<=1048576:raise DomainError('not_found','Prepared audio pieces are unavailable.',404)
+    return storage.verify_private(prepared['storage_key'],prepared['bytes'],prepared['sha256'],'application/json',max_seconds=8,return_bytes=True)

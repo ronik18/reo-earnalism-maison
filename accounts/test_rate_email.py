@@ -132,3 +132,35 @@ class EmailRecoveryTests(TestCase):
         self.user.email=self.action.email_normalized;self.user.is_active=False;self.user.save()
         with self.assertRaises(DomainError) as error:services.confirm_password_reset(token,'Another-strong-password-47')
         self.assertEqual(error.exception.status,410)
+
+class PublicAuthRateTests(TestCase):
+    def setUp(self):
+        self.factory=RequestFactory();self.called=0
+        def downstream(request):self.called+=1;return JsonResponse({'ok':True})
+        self.middleware=MemberRateLimitMiddleware(downstream)
+    def request(self,path,email='member@example.test',ip='192.0.2.1'):
+        from django.contrib.auth.models import AnonymousUser
+        request=self.factory.post(path,{'email':email,'password':'not-used-by-test','locale':'en'},content_type='application/json',REMOTE_ADDR=ip)
+        request.user=AnonymousUser();request.session={};return request
+    @override_settings(LOCAL=True)
+    def test_login_identity_limit_and_ip_limit_apply_to_anonymous_clients(self):
+        for n in range(5):self.assertEqual(self.middleware(self.request('/api/v1/auth/login')).status_code,200)
+        denied=self.middleware(self.request('/api/v1/auth/login'));self.assertEqual(denied.status_code,429);self.assertEqual(denied['RateLimit-Limit'],'5')
+        self.assertEqual(self.called,5)
+        form=self.factory.post('/bn/sign-in/',{'email':'member@example.test','password':'not-used'},REMOTE_ADDR='192.0.2.1')
+        from django.contrib.auth.models import AnonymousUser
+        form.user=AnonymousUser();form.session={}
+        self.assertEqual(self.middleware(form).status_code,429)
+        for n in range(23):self.assertEqual(self.middleware(self.request('/api/v1/auth/login',email=f'different{n}@example.test')).status_code,200)
+        denied=self.middleware(self.request('/api/v1/auth/login',email='last@example.test'));self.assertEqual(denied.status_code,429);self.assertEqual(denied['RateLimit-Limit'],'30')
+    @override_settings(LOCAL=True)
+    def test_email_and_registration_ip_limits_cannot_be_evaded_by_changing_email(self):
+        for n in range(20):self.assertEqual(self.middleware(self.request('/api/v1/auth/email-links/request',email=f'email{n}@example.test')).status_code,200)
+        self.assertEqual(self.middleware(self.request('/api/v1/auth/password-resets/request',email='extra@example.test')).status_code,429)
+        for n in range(3):self.assertEqual(self.middleware(self.request('/api/v1/auth/register',email=f'register{n}@example.test')).status_code,200)
+        self.assertEqual(self.middleware(self.request('/api/v1/auth/register',email='register-last@example.test')).status_code,429)
+    @override_settings(LOCAL=False)
+    def test_public_auth_requires_attested_production_ip(self):
+        request=self.request('/api/v1/auth/login');request.META['HTTP_CF_CONNECTING_IP']='198.51.100.1'
+        self.assertEqual(self.middleware(request).status_code,503);self.assertEqual(self.called,0)
+        request.trusted_client_ip='2001:db8::1';self.assertEqual(self.middleware(request).status_code,200)

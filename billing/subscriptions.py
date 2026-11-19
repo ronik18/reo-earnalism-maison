@@ -1,5 +1,6 @@
 """Existing agreement management: durable intent never pretends provider confirmation."""
 from django.utils import timezone
+from django.conf import settings
 from core.api import json_endpoint,api_response,DomainError,operation_key,expected_version,json_body
 from core.services import apply_operation,audit
 from core.models import OutboxJob
@@ -23,9 +24,15 @@ def own_subscription(user,subscription_id,lock=False):
     return row
 
 def queue_intent(user,row,action):
-    # No qualified recurring transport exists. Keep an explicit blocked durable intent
-    # rather than invoke a fake adapter or allow a generic worker to claim delivery.
-    OutboxJob.objects.get_or_create(dedupe_key=f'{action}:{row.pk}',defaults={'kind':'subscription_reconcile','actor':user,'payload':{'action':action,'resource_id':str(row.pk)},'not_before':timezone.now(),'status':'blocked','error_code':'provider_not_qualified'})
+    status='blocked';error='provider_token_identity_missing' if action=='mandate.revoke' else 'provider_not_qualified'
+    if action=='subscription.cancel':
+        try:
+            from .checkout import qualified_mode
+            mode,_,_=qualified_mode()
+            if row.provider=='razorpay' and row.provider_subscription_id and row.plan.offer.test_only==(mode=='test'):
+                status='pending';error=''
+        except DomainError:pass
+    OutboxJob.objects.get_or_create(dedupe_key=f'{action}:{row.pk}',defaults={'kind':'subscription_reconcile','actor':user,'payload':{'action':action,'resource_id':str(row.pk),'provider_mode':getattr(settings,'RAZORPAY_MODE','test'),'provider':row.provider,'provider_resource_id':row.provider_subscription_id if action=='subscription.cancel' else row.provider_mandate_id},'not_before':timezone.now(),'status':status,'error_code':error})
 
 def cancel_existing(user,subscription_id,data,base,key):
     if data.get('at_period_end') is not True:
@@ -41,6 +48,7 @@ def cancel_existing(user,subscription_id,data,base,key):
             row.save(update_fields=['cancel_at_period_end','cancellation_requested_at','version'])
             queue_intent(user,row,'subscription.cancel')
             audit(user,'subscription.cancel_requested',row,{'at_period_end':True})
+        if row.cancel_at_period_end and row.status not in ['cancelled','completed','expired']:queue_intent(user,row,'subscription.cancel')
         return 200,subscription_data(row),row.version
     return apply_operation(user,key,'subscription.cancel',{'subscription_id':str(subscription_id),'version':base,**data},execute)
 
@@ -59,6 +67,7 @@ def revoke_existing(user,mandate_id,key):
             if not sub.cancel_at_period_end:
                 sub.cancel_at_period_end=True;sub.cancellation_requested_at=timezone.now();sub.version+=1
                 sub.save(update_fields=['cancel_at_period_end','cancellation_requested_at','version'])
+            queue_intent(user,sub,'subscription.cancel')
             queue_intent(user,row,'mandate.revoke')
             audit(user,'mandate.revoke_requested',row)
         return 200,mandate_data(row),row.version

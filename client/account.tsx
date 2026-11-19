@@ -44,7 +44,8 @@ function AuthenticatorQR({ uri }: { uri: string }) {
   }, [uri]);
   return <canvas ref={canvas} role="img" aria-label={t("mfa_scan_qr")} style={{maxWidth:"100%",height:"auto"}} />;
 }
-function Account({ staff }: { staff: boolean }) {
+interface AccountBoot {staff:boolean;google_enabled?:boolean;google_linked?:boolean;fresh_until?:number;}
+function Account({ staff, google_enabled, google_linked, fresh_until }: AccountBoot) {
   const [profile, setProfile] = useState<Profile>();
   const [consents, setConsents] = useState<Consents>();
   const [loaded, setLoaded] = useState(false);
@@ -57,7 +58,7 @@ function Account({ staff }: { staff: boolean }) {
   const [codes, setCodes] = useState<string[]>([]);
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
-  const [freshUntil, setFreshUntil] = useState(0);
+  const [freshUntil, setFreshUntil] = useState(fresh_until || 0);
   const fresh = freshUntil > Date.now();
   const setFresh = (value: boolean) => setFreshUntil(value ? Date.now() + 300000 : 0);
   const [deleting, setDeleting] = useState(false);
@@ -253,10 +254,12 @@ function Account({ staff }: { staff: boolean }) {
           </label>
           <button disabled={busy}>{t("confirm_password")}</button>
         </form>
+        {google_enabled && google_linked ? <p><a className="button secondary" href={`/api/v1/auth/google?${new URLSearchParams({intent:"reauthenticate",return_path:`/${locale}/settings/`})}`}>{t("google_confirm")}</a></p> : null}
         <p>{t("reauthentication_window")}</p>
       </section>
       <section><h2>{t("change_password")}</h2><p>{t("password_session_notice")}</p><form className="narrow" onSubmit={e => {e.preventDefault(); const form=e.currentTarget; const data=new FormData(form); if(data.get("new_password") !== data.get("repeat_password")){setStatus(t("password_mismatch"));return;} void act(async()=>{await api("/me/password",{method:"POST",key:crypto.randomUUID(),body:{current_password:data.get("current_password"),new_password:data.get("new_password")}});form.reset();await load();setStatus(t("password_changed_settings"));});}}><label>{t("password")}<input name="current_password" type="password" autoComplete="current-password" required /></label><label>{t("new_password")}<input name="new_password" type="password" autoComplete="new-password" required /></label><p className="fine">{t("password_hint")}</p><label>{t("repeat_password")}<input name="repeat_password" type="password" autoComplete="new-password" required /></label><button disabled={busy || !online}>{t("change_password")}</button></form></section>
       {consents ? <section><h2>{t("consent_choices")}</h2><p>{t("consent_help")}</p><form className="narrow" onSubmit={e=>{e.preventDefault();const data=new FormData(e.currentTarget);void act(async()=>{const next=await api<Consents>("/me/consents",{method:"PUT",version:consents.version,key:crypto.randomUUID(),body:{necessary_notice_version:consents.necessary_notice_version,analytics_opt_in:data.get("analytics") === "on",marketing_email_opt_in:data.get("marketing") === "on"}});setConsents(next);setStatus(t("saved_server"));});}}><label className="check-label"><input type="checkbox" name="analytics" defaultChecked={consents.analytics_opt_in} />{t("analytics_choice")}</label><label className="check-label"><input type="checkbox" name="marketing" defaultChecked={consents.marketing_email_opt_in} />{t("marketing_choice")}</label><button disabled={busy || !online}>{t("save")}</button></form></section> : null}
+      {google_enabled ? <section><h2>{t("google_connection")}</h2>{google_linked ? <p>{t("google_connected")}</p> : <><p>{t("google_link_help")}</p>{fresh && online ? <a className="button secondary" href={`/api/v1/auth/google?${new URLSearchParams({intent:"link",return_path:`/${locale}/settings/`})}`}>{t("google_link")}</a> : <a href="#sensitive-actions">{t("reauthentication_required")}</a>}</>}</section> : null}
       <BillingHistory online={online} fresh={fresh} onFreshRequired={()=>setFresh(false)} />
       {staff ? (
         <section id="mfa-settings">
@@ -497,7 +500,7 @@ function Account({ staff }: { staff: boolean }) {
 export function mount() {
   mountIsland(document.getElementById("account-island"), () => (
     <Account
-      staff={readBootstrap<{ staff: boolean }>("account-bootstrap").staff}
+      {...readBootstrap<AccountBoot>("account-bootstrap")}
     />
   ));
 }

@@ -1,0 +1,83 @@
+{
+  "recorded_at": "2026-11-19T06:04:53.642166Z",
+  "scope": "Bounded re-review of REV01/REV02 fixes only; no broadened audit.",
+  "shared_source_edits": false,
+  "provider_calls": 0,
+  "findings": [
+    {
+      "id": "REV01",
+      "severity": "P1",
+      "file": "accounts/google.py",
+      "lines": [
+        90,
+        107
+      ],
+      "title": "Valid compressed Google response rejected by wire/decoded length mismatch",
+      "confirmed_by": "google_gzip_result.json; actual urllib3 gzip decoding in a network-disabled container",
+      "trigger": "Content-Length=60 encoded bytes and629 decoded JSON bytes",
+      "impact": "OAuth cert/token reads reject a valid compressed response, preventing Google sign-in.",
+      "smallest_fix": "Read decoded content to EOF under existing byte/time caps without comparing decoded count to encoded Content-Length; preserve encoded-length cap and urllib3 encoded-stream truncation validation; add gzip/truncated regressions.",
+      "status": "closed",
+      "closure": {
+        "file": "accounts/google.py",
+        "lines": [
+          90,
+          108
+        ],
+        "source_review": "Decoded stream now reads to EOF; encoded Content-Length remains a wire-size upper bound while decoded bytes retain their independent128KiB/time cap. Incorrect encoded-vs-decoded equality removed.",
+        "reproduction": "google_gzip_after.json: result accepted, body_matches true,629decoded bytes/60encoded bytes, provider_calls0"
+      }
+    },
+    {
+      "id": "REV02",
+      "severity": "P1",
+      "file": "core/jobs.py",
+      "lines": [
+        40,
+        43
+      ],
+      "title": "New financial workers are not dispatched by actual maintenance loop",
+      "confirmed_by": "Current source branch still raises for refund_reconcile/refund_review and lacks subscription_reconcile.",
+      "impact": "Approved refunds and existing cancellation jobs cannot execute through scheduled maintenance even with qualified configuration.",
+      "smallest_fix": "Dispatch refund_reconcile and subscription_reconcile to their existing workers after authority checks land; retain unsupported/unreviewed obligations as blocked and test run_due_jobs with mocked provider.",
+      "status": "closed",
+      "closure": {
+        "file": "core/jobs.py",
+        "lines": [
+          40,
+          55
+        ],
+        "source_review": "refund_review/refund_reconcile dispatch to existing gated process_refund_job; subscription_reconcile dispatches to process_subscription_job. Unreviewed/unsupported refund/mandate/provider cases classify as blocked.",
+        "runtime_test_status": "Parent/implementer focused tests running separately; no new full-suite pass claimed by this receipt."
+      }
+    }
+  ],
+  "reviewed_authority_followup": {
+    "result": "PASS source review",
+    "files": [
+      "billing/subscriptions.py:26-35",
+      "billing/subscription_worker.py:15-25"
+    ],
+    "summary": "Queued cancellation records exact provider, merchant mode and provider resource ID; worker rejects absent or mismatched bindings before adapter construction. Owner, cancellation intent and mode checks remain; earned periods and mandate authority are preserved."
+  },
+  "other_review_result": "No additional concrete blocking financial/media authority regression found in the reviewed paths. This is not an exhaustive security assessment or actual provider qualification.",
+  "source_sha256": {
+    "accounts/google.py": "07e1e622c2317bebd3619f2f6919d1fad18ad0835b23bd1bf4a985252cf89ec6",
+    "core/jobs.py": "875da080eb0e60e60b906bb093ac73620497033cdf50bf9d5feba8111cf7bdfd",
+    "billing/finance.py": "ae8acbea326e78b91453fb292883a9d1166251a43ac18a6d4f8e0405b1e98f6c",
+    "billing/refunds.py": "7331c4cb91ae45414fa4c4dd6e604f96c5771c7bbc776a45a2bf73e6496819ad",
+    "billing/subscriptions.py": "64e457ed99603b2cd9ed0d2ebd573d605de9c4b9ae3bac2d9f84593be2a2df2e",
+    "billing/subscription_worker.py": "f7e9f3efeb84f6c04c3946f08298be8fb1a9596fdde642d1be30cee580dcb699",
+    "billing/services.py": "cdf6a4ef0ed8d281552002aea397e90a0b63945723153db39808c2712aca14f9",
+    "billing/checkout.py": "c4f0134a5dcfcf7472408bec3adf81de48b1ee5f37c7ae82a1452e8ab6880b90",
+    "billing/webhooks.py": "4882880f5542c194ccd86c3f4edc143e7583540106eb3f2be1f8baed8abf8e42",
+    "library/stream.py": "380aef67d1bbfdec1c1f3152522c6138b2f6c5e3d3e42fb985b6033d239b49e8",
+    "library/audio_preview.py": "f1a0e12ea56989c56bf76ab7a255662631101fb6d7103a20cacd9f0b12d69948"
+  },
+  "closed_at": "2026-11-19T06:12:41.331842Z",
+  "result": "PASS: both concrete findings closed by source reread; original gzip reproduction now accepted",
+  "source_sha256_after": {
+    "accounts/google.py": "4e84169fc545f3175fb4cf012f9b762808cf87668b1d2b002b6ecd6c5f78c628",
+    "core/jobs.py": "58d65cd5637172696573103738378913e092ab0426f92bebc41766d395fdbb8f"
+  }
+}

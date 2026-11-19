@@ -58,13 +58,33 @@ def _revision(value):
         raise DomainError('not_found', 'Edition revision not found.', 404)
 
 
+def prefetch_public_rights(revisions):
+    """One complete, response-local rights snapshot; never an authorization cache.
+
+    Callers finalizing public cache responses hold the existing generation lock.
+    Authorization still re-fetches Revision via _revision and uses fresh queries.
+    """
+    from django.db.models import Prefetch,prefetch_related_objects
+    rows=list(revisions)
+    for revision in rows:
+        if hasattr(revision,'_maison_public_rights'):delattr(revision,'_maison_public_rights')
+    prefetch_related_objects(rows,Prefetch('rights',queryset=Rights.objects.only(
+        'id','revision_id','format','action','territories','starts_at','ends_at','approved','test_only').order_by('-ends_at'),
+        to_attr='_maison_public_rights'))
+    return rows
+
+
 def current_right(revision, format='reader', action='read', territory='IN', at=None):
     if territory.upper() not in settings.MAISON_PUBLICATION_TERRITORIES:
         return None
     at = at or timezone.now()
-    grants = Rights.objects.filter(revision=revision, format=format, action=action, approved=True,
-                                   starts_at__lte=at, ends_at__gt=at).order_by('-ends_at')
+    grants=getattr(revision,'_maison_public_rights',None)
+    if grants is None:
+        grants=Rights.objects.filter(revision=revision,format=format,action=action,approved=True,
+            starts_at__lte=at,ends_at__gt=at).order_by('-ends_at')
     for right in grants:
+        if right.format!=format or right.action!=action or not right.approved or not right.starts_at<=at<right.ends_at:
+            continue
         if right.test_only and not local_fixtures_enabled():
             continue
         if not isinstance(right.territories,list) or not right.territories or any(not isinstance(t,str) or (t!='*' and (len(t)!=2 or not t.isupper() or not t.isalpha())) for t in right.territories):
@@ -164,7 +184,7 @@ def public_ttl(revision, class_seconds=30, action='read', territory='IN'):
 def available_formats(revision, territory='IN'):
     return [f for f in FORMATS if revision.access_policy.get(f, 'deny') != 'deny'
             and current_right(revision, f, 'read', territory)
-            and revision.assets.filter(state='ready',kind={'reader':'reader_package','audio':'audio_chapter','video':'video'}[f]).exists()]
+            and revision.assets.filter(state='ready',kind={'reader':'reader_package','audio':'audio_chapter','video':'video'}[f],provider='stream' if f=='video' else 'r2').exists()]
 
 
 def _cover(revision):
@@ -179,46 +199,9 @@ def _cover(revision):
 
 
 def catalog_cards(locale='en', territory='IN', query='', house='', format='', **filters):
-    editions = Edition.objects.filter(locale=locale, live_revision__state='live').select_related('work','live_revision')
-    if query:
-        query=unicodedata.normalize('NFC',' '.join(query.split()))
-        editions = editions.filter(Q(live_revision__title__icontains=query)|Q(live_revision__description__icontains=query)|
-                                   Q(work__title__icontains=query)|Q(work__creators__icontains=query)|Q(work__topic__icontains=query))
-    if house:
-        editions = editions.filter(work__house=house)
-    if filters.get('topic'):
-        editions = editions.filter(work__topic=filters['topic'])
-    if filters.get('level'):
-        editions = editions.filter(work__level=filters['level'])
-    if filters.get('author'):
-        editions = editions.filter(work__creators__icontains=filters['author'])
-    if filters.get('recency_days'):
-        try:
-            days = int(filters['recency_days'])
-        except (TypeError,ValueError):
-            raise DomainError('invalid_filter','Recency must be an integer number of days.',422)
-        if days:
-            editions = editions.filter(live_revision__published_at__gte=timezone.now()-timedelta(days=days))
-    cards = []
-    for edition in editions.order_by('work__title','id'):
-        revision = edition.live_revision
-        formats = available_formats(revision, territory)
-        if not formats or (format and format not in formats):
-            continue
-        access = 'free' if any(revision.access_policy.get(f)=='free' for f in formats) else 'pass_required'
-        access_filter='pass_required' if filters.get('access')=='paid' else filters.get('access')
-        if access_filter and access_filter not in {access,'all'}:
-            continue
-        duration = sum(revision.units.values_list('duration_ms',flat=True).exclude(duration_ms=None))
-        try:
-            if filters.get('duration_min') not in (None,'') and duration < int(filters['duration_min'])*60000: continue
-            if filters.get('duration_max') not in (None,'') and duration > int(filters['duration_max'])*60000: continue
-        except (TypeError,ValueError):
-            raise DomainError('invalid_filter','Duration bounds must be integer minutes.',422)
-        cards.append({'work_id':str(edition.work_id),'edition_id':str(edition.id),'title':revision.title,
-                      'subtitle':None,'creators':edition.work.creators,'locale':edition.locale,'house':edition.work.house,
-                      'formats':formats,'cover':_cover(revision),'access_label':access,'availability':'available'})
-    return cards
+    """Bounded Home/SSR candidates; public listing APIs use catalog_page cursors."""
+    from .catalog_query import catalog_cards_bounded
+    return catalog_cards_bounded(locale,territory,query,house,format,**filters)
 
 
 def get_edition_by_slug(slug, locale=None):
@@ -279,10 +262,10 @@ def edition_detail(edition_id, territory='IN', user=None):
 
 
 def unit_dto(unit,territory='IN'):
-    kinds = set(unit.assets.filter(state='ready').values_list('kind',flat=True))
+    kinds=set(unit.assets.filter(state='ready').values_list('kind','provider'))
     return {'unit_id':str(unit.id),'edition_revision_id':str(unit.revision_id),'title':unit.title,'ordinal':unit.ordinal,
             'kind':unit.kind,'formats':[f for f in available_formats(unit.revision,territory)
-                                     if {'reader':'reader_package','audio':'audio_chapter','video':'video'}[f] in kinds],
+                                     if ({'reader':'reader_package','audio':'audio_chapter','video':'video'}[f],'stream' if f=='video' else 'r2') in kinds],
             'duration_ms':unit.duration_ms,'preview':unit.preview}
 
 
@@ -439,7 +422,8 @@ def media_grant(user,data,territory='IN'):
         if data.get('quality_kbps',prepared['quality_kbps'])!=prepared['quality_kbps']:
             raise DomainError('quality_unavailable','The requested prepared audio rendition is unavailable.',409)
     else:
-        raise DomainError('feature_disabled','Video requires an approved Stream rendition.',503)
+        from .stream import grant
+        return grant(user,asset,data.get('device_id'),territory)
     descriptor,expiry=_asset_grant(user,asset,data.get('device_id'),territory)
     from .storage import is_r2
     return {'grant_id':str(uuid.uuid4()),'asset_id':str(asset.id),'edition_revision_id':str(asset.revision_id),
@@ -540,12 +524,16 @@ def prepare_revision_validation(revision):
     revision=_revision(revision)
     before=revision.version
     assets=list(revision.assets.order_by('id'))
-    identity=[(str(a.id),a.version,a.state,a.sha256,a.bytes,a.storage_key,a.content_type) for a in assets]
+    identity=[(str(a.id),a.version,a.state,a.sha256,a.bytes,a.storage_key,a.content_type,a.provider,a.duration_ms) for a in assets]
     integrity=True
     try:
         from .storage import verify_asset
         for asset in assets:
-            if asset.state=='ready':verify_asset(asset,max_seconds=8)
+            if asset.state=='ready':
+                if asset.provider=='stream':
+                    from .stream import verify_video_metadata
+                    verify_video_metadata(asset,max_seconds=8)
+                else:verify_asset(asset,max_seconds=8)
     except DomainError:integrity=False
     coverage=_reader_package_coverage(revision,[a for a in assets if a.state=='ready']) if revision.access_policy.get('reader','deny')!='deny' else True
     current=Revision.objects.only('version','content_sha256').get(pk=revision.pk)
@@ -554,10 +542,24 @@ def prepare_revision_validation(revision):
     return {'revision_id':str(revision.id),'version':before,'sha256':revision.content_sha256,'assets':identity,'integrity':integrity,'coverage':coverage}
 
 
+def publication_clearance_matches(revision,ready_assets,formats=None,regions=None):
+    """Exact private clearance facts; no provider I/O and no inferred legal claim."""
+    formats=formats if formats is not None else [fmt for fmt in FORMATS if revision.access_policy.get(fmt,'deny')!='deny']
+    regions=regions if regions is not None else list(settings.MAISON_PUBLICATION_TERRITORIES)
+    clearance=revision.validation_evidence.get('publication_clearance',{})
+    return (isinstance(clearance,dict) and clearance.get('status')=='pass'
+        and clearance.get('sha256')==revision.content_sha256
+        and isinstance(clearance.get('territories'),list) and set(clearance['territories'])==set(regions)
+        and len(clearance['territories'])==len(regions)
+        and isinstance(clearance.get('formats'),list) and set(clearance['formats'])==set(formats)
+        and clearance.get('asset_sha256')=={str(asset.id):asset.sha256 for asset in ready_assets}
+        and isinstance(clearance.get('evidence_ref'),str) and bool(clearance['evidence_ref'].strip()))
+
+
 def validate_revision(revision,territory='IN',*,prepared=None):
     revision=_revision(revision)
     prepared=prepared if prepared is not None else prepare_revision_validation(revision)
-    identity=[(str(a.id),a.version,a.state,a.sha256,a.bytes,a.storage_key,a.content_type) for a in revision.assets.order_by('id')]
+    identity=[(str(a.id),a.version,a.state,a.sha256,a.bytes,a.storage_key,a.content_type,a.provider,a.duration_ms) for a in revision.assets.order_by('id')]
     if prepared.get('revision_id')!=str(revision.id) or prepared.get('version')!=revision.version or prepared.get('sha256')!=revision.content_sha256 or prepared.get('assets')!=identity:
         raise DomainError('version_conflict','Revision/assets changed after private verification.',412,{'current_version':revision.version})
     checks=[]
@@ -568,8 +570,9 @@ def validate_revision(revision,territory='IN',*,prepared=None):
                     and not revision.rights.filter(approved=True,test_only=False).exists())
     regions = [territory] if fixture_only else list(settings.MAISON_PUBLICATION_TERRITORIES)
     region_rights = bool(formats) and bool(regions)
+    audio_preview_offered=revision.assets.filter(kind='preview_audio',state='ready').exists()
     for fmt in formats:
-        actions = ['read'] + (['preview'] if fmt=='reader' and revision.preview else [])
+        actions = ['read'] + (['preview'] if (fmt=='reader' and revision.preview) or (fmt=='audio' and audio_preview_offered) else [])
         if revision.download_policy.get(fmt) is True: actions.append('download')
         for region in regions:
             for action in actions:
@@ -585,22 +588,25 @@ def validate_revision(revision,territory='IN',*,prepared=None):
     if fixture_only:
         checks.append({'code':'publication_clearance','status':'not_applicable','message':'Synthetic local fixture only; no commercial legal clearance is implied.'})
     else:
-        clearance_ok = (isinstance(clearance,dict) and clearance.get('status')=='pass'
-            and clearance.get('sha256')==revision.content_sha256
-            and isinstance(clearance.get('territories'),list) and set(clearance['territories'])==set(regions)
-            and len(clearance['territories'])==len(regions)
-            and isinstance(clearance.get('formats'),list) and set(clearance['formats'])==set(formats)
-            and clearance.get('asset_sha256')=={str(a.id):a.sha256 for a in ready_assets}
-            and isinstance(clearance.get('evidence_ref'),str) and bool(clearance['evidence_ref'].strip()))
+        clearance_ok = publication_clearance_matches(revision,ready_assets,formats,regions)
         add('publication_clearance',clearance_ok,'Private exact-text/asset legal evidence must cover all whitelisted regions and offered formats, including applicable distribution permissions; draft term research is insufficient.')
     integrity=prepared['integrity']
     for fmt in formats:
         kind={'reader':'reader_package','audio':'audio_chapter','video':'video'}[fmt]
-        if not any(a.kind==kind for a in ready_assets): integrity=False
+        if not any(a.kind==kind and a.provider==('stream' if fmt=='video' else 'r2') for a in ready_assets):integrity=False
     if 'reader' in formats and not prepared['coverage']:
         integrity=False
     add('media',integrity and all(a.state=='ready' for a in revision.assets.all()),
-        'All assets require verified bytes/checksums; every Reader unit requires complete ordered canonical packages bound to this revision, unit, chunk and anchor revision.')
+        'All assets require verified private bytes/checksums or exact signed Stream metadata; every Reader unit requires complete canonical revision/unit/chunk/anchor packages.')
+    clips=list(revision.assets.filter(kind='preview_audio',state='ready'))
+    if clips:
+        from .audio_preview import prepared_clip
+        sample_ok=len(clips)==1 and 'audio' in formats
+        for clip in clips:
+            clip.revision=revision
+            try:prepared_clip(clip)
+            except DomainError:sample_ok=False
+        add('audio_preview',sample_ok,'Only one physically separate bounded audio sample with exact measurement evidence may be offered.')
     audio=revision.assets.filter(kind='audio_chapter',state='ready')
     if audio.exists():
         from .timing import validated_segments
@@ -664,6 +670,8 @@ def _transition_revision(user,revision_id,action,expected_version,expected_sha25
             # The cross-row FK guard requires the pointed-to revision to be live in this transaction.
             revision.version+=1;revision.save()
             edition.live_revision=revision;edition.version+=1;edition.full_clean();edition.save()
+            from .search import refresh_revision_search
+            refresh_revision_search(revision)
             queue_catalog_purge(revision)
             return staff_state(revision)
     elif action=='withdraw':
@@ -674,6 +682,12 @@ def _transition_revision(user,revision_id,action,expected_version,expected_sha25
     else:
         raise DomainError('invalid_action','Unknown publication action.',400)
     revision.version+=1;revision.save()
+    if action=='schedule':
+        from core.models import OutboxJob
+        OutboxJob.objects.create(kind='scheduled_publication',actor=user,
+            dedupe_key=f'scheduled-publication:{revision.id}:{revision.version}',not_before=revision.scheduled_for,
+            payload={'actor_id':str(user.pk),'revision_id':str(revision.id),'expected_version':revision.version,
+                'expected_sha256':revision.content_sha256,'scheduled_for':iso(revision.scheduled_for),'reason':reason})
     if action=='withdraw':queue_catalog_purge(revision)
     return staff_state(revision)
 
@@ -681,6 +695,8 @@ def _transition_revision(user,revision_id,action,expected_version,expected_sha25
 def clone_revision(source_id):
     """Prepare copies outside locks, then atomically persist the exact unchanged source snapshot."""
     source=Revision.objects.select_related('edition').get(pk=source_id)
+    if source.assets.filter(provider='stream').exists():
+        raise DomainError('stream_reimport_required','Prepare a separately approved Stream asset for the new revision.',409)
     source_version=source.version
     clone=Revision(id=uuid.uuid4(),edition=source.edition,title=source.title,description=source.description,
                    anchor_revision=source.anchor_revision+1,access_policy=source.access_policy.copy(),
@@ -697,10 +713,11 @@ def clone_revision(source_id):
     from .storage import copy_verified
     for old in source.assets.exclude(kind__in=['reader_package','timing_map']):
         if old.state!='ready':raise DomainError('source_asset_not_ready','Finish source uploads before cloning this revision.',409)
+        if old.provider=='stream':raise DomainError('stream_reimport_required','Prepare a separately approved Stream asset for the new revision.',409)
         aid=uuid.uuid4();key=f'revisions/{clone.id}/{aid}';asset_map[str(old.id)]=str(aid)
         copy_verified(old,key)
         assets.append(Asset(id=aid,revision=clone,unit=unit_map.get(old.unit_id),kind=old.kind,state='ready',storage_key=key,
-                            sha256=old.sha256,bytes=old.bytes,content_type=old.content_type,copy_verified_bytes=old.bytes))
+                            sha256=old.sha256,bytes=old.bytes,content_type=old.content_type,copy_verified_bytes=old.bytes,provider=old.provider,duration_ms=old.duration_ms))
     selected=source.validation_evidence.get('cover_pair',{})
     pair={side:{**item,'asset_id':asset_map[item['asset_id']]} for side,item in selected.items()
           if isinstance(item,dict) and item.get('asset_id') in asset_map}
@@ -728,10 +745,11 @@ def queue_catalog_purge(revision):
 
 def prepared_audio(asset):
     data=asset.revision.validation_evidence.get('media_assets',{}).get(str(asset.id),{})
-    if (asset.kind!='audio_chapter' or asset.state!='ready' or not asset.unit_id or not isinstance(data,dict)
+    if (asset.kind!='audio_chapter' or asset.provider!='r2' or asset.state!='ready' or not asset.unit_id or not isinstance(data,dict)
         or data.get('sha256')!=asset.sha256 or data.get('unit_id')!=str(asset.unit_id)
         or data.get('prepared') is not True or not data.get('measurement_evidence')
         or type(data.get('duration_ms'))!=int or data['duration_ms']<1 or data['duration_ms']!=asset.unit.duration_ms
+        or (asset.duration_ms is not None and data['duration_ms']!=asset.duration_ms)
         or data.get('quality_kbps') not in {48,96}):
         raise DomainError('media_not_ready','Audio requires exact prepared rendition and measured duration evidence.',409)
     return data

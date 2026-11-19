@@ -9005,6 +9005,52 @@
           },
           "503": {
             "$ref": "#/components/responses/503"
+          },
+          "202": {
+            "description": "Accepted: durable order is creating; provider creation or reconciliation is pending. Access is not granted by this response.",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -14341,6 +14387,107 @@
           }
         }
       }
+    },
+    "/content/audio-previews/{asset_id}": {
+      "get": {
+        "operationId": "getAudioPreview",
+        "summary": "Deliver a physically separate bounded audio preview",
+        "tags": [
+          "Content"
+        ],
+        "security": [],
+        "description": "Anonymous access only to a ready measured preview clip on the current Live revision with current approved preview rights and exact clearance. Production redirects privately to an expiring direct R2 capability (<=120s, clipped to rights). Original local fixtures may serve bytes/Range; full chapters are never a fallback.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "public_read"
+        },
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "307": {
+            "description": "Temporary redirect to the authorized short-lived R2 MP3 preview",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "format": "uri",
+                  "maxLength": 4096
+                }
+              },
+              "Cache-Control": {
+                "schema": {
+                  "const": "private, no-store"
+                }
+              },
+              "Referrer-Policy": {
+                "schema": {
+                  "const": "no-referrer"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Local synthetic fixture preview bytes only; never a production byte proxy",
+            "content": {
+              "audio/mpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Local synthetic fixture byte range only",
+            "content": {
+              "audio/mpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Invalid or unsatisfiable local fixture range"
+          }
+        },
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -14468,7 +14615,7 @@
           "request_id",
           "retryable"
         ],
-        "description": "RFC9457-shaped error. current_resource is an authorized current representation only; never another member\u2019s object. No secrets, private notes or provider raw payloads."
+        "description": "RFC9457-shaped error. current_resource is an authorized current representation only; never another member’s object. No secrets, private notes or provider raw payloads."
       },
       "Acknowledgement": {
         "type": "object",
@@ -16054,6 +16201,7 @@
             "enum": [
               "exact",
               "prefix",
+              "full_text",
               "alias",
               "fuzzy",
               "none"
@@ -16255,6 +16403,9 @@
           },
           "full_content_included": {
             "const": false
+          },
+          "audio": {
+            "$ref": "#/components/schemas/AudioPreviewDescriptor"
           }
         },
         "required": [
@@ -20677,6 +20828,7 @@
               "reader_source",
               "reader_package",
               "audio",
+              "preview_audio",
               "video",
               "timing_map",
               "rights_document"
@@ -20688,7 +20840,8 @@
               "audio": "audio_chapter",
               "video": "video",
               "timing_map": "timing_map",
-              "rights_document": "rights_document"
+              "rights_document": "rights_document",
+              "preview_audio": "preview_audio"
             }
           },
           "content_type": {
@@ -20708,6 +20861,16 @@
             "type": "string",
             "maxLength": 160,
             "minLength": 1
+          },
+          "unit_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807
           }
         },
         "required": [
@@ -20718,7 +20881,35 @@
           "sha256",
           "file_name"
         ],
-        "description": "Server enforces per-kind MIME/size and extension allowlists; path supplied by browser is never an object key. Rights files are staff-private."
+        "description": "Server enforces per-kind MIME/size and extension allowlists; path supplied by browser is never an object key. Rights files are staff-private.",
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "preview_audio"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "unit_id",
+                "duration_ms"
+              ],
+              "properties": {
+                "content_type": {
+                  "const": "audio/mpeg"
+                },
+                "bytes": {
+                  "maximum": 2097152
+                },
+                "duration_ms": {
+                  "maximum": 120000
+                }
+              }
+            }
+          }
+        ]
       },
       "UploadIntent": {
         "type": "object",
@@ -21885,6 +22076,68 @@
         },
         "required": [
           "code"
+        ]
+      },
+      "AudioPreviewDescriptor": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Physically separate, measured bounded MP3 preview. Stable same-origin URL rechecks current publication/preview rights before short-lived direct delivery; never a full chapter URL.",
+        "properties": {
+          "asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "edition_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri-reference",
+            "maxLength": 4096
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2097152
+          },
+          "content_type": {
+            "const": "audio/mpeg"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120000
+          },
+          "quality_kbps": {
+            "type": "integer",
+            "enum": [
+              48,
+              96
+            ]
+          },
+          "unit_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        "required": [
+          "asset_id",
+          "edition_revision_id",
+          "unit_id",
+          "url",
+          "sha256",
+          "bytes",
+          "content_type",
+          "duration_ms",
+          "quality_kbps"
         ]
       }
     },

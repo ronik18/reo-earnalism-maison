@@ -127,7 +127,7 @@ class Paragraph(RevisionContent):
 
 
 class Asset(RevisionContent):
-    KINDS = ('cover','reader_source','reader_package','audio_chapter','video','timing_map','rights_document')
+    KINDS = ('cover','reader_source','reader_package','audio_chapter','preview_audio','video','timing_map','rights_document')
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     revision = models.ForeignKey(Revision, on_delete=models.PROTECT, related_name='assets')
     unit = models.ForeignKey(Unit, null=True, blank=True, on_delete=models.PROTECT, related_name='assets')
@@ -137,18 +137,28 @@ class Asset(RevisionContent):
     sha256 = models.CharField(max_length=64)
     bytes = models.PositiveBigIntegerField()
     compressed_bytes = models.PositiveBigIntegerField(null=True, blank=True)
+    provider = models.CharField(max_length=8,choices=[('r2','R2'),('stream','Stream')],default='r2')
+    duration_ms = models.PositiveBigIntegerField(null=True,blank=True)
     content_type = models.CharField(max_length=100)
     version = models.PositiveIntegerField(default=1)
     copy_verified_bytes = models.PositiveBigIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table = 'maison_asset'
-        constraints = [models.CheckConstraint(condition=Q(state__in=['uploading','processing','failed','ready']),name='maison_asset_state')]
+        constraints = [models.CheckConstraint(condition=Q(state__in=['uploading','processing','failed','ready']),name='maison_asset_state'),
+            models.CheckConstraint(condition=Q(provider__in=['r2','stream']),name='maison_asset_provider'),
+            models.CheckConstraint(condition=Q(duration_ms__isnull=True)|Q(duration_ms__gt=0),name='maison_asset_duration'),
+            models.CheckConstraint(condition=Q(provider='r2')|Q(provider='stream',kind='video',storage_key__regex=r'^[a-f0-9]{32}$',duration_ms__isnull=False,duration_ms__gt=0),name='maison_stream_asset_identity'),
+            models.CheckConstraint(condition=~Q(kind='preview_audio')|Q(provider='r2',unit__isnull=False,duration_ms__isnull=False,duration_ms__gt=0,duration_ms__lte=120000,bytes__lte=2097152,content_type='audio/mpeg'),name='maison_audio_preview_bounds')]
 
     def clean(self):
         if self.unit_id and self.unit.revision_id != self.revision_id:
             raise ValidationError('Asset unit must belong to the same revision.')
-        if not self.storage_key.startswith(f'revisions/{self.revision_id}/'):
+        if self.provider=='stream':
+            import re
+            if self.kind!='video' or not re.fullmatch(r'[a-f0-9]{32}',self.storage_key) or not self.duration_ms:
+                raise ValidationError('Stream video requires an exact provider UID and measured duration.')
+        elif not self.storage_key.startswith(f'revisions/{self.revision_id}/'):
             raise ValidationError('Storage key must be revision scoped.')
 
 
@@ -191,3 +201,5 @@ class TimingMap(RevisionContent):
 
 
 from .collection_models import CatalogCollection,CatalogItem
+
+from .search_models import SearchDocument,SearchAlias

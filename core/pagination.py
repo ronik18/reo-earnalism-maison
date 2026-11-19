@@ -2,7 +2,7 @@
 import hashlib
 import json
 from django.core import signing
-from django.core.exceptions import ValidationError
+from django.core.exceptions import FieldDoesNotExist, FieldError, ValidationError
 from django.db.models import Q
 from .api import DomainError
 
@@ -40,10 +40,19 @@ def paginate_queryset(request,queryset,scope,ordering='-created_at',maximum=100,
         try:
             after=data['after']
             if not isinstance(after,list) or len(after)!=2:raise ValueError
-            value=queryset.model._meta.get_field(field).to_python(after[0]);identity=pk.to_python(after[1])
+            try:
+                value_field = queryset.model._meta.get_field(field)
+            except FieldDoesNotExist:
+                annotation = queryset.query.annotations.get(field)
+                if annotation is None:
+                    raise ValueError
+                value_field = annotation.output_field
+            value=value_field.to_python(after[0]);identity=pk.to_python(after[1])
+            if value is None or identity is None:
+                raise ValueError
             lookup='lt' if descending else 'gt'
             qs=qs.filter(Q(**{field+'__'+lookup:value}) | Q(**{field:value,pk.name+'__'+lookup:identity}))
-        except (KeyError,ValueError,TypeError,ValidationError):raise DomainError('invalid_cursor','Invalid list position.',422)
+        except (KeyError,ValueError,TypeError,OverflowError,FieldDoesNotExist,FieldError,ValidationError):raise DomainError('invalid_cursor','Invalid list position.',422)
     position=lambda row:[str(getattr(row,field)),str(row.pk)]
     if serialize is None:return _result(list(qs[:limit+1]),limit,binding,position)
     batch=list(qs[:scan_limit+1]);selected=[];examined=None;count=0

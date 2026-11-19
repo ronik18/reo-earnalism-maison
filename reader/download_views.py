@@ -29,3 +29,10 @@ def refresh(request,license_id):return api_response(services.refresh_license(req
 @json_endpoint(('POST',))
 def renew(request,license_id):
     status,result=services.renew_license(request.user,_device(request),license_id,operation_key(request),territory(request));return api_response(result,status)
+
+
+@json_endpoint(('GET',))
+def pieces(request,license_id,asset_id):
+    from django.http import HttpResponse
+    raw=services.local_piece_manifest(request.user,_device(request),license_id,asset_id,request.GET.get('token',''),territory(request))
+    response=HttpResponse(raw,content_type='application/json');response['Cache-Control']='private, no-store';response['X-Content-Type-Options']='nosniff';return response

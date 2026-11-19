@@ -16,8 +16,8 @@ from django.core import signing
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction,IntegrityError
-from django.db.models import F
-from django.middleware.csrf import get_token
+from django.db.models import F,Q
+from django.middleware.csrf import get_token,rotate_token
 from django.utils import timezone
 from core.api import DomainError,public_uuid
 from core.models import OutboxJob
@@ -85,14 +85,14 @@ def _token_value(action):
     return signing.Signer(key=_key(),salt='maison.email-action.v1').sign(str(action.id))
 
 
-def _create_action(user,purpose,return_path='/'):
+def _create_action(user,purpose,return_path='/',locale='en'):
     now=timezone.now()
     EmailActionToken.objects.filter(user=user,purpose=purpose,consumed_at__isnull=True).update(consumed_at=now)
     action=EmailActionToken(id=uuid.uuid4(),user=user,email_normalized=user.email,purpose=purpose,
         return_path=safe_return_path(return_path),expires_at=now+timedelta(seconds=TTL[purpose]))
     action.token_sha256=_digest(_token_value(action));action.save()
     OutboxJob.objects.create(kind='email_action',dedupe_key=f'email-action:{action.id}',actor=user,
-        payload={'action_id':str(action.id)},not_before=now)
+        payload={'action_id':str(action.id),'locale':locale},not_before=now)
     return action
 
 
@@ -103,28 +103,60 @@ def register_member(email,password,display_name='',locale='en',return_path='/'):
     with transaction.atomic():
         user=User.objects.filter(email=email).first()
         if user:return {'status':'delivery_pending'}
+        from django.apps import apps
+        if apps.is_installed('allauth.account'):
+            from allauth.account.models import EmailAddress
+            if EmailAddress.objects.filter(email__iexact=email,verified=True).exists():return {'status':'delivery_pending'}
         try:
             with transaction.atomic():user=User.objects.create_user(email,password,display_name=display_name)
         except IntegrityError:return {'status':'delivery_pending'}
         Preferences.objects.create(user=user,locale=locale);Consent.objects.create(user=user)
-        _create_action(user,'verify_email',return_path);audit(user,'account.registered',user)
+        _create_action(user,'verify_email',return_path,locale);audit(user,'account.registered',user)
     return {'status':'delivery_pending'}
 
 
-def request_email_verification(email,return_path='/'):
-    email=_email(email);check_rate('verify_email',email,5,3600)
+def request_email_verification(email,return_path='/',locale='en'):
+    if locale not in ('en','bn'):raise DomainError('validation_error','Invalid locale.',422)
+    email=_email(email);check_rate('verify_email',email,3,900)
     with transaction.atomic():
         user=User.objects.select_for_update().filter(email=email,is_active=True,is_verified=False).first()
-        if user:_create_action(user,'verify_email',return_path)
+        if user:_create_action(user,'verify_email',return_path,locale)
     return {'status':'delivery_pending'}
 
 
-def request_password_reset(email,return_path='/'):
-    email=_email(email);check_rate('password_reset',email,5,3600)
+def request_password_reset(email,return_path='/',locale='en'):
+    if locale not in ('en','bn'):raise DomainError('validation_error','Invalid locale.',422)
+    email=_email(email);check_rate('password_reset',email,3,900)
     with transaction.atomic():
         user=User.objects.select_for_update().filter(email=email,is_active=True).first()
-        if user:_create_action(user,'password_reset',return_path)
+        if user:_create_action(user,'password_reset',return_path,locale)
     return {'status':'delivery_pending'}
+
+
+def request_magic_signin(email,return_path='/',locale='en'):
+    if not getattr(settings,'FEATURES',{}).get('email_link',False):raise DomainError('feature_disabled','Email sign-in is not enabled.',409)
+    if locale not in ('en','bn'):raise DomainError('validation_error','Invalid locale.',422)
+    email=_email(email);return_path=safe_return_path(return_path);check_rate('magic_signin',email,3,900)
+    with transaction.atomic():
+        user=User.objects.select_for_update().filter(email=email,is_active=True).first()
+        if user:_create_action(user,'magic_signin',return_path,locale)
+    return {'status':'delivery_pending'}
+
+
+def confirm_magic_signin(request,token):
+    """Explicit CSRF-protected POST establishes mailbox ownership, never a link GET."""
+    if not getattr(settings,'FEATURES',{}).get('email_link',False):raise DomainError('feature_disabled','Email sign-in is not enabled.',409)
+    with transaction.atomic():
+        action=consume_action(token,'magic_signin')
+        user=User.objects.select_for_update().get(pk=action.user_id)
+        if not user.is_verified:
+            user.is_verified=True;user.version+=1;user.save(update_fields=['is_verified','version'])
+        from .email_identity import ensure_email_address
+        ensure_email_address(user,verified=True)
+        action.consumed_at=timezone.now();action.save(update_fields=['consumed_at'])
+        login(request,user,backend='django.contrib.auth.backends.ModelBackend')
+        audit(user,'account.magic_signin',user)
+    return action.return_path
 
 
 def consume_action(token,purpose):
@@ -140,11 +172,18 @@ def consume_action(token,purpose):
     return action
 
 
-def confirm_email_verification(token):
+def confirm_email_verification(token,request=None):
     with transaction.atomic():
         action=consume_action(token,'verify_email');user=User.objects.select_for_update().get(pk=action.user_id)
         user.is_verified=True;user.version+=1;user.save(update_fields=['is_verified','version'])
+        from .email_identity import ensure_email_address
+        ensure_email_address(user,verified=True)
         action.consumed_at=timezone.now();action.save(update_fields=['consumed_at']);audit(user,'account.email_verified',user)
+        if request is not None:
+            device=getattr(request,'device',None)
+            request.session.cycle_key();rotate_token(request)
+            if device is not None:
+                Device.objects.filter(pk=device.pk,user=request.user,revoked_at=None).update(session_id=request.session.session_key,version=F('version')+1)
     return user
 
 
@@ -161,11 +200,18 @@ def confirm_password_reset(token,new_password):
         audit(user,'account.password_reset',user)
 
 
+@transaction.atomic
 def bind_device(request,user):
     if not request.session.session_key:request.session.save()
     token=secrets.token_urlsafe(32)
     session=Session.objects.get(session_key=request.session.session_key)
-    Device.objects.filter(session=session).update(session=None,revoked_at=timezone.now(),version=F('version')+1)
+    previous=getattr(request,'device',None)
+    replaced=Device.objects.filter(Q(session=session)|Q(pk=getattr(previous,'pk',None))).filter(revoked_at=None)
+    identifiers=list(replaced.values_list('pk',flat=True));now=timezone.now()
+    replaced.update(session=None,revoked_at=now,version=F('version')+1)
+    if identifiers:
+        from reader.models import DownloadLicense
+        DownloadLicense.objects.filter(device_id__in=identifiers,revoked_at=None).update(revoked_at=now)
     device=Device.objects.create(user=user,session=session,token_binding_sha256=_digest(token),
         label='Browser',expires_at=timezone.now()+timedelta(seconds=28800 if user.is_staff else 1209600))
     request.session['device_id']=str(device.id);request.session['session_epoch']=user.session_epoch;request.session['reauthenticated_at']=timezone.now().isoformat();request.session['staff_last_seen']=timezone.now().isoformat()
@@ -175,7 +221,7 @@ def bind_device(request,user):
 
 
 def login_member(request,email,password):
-    email=_email(email);check_rate('login',email,10,600)
+    email=_email(email);check_rate('login',email,5,900)
     user=authenticate(request,email=email,password=password)
     if user is None:raise DomainError('invalid_credentials','Email or password is incorrect.',403)
     if not user.is_verified:raise DomainError('email_verification_required','Verify your email before signing in.',403)

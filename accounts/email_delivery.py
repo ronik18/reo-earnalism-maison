@@ -44,10 +44,13 @@ def deliver_action(job,max_seconds=8):
     from .services import _token_value,safe_return_path,iso
     action=EmailActionToken.objects.select_related('user').filter(pk=job.payload.get('action_id')).first()
     if not action or action.consumed_at or action.expires_at<=timezone.now():return {'status':'expired_without_send'}
-    if not action.user.is_active or action.email_normalized!=action.user.email or action.purpose not in ['password_reset','verify_email']:
+    if not action.user.is_active or action.email_normalized!=action.user.email or action.purpose not in ['password_reset','verify_email','magic_signin']:
         return {'status':'invalidated_without_send'}
+    if action.purpose=='magic_signin' and not getattr(settings,'FEATURES',{}).get('email_link',False):return {'status':'disabled_without_send'}
+    locale=job.payload.get('locale','en')
+    if locale not in ('en','bn'):raise DomainError('invalid_email_locale','Email locale is invalid.',422)
     base=settings.PUBLIC_BASE_URL.rstrip('/')
-    route='/auth/reset/' if action.purpose=='password_reset' else '/auth/verify/'
-    link=f'{base}{route}?token={quote(_token_value(action))}&return_to={quote(safe_return_path(action.return_path),safe="")}'
+    route='/auth/sign-in/' if action.purpose=='magic_signin' else '/auth/reset/' if action.purpose=='password_reset' else '/auth/verify/'
+    link=f'{base}{route}?token={quote(_token_value(action))}&return_to={quote(safe_return_path(action.return_path),safe="")}&locale={locale}'
     body=f'Use this link to confirm your requested account action: {link}\nThis link expires at {iso(action.expires_at)}.'
     return submit_message(job,'Earnalism account action',body,[action.email_normalized],max_seconds,message_identifier='action-'+str(action.id))

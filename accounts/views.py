@@ -1,10 +1,11 @@
 import json
+from functools import wraps
 from datetime import timedelta
 from pathlib import Path
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.sessions.models import Session
-from django.db import transaction
+from django.db import transaction,DatabaseError
 from django.db.models import F
 from django.http import FileResponse
 from django.utils import timezone
@@ -57,18 +58,20 @@ def login_view(request):
 
 @json_endpoint(('POST',),auth=False)
 def request_action(request,purpose):
-    if purpose=='email-links':raise DomainError('feature_disabled','Email magic sign-in is not enabled.',409)
-    d=json_body(request,{'email','return_path'},['email'])
-    fn=services.request_password_reset if purpose=='password-resets' else services.request_email_verification
+    if purpose not in {'email-links','email-verifications','password-resets'}:raise DomainError('not_found','Account action not found.',404)
+    d=json_body(request,{'email','return_path','locale'},['email'])
+    fn=services.request_magic_signin if purpose=='email-links' else services.request_password_reset if purpose=='password-resets' else services.request_email_verification
     fn(**d);return api_response(acknowledgement(request),202)
 
 
 @json_endpoint(('POST',),auth=False)
 def consume_action(request,purpose):
-    if purpose=='email-links':raise DomainError('feature_disabled','Email magic sign-in is not enabled.',409)
+    if purpose not in {'email-links','email-verifications','password-resets'}:raise DomainError('not_found','Account action not found.',404)
     d=json_body(request,{'token','new_password'} if purpose=='password-resets' else {'token'},['token','new_password'] if purpose=='password-resets' else ['token'])
+    if purpose=='email-links':
+        services.confirm_magic_signin(request,d['token']);return api_response(services.session_data(request))
     if purpose=='password-resets':services.confirm_password_reset(**d);return api_response({},204)
-    services.confirm_email_verification(d['token']);return api_response(services.session_data(request))
+    services.confirm_email_verification(d['token'],request=request);return api_response(services.session_data(request))
 
 
 @json_endpoint(('GET','POST'),auth=False)
@@ -148,8 +151,11 @@ def change_password(request):
 
 @json_endpoint(('GET',))
 def devices(request):
-    rows=Device.objects.filter(user=request.user).order_by('-last_seen_at')[:100]
-    return api_response({'items':[{'device_id':str(d.id),'label':d.label,'current':str(d.id)==request.session.get('device_id'),'created_at':services.iso(d.created_at),'last_seen_at':services.iso(d.last_seen_at),'revoked_at':services.iso(d.revoked_at)} for d in rows],'next_cursor':None,'has_more':False})
+    from core.pagination import paginate_queryset
+    result=paginate_queryset(request,Device.objects.filter(user=request.user),'devices',ordering='-last_seen_at')
+    result['items']=[{'device_id':str(d.id),'label':d.label,'current':str(d.id)==request.session.get('device_id'),'created_at':services.iso(d.created_at),'last_seen_at':services.iso(d.last_seen_at),'revoked_at':services.iso(d.revoked_at)} for d in result['items']]
+    return api_response(result)
+
 
 
 @json_endpoint(('DELETE',))
@@ -284,3 +290,28 @@ def mfa_verify(request):
 def mfa_recover(request):
     from . import mfa
     data=json_body(request,{'code'},['code']);return api_response(mfa.recover(request,data['code']))
+
+
+def _oauth_response_headers(view):
+    @wraps(view)
+    def wrapped(*args,**kwargs):
+        response=view(*args,**kwargs);response['Referrer-Policy']='no-referrer';return response
+    return wrapped
+
+
+@_oauth_response_headers
+@json_endpoint(('GET',),auth=False)
+def google_start(request):
+    from .google import start,oauth_problem
+    try:return start(request)
+    except DomainError as error:return oauth_problem(error,request)
+    except DatabaseError:return oauth_problem(DomainError('google_provider_unavailable','Google sign-in is temporarily unavailable.',503),request)
+
+
+@_oauth_response_headers
+@json_endpoint(('GET',),auth=False)
+def google_callback(request):
+    from .google import callback,oauth_problem
+    try:return callback(request)
+    except DomainError as error:return oauth_problem(error,request)
+    except DatabaseError:return oauth_problem(DomainError('google_provider_unavailable','Google sign-in is temporarily unavailable.',503),request)

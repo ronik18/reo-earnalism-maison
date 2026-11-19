@@ -103,7 +103,7 @@ class CollectionTests(TestCase):
         self.assertEqual(len({x['edition_id'] for x in first['items']+second['items']}),103)
         with self.assertRaises(DomainError):collection_detail(self.request(limit=99,cursor=first['next_cursor']),self.series.id,'en','IN')
 
-    def test_bounded_scan_can_traverse_more_than_five_hundred_unavailable_items(self):
+    def test_sql_filter_skips_more_than_five_hundred_unavailable_items_before_page_limit(self):
         series=CatalogCollection.objects.create(slug='withdrawn-prefix',title_en='Prefix',title_bn='আগের অংশ',kind='series',house='series',published=True)
         work=Work.objects.create(slug='unavailable-many',title='Unavailable test episodes')
         editions=Edition.objects.bulk_create([Edition(work=work,slug=f'unavailable-{index}',locale='en') for index in range(501)])
@@ -111,10 +111,8 @@ class CollectionTests(TestCase):
         CatalogItem.objects.bulk_create([CatalogItem(collection=series,edition=edition,sort_order=index) for index,edition in enumerate(editions)])
         CatalogItem.objects.create(collection=series,edition=self.en,sort_order=501)
         first=collection_detail(self.request(limit=100),series.id,'en','IN')
-        self.assertEqual(first['items'],[]);self.assertIsNotNone(first['next_cursor'])
-        second=collection_detail(self.request(limit=100,cursor=first['next_cursor']),series.id,'en','IN')
-        self.assertEqual([x['edition_id'] for x in second['items']],[str(self.en.id)])
-        self.assertIsNone(second['next_cursor'])
+        self.assertEqual([x['edition_id'] for x in first['items']],[str(self.en.id)])
+        self.assertIsNone(first['next_cursor'])
 
     def test_work_related_collections_use_published_eligible_memberships_without_global_scan(self):
         import json

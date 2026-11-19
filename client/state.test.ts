@@ -265,6 +265,7 @@ test("Persistent navigation preserves auth boundaries and native hash/external l
     "/admin/",
     "/api/v1/session",
     "/en/sign-out/",
+    "/bn/email-sign-in/",
     "#chapter",
   ]) {
     assert.equal(internalPageURL(path, base), undefined);

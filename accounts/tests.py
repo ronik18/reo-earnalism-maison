@@ -53,7 +53,7 @@ class AccountAcceptanceTests(TestCase):
         self.assertNotIn('token',OutboxJob.objects.get(kind='email_action').payload)
         token=services._token_value(action);self.assertNotIn(token,action.token_sha256)
         self.assertIn(token.replace(':','%3A'),mail.outbox[0].body)
-        verified=self.post('/api/v1/auth/email-verifications/confirm',{'token':token});self.assertEqual(verified.status_code,200)
+        verified=self.post('/api/v1/auth/email-verifications/confirm',{'token':token});self.assertEqual(verified.status_code,200);self.csrf=verified.json()['csrf_token']
         self.assertEqual(self.post('/api/v1/auth/email-verifications/confirm',{'token':token}).status_code,410)
         user.refresh_from_db();self.assertTrue(user.is_verified)
     def test_password_reset_revokes_every_old_session_and_action_token(self):

@@ -25,11 +25,24 @@ def run_due_jobs(limit=25,max_seconds=45):
             elif job.kind=='checkout_reconcile':
                 from billing.checkout import process_checkout
                 result=process_checkout(job)
+            elif job.kind=='order_payment_reconcile':
+                from billing.checkout import process_order_reconcile
+                result=process_order_reconcile(job)
+            elif job.kind=='payment_event_reconcile':
+                from billing.checkout import process_payment_event
+                result=process_payment_event(job)
+            elif job.kind=='scheduled_publication':
+                from operations.publication import process_scheduled_publication
+                result=process_scheduled_publication(job)
             elif job.kind=='catalog_cache_purge':
                 from operations.providers import purge_catalog_cache
                 result=purge_catalog_cache(job.payload)
             elif job.kind in ['refund_review','refund_reconcile']:
-                raise DomainError('provider_not_enabled','Refund remains a durable review obligation; no provider call is configured.',409)
+                from billing.refunds import process_refund_job
+                result=process_refund_job(job)
+            elif job.kind=='subscription_reconcile':
+                from billing.subscription_worker import process_subscription_job
+                result=process_subscription_job(job)
             else:
                 raise DomainError('handler_not_enabled','This job requires its qualified adapter.',409)
         except Exception as exc:error=exc.code if isinstance(exc,DomainError) else 'delivery_failed'
@@ -39,7 +52,7 @@ def run_due_jobs(limit=25,max_seconds=45):
             current.locked_until=None;current.lease_owner=''
             if error:
                 current.error_code=error
-                if error in ['awaiting_resolution','provider_not_enabled','handler_not_enabled']:current.status='blocked'
+                if error in ['awaiting_resolution','provider_not_enabled','handler_not_enabled','scheduled_publication_invalid','scheduled_publication_held','refund_review_required','provider_not_qualified','provider_token_identity_missing']:current.status='blocked'
                 elif current.attempts>=7:current.status='dead'
                 else:
                     current.status='pending';delays=[30,120,600,1800,7200,21600];current.not_before=timezone.now()+timedelta(seconds=delays[min(current.attempts-1,5)])

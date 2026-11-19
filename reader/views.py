@@ -2,6 +2,7 @@ import uuid
 from django.conf import settings
 from core.api import json_endpoint,json_body,api_response,DomainError,expected_version,operation_key,problem_data
 from core.pagination import paginate_queryset
+from library.validation import validate_schema
 from . import services
 from .models import Progress,Completion,Annotation,SavedItem,PersonalList
 
@@ -16,6 +17,7 @@ def progress(request,edition_id,format):
     if request.method=='GET':
         result=services.get_progress(request.user,edition_id,format,territory(request));return api_response(result,version=result['version'])
     d=json_body(request,{'operation_id','edition_revision_id','location','occurred_at'},['operation_id','edition_revision_id','location','occurred_at'])
+    validate_schema(d,'ProgressInput')
     status,result=services.set_progress(request.user,edition_id,format,d,expected_version(request),territory(request));return api_response(result,status,version=result['version'])
 
 
@@ -135,6 +137,7 @@ def sync(request):
     for op in d['operations']:
         try:
             if not isinstance(op,dict):raise DomainError('validation_error','Invalid operation.',422)
+            validate_schema(op,'SyncOperation')
             kind=op.get('kind');oid=op.get('operation_id')
             if kind=='progress.set':
                 data={k:op[k] for k in ['operation_id','edition_revision_id','location','occurred_at']}

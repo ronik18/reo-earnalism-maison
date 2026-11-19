@@ -1,0 +1,29 @@
+{
+  "scope": "isolated local PostgreSQL 18; no provider financial mutation or publication",
+  "base_commit": "325e3110809f130dde66602560fd188397a6db3d",
+  "backend_suite": {
+    "tests": 418,
+    "passed": 418,
+    "seconds": 214.821,
+    "status": "PASS",
+    "note": "Before final Google compressed-response and queued-mode followups; affected regressions and exact-head CI must cover final candidate."
+  },
+  "production_docker_build": "PASS",
+  "migration_drift": "No changes detected",
+  "public_assets": {
+    "release_id": "3cec3a985cd2c4a93c9994d1fdf4a6669597ef11807678f4c03ff97563a98108",
+    "files": 55,
+    "bytes": 7298682,
+    "prepared_from_clean_image": true,
+    "uploaded": true,
+    "origin_readback_verified": true,
+    "cdn_http_verified": false
+  },
+  "deployment": "pending",
+  "final_followups": {
+    "google_and_maintenance_tests": 20,
+    "subscription_mode_identity_tests": 16,
+    "status": "PASS",
+    "independent_review": "both confirmed findings closed"
+  }
+}

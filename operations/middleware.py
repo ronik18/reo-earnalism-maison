@@ -53,16 +53,23 @@ def content_security_policy():
     private=[]
     if getattr(settings,'MEDIA_STORAGE_BACKEND','local')=='r2' and getattr(settings,'R2_ENDPOINT_URL',''):
         private.append(settings.R2_ENDPOINT_URL.rstrip('/'))
-    scripts=["'self'",*assets];connect=["'self'",*private,*assets];frames=["'none'"]
+    scripts=["'self'",*assets];connect=["'self'",*private,*assets];frames=["'none'"];stream=[]
     if getattr(settings,'RAZORPAY_ENABLED',False):
         scripts.append('https://checkout.razorpay.com')
         connect.append('https://api.razorpay.com')
         frames=['https://api.razorpay.com','https://checkout.razorpay.com']
+    stream_host=getattr(settings,'STREAM_CUSTOMER_HOST','')
+    if (getattr(settings,'FEATURES',{}).get('video')
+            and re.fullmatch(r'customer-[a-z0-9]+\.cloudflarestream\.com',stream_host)):
+        stream=['https://'+stream_host]
+        scripts.append('https://embed.cloudflarestream.com')
+        connect.extend(stream)
+        frames=([host for host in frames if host!="'none'"]+stream)
     directives={
         'default-src':["'self'"], 'img-src':["'self'",'data:',*assets],
         'style-src':["'self'",*assets], 'script-src':scripts,
         'font-src':["'self'",*assets], 'connect-src':connect,
-        'media-src':["'self'",'blob:',*private], 'frame-src':frames,
+        'media-src':["'self'",'blob:',*private,*stream], 'frame-src':frames,
         'base-uri':["'self'"], 'frame-ancestors':["'none'"], 'form-action':["'self'"],
     }
     return '; '.join(name+' '+' '.join(values) for name,values in directives.items())

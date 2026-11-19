@@ -1,0 +1,20 @@
+{
+  "scope": "Actual native Safari, original local fixture only; physical Android/iOS UAT deferred and non-blocking",
+  "results": [
+    {
+      "id": "google-recovery",
+      "status": "PASS",
+      "nativeBrowser": "Safari 26.5"
+    },
+    {
+      "id": "guest-bounded-audio",
+      "status": "PASS",
+      "nativeBrowser": "Safari 26.5",
+      "horizontalOverflow": false,
+      "duration": 6.034285714285715,
+      "memberMediaGrantRequests": 0,
+      "error": null,
+      "currentTime": 6
+    }
+  ]
+}

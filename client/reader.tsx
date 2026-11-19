@@ -643,7 +643,7 @@ function Reader({ boot }: { boot: Boot }) {
     await act(async () => {
       const result = await api<{
         outcome: string;
-        to_location?: { asset_id: string; position_ms: number };
+        to_location?: { format: "audio"; unit_id: string; position_ms: number };
       }>("/content/switch-position", {
         method: "POST",
         key: crypto.randomUUID(),
@@ -654,10 +654,10 @@ function Reader({ boot }: { boot: Boot }) {
         },
       });
       await savePosition();
-      if (result.outcome === "mapped" && result.to_location)
+      if (result.outcome === "mapped" && result.to_location?.format === "audio")
         window.location.assign(
           boot.player_url +
-            `?asset=${result.to_location.asset_id}&position_ms=${result.to_location.position_ms}`,
+            `?unit_id=${result.to_location.unit_id}&position_ms=${result.to_location.position_ms}`,
         );
       else setStatus(t("switch_unmapped_audio"));
     });

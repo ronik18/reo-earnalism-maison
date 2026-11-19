@@ -1,0 +1,108 @@
+{
+  "scope": "Frontend P0 integration and independent local E2E; final integration/deployment owned by root",
+  "status": "LOCAL_ACCEPTANCE_PASS_DEPLOYMENT_PENDING",
+  "base_commit": "325e3110809f130dde66602560fd188397a6db3d",
+  "files_sha256": {
+    "client/stream-sdk.ts": "174cdeb4f40e822cd894c8eff3b94fced9922515fa68f7a9de08a3b2002eb35d",
+    "web/test_audio_preview.py": "779c56f61ac01fd9a58bc38c1ef7c4a739ae84b0eb171d2f743dd63b29ac0352",
+    "web/test_catalog_pagination.py": "9cedf9fa12f1870656d9307f663f7c5a05c84c8274376c1bf762ffa1f2798779",
+    "web/test_magic_signin.py": "b765ebd2e1ff22eed83748237ccccf28fede80758f3d6f58f488783bf30a7e52",
+    "web/test_video.py": "00c2f2a5ad2bd6f117cb8b023d401102b94843de5e11225a3b297fe2f17869c1",
+    "client/account.tsx": "b203bb109ac7950cb555bf693407cc78c98981c38f782a50185e6555482c604b",
+    "client/auth.tsx": "78ca573df41e26cd096b46aa599795dd36a884e7f3ceeb1900ecd799be5dd035",
+    "client/media-state.test.ts": "79afd9ad39244c35e042c6cc522afb3c5211dbbba33e6e3285291dc8690706f5",
+    "client/media-state.ts": "237234c24f836533381ccd5ae6359079504c34f167f163f7a2b18f7ab1ad2ef7",
+    "client/navigation-state.ts": "bcad2fb01295bee8387aae596675050e02d8b1bbeefd866b1f7528402652e8ad",
+    "client/player.tsx": "de88b4bab1424e8e3afce9a26ff36d59081ad1f4449bbea8425c120853b392e9",
+    "client/reader.tsx": "b9772cf457cd81451eae6ea9ce11b6c61e299f1565bcec6b2871d4c4588c93d1",
+    "client/state.test.ts": "e0bd09e6057f3b6ba02af56a267fd79a88391cd88cc84d33d7918d018540e748",
+    "client/video.tsx": "d22997f2bdc7dc5726eeb8156861a80b9125ad3b9710f4c167504d3ad744932c",
+    "templates/web/auth.html": "ea5e3450e5782be204dd64f8dcf9e325693c5bbf4bb65670c5932d639e15528b",
+    "templates/web/home.html": "6e175131bd7a69b6195a79d0280b3964075daf565cc0634ea77d3b13d759e207",
+    "templates/web/search.html": "337cea39a0f363588e43fc59f8905803325fcc7cfabec0570fb3ec15fcf6b8b7",
+    "templates/web/title.html": "bd4b95d7ee48d2fe3c9ab4b532030da4c395e54e83cce1dd5978f7d5aff9d8b3",
+    "templates/web/video.html": "9d18440cbcc0be5053bdfcc58f731c49d4ece33bfe1b5b3e49830276c6a0475c",
+    "web/i18n.py": "59a6881a91a2b1417a4c5c432c310f71f8bfbc44dce173324836ee9d3d524db4",
+    "web/tests.py": "ae84a0ce9640430f4feaa731207127ab33c54664b5092b7ea11b3700077bd916",
+    "web/urls.py": "9005e49ef744c9bf8143036c45b6b5c4fccfa914b5b450c5700cd4f2e199b6ac",
+    "web/views.py": "afd47cca6947d0aa3a10a0f4396b16783680d5814b38e43c51028df8766f5f2d"
+  },
+  "changes": [
+    "Email-link request and non-consuming explicit-CSRF confirmation screens in EN/BN",
+    "Token-bound return path, generic delivery status and single-use replay boundary",
+    "Origin-only strict-origin on token-bearing SSR forms; fixes Chromium Origin:null while omitting token path/query from Referer",
+    "Verification SSR passes request to rotate verification session/CSRF",
+    "Reader\u2192Audio uses mapped unit_id/position_ms rather than nonexistent asset_id",
+    "Search/Explore use API keyset pages with preserved filters, a next-page control and independently scoped collection sidebar; author input and recency bounds match backend.",
+    "Enabled-only Google start control on sign-in/up, preserving safe localized return path; inactive when provider flag is off.",
+    "Audio\u2192Reader submits the actual unit_id semantic location",
+    "Guest Home/Title sample links use only a prepared separate bounded MP3; sample player cannot request full member chapters",
+    "Google recovery allowlist and explicit Settings link/reauthentication using existing five-minute identity window",
+    "Video SSR actual revision/unit/duration chapter binding and bounded cursor navigation",
+    "Official Cloudflare SDK loaded only by enabled Watch; semantic playhead progress, pre-expiry renewal, preserved playback, bounded retry and listener cleanup"
+  ],
+  "checks": {
+    "local_browser_checks": 22,
+    "engines": [
+      "Chromium desktop1440x1000",
+      "WebKit mobile viewport390x844",
+      "Firefox desktop1440x1000"
+    ],
+    "auth_groups": 2,
+    "auth_coverage": [
+      "generic request",
+      "GET non-consuming",
+      "explicit CSRF confirmation",
+      "token-bound return",
+      "replay410",
+      "native verification confirm",
+      "native reset confirm"
+    ],
+    "existing_web_tests": 24,
+    "new_magic_web_tests": 7,
+    "frontend_tests": 30,
+    "typecheck": "pass",
+    "build": "pass",
+    "react_review": "Scoped listener cleanup, stale grant cancellation, exact binding and effect cleanup reviewed; controlled browser lifecycle tests pass",
+    "catalog_web_tests": 2,
+    "full_web_tests": 43,
+    "catalog_browser_groups": 2,
+    "actual_private_r2_browser_groups": 2,
+    "post_allauth_upgrade_existing_member": "PASS Chromium and WebKit local browser",
+    "audio_preview_web_tests": 3,
+    "video_ssr_web_tests": 2,
+    "preview_browser_groups": 3,
+    "controlled_video_browser_groups": 3,
+    "google_ui_browser_groups": 3,
+    "actual_native_safari_followup": "PASS Safari26.5: allowlisted Google recovery and actual separate MP3 boundary, currentTime6000ms, no media error or member grant"
+  },
+  "browser_evidence": "browser-local-results.json",
+  "auth_evidence": "magic-browser-results.json",
+  "previews": [
+    "magic-request-desktop-en.png",
+    "magic-confirm-mobile-bn.png",
+    "preview-chromium-desktop.png",
+    "preview-webkit-mobile.png",
+    "google-settings-webkit-mobile.png"
+  ],
+  "limits": [
+    "Local content/media/learning and local mail-action fixtures qualify application journeys; no actual email or merchant mutation performed by this lane",
+    "Private R2 provider browser transport qualifies the synthetic object, not a book release or physical device",
+    "Final exact-source CI/push/deployment and remaining provider acceptance owned by integration",
+    "Controlled video SDK/iframe/grant mocks qualify client lifecycle only, not actual Cloudflare Stream delivery"
+  ],
+  "preserved": [
+    "Book draft and manuscript",
+    "Legacy platform and DNS"
+  ],
+  "physical_UAT": {
+    "status": "owner-deferred",
+    "blocking": false
+  },
+  "provider_evidence": "private-r2-browser.json",
+  "catalog_browser_evidence": "catalog-browser-results.json",
+  "preview_evidence": "preview-browser-results.json",
+  "controlled_video_evidence": "stream-controlled-browser.json",
+  "google_ui_evidence": "google-ui-browser.json",
+  "safari_evidence": "safari-followup.json"
+}

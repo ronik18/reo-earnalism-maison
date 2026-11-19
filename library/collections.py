@@ -59,8 +59,11 @@ def list_collections(request,locale,territory,*,kind=None):
 def collection_detail(request,identifier,locale,territory,*,series_only=False):
     collection=get_collection(identifier,series_only=series_only)
     _context(locale,territory)
-    result=paginate_queryset(request,_item_rows(collection,locale),f'collection:{collection.id}:{collection.version}:{locale}:{territory}',ordering='sort_order',serialize=lambda item:_item_card(item,locale,territory),maximum=100,scan_limit=500)
-    return {'collection_id':str(collection.id),'kind':collection.kind,'title':getattr(collection,'title_'+locale),'description':getattr(collection,'description_'+locale),'items':result['items'],'next_cursor':result['next_cursor']}
+    from django.db.models import F
+    from .catalog_query import catalog_queryset,card_from_edition
+    rows=catalog_queryset(locale,territory).filter(catalog_items__collection=collection).annotate(catalog_item_order=F('catalog_items__sort_order'))
+    result=paginate_queryset(request,rows,f'collection:{collection.id}:{collection.version}:{locale}:{territory}',ordering='catalog_item_order',maximum=100)
+    return {'collection_id':str(collection.id),'kind':collection.kind,'title':getattr(collection,'title_'+locale),'description':getattr(collection,'description_'+locale),'items':[card_from_edition(row) for row in result['items']],'next_cursor':result['next_cursor']}
 
 
 def series_member_state(user,collection,locale,territory,*,cards=None):

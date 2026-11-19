@@ -73,8 +73,11 @@ class RazorpayClient:
             if not isinstance(items,list):raise DomainError('provider_response_invalid','Merchant order collection is invalid.',503)
             found.extend(row for row in items if row.get('receipt')==str(order.id) and isinstance(row.get('notes'),dict) and row['notes'].get('maison_order_id')==str(order.id))
             if len(items)<100:break
+        else:raise DomainError('provider_search_incomplete','Merchant search exceeded its safe bound; reconciliation requires review.',503)
         if len(found)>1:raise DomainError('provider_identity_ambiguous','Multiple merchant orders require review.',409)
         return found[0] if found else None
+    def fetch_subscription(self,subscription_id):return self.request('GET','/subscriptions/'+provider_id(subscription_id,'sub'))
+    def cancel_subscription(self,subscription_id):return self.request('POST','/subscriptions/'+provider_id(subscription_id,'sub')+'/cancel',{'cancel_at_cycle_end':True})
     def fetch_payment(self,payment_id):return self.request('GET','/payments/'+provider_id(payment_id,'pay'))
     def order_payments(self,order_id):return self.request('GET','/orders/'+provider_id(order_id,'order')+'/payments')
     def create_refund(self,refund):
@@ -88,6 +91,7 @@ class RazorpayClient:
             if not isinstance(items,list):raise DomainError('provider_response_invalid','Merchant refund collection is invalid.',503)
             found.extend(row for row in items if row.get('receipt')==str(refund.id) and isinstance(row.get('notes'),dict) and row['notes'].get('maison_refund_id')==str(refund.id))
             if len(items)<100:break
+        else:raise DomainError('provider_search_incomplete','Merchant search exceeded its safe bound; reconciliation requires review.',503)
         if len(found)>1:raise DomainError('provider_identity_ambiguous','Multiple merchant refunds require review.',409)
         return found[0] if found else None
 

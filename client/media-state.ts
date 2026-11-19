@@ -5,12 +5,14 @@ export interface StreamGrant {
   content_type: string;
   url: string;
   expires_at: string;
+  duration_ms?: number;
 }
 /** Accept only a fresh grant for this exact revision and approved Stream delivery. */
-export function approvedStreamURL(grant: StreamGrant, assetId: string, revisionId: string, now = Date.now()): string | undefined {
+export function approvedStreamURL(grant: StreamGrant, assetId: string, revisionId: string, now = Date.now(), expectedHost?: string): string | undefined {
   try {
     const url = new URL(grant.url);
     const expiry = Date.parse(grant.expires_at);
+    if (expectedHost !== undefined && (!/^customer-[a-z0-9]+\.cloudflarestream\.com$/.test(expectedHost) || url.hostname !== expectedHost)) return undefined;
     if (grant.asset_id !== assetId || grant.edition_revision_id !== revisionId || grant.transport !== "stream_signed" || !["video/mp4", "application/vnd.apple.mpegurl", "application/x-mpegURL"].includes(grant.content_type) || !Number.isFinite(expiry) || expiry <= now || expiry > now + 120000 || url.protocol !== "https:" || url.username || url.password || url.port || !(url.hostname === "iframe.videodelivery.net" || /^customer-[a-z0-9]+\.cloudflarestream\.com$/.test(url.hostname))) return undefined;
     return url.href;
   } catch { return undefined; }
@@ -19,6 +21,25 @@ export function approvedStreamURL(grant: StreamGrant, assetId: string, revisionI
 export interface AudioGrant {
   asset_id: string; edition_revision_id: string; transport: string; content_type: string;
   url: string; expires_at: string; sha256: string; duration_ms: number; quality_kbps: number;
+}
+
+export interface AudioPreviewDescriptor {
+  asset_id: string; edition_revision_id: string; unit_id: string; url: string;
+  sha256: string; bytes: number; content_type: string; duration_ms: number; quality_kbps: number;
+}
+/** A public sample is a separate bounded clip, never a protected chapter URL. */
+export function approvedAudioPreviewURL(preview: AudioPreviewDescriptor, revisionId: string, origin: string): string | undefined {
+  try {
+    const url = new URL(preview.url, origin);
+    if (preview.edition_revision_id !== revisionId || !preview.asset_id || !preview.unit_id ||
+        url.origin !== new URL(origin).origin || url.username || url.password || url.hash ||
+        url.pathname !== `/api/v1/content/audio-previews/${preview.asset_id}` ||
+        preview.content_type !== "audio/mpeg" || !/^[a-f0-9]{64}$/.test(preview.sha256) ||
+        !Number.isInteger(preview.bytes) || preview.bytes < 1 || preview.bytes > 2 * 1024 * 1024 ||
+        !Number.isInteger(preview.duration_ms) || preview.duration_ms < 1 || preview.duration_ms > 120000 ||
+        ![48, 96].includes(preview.quality_kbps)) return undefined;
+    return url.href;
+  } catch { return undefined; }
 }
 export function approvedAudioURL(grant: AudioGrant, expected: {asset_id:string;sha256:string;duration_ms:number;quality_kbps:number}, revisionId: string, origin: string, now = Date.now()): string | undefined {
   try {

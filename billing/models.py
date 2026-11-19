@@ -55,6 +55,7 @@ class Order(models.Model):
     version=models.PositiveBigIntegerField(default=1)
     class Meta:
         db_table='maison_order'
+        permissions=[('reconcile_order','Can request authoritative merchant order reconciliation')]
         indexes=[models.Index(fields=['user','-created_at','-id'],name='maison_order_keyset_idx')]
         constraints=[models.UniqueConstraint(fields=['user','operation_id'],name='maison_order_operation_uq'),
                      models.CheckConstraint(condition=Q(total_minor__gt=0),name='maison_order_positive'),

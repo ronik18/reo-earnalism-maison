@@ -7,7 +7,7 @@ export function internalPageURL(
   if (
     url.origin !== base.origin ||
     !/^\/(en|bn)\//.test(url.pathname) ||
-    /\/(sign-in|sign-up|sign-out|password-reset|verify-email|offline)(\/|$)/.test(
+    /\/(sign-in|email-sign-in|sign-up|sign-out|password-reset|verify-email|offline)(\/|$)/.test(
       url.pathname,
     ) ||
     (url.pathname === base.pathname && url.search === base.search && !!url.hash)

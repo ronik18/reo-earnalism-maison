@@ -60,6 +60,7 @@ class FirstBookJourneyTests(TestCase):
         # GET only shows confirmation and never consumes the token.
         self.assertIn(self.client.get(url.path+'?'+url.query).status_code,[200,302])
         self.assertStatus(self.send('/api/v1/auth/email-verifications/confirm',{'token':token}),200)
+        self.csrf=self.client.get('/api/v1/session').json()['csrf_token']
         self.assertStatus(self.send('/api/v1/auth/login',{'email':'journey@example.test','password':'Journey-Original-Passphrase-47'}),200,'Session')
         self.csrf=self.client.get('/api/v1/session').json()['csrf_token']
         session=self.client.get('/api/v1/session').json()
@@ -69,13 +70,13 @@ class FirstBookJourneyTests(TestCase):
         self.assertContains(reader,unit.paragraphs.order_by('ordinal').last().text)
         self.assertContains(reader,'lang="en"')
         manifest=self.assertStatus(self.client.get(f'/api/v1/content/manifests/{edition.live_revision_id}'),200,'ReaderManifest')
-        grant=self.assertStatus(self.send('/api/v1/content/packages/grants',{'edition_revision_id':str(edition.live_revision_id),'unit_ids':[str(unit.id)],'device_id':session['device_id'],'purpose':'online'}),201,'PackageGrant')
+        grant=self.assertStatus(self.send('/api/v1/content/packages/grants',{'edition_revision_id':str(edition.live_revision_id),'unit_ids':[str(unit.id)],'device_id':session['device_id'],'purpose':'online'}),200,'PackageGrant')
         descriptor=grant['assets'][0];url=urlsplit(descriptor['url']);asset_path=url.path+'?'+url.query
         package=self.client.get(asset_path);self.assertEqual(package.status_code,200)
         self.assertEqual(hashlib.sha256(package.content).hexdigest(),descriptor['sha256'])
         progress_path=f'/api/v1/me/progress/{EN}/reader'
         empty=self.assertStatus(self.client.get(progress_path),200,'Progress');self.assertEqual(empty['version'],0)
-        operation=str(uuid.uuid4());body={'operation_id':operation,'edition_revision_id':str(edition.live_revision_id),'location':{'format':'reader','unit_id':str(unit.id),'anchor_id':str(paragraph.anchor_id),'offset_chars':0},'occurred_at':timezone.now().isoformat()}
+        operation=str(uuid.uuid4());body={'operation_id':operation,'edition_revision_id':str(edition.live_revision_id),'location':{'format':'reader','unit_id':str(unit.id),'anchor_id':str(paragraph.anchor_id),'offset_chars':0},'occurred_at':timezone.now().isoformat().replace('+00:00','Z')}
         saved=self.assertStatus(self.send(progress_path,body,'put',version=0,key=operation),200,'Progress');self.assertEqual(saved['version'],1)
         replay=self.assertStatus(self.send(progress_path,body,'put',version=0,key=operation),200,'Progress');self.assertEqual(saved,replay)
         stale={**body,'operation_id':str(uuid.uuid4())}

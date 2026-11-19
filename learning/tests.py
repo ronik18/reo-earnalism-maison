@@ -86,3 +86,35 @@ class LearningAcceptanceTests(TestCase):
         # A changed key requires the current revision's quiz rather than silently carrying mastery.
         self.quiz.version+=1;self.quiz.save()
         with self.assertRaises(DomainError):svc.complete_lesson(self.other,first.id)
+
+
+    def test_changed_quiz_requires_explicit_current_completion_and_allows_revision_restart(self):
+        from .models import Lesson
+        first=self.quiz.lesson;first.completion_rule='quiz_pass';first.save()
+        self.quiz.max_attempts=1;self.quiz.save()
+        later=Lesson.objects.create(track=self.track,title='Next revision-bound lesson',ordinal=first.ordinal+10,requires_previous=True)
+        def pass_current():
+            quiz=Quiz.objects.get(pk=self.quiz.pk)
+            attempt=svc.start_attempt(self.user,quiz.id,quiz.version)
+            svc.submit_attempt(self.user,attempt.id,[{'question_id':q['question_id'],'option_id':q['correct_option_id']} for q in attempt.scoring_snapshot],1)
+        pass_current();svc.complete_lesson(self.user,first.id)
+        self.assertTrue(svc.lesson_detail(self.user,first.id)['completed'])
+        self.assertEqual(svc.lesson_detail(self.user,later.id)['lesson_id'],str(later.id))
+        self.quiz.refresh_from_db();self.quiz.version+=1;self.quiz.save()
+        self.assertFalse(svc.lesson_detail(self.user,first.id)['completed'])
+        with self.assertRaises(DomainError) as error:svc.lesson_detail(self.user,later.id)
+        self.assertEqual(error.exception.code,'prerequisite_unmet')
+        pass_current()
+        self.assertFalse(svc.lesson_detail(self.user,first.id)['completed'])
+        svc.complete_lesson(self.user,first.id)
+        self.assertTrue(svc.lesson_detail(self.user,first.id)['completed'])
+        self.assertEqual(LessonCompletion.objects.filter(user=self.user,lesson=first).count(),1)
+
+    def test_lesson_media_cannot_silently_use_another_track_edition(self):
+        from library.models import Edition
+        lesson=self.quiz.lesson
+        edition=Edition.objects.get(pk='20000000-0000-4000-8000-000000000002')
+        self.track.edition=Edition.objects.get(pk='20000000-0000-4000-8000-000000000001');self.track.save()
+        lesson.unit=edition.live_revision.units.first();lesson.save()
+        with self.assertRaises(DomainError) as error:svc.lesson_detail(self.user,lesson.id)
+        self.assertEqual(error.exception.code,'lesson_not_ready')

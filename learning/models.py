@@ -37,6 +37,8 @@ class LessonCompletion(models.Model):
     user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
     lesson=models.ForeignKey(Lesson,on_delete=models.PROTECT)
     completed_at=models.DateTimeField(auto_now_add=True)
+    lesson_version=models.PositiveIntegerField(default=1)
+    quiz_version=models.PositiveIntegerField(null=True,blank=True)
     class Meta:
         db_table='maison_lesson_completion'
         constraints=[models.UniqueConstraint(fields=['user','lesson'],name='maison_completion_user_lesson')]

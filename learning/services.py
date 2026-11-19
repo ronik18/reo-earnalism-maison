@@ -29,11 +29,24 @@ def track_dto(user,track):
 def list_tracks(user,locale='en'):
     return [track_dto(user,t) for t in Track.objects.filter(published=True,locale=locale).exclude(access='deny').order_by('title','id')]
 
+def completion_is_current(record,lesson):
+    if not record or record.lesson_version!=lesson.version:return False
+    if lesson.completion_rule=='quiz_pass':
+        return hasattr(lesson,'quiz') and record.quiz_version==lesson.quiz.version
+    return record.quiz_version is None
+
+
+def lesson_is_complete(user,lesson):
+    if not getattr(user,'is_authenticated',False):return False
+    record=LessonCompletion.objects.filter(user=user,lesson=lesson).first()
+    return completion_is_current(record,lesson)
+
+
 def track_detail(user,track_id):
     track=_track(user,track_id,allow_locked=True)
     result=track_dto(user,track)
-    completed=set(LessonCompletion.objects.filter(user=user,lesson__track=track).values_list('lesson_id',flat=True)) if getattr(user,'is_authenticated',False) else set()
-    result['lessons']=[{'lesson_id':str(l.id),'title':l.title,'ordinal':l.ordinal,'completed':l.id in completed} for l in track.lessons.all()]
+    completed={row.lesson_id:row for row in LessonCompletion.objects.filter(user=user,lesson__track=track)} if getattr(user,'is_authenticated',False) else {}
+    result['lessons']=[{'lesson_id':str(l.id),'title':l.title,'ordinal':l.ordinal,'completed':completion_is_current(completed.get(l.id),l)} for l in track.lessons.select_related('quiz').all()]
     return result
 
 def _lesson(user,value):
@@ -42,25 +55,32 @@ def _lesson(user,value):
     _track(user,lesson.track_id)
     if lesson.requires_previous:
         previous=lesson.track.lessons.filter(ordinal__lt=lesson.ordinal).order_by('-ordinal').first()
-        if previous and (not getattr(user,'is_authenticated',False) or not LessonCompletion.objects.filter(user=user,lesson=previous).exists()):
+        if previous and (not lesson_is_complete(user,previous)):
             raise DomainError('prerequisite_unmet','Complete the previous lesson first.',409)
     if lesson.unit_id:
+        if lesson.track.edition_id and lesson.unit.revision.edition_id!=lesson.track.edition_id:
+            raise DomainError('lesson_not_ready','Lesson media belongs to another edition.',409)
         authorize_revision(user,lesson.unit.revision,territory=getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ'))
     return lesson
 
 def lesson_detail(user,lesson_id):
     lesson=_lesson(user,lesson_id)
     return {'lesson_id':str(lesson.id),'track_id':str(lesson.track_id),'title':lesson.title,'locale':lesson.track.locale,
-            'edition_id':str(lesson.track.edition_id) if lesson.track.edition_id else None,'unit_id':str(lesson.unit_id) if lesson.unit_id else None,
+            'edition_id':str(lesson.unit.revision.edition_id) if lesson.unit_id else (str(lesson.track.edition_id) if lesson.track.edition_id else None),'unit_id':str(lesson.unit_id) if lesson.unit_id else None,
             'body':lesson.body,'quiz_id':str(lesson.quiz.id) if hasattr(lesson,'quiz') else None,
-            'completed':getattr(user,'is_authenticated',False) and LessonCompletion.objects.filter(user=user,lesson=lesson).exists(),'version':lesson.version}
+            'completed':lesson_is_complete(user,lesson),'version':lesson.version}
 
+@transaction.atomic
 def complete_lesson(user,lesson_id):
     lesson=_lesson(user,lesson_id)
     if lesson.completion_rule=='quiz_pass':
         if not hasattr(lesson,'quiz') or not QuizAttempt.objects.filter(user=user,quiz=lesson.quiz,quiz_version=lesson.quiz.version,status='submitted',score__gte=lesson.pass_score).exists():
             raise DomainError('completion_rule_unmet','Pass the current lesson quiz before completing it.',409)
-    record,_=LessonCompletion.objects.get_or_create(user=user,lesson=lesson)
+    quiz_version=lesson.quiz.version if lesson.completion_rule=='quiz_pass' else None
+    record,_=LessonCompletion.objects.get_or_create(user=user,lesson=lesson,defaults={'lesson_version':lesson.version,'quiz_version':quiz_version})
+    if not completion_is_current(record,lesson):
+        record.lesson_version=lesson.version;record.quiz_version=quiz_version;record.completed_at=timezone.now()
+        record.save(update_fields=['lesson_version','quiz_version','completed_at'])
     return {'lesson_id':str(lesson.id),'completed':True,'completed_at':iso(record.completed_at),'version':lesson.version}
 
 def interview_questions(user,track_id,topic='',difficulty='',company_style=''):
@@ -92,7 +112,7 @@ def start_attempt(user,quiz_id,quiz_version):
     except (Quiz.DoesNotExist,ValueError,ValidationError): raise DomainError('not_found','Quiz not found.',404)
     _lesson(user,quiz.lesson_id)
     if quiz.version!=quiz_version: raise DomainError('version_conflict','Quiz changed. Reload the questions.',412,{'current_version':quiz.version})
-    if quiz.max_attempts and quiz.attempts.filter(user=user).count()>=quiz.max_attempts:
+    if quiz.max_attempts and quiz.attempts.filter(user=user,quiz_version=quiz.version).count()>=quiz.max_attempts:
         raise DomainError('attempt_limit','Maximum attempts reached.',409)
     snapshot=[]
     for q in quiz.questions.all():

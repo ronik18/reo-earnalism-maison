@@ -1,0 +1,164 @@
+{
+  "source": "325e311 + coordinated uncommitted P0 fixes",
+  "scope": "Original local-only synthetic fixture; no provider or physical UAT qualification",
+  "results": [
+    {
+      "engine": "chromium-desktop",
+      "id": "member-login",
+      "authenticated": true,
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "reader-package",
+      "assets": [
+        {
+          "status": 200,
+          "shaMatch": true,
+          "bytes": 1986,
+          "cache": "private, no-store"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "audio-range",
+      "status": "PASS",
+      "range": "bytes 0-99/180471",
+      "bytes": 100,
+      "cache": "private, no-store"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "audio-playback",
+      "currentTime": 15,
+      "duration": 30,
+      "error": null,
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "reader-switch-to-audio",
+      "url": "http://localhost:8031/en/listen/20000000-0000-4000-8000-000000000001/?unit_id=a1223b47-bce1-4dbd-9c08-e04072332416&position_ms=15000",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "audio-switch-to-reader",
+      "mappedUnit": true,
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "quiz-offline-recovery",
+      "result": "Your result\n\nScore: 100\n\nCorrect · FIFO means first in, first out.\n\nMark lesson complete\n\nLearn",
+      "explicitLessonCompletion": true,
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "offline-reader",
+      "paragraphs": 6,
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "offline-audio-range-playback",
+      "status": "PASS",
+      "bytes": 100,
+      "range": "bytes 0-99/180471"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "offline-audio-license",
+      "assets": 1,
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "page-errors",
+      "status": "PASS",
+      "errors": []
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "member-login",
+      "authenticated": true,
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "reader-package",
+      "assets": [
+        {
+          "status": 200,
+          "shaMatch": true,
+          "bytes": 1986,
+          "cache": "private, no-store"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "audio-range",
+      "status": "PASS",
+      "range": "bytes 0-99/180471",
+      "bytes": 100,
+      "cache": "private, no-store"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "audio-playback",
+      "currentTime": 15.014,
+      "duration": 30.040816326530614,
+      "error": null,
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "reader-switch-to-audio",
+      "url": "http://localhost:8031/en/listen/20000000-0000-4000-8000-000000000001/?unit_id=a1223b47-bce1-4dbd-9c08-e04072332416&position_ms=15000",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "audio-switch-to-reader",
+      "mappedUnit": true,
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "quiz-offline-recovery",
+      "result": "Your result\n\nScore: 100\n\nCorrect · FIFO means first in, first out.\n\nMark lesson complete\n\nLearn",
+      "explicitLessonCompletion": true,
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "offline-reader",
+      "paragraphs": 6,
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "offline-audio-range-playback",
+      "status": "PASS",
+      "bytes": 100,
+      "range": "bytes 0-99/180471"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "offline-audio-license",
+      "assets": 1,
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-mobile",
+      "id": "page-errors",
+      "status": "PASS",
+      "errors": []
+    }
+  ]
+}

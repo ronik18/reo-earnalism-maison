@@ -3,7 +3,22 @@ import uuid
 from unittest.mock import patch
 from django.conf import settings
 from django.db import OperationalError, connection
-from django.test import Client, TestCase, override_settings
+from django.test import Client, SimpleTestCase, TestCase, override_settings
+
+
+class StreamCSPTests(SimpleTestCase):
+    @override_settings(FEATURES={'video':True}, STREAM_CUSTOMER_HOST='customer-fixture.cloudflarestream.com', RAZORPAY_ENABLED=False)
+    def test_qualified_video_allows_only_exact_sdk_and_customer_origin(self):
+        from operations.middleware import content_security_policy
+        policy=content_security_policy()
+        self.assertIn('https://embed.cloudflarestream.com',policy)
+        self.assertIn('frame-src https://customer-fixture.cloudflarestream.com',policy)
+        self.assertNotIn('unsafe-eval',policy)
+        self.assertNotIn('*.cloudflarestream.com',policy)
+        with override_settings(FEATURES={'video':False}):
+            self.assertNotIn('embed.cloudflarestream.com',content_security_policy())
+        with override_settings(STREAM_CUSTOMER_HOST='customer-fixture.cloudflarestream.com; script-src *'):
+            self.assertNotIn('embed.cloudflarestream.com',content_security_policy())
 
 class RuntimeBoundaryTests(TestCase):
     def test_real_postgresql_and_no_paid_features(self):

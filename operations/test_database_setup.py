@@ -51,6 +51,14 @@ class DatabaseConfigurationTests(SimpleTestCase):
             "print(s.PRIVACY_EXPORT_DB_ALIAS)"], env=env,
             cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=10)
 
+    def test_merchant_finance_policy_requires_json_object(self):
+        self.assertEqual(self.settings_process(MERCHANT_FINANCE_POLICY='{}').returncode, 0)
+        for value in ['[]', 'null', 'invalid-json']:
+            with self.subTest(value=value):
+                result = self.settings_process(MERCHANT_FINANCE_POLICY=value)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('Merchant finance policy must be a JSON object', result.stderr)
+
     def test_neon_pool_omits_startup_options_and_direct_export_verifies_tls(self):
         result = self.settings_process(DATABASE_URL_UNPOOLED='postgresql://review:unused@ep-test.region.neon.tech/maison?sslmode=disable')
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -78,3 +86,43 @@ class DatabaseConfigurationTests(SimpleTestCase):
                 result=self.settings_process(R2_PUBLIC_ASSET_HOST=host)
                 self.assertNotEqual(result.returncode,0)
                 self.assertIn('dedicated HTTPS CDN hostname',result.stderr)
+
+    def production_email_process(self, **updates):
+        profile = dict(MAISON_ENV='production', DJANGO_SECRET_KEY='x'*64,
+            DATABASE_URL_UNPOOLED='postgresql://review:unused@ep-test.region.neon.tech/maison',
+            ALLOWED_HOSTS='maison.example', CSRF_TRUSTED_ORIGINS='https://maison.example',
+            PUBLIC_BASE_URL='https://maison.example', ORIGIN_SHARED_SECRET='o'*64, HEALTH_PROBE_SECRET='h'*64,
+            EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend', EMAIL_HOST='smtp.example.test',
+            EMAIL_HOST_USER='sender@example.test', EMAIL_HOST_PASSWORD='local-test-placeholder',
+            EMAIL_FROM_ADDRESS='sender@example.test', EMAIL_PORT='465', EMAIL_USE_SSL='true', EMAIL_USE_TLS='false',
+            MEDIA_STORAGE_BACKEND='r2', R2_ACCOUNT_ID='a'*32, R2_PRIVATE_BUCKET='fixture-private',
+            R2_APPLICATION_KEY_ID='fixture-read', R2_APPLICATION_SECRET='fixture-read-secret',
+            R2_UPLOAD_KEY_ID='fixture-write', R2_UPLOAD_SECRET='fixture-write-secret',
+            R2_PUBLIC_ASSET_HOST='https://assets.maison.example', STATIC_RELEASE_ID='a'*64,
+            MAISON_EMAIL_LINK='true', MAISON_GOOGLE_OAUTH='false', MAISON_PHONE_OTP='false',
+            MAISON_RECURRING_BILLING='false', MAISON_INTERNATIONAL_CHECKOUT='false', MAISON_VIDEO='false')
+        profile.update(updates)
+        return self.settings_process(**profile)
+
+    def test_email_links_allow_authenticated_smtp_without_unlocking_other_providers(self):
+        result = self.production_email_process()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for feature in ['MAISON_PHONE_OTP', 'MAISON_RECURRING_BILLING', 'MAISON_INTERNATIONAL_CHECKOUT']:
+            with self.subTest(feature=feature):
+                result = self.production_email_process(**{feature: 'true'})
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('qualified production adapter', result.stderr)
+
+    def test_google_requires_registered_credentials_without_unlocking_other_providers(self):
+        result = self.production_email_process(MAISON_GOOGLE_OAUTH='true')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('registered client and exact canonical callback', result.stderr)
+        result = self.production_email_process(MAISON_GOOGLE_OAUTH='true',
+            GOOGLE_CLIENT_ID='123-fixture.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET='local-test-placeholder')
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_email_links_cannot_start_with_unqualified_mail_transport(self):
+        for updates in [dict(EMAIL_HOST_PASSWORD=''), dict(EMAIL_USE_SSL='false', EMAIL_USE_TLS='false'),
+                        dict(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')]:
+            with self.subTest(updates=updates):
+                self.assertNotEqual(self.production_email_process(**updates).returncode, 0)

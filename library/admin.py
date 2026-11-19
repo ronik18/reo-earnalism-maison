@@ -24,8 +24,10 @@ class WorkAdmin(admin.ModelAdmin):
         if old and all(old[field]==getattr(obj,field) for field in fields):return
         # The existing helper includes work dependencies, so one live representative
         # invalidates every recorded edition/listing reference for this work.
-        revision=Revision.objects.filter(edition__work=obj,state='live',edition__live_revision_id=F('id')).order_by('id').first()
-        if revision:_queue_live_revisions([revision.id])
+        from .search import refresh_revision_search
+        revisions=list(Revision.objects.filter(edition__work=obj,state='live',edition__live_revision_id=F('id')).select_related('edition__work').order_by('id'))
+        for revision in revisions:refresh_revision_search(revision)
+        if revisions:_queue_live_revisions([revisions[0].id])
 
 @admin.register(Edition)
 class EditionAdmin(admin.ModelAdmin):
@@ -39,6 +41,8 @@ class EditionAdmin(admin.ModelAdmin):
         old=Edition.objects.select_for_update().filter(pk=obj.pk).values(*fields).first() if change else None
         super().save_model(request,obj,form,change)
         if old and all(old[field]==getattr(obj,field) for field in fields):return
+        from .search import refresh_revision_search
+        for revision in Revision.objects.filter(edition=obj,state='live',edition__live_revision_id=F('id')).select_related('edition__work'):refresh_revision_search(revision)
         _queue_live_revisions(Revision.objects.filter(edition=obj).values_list('id',flat=True))
 
 @admin.register(Revision)
@@ -148,3 +152,18 @@ class CatalogCollectionAdmin(admin.ModelAdmin):
     def delete_queryset(self,request,queryset):
         super().delete_queryset(request,queryset)
         self._invalidate_editorial_catalog()
+
+
+from .search_models import SearchAlias
+
+
+@admin.register(SearchAlias)
+class SearchAliasAdmin(admin.ModelAdmin):
+    list_display=('locale','alias_normalized','target_normalized','active','reviewed_by','reviewed_at')
+    list_filter=('locale','active')
+    search_fields=('alias_normalized','target_normalized')
+    readonly_fields=('reviewed_by','reviewed_at')
+    def save_model(self,request,obj,form,change):
+        from django.utils import timezone
+        obj.reviewed_by=request.user;obj.reviewed_at=timezone.now()
+        super().save_model(request,obj,form,change)

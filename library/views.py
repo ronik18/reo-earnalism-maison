@@ -55,11 +55,11 @@ def _catalog_ttl(cards,territory):
     # the first publication invalidates it just like a populated listing.
     if not ids:return 30
     revisions=Revision.objects.filter(edition__id__in=ids,edition__live_revision_id=__import__('django.db.models',fromlist=['F']).F('id'))
-    return min([svc.public_ttl(r,30,territory=territory) for r in revisions] or [0])
+    return min([svc.public_ttl(r,30,territory=territory) for r in svc.prefetch_public_rights(revisions)] or [0])
 
 @json_endpoint(auth=False)
 def home(request):
-    locale,territory=context(request);cards=svc.catalog_cards(locale,territory)
+    locale,territory=context(request);cards=svc.catalog_cards(locale,territory,limit=1)
     from .collections import list_collections,eligible_items
     from .collection_models import CatalogCollection
     shelves=[]
@@ -79,12 +79,10 @@ def home(request):
 def catalog(request):
     locale,territory=context(request)
     if len(request.GET.get('q',''))>120: raise DomainError('query_too_long','Search query is limited to 120 characters.',422)
-    cards=svc.catalog_cards(locale,territory,query=request.GET.get('q',''),house=request.GET.get('house',''),format=request.GET.get('format',''),
+    from .catalog_query import catalog_page
+    result,ttl=catalog_page(request,locale,territory,query=request.GET.get('q',''),house=request.GET.get('house',''),format=request.GET.get('format',''),
         **{k:request.GET.get(k,'') for k in ('author','topic','level','duration_min','duration_max','access','recency_days')})
-    result=page(request,cards,'catalog')
-    if request.path.endswith('/search'):
-        result.update({'query':request.GET.get('q',''),'locale':locale,'territory':territory,'match_mode':'prefix' if cards else 'none'})
-    return public_response(result,_catalog_ttl(cards,territory))
+    return public_response(result,ttl)
 
 @json_endpoint(auth=False)
 def collections(request):
@@ -133,18 +131,33 @@ def units(request,edition_id):
 @json_endpoint(auth=False)
 def preview(request,revision_id):
     _,territory=context(request);revision=svc._revision(revision_id)
-    if not svc._live(revision) or not revision.preview or not svc.current_right(revision,'reader','preview',territory):
-        raise DomainError('preview_unavailable','No public preview is available.',404)
+    if not svc._live(revision):raise DomainError('preview_unavailable','No public preview is available.',404)
+    from .audio_preview import descriptor
+    audio=descriptor(revision,territory)
     unit=revision.units.first()
-    paragraphs=revision.preview
-    if not unit or len(paragraphs)>3 or sum(len(p['text']) for p in paragraphs)>1200:
-        raise DomainError('preview_unavailable','Preview does not pass its bounds.',409)
+    paragraphs=revision.preview if svc.current_right(revision,'reader','preview',territory) else []
+    if not unit or len(paragraphs)>3 or sum(len(p['text']) for p in paragraphs)>1200 or (not paragraphs and not audio):
+        raise DomainError('preview_unavailable','Preview does not pass its bounds.',404)
+    first=unit.paragraphs.first()
+    if not paragraphs and not first:raise DomainError('preview_unavailable','A semantic preview boundary is unavailable.',409)
     data={'schema_version':1,'edition_revision_id':str(revision.id),'locale':revision.edition.locale,
-          'preview_sha256':svc.digest(svc.canonical_bytes(paragraphs)),
-          'units':[{'unit_id':str(unit.id),'title':unit.title,'paragraphs':paragraphs}],
-          'boundary':{'end_anchor_id':paragraphs[-1]['anchor_id'],'end_offset_chars':len(paragraphs[-1]['text']),'audio_end_ms':None,'video_end_ms':None},
-          'full_content_included':False}
-    return public_response(data,svc.public_ttl(revision,60,'preview',territory))
+        'preview_sha256':svc.digest(svc.canonical_bytes(paragraphs)),
+        'units':[{'unit_id':str(unit.id),'title':unit.title,'paragraphs':paragraphs}] if paragraphs else [],
+        'boundary':{'end_anchor_id':paragraphs[-1]['anchor_id'] if paragraphs else str(first.anchor_id),
+            'end_offset_chars':len(paragraphs[-1]['text']) if paragraphs else 0,
+            'audio_end_ms':audio['duration_ms'] if audio else None,'video_end_ms':None},'full_content_included':False}
+    if audio:data['audio']=audio
+    # A descriptor leads to a short-lived private redirect; never cache the audio
+    # package longer than current text/audio preview rights.
+    ttl=svc.public_ttl(revision,60,'preview',territory)
+    return public_response(data,ttl)
+
+
+@json_endpoint(auth=False)
+def audio_preview(request,asset_id):
+    _,territory=context(request)
+    from .audio_preview import deliver
+    return deliver(request,asset_id,territory)
 
 @json_endpoint(auth=False)
 def cover(request,asset_id):
@@ -167,7 +180,7 @@ def packages(request):
     data=body(request,'PackageGrantInput');_,territory=context(request)
     result=svc.package_grant(request.user,data,territory)
     for asset in result['assets']: asset['url']=request.build_absolute_uri(asset['url'])
-    return api_response(result,201)
+    return api_response(result)
 
 @json_endpoint(methods=('POST',))
 def media(request):
@@ -175,7 +188,7 @@ def media(request):
         raise DomainError('feature_disabled','Media providers are not enabled in this launch slice.',503)
     data=body(request,'MediaGrantInput');_,territory=context(request)
     result=svc.media_grant(request.user,data,territory);result['url']=request.build_absolute_uri(result['url'])
-    return api_response(result,201)
+    return api_response(result)
 
 @json_endpoint()
 def local_asset(request,asset_id):
@@ -259,8 +272,11 @@ def upload(request):
     from . import storage
     remote=storage.is_r2()
     operation=operation_key(request)
+    duration=data.get('duration_ms')
+    if duration is not None and (type(duration)!=int or not 1<=duration<=9223372036854775807):
+        raise DomainError('invalid_duration','Media duration must fit a positive64-bit millisecond value.',422)
     if not remote and data['bytes']>262144: raise DomainError('local_upload_limit','Local acceptance uploads are limited to 256 KiB.',413)
-    limits={'cover':2097152,'reader_source':4194304,'reader_package':262144,'timing_map':1048576,'rights_document':4194304,'audio':268435456}
+    limits={'cover':2097152,'reader_source':4194304,'reader_package':262144,'timing_map':1048576,'rights_document':4194304,'audio':268435456,'preview_audio':2097152}
     if data['kind']=='video':raise DomainError('provider_processing_required','Video requires an approved Stream upload profile.',409)
     if data['bytes']>limits[data['kind']]:raise DomainError('upload_limit','Split this input before uploading.',413)
     suffixes={'image/png':{'.png'},'image/jpeg':{'.jpg','.jpeg'},'image/webp':{'.webp'},'text/plain':{'.txt'},'application/json':{'.json'},'application/pdf':{'.pdf'},'audio/mpeg':{'.mp3'}}
@@ -268,14 +284,21 @@ def upload(request):
     if any(c in data['file_name'] for c in '/\\') or any(ord(c)<32 for c in data['file_name']) or PurePath(data['file_name']).suffix.lower() not in suffixes.get(data['content_type'],set()):raise DomainError('invalid_file_name','Use an allowed plain file name and extension.',422)
     mime_types={'cover':{'image/png','image/jpeg','image/webp'},'reader_source':{'text/plain','application/json'},
                 'reader_package':{'application/json'},'timing_map':{'application/json'},'rights_document':{'application/pdf','text/plain'},
-                'audio':{'audio/mpeg'},'video':{'video/mp4'}}
+                'audio':{'audio/mpeg'},'preview_audio':{'audio/mpeg'},'video':{'video/mp4'}}
     if data['content_type'] not in mime_types.get(data['kind'],set()):
         raise DomainError('invalid_content_type','Content type is not permitted for this input kind.',422)
     def execute():
         revision=Revision.objects.select_for_update().get(pk=data['edition_revision_id'])
         if revision.state!='draft': raise DomainError('revision_frozen','Upload only into a draft revision.',409)
         asset_id=uuid.uuid4();kind='audio_chapter' if data['kind']=='audio' else data['kind']
-        asset=Asset.objects.create(id=asset_id,revision=revision,kind=kind,storage_key=f'revisions/{revision.id}/{asset_id}',sha256=data['sha256'],bytes=data['bytes'],content_type=data['content_type'])
+        unit=None
+        if data.get('unit_id'):
+            unit=Unit.objects.filter(pk=data['unit_id'],revision=revision).first()
+            if not unit:raise DomainError('unit_revision_mismatch','The media unit must belong to this revision.',409)
+        if kind=='preview_audio' and (not unit or type(data.get('duration_ms'))!=int or not 1<=data['duration_ms']<=120000):
+            raise DomainError('preview_not_ready','A preview requires its actual unit and measured duration up to120seconds.',422)
+        asset=Asset.objects.create(id=asset_id,revision=revision,unit=unit,kind=kind,duration_ms=data.get('duration_ms'),
+            storage_key=f'revisions/{revision.id}/{asset_id}',sha256=data['sha256'],bytes=data['bytes'],content_type=data['content_type'])
         expiry=timezone.now()+timedelta(seconds=120)
         token=signing.dumps({'asset':str(asset.id),'actor':str(request.user.public_id),'exp':int(expiry.timestamp()),'method':'PUT'},salt='maison-local-upload')
         url,headers=storage.upload_url(asset) if remote else (request.build_absolute_uri(f'/api/v1/staff/assets/{asset.id}/local-upload?token={token}'),{'Content-Type':asset.content_type})
@@ -321,7 +344,7 @@ def complete_upload(request,asset_id):
         if asset.version!=version: raise DomainError('version_conflict','Asset changed.',412,{'current_version':asset.version})
         if asset.state!='uploading' or asset.revision.state!='draft': raise DomainError('invalid_transition','Only uploading draft assets can complete.',409)
         if data['bytes']!=asset.bytes or data['sha256']!=asset.sha256: raise DomainError('upload_integrity_failed','Completion does not match intent.',422)
-        if asset.kind=='audio_chapter' and remote:
+        if asset.kind=='preview_audio' or (asset.kind=='audio_chapter' and remote):
             asset.state='processing';asset.version+=1;asset.save()
             audit(request.user,'asset.processing',asset,{'sha256':asset.sha256,'next_command':'verify_media_asset'})
             return 200,asset_state(asset),asset.version

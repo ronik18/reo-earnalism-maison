@@ -71,6 +71,9 @@ class Command(BaseCommand):
             revision.state='live';revision.published_at=now;revision.save()
             edition.live_revision=revision;edition.save()
             self.stdout.write(f'LOCAL TEST ONLY edition={eid} revision={rid} unit={unid} locale={row["locale"]}')
+        from library.search import refresh_revision_search
+        for revision in Revision.objects.filter(edition__id__in=[uid('20',row['suffix']) for row in packet['editions']],state='live').select_related('edition__work'):
+            refresh_revision_search(revision)
         self.seed_learning()
         self.stdout.write(self.style.SUCCESS('Original local fixtures ready. Commercial release, provider and browser gates remain separate.'))
 

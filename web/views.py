@@ -8,10 +8,10 @@ from uuid import UUID
 from django import forms
 from django.conf import settings as django_settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, QueryDict
 from django.shortcuts import render
 from django.urls import reverse
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
 from .i18n import catalogue, text
 
@@ -29,7 +29,7 @@ def safe_return(value, locale="en"):
     parsed = urlsplit(value)
     if parsed.scheme or parsed.netloc or not re.match(r"^/(en|bn)/", parsed.path):
         return fallback
-    if any(part in parsed.path for part in ("sign-in", "sign-up", "sign-out", "password-reset", "verify-email")):
+    if any(part in parsed.path for part in ("sign-in", "sign-up", "sign-out", "email-sign-in", "password-reset", "verify-email")):
         return fallback
     return value
 
@@ -39,6 +39,10 @@ def context(request, locale, **extra):
         raise Http404
     other = "bn" if locale == "en" else "en"
     switch = re.sub(r"^/(en|bn)/", f"/{other}/", request.get_full_path(), count=1)
+    if request.path.startswith("/auth/"):
+        query = request.GET.copy()
+        query["locale"] = other
+        switch = request.path + "?" + query.urlencode()
     prefs = None
     if request.user.is_authenticated:
         try:
@@ -47,6 +51,8 @@ def context(request, locale, **extra):
             pass
     return {
         "auth_bootstrap":{"mode":extra.get("auth_mode","sign-in"),"return_path":safe_return(request.POST.get("return_to",request.GET.get("return_to")),locale),"email":extra.get("values",{}).get("email","")},
+        "email_link_enabled": django_settings.FEATURES.get("email_link", False),
+        "google_oauth_enabled": django_settings.FEATURES.get("google_oauth", False),
         "app_theme": prefs.theme if prefs and prefs.theme in ("light", "dark", "true_black") else "dark",
         "reduced_motion": bool(prefs and prefs.reduced_motion),
         "ui_locale": locale, "ui": catalogue(locale), "switch_locale_url": switch,
@@ -91,10 +97,11 @@ def domain_view(fn):
 
 
 def token_response(fn):
+    """Keep token paths out of referrers without nulling native form Origins."""
     @wraps(fn)
     def wrapped(*args, **kwargs):
         response = fn(*args, **kwargs)
-        response["Referrer-Policy"] = "no-referrer"
+        response["Referrer-Policy"] = "strict-origin"
         return response
     return wrapped
 
@@ -118,7 +125,9 @@ def root(request):
 def home(request, locale):
     from library.services import catalog_cards
     cards = catalog_cards(locale=request.GET.get("content_locale", locale), territory=trusted_territory(request))
-    return page(request, locale, "web/home.html", cards=cards, featured=cards[0] if cards else None, allow_index=not django_settings.LOCAL)
+    featured = cards[0] if cards else None
+    sample = public_preview_data(request, featured) if featured else {}
+    return page(request, locale, "web/home.html", cards=cards, featured=featured, reader_sample_available=bool(sample.get("units")), audio_sample=sample.get("audio") if django_settings.FEATURES.get("audio") else None, allow_index=not django_settings.LOCAL)
 
 
 @require_GET
@@ -130,15 +139,21 @@ def welcome(request, locale):
 @require_GET
 @domain_view
 def search(request, locale):
-    from library.services import catalog_cards
-    selected = {key: request.GET.get(key, "") for key in ("q", "format", "house", "duration_min", "duration_max", "level", "topic", "access", "recency_days")}
+    selected = {key: request.GET.get(key, "") for key in ("q", "format", "house", "author", "duration_min", "duration_max", "level", "topic", "access", "recency_days")}
     content_locale = request.GET.get("content_locale", locale)
     if content_locale not in ("en", "bn"):
         return error_page(request, locale, "invalid_input")
-    cards = catalog_cards(locale=content_locale, territory=trusted_territory(request), query=selected["q"], house=selected["house"], format=selected["format"], **{key: selected[key] for key in ("duration_min", "duration_max", "level", "topic", "access", "recency_days")})
-    from library.views import collections as collection_index
-    shelves=catalog_payload(request,content_locale,collection_index)["items"]
-    return page(request, locale, "web/search.html", collections=shelves, cards=cards, selected=selected, content_locale=content_locale, active_nav="explore")
+    from library.views import catalog, collections as collection_index
+    api_path = "/api/v1/catalog" if request.path.endswith("/explore/") else "/api/v1/search"
+    data = catalog_payload(request, content_locale, catalog, api_path=api_path)
+    # Catalog and collection cursors have separate scopes. A result-page cursor
+    # must never be sent to the independently rendered collection sidebar.
+    shelf_request = copy(request)
+    shelf_request.GET = request.GET.copy()
+    shelf_request.GET.pop("cursor", None)
+    shelf_request.GET.pop("limit", None)
+    shelves = catalog_payload(shelf_request, content_locale, collection_index)["items"]
+    return page(request, locale, "web/search.html", collections=shelves, cards=data["items"], next_cursor=data["next_cursor"], selected=selected, content_locale=content_locale, active_nav="explore")
 
 
 @require_GET
@@ -169,7 +184,8 @@ def title(request, locale, identifier):
         pair=revision.validation_evidence.get('cover_pair',{})
         if pair.get('back'):back_cover='/api/v1/staff/draft-covers/'+pair['back']['asset_id']
     download_bootstrap = {"edition_revision_id":edition["edition_revision_id"],"unit_ids":[u["unit_id"] for u in units],"units":[{"unit_id":u["unit_id"],"title":u["title"]} for u in units],"formats":edition["downloadable_formats"],"title":edition["title"],"locale":edition["locale"]} if django_settings.FEATURES.get("offline_text_audio") and edition["published_at"] and request.user.is_authenticated else None
-    return page(request, locale, "web/title.html", edition=edition, units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
+    sample = public_preview_data(request, edition) if django_settings.FEATURES.get("audio") else {}
+    return page(request, locale, "web/title.html", edition=edition, units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
 
 
 @require_GET
@@ -232,7 +248,21 @@ def sign_in(request, locale):
                 return page(request, locale, "web/auth.html", status=exc.status, auth_mode="sign-in", error_key=key, values={"email": form.cleaned_data["email"]})
             return HttpResponseRedirect(safe_return(request.POST.get("return_to"), locale))
         return page(request, locale, "web/auth.html", status=400, auth_mode="sign-in", error_key="invalid_input", values=request.POST)
-    return page(request, locale, "web/auth.html", auth_mode="sign-in")
+    google_errors = {
+        'identity_link_required': 'google_link_required',
+        'identity_already_linked': 'google_already_linked',
+        'reauthentication_required': 'google_reauth_required',
+        'authentication_required': 'google_signin_required',
+        'email_verification_required': 'email_unverified',
+        'identity_mismatch': 'google_identity_mismatch',
+        'account_unavailable': 'google_account_unavailable',
+        'feature_disabled': 'google_unavailable',
+        'provider_not_configured': 'google_unavailable',
+        'google_provider_unavailable': 'google_unavailable',
+        'google_authentication_failed': 'google_retry',
+        'invalid_oauth_state': 'google_retry',
+    }
+    return page(request, locale, "web/auth.html", auth_mode="sign-in", error_key=google_errors.get(request.GET.get('google_error')))
 
 
 @domain_view
@@ -263,6 +293,22 @@ def password_reset(request, locale):
     return page(request, locale, "web/auth.html", auth_mode="reset")
 
 
+@require_http_methods(["GET", "POST"])
+@domain_view
+def email_link(request, locale):
+    from accounts.services import request_magic_signin
+    from core.api import DomainError
+    if not django_settings.FEATURES.get("email_link"):
+        raise DomainError("feature_disabled", "Email sign-in is unavailable.", 409)
+    if request.method == "POST":
+        form = EmailForm(request.POST)
+        if not form.is_valid():
+            return page(request, locale, "web/auth.html", status=400, auth_mode="email-link", error_key="invalid_input", values=request.POST)
+        request_magic_signin(form.cleaned_data["email"], locale=locale, return_path=safe_return(request.POST.get("return_to"), locale))
+        return page(request, locale, "web/auth.html", auth_mode="email-link", notice_key="email_link_sent")
+    return page(request, locale, "web/auth.html", auth_mode="email-link")
+
+
 @token_response
 @domain_view
 def password_reset_confirm(request, locale, token):
@@ -274,9 +320,7 @@ def password_reset_confirm(request, locale, token):
         except DomainError as exc:
             return page(request, locale, "web/auth.html", status=exc.status, auth_mode="reset-confirm", error_key="token_expired" if exc.code == "action_token_invalid" else "invalid_input")
         return page(request, locale, "web/auth.html", auth_mode="sign-in", notice_key="password_changed")
-    response = page(request, locale, "web/auth.html", auth_mode="reset-confirm")
-    response["Referrer-Policy"] = "no-referrer"
-    return response
+    return page(request, locale, "web/auth.html", auth_mode="reset-confirm")
 
 
 @token_response
@@ -284,11 +328,9 @@ def password_reset_confirm(request, locale, token):
 def verify_email(request, locale, token):
     from accounts.services import confirm_email_verification
     if request.method == "POST":
-        confirm_email_verification(token)
+        confirm_email_verification(token, request=request)
         return page(request, locale, "web/auth.html", auth_mode="sign-in", notice_key="verified")
-    response = page(request, locale, "web/auth.html", auth_mode="verify")
-    response["Referrer-Policy"] = "no-referrer"
-    return response
+    return page(request, locale, "web/auth.html", auth_mode="verify")
 
 
 def verify_landing(request):
@@ -299,6 +341,28 @@ def verify_landing(request):
 def reset_landing(request):
     locale = request.GET.get("locale") or safe_return(request.GET.get("return_to")).split("/")[1]
     return password_reset_confirm(request, locale=locale, token=request.GET.get("token", ""))
+
+
+@require_http_methods(["GET", "POST"])
+def email_link_landing(request):
+    locale = request.GET.get("locale") or safe_return(request.GET.get("return_to")).split("/")[1]
+    return email_link_confirm(request, locale=locale, token=request.GET.get("token", ""))
+
+
+@token_response
+@domain_view
+def email_link_confirm(request, locale, token):
+    from core.api import DomainError
+    if not django_settings.FEATURES.get("email_link"):
+        raise DomainError("feature_disabled", "Email sign-in is unavailable.", 409)
+    if request.method == "POST":
+        from accounts.services import confirm_magic_signin
+        try:
+            destination = confirm_magic_signin(request, token)
+        except DomainError as exc:
+            return page(request, locale, "web/auth.html", status=exc.status, auth_mode="email-link-confirm", error_key="token_expired" if exc.code == "action_token_invalid" else "error")
+        return HttpResponseRedirect(safe_return(destination, locale))
+    return page(request, locale, "web/auth.html", auth_mode="email-link-confirm")
 
 
 @require_POST
@@ -337,7 +401,21 @@ def downloads(request, locale):
 @member_required
 @domain_view
 def settings(request, locale):
-    return page(request, locale, "web/settings.html", active_nav="vault", account_bootstrap={"staff":request.user.is_staff})
+    from datetime import timedelta
+    from django.utils import timezone
+    from django.utils.dateparse import parse_datetime
+    from allauth.socialaccount.models import SocialAccount
+    google_enabled = django_settings.FEATURES.get('google_oauth', False)
+    try:
+        stamp = parse_datetime(request.session.get('reauthenticated_at', ''))
+    except (TypeError, ValueError):
+        stamp = None
+    fresh_until = (stamp + timedelta(minutes=5)).timestamp() * 1000 if stamp and timezone.is_aware(stamp) and timedelta(0) <= timezone.now() - stamp <= timedelta(minutes=5) else 0
+    return page(request, locale, "web/settings.html", active_nav="vault", account_bootstrap={
+        "staff": request.user.is_staff, "google_enabled": google_enabled,
+        "google_linked": google_enabled and SocialAccount.objects.filter(user=request.user, provider='google').exists(),
+        "fresh_until": fresh_until,
+    })
 
 
 @require_GET
@@ -383,18 +461,40 @@ def interview(request, locale):
     return page(request, locale, "web/learn.html", tracks=tracks, interview=True, active_nav="learn")
 
 
-def catalog_payload(request, locale, endpoint, **kwargs):
+def catalog_payload(request, locale, endpoint, api_path=None, **kwargs):
     """Reuse the existing public catalog boundary without a loopback HTTP request."""
     from core.api import DomainError
     catalog_request=copy(request)
     catalog_request.GET=request.GET.copy()
     catalog_request.GET["locale"]=locale
     catalog_request.GET["territory"]=trusted_territory(request)
+    if api_path:
+        catalog_request.path = catalog_request.path_info = api_path
     response=endpoint(catalog_request,**kwargs)
     data=json.loads(response.content)
     if response.status_code>=400:
         raise DomainError(data.get("code","not_found"),"Catalog destination unavailable.",response.status_code)
     return data
+
+
+def public_preview_data(request, edition, *, required=False):
+    """Reuse the public boundary; never infer a sample from a full audio asset."""
+    from core.api import DomainError
+    from library.services import edition_detail
+    from library.views import preview
+    try:
+        if "edition_revision_id" not in edition:
+            edition = edition_detail(edition["edition_id"], territory=trusted_territory(request), user=request.user)
+        if not edition.get("published_at"):
+            raise DomainError("preview_unavailable", "This preview is unavailable.", 404)
+        sample_request = copy(request)
+        sample_request.GET = QueryDict("", mutable=True)
+        revision = edition["edition_revision_id"]
+        return catalog_payload(sample_request, edition["locale"], preview, api_path=f"/api/v1/content/previews/{revision}", revision_id=revision)
+    except DomainError:
+        if required:
+            raise
+        return {}
 
 
 @require_GET
@@ -444,12 +544,49 @@ def series(request, locale, slug=None):
 def video(request,locale,edition_id):
     from library.services import edition_detail
     edition=edition_detail(edition_id,territory=trusted_territory(request),user=request.user)
-    boot={"edition_id":str(edition_id),"edition_revision_id":edition["edition_revision_id"],"title":edition["title"],"locale":edition["locale"],"enabled":False,"title_url":reverse("web:title",args=[locale,edition_id])}
+    boot={"edition_id":str(edition_id),"edition_revision_id":edition["edition_revision_id"],"title":edition["title"],"locale":edition["locale"],"enabled":False,"title_url":reverse("web:title",args=[locale,edition_id]),"authenticated":request.user.is_authenticated}
+    next_cursor = None
+    if django_settings.FEATURES.get("video") and "video" in edition["formats"]:
+        if not request.user.is_authenticated:
+            boot["sign_in_url"] = reverse("web:sign-in", args=[locale]) + "?" + urlencode({"return_to": request.get_full_path()})
+        else:
+            from core.api import DomainError
+            from library.models import Asset
+            from library.services import authorize_revision
+            from library.stream import customer_host
+            from django.db.models import F
+            from core.pagination import paginate_queryset
+            from reader.models import Progress
+            try:
+                revision = authorize_revision(request.user, edition["edition_revision_id"], "video", territory=trusted_territory(request))
+                rows = Asset.objects.filter(revision=revision, kind="video", provider="stream", state="ready", unit__isnull=False, duration_ms__gt=0, duration_ms=F("unit__duration_ms")).select_related("unit").annotate(video_ordinal=F("unit__ordinal"))
+                selected = None
+                if request.GET.get("asset"):
+                    selected = rows.filter(pk=UUID(request.GET["asset"])).first()
+                elif request.GET.get("unit_id"):
+                    selected = rows.filter(unit_id=UUID(request.GET["unit_id"])).order_by("id").first()
+                else:
+                    saved = Progress.objects.filter(user=request.user, edition_id=edition_id, revision=revision, format="video").values_list("location", flat=True).first()
+                    if isinstance(saved, dict) and saved.get("unit_id"):
+                        selected = rows.filter(unit_id=saved["unit_id"]).order_by("id").first()
+                chapter_page = paginate_queryset(request, rows, "video-chapters:"+str(revision.id), ordering="video_ordinal", maximum=100)
+                assets = chapter_page["items"]
+                if selected is not None and all(asset.id != selected.id for asset in assets):
+                    assets = [selected, *assets]
+                chapters = [{"asset_id":str(asset.id), "unit_id":str(asset.unit_id), "duration_ms":asset.duration_ms, "title":asset.unit.title} for asset in assets]
+                next_cursor = chapter_page["next_cursor"]
+                if chapters:
+                    boot.update(enabled=True, chapters=chapters, asset_id=chapters[0]["asset_id"], unit_id=chapters[0]["unit_id"], duration_ms=chapters[0]["duration_ms"], stream_customer_host=customer_host())
+                    if selected:
+                        boot["start_asset_id"] = str(selected.id)
+            except DomainError as exc:
+                if exc.code not in {"entitlement_required", "access_denied", "email_verification_required"}:
+                    raise
     if "reader" in edition["formats"]:
         boot["reader_url"]=reverse("web:reader-start",args=[locale,edition_id])
     if django_settings.FEATURES.get("audio") and "audio" in edition["formats"]:
         boot["player_url"]=reverse("web:player",args=[locale,edition_id])
-    return page(request,locale,"web/video.html",edition=edition,bootstrap=boot,focused=True,active_nav="series")
+    return page(request,locale,"web/video.html",edition=edition,bootstrap=boot,next_cursor=next_cursor,focused=True,active_nav="series")
 
 
 @require_GET
@@ -489,6 +626,30 @@ def question(request, locale, track_id, question_id):
 @domain_view
 def unavailable(request, locale):
     return page(request, locale, "web/status.html", status=410, error_key="not_available")
+
+
+@require_GET
+@domain_view
+def audio_preview(request, locale, edition_id):
+    from core.api import DomainError
+    from library.services import edition_detail
+    if not django_settings.FEATURES.get("audio"):
+        raise DomainError("preview_unavailable", "This preview is unavailable.", 404)
+    edition = edition_detail(edition_id, territory=trusted_territory(request), user=request.user)
+    sample = public_preview_data(request, edition, required=True)
+    clip = sample.get("audio")
+    if not clip or not clip.get("unit_id"):
+        raise DomainError("preview_unavailable", "This preview is unavailable.", 404)
+    full_player_url = reverse("web:player", args=[locale, edition_id]) + "?" + urlencode({"unit_id": clip["unit_id"]})
+    bootstrap = {"edition_id": str(edition_id), "edition_revision_id": edition["edition_revision_id"],
+                 "title": edition["title"], "locale": edition["locale"], "preview": clip,
+                 "chapters": [{key: clip[key] for key in ("asset_id", "unit_id", "duration_ms", "sha256", "quality_kbps")} | {"title": text("listen_sample", locale)}],
+                 "reader_url": reverse("web:reader-start", args=[locale, edition_id]), "reader_available": False,
+                 "authenticated": request.user.is_authenticated, "full_player_url": full_player_url,
+                 "title_url": reverse("web:title", args=[locale, edition_id]),
+                 "sign_in_url": reverse("web:sign-in", args=[locale]) + "?" + urlencode({"return_to": full_player_url}),
+                 "pass_url": reverse("web:pass", args=[locale]) + "?" + urlencode({"return_to": full_player_url})}
+    return page(request, locale, "web/player.html", edition=edition, bootstrap=bootstrap, active_nav="explore", focused=True)
 
 
 @require_GET

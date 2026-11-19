@@ -388,3 +388,11 @@ class SupportRetentionConcurrencyTests(TransactionTestCase):
         finally:release.set();worker.join(timeout=10)
         self.assertFalse(worker.is_alive());self.assertEqual(errors,[])
         self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['support_payloads'],1)
+
+    def test_allauth_verified_or_secondary_address_prevents_abandoned_cleanup(self):
+        from allauth.account.models import EmailAddress
+        user=User.objects.create_user('secondary-address@example.test')
+        User.objects.filter(pk=user.pk).update(date_joined=timezone.now()-timedelta(days=10))
+        EmailAddress.objects.create(user=user,email='secondary@example.test',verified=False,primary=False)
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['abandoned_signups'],0)
+        self.assertTrue(User.objects.filter(pk=user.pk).exists())

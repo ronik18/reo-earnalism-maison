@@ -15,7 +15,10 @@ class UserManager(BaseUserManager):
     def create_user(self,email,password=None,**extra):
         email = normalize_email_address(email)
         if not email: raise ValueError('An email address is required')
-        user=self.model(email=email,**extra);user.set_password(password);user.save(using=self._db);return user
+        user=self.model(email=email,**extra);user.set_password(password);user.save(using=self._db)
+        from .email_identity import ensure_email_address
+        ensure_email_address(user)
+        return user
     def create_superuser(self,email,password=None,**extra):
         extra.update(is_staff=True,is_superuser=True,is_verified=True)
         return self.create_user(email,password,**extra)

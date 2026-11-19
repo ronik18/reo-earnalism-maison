@@ -76,7 +76,8 @@ def set_progress(user,edition_id,format,data,base_version,territory='IN'):
         row=Progress.objects.select_for_update().filter(user=user,edition=edition,format=format).first()
         current=progress_data(row,edition,format)
         if current['version']!=base_version:raise DomainError('version_conflict','Progress changed on another device.',412,current)
-        occurred=parse_datetime(data.get('occurred_at',''))
+        try:occurred=parse_datetime(data.get('occurred_at',''))
+        except (ValueError,TypeError):raise DomainError('validation_error','Use a valid aware UTC occurrence time.',422)
         if not occurred or timezone.is_naive(occurred):raise DomainError('validation_error','Use an aware UTC occurrence time.',422)
         if row is None:
             row=Progress.objects.create(user=user,edition=edition,revision=revision,format=format,location=loc,fraction_complete=fraction,last_operation_id=public_uuid(data['operation_id']),client_occurred_at=occurred)

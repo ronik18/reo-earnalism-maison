@@ -1,4 +1,4 @@
-import { approvedAudioURL } from "./media-state";
+import { approvedAudioURL, approvedAudioPreviewURL, type AudioPreviewDescriptor } from "./media-state";
 import { PreviewBoundary, FormatSwitch } from "./media-sheets";
 import { useEffect, useRef, useState } from "react";
 import { mountIsland, closePlayer } from "./lifecycle";
@@ -24,10 +24,11 @@ interface Boot {
   start_asset_id?: string;
   start_ms?: number;
   authenticated?: boolean;
-  preview?: { url: string; duration_ms: number };
+  preview?: AudioPreviewDescriptor;
   title_url?: string;
   sign_in_url?: string;
   pass_url?: string;
+  full_player_url?: string;
 }
 interface Grant {
   transport: string;
@@ -79,6 +80,7 @@ function Player({ boot }: { boot: Boot }) {
   const mounted = useRef(true);
   const loadGeneration = useRef(0);
   const previewEnded = useRef(false);
+  const previewRenewed = useRef(false);
   async function persist(keepalive = false) {
     const element = audio.current,
       c = boot.chapters[activeChapter.current];
@@ -164,10 +166,11 @@ function Player({ boot }: { boot: Boot }) {
     setBusy(true);
     try {
       if (boot.preview) {
-        if (i !== 0 || boot.preview.duration_ms <= 0 || boot.preview.duration_ms !== c.duration_ms) throw new Error("media_changed");
+        const source = approvedAudioPreviewURL(boot.preview, boot.edition_revision_id, location.origin);
+        if (!source || i !== 0 || boot.preview.asset_id !== c.asset_id || boot.preview.unit_id !== c.unit_id || boot.preview.duration_ms !== c.duration_ms) throw new Error("media_changed");
         const el = audio.current!;
         previewEnded.current = false;
-        el.src = boot.preview.url;
+        el.src = source;
         el.currentTime = Math.max(0, Math.min(at, boot.preview.duration_ms) / 1000);
         el.playbackRate = speed;
         if (autoplay) await el.play();
@@ -323,6 +326,7 @@ function Player({ boot }: { boot: Boot }) {
   }
   async function nextChapter(i: number) {
     if (busy) return;
+    if (boot.preview) previewRenewed.current = false;
     try {
       await persist();
       await load(i, 0, playing);
@@ -331,6 +335,15 @@ function Player({ boot }: { boot: Boot }) {
     }
   }
   async function retryExpired() {
+    if (boot.preview) {
+      if (renewal.current || previewRenewed.current) { setStatus(t("media_retry")); return; }
+      previewRenewed.current = true;
+      renewal.current = true;
+      try {
+        await load(0, Math.round((audio.current?.currentTime || 0) * 1000), playing);
+      } finally { renewal.current = false; }
+      return;
+    }
     if (
       renewal.current ||
       !grant.current ||
@@ -367,7 +380,7 @@ function Player({ boot }: { boot: Boot }) {
           edition_revision_id: boot.edition_revision_id,
           from_location: {
             format: "audio",
-            asset_id: chapter.asset_id,
+            unit_id: chapter.unit_id,
             position_ms: Math.round((audio.current?.currentTime || 0) * 1000),
           },
           to_format: "reader",
@@ -523,7 +536,7 @@ function Player({ boot }: { boot: Boot }) {
         </a></> : null}
       </div>
       <FormatSwitch open={switchOpen} onClose={() => setSwitchOpen(false)} busy={busy} status={status} onExact={() => void switchToRead()} chapterUrl={boot.reader_url + chapter.unit_id + "/"} target="reader" />
-      {boot.preview ? <><button onClick={() => setBoundaryOpen(true)}>{t("preview_end_options")}</button><PreviewBoundary editionId={boot.edition_id} format="audio" authenticated={boot.authenticated === true} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.reload()} /></> : null}
+      {boot.preview ? <><button onClick={() => setBoundaryOpen(true)}>{t("preview_end_options")}</button><PreviewBoundary editionId={boot.edition_id} format="audio" authenticated={boot.authenticated === true} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.assign(validReturnPath(boot.full_player_url || location.pathname + location.search))} /></> : null}
       <ol className="unit-list" hidden={mini}>
         {boot.chapters.map((c, i) => (
           <li key={c.asset_id}>

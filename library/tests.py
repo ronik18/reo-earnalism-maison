@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.management import call_command
 from django.db import connection,transaction,IntegrityError
-from django.test import TestCase,override_settings
+from django.test import TestCase,SimpleTestCase,override_settings
 from django.utils import timezone
 from core.api import DomainError
 from .models import Work,Edition,Revision,Unit,Paragraph,Asset,Rights
@@ -40,9 +40,35 @@ class LibraryAcceptanceTests(TestCase):
         self.assertEqual(response.status_code,200,response.content)
         self.device=response.json()['device_id']
 
+    def test_catalog_numeric_filters_are_bounded_before_query_or_datetime_arithmetic(self):
+        for field,value in [('recency_days','9'*100),('recency_days','-1'),('recency_days','3651'),('duration_min','1441'),('duration_max','not-an-integer')]:
+            with self.subTest(field=field,value=value),self.assertRaises(DomainError) as error:svc.catalog_cards(**{field:value})
+            self.assertEqual(error.exception.status,422)
+        with self.assertRaises(DomainError):svc.catalog_cards(duration_min='60',duration_max='30')
+        self.assertIsInstance(svc.catalog_cards(duration_min='0',duration_max='1440',recency_days='3650'),list)
+
     def test_requires_real_postgresql(self):
         self.assertEqual(connection.vendor,'postgresql')
         self.assertIn(connection.pg_version//10000,(17,18))
+
+    def test_response_rights_snapshot_matches_policy_without_caching_authorization(self):
+        now=timezone.now()
+        Rights.objects.create(revision=self.revision,format='reader',action='read',territories=['IN',123],
+            starts_at=now-timedelta(days=1),ends_at=now+timedelta(days=500),approved=True,test_only=True,evidence='Malformed synthetic row')
+        checks=[(format,action,region) for format in ('reader','audio') for action in ('read','preview','download') for region in ('IN','US')]
+        expected={(format,action,region):getattr(svc.current_right(self.revision,format,action,region,at=now),'pk',None) for format,action,region in checks}
+        with self.assertNumQueries(1):svc.prefetch_public_rights([self.revision])
+        with self.assertNumQueries(0):
+            for format,action,region in checks:
+                self.assertEqual(getattr(svc.current_right(self.revision,format,action,region,at=now),'pk',None),expected[format,action,region])
+            self.assertEqual(svc.public_ttl(self.revision,30,territory='IN'),30)
+            self.assertIsNone(svc.current_right(self.revision,at=now+timedelta(days=600)))
+            with override_settings(MAISON_LOCAL_FIXTURES=False):self.assertIsNone(svc.current_right(self.revision,at=now))
+        Rights.objects.filter(revision=self.revision,action='read').update(approved=False)
+        with self.assertRaises(DomainError):svc.authorize_revision(self.user,self.revision,territory='IN')
+        # Refreshing the same response object must not preserve an older snapshot.
+        svc.prefetch_public_rights([self.revision])
+        self.assertIsNone(svc.current_right(self.revision,at=now))
 
     def test_default_deny_even_with_rights_and_no_offer(self):
         clone=svc.clone_revision(self.revision.id)
@@ -81,7 +107,7 @@ class LibraryAcceptanceTests(TestCase):
     def test_local_grant_bytes_are_verified_private_and_logout_denied(self):
         request={'edition_revision_id':str(self.revision.id),'unit_ids':[str(self.unit.id)],'device_id':self.device,'purpose':'online'}
         response=self.client.post('/api/v1/content/packages/grants',request,content_type='application/json')
-        self.assertEqual(response.status_code,201,response.content);grant=response.json();validate_schema(grant,'PackageGrant')
+        self.assertEqual(response.status_code,200,response.content);grant=response.json();validate_schema(grant,'PackageGrant')
         descriptor=grant['assets'][0];url=urlsplit(descriptor['url']);path=url.path+'?'+url.query
         result=self.client.get(path);self.assertEqual(result.status_code,200,result.content)
         self.assertEqual(result['Cache-Control'],'private, no-store');self.assertEqual(svc.digest(result.content),descriptor['sha256'])
@@ -154,6 +180,42 @@ class LibraryAcceptanceTests(TestCase):
         self.assertEqual(published['state'],'live');self.edition.refresh_from_db();self.assertEqual(self.edition.live_revision_id,clone.id)
         self.revision.refresh_from_db();self.assertEqual(self.revision.state,'retired')
 
+    def test_schedule_outbox_is_exact_revision_version_actor_bound_and_reschedule_safe(self):
+        from core.models import OutboxJob
+        clone=svc.clone_revision(self.revision.id)
+        Rights.objects.filter(revision=clone).update(approved=True)
+        clone.refresh_from_db()
+        clone.validation_evidence={'browser':{'status':'pass','sha256':clone.content_sha256,'scope':'local_test_only'}};clone.save()
+        ready=svc.transition_revision(self.admin,clone.id,'mark-ready',clone.version,clone.content_sha256,'Synthetic schedule preparation')
+        due=timezone.now()+timedelta(hours=1)
+        scheduled=svc.transition_revision(self.admin,clone.id,'schedule',ready['version'],clone.content_sha256,'Synthetic scheduled publication',publish_at=due)
+        job=OutboxJob.objects.get(kind='scheduled_publication')
+        self.assertEqual(job.actor,self.admin);self.assertEqual(job.not_before,due)
+        self.assertEqual(job.payload,{'actor_id':str(self.admin.pk),'revision_id':str(clone.id),'expected_version':scheduled['version'],
+            'expected_sha256':clone.content_sha256,'scheduled_for':svc.iso(due),'reason':'Synthetic scheduled publication'})
+        self.assertEqual(job.dedupe_key,f"scheduled-publication:{clone.id}:{scheduled['version']}")
+        with self.assertRaises(DomainError) as error:
+            svc.transition_revision(self.admin,clone.id,'schedule',ready['version'],clone.content_sha256,'Repeated stale schedule',publish_at=due)
+        self.assertEqual(error.exception.status,412);self.assertEqual(OutboxJob.objects.filter(kind='scheduled_publication').count(),1)
+        later=due+timedelta(hours=1)
+        rescheduled=svc.transition_revision(self.admin,clone.id,'schedule',scheduled['version'],clone.content_sha256,'Synthetic reschedule',publish_at=later)
+        self.assertGreater(rescheduled['version'],scheduled['version'])
+        jobs=list(OutboxJob.objects.filter(kind='scheduled_publication').order_by('not_before'))
+        self.assertEqual(len(jobs),2);self.assertNotEqual(jobs[0].dedupe_key,jobs[1].dedupe_key)
+        self.assertEqual(jobs[0].payload['scheduled_for'],svc.iso(due));self.assertEqual(jobs[1].payload['scheduled_for'],svc.iso(later))
+        clone.refresh_from_db();self.assertEqual(clone.state,'ready');self.assertEqual(clone.scheduled_for,later)
+        self.edition.refresh_from_db();self.assertEqual(self.edition.live_revision_id,self.revision.id)
+
+    def test_schedule_rolls_back_when_durable_job_cannot_be_written(self):
+        clone=svc.clone_revision(self.revision.id)
+        Rights.objects.filter(revision=clone).update(approved=True);clone.refresh_from_db()
+        clone.validation_evidence={'browser':{'status':'pass','sha256':clone.content_sha256,'scope':'local_test_only'}};clone.save()
+        ready=svc.transition_revision(self.admin,clone.id,'mark-ready',clone.version,clone.content_sha256,'Synthetic schedule preparation')
+        with patch('core.models.OutboxJob.objects.create',side_effect=RuntimeError('Synthetic outbox unavailable')):
+            with self.assertRaises(RuntimeError):
+                svc.transition_revision(self.admin,clone.id,'schedule',ready['version'],clone.content_sha256,'Synthetic scheduled publication',publish_at=timezone.now()+timedelta(hours=1))
+        clone.refresh_from_db();self.assertIsNone(clone.scheduled_for);self.assertEqual(clone.version,ready['version'])
+
     def test_publication_preparation_is_outside_locked_transition_and_rejects_stale_assets(self):
         from unittest.mock import patch
         clone=svc.clone_revision(self.revision.id)
@@ -215,6 +277,17 @@ class LibraryAcceptanceTests(TestCase):
         policy=json.loads((__import__('pathlib').Path(__file__).parent/'fixtures/r2_cors_policies.json').read_text())
         upload_policy=policy['private_staff_upload_bucket'][0]
         self.assertEqual(upload_policy['AllowedMethods'],['PUT']);self.assertNotIn('*',upload_policy['AllowedOrigins'])
+
+    def test_bounded_search_rebuild_only_indexes_live_metadata_without_revision_edits(self):
+        from .search_models import SearchDocument
+        draft=svc.clone_revision(self.revision.id)
+        before=dict(Revision.objects.values_list('id','version'))
+        output=io.StringIO();call_command('rebuild_search_index',limit=1,stdout=output)
+        result=json.loads(output.getvalue());self.assertEqual(result['indexed'],1);self.assertIsNotNone(result['next_cursor'])
+        output=io.StringIO();call_command('rebuild_search_index',limit=1,after=result['next_cursor'],stdout=output)
+        self.assertEqual(json.loads(output.getvalue())['indexed'],1)
+        self.assertFalse(SearchDocument.objects.filter(revision=draft).exists())
+        self.assertEqual(dict(Revision.objects.values_list('id','version')),before)
 
     def test_seed_is_idempotent_preserves_existing_frozen_content(self):
         before=(Revision.objects.count(),Asset.objects.count(),self.revision.content_sha256)
@@ -282,3 +355,13 @@ class EmptyCatalogCacheTests(TestCase):
         queue_catalog_purge(self.draft)
         self.assertEqual(cache_headers(request,response)['Cloudflare-CDN-Cache-Control'],'no-store')
         self.assertEqual(_catalog_ttl([{'edition_id':str(self.edition.id)}],'IN'),0)
+
+
+class ContractDatetimeTests(SimpleTestCase):
+    def test_schedule_rejects_invalid_calendar_and_timezone_before_service_parse(self):
+        base={'edition_revision_id':str(uuid.uuid4()),'expected_sha256':'a'*64,'reason':'Synthetic date validation'}
+        for value in ['2026-02-30T12:00:00Z','2026-13-01T12:00:00Z','2026-11-19T25:00:00Z','2026-11-19T12:00:00',
+                      '2026-11-19T12:00:00+24:00','2026-11-19T12:00:00+01:65','not-a-dateZ']:
+            with self.subTest(value=value),self.assertRaises(DomainError) as error:validate_schema({**base,'publish_at':value},'ScheduleInput')
+            self.assertEqual(error.exception.status,422)
+        validate_schema({**base,'publish_at':'2026-11-20T12:00:00.123Z'},'ScheduleInput')

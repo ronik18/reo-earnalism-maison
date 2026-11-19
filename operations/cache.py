@@ -7,7 +7,7 @@ from datetime import timedelta
 from urllib.parse import urlsplit
 from django.conf import settings
 from django.db import connection,transaction
-from django.db.models import Q
+from django.db.models import F,Q
 from django.utils import timezone
 from core.models import OutboxJob
 from .models import PublicCacheReference,PublicCacheGeneration
@@ -109,16 +109,18 @@ def _dependencies(request,response):
         assets=list(Asset.objects.filter(pk__in=asset_ids,state='ready',kind='cover'))
         if len(assets)!=len(asset_ids):raise ValueError('Unready public asset')
         revision_ids.update(str(a.revision_id) for a in assets)
-    if edition_ids:
-        editions=list(Edition.objects.filter(pk__in=edition_ids))
-        if len(editions)!=len(edition_ids) or any(not e.live_revision_id for e in editions):raise ValueError('Unpublished edition')
-        revision_ids.update(str(e.live_revision_id) for e in editions)
-        work_ids.update(str(e.work_id) for e in editions)
     if not revision_ids and not edition_ids and response.get('Content-Type','').startswith('text/html'):
         raise ValueError('SSR requires exact rendered cache dependencies')
-    revisions=list(Revision.objects.filter(pk__in=revision_ids).select_related('edition'))
-    if len(revisions)!=len(revision_ids):raise ValueError('Missing revision')
-    from library.services import public_ttl
+    # Resolve explicit revisions and current edition pointers together. The same
+    # response-local rights snapshot feeds the ordinary policy selector below.
+    from library.services import prefetch_public_rights,public_ttl
+    revisions=prefetch_public_rights(Revision.objects.filter(
+        Q(pk__in=revision_ids) | Q(edition_id__in=edition_ids,edition__live_revision_id=F('id'))
+    ).select_related('edition'))
+    if (not revision_ids.issubset({str(r.id) for r in revisions})
+            or not edition_ids.issubset({str(r.edition_id) for r in revisions})):
+        raise ValueError('Missing revision or unpublished edition')
+    revision_ids.update(str(r.id) for r in revisions)
     ttl=60 if preview else 3600 if cover else 30
     for revision in revisions:
         if revision.state!='live' or revision.edition.live_revision_id!=revision.id:raise ValueError('Stale published response')

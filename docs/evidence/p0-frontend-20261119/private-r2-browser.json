@@ -1,0 +1,43 @@
+{
+  "scope": "Synthetic private provider canary, actual browser from Maison HTTPS origin; no book publication or physical device qualification",
+  "transport": "Process-local allowlisted CONNECT tunnel with fresh DNS; browser end-to-end TLS retained, no global DNS changes",
+  "signed_urls_emitted": false,
+  "results": [
+    {
+      "engine": "chromium",
+      "origin": "https://maison.theearnalism.com",
+      "checks": {
+        "fullStatus": 200,
+        "bytes": 4096,
+        "expectedBytes": 4096,
+        "shaMatch": true,
+        "typeMatch": true,
+        "privateNoStore": true,
+        "rangeStatus": 206,
+        "rangeBytes": 32,
+        "rangeHeader": "bytes 0-31/4096",
+        "rangeBytesMatch": true,
+        "responseType": "cors"
+      },
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "origin": "https://maison.theearnalism.com",
+      "checks": {
+        "fullStatus": 200,
+        "bytes": 4096,
+        "expectedBytes": 4096,
+        "shaMatch": true,
+        "typeMatch": true,
+        "privateNoStore": true,
+        "rangeStatus": 206,
+        "rangeBytes": 32,
+        "rangeHeader": "bytes 0-31/4096",
+        "rangeBytesMatch": true,
+        "responseType": "cors"
+      },
+      "status": "PASS"
+    }
+  ]
+}

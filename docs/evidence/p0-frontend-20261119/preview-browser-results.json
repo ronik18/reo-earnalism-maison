@@ -1,0 +1,35 @@
+{
+  "scope": "Original measured six-second synthetic MP3 in disposable local fixture; no actual book/provider/physical device qualification",
+  "results": [
+    {
+      "engine": "chromium-desktop",
+      "status": "PASS",
+      "duration": 6,
+      "currentTime": 6,
+      "error": null,
+      "memberMediaGrantRequests": 0,
+      "physicalSeparateClip": true,
+      "boundaryDialog": true
+    },
+    {
+      "engine": "webkit-mobile",
+      "status": "PASS",
+      "duration": 6.034285714285715,
+      "currentTime": 6,
+      "error": null,
+      "memberMediaGrantRequests": 0,
+      "physicalSeparateClip": true,
+      "boundaryDialog": true
+    },
+    {
+      "engine": "firefox-desktop",
+      "status": "PASS",
+      "duration": 6,
+      "currentTime": 6,
+      "error": null,
+      "memberMediaGrantRequests": 0,
+      "physicalSeparateClip": true,
+      "boundaryDialog": true
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "status": "configured_not_yet_live_qualified",
+  "scope": "isolated_maison",
+  "approved_credentials": [
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET"
+  ],
+  "private_configuration": "ignored mode-600 .env.providers.local; existing configuration preserved",
+  "callback_added": "https://maison.theearnalism.com/api/v1/auth/google/callback",
+  "existing_redirect_uris_preserved": true,
+  "existing_javascript_origins_preserved": true,
+  "console_save_and_readback_verified": true,
+  "publishing_status": "Testing",
+  "audience_changed": false,
+  "remaining": [
+    "Deploy tested matching source and enable qualified Google profile",
+    "Perform Google browser sign-in/link acceptance with an authorized test user"
+  ],
+  "book_published": false,
+  "legacy_platform_changed": false
+}

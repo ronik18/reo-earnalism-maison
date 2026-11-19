@@ -51,6 +51,12 @@ def _write_export(user,file,deadline):
         'invoices':Invoice.objects.filter(Q(order__user=user)|Q(subscription__user=user)).values('id','order_id','subscription_id','number','amount_minor','currency','line_snapshot','period_start','period_end','revision','issued_at'),
         'refunds':Refund.objects.filter(payment__order__user=user).values('id','amount_minor','proposed_amount_minor','currency','status','created_at','processed_at'),
     }
+    from django.apps import apps
+    if apps.is_installed('allauth.account'):
+        from allauth.account.models import EmailAddress
+        from allauth.socialaccount.models import SocialAccount
+        arrays['email_addresses']=EmailAddress.objects.filter(user=user).values('email','verified','primary')
+        arrays['linked_identities']=SocialAccount.objects.filter(user=user).values('provider','uid','date_joined')
     raw('{');first=True
     for name,item in fields.items():
         if not first:raw(',')
@@ -126,7 +132,12 @@ def delete_account(job):
         DownloadLicense.objects.filter(user=user,revoked_at=None).update(revoked_at=now)
         Session.objects.filter(session_key__in=user.devices.exclude(session_id=None).values_list('session_id',flat=True)).delete()
         user.devices.filter(revoked_at=None).update(revoked_at=now,version=F('version')+1)
-        user.email=f'deleted-{user.public_id}@invalid.local';user.display_name='';user.first_name='';user.last_name='';user.is_active=False;user.session_epoch+=1;user.version+=1;user.set_unusable_password();user.save()
+        user.email=f'deleted-{user.public_id}@invalid.local';user.display_name='';user.first_name='';user.last_name='';user.is_active=False;user.is_verified=False;user.session_epoch+=1;user.version+=1;user.set_unusable_password();user.save()
+        from django.apps import apps
+        if apps.is_installed('allauth.account'):
+            from allauth.account.models import EmailAddress
+            from allauth.socialaccount.models import SocialAccount
+            SocialAccount.objects.filter(user=user).delete();EmailAddress.objects.filter(user=user).delete()
         Preferences.objects.filter(user=user).delete();Consent.objects.filter(user=user).delete();EmailActionToken.objects.filter(user=user).delete();MFARecoveryCode.objects.filter(user=user).delete()
         from django.apps import apps
         if apps.is_installed('django_otp.plugins.otp_totp'):

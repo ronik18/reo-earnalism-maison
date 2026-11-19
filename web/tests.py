@@ -170,7 +170,7 @@ class ExperienceTests(TestCase):
         self.assertEqual(response.status_code, 200)
         action.refresh_from_db()
         self.assertIsNone(action.consumed_at)
-        self.assertEqual(response["Referrer-Policy"], "no-referrer")
+        self.assertEqual(response["Referrer-Policy"], "strict-origin")
 
     def test_accepted_search_facets_and_saved_filter_control_are_exposed(self):
         self.login()

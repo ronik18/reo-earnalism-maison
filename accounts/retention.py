@@ -111,6 +111,13 @@ def _abandoned(user, cutoff):
     # Only untouched registration scaffolding may cascade. Every other known or
     # future FK/M2M relationship conservatively means activity or an obligation.
     allowed = {Preferences, Consent, EmailActionToken, OutboxJob, AuditEvent}
+    from django.apps import apps
+    if apps.is_installed('allauth.account'):
+        from allauth.account.models import EmailAddress
+        # One unverified primary address is registration scaffolding, not activity.
+        # A verified/secondary/different address remains evidence and blocks cleanup.
+        if EmailAddress.objects.filter(user=user).exclude(email=user.email,verified=False,primary=True).exists():return False
+        allowed.add(EmailAddress)
     for rel in User._meta.related_objects:
         if rel.related_model in allowed:
             continue

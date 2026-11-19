@@ -1,0 +1,38 @@
+{
+  "scope": "Controlled official-SDK API/iframe/grant mocks for client lifecycle only; NOT actual Stream delivery/provider qualification",
+  "results": [
+    {
+      "engine": "chromium-desktop",
+      "status": "PASS",
+      "sdkLoads": 1,
+      "grants": 3,
+      "preservedPositionMs": 12500,
+      "preservedPlaying": true,
+      "oldListenersRemoved": true,
+      "denialStopsRenewal": true,
+      "progressSaves": 1
+    },
+    {
+      "engine": "webkit-mobile",
+      "status": "PASS",
+      "sdkLoads": 1,
+      "grants": 3,
+      "preservedPositionMs": 12500,
+      "preservedPlaying": true,
+      "oldListenersRemoved": true,
+      "denialStopsRenewal": true,
+      "progressSaves": 1
+    },
+    {
+      "engine": "firefox-desktop",
+      "status": "PASS",
+      "sdkLoads": 1,
+      "grants": 3,
+      "preservedPositionMs": 12500,
+      "preservedPlaying": true,
+      "oldListenersRemoved": true,
+      "denialStopsRenewal": true,
+      "progressSaves": 1
+    }
+  ]
+}

@@ -7,3 +7,5 @@ urlpatterns=[path('me/progress',views.list_progress),path('me/progress/<uuid:edi
  path('me/lists',views.lists),path('me/lists/<uuid:list_id>',views.personal_list),path('me/lists/<uuid:list_id>/items/<uuid:edition_id>',views.list_edition),path('me/lists/<uuid:list_id>/order',views.list_order),path('me/vault',views.vault)]
 
 urlpatterns += [path("me/downloads",download_views.downloads),path("me/downloads/<uuid:license_id>",download_views.download),path("me/downloads/<uuid:license_id>/refresh",download_views.refresh),path("me/downloads/<uuid:license_id>/renew",download_views.renew)]
+
+urlpatterns += [path("me/downloads/<uuid:license_id>/pieces/<uuid:asset_id>",download_views.pieces)]

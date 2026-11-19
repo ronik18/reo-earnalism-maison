@@ -82,10 +82,10 @@ def checkout_data(row):
     from .checkout import qualified_mode
     try:mode,key,secret=qualified_mode()
     except DomainError:return None
-    if not row.test_only:return None
+    if row.test_only!=(mode=='test'):return None
     return {'provider':'razorpay','public_key_id':key,'provider_order_id':row.provider_order_id,
-        'amount':{'amount_minor':row.total_minor,'currency':row.currency},'name':'Earnalism — Sandbox',
-        'description':row.offer.name[:220]+' (test payment)'}
+        'amount':{'amount_minor':row.total_minor,'currency':row.currency},'name':'Earnalism — Sandbox' if mode=='test' else 'Earnalism',
+        'description':row.offer.name[:220]+(' (test payment)' if mode=='test' else '')}
 
 
 def create_local_order(user,offer,operation_id,return_path='/',offer_version=None,terms_version=None):
@@ -119,9 +119,10 @@ def apply_capture(order_id,facts,event_id=None,territory='IN'):
 
     No public endpoint can construct these facts until a real adapter is qualified.
     """
-    if facts.verification_source=='razorpay_api_test':
+    if facts.verification_source in ['razorpay_api_test','razorpay_api_live']:
         from .checkout import qualified_mode
-        qualified_mode()
+        mode,_,_=qualified_mode()
+        if facts.verification_source!='razorpay_api_'+mode:raise DomainError('provider_mode_mismatch','Payment verifier mode does not match merchant mode.',409)
         if facts.provider!='razorpay':raise DomainError('invalid_payment_facts','Invalid verifier/provider binding.',422)
     elif facts.verification_source!='synthetic_test':raise DomainError('provider_not_enabled','No live merchant verifier has been qualified.',409)
     if facts.verification_source=='synthetic_test' and not getattr(settings,'MAISON_LOCAL_FIXTURES',False):raise DomainError('synthetic_payment_forbidden','Synthetic payment facts are local-test only.',403)
@@ -131,24 +132,30 @@ def apply_capture(order_id,facts,event_id=None,territory='IN'):
         raise DomainError('invalid_payment_facts','Invalid trusted payment facts.',422)
     with transaction.atomic():
         order=Order.objects.select_for_update(of=('self',)).select_related('offer','user','offer__edition__live_revision').get(pk=order_id)
-        if not order.test_only:raise DomainError('synthetic_payment_forbidden','A synthetic event cannot change a real order.',403)
+        if facts.verification_source=='synthetic_test' and not order.test_only:raise DomainError('synthetic_payment_forbidden','A synthetic event cannot change a real order.',403)
+        if facts.verification_source.startswith('razorpay_api_') and order.test_only!=(mode=='test'):raise DomainError('provider_mode_mismatch','Payment and order merchant modes differ.',409)
         if event_id:
             event=PaymentEvent.objects.select_for_update().filter(provider=facts.provider,provider_event_id=event_id).first()
             if event and event.body_sha256!=facts.evidence_sha256:raise DomainError('event_payload_mismatch','An event ID was reused with different facts.',409)
-            if event:
+            if event and event.status=='applied':
                 if not event.payment_id or event.payment.order_id!=order.id or event.payment.provider_payment_id!=facts.payment_id:
                     raise DomainError('event_identity_mismatch','An authenticated event cannot identify another payment.',409)
                 return order_data(order)
         existing=Payment.objects.select_for_update().filter(provider=facts.provider,provider_payment_id=facts.payment_id).first()
         if existing:
             if existing.order_id!=order.id or existing.amount_minor!=facts.amount_minor or existing.currency!=facts.currency:raise DomainError('payment_identity_mismatch','Payment identity cannot be reassigned.',409)
-            if event_id:PaymentEvent.objects.create(provider=facts.provider,provider_event_id=event_id,body_sha256=facts.evidence_sha256,payment=existing,status='applied')
+            if event_id:
+                if event:
+                    event.payment=existing;event.status='applied';event.save(update_fields=['payment','status'])
+                else:PaymentEvent.objects.create(provider=facts.provider,provider_event_id=event_id,body_sha256=facts.evidence_sha256,payment=existing,status='applied')
             return order_data(order)
         now=timezone.now();late=order.status in ['expired','cancelled','failed'] or order.expires_at<=now
         payment=Payment.objects.create(order=order,provider=facts.provider,provider_payment_id=facts.payment_id,amount_minor=facts.amount_minor,currency=facts.currency,
             verification_source=facts.verification_source,evidence_sha256=facts.evidence_sha256,captured_at=now)
-        event=None
-        if event_id:event=PaymentEvent.objects.create(provider=facts.provider,provider_event_id=event_id,body_sha256=facts.evidence_sha256,payment=payment,status='applied')
+        if event_id:
+            if event:
+                event.payment=payment;event.status='applied';event.save(update_fields=['payment','status'])
+            else:PaymentEvent.objects.create(provider=facts.provider,provider_event_id=event_id,body_sha256=facts.evidence_sha256,payment=payment,status='applied')
         already_paid=order.status=='paid';order.status='paid';order.paid_at=order.paid_at or now;order.version+=1
         if facts.amount_minor!=order.total_minor or facts.currency!=order.currency or facts.order_reference!=(order.provider_order_id or str(order.id)):
             order.fulfillment_status='review';_review_job(order,payment,'payment_mismatch')
@@ -158,6 +165,10 @@ def apply_capture(order_id,facts,event_id=None,territory='IN'):
             _review_job(order,payment,'late_capture' if late else 'duplicate_capture')
         else:
             try:
+                live_invoice=None
+                if facts.verification_source=='razorpay_api_live':
+                    from .finance import invoice_snapshot
+                    live_invoice=invoice_snapshot(order)
                 from library.services import authorize_purchase
                 edition_id=order.offer_snapshot.get('edition_id')
                 from library.models import Edition
@@ -171,7 +182,9 @@ def apply_capture(order_id,facts,event_id=None,territory='IN'):
                     'valid_from':now,'valid_until':now+timedelta(seconds=order.offer_snapshot['duration_seconds'])})
                 order.fulfillment_status='granted'
                 snapshot={'order_id':str(order.id),'amount_minor':order.total_minor,'currency':order.currency,'local_test_document':True,'sandbox':facts.verification_source=='razorpay_api_test'}
-                inv,_=Invoice.objects.get_or_create(order=order,defaults={'number':f"{'SANDBOX' if facts.verification_source=='razorpay_api_test' else 'LOCAL-TEST'}-{order.id}",'amount_minor':order.total_minor,'currency':order.currency,'document_sha256':hashlib.sha256(json.dumps(snapshot,sort_keys=True).encode()).hexdigest(),'line_snapshot':snapshot,'issued_at':now})
+                number=f"{'SANDBOX' if facts.verification_source=='razorpay_api_test' else 'LOCAL-TEST'}-{order.id}"
+                if live_invoice:snapshot,number=live_invoice
+                inv,_=Invoice.objects.get_or_create(order=order,defaults={'number':number,'amount_minor':order.total_minor,'currency':order.currency,'document_sha256':hashlib.sha256(json.dumps(snapshot,sort_keys=True).encode()).hexdigest(),'line_snapshot':snapshot,'issued_at':now})
                 PaymentAllocation.objects.get_or_create(payment=payment,invoice=inv,defaults={'amount_minor':order.total_minor})
         order.save();audit(order.user,'payment.capture_applied',order,{'source':facts.verification_source,'fulfillment':order.fulfillment_status})
         return order_data(order)
@@ -253,3 +266,20 @@ def apply_synthetic_refund(refund_id,provider_refund_id):
             Entitlement.objects.filter(order=payment.order,revoked_at=None).update(revoked_at=timezone.now())
             payment.order.fulfillment_status='refunded';payment.order.version+=1;payment.order.save()
         return refund_data(row)
+
+
+def reject_refund(actor,refund_id,base_version,operation_id,reason):
+    if not actor.is_active or not actor.is_staff or not actor.has_perm('billing.approve_refund'):
+        raise DomainError('permission_denied','Refund review permission is required.',403)
+    def execute():
+        entry=Refund.objects.select_related('payment').filter(pk=refund_id).first()
+        if not entry:raise DomainError('not_found','Refund not found.',404)
+        Order.objects.select_for_update().get(pk=entry.payment.order_id)
+        Payment.objects.select_for_update().get(pk=entry.payment_id)
+        row=Refund.objects.select_for_update().get(pk=refund_id)
+        if row.version!=base_version:raise DomainError('version_conflict','Refund changed.',412,refund_data(row))
+        if row.status!='requested':raise DomainError('invalid_refund_state','Only an unsubmitted requested refund can be rejected.',409)
+        row.status='rejected';row.version+=1;row.save(update_fields=['status','version'])
+        audit(actor,'refund.rejected',row,{'reason':reason})
+        return 200,refund_data(row),row.version
+    return apply_operation(actor,operation_id,'refund.reject',{'refund_id':str(refund_id),'base_version':base_version,'reason':reason},execute)

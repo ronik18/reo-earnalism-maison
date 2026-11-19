@@ -79,6 +79,18 @@ class DownloadAcceptanceTests(TestCase):
         self.assertEqual(result.status_code,200,result.content);self.assertEqual(result.json()['status'],'revoked');self.assertEqual(result.json()['assets'],[])
         row.refresh_from_db();self.assertIsNotNone(row.revoked_at)
 
+    def test_previously_issued_delivery_stops_when_offline_feature_disabled(self):
+        response=self.create();self.assertEqual(response.status_code,201,response.content)
+        url=urlsplit(response.json()['assets'][0]['url'])
+        with override_settings(FEATURES={**settings.FEATURES,'offline_text_audio':False}):
+            denied=self.client.get(url.path+'?'+url.query);self.assertEqual(denied.status_code,409,denied.content)
+
+    def test_same_browser_login_revokes_its_previous_offline_license(self):
+        response=self.create();self.assertEqual(response.status_code,201,response.content);row=DownloadLicense.objects.get()
+        relogin=self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json')
+        self.assertEqual(relogin.status_code,200,relogin.content);self.assertNotEqual(relogin.json()['device_id'],self.device)
+        row.refresh_from_db();self.assertIsNotNone(row.revoked_at)
+
 
 class AudioDownloadAcceptanceTests(TestCase):
     def test_prepared_pieces_bind_the_audio_and_license(self):
@@ -107,6 +119,12 @@ class AudioDownloadAcceptanceTests(TestCase):
                 result=client.post('/api/v1/me/downloads',data,content_type='application/json',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
             self.assertEqual(result.status_code,201,result.content);validate_schema(result.json(),'DownloadLicense')
             self.assertEqual(result.json()['assets'][0]['piece_manifest']['sha256'],proof['sha256'])
+            piece_url=urlsplit(result.json()['assets'][0]['piece_manifest']['url'])
+            pieces=client.get(piece_url.path+'?'+piece_url.query);self.assertEqual(pieces.status_code,200,pieces.content);validate_schema(pieces.json(),'OfflinePiecePage')
+            self.assertEqual(pieces['Cache-Control'],'private, no-store')
+            other=Client();other.post('/api/v1/auth/login',{'email':user.email,'password':PASS},content_type='application/json')
+            self.assertEqual(other.get(piece_url.path+'?'+piece_url.query).status_code,403)
+
             row=DownloadLicense.objects.get();self.assertEqual(download_services.validate_delivery_license(user,row.id,asset,device,'IN').pk,row.pk)
             revision.validation_evidence['offline_piece_manifests'][str(asset.id)]['asset_sha256']='0'*64;revision.save()
             with self.assertRaises(DomainError) as error,transaction.atomic():download_services._create(user,device,data,'IN')

@@ -6,6 +6,8 @@ urlpatterns=[path('commerce/offers',views.offers),path('commerce/orders',views.o
  path('commerce/plans',views.disabled),path('commerce/subscriptions',subscriptions.subscriptions),path('commerce/mandates',subscriptions.mandates),path('commerce/invoices',invoices.list_invoices),path('webhooks/razorpay',views.webhook)]
 
 urlpatterns += [
+ path('staff/refunds/<uuid:refund_id>/reject',views.reject),
+ path('staff/orders/<uuid:order_id>/reconcile',views.reconcile),
  path('commerce/subscriptions/<uuid:subscription_id>',subscriptions.subscription),
  path('commerce/subscriptions/<uuid:subscription_id>/cancel',subscriptions.cancel),
  path('commerce/subscriptions/<uuid:subscription_id>/verify',subscriptions.verify),

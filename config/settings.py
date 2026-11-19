@@ -48,7 +48,8 @@ ROOT_URLCONF = 'config.urls'
 WSGI_APPLICATION = 'config.wsgi.application'
 INSTALLED_APPS = [
     'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
-    'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
+    'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles', 'django.contrib.postgres',
+    'allauth', 'allauth.account', 'allauth.socialaccount', 'allauth.socialaccount.providers.google',
     'django_otp', 'django_otp.plugins.otp_totp',
     'core', 'accounts', 'library', 'reader', 'billing', 'learning', 'operations', 'web',
 ]
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'accounts.middleware.DeviceSessionMiddleware',
     'accounts.middleware.StaffMFAMiddleware',
     'core.rate_limits.MemberRateLimitMiddleware',
@@ -76,6 +78,24 @@ TEMPLATES = [{
     ]},
 }]
 AUTH_USER_MODEL = 'accounts.User'
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+# The reviewed DB contract keeps email verification/provider subjects in allauth.
+# Maison retains its existing single-use email-action capabilities and API routes.
+ACCOUNT_ADAPTER = 'accounts.google.MaisonAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'accounts.google.MaisonSocialAccountAdapter'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_UNIQUE_EMAIL = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = False
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = False
+SOCIALACCOUNT_STORE_TOKENS = False
+SOCIALACCOUNT_LOGIN_ON_GET = True  # Existing GET contract creates only a temporary OAuth challenge.
+SOCIALACCOUNT_REQUESTS_TIMEOUT = 3
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 12}},
@@ -279,11 +299,34 @@ FEATURES = {
     ]},
 }
 FEATURE_FLAGS = FEATURES
-if not LOCAL and FEATURES['video']:
-    raise ImproperlyConfigured('Video requires its separately qualified Stream adapter')
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '')
+GOOGLE_REDIRECT_URI = PUBLIC_BASE_URL.rstrip('/') + '/api/v1/auth/google/callback'
+GOOGLE_CHALLENGE_SECONDS = 600
+SOCIALACCOUNT_PROVIDERS = {'google': {
+    'SCOPE': ['openid', 'email', 'profile'],
+    'AUTH_PARAMS': {'prompt': 'select_account'},
+    'OAUTH_PKCE_ENABLED': True,
+    'APP': {'client_id': GOOGLE_CLIENT_ID, 'secret': GOOGLE_CLIENT_SECRET, 'key': ''},
+}}
+if FEATURES['google_oauth'] and (not GOOGLE_CLIENT_ID.endswith('.apps.googleusercontent.com') or not GOOGLE_CLIENT_SECRET):
+    raise ImproperlyConfigured('Google sign-in requires its registered client and exact canonical callback')
+STREAM_ACCOUNT_ID = os.getenv('STREAM_ACCOUNT_ID', '')
+STREAM_API_TOKEN = os.getenv('STREAM_API_TOKEN', '')
+STREAM_SIGNING_KEY_ID = os.getenv('STREAM_SIGNING_KEY_ID', '')
+STREAM_SIGNING_PRIVATE_KEY = os.getenv('STREAM_SIGNING_PRIVATE_KEY', '')
+STREAM_CUSTOMER_HOST = os.getenv('STREAM_CUSTOMER_HOST', '')
+if FEATURES['video']:
+    import re
+    if (not re.fullmatch(r'[a-f0-9]{32}', STREAM_ACCOUNT_ID)
+            or not re.fullmatch(r'customer-[a-z0-9]+\.cloudflarestream\.com', STREAM_CUSTOMER_HOST)
+            or not all([STREAM_API_TOKEN, STREAM_SIGNING_KEY_ID, STREAM_SIGNING_PRIVATE_KEY])):
+        raise ImproperlyConfigured('Video requires its configured signed Stream profile and exact customer host')
 if not LOCAL and (FEATURES['audio'] or FEATURES['offline_text_audio']) and MEDIA_STORAGE_BACKEND != 'r2':
     raise ImproperlyConfigured('Production audio/offline delivery requires configured private R2 storage')
-if not LOCAL and any(FEATURES[n] for n in ['google_oauth', 'email_link', 'phone_otp', 'recurring_billing', 'international_checkout']):
+# Email links use the same authenticated TLS SMTP profile validated above.
+# The remaining providers still need their own qualified adapter/configuration.
+if not LOCAL and any(FEATURES[n] for n in ['phone_otp', 'recurring_billing', 'international_checkout']):
     raise ImproperlyConfigured('Enabled provider features require their qualified production adapter/configuration')
 
 LOGGING = {
@@ -304,6 +347,13 @@ RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
 RAZORPAY_WEBHOOK_SECRETS = tuple(v for v in [os.getenv('RAZORPAY_WEBHOOK_SECRET',''),os.getenv('RAZORPAY_PREVIOUS_WEBHOOK_SECRET','')] if v)
 MERCHANT_ENTITY_CONFIG_VERSION = os.getenv('MERCHANT_ENTITY_CONFIG_VERSION', '')
 RAZORPAY_LIVE_APPROVED = bool_setting('RAZORPAY_LIVE_APPROVED', False)
+# No finance terms are inferred from the merchant credential or entity name.
+try:
+    MERCHANT_FINANCE_POLICY = json.loads(os.getenv('MERCHANT_FINANCE_POLICY', '{}'))
+except (TypeError, ValueError) as exc:
+    raise ImproperlyConfigured('Merchant finance policy must be a JSON object') from exc
+if not isinstance(MERCHANT_FINANCE_POLICY, dict):
+    raise ImproperlyConfigured('Merchant finance policy must be a JSON object')
 if RAZORPAY_MODE not in {'test','live'}:
     raise ImproperlyConfigured('Razorpay mode must be test/live')
 if RAZORPAY_ENABLED:
