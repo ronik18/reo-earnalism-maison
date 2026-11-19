@@ -1,0 +1,105 @@
+{
+  "status": "DEPLOYED_AND_VALIDATED",
+  "application_commit": "061ad0a93159a905f74dadccd61e393f9dfbe700",
+  "source_PR": "https://github.com/ronik18/reo-earnalism-maison/pull/6",
+  "ci": {
+    "backend_tests": 498,
+    "client_tests": 32,
+    "main_run": 44518863752,
+    "conclusion": "success"
+  },
+  "services": {
+    "web": {
+      "service": "srv-dbunbd8jo6nc73akbng0",
+      "deployment": "dep-dbvelmjm8hqs739p828g",
+      "status": "LIVE"
+    },
+    "maintenance": {
+      "service": "crn-dbv7bte7bikc73fpso3g",
+      "deployment": "dep-dbvf1npsrm7s73c9pml0",
+      "status": "LIVE"
+    },
+    "archive": {
+      "service": "crn-dbv7agetlv9c7381is10",
+      "deployment": "dep-dbvf8c6tlv9c738mt6ig",
+      "status": "Deploy succeeded|Live"
+    }
+  },
+  "free_access": {
+    "enabled": true,
+    "all_three_services_saved": true,
+    "actual_price": "FREE",
+    "planned_references_INR": {
+      "monthly": 99,
+      "annual": 999
+    },
+    "references_previously_charged": false,
+    "automatic_future_charges": false
+  },
+  "assets": {
+    "release": "7f55a7940999c4c1567bf119d49086b939bfbb68294f176eff74b7b72b3fa72e",
+    "files": 71,
+    "bytes": 7373564,
+    "origin_checksums": "PASS",
+    "public_HTTPS_checksum": "PASS",
+    "CDN": "MISS to HIT"
+  },
+  "migration": {
+    "name": "billing.0011_finance_visible_series",
+    "project": "quiet-cloud-63128335",
+    "branch": "br-nameless-rain-aok6bsea",
+    "database": "neondb",
+    "owner_approved": true,
+    "applied": true,
+    "final_readonly_column_and_migration_checks": "PASS"
+  },
+  "browser_validation": {
+    "passed": 39,
+    "total": 39,
+    "engines": [
+      "desktop Chromium",
+      "desktop Firefox",
+      "phone-sized WebKit"
+    ],
+    "scope": "Public EN/BN Pass, Home, Explore, Series and Terms; anonymous financial denial; no overflow/broken images/page errors/payment traffic; exact static release",
+    "receipt_recovery": "Aggregate recorded from completed checks. Original per-case local receipts became unavailable with the original workspace; no per-case records were reconstructed. Preserved source contains prior local browser receipts; fresh deployed screenshot included."
+  },
+  "final_readonly_book": {
+    "state": "draft",
+    "live_revision_id": null,
+    "version": 42,
+    "paragraphs": 32,
+    "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+    "status": "PASS"
+  },
+  "final_readonly_financial_counts": {
+    "live_active_offers": 0,
+    "live_pending_orders": 0,
+    "live_nonterminal_subscriptions": 0,
+    "live_authorized_or_pending_mandates": 0,
+    "finance_sequences": 0,
+    "invoices": 0,
+    "credit_notes": 0
+  },
+  "actual_final_public_checks": {
+    "session": 200,
+    "authenticated": false,
+    "draft_catalog": 404,
+    "free_price": "FREE",
+    "legacy_HTTPS": 200
+  },
+  "financial_mutations": false,
+  "schedules_plans_backup_credentials_changed": false,
+  "legacy_changed": false,
+  "book_changed": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "limits": [
+    "No real charge, refund, mandate revocation or financial document issued; current live cohort is empty.",
+    "Future paid activation requires exact terms and actual provider/document acceptance.",
+    "Existing authenticated live session was unavailable; authenticated free guards and history behavior were tested locally against PostgreSQL.",
+    "No new restore drill was required for this application-only rollout; prior archive/restore qualification is reused."
+  ]
+}
