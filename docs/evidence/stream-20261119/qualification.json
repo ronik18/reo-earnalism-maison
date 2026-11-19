@@ -1,5 +1,5 @@
 {
-  "status": "PARTIAL",
+  "status": "HOLD_RENEWAL_REPEAT",
   "scope": "original technical fixture provider qualification, not full authenticated Maison journey",
   "runtime_commit": "4c2a4f0333fd56ad7b58b7bed50b4b4c353e7924",
   "render_deploy": "dep-dbvbvv9srm7s73c1pelg",
@@ -22,12 +22,15 @@
   },
   "terminal_probe": "Cloudflare1010 prevents urllib transport qualification; not treated as token-denial proof",
   "pending": [
-    "owner existing staff MFA verification",
-    "approval for five temporary content-create permissions to prepare separate technical draft, removed after intake",
-    "authenticated Maison technical-draft playback, renewal, progress/resume"
+    "deploy and repeat actual private application playback after narrow renewal startup fix",
+    "verify reload/resume and end-to-end completion"
   ],
   "book_published": false,
   "legacy_changed": false,
   "new_paid_plan": false,
-  "account_authority_changed": false
+  "account_authority_changed": false,
+  "temporary_content_create_permissions": "owner-approved five added for one intake; removed on both attempts; original permissions restored",
+  "mfa": "owner verified and observed in refreshed Settings",
+  "technical_fixture_edition_id": "d9f28c65-5e5a-45e2-a0a3-746963dd6bac",
+  "technical_fixture_state": "draft; null live pointer"
 }

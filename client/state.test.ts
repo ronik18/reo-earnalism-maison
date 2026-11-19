@@ -419,3 +419,20 @@ test("Financial PDF grants remain fresh and bound to their local document route"
  for(const override of [{url:origin+"/en/sign-in/"},{url:"http://private.example/document"},{url:"https://user:secret@private.example/document"},{url:grant.url+"#token"},{expires_at:new Date(now).toISOString()},{expires_at:new Date(now+126000).toISOString()},{sha256:"bad"},{content_type:"text/html"}])assert.equal(approvedFinancialPDFURL({...grant,...override},path,origin,now),undefined);
  assert.equal(approvedFinancialPDFURL({...grant,url:"https://private.example/retained.pdf?signed=fixture"},path,origin,now),"https://private.example/retained.pdf?signed=fixture");
 });
+
+
+test("Stream renewal primes playback before real metadata and seeks once after load", async()=>{
+  const original=globalThis.document;
+  globalThis.document={getElementById:()=>null,documentElement:{dataset:{}}} as unknown as Document;
+  try {
+    const {streamRestoration}=await import("./video");
+    let plays=0,position=0,current=true,restored=0;
+    const sdk={duration:180,paused:true,controls:true,get currentTime(){return position},set currentTime(value:number){position=value},play:()=>{plays++;return Promise.resolve()},pause:()=>{},addEventListener:()=>{},removeEventListener:()=>{}};
+    const lifecycle=streamRestoration(sdk,155000,true,()=>current,()=>assert.fail("Unexpected playback failure"),()=>{restored++});
+    lifecycle.prime();assert.equal(plays,1);assert.equal(position,0);assert.equal(lifecycle.ready(),false);
+    lifecycle.metadata();assert.equal(position,155);assert.equal(restored,1);
+    position=157;lifecycle.metadata();assert.equal(position,157);assert.equal(restored,1);
+    current=false;const stale=streamRestoration(sdk,80000,true,()=>current,()=>{},()=>assert.fail("Stale iframe restored"));stale.prime();stale.metadata();assert.equal(plays,1);assert.equal(position,157);
+    const paused=streamRestoration(sdk,80000,false,()=>true,()=>{},()=>{});paused.prime();assert.equal(plays,1);paused.metadata();assert.equal(position,80);
+  } finally {globalThis.document=original;}
+});

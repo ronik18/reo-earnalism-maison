@@ -14,11 +14,25 @@ interface Boot {
 }
 interface Progress { version: number; location?: { unit_id: string; position_ms: number } }
 interface Source { url: string; chapter: Chapter; generation: number; at: number; resume: boolean }
+/** A new iframe can expose cached duration before its media is loaded. */
+export function streamRestoration(sdk:StreamPlayerAPI, at:number, resume:boolean, current:()=>boolean, failed:()=>void, restoredPosition:()=>void) {
+  let restored=false;
+  return {
+    ready:()=>restored,
+    metadata:()=>{
+      if(restored || !current() || !Number.isFinite(sdk.duration) || sdk.duration<=0)return;
+      sdk.currentTime=Math.max(0,Math.min(at/1000,sdk.duration));
+      restored=true;restoredPosition();
+    },
+    prime:()=>{if(resume && current())void sdk.play().catch(()=>{if(current())failed();});},
+  };
+}
 function Video({boot}: {boot: Boot}) {
   const chapters = boot.chapters || (boot.asset_id && boot.unit_id && boot.duration_ms ? [{asset_id:boot.asset_id,unit_id:boot.unit_id,duration_ms:boot.duration_ms,title:boot.title}] : []);
   const [online, setOnline] = useState(navigator.onLine), [status, setStatus] = useState(""), [busy, setBusy] = useState(false);
   const [source, setSource] = useState<Source>(), [index, setIndex] = useState(0), [conflict, setConflict] = useState(false);
   const iframe = useRef<HTMLIFrameElement>(null), player = useRef<StreamPlayerAPI | undefined>(undefined), factory = useRef<StreamFactory | undefined>(undefined);
+  const restorationPending = useRef(false);
   const active = useRef(0), position = useRef(0), playing = useRef(false), progress = useRef<Progress | undefined>(undefined);
   const pending = useRef<{key:string;version:number;body:unknown} | undefined>(undefined);
   const mounted = useRef(true), loading = useRef(false), saving = useRef(false), conflicting = useRef(false), errorRetried = useRef(false);
@@ -26,7 +40,7 @@ function Video({boot}: {boot: Boot}) {
   const path = `/me/progress/${boot.edition_id}/video`;
   const chapter = chapters[index];
   function point(c = chapters[active.current]) {
-    const value = player.current?.currentTime;
+    const value = restorationPending.current ? undefined : player.current?.currentTime;
     return {unit_id:c?.unit_id,position_ms:Math.max(0,Math.min(c?.duration_ms || 0,Number.isFinite(value) ? Math.round(value! * 1000) : position.current))};
   }
   async function save(c = chapters[active.current], at = point(c).position_ms, keepalive = false) {
@@ -70,7 +84,7 @@ function Video({boot}: {boot: Boot}) {
       renewAt.current = performance.now()+Math.max(250,remaining-Math.min(15000,remaining/3));
       if (resume && player.current && chapters[active.current]?.asset_id === c.asset_id) at = point(c).position_ms;
       active.current = i; setIndex(i); position.current = Math.max(0,Math.min(c.duration_ms,at || 0));
-      setSource({url,chapter:c,generation:run,at:position.current,resume});
+      setSource({url,chapter:c,generation:run,at:position.current,resume:resume && playing.current});
     } catch(error) {
       if (!mounted.current || run !== generation.current || abort.signal.aborted) return;
       playing.current = false; renewAt.current = Infinity; setSource(undefined); setStatus(errorText(error));
@@ -85,21 +99,19 @@ function Video({boot}: {boot: Boot}) {
   useEffect(()=>{
     if (!source || !iframe.current || !factory.current) return;
     const sdk = factory.current(iframe.current); player.current = sdk; sdk.controls = true;
-    let restored = false;
-    const restore = () => {
-      if (restored || !mounted.current || generation.current!==source.generation || !Number.isFinite(sdk.duration) || sdk.duration<=0) return;
-      restored = true; sdk.currentTime = Math.min(source.at/1000,sdk.duration);
-      if (source.resume) void sdk.play().catch(()=>setStatus(t("media_retry")));
-    };
+    restorationPending.current=true;
+    const restoration=streamRestoration(sdk,source.at,source.resume,
+      ()=>mounted.current && generation.current===source.generation,
+      ()=>setStatus(t("media_retry")),()=>{restorationPending.current=false;});
     const store = () => {position.current = Math.max(0,Math.min(source.chapter.duration_ms,Math.round((sdk.currentTime || 0)*1000)));};
-    const update = () => {store();if(performance.now()-lastSaved.current>=15000)void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
-    const paused = () => {playing.current=false;store();void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
+    const update = () => {if(!restoration.ready())return;store();if(performance.now()-lastSaved.current>=15000)void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
+    const paused = () => {playing.current=false;if(!restoration.ready())return;store();void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
     const play = () => {playing.current=true;if(performance.now()>=renewAt.current)void load(active.current,point().position_ms,true);};
     const error = () => {void recover();};
-    const handlers: [string,()=>void][] = [["loadedmetadata",restore],["canplay",restore],["timeupdate",update],["play",play],["pause",paused],["ended",paused],["error",error]];
+    const handlers: [string,()=>void][] = [["loadedmetadata",restoration.metadata],["canplay",restoration.metadata],["timeupdate",update],["play",play],["pause",paused],["ended",paused],["error",error]];
     for(const [event,handler] of handlers)sdk.addEventListener(event,handler);
-    const fallback = window.setTimeout(restore,1000);
-    return()=>{clearTimeout(fallback);for(const[event,handler]of handlers)sdk.removeEventListener(event,handler);sdk.pause();if(player.current===sdk)player.current=undefined;};
+    restoration.prime();
+    return()=>{restorationPending.current=false;for(const[event,handler]of handlers)sdk.removeEventListener(event,handler);sdk.pause();if(player.current===sdk)player.current=undefined;};
   },[source]);
   useEffect(()=>{
     mounted.current = true;
