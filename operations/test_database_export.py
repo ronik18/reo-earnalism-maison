@@ -122,6 +122,10 @@ class ConsistentReferenceTests(TransactionTestCase):
         from psycopg import sql
         from core.models import OutboxJob
         from django.utils import timezone
+        # Other TransactionTestCases can close the wrapper; exercise that cold
+        # start explicitly instead of depending on test execution order.
+        connection.close()
+        connection.ensure_connection()
         config=connection.settings_dict
         env={'PGHOST':config.get('HOST') or '127.0.0.1','PGPORT':str(config.get('PORT') or 5432),'PGUSER':config['USER'],
              'PGPASSWORD':config['PASSWORD'],'PGDATABASE':connection.connection.info.dbname,'PGSSLMODE':'disable'}
