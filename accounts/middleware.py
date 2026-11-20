@@ -22,6 +22,7 @@ class DeviceSessionMiddleware:
             if invalid:logout(request)
             else:
                 request.device=device
+                request.user._maison_operation_authority=(request.user.session_epoch,device.pk,device.session_id,device.token_binding_sha256)
                 if (timezone.now()-device.last_seen_at).total_seconds()>1800:
                     Device.objects.filter(pk=device.pk).update(last_seen_at=timezone.now())
         response=self.get_response(request)

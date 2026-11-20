@@ -7,13 +7,19 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from core.api import DomainError
-from core.services import audit
+from core.services import audit,locked_actor
 from .models import MFARecoveryCode,User
 from .services import _digest,check_rate
 
 
 def _staff(request):
     if not request.user.is_staff or not request.user.is_active:raise DomainError('permission_denied','Staff access is required.',403)
+
+
+def _locked_staff(request):
+    user=locked_actor(request.user)
+    if not user.is_staff:raise DomainError('permission_denied','Staff access is required.',403)
+    return user
 
 
 def _fresh(request):
@@ -57,7 +63,7 @@ def enroll(request):
     _staff(request);_fresh(request);check_rate('mfa_enroll',str(request.user.public_id),5,3600)
     from django_otp.plugins.otp_totp.models import TOTPDevice
     with transaction.atomic():
-        User.objects.select_for_update().get(pk=request.user.pk)
+        _locked_staff(request)
         if TOTPDevice.objects.filter(user=request.user,confirmed=True).exists():raise DomainError('mfa_already_configured','Use your existing authenticator or a recovery code.',409)
         TOTPDevice.objects.filter(user=request.user,confirmed=False).delete()
         device=TOTPDevice.objects.create(user=request.user,name='Earnalism staff',confirmed=False)
@@ -70,7 +76,7 @@ def confirm(request,token):
     import django_otp
     from django_otp.plugins.otp_totp.models import TOTPDevice
     with transaction.atomic():
-        User.objects.select_for_update().get(pk=request.user.pk)
+        _locked_staff(request)
         device=TOTPDevice.objects.select_for_update().filter(user=request.user,confirmed=False).first()
         valid=_verify_token(device,token)
         if valid:
@@ -79,8 +85,8 @@ def confirm(request,token):
             codes=[secrets.token_hex(8) for _ in range(10)]
             MFARecoveryCode.objects.bulk_create([MFARecoveryCode(user=request.user,code_sha256=_digest('mfa-recovery:'+code)) for code in codes])
             audit(request.user,'staff.mfa_enrolled',request.user)
+            django_otp.login(request,device)
     if not valid:raise DomainError('invalid_mfa_code','Authenticator code is invalid or expired.',403)
-    django_otp.login(request,device)
     return {'configured':True,'session_verified':True,'recovery_codes':codes}
 
 
@@ -90,10 +96,11 @@ def verify(request,token):
     from django_otp.plugins.otp_totp.models import TOTPDevice
     # django-otp persists its own throttling and replay counter under the row lock.
     with transaction.atomic():
+        _locked_staff(request)
         device=TOTPDevice.objects.select_for_update().filter(user=request.user,confirmed=True).first()
         valid=_verify_token(device,token)
+        if valid:django_otp.login(request,device)
     if not valid:raise DomainError('invalid_mfa_code','Authenticator code is invalid or expired.',403)
-    django_otp.login(request,device)
     return {'session_verified':True}
 
 
@@ -103,10 +110,10 @@ def recover(request,code):
     import django_otp
     from django_otp.plugins.otp_totp.models import TOTPDevice
     with transaction.atomic():
-        User.objects.select_for_update().get(pk=request.user.pk)
+        _locked_staff(request)
         row=MFARecoveryCode.objects.select_for_update().filter(user=request.user,code_sha256=_digest('mfa-recovery:'+code.strip().lower()),used_at=None).first()
         device=TOTPDevice.objects.filter(user=request.user,confirmed=True).first()
         if not row or not device:raise DomainError('invalid_mfa_code','Recovery code is invalid or already used.',403)
         row.used_at=timezone.now();row.save(update_fields=['used_at']);audit(request.user,'staff.mfa_recovery_used',request.user)
-    django_otp.login(request,device)
+        django_otp.login(request,device)
     return {'session_verified':True,'recovery_codes_remaining':MFARecoveryCode.objects.filter(user=request.user,used_at=None).count()}

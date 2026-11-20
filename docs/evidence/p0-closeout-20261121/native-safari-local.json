@@ -1,0 +1,23 @@
+{
+  "browser": "native Safari",
+  "version": "26.5",
+  "scope": "Actual local synthetic staff forms and current-session writes; no production credentials or account changes",
+  "rows": [
+    {
+      "id": "actual-staff-password-change-original-restored",
+      "status": "PASS"
+    },
+    {
+      "id": "mailbox-only-settings",
+      "status": "PASS"
+    },
+    {
+      "id": "post-rotation-current-session-preferences-write-restored",
+      "status": "PASS"
+    }
+  ],
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

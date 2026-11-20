@@ -1,0 +1,40 @@
+{
+  "client_date": "2026-11-21",
+  "full_postgresql": {
+    "tests": 635,
+    "status": "PASS",
+    "skipped": 0,
+    "scope": "635-test full run before final small MFA authority reuse; final MFA+core14 pass; fresh exact-head fullCI required"
+  },
+  "production_image_build": "PASS",
+  "focused": {
+    "authority_accounts": 44,
+    "frontend": 7,
+    "static_publication": 10,
+    "free_library_learning_series": 23,
+    "all": "PASS",
+    "overlap_not_summed": true,
+    "final_mfa_and_authority": 14
+  },
+  "client_tests": 37,
+  "typecheck_build": "PASS",
+  "schema_changes": false,
+  "local_browsers": {
+    "chromium_firefox_webkit_desktop_phone": 13,
+    "native_safari_staff_flow": 3,
+    "status": "PASS",
+    "controlled_stale_support_503": true
+  },
+  "actual_prior_defects": [
+    "Settings offered a disabled support form",
+    "staff password-change template omitted mandatory consent fields and full explanation",
+    "operation authority not rechecked after actor lock",
+    "deployed admin/css/base.css returned404"
+  ],
+  "privacy_scope": "No real account, email, payment, book or legacy mutation; test accounts original synthetic .test data",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "deployment": "Pending exact-headCI, immutable asset readback and isolated rollout"
+}

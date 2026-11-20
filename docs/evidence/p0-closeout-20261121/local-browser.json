@@ -1,0 +1,88 @@
+{
+  "scope": "Actual local synthetic staff browser form/login/password rotation/preferences; mailbox-only Settings; one explicitly controlled stale-form error response, no real mail",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "actual-admin-password-change-original-restored-and-current-session-pref-write",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "unconfigured-settings-mailbox-only-and-no-support-bundle",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "controlled-stale-form-known503-confirms-no-collection-no-uncertainty",
+      "status": "PASS",
+      "controlledResponse": true
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "actual-admin-password-change-original-restored-and-current-session-pref-write",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "unconfigured-settings-mailbox-only-and-no-support-bundle",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "actual-admin-password-change-original-restored-and-current-session-pref-write",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "unconfigured-settings-mailbox-only-and-no-support-bundle",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "actual-admin-password-change-original-restored-and-current-session-pref-write",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "unconfigured-settings-mailbox-only-and-no-support-bundle",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "actual-admin-password-change-original-restored-and-current-session-pref-write",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "unconfigured-settings-mailbox-only-and-no-support-bundle",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "actual-admin-password-change-original-restored-and-current-session-pref-write",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "unconfigured-settings-mailbox-only-and-no-support-bundle",
+      "status": "PASS"
+    }
+  ]
+}

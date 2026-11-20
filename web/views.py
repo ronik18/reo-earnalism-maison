@@ -426,7 +426,7 @@ def settings(request, locale):
     except (TypeError, ValueError):
         stamp = None
     fresh_until = (stamp + timedelta(minutes=5)).timestamp() * 1000 if stamp and timezone.is_aware(stamp) and timedelta(0) <= timezone.now() - stamp <= timedelta(minutes=5) else 0
-    return page(request, locale, "web/settings.html", active_nav="vault", account_bootstrap={
+    return page(request, locale, "web/settings.html", active_nav="vault", support_configured=bool(django_settings.SUPPORT_EMAIL), account_bootstrap={
         "staff": request.user.is_staff, "google_enabled": google_enabled,
         "google_linked": google_enabled and SocialAccount.objects.filter(user=request.user, provider='google').exists(),
         "fresh_until": fresh_until,

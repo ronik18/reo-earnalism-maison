@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
 from core.api import json_endpoint,json_body,api_response,DomainError,expected_version,operation_key,public_uuid
 from core.models import OutboxJob
-from core.services import apply_operation,audit
+from core.services import apply_operation,audit,locked_actor
 from .models import User,Preferences,Device,Consent,EmailActionToken
 from . import services
 from .password_consent import PASSWORD_PURPOSE_FIELDS,validate_password_purpose_consent,record_password_purpose_consent
@@ -23,7 +23,9 @@ def acknowledgement(request):
             'message':'If the request is eligible, it will be processed shortly.'}
 
 
+@transaction.atomic
 def profile_data(user):
+    locked_actor(user)
     p,_=Preferences.objects.get_or_create(user=user)
     return {'member_id':str(user.public_id),'display_name':user.display_name,'email':user.email,
         'email_verified':user.is_verified,'locale':p.locale,'created_at':services.iso(user.date_joined),'version':user.version}
@@ -92,7 +94,7 @@ def profile(request):
     data=json_body(request,{'display_name','locale'});base=expected_version(request)
     if not data:raise DomainError('validation_error','Provide a profile change.',422)
     with transaction.atomic():
-        user=User.objects.select_for_update().get(pk=request.user.pk)
+        user=locked_actor(request.user)
         if user.version!=base:raise DomainError('version_conflict','Profile changed.',412,profile_data(user))
         if 'display_name' in data:
             if not isinstance(data['display_name'],str) or len(data['display_name'])>100:raise DomainError('validation_error','Invalid display name.',422)
@@ -107,10 +109,13 @@ def profile(request):
 @json_endpoint(('GET','PATCH'))
 def preferences(request):
     if request.method=='GET':
-        p,_=Preferences.objects.get_or_create(user=request.user);return api_response(services.preferences_data(p),version=p.version)
+        with transaction.atomic():
+            locked_actor(request.user)
+            p,_=Preferences.objects.get_or_create(user=request.user)
+        return api_response(services.preferences_data(p),version=p.version)
     data=json_body(request);base=expected_version(request)
     with transaction.atomic():
-        User.objects.select_for_update().get(pk=request.user.pk)
+        locked_actor(request.user)
         result=services.update_preferences(request.user,data,base)
     return api_response(result,version=result['version'])
 
@@ -119,11 +124,14 @@ def preferences(request):
 def consents(request):
     def serialize(c):return {k:getattr(c,k) for k in ['necessary_notice_version','analytics_opt_in','marketing_email_opt_in','version']}|{'updated_at':services.iso(c.updated_at)}
     if request.method=='GET':
-        c,_=Consent.objects.get_or_create(user=request.user);return api_response(serialize(c),version=c.version)
+        with transaction.atomic():
+            locked_actor(request.user)
+            c,_=Consent.objects.get_or_create(user=request.user)
+        return api_response(serialize(c),version=c.version)
     data=json_body(request,{'necessary_notice_version','analytics_opt_in','marketing_email_opt_in'},['necessary_notice_version','analytics_opt_in','marketing_email_opt_in']);base=expected_version(request)
     if not isinstance(data['necessary_notice_version'],str) or not 1<=len(data['necessary_notice_version'])<=64 or any(type(data[k])!=bool for k in ['analytics_opt_in','marketing_email_opt_in']):raise DomainError('validation_error','Invalid consent value.',422)
     with transaction.atomic():
-        User.objects.select_for_update().get(pk=request.user.pk);c,_=Consent.objects.get_or_create(user=request.user)
+        locked_actor(request.user);c,_=Consent.objects.get_or_create(user=request.user)
         if c.version!=base:raise DomainError('version_conflict','Consent choices changed.',412,serialize(c))
         for k,v in data.items():setattr(c,k,v)
         c.version+=1;c.save();audit(request.user,'consent.changed',c,{k:v for k,v in data.items()})
@@ -135,10 +143,11 @@ def reauthenticate(request):
     data=json_body(request,{'password'}|PASSWORD_PURPOSE_FIELDS,['password'])
     consent=validate_password_purpose_consent(data)
     services.check_rate('reauth',str(request.user.public_id),5,600)
-    if not request.user.check_password(data['password']):raise DomainError('invalid_credentials','Authentication could not be confirmed.',403)
     now=timezone.now()
     with transaction.atomic():
-        record_password_purpose_consent(request.user,'reauthentication',consent)
+        user=locked_actor(request.user)
+        if not user.check_password(data['password']):raise DomainError('invalid_credentials','Authentication could not be confirmed.',403)
+        record_password_purpose_consent(user,'reauthentication',consent)
         request.session['reauthenticated_at']=now.isoformat()
     return api_response({'reauthenticated_at':services.iso(now),'valid_until':services.iso(now+timedelta(minutes=5))})
 
@@ -147,10 +156,11 @@ def reauthenticate(request):
 def change_password(request):
     data=json_body(request,{'current_password','new_password'}|PASSWORD_PURPOSE_FIELDS,['current_password','new_password'])
     consent=validate_password_purpose_consent(data)
-    if not request.user.check_password(data['current_password']):raise DomainError('invalid_credentials','Authentication could not be confirmed.',403)
     services._password(data['new_password'],request.user)
     with transaction.atomic():
-        user=User.objects.select_for_update().get(pk=request.user.pk);user.set_password(data['new_password']);user.session_epoch+=1;user.version+=1;user.save()
+        user=locked_actor(request.user)
+        if not user.check_password(data['current_password']):raise DomainError('invalid_credentials','Authentication could not be confirmed.',403)
+        user.set_password(data['new_password']);user.session_epoch+=1;user.version+=1;user.save()
         current=request.session.session_key;keys=list(user.devices.exclude(session_id=current).exclude(session_id=None).values_list('session_id',flat=True));Session.objects.filter(session_key__in=keys).delete()
         user.devices.exclude(session_id=current).filter(revoked_at__isnull=True).update(revoked_at=timezone.now(),version=F('version')+1)
         from reader.models import DownloadLicense
