@@ -26,4 +26,4 @@ COPY --from=frontend /build/static/maison/dist ./static/maison/dist
 RUN useradd --system --uid 10001 --create-home maison && mkdir -p /app/.local && chown maison:maison /app/.local
 USER maison
 EXPOSE 8000
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--worker-class", "gthread", "--threads", "2", "--timeout", "30", "--graceful-timeout", "30", "--max-requests", "2000", "--max-requests-jitter", "200", "--access-logfile", "-", "--access-logformat", "%(m)s %(s)s %(L)s"]
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--worker-class", "gthread", "--threads", "2", "--timeout", "30", "--graceful-timeout", "30", "--max-requests", "2000", "--max-requests-jitter", "200"]

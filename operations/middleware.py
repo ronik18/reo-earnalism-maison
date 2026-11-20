@@ -95,7 +95,8 @@ class RequestContextMiddleware:
         response['X-Content-Type-Options']='nosniff'
         response.setdefault('Referrer-Policy',settings.SECURE_REFERRER_POLICY)
         response['Content-Security-Policy']=content_security_policy()
-        if getattr(settings,'SECURITY_EVENT_LOGGING',False):
+        routine_liveness = (request.method=='GET' and request.path=='/api/v1/health/live' and response.status_code==200)
+        if getattr(settings,'SECURITY_EVENT_LOGGING',False) and not routine_liveness:
             from .security_events import emit_request_event
             emit_request_event(request,response,(time.monotonic()-started)*1000)
         return response
