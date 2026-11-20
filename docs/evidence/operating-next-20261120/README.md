@@ -23,3 +23,7 @@ The [read-only invariants](final-invariants.json) confirm protected draft/null l
 ![Live desktop signup](live-notice-chromium-desktop-en.png)
 
 ![Live phone signup](live-notice-webkit-phone-en.png)
+
+## Superseding approval resolution —21November2026
+
+The exact professional grievance-name/business-mailbox publication is now owner-approved, deployed and verified. This resolves the earlier pending item above; all other historical receipts retain their original timestamps/scope. [Current evidence](../grievance-publication-20261121/README.md).

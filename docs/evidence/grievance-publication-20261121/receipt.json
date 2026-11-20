@@ -1,0 +1,99 @@
+{
+  "client_date": "2026-11-21",
+  "verified_at_utc": "2026-11-20T19:17:59.600083+00:00",
+  "owner_approval": "Publish only Ronik Basak and sales@reoenterprise.org as grievance contact. Physical UAT deferred/nonblocking; book draft and legacy unchanged.",
+  "change": "Runtime EARNALISM_PUBLIC_GRIEVANCE_OFFICER_NAME=Ronik Basak on existing isolated web service only; business mailbox already in pretested template",
+  "runtime_commit": "498222324e867b1ec05ade3105024748d64e0bdd",
+  "web_resource": "srv-dbunbd8jo6nc73akbng0",
+  "web_deploy": "dep-dc09o5k0916s73d35jo0",
+  "provider_status": "Live",
+  "saved_configuration_readback": "PASS; verified by key after reload",
+  "browser_checks": {
+    "chromium_firefox_webkit_desktop_virtual_phone": 30,
+    "native_safari_desktop": 2,
+    "status": "PASS"
+  },
+  "public_pages": [
+    "https://maison.theearnalism.com/en/contact/",
+    "https://maison.theearnalism.com/en/privacy/"
+  ],
+  "historic_bn_aliases": "PASS; same English journey and approved notice",
+  "private_phone_personal_gmail_cert_submission_publication": false,
+  "new_mail_sent": false,
+  "source_or_schema_or_static_asset_change": false,
+  "baseline_validation_reused": {
+    "main_ci": 44796158557,
+    "backend_suite": 621,
+    "age_tool_ci_skips": 20,
+    "actual_local_crypto_coverage": true,
+    "client_tests": 37,
+    "prior_live_checks": 113,
+    "reason": "Exact runtime code/assets unchanged; only pretested public display setting activated"
+  },
+  "invariants": [
+    {
+      "maintenance_last_success": {
+        "commit": "498222324e867b1ec05ade3105024748d64e0bdd",
+        "counts": {
+          "processed": 0,
+          "retention": {
+            "dry_run": false,
+            "eligible": {
+              "devices": 0,
+              "receipts": 0,
+              "sessions": 0,
+              "action_tokens": 0,
+              "mail_payloads": 0,
+              "audit_outcomes": 0,
+              "support_payloads": 0,
+              "abandoned_signups": 0
+            },
+            "time_budget_exhausted": false
+          },
+          "rate_counters": {
+            "deleted": 0
+          },
+          "expired_exports": {
+            "failed": 0,
+            "cleaned": 0
+          },
+          "cache_references": {
+            "deleted": 0
+          }
+        },
+        "run_id": "db0ffa2c-3e41-4400-beff-18cf5365c409",
+        "source": "scheduled",
+        "outcome": "success",
+        "error_code": "",
+        "started_at": "2026-11-20T19:15:11.193154Z",
+        "finished_at": "2026-11-20T19:15:11.293032Z"
+      },
+      "lease_clear": true,
+      "read_only": true
+    },
+    {
+      "status": "PASS",
+      "read_only": true,
+      "book": {
+        "state": "draft",
+        "live_revision_id": null,
+        "version": 42,
+        "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+        "paragraphs": 32
+      },
+      "counts": {
+        "maison_invoice": 0,
+        "maison_invoice_revision": 0,
+        "maison_finance_number_sequence": 0,
+        "maison_offer": 0
+      },
+      "credential_copy": false
+    }
+  ],
+  "legacy_https": 200,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "qualification_scope": "Closes the exact current public grievance-name approval item; no blanket future-public/all-ages,47-region,HA,paid or exact-title clearance."
+}
