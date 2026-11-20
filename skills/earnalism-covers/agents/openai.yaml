@@ -1,0 +1,4 @@
+interface:
+  display_name: "Earnalism Covers"
+  short_description: "Design and publish a matching book cover pair"
+  default_prompt: "Use $earnalism-covers to design or update a book’s front and back covers and complete its requested publication."
