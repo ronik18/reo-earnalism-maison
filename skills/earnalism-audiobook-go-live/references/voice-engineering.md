@@ -112,3 +112,14 @@ technical milestone, not listening acceptance. Keep primary and cleanup errors
 separate. Missing terminal journals mean unknown model counts; a reservation is
 not completed work. Bind actual provider/rate observations and report estimates
 as estimates. Apply the actual standing access scope without expanding it.
+# Whisper decoder budgeting
+
+Budget `max_new_tokens` together with the actual decoder prefix against the pinned
+model's `max_target_positions`. For Whisper large-v3 with Transformers 4.46.1,
+timestamped English/Bengali transcription uses a three-token initial prefix:
+440 + 3 fits its 448-token window; requesting 448 new tokens overflows it.
+Recheck the actual prefix when prompt or generation settings change. Preserve the
+failed ASR intent, cumulative counters and private exception trace; retain a
+corrected recognition pass in its own namespace. An ASR software failure does not
+justify regenerating healthy narration, and successful recognition still needs
+content adjudication rather than an invented listening or performance grade.
