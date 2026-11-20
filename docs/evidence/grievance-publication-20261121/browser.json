@@ -1,0 +1,237 @@
+{
+  "scope": "Actual deployed approved grievance contact on desktop/virtual-phone Chromium Firefox WebKit; EN and historic BN aliases; no email/account/payment mutation",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "/en/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "/en/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "/bn/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "/bn/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "unified-library-and-password-choice-smoke",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "/en/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "/en/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "/bn/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "/bn/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "unified-library-and-password-choice-smoke",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "/en/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "/en/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "/bn/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "/bn/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "unified-library-and-password-choice-smoke",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "/en/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "/en/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "/bn/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "/bn/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "unified-library-and-password-choice-smoke",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "/en/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "/en/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "/bn/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "/bn/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "unified-library-and-password-choice-smoke",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "/en/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "/en/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "/bn/contact/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "/bn/privacy/",
+      "status": "PASS",
+      "approvedPublicContact": true,
+      "privateContactAbsent": true
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "unified-library-and-password-choice-smoke",
+      "status": "PASS"
+    }
+  ]
+}

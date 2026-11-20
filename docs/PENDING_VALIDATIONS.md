@@ -82,3 +82,7 @@ The candidate adds prospective purpose-specific password choice at public and st
 ## Latest isolated operating deployment
 
 PR#17/main `4982223` is deployed: webLive and both existing cron builds updated; exact-mainCI621backend/37client PASS (20crypto-tool CI skips covered locally),108live cross-browser/virtual-phone and5nativeSafari checks PASS. Scheduled maintenance,protected book/empty-finance and legacy invariants PASS. [Final receipt and previews](evidence/operating-next-20261120/README.md). Only the separately requested public grievance-name approval remains open for current operating closeout; the field is unconfigured and private CERT contact remains unpublished. Physical UAT is deferred/nonblocking; other future-scope rows are not silently converted into PASS.
+
+## Approved public grievance contact —21November2026
+
+The owner expressly approved public professional name/business mailbox only. The approved runtime setting is now deployed and verified on Contact/Privacy, closing the earlier current officer-name approval item.30live desktop/virtual-phone cross-browser checks and2nativeSafari checks PASS. Private phone/personalGmail/CERT submission remain unpublished. Book/finance/maintenance/legacy invariants PASS. [Approved contact deployment and validation](evidence/grievance-publication-20261121/README.md). PhysicalUAT remains deferred/nonblocking; future-scope qualification is unchanged.
