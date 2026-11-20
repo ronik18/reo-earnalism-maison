@@ -1,0 +1,61 @@
+{
+  "status": "PASS",
+  "checkpoint_key": "security-logs/v1/checkpoints/20261120T170100Z.json",
+  "checkpoint_sha256": "6b142efb9a487afc7fba4a54ca29dedaffb3ccb2939ed0d0bff4c4e2e202c201",
+  "window_start": "2026-11-17T00:00:00Z",
+  "last_run_window_start": "2026-11-17T00:00:00Z",
+  "window_end": "2026-11-20T17:01:00Z",
+  "rows": 66104,
+  "rows_by_resource": {
+    "srv-dbunbd8jo6nc73akbng0": 47857,
+    "crn-dbv7bte7bikc73fpso3g": 12830,
+    "crn-dbv7agetlv9c7381is10": 5417
+  },
+  "earliest_available_event": "2026-11-18T09:54:11.738025619Z",
+  "latest_available_event": "2026-11-20T17:00:17.664742657Z",
+  "known_probe_recovered": true,
+  "matching_probe_events": 1,
+  "manifests": [
+    {
+      "manifest_key": "security-logs/v1/windows/2026-11-17/20261118T000000Z-7d45371ec7b1.manifest.json",
+      "ciphertext_sha256": "7d45371ec7b14a11091ec9c8aa5cb9f3691ea57e45b72affe8c623c3d8362eb8",
+      "ciphertext_bytes": 200,
+      "decrypted_rows": 0,
+      "window_start": "2026-11-17T00:00:00Z",
+      "window_end": "2026-11-18T00:00:00Z"
+    },
+    {
+      "manifest_key": "security-logs/v1/windows/2026-11-18/20261119T000000Z-cd0370853324.manifest.json",
+      "ciphertext_sha256": "cd0370853324b43c38bd24933fd1e6953cb309682df3360cc329f6c99f5348d8",
+      "ciphertext_bytes": 4037577,
+      "decrypted_rows": 15451,
+      "window_start": "2026-11-18T00:00:00Z",
+      "window_end": "2026-11-19T00:00:00Z"
+    },
+    {
+      "manifest_key": "security-logs/v1/windows/2026-11-19/20261120T000000Z-ecde1339f23a.manifest.json",
+      "ciphertext_sha256": "ecde1339f23a7f152b8c9a6516d2ec1229d658e08f59b80790d10b1bc0c1db63",
+      "ciphertext_bytes": 9175705,
+      "decrypted_rows": 33264,
+      "window_start": "2026-11-19T00:00:00Z",
+      "window_end": "2026-11-20T00:00:00Z"
+    },
+    {
+      "manifest_key": "security-logs/v1/windows/2026-11-20/20261120T170100Z-23150500b4a6.manifest.json",
+      "ciphertext_sha256": "23150500b4a6cd94ae4451fd8472ea2c71c4dbf4c880ea9413361269776d7953",
+      "ciphertext_bytes": 4966505,
+      "decrypted_rows": 17389,
+      "window_start": "2026-11-20T00:00:00Z",
+      "window_end": "2026-11-20T17:01:00Z"
+    }
+  ],
+  "actual_age_decryption": true,
+  "private_identity_stayed_in_owner_custody": true,
+  "plaintext_written_to_disk": false,
+  "temporary_ciphertexts_removed": true,
+  "database_backup_key_changed": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "status": "PASS_SCOPED_ISOLATED_RELEASE",
+  "release_commit": "6fda67205cbcd8bee6f2a2338a2db14bc99cc0f5",
+  "source_prs": [
+    12,
+    13,
+    14,
+    15
+  ],
+  "qualified_source": "92fcee5363830721bf300fa745d39f4c384b6a0a",
+  "source_CI": 44778689155,
+  "merged_main_CI": 44783822779,
+  "full_backend_suite": {
+    "tests": 604,
+    "result": "PASS",
+    "age_dependent_skips": 20,
+    "covered_by_actual_local_crypto_tests": true
+  },
+  "client_tests": 37,
+  "local_focused_tests": 105,
+  "local_focused_skips": 0,
+  "local_desktop_phone_browser_checks": 42,
+  "live_desktop_phone_viewport_checks": 96,
+  "production_image_build": "PASS",
+  "new_migrations": false,
+  "static_release": "43e16062825e61ff2ad1f266d12f478b4171b842da9c4ba477eb7521ec34fe75",
+  "scoped_security_capture": {
+    "status": "COMPLETE_THROUGH_REQUESTED_END",
+    "configured_start": "2026-11-17T00:00:00Z",
+    "earliest_available_event": "2026-11-18T09:54:11.738025619Z",
+    "verified_end": "2026-11-20T17:01:00Z",
+    "decrypted_records": 66104,
+    "resources": 3,
+    "full_ciphertext_checksums_and_age_decryption": "PASS",
+    "known_probe_recovered": true,
+    "plaintext_written_to_disk": false,
+    "temporary_ciphertexts_removed": true,
+    "coverage_checkpoint": "security-logs/v1/checkpoints/20261120T170100Z.json"
+  },
+  "combined_job": {
+    "provider_result": "SUCCESS",
+    "backup_ciphertext_bytes": 316755,
+    "backup_readback": "PASS",
+    "new_database_restore_claimed": false,
+    "existing_database_restore_evidence": "../scheduled-archive-restore-result.json",
+    "security_logs_result": "verified_security_log_archive",
+    "security_coverage": "complete",
+    "adopted_previously_verified_windows": 3,
+    "newly_collected_rows": 17389,
+    "pages": 174,
+    "aged_objects_deleted": 0
+  },
+  "retention": {
+    "classified_security_audit_days": 180,
+    "encrypted_log_minimum_days": 180,
+    "daily_batch_expiry": true,
+    "holds_preserved": true,
+    "support_days_after_actual_resolution": 90,
+    "native_render_source_days": 7,
+    "database_backup_policy_unchanged": true,
+    "separate_owner_held_log_identity": true,
+    "prospective_history_only": true
+  },
+  "cert_in_contact": {
+    "approved_exact_message_sent": true,
+    "provider_sent_verified": true,
+    "agency_acknowledgement": "PENDING",
+    "private_personal_details_outside_git_and_website": true
+  },
+  "preservation": {
+    "book_draft_hash_version_and_paragraphs": "PASS_UNCHANGED",
+    "empty_finance_counters": "PASS_UNCHANGED",
+    "legacy_https": 200,
+    "legacy_source_data_DNS_not_changed": true,
+    "no_new_service_or_plan": true
+  },
+  "physical_UAT": {
+    "Android_iOS_OS_specific": "DEFERRED",
+    "blocking": false
+  },
+  "limits": [
+    "Application/maintenance/archive Render logs and classified PostgreSQL audit outcomes; no all-vendor-infrastructure or country-local storage certification.",
+    "Existing newly created service history is captured; no retrospective180-day history or aged production expiry claimed.",
+    "Future public-audience/legal/HA/paid/exact-edition qualification remains separately recorded."
+  ],
+  "logs_ciphertext_bytes": 18179987,
+  "archive_qualified_release_commit": "4db8e693a9d53e733bf16ef489b127767578f9dc",
+  "final_copy_followup": {
+    "source": "6a2be574957603056666b898638bb5335c9b33ab",
+    "source_CI": 44783123148,
+    "merged_main_CI": 44783822779,
+    "existing_web_regression_tests": 36,
+    "live_series_desktop_phone_engine_checks": 12,
+    "result": "PASS",
+    "runtime_change": "Series empty-state wording only; no false language restriction implied",
+    "archive_and_retention_sources_unchanged": true,
+    "merged_main_CI_result": "PASS",
+    "source_CI_result": "PASS"
+  },
+  "archive_qualification_main_CI": 44779496395,
+  "qualified_runtime_source": "6a2be574957603056666b898638bb5335c9b33ab",
+  "archival_sources_unchanged_in_final_copy": true
+}

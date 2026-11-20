@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "matching_events": [
+    {
+      "provider_timestamp": "2026-11-20T16:14:05.155709314Z",
+      "schema_fields": [
+        "actor_id",
+        "at",
+        "component",
+        "duration_ms",
+        "event",
+        "method",
+        "request_id",
+        "route",
+        "schema_version",
+        "source_ip",
+        "status",
+        "territory"
+      ],
+      "route": "<str:locale>/privacy/",
+      "status": 200,
+      "correlation_matches": true
+    }
+  ],
+  "raw_payload_saved": false
+}

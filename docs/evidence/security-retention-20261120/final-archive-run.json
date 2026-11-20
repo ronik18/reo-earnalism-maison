@@ -1,0 +1,53 @@
+{
+  "url": "https://dashboard.render.com/cron/crn-dbv7agetlv9c7381is10/logs?r=live",
+  "latest": {
+    "archives": [
+      {
+        "ciphertext_sha256": "eb829b456a595bd982e44e02c2afb36853fd8d79701c803f18b4a95616655baa",
+        "class": "daily",
+        "manifest_key": "backups/v1/daily/2026-11-20/maison-20261120T170633Z-a7bf8dbecf6d.manifest.json"
+      }
+    ],
+    "ciphertext_bytes": 316755,
+    "ciphertext_sha256": "eb829b456a595bd982e44e02c2afb36853fd8d79701c803f18b4a95616655baa",
+    "restore_verified": false,
+    "retention": {
+      "dry_run": false,
+      "eligible_orphans": 0,
+      "eligible_pairs": 0,
+      "held_orphans": 0,
+      "held_pairs": 0,
+      "more": false,
+      "orphan_targets": [],
+      "removed_orphans": 0,
+      "removed_pairs": 0,
+      "selected_pairs": 0,
+      "targets": []
+    },
+    "security_logs": {
+      "adopted_manifest_count": 3,
+      "checkpoint_sha256": "6b142efb9a487afc7fba4a54ca29dedaffb3ccb2939ed0d0bff4c4e2e202c201",
+      "coverage_status": "complete",
+      "logs": 17389,
+      "manifest_count": 4,
+      "pages": 174,
+      "requested_window_end": "2026-11-20T17:01:00Z",
+      "retention": {
+        "dry_run": false,
+        "eligible_pairs": 0,
+        "more": false,
+        "removed_pairs": 0
+      },
+      "status": "verified_security_log_archive",
+      "verified_window_end": "2026-11-20T17:01:00Z",
+      "window_end": "2026-11-20T17:01:00Z",
+      "window_start": "2026-11-17T00:00:00Z"
+    },
+    "status": "verified_archive"
+  },
+  "terminal_status": [
+    "Cron job run started",
+    "Exited with status 1",
+    "Cron job run started"
+  ]
+}
