@@ -234,7 +234,7 @@ class SecurityAndSupportRetentionTests(TestCase):
         self.user = User.objects.create_user('security-retention@example.test', is_verified=True)
         self.operator = User.objects.create_user('operator-retention@example.test', is_staff=True, is_verified=True)
 
-    def audit(self, action='account.password_reset', days=91, actor=True, detail=None, kind='User'):
+    def audit(self, action='account.password_reset', days=181, actor=True, detail=None, kind='User'):
         target = str(self.user.pk)
         if kind == 'Device':
             target = str(Device.objects.create(user=self.user, token_binding_sha256=uuid.uuid4().hex,
@@ -264,7 +264,7 @@ class SecurityAndSupportRetentionTests(TestCase):
         preserve = [self.audit(action=action) for action in [
             'content.publish', 'book.draft_import', 'asset.complete', 'payment.capture_applied',
             'consent.changed', 'privacy.account_anonymised', 'unknown.future_security_action']]
-        preserve += [self.audit(days=89), self.audit(actor=False), self.audit(detail={'incident':'open'}), self.audit(kind='Unexpected')]
+        preserve += [self.audit(days=179), self.audit(actor=False), self.audit(detail={'incident':'open'}), self.audit(kind='Unexpected')]
         before = AuditEvent.objects.count()
         preview = cleanup_account_retention()
         self.assertEqual(preview['eligible']['audit_outcomes'], len(eligible))
@@ -354,12 +354,30 @@ class SecurityAndSupportRetentionTests(TestCase):
         self.assertEqual((first['audit_outcomes'],first['support_payloads']),(0,0))
         self.assertEqual((second['audit_outcomes'],second['support_payloads']),(1,1))
 
-    def test_exact_90day_boundary(self):
+    def test_exact_90day_support_boundary_keeps_security_records(self):
         from unittest.mock import patch
         audit=self.audit(days=90); support=self.support(days=90)
         with patch('accounts.retention.timezone.now',return_value=self.now):
             report=cleanup_account_retention(dry_run=False)['eligible']
-        self.assertEqual((report['audit_outcomes'],report['support_payloads']),(1,1))
+        self.assertEqual((report['audit_outcomes'],report['support_payloads']),(0,1))
+
+    def test_security_minimum_180day_predicate_preserves_90_179_and_just_under_boundary(self):
+        from unittest.mock import patch
+        keep=[self.audit(days=90),self.audit(days=179),self.audit(days=180)]
+        AuditEvent.objects.filter(pk=keep[-1].pk).update(created_at=self.now-timedelta(days=180)+timedelta(microseconds=1))
+        exact=self.audit(days=180);older=self.audit(days=181)
+        support=self.support(days=90)
+        before=AuditEvent.objects.count()
+        with patch('accounts.retention.timezone.now',return_value=self.now):
+            preview=cleanup_account_retention()
+            self.assertEqual(preview['eligible']['audit_outcomes'],2)
+            self.assertEqual(preview['eligible']['support_payloads'],1)
+            self.assertEqual(AuditEvent.objects.count(),before)
+            actual=cleanup_account_retention(dry_run=False)['eligible']
+        self.assertEqual((actual['audit_outcomes'],actual['support_payloads']),(2,1))
+        self.assertEqual(AuditEvent.objects.filter(pk__in=[row.pk for row in keep]).count(),3)
+        self.assertFalse(AuditEvent.objects.filter(pk__in=[exact.pk,older.pk]).exists())
+        support.refresh_from_db();self.assertEqual(support.payload,{'retention_cleaned':True})
 
 
 @skipUnless(connection.vendor == 'postgresql', 'PostgreSQL row locking required')

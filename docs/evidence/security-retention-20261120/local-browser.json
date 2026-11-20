@@ -1,0 +1,261 @@
+{
+  "scope": "Actual final-source local Chromium Firefox WebKit desktop/mobile public screens and180-day notices; no production changes",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "series",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "explore",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "pass",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "route": "sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "series",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "explore",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "pass",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "route": "sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "series",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "explore",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "pass",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "route": "sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "series",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "explore",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "pass",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "route": "sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "series",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "explore",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "pass",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "route": "sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "series",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "explore",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "pass",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "route": "sign-up",
+      "status": "PASS"
+    }
+  ]
+}
