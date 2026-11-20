@@ -35,5 +35,13 @@
     "deferred": true,
     "blocking": false
   },
-  "scope": "No production account creation, payment, book or legacy mutation. Public officer name remains unconfigured pending exact publication approval."
+  "scope": "No production account creation, payment, book or legacy mutation. Public officer name remains unconfigured pending exact publication approval.",
+  "fresh_full_ci": {
+    "commit": "498222324e867b1ec05ade3105024748d64e0bdd",
+    "run": 44796158557,
+    "status": "PASS",
+    "total_backend": 621,
+    "skipped": 20,
+    "client_tests": 37
+  }
 }

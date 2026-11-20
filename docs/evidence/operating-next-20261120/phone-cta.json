@@ -1,0 +1,7 @@
+{
+  "scope": "Mobile signup submit remains reachable and unobstructed after scrolling",
+  "status": "PASS",
+  "top": 403.390625,
+  "bottom": 451.390625,
+  "hit": true
+}

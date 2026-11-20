@@ -11,3 +11,15 @@ Actual source checks: 38 focused account/retention and 74 web tests,37client tes
 ![Desktop sign-in](chromium-desktop-sign-in.png)
 
 ![Phone sign-in](chromium-phone-sign-in.png)
+
+## Deployed acceptance
+
+PR#17/main `4982223` passed fresh exact-mainCI44796158557:621backend tests (20age-dependent CI skips covered by actual local execution),37client tests and no migration. Web is Live; both existing cron builds report the same successfully deployed commit. Actual scheduled maintenance succeeds/lease clear. [Deployment receipt](deployment.json).108live Chromium/Firefox/phoneWebKit checks and5nativeSafari desktop checks PASS; existing authenticated operator UI mounts both unchecked consent controls using the new bundle without a credential/profile change. [Live browsers](live-browser.json), [nativeSafari](safari-live.json). No new archive run/restore is claimed; valid unchanged security/archive recovery evidence is reused.
+
+The [read-only invariants](final-invariants.json) confirm protected draft/null live/version42/32paragraphs/original hash,zero finance records and legacyHTTPS200. Physical UAT is deferred/nonblocking.
+
+**Only current operating approval pending:** publish the professional grievance officer name with the existing business mailbox. The tested public rendering remains blank by default until that exact owner approval; private CERT phone/email/submission are not published or embedded. Future public/all-ages,productionHA,paid activation and exact-title publication retain their separate stated scopes.
+
+![Live desktop signup](live-notice-chromium-desktop-en.png)
+
+![Live phone signup](live-notice-webkit-phone-en.png)
