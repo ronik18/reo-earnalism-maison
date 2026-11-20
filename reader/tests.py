@@ -32,7 +32,7 @@ class ReaderFixture:
 
 class ReaderAcceptanceTests(ReaderFixture,TestCase):
     def setUp(self):
-        self.seed();self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json')
+        self.seed();self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
     def test_progress_first_v0_replay_conflict_and_strict_contract(self):
         initial=self.client.get(f'/api/v1/me/progress/{EN}/reader');self.assertEqual(initial.json()['version'],0);validate_schema(initial.json(),'Progress')
         data=self.data();path=f'/api/v1/me/progress/{EN}/reader'
@@ -57,7 +57,7 @@ class ReaderAcceptanceTests(ReaderFixture,TestCase):
         # Isolated fixture becomes an unpublished draft review target.
         self.edition.live_revision=None;self.edition.save()
         staff=User.objects.create_superuser('draft-review@example.test',PASS)
-        self.client.post('/api/v1/auth/login',{'email':staff.email,'password':PASS},content_type='application/json')
+        self.client.post('/api/v1/auth/login',{'email':staff.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         unit=draft.units.first();paragraph=unit.paragraphs.first()
         data=self.annotation();data['edition_revision_id']=str(draft.id)
         data['range'].update(unit_id=str(unit.id),start_anchor_id=str(paragraph.anchor_id),end_anchor_id=str(paragraph.anchor_id))
@@ -69,7 +69,7 @@ class ReaderAcceptanceTests(ReaderFixture,TestCase):
         self.assertEqual(annotation_data(row,self.user)['anchor_status'],'orphaned')
         paragraph.text='Changed draft text invalidates old quote.';paragraph.save()
         self.assertEqual(annotation_data(row,staff)['anchor_status'],'orphaned')
-        self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json')
+        self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         denied=self.client.post('/api/v1/me/annotations',{**data,'annotation_id':str(uuid.uuid4())},content_type='application/json',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
         self.assertEqual(denied.status_code,404)
         # An existing different live revision keeps the old orphan behavior.
@@ -83,7 +83,7 @@ class ReaderAcceptanceTests(ReaderFixture,TestCase):
         aid=data['annotation_id'];deleted=self.client.delete(f'/api/v1/me/annotations/{aid}',HTTP_IF_MATCH='"v1"',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()));self.assertEqual(deleted.status_code,204)
         self.assertEqual(self.client.post('/api/v1/me/annotations',data,content_type='application/json',HTTP_IDEMPOTENCY_KEY=key).status_code,201)
         self.assertIsNotNone(Annotation.objects.get(pk=aid).deleted_at)
-        other=User.objects.create_user('other@example.test',PASS,is_verified=True);self.client.post('/api/v1/auth/login',{'email':other.email,'password':PASS},content_type='application/json')
+        other=User.objects.create_user('other@example.test',PASS,is_verified=True);self.client.post('/api/v1/auth/login',{'email':other.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(self.client.get(f'/api/v1/me/annotations/{aid}').status_code,404)
     def test_keyed_actions_reject_missing_idempotency_key(self):
         response=self.client.put(f'/api/v1/me/saved-items/{EN}');self.assertEqual(response.status_code,400);validate_schema(response.json(),'Problem')

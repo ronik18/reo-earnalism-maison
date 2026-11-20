@@ -194,7 +194,7 @@ class StreamAuthorityIntegrationTests(TestCase):
         self.override=override_settings(STREAM_SIGNING_PRIVATE_KEY=pem)
         self.override.enable();self.addCleanup(self.override.disable)
         user=get_user_model().objects.create_user('stream-authority@example.test','Synthetic-Video-Passphrase-47',is_verified=True)
-        login=self.client.post('/api/v1/auth/login',{'email':user.email,'password':'Synthetic-Video-Passphrase-47'},content_type='application/json')
+        login=self.client.post('/api/v1/auth/login',{'email':user.email,'password':'Synthetic-Video-Passphrase-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(login.status_code,200,login.content)
         device=login.json()['device_id']
         work=Work.objects.create(slug='synthetic-stream-authority',title='Synthetic video authority')
@@ -348,7 +348,7 @@ class StreamPreparationTests(TestCase):
         now=timezone.now()
         right=Rights.objects.create(revision=self.revision,format='video',action='read',territories=['IN'],
             starts_at=now-timedelta(days=1),ends_at=now+timedelta(minutes=5),approved=True,test_only=False)
-        login=self.client.post('/api/v1/auth/login',{'email':self.actor.email,'password':'Synthetic-Preparation-Passphrase-47'},content_type='application/json')
+        login=self.client.post('/api/v1/auth/login',{'email':self.actor.email,'password':'Synthetic-Preparation-Passphrase-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(login.status_code,200,login.content);device=login.json()['device_id']
         key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
         pem=key.private_bytes(serialization.Encoding.PEM,serialization.PrivateFormat.PKCS8,serialization.NoEncryption()).decode()

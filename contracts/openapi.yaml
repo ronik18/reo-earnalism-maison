@@ -345,9 +345,8 @@
                 "password": "ExampleOnlyPassphrase42!",
                 "display_name": "A fictional reader",
                 "locale": "en",
-                "terms_version": "2026-11-review",
-                "privacy_notice_version": "2026-11-review",
-                "marketing_opt_in": false
+                "password_purpose_consent": true,
+                "password_purpose_version": "password-account-v1"
               }
             }
           }
@@ -469,7 +468,9 @@
               },
               "example": {
                 "email": "reader@example.com",
-                "password": "ExampleOnlyPassphrase42!"
+                "password": "ExampleOnlyPassphrase42!",
+                "password_purpose_consent": true,
+                "password_purpose_version": "password-account-v1"
               }
             }
           }
@@ -15703,25 +15704,26 @@
               "bn"
             ]
           },
-          "terms_version": {
-            "type": "string",
-            "maxLength": 64
+          "password_purpose_consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Affirmative electronic choice for the disclosed password-account purpose. Optional marketing remains separate."
           },
-          "privacy_notice_version": {
+          "password_purpose_version": {
             "type": "string",
-            "maxLength": 64
-          },
-          "marketing_opt_in": {
-            "type": "boolean"
+            "enum": [
+              "password-account-v1"
+            ]
           }
         },
         "required": [
           "email",
           "password",
           "display_name",
-          "locale",
-          "terms_version",
-          "privacy_notice_version"
+          "password_purpose_consent",
+          "password_purpose_version"
         ],
         "examples": [
           {
@@ -15729,9 +15731,8 @@
             "password": "ExampleOnlyPassphrase42!",
             "display_name": "A fictional reader",
             "locale": "en",
-            "terms_version": "2026-11-review",
-            "privacy_notice_version": "2026-11-review",
-            "marketing_opt_in": false
+            "password_purpose_consent": true,
+            "password_purpose_version": "password-account-v1"
           }
         ]
       },
@@ -15749,16 +15750,33 @@
             "maxLength": 128,
             "minLength": 1,
             "writeOnly": true
+          },
+          "password_purpose_consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Affirmative electronic choice for the disclosed password-account purpose. Optional marketing remains separate."
+          },
+          "password_purpose_version": {
+            "type": "string",
+            "enum": [
+              "password-account-v1"
+            ]
           }
         },
         "required": [
           "email",
-          "password"
+          "password",
+          "password_purpose_consent",
+          "password_purpose_version"
         ],
         "examples": [
           {
             "email": "reader@example.com",
-            "password": "ExampleOnlyPassphrase42!"
+            "password": "ExampleOnlyPassphrase42!",
+            "password_purpose_consent": true,
+            "password_purpose_version": "password-account-v1"
           }
         ]
       },
@@ -15824,11 +15842,26 @@
             "minLength": 12,
             "writeOnly": true,
             "description": "Validate with Django password validators; never log, echo or trim."
+          },
+          "password_purpose_consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Affirmative electronic choice for the disclosed password-account purpose. Optional marketing remains separate."
+          },
+          "password_purpose_version": {
+            "type": "string",
+            "enum": [
+              "password-account-v1"
+            ]
           }
         },
         "required": [
           "token",
-          "new_password"
+          "new_password",
+          "password_purpose_consent",
+          "password_purpose_version"
         ]
       },
       "PasswordChangeInput": {
@@ -15847,11 +15880,26 @@
             "minLength": 12,
             "writeOnly": true,
             "description": "Validate with Django password validators; never log, echo or trim."
+          },
+          "password_purpose_consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Affirmative electronic choice for the disclosed password-account purpose. Optional marketing remains separate."
+          },
+          "password_purpose_version": {
+            "type": "string",
+            "enum": [
+              "password-account-v1"
+            ]
           }
         },
         "required": [
           "current_password",
-          "new_password"
+          "new_password",
+          "password_purpose_consent",
+          "password_purpose_version"
         ]
       },
       "ReauthenticateInput": {
@@ -15863,10 +15911,25 @@
             "maxLength": 128,
             "minLength": 1,
             "writeOnly": true
+          },
+          "password_purpose_consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Affirmative electronic choice for the disclosed password-account purpose. Optional marketing remains separate."
+          },
+          "password_purpose_version": {
+            "type": "string",
+            "enum": [
+              "password-account-v1"
+            ]
           }
         },
         "required": [
-          "password"
+          "password",
+          "password_purpose_consent",
+          "password_purpose_version"
         ],
         "description": "Password users. Google-only users use auth/google?intent=reauthenticate; never manufacture a password."
       },

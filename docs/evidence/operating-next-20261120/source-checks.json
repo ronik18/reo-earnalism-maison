@@ -1,0 +1,39 @@
+{
+  "date_utc": "2026-11-20",
+  "client": {
+    "typecheck": "PASS",
+    "tests": 37,
+    "build": "PASS"
+  },
+  "production_image_build": "PASS",
+  "migration_check": "No changes detected",
+  "focused_backend_consent_retention": {
+    "tests": 38,
+    "status": "PASS"
+  },
+  "focused_web": {
+    "tests": 74,
+    "status": "PASS",
+    "note": "73 web tests followed by four focused presentation tests after adding one admin case; overlap is not summed"
+  },
+  "local_full_suite": {
+    "tests": 621,
+    "passed": 620,
+    "failed": 1,
+    "failure": "Only the cross-lane test fixture loaded before its explicit-choice update; the corrected integration journey passed separately (1test). Exact-head fresh full CI required before deployment."
+  },
+  "corrected_cross_lane_journey": {
+    "tests": 1,
+    "status": "PASS"
+  },
+  "browser": {
+    "chromium_firefox_webkit_desktop_virtual_phone": 58,
+    "native_safari_desktop": 6,
+    "status": "PASS"
+  },
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "scope": "No production account creation, payment, book or legacy mutation. Public officer name remains unconfigured pending exact publication approval."
+}

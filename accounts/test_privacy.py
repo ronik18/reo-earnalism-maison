@@ -20,7 +20,7 @@ class PrivacyAcceptanceTests(TestCase):
         self.o=override_settings(MEDIA_ROOT=self.tmp.name,LOCAL=True,MEDIA_STORAGE_BACKEND='local');self.o.enable();self.addCleanup(self.o.disable)
         self.user=User.objects.create_user('privacy@example.test',PASS,is_verified=True)
         self.other=User.objects.create_user('other-private@example.test',PASS,is_verified=True)
-        self.client=Client();self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json')
+        self.client=Client();self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
     def request_export(self):
         response=self.client.post('/api/v1/me/privacy/requests',{'kind':'export','confirm':True},content_type='application/json',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
         self.assertEqual(response.status_code,202,response.content);return OutboxJob.objects.get(pk=response.json()['privacy_request_id'])
@@ -34,7 +34,7 @@ class PrivacyAcceptanceTests(TestCase):
         body=json.loads(raw);self.assertEqual(len(body['lists']),105);self.assertNotIn('Other private list',raw.decode());self.assertNotIn(self.user.password,raw.decode());self.assertNotIn('scoring_snapshot',raw.decode())
         response=self.client.post(f'/api/v1/me/privacy/requests/{job.id}/download',{},content_type='application/json');self.assertEqual(response.status_code,200,response.content);validate_schema(response.json(),'PrivateFileGrant')
         result=self.client.get(response.json()['url']);self.assertEqual(result.status_code,200);self.assertEqual(result['Cache-Control'],'private, no-store')
-        other=Client();other.post('/api/v1/auth/login',{'email':self.other.email,'password':PASS},content_type='application/json')
+        other=Client();other.post('/api/v1/auth/login',{'email':self.other.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(other.post(f'/api/v1/me/privacy/requests/{job.id}/download',{},content_type='application/json').status_code,404)
     def test_export_unknown_outcome_reuses_verified_prepared_artifact(self):
         job=self.request_export();job.status='claimed';job.lease_owner='test-worker';job.save()
@@ -73,7 +73,7 @@ class PrivacyAcceptanceTests(TestCase):
             page=response.json();seen.extend(x['privacy_request_id'] for x in page['items']);cursor=page['next_cursor']
         self.assertEqual(len(seen),5);self.assertEqual(len(set(seen)),5)
         self.assertEqual(self.client.get('/api/v1/me/privacy/requests',{'limit':3,'cursor':body['next_cursor']}).status_code,400)
-        other=Client();other.post('/api/v1/auth/login',{'email':self.other.email,'password':PASS},content_type='application/json')
+        other=Client();other.post('/api/v1/auth/login',{'email':self.other.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(other.get('/api/v1/me/privacy/requests',{'limit':2,'cursor':body['next_cursor']}).status_code,400)
         self.assertEqual(self.client.get('/api/v1/me/privacy/requests?limit=0').status_code,422)
 

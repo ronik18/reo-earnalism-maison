@@ -78,7 +78,7 @@ class LearningKeysetTests(TestCase):
     def test_http_tracks_preserves_page_shape_kind_filter_and_private_cache(self):
         self.track(10)
         Track.objects.create(title='Original SDE only',locale='en',kind='sde_interview',description='Original',access='free',published=True)
-        self.assertEqual(self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':'Original-Learning-Page-47'},content_type='application/json').status_code,200)
+        self.assertEqual(self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':'Original-Learning-Page-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json').status_code,200)
         response=self.client.get('/api/v1/learning/tracks',{'locale':'en','kind':'sde_interview','limit':1})
         self.assertEqual(response.status_code,200,response.content)
         self.assertEqual(set(response.json()),{'items','next_cursor','has_more'})

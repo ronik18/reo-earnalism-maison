@@ -32,7 +32,7 @@ class DownloadAcceptanceTests(TestCase):
         self.revision.refresh_from_db();self.client=self.login(self.user);self.device=self.client.get('/api/v1/session').json()['device_id']
         self.data={'edition_revision_id':str(self.revision.id),'format':'reader','unit_ids':[str(self.revision.units.first().id)],'device_id':self.device}
     def login(self,user):
-        c=Client();response=c.post('/api/v1/auth/login',{'email':user.email,'password':PASS},content_type='application/json');self.assertEqual(response.status_code,200);return c
+        c=Client();response=c.post('/api/v1/auth/login',{'email':user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json');self.assertEqual(response.status_code,200);return c
     def create(self,key=None):return self.client.post('/api/v1/me/downloads',self.data,content_type='application/json',HTTP_IDEMPOTENCY_KEY=key or str(uuid.uuid4()))
     def test_lease_is_device_bound_idempotent_bounded_and_revocable(self):
         key=str(uuid.uuid4());a=self.create(key);self.assertEqual(a.status_code,201,a.content);body=a.json();validate_schema(body,'DownloadLicense')
@@ -87,7 +87,7 @@ class DownloadAcceptanceTests(TestCase):
 
     def test_same_browser_login_revokes_its_previous_offline_license(self):
         response=self.create();self.assertEqual(response.status_code,201,response.content);row=DownloadLicense.objects.get()
-        relogin=self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json')
+        relogin=self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(relogin.status_code,200,relogin.content);self.assertNotEqual(relogin.json()['device_id'],self.device)
         row.refresh_from_db();self.assertIsNotNone(row.revoked_at)
 
@@ -113,7 +113,7 @@ class AudioDownloadAcceptanceTests(TestCase):
             revision.edition.live_revision=revision;revision.edition.save()
             for action in ['read','download']:
                 Rights.objects.create(revision=revision,format='audio',action=action,territories=['IN'],starts_at=timezone.now()-timedelta(days=1),ends_at=timezone.now()+timedelta(days=1),approved=True,test_only=True)
-            client=Client();self.assertEqual(client.post('/api/v1/auth/login',{'email':user.email,'password':PASS},content_type='application/json').status_code,200)
+            client=Client();self.assertEqual(client.post('/api/v1/auth/login',{'email':user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json').status_code,200)
             device=client.get('/api/v1/session').json()['device_id'];data={'edition_revision_id':str(revision.id),'device_id':device,'format':'audio','unit_ids':[str(unit.id)]}
             with patch('library.storage.private_url',return_value='https://synthetic.example.test/piece-manifest'):
                 result=client.post('/api/v1/me/downloads',data,content_type='application/json',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
@@ -122,7 +122,7 @@ class AudioDownloadAcceptanceTests(TestCase):
             piece_url=urlsplit(result.json()['assets'][0]['piece_manifest']['url'])
             pieces=client.get(piece_url.path+'?'+piece_url.query);self.assertEqual(pieces.status_code,200,pieces.content);validate_schema(pieces.json(),'OfflinePiecePage')
             self.assertEqual(pieces['Cache-Control'],'private, no-store')
-            other=Client();other.post('/api/v1/auth/login',{'email':user.email,'password':PASS},content_type='application/json')
+            other=Client();other.post('/api/v1/auth/login',{'email':user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
             self.assertEqual(other.get(piece_url.path+'?'+piece_url.query).status_code,403)
 
             row=DownloadLicense.objects.get();self.assertEqual(download_services.validate_delivery_license(user,row.id,asset,device,'IN').pk,row.pk)

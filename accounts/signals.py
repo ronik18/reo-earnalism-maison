@@ -6,6 +6,11 @@ from .services import bind_device
 @receiver(user_logged_in,dispatch_uid='maison-bind-device')
 def on_login(sender,request,user,**kwargs):
     bind_device(request,user)
+    evidence=getattr(request,'_maison_admin_password_consent',None)
+    if evidence is not None:
+        from .password_consent import record_password_purpose_consent
+        record_password_purpose_consent(user,'admin_sign_in',evidence)
+        del request._maison_admin_password_consent
 
 
 from django.apps import apps

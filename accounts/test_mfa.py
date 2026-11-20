@@ -16,7 +16,7 @@ class StaffMFAAcceptanceTests(TestCase):
         self.client=Client(enforce_csrf_checks=True);self.login()
     def login(self):
         csrf=self.client.get('/api/v1/session').json()['csrf_token']
-        response=self.client.post('/api/v1/auth/login',{'email':self.staff.email,'password':PASS},content_type='application/json',HTTP_X_CSRFTOKEN=csrf)
+        response=self.client.post('/api/v1/auth/login',{'email':self.staff.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json',HTTP_X_CSRFTOKEN=csrf)
         self.assertEqual(response.status_code,200,response.content);self.csrf=response.json()['csrf_token']
     def post(self,path,data):return self.client.post(path,data,content_type='application/json',HTTP_X_CSRFTOKEN=self.csrf)
     def enroll(self):
@@ -47,7 +47,7 @@ class StaffMFAAcceptanceTests(TestCase):
         device,codes,token=self.enroll();self.client.delete('/api/v1/session',HTTP_X_CSRFTOKEN=self.csrf);self.login()
         session=self.client.session;session['reauthenticated_at']=(timezone.now()-timedelta(minutes=6)).isoformat();session.save()
         self.assertEqual(self.post('/api/v1/me/mfa/recovery',{'code':codes[0]}).status_code,403)
-        self.assertEqual(self.post('/api/v1/me/reauthenticate',{'password':PASS}).status_code,200)
+        self.assertEqual(self.post('/api/v1/me/reauthenticate',{'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'}).status_code,200)
         response=self.post('/api/v1/me/mfa/recovery',{'code':codes[0]});self.assertEqual(response.status_code,200,response.content);self.assertEqual(response.json()['recovery_codes_remaining'],9)
         self.assertEqual(self.post('/api/v1/me/mfa/recovery',{'code':codes[0]}).status_code,403)
         self.assertEqual(MFARecoveryCode.objects.filter(user=self.staff,used_at__isnull=False).count(),1)

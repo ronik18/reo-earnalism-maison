@@ -36,7 +36,7 @@ class LibraryAcceptanceTests(TestCase):
     def login(self,user=None):
         user=user or self.user
         password='LocalStaff-Passphrase-47' if user==self.admin else 'LocalReader-Passphrase-47'
-        response=self.client.post('/api/v1/auth/login',{'email':user.email,'password':password},content_type='application/json')
+        response=self.client.post('/api/v1/auth/login',{'email':user.email,'password':password,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(response.status_code,200,response.content)
         self.device=response.json()['device_id']
 

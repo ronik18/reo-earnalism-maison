@@ -43,7 +43,7 @@ class InvoiceHistoryTests(TestCase):
     def login(self,client,user):
         response=client.get('/api/v1/session')
         token=response.json()['csrf_token']
-        result=client.post('/api/v1/auth/login',json.dumps({'email':user.email,'password':'Invoice-local-test-Strong47'}),
+        result=client.post('/api/v1/auth/login',json.dumps({'email':user.email,'password':'Invoice-local-test-Strong47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'}),
             content_type='application/json',HTTP_X_CSRFTOKEN=token)
         self.assertEqual(result.status_code,200)
 

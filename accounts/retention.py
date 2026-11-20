@@ -25,13 +25,41 @@ def _held(user_id):
 
 # Only existing routine authentication outcomes are eligible. New actions do not
 # silently inherit a deletion policy; publication/rights/finance/privacy/consent
-# records and hold markers are deliberately outside this allowlist.
+# records and hold markers are deliberately outside this allowlist. The exact
+# password-purpose security receipt has a separate schema-checked180-day policy.
 SECURITY_AUDIT_RETENTION_DAYS = 180
 
 ROUTINE_SECURITY_ACTIONS = frozenset({
     'account.registered', 'account.email_verified', 'account.password_reset',
     'device.revoked', 'staff.mfa_enrolled', 'staff.mfa_recovery_used',
 })
+
+
+PASSWORD_PURPOSE_AUDIT_ACTION = 'password.purpose_consented'
+
+
+def _password_purpose_receipt(row):
+    """Only the exact bounded password security receipt inherits180-day expiry."""
+    from .password_consent import PASSWORD_PURPOSE_VERSION, PASSWORD_PURPOSES
+    detail = row.detail
+    if (row.action != PASSWORD_PURPOSE_AUDIT_ACTION or row.entity_kind != 'User'
+            or not isinstance(detail, dict)
+            or set(detail) != {'purpose', 'notice_version', 'affirmative', 'collected_at'}
+            or detail.get('purpose') not in PASSWORD_PURPOSES
+            or detail.get('notice_version') != PASSWORD_PURPOSE_VERSION
+            or detail.get('affirmative') is not True
+            or not isinstance(detail.get('collected_at'), str)):
+        return False
+    try:
+        stamp = parse_datetime(detail['collected_at'])
+    except (ValueError, TypeError):
+        return False
+    if not stamp or timezone.is_naive(stamp) or stamp > row.created_at:
+        return False
+    # Abandoned/deleted accounts become null actors; the validated exact receipt
+    # still expires180days after its event, subject to entity/row hold markers.
+    return (row.entity_id == str(row.actor_id) if row.actor_id is not None
+            else row.entity_id.isdigit() and int(row.entity_id) > 0)
 
 
 def _row_held(row, *, actor_held=None, held_targets=None):
@@ -107,8 +135,10 @@ def _abandoned(user, cutoff):
         Q(created_at__gt=cutoff) | (Q(expires_at__gt=cutoff) & (Q(consumed_at=None) | Q(consumed_at__gt=cutoff)))
     ).exists():
         return False
-    if AuditEvent.objects.filter(actor=user).exclude(action='account.registered').exists():
-        return False
+    for event in AuditEvent.objects.filter(actor=user).exclude(action='account.registered'):
+        if (not _password_purpose_receipt(event) or event.detail['purpose'] != 'registration'
+                or event.created_at > user.date_joined + timedelta(minutes=5)):
+            return False
     if any(not _terminal_mail(j) for j in OutboxJob.objects.filter(actor=user)):
         return False
     if OutboxJob.objects.filter(actor=user).exclude(kind='email_action').exists():
@@ -260,18 +290,21 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
             counts['receipts'] += 1
             if not dry_run: row.delete()
     security_cutoff = now - timedelta(days=SECURITY_AUDIT_RETENTION_DAYS)
-    for pk in ids(AuditEvent.objects.filter(action__in=ROUTINE_SECURITY_ACTIONS, actor__isnull=False, created_at__lte=security_cutoff), 'security_audit'):
+    security_events = Q(action__in=ROUTINE_SECURITY_ACTIONS, actor__isnull=False) | Q(action=PASSWORD_PURPOSE_AUDIT_ACTION)
+    for pk in ids(AuditEvent.objects.filter(security_events, created_at__lte=security_cutoff), 'security_audit'):
         if not remaining(): break
         with transaction.atomic():
             row = AuditEvent.objects.select_for_update(skip_locked=True).filter(
-                pk=pk, action__in=ROUTINE_SECURITY_ACTIONS,
-                actor__isnull=False, created_at__lte=security_cutoff).first()
+                security_events, pk=pk, created_at__lte=security_cutoff).first()
             if not row or _row_held(row): continue
             expected_kind = 'Device' if row.action == 'device.revoked' else 'User'
             # Unexpected entity/detail can carry incident evidence; preserve it.
-            if row.entity_kind != expected_kind or row.detail != {}: continue
+            password_receipt = row.action == PASSWORD_PURPOSE_AUDIT_ACTION
+            if password_receipt:
+                if not _password_purpose_receipt(row): continue
+            elif row.entity_kind != expected_kind or row.detail != {}: continue
             if expected_kind == 'User':
-                if row.entity_id != str(row.actor_id): continue
+                if not password_receipt and row.entity_id != str(row.actor_id): continue
             else:
                 try:
                     if not Device.objects.filter(pk=row.entity_id, user_id=row.actor_id).exists(): continue

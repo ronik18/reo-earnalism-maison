@@ -47,7 +47,7 @@ CSRF_TRUSTED_ORIGINS = [v for v in os.getenv('CSRF_TRUSTED_ORIGINS', 'http://loc
 ROOT_URLCONF = 'config.urls'
 WSGI_APPLICATION = 'config.wsgi.application'
 INSTALLED_APPS = [
-    'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
+    'accounts.apps.PasswordPurposeAdminConfig', 'django.contrib.auth', 'django.contrib.contenttypes',
     'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles', 'django.contrib.postgres',
     'allauth', 'allauth.account', 'allauth.socialaccount', 'allauth.socialaccount.providers.google',
     'django_otp', 'django_otp.plugins.otp_totp',
@@ -242,7 +242,8 @@ if not LOCAL and (urlparse(PUBLIC_BASE_URL).scheme != 'https' or not urlparse(PU
     raise ImproperlyConfigured('A canonical HTTPS PUBLIC_BASE_URL is required')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_FROM_ADDRESS', 'maison@localhost.test' if LOCAL else '')
 SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', '')
-PRIVACY_NOTICE_VERSION = 'earnalism-privacy-2026-11-20-r3'
+PRIVACY_NOTICE_VERSION = 'earnalism-privacy-2026-11-20-r4'
+EARNALISM_PUBLIC_GRIEVANCE_OFFICER_NAME = os.getenv('EARNALISM_PUBLIC_GRIEVANCE_OFFICER_NAME', '').strip()
 if not LOCAL and (not EMAIL_BACKEND or not DEFAULT_FROM_EMAIL):
     raise ImproperlyConfigured('Production email configuration is required')
 ORIGIN_SHARED_SECRET = os.getenv('ORIGIN_SHARED_SECRET', '')
