@@ -453,3 +453,5 @@ STRINGS.update({
     'password_purpose_choice': ('I consent to this use of my password for account access and security.', 'অ্যাকাউন্টে প্রবেশ ও নিরাপত্তার জন্য আমার পাসওয়ার্ডের এই ব্যবহারে আমি সম্মতি দিচ্ছি।'),
     'password_purpose_withdrawal': ('You may decline or withdraw by contacting us, or request account deletion in Settings. Without this processing, password access cannot be provided. Write to', 'আপনি সম্মতি না দিতে বা প্রত্যাহার করতে আমাদের লিখতে পারেন, অথবা সেটিংস থেকে অ্যাকাউন্ট মোছার অনুরোধ করতে পারেন। এই প্রক্রিয়াকরণ ছাড়া পাসওয়ার্ড দিয়ে প্রবেশ দেওয়া সম্ভব নয়। লিখুন'),
 })
+
+STRINGS.update({'support_not_collected': ('The contact form is unavailable. No message was collected. Please email sales@reoenterprise.org.', 'যোগাযোগের ফর্ম এখন উপলব্ধ নয়। কোনো বার্তা সংগ্রহ করা হয়নি। sales@reoenterprise.org-এ ইমেল করুন।')})

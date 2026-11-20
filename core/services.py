@@ -18,6 +18,26 @@ def payload_hash(kind, payload):
     return hashlib.sha256(raw).hexdigest()
 
 
+def locked_actor(user):
+    """Within an atomic block, fence server-authenticated request authority.
+
+    Internal callers without a middleware snapshot still require an active actor.
+    Preserve the original request user and its non-persistent context attributes.
+    """
+    actor=get_user_model().objects.select_for_update().get(pk=user.pk)
+    if not actor.is_active:
+        raise DomainError('authentication_required','Sign in to continue.',401)
+    authority=getattr(user,'_maison_operation_authority',None)
+    if authority is not None:
+        from accounts.models import Device
+        epoch,device_id,session_id,binding=authority
+        if (actor.session_epoch!=epoch or not Device.objects.filter(
+            pk=device_id,user=actor,session_id=session_id,token_binding_sha256=binding,
+            revoked_at__isnull=True,expires_at__gt=timezone.now()).exists()):
+            raise DomainError('authentication_required','Sign in to continue.',401)
+    return actor
+
+
 def apply_operation(user, operation_id, kind, payload, callback):
     """Serialize a member's short local mutation and receipt in one transaction.
 
@@ -27,7 +47,7 @@ def apply_operation(user, operation_id, kind, payload, callback):
     operation_id = public_uuid(operation_id, 'operation_id')
     digest = payload_hash(kind,payload)
     with transaction.atomic():
-        get_user_model().objects.select_for_update().get(pk=user.pk)
+        locked_actor(user)
         old = OperationReceipt.objects.filter(actor=user,operation_id=operation_id).first()
         if old:
             if old.kind != kind or old.request_sha256 != digest:

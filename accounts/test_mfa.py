@@ -95,3 +95,38 @@ class StaffMFAAcceptanceTests(TestCase):
         self.assertEqual(response['Retry-After'],'32')
         device.refresh_from_db()
         self.assertEqual(device.throttling_failure_count,6)
+
+    def test_stale_authority_cannot_enroll_confirm_verify_or_consume_recovery(self):
+        from . import mfa
+        from .models import Device
+        from .services import _digest
+        from core.api import DomainError
+        from django.test import RequestFactory
+        actor=self.client.get('/api/v1/session').wsgi_request.user
+        device_id=self.client.session['device_id']
+        original_epoch=self.staff.session_epoch
+        for state in ('inactive','reset','revoked','demoted'):
+            for action in ('enroll','confirm','verify','recover'):
+                with self.subTest(state=state,action=action):
+                    User.objects.filter(pk=self.staff.pk).update(is_active=True,is_staff=True,session_epoch=original_epoch)
+                    Device.objects.filter(pk=device_id).update(revoked_at=None)
+                    TOTPDevice.objects.filter(user=self.staff).delete();MFARecoveryCode.objects.filter(user=self.staff).delete()
+                    if action!='enroll':TOTPDevice.objects.create(user=self.staff,confirmed=action in ('verify','recover'))
+                    recovery=MFARecoveryCode.objects.create(user=self.staff,code_sha256=_digest('mfa-recovery:original-code'))
+                    before=list(TOTPDevice.objects.filter(user=self.staff).values())
+                    if state=='inactive':User.objects.filter(pk=self.staff.pk).update(is_active=False)
+                    elif state=='reset':User.objects.filter(pk=self.staff.pk).update(session_epoch=original_epoch+1)
+                    elif state=='revoked':Device.objects.filter(pk=device_id).update(revoked_at=timezone.now())
+                    else:User.objects.filter(pk=self.staff.pk).update(is_staff=False)
+                    request=RequestFactory().post('/original-mfa-fixture');request.user=actor;request.session=self.client.session
+                    request.session.pop('otp_device_id',None)
+                    with patch('accounts.mfa._verify_token') as verify,patch('django_otp.login') as login:
+                        with self.assertRaises(DomainError) as denied:
+                            if action=='enroll':mfa.enroll(request)
+                            else:getattr(mfa,action)(request,'original-code' if action=='recover' else '123456')
+                        self.assertEqual(denied.exception.code,'permission_denied' if state=='demoted' else 'authentication_required')
+                        verify.assert_not_called();login.assert_not_called()
+                    self.assertEqual(list(TOTPDevice.objects.filter(user=self.staff).values()),before)
+                    recovery.refresh_from_db();self.assertIsNone(recovery.used_at)
+                    self.assertEqual(MFARecoveryCode.objects.filter(user=self.staff).count(),1)
+                    self.assertNotIn('otp_device_id',request.session)

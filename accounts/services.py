@@ -186,6 +186,7 @@ def confirm_email_verification(token,request=None):
             request.session.cycle_key();rotate_token(request)
             if device is not None:
                 Device.objects.filter(pk=device.pk,user=request.user,revoked_at=None).update(session_id=request.session.session_key,version=F('version')+1)
+                request.user._maison_operation_authority=(request.user.session_epoch,device.pk,request.session.session_key,device.token_binding_sha256)
     return user
 
 
@@ -205,6 +206,8 @@ def confirm_password_reset(token,new_password,*,password_consent=None):
 
 @transaction.atomic
 def bind_device(request,user):
+    from core.services import locked_actor
+    user=locked_actor(user)
     if not request.session.session_key:request.session.save()
     token=secrets.token_urlsafe(32)
     session=Session.objects.get(session_key=request.session.session_key)
@@ -234,7 +237,9 @@ def login_member(request,email,password,*,password_consent=None):
     return user
 
 
+@transaction.atomic
 def logout_member(request):
+    if request.user.is_authenticated:User.objects.select_for_update().get(pk=request.user.pk)
     if request.user.is_authenticated:
         Device.objects.filter(user=request.user,session_id=request.session.session_key,revoked_at__isnull=True).update(revoked_at=timezone.now(),version=F('version')+1)
     if request.user.is_authenticated:
@@ -243,10 +248,13 @@ def logout_member(request):
     logout(request);request._maison_clear_device_cookie=True
 
 
+@transaction.atomic
 def session_data(request):
     user=request.user;flags=getattr(settings,'FEATURES',{})
     member=None
     if user.is_authenticated:
+        from core.services import locked_actor
+        user=locked_actor(user)
         prefs,_=Preferences.objects.get_or_create(user=user)
         member={'member_id':str(user.public_id),'display_name':user.display_name,'locale':prefs.locale,'email_verified':user.is_verified,'email':user.email,'created_at':iso(user.date_joined),'version':user.version}
     return {'authenticated':user.is_authenticated,'member':member,'device_id':request.session.get('device_id') if user.is_authenticated else None,'csrf_token':get_token(request),'reauthenticated_at':request.session.get('reauthenticated_at','').replace('+00:00','Z') or None if user.is_authenticated else None,
@@ -259,11 +267,14 @@ def preferences_data(pref):
     return result
 
 
+@transaction.atomic
 def update_preferences(user,data,base_version):
     # Validate the complete nested contract before creating/locking or changing state.
     # This boundary also protects direct SSR callers of the shared service.
     from library.validation import validate_schema
     validate_schema(data,'PreferencesPatch')
+    from core.services import locked_actor
+    locked_actor(user)
     pref,_=Preferences.objects.get_or_create(user=user)
     pref=Preferences.objects.select_for_update().get(pk=pref.pk)
     if pref.version!=base_version:raise DomainError('version_conflict','Preferences changed on another device.',412,preferences_data(pref))

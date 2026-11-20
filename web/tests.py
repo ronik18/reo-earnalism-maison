@@ -381,3 +381,44 @@ class PasswordPurposePresentationTests(TestCase):
             response = self.client.get(path)
             self.assertContains(response, 'Approved &lt;Professional&gt;')
             self.assertNotContains(response, 'Approved <Professional>')
+
+class SupportAvailabilityAndAdminChangeTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_superuser('frontend-staff@example.test', 'Frontend-Staff-Password-2026')
+
+    def login_staff(self):
+        response = self.client.post('/admin/login/', {'username':self.user.email, 'password':'Frontend-Staff-Password-2026', 'password_purpose_consent':'on', 'password_purpose_version':'password-account-v1', 'next':'/admin/'})
+        self.assertEqual(response.status_code, 302)
+
+    @override_settings(SUPPORT_EMAIL='')
+    def test_unconfigured_settings_offer_mailbox_without_support_collection(self):
+        self.login_staff()
+        response = self.client.get('/en/settings/')
+        self.assertContains(response, 'mailto:sales@reoenterprise.org')
+        self.assertContains(response, 'The contact form is unavailable.')
+        self.assertNotContains(response, 'id="support-island"')
+        self.assertNotRegex(response.content.decode(), r'<script[^>]+src="[^"]*/support-[^"]+\.js"')
+
+    @override_settings(SUPPORT_EMAIL='configured@example.test')
+    def test_configured_settings_mount_support_form(self):
+        self.login_staff()
+        response = self.client.get('/en/settings/')
+        self.assertContains(response, 'id="support-island"')
+        self.assertNotIn('The contact form is unavailable.', response.content.decode().split('</main>')[0])
+        self.assertRegex(response.content.decode(), r'<script[^>]+src="[^"]*/support-[^"]+\.js"')
+
+    def test_admin_password_change_renders_and_submits_actual_consent_fields(self):
+        self.login_staff()
+        response = self.client.get('/admin/password_change/')
+        self.assertContains(response, 'name="password_purpose_consent"')
+        self.assertContains(response, 'name="password_purpose_version"')
+        self.assertContains(response, 'password-account-v1')
+        self.assertContains(response, 'Reo Enterprise uses your password')
+        self.assertContains(response, 'href="/en/privacy/"')
+        self.assertContains(response, 'withdraw')
+        self.assertNotContains(response, 'name="password_purpose_consent" checked')
+        response = self.client.post('/admin/password_change/', {'old_password':'Frontend-Staff-Password-2026','new_password1':'Changed-Frontend-Password-2026','new_password2':'Changed-Frontend-Password-2026','password_purpose_consent':'on','password_purpose_version':'password-account-v1'})
+        self.assertRedirects(response, '/admin/password_change/done/')
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('Changed-Frontend-Password-2026'))

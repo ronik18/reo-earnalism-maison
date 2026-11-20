@@ -6,7 +6,7 @@
 <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
 <div class="form-row">{{ form.username.errors }}{{ form.username.label_tag }} {{ form.username }}</div>
 <div class="form-row">{{ form.password.errors }}{{ form.password.label_tag }} {{ form.password }}<input type="hidden" name="next" value="{{ next }}"></div>
-<div class="form-row"><p>Reo Enterprise uses your password to verify your identity and secure your Earnalism account. Passwords are stored as protected hashes. <a href="/en/privacy/">Privacy notice</a></p>{{ form.password_purpose_consent.errors }}{{ form.password_purpose_consent }} {{ form.password_purpose_consent.label_tag }}{{ form.password_purpose_version }}{{ form.password_purpose_version.errors }}<p>You may decline or withdraw by contacting <a href="mailto:sales@reoenterprise.org">sales@reoenterprise.org</a>, or request account deletion in Settings. Password access cannot be provided without this processing.</p></div>
+<div class="form-row">{% include 'admin/password_purpose_explanation.html' %}{{ form.password_purpose_consent.errors }}{{ form.password_purpose_consent }} {{ form.password_purpose_consent.label_tag }}{{ form.password_purpose_version }}{{ form.password_purpose_version.errors }}</div>
 {% url 'admin_password_reset' as password_reset_url %}{% if password_reset_url %}<div class="password-reset-link"><a href="{{ password_reset_url }}">{% translate 'Forgotten your login credentials?' %}</a></div>{% endif %}
 <div class="submit-row"><input type="submit" value="{% translate 'Log in' %}"></div>
 </form></div>

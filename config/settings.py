@@ -210,6 +210,10 @@ WEBHOOK_BODY_MAX_BYTES = 1048576
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = LOCAL_DIR / 'static'
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'operations.static_storage.MaisonStaticFilesStorage'},
+}
 MEDIA_ROOT = LOCAL_DIR / 'private-media'
 BACKUP_ROOT = LOCAL_DIR / 'backups'
 
