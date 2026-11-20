@@ -1,0 +1,16 @@
+{
+  "isolated_release": "e9428f9285cad6d58dc3747170f5c83dc18956ce",
+  "pull_request": 11,
+  "main_CI_run": 44667277831,
+  "main_CI": "PASS",
+  "web_deploy": "dep-dbvrqrcs728c73bpcu80",
+  "maintenance_deploy": "dep-dbvrr7ijnfac73884c0g",
+  "archive_deploy": "dep-dbvrvjmc6qcc73advidg",
+  "all_three_services": "Live at qualified main",
+  "public_static_release": "43e16062825e61ff2ad1f266d12f478b4171b842da9c4ba477eb7521ec34fe75",
+  "live_public_browser_checks": 96,
+  "live_public_browser_passed": 96,
+  "existing_identity_withdrawal": "PASS",
+  "book_draft_legacy_invariants": "PASS",
+  "physical_UAT": "deferred, non-blocking"
+}

@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import ipaddress
 import re
+import time
 import uuid
 from django.conf import settings
 from django.http import HttpResponseNotModified, JsonResponse
@@ -79,6 +80,7 @@ def content_security_policy():
 class RequestContextMiddleware:
     def __init__(self,get_response):self.get_response=get_response
     def __call__(self,request):
+        started=time.monotonic()
         try:
             value=uuid.UUID(request.headers.get('X-Request-ID',''))
             if value.version!=4:raise ValueError
@@ -93,6 +95,9 @@ class RequestContextMiddleware:
         response['X-Content-Type-Options']='nosniff'
         response.setdefault('Referrer-Policy',settings.SECURE_REFERRER_POLICY)
         response['Content-Security-Policy']=content_security_policy()
+        if getattr(settings,'SECURITY_EVENT_LOGGING',False):
+            from .security_events import emit_request_event
+            emit_request_event(request,response,(time.monotonic()-started)*1000)
         return response
 
 

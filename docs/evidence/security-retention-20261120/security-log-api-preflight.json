@@ -1,0 +1,36 @@
+{
+  "http": 200,
+  "query_resources": [
+    "srv-dbunbd8jo6nc73akbng0",
+    "crn-dbv7bte7bikc73fpso3g",
+    "crn-dbv7agetlv9c7381is10"
+  ],
+  "keys": [
+    "hasMore",
+    "logs",
+    "nextEndTime",
+    "nextStartTime"
+  ],
+  "count": 100,
+  "has_more": true,
+  "row_keys": [
+    "id",
+    "labels",
+    "message",
+    "timestamp"
+  ],
+  "label_names": [
+    "build",
+    "level",
+    "resource",
+    "type"
+  ],
+  "observed_resources": [
+    "srv-dbunbd8jo6nc73akbng0"
+  ],
+  "first_timestamp": "2026-11-18T09:54:11.738025619Z",
+  "last_timestamp": "2026-11-18T09:54:31.075529244Z",
+  "next_start": "2026-11-18T09:54:31.075529245Z",
+  "next_end": "2026-11-20T15:31:11.153217Z",
+  "messages_saved": false
+}

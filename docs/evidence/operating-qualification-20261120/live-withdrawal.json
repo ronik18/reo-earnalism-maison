@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "existing_authorized_identity": true,
+  "new_account": false,
+  "request_kind": "export",
+  "initial_queue_and_withdrawal": "202 then200 observed before order-sensitive harness comparison; same unique task request rechecked",
+  "final_status": "cancelled",
+  "final_can_cancel": false,
+  "idempotent_replay_http": 200,
+  "idempotent_semantic_replay": true,
+  "cancelled_download_http": 404,
+  "account_still_active": true,
+  "account_deletion_requested": false,
+  "personal_export_downloaded": false,
+  "emails_sent": false
+}

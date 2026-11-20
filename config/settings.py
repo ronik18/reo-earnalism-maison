@@ -242,7 +242,7 @@ if not LOCAL and (urlparse(PUBLIC_BASE_URL).scheme != 'https' or not urlparse(PU
     raise ImproperlyConfigured('A canonical HTTPS PUBLIC_BASE_URL is required')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_FROM_ADDRESS', 'maison@localhost.test' if LOCAL else '')
 SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', '')
-PRIVACY_NOTICE_VERSION = 'earnalism-privacy-2026-11-20-r2'
+PRIVACY_NOTICE_VERSION = 'earnalism-privacy-2026-11-20-r3'
 if not LOCAL and (not EMAIL_BACKEND or not DEFAULT_FROM_EMAIL):
     raise ImproperlyConfigured('Production email configuration is required')
 ORIGIN_SHARED_SECRET = os.getenv('ORIGIN_SHARED_SECRET', '')
@@ -334,11 +334,15 @@ if not LOCAL and (FEATURES['audio'] or FEATURES['offline_text_audio']) and MEDIA
 if not LOCAL and any(FEATURES[n] for n in ['phone_otp', 'recurring_billing', 'international_checkout']):
     raise ImproperlyConfigured('Enabled provider features require their qualified production adapter/configuration')
 
+SECURITY_EVENT_LOGGING = bool_setting('SECURITY_EVENT_LOGGING', not LOCAL)
+
 LOGGING = {
     'version': 1, 'disable_existing_loggers': False,
     'filters': {'redact_query': {'()': 'operations.logging.RedactQueryFilter'}},
-    'handlers': {'console': {'class': 'logging.StreamHandler', 'filters': ['redact_query']}},
-    'loggers': {'django.server': {'handlers': ['console'], 'level': 'INFO', 'propagate': False}},
+    'handlers': {'console': {'class': 'logging.StreamHandler', 'filters': ['redact_query']},
+                 'security_console': {'class': 'logging.StreamHandler', 'stream': 'ext://sys.stdout', 'filters': ['redact_query']}},
+    'loggers': {'django.server': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+                'earnalism.security': {'handlers': ['security_console'], 'level': 'INFO', 'propagate': False}},
 }
 
 # Optional, zone-scoped CDN invalidation; unconfigured providers stay disabled.

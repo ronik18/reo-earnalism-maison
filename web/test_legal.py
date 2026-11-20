@@ -44,7 +44,7 @@ class LegalNoticeTests(SimpleTestCase):
 
     def test_current_retention_and_provider_facts_replace_obsolete_pending_claims(self):
         response=legal.privacy(self.request('/en/privacy/'),'en')
-        for fact in ['20 November 2026','7 days after expiry or use','35-day window','90 days after an operator records actual resolution','latest 12 calendar-month snapshots','7 days under the approved isolated-service exception','Cloudflare','signed Stream video','Google sign-in','Singapore','Recorded legal/retention holds']:
+        for fact in ['20 November 2026','7 days after expiry or use','35-day window','90 days after an operator records actual resolution','latest 12 calendar-month snapshots','separate 7-day buffer','eligible after 180 days','Cloudflare','signed Stream video','Google sign-in','Singapore','Recorded legal/retention holds']:
             self.assertContains(response,fact)
         for obsolete in ['awaiting confirmation','retention schedule and applicable request periods','Provider processing and applicable transfer arrangements must be finalized']:
             self.assertNotContains(response,obsolete)

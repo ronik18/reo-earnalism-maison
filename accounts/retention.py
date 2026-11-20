@@ -26,6 +26,8 @@ def _held(user_id):
 # Only existing routine authentication outcomes are eligible. New actions do not
 # silently inherit a deletion policy; publication/rights/finance/privacy/consent
 # records and hold markers are deliberately outside this allowlist.
+SECURITY_AUDIT_RETENTION_DAYS = 180
+
 ROUTINE_SECURITY_ACTIONS = frozenset({
     'account.registered', 'account.email_verified', 'account.password_reset',
     'device.revoked', 'staff.mfa_enrolled', 'staff.mfa_recovery_used',
@@ -257,7 +259,7 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
             if not row or _held(row.actor_id): continue
             counts['receipts'] += 1
             if not dry_run: row.delete()
-    security_cutoff = now - timedelta(days=90)
+    security_cutoff = now - timedelta(days=SECURITY_AUDIT_RETENTION_DAYS)
     for pk in ids(AuditEvent.objects.filter(action__in=ROUTINE_SECURITY_ACTIONS, actor__isnull=False, created_at__lte=security_cutoff), 'security_audit'):
         if not remaining(): break
         with transaction.atomic():
@@ -280,6 +282,7 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
 
     # Scan only explicitly resolved support cases; SMTP submission alone never
     # starts the90-day clock. Keyset checkpointing advances past held prefixes.
+    support_cutoff = now - timedelta(days=90)
     support = OutboxJob.objects.filter(kind='contact_support', status='done', result__retention_case__isnull=False).exclude(result__status='retention_cleaned')
     for pk in ids(support, 'support_cases'):
         if not remaining(): break
@@ -287,7 +290,7 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
             row = OutboxJob.objects.select_for_update(skip_locked=True).filter(pk=pk, kind='contact_support', status='done').first()
             if not row or _row_held(row) or not _support_submitted(row): continue
             metadata = _support_case(row)
-            if not metadata or metadata[1] > security_cutoff: continue
+            if not metadata or metadata[1] > support_cutoff: continue
             case, _ = metadata
             counts['support_payloads'] += 1
             if not dry_run:
