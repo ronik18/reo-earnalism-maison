@@ -1,0 +1,31 @@
+{
+  "browser": "native Safari",
+  "version": "26.5",
+  "scope": "Actual deployed public desktop consent and notices; no production sign-in or account mutation",
+  "rows": [
+    {
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "route": "series",
+      "status": "PASS"
+    },
+    {
+      "route": "sign-up",
+      "status": "PASS"
+    },
+    {
+      "route": "sign-in",
+      "status": "PASS"
+    }
+  ],
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

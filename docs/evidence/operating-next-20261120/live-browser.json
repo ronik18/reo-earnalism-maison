@@ -1,0 +1,572 @@
+{
+  "application_commit": "498222324e867b1ec05ade3105024748d64e0bdd",
+  "static_release": "012a3a8a2213a46ffcc12a2ae9d234de97f95135c9b5a3bfe864ac42321b32aa",
+  "scope": "Actual deployed public EN/BN free Pass/navigation/learning pagination boundaries and anonymous financial/draft denial; no payment or book mutations",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/pass/?return_to=%2Fen%2Flearn%2F",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/pass/?return_to=%2Fbn%2Flearn%2F",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/explore/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/terms/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/terms/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/privacy/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/privacy/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/contact/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/contact/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/sign-up/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/sign-up/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/en/learn/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/bn/learn/",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "all-language-default-or-explicit-all",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "all-language-default-or-explicit-en",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "all-language-default-or-explicit-bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "optional-content-language-control",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "current-operator-CDPA-and-email-contact-disclosures",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "disabled-support-rejects-before-collection",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/commerce/invoices",
+      "status": "PASS",
+      "anonymousDenied": true
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/commerce/credit-notes",
+      "status": "PASS",
+      "anonymousDenied": true
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/commerce/mandates",
+      "status": "PASS",
+      "anonymousDenied": true
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "protected-draft-denied",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/api/v1/learning/tracks?locale=en&kind=sde_interview&limit=1",
+      "status": "PASS",
+      "httpStatus": 200
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/api/v1/learning/tracks?locale=en&kind=invalid",
+      "status": "PASS",
+      "httpStatus": 422
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/api/v1/learning/tracks?locale=en&limit=101",
+      "status": "PASS",
+      "httpStatus": 422
+    },
+    {
+      "engine": "chromium-desktop",
+      "path": "/api/v1/learning/tracks?locale=en&cursor=invalid",
+      "status": "PASS",
+      "httpStatus": 422
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "current-affirmative-password-choice-sign-in",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "current-affirmative-password-choice-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "missing-choice-rejected-before-account-or-password-action-/auth/register",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "missing-choice-rejected-before-account-or-password-action-/auth/login",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "no-commerce-or-sdk-requests",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "no-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/pass/?return_to=%2Fen%2Flearn%2F",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/pass/?return_to=%2Fbn%2Flearn%2F",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/explore/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/terms/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/terms/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/privacy/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/privacy/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/contact/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/contact/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/sign-up/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/sign-up/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/en/learn/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/bn/learn/",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "all-language-default-or-explicit-all",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "all-language-default-or-explicit-en",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "all-language-default-or-explicit-bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "optional-content-language-control",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "current-operator-CDPA-and-email-contact-disclosures",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "disabled-support-rejects-before-collection",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/commerce/invoices",
+      "status": "PASS",
+      "anonymousDenied": true
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/commerce/credit-notes",
+      "status": "PASS",
+      "anonymousDenied": true
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/commerce/mandates",
+      "status": "PASS",
+      "anonymousDenied": true
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "protected-draft-denied",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/api/v1/learning/tracks?locale=en&kind=sde_interview&limit=1",
+      "status": "PASS",
+      "httpStatus": 200
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/api/v1/learning/tracks?locale=en&kind=invalid",
+      "status": "PASS",
+      "httpStatus": 422
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/api/v1/learning/tracks?locale=en&limit=101",
+      "status": "PASS",
+      "httpStatus": 422
+    },
+    {
+      "engine": "firefox-desktop",
+      "path": "/api/v1/learning/tracks?locale=en&cursor=invalid",
+      "status": "PASS",
+      "httpStatus": 422
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "current-affirmative-password-choice-sign-in",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "current-affirmative-password-choice-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "missing-choice-rejected-before-account-or-password-action-/auth/register",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "missing-choice-rejected-before-account-or-password-action-/auth/login",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "no-commerce-or-sdk-requests",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "no-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/en/pass/?return_to=%2Fen%2Flearn%2F",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/bn/pass/?return_to=%2Fbn%2Flearn%2F",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/en/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/en/explore/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/en/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/bn/series/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/en/terms/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/bn/terms/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/en/privacy/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/bn/privacy/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/en/contact/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/bn/contact/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/en/sign-up/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/bn/sign-up/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/en/learn/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/bn/learn/",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "all-language-default-or-explicit-all",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "all-language-default-or-explicit-en",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "all-language-default-or-explicit-bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "optional-content-language-control",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "current-operator-CDPA-and-email-contact-disclosures",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "disabled-support-rejects-before-collection",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/commerce/invoices",
+      "status": "PASS",
+      "anonymousDenied": true
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/commerce/credit-notes",
+      "status": "PASS",
+      "anonymousDenied": true
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/commerce/mandates",
+      "status": "PASS",
+      "anonymousDenied": true
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "protected-draft-denied",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/api/v1/learning/tracks?locale=en&kind=sde_interview&limit=1",
+      "status": "PASS",
+      "httpStatus": 200
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/api/v1/learning/tracks?locale=en&kind=invalid",
+      "status": "PASS",
+      "httpStatus": 422
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/api/v1/learning/tracks?locale=en&limit=101",
+      "status": "PASS",
+      "httpStatus": 422
+    },
+    {
+      "engine": "webkit-phone",
+      "path": "/api/v1/learning/tracks?locale=en&cursor=invalid",
+      "status": "PASS",
+      "httpStatus": 422
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "current-affirmative-password-choice-sign-in",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "current-affirmative-password-choice-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "missing-choice-rejected-before-account-or-password-action-/auth/register",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "missing-choice-rejected-before-account-or-password-action-/auth/login",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "no-commerce-or-sdk-requests",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "no-page-errors",
+      "status": "PASS"
+    }
+  ]
+}

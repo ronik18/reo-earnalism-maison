@@ -1,0 +1,71 @@
+{
+  "date_utc": "2026-11-20",
+  "application_commit": "498222324e867b1ec05ade3105024748d64e0bdd",
+  "source_pr": 17,
+  "main_ci": {
+    "run": 44796158557,
+    "status": "PASS",
+    "backend_tests": 621,
+    "backend_skips": 20,
+    "client_tests": 37,
+    "skip_scope": "age-tool-dependent CI checks; actual local full run exercised them without skips; unchanged crypto also has prior105focused actual-crypto proof"
+  },
+  "web": {
+    "resource": "srv-dbunbd8jo6nc73akbng0",
+    "deploy": "dep-dc09eegm7kps73db91d0",
+    "status": "Live",
+    "last_successful_commit": "498222324e867b1ec05ade3105024748d64e0bdd"
+  },
+  "maintenance": {
+    "resource": "crn-dbv7bte7bikc73fpso3g",
+    "deploy": "dep-dc09essipgvc73dlt250",
+    "status": "Latest successfully deployed build",
+    "last_successful_commit": "498222324e867b1ec05ade3105024748d64e0bdd",
+    "actual_scheduled_run": "PASS",
+    "lease_clear": true
+  },
+  "archive": {
+    "resource": "crn-dbv7agetlv9c7381is10",
+    "deploy": "dep-dc09f5kipgvc73dltop0",
+    "status": "Latest successfully deployed build",
+    "last_successful_commit": "498222324e867b1ec05ade3105024748d64e0bdd",
+    "new_archive_run_triggered": false,
+    "reason": "Archive implementation/schedule/key policy unchanged; existing successful capture/restore receipt reused without claiming a fresh restore"
+  },
+  "static_release": "012a3a8a2213a46ffcc12a2ae9d234de97f95135c9b5a3bfe864ac42321b32aa",
+  "static_files": 72,
+  "static_bytes": 7374763,
+  "static_public_readback": "PASS; checksums/types/immutable metadata and actual MISS\u2192HIT",
+  "live_checks": {
+    "chromium_firefox_webkit": 108,
+    "native_safari_desktop": 5,
+    "status": "PASS",
+    "existing_authenticated_operator_UI": {
+      "new_bundle": true,
+      "password_purpose_controls": 2,
+      "choices_unchecked": true,
+      "profile_credentials_changed": false
+    }
+  },
+  "migrations": 0,
+  "current_operating_facts": {
+    "access": "India-only adult authorized staff/testers",
+    "foreign_establishment_or_appointed_representative": false,
+    "customers_or_known_child_accounts": false
+  },
+  "public_grievance_name": {
+    "configured": false,
+    "status": "Exact separate publication approval pending; private preview prepared and tested. Personal phone/Gmail/CERT submission not published."
+  },
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "preserved": [
+    "protected book draft/live pointer/version42/32paragraphs/hash",
+    "legacy application/data/DNS",
+    "free pricing/47-region/all-ages policies",
+    "existing provider plans/schedules/database backup key and policy"
+  ],
+  "scope": "Engineering candidate deployed/validated; named public grievance-contact approval remains open. No blanket future-public/all-ages,HA,paid or exact-title certification."
+}

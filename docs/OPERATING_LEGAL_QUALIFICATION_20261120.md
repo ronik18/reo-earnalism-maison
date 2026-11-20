@@ -55,3 +55,7 @@ Test and deploy accurate disclosures and the privacy fixes on isolated Maison wh
 ## Current India-only follow-up
 
 [Purpose, applicable law, recipients and security assessment](evidence/operating-next-20261120/current-india-assessment.md) records the confirmed current India-only facts, operative SPDI versus future DPDP commencement, prospective password-purpose choice and Rule7 requested-service transfer route. [Updated exact47-region matrix](evidence/operating-next-20261120/region-operating-triage.md) preserves conditional future/public questions; no blanket regional PASS. Public officer-name approval and actual candidate validation are recorded in the final receipt when completed.
+
+## Latest isolated operating deployment
+
+PR#17/main `4982223` is deployed: webLive and both existing cron builds updated; exact-mainCI621backend/37client PASS (20crypto-tool CI skips covered locally),108live cross-browser/virtual-phone and5nativeSafari checks PASS. Scheduled maintenance,protected book/empty-finance and legacy invariants PASS. [Final receipt and previews](evidence/operating-next-20261120/README.md). Only the separately requested public grievance-name approval remains open for current operating closeout; the field is unconfigured and private CERT contact remains unpublished. Physical UAT is deferred/nonblocking; other future-scope rows are not silently converted into PASS.
