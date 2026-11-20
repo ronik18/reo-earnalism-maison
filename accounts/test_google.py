@@ -88,7 +88,7 @@ class GoogleOIDCAcceptanceTests(TestCase):
     def test_email_collision_requires_explicit_fresh_link_and_subject_stays_authoritative(self):
         user=User.objects.create_user('google-member@example.test',PASS,is_verified=True)
         params=self.start();response,_=self.finish(params);self.assertEqual(response.status_code,409,response.content);self.assertFalse(SocialAccount.objects.exists())
-        self.client.post('/api/v1/auth/login',{'email':user.email,'password':PASS},content_type='application/json',HTTP_HOST='localhost')
+        self.client.post('/api/v1/auth/login',{'email':user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json',HTTP_HOST='localhost')
         params=self.start(intent='link',return_path='/en/settings/');response,_=self.finish(params)
         self.assertEqual(response.status_code,302,response.content);self.assertEqual(SocialAccount.objects.get().user_id,user.pk)
         self.client.delete('/api/v1/session',HTTP_HOST='localhost')
@@ -118,7 +118,7 @@ class GoogleOIDCAcceptanceTests(TestCase):
     def test_reauthentication_requires_the_linked_subject_and_keeps_member_device(self):
         user=User.objects.create_user('google-member@example.test',PASS,is_verified=True)
         SocialAccount.objects.create(user=user,provider='google',uid='synthetic-subject')
-        self.client.post('/api/v1/auth/login',{'email':user.email,'password':PASS},content_type='application/json',HTTP_HOST='localhost')
+        self.client.post('/api/v1/auth/login',{'email':user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json',HTTP_HOST='localhost')
         before=self.client.get('/api/v1/session',HTTP_HOST='localhost').json()['device_id']
         session=self.client.session;session['reauthenticated_at']=(timezone.now()-timedelta(minutes=6)).isoformat();session.save()
         self.assertEqual(self.client.get('/api/v1/auth/google',{'intent':'link'},HTTP_HOST='localhost').status_code,403)
@@ -131,7 +131,7 @@ class GoogleOIDCAcceptanceTests(TestCase):
 
     def test_link_cannot_take_other_member_identity_or_revive_a_used_session_state(self):
         user=User.objects.create_user('google-member@example.test',PASS,is_verified=True)
-        self.client.post('/api/v1/auth/login',{'email':user.email,'password':PASS},content_type='application/json',HTTP_HOST='localhost')
+        self.client.post('/api/v1/auth/login',{'email':user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json',HTTP_HOST='localhost')
         params=self.start(intent='link');old_states=json.loads(json.dumps(self.client.session['socialaccount_states']))
         response,_=self.finish(params);self.assertEqual(response.status_code,302,response.content)
         session=self.client.session;session['socialaccount_states']=old_states;session.save()

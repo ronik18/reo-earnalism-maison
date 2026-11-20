@@ -73,7 +73,7 @@ class ExperienceTests(TestCase):
     def login(self, client=None, destination="/en/vault/"):
         client = client or self.client
         client.get(reverse("web:sign-in", args=["en"]))
-        data = {"email":self.user.email, "password":"A-strong-local-password-47", "return_to":destination}
+        data = {"email":self.user.email, "password":"A-strong-local-password-47", "return_to":destination, "password_purpose_consent":"on", "password_purpose_version":"password-account-v1"}
         if settings.CSRF_COOKIE_NAME in client.cookies:
             data["csrfmiddlewaretoken"] = client.cookies[settings.CSRF_COOKIE_NAME].value
         return client.post(reverse("web:sign-in", args=["en"]), data)
@@ -144,7 +144,7 @@ class ExperienceTests(TestCase):
         self.assertNotContains(response,'aria-label="Interface language"')
 
     def test_legacy_login_error_uses_english_and_preserves_email(self):
-        response = self.client.post("/bn/sign-in/", {"email":self.user.email,"password":"wrong","return_to":"/bn/vault/"}, follow=True)
+        response = self.client.post("/bn/sign-in/", {"email":self.user.email,"password":"wrong","return_to":"/bn/vault/","password_purpose_consent":"on","password_purpose_version":"password-account-v1"}, follow=True)
         self.assertContains(response, "The email or password could not be verified.", status_code=403)
         self.assertContains(response, self.user.email, status_code=403)
         self.assertNotContains(response, 'value="wrong"', status_code=403)
@@ -350,3 +350,34 @@ class DatabaseFailureErrorPageTests(SimpleTestCase):
         self.assertIn('private',response['Cache-Control'])
         self.assertIn('no-store',response['Cache-Control'])
         self.assertNotIn(b'Synthetic database unavailable',response.content)
+
+class PasswordPurposePresentationTests(TestCase):
+    def test_password_pages_present_unchecked_separate_purpose_choice(self):
+        for path in ('/en/sign-in/', '/en/sign-up/', '/en/password-reset/example/'):
+            response = self.client.get(path)
+            self.assertContains(response, 'name="password_purpose_consent" required')
+            self.assertNotContains(response, 'name="password_purpose_consent" checked')
+            self.assertContains(response, 'password-account-v1')
+            self.assertContains(response, 'withdraw')
+
+    def test_ssr_rejects_missing_choice_before_password_service(self):
+        from unittest.mock import patch
+        for path, service in (('/en/sign-in/', 'login_member'), ('/en/sign-up/', 'register_member')):
+            with patch('accounts.services.' + service) as action:
+                response = self.client.post(path, {'email':'tester@example.test','password':'secret-purpose-password'})
+                self.assertEqual(response.status_code, 400)
+                action.assert_not_called()
+
+    def test_admin_password_form_presents_separate_unchecked_choice(self):
+        response = self.client.get('/admin/login/')
+        self.assertContains(response, 'name="password_purpose_consent"')
+        self.assertContains(response, 'password-account-v1')
+        self.assertContains(response, 'withdraw')
+        self.assertNotContains(response, 'name="password_purpose_consent" checked')
+
+    @override_settings(EARNALISM_PUBLIC_GRIEVANCE_OFFICER_NAME='Approved <Professional>')
+    def test_configured_grievance_name_is_escaped_on_both_pages(self):
+        for path in ('/en/privacy/', '/en/contact/'):
+            response = self.client.get(path)
+            self.assertContains(response, 'Approved &lt;Professional&gt;')
+            self.assertNotContains(response, 'Approved <Professional>')

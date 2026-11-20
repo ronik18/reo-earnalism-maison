@@ -55,7 +55,7 @@ class MagicAndDeviceAcceptanceTests(TestCase):
         self.assertFalse(EmailActionToken.objects.exists())
     def test_device_history_has_complete_member_bound_keyset_pages(self):
         self.user.is_verified=True;self.user.save()
-        response=self.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS});self.assertEqual(response.status_code,200);self.csrf=response.json()['csrf_token']
+        response=self.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'});self.assertEqual(response.status_code,200);self.csrf=response.json()['csrf_token']
         now=timezone.now();Device.objects.bulk_create([Device(user=self.user,token_binding_sha256='a'*64,expires_at=now+timedelta(days=1)) for _ in range(105)])
         Device.objects.filter(user=self.user).update(last_seen_at=now)
         ids=[];cursor=None
@@ -77,9 +77,9 @@ class MagicAndDeviceAcceptanceTests(TestCase):
 
     def test_verification_preserves_current_and_other_member_device_sessions(self):
         self.user.is_verified=True;self.user.save()
-        response=self.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS});self.csrf=response.json()['csrf_token']
+        response=self.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'});self.csrf=response.json()['csrf_token']
         current=response.json()['device_id'];before=self.client.session.session_key
-        other=Client();other.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json')
+        other=Client();other.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         other_id=other.get('/api/v1/session').json()['device_id']
         action=services._create_action(self.user,'verify_email',locale='en')
         response=self.post('/api/v1/auth/email-verifications/confirm',{'token':services._token_value(action)})
@@ -92,8 +92,8 @@ class MagicAndDeviceAcceptanceTests(TestCase):
 
     def test_same_browser_relogin_replaces_only_its_validated_device(self):
         self.user.is_verified=True;self.user.save()
-        response=self.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS});self.csrf=response.json()['csrf_token'];old=response.json()['device_id']
-        other=Client();other.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json');other_id=other.get('/api/v1/session').json()['device_id']
+        response=self.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'});self.csrf=response.json()['csrf_token'];old=response.json()['device_id']
+        other=Client();other.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json');other_id=other.get('/api/v1/session').json()['device_id']
         action=self.request_magic();response=self.post('/api/v1/auth/email-links/consume',{'token':services._token_value(action)})
         self.assertEqual(response.status_code,200,response.content);self.assertNotEqual(response.json()['device_id'],old)
         self.assertIsNotNone(Device.objects.get(pk=old).revoked_at);self.assertIsNone(Device.objects.get(pk=other_id).revoked_at)

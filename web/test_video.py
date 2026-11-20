@@ -24,7 +24,7 @@ class VideoScreensTests(TestCase):
         self.override_video.enable();self.addCleanup(self.override_video.disable)
 
     def login(self):
-        self.client.post('/en/sign-in/',{'email':self.user.email,'password':'Test-Only-Password-47'})
+        self.client.post('/en/sign-in/',{'email':self.user.email,'password':'Test-Only-Password-47','password_purpose_consent':'on','password_purpose_version':'password-account-v1'})
 
     def test_guest_signin_fallback_and_disabled_video_have_no_fake_chapter(self):
         boot=self.client.get(self.path).context['bootstrap']

@@ -7,7 +7,7 @@ from library.validation import validate_schema
 
 class SyncContractAcceptanceTests(ReaderFixture,TestCase):
     def setUp(self):
-        self.seed();self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json')
+        self.seed();self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
     def test_invalid_sync_types_rejected_while_valid_operation_applies(self):
         device=self.client.get('/api/v1/session').json()['device_id'];stamp=timezone.now().isoformat().replace('+00:00','Z')
         operations=[{'operation_id':str(uuid.uuid4()),'kind':'saved.set','edition_id':EN,'saved':'false','occurred_at':stamp},

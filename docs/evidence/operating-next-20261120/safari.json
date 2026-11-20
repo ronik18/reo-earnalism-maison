@@ -1,0 +1,35 @@
+{
+  "browser": "native Safari",
+  "version": "26.5",
+  "scope": "Current local changed-area desktop consent/notices and actual synthetic login",
+  "rows": [
+    {
+      "route": "privacy",
+      "status": "PASS"
+    },
+    {
+      "route": "contact",
+      "status": "PASS"
+    },
+    {
+      "route": "series",
+      "status": "PASS"
+    },
+    {
+      "route": "sign-up",
+      "status": "PASS"
+    },
+    {
+      "route": "sign-in",
+      "status": "PASS"
+    },
+    {
+      "id": "native-password-login-and-settings-bundle",
+      "status": "PASS"
+    }
+  ],
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

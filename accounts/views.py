@@ -15,6 +15,7 @@ from core.models import OutboxJob
 from core.services import apply_operation,audit
 from .models import User,Preferences,Device,Consent,EmailActionToken
 from . import services
+from .password_consent import PASSWORD_PURPOSE_FIELDS,validate_password_purpose_consent,record_password_purpose_consent
 
 
 def acknowledgement(request):
@@ -46,13 +47,16 @@ def session_view(request):
 
 @json_endpoint(('POST',),auth=False)
 def register_view(request):
-    d=json_body(request,{'email','password','display_name','locale','return_path'},['email','password','display_name'])
-    services.register_member(**d);return api_response(acknowledgement(request),202)
+    d=json_body(request,{'email','password','display_name','locale','return_path'}|PASSWORD_PURPOSE_FIELDS,['email','password','display_name'])
+    consent=validate_password_purpose_consent(d)
+    services.register_member(**{k:v for k,v in d.items() if k not in PASSWORD_PURPOSE_FIELDS},password_consent=consent);return api_response(acknowledgement(request),202)
 
 
 @json_endpoint(('POST',),auth=False)
 def login_view(request):
-    d=json_body(request,{'email','password'},['email','password']);services.login_member(request,**d)
+    d=json_body(request,{'email','password'}|PASSWORD_PURPOSE_FIELDS,['email','password'])
+    consent=validate_password_purpose_consent(d)
+    services.login_member(request,email=d['email'],password=d['password'],password_consent=consent)
     return api_response(services.session_data(request))
 
 
@@ -67,10 +71,13 @@ def request_action(request,purpose):
 @json_endpoint(('POST',),auth=False)
 def consume_action(request,purpose):
     if purpose not in {'email-links','email-verifications','password-resets'}:raise DomainError('not_found','Account action not found.',404)
-    d=json_body(request,{'token','new_password'} if purpose=='password-resets' else {'token'},['token','new_password'] if purpose=='password-resets' else ['token'])
+    d=json_body(request,({'token','new_password'}|PASSWORD_PURPOSE_FIELDS) if purpose=='password-resets' else {'token'},['token','new_password'] if purpose=='password-resets' else ['token'])
     if purpose=='email-links':
         services.confirm_magic_signin(request,d['token']);return api_response(services.session_data(request))
-    if purpose=='password-resets':services.confirm_password_reset(**d);return api_response({},204)
+    if purpose=='password-resets':
+        consent=validate_password_purpose_consent(d)
+        services.confirm_password_reset(token=d['token'],new_password=d['new_password'],password_consent=consent)
+        return api_response({},204)
     services.confirm_email_verification(d['token'],request=request);return api_response(services.session_data(request))
 
 
@@ -125,15 +132,21 @@ def consents(request):
 
 @json_endpoint(('POST',))
 def reauthenticate(request):
-    data=json_body(request,{'password'},['password']);services.check_rate('reauth',str(request.user.public_id),5,600)
+    data=json_body(request,{'password'}|PASSWORD_PURPOSE_FIELDS,['password'])
+    consent=validate_password_purpose_consent(data)
+    services.check_rate('reauth',str(request.user.public_id),5,600)
     if not request.user.check_password(data['password']):raise DomainError('invalid_credentials','Authentication could not be confirmed.',403)
-    now=timezone.now();request.session['reauthenticated_at']=now.isoformat()
+    now=timezone.now()
+    with transaction.atomic():
+        record_password_purpose_consent(request.user,'reauthentication',consent)
+        request.session['reauthenticated_at']=now.isoformat()
     return api_response({'reauthenticated_at':services.iso(now),'valid_until':services.iso(now+timedelta(minutes=5))})
 
 
 @json_endpoint(('POST',))
 def change_password(request):
-    data=json_body(request,{'current_password','new_password'},['current_password','new_password'])
+    data=json_body(request,{'current_password','new_password'}|PASSWORD_PURPOSE_FIELDS,['current_password','new_password'])
+    consent=validate_password_purpose_consent(data)
     if not request.user.check_password(data['current_password']):raise DomainError('invalid_credentials','Authentication could not be confirmed.',403)
     services._password(data['new_password'],request.user)
     with transaction.atomic():
@@ -146,6 +159,7 @@ def change_password(request):
         update_session_auth_hash(request,user);request.session['session_epoch']=user.session_epoch;request.session['reauthenticated_at']=timezone.now().isoformat()
         # Django rotated the current session key; keep its bound device relationship.
         Device.objects.filter(pk=request.session.get('device_id')).update(session_id=request.session.session_key)
+        record_password_purpose_consent(user,'password_change',consent)
     return api_response({},204)
 
 

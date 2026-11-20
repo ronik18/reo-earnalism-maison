@@ -31,7 +31,7 @@ class PublicAudioPreviewScreensTests(TestCase):
         from django.contrib.auth import get_user_model
         from billing.models import Entitlement
         user=get_user_model().objects.create_user('free-sample-member@example.test','Local-Free-Sample-2026',is_verified=True)
-        login=self.client.post('/en/sign-in/', {'email':user.email,'password':'Local-Free-Sample-2026','return_to':'/en/'})
+        login=self.client.post('/en/sign-in/', {'email':user.email,'password':'Local-Free-Sample-2026','password_purpose_consent':'on','password_purpose_version':'password-account-v1','return_to':'/en/'})
         self.assertEqual(login.status_code,302)
         self.assertFalse(Entitlement.objects.filter(user=user).exists())
         response=self.client.get(f'/en/listen/{self.revision.edition_id}/preview/')

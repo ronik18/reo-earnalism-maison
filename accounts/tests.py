@@ -25,7 +25,7 @@ class AccountAcceptanceTests(TestCase):
         if response.status_code==200 and path=='/api/v1/auth/login':self.csrf=response.json()['csrf_token']
         return response
     def login(self):
-        response=self.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS});self.assertEqual(response.status_code,200,response.content);return response
+        response=self.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'});self.assertEqual(response.status_code,200,response.content);return response
     def test_anonymous_and_authenticated_session_match_contract(self):
         validate_schema(self.client.get('/api/v1/session').json(),'Session')
         response=self.login();validate_schema(response.json(),'Session')
@@ -33,20 +33,20 @@ class AccountAcceptanceTests(TestCase):
         self.assertTrue(response.json()['reauthenticated_at'].endswith('Z'))
         self.assertNotIn('password',response.content.decode());self.assertNotIn('session_epoch',response.content.decode())
     def test_csrf_is_required_for_login_and_registration(self):
-        response=self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json')
+        response=self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(response.status_code,403);validate_schema(response.json(),'Problem')
         self.assertEqual(self.client.post('/api/v1/auth/register',{},content_type='application/json').status_code,403)
     def test_email_normalization_and_password_hash(self):
         self.assertNotEqual(self.user.password,PASS)
         self.assertTrue(self.user.check_password(PASS))
         self.assertEqual(services.login_member.__name__,'login_member')
-        response=self.post('/api/v1/auth/login',{'email':' MEMBER@EXAMPLE.TEST ','password':PASS})
+        response=self.post('/api/v1/auth/login',{'email':' MEMBER@EXAMPLE.TEST ','password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'})
         self.assertEqual(response.status_code,200,response.content)
     def test_unverified_registration_queues_and_delivers_real_local_mail(self):
-        response=self.post('/api/v1/auth/register',{'email':'new@example.test','password':PASS,'display_name':'Local member'})
+        response=self.post('/api/v1/auth/register',{'email':'new@example.test','password':PASS,'display_name':'Local member','password_purpose_consent':True,'password_purpose_version':'password-account-v1'})
         self.assertEqual(response.status_code,202);validate_schema(response.json(),'Acknowledgement')
         user=User.objects.get(email='new@example.test');self.assertFalse(user.is_verified)
-        self.assertEqual(self.post('/api/v1/auth/login',{'email':user.email,'password':PASS}).status_code,403)
+        self.assertEqual(self.post('/api/v1/auth/login',{'email':user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'}).status_code,403)
         run_due_jobs();self.assertEqual(len(mail.outbox),1)
         self.assertEqual(OutboxJob.objects.get(kind='email_action').status,'done')
         action=EmailActionToken.objects.get(user=user)
@@ -88,7 +88,7 @@ class AccountAcceptanceTests(TestCase):
         staff=User.objects.create_superuser('staff@example.test',PASS)
         first=self.client.get('/admin/login/')
         token=self.client.cookies[settings.CSRF_COOKIE_NAME].value
-        response=self.client.post('/admin/login/',{'username':staff.email,'password':PASS,'next':'/admin/'},HTTP_X_CSRFTOKEN=token)
+        response=self.client.post('/admin/login/',{'username':staff.email,'password':PASS,'next':'/admin/','password_purpose_consent':True,'password_purpose_version':'password-account-v1'},HTTP_X_CSRFTOKEN=token)
         self.assertEqual(response.status_code,302,response.content)
         self.assertIn(settings.DEVICE_COOKIE_NAME,self.client.cookies)
         self.assertEqual(self.client.get('/admin/').status_code,200)

@@ -23,6 +23,7 @@ from core.api import DomainError,public_uuid
 from core.models import OutboxJob
 from core.services import audit
 from .models import User,Preferences,Device,EmailActionToken,Consent,RateLimitBucket,normalize_email_address
+from .password_consent import record_password_purpose_consent
 
 TTL={'magic_signin':600,'password_reset':1800,'verify_email':86400}
 
@@ -96,7 +97,7 @@ def _create_action(user,purpose,return_path='/',locale='en'):
     return action
 
 
-def register_member(email,password,display_name='',locale='en',return_path='/'):
+def register_member(email,password,display_name='',locale='en',return_path='/',*,password_consent=None):
     email=_email(email);_password(password);check_rate('registration',email,3,3600)
     if locale not in ('en','bn') or not isinstance(display_name,str) or len(display_name)>100:
         raise DomainError('validation_error','Invalid profile fields.',422)
@@ -112,6 +113,7 @@ def register_member(email,password,display_name='',locale='en',return_path='/'):
         except IntegrityError:return {'status':'delivery_pending'}
         Preferences.objects.create(user=user,locale=locale);Consent.objects.create(user=user,necessary_notice_version=settings.PRIVACY_NOTICE_VERSION)
         _create_action(user,'verify_email',return_path,locale);audit(user,'account.registered',user)
+        record_password_purpose_consent(user,'registration',password_consent)
     return {'status':'delivery_pending'}
 
 
@@ -187,7 +189,7 @@ def confirm_email_verification(token,request=None):
     return user
 
 
-def confirm_password_reset(token,new_password):
+def confirm_password_reset(token,new_password,*,password_consent=None):
     _password(new_password)
     with transaction.atomic():
         action=consume_action(token,'password_reset');user=User.objects.select_for_update().get(pk=action.user_id)
@@ -198,6 +200,7 @@ def confirm_password_reset(token,new_password):
         from reader.models import DownloadLicense
         DownloadLicense.objects.filter(user=user,revoked_at=None).update(revoked_at=now)
         audit(user,'account.password_reset',user)
+        record_password_purpose_consent(user,'password_reset',password_consent)
 
 
 @transaction.atomic
@@ -220,12 +223,14 @@ def bind_device(request,user):
     return device
 
 
-def login_member(request,email,password):
+def login_member(request,email,password,*,password_consent=None):
     email=_email(email);check_rate('login',email,5,900)
     user=authenticate(request,email=email,password=password)
     if user is None:raise DomainError('invalid_credentials','Email or password is incorrect.',403)
     if not user.is_verified:raise DomainError('email_verification_required','Verify your email before signing in.',403)
-    login(request,user)
+    with transaction.atomic():
+        login(request,user)
+        record_password_purpose_consent(user,'sign_in',password_consent)
     return user
 
 

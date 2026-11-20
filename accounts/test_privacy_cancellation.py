@@ -18,7 +18,7 @@ class PrivacyCancellationTests(TestCase):
   self.user=User.objects.create_user('original-cancel-owner@example.test',PASS,is_verified=True)
   self.other=User.objects.create_user('original-cancel-other@example.test',PASS,is_verified=True)
   self.personal=PersonalList.objects.create(user=self.user,name='Keep original private list')
-  self.client=Client();self.assertEqual(self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS},content_type='application/json').status_code,200)
+  self.client=Client();self.assertEqual(self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json').status_code,200)
  def deletion(self):
   r=self.client.post('/api/v1/me/privacy/requests',{'kind':'delete','confirm':True},content_type='application/json',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()));self.assertEqual(r.status_code,202,r.content)
   return OutboxJob.objects.get(pk=r.json()['privacy_request_id'])
@@ -57,7 +57,7 @@ class PrivacyCancellationTests(TestCase):
      response=self.cancel(job);self.assertEqual(response.status_code,409,response.content);job.refresh_from_db();self.assertEqual(job.status,status)
  def test_foreign_owner_and_stale_reauthentication_never_change_the_request(self):
   job=self.deletion();job.status='blocked';job.error_code='privacy_hold';job.save()
-  foreign=Client();self.assertEqual(foreign.post('/api/v1/auth/login',{'email':self.other.email,'password':PASS},content_type='application/json').status_code,200)
+  foreign=Client();self.assertEqual(foreign.post('/api/v1/auth/login',{'email':self.other.email,'password':PASS,'password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json').status_code,200)
   self.assertEqual(self.cancel(job,client=foreign).status_code,404)
   session=self.client.session;session['reauthenticated_at']=(timezone.now()-timedelta(minutes=10)).isoformat();session.save()
   self.assertEqual(self.cancel(job).status_code,403);job.refresh_from_db();self.assertEqual(job.status,'blocked')

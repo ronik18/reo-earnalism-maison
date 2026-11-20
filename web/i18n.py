@@ -446,3 +446,10 @@ STRINGS.update({
 STRINGS.update({'account_notice_help': ('Read how we use your account details before creating an account. Optional marketing is a separate choice.', 'অ্যাকাউন্ট খোলার আগে আপনার তথ্য কীভাবে ব্যবহার হয় পড়ুন। ঐচ্ছিক বিপণনের পছন্দ আলাদা।')})
 
 STRINGS['privacy_cancel_help'] = ('Withdrawing this request does not release a legal hold, resolve financial obligations or undo completed actions.', 'অনুরোধ প্রত্যাহারে আইনি সংরক্ষণ বা আর্থিক দায় মেটে না এবং সম্পূর্ণ কাজ ফেরানো যায় না।')
+
+STRINGS.update({
+    'password_purpose_consent_required': ('Please select the password-purpose choice before continuing. If this page is old, reload it to read the current notice.', 'চালিয়ে যাওয়ার আগে পাসওয়ার্ড ব্যবহারের উদ্দেশ্যে সম্মতি দিন। পুরোনো পৃষ্ঠা হলে বর্তমান বিজ্ঞপ্তি পড়তে পুনরায় লোড করুন।'),
+    'password_purpose_help': ('Reo Enterprise uses your password to verify your identity and secure your Earnalism account. Passwords are stored as protected hashes.', 'Reo Enterprise আপনার পরিচয় যাচাই ও আর্নালিজম অ্যাকাউন্ট সুরক্ষিত রাখতে পাসওয়ার্ড ব্যবহার করে। পাসওয়ার্ড সুরক্ষিত হ্যাশ হিসেবে রাখা হয়।'),
+    'password_purpose_choice': ('I consent to this use of my password for account access and security.', 'অ্যাকাউন্টে প্রবেশ ও নিরাপত্তার জন্য আমার পাসওয়ার্ডের এই ব্যবহারে আমি সম্মতি দিচ্ছি।'),
+    'password_purpose_withdrawal': ('You may decline or withdraw by contacting us, or request account deletion in Settings. Without this processing, password access cannot be provided. Write to', 'আপনি সম্মতি না দিতে বা প্রত্যাহার করতে আমাদের লিখতে পারেন, অথবা সেটিংস থেকে অ্যাকাউন্ট মোছার অনুরোধ করতে পারেন। এই প্রক্রিয়াকরণ ছাড়া পাসওয়ার্ড দিয়ে প্রবেশ দেওয়া সম্ভব নয়। লিখুন'),
+})

@@ -233,6 +233,8 @@ class EmailForm(forms.Form):
 
 class LoginForm(EmailForm):
     password = forms.CharField(strip=False)
+    password_purpose_consent = forms.BooleanField(required=True)
+    password_purpose_version = forms.ChoiceField(choices=[("password-account-v1", "password-account-v1")])
 
 
 @domain_view
@@ -243,7 +245,12 @@ def sign_in(request, locale):
         form = LoginForm(request.POST)
         if form.is_valid():
             try:
-                login_member(request, **form.cleaned_data)
+                from accounts.password_consent import validate_password_purpose_consent
+                credentials = dict(form.cleaned_data)
+                consent = validate_password_purpose_consent(credentials)
+                credentials.pop("password_purpose_consent")
+                credentials.pop("password_purpose_version")
+                login_member(request, **credentials, password_consent=consent)
             except DomainError as exc:
                 key = {"verification_required": "email_unverified", "email_verification_required": "email_unverified"}.get(exc.code, "invalid_credentials")
                 return page(request, locale, "web/auth.html", status=exc.status, auth_mode="sign-in", error_key=key, values={"email": form.cleaned_data["email"]})
@@ -275,7 +282,12 @@ def sign_up(request, locale):
         if not form.is_valid():
             return page(request, locale, "web/auth.html", status=400, auth_mode="sign-up", error_key="invalid_input", values=request.POST)
         try:
-            register_member(**form.cleaned_data, display_name=request.POST.get("display_name", ""), locale=locale, return_path=safe_return(request.POST.get("return_to"), locale))
+            from accounts.password_consent import validate_password_purpose_consent
+            credentials = dict(form.cleaned_data)
+            consent = validate_password_purpose_consent(credentials)
+            credentials.pop("password_purpose_consent")
+            credentials.pop("password_purpose_version")
+            register_member(**credentials, password_consent=consent, display_name=request.POST.get("display_name", ""), locale=locale, return_path=safe_return(request.POST.get("return_to"), locale))
         except DomainError as exc:
             return page(request, locale, "web/auth.html", status=exc.status, auth_mode="sign-up", error_key="invalid_input", values={"email":form.cleaned_data["email"], "display_name":request.POST.get("display_name", "")})
         return page(request, locale, "web/auth.html", auth_mode="sign-up", notice_key="registration_sent")
@@ -317,7 +329,9 @@ def password_reset_confirm(request, locale, token):
     from core.api import DomainError
     if request.method == "POST":
         try:
-            confirm_password_reset(token, request.POST.get("password", ""))
+            from accounts.password_consent import validate_password_purpose_consent
+            consent = validate_password_purpose_consent({"password_purpose_consent": request.POST.get("password_purpose_consent") == "on", "password_purpose_version": request.POST.get("password_purpose_version")})
+            confirm_password_reset(token, request.POST.get("password", ""), password_consent=consent)
         except DomainError as exc:
             return page(request, locale, "web/auth.html", status=exc.status, auth_mode="reset-confirm", error_key="token_expired" if exc.code == "action_token_invalid" else "invalid_input")
         return page(request, locale, "web/auth.html", auth_mode="sign-in", notice_key="password_changed")

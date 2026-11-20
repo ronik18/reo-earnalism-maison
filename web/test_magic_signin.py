@@ -96,7 +96,7 @@ class MagicSigninScreensTests(TestCase):
     def test_settings_connect_requires_fresh_identity_and_preserves_google_session_window(self):
         import json
         from django.utils import timezone
-        self.client.post('/en/sign-in/', {'email': self.user.email, 'password': 'Local-Magic-Fixture-2026'})
+        self.client.post('/en/sign-in/', {'email': self.user.email, 'password': 'Local-Magic-Fixture-2026','password_purpose_consent':'on','password_purpose_version':'password-account-v1'})
         session = self.client.session
         session.pop('reauthenticated_at', None)
         session.save()

@@ -414,3 +414,50 @@ class SupportRetentionConcurrencyTests(TransactionTestCase):
         EmailAddress.objects.create(user=user,email='secondary@example.test',verified=False,primary=False)
         self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['abandoned_signups'],0)
         self.assertTrue(User.objects.filter(pk=user.pk).exists())
+
+
+class PasswordPurposeRetentionTests(TestCase):
+    def receipt(self, user, purpose='registration', days=181, **extra):
+        from .password_consent import PASSWORD_PURPOSE_VERSION
+        at = timezone.now()-timedelta(days=days)
+        detail={'purpose':purpose,'notice_version':PASSWORD_PURPOSE_VERSION,'affirmative':True,'collected_at':at.isoformat()}
+        detail.update(extra)
+        row=AuditEvent.objects.create(actor=user,action='password.purpose_consented',entity_kind='User',entity_id=str(user.pk),detail=detail)
+        AuditEvent.objects.filter(pk=row.pk).update(created_at=at)
+        row.refresh_from_db()
+        return row
+
+    def test_registration_choice_does_not_keep_untouched_abandoned_signup_forever(self):
+        user=User.objects.create_user('abandoned-consent@example.test')
+        User.objects.filter(pk=user.pk).update(date_joined=timezone.now()-timedelta(days=10))
+        receipt=self.receipt(user,days=10)
+        # Receipt is at the registration instant, inside the five-minute window.
+        User.objects.filter(pk=user.pk).update(date_joined=receipt.created_at)
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['abandoned_signups'],1)
+        self.assertFalse(User.objects.filter(pk=user.pk).exists())
+        receipt.refresh_from_db()
+        self.assertIsNone(receipt.actor_id)
+        self.assertEqual(receipt.detail['purpose'],'registration')
+
+    def test_active_other_purpose_or_malformed_registration_remains_activity(self):
+        for purpose,extra in [('sign_in',{}),('registration',{'extra_evidence':'must preserve'})]:
+            user=User.objects.create_user('active-'+purpose+'@example.test')
+            receipt=self.receipt(user,purpose=purpose,days=10,**extra)
+            User.objects.filter(pk=user.pk).update(date_joined=receipt.created_at)
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['abandoned_signups'],0)
+        self.assertEqual(User.objects.count(),2)
+
+    def test_exact_receipts_expire_at180_days_including_null_actor_but_holds_and_unknown_details_remain(self):
+        user=User.objects.create_user('receipt-retention@example.test',is_verified=True)
+        eligible=self.receipt(user)
+        orphan=self.receipt(user,purpose='sign_in');orphan.actor=None;orphan.save(update_fields=['actor'])
+        recent=self.receipt(user,days=179)
+        held=self.receipt(user,purpose='reauthentication')
+        AuditEvent.objects.create(action='retention.hold',entity_kind='AuditEvent',entity_id=str(held.pk))
+        malformed=self.receipt(user,extra_note='preserve')
+        preview=cleanup_account_retention(dry_run=True)
+        self.assertEqual(preview['eligible']['audit_outcomes'],2)
+        self.assertTrue(AuditEvent.objects.filter(pk=eligible.pk).exists())
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['audit_outcomes'],2)
+        self.assertFalse(AuditEvent.objects.filter(pk__in=[eligible.pk,orphan.pk]).exists())
+        self.assertEqual(AuditEvent.objects.filter(pk__in=[recent.pk,held.pk,malformed.pk]).count(),3)

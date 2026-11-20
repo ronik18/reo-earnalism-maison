@@ -12,7 +12,7 @@ class ClearedDraftJourneyTests(TestCase):
         self.staff=get_user_model().objects.create_superuser('intake@example.test','Local-Intake-Password-47')
         self.client=Client(enforce_csrf_checks=True)
         token=self.client.get('/api/v1/session').json()['csrf_token']
-        self.client.post('/api/v1/auth/login',json.dumps({'email':self.staff.email,'password':'Local-Intake-Password-47'}),content_type='application/json',HTTP_X_CSRFTOKEN=token)
+        self.client.post('/api/v1/auth/login',json.dumps({'email':self.staff.email,'password':'Local-Intake-Password-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'}),content_type='application/json',HTTP_X_CSRFTOKEN=token)
         self.csrf=self.client.get('/api/v1/session').json()['csrf_token']
     def test_draft_intake_review_integrity_replay_and_member_denial(self):
         key=str(uuid.uuid4());body=json.dumps({'manifest_id':'EN-071'})
@@ -39,7 +39,7 @@ class ClearedDraftJourneyTests(TestCase):
         self.assertContains(page,'all covered with white blossoms.')
         self.assertEqual(Client().get(url).status_code,404)
         member=get_user_model().objects.create_user('member-review@example.test','Local-Member-Password-47',is_verified=True)
-        c=Client();c.post('/api/v1/auth/login',{'email':member.email,'password':'Local-Member-Password-47'},content_type='application/json')
+        c=Client();c.post('/api/v1/auth/login',{'email':member.email,'password':'Local-Member-Password-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(c.get(url).status_code,404)
         self.assertNotEqual(c.get(f'/api/v1/content/manifests/{r.id}').status_code,200)
         u=r.units.first();p=u.paragraphs.first();from django.utils import timezone
@@ -65,7 +65,7 @@ class ClearedDraftJourneyTests(TestCase):
         self.assertEqual(digest(result.content),images[1].sha256)
         self.assertEqual(Client().get(url).status_code,401)
         member=get_user_model().objects.create_user('ordinary-cover@example.test','Ordinary-Password-47',is_verified=True)
-        c=Client();c.post('/api/v1/auth/login',{'email':member.email,'password':'Ordinary-Password-47'},content_type='application/json')
+        c=Client();c.post('/api/v1/auth/login',{'email':member.email,'password':'Ordinary-Password-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(c.get(url).status_code,403)
         self.assertEqual(c.get(f'/api/v1/staff/draft-editions/{r.edition_id}').status_code,403)
         page=self.client.get(f'/en/titles/{r.edition_id}/');self.assertContains(page,'Reader · draft edition')

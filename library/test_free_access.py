@@ -82,7 +82,7 @@ class FreeAccessBoundaryTests(TestCase):
             self.assertEqual(services.authorized_until(self.user,self.revision),expiry)
 
     def test_offline_free_license_is_bounded_device_owned_and_rolls_back_without_financial_mutation(self):
-        response=self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':'Original-Free-Fixture-47'},content_type='application/json')
+        response=self.client.post('/api/v1/auth/login',{'email':self.user.email,'password':'Original-Free-Fixture-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
         self.assertEqual(response.status_code,200);device=response.json()['device_id']
         body={'edition_revision_id':str(self.revision.pk),'format':'reader','unit_ids':[str(self.revision.units.first().pk)],'device_id':device}
         response=self.client.post('/api/v1/me/downloads',body,content_type='application/json',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
@@ -176,7 +176,7 @@ class FreeAccessBoundaryTests(TestCase):
             for index,formats in enumerate((('reader','audio'),('audio','reader'))):
                 with self.subTest(first_format=formats[0]):
                     user=get_user_model().objects.create_user(f'original-mixed-{index}@example.test','Original-Free-Fixture-47',is_verified=True)
-                    self.assertEqual(self.client.post('/api/v1/auth/login',{'email':user.email,'password':'Original-Free-Fixture-47'},content_type='application/json').status_code,200)
+                    self.assertEqual(self.client.post('/api/v1/auth/login',{'email':user.email,'password':'Original-Free-Fixture-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json').status_code,200)
                     device=self.client.get('/api/v1/session').json()['device_id'];licenses={}
                     for fmt in formats:
                         body={'edition_revision_id':str(revision.pk),'format':fmt,'unit_ids':[str(unit.pk)],'device_id':device}

@@ -48,7 +48,7 @@ class FirstBookJourneyTests(TestCase):
         preview=self.client.get(f'/en/read/{EN}/{unit.id}/')
         self.assertEqual(preview.status_code,200)
         self.assertNotIn(unit.paragraphs.order_by('ordinal').last().text,preview.content.decode())
-        self.assertStatus(self.send('/api/v1/auth/register',{'email':'journey@example.test','password':'Journey-Original-Passphrase-47','display_name':'Local journey','locale':'bn','return_path':f'/bn/read/{EN}/{unit.id}/'}),202)
+        self.assertStatus(self.send('/api/v1/auth/register',{'email':'journey@example.test','password':'Journey-Original-Passphrase-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1','display_name':'Local journey','locale':'bn','return_path':f'/bn/read/{EN}/{unit.id}/'}),202)
         call_command('run_maintenance',stdout=io.StringIO())
         messages=list((Path(self.directory.name)/'mail').glob('*'))
         self.assertEqual(len(messages),1,'Verification must reach the configured local outbox')
@@ -61,7 +61,7 @@ class FirstBookJourneyTests(TestCase):
         self.assertIn(self.client.get(url.path+'?'+url.query).status_code,[200,302])
         self.assertStatus(self.send('/api/v1/auth/email-verifications/confirm',{'token':token}),200)
         self.csrf=self.client.get('/api/v1/session').json()['csrf_token']
-        self.assertStatus(self.send('/api/v1/auth/login',{'email':'journey@example.test','password':'Journey-Original-Passphrase-47'}),200,'Session')
+        self.assertStatus(self.send('/api/v1/auth/login',{'email':'journey@example.test','password':'Journey-Original-Passphrase-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'}),200,'Session')
         self.csrf=self.client.get('/api/v1/session').json()['csrf_token']
         session=self.client.get('/api/v1/session').json()
         # Historic Bengali account/link reaches the shared English controls and unchanged edition.
