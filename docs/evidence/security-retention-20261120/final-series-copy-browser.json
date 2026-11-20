@@ -1,0 +1,81 @@
+{
+  "release": "6fda67205cbcd8bee6f2a2338a2db14bc99cc0f5",
+  "rows": [
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "legacy_alias": "en",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "legacy_alias": "bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "legacy_alias": "en",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "legacy_alias": "bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "legacy_alias": "en",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "legacy_alias": "bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "legacy_alias": "en",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "legacy_alias": "bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "legacy_alias": "en",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "legacy_alias": "bn",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "legacy_alias": "en",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "legacy_alias": "bn",
+      "status": "PASS"
+    }
+  ],
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

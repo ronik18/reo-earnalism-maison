@@ -1,0 +1,10 @@
+{
+  "url": "https://dashboard.render.com/cron/crn-dbv7agetlv9c7381is10/runs",
+  "commit": "4db8e69",
+  "run_tail": " \nNovember 20, 2026 at 10:36 PM GMT+5:30\nRUN\n4\nTRIGGER\nDURATION\nRun\n\nCron job run\n\nTRIGGER\nManual\nDURATION\n5m 53s\n\nRun\n9m ago\nby\nyou\n\nRun\n\nCron job run\n\nTRIGGER\nManual\nDURATION\n16m 35s\n\nRun\n55m ago\nby\nyou\n\nRun\n\nCron job run\n\nTRIGGER\nScheduled\nDURATION\n34.1s\n\nRun\n14h ago\n\nRun\n\nCron job run\n\nTRIGGER\nScheduled\nDURATION\n13.8s\n\nRun\n1d ago\n\n0 services selected:\nMove",
+  "labels": [
+    "Last successful run",
+    "Run failed",
+    "Run failed"
+  ]
+}

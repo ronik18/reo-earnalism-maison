@@ -1,7 +1,7 @@
 {
   "review_date": "2026-11-20",
   "scope": "Source qualification for scoped Earnalism security-log retention in existing isolated deployment",
-  "status": "SOURCE_QUALIFIED_PROVIDER_ACCEPTANCE_PENDING",
+  "status": "SCOPED_PROVIDER_ACCEPTANCE_PASS",
   "provenance": "Actual local test/build results supplied by authoritative root integration lane; this documentation task did not rerun them. Exact final-source CI remains root-owned after final fixes.",
   "checks": [
     {
@@ -35,10 +35,10 @@
     "required": false,
     "new_migration_claimed": false
   },
-  "provider_activation": "PENDING",
-  "actual_provider_archive_restore": "PENDING",
-  "live_end_to_end_validation": "PENDING",
-  "final_exact_source_ci": "ROOT_OWNED_PENDING_FINAL_SOURCE",
+  "provider_activation": "PASS_ALL_THREE_SERVICES_LIVE",
+  "actual_provider_archive_restore": "PASS_ENCRYPTED_LOG_HISTORY",
+  "live_end_to_end_validation": "PASS",
+  "final_exact_source_ci": "PASS",
   "cert_in_contact": {
     "submission": "SENT_PROVIDER_RECORD_VERIFIED",
     "authority": "Explicit exact-message owner approval",
@@ -55,12 +55,11 @@
     "new_service_or_plan": "NONE"
   },
   "limits": [
-    "Source tests do not prove provider activation or captured production coverage.",
-    "No retrospective180-day log history or vendor-internal ICT-log completeness claimed."
+    "Scoped application-log acceptance; no full vendor/geographic legal certification or invented historical180-day coverage."
   ],
   "provider_browser": "Recovered using supported headed mode; no profile copy or new browser provisioning.",
   "render_monitoring_key": "Only Monitoring Read, existing workspace; exact three resource query/response allowlist. Services/Deploys/write permissions absent.",
-  "provider_configuration": "Four archive variables saved; feature OFF until qualified source deploy.",
+  "provider_configuration": "Feature ON; exact fixed three-resource source; separate log-only recipient; existing backup configuration preserved.",
   "initial_source_CI": {
     "commit": "c1d4817cbbcd85920f4d081a3cabb89f59a0cf42",
     "run": 44767009318,
@@ -85,9 +84,10 @@
     "note": "Before final quota-zero patch;57focused archive tests cover final patch."
   },
   "provider_source_validation": {
-    "safe_rows_processed": 18000,
-    "complete": false,
-    "issue": "Quota reset boundary exhausted earlier retries; final Retry-After zero margin tested. Complete production archive acceptance pending."
+    "complete": true,
+    "decrypted_rows": 66104,
+    "coverage_end": "2026-11-20T17:01:00Z",
+    "raw_logs_saved": false
   },
   "local_browser": {
     "checks": 42,
@@ -102,5 +102,24 @@
       "phone"
     ],
     "private_contact_details_absent": true
+  },
+  "final_release": "6fda67205cbcd8bee6f2a2338a2db14bc99cc0f5",
+  "final_root_checks": {
+    "tests": 105,
+    "skips": 0,
+    "result": "PASS"
+  },
+  "final_CI": {
+    "tests": 604,
+    "result": "PASS",
+    "age_dependent_skips": 20,
+    "covered_by_actual_local_crypto_tests": true
+  },
+  "final_main_CI": 44783822779,
+  "archive_qualified_release": "4db8e693a9d53e733bf16ef489b127767578f9dc",
+  "final_copy_tests": {
+    "existing_web_tests": 36,
+    "live_three_engine_desktop_phone_and_legacy_aliases": 12,
+    "result": "PASS"
   }
 }
