@@ -18,7 +18,7 @@
     {
       "name": "archive_export_restore",
       "status": "PASS",
-      "tests": 53,
+      "tests": 56,
       "qualification": "Actual local age encryption/decryption fixture and archive/export/restore tests; no production archive restore claim."
     },
     {
@@ -60,5 +60,22 @@
   ],
   "provider_browser": "Recovered using supported headed mode; no profile copy or new browser provisioning.",
   "render_monitoring_key": "Only Monitoring Read, existing workspace; exact three resource query/response allowlist. Services/Deploys/write permissions absent.",
-  "provider_configuration": "Four archive variables saved; feature OFF until qualified source deploy."
+  "provider_configuration": "Four archive variables saved; feature OFF until qualified source deploy.",
+  "initial_source_CI": {
+    "commit": "c1d4817cbbcd85920f4d081a3cabb89f59a0cf42",
+    "run": 44767009318,
+    "backend_tests": 589,
+    "backend_skips": 11,
+    "backend_seconds": 244.656,
+    "client_tests": 37,
+    "result": "PASS",
+    "crypto_note": "Actual age fixtures separately passed in local Docker."
+  },
+  "provider_quota": {
+    "observed_requests_per_minute": 30,
+    "bootstrap_page_bound": 200,
+    "bootstrap_line_bound": 20000,
+    "security_time_budget_seconds": 600,
+    "database_backup_time_budget_unchanged": true
+  }
 }

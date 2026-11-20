@@ -165,6 +165,20 @@ class SecurityArchiveTests(TestCase):
         self.client.list_objects_v2=lambda **kwargs:{'Contents':[]}
         with self.assertRaises(ArchiveError):collector._inventory(prefix)
 
+    def test_bootstrap_capacity_changes_only_security_budget_and_cap_exhaustion_is_incomplete(self):
+        from unittest.mock import patch
+        with patch('operations.security_log_archive.time.monotonic',return_value=1000):collector=self.collector()
+        self.assertEqual(self.archive.max_seconds,300);self.assertEqual(collector.archive.config.max_seconds,600);self.assertEqual(collector.archive.deadline,1600)
+        self.assertEqual(collector.config.max_pages,200);self.assertEqual(collector.config.max_lines,20000)
+        self.assertEqual(collector.config.max_plain_bytes,20*1024**2);self.assertEqual(collector.archive.config.max_bytes,25*1024**2)
+        api=API();calls=[]
+        def unfinished(start,end):
+            calls.append((start,end));lower=datetime.fromisoformat(start.replace('Z','+00:00'))+timedelta(seconds=1)
+            return {'hasMore':True,'nextStartTime':iso(lower),'nextEndTime':end,'logs':[]}
+        api.page=unfinished;collector=self.collector(api)
+        with self.assertRaises(ArchiveError):list(collector._rows(self.start,self.now))
+        self.assertEqual(len(calls),200);self.assertEqual(self.client.objects,{})
+
     def test_inventory_truncation_and_unknown_ciphertext_metadata_stop_deletion(self):
         collector=self.collector();collector.run(self.now);self.client.truncated=True
         with self.assertRaises(ArchiveError):collector.retention(self.now+timedelta(days=181),True)
@@ -253,6 +267,25 @@ class RenderTransportTests(TestCase):
             factory.return_value.request.side_effect=ConnectionResetError('original-private-transport-detail')
             with self.assertRaises(ArchiveError) as failed:RenderLogs(config,monotonic()+30).page(config.inception,'2026-11-20T01:00:00Z')
             self.assertEqual(factory.call_count,3);self.assertEqual(sleep.call_count,2);self.assertNotIn('original-private',str(failed.exception))
+
+    def test_quota_retry_waits_58_or_60_seconds_only_inside_the_same_deadline(self):
+        config=LogConfig('original-private-fixture','2026-11-20T00:00:00Z');end='2026-11-20T01:00:00Z'
+        for wait in [58,60]:
+            clock=[10.0];connections=[MagicMock(),MagicMock()]
+            connections[0].getresponse.return_value=self.response(429,retry_after=str(wait));connections[1].getresponse.return_value=self.response()
+            def slept(seconds):clock[0]+=seconds
+            with self.subTest(wait=wait),patch('operations.security_log_archive.time.monotonic',side_effect=lambda:clock[0]),patch('operations.security_log_archive.time.sleep',side_effect=slept) as sleep,patch('operations.security_log_archive.http.client.HTTPSConnection',side_effect=connections) as factory:
+                self.assertEqual(RenderLogs(config,71).page(config.inception,end)['logs'],[])
+                sleep.assert_called_once_with(wait);self.assertEqual(factory.call_count,2)
+                self.assertLessEqual(factory.call_args_list[1].kwargs['timeout'],61-wait)
+
+    def test_quota_wait_over_60_or_remaining_budget_fails_without_sleep_or_retry(self):
+        config=LogConfig('original-private-fixture','2026-11-20T00:00:00Z');end='2026-11-20T01:00:00Z'
+        for header,deadline in [('61',100),('nan',100),('inf',100),('invalid',100),('58',40)]:
+            with self.subTest(header=header,deadline=deadline),patch('operations.security_log_archive.time.monotonic',return_value=10),patch('operations.security_log_archive.time.sleep') as sleep,patch('operations.security_log_archive.http.client.HTTPSConnection') as factory:
+                factory.return_value.getresponse.return_value=self.response(429,retry_after=header)
+                with self.assertRaises(ArchiveError):RenderLogs(config,deadline).page(config.inception,end)
+                self.assertEqual(factory.call_count,1);sleep.assert_not_called()
 
     def test_deadline_invalid_payload_and_tls_fail_without_unsafe_retry(self):
         import ssl

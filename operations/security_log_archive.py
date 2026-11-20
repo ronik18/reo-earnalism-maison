@@ -111,8 +111,8 @@ class LogConfig:
     token:str
     inception:str
     held_prefixes:tuple=()
-    max_pages:int=100
-    max_lines:int=10000
+    max_pages:int=200
+    max_lines:int=20000
     max_plain_bytes:int=20*1024**2
 
     def validate(self):
@@ -167,7 +167,7 @@ class RenderLogs:
                 if isinstance(retry_after,str):
                     try:
                         delay=float(retry_after)
-                        if not math.isfinite(delay) or not 0<=delay<=10:raise ValueError()
+                        if not math.isfinite(delay) or not 0<=delay<=60:raise ValueError()
                     except ValueError:raise ArchiveError('Scoped Render log read requires a later retry.') from None
             except ssl.SSLCertVerificationError:
                 raise ArchiveError('Scoped Render log TLS verification failed.') from None
@@ -189,7 +189,7 @@ class SecurityLogs:
         log_config.validate()
         if not isinstance(recipient,str) or not re.fullmatch(r'age1[0-9a-z]{58}',recipient):raise ArchiveError('A public age archive recipient is required.')
         #180 daily overlapping windows need more than1000 pair/checkpoint objects.
-        self.archive=Archive(replace(archive_config,max_objects=max(archive_config.max_objects,5000),max_bytes=min(archive_config.max_bytes,25*1024**2)),client)
+        self.archive=Archive(replace(archive_config,max_objects=max(archive_config.max_objects,5000),max_bytes=min(archive_config.max_bytes,25*1024**2),max_seconds=max(archive_config.max_seconds,600)),client)
         self.config=log_config;self.recipient=recipient;self.api=api or RenderLogs(log_config,self.archive.deadline);self.age=age
         self.pages=self.lines=self.plain_bytes=0
 
