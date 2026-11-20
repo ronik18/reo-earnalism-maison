@@ -36,5 +36,14 @@
     "deferred": true,
     "blocking": false
   },
-  "deployment": "Pending exact-headCI, immutable asset readback and isolated rollout"
+  "deployment": "PASS; see deployment.json",
+  "fresh_exact_main_ci": {
+    "run": 44813626255,
+    "status": "PASS",
+    "backend_suite": 636,
+    "backend_ci_skips": 20,
+    "client_tests": 37,
+    "local_crypto_coverage": "Actual no-skip635full local run plus final14MFA/corefocused pass; skippedCIcrypto area unchanged and exercised locally"
+  },
+  "ordinary_member_browser_checks": 3
 }
