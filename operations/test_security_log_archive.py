@@ -12,7 +12,7 @@ from pathlib import Path
 from unittest import TestCase,skipUnless
 from unittest.mock import patch,MagicMock
 from .database_archive import ArchiveConfig,ArchiveError
-from .security_log_archive import (LogConfig,SecurityLogs,RenderLogs,ROOT,RESOURCES,WORKSPACE,iso,packed,safe_row,redact,run_security_log_archive)
+from .security_log_archive import (LogConfig,SecurityLogs,RenderLogs,ROOT,RESOURCES,WORKSPACE,iso,packed,safe_row,redact,run_security_log_archive,security_log_failure,coded_error)
 from .test_database_archive import FakeR2
 
 
@@ -44,6 +44,28 @@ class RedactionTests(TestCase):
         safe=safe_row(row(self.now,message=json.dumps(event)),self.now,self.now)
         self.assertEqual(safe['source']['actor_id'],identity);self.assertEqual(safe['source']['source_ip'],'192.0.2.1')
         self.assertNotIn('password',safe['source']);self.assertNotIn('headers',safe['source']);self.assertNotIn('original-private-fixture',json.dumps(safe))
+    def test_maintenance_outcomes_and_fixed_diagnostics_are_preserved_without_nested_payloads(self):
+        identity='20000000-0000-4000-8000-000000000001'
+        event={'outcome':'partial_failure','run_id':identity,'source':'scheduled_export','commit':'0123456789abcdef0123456789abcdef01234567',
+            'error_code':'security_log_provider_transport','started_at':iso(self.now),'finished_at':iso(self.now),
+            'backup_status':'verified_archive','payload':'private-unknown',
+            'security_logs':{'status':'failed','code':'security_log_deadline','coverage_status':'catching_up',
+                'verified_window_end':iso(self.now),'requested_window_end':iso(self.now),'logs':15451,
+                'pages':155,'adopted_manifest_count':2,'payload':{'token':'nested-private'},
+                'message':'raw-private','token':'private-token'}}
+        source=safe_row(row(self.now,message=json.dumps(event)),self.now,self.now)['source']
+        self.assertEqual(source['run_id'],identity);self.assertEqual(source['outcome'],'partial_failure')
+        self.assertEqual(source['commit'],event['commit']);self.assertEqual(source['error_code'],'security_log_provider_transport')
+        self.assertEqual(source['backup_status'],'verified_archive');self.assertEqual(source['security_logs']['logs'],15451)
+        self.assertEqual(len(source['security_logs']),8)
+        raw=json.dumps(source)
+        for secret in ['private-unknown','nested-private','raw-private','private-token']:self.assertNotIn(secret,raw)
+        event['commit']='token=private-commit';event['run_id']='not-a-uuid';event['source']='https://example.test/verify-email/private-action/?token=private-query'
+        event['security_logs']['code']='token=private-credential';event['security_logs']['pages']=-1
+        source=safe_row(row(self.now,message=json.dumps(event)),self.now,self.now)['source']
+        self.assertEqual(source['commit'],'[redacted-invalid-commit]');self.assertEqual(source['run_id'],'[redacted-invalid-identity]');self.assertNotIn('pages',source['security_logs'])
+        for secret in ['private-action','private-query','private-credential']:self.assertNotIn(secret,json.dumps(source))
+
     def test_every_resource_timestamp_and_field_bound_is_checked(self):
         for change in [dict(resource='srv-unrelated'),dict(message='x'*32769)]:
             with self.assertRaises(ArchiveError):safe_row(row(self.now,**change),self.now,self.now)
@@ -111,7 +133,31 @@ class SecurityArchiveTests(TestCase):
         self.assertNotIn('original-private-provider-error',str(failed.exception))
         self.assertTrue(any(key.endswith('.manifest.json') for key in self.client.objects));self.assertFalse(any('/checkpoints/' in key for key in self.client.objects))
         self.client.put_object=original;api=API();result=self.collector(api).run(self.now)
-        self.assertEqual(api.calls[0][0],iso(self.start));self.assertEqual(result['status'],'verified_security_log_archive')
+        self.assertEqual(api.calls,[]);self.assertEqual(result['adopted_manifest_count'],1);self.assertEqual(result['status'],'verified_security_log_archive')
+    def test_checkpoint_and_adoption_require_ciphertext_ownership_metadata(self):
+        collector=self.collector();collector.run(self.now)
+        checkpoint=next(key for key in self.client.objects if '/checkpoints/' in key)
+        cipher=next(key for key in self.client.objects if key.endswith('.jsonl.age'))
+        self.client.metadata[cipher]['maison-security-logs']='unrelated'
+        with self.assertRaises(ArchiveError):collector._checkpoint(checkpoint)
+        del self.client.objects[checkpoint]
+        with self.assertRaises(ArchiveError):self.collector().run(self.now)
+        self.assertFalse(any('/checkpoints/' in key for key in self.client.objects))
+
+    def test_adoption_accepts_known_redaction_versions_and_rejects_unknown(self):
+        for version in (1,2,3):
+            self.client=FakeR2();collector=self.collector();collector.run(self.now)
+            for key in list(self.client.objects):
+                if '/checkpoints/' in key:del self.client.objects[key]
+                elif key.endswith('.manifest.json'):
+                    manifest=json.loads(self.client.objects[key]);self.assertEqual(manifest['redaction_version'],2)
+                    manifest['redaction_version']=version;raw=packed(manifest);self.client.objects[key]=raw
+                    self.client.metadata[key]['sha256']=hashlib.sha256(raw).hexdigest()
+            if version in (1,2):
+                result=self.collector(API()).run(self.now);self.assertEqual(result['adopted_manifest_count'],1)
+            else:
+                with self.assertRaises(ArchiveError):self.collector(API()).run(self.now)
+
     def test_checkpoint_lost_response_and_conflicting_retry_preserve_first_verified_window(self):
         original=self.client.put_object
         def lost_response(**kwargs):
@@ -126,6 +172,84 @@ class SecurityArchiveTests(TestCase):
         changed=packed({'original':'different checkpoint body'})
         with self.assertRaises(ArchiveError):collector._put(key,changed,'application/json',hashlib.sha256(changed).hexdigest(),len(changed))
         self.assertEqual(self.client.objects[key],previous)
+
+    def test_interrupted_bootstrap_resumes_verified_end_without_overlap_and_signals_full_coverage(self):
+        requested=self.now+timedelta(days=2);api=API();original=api.page
+        def interrupted(start,end):
+            if datetime.fromisoformat(start.replace('Z','+00:00')).day==21:raise coded_error('security_log_provider_transport','original private fixture error')
+            return original(start,end)
+        api.page=interrupted;collector=self.collector(api)
+        with self.assertRaises(ArchiveError) as failed:collector.run(requested)
+        report=security_log_failure(failed.exception)
+        self.assertEqual(report['code'],'security_log_provider_transport');self.assertEqual(report['coverage_status'],'catching_up')
+        verified=datetime(2026,11,21,tzinfo=timezone.utc)
+        self.assertEqual(report['verified_window_end'],iso(verified));self.assertEqual(report['requested_window_end'],iso(requested-timedelta(minutes=5)))
+        key=max(key for key in self.client.objects if '/checkpoints/' in key);checkpoint=collector._checkpoint(key)
+        self.assertEqual(checkpoint['coverage_status'],'catching_up');self.assertEqual(checkpoint['window_end'],iso(verified))
+        retry=API();result=self.collector(retry).run(requested)
+        self.assertEqual(retry.calls[0][0],iso(verified));self.assertEqual(result['coverage_status'],'complete');self.assertEqual(result['verified_window_end'],result['requested_window_end'])
+
+    def old_piece(self,start,end):
+        with tempfile.TemporaryDirectory() as directory:return self.collector()._window(start,end,directory)
+
+    def test_adopts_only_complete_exact_contiguous_old_pairs_and_validates_legacy_checkpoint(self):
+        first=datetime(2026,11,21,tzinfo=timezone.utc);second=first+timedelta(days=1)
+        self.old_piece(self.start,first);self.old_piece(first,second)
+        api=API();collector=self.collector(api);result=collector.run(self.now+timedelta(days=2))
+        self.assertEqual(result['adopted_manifest_count'],2);self.assertEqual(api.calls[0][0],iso(second));self.assertEqual(result['coverage_status'],'complete')
+        key=max(key for key in self.client.objects if '/checkpoints/' in key);value=collector._checkpoint(key)
+        value.pop('coverage_status');value.pop('requested_window_end')
+        raw=packed(value);self.client.objects[key]=raw;self.client.metadata[key]['sha256']=hashlib.sha256(raw).hexdigest()
+        self.assertEqual(collector._checkpoint(key)['window_end'],result['window_end'])
+        legacy_retry=API();self.collector(legacy_retry).run(self.now+timedelta(days=3))
+        self.assertEqual(legacy_retry.calls[0][0],iso(datetime.fromisoformat(result['window_end'].replace('Z','+00:00'))-timedelta(days=1)))
+
+    def test_later_old_pair_cannot_skip_an_unverified_earlier_window_and_corruption_cannot_be_adopted(self):
+        first=datetime(2026,11,21,tzinfo=timezone.utc);second=first+timedelta(days=1)
+        self.old_piece(first,second)
+        api=API([coded_error('security_log_provider_transport','private-fixture')])
+        with self.assertRaises(ArchiveError):self.collector(api).run(self.now+timedelta(days=2))
+        self.assertEqual(api.calls[0][0],iso(self.start));self.assertFalse(any('/checkpoints/' in key for key in self.client.objects))
+        self.client=FakeR2();entry=self.old_piece(self.start,first);manifest=self.collector()._manifest(entry['key']);cipher=manifest['ciphertext_key']
+        raw=self.client.objects[cipher];self.client.objects[cipher]=raw[:-1]+bytes([raw[-1]^1])
+        api=API()
+        with self.assertRaises(ArchiveError) as failed:self.collector(api).run(self.now+timedelta(days=2))
+        self.assertEqual(security_log_failure(failed.exception)['code'],'security_log_integrity');self.assertEqual(api.calls,[]);self.assertFalse(any('/checkpoints/' in key for key in self.client.objects))
+
+    def test_complete_normal_overlap_does_not_rewrite_old_checkpoint_keys(self):
+        requested=self.now+timedelta(days=2);self.collector().run(requested)
+        original={key:value for key,value in self.client.objects.items() if '/checkpoints/' in key}
+        api=API();result=self.collector(api).run(requested+timedelta(days=1))
+        self.assertEqual(api.calls[0][0],iso(requested-timedelta(minutes=5)-timedelta(days=1)))
+        self.assertEqual(result['coverage_status'],'complete')
+        for key,value in original.items():self.assertEqual(self.client.objects[key],value)
+
+    def test_partial_progress_checkpoints_follow_hold_and_expiry_pair_rules(self):
+        requested=self.now+timedelta(days=2);api=API();original=api.page
+        def interrupted(start,end):
+            if datetime.fromisoformat(start.replace('Z','+00:00')).day==21:raise ArchiveError('Original interrupted fixture')
+            return original(start,end)
+        api.page=interrupted;collector=self.collector(api)
+        with self.assertRaises(ArchiveError):collector.run(requested)
+        key=max(key for key in self.client.objects if '/checkpoints/' in key);value=collector._checkpoint(key)
+        manifest_key=value['manifests'][0]['key'];manifest=collector._manifest(manifest_key)
+        self.client.metadata[manifest['ciphertext_key']]['retention-hold']='true'
+        old=requested+timedelta(days=181);self.assertEqual(collector.retention(old,True)['removed_pairs'],0);self.assertIn(key,self.client.objects)
+        self.client.metadata[manifest['ciphertext_key']].pop('retention-hold');self.assertEqual(collector.retention(old,True)['removed_pairs'],1);self.assertNotIn(key,self.client.objects)
+
+    def test_lost_partial_checkpoint_response_resumes_without_rereading_verified_window(self):
+        original=self.client.put_object;lost=[False]
+        def lost_response(**kwargs):
+            result=original(**kwargs)
+            if '/checkpoints/' in kwargs['Key'] and not lost[0]:
+                lost[0]=True;raise RuntimeError('original lost partial checkpoint fixture')
+            return result
+        self.client.put_object=lost_response;requested=self.now+timedelta(days=2)
+        with self.assertRaises(ArchiveError):self.collector().run(requested)
+        key=max(key for key in self.client.objects if '/checkpoints/' in key);checkpoint=self.collector()._checkpoint(key)
+        self.assertEqual(checkpoint['coverage_status'],'catching_up')
+        api=API();result=self.collector(api).run(requested)
+        self.assertEqual(api.calls[0][0],checkpoint['window_end']);self.assertEqual(result['coverage_status'],'complete')
 
     def test_native_retention_gap_fails_instead_of_advancing_checkpoint(self):
         self.collector().run(self.now);before=set(self.client.objects)
@@ -256,6 +380,7 @@ class RenderTransportTests(TestCase):
                 response=self.response(status);factory.return_value.getresponse.return_value=response
                 with self.assertRaises(ArchiveError) as failed:RenderLogs(config,monotonic()+30).page(config.inception,'2026-11-20T01:00:00Z')
                 self.assertNotIn(config.token,str(failed.exception));self.assertEqual(factory.call_count,1);response.read.assert_not_called();sleep.assert_not_called()
+                self.assertEqual(security_log_failure(failed.exception)['code'],'security_log_provider_auth' if status in (401,403) else 'security_log_provider_http')
 
     def test_429_retry_after_and_transport_exhaustion_are_bounded(self):
         from time import monotonic
@@ -268,6 +393,7 @@ class RenderTransportTests(TestCase):
             factory.return_value.request.side_effect=ConnectionResetError('original-private-transport-detail')
             with self.assertRaises(ArchiveError) as failed:RenderLogs(config,monotonic()+30).page(config.inception,'2026-11-20T01:00:00Z')
             self.assertEqual(factory.call_count,3);self.assertEqual(sleep.call_count,2);self.assertNotIn('original-private',str(failed.exception))
+            self.assertEqual(security_log_failure(failed.exception)['code'],'security_log_provider_transport')
 
     def test_quota_retry_waits_58_or_60_seconds_only_inside_the_same_deadline(self):
         config=LogConfig('original-private-fixture','2026-11-20T00:00:00Z');end='2026-11-20T01:00:00Z'
@@ -351,6 +477,17 @@ class ScheduledIntegrationTests(TestCase):
             self.assertEqual(main([]),1);logs.assert_called_once()
         raw=output.call_args.args[0];result=json.loads(raw)
         self.assertEqual(result['status'],'failed');self.assertEqual(result['code'],'backup_archive_failed');self.assertEqual(result['security_logs']['status'],'verified_security_log_archive');self.assertNotIn('never-echo-this',raw)
+
+    def test_returned_partial_coverage_is_not_a_successful_cron_and_safe_codes_never_echo_details(self):
+        from .scheduled_export import main
+        env={'BACKUP_R2_ENDPOINT':'https://'+'a'*32+'.r2.cloudflarestorage.com','BACKUP_R2_BUCKET':'original-security-fixture','BACKUP_R2_KEY_ID':'fixture','BACKUP_R2_SECRET':'original-private-secret'}
+        report={'ciphertext_bytes':10,'ciphertext_sha256':'a'*64}
+        for logs in [{'status':'verified_security_log_archive','coverage_status':'catching_up'}, {'status':'partial','coverage_status':'catching_up'}]:
+            with patch.dict(os.environ,env,clear=True),patch('operations.scheduled_export.export_database',return_value=report),patch('operations.scheduled_export.Archive') as archive,patch('operations.scheduled_export.run_security_log_archive',return_value=logs),patch('builtins.print') as output:
+                archive.return_value.upload.return_value=[];archive.return_value.retention.return_value={'dry_run':True}
+                self.assertEqual(main([]),1);self.assertEqual(json.loads(output.call_args.args[0])['status'],'partial_failure')
+        for error,code in [(ArchiveError('Security-log collection exceeded its time budget.'),'security_log_deadline'),(ArchiveError('Render log pagination did not complete within its bound.'),'security_log_page_bound'),(coded_error('security_log_provider_rate_limited','original-private-provider-payload'),'security_log_provider_rate_limited')]:
+            result=security_log_failure(error);self.assertEqual(result['code'],code);self.assertNotIn('original-private',json.dumps(result))
 
     def test_log_failure_cannot_turn_verified_backup_into_false_cron_success(self):
         from .scheduled_export import main

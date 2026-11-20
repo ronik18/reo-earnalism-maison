@@ -33,7 +33,58 @@ MANIFEST=re.compile(ROOT+r'windows/(\d{4}-\d{2}-\d{2})/('+STAMP+r')-([0-9a-f]{12
 CHECKPOINT=re.compile(ROOT+r'checkpoints/('+STAMP+r')\.json\Z')
 HOLD=re.compile(ROOT+r'windows/\d{4}-\d{2}-\d{2}/\Z')
 LABELS={'resource','instance','host','statusCode','method','level','type','path','build'}
-SOURCE_FIELDS={'event','schema_version','at','component','method','path','route','status','duration_ms','request_id','actor_id','source_ip','territory'}
+SOURCE_FIELDS={'event','schema_version','at','component','method','path','route','status','duration_ms','request_id','actor_id','source_ip','territory','outcome','run_id','source','commit','code','error_code','started_at','finished_at','backup_status'}
+
+
+ERROR_CODES={
+    'Security-log collection exceeded its time budget.':'security_log_deadline',
+    'Security-log retry exceeds its time budget.':'security_log_deadline',
+    'Archive exceeded its time budget.':'security_log_deadline',
+    'Render log pagination did not complete within its bound.':'security_log_page_bound',
+    'Security-log content exceeded its bound.':'security_log_content_bound',
+    'Security-log text exceeds its bound.':'security_log_content_bound',
+    'Render log page exceeds its bound.':'security_log_content_bound',
+    'Render log label exceeds its bound.':'security_log_content_bound',
+    'Security-log ciphertext exceeds its bound.':'security_log_encryption_bound',
+    'Security-log encryption failed.':'security_log_encryption',
+    'Security-log encryption header is invalid.':'security_log_encryption',
+    'Security-log encrypted export failed.':'security_log_encryption',
+    'Security-log encryption exceeded its bound.':'security_log_encryption_bound',
+    'Available log window exceeds native retention; no checkpoint advanced.':'security_log_coverage_gap',
+}
+
+
+SECURITY_LOG_CODES={'security_log_deadline','security_log_page_bound','security_log_content_bound','security_log_encryption_bound','security_log_coverage_gap','security_log_provider_rate_limited','security_log_provider_unavailable','security_log_provider_transport','security_log_provider_auth','security_log_provider_http','security_log_tls','security_log_integrity','security_log_configuration','security_log_archive_io','security_log_invalid_page','security_log_archive_failed','security_log_encryption'}
+
+def coded_error(code,message):
+    error=ArchiveError(message);error.security_code=code;return error
+
+
+def security_log_failure(error):
+    # Stable allowlisted categories only; never return exception/provider text.
+    code=getattr(error,'security_code',None)
+    if code not in SECURITY_LOG_CODES:
+        message=str(error)
+        code=ERROR_CODES.get(message)
+        if code is None:
+            if any(word in message for word in ('checksum','ownership','manifest','checkpoint','continuity')):code='security_log_integrity'
+            elif any(word in message for word in ('credential','recipient','configuration','inception')):code='security_log_configuration'
+            elif any(word in message for word in ('schema','labels','allowlist','requested window','valid JSON','changed log identity')):code='security_log_invalid_page'
+            elif any(word in message for word in ('Archive','archive','readback','deletion')):code='security_log_archive_io'
+            else:code='security_log_archive_failed'
+    result={'status':'failed','code':code}
+    state=getattr(error,'security_coverage',{})
+    if isinstance(state,dict):
+        if state.get('coverage_status') in ('catching_up','complete'):result['coverage_status']=state['coverage_status']
+        for name in ('verified_window_end','requested_window_end'):
+            value=state.get(name)
+            if value is None:result[name]=None
+            else:
+                try:result[name]=iso(instant(value))
+                except ArchiveError:pass
+        for name in ('logs','pages','adopted_manifest_count'):
+            if type(state.get(name)) is int and 0<=state[name]<=200001:result[name]=state[name]
+    return result
 
 
 def instant(value):
@@ -72,7 +123,9 @@ def redact(value):
 def source_value(key,value):
     if type(value) is float and not math.isfinite(value):return '[redacted-invalid-number]'
     if not isinstance(value,str):return value
-    if key in {'request_id','actor_id'}:
+    if key=='commit':return value if re.fullmatch(r'[0-9a-fA-F]{40}',value) else '[redacted-invalid-commit]'
+    if key in {'code','error_code'} and value in SECURITY_LOG_CODES:return value
+    if key in {'request_id','actor_id','run_id'}:
         try:return str(uuid.UUID(value))
         except ValueError:return '[redacted-invalid-identity]'
     if key=='source_ip':
@@ -100,7 +153,14 @@ def safe_row(row,start,end):
     except (ValueError,TypeError):source=None
     if isinstance(source,dict):
         # Unknown structured fields are omitted rather than copied as raw JSON.
+        diagnostic=source.get('security_logs')
         message=None;source={key:source_value(key,value) for key,value in source.items() if key in SOURCE_FIELDS and (value is None or type(value) in (str,int,float,bool))}
+        if isinstance(diagnostic,dict):
+            fields={'status','code','coverage_status','verified_window_end','requested_window_end'}
+            numeric={'logs','pages','adopted_manifest_count'}
+            source['security_logs']={key:source_value(key,value) for key,value in diagnostic.items()
+                if (key in fields and (value is None or isinstance(value,str)))
+                or (key in numeric and type(value) is int and 0<=value<=200000)}
     result={'id':row['id'],'timestamp':row['timestamp'],'labels':labels}
     result['source' if message is None else 'message']=source if message is None else message
     return result
@@ -138,6 +198,7 @@ class RenderLogs:
     def page(self,start,end):
         query=[('ownerId',WORKSPACE),('startTime',start),('endTime',end),('direction','forward'),('limit','100')]+[('resource',value) for value in RESOURCES]
         for attempt in range(3):
+            retry_code='security_log_provider_transport'
             delay=2**attempt
             connection=http.client.HTTPSConnection('api.render.com',timeout=min(10,self._remaining()),context=ssl.create_default_context())
             try:
@@ -162,16 +223,17 @@ class RenderLogs:
                     try:return json.loads(b''.join(chunks))
                     except (ValueError,UnicodeDecodeError):raise ArchiveError('Render log page is not valid JSON.') from None
                 if response.status!=429 and not 500<=response.status<=599:
-                    raise ArchiveError('Scoped Render log read failed.')
+                    raise coded_error('security_log_provider_auth' if response.status in (401,403) else 'security_log_provider_http','Scoped Render log read failed.')
+                retry_code='security_log_provider_rate_limited' if response.status==429 else 'security_log_provider_unavailable'
                 retry_after=response.getheader('Retry-After')
                 if isinstance(retry_after,str):
                     try:
                         delay=float(retry_after)
                         if not math.isfinite(delay) or not 0<=delay<=60:raise ValueError()
                         delay=max(1,min(60,delay+1))
-                    except ValueError:raise ArchiveError('Scoped Render log read requires a later retry.') from None
+                    except ValueError:raise coded_error(retry_code,'Scoped Render log read requires a later retry.') from None
             except ssl.SSLCertVerificationError:
-                raise ArchiveError('Scoped Render log TLS verification failed.') from None
+                raise coded_error('security_log_tls','Scoped Render log TLS verification failed.') from None
             except (OSError,http.client.HTTPException):
                 # GET-only transport retries repeat the exact uncommitted page,
                 # never yield partial records or expose provider exception data.
@@ -179,7 +241,7 @@ class RenderLogs:
             finally:
                 try:connection.close()
                 except (OSError,http.client.HTTPException):pass
-            if attempt==2:raise ArchiveError('Scoped Render log read failed after bounded retries.')
+            if attempt==2:raise coded_error(retry_code,'Scoped Render log read failed after bounded retries.')
             if delay>=self._remaining():raise ArchiveError('Security-log retry exceeds its time budget.')
             time.sleep(delay)
         raise ArchiveError('Scoped Render log read failed.')
@@ -193,6 +255,7 @@ class SecurityLogs:
         self.archive=Archive(replace(archive_config,max_objects=max(archive_config.max_objects,5000),max_bytes=min(archive_config.max_bytes,25*1024**2),max_seconds=max(archive_config.max_seconds,1200)),client)
         self.config=log_config;self.recipient=recipient;self.api=api or RenderLogs(log_config,self.archive.deadline);self.age=age
         self.pages=self.lines=self.plain_bytes=0
+        self.last_checkpoint=None;self.requested_end=None;self.adopted=0
 
     def _inventory(self,prefix):
         rows=[];token=None;seen=set()
@@ -233,28 +296,68 @@ class SecurityLogs:
         value=self._json(key)
         try:
             start=instant(value['window_start']);end=instant(value['window_end']);cipher=value['ciphertext_key']
-            if (value['security_log_version']!=1 or value['workspace']!=WORKSPACE or value['resources']!=list(RESOURCES) or not start<end or end-start>timedelta(days=1)
+            if (type(value.get('redaction_version')) is not int or value['redaction_version'] not in (1,2) or value['security_log_version']!=1 or value['workspace']!=WORKSPACE or value['resources']!=list(RESOURCES) or not start<end or end-start>timedelta(days=1)
                 or match[1]!=start.strftime('%Y-%m-%d') or match[2]!=stamp(end) or cipher!=key.removesuffix('.manifest.json')+'.jsonl.age'
                 or not HEX.fullmatch(value['ciphertext_sha256']) or match[3]!=value['ciphertext_sha256'][:12] or type(value['ciphertext_bytes']) is not int or not 0<value['ciphertext_bytes']<=self.archive.config.max_bytes):raise ValueError()
         except (KeyError,TypeError,ValueError):raise ArchiveError('Security-log manifest is invalid.') from None
         return value
 
+    def _verify_cipher(self,manifest):
+        head=self.archive.head(manifest['ciphertext_key']);metadata=head.get('Metadata',{})
+        if (head.get('ContentLength')!=manifest['ciphertext_bytes'] or metadata.get('maison-security-logs')!='v1'
+            or metadata.get('sha256')!=manifest['ciphertext_sha256']):raise ArchiveError('Security-log ciphertext ownership/checksum is invalid.')
+        actual,size,_=self.archive.get(manifest['ciphertext_key'],self.archive.config.max_bytes)
+        if (actual,size)!=(manifest['ciphertext_sha256'],manifest['ciphertext_bytes']):raise ArchiveError('Security-log ciphertext checksum is invalid.')
+
     def _checkpoint(self,key):
         match=CHECKPOINT.fullmatch(key);value=self._json(key)
         try:
             if not match or value['security_log_checkpoint']!=1 or value['workspace']!=WORKSPACE or value['resources']!=list(RESOURCES) or match[1]!=stamp(instant(value['window_end'])):raise ValueError()
+            status=value.get('coverage_status','complete');requested=instant(value.get('requested_window_end',value['window_end']));verified=instant(value['window_end'])
+            if status not in ('catching_up','complete') or (status=='complete' and verified!=requested) or (status=='catching_up' and not verified<requested):raise ValueError()
             entries=value['manifests']
             if not isinstance(entries,list) or not 1<=len(entries)<=9:raise ValueError()
             expected=instant(value['window_start'])
             for entry in entries:
                 manifest=self._manifest(entry['key'])
                 if hashlib.sha256(packed(manifest)).hexdigest()!=entry['sha256'] or instant(manifest['window_start'])!=expected:raise ValueError()
-                actual,size,_=self.archive.get(manifest['ciphertext_key'],self.archive.config.max_bytes)
-                if (actual,size)!=(manifest['ciphertext_sha256'],manifest['ciphertext_bytes']):raise ValueError()
+                self._verify_cipher(manifest)
                 expected=instant(manifest['window_end'])
             if expected!=instant(value['window_end']):raise ValueError()
         except (KeyError,TypeError,ValueError):raise ArchiveError('Security-log checkpoint is invalid/incomplete.') from None
         return value
+
+    def _adopt_window(self,start,end,inventory):
+        candidates=[]
+        for row in inventory:
+            match=MANIFEST.fullmatch(row['Key'])
+            if not match or match[1]!=start.strftime('%Y-%m-%d') or match[2]!=stamp(end):continue
+            manifest=self._manifest(row['Key'])
+            if instant(manifest['window_start'])!=start or instant(manifest['window_end'])!=end:continue
+            if manifest.get('redaction_version') not in (1,2):raise ArchiveError('Security-log adoption manifest is invalid.')
+            self._verify_cipher(manifest)
+            modified=row.get('LastModified')
+            if not isinstance(modified,datetime) or modified.tzinfo is None:raise ArchiveError('Security-log adoption manifest modification time is invalid.')
+            candidates.append((modified,row['Key'],{'key':row['Key'],'sha256':hashlib.sha256(packed(manifest)).hexdigest()}))
+        if not candidates:return None
+        self.adopted+=1
+        return max(candidates,key=lambda value:(value[0],value[1]))[2]
+
+    def _save_progress(self,start,end,inception,manifests):
+        checkpoint={'security_log_checkpoint':1,'inception':iso(inception),'workspace':WORKSPACE,'resources':list(RESOURCES),
+                    'window_start':iso(start),'window_end':iso(end),'requested_window_end':iso(self.requested_end),
+                    'coverage_status':'complete' if end==self.requested_end else 'catching_up','manifests':list(manifests)}
+        raw=packed(checkpoint);key=ROOT+'checkpoints/'+stamp(end)+'.json'
+        self._put(key,raw,'application/json',hashlib.sha256(raw).hexdigest(),len(raw))
+        self.last_checkpoint=checkpoint
+        return hashlib.sha256(raw).hexdigest()
+
+    def _coverage(self):
+        verified=self.last_checkpoint.get('window_end') if self.last_checkpoint else None
+        complete=bool(verified and self.requested_end and instant(verified)==self.requested_end)
+        return {'coverage_status':'complete' if complete else 'catching_up','verified_window_end':verified,
+                'requested_window_end':iso(self.requested_end) if self.requested_end else None,
+                'logs':self.lines,'pages':self.pages,'adopted_manifest_count':self.adopted}
 
     def _rows(self,start,end):
         original_start=start;original_end=end;lower=iso(start);upper=iso(end);seen=set();ids={}
@@ -305,7 +408,7 @@ class SecurityLogs:
             if not 0<size<=self.archive.config.max_bytes:raise ArchiveError('Security-log ciphertext exceeds its bound.')
             prefix=ROOT+'windows/'+start.strftime('%Y-%m-%d')+'/'+stamp(end)+'-'+digest[:12]
             with target.open('rb') as stream:self._put(prefix+'.jsonl.age',stream,'application/octet-stream',digest,size)
-            manifest={'security_log_version':1,'workspace':WORKSPACE,'resources':list(RESOURCES),'window_start':iso(start),'window_end':iso(end),'ciphertext_key':prefix+'.jsonl.age','ciphertext_sha256':digest,'ciphertext_bytes':size,'redaction_version':1}
+            manifest={'security_log_version':1,'workspace':WORKSPACE,'resources':list(RESOURCES),'window_start':iso(start),'window_end':iso(end),'ciphertext_key':prefix+'.jsonl.age','ciphertext_sha256':digest,'ciphertext_bytes':size,'redaction_version':2}
             raw=packed(manifest);self._put(prefix+'.manifest.json',raw,'application/json',hashlib.sha256(raw).hexdigest(),len(raw))
             return {'key':prefix+'.manifest.json','sha256':hashlib.sha256(raw).hexdigest()}
         except ArchiveError:raise
@@ -365,26 +468,44 @@ class SecurityLogs:
         return {'dry_run':not apply,'eligible_pairs':len(candidates),'removed_pairs':removed,'more':len(candidates)>len(selected)}
 
     def run(self,now=None,apply_retention=False):
+        self.pages=self.lines=self.plain_bytes=0;self.last_checkpoint=None;self.requested_end=None;self.adopted=0
+        try:return self._run(now,apply_retention)
+        except ArchiveError as error:
+            error.security_coverage=self._coverage()
+            raise
+
+    def _run(self,now,apply_retention):
         if type(apply_retention) is not bool:raise ArchiveError('Security-log retention flag must be boolean.')
-        self.pages=self.lines=self.plain_bytes=0
         now=now or datetime.now(timezone.utc)
         if not isinstance(now,datetime) or now.tzinfo is None:raise ArchiveError('Security-log collection requires an aware UTC time.')
-        now=now.astimezone(timezone.utc);end=(now-timedelta(minutes=5)).replace(second=0,microsecond=0)
+        now=now.astimezone(timezone.utc);end=(now-timedelta(minutes=5)).replace(second=0,microsecond=0);self.requested_end=end
         keys=[row['Key'] for row in self._inventory(ROOT+'checkpoints/')];known=[key for key in keys if CHECKPOINT.fullmatch(key)]
         previous=self._checkpoint(max(known)) if known else None
         inception=instant(self.config.inception)
-        if previous and (instant(previous['window_end'])>now or instant(previous.get('inception',''))!=inception):raise ArchiveError('Security-log checkpoint continuity is invalid.')
-        start=max(inception,instant(previous['window_end'])-timedelta(days=1)) if previous else inception
-        if start<now-timedelta(days=7) or inception>start or start>=end:raise ArchiveError('Available log window is invalid or exceeds native retention; no checkpoint advanced.')
-        if previous and end<=instant(previous['window_end']):return {'status':'already_archived','retention':self.retention(now,apply_retention)}
-        manifests=[];point=start
+        if previous and (instant(previous['window_end'])>end or instant(previous.get('requested_window_end',previous['window_end']))>end or instant(previous.get('inception',''))!=inception):raise ArchiveError('Security-log checkpoint continuity is invalid.')
+        self.last_checkpoint=previous
+        if previous and end==instant(previous['window_end']):return {'status':'already_archived',**self._coverage(),'retention':self.retention(now,apply_retention)}
+        catching_up=previous is None or previous.get('coverage_status','complete')=='catching_up'
+        start=instant(previous['window_end']) if previous and catching_up else max(inception,instant(previous['window_end'])-timedelta(days=1)) if previous else inception
+        if inception>start or start>=end:raise ArchiveError('Security-log inception/window configuration is invalid.')
+        # Adopt only old, fully committed exact pieces during catch-up, never
+        # normal overlap refreshes where late-arriving records must be reread.
+        inventory=self._inventory(ROOT+'windows/') if catching_up else []
+        manifests=[];point=start;prior_end=instant(previous['window_end']) if previous else None;checkpoint_sha=None
         with tempfile.TemporaryDirectory(prefix='maison-encrypted-security-logs-') as directory:
             while point<end:
                 following=min(end,(point+timedelta(days=1)).replace(hour=0,minute=0,second=0,microsecond=0))
-                manifests.append(self._window(point,following,directory));point=following
-        checkpoint={'security_log_checkpoint':1,'inception':iso(inception),'workspace':WORKSPACE,'resources':list(RESOURCES),'window_start':iso(start),'window_end':iso(end),'manifests':manifests}
-        raw=packed(checkpoint);key=ROOT+'checkpoints/'+stamp(end)+'.json';self._put(key,raw,'application/json',hashlib.sha256(raw).hexdigest(),len(raw))
-        return {'status':'verified_security_log_archive','window_start':iso(start),'window_end':iso(end),'logs':self.lines,'pages':self.pages,'manifest_count':len(manifests),'checkpoint_sha256':hashlib.sha256(raw).hexdigest(),'retention':self.retention(now,apply_retention)}
+                entry=self._adopt_window(point,following,inventory) if catching_up else None
+                if entry is None:
+                    if point<now-timedelta(days=7):raise ArchiveError('Available log window exceeds native retention; no checkpoint advanced.')
+                    entry=self._window(point,following,directory)
+                manifests.append(entry);point=following
+                # Overlap can end at a key already committed by a prior run.
+                # Only newly covered ends create progress; never rewrite keys.
+                if prior_end is None or point>prior_end:
+                    checkpoint_sha=self._save_progress(start,point,inception,manifests)
+        return {'status':'verified_security_log_archive','window_start':iso(start),'window_end':iso(end),**self._coverage(),
+                'manifest_count':len(manifests),'checkpoint_sha256':checkpoint_sha,'retention':self.retention(now,apply_retention)}
 
 
 def run_security_log_archive(archive_config,*,apply_retention=False):

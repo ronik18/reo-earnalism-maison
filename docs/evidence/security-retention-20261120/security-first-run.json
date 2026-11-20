@@ -1,0 +1,27 @@
+{
+  "run_started_at": "2026-11-20T16:20:36Z",
+  "release": "5e29c87675313707e7c5c9f36585f6a9049dee9e",
+  "status": "partial_failure",
+  "backup_status": "verified_archive",
+  "ciphertext_bytes": 316768,
+  "ciphertext_sha256": "e28956980a9c45cdab918eb0866f37ccfc42a05736bc098c049fa7c6406554a1",
+  "daily_manifest": "backups/v1/daily/2026-11-20/maison-20261120T162040Z-fa60409efdf6.manifest.json",
+  "backup_retention_removed_pairs": 0,
+  "backup_retention_removed_orphans": 0,
+  "security_logs": {
+    "status": "failed",
+    "code": "security_log_archive_failed",
+    "complete_checkpoint": false,
+    "complete_manifest_pairs": [
+      {
+        "day": "2026-11-17",
+        "ciphertext_bytes": 200
+      },
+      {
+        "day": "2026-11-18",
+        "ciphertext_bytes": 4037577
+      }
+    ]
+  },
+  "no_complete_security_acceptance_claimed": true
+}
