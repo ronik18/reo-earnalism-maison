@@ -2,6 +2,12 @@
 
 A new, independent application repository for the approved Maison design. The existing Earnalism application and infrastructure remain operational and unchanged. This repository is not a production deployment.
 
+## Audiovisual production skills
+
+The [shared audiovisual workflow](docs/EARNALISM_AUDIOVISUAL_PIPELINE.md) coordinates the six [Earnalism skills](skills/) for Bengali/English books, tutorials and social content: source and rights, the owner's final voice roster, measured background score, visuals, covers and exact-candidate review. Reuse the existing Colab resources and accepted media. The guide identifies the Maison operations that exist and the historical adapters that still need a verified handoff; skill updates do not publish content or qualify unheard recordings.
+
+Repository discovery uses `.agents/skills/` links to these canonical skill folders. Select the repository-scoped skill when another installed copy has the same name; duplicate skills are not merged, and a Git update does not automatically install or synchronize global/plugin copies.
+
 ## Run the local build
 
 Use Python 3.13 (the current macOS verification environment also uses supported Python 3.12) and PostgreSQL 18. PostgreSQL 17 local data is retained for prior-work compatibility. Install `requirements.lock` into `.venv`. The existing isolated PostgreSQL container is `earnalism-maison-pg17`, bound only to `127.0.0.1:55432`. Its generated credentials are in ignored, mode-600 `.local/database.json`; never copy this directory into a review package.
