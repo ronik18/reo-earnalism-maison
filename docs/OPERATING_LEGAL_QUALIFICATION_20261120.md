@@ -63,3 +63,7 @@ PR#17/main `4982223` is deployed: webLive and both existing cron builds updated;
 ## Approved public grievance contact —21November2026
 
 The owner expressly approved public professional name/business mailbox only. The approved runtime setting is now deployed and verified on Contact/Privacy, closing the earlier current officer-name approval item.30live desktop/virtual-phone cross-browser checks and2nativeSafari checks PASS. Private phone/personalGmail/CERT submission remain unpublished. Book/finance/maintenance/legacy invariants PASS. [Approved contact deployment and validation](evidence/grievance-publication-20261121/README.md). PhysicalUAT remains deferred/nonblocking; future-scope qualification is unchanged.
+
+## Current enabled isolated-free P0 closeout —21November2026
+
+Reviewed support/staffform/post-lock authority/staffassets defects are fixed and deployed on7297a9d. Exact-mainCI636backend/37client suite checks PASS (20CIcrypto skips covered locally),201immutable assets and120live browser checks PASS. Existing operator access,scheduledmaintenance and protected-book/finance/legacy invariants PASS. [Current register](PENDING_VALIDATIONS.md) and [actual receipt/previews](evidence/p0-closeout-20261121/README.md) supersede historical isolated-pending statements. PhysicalUAT remains deferred/nonblocking; future public/all-ages,productionHA/SLO/alert/nativePITR,paid,title and gated-capability acceptance remain distinct.

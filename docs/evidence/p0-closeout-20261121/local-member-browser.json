@@ -1,0 +1,26 @@
+{
+  "scope": "Actual local existing synthetic nonstaff member login/settings/preferences with new authority fence; original theme restored; no privacy/book/mail mutation",
+  "rows": [
+    {
+      "engine": "chromium-desktop",
+      "status": "PASS",
+      "memberSettingsMounted": true,
+      "supportMailboxOnly": true,
+      "actualPreferenceWriteRestored": true
+    },
+    {
+      "engine": "firefox-desktop",
+      "status": "PASS",
+      "memberSettingsMounted": true,
+      "supportMailboxOnly": true,
+      "actualPreferenceWriteRestored": true
+    },
+    {
+      "engine": "webkit-phone",
+      "status": "PASS",
+      "memberSettingsMounted": true,
+      "supportMailboxOnly": true,
+      "actualPreferenceWriteRestored": true
+    }
+  ]
+}

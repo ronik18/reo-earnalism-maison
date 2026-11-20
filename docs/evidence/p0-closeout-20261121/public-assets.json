@@ -1,0 +1,1422 @@
+{
+  "release": "3bfe0f7d15d03be53adb0b39daeebbc6f7153f912f8ea19df852366ebd65b175",
+  "files": 201,
+  "bytes": 8815295,
+  "all_public_HTTPS_checksums": "PASS",
+  "cache_states": [
+    "HIT",
+    "HIT"
+  ],
+  "rows": [
+    {
+      "path": "maison/app.css",
+      "status": "PASS",
+      "bytes": 27149,
+      "sha256": "2039d2285edd78190fe762fa6350aea3b03e3ab855355b6dac3d9ac0ff1afaf7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/app.js",
+      "status": "PASS",
+      "bytes": 18160,
+      "sha256": "2f04829f5f93ca5a2c0f4a154fbbb998bb8d9a5279b9570ab0ca2f9f1f22eebe",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/art/ford-gold-column.webp",
+      "status": "PASS",
+      "bytes": 280478,
+      "sha256": "ae461035db947236311f51fb6661f3d7ce6e2de704b9cefcee33b23ca6a4ff5a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/art/ford-gold-wash.webp",
+      "status": "PASS",
+      "bytes": 136396,
+      "sha256": "08446c9f43d2d9397098a165d848b559d1f3acc52728e12021406c1fc1c0e428",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/art/gold-pages.jpg",
+      "status": "PASS",
+      "bytes": 205384,
+      "sha256": "e75129d2e422c9f73dff8933701ebc6206e6d56850b0897f5b612d359b1f9c9d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/art/hero.png",
+      "status": "PASS",
+      "bytes": 2824803,
+      "sha256": "c2133204a1575120b33d057b1566ea107e76bc46a75f79238cb1afd3ad92685e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/art/river.png",
+      "status": "PASS",
+      "bytes": 2605103,
+      "sha256": "f76d6c92c4a6f464008f238dfd9994127e776859b4721fcb91be18dea6c2a61e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/asset-manifest.json",
+      "status": "PASS",
+      "bytes": 4001,
+      "sha256": "d081fad31dd02b872d1d33916fb1351bcc1e4d8e10ce5365c8dd84b7878276df",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/account-WM4D3VHU.js",
+      "status": "PASS",
+      "bytes": 48694,
+      "sha256": "11d77540c5006361299b26f8fdfc67547c9430f97ce802348217b119ae25e7ed",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/auth-OKHJF4V6.js",
+      "status": "PASS",
+      "bytes": 2798,
+      "sha256": "46d73fcbabec900fd8700412c84d7ff20c6dcdc1944d3b6e32e4e5b4e8b1e76a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/commerce-6XZH52BU.js",
+      "status": "PASS",
+      "bytes": 6888,
+      "sha256": "8790c5c887044e410d76ff3bccb5aa6bcb458f74a66fac4059e66ca6f98da525",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/downloads-GXZMW34Y.js",
+      "status": "PASS",
+      "bytes": 10438,
+      "sha256": "2e0536db0d5fee31b92ddbf9089664048d07f2fb7bae73780a98728c6ad2ca37",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/home-R6P2GZFS.js",
+      "status": "PASS",
+      "bytes": 5103,
+      "sha256": "7a2a98f0f50d7dd532326407c134f43d6a4452d9ab09020dbe11c5f4cf1d679b",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/manifest.json",
+      "status": "PASS",
+      "bytes": 1545,
+      "sha256": "db5b9f642f2bfd2a4bd736a45f12343597815e2dfdbffb4252f19d6305ab794d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/onboarding-EV5AONUN.js",
+      "status": "PASS",
+      "bytes": 8714,
+      "sha256": "0ae2ccdd2d382881dc0c0307df4578ffa00150328354642010427b85ca5c96b7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/player-7YIWJXZM.js",
+      "status": "PASS",
+      "bytes": 12028,
+      "sha256": "c3f935a89ff8a3e479a37af65d4d1b150712e4474ce24c73092a0007d431793f",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/quiz-6RK54DLN.js",
+      "status": "PASS",
+      "bytes": 4555,
+      "sha256": "e28f17ccbf1d5d8119e11c83bfc465937b787f4db3e49354f2e38a65c1c9fde5",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/reader-ZYKBQE6N.js",
+      "status": "PASS",
+      "bytes": 19150,
+      "sha256": "5f479d18643112519a7ce6264d4461bfa01618d41171a7026f08a3a8d1b03df2",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-5LQAVZYG.js",
+      "status": "PASS",
+      "bytes": 144,
+      "sha256": "87e036d7c1bc8ca63c8468fa646c307723a5f4d932aa1287acd27d1ae8205112",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-6BQSIVVD.js",
+      "status": "PASS",
+      "bytes": 577,
+      "sha256": "11247d28c5c2fb3d976002c2b55fecb6ba19fd88153e11d2c7af5832fd6ff331",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-FGAYQ3CA.js",
+      "status": "PASS",
+      "bytes": 221571,
+      "sha256": "996657229d869e7b7f28d7ea270a6514d1fab93cdf068577629fcc5f8907450e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-FGAYQ3CA.js.LEGAL.txt",
+      "status": "PASS",
+      "bytes": 1219,
+      "sha256": "c05b7fcb24f8e53417eaa2c075d12b11913d4e79aa79a3ddc5f3364332b67d61",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-FS6FJSVP.js",
+      "status": "PASS",
+      "bytes": 1474,
+      "sha256": "bb63390b3e4725b64961f482811f8e2f9990d95e48af5802ab42e83c75482540",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-H7ECUXTH.js",
+      "status": "PASS",
+      "bytes": 355,
+      "sha256": "2b40f6dab25ad6a7b6b19a18b909204117f2f9ca874bf71dd904165cb64a22d8",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-HNVLYHTX.js",
+      "status": "PASS",
+      "bytes": 830,
+      "sha256": "6c191f10996d8e1f8f73d6b26af1a301f54cca5c78e70639c9831223c45abc8d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-KPKIPHCA.js",
+      "status": "PASS",
+      "bytes": 5066,
+      "sha256": "658cbf393ca3a8927e52388e77389c454a98e0ac04a833e25a6d6564b8e6ab36",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-LMHERZFN.js",
+      "status": "PASS",
+      "bytes": 524,
+      "sha256": "90f95a5dc5459c026dd8852453eb5c313bc57779a03a03ccaf76440eedb2d065",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-LMHERZFN.js.LEGAL.txt",
+      "status": "PASS",
+      "bytes": 338,
+      "sha256": "13d20c1ebb2ef3d0dd5222cf202d91b580a7cb733249161582e7b43c8ac7a9d4",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-LP5VOVSZ.js",
+      "status": "PASS",
+      "bytes": 4501,
+      "sha256": "304ca4658ccfdcf95f1567ce6445889286cb53a93f6b8ced0fc24b0902ab886b",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-PLBWFTBM.js",
+      "status": "PASS",
+      "bytes": 1659,
+      "sha256": "12f8d399829c396f4a950bfa1609ed2a37b3d301177f096bac17825c62e88cd7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-QGIBMLAL.js",
+      "status": "PASS",
+      "bytes": 3920,
+      "sha256": "17cb9f813d4f60d23843c5634c7fc06f5d034ff8d3f6b6c7a3048b782670c5a2",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shared-YXHLZRW7.js",
+      "status": "PASS",
+      "bytes": 2328,
+      "sha256": "2bddcd6a270306291c835096faa707d81222b61d135feea7f37c5706f87d5e37",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/shell-JFGIWKBI.js",
+      "status": "PASS",
+      "bytes": 6362,
+      "sha256": "fa55738723fd5b8ae9e615fc3de12ca6f309ad58ef0628b2dfcbe9c1ac2fe486",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/support-V3ZZ3PMK.js",
+      "status": "PASS",
+      "bytes": 2144,
+      "sha256": "2ad1527e70aa93c264ec630349dce19a5dce1a24122ba62d9218bbb24d9676e3",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/dist/video-K6BQXRAV.js",
+      "status": "PASS",
+      "bytes": 8762,
+      "sha256": "375fdcc7fe3e8df042b8748f73d334f608ab6089b452ee74d1cae835ca74531f",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/cormorant-garamond-latin-wght-normal.woff2",
+      "status": "PASS",
+      "bytes": 37640,
+      "sha256": "d80df8ff5aecd299a61549f9e29ab1ed0b9b05f4ea71d50fe978e07d5240b235",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/dm-sans-latin-standard-normal.woff2",
+      "status": "PASS",
+      "bytes": 62724,
+      "sha256": "ca72d2bcea8f4daa783dbdfa2d9b46068c3ce38168e05918fb867aa453b4f890",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/font-manifest.json",
+      "status": "PASS",
+      "bytes": 1985,
+      "sha256": "268de4f9f12687b7337866d697984a6b27d36ebe45f34caba1f728e849d8d28d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/fontsource-noto-sans-bengali-5.3.0-OFL.txt",
+      "status": "PASS",
+      "bytes": 4381,
+      "sha256": "c0d17a4a6f928d78749dbebfa9d2953b6086c2a1f64cdd1e450cc77fb8199b32",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/fontsource-noto-serif-bengali-5.3.0-OFL.txt",
+      "status": "PASS",
+      "bytes": 4381,
+      "sha256": "c0d17a4a6f928d78749dbebfa9d2953b6086c2a1f64cdd1e450cc77fb8199b32",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/fontsource-variable-cormorant-garamond-5.3.0-OFL.txt",
+      "status": "PASS",
+      "bytes": 4504,
+      "sha256": "732f37009943e7f4378cf37113c9bcc4716af002a8583511aa91ed5d37683e73",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/fontsource-variable-dm-sans-5.3.0-OFL.txt",
+      "status": "PASS",
+      "bytes": 4502,
+      "sha256": "6fbd040a29c2037a765dfb9f2561e9965b5c95c6dcb5dce516089d63d5f17af7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/fontsource-variable-source-serif-4-5.3.1-OFL.txt",
+      "status": "PASS",
+      "bytes": 4314,
+      "sha256": "18aabf190848725e2576eefb5c29ba06aac1029d02132252a7f312eac2e50cf3",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/layout.tokens.json",
+      "status": "PASS",
+      "bytes": 1222,
+      "sha256": "57dc821e2b3ae52ad61e44264fbbeca432bd1dfd29d6392ac5fb85cb4c4efefa",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-sans-bengali-bengali-400-normal.woff2",
+      "status": "PASS",
+      "bytes": 44352,
+      "sha256": "adb805ae2eb639cc5d7276ee0e3798a8092fbfe02a6e5a0e19d82587680b528c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-sans-bengali-bengali-500-normal.woff2",
+      "status": "PASS",
+      "bytes": 47192,
+      "sha256": "3af14da23cfcdafc5f812a797e34abbf698b596ae0ab3c595165e68ee4ad2cef",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-sans-bengali-bengali-600-normal.woff2",
+      "status": "PASS",
+      "bytes": 47636,
+      "sha256": "abfa65f4f73d0fab61667ad7a29ed1f96d143c2c7a8323ab04d0697d858a4d90",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-serif-bengali-bengali-400-normal.woff2",
+      "status": "PASS",
+      "bytes": 58720,
+      "sha256": "b2526e720328996ce10e17f7db2eb2b6a305a68cb9fea6c719d1ade18404c2c5",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-serif-bengali-bengali-500-normal.woff2",
+      "status": "PASS",
+      "bytes": 69816,
+      "sha256": "d0f1a7611e7ec04b8d15248b393c787583fc960242166d16c4e0909614d0b830",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/noto-serif-bengali-bengali-600-normal.woff2",
+      "status": "PASS",
+      "bytes": 70824,
+      "sha256": "c494ff3edf5fb25102e2add0bfdb491d873e2f2a4d944fce0b4798a6e3e6168a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/source-serif-4-latin-standard-normal.woff2",
+      "status": "PASS",
+      "bytes": 122360,
+      "sha256": "f2ea9c12d2fe9bd3a9589b02ad2c0909da88f30938c91adc838c4f4098f9f9e0",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/typography.css",
+      "status": "PASS",
+      "bytes": 6238,
+      "sha256": "714e5e9c7b751508b9cd5bb3864546bac342225b42ca3cf1064936e3aeff7af5",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/fonts/typography.tokens.json",
+      "status": "PASS",
+      "bytes": 2527,
+      "sha256": "1b4fbfa846ecb5443b7970125ce96c86e5c3b1682e69723a721f6962864a91b2",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/LICENSE",
+      "status": "PASS",
+      "bytes": 1552,
+      "sha256": "b846415d1b514e9c1dff14a22deb906d794bc546ca6129f950a18cd091e2a669",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/LICENSE.python",
+      "status": "PASS",
+      "bytes": 14256,
+      "sha256": "765e2b1e339fef8d3e9f12892e7e072a8be309996a0be43ffc5796398ec4e7d4",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/autocomplete.css",
+      "status": "PASS",
+      "bytes": 9185,
+      "sha256": "a1909029a26579553af25a390357d10f5886cea3604a0b6896501cda05566dac",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/base.css",
+      "status": "PASS",
+      "bytes": 22120,
+      "sha256": "737e61de79492d6acfb351ee3e930b0ea3995452966f9d3f725601fdea80a86e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/changelists.css",
+      "status": "PASS",
+      "bytes": 6878,
+      "sha256": "a9a35fc49948fcd6ab2a6d088f24e49ad468357bcea151df321a0ebd58db1383",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/dark_mode.css",
+      "status": "PASS",
+      "bytes": 2808,
+      "sha256": "f8ba0096b5086c17b7bf75b2782760fb985eae1569f428a6a54bea9ee742506e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/dashboard.css",
+      "status": "PASS",
+      "bytes": 441,
+      "sha256": "882cfb2a4af92dddc7ca3c7f3b5aff5df6762dca713a9563703652d706ea1d6b",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/forms.css",
+      "status": "PASS",
+      "bytes": 8525,
+      "sha256": "bccb52c9fc42dac8730b7208062f11a0fe97c4dbb0bc5047bb0d6f24cca8ef1a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/login.css",
+      "status": "PASS",
+      "bytes": 951,
+      "sha256": "7fc95b6507405add6b19dbcdac87f591c8903d5701257e336077fcd49aea5e72",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/nav_sidebar.css",
+      "status": "PASS",
+      "bytes": 2810,
+      "sha256": "e309816f9b554f9fdf7273ff52d4b5ea36a5d108aa80e2aaff2cf5eb61ebfc2e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/responsive.css",
+      "status": "PASS",
+      "bytes": 16565,
+      "sha256": "d67321e608149091da96a7780928ed96bc49a7b44ace224075a1784ea911c6c3",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/responsive_rtl.css",
+      "status": "PASS",
+      "bytes": 1991,
+      "sha256": "54034f41942117da5bf5c1f014c9dda79eaec7fd57d13d003fb85b4131f64af8",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/rtl.css",
+      "status": "PASS",
+      "bytes": 4772,
+      "sha256": "be2dc1a643d99c41cda2fae9455da72d043f5fa565342712dafbf362d280031a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/unusable_password_field.css",
+      "status": "PASS",
+      "bytes": 663,
+      "sha256": "73eb3a7d2807e67da1ad93ba8e8a72fff4fdfd51d7d186499e719311f58d8d10",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/vendor/select2/LICENSE-SELECT2.md",
+      "status": "PASS",
+      "bytes": 1124,
+      "sha256": "4ee0cbc51370afde358652a0f977972053729ed578b6a42f5e2a037d114f0b39",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/vendor/select2/select2.css",
+      "status": "PASS",
+      "bytes": 17358,
+      "sha256": "91a960439e4f7f2f580644fee3261877937c2286defa259e06eccfecb8d53b4a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/vendor/select2/select2.min.css",
+      "status": "PASS",
+      "bytes": 14966,
+      "sha256": "15d6ad4dfdb43d0affad683e70029f97a8f8fc8637a28845009ee0542dccdf81",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/css/widgets.css",
+      "status": "PASS",
+      "bytes": 11973,
+      "sha256": "e95d23146fac9785d32f8db680803833716205cd976f75a6fb063f9285b32efb",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/LICENSE",
+      "status": "PASS",
+      "bytes": 1081,
+      "sha256": "d114faff3488c16c319b3235dc41f90239d3d63d9853733033d8f7535f5c0004",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/README.txt",
+      "status": "PASS",
+      "bytes": 321,
+      "sha256": "67963f02e1b757bdaa5d1a3f852ec94c702277a75e29440a7cb1e058fe61407c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/calendar-icons.svg",
+      "status": "PASS",
+      "bytes": 2455,
+      "sha256": "54fce3b74f82c2115a885d89c97d928c490fb842d4ed09611f8521b96666597d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/gis/move_vertex_off.svg",
+      "status": "PASS",
+      "bytes": 1129,
+      "sha256": "a2efa9a54372cb941908a15895caf3181c041224c35f99a626f33cae9c02e433",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/gis/move_vertex_on.svg",
+      "status": "PASS",
+      "bytes": 1129,
+      "sha256": "0e099c7b35839acff756182a8185069fe446147c927013f431e5fc3f01f2fe71",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-addlink.svg",
+      "status": "PASS",
+      "bytes": 331,
+      "sha256": "ff96d142f13157048fe03b11cc86fec83c2eb6e7edd919072ea7227dd956ca91",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-alert.svg",
+      "status": "PASS",
+      "bytes": 504,
+      "sha256": "697b5df4f03aead71c96cf9325fc84090ae6756ae3f11396282d2d24a6bbb700",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-calendar.svg",
+      "status": "PASS",
+      "bytes": 1086,
+      "sha256": "fdb705edafd1f7852939f2dff91d29955a1b35479e4eda3d50c89420705c4876",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-changelink.svg",
+      "status": "PASS",
+      "bytes": 380,
+      "sha256": "a6309c94b0c6f2fbd099f664155cc5330d422deafddf4cda7c8f1782f0cdf3a7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-clock.svg",
+      "status": "PASS",
+      "bytes": 677,
+      "sha256": "939e58bfa47af93c92f2194bdcac9ed0830d8a180e4458e82631d8db5beda440",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-deletelink.svg",
+      "status": "PASS",
+      "bytes": 392,
+      "sha256": "d3a5ce1e8e72e7d51f341b4ef233011d0aa65edf149a886548c96852e67a7740",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-hidelink.svg",
+      "status": "PASS",
+      "bytes": 784,
+      "sha256": "e0c1a2727b4e1643eeac1f4b5bf202fb437cf165cabeb431572041f69e603130",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-no.svg",
+      "status": "PASS",
+      "bytes": 560,
+      "sha256": "42a05a4ebae9dca8582712d807913ed1c9ffb3803f63c3c89987568df41233e7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-unknown-alt.svg",
+      "status": "PASS",
+      "bytes": 655,
+      "sha256": "2f22fda09b51d14e3d9061d828cc669a6d6f030deab1f5d1eeecd91fbeac67f8",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-unknown.svg",
+      "status": "PASS",
+      "bytes": 655,
+      "sha256": "78f7179728bb7286ff21c24ea59ebaba2ca6c8580c3c797ca7d8849ff784ddf7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-viewlink.svg",
+      "status": "PASS",
+      "bytes": 581,
+      "sha256": "34bedf732ee640e43dd6c473c685512dfcd6cd7051539f5c14034eac63b058cd",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/icon-yes.svg",
+      "status": "PASS",
+      "bytes": 436,
+      "sha256": "fc7e09a8bcb027e371a0f2ea4aa93d68625cc44759c2d485b9ad53b88f6421c3",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/inline-delete.svg",
+      "status": "PASS",
+      "bytes": 537,
+      "sha256": "197e97a6f8c449279ef92045548247b991639572ac41582b8b66e562c518c3e0",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/search.svg",
+      "status": "PASS",
+      "bytes": 458,
+      "sha256": "1e0bcb3cd4fb15f818be66edd40975ca15e09b3607ccc83c06e0cb9d4f6aa4c5",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/selector-icons.svg",
+      "status": "PASS",
+      "bytes": 3291,
+      "sha256": "d11272aee949fd447d6983fb59bbece6361ac815612e85d1dbacdac0d319d094",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/sorting-icons.svg",
+      "status": "PASS",
+      "bytes": 1097,
+      "sha256": "702bdca788b7300afe9a8f0b13f87c651bb72c3ecc6bd06da4afa9db83b79550",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/tooltag-add.svg",
+      "status": "PASS",
+      "bytes": 331,
+      "sha256": "7d3642a2e18c242e90ab6c65ab0fe1f5f168755b4b98332ba6665a7065496194",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/img/tooltag-arrowright.svg",
+      "status": "PASS",
+      "bytes": 280,
+      "sha256": "18802acbfe0ea2bf5c0cc342d9f49a10687ede0a9272fa9111a50b9e2c77c077",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/SelectBox.js",
+      "status": "PASS",
+      "bytes": 4530,
+      "sha256": "6f8dac195a9a083aa5af489b16266eb3d15bad4c1e45c283ff2eb51c301d42e7",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/SelectFilter2.js",
+      "status": "PASS",
+      "bytes": 15845,
+      "sha256": "00cbbff75b9ad6de2b32a1cef786aef3eeb681d4b5931540875578b526a27a7d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/actions.js",
+      "status": "PASS",
+      "bytes": 8076,
+      "sha256": "2999e6a620c2ae83bc11c09ac1138974701d5052fced7bbda6a6142f98c72313",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/admin/DateTimeShortcuts.js",
+      "status": "PASS",
+      "bytes": 19319,
+      "sha256": "af2261b4cf523747cc75f9e157f9b61efda973a6bd074669737ee8719f36ffed",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/admin/RelatedObjectLookups.js",
+      "status": "PASS",
+      "bytes": 9777,
+      "sha256": "b7cb5151e34a530454859be8c0cb35f9eb73a986bd75057200975c0234f63aeb",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/autocomplete.js",
+      "status": "PASS",
+      "bytes": 1060,
+      "sha256": "380a924e21d99d3599cc9284bce9be675b5d0252e33d65fd8caa589261f43b3a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/calendar.js",
+      "status": "PASS",
+      "bytes": 9141,
+      "sha256": "723eaa3eb4aa7567aafce9d6514296cb88d51828b2e18c6c6d76b92a1530febe",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/cancel.js",
+      "status": "PASS",
+      "bytes": 884,
+      "sha256": "50465dbef5aee6ce191f5ea515fc5af143e05972778bc56c78ae4b730d8aade8",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/change_form.js",
+      "status": "PASS",
+      "bytes": 606,
+      "sha256": "cce4de3910aad62f575d5fec6920410ce5dba2ee54b59bf1605a553eac50d364",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/core.js",
+      "status": "PASS",
+      "bytes": 6208,
+      "sha256": "1f8fd8669d81dd8f49c4c64fa47295badad46496c065de07e8673e8a549be3f1",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/filters.js",
+      "status": "PASS",
+      "bytes": 978,
+      "sha256": "4fe265aea64405259b885c3f7b997190cca4900096a965ddff0332f9bdd39da1",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/inlines.js",
+      "status": "PASS",
+      "bytes": 15628,
+      "sha256": "d48633adb736dac091477ec2206feebeee88e3e6e486aedb21c584e4b49be0ec",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/jquery.init.js",
+      "status": "PASS",
+      "bytes": 347,
+      "sha256": "b8cfca7fb10e04c8a97029ae4076f2b9b424c9c95e4960c24bcf9cdd67af156d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/nav_sidebar.js",
+      "status": "PASS",
+      "bytes": 3063,
+      "sha256": "d71cd5f7947719aa90f79dec56690b22e649af314da0324c1c1ab041e3e9ebe4",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/popup_response.js",
+      "status": "PASS",
+      "bytes": 532,
+      "sha256": "20a460d1d0a95bf824c13fa5eb2cb78481711306da039b70d1711c9293da1ef1",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/prepopulate.js",
+      "status": "PASS",
+      "bytes": 1531,
+      "sha256": "518916ac734ad7e396a756b921665d834b9d7e8fdd711fa32929f9025c71aa05",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/prepopulate_init.js",
+      "status": "PASS",
+      "bytes": 586,
+      "sha256": "98920f0209fc4078e2feb4aa3ba58a35111ba640882c5ae344208e435fbd4a84",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/theme.js",
+      "status": "PASS",
+      "bytes": 1653,
+      "sha256": "806eb086e2d76ed745fadfe9bd43b53bb2df5653590eeccc64e34436b3ae669e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/unusable_password_field.js",
+      "status": "PASS",
+      "bytes": 1480,
+      "sha256": "b5c1a3ec60212cca211cbb7118e02c6991f5b7416eddf4d0936977bc557d018e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/urlify.js",
+      "status": "PASS",
+      "bytes": 7887,
+      "sha256": "f280b805cc6df28258e2ecbd3b83633f0b39957cc391d7f02365e8dccc69053a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/jquery/LICENSE.txt",
+      "status": "PASS",
+      "bytes": 1097,
+      "sha256": "d4db9ebe6f29f5168eac45ad713f055623ac5d0dcd5ba92da23d650ae012020d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/jquery/jquery.js",
+      "status": "PASS",
+      "bytes": 285314,
+      "sha256": "78a85aca2f0b110c29e0d2b137e09f0a1fb7a8e554b499f740d6744dc8962cfe",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/jquery/jquery.min.js",
+      "status": "PASS",
+      "bytes": 87533,
+      "sha256": "fc9a93dd241f6b045cbff0481cf4e1901becd0e12fb45166a8f17f95823f0b1a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/LICENSE.md",
+      "status": "PASS",
+      "bytes": 1124,
+      "sha256": "4ee0cbc51370afde358652a0f977972053729ed578b6a42f5e2a037d114f0b39",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/af.js",
+      "status": "PASS",
+      "bytes": 866,
+      "sha256": "229237ba8d7d7e8efb8ccb4de51de97a83f43ab88dfa741f3d8d89e1fb9f77c8",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/ar.js",
+      "status": "PASS",
+      "bytes": 905,
+      "sha256": "cf1437a5e4a76d521fac7d4d763c780eb1c3b266e9aaeea67deca555614ce666",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/az.js",
+      "status": "PASS",
+      "bytes": 721,
+      "sha256": "37f294edfb688dfd8782f2519693fc2aa1ba84a21baa28183772b4607fdcb6e4",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/bg.js",
+      "status": "PASS",
+      "bytes": 968,
+      "sha256": "e59e889479ae93fe8875974056f7628179e58fb20e68a5ed723b88d27d059984",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/bn.js",
+      "status": "PASS",
+      "bytes": 1291,
+      "sha256": "c1d41b81ac59e3b4f21a5c2fb28ec63a3a664d750a696cef554affa0245e9841",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/bs.js",
+      "status": "PASS",
+      "bytes": 965,
+      "sha256": "839ea4592bbd471ca1feb6ab2d20daffc9eb76a2f9d49a996a2e10431db48f04",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/ca.js",
+      "status": "PASS",
+      "bytes": 900,
+      "sha256": "0d2cb2017254234c13a7f4db1612cd1ab82f811b0659e57721a7f16141818203",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/cs.js",
+      "status": "PASS",
+      "bytes": 1292,
+      "sha256": "b7ff0e5958ba632dbd29a6eab3f975b0cd924ab8d4020653c1b4d7fe6d0c08bf",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/da.js",
+      "status": "PASS",
+      "bytes": 828,
+      "sha256": "b45da6bf315849660e537624b65dc6f77a4291ff95f60a270b193b85c039275a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/de.js",
+      "status": "PASS",
+      "bytes": 866,
+      "sha256": "e5bb297dc8a1329f325c3c1f72abc2fe75774136ed06e403991ddced43d0b45c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/dsb.js",
+      "status": "PASS",
+      "bytes": 1017,
+      "sha256": "2ad3f6c4da0fef9a169e86d4ad2ec4a7f04e14fcdc30d0edd30c8f9e46c817f4",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/el.js",
+      "status": "PASS",
+      "bytes": 1182,
+      "sha256": "21dbc3f1e63f2a95fd7dd1ef95ddce32f41f62c9daa098c37959206c87a67e7f",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/en.js",
+      "status": "PASS",
+      "bytes": 844,
+      "sha256": "0bae803be28e5cdb97116c21c1f8d80456b7806708cec3c51d0019f6a4a1dc6a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/es.js",
+      "status": "PASS",
+      "bytes": 922,
+      "sha256": "22165a232f2e7d376e3b6faf06b8afb303028e53e4eefae4e0ff35a43e81d123",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/et.js",
+      "status": "PASS",
+      "bytes": 801,
+      "sha256": "2e02e074e90a8dceb7b2fc4fd546bb034cded4be96aefd17ea7a7ef22443e73c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/eu.js",
+      "status": "PASS",
+      "bytes": 868,
+      "sha256": "acb9ad3fb6c0fdab643488fcd65feb89333b7e2e425f156b1411c5c9d74ef87c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/fa.js",
+      "status": "PASS",
+      "bytes": 1023,
+      "sha256": "7ea66413d7bcb6ddab67b3ab0c63e23ac4cd763dd2dabd028db75d55404378c0",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/fi.js",
+      "status": "PASS",
+      "bytes": 803,
+      "sha256": "2951a2ae118635e7bf888a4c18b5f91331ff52435ef8538f0bfd38f381be410d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/fr.js",
+      "status": "PASS",
+      "bytes": 924,
+      "sha256": "6a3d2adab749378ec144173d2eabec83192e3ce71601b66c5055256e0bb0758d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/gl.js",
+      "status": "PASS",
+      "bytes": 924,
+      "sha256": "1d225a7c8f39c8aa785b38c53d3e7fdde67ff9740360fcf37f80569aeeae5c79",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/he.js",
+      "status": "PASS",
+      "bytes": 984,
+      "sha256": "0c83d1287c343640ee52d2cd19d4e76197280a2377bacb4763e50c9b0df857fb",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/hi.js",
+      "status": "PASS",
+      "bytes": 1175,
+      "sha256": "9ba66a88a67f8f3c33545802f2f9188b0cb8947e5f244315f8b4cf54ed96bb8d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/hr.js",
+      "status": "PASS",
+      "bytes": 852,
+      "sha256": "35c9539434e23455f5cb45b52e58f5d3e648a1751877bbc35eac9e509eefdc1e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/hsb.js",
+      "status": "PASS",
+      "bytes": 1018,
+      "sha256": "1532eccdcac669e9535bae96579d2efeb4ba1d5d1267143a561a62dad9e00ba3",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/hu.js",
+      "status": "PASS",
+      "bytes": 831,
+      "sha256": "dcf7549344a91d8f87fa1eb6c289b0e00cb244cba394673afe8c56f8bd56c8eb",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/hy.js",
+      "status": "PASS",
+      "bytes": 1028,
+      "sha256": "04b8747e7b6bc2dc0dc254288b02e4750395c8d5c77664692f6f29f96e45b038",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/id.js",
+      "status": "PASS",
+      "bytes": 768,
+      "sha256": "7c627ef80c3bd0fa739371202e317557f42fa83daafee7d78e740823266a6207",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/is.js",
+      "status": "PASS",
+      "bytes": 807,
+      "sha256": "827d1d748a939c95f8c24fad582e6014e449b357648081fd30ec0b96306e40ad",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/it.js",
+      "status": "PASS",
+      "bytes": 897,
+      "sha256": "906c6d6a9c214458f7bbf22163fef359984a811e42ad99a66ac4f9c3e6a85d13",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/ja.js",
+      "status": "PASS",
+      "bytes": 862,
+      "sha256": "b59e2ca9dc7f4847096e25b9f9ca070d5f0556612525103767cdb61051e48cb3",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/ka.js",
+      "status": "PASS",
+      "bytes": 1195,
+      "sha256": "0c7e95ae755d47c497ea4b28dadcea9c9aacdf6b82a41372bcff4ac6cdecb232",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/km.js",
+      "status": "PASS",
+      "bytes": 1088,
+      "sha256": "c7d8728de9e77358b4a1e62b1541d09d81da917a6fed60fb31217e73d01a4e38",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/ko.js",
+      "status": "PASS",
+      "bytes": 855,
+      "sha256": "226981f6fee0d9928498f15441e5eb2fbdb75448db8845b761e9717aa1c48077",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/lt.js",
+      "status": "PASS",
+      "bytes": 944,
+      "sha256": "653fb8e626d5c1d5a74f2a3e4eab2a5b6363229f73c38c6ce52a3bf0a31bfecf",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/lv.js",
+      "status": "PASS",
+      "bytes": 900,
+      "sha256": "847a442b87984a8263fdfbc0db097c412b8996e37187e4efa7a5199be65869e1",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/mk.js",
+      "status": "PASS",
+      "bytes": 1038,
+      "sha256": "3d2a71ae70692f8492b3d4dbd2a7560fbba6508c88a11d95d5fa6a450bc25dc0",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/ms.js",
+      "status": "PASS",
+      "bytes": 811,
+      "sha256": "342cf8467b642597fc6030c2d53141bcafa7927f83f9c18dcbbc2886aa9a403e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/nb.js",
+      "status": "PASS",
+      "bytes": 778,
+      "sha256": "79db8a086efa2778883eb51e9020c2abbe35ae71b8c43ed353713b2e26fbb0f1",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/ne.js",
+      "status": "PASS",
+      "bytes": 1357,
+      "sha256": "4108c33d013a1832974b9731ab62518e4dcc183be38372337b1ef5661a276e3f",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/nl.js",
+      "status": "PASS",
+      "bytes": 904,
+      "sha256": "25cb4b7d3a4b4395055edc809a06c2bd23d4b56d1fcb5984ee835870c23dd1b2",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/pl.js",
+      "status": "PASS",
+      "bytes": 947,
+      "sha256": "ea012e2989c975ff1c6cf111b30fa6b5d720741c9426e2dfd50507d1a49a8cca",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/ps.js",
+      "status": "PASS",
+      "bytes": 1049,
+      "sha256": "e09e2c66d49abf1af5bd97719a7b9bd89d07d2aaf54bc5a736c4de85f75fab83",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/pt-BR.js",
+      "status": "PASS",
+      "bytes": 876,
+      "sha256": "d0315ed47bbd7c40d25e0a633ce42b03a12ad2b19bd793516ec1a1d54e2f12bd",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/pt.js",
+      "status": "PASS",
+      "bytes": 878,
+      "sha256": "2f98eacfccdce4117cba4ae1a48dafbc6acd477e17ef8f3675c917f8852e5290",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/ro.js",
+      "status": "PASS",
+      "bytes": 938,
+      "sha256": "01a75be8b574bb62f69823a0c97d9c619eb1239b034fd388dd5ec7c2eb9e8af3",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/ru.js",
+      "status": "PASS",
+      "bytes": 1171,
+      "sha256": "6d5e9e995084f656342f36d537ced628000014b513de42aa1339fae35a49dbda",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/sk.js",
+      "status": "PASS",
+      "bytes": 1306,
+      "sha256": "3276d470fea9227b81cd35bf2ffc265d8f203cb18239c2b2cd01ed845908999a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/sl.js",
+      "status": "PASS",
+      "bytes": 925,
+      "sha256": "2cf20ac29f60a7f59c51ce14695b7f7324a534be7f9667d996dd1b82dc279059",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/sq.js",
+      "status": "PASS",
+      "bytes": 903,
+      "sha256": "a08c492d82ed2b4bc6da0dece63b062e7e251ee0e04a877160058bd01c87447a",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/sr-Cyrl.js",
+      "status": "PASS",
+      "bytes": 1109,
+      "sha256": "0684f629d89c7991a0c61112473dd6d89ffb08562a5b2672a2fd9892d528ff6c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/sr.js",
+      "status": "PASS",
+      "bytes": 980,
+      "sha256": "ec410b617c1bd2d212b2ebcbe9ea2bc734ef88c2bea1e752bd9bc4642325a065",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/sv.js",
+      "status": "PASS",
+      "bytes": 786,
+      "sha256": "73a9ea5268ad2ace3fe809580ef8827ba1ea2f2387aa8b7622bbc94468e3d491",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/th.js",
+      "status": "PASS",
+      "bytes": 1074,
+      "sha256": "b1a0cf2e4fb676ae5fb4a0af5b5c1d76424e83e99703e194a0f3d53a5499ac86",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/tk.js",
+      "status": "PASS",
+      "bytes": 771,
+      "sha256": "99410695bfbd9d01efcdc4d823ed648ec07b26c3d11a92f159b8eb27c511b615",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/tr.js",
+      "status": "PASS",
+      "bytes": 775,
+      "sha256": "743cfc892a74eef6f1f6072222acf9eb099cd932c78f9bfca3a7acef9bf39995",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/uk.js",
+      "status": "PASS",
+      "bytes": 1156,
+      "sha256": "322c61143bdd45d6bec23f938eb374d7cb3b47b137e1a421463cf86dac6b74ac",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/vi.js",
+      "status": "PASS",
+      "bytes": 796,
+      "sha256": "9b04dec92b14020aaefc803a86f17333285c488335cc684d60aabc1bb5ffb693",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/zh-CN.js",
+      "status": "PASS",
+      "bytes": 768,
+      "sha256": "a2501dbcf439aac37d219bb100a80355033e6e57b15275930d35d4b62a2bca02",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/i18n/zh-TW.js",
+      "status": "PASS",
+      "bytes": 707,
+      "sha256": "0e70c11bdcb004e7f155bd955e0ef5c4147fb4408f031c3b40b859397889e1fa",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/select2.full.js",
+      "status": "PASS",
+      "bytes": 173566,
+      "sha256": "ba0664111e4e0041b30b0c1bff832f841284e46be67344b9f4c2a7f9da2865a2",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/select2/select2.full.min.js",
+      "status": "PASS",
+      "bytes": 79212,
+      "sha256": "5c6fdab80cb86a279695dccc226a1fac50e2c922bea70242edaa28f52b7bad2d",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/xregexp/LICENSE.txt",
+      "status": "PASS",
+      "bytes": 1106,
+      "sha256": "73af2949bff9296cb0f816c3be19a4da4e95adc94c1f924796e8bad3f03f2f29",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/xregexp/xregexp.js",
+      "status": "PASS",
+      "bytes": 325171,
+      "sha256": "14cd9f16be1af6656c710a1ba723501b506ee3ff1ec63ba7420944a0f48fe6ea",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/framework/admin/js/vendor/xregexp/xregexp.min.js",
+      "status": "PASS",
+      "bytes": 163184,
+      "sha256": "f854171b2c0e1b05bee4374531622ad105a9197deb405b90a480dee8dffd7952",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/logo.png",
+      "status": "PASS",
+      "bytes": 218020,
+      "sha256": "a9513b9c17a4e9e303ea5b9483546366f9648a9dfb11bb8691d1fbb297d48da8",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/offline-worker.js",
+      "status": "PASS",
+      "bytes": 5827,
+      "sha256": "c0c26a1417543b1dce73d425051ad5eb73c9e3c90b5c5bb2294a034890aa8b31",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/LICENSE.txt",
+      "status": "PASS",
+      "bytes": 1071,
+      "sha256": "b5b1f1da112d18ea2147decfd48ddc1bf2b5aeb6c265381579340e95b15a2bb2",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/SOURCE.json",
+      "status": "PASS",
+      "bytes": 1020,
+      "sha256": "14d0e168454fb9ab31be9b76b36035e803138a407fbe94f3dfca148ec7dffead",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/archive.svg",
+      "status": "PASS",
+      "bytes": 339,
+      "sha256": "bde81c0c44e80a7b8bf97f29ec11488c1b48998f2f74b2eb29e13ef8c1975e75",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/book-open.svg",
+      "status": "PASS",
+      "bytes": 396,
+      "sha256": "b38cdb3a15dcf00cfa4811e318b021e25c6a87b47acbb11888e16d107a5642da",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/compass.svg",
+      "status": "PASS",
+      "bytes": 402,
+      "sha256": "00c7e42415f795fcea90bd9dc0b2c8266b4e9601d2937cb122cd03b7e9e9e198",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/gear.svg",
+      "status": "PASS",
+      "bytes": 1977,
+      "sha256": "5c0cb3ba307c72babf78d952d9140c682ff30307fedc7fbb87c9a293c1e2fd64",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/house.svg",
+      "status": "PASS",
+      "bytes": 356,
+      "sha256": "180e9259e99e23da197b59b19394d006d6a5d33e384cc2b9c8381cb0214a5716",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/stack.svg",
+      "status": "PASS",
+      "bytes": 483,
+      "sha256": "ee9eaaeb345e8a28c9662cf8a59147cb86080bd922e41f143444189e0116ea7e",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/icons/star.svg",
+      "status": "PASS",
+      "bytes": 810,
+      "sha256": "165cd96e51d60442fb9c7aa89592fa6ef28f22d18368c85771be302c2e977101",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/maison-theme.css",
+      "status": "PASS",
+      "bytes": 14647,
+      "sha256": "6ed8acd85b9447f72c3ae8f5734b9d86463c6f3762136c0923134a307b6d9eff",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/svg/alpana-halo.svg",
+      "status": "PASS",
+      "bytes": 11826,
+      "sha256": "b1acf5437f39b7dddb47bbc22de9457aca230c907428e59859261327192b5ca9",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/svg/jali-panel.svg",
+      "status": "PASS",
+      "bytes": 11926,
+      "sha256": "d6845867ec0bf8ca876288ebd212fcdd146167442bcddf9ed9cdaaa89efbca6c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/svg/kantha-tile.svg",
+      "status": "PASS",
+      "bytes": 510,
+      "sha256": "f3932a2dabedc4783ef234a84f9fbde8caba92ee55c81c13584c6dbaba9d2188",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/svg/peacock-crest.svg",
+      "status": "PASS",
+      "bytes": 20511,
+      "sha256": "7b9e0598b0887853e8d36f827f555a6416bf1f69bbb419d0c2dcccaba0fe35d4",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/tokens.css",
+      "status": "PASS",
+      "bytes": 1274,
+      "sha256": "ec442a9e29b2722101170074700621aaa27d7f160edf212a2b0de3d358d5b411",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/peacock/tokens.json",
+      "status": "PASS",
+      "bytes": 3884,
+      "sha256": "2d331f41ad922e8875ffa6eeb1dd034c4b656f42226f9d3b63bd4fc74f36fd7c",
+      "immutable_cache": true
+    },
+    {
+      "path": "maison/qrcode-generator-LICENSE.txt",
+      "status": "PASS",
+      "bytes": 1094,
+      "sha256": "50999ee9974fa6c9cad0c4215252fafabeba4948bc4ac13982ade086406d8fc2",
+      "immutable_cache": true
+    }
+  ],
+  "first_app_cache_states": [
+    "MISS"
+  ]
+}

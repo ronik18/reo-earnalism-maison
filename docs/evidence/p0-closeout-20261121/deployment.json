@@ -1,0 +1,89 @@
+{
+  "client_date": "2026-11-21",
+  "verified_at_utc": "2026-11-20T20:51:37.980216+00:00",
+  "application_commit": "7297a9def8a8a6f989e66d0682cc232e084afb4a",
+  "source_pr": 21,
+  "tested_candidate": "c8292ae630a6b632ac087b5fbe0f89873505c5be",
+  "candidate_and_merge_trees_identical": true,
+  "concurrent_work_preserved": "c0df8a65f683deeaff0eb8eb10f2ad5bfab00d25 audiovisual skills/documentation; no AV/book runtime execution",
+  "main_ci": {
+    "run": 44813626255,
+    "status": "PASS",
+    "backend_suite": 636,
+    "backend_ci_skips": 20,
+    "client_tests": 37,
+    "local_crypto_coverage": "Actual no-skip635full local run plus final14MFA/corefocused pass; skippedCIcrypto area unchanged and exercised locally"
+  },
+  "migrations": 0,
+  "static_release": "3bfe0f7d15d03be53adb0b39daeebbc6f7153f912f8ea19df852366ebd65b175",
+  "static_files": 201,
+  "static_bytes": 8815295,
+  "asset_acceptance": "AllpublicHTTPSchecksums/MIME/immutable metadata PASS; actualMISS\u2192HIT; licensed packagedadmin CSS/JS/relative-image files included insideMaison namespace",
+  "web": {
+    "resource": "srv-dbunbd8jo6nc73akbng0",
+    "deploy": "dep-dc0b1il9el5s73fgtf1g",
+    "status": "Live",
+    "commit": "7297a9def8a8a6f989e66d0682cc232e084afb4a"
+  },
+  "maintenance": {
+    "resource": "crn-dbv7bte7bikc73fpso3g",
+    "deploy": "dep-dc0b1ul6e07s73c80png",
+    "status": "Latest successfully deployed build",
+    "commit": "7297a9def8a8a6f989e66d0682cc232e084afb4a",
+    "actual_scheduled_success": true,
+    "lease_clear": true
+  },
+  "archive": {
+    "resource": "crn-dbv7agetlv9c7381is10",
+    "deploy": "dep-dc0b27t9el5s73fgvi1g",
+    "status": "Latest successfully deployed build",
+    "commit": "7297a9def8a8a6f989e66d0682cc232e084afb4a",
+    "schedule_key_policy_unchanged": true,
+    "new_run_or_restore_claimed": false
+  },
+  "live_browsers": {
+    "chromium_firefox_webkit_desktop_virtual_phone": 114,
+    "native_safari_desktop": 6,
+    "status": "PASS"
+  },
+  "existing_operator_readback": {
+    "session_profile_preferences_consents_devices_http": [
+      200,
+      200,
+      200,
+      200,
+      200
+    ],
+    "account_island_mounted": true,
+    "unconfigured_support_form_and_bundle_absent": true,
+    "business_mailto_present": true,
+    "new_static_namespace": true,
+    "credential_profile_financial_mutation": false
+  },
+  "closed_findings": [
+    "disabled support form advertised in Settings",
+    "missing staff password purpose inputs/explanation",
+    "post-lock account/receipt/MFA authority gap",
+    "staff static asset404"
+  ],
+  "current_isolated_free_qualification": "PASS within reviewed enabled scope; no known unresolved P0 finding from this bounded review",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "unchanged": [
+    "protected draft/null live/version42/32paragraphs/original hash",
+    "legacy source/data/DNS",
+    "free/47-region/all-ages policies",
+    "approved provider plans and schedules",
+    "database backup and log identities/policies",
+    "approved grievance name/business mailbox and private phone/Gmail boundary"
+  ],
+  "separate_conditional_scope": [
+    "future public/all-ages/actual foreign connections",
+    "full production HA/SLO/alert/nativePITR/load/recovery targets",
+    "exact-title publication",
+    "future paid/recurring provider/document acceptance",
+    "gated/P1 capabilities"
+  ]
+}

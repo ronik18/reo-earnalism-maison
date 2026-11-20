@@ -6,20 +6,18 @@ This is the current Integration Lane register. [Earlier register and detailed re
 
 **Preserved:** The Selfish Giant remains draft/null live pointer/version42/32paragraphs/original hash. Legacy source/data/apex/www/API/DNS are unchanged. No new provider plan, spending, paid activation, title publication or cutover is included. Physical Android/iOS/OS-specific UAT is **deferred and non-blocking**.
 
-## Current deployed baseline
+## Current qualified isolated release
 
-Qualified runtime `4982223`, current main evidence `ed6a425`, static release `012a3a8a2213a46ffcc12a2ae9d234de97f95135c9b5a3bfe864ac42321b32aa`. MainCI44800994283 passed621backend/37client tests (20age-tool CI skips have actual local coverage). The owner-approved grievance name/business mailbox is deployed;32changed-area live checks passed. [Deployment/approval evidence](evidence/grievance-publication-20261121/README.md).
+**Reviewed enabled free-access P0 findings are closed.** Runtime `7297a9d` is Live on the web service and the successfully deployed maintenance/archive builds. Exact-mainCI44813626255 passed636backend/37client suite checks (20CIcrypto skips have actual local coverage); no migration. All201immutable assets passed hashes/types/cache checks.114live cross-browser/virtual-phone and6nativeSafari checks PASS. Existing operator account access and actual scheduled maintenance/clear lease PASS. Protected draft/empty-finance/legacy invariants PASS. [Authoritative receipt, scope and previews](evidence/p0-closeout-20261121/README.md).
 
-## Concrete final corrections in progress
-
-| Item | Correction and required acceptance |
+| Closed finding | Actual acceptance |
 |---|---|
-| Settings support | Hide the unconfigured form/bundle and show the working business-mail channel. A known503 must state no collection, not uncertain delivery. Verify configured/unconfigured SSR and actual browser behavior. |
-| Staff password change | Render mandatory purpose checkbox/version inside the actual Django form, plus the complete purpose/privacy/withdrawal explanation. Verify real local browser change and current-session continuation. |
-| Post-lock account authority | Recheck active account, epoch and bound device/session after the User lock, before replay or mutation. Verify actual PostgreSQL lock contention for deletion/reset/revocation; preserve valid replay, verification and password/session rotation. |
-| Staff static delivery | The deployed built-in admin CSS URL returned404. Package only the installed Django admin assets and licences inside the existing Maison immutable namespace; verify production URL mapping, dependency hashes and actual live rendering. |
+| Settings support | Unconfigured form/bundle absent; business-mail channel present. Known503 says no collection. Configured/unconfiguredSSR and actual controlled stale-form browser behavior PASS. |
+| Staff password change | Mandatory purpose inputs and full explanation rendered inside the actual form; real local browser password rotation/current-session continuation PASS across engines including nativeSafari. |
+| Post-lock account authority | Current account/epoch/device/session rechecked before replay/write/default creation and staffMFA. ActualPGblocking deletion/reset/revocation tests reject without callback/receipt; valid replay,verification,reader preferences and admin rotation PASS. |
+| Staff static delivery | Previously missing installed admin assets/licences are under the existing Maison immutable namespace.201publicasset checks and actual live styled admin rendering PASS; private exclusions unchanged. |
 
-Final candidate testing, exact-headCI, immutable publication, three-service deployment and live invariant checks must pass before these rows are closed. Implementation text alone is not acceptance.
+Concurrent audiovisual skills/documentation are preserved; no book/media release workflow ran. [Earlier baseline and approval history](evidence/p0-closeout-20261121/register-before-closeout.md) remains available. This scoped acceptance is not a blanket future-public,HA,paid or title certification.
 
 ## Reusable acceptance for enabled free paths
 
