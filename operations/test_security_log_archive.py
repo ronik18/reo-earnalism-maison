@@ -168,8 +168,8 @@ class SecurityArchiveTests(TestCase):
     def test_bootstrap_capacity_changes_only_security_budget_and_cap_exhaustion_is_incomplete(self):
         from unittest.mock import patch
         with patch('operations.security_log_archive.time.monotonic',return_value=1000):collector=self.collector()
-        self.assertEqual(self.archive.max_seconds,300);self.assertEqual(collector.archive.config.max_seconds,600);self.assertEqual(collector.archive.deadline,1600)
-        self.assertEqual(collector.config.max_pages,200);self.assertEqual(collector.config.max_lines,20000)
+        self.assertEqual(self.archive.max_seconds,300);self.assertEqual(collector.archive.config.max_seconds,1200);self.assertEqual(collector.archive.deadline,2200)
+        self.assertEqual(collector.config.max_pages,500);self.assertEqual(collector.config.max_lines,50000)
         self.assertEqual(collector.config.max_plain_bytes,20*1024**2);self.assertEqual(collector.archive.config.max_bytes,25*1024**2)
         api=API();calls=[]
         def unfinished(start,end):
@@ -177,7 +177,7 @@ class SecurityArchiveTests(TestCase):
             return {'hasMore':True,'nextStartTime':iso(lower),'nextEndTime':end,'logs':[]}
         api.page=unfinished;collector=self.collector(api)
         with self.assertRaises(ArchiveError):list(collector._rows(self.start,self.now))
-        self.assertEqual(len(calls),200);self.assertEqual(self.client.objects,{})
+        self.assertEqual(len(calls),500);self.assertEqual(self.client.objects,{})
 
     def test_inventory_truncation_and_unknown_ciphertext_metadata_stop_deletion(self):
         collector=self.collector();collector.run(self.now);self.client.truncated=True
@@ -194,14 +194,15 @@ class RenderTransportTests(TestCase):
         value.read.side_effect=[body if body is not None else packed({'hasMore':False,'nextStartTime':'2026-11-20T01:00:00Z','nextEndTime':'2026-11-20T01:00:00Z','logs':[]}),b'']
         return value
 
-    def real_connection(self,body,*,chunked=False,declared_length=None):
+    def real_connection(self,body,*,chunked=False,declared_length=None,status=200,retry_after=None):
         import http.client,socket
         client,server=socket.socketpair();self.addCleanup(client.close);self.addCleanup(server.close)
         if chunked:
             headers=b'HTTP/1.1 200 OK\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\n'
             payload=f'{len(body):x}\r\n'.encode()+body+b'\r\n0\r\n\r\n'
         else:
-            headers=f'HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: {len(body) if declared_length is None else declared_length}\r\n\r\n'.encode();payload=body
+            quota=f'Retry-After: {retry_after}\r\n' if retry_after is not None else ''
+            headers=f'HTTP/1.1 {status} OriginalFixture\r\nConnection: close\r\n{quota}Content-Length: {len(body) if declared_length is None else declared_length}\r\n\r\n'.encode();payload=body
         server.sendall(headers+payload);server.shutdown(socket.SHUT_WR)
         connection=http.client.HTTPConnection('original-fixture.invalid');connection.sock=client
         return connection
@@ -262,7 +263,7 @@ class RenderTransportTests(TestCase):
         connections[0].getresponse.return_value=self.response(429,retry_after='1');connections[1].getresponse.return_value=self.response()
         with patch('operations.security_log_archive.http.client.HTTPSConnection',side_effect=connections) as factory,patch('operations.security_log_archive.time.sleep') as sleep:
             self.assertEqual(RenderLogs(config,monotonic()+30).page(config.inception,'2026-11-20T01:00:00Z')['logs'],[])
-            self.assertEqual(factory.call_count,2);sleep.assert_called_once_with(1)
+            self.assertEqual(factory.call_count,2);sleep.assert_called_once_with(2)
         with patch('operations.security_log_archive.http.client.HTTPSConnection') as factory,patch('operations.security_log_archive.time.sleep') as sleep:
             factory.return_value.request.side_effect=ConnectionResetError('original-private-transport-detail')
             with self.assertRaises(ArchiveError) as failed:RenderLogs(config,monotonic()+30).page(config.inception,'2026-11-20T01:00:00Z')
@@ -276,8 +277,19 @@ class RenderTransportTests(TestCase):
             def slept(seconds):clock[0]+=seconds
             with self.subTest(wait=wait),patch('operations.security_log_archive.time.monotonic',side_effect=lambda:clock[0]),patch('operations.security_log_archive.time.sleep',side_effect=slept) as sleep,patch('operations.security_log_archive.http.client.HTTPSConnection',side_effect=connections) as factory:
                 self.assertEqual(RenderLogs(config,71).page(config.inception,end)['logs'],[])
-                sleep.assert_called_once_with(wait);self.assertEqual(factory.call_count,2)
-                self.assertLessEqual(factory.call_args_list[1].kwargs['timeout'],61-wait)
+                actual=min(60,wait+1)
+                sleep.assert_called_once_with(actual);self.assertEqual(factory.call_count,2)
+                self.assertLessEqual(factory.call_args_list[1].kwargs['timeout'],61-actual)
+
+    def test_real_zero_retry_after_waits_across_reset_rollover_before_success(self):
+        config=LogConfig('original-private-fixture','2026-11-20T00:00:00Z');end='2026-11-20T01:00:00Z'
+        expected={'hasMore':False,'nextStartTime':end,'nextEndTime':end,'logs':[]};body=packed(expected)
+        connections=[self.real_connection(b'original quota fixture',status=429,retry_after='0'),self.real_connection(b'original quota fixture',status=429,retry_after='0'),self.real_connection(body)]
+        clock=[10.0]
+        def slept(seconds):clock[0]+=seconds
+        with patch('operations.security_log_archive.time.monotonic',side_effect=lambda:clock[0]),patch('operations.security_log_archive.time.sleep',side_effect=slept) as sleep,patch('operations.security_log_archive.http.client.HTTPSConnection',side_effect=connections) as factory:
+            self.assertEqual(RenderLogs(config,40).page(config.inception,end),expected)
+            self.assertEqual(factory.call_count,3);self.assertEqual([item.args[0] for item in sleep.call_args_list],[1,1]);self.assertEqual(clock[0],12)
 
     def test_quota_wait_over_60_or_remaining_budget_fails_without_sleep_or_retry(self):
         config=LogConfig('original-private-fixture','2026-11-20T00:00:00Z');end='2026-11-20T01:00:00Z'

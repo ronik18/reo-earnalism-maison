@@ -111,8 +111,8 @@ class LogConfig:
     token:str
     inception:str
     held_prefixes:tuple=()
-    max_pages:int=200
-    max_lines:int=20000
+    max_pages:int=500
+    max_lines:int=50000
     max_plain_bytes:int=20*1024**2
 
     def validate(self):
@@ -138,7 +138,7 @@ class RenderLogs:
     def page(self,start,end):
         query=[('ownerId',WORKSPACE),('startTime',start),('endTime',end),('direction','forward'),('limit','100')]+[('resource',value) for value in RESOURCES]
         for attempt in range(3):
-            delay=.25*(2**attempt)
+            delay=2**attempt
             connection=http.client.HTTPSConnection('api.render.com',timeout=min(10,self._remaining()),context=ssl.create_default_context())
             try:
                 connection.request('GET','/v1/logs?'+urlencode(query),headers={'Authorization':'Bearer '+self.config.token,'Accept':'application/json','User-Agent':'Earnalism-Security-Archive/1'})
@@ -168,6 +168,7 @@ class RenderLogs:
                     try:
                         delay=float(retry_after)
                         if not math.isfinite(delay) or not 0<=delay<=60:raise ValueError()
+                        delay=max(1,min(60,delay+1))
                     except ValueError:raise ArchiveError('Scoped Render log read requires a later retry.') from None
             except ssl.SSLCertVerificationError:
                 raise ArchiveError('Scoped Render log TLS verification failed.') from None
@@ -189,7 +190,7 @@ class SecurityLogs:
         log_config.validate()
         if not isinstance(recipient,str) or not re.fullmatch(r'age1[0-9a-z]{58}',recipient):raise ArchiveError('A public age archive recipient is required.')
         #180 daily overlapping windows need more than1000 pair/checkpoint objects.
-        self.archive=Archive(replace(archive_config,max_objects=max(archive_config.max_objects,5000),max_bytes=min(archive_config.max_bytes,25*1024**2),max_seconds=max(archive_config.max_seconds,600)),client)
+        self.archive=Archive(replace(archive_config,max_objects=max(archive_config.max_objects,5000),max_bytes=min(archive_config.max_bytes,25*1024**2),max_seconds=max(archive_config.max_seconds,1200)),client)
         self.config=log_config;self.recipient=recipient;self.api=api or RenderLogs(log_config,self.archive.deadline);self.age=age
         self.pages=self.lines=self.plain_bytes=0
 

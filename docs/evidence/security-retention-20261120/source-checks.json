@@ -18,7 +18,7 @@
     {
       "name": "archive_export_restore",
       "status": "PASS",
-      "tests": 56,
+      "tests": 57,
       "qualification": "Actual local age encryption/decryption fixture and archive/export/restore tests; no production archive restore claim."
     },
     {
@@ -73,9 +73,34 @@
   },
   "provider_quota": {
     "observed_requests_per_minute": 30,
-    "bootstrap_page_bound": 200,
-    "bootstrap_line_bound": 20000,
-    "security_time_budget_seconds": 600,
+    "bootstrap_page_bound": 500,
+    "bootstrap_line_bound": 50000,
+    "security_time_budget_seconds": 1200,
     "database_backup_time_budget_unchanged": true
+  },
+  "final_local_focused": {
+    "tests": 93,
+    "seconds": 3.464,
+    "result": "PASS",
+    "note": "Before final quota-zero patch;57focused archive tests cover final patch."
+  },
+  "provider_source_validation": {
+    "safe_rows_processed": 18000,
+    "complete": false,
+    "issue": "Quota reset boundary exhausted earlier retries; final Retry-After zero margin tested. Complete production archive acceptance pending."
+  },
+  "local_browser": {
+    "checks": 42,
+    "passed": 42,
+    "engines": [
+      "Chromium",
+      "Firefox",
+      "WebKit"
+    ],
+    "viewports": [
+      "desktop",
+      "phone"
+    ],
+    "private_contact_details_absent": true
   }
 }
