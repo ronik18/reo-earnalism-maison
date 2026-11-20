@@ -242,7 +242,7 @@ if not LOCAL and (urlparse(PUBLIC_BASE_URL).scheme != 'https' or not urlparse(PU
     raise ImproperlyConfigured('A canonical HTTPS PUBLIC_BASE_URL is required')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_FROM_ADDRESS', 'maison@localhost.test' if LOCAL else '')
 SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', '')
-PRIVACY_NOTICE_VERSION = 'maison-privacy-2026-11-20'
+PRIVACY_NOTICE_VERSION = 'earnalism-privacy-2026-11-20-r2'
 if not LOCAL and (not EMAIL_BACKEND or not DEFAULT_FROM_EMAIL):
     raise ImproperlyConfigured('Production email configuration is required')
 ORIGIN_SHARED_SECRET = os.getenv('ORIGIN_SHARED_SECRET', '')

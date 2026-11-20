@@ -94,7 +94,7 @@ STRINGS = {
     'mandate_method_other': ('Other', 'অন্য মাধ্যম'),
 
     'show_more': ('Show more', 'আরও দেখুন'),
-    'contact_support': ('Contact the Maison team', 'মেজঁ দলের সঙ্গে যোগাযোগ করুন'),
+    'contact_support': ('Contact the Earnalism team', 'আর্নালিজম দলের সঙ্গে যোগাযোগ করুন'),
     'support_help': ('Tell us what happened. Include the support reference above if shown. Leave out passwords and payment card details.', 'কী হয়েছে জানান। উপরে সহায়তার পরিচিতি থাকলে লিখুন। পাসওয়ার্ড বা পেমেন্ট কার্ডের তথ্য দেবেন না।'),
     'support_category': ('Topic', 'বিষয়'),
     'support_message': ('Your message', 'আপনার বার্তা'),
@@ -224,7 +224,7 @@ STRINGS = {
     "reader": ("Read", "পড়ুন"), "audio": ("Listen", "শুনুন"), "video": ("Watch", "দেখুন"),
     "version_conflict": ("Saved information changed on another device. Reload and review before trying again.", "অন্য যন্ত্রে সংরক্ষিত তথ্য বদলেছে। আবার পাতা খুলে দেখে তারপর চেষ্টা করুন।"),
     "password_hint": ("Use at least 12 characters and avoid a common or entirely numeric password.", "অন্তত ১২টি অক্ষর ব্যবহার করুন। প্রচলিত অথবা শুধু সংখ্যা দিয়ে পাসওয়ার্ড দেবেন না।"),
-    "site_name": ("Earnalism Maison", "আর্নালিজম মেজঁ"),
+    "site_name": ("Earnalism", "আর্নালিজম"),
     "home": ("Home", "হোম"), "explore": ("Explore", "অন্বেষণ"),
     "learn": ("Learn", "শিখুন"), "series": ("Series", "ধারাবাহিক"),
     "vault": ("Vault", "সংগ্রহ"), "settings": ("Settings", "পছন্দ ও অ্যাকাউন্ট"),
@@ -421,7 +421,7 @@ STRINGS.update({
     'free_historical_billing': ('Existing orders, invoices, refunds and mandate controls remain in Settings. Free access does not cancel an existing provider agreement.', 'আগের অর্ডার, ইনভয়েস, ফেরত ও ম্যান্ডেট নিয়ন্ত্রণ সেটিংসে থাকবে। বিনামূল্যে প্রবেশাধিকার বিদ্যমান পেমেন্ট-প্রদানকারীর চুক্তি বাতিল করে না।'),
     'free_checkout_title': ('Review your existing order.', 'আগের অর্ডারটি দেখুন।'),
     'free_checkout_help': ('New purchases are turned off. Access follows regional availability. Your existing order status remains below; no payment can be started from this screen.', 'নতুন কেনাকাটা বন্ধ রয়েছে। প্রবেশাধিকার আঞ্চলিক প্রাপ্যতার উপর নির্ভর করে। আগের অর্ডারের অবস্থা নিচে রয়েছে; এই পাতা থেকে পেমেন্ট শুরু করা যাবে না।'),
-    'free_access_enabled': ('Maison access is free. New purchases are disabled.', 'Maison-এ প্রবেশাধিকার বিনামূল্যে। নতুন কেনাকাটা বন্ধ রয়েছে।'),
+    'free_access_enabled': ('Earnalism access is free. New purchases are disabled.', 'Earnalism-এ প্রবেশাধিকার বিনামূল্যে। নতুন কেনাকাটা বন্ধ রয়েছে।'),
     'back_to_free_access': ('Back to free access', 'বিনামূল্যে প্রবেশাধিকারে ফিরুন'),
 })
 
@@ -444,3 +444,5 @@ STRINGS.update({
 })
 
 STRINGS.update({'account_notice_help': ('Read how we use your account details before creating an account. Optional marketing is a separate choice.', 'অ্যাকাউন্ট খোলার আগে আপনার তথ্য কীভাবে ব্যবহার হয় পড়ুন। ঐচ্ছিক বিপণনের পছন্দ আলাদা।')})
+
+STRINGS['privacy_cancel_help'] = ('Withdrawing this request does not release a legal hold, resolve financial obligations or undo completed actions.', 'অনুরোধ প্রত্যাহারে আইনি সংরক্ষণ বা আর্থিক দায় মেটে না এবং সম্পূর্ণ কাজ ফেরানো যায় না।')

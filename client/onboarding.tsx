@@ -33,7 +33,7 @@ function Onboarding({ boot }: { boot: Boot }) {
   }
   const titles = [say("Make yourself at home.", "নিজের মতো সাজিয়ে নিন।"), say("Follow your curiosity.", "কৌতূহলের পথে চলুন।"), say("What brings you here?", "কোন টানে এখানে এসেছেন?")];
   return <section className="onboarding-panel narrow" aria-busy={busy}>
-    <p className="eyebrow">{say("Your Maison · a personal beginning", "আপনার মেজঁ · নিজের মতো শুরু")}</p>
+    <p className="eyebrow">{say("Your Earnalism · a personal beginning", "আপনার আর্নালিজম · নিজের মতো শুরু")}</p>
     <h1 ref={heading} tabIndex={-1}>{finished?say("Your next chapter awaits.", "পরের অধ্যায় অপেক্ষায়।"):titles[step]}</h1>
     {returning && !finished && <p className="notice">{say("Welcome back. Review your choices or continue browsing.", "আবার স্বাগতম। পছন্দ দেখে নিন অথবা সংগ্রহ দেখতে এগিয়ে যান।")}</p>}
     {!finished && <><ol className="onboarding-steps" aria-label={say("Setup steps", "সাজানোর ধাপ")}>{[say("Comfort", "স্বাচ্ছন্দ্য"),say("Interests", "পছন্দ"),say("Purpose", "উদ্দেশ্য")].map((label,i)=><li key={label} aria-current={i===step?"step":undefined}>{i+1}. {label}</li>)}</ol>

@@ -21418,6 +21418,10 @@
               "maxLength": 120
             },
             "maxItems": 20
+          },
+          "can_cancel": {
+            "type": "boolean",
+            "description": "Whether this unprocessed owned request can still be withdrawn. False after processing or durable erasure cleanup begins; withdrawal never releases holds or obligations."
           }
         },
         "required": [

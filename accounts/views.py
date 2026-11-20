@@ -176,6 +176,15 @@ def revoke_device(request,device_id):
     return api_response(body,status)
 
 
+def privacy_cancellable(job):
+    """Pure availability projection; mutation separately rechecks the active actor."""
+    if job.kind not in ('privacy_export','privacy_delete') or job.status not in ('pending','blocked') or job.completed_at is not None:return False
+    if job.kind=='privacy_delete' and (
+        not isinstance(job.payload,dict) or 'delete_export_keys' in job.payload
+        or isinstance(job.result,dict) and job.result.get('status') in ('anonymised','anonymised_financial_records_retained','already_removed')):return False
+    return True
+
+
 def privacy_data(job):
     retained=[]
     if job.kind=='privacy_delete':
@@ -187,7 +196,7 @@ def privacy_data(job):
     status={'pending':'queued','claimed':'processing','done':'completed','blocked':'awaiting_resolution','dead':'failed','cancelled':'cancelled'}[job.status]
     return {'privacy_request_id':str(job.id),'kind':job.kind.removeprefix('privacy_'),'status':status,
         'requested_at':services.iso(job.created_at),'completed_at':services.iso(job.completed_at),
-        'download_expires_at':job.result.get('expires_at'),'retained_categories':retained}
+        'download_expires_at':job.result.get('expires_at'),'retained_categories':retained,'can_cancel':privacy_cancellable(job)}
 
 
 @json_endpoint(('GET','POST'))
@@ -218,7 +227,16 @@ def privacy_cancel(request,privacy_request_id):
     def mutate():
         job=OutboxJob.objects.select_for_update().filter(id=privacy_request_id,actor=request.user,kind__in=['privacy_export','privacy_delete']).first()
         if not job:raise DomainError('not_found','Request not found.',404)
-        if job.status=='pending':job.status='cancelled';job.save(update_fields=['status'])
+        if job.status in ('pending','blocked'):
+            # A blocked request may be withdrawn, but never abandon cleanup after
+            # account erasure has committed or reverse a completed export.
+            if not privacy_cancellable(job) or not User.objects.filter(pk=request.user.pk,is_active=True).exists():
+                raise DomainError('already_processing','This request can no longer be cancelled.',409)
+            job.status='cancelled';job.lease_owner='';job.locked_until=None
+            job.save(update_fields=['status','lease_owner','locked_until'])
+            # Preserve holds, obligations and prepared-export keys/expiry. The
+            # existing retention worker remains responsible for eligible cleanup.
+            audit(request.user,'privacy.cancelled',job)
         elif job.status!='cancelled':raise DomainError('already_processing','This request can no longer be cancelled.',409)
         return 200,privacy_data(job),1
     status,body=apply_operation(request.user,key,'privacy.cancel',{'id':privacy_request_id},mutate);return api_response(body,status)

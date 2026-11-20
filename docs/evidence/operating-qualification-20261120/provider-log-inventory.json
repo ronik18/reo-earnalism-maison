@@ -1,0 +1,32 @@
+{
+  "review_date": "2026-11-20",
+  "workspace": "tea-dbu9jguc6qcc73c379bg",
+  "isolation_preserved": true,
+  "runtime_service": "srv-dbunbd8jo6nc73akbng0",
+  "retention_UI": {
+    "last_7_days_enabled": true,
+    "last_14_days_aria_disabled": true,
+    "last_30_days_aria_disabled": true
+  },
+  "workspace_log_stream": {
+    "default_destination_configured": false,
+    "observed_action": "Set default",
+    "scope_warning": "Settings apply to all workspace services",
+    "modified": false
+  },
+  "log_payloads_exported": false,
+  "new_credentials_created": false,
+  "provider_changes": false,
+  "gap": "No verified qualifying 180-day ICT log archive or formal CERT-In contact evidence. Existing operator facility question pending. Render export alone would not establish other provider categories.",
+  "connected_metadata_search": {
+    "queries": [
+      "CERT-In",
+      "Reo security",
+      "Earnalism logs"
+    ],
+    "qualifying_facility_or_contact_record_identified": false,
+    "document_bodies_fetched": false,
+    "mailbox_accessed": false,
+    "limitation": "Bounded metadata search, not proof no operator-held facility exists; unrelated files were not opened"
+  }
+}

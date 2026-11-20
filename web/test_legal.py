@@ -50,7 +50,7 @@ class LegalNoticeTests(SimpleTestCase):
             self.assertNotContains(response,obsolete)
         self.assertContains(response,'account deletion does not instantly erase immutable backups')
         self.assertContains(response,'Existing business-mail copies remain operator-managed')
-        self.assertContains(response,'Applicable regional operating and age-appropriate requirements remain under review')
+        self.assertContains(response,'Future public-audience qualification and exact-edition publication across the approved 47 territories remain separate')
 
     def test_legacy_locale_uses_current_english_notice(self):
         response=legal.privacy(self.request('/bn/privacy/'),'bn')
@@ -67,3 +67,36 @@ class LegalNoticeTests(SimpleTestCase):
         self.assertContains(response,'readers of any age')
         self.assertContains(response,'New paid purchases are disabled during free access')
         self.assertNotContains(response,'Payments, audio/video and offline access remain unavailable')
+
+
+    def test_current_operator_tester_and_agreement_facts_do_not_claim_future_clearance(self):
+        response=legal.privacy(self.request('/en/privacy/'),'en')
+        for fact in ['registered Indian proprietorship','authorized adult staff/testers','no real customers or known child accounts','not a new age restriction','Cloud Data Processing Addendum accepted','Google sign-in is a separate identity service','IP-derived territory','approved 47 territories remain separate']:
+            self.assertContains(response,fact)
+        self.assertNotContains(response,'Account-specific acceptance and regional safeguards are being verified')
+        terms=legal.terms(self.request('/en/terms/'),'en')
+        self.assertContains(terms,'readers of any age')
+        self.assertContains(terms,'do not establish a consent exemption or change the reading-age policy')
+
+    def test_contact_channel_truthfully_tracks_disabled_and_enabled_form(self):
+        with override_settings(SUPPORT_EMAIL=''):
+            response=legal.contact(self.request('/en/contact/'),'en')
+            self.assertContains(response,'The contact form is unavailable. Please use the email address above')
+            self.assertContains(response,'support, privacy, grievance or incident requests')
+            self.assertNotContains(response,'id="support-island"')
+        with override_settings(SUPPORT_EMAIL='sales@reoenterprise.org'):
+            response=legal.contact(self.request('/en/contact/'),'en')
+            self.assertContains(response,'id="support-island"')
+            self.assertNotContains(response,'The contact form is unavailable. Please use the email address above')
+
+
+    def test_customer_notices_name_the_app_and_operator_without_internal_deployment_brand(self):
+        for view in [legal.privacy,legal.terms,legal.contact]:
+            response=view(self.request('/en/privacy/'),'en')
+            main=response.content.decode().split('<main',1)[1].split('</main>',1)[0]
+            self.assertIn('Earnalism',main)
+            self.assertIn('Reo Enterprise',main)
+            self.assertNotIn('Maison',main)
+            self.assertNotIn('all testers are physically in India',main)
+        response=legal.privacy(self.request('/en/privacy/'),'en')
+        self.assertContains(response,'approved 47 territories remain separate')

@@ -1,0 +1,22 @@
+{
+  "local_backend_tests": 558,
+  "local_backend_result": "PASS",
+  "client_tests": 37,
+  "typecheck_client_build": "PASS",
+  "production_Docker_build": "PASS",
+  "local_changed_area_browser_checks": 42,
+  "local_changed_area_browser_passed": 42,
+  "focused_cancellation_tests": 28,
+  "focused_notices_tests": 19,
+  "new_migrations": false,
+  "public_app_name": "Earnalism",
+  "operator": "Reo Enterprise",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "legal_signoff": "Not claimed; 180-day ICT log/contact evidence and jurisdiction-specific applicability remain explicit.",
+  "notice_version_regression_tests": 13,
+  "notice_version_regression_result": "PASS",
+  "notice_version": "earnalism-privacy-2026-11-20-r2"
+}

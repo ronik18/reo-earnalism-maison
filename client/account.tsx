@@ -16,6 +16,7 @@ interface Privacy {
   status: string;
   requested_at: string;
   retained_categories?: string[];
+  can_cancel?: boolean;
 }
 interface Profile {display_name:string; email:string; email_verified:boolean; locale:string; version:number;}
 interface Consents {necessary_notice_version:string; analytics_opt_in:boolean; marketing_email_opt_in:boolean; version:number;}
@@ -456,7 +457,7 @@ function Account({ staff, google_enabled, google_linked, fresh_until }: AccountB
                 · {t("privacy_" + request.status)}
               </p>
               {request.kind === "delete" && request.retained_categories?.length ? <p className="notice" role="status">{request.retained_categories.map(category => t(({legal_or_retention_hold:"privacy_legal_hold",financial_obligations:"privacy_financial_retained",account_security_records:"privacy_security_retained",retention_details_unavailable:"privacy_retention_unknown"} as Record<string,string>)[category] || "privacy_retention_unknown")).join(" ")} <a href="mailto:sales@reoenterprise.org">{t("contact_support")}</a></p> : null}
-              {request.status === "queued" ? (
+              {(request.can_cancel ?? request.status === "queued") ? (
                 <button
                   disabled={busy || !fresh}
                   onClick={() =>
@@ -474,6 +475,7 @@ function Account({ staff, google_enabled, google_linked, fresh_until }: AccountB
                   {t("cancel_request")}
                 </button>
               ) : null}
+              {request.can_cancel && request.status === "awaiting_resolution" ? <p className="fine">{t("privacy_cancel_help")}</p> : null}
               {request.kind === "export" && request.status === "completed" ? (
                 <button
                   disabled={busy || !fresh}
