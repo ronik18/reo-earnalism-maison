@@ -52,3 +52,10 @@ class SecurityEventTests(SimpleTestCase):
    self.assertEqual(json.loads(lines[0])['event'],'earnalism.security.request')
    self.assertEqual(settings.LOGGING['handlers']['security_console']['stream'],'ext://sys.stdout')
   finally:logging.config.dictConfig(settings.LOGGING)
+
+ @override_settings(SECURITY_EVENT_LOGGING=True)
+ def test_successful_liveness_noise_excluded_without_losing_other_security_outcomes(self):
+  for method,path,status,expected in [('get','/api/v1/health/live',200,False),('get','/api/v1/health/live',503,True),('post','/api/v1/health/live',200,True),('get','/en/privacy/',200,True),('get','/missing/',404,True)]:
+   with self.subTest(method=method,path=path,status=status),patch('operations.middleware.cache_headers',side_effect=lambda req,res:res),patch('operations.security_events.logger.info') as log:
+    response=RequestContextMiddleware(lambda req:HttpResponse(status=status))(getattr(RequestFactory(),method)(path))
+    self.assertEqual(response.status_code,status);self.assertEqual(log.called,expected);self.assertIn('X-Request-ID',response)

@@ -1,0 +1,10 @@
+{
+  "sample_seconds": 60,
+  "logs": 28,
+  "has_more": false,
+  "structured_routes": {
+    "api/v1/health/live": 14
+  },
+  "nonstructured": 14,
+  "raw_logs_saved": false
+}
