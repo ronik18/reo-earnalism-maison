@@ -1,0 +1,255 @@
+{
+  "scope": "Actual original local held-request withdrawal,active-account/hold preservation,public Earnalism/Reo branding and notices across desktop/phone3engines",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "desktop",
+      "id": "held-request-can-withdraw-without-releasing-hold",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "size": "phone",
+      "id": "held-request-can-withdraw-without-releasing-hold",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "id": "actual-held-cancel-API-and-UI-account-active-hold-preserved",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium",
+      "id": "no-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "desktop",
+      "id": "held-request-can-withdraw-without-releasing-hold",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "size": "phone",
+      "id": "held-request-can-withdraw-without-releasing-hold",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "id": "actual-held-cancel-API-and-UI-account-active-hold-preserved",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox",
+      "id": "no-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "Earnalism-brand-and-accurate-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "desktop",
+      "id": "held-request-can-withdraw-without-releasing-hold",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-privacy",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-terms",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-contact",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-welcome",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "Earnalism-brand-and-accurate-sign-up",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "size": "phone",
+      "id": "held-request-can-withdraw-without-releasing-hold",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "id": "actual-held-cancel-API-and-UI-account-active-hold-preserved",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit",
+      "id": "no-page-errors",
+      "status": "PASS"
+    }
+  ]
+}

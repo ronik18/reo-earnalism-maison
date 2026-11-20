@@ -1,4 +1,18 @@
-# Free-access operating and release qualification —20November2026
+# Earnalism operating and release qualification — 20 November 2026
+
+Public app: **Earnalism**. Operator: **Reo Enterprise**, a registered Indian proprietorship. “Maison” identifies the existing isolated technical deployment, not the app name.
+
+## Current follow-up
+
+The owner confirmed the existing47-country scope, India-based Reo Enterprise and Indian staff, with authorized adult testers only/no real customers or known child accounts. Do not infer that every tester is physically in India or that all foreign connections/representative obligations are settled. The unified English interface and optional book-language filter remain in effect.
+
+Withdrawal of held, unprocessed privacy requests now follows the approved contract. The API exposes actual cancellation availability; the UI explains that withdrawal does not release holds or obligations. Claimed/completed requests and durable erasure cleanup remain protected. Public names/notices and the unconfigured contact form's email channel are accurate. New account collection uses notice version `earnalism-privacy-2026-11-20-r2` without rewriting historic choices.558backend/37client tests and42changed-area desktop/mobile browser checks passed. [Follow-up evidence](evidence/operating-qualification-20261120/README.md).
+
+The [processing record](EARNALISM_PROCESSING_RECORD.md) and [rights/incident runbook](PRIVACY_REQUEST_AND_INCIDENT_RUNBOOK.md) map actual processing, conditional legal grounds, provider roles, transfer questions, responsible operator and rehearsable workflows. They do not make external declarations or claim every jurisdiction cleared.
+
+**Open statutory evidence:** seven-day native Render logs and90-day routine audit retention do not establish180-day ICT log coverage/producibility under applicable CERT-In duties. No configured workspace log stream or supplied operator archive/contact record establishes the missing coverage. A commercial isolated-plan exception does not waive a statutory duty. [Read-only inventory](evidence/operating-qualification-20261120/provider-log-inventory.json), [reviewable decision](SECURITY_LOG_RETENTION_DECISION.md). No shared-workspace stream, retention amendment, new credential/service/spend or external filing has been made. The current operator-facility question is pending.
+
+Earlier scoped implementation/provider acceptance evidence follows as history. It remains valid only within its stated scope; it is not a blanket legal sign-off.
 
 Scope: the existing isolated Maison service and exact47 active jurisdictions in contracts/publication-policy.json. Free access changes price, not privacy duties. The protected book stays draft; no apex cutover,legacy application/data/DNS change,paid activation,new spend,mailbox inventory/deletion or age/guardian-flow change is included. Physical Android/iOS/OS-specific UAT is deferred/non-blocking.
 

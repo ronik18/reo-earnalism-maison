@@ -1,0 +1,30 @@
+{
+  "kind": "tabletop_only",
+  "review_date": "2026-11-20",
+  "scenario": "Suspected exposure of an original local test credential; no actual incident declared",
+  "awareness_UTC": "2026-11-20T03:14:27.324905+00:00",
+  "simulated_initial_report_due_if_applicable": "2026-11-20T09:14:27.324905+00:00",
+  "responsible_operator": "Chief of Operations / Grievance Officer, Reo Enterprise",
+  "rehearsed_decisions": [
+    "Confirm exact isolated system and affected synthetic identity; no blanket account or content deletion",
+    "Stop evidence-destroying cleanup for affected records through existing hold semantics; cancellation preserves underlying hold",
+    "Restrict credentials and prepare least-scope rotation/containment for an actual incident under existing authority",
+    "Use available facts for initial applicable CERT-In reporting without waiting for completed forensics; prepare supplements",
+    "Restore only to a distinct target, reconcile holds/deletions before reopening and verify unaffected book hash"
+  ],
+  "reused_executed_evidence": [
+    "../operating-release-20261120/restore-privacy-drill.json",
+    "../operating-release-20261120/live-export.json",
+    "browser.json"
+  ],
+  "current_log_gap": "180-day relevant ICT coverage/producibility and formal contact evidence are not established",
+  "external_report_sent": false,
+  "emails_sent": false,
+  "provider_or_OS_changes": false,
+  "actual_containment_or_response_time_claimed": false,
+  "limits": [
+    "This is a tabletop review, not a real incident response or statutory contact filing",
+    "No 180-day retention or whole-region legal clearance is inferred from this exercise",
+    "No physical-device UAT acceptance is claimed"
+  ]
+}
