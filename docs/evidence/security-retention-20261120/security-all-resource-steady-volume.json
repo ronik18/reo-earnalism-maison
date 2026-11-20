@@ -1,0 +1,13 @@
+{
+  "sample_seconds": 60,
+  "has_more": false,
+  "logs": 3,
+  "by_resource": {
+    "crn-dbv7bte7bikc73fpso3g": 3
+  },
+  "by_type": {
+    "app": 3
+  },
+  "raw_bytes_processed_in_memory": 1230,
+  "raw_logs_saved": false
+}

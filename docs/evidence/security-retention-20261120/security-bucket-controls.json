@@ -1,0 +1,10 @@
+{
+  "checked": "2026-11-20",
+  "bucket": "reo-earnalism-maison-backups",
+  "public_development_url": "disabled",
+  "completed_object_expiration_rules": [],
+  "multipart_abort": "7days; incomplete uploads only",
+  "bucket_lock_rules": [],
+  "native_object_access_logging": "disabled; no vendor-infrastructure completeness claimed",
+  "provider_settings_changed": false
+}

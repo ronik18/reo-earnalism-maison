@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "release": "fc18f4c2053afb4bc0d4e6c743c5602efdc63e35",
+  "sample_seconds": 70,
+  "returned_log_rows": 3,
+  "routine_successful_health_events": 0,
+  "duplicate_generic_access_events": 0,
+  "blocked_post_health_403_preserved": true,
+  "ordinary_notice_200_preserved": true,
+  "unmatched_404_preserved": true,
+  "headers_and_http_behavior_preserved": true,
+  "raw_logs_saved": false
+}

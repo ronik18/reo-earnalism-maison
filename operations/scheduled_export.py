@@ -9,7 +9,7 @@ import os
 import tempfile
 from .database_archive import Archive, ArchiveConfig, ArchiveError
 from .database_export import export_database, ExportError
-from .security_log_archive import run_security_log_archive
+from .security_log_archive import run_security_log_archive, security_log_failure
 
 
 def main(argv=None):
@@ -41,8 +41,10 @@ def main(argv=None):
     # stages keep truthful outcomes; either enabled-stage failure fails the cron.
     try:
         result['security_logs'] = run_security_log_archive(config, apply_retention=args.apply_retention)
-    except (ArchiveError, ValueError, TypeError, OSError):
-        result['security_logs'] = {'status': 'failed', 'code': 'security_log_archive_failed'}
+    except (ArchiveError, ValueError, TypeError, OSError) as error:
+        result['security_logs'] = security_log_failure(error)
+    logs = result['security_logs']
+    if logs.get('status') != 'disabled' and (logs.get('status') not in ('verified_security_log_archive', 'already_archived') or logs.get('coverage_status') != 'complete'):
         if result['status'] == 'verified_archive':
             result.update(status='partial_failure', backup_status='verified_archive')
     print(json.dumps(result, sort_keys=True))

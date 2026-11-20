@@ -1,0 +1,20 @@
+{
+  "status": "VERIFIED_SINGLE_WINDOW_ONLY",
+  "complete_bootstrap": false,
+  "window_start": "2026-11-18T00:00:00Z",
+  "window_end": "2026-11-19T00:00:00Z",
+  "ciphertext_sha256": "cd0370853324b43c38bd24933fd1e6953cb309682df3360cc329f6c99f5348d8",
+  "ciphertext_bytes": 4037577,
+  "plaintext_bytes_processed_only_in_pipe": 4036401,
+  "rows": 15451,
+  "rows_by_resource": {
+    "srv-dbunbd8jo6nc73akbng0": 15451,
+    "crn-dbv7bte7bikc73fpso3g": 0,
+    "crn-dbv7agetlv9c7381is10": 0
+  },
+  "legacy_health_access_lines": 11931,
+  "actual_age_decryption": true,
+  "plaintext_written_to_disk": false,
+  "private_identity_stayed_in_custody": true,
+  "ciphertext_retained_temporarily_for_final_restore": true
+}
