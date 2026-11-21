@@ -1,0 +1,59 @@
+{
+  "date": "2026-11-21",
+  "source_commit": "4edbcd753bc655d2256b0f981c9678414108cd6e",
+  "source_ci": {
+    "run": 44868293105,
+    "conclusion": "success"
+  },
+  "local_frontend": {
+    "typecheck": "PASS",
+    "tests": 37,
+    "failures": 0,
+    "build": "PASS"
+  },
+  "operations": {
+    "maison_liveness": 200,
+    "anonymous_readiness": 403,
+    "readiness_meaning": "protected; not fresh DB/schema readiness proof",
+    "anonymous_selfish_giant_catalog": 404,
+    "legacy_apex": 200,
+    "tls_verified": true,
+    "cdn": {
+      "release": "3bfe0f7d15d03be53adb0b39daeebbc6f7153f912f8ea19df852366ebd65b175",
+      "app_js_bytes": 18160,
+      "app_css_bytes": 27149,
+      "both_checksums": "PASS",
+      "cache": "HIT",
+      "immutable_metadata": "PASS",
+      "purge_repeated": false
+    }
+  },
+  "compliance_review": {
+    "active_regions": 47,
+    "excluded_pending_overlap": false,
+    "assessment_relative_links": "PASS",
+    "guardian_foundation": "separate PR24; not deployed or legal clearance",
+    "pr24_ci_runs": [
+      44860872439,
+      44860909252
+    ],
+    "pr24_ci": "PASS"
+  },
+  "actions": {
+    "runtime_deployment": false,
+    "database_write": false,
+    "dns_change": false,
+    "new_spending": false,
+    "book_publication": false,
+    "legacy_mutation": false
+  },
+  "db_invariants": "Last qualified SQL receipt reused; not represented as a new database readback",
+  "remaining": [
+    "public/all-ages substantive qualification and approved implementation",
+    "production HA/PITR/load/SLO and spending authority",
+    "exact-title rights/publication acceptance",
+    "future paid activation acceptance",
+    "credential renewal before 2027-02-16"
+  ],
+  "physical_device_uat": "owner deferred; non-blocking"
+}
