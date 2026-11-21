@@ -16,11 +16,19 @@ Bengali stories/male narration and Riya for Bengali tutorials/technical/female
 narration. Reuse compatible accepted title pins and healthy masters. Do not reopen
 voice search or silently substitute a provider/profile.
 
+Use `scripts/plan_voice.py` for an offline casting proposal with an exact title,
+English/Bengali language and story/tutorial/technical kind. It reads the final-five snapshot
+in `references/final-voice-roster.json`; historical roster data is retained only
+to locate existing title pins. A supplied source hash is declared metadata until
+the exact source bytes are verified. The planner never generates or accepts audio.
+
 Read the [private voice bank](https://drive.google.com/file/d/13e4EYrynikQqPbjIIxXy4oQxtf8wWJ4e/view)
 and use the [existing voice notebook](https://colab.research.google.com/drive/1DTgjm3NeouooJ9ZVv6UIfYU0pvXtZiUy)
 for actual model revisions, supported settings, runtime and qualification receipts.
 These are selected base-model profiles. Selection, loading or successful training
 does not accept a new recording; unassessed listening dimensions remain unassessed.
+Read the [latest completed diagnostic](references/voice-qualification-20261121.md)
+for its observed scope and unresolved English/Bengali evidence.
 
 Read the whole source and direct paragraph/sentence/phrase performance in context.
 Keep exact spoken text separate from unspoken performance captions. Use supported
@@ -57,3 +65,11 @@ records historical context. Consult references only for the relevant operation
 and reconcile old provider/repository commands with Maison's live contract.
 The local `scripts/plan_voice.py` is preparation-only; its historical roster cannot
 override the owner's final five profiles or compatible title pins.
+
+
+For private output delivery, use the common source-bound bundle and
+[Colab-to-Maison/social handoff](https://github.com/ronik18/reo-earnalism-maison/blob/main/docs/EARNALISM_PRIVATE_HANDOFF.md).
+Prepare verifies retained bytes without provider requests. Explicit private staging
+reuses existing draft intake and nonpublic provider adapters; it does not grant
+publication, rights or performance acceptance. Reuse measured timing and original
+assets; never recreate narration/music/visuals merely to transfer them.

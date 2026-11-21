@@ -277,9 +277,12 @@ def upload(request):
     duration=data.get('duration_ms')
     if duration is not None and (type(duration)!=int or not 1<=duration<=9223372036854775807):
         raise DomainError('invalid_duration','Media duration must fit a positive64-bit millisecond value.',422)
+    if data['kind']=='video':
+        from .stream_upload import create_private_upload
+        status,result=create_private_upload(request.user,data,operation)
+        return api_response(result,status,version=result['version'])
     if not remote and data['bytes']>262144: raise DomainError('local_upload_limit','Local acceptance uploads are limited to 256 KiB.',413)
     limits={'cover':2097152,'reader_source':4194304,'reader_package':262144,'timing_map':1048576,'rights_document':4194304,'audio':268435456,'preview_audio':2097152}
-    if data['kind']=='video':raise DomainError('provider_processing_required','Video requires an approved Stream upload profile.',409)
     if data['bytes']>limits[data['kind']]:raise DomainError('upload_limit','Split this input before uploading.',413)
     suffixes={'image/png':{'.png'},'image/jpeg':{'.jpg','.jpeg'},'image/webp':{'.webp'},'text/plain':{'.txt'},'application/json':{'.json'},'application/pdf':{'.pdf'},'audio/mpeg':{'.mp3'}}
     from pathlib import PurePath
@@ -346,6 +349,12 @@ def complete_upload(request,asset_id):
         if asset.version!=version: raise DomainError('version_conflict','Asset changed.',412,{'current_version':asset.version})
         if asset.state!='uploading' or asset.revision.state!='draft': raise DomainError('invalid_transition','Only uploading draft assets can complete.',409)
         if data['bytes']!=asset.bytes or data['sha256']!=asset.sha256: raise DomainError('upload_integrity_failed','Completion does not match intent.',422)
+        if asset.kind=='video':
+            from .stream_upload import verify_private_upload_association
+            verify_private_upload_association(request.user,asset)
+            asset.state='processing';asset.version+=1;asset.save()
+            audit(request.user,'asset.processing',asset,{'sha256':asset.sha256,'next_command':'verify_media_asset','provider':'stream'})
+            return 200,asset_state(asset),asset.version
         if asset.kind=='preview_audio' or (asset.kind=='audio_chapter' and remote):
             asset.state='processing';asset.version+=1;asset.save()
             audit(request.user,'asset.processing',asset,{'sha256':asset.sha256,'next_command':'verify_media_asset'})

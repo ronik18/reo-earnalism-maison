@@ -1,0 +1,89 @@
+{
+  "schema": "earnalism.private_bridge_implementation_evidence.v1",
+  "recorded_at": "2026-11-21T03:53:38.560452+00:00",
+  "state": "IMPLEMENTED_PRIVATE_ONLY_LIVE_PROVIDER_QUALIFICATION_PENDING",
+  "authority": "Owner requested private voice qualification gap resolution and Colab-to-Maison/social bridge implementation. No purchases or publication.",
+  "notebook": {
+    "same_drive_id": "1DTgjm3NeouooJ9ZVv6UIfYU0pvXtZiUy",
+    "source": "notebooks/Earnalism_Production_Orchestrator.ipynb",
+    "sha256": "79b67151c165ffb4188c40a11b07c911daa05c1ddb909087b0a00cba7fc09a4c",
+    "original_nine_cells_preserved": true,
+    "saved_execution_enabled": false,
+    "RunAll_provider_model_auth_install_requests": 0
+  },
+  "verification": {
+    "pure_bridge_and_notebook_tests": {
+      "passed": 62,
+      "method": "python3 -m unittest operations.test_production_notebook operations.test_production_bundle operations.test_production_delivery operations.social_delivery.test_bridge operations.test_stream_delivery -q (plus operations.test_mp3_isolation)"
+    },
+    "Maison_handoff_PostgreSQL18_tests": {
+      "passed": 25,
+      "provider_HTTP": "MOCKED",
+      "authenticated_CSRF_journey": true,
+      "measured_timing_maps": true
+    },
+    "Stream_PostgreSQL18_tests": {
+      "passed": 12,
+      "provider_HTTP": "MOCKED",
+      "asserted_HTTP_outside_atomic": true
+    },
+    "image_dependency_build": "PASS; ffprobe5.1.9 and pure modules imported with Docker networking disabled",
+    "full_suite": {
+      "tests": 729,
+      "passed": true,
+      "skipped": 20,
+      "command": "MAISON_ENV_FILE=<private-loopback-env> MAISON_TEST_DB_NAME=<isolated> .venv/bin/python manage.py test --noinput --verbosity 0",
+      "initial_setup_failure": "74missing local frontend manifest errors; all were FileNotFoundError, corrected by the existing npm build.",
+      "exact_head_CI": "Required and tracked in private PR25."
+    },
+    "final_five_planner_tests": {
+      "passed": 12,
+      "network_requests": 0
+    }
+  },
+  "recovery_regressions": [
+    "missing_asset_on_attachment_replay_holds",
+    "repeated_explicit_pending_reconciliation_gets_fresh_same_operation_state",
+    "Stream_UID_binding_revision_mutation_is_attributed",
+    "YouTube_resumed_completion_restores_ID_without_capability_or_reupload",
+    "provider_observed_nonprivate_visibility_holds",
+    "unknown_provider_writes_never_blindly_retry",
+    "opaque_exception_text_is_redacted",
+    "disguised_MP3_playlist_cannot_fetch_even_loopback"
+  ],
+  "unchanged": [
+    "final_en_mary_en_raghav_en_tisha_bn_arnav_bn_riya_roster",
+    "Open_Window_exact_soundtrack_selected_visual_style_and_originals",
+    "47_region_publication_policy",
+    "legacy_app"
+  ],
+  "unqualified": [
+    "live_R2_and_Stream_transfer_processing",
+    "live_social_account_permissions_upload_and_saved_state",
+    "actual_listening_accent_naturalness_expression",
+    "general_arbitrary_title_importer"
+  ],
+  "training_updates_claimed": 0,
+  "publication": false,
+  "new_purchases": false,
+  "deployment": false,
+  "private_drive_readback": {
+    "notebook_id": "1DTgjm3NeouooJ9ZVv6UIfYU0pvXtZiUy",
+    "raw_SHA256_verified": true,
+    "owner_only_permissions_verified": true,
+    "source_archive_id": "1-wHAFvubPliSTmEDlvtmR74i8ZdTcnVw",
+    "temporary_download_urls_retained": false
+  },
+  "voice_repair": {
+    "native_calls": 18,
+    "ASR_calls": 5,
+    "training_updates": 0,
+    "private_evidence_drive_id": "1i_NPTsr3SdvtUcmRZWrLy6ACHM5Eqr2r",
+    "model_unchanged": true,
+    "observed_token_caps": 0,
+    "new_performance_acceptance": false,
+    "sustained_qualification": "HELD",
+    "resource_debit_existing_CU": 0.77,
+    "runtime_closed": true
+  }
+}

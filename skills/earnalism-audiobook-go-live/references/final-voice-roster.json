@@ -1,0 +1,263 @@
+{
+  "schema": "earnalism.offline_final_voice_roster.v1",
+  "source_voice_bank": {
+    "name": "VOICE-BANK.updated.json",
+    "sha256": "6e5fe2a91e64105207c989f55774fbe0bfc1a40d8cab0e03d808eeaff263395a"
+  },
+  "source_identity_roster_sha256": "4562ef406c2ba2d5be8688b2a1bb4c1930d9ea52c834662141724c951a4c1193",
+  "owner_profile_selection_final": true,
+  "active_profiles": [
+    "en_mary",
+    "en_raghav",
+    "en_tisha",
+    "bn_arnav",
+    "bn_riya"
+  ],
+  "default_routes": {
+    "en_story": "en_tisha",
+    "en_tutorial": "en_mary",
+    "en_technical": "en_mary",
+    "en_male": "en_raghav",
+    "bn_story": "bn_arnav",
+    "bn_tutorial": "bn_riya",
+    "bn_technical": "bn_riya",
+    "bn_male": "bn_arnav",
+    "bn_female": "bn_riya"
+  },
+  "model": {
+    "repo_id": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca",
+    "weight_sha256": "c68daecb60f80c8f1faf0a6d2e6ddd6de8e224fb19750f3e9a33bca43c552c90",
+    "profile_type": "Owner-selected base-model speaker presets",
+    "new_weight_training_updates": 0,
+    "preset_artifact_sha256": "10ee3743e4fa3008b282e21a1a5685ba27c89c4600c63ae3f88ee9215c0a7f75"
+  },
+  "qualification_state": "PRIVATE_EVIDENCE_REVIEW",
+  "selection_policy": "Reuse compatible title pins; choose the fixed final default for new content and migrate excluded historical pins without changing original media. No new voice search for ordinary title production.",
+  "new_recording_acceptance_not_implied_by_profile_choice": true,
+  "profiles": {
+    "en_mary": {
+      "profile_id": "en_mary",
+      "speaker": "Mary",
+      "locale": "en-IN",
+      "gender_presentation": "female",
+      "metadata_source": "retained notebook literal VOICES; not heard identity inference",
+      "qualification": {
+        "owner_roster_selection": "FINAL",
+        "native_duration_scope": "TARGETS_MET",
+        "asr_scope": "EVIDENCE_AVAILABLE_REQUIRES_ADJUDICATION",
+        "voice_quality": "UNASSESSED",
+        "overall_verdict": "INCONCLUSIVE",
+        "release_ready": false
+      },
+      "presets": {
+        "story": {
+          "preset_key": "en_mary::story",
+          "default_tone": "narration",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Mary speaks with a natural Indian English accent in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.91,
+          "origin_audio_sha256": "b19cfc5a51b5225e9deaf767eb2a668b5dd49863ae4bff655de123888a72a7e2",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        },
+        "tutorial": {
+          "preset_key": "en_mary::tutorial",
+          "default_tone": "tutorial",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Mary speaks with a natural Indian English accent in a bright, crisp voice, with a moderate pitch and moderate intonation, in a confident, engaging manner, at a moderate pace, with a clear, friendly and steady instructional delivery. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.865,
+          "origin_audio_sha256": "cd3ef0d74b5e273120193d5b82ea51be143c884888868e8aaa89df9536956556",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        },
+        "technical": {
+          "preset_key": "en_mary::technical",
+          "default_tone": "technical",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Mary speaks with a natural Indian English accent in a clear, natural voice, with a moderate pitch and moderate intonation, in a confident, engaging manner, at a slightly slow pace, with a precise, measured and confident explanatory delivery. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.82,
+          "origin_audio_sha256": "49aa65fd78a873208587602502c7c8dd7057ed1609711949bb7a10f3c17213c7",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        }
+      }
+    },
+    "en_raghav": {
+      "profile_id": "en_raghav",
+      "speaker": "Raghav",
+      "locale": "en-IN",
+      "gender_presentation": "male",
+      "metadata_source": "retained notebook literal VOICES; not heard identity inference",
+      "qualification": {
+        "owner_roster_selection": "FINAL",
+        "native_duration_scope": "TARGETS_MET",
+        "asr_scope": "EVIDENCE_AVAILABLE_REQUIRES_ADJUDICATION",
+        "voice_quality": "UNASSESSED",
+        "overall_verdict": "INCONCLUSIVE",
+        "release_ready": false
+      },
+      "presets": {
+        "story": {
+          "preset_key": "en_raghav::story",
+          "default_tone": "narration",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Raghav speaks with a natural Indian English accent in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.91,
+          "origin_audio_sha256": "d28de7ed56865974205f19936a2b6a3439313fcb2fc3a371f8b6bea0519ef0b4",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        },
+        "tutorial": {
+          "preset_key": "en_raghav::tutorial",
+          "default_tone": "tutorial",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Raghav speaks with a natural Indian English accent in a bright, crisp voice, with a moderate pitch and moderate intonation, in a confident, engaging manner, at a moderate pace, with a clear, friendly and steady instructional delivery. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.865,
+          "origin_audio_sha256": "b49b75d124b18bf1e192b396d105a1536e97a2dce2f3a14c44ac246d8b963932",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        },
+        "technical": {
+          "preset_key": "en_raghav::technical",
+          "default_tone": "technical",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Raghav speaks with a natural Indian English accent in a clear, natural voice, with a moderate pitch and moderate intonation, in a confident, engaging manner, at a slightly slow pace, with a precise, measured and confident explanatory delivery. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.82,
+          "origin_audio_sha256": "d42f859da5d5f4b0387e6d80dbbbf95d41675808426ffd6ceac9ad2bb4b2b0f8",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        }
+      }
+    },
+    "en_tisha": {
+      "profile_id": "en_tisha",
+      "speaker": "Tisha",
+      "locale": "en-IN",
+      "gender_presentation": "female",
+      "metadata_source": "retained notebook literal VOICES; not heard identity inference",
+      "qualification": {
+        "owner_roster_selection": "FINAL",
+        "native_duration_scope": "PENDING_OR_HOLD",
+        "asr_scope": "EVIDENCE_AVAILABLE_REQUIRES_ADJUDICATION",
+        "voice_quality": "UNASSESSED",
+        "overall_verdict": "INCONCLUSIVE",
+        "release_ready": false
+      },
+      "presets": {
+        "story": {
+          "preset_key": "en_tisha::story",
+          "default_tone": "narration",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Tisha speaks with a natural Indian English accent in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.91,
+          "origin_audio_sha256": "9e5c614d9168377c8a3029696d7c556f80fb912d626714c7347870b5ee13f8bc",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        },
+        "tutorial": {
+          "preset_key": "en_tisha::tutorial",
+          "default_tone": "tutorial",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Tisha speaks with a natural Indian English accent in a bright, crisp voice, with a moderate pitch and moderate intonation, in a confident, engaging manner, at a moderate pace, with a clear, friendly and steady instructional delivery. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.865,
+          "origin_audio_sha256": "42dfaa28e07d9a90159a4f287b79c0c0edfb754d34a9fedef75de3f0dcdb750a",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        },
+        "technical": {
+          "preset_key": "en_tisha::technical",
+          "default_tone": "technical",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Tisha speaks with a natural Indian English accent in a clear, natural voice, with a moderate pitch and moderate intonation, in a confident, engaging manner, at a slightly slow pace, with a precise, measured and confident explanatory delivery. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.82,
+          "origin_audio_sha256": "39c02234b5e05c2b0d9bdca491a63513aa4dcc5248140d4bd6a76c9e3495bf92",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        }
+      }
+    },
+    "bn_arnav": {
+      "profile_id": "bn_arnav",
+      "speaker": "Arnav",
+      "locale": "bn-IN",
+      "gender_presentation": "male",
+      "metadata_source": "retained notebook literal VOICES; not heard identity inference",
+      "qualification": {
+        "owner_roster_selection": "FINAL",
+        "native_duration_scope": "TARGETS_MET",
+        "asr_scope": "EVIDENCE_AVAILABLE_REQUIRES_ADJUDICATION",
+        "voice_quality": "UNASSESSED",
+        "overall_verdict": "INCONCLUSIVE",
+        "release_ready": false
+      },
+      "presets": {
+        "story": {
+          "preset_key": "bn_arnav::story",
+          "default_tone": "narration",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Arnav speaks in fluent, natural standard Bengali in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.91,
+          "origin_audio_sha256": "843dbb5e8e8ac561f752fcb6c081f887f56a112a12d65f8e3c942d7d7cb97a7e",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        },
+        "tutorial": {
+          "preset_key": "bn_arnav::tutorial",
+          "default_tone": "tutorial",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Arnav speaks in fluent, natural standard Bengali in a bright, crisp voice, with a moderate pitch and moderate intonation, in a confident, engaging manner, at a moderate pace, with a clear, friendly and steady instructional delivery. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.865,
+          "origin_audio_sha256": "fcc989945a8140b7961cf0da8480e3622b0e74fa5e72b7683d162c6fe7473c0c",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        },
+        "technical": {
+          "preset_key": "bn_arnav::technical",
+          "default_tone": "technical",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Arnav speaks in fluent, natural standard Bengali in a clear, natural voice, with a moderate pitch and moderate intonation, in a confident, engaging manner, at a slightly slow pace, with a precise, measured and confident explanatory delivery. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.82,
+          "origin_audio_sha256": "3d439f82664e6513c9aec313dbda5668f09e0866ffd51e4dcf626cb4656e52c6",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        }
+      }
+    },
+    "bn_riya": {
+      "profile_id": "bn_riya",
+      "speaker": "Riya",
+      "locale": "bn-IN",
+      "gender_presentation": "female",
+      "metadata_source": "retained notebook literal VOICES; not heard identity inference",
+      "qualification": {
+        "owner_roster_selection": "FINAL",
+        "native_duration_scope": "TARGETS_MET",
+        "asr_scope": "EVIDENCE_AVAILABLE_REQUIRES_ADJUDICATION",
+        "voice_quality": "UNASSESSED",
+        "overall_verdict": "INCONCLUSIVE",
+        "release_ready": false
+      },
+      "presets": {
+        "story": {
+          "preset_key": "bn_riya::story",
+          "default_tone": "narration",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Riya speaks in fluent, natural standard Bengali in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.91,
+          "origin_audio_sha256": "a1a07f870e8f9a7bacb1f6a99947c9c0958eb520178a4fd628ad825423f70740",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        },
+        "tutorial": {
+          "preset_key": "bn_riya::tutorial",
+          "default_tone": "tutorial",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Riya speaks in fluent, natural standard Bengali in a bright, crisp voice, with a moderate pitch and moderate intonation, in a confident, engaging manner, at a moderate pace, with a clear, friendly and steady instructional delivery. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.865,
+          "origin_audio_sha256": "80ff3f7d53b6e60a49a9c361375a08c429a43be2b71f038a1d93ea5fdafcf764",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        },
+        "technical": {
+          "preset_key": "bn_riya::technical",
+          "default_tone": "technical",
+          "caption_is_direction_not_listening_evidence": true,
+          "description": "Riya speaks in fluent, natural standard Bengali in a clear, natural voice, with a moderate pitch and moderate intonation, in a confident, engaging manner, at a slightly slow pace, with a precise, measured and confident explanatory delivery. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+          "temperature": 0.82,
+          "origin_audio_sha256": "396a8b530d574882e1ced48b60829bed19017e6465ae887e88e16a784755ec61",
+          "status": "RETAINED_AUDITION_CAPTION_NOT_QUALIFIED_PERFORMANCE"
+        }
+      }
+    }
+  },
+  "execution_default": false,
+  "publication_enabled": false,
+  "new_purchases": false
+}

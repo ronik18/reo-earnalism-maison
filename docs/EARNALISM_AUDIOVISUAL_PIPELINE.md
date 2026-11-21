@@ -6,8 +6,9 @@ Use one content instruction, one durable production record and one release write
 Prepare independent books/topics in parallel; serialize actual shared-model work
 and mutations of the same edition or release record. Reuse the owner's existing
 Colab notebook and retained inputs instead of creating a supervisor or notebook
-for each stage. This guide connects the workflows; it does not install a missing
-runtime adapter or assert that every stage is automated.
+for each stage. The checked-in notebook copy and private delivery adapters below
+connect retained outputs to existing destinations. They do not generate cleared
+source or certify performance and live provider acceptance.
 
 ## Instruction to finished candidate
 
@@ -111,9 +112,10 @@ the existing authentication, object permission and scope.
 | Operation | Current implementation and boundary |
 |---|---|
 | Draft import | `POST /api/v1/staff/books/imports` in `library/intake_api.py` accepts the reviewed `EN-071` Selfish Giant packet only. It creates draft Reader content; it is not a general arbitrary-book importer. |
-| Private asset intake | `POST /api/v1/staff/assets/uploads`, asset state and `/complete` use bounded, revision-bound direct R2 uploads. Current audio input is MP3; preserve native originals and create an explicitly identified derivative. Upload completion and provider processing must be verified. |
+| Private asset intake | `POST /api/v1/staff/assets/uploads`, asset state and `/complete` use bounded, revision-bound direct R2 uploads. Current audio input is MP3; preserve native originals and create an explicitly identified derivative. Upload completion and provider processing must be verified. Video uses a private Stream TUS intent from the same endpoint, with revision/unit/source binding, encrypted short-lived capability and signed-URL privacy verified before returning the grant. |
 | Pre-produced media verification | `python manage.py verify_media_asset <asset-id>` verifies eligible private draft audio/sample/video; it does not generate or publish. Audio additionally needs prepared-rendition evidence and measured maps. |
-| Existing Stream video | `python manage.py verify_media_asset --stream-manifest <private.json> --actor-email <permitted-publisher>` verifies and registers an already-uploaded signed Stream rendition bound to its retained source and unit. This command does not upload video. The ordinary upload endpoint currently rejects video intake. |
+| Existing Stream video | `python manage.py verify_media_asset --stream-manifest <private.json> --actor-email <permitted-publisher>` verifies and registers an already-uploaded signed Stream rendition bound to its retained source and unit. This command does not upload video. The ordinary endpoint now also supports managed private video intake; neither route publishes. |
+| Private production attachment | `GET/POST /api/v1/staff/editions/<edition-id>/production-handoffs`: cheap draft identity/ETag, then exact staged assets, measured maps and private QA/rights/caption references under existing staff session, CAS and operation receipts. No rights approval or listening pass is created. Audio piece/Stream readiness is independently checked; pending processing returns202. |
 | Revision review and release | `GET /api/v1/staff/editions/<edition-id>/review`; `POST /api/v1/staff/editions/<edition-id>/{validate,mark-ready,publish,schedule,withdraw}` with the contract's revision ID, expected hash, current ETag, operation ID and reason as applicable. Draft → Ready → Live is enforced by `library/services.py`. |
 | Scheduled release | `operations/publication.py` rechecks the exact Ready revision/hash/time and publisher authority, then uses the same publication transition. Scheduling does not bypass validation. |
 
@@ -138,15 +140,33 @@ video remains held. See [the book policy](BOOK_PUBLICATION_POLICY.md).
 
 The copied skill references preserve prior Earnalism work, including links to
 `ronik18/earnalism-digital-library`. Those are historical source/provenance, not
-Maison serving paths. Maison currently has no checked-in Colab notebook,
-`scripts/book_audiovisual.py`, `scripts/audiobook_score.py`, `scripts/produce_release.py` or
-`scripts/release_runtime.py`. Do not rename their repository URL and claim an
-adapter exists. The existing external Colab workflow can prepare private outputs;
-a verified general arbitrary-title/episode importer, automated Colab-to-Maison
-media/evidence bridge, managed video upload path and social publication adapters
-are not established by this documentation. Prepare the exact private handoff and
-name the missing operation when one is required. Do not use fixture success as
-customer-path or provider acceptance.
+Maison serving paths. Use the checked-in
+[existing notebook copy](../notebooks/Earnalism_Production_Orchestrator.ipynb)
+and [private handoff instructions](EARNALISM_PRIVATE_HANDOFF.md). Run All is
+execution-disabled. The common `python -m operations.production_delivery prepare`
+verifies actual bundle bytes without provider requests; explicit `maison-stage`
+or `social-stage` supports private staging only. There is no public CLI action.
+
+The Maison adapter stages into an existing exact draft, reuses ordinary R2/Stream
+intake and attaches measured maps/evidence through the new private endpoint.
+Source WAVs and thumbnails remain retained provenance; server verification covers
+only the exact staged subset. Stream verifies the original upload association,
+provider UID, privacy and duration; it does not hash adaptive rendition bytes.
+Unknown write outcomes require retained same-operation reconciliation; upload
+creation is never retried blindly. The general arbitrary-title/episode source
+importer remains unimplemented; the existing reviewed EN-071 import is unchanged.
+
+Social adapters implement official YouTube private resumable video/captions/cover,
+Instagram nonpublic Reels containers, Facebook Page draft Reels and X nonpublic
+media. `social-stage --action private-upload` keeps temporary upload capabilities
+in one process and reads processing once; it never posts publicly. Later checks
+reuse acknowledged IDs and fresh provider status. Instagram/X have no private
+feed-post equivalent. Separate cover/caption support varies by platform and is
+reported explicitly. These adapters have local/mocked protocol tests; authenticated
+live account permissions, real provider transfer/processing and served rendition
+acceptance remain **unqualified** until actually exercised under applicable authority.
+No service, account, purchase, publication or provider resource is provisioned by
+this implementation. Never promote fixtures to customer-path acceptance.
 
 ## Finite review and reusable improvement
 
