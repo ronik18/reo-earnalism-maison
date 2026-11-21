@@ -43,4 +43,3 @@ Official protocol references checked 2026-11-21:
 - [X v2 chunked upload](https://docs.x.com/x-api/media/quickstart/media-upload-chunked), [Post creation](https://docs.x.com/x-api/posts/create-post).
 
 These links define protocols, not evidence that Earnalism's live accounts or this candidate have passed them.
-
