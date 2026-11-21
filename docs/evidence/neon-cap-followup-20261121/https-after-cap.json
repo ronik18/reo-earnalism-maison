@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "checked_at_utc": "2026-11-21T12:06:54.225961+00:00",
+  "read_only": true,
+  "checks": [
+    {
+      "url": "https://maison.theearnalism.com/api/v1/health/live",
+      "http": 200,
+      "tls_verified": true
+    },
+    {
+      "url": "https://maison.theearnalism.com/api/v1/catalog/editions/55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+      "http": 404,
+      "tls_verified": true
+    },
+    {
+      "url": "https://theearnalism.com/",
+      "http": 200,
+      "tls_verified": true
+    }
+  ]
+}

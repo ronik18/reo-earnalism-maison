@@ -1,0 +1,201 @@
+{
+  "status": "PASS",
+  "scope": "actual loopback HTTP+local PostgreSQL synthetic member workload; not cloud capacity/HA/PITR",
+  "source_commit": "74a48e85e551fec0dfddd0d633cf2f86a1642894",
+  "profile": [
+    {
+      "name": "baseline",
+      "seconds": 30,
+      "offered_operations_per_second": 5
+    },
+    {
+      "name": "burst",
+      "seconds": 10,
+      "offered_operations_per_second": 50
+    },
+    {
+      "name": "recovery",
+      "seconds": 30,
+      "offered_operations_per_second": 5
+    }
+  ],
+  "offered_operations": 800,
+  "actual_http_requests": 900,
+  "elapsed_seconds": 70.012,
+  "http_executor_workers": 24,
+  "synthetic_users": 10,
+  "one_inflight_per_user": true,
+  "progress_writes": 100,
+  "private_package_checksum_verifications": 100,
+  "persisted_progress_versions": [
+    20,
+    0,
+    20,
+    0,
+    20,
+    0,
+    20,
+    0,
+    20,
+    0
+  ],
+  "errors": {},
+  "overall": {
+    "requests": 900,
+    "http_status_counts": {
+      "200": 900
+    },
+    "semantic_failures": 0,
+    "p50_ms": 13.056,
+    "p95_ms": 25.149,
+    "p99_ms": 32.853,
+    "max_ms": 50.428,
+    "bytes": 586758
+  },
+  "stages": {
+    "baseline": {
+      "requests": 168,
+      "http_status_counts": {
+        "200": 168
+      },
+      "semantic_failures": 0,
+      "p50_ms": 19.39,
+      "p95_ms": 27.142,
+      "p99_ms": 35.651,
+      "max_ms": 43.961,
+      "bytes": 108314
+    },
+    "burst": {
+      "requests": 563,
+      "http_status_counts": {
+        "200": 563
+      },
+      "semantic_failures": 0,
+      "p50_ms": 10.789,
+      "p95_ms": 14.583,
+      "p99_ms": 21.845,
+      "max_ms": 50.428,
+      "bytes": 368090
+    },
+    "recovery": {
+      "requests": 169,
+      "http_status_counts": {
+        "200": 169
+      },
+      "semantic_failures": 0,
+      "p50_ms": 19.871,
+      "p95_ms": 26.857,
+      "p99_ms": 34.392,
+      "max_ms": 35.277,
+      "bytes": 110354
+    }
+  },
+  "routes": {
+    "GET /api/v1/catalog": {
+      "requests": 200,
+      "http_status_counts": {
+        "200": 200
+      },
+      "semantic_failures": 0,
+      "p50_ms": 14.123,
+      "p95_ms": 25.559,
+      "p99_ms": 34.392,
+      "max_ms": 50.428,
+      "bytes": 113400
+    },
+    "GET /api/v1/content/manifests/30000000-0000-4000-8000-000000000001": {
+      "requests": 100,
+      "http_status_counts": {
+        "200": 100
+      },
+      "semantic_failures": 0,
+      "p50_ms": 10.671,
+      "p95_ms": 20.721,
+      "p99_ms": 24.549,
+      "max_ms": 25.007,
+      "bytes": 74900
+    },
+    "GET /api/v1/me/profile": {
+      "requests": 100,
+      "http_status_counts": {
+        "200": 100
+      },
+      "semantic_failures": 0,
+      "p50_ms": 7.534,
+      "p95_ms": 16.568,
+      "p99_ms": 17.157,
+      "max_ms": 17.401,
+      "bytes": 20900
+    },
+    "GET /api/v1/me/progress/20000000-0000-4000-8000-000000000001/reader": {
+      "requests": 100,
+      "http_status_counts": {
+        "200": 100
+      },
+      "semantic_failures": 0,
+      "p50_ms": 8.675,
+      "p95_ms": 18.721,
+      "p99_ms": 20.365,
+      "max_ms": 21.161,
+      "bytes": 24000
+    },
+    "GET /api/v1/me/vault": {
+      "requests": 100,
+      "http_status_counts": {
+        "200": 100
+      },
+      "semantic_failures": 0,
+      "p50_ms": 10.789,
+      "p95_ms": 22.041,
+      "p99_ms": 32.999,
+      "max_ms": 34.333,
+      "bytes": 13100
+    },
+    "GET private_reader_bytes": {
+      "requests": 100,
+      "http_status_counts": {
+        "200": 100
+      },
+      "semantic_failures": 0,
+      "p50_ms": 7.404,
+      "p95_ms": 11.141,
+      "p99_ms": 22.767,
+      "max_ms": 26.857,
+      "bytes": 198600
+    },
+    "POST /api/v1/content/packages/grants": {
+      "requests": 100,
+      "http_status_counts": {
+        "200": 100
+      },
+      "semantic_failures": 0,
+      "p50_ms": 13.644,
+      "p95_ms": 26.275,
+      "p99_ms": 33.813,
+      "max_ms": 35.277,
+      "bytes": 96403
+    },
+    "PUT /api/v1/me/progress/20000000-0000-4000-8000-000000000001/reader": {
+      "requests": 100,
+      "http_status_counts": {
+        "200": 100
+      },
+      "semantic_failures": 0,
+      "p50_ms": 13.771,
+      "p95_ms": 27.35,
+      "p99_ms": 35.413,
+      "max_ms": 35.651,
+      "bytes": 45455
+    }
+  },
+  "new_provider_spend_usd": 0,
+  "remote_provider_calls": 0,
+  "book_or_legacy_touched": false,
+  "local_fixture_only": true,
+  "all_sessions_and_tokens_excluded_from_receipt": true,
+  "completed_primary_operations": 800,
+  "dropped_primary_operations": 0,
+  "latency_meaning": "Measured HTTP service duration after per-user sequencing lock; scheduler/lock-queue time is not included in the reported percentiles",
+  "cache_scope": "Natural local application cache state; no forced cold-cache/CDN hit-miss experiment",
+  "additional_setup_and_postload_requests": 33
+}
