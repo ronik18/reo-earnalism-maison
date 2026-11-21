@@ -17,3 +17,7 @@ This approval would authorize only that organization record and the already appr
 After organization creation is approved and succeeds, submit exactly [kws-private-inquiry.txt](kws-private-inquiry.txt) as one **private** EOS Developer Support discussion, topic **Kids Web Services**, if accessible without further acceptance. Verify an actual private-case receipt and exact message; never substitute a public post or end-user support request. The existing exact inquiry approval persists; do not request it again unless its content, recipient or scope changes.
 
 Inspect the actual KWS agreements read-only. The conditional TEST scope and47-country technical availability mapping remain [prepared](kws-exact-approvals.md). Those are not approval for unknown portal agreements, public child enrollment, real identities/cards/images or real charges. No KWS term was accepted during this review. No runtime, schema, book or legacy change occurred. Physical UAT remains deferred, untested and non-blocking.
+
+## Superseding owner direction
+
+The owner subsequently directed public-document review and skipping unnecessary Epic/KWS setup. This organization-creation proposal is **deferred and not a release prerequisite**. No organization was created; the approved private inquiry remains unsent. See [simplest free-launch review](../public-doc-review-20261121/README.md). No repeat setup approval is requested.
