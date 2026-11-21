@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-21",
+  "operations": {
+    "liveness": 200,
+    "anonymous_readiness": 403,
+    "draft_catalog": 404,
+    "legacy_apex": 200,
+    "tls_verified": true,
+    "cdn": {
+      "release": "3bfe0f7d15d03be53adb0b39daeebbc6f7153f912f8ea19df852366ebd65b175",
+      "app_js_bytes": 18160,
+      "app_css_bytes": 27149,
+      "checksums": "PASS",
+      "mime_immutable_headers": "PASS",
+      "cache_sequence": [
+        "MISS",
+        "HIT"
+      ],
+      "purge_performed": false
+    }
+  },
+  "account_source_review": {
+    "candidate": "137619b",
+    "regions": 47,
+    "excluded_pending_overlap": false,
+    "assessment_document_count": 12,
+    "relative_links": "PASS",
+    "targeted_python_parse": "PASS",
+    "guardian_activation": false,
+    "method_policy_map": {},
+    "legal_clearance_claimed": false
+  },
+  "main_ci": {
+    "commit": "23f4f86fe62a21e5e918d4da52f3dae56bd62c0b",
+    "run": 44893625917,
+    "conclusion": "success"
+  },
+  "remote_writes_by_this_validation": false
+}

@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "checked_at_utc": "2026-11-21T10:24:56.690794+00:00",
+  "http": 200,
+  "tls_verified": true,
+  "authenticated": true,
+  "database_select_and_deployed_migration_graph_ready": true,
+  "response_status": "ok",
+  "error_code": null
+}
