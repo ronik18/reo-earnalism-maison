@@ -236,7 +236,7 @@
   ],
   "browser_handoff_active": true,
   "browser_controls_paused": true,
-  "owner_only_dependency": "Google Cloud requires the business account device/passkey verification; no bypass or IAM/audience/scope change attempted",
+  "owner_only_dependency": "Google reports redirect_uri_mismatch for the new apex callback while accepting the existing Maison callback. Business Google Cloud device/passkey verification is required to correct and read back the existing client configuration. No bypass, IAM/audience/scope change or new client attempted.",
   "cutover_complete": false,
   "new_purchases": false,
   "content_publication": false,
@@ -329,5 +329,32 @@
     "scope_unchanged": true,
     "same_static_release": true,
     "fresh_runtime_readback_required_before_cutover": true
+  },
+  "public_google_callback_validation": {
+    "schema": "earnalism.public_google_redirect_admission_probe.v1",
+    "checked_at": "2026-11-21T17:28:08.515061+00:00",
+    "scope": "Unauthenticated normal authorization endpoint validation only; no login, consent, token exchange, account or client mutation",
+    "rows": [
+      {
+        "registered_callback_candidate": "https://maison.theearnalism.com/api/v1/auth/google/callback",
+        "http": 200,
+        "explicit_redirect_uri_mismatch": false,
+        "google_signin_document": true,
+        "authenticated": false,
+        "authorization_code_or_token_obtained": false
+      },
+      {
+        "registered_callback_candidate": "https://theearnalism.com/api/v1/auth/google/callback",
+        "http": 200,
+        "explicit_redirect_uri_mismatch": true,
+        "google_signin_document": true,
+        "authenticated": false,
+        "authorization_code_or_token_obtained": false
+      }
+    ],
+    "authorization_or_challenge_urls_saved": false,
+    "browser_controls_used": false,
+    "provider_mutations": 0,
+    "inference": "Explicit mismatch establishes that candidate is not currently accepted; lack of mismatch alone is not full successful OAuth or admin-readback acceptance."
   }
 }

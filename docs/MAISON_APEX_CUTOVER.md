@@ -8,7 +8,7 @@
 
 The corrected bounded anonymous check passes12of13requests on the isolated host; its sole failure is the expected still-legacy www route. This is not an apex acceptance pass.
 
-Google Cloud requires the business account's device verification before its existing web client's callback can be inspected/updated. This is an authentication dependency, not missing launch/spending approval. The owner handoff is active; browser controls remain paused until the owner returns control. No callback change, Render environment save, domain removal, DNS change or active redirect has occurred. An unsaved alias form and normal Render environment editor are preparation only.
+A bounded unauthenticated Google admission check accepts the existing Maison callback and explicitly reports `redirect_uri_mismatch` for the proposed apex callback. Google Cloud requires the business account's device verification before that existing web client can be corrected and read back. This is an authentication dependency, not missing launch/spending approval. The owner handoff is active; browser controls remain paused until the owner returns control. No callback change, Render environment save, domain removal, DNS change or active redirect has occurred. An unsaved alias form and normal Render environment editor are preparation only.
 
 ## Fixed source and recovery basis
 
