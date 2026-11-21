@@ -1,0 +1,80 @@
+{
+  "schema": "earnalism.general_source_import_private_acceptance_preparation.v1",
+  "recorded_at": "2026-11-21T10:06:52.168382+00:00",
+  "state": "IMPLEMENTED_AND_PREPARED_NOT_EXECUTED_ON_LIVE_PROVIDERS",
+  "general_import": {
+    "languages": [
+      "en",
+      "bn"
+    ],
+    "units": [
+      "chapter",
+      "lesson",
+      "episode"
+    ],
+    "title_allowlist": false,
+    "draft_only": true,
+    "offered_formats": "ALL_DENIED",
+    "rights_approvals_created": false,
+    "original_source": "EXACT_RAW_BYTES_RETAINED",
+    "reader_derivative": "EXPLICIT_UNICODE_NFC_PROOF",
+    "maximum_source_bytes": 4194304,
+    "maximum_units": 128,
+    "maximum_source_paragraphs": 50000,
+    "maximum_paragraph_characters_raw_and_NFC": 32000,
+    "maximum_paragraph_UTF8_bytes": 49152,
+    "maximum_package_paragraphs": 100,
+    "maximum_package_raw_budget": 61440,
+    "maximum_packages": 128,
+    "all_supported_layout_limits_checked_before_HTTP": true,
+    "existing_EN_071_route": "UNCHANGED"
+  },
+  "private_live_acceptance": {
+    "mode": "PREPARATION_ONLY_NO_EXECUTE_PATH",
+    "candidate_sha256": "20babcae0e798d0a5f6e246fb657a98bbae47501f8f7d189213a651669b8431a",
+    "retained_video_sha256": "9cc3f6a696a18fc29c7a55156c11f9648db28c39707fa6b58916db9c03802ad5",
+    "video_bytes": 1876037,
+    "video_duration_seconds": 5.041667,
+    "video_only_no_audio": true,
+    "R2_source_QA_objects": 4,
+    "R2_source_QA_bytes": 16056,
+    "proposed_private_video_objects_each_stream_youtube_x": 1,
+    "account_draft_and_unit_bindings": "NOT_INVENTED_UNBOUND",
+    "Facebook": "HELD_EXISTING_ADAPTER_GEOMETRY",
+    "Instagram": "HELD_ACCOUNT_AND_CURRENT_PREFLIGHT",
+    "Maison_playback": "REQUIRES_EXISTING_PERMITTED_PRIVATE_PLAYBACK_AUTHORITY",
+    "voice_film_and_soundtrack_acceptance": "NOT_ESTABLISHED_BY_TRANSPORT"
+  },
+  "verification": {
+    "focused_import_notebook_transport_tests_passed": 99,
+    "source_client_tests_passed": 21,
+    "actual_PostgreSQL_general_import_API_tests_passed": 15,
+    "large_EN_and_BN_sources_above_256KiB_and_actual_Reader_coverage": true,
+    "revoked_authority_before_and_during_preparation": "HOLDS_NO_DB_COMMIT",
+    "provider_IO_under_DB_transaction": false,
+    "full_local_tests": {
+      "passed": 787,
+      "skipped": 20
+    },
+    "frontend": {
+      "typecheck": "PASS",
+      "tests_passed": 37,
+      "build": "PASS"
+    },
+    "model_free_default_notebook_tests": "PASS",
+    "migrations": "NO_CHANGES",
+    "provider_HTTP_in_tests": "MOCKED"
+  },
+  "retained_example": {
+    "source": "Exact retained EN-071 paragraphs, not newly authored content",
+    "raw_source_sha256": "b3f89b778ee9e21808fdd6c504eda445244ab0f6b0996f5480aeb5d05a896315",
+    "prepared_only": true
+  },
+  "notebook_sha256": "251dada6f90d24d6a7466e986d6d1573ee90b28bc658991568fae16d3eb119eb",
+  "new_model_TTS_ASR_GPU_or_media_generation_calls": 0,
+  "live_provider_requests": 0,
+  "purchases": false,
+  "publication": false,
+  "final_roster_Open_Window_soundtrack_and_style": "PRESERVED",
+  "release_or_voice_acceptance_changed": false
+}

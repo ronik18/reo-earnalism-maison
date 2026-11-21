@@ -56,3 +56,10 @@ One authoritative candidate and receipt; reuse unchanged valid evidence. New fai
 [Current receipt](evidence/remaining-validations-20261121/qualification.json). Fresh main `4edbcd7` CI44868293105 passes; local typecheck,37client tests and build pass. Independent operations and compliance lanes confirm HTTPS/CDN boundaries and47-region policy/link consistency. No runtime/schema/provider/DNS changes were made. The Selfish Giant remains held in draft; public catalog access remains404.
 
 Public/all-ages preparation is isolated in PR#24; its two CI runs pass, but this does not qualify enrollment, regional storage/transfer routes or public legal clearance. Do not deploy its new account relation without its schema migration and applicable authorization. Preserve concurrent edits. The next integration action is to resolve supported country/purpose/authority and data-flow decisions in that preparation lane; present any exact paid/provider/DNS package before execution. Reuse completed free-path evidence rather than rerunning it as a prerequisite for those separate decisions.
+
+
+## Private general-source and provider preparation
+
+[PR27](https://github.com/ronik18/reo-earnalism-maison/pull/27) adds bounded English/Bengali source import into denied drafts, alongside the unchanged reviewed EN-071 route. Exact raw sources are retained and the existing NFC Reader derivative is explicitly recorded. It creates no rights approvals, previews, offered formats or publication. [Implementation and tests](evidence/general-title-import-private-acceptance-20261121.json).
+
+The same saved Colab notebook/common CLI now prepares private live-provider acceptance with execution disabled. The retained video-only motion clip and source/QA bytes qualify a proposed transport scope only; current account/draft/unit bindings and actual permitted playback evidence remain required. No live import, provider-acceptance execution, model/GPU/media generation, deployment, purchases or title publication occurred. Existing voice/source/rights and runtime acceptance holds remain; prior free-path acceptance and the separate PR24 scope are unchanged.

@@ -48,7 +48,12 @@ from the same notebook: prepare verifies exact bundle bytes offline; explicit
 private staging uses existing Maison draft intake, measured map/evidence attachment
 and provider processing, or supported nonpublic social media staging. No public
 CLI action exists. Keep actual live provider and performance qualification distinct
-from local protocol tests. General arbitrary-title import remains absent.
+from local protocol tests. General English/Bengali title/lesson/episode import now uses the
+[exact source workflow](https://github.com/ronik18/reo-earnalism-maison/blob/main/docs/EARNALISM_GENERAL_IMPORT.md).
+Retain original bytes and explicit NFC Reader provenance; use actual returned
+draft/unit identities for media binding. The same notebook prepares private live-
+provider acceptance without execution or new generation. No preparation or import
+accepts voice performance, rights or publication.
 Preserve complete47-region book clearance for each offered format/action.
 
 Release only the exact assessed candidate/requested destinations under actual
