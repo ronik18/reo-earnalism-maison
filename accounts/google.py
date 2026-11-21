@@ -4,7 +4,7 @@ import re
 import secrets
 import time
 from datetime import timedelta
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit,urlencode
 import requests
 from urllib3.exceptions import HTTPError as Urllib3HTTPError
 from django.conf import settings
@@ -36,13 +36,16 @@ PUBLIC_GOOGLE_ERRORS=frozenset({'identity_link_required','identity_already_linke
 
 
 def oauth_problem(error,request):
-    """Native browser recovery exposes only a public code and saved-state locale."""
+    """Keep the saved local destination without exposing OAuth state or details."""
     if request.get_preferred_type(['application/json','text/html'])=='text/html':
         next_path=getattr(request,'_maison_google_state',{}).get('next','')
-        match=re.match(r'^/(en|bn)/',next_path) if isinstance(next_path,str) else None
+        if not next_path and request.path=='/api/v1/auth/google':next_path=request.GET.get('return_path','')
+        try:return_path=safe_return_path(next_path or '/en/vault/')
+        except DomainError:return_path='/en/vault/'
+        match=re.match(r'^/(en|bn)/',return_path)
         locale=match[1] if match else 'en'
         code=error.code if error.code in PUBLIC_GOOGLE_ERRORS else 'google_authentication_failed'
-        response=HttpResponseRedirect(f'/{locale}/sign-in/?google_error={code}',status=303)
+        response=HttpResponseRedirect(f'/{locale}/sign-in/?'+urlencode({'google_error':code,'return_to':return_path}),status=303)
     else:response=problem(error,request)
     response['Referrer-Policy']='no-referrer';response['Cache-Control']='private, no-store'
     return response

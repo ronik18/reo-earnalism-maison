@@ -127,6 +127,34 @@ class IndiaEnrollmentTests(TestCase):
             self.assertEqual(r.status_code,403);responses.append(r.json()['code'])
         self.assertEqual(responses,['invalid_credentials','invalid_credentials']);child.refresh_from_db();self.assertTrue(child.guardian_managed)
 
+    def test_historical_guardian_withdrawal_cannot_revoke_independent_reader_sessions(self):
+        aid,child,_,_=self.child()
+        action=EmailActionToken.objects.get(user=child,purpose='verify_email');services.confirm_email_verification(services._token_value(action))
+        child.refresh_from_db()
+        r=self.client.post('/api/v1/auth/account-capacity',{'email':child.email,'password':PASS,**PASSWORD,**ADULT},content_type='application/json')
+        self.assertEqual(r.status_code,202,r.content);child.refresh_from_db();self.assertFalse(child.guardian_managed)
+        reader=self.client_for(child);self.assertTrue(reader.get('/api/v1/session').json()['authenticated'])
+        epoch=child.session_epoch;row=GuardianAuthorization.objects.get(pk=aid);version=row.version;withdrawn=row.withdrawn_at
+        for _ in range(3):
+            response=self.post(f'/me/guardian/authorizations/{aid}/withdraw',{'expected_version':version})
+            self.assertEqual(response.status_code,200,response.content);self.assertEqual(response.json()['version'],version)
+            self.assertTrue(reader.get('/api/v1/session').json()['authenticated'])
+        row.refresh_from_db();child.refresh_from_db()
+        self.assertEqual((row.version,row.withdrawn_at,child.session_epoch),(version,withdrawn,epoch))
+        stale=self.post(f'/me/guardian/authorizations/{aid}/withdraw',{'expected_version':version-1})
+        self.assertEqual(stale.status_code,412);self.assertTrue(reader.get('/api/v1/session').json()['authenticated'])
+
+    def test_former_parent_privacy_delete_does_not_revoke_independent_reader(self):
+        from .privacy import delete_account
+        _,child,_,_=self.child();child.is_verified=True;child.save(update_fields=['is_verified'])
+        r=self.client.post('/api/v1/auth/account-capacity',{'email':child.email,'password':PASS,**PASSWORD,**ADULT},content_type='application/json')
+        self.assertEqual(r.status_code,202,r.content)
+        reader=self.client_for(child);child.refresh_from_db();epoch=child.session_epoch
+        job=OutboxJob.objects.create(actor=self.guardian,kind='privacy_delete',dedupe_key=str(uuid.uuid4()),payload={'session_epoch':self.guardian.session_epoch},not_before=timezone.now())
+        self.assertEqual(delete_account(job)['status'],'anonymised')
+        child.refresh_from_db();self.assertTrue(child.is_active);self.assertFalse(child.guardian_managed);self.assertEqual(child.session_epoch,epoch)
+        self.assertTrue(reader.get('/api/v1/session').json()['authenticated'])
+
     def test_independent_ssr_and_api_share_ip_budget_when_emails_rotate(self):
         RateLimitBucket.objects.all().delete()
         with patch('django.contrib.auth.authenticate',return_value=None):
