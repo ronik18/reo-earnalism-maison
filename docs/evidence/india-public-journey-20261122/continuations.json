@@ -1,0 +1,698 @@
+[
+  {
+    "device": "android-emulated",
+    "id": "01-home",
+    "label": "Public home",
+    "offset": 407,
+    "total_scroll": 407,
+    "screenshot": "screenshots/android-emulated-01-home-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "01-home",
+    "label": "Public home",
+    "offset": 410,
+    "total_scroll": 561,
+    "screenshot": "screenshots/ios-emulated-01-home-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "02-welcome",
+    "label": "Reader welcome",
+    "offset": 109,
+    "total_scroll": 109,
+    "screenshot": "screenshots/desktop-02-welcome-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "01-home",
+    "label": "Public home",
+    "offset": 561,
+    "total_scroll": 561,
+    "screenshot": "screenshots/ios-emulated-01-home-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "02-welcome",
+    "label": "Reader welcome",
+    "offset": 343,
+    "total_scroll": 343,
+    "screenshot": "screenshots/android-emulated-02-welcome-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "02-welcome",
+    "label": "Reader welcome",
+    "offset": 410,
+    "total_scroll": 537,
+    "screenshot": "screenshots/ios-emulated-02-welcome-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "03-library",
+    "label": "Library: all languages",
+    "offset": 589,
+    "total_scroll": 589,
+    "screenshot": "screenshots/desktop-03-library-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "02-welcome",
+    "label": "Reader welcome",
+    "offset": 537,
+    "total_scroll": 537,
+    "screenshot": "screenshots/ios-emulated-02-welcome-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "03-library",
+    "label": "Library: all languages",
+    "offset": 550,
+    "total_scroll": 1358,
+    "screenshot": "screenshots/android-emulated-03-library-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "03-library",
+    "label": "Library: all languages",
+    "offset": 1358,
+    "total_scroll": 1358,
+    "screenshot": "screenshots/android-emulated-03-library-continuation-2.png"
+  },
+  {
+    "device": "desktop",
+    "id": "04-search",
+    "label": "Search empty state",
+    "offset": 713,
+    "total_scroll": 713,
+    "screenshot": "screenshots/desktop-04-search-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "03-library",
+    "label": "Library: all languages",
+    "offset": 410,
+    "total_scroll": 1523,
+    "screenshot": "screenshots/ios-emulated-03-library-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "03-library",
+    "label": "Library: all languages",
+    "offset": 1523,
+    "total_scroll": 1523,
+    "screenshot": "screenshots/ios-emulated-03-library-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "04-search",
+    "label": "Search empty state",
+    "offset": 550,
+    "total_scroll": 1550,
+    "screenshot": "screenshots/android-emulated-04-search-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "04-search",
+    "label": "Search empty state",
+    "offset": 1550,
+    "total_scroll": 1550,
+    "screenshot": "screenshots/android-emulated-04-search-continuation-2.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "04-search",
+    "label": "Search empty state",
+    "offset": 410,
+    "total_scroll": 1715,
+    "screenshot": "screenshots/ios-emulated-04-search-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "04-search",
+    "label": "Search empty state",
+    "offset": 1715,
+    "total_scroll": 1715,
+    "screenshot": "screenshots/ios-emulated-04-search-continuation-2.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "05-series",
+    "label": "Series empty state",
+    "offset": 166,
+    "total_scroll": 166,
+    "screenshot": "screenshots/ios-emulated-05-series-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "08-free-pass",
+    "label": "India free Pass",
+    "offset": 36,
+    "total_scroll": 36,
+    "screenshot": "screenshots/desktop-08-free-pass-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "08-free-pass",
+    "label": "India free Pass",
+    "offset": 541,
+    "total_scroll": 541,
+    "screenshot": "screenshots/android-emulated-08-free-pass-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "09-signup-choice",
+    "label": "Account capacity choice",
+    "offset": 78,
+    "total_scroll": 78,
+    "screenshot": "screenshots/desktop-09-signup-choice-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "09-signup-choice",
+    "label": "Account capacity choice",
+    "offset": 435,
+    "total_scroll": 435,
+    "screenshot": "screenshots/android-emulated-09-signup-choice-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "10-adult-signup",
+    "label": "Adult account form; not submitted",
+    "offset": 738,
+    "total_scroll": 909,
+    "screenshot": "screenshots/desktop-10-adult-signup-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "08-free-pass",
+    "label": "India free Pass",
+    "offset": 410,
+    "total_scroll": 748,
+    "screenshot": "screenshots/ios-emulated-08-free-pass-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "10-adult-signup",
+    "label": "Adult account form; not submitted",
+    "offset": 909,
+    "total_scroll": 909,
+    "screenshot": "screenshots/desktop-10-adult-signup-continuation-2.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "08-free-pass",
+    "label": "India free Pass",
+    "offset": 748,
+    "total_scroll": 748,
+    "screenshot": "screenshots/ios-emulated-08-free-pass-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "10-adult-signup",
+    "label": "Adult account form; not submitted",
+    "offset": 550,
+    "total_scroll": 1290,
+    "screenshot": "screenshots/android-emulated-10-adult-signup-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "10-adult-signup",
+    "label": "Adult account form; not submitted",
+    "offset": 1290,
+    "total_scroll": 1290,
+    "screenshot": "screenshots/android-emulated-10-adult-signup-continuation-2.png"
+  },
+  {
+    "device": "desktop",
+    "id": "11-parent-guidance",
+    "label": "Parent guidance; no child enrollment",
+    "offset": 738,
+    "total_scroll": 754,
+    "screenshot": "screenshots/desktop-11-parent-guidance-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "11-parent-guidance",
+    "label": "Parent guidance; no child enrollment",
+    "offset": 754,
+    "total_scroll": 754,
+    "screenshot": "screenshots/desktop-11-parent-guidance-continuation-2.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "09-signup-choice",
+    "label": "Account capacity choice",
+    "offset": 410,
+    "total_scroll": 605,
+    "screenshot": "screenshots/ios-emulated-09-signup-choice-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "09-signup-choice",
+    "label": "Account capacity choice",
+    "offset": 605,
+    "total_scroll": 605,
+    "screenshot": "screenshots/ios-emulated-09-signup-choice-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "11-parent-guidance",
+    "label": "Parent guidance; no child enrollment",
+    "offset": 550,
+    "total_scroll": 1379,
+    "screenshot": "screenshots/android-emulated-11-parent-guidance-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "11-parent-guidance",
+    "label": "Parent guidance; no child enrollment",
+    "offset": 1379,
+    "total_scroll": 1379,
+    "screenshot": "screenshots/android-emulated-11-parent-guidance-continuation-2.png"
+  },
+  {
+    "device": "desktop",
+    "id": "12-signin",
+    "label": "Existing-account sign-in",
+    "offset": 488,
+    "total_scroll": 488,
+    "screenshot": "screenshots/desktop-12-signin-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "10-adult-signup",
+    "label": "Adult account form; not submitted",
+    "offset": 410,
+    "total_scroll": 1563,
+    "screenshot": "screenshots/ios-emulated-10-adult-signup-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "10-adult-signup",
+    "label": "Adult account form; not submitted",
+    "offset": 1563,
+    "total_scroll": 1563,
+    "screenshot": "screenshots/ios-emulated-10-adult-signup-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "12-signin",
+    "label": "Existing-account sign-in",
+    "offset": 550,
+    "total_scroll": 760,
+    "screenshot": "screenshots/android-emulated-12-signin-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "12-signin",
+    "label": "Existing-account sign-in",
+    "offset": 760,
+    "total_scroll": 760,
+    "screenshot": "screenshots/android-emulated-12-signin-continuation-2.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "11-parent-guidance",
+    "label": "Parent guidance; no child enrollment",
+    "offset": 410,
+    "total_scroll": 1658,
+    "screenshot": "screenshots/ios-emulated-11-parent-guidance-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "11-parent-guidance",
+    "label": "Parent guidance; no child enrollment",
+    "offset": 1658,
+    "total_scroll": 1658,
+    "screenshot": "screenshots/ios-emulated-11-parent-guidance-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "13-email-signin",
+    "label": "Email sign-in; not submitted",
+    "offset": 87,
+    "total_scroll": 87,
+    "screenshot": "screenshots/android-emulated-13-email-signin-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "15-vault-gate",
+    "label": "Vault: signed-out access gate",
+    "offset": 488,
+    "total_scroll": 488,
+    "screenshot": "screenshots/desktop-15-vault-gate-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "12-signin",
+    "label": "Existing-account sign-in",
+    "offset": 410,
+    "total_scroll": 1059,
+    "screenshot": "screenshots/ios-emulated-12-signin-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "12-signin",
+    "label": "Existing-account sign-in",
+    "offset": 1059,
+    "total_scroll": 1059,
+    "screenshot": "screenshots/ios-emulated-12-signin-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "14-password-reset",
+    "label": "Password recovery; not submitted",
+    "offset": 4,
+    "total_scroll": 4,
+    "screenshot": "screenshots/android-emulated-14-password-reset-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "16-downloads-gate",
+    "label": "Downloads: signed-out access gate",
+    "offset": 488,
+    "total_scroll": 488,
+    "screenshot": "screenshots/desktop-16-downloads-gate-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "13-email-signin",
+    "label": "Email sign-in; not submitted",
+    "offset": 324,
+    "total_scroll": 324,
+    "screenshot": "screenshots/ios-emulated-13-email-signin-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "15-vault-gate",
+    "label": "Vault: signed-out access gate",
+    "offset": 550,
+    "total_scroll": 760,
+    "screenshot": "screenshots/android-emulated-15-vault-gate-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "15-vault-gate",
+    "label": "Vault: signed-out access gate",
+    "offset": 760,
+    "total_scroll": 760,
+    "screenshot": "screenshots/android-emulated-15-vault-gate-continuation-2.png"
+  },
+  {
+    "device": "desktop",
+    "id": "17-settings-gate",
+    "label": "Settings: signed-out access gate",
+    "offset": 488,
+    "total_scroll": 488,
+    "screenshot": "screenshots/desktop-17-settings-gate-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "14-password-reset",
+    "label": "Password recovery; not submitted",
+    "offset": 242,
+    "total_scroll": 242,
+    "screenshot": "screenshots/ios-emulated-14-password-reset-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "16-downloads-gate",
+    "label": "Downloads: signed-out access gate",
+    "offset": 550,
+    "total_scroll": 760,
+    "screenshot": "screenshots/android-emulated-16-downloads-gate-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "16-downloads-gate",
+    "label": "Downloads: signed-out access gate",
+    "offset": 760,
+    "total_scroll": 760,
+    "screenshot": "screenshots/android-emulated-16-downloads-gate-continuation-2.png"
+  },
+  {
+    "device": "desktop",
+    "id": "18-independence",
+    "label": "Independent account entry",
+    "offset": 477,
+    "total_scroll": 477,
+    "screenshot": "screenshots/desktop-18-independence-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "15-vault-gate",
+    "label": "Vault: signed-out access gate",
+    "offset": 410,
+    "total_scroll": 1059,
+    "screenshot": "screenshots/ios-emulated-15-vault-gate-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "15-vault-gate",
+    "label": "Vault: signed-out access gate",
+    "offset": 1059,
+    "total_scroll": 1059,
+    "screenshot": "screenshots/ios-emulated-15-vault-gate-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "17-settings-gate",
+    "label": "Settings: signed-out access gate",
+    "offset": 550,
+    "total_scroll": 760,
+    "screenshot": "screenshots/android-emulated-17-settings-gate-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "17-settings-gate",
+    "label": "Settings: signed-out access gate",
+    "offset": 760,
+    "total_scroll": 760,
+    "screenshot": "screenshots/android-emulated-17-settings-gate-continuation-2.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "16-downloads-gate",
+    "label": "Downloads: signed-out access gate",
+    "offset": 410,
+    "total_scroll": 1059,
+    "screenshot": "screenshots/ios-emulated-16-downloads-gate-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "20-privacy",
+    "label": "Privacy notice",
+    "offset": 738,
+    "total_scroll": 2706,
+    "screenshot": "screenshots/desktop-20-privacy-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "16-downloads-gate",
+    "label": "Downloads: signed-out access gate",
+    "offset": 1059,
+    "total_scroll": 1059,
+    "screenshot": "screenshots/ios-emulated-16-downloads-gate-continuation-2.png"
+  },
+  {
+    "device": "desktop",
+    "id": "20-privacy",
+    "label": "Privacy notice",
+    "offset": 2706,
+    "total_scroll": 2706,
+    "screenshot": "screenshots/desktop-20-privacy-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "18-independence",
+    "label": "Independent account entry",
+    "offset": 550,
+    "total_scroll": 754,
+    "screenshot": "screenshots/android-emulated-18-independence-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "18-independence",
+    "label": "Independent account entry",
+    "offset": 754,
+    "total_scroll": 754,
+    "screenshot": "screenshots/android-emulated-18-independence-continuation-2.png"
+  },
+  {
+    "device": "desktop",
+    "id": "21-terms",
+    "label": "Service terms",
+    "offset": 738,
+    "total_scroll": 955,
+    "screenshot": "screenshots/desktop-21-terms-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "17-settings-gate",
+    "label": "Settings: signed-out access gate",
+    "offset": 410,
+    "total_scroll": 1059,
+    "screenshot": "screenshots/ios-emulated-17-settings-gate-continuation-1.png"
+  },
+  {
+    "device": "desktop",
+    "id": "21-terms",
+    "label": "Service terms",
+    "offset": 955,
+    "total_scroll": 955,
+    "screenshot": "screenshots/desktop-21-terms-continuation-2.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "17-settings-gate",
+    "label": "Settings: signed-out access gate",
+    "offset": 1059,
+    "total_scroll": 1059,
+    "screenshot": "screenshots/ios-emulated-17-settings-gate-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "19-contact",
+    "label": "Contact and grievance information",
+    "offset": 324,
+    "total_scroll": 324,
+    "screenshot": "screenshots/android-emulated-19-contact-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "18-independence",
+    "label": "Independent account entry",
+    "offset": 410,
+    "total_scroll": 1028,
+    "screenshot": "screenshots/ios-emulated-18-independence-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "18-independence",
+    "label": "Independent account entry",
+    "offset": 1028,
+    "total_scroll": 1028,
+    "screenshot": "screenshots/ios-emulated-18-independence-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "20-privacy",
+    "label": "Privacy notice",
+    "offset": 550,
+    "total_scroll": 4546,
+    "screenshot": "screenshots/android-emulated-20-privacy-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "20-privacy",
+    "label": "Privacy notice",
+    "offset": 4546,
+    "total_scroll": 4546,
+    "screenshot": "screenshots/android-emulated-20-privacy-continuation-2.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "19-contact",
+    "label": "Contact and grievance information",
+    "offset": 410,
+    "total_scroll": 540,
+    "screenshot": "screenshots/ios-emulated-19-contact-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "19-contact",
+    "label": "Contact and grievance information",
+    "offset": 540,
+    "total_scroll": 540,
+    "screenshot": "screenshots/ios-emulated-19-contact-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "21-terms",
+    "label": "Service terms",
+    "offset": 550,
+    "total_scroll": 1749,
+    "screenshot": "screenshots/android-emulated-21-terms-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "21-terms",
+    "label": "Service terms",
+    "offset": 1749,
+    "total_scroll": 1749,
+    "screenshot": "screenshots/android-emulated-21-terms-continuation-2.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "20-privacy",
+    "label": "Privacy notice",
+    "offset": 410,
+    "total_scroll": 4947,
+    "screenshot": "screenshots/ios-emulated-20-privacy-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "20-privacy",
+    "label": "Privacy notice",
+    "offset": 4947,
+    "total_scroll": 4947,
+    "screenshot": "screenshots/ios-emulated-20-privacy-continuation-2.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "21-terms",
+    "label": "Service terms",
+    "offset": 410,
+    "total_scroll": 2039,
+    "screenshot": "screenshots/ios-emulated-21-terms-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "21-terms",
+    "label": "Service terms",
+    "offset": 2039,
+    "total_scroll": 2039,
+    "screenshot": "screenshots/ios-emulated-21-terms-continuation-2.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "23-not-found",
+    "label": "Not found state",
+    "offset": 6,
+    "total_scroll": 6,
+    "screenshot": "screenshots/android-emulated-23-not-found-continuation-1.png"
+  },
+  {
+    "device": "android-emulated",
+    "id": "24-practice-disabled",
+    "label": "Deferred practice unavailable",
+    "offset": 6,
+    "total_scroll": 6,
+    "screenshot": "screenshots/android-emulated-24-practice-disabled-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "22-offline",
+    "label": "Explicit offline shell; online-rendered",
+    "offset": 142,
+    "total_scroll": 142,
+    "screenshot": "screenshots/ios-emulated-22-offline-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "23-not-found",
+    "label": "Not found state",
+    "offset": 210,
+    "total_scroll": 210,
+    "screenshot": "screenshots/ios-emulated-23-not-found-continuation-1.png"
+  },
+  {
+    "device": "ios-emulated",
+    "id": "24-practice-disabled",
+    "label": "Deferred practice unavailable",
+    "offset": 210,
+    "total_scroll": 210,
+    "screenshot": "screenshots/ios-emulated-24-practice-disabled-continuation-1.png"
+  }
+]
