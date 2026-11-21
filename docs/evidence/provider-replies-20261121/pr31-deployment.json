@@ -1,0 +1,123 @@
+{
+  "date": "2026-11-21",
+  "application_commit": "831f06ef02f48e083af3f5214d0c5f9d45a56975",
+  "source_pr": 31,
+  "scope": "Isolated Earnalism only; guardian household ownership security correction",
+  "ci": {
+    "run_id": 44899533909,
+    "status": "PASS",
+    "backend_tests": 823,
+    "tool_dependent_skips": 22,
+    "client_tests": 37,
+    "voice_plan_tests": 12,
+    "focused_postgres_tests": 33
+  },
+  "deployments": {
+    "web": {
+      "service": "srv-dbunbd8jo6nc73akbng0",
+      "deploy": "dep-dc0of617lnhs7399mssg",
+      "status": "Live"
+    },
+    "maintenance": {
+      "service": "crn-dbv7bte7bikc73fpso3g",
+      "deploy": "dep-dc0ofgu7bikc73bdo390",
+      "status": "Live"
+    },
+    "archive": {
+      "service": "crn-dbv7agetlv9c7381is10",
+      "deploy": "dep-dc0ofr942hec73c1v5eg",
+      "status": "Live",
+      "extra_export_run": false
+    }
+  },
+  "validation": {
+    "cross_browser_checks": 114,
+    "cross_browser_passed": 114,
+    "engines": [
+      "Chromium desktop",
+      "Firefox desktop",
+      "WebKit virtual phone"
+    ],
+    "native_safari_checks": 6,
+    "native_safari_version": "26.5",
+    "native_safari_status": "PASS after initial Safari startup timeout and explicit launch",
+    "existing_operator_read_only_endpoints": 200,
+    "guardian_policy_and_page": 404,
+    "guardian_script_absent": true,
+    "scheduled_maintenance": {
+      "maintenance_last_success": {
+        "commit": "831f06ef02f48e083af3f5214d0c5f9d45a56975",
+        "counts": {
+          "processed": 0,
+          "retention": {
+            "dry_run": false,
+            "eligible": {
+              "devices": 0,
+              "receipts": 0,
+              "sessions": 0,
+              "action_tokens": 0,
+              "mail_payloads": 0,
+              "audit_outcomes": 0,
+              "support_payloads": 0,
+              "abandoned_signups": 0,
+              "guardian_authorizations": 0,
+              "guardian_accounts_suspended": 0
+            },
+            "time_budget_exhausted": false
+          },
+          "rate_counters": {
+            "deleted": 0
+          },
+          "expired_exports": {
+            "failed": 0,
+            "cleaned": 0
+          },
+          "cache_references": {
+            "deleted": 0
+          }
+        },
+        "run_id": "e1d1e593-c3b0-46bd-9ac5-fc2d1351e227",
+        "source": "scheduled",
+        "outcome": "success",
+        "error_code": "",
+        "started_at": "2026-11-21T12:02:14.884590Z",
+        "finished_at": "2026-11-21T12:02:14.995210Z"
+      },
+      "lease_clear": true,
+      "read_only": true
+    },
+    "book": {
+      "state": "draft",
+      "live_revision_id": null,
+      "version": 42,
+      "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+      "paragraphs": 32
+    },
+    "finance_counts": {
+      "maison_invoice": 0,
+      "maison_invoice_revision": 0,
+      "maison_finance_number_sequence": 0,
+      "maison_offer": 0
+    },
+    "guardian_rows": 0,
+    "managed_accounts": 0,
+    "legacy_https_status": 200
+  },
+  "static_release_unchanged": "7cbf84d3124fa03c5606333df71ac6630b7d72660dd9a8cdb6b786c4f94679dd",
+  "new_migrations": false,
+  "production_guardian_activation": false,
+  "production_guardian_policies": {},
+  "provider_review": {
+    "business_all_folder_search": "No provider-domain matches since inquiry send, including spam/trash",
+    "yandex": "Acknowledgment BD909792 only; no substantive offer established",
+    "datarep": "No response found in scoped checks",
+    "epic_kws": "Official Dev Portal linked from KWS still redirects to Epic sign-in; authenticated onboarding screen not accessible; no terms or account/product creation"
+  },
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false,
+    "tested": false
+  },
+  "book_legacy_changes": false,
+  "public_47_country_clearance": false
+}
