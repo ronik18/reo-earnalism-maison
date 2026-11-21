@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "checked_at_utc": "2026-11-21T13:22:34.407000+00:00",
+  "local_snapshot_before_cleanup": {
+    "users": 10,
+    "progress_rows": 5,
+    "operation_receipts": 100,
+    "real_selfish_giant_edition_rows": 0,
+    "database": "maison_zero_load_20261121_1200",
+    "pg_version": "PostgreSQL 18.7 (Debian 18.7-1.pgdg13+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit"
+  },
+  "owned_app_removed": true,
+  "owned_degraded_app_removed": true,
+  "owned_database_removed": true,
+  "existing_pg_preserved": true,
+  "existing_qualification_ui_preserved": true,
+  "remote_provider_calls": 0,
+  "new_provider_spend_usd": 0,
+  "local_resource_limits": {
+    "docker_nano_cpus": 0,
+    "memory_bytes": 0,
+    "interpretation": "no per-container CPU/RAM cap; not the Render0.5CPU/512MBhardware profile"
+  },
+  "source_mount": "current worktree74a48e8 read-only /app; separately writable owned runtime directory",
+  "synthetic_fixture": "original local River Notebook EN/BN only; no real book data"
+}
