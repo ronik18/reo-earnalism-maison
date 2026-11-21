@@ -1,4 +1,6 @@
-# HA / PITR / load — exact proposed authorization package
+# Historical HA / PITR / load proposal — OWNER DECLINED
+
+**Current owner decision: DO NOT APPROVE OR EXECUTE this $50 pilot. New-spending budget is $0. Retain this document as historical preparation only; its proposed actions and ceilings are not authority. Use the zero-cost local-validation receipt in the current checklist.**
 
 21November2026; source93b9730. **PREPARED / NOT APPROVED / NOT EXECUTED.** All amounts are USD. The exact proposed authorization is a **$50 gross additional-charge ceiling**, not a vendor quote or provider-enforced hard stop. [Actual account pricing](account-pricing-readback.json) confirms the underlying rates; Final payable taxes/fees and account eligibility must pass the checks below before any purchase. Supported Render cessation and synthetic-project disposal routes are now verified in primary documentation, as recorded below. The book stays draft; legacy/DNS are outside scope.
 
