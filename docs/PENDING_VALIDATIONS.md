@@ -30,7 +30,7 @@ Concurrent audiovisual skills/documentation are preserved; no book/media release
 | Free finance boundary | No new checkout/provider creation or automatic charge; planned reference values are struck through. Historical financial read/cancellation controls remain. No active cohort or issued finance rows were invented. [Free rollout](evidence/free-access-20261119/README.md). |
 | Rights/privacy/grievance | Purpose-specific password choice, optional flags defaultoff, ownership/export/deletion/withdrawal/holds and post-restore reconciliation; actual operator Google/private-export and restore-reconciliation proof. Approved name/business mailbox is public; private phone/Gmail/CERT submission are not. [Operating scope](OPERATING_LEGAL_QUALIFICATION_20261120.md), [contact acceptance](evidence/grievance-publication-20261121/README.md). |
 | Scheduled operation/recovery/security | Actual scheduled maintenance and encrypted daily/monthly archive/readback/isolated restore; classified audit180days, resolved support90days, approved DB backup policy unchanged. Complete available log history66104records was decrypted/checksummed with probe recovery. Native7daylogs are a collection buffer, not retrospective180dayproof. [Activation/restore](evidence/scheduled-archive-restore-result.json), [security receipt](evidence/security-retention-20261120/README.md). |
-| HTTPS/CDN/draft/legacy | Qualified isolated HTTPS/country/origin/private/draft boundaries, immutable asset hashes/types/cache and read-only protected-book/empty-finance plus legacyHTTPS checks. Fresh final-candidate readback remains required for this change. |
+| HTTPS/CDN/draft/legacy | Qualified isolated HTTPS/country/origin/private/draft boundaries, immutable asset hashes/types/cache and read-only protected-book/empty-finance plus legacyHTTPS checks. 21November read-only refresh: liveness200, anonymous readiness403 (protected, not fresh DB readiness proof), protected draft404 and legacy200; app.js/app.css hashes, MIME, immutable metadata and CDN HIT pass. Last SQL invariant receipt is reused, not claimed refreshed. |
 
 ## Separate conditional work — not isolated free-access blockers
 
@@ -46,3 +46,13 @@ Concurrent audiovisual skills/documentation are preserved; no book/media release
 | Credential renewal | Existing private/public/archive R2 credentials expire16February2027; renew with overlap before expiry. Restore identities remain private owner custody. |
 
 One authoritative candidate and receipt; reuse unchanged valid evidence. New failures or processing/scope changes reopen only their affected acceptance. No force push, extra service, DNS change, book publication or legacy mutation is implied.
+
+## Pending read-only follow-up
+
+- Fresh protected DB/schema readiness and SELECT-only book/finance/maintenance invariants: use the existing authorized operator credential path when available. No new credential access or schema writes are needed. The last verified receipt is preserved above; today’s anonymous readiness403 and draft404 do not replace this check.
+
+## 21November parallel validation refresh
+
+[Current receipt](evidence/remaining-validations-20261121/qualification.json). Fresh main `4edbcd7` CI44868293105 passes; local typecheck,37client tests and build pass. Independent operations and compliance lanes confirm HTTPS/CDN boundaries and47-region policy/link consistency. No runtime/schema/provider/DNS changes were made. The Selfish Giant remains held in draft; public catalog access remains404.
+
+Public/all-ages preparation is isolated in PR#24; its two CI runs pass, but this does not qualify enrollment, regional storage/transfer routes or public legal clearance. Do not deploy its new account relation without its schema migration and applicable authorization. Preserve concurrent edits. The next integration action is to resolve supported country/purpose/authority and data-flow decisions in that preparation lane; present any exact paid/provider/DNS package before execution. Reuse completed free-path evidence rather than rerunning it as a prerequisite for those separate decisions.
