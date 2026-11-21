@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-21",
+  "method": "Read-only signed-in Neon project overview, Computes and Backup & Restore pages",
+  "project": "quiet-cloud-63128335",
+  "branch": "br-nameless-rain-aok6bsea",
+  "branch_name": "production",
+  "region": "AWS Singapore",
+  "plan": "Launch",
+  "primary_compute": {
+    "min_CU": 0.25,
+    "max_CU": 8,
+    "status": "ACTIVE"
+  },
+  "recorded_isolated_approval": {
+    "min_CU": 0.25,
+    "max_CU": 2
+  },
+  "cap_discrepancy": true,
+  "history_window_days_configured": 7,
+  "earliest_restore_time_displayed": "2026-11-17 23:50 GMT+05:30",
+  "history_meaning": "Available since project creation; not seven full elapsed days or a tested recovery",
+  "snapshot_status_displayed": "No snapshots, no schedule set",
+  "restore_preview_or_restore_executed": false,
+  "compute_or_project_settings_saved": false,
+  "spending": false
+}
