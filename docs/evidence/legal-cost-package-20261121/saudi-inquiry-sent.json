@@ -1,0 +1,23 @@
+{
+  "status": "SMTP_ACCEPTED_AND_SENT_VERIFIED",
+  "body_sha256": "f21a92ed2ee03954a2be76b476fbe999f632cc06a00d685010b900e95621f576",
+  "from": "sales@reoenterprise.org",
+  "to": "contact@gmedia.gov.sa",
+  "subject": "Non-binding applicability inquiry: overseas free browser Reader \u2014 Reo Enterprise / Earnalism",
+  "user_approved": true,
+  "attachments": 0,
+  "cc": 0,
+  "bcc": 0,
+  "accepted_at_utc": "2026-11-21T13:04:08.164891+00:00",
+  "delivery_or_regulatory_reply_verified": false,
+  "recipient_reconfirmed_source": "https://gmedia.gov.sa/ar/contact-us",
+  "clearance_achieved": false,
+  "application_or_commitment": false,
+  "book_published": false,
+  "spending": false,
+  "dns_change": false,
+  "sent_copy_verified": true,
+  "delivery_or_reply_verified": false,
+  "read_only_imap": true,
+  "exact_sender_recipient_subject_message_match": true
+}
