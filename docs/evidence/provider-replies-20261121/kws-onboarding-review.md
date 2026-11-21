@@ -33,3 +33,7 @@ Record the actual environment/app/service IDs without publishing secrets; verify
 Confirm Indian proprietorship eligibility; test mode and documented synthetic identities; each47 country’s methods and unsupported-country behavior; developer and parent-side fees/authorizations; independent-controller and processor roles, locations/subprocessors and retention/AgeGraph deletion; parental relationship assurance versus adult assurance; permitted evidence and result semantics; service-specific legal acceptance and production approval requirements. These are provider facts, not business facts the owner can truthfully guess. No third external inquiry is authorized by the prior DataRep/Yandex send approval: prepare a separate exact support message and obtain sending approval if public/console documentation cannot resolve them.
 
 No production activation, legal clearance, paid verification or title/legacy change is implied. Physical Android/iOS UAT remains deferred and non-blocking.
+
+## Authenticated follow-up
+
+[Exact next actions and private inquiry](kws-exact-approvals.md): Epic sign-in confirmed; mandatory2FA is the next owner-controlled step. Fresh official docs now establish a TEST route and published method availability mapped to all47codes. Earlier unavailable-document/matrix observations above are historical; actual account eligibility, portal contracts and national legal qualification remain unresolved. No terms accepted.
