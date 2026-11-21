@@ -1,6 +1,6 @@
 # Current Maison acceptance checklist
 
-**Authority: $0 new spending.** The $50 pilot is declined. No paid provider test, upgrade, remote test project, cloud load/restore, deployment or DNS change is authorized by this task. The Selfish Giant stays draft; legacy is untouched. Hosted CI is skipped for documentation-only updates; local checks run and no branch requirement is changed or bypassed.
+**Authority: $0 new spending.** The $50 pilot is declined. The earlier zero-cost preparation task authorized no provider drill or deployment; the owner subsequently explicitly authorized the India-first source-fix deployment recorded below. No paid provider test, upgrade, remote test project, cloud load/restore or DNS change is included. The Selfish Giant stays draft; legacy is untouched. Hosted CI is skipped for documentation-only updates; local checks run and no branch requirement is changed or bypassed.
 
 **Current service scope:** the owner-approved India-first free account/reading service. The separate [47-region exact-edition publication policy](../contracts/publication-policy.json) is unchanged. India-first service acceptance does not publish the held book, clear foreign expansion or waive the full HLD/LLD production baseline. Physical Android/iOS UAT remains deferred, untested and non-blocking.
 
@@ -39,3 +39,7 @@ This follow-up used current source `125e48e` locally, primary-source research an
 | Credential renewal | Existing private/public/archive R2 credentials expire 16 February 2027; prepare overlap renewal before expiry. Private restore identities remain owner-held. No new access is created by this checklist. |
 
 Earlier details are preserved in the [historical register](evidence/zero-followup-20261121/previous-register.md); its old runtime/off-guardian/global-scope statements are not current. One Integration Lane owns final source/release state. No force push, new spend, book publication, cutover, legacy mutation or DNS change is implied.
+
+## Latest India-first correctness follow-up —21November2026
+
+[Executed receipt](evidence/india-first-followup-20261121/release-receipt.json): current isolated runtime**516179f**, all3servicesLive. Fixed historicalguardian withdrawal affecting independent sessions, a real deferred-FK renewal/independence deadlock and safe Google/signup recovery destinations.107focusedPG+16web checksPASS; head/merge/mainCI861backend(22unchangedtoolskips),37client,12voiceplanPASS. Actual18cross-engine/virtual-phone+3nativeSafari recovery checksPASS. Existing a9865d3/202-file staticrelease unchanged; no assetupload or environmentedit. Schedulednewbuildmaintenance, protecteddraft/zero-finance/enrollment and legacyavailabilityPASS. Existingbrowser was signedout and privateendpoints returned401/no-store; no freshproductionidentity/childfixture was created. Earlier853actual-image/binary and broader131livechecks remain retained forunchangedareas, not relabeled a newexecution. PhysicalUAT remains deferred/non-blocking. No newprovider, migration, paidresource, bookpublication or legacy/DNS mutation.

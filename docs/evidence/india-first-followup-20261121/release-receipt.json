@@ -1,0 +1,155 @@
+{
+  "date": "2026-11-21",
+  "product": "Earnalism",
+  "scope": "India-first isolated follow-up; current declared-permission method unchanged",
+  "source_pr": 41,
+  "tested_head": "ed30f46f1248e7d356c5c7db7440e96098683f66",
+  "application_commit": "516179fe5213da8a8f762797dee74c702cd377dc",
+  "runtime_source_matches_tested_head": true,
+  "concurrent_main_documentation_preserved": true,
+  "ci": {
+    "head_run": 44926509061,
+    "merge_validation_run": 44926548592,
+    "main_run": 44927192709,
+    "all_status": "PASS",
+    "backend_tests_total": 861,
+    "unchanged_binary_tool_skips": 22,
+    "client_tests": 37,
+    "voice_plan_tests": 12,
+    "unchanged_binary_acceptance": "../india-first-launch-20261121/predeploy-validation.json"
+  },
+  "focused_postgresql": {
+    "tests": 107,
+    "seconds": 97.419,
+    "status": "PASS",
+    "both_renewal_independence_orderings": true,
+    "historical_guardian_cannot_revoke_independent_session": true,
+    "former_parent_delete_preserves_independent_session": true
+  },
+  "rendered_web": {
+    "tests": 16,
+    "status": "PASS"
+  },
+  "deployments": {
+    "web": {
+      "service": "srv-dbunbd8jo6nc73akbng0",
+      "deployment": "dep-dc0sqlcs728c73b9ffh0",
+      "status": "Live"
+    },
+    "maintenance": {
+      "service": "crn-dbv7bte7bikc73fpso3g",
+      "deployment": "dep-dc0sqmivcj2c73bljcf0",
+      "status": "Live"
+    },
+    "archive": {
+      "service": "crn-dbv7agetlv9c7381is10",
+      "deployment": "dep-dc0sqq3m8hqs73fhg280",
+      "status": "Live",
+      "extra_export_run": false
+    }
+  },
+  "live_recovery": {
+    "checks": 18,
+    "passed": 18,
+    "engines": [
+      "Chromium desktop",
+      "Firefox desktop",
+      "WebKit virtual phone"
+    ],
+    "native_safari_checks": 3,
+    "native_safari_version": "26.5",
+    "native_safari_status": "PASS",
+    "provider_calls_or_account_creation": false
+  },
+  "public_live_boundaries": {
+    "health": 200,
+    "catalog": 200,
+    "protected_draft": 404,
+    "signed_out_session": 200,
+    "signed_out_profile_preferences_devices_guardian": 401,
+    "fresh_operator_signin_this_followup": false,
+    "note": "Existing browser was signed out; private endpoints denied access with no-store. No fresh production sign-in or real child session was created. Earlier authenticated operator acceptance is reused only for unchanged paths."
+  },
+  "assets": {
+    "release": "a9865d304bd665301cdf337e0e6a7f7de0e51f5731ac6afe604ace6b18c240f6",
+    "files": 202,
+    "manifest_identical_in_final_image": true,
+    "live_links_match": true,
+    "new_upload_or_environment_edit": false
+  },
+  "scheduled_maintenance": {
+    "maintenance_last_success": {
+      "commit": "516179fe5213da8a8f762797dee74c702cd377dc",
+      "counts": {
+        "processed": 0,
+        "retention": {
+          "dry_run": false,
+          "eligible": {
+            "devices": 0,
+            "receipts": 0,
+            "sessions": 0,
+            "action_tokens": 0,
+            "mail_payloads": 0,
+            "audit_outcomes": 0,
+            "support_payloads": 0,
+            "abandoned_signups": 0,
+            "guardian_authorizations": 0,
+            "guardian_accounts_suspended": 0
+          },
+          "time_budget_exhausted": false
+        },
+        "rate_counters": {
+          "deleted": 0
+        },
+        "expired_exports": {
+          "failed": 0,
+          "cleaned": 0
+        },
+        "cache_references": {
+          "deleted": 0
+        }
+      },
+      "run_id": "39e9a516-a0a3-4b9e-8de5-45125d861a33",
+      "source": "scheduled",
+      "outcome": "success",
+      "error_code": "",
+      "started_at": "2026-11-21T16:59:13.689011Z",
+      "finished_at": "2026-11-21T16:59:13.781775Z"
+    },
+    "lease_clear": true,
+    "read_only": true
+  },
+  "protected_book_unchanged": {
+    "state": "draft",
+    "live_revision_id": null,
+    "version": 42,
+    "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+    "paragraphs": 32
+  },
+  "finance_counts": {
+    "maison_invoice": 0,
+    "maison_invoice_revision": 0,
+    "maison_finance_number_sequence": 0,
+    "maison_offer": 0
+  },
+  "guardian_rows": 0,
+  "managed_accounts": 0,
+  "accounts_schema_last": "0005_guardianauthorization_claim_expires_at_and_more",
+  "new_migrations": false,
+  "legacy": {
+    "HTTPS": 200,
+    "source_data_DNS_writes": false
+  },
+  "provider_setup_contract_or_paid_resource": false,
+  "permission_policy_changed": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false,
+    "tested": false
+  },
+  "image_source": {
+    "source_files": 285,
+    "frozen_image_source_match": true,
+    "source_tree_sha256": "eec1530a63f6458250de07b2d480a60ad1ab8d452d5de6960d37401a985a8f32"
+  }
+}
