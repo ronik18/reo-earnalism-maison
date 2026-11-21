@@ -1,0 +1,29 @@
+{% extends 'web/base.html' %}
+{% block title %}Children and guardian permissions · Earnalism{% endblock %}
+{% block content %}
+<article class="narrow ornamental-panel" aria-labelledby="guardian-heading">
+  <p class="eyebrow">Children and guardians</p>
+  <h1 id="guardian-heading">A thoughtful place for every reader.</h1>
+  <p class="lead">Earnalism is intended for readers of any age. Reading access and permission to process a child’s account information need separate care.</p>
+  <section aria-labelledby="guardian-status-heading">
+    <h2 id="guardian-status-heading">Guardian permissions are not available yet.</h2>
+    <p class="notice" role="status">This is an information-only preview. The authorization method, storage safeguards and applicable legal route are still under review. No guardian request or permission is recorded here.</p>
+    <p>A parent or legal guardian may need to authorize specific account features under the rules that apply to a reader. This page does not set a universal age threshold or confirm anyone’s authority.</p>
+  </section>
+  <section aria-labelledby="guardian-rights-heading">
+    <h2 id="guardian-rights-heading">Understand the information and your rights.</h2>
+    <p>Read our privacy notice to understand the information used by the service. For your own signed-in account, Settings provides the available privacy requests.</p>
+    <div class="actions">
+      <a class="button secondary" href="{% url 'web:privacy' 'en' %}">Read the privacy notice</a>
+      <a class="text-link" href="{% url 'web:settings' 'en' %}">Your account and privacy requests</a>
+    </div>
+    <p>Acting for another account requires a verified legal basis and authority. A message or a checkbox does not by itself establish that authority or grant access to another reader’s information.</p>
+  </section>
+  <section aria-labelledby="guardian-questions-heading">
+    <h2 id="guardian-questions-heading">Questions before sharing information?</h2>
+    <p>Use our existing business contact page for general questions about available permissions. Do not send a child’s name, date of birth, identification documents, account details or private notes. A contact message is not verified guardian permission.</p>
+    <a class="text-link" href="{% url 'web:contact' 'en' %}">Contact Earnalism</a>
+  </section>
+  <a class="text-link" href="{% url 'web:explore' 'en' %}">Explore available reading</a>
+</article>
+{% endblock %}

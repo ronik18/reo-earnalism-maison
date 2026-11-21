@@ -1,0 +1,52 @@
+{
+  "review_date": "2026-11-21",
+  "scope": "review-only public/all-ages foundation; no public qualification or production deployment",
+  "country_coverage": {
+    "exact_whitelist": true,
+    "unique_countries": 47,
+    "groups": [
+      9,
+      16,
+      22
+    ]
+  },
+  "relative_document_links": "PASS",
+  "focused_tests": {
+    "postgres_guardian_and_current_operation_authority": 20,
+    "information_preview": 3,
+    "status": "PASS"
+  },
+  "migration_consistency": "PASS; source migration 0004 local only, production unapplied",
+  "browser_preview": {
+    "chromium_firefox_webkit_desktop_phone": 6,
+    "native_safari_26_5": 1,
+    "status": "PASS",
+    "actual_child_collection": false
+  },
+  "live_read_only": {
+    "browser_home_and_privacy": "PASS",
+    "privacy_current_qualification_and_approved_public_contact": "PASS",
+    "command_line_https": "403 from isolated site; browser succeeds; not labeled PASS",
+    "legacy_https": 200,
+    "book": {
+      "state": "draft",
+      "live_revision_id": null,
+      "version": 42,
+      "paragraphs": 32,
+      "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4"
+    },
+    "finance_rows": 0,
+    "scheduled_maintenance": "success on 7297a9d; lease clear",
+    "credential_copy": false
+  },
+  "physical_android_ios_uat": {
+    "status": "deferred; not tested",
+    "blocking": false
+  },
+  "deployment": {
+    "performed": false,
+    "reason": "Public legal controls not qualified; production migration excluded from approval; new reverse FK requires schema before deployment",
+    "unchanged_runtime": "7297a9def8a8a6f989e66d0682cc232e084afb4a"
+  },
+  "full_suite": "Exact-head GitHub CI result must be checked separately; local full-suite run in progress, no PASS inferred"
+}

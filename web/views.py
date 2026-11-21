@@ -141,6 +141,17 @@ def welcome(request, locale):
 
 @require_GET
 @domain_view
+def guardian_guidance(request, locale):
+    # A preview is not permission to collect a child's or guardian's information.
+    # Root separately owns regional policy/method qualification and activation.
+    if not getattr(django_settings, "GUARDIAN_AUTHORIZATION_ENABLED", False):
+        raise Http404
+    return page(request, "en", "web/guardian.html",
+                return_to=reverse("web:guardian-guidance", args=["en"]))
+
+
+@require_GET
+@domain_view
 def search(request, locale):
     selected = {key: request.GET.get(key, "") for key in ("q", "format", "house", "author", "duration_min", "duration_max", "level", "topic", "access", "recency_days")}
     content_locale = request.GET.get("content_locale", "")

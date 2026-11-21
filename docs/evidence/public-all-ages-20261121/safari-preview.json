@@ -1,0 +1,10 @@
+{
+  "browser": "native Safari",
+  "version": "26.5",
+  "scope": "local information-only preview",
+  "status": "PASS",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

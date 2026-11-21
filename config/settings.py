@@ -247,6 +247,10 @@ if not LOCAL and (urlparse(PUBLIC_BASE_URL).scheme != 'https' or not urlparse(PU
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_FROM_ADDRESS', 'maison@localhost.test' if LOCAL else '')
 SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', '')
 PRIVACY_NOTICE_VERSION = 'earnalism-privacy-2026-11-20-r4'
+# Preparation only. Real jurisdiction/method policies require separate legal and
+# provider acceptance; an environment toggle must not invent that qualification.
+GUARDIAN_AUTHORIZATION_ENABLED = False
+GUARDIAN_AUTHORIZATION_POLICIES = {}
 EARNALISM_PUBLIC_GRIEVANCE_OFFICER_NAME = os.getenv('EARNALISM_PUBLIC_GRIEVANCE_OFFICER_NAME', '').strip()
 if not LOCAL and (not EMAIL_BACKEND or not DEFAULT_FROM_EMAIL):
     raise ImproperlyConfigured('Production email configuration is required')

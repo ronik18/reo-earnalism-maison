@@ -1,0 +1,44 @@
+[
+  {
+    "engine": "chromium",
+    "size": "desktop",
+    "status": "PASS",
+    "collection": false,
+    "overflow": false
+  },
+  {
+    "engine": "chromium",
+    "size": "phone",
+    "status": "PASS",
+    "collection": false,
+    "overflow": false
+  },
+  {
+    "engine": "firefox",
+    "size": "desktop",
+    "status": "PASS",
+    "collection": false,
+    "overflow": false
+  },
+  {
+    "engine": "firefox",
+    "size": "phone",
+    "status": "PASS",
+    "collection": false,
+    "overflow": false
+  },
+  {
+    "engine": "webkit",
+    "size": "desktop",
+    "status": "PASS",
+    "collection": false,
+    "overflow": false
+  },
+  {
+    "engine": "webkit",
+    "size": "phone",
+    "status": "PASS",
+    "collection": false,
+    "overflow": false
+  }
+]
