@@ -1,0 +1,9 @@
+# Approved Neon cap correction and parallel qualification
+
+21November2026. The owner explicitly approved restoring the existing primary maximum to2CU. The signed-in provider UI saved successfully and showed ACTIVE0.25–2CU; minimum0.25CU and enabled five-minute scale-to-zero were preserved. No plan, history, branch, service, DNS or credential change was made. [Action receipt](cap-restoration.json). This closes the actual8CU-cap discrepancy; historical snapshots remain unchanged as history.
+
+[Post-save database readback](database-after-cap.json) is a bounded repeatable-read READ ONLY transaction using existing `maison_backup` and full TLS verification. The original canonical content root is recomputed and matches; The Selfish Giant stays draft/null-live/version42/32paragraphs. Finance tables remain empty and scheduled maintenance succeeds/lease clears. [Authenticated readiness](health-after-cap.json) returns200; [public HTTPS](https-after-cap.json) confirms live200/draft404/legacy200 with verified TLS. Only the approved cap was mutated.
+
+Three parallel lanes continue beyond that completed operation: [public legal](legal.md), [title](title.md) and [resilience](resilience.md). Findings distinguish authoritative research, source/data-flow review and proposed tests from actual public legal or production capacity acceptance. No new external message, contract, public method, load/chaos/PITR operation, title approval or publication ran.
+
+The resilience plan now gives finite workload/request/byte/write bounds and stop conditions, plus priced provider components. It is a proposal, not approvedSLOs or a complete spend cap. Resolve the remaining account-specific total quote/recovery-target terms before seeking exact spending/drill authority. No new service/cache/vendor is introduced as a shortcut.
