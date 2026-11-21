@@ -1,0 +1,9 @@
+# Fresh protected readback — 21 November 2026
+
+[Database receipt](database.json) and [authenticated readiness](health.json) close the previously pending fresh readback. The existing `maison_backup` identity ran a bounded repeatable-read, READ ONLY transaction with full certificate/hostname verification and a12-second statement timeout. No credentials, content text, private account data or signed URLs are retained here. The canonical manuscript hash was recomputed from ordered units/paragraphs using the application's NFC/JSON contract and matches the original.
+
+The Selfish Giant remains draft/null live/version42/32paragraphs. Finance tables remain empty; the latest provider-scheduled maintenance checkpoint succeeded and its lease is clear. Existing account migrations0004/0005 are observed applied; this validation did not apply them or deploy code. Protected readiness200 checks SELECT1 and the deployed migration graph, not future-main deployment identity, HA or PITR.
+
+The first local psycopg connection lacked a usable default trust store. Selecting the existing container's system CA bundle fixed it without relaxing `verify-full`, changing credentials or creating a service. Existing ignored owner-only archived configuration was read in place; no secrets were committed or transmitted to another chat.
+
+[Parallel results](parallel.json) refresh HTTPS/draft/legacy and CDN MISS→HIT/checksum/MIME/immutable checks without purge. The separate source lane verifies47-region consistency,12assessment links and targeted parsing; no synthetic guardian method is treated as public legal clearance. Current main CI44893625917 passes. Concurrent guardian implementation, exact approved migration/deployment work and inquiry follow-up remain separate; this lane performs no deployment or provider writes.
