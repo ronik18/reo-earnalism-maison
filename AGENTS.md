@@ -35,3 +35,9 @@ Coordinate interfaces directly between lanes. Do not edit another lane's files o
 
 
 Owner database amendment,18November2026: retain the existing Neon PostgreSQL18 project and update the version baseline after compatibility verification. For the current Neon migration and first-book acceptance task, leave the existing platform unchanged; no cutover or paid provisioning is included.
+
+## Owner domain-cutover amendment,21November2026
+
+The owner now explicitly requests: "Proceed autonomously: close the remaining launch gaps and cut over theearnalism.com to Maison once qualified. Preserve legacy rollback and private book drafts; no new purchases or content publication."
+
+This authorizes root to qualify and execute the apex/www host migration for the already approved India-first free service using existing resources. Earlier no-DNS/no-cutover statements describe their previous isolated tasks. Preserve the India service boundary, separate47-region edition-rights policy, private revisions/live pointers, existing resource limits and recoverable legacy service/code/data. No foreign expansion, paid upgrade, title release or media/model generation follows from this amendment. Reuse valid unchanged evidence and verify actual changed-host authentication, TLS, origin/CORS/cache boundaries and rollback before declaring the main-domain launch complete. Root remains the sole integration/provider writer.
