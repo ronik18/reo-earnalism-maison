@@ -28,7 +28,14 @@
       "asserted_HTTP_outside_atomic": true
     },
     "image_dependency_build": "PASS; ffprobe5.1.9 and pure modules imported with Docker networking disabled",
-    "full_suite": "Required local suite and exact-head CI tracked in the integration PR; initial local run had74 missing frontend-build errors, corrected by the existing npm build. No source regression inferred from that setup error."
+    "full_suite": {
+      "tests": 729,
+      "passed": true,
+      "skipped": 20,
+      "command": "MAISON_ENV_FILE=<private-loopback-env> MAISON_TEST_DB_NAME=<isolated> .venv/bin/python manage.py test --noinput --verbosity 0",
+      "initial_setup_failure": "74missing local frontend manifest errors; all were FileNotFoundError, corrected by the existing npm build.",
+      "exact_head_CI": "Required and tracked in private PR25."
+    }
   },
   "recovery_regressions": [
     "missing_asset_on_attachment_replay_holds",
@@ -54,5 +61,12 @@
   "training_updates_claimed": 0,
   "publication": false,
   "new_purchases": false,
-  "deployment": false
+  "deployment": false,
+  "private_drive_readback": {
+    "notebook_id": "1DTgjm3NeouooJ9ZVv6UIfYU0pvXtZiUy",
+    "raw_SHA256_verified": true,
+    "owner_only_permissions_verified": true,
+    "source_archive_id": "1-wHAFvubPliSTmEDlvtmR74i8ZdTcnVw",
+    "temporary_download_urls_retained": false
+  }
 }

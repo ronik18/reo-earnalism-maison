@@ -16,6 +16,12 @@ Bengali stories/male narration and Riya for Bengali tutorials/technical/female
 narration. Reuse compatible accepted title pins and healthy masters. Do not reopen
 voice search or silently substitute a provider/profile.
 
+For an offline casting proposal, use `scripts/plan_voice.py --title <title>
+--language en|bn --kind story|tutorial|technical`. It reads the final-five snapshot
+in `references/final-voice-roster.json`; historical roster data is retained only
+to locate existing title pins. A supplied source hash is declared metadata until
+the exact source bytes are verified. The planner never generates or accepts audio.
+
 Read the [private voice bank](https://drive.google.com/file/d/13e4EYrynikQqPbjIIxXy4oQxtf8wWJ4e/view)
 and use the [existing voice notebook](https://colab.research.google.com/drive/1DTgjm3NeouooJ9ZVv6UIfYU0pvXtZiUy)
 for actual model revisions, supported settings, runtime and qualification receipts.
