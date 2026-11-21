@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, intake_api
+from . import views, intake_api, production_handoff_api
 urlpatterns=[
     path("staff/draft-editions/<uuid:edition_id>",intake_api.draft_edition),
     path("staff/draft-covers/<uuid:asset_id>",intake_api.draft_cover),
@@ -13,6 +13,7 @@ urlpatterns=[
     path('content/packages/grants',views.packages),path('media/grants',views.media),
     path('content/local-assets/<uuid:asset_id>',views.local_asset),path('content/mappings/<uuid:revision_id>',views.mappings),
     path('content/switch-position',views.switch),path('staff/editions/<uuid:edition_id>/review',views.staff_review),
+    path('staff/editions/<uuid:edition_id>/production-handoffs',production_handoff_api.production_handoffs),
     path('staff/editions/<uuid:edition_id>/<str:action>',views.staff_action),path('staff/assets/uploads',views.upload),
     path('staff/assets/<uuid:asset_id>',views.staff_asset),path('staff/assets/<uuid:asset_id>/local-upload',views.local_upload),
     path('staff/assets/<uuid:asset_id>/complete',views.complete_upload),

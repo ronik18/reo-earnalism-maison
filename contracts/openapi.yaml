@@ -16721,6 +16721,323 @@
           }
         }
       }
+    },
+    "/staff/editions/{edition_id}/production-handoffs": {
+      "get": {
+        "operationId": "getProductionHandoffIdentity",
+        "summary": "Read exact private draft identity",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "description": "Verified staff publisher session/MFA and same-origin CSRF for writes. Private only. No publication, rights approval or listening pass. GET returns metadata without provider reads. POST verifies at most64MiB stagedR2bytes/100uploads within20s, attaches existing measured maps under CAS, then bounded media verification. Replay uses the same operation and may return202 processing; no restaging required. Stream verifies UID/privacy/duration, not adaptive rendition byte hashes. Native WAV is retained provenance only.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_read"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "example": "\"v3\"",
+                "description": "Strong current version; repeat as If-Match on mutation."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionHandoffIdentity"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "412": {
+            "$ref": "#/components/responses/412"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "428": {
+            "$ref": "#/components/responses/428"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "edition_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "x-required-permissions": [
+          "catalog.publish_edition"
+        ]
+      },
+      "post": {
+        "operationId": "attachProductionHandoff",
+        "summary": "Attach measured private production output to the exact draft",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "description": "Verified staff publisher session/MFA and same-origin CSRF for writes. Private only. No publication, rights approval or listening pass. GET returns metadata without provider reads. POST verifies at most64MiB stagedR2bytes/100uploads within20s, attaches existing measured maps under CAS, then bounded media verification. Replay uses the same operation and may return202 processing; no restaging required. Stream verifies UID/privacy/duration, not adaptive rendition byte hashes. Native WAV is retained provenance only.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_write"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "example": "\"v3\"",
+                "description": "Strong current version; repeat as If-Match on mutation."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionHandoffResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "412": {
+            "$ref": "#/components/responses/412"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "428": {
+            "$ref": "#/components/responses/428"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "202": {
+            "description": "Attached private draft; exact media processing remains pending. Same-operation reconciliation may continue.",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "example": "\"v3\"",
+                "description": "Strong current version; repeat as If-Match on mutation."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductionHandoffResult"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          },
+          {
+            "name": "edition_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductionHandoffInput"
+              }
+            }
+          }
+        },
+        "x-required-permissions": [
+          "catalog.publish_edition"
+        ]
+      }
     }
   },
   "components": {
@@ -23248,7 +23565,8 @@
             "type": "string",
             "enum": [
               "PUT",
-              "POST"
+              "POST",
+              "PATCH"
             ]
           },
           "upload_url": {
@@ -23272,6 +23590,10 @@
           "max_bytes": {
             "type": "integer",
             "minimum": 1
+          },
+          "provider_uid": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{32}$"
           }
         },
         "required": [
@@ -23284,7 +23606,31 @@
           "expires_at",
           "max_bytes"
         ],
-        "description": "Direct upload<=120s initiation; completion is independently validated. TUS is resumable; expiry governs new authorized upload sessions. No Django byte proxy. version is initial asset CAS version. Local-only development may use local_put on loopback; production must reject that variant. This does not certify the provider transport."
+        "description": "Direct upload<=120s initiation; completion is independently validated. TUS is resumable; expiry governs new authorized upload sessions. No Django byte proxy. version is initial asset CAS version. Local-only development may use local_put on loopback; production must reject that variant. This does not certify the provider transport. Stream: one durable private creation intent, encrypted short-lived capability, PATCH upload after HEAD; provider_uid is upload association, source SHA is not adaptive rendition hash. Unknown creation never allocates again automatically.",
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "protocol": {
+                  "const": "stream_tus"
+                }
+              },
+              "required": [
+                "protocol"
+              ]
+            },
+            "then": {
+              "properties": {
+                "method": {
+                  "const": "PATCH"
+                }
+              },
+              "required": [
+                "provider_uid"
+              ]
+            }
+          }
+        ]
       },
       "UploadCompleteInput": {
         "type": "object",
@@ -25167,6 +25513,560 @@
           "status"
         ],
         "description": "Uniform response for new and existing email; never binds an existing account or exposes account existence. Mailbox proof precedes visible child binding."
+      },
+      "ProductionBundleAsset": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 4096
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "content_type": {
+            "type": "string",
+            "pattern": "^[a-z0-9.+-]+/[a-z0-9.+-]+$"
+          },
+          "role": {
+            "enum": [
+              "audio",
+              "native_audio",
+              "video",
+              "captions",
+              "timing_map",
+              "qa_report",
+              "rights_document",
+              "thumbnail",
+              "source_text",
+              "reader_source"
+            ]
+          },
+          "unit_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "native_wav": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+          }
+        },
+        "required": [
+          "id",
+          "path",
+          "bytes",
+          "sha256",
+          "content_type",
+          "role"
+        ]
+      },
+      "ProductionSocialTarget": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "platform": {
+            "enum": [
+              "youtube",
+              "instagram",
+              "facebook",
+              "x"
+            ]
+          },
+          "account_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:@-]{1,256}$"
+          },
+          "video_asset_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000
+          },
+          "caption_asset_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+          },
+          "thumbnail_asset_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+          },
+          "made_for_kids": {
+            "type": "boolean"
+          },
+          "cover_timestamp_ms": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "platform",
+          "account_id",
+          "video_asset_id",
+          "title",
+          "description"
+        ]
+      },
+      "PrivateProductionBundle": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "const": "earnalism.production_bundle.v1"
+          },
+          "project_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+          },
+          "private": {
+            "const": true
+          },
+          "content": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "text_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "language": {
+                "enum": [
+                  "en",
+                  "bn"
+                ]
+              },
+              "voice_profile": {
+                "enum": [
+                  "en_mary",
+                  "en_raghav",
+                  "en_tisha",
+                  "bn_arnav",
+                  "bn_riya"
+                ]
+              },
+              "edition_id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "revision_id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "expected_etag": {
+                "type": "string",
+                "pattern": "^\"v[1-9][0-9]*\"$"
+              },
+              "source_text_asset_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+              },
+              "source_text_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "text_sha256",
+              "language",
+              "voice_profile",
+              "edition_id",
+              "revision_id",
+              "expected_etag"
+            ]
+          },
+          "assets": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1000,
+            "items": {
+              "$ref": "#/components/schemas/ProductionBundleAsset"
+            }
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "qa": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+                },
+                "uniqueItems": true,
+                "maxItems": 1000
+              },
+              "rights": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+                },
+                "uniqueItems": true,
+                "maxItems": 1000
+              },
+              "measured_maps": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+              },
+              "captions": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+              }
+            },
+            "required": [
+              "qa",
+              "rights"
+            ]
+          },
+          "social": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "$ref": "#/components/schemas/ProductionSocialTarget"
+            }
+          }
+        },
+        "required": [
+          "schema",
+          "project_id",
+          "private",
+          "content",
+          "assets",
+          "evidence"
+        ],
+        "description": "Metadata contract only. Runtime verifies unique contained paths, voice/language/reference consistency, exact staged subset and source hashes. No quality, rights or publication approval is inferred."
+      },
+      "ProductionStagingReceipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "const": "earnalism.maison_private_handoff.v1"
+          },
+          "state": {
+            "const": "DRAFT_ASSETS_STAGED_ATTACHMENT_AND_MEDIA_VERIFICATION_PENDING"
+          },
+          "bundle_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "edition_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "text_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "expected_etag": {
+            "type": "string",
+            "pattern": "^\"v[1-9][0-9]*\"$"
+          },
+          "assets": {
+            "type": "object",
+            "minProperties": 1,
+            "maxProperties": 100,
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AssetState"
+            }
+          },
+          "uncertain_uploads_require_provider_verification": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 1000
+          },
+          "retained_only_assets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+            },
+            "uniqueItems": true,
+            "maxItems": 1000
+          },
+          "publication": {
+            "const": false
+          },
+          "ready": {
+            "const": false
+          },
+          "rights_approval_created": {
+            "const": false
+          }
+        },
+        "required": [
+          "schema",
+          "state",
+          "bundle_sha256",
+          "edition_id",
+          "revision_id",
+          "text_sha256",
+          "expected_etag",
+          "assets",
+          "uncertain_uploads_require_provider_verification",
+          "retained_only_assets",
+          "publication",
+          "ready",
+          "rights_approval_created"
+        ]
+      },
+      "ProductionHandoffInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "manifest": {
+            "$ref": "#/components/schemas/PrivateProductionBundle"
+          },
+          "staging_receipt": {
+            "$ref": "#/components/schemas/ProductionStagingReceipt"
+          }
+        },
+        "required": [
+          "manifest",
+          "staging_receipt"
+        ]
+      },
+      "ProductionHandoffIdentity": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "edition_id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "edition_revision_id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+              },
+              "state": {
+                "const": "draft"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "required": [
+              "edition_id",
+              "edition_revision_id",
+              "state",
+              "sha256",
+              "version"
+            ]
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "ProductionAttachment": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "const": "DRAFT_ATTACHED_MEDIA_VERIFICATION_PENDING"
+          },
+          "bundle_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "edition_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "expected_etag": {
+            "type": "string",
+            "pattern": "^\"v[1-9][0-9]*\"$"
+          },
+          "timing_map_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          "verify_media_asset_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          "rights_approval_created": {
+            "const": false
+          },
+          "publication": {
+            "const": false
+          },
+          "ready": {
+            "const": false
+          }
+        },
+        "required": [
+          "state",
+          "bundle_sha256",
+          "edition_id",
+          "revision_id",
+          "expected_etag",
+          "timing_map_ids",
+          "verify_media_asset_ids",
+          "rights_approval_created",
+          "publication",
+          "ready"
+        ]
+      },
+      "ProductionHandoffResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "const": "earnalism.maison_private_attachment_rpc.v1"
+          },
+          "attachment": {
+            "$ref": "#/components/schemas/ProductionAttachment"
+          },
+          "state": {
+            "enum": [
+              "DRAFT_PRIVATE_HANDOFF_TECHNICALLY_COMPLETE",
+              "DRAFT_PRIVATE_MEDIA_PROCESSING"
+            ]
+          },
+          "verified_asset_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          "processing_asset_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          "asset_snapshot": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "state": {
+                  "enum": [
+                    "uploading",
+                    "processing",
+                    "failed",
+                    "ready"
+                  ]
+                },
+                "version": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "state",
+                "version",
+                "sha256"
+              ]
+            }
+          },
+          "stream_source_scope": {
+            "const": "SOURCE_UPLOAD_SHA_AND_PRIVATE_PROVIDER_UID_BINDING_NOT_RENDITION_BYTE_HASH"
+          },
+          "native_wav_scope": {
+            "const": "PROVENANCE_REFERENCE_ONLY_NOT_SERVER_BYTE_VERIFIED"
+          },
+          "source_byte_verification_scope": {
+            "const": "EXACT_STAGED_SUBSET_ONLY"
+          },
+          "current_etag": {
+            "type": "string",
+            "pattern": "^\"v[1-9][0-9]*\"$"
+          },
+          "release_ready": {
+            "const": false
+          },
+          "publication": {
+            "const": false
+          }
+        },
+        "required": [
+          "schema",
+          "attachment",
+          "state",
+          "verified_asset_ids",
+          "processing_asset_ids",
+          "asset_snapshot",
+          "stream_source_scope",
+          "native_wav_scope",
+          "source_byte_verification_scope",
+          "current_etag",
+          "release_ready",
+          "publication"
+        ]
       }
     },
     "parameters": {
