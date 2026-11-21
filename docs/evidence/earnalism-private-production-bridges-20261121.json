@@ -1,0 +1,58 @@
+{
+  "schema": "earnalism.private_bridge_implementation_evidence.v1",
+  "recorded_at": "2026-11-21T03:53:38.560452+00:00",
+  "state": "IMPLEMENTED_PRIVATE_ONLY_LIVE_PROVIDER_QUALIFICATION_PENDING",
+  "authority": "Owner requested private voice qualification gap resolution and Colab-to-Maison/social bridge implementation. No purchases or publication.",
+  "notebook": {
+    "same_drive_id": "1DTgjm3NeouooJ9ZVv6UIfYU0pvXtZiUy",
+    "source": "notebooks/Earnalism_Production_Orchestrator.ipynb",
+    "sha256": "a11d61a761ad8c3682bd1c609f28edf284acb3b57b0f92d23a5da4519adef8a5",
+    "original_nine_cells_preserved": true,
+    "saved_execution_enabled": false,
+    "RunAll_provider_model_auth_install_requests": 0
+  },
+  "verification": {
+    "pure_bridge_and_notebook_tests": {
+      "passed": 61,
+      "method": "python3 -m unittest operations.test_production_notebook operations.test_production_bundle operations.test_production_delivery operations.social_delivery.test_bridge operations.test_stream_delivery -q"
+    },
+    "Maison_handoff_PostgreSQL18_tests": {
+      "passed": 25,
+      "provider_HTTP": "MOCKED",
+      "authenticated_CSRF_journey": true,
+      "measured_timing_maps": true
+    },
+    "Stream_PostgreSQL18_tests": {
+      "passed": 12,
+      "provider_HTTP": "MOCKED",
+      "asserted_HTTP_outside_atomic": true
+    },
+    "image_dependency_build": "PASS; ffprobe5.1.9 and pure modules imported with Docker networking disabled",
+    "full_suite": "Required local suite and exact-head CI tracked in the integration PR; initial local run had74 missing frontend-build errors, corrected by the existing npm build. No source regression inferred from that setup error."
+  },
+  "recovery_regressions": [
+    "missing_asset_on_attachment_replay_holds",
+    "repeated_explicit_pending_reconciliation_gets_fresh_same_operation_state",
+    "Stream_UID_binding_revision_mutation_is_attributed",
+    "YouTube_resumed_completion_restores_ID_without_capability_or_reupload",
+    "provider_observed_nonprivate_visibility_holds",
+    "unknown_provider_writes_never_blindly_retry",
+    "opaque_exception_text_is_redacted"
+  ],
+  "unchanged": [
+    "final_en_mary_en_raghav_en_tisha_bn_arnav_bn_riya_roster",
+    "Open_Window_exact_soundtrack_selected_visual_style_and_originals",
+    "47_region_publication_policy",
+    "legacy_app"
+  ],
+  "unqualified": [
+    "live_R2_and_Stream_transfer_processing",
+    "live_social_account_permissions_upload_and_saved_state",
+    "actual_listening_accent_naturalness_expression",
+    "general_arbitrary_title_importer"
+  ],
+  "training_updates_claimed": 0,
+  "publication": false,
+  "new_purchases": false,
+  "deployment": false
+}

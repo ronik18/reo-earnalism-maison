@@ -57,3 +57,11 @@ records historical context. Consult references only for the relevant operation
 and reconcile old provider/repository commands with Maison's live contract.
 The local `scripts/plan_voice.py` is preparation-only; its historical roster cannot
 override the owner's final five profiles or compatible title pins.
+
+
+For private output delivery, use the common source-bound bundle and
+[Colab-to-Maison/social handoff](https://github.com/ronik18/reo-earnalism-maison/blob/main/docs/EARNALISM_PRIVATE_HANDOFF.md).
+Prepare verifies retained bytes without provider requests. Explicit private staging
+reuses existing draft intake and nonpublic provider adapters; it does not grant
+publication, rights or performance acceptance. Reuse measured timing and original
+assets; never recreate narration/music/visuals merely to transfer them.

@@ -43,11 +43,13 @@ Fix the smallest demonstrated defect and affected dependencies, then end with
 accepted/held/failed scope. Do not run speculative loops or promise perfection.
 Configuration/direction improvements are distinct from actual weight training.
 
-Maison uses the guide's actual private intake, media verification and revision
-transitions. General arbitrary-title import, automated Colab-to-Maison evidence
-transfer and social publication adapters are not installed by these skill files.
-Name missing operations and prepare an exact private handoff. Preserve complete
-47-region book clearance for every offered format/action; fixtures cannot clear it.
+Use the [private handoff adapter](https://github.com/ronik18/reo-earnalism-maison/blob/main/docs/EARNALISM_PRIVATE_HANDOFF.md)
+from the same notebook: prepare verifies exact bundle bytes offline; explicit
+private staging uses existing Maison draft intake, measured map/evidence attachment
+and provider processing, or supported nonpublic social media staging. No public
+CLI action exists. Keep actual live provider and performance qualification distinct
+from local protocol tests. General arbitrary-title import remains absent.
+Preserve complete47-region book clearance for each offered format/action.
 
 Release only the exact assessed candidate/requested destinations under actual
 authority, then verify served assets and access. Private instructions remain

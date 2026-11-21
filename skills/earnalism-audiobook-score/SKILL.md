@@ -67,3 +67,11 @@ when appropriate. Finish each bounded pass with accepted/held/failed scope.
 This improves direction/configuration; it does not train model weights or promise
 perfect score fit. The [installed entrypoint snapshot](references/installed-entrypoint-20261121.md)
 preserves earlier recipes and provenance without making legacy paths Maison APIs.
+
+
+For private output delivery, use the common source-bound bundle and
+[Colab-to-Maison/social handoff](https://github.com/ronik18/reo-earnalism-maison/blob/main/docs/EARNALISM_PRIVATE_HANDOFF.md).
+Prepare verifies retained bytes without provider requests. Explicit private staging
+reuses existing draft intake and nonpublic provider adapters; it does not grant
+publication, rights or performance acceptance. Reuse measured timing and original
+assets; never recreate narration/music/visuals merely to transfer them.
