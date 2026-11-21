@@ -1,0 +1,21 @@
+{
+  "approved_action": "Restore existing primary maximum from8CUto2CU only",
+  "project": "quiet-cloud-63128335",
+  "branch": "br-nameless-rain-aok6bsea",
+  "minimum_CU": 0.25,
+  "maximum_CU_before": 8,
+  "maximum_CU_after": 2,
+  "scale_to_zero_enabled": true,
+  "scale_to_zero_inactivity_minutes": 5,
+  "save_result": "Endpoint is updated successfully",
+  "provider_reported_scaling_seconds": 1.03,
+  "readback": "ACTIVE;0.25 to2CU",
+  "plan_upgrade": false,
+  "new_resource": false,
+  "dns_change": false,
+  "application_deployment_by_this_lane": false,
+  "book_publication": false,
+  "legacy_mutation": false,
+  "history_setting_changed": false,
+  "operator_screenshot": "Captured and shown in owner review chat; kept outside git"
+}
