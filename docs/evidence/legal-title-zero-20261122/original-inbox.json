@@ -1,0 +1,11 @@
+{
+  "client_date": "2026-11-22",
+  "checked_at_utc": "2026-11-21 18:40:14 UTC",
+  "method": "Read-only original sender inbox search by Yandex ticket/subject, excluding own sent messages",
+  "known_incoming_count": 2,
+  "new_followup_answers_found": 0,
+  "earlier_technical_reply_reused": true,
+  "private_message_ids_or_personal_addresses_in_receipt": false,
+  "message_sent": false,
+  "new_spending_usd": 0
+}
