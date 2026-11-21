@@ -1,0 +1,23 @@
+{
+  "reply_received_utc": "2026-11-21T13:11:04Z",
+  "provider": "YandexCloud",
+  "email_authentication": {
+    "dkim": "pass",
+    "spf": "pass",
+    "dmarc": "pass"
+  },
+  "technical_reply_received": true,
+  "provider_states_postgresql18_supported": true,
+  "provider_states_backup_pitr_supported": true,
+  "provider_states_kazakhstan_availability_zones": 1,
+  "indian_entity_eligibility_confirmed": false,
+  "contractual_data_locations_confirmed": false,
+  "complete_quote_received": false,
+  "business_development_consultation_offered": true,
+  "consultation_fee_status": "not confirmed",
+  "reply_sent": false,
+  "new_spending_usd": 0,
+  "dns_changes": false,
+  "publication_clearance": false,
+  "private_headers_or_message_ids_in_receipt": false
+}

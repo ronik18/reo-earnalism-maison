@@ -113,3 +113,9 @@ The [completed zero-cost refresh](evidence/zero-cost-resilience-20261121/README.
 - [Legal](evidence/zero-cost-resilience-20261121/legal.md):purpose-specific child retention/writtensecurity requirements narrowed without inventing a universal deadline or buying a vendor. [Saudi inbox](evidence/zero-cost-resilience-20261121/saudi-reply-status.json):no matching reply found in one read-only check; do not resend.
 
 NativeNeonPITR,RenderHA/autoscaling,cloudcapacity and full47-country public/title clearance remain OPEN; local results do not substitute for them. The$50pilot remains declined and will not execute. No required branch policy is changed; hostedCI is intentionally skipped for this documentation-only$0update, with all local evidence/link/diff checks recorded rather than a fabricated hostedpass.
+
+## Latest Yandex response —technical reply received
+
+[Review and exact unsent follow-up](evidence/yandex-reply-20261121/review.md), [redacted status](evidence/yandex-reply-20261121/status.json): provider confirms technical building blocks,PostgreSQL18and backup/PITR availability, and says Kazakhstan currently has one availability zone. This does not establish cross-zoneHA. Indian proprietorship onboarding/payment, exact contracting/location guarantees and complete quote remain unanswered; BusinessDevelopment consultation is offered but not confirmed free. No consultation, fee or provider adoption accepted.
+
+Next: obtain authority for the single written no-charge/non-binding follow-up in the existing ticket; no meeting, attachments, duplicate sales form, signup or commitment. New-spending authority remains$0; book staysdraft and legacy/DNS unchanged. Earlier automated-acknowledgement-only snapshots are historical.
