@@ -23,6 +23,9 @@ from pathlib import Path
 import builtins,contextlib,hashlib,io,json,os,sys,tempfile
 from unittest.mock import patch
 notebook=json.loads(Path(sys.argv[1]).read_bytes());mode=sys.argv[2]
+if mode in ('book-import','provider-acceptance'):
+    cell=next(c for c in notebook['cells'] if c.get('id')=='private-production-inputs')
+    cell['source']=''.join(cell['source']).replace('PRODUCTION_OPERATION = "delivery"', 'PRODUCTION_OPERATION = '+repr(mode)).splitlines(keepends=True)
 original_import=builtins.__import__
 def guarded_import(name,*args,**kwargs):
     if name.split('.')[0] in {'torch','transformers','numpy','huggingface_hub','django','google','requests','httpx'}:
@@ -60,6 +63,12 @@ print('PASS: '+mode+'; no model, provider, authentication, install or child proc
 
 
 class ProductionNotebookTests(unittest.TestCase):
+    def test_empty_book_import_runall_needs_no_auth_or_network(self):
+        self.isolated('book-import')
+
+    def test_empty_provider_acceptance_runall_needs_no_auth_or_network(self):
+        self.isolated('provider-acceptance')
+
     def notebook(self):
         return json.loads((ROOT / builder.NOTEBOOK).read_bytes())
 

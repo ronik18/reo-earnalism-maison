@@ -16,6 +16,8 @@ SOURCE_FILES = (
     "operations/stream_delivery.py", "operations/social_delivery/__init__.py",
     "operations/social_delivery/bridge.py", "operations/social_delivery/http.py",
     "library/__init__.py", "library/production_handoff.py",
+    "operations/book_source.py", "library/book_import_client.py",
+    "operations/provider_acceptance.py",
 )
 NOTEBOOK = "notebooks/Earnalism_Production_Orchestrator.ipynb"
 

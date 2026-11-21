@@ -13601,7 +13601,7 @@
     "/staff/books/imports": {
       "post": {
         "operationId": "importClearedDraftBook",
-        "summary": "Import a retained cleared packet as draft",
+        "summary": "Import a reviewed packet or reserve a general private source draft",
         "tags": [
           "Staff"
         ],
@@ -13611,7 +13611,7 @@
             "csrfToken": []
           }
         ],
-        "description": "Uses a server-selected manifest packet, publisher permission and durable input-hash receipt. Does not accept client source URLs or rights flags. Never assigns a live revision. Same-key replay returns the same result; existing imported slug conflicts without overwrite. Ordered text fingerprint, review ID and explicit countries must match the private assessment; a mismatch returns409 rights_review_mismatch. Current draft Reader scope is the explicit reviewed packet list; all held codes are excluded, including AE/CN. Region names and client-supplied countries cannot grant rights. No production activation or broader format rights are implied. Region scope follows publication-policy.json: UAE/Mainland China and all pending codes are excluded. Draft intake never substitutes for all-whitelist publication legal evidence.",
+        "description": "Existing EN-071 import remains unchanged. A general manifest reserves one actor/source-bound empty draft with reader/audio/video denied, downloads false, no preview and no Rights approval. Upload/complete its exact JSON reader_source Asset, then finalize the source under CAS. No source download, generation or provider allocation occurs during general reservation.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -13623,7 +13623,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DraftImportResult"
+                  "$ref": "#/components/schemas/DraftBookImportResponse"
                 }
               }
             }
@@ -13666,7 +13666,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DraftImportInput"
+                "$ref": "#/components/schemas/DraftBookImportRequest"
               }
             }
           }
@@ -17030,6 +17030,147 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ProductionHandoffInput"
+              }
+            }
+          }
+        },
+        "x-required-permissions": [
+          "catalog.publish_edition"
+        ]
+      }
+    },
+    "/staff/editions/{edition_id}/source-imports": {
+      "post": {
+        "operationId": "finalizeGeneralDraftSourceImport",
+        "summary": "Verify and package one exact private English or Bengali source",
+        "tags": [
+          "Staff"
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ],
+        "description": "Existing verified staff publisher session/MFA/CSRF and actor/source-bound denied draft only. Read owned ready reader_source bytes and prepare <=128 deterministic private Reader chunks outside DB locks within a bounded20s preparation pass. Atomically attach full ordered units/paragraphs under original If-Match/Idempotency-Key and compute actual revision hash. No rights, preview, offered-format or publication approval is created. Source<=4MiB; no arbitrary URL fetch. Same-operation reconciliation checks the actual imported source, units and assets; unrelated changes or missing assets hold.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "member_write"
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              },
+              "ETag": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                "example": "\"v3\"",
+                "description": "Strong current version; repeat as If-Match on mutation."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralBookImportResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "412": {
+            "$ref": "#/components/responses/412"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "428": {
+            "$ref": "#/components/responses/428"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/IfMatch"
+          },
+          {
+            "name": "edition_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneralBookImportFinalizeInput"
               }
             }
           }
@@ -26067,6 +26208,524 @@
           "release_ready",
           "publication"
         ]
+      },
+      "GeneralBookImportManifest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "const": "earnalism.book_import_manifest.v1"
+          },
+          "project_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+          },
+          "work": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[-A-Za-z0-9_]{1,50}$"
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "creators": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 20,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 240
+                }
+              },
+              "house": {
+                "enum": [
+                  "classics",
+                  "golpo",
+                  "learn",
+                  "interview",
+                  "series",
+                  "collections"
+                ]
+              }
+            },
+            "required": [
+              "slug",
+              "title",
+              "creators",
+              "house"
+            ]
+          },
+          "edition": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[-A-Za-z0-9_]{1,50}$"
+              },
+              "language": {
+                "enum": [
+                  "en",
+                  "bn"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "description": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 4000
+              }
+            },
+            "required": [
+              "slug",
+              "language",
+              "title",
+              "description"
+            ]
+          },
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4194304
+              },
+              "content_type": {
+                "const": "application/json"
+              },
+              "format": {
+                "const": "earnalism.book_source.v1"
+              }
+            },
+            "required": [
+              "sha256",
+              "bytes",
+              "content_type",
+              "format"
+            ]
+          },
+          "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "source_ref": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048
+              },
+              "source_edition": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "rights_note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "rights_evidence_refs": {
+                "type": "array",
+                "maxItems": 20,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048
+                }
+              }
+            },
+            "required": [
+              "source_ref",
+              "source_edition",
+              "rights_note",
+              "rights_evidence_refs"
+            ]
+          }
+        },
+        "required": [
+          "schema",
+          "project_id",
+          "work",
+          "edition",
+          "source",
+          "provenance"
+        ],
+        "description": "Bounded128KiB metadata reservation only; source bytes are uploaded through existing private reader_source Asset intake. Provenance references are never fetched or accepted as instructions/rights approval. No voice, model or publication selection occurs."
+      },
+      "GeneralBookSourceParagraph": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "paragraph",
+              "heading",
+              "verse"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32000
+          }
+        },
+        "required": [
+          "kind",
+          "text"
+        ]
+      },
+      "GeneralBookSourceUnit": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          },
+          "kind": {
+            "enum": [
+              "chapter",
+              "lesson",
+              "episode"
+            ]
+          },
+          "paragraphs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 50000,
+            "items": {
+              "$ref": "#/components/schemas/GeneralBookSourceParagraph"
+            }
+          },
+          "duration_ms": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9223372036854775807
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "kind",
+          "paragraphs"
+        ]
+      },
+      "GeneralBookSource": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "const": "earnalism.book_source.v1"
+          },
+          "language": {
+            "enum": [
+              "en",
+              "bn"
+            ]
+          },
+          "units": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 128,
+            "items": {
+              "$ref": "#/components/schemas/GeneralBookSourceUnit"
+            }
+          }
+        },
+        "required": [
+          "schema",
+          "language",
+          "units"
+        ],
+        "description": "Private source artifact, not inline HTTP request: exactUTF8JSON<=4MiB, <=128unique units, <=50000paragraphs total, eachparagraphUTF8<=48KiB and at most32000 characters both before/after NFC. Reader preflight uses at most100 paragraphs and60KiB raw per package, at most128 packages total, and rejects unsupported layouts before HTTP. Runtime additionally rejects duplicateJSONkeys/nonfinite values/control characters, verifies raw hash/bytes and exact language, and preserves text without normalization. Source strings are content, never executable instructions. The exact original stays retained; imported Reader text uses an explicitly recorded UnicodeNFC derivative to match existing canonical serialization."
+      },
+      "GeneralBookImportStartInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "manifest": {
+            "$ref": "#/components/schemas/GeneralBookImportManifest"
+          }
+        },
+        "required": [
+          "manifest"
+        ]
+      },
+      "DraftBookImportRequest": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DraftImportInput"
+          },
+          {
+            "$ref": "#/components/schemas/GeneralBookImportStartInput"
+          }
+        ]
+      },
+      "GeneralBookImportStartResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "const": "earnalism.book_import_started.v1"
+          },
+          "edition_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "edition_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "current_etag": {
+            "type": "string",
+            "pattern": "^\"v[1-9][0-9]*\"$"
+          },
+          "state": {
+            "const": "DRAFT_SOURCE_UPLOAD_REQUIRED"
+          },
+          "publication": {
+            "const": false
+          },
+          "rights_approval_created": {
+            "const": false
+          }
+        },
+        "required": [
+          "schema",
+          "edition_id",
+          "edition_revision_id",
+          "sha256",
+          "version",
+          "current_etag",
+          "state",
+          "publication",
+          "rights_approval_created"
+        ]
+      },
+      "DraftBookImportResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DraftImportResult"
+          },
+          {
+            "$ref": "#/components/schemas/GeneralBookImportStartResult"
+          }
+        ]
+      },
+      "GeneralBookImportFinalizeInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "edition_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "source_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "source_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "source_bytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4194304
+          }
+        },
+        "required": [
+          "edition_revision_id",
+          "source_asset_id",
+          "source_sha256",
+          "source_bytes"
+        ]
+      },
+      "GeneralBookImportResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "const": "earnalism.book_import_result.v1"
+          },
+          "state": {
+            "const": "DRAFT_SOURCE_IMPORTED"
+          },
+          "edition_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "edition_revision_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "current_etag": {
+            "type": "string",
+            "pattern": "^\"v[1-9][0-9]*\"$"
+          },
+          "source_asset_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          },
+          "units": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 128,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+                },
+                "unit_id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "ordinal": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "paragraph_count": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "key",
+                "unit_id",
+                "ordinal",
+                "paragraph_count"
+              ]
+            }
+          },
+          "reader_asset_ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          "paragraph_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50000
+          },
+          "rights_approval_created": {
+            "const": false
+          },
+          "publication": {
+            "const": false
+          },
+          "source_transform": {
+            "$ref": "#/components/schemas/GeneralBookSourceTransform"
+          }
+        },
+        "required": [
+          "schema",
+          "state",
+          "edition_id",
+          "edition_revision_id",
+          "sha256",
+          "version",
+          "current_etag",
+          "source_asset_id",
+          "units",
+          "reader_asset_ids",
+          "paragraph_count",
+          "rights_approval_created",
+          "publication",
+          "source_transform"
+        ]
+      },
+      "GeneralBookSourceTransform": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "method": {
+            "const": "UNICODE_NFC_READER_DERIVATIVE"
+          },
+          "original_source_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "canonical_source_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "normalized_paragraphs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 50000
+          },
+          "normalized_unit_titles": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 128
+          },
+          "source_unchanged": {
+            "const": true
+          }
+        },
+        "required": [
+          "method",
+          "original_source_sha256",
+          "canonical_source_sha256",
+          "normalized_paragraphs",
+          "normalized_unit_titles",
+          "source_unchanged"
+        ],
+        "description": "Exact original source blob/rawSHA stays unchanged. Only the Reader derivative uses existing Maison UnicodeNFC canonical text for unit titles and paragraphs; no spelling or whitespace edits. This is serialization provenance, not creative generation or clearance."
       }
     },
     "parameters": {

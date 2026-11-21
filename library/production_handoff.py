@@ -106,7 +106,7 @@ class MaisonHTTP:
 
     def request(self, method, path, *, payload=None, headers=None):
         routes = {"GET": r"/api/v1/staff/(?:editions/[a-f0-9-]+/(?:review|production-handoffs)|drafts/[a-f0-9-]+/document|assets/[a-f0-9-]+)",
-                  "POST": r"/api/v1/staff/(?:assets/(?:uploads|[a-f0-9-]+/complete)|editions/[a-f0-9-]+/production-handoffs)"}
+                  "POST": r"/api/v1/staff/(?:books/imports|assets/(?:uploads|[a-f0-9-]+/complete)|editions/[a-f0-9-]+/(?:production-handoffs|source-imports))"}
         if not re.fullmatch(routes.get(method, r"(?!)"), path):
             raise HandoffError("STAFF_ROUTE_REQUIRED")
         h = {"Accept": "application/json", "Cookie": self.cookie, "X-CSRFToken": self.csrf,
