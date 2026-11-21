@@ -231,6 +231,10 @@ def delete_account(job):
         managed_children=list(GuardianAuthorization.objects.filter(guardian=user,purpose='account_processing',child__guardian_managed=True).exclude(child=user).values_list('child_id',flat=True).distinct())
         for child_id in sorted(managed_children):_revoke_child_sessions(child_id)
         GuardianAuthorization.objects.filter(Q(child=user)|Q(guardian=user)).update(status='withdrawn',withdrawn_at=now,evidence_sha256='',claim_sha256='',claim_expires_at=None,reviewer=None)
+        from .enrollment import DIRECT_PARENT_METHOD
+        for permission in GuardianAuthorization.objects.filter(Q(child=user)|Q(guardian=user),jurisdiction='IN',method=DIRECT_PARENT_METHOD):
+            policy=getattr(settings,'GUARDIAN_AUTHORIZATION_POLICIES',{}).get(f'IN:{permission.purpose}:{permission.notice_version}:{permission.method}',{})
+            permission.expires_at=now;permission.retain_until=now+timedelta(seconds=policy.get('record_retention_seconds',604800));permission.save(update_fields=['expires_at','retain_until'])
         GuardianAuthorization.objects.filter(reviewer=user).update(reviewer=None)
         audit(user,'privacy.account_anonymised',user)
     # Exact export keys survive provider failures in the deletion job payload; retries are idempotent.

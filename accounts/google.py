@@ -32,7 +32,7 @@ PROVIDER_URLS={'https://oauth2.googleapis.com/token','https://www.googleapis.com
 
 PUBLIC_GOOGLE_ERRORS=frozenset({'identity_link_required','identity_already_linked','reauthentication_required','authentication_required',
     'email_verification_required','identity_mismatch','account_unavailable','feature_disabled','provider_not_configured',
-    'google_provider_unavailable','google_authentication_failed','invalid_oauth_state'})
+    'google_provider_unavailable','google_authentication_failed','invalid_oauth_state','account_registration_required','account_permission_required'})
 
 
 def oauth_problem(error,request):
@@ -149,14 +149,27 @@ class MaisonSocialAccountAdapter(DefaultSocialAccountAdapter):
             if sociallogin.is_existing and sociallogin.user.pk!=request.user.pk:
                 raise ImmediateHttpResponse(oauth_problem(DomainError('identity_already_linked','This Google identity cannot be linked.',409),request))
             return
+        from .enrollment import enabled,adult_declaration
+        if enabled() and not sociallogin.is_existing:
+            if data.get('create_account') is not True:
+                raise ImmediateHttpResponse(oauth_problem(DomainError('account_registration_required','Create your account first. A parent or legal guardian creates a younger reader’s account.',403),request))
+            try:adult_declaration(data.get('account_declaration',{}))
+            except DomainError as error:raise ImmediateHttpResponse(oauth_problem(error,request))
         if not sociallogin.is_existing and (User.objects.filter(email=email).exists() or EmailAddress.objects.filter(email__iexact=email).exists()):
             raise ImmediateHttpResponse(oauth_problem(DomainError('identity_link_required','Sign in to your existing account, then explicitly link Google in Settings.',409),request))
     def save_user(self,request,sociallogin,form=None):
+        from .enrollment import enabled,adult_declaration,record_adult
+        declaration=None
+        if enabled():
+            state=getattr(request,'_maison_google_state',{}).get('data',{})
+            if state.get('create_account') is not True:raise DomainError('account_registration_required','Create your account through the permitted signup route first.',403)
+            declaration=adult_declaration(state.get('account_declaration',{}))
         try:
             with transaction.atomic():
                 sociallogin.user.email=sociallogin.account.extra_data['email'];sociallogin.user.is_verified=True
                 user=super().save_user(request,sociallogin,form)
                 Preferences.objects.get_or_create(user=user);Consent.objects.get_or_create(user=user,defaults={'necessary_notice_version':settings.PRIVACY_NOTICE_VERSION})
+                record_adult(user,declaration,'google_registration')
                 audit(user,'account.google_registered',user)
                 return user
         except IntegrityError:
@@ -207,11 +220,21 @@ class MaisonGoogleCallback(OAuth2CallbackView):
 
 def start(request):
     _enabled()
-    if set(request.GET)-{'intent','return_path'} or any(len(request.GET.getlist(key))!=1 for key in request.GET):
+    from .enrollment import enabled,ACCOUNT_FIELDS,adult_declaration
+    if set(request.GET)-({'intent','return_path','create_account'}|ACCOUNT_FIELDS) or any(len(request.GET.getlist(key))!=1 for key in request.GET):
         raise DomainError('validation_error','Invalid Google sign-in parameters.',422)
     intent=request.GET.get('intent','sign_in');return_path=safe_return_path(request.GET.get('return_path','/en/vault/'))
     if not request.session.session_key:request.session.create()
     data={'intent':intent,'browser_session':request.session.session_key,'nonce':secrets.token_urlsafe(32)}
+    if enabled():
+        create=request.GET.get('create_account','false')
+        if create not in ('true','false'):raise DomainError('validation_error','Choose a valid account action.',422)
+        if create=='true':
+            if intent!='sign_in':raise DomainError('validation_error','Account creation is available only through signup.',422)
+            declaration={k:request.GET.get(k) for k in ACCOUNT_FIELDS}
+            declaration['account_terms_consent']=declaration.get('account_terms_consent')=='true'
+            data.update(create_account=True,account_declaration=adult_declaration(declaration))
+        else:data['create_account']=False
     if intent!='sign_in':
         data.update(member=str(getattr(request.user,'public_id','')),device=str(getattr(getattr(request,'device',None),'pk','')))
     _bound_intent(request,data)

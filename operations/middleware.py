@@ -126,4 +126,19 @@ class OriginMiddleware:
             request.territory=country if re.fullmatch('[A-Z]{2}',country) and country!='XX' else 'ZZ'
             try:request.trusted_client_ip=str(ipaddress.ip_address(request.headers.get('CF-Connecting-IP','')))
             except ValueError:request.trusted_client_ip=None
+        if (getattr(settings,'INDIA_FIRST_LAUNCH_ENABLED',False)
+            and request.path not in {'/api/v1/health/live','/api/v1/health/ready'}
+            and not re.fullmatch(r'/(en|bn)/(privacy|terms|contact)/',request.path)
+            and request.territory not in settings.MAISON_SERVICE_TERRITORIES):
+            # Availability is based on trusted edge location, never citizenship.
+            # Reject before session/authentication or request-body collection.
+            if request.path.startswith('/api/'):
+                response=JsonResponse({'type':'about:blank','title':'India-first availability','status':403,
+                    'code':'service_region_unavailable','detail':'Earnalism account and reading services are currently available from India.',
+                    'request_id':request.request_id,'retryable':False},status=403,content_type='application/problem+json')
+            else:
+                from django.shortcuts import render
+                response=render(request,'web/india_unavailable.html',status=403)
+            response['Cache-Control']='private, no-store'
+            return response
         return self.get_response(request)

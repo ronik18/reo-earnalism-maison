@@ -29,7 +29,7 @@ def safe_return(value, locale="en"):
     parsed = urlsplit(value)
     if parsed.scheme or parsed.netloc or not re.match(r"^/(en|bn)/", parsed.path):
         return fallback
-    if any(part in parsed.path for part in ("sign-in", "sign-up", "sign-out", "email-sign-in", "password-reset", "verify-email")):
+    if any(part in parsed.path for part in ("sign-in", "sign-up", "sign-out", "email-sign-in", "password-reset", "verify-email", "independent-account")):
         return fallback
     return re.sub(r"^/bn/", "/en/", value, count=1)
 
@@ -51,6 +51,7 @@ def context(request, locale, **extra):
             pass
     return {
         "auth_bootstrap":{"mode":extra.get("auth_mode","sign-in"),"return_path":safe_return(request.POST.get("return_to",request.GET.get("return_to")),locale),"email":extra.get("values",{}).get("email","")},
+        "india_first_launch": bool(getattr(django_settings, "INDIA_FIRST_LAUNCH_ENABLED", False)),
         "email_link_enabled": django_settings.FEATURES.get("email_link", False),
         "google_oauth_enabled": django_settings.FEATURES.get("google_oauth", False),
         "app_theme": prefs.theme if prefs and prefs.theme in ("light", "dark", "true_black") else "dark",
@@ -148,7 +149,8 @@ def guardian_guidance(request, locale):
         raise Http404
     return page(request, "en", "web/guardian.html",
                 return_to=reverse("web:guardian-guidance", args=["en"]),
-                guardian_journey=bool(getattr(django_settings,"GUARDIAN_AUTHORIZATION_POLICIES",{})) and request.user.is_authenticated)
+                guardian_journey=bool(getattr(django_settings,"GUARDIAN_AUTHORIZATION_POLICIES",{})) and request.user.is_authenticated,
+                guardian_bootstrap={"india_first":bool(getattr(django_settings,"INDIA_FIRST_LAUNCH_ENABLED",False))})
 
 
 @require_GET
@@ -281,6 +283,8 @@ def sign_in(request, locale):
         'google_provider_unavailable': 'google_unavailable',
         'google_authentication_failed': 'google_retry',
         'invalid_oauth_state': 'google_retry',
+        'account_registration_required': 'account_registration_required',
+        'account_permission_required': 'account_permission_required',
     }
     return page(request, locale, "web/auth.html", auth_mode="sign-in", error_key=google_errors.get(request.GET.get('google_error')))
 
@@ -289,6 +293,11 @@ def sign_in(request, locale):
 def sign_up(request, locale):
     from accounts.services import register_member
     from core.api import DomainError
+    india_first = bool(getattr(django_settings, "INDIA_FIRST_LAUNCH_ENABLED", False))
+    adult_choice = (request.POST if request.method == "POST" else request.GET).get("account_capacity") == "adult"
+    if india_first and not adult_choice:
+        return page(request, locale, "web/auth.html", status=422 if request.method == "POST" else 200,
+                    auth_mode="sign-up", capacity_preflight=True)
     if request.method == "POST":
         form = LoginForm(request.POST)
         if not form.is_valid():
@@ -299,11 +308,37 @@ def sign_up(request, locale):
             consent = validate_password_purpose_consent(credentials)
             credentials.pop("password_purpose_consent")
             credentials.pop("password_purpose_version")
-            register_member(**credentials, password_consent=consent, display_name=request.POST.get("display_name", ""), locale=locale, return_path=safe_return(request.POST.get("return_to"), locale))
+            register_member(**credentials, password_consent=consent, display_name=request.POST.get("display_name", ""), locale=locale, return_path=safe_return(request.POST.get("return_to"), locale), **({
+                "account_capacity": request.POST.get("account_capacity"),
+                "account_notice_version": request.POST.get("account_notice_version"),
+                "account_terms_consent": request.POST.get("account_terms_consent") == "on",
+            } if india_first else {}))
         except DomainError as exc:
-            return page(request, locale, "web/auth.html", status=exc.status, auth_mode="sign-up", error_key="invalid_input", values={"email":form.cleaned_data["email"], "display_name":request.POST.get("display_name", "")})
+            return page(request, locale, "web/auth.html", status=exc.status, auth_mode="sign-up", error_key=exc.code if exc.code == "account_permission_required" else "invalid_input", values={"email":form.cleaned_data["email"], "display_name":request.POST.get("display_name", "")})
         return page(request, locale, "web/auth.html", auth_mode="sign-up", notice_key="registration_sent")
     return page(request, locale, "web/auth.html", auth_mode="sign-up")
+
+
+@require_http_methods(["GET", "POST"])
+@domain_view
+def independent_account(request, locale):
+    if not getattr(django_settings, "INDIA_FIRST_LAUNCH_ENABLED", False):
+        raise Http404
+    if request.method == "POST":
+        from accounts.enrollment import become_independent_with_password
+        from accounts.password_consent import validate_password_purpose_consent
+        from core.api import DomainError
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            try:
+                consent = validate_password_purpose_consent(dict(form.cleaned_data))
+                become_independent_with_password(request, email=form.cleaned_data["email"], password=form.cleaned_data["password"], password_consent=consent,
+                    account_capacity=request.POST.get("account_capacity"), account_notice_version=request.POST.get("account_notice_version"), account_terms_consent=request.POST.get("account_terms_consent") == "on")
+                return page(request, locale, "web/auth.html", auth_mode="independent", notice_key="independent_account_updated")
+            except DomainError as exc:
+                return page(request, locale, "web/auth.html", status=exc.status, auth_mode="independent", error_key="independent_account_unavailable")
+        return page(request, locale, "web/auth.html", status=400, auth_mode="independent", error_key="invalid_input")
+    return page(request, locale, "web/auth.html", auth_mode="independent")
 
 
 @domain_view

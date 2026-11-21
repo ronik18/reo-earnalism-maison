@@ -1,0 +1,100 @@
+{
+  "date": "2026-11-21",
+  "scope": "Frozen India-first application source before push/deploy",
+  "application_image": "earnalism-maison:india-first-20261121",
+  "full_backend": {
+    "tests": 853,
+    "skipped": 0,
+    "status": "PASS",
+    "seconds": 440.859,
+    "postgresql": 18,
+    "actual_image_tools": [
+      "age",
+      "ffmpeg",
+      "psql18"
+    ]
+  },
+  "schema_checks": "PASS; no changes detected",
+  "client_type_and_tests": {
+    "tests": 37,
+    "status": "PASS"
+  },
+  "voice_plan": {
+    "tests": 12,
+    "status": "PASS",
+    "media_execution": false
+  },
+  "focused_postgresql": {
+    "affected_tests": 109,
+    "final_lifecycle_and_shared_rate_limit_tests": 15,
+    "status": "PASS"
+  },
+  "web_tests": {
+    "regression_tests": 35,
+    "final_affected_tests": 8,
+    "status": "PASS"
+  },
+  "local_browser": {
+    "checks": 30,
+    "engines": [
+      "Chromium desktop",
+      "Firefox desktop",
+      "WebKit virtual phone"
+    ],
+    "status": "PASS"
+  },
+  "local_http_lifecycle": {
+    "scope": "Synthetic local HTTP/API E2E, test email token obtained from owned fixture; no real mail, age, custody or provider verification claimed",
+    "physical_UAT": {
+      "deferred": true,
+      "blocking": false
+    },
+    "rows": [
+      {
+        "id": "one-IN-processing-policy-no-automatic-parent-data-rights",
+        "status": "PASS"
+      },
+      {
+        "id": "direct-parent-permission-recorded-before-child-account",
+        "status": "PASS"
+      },
+      {
+        "id": "exact-child-binding-pending-real-link-consumption-with-bounded-expiry",
+        "status": "PASS"
+      },
+      {
+        "id": "application-mail-link-consumption-promotes-exact-permission-until-withdrawn",
+        "status": "PASS"
+      },
+      {
+        "id": "verified-managed-reader-can-sign-in",
+        "status": "PASS"
+      },
+      {
+        "id": "parent-withdrawal-revokes-managed-reader-session",
+        "status": "PASS"
+      },
+      {
+        "id": "independent-declaration-reuses-account-and-current-password",
+        "status": "PASS"
+      }
+    ]
+  },
+  "trusted_country_no_body_tests": {
+    "tests": 5,
+    "status": "PASS"
+  },
+  "image_source": {
+    "source_files": 284,
+    "frozen_image_source_match": true,
+    "source_tree_sha256": "73beef5b2e86783c15dd72c06251a45e369eec321adc631cf76cea9c03f02790"
+  },
+  "new_migrations": false,
+  "production_guardian_records_created_for_testing": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false,
+    "tested": false
+  },
+  "deployment_status": "Pending exact-head CI and provider activation; not yet claimed PASS"
+}

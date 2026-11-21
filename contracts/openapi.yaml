@@ -4,7 +4,7 @@
   "info": {
     "title": "Earnalism Maison API",
     "version": "1.1.1",
-    "description": "Implementation contract,17Nov2026. One Django application, same-origin /api/v1. Design only, no deployed endpoint claims. PublicUUID4,UTC timestamps,snake_case,en/bn. Session cookie+CSRF, not app bearerJWT. Monetary values exclusively server-owned approved terms. Examples use fictional IDs/example domains, never productiondata or approved prices."
+    "description": "Implementation contract,17Nov2026. One Django application, same-origin /api/v1. Design only, no deployed endpoint claims. PublicUUID4,UTC timestamps,snake_case,en/bn. Session cookie+CSRF, not app bearerJWT. Monetary values exclusively server-owned approved terms. Examples use fictional IDs/example domains, never productiondata or approved prices. India-first service rollout has one provider-independent direct parent-permission route; edition publication territory/rights policy remains separate and unchanged."
   },
   "servers": [
     {
@@ -1143,7 +1143,7 @@
           "Accounts"
         ],
         "security": [],
-        "description": "Issue single-use short-lived state, nonce and PKCE verifier bound to anonymous/authenticated session; server-only code exchange. intent=link requires recent<=5min reauthentication. Never auto-link an existing password account by email alone. No side effect except temporary challenge.",
+        "description": "India-first default signs in existing linked identities only. Explicit create_account=true requires the current adult declaration before OAuth redirect; opaque state binds that permission. Google identity is not proof of parenthood. Younger accounts are parent-created and may explicitly link Google later.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -1239,6 +1239,50 @@
               "description": "Allowlisted relative route only; server rejects external, protocol-relative, encoded bypass and auth-loop destinations."
             },
             "description": ""
+          },
+          {
+            "name": "create_account",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "account_capacity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "adult"
+              ],
+              "description": "Self-declared independent adult capacity for India-first new enrollment; not independently verified age."
+            }
+          },
+          {
+            "name": "account_notice_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "india-account-v1"
+              ]
+            }
+          },
+          {
+            "name": "account_terms_consent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "enum": [
+                true
+              ],
+              "description": "Affirmative acceptance of the free-account notice, necessary purposes and stated overseas processing; separate from optional choices."
+            }
           }
         ]
       }
@@ -15359,7 +15403,7 @@
             "sessionCookie": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. Empty items means no available route; never ask for child identity to select a route.",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. Empty items means no available route; never ask for child identity to select a route.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -15462,7 +15506,7 @@
             "sessionCookie": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. Signed actor-bound keyset pagination; no other household data.",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. Signed actor-bound keyset pagination; no other household data.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -15571,7 +15615,7 @@
             "csrfToken": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. Fresh reconfirmation required. New account purpose creates an opaque slot only; rights/renewal requests must bind to an owned source authorization and receive independent review. No guardian claim is established by submitting this request.",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. Fresh reconfirmation required. New account purpose creates an opaque slot only; rights/renewal requests must bind to an owned source authorization and receive independent review. No guardian claim is established by submitting this request.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -15688,7 +15732,7 @@
             "sessionCookie": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. ",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. ",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -15802,7 +15846,7 @@
             "csrfToken": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. Fresh reconfirmation. Clear outstanding claim capability; current authority is checked before rights processing. Existing signed URLs are bounded bearer grants, not instantly recallable.",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. Fresh reconfirmation. Clear outstanding claim capability; current authority is checked before rights processing. Existing signed URLs are bounded bearer grants, not instantly recallable.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -15929,7 +15973,7 @@
             "csrfToken": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. Independent active staff with current MFA and accounts.review_guardian_authorization permission; exact method/purpose/notice/policy evidence digest is an audit binding, not verification by itself.",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. Independent active staff with current MFA and accounts.review_guardian_authorization permission; exact method/purpose/notice/policy evidence digest is an audit binding, not verification by itself.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -16056,7 +16100,7 @@
             "csrfToken": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. Fresh reconfirmation and currently authorized account-processing grant. Raw capability only in this no-store response, never URL/receipt/log/storage. Maximum five minutes; rotation invalidates older capability.",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. Fresh reconfirmation and currently authorized account-processing grant. Raw capability only in this no-store response, never URL/receipt/log/storage. Maximum five minutes; rotation invalidates older capability.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -16170,7 +16214,7 @@
             "csrfToken": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. Fresh reconfirmation. Header capability is validated before application JSON parsing/persistence, not before transport receipt. Atomically consumes capability and creates a NEW account without impersonating the child or linking an existing email. Child details must not be entered until current capability is issued.",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. Fresh reconfirmation. Header capability is validated before application JSON parsing/persistence, not before transport receipt. Atomically consumes capability and creates a NEW account without impersonating the child or linking an existing email. Child details must not be entered until current capability is issued.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -16284,7 +16328,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RegisterInput"
+                "$ref": "#/components/schemas/GuardianClaimInput"
               }
             }
           }
@@ -16304,7 +16348,7 @@
             "csrfToken": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. Fresh reconfirmation. Exact independent privacy_access/privacy_delete authority and qualified export-section/delete scope required; not automatic full household access. Worker and delivery revalidate authority; existing holds/obligations remain.",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. Fresh reconfirmation. Exact independent privacy_access/privacy_delete authority and qualified export-section/delete scope required; not automatic full household access. Worker and delivery revalidate authority; existing holds/obligations remain.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -16430,7 +16474,7 @@
             "sessionCookie": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. ",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. ",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -16553,7 +16597,7 @@
             "csrfToken": []
           }
         ],
-        "description": "Default OFF; no production method or region is qualified by these endpoints. Verified current session required. Fresh reconfirmation; matching completed, unexpired scoped export and current authority. Signed URL <=120seconds and artifact expiry; no instant bearer-URL recall promise.",
+        "description": "Only the owner-approved India direct account-processing method is activated in the India-first service. Other jurisdiction/method and automated guardian disclosure rights remain unavailable. Verified current session required. Fresh reconfirmation; matching completed, unexpired scoped export and current authority. Signed URL <=120seconds and artifact expiry; no instant bearer-URL recall promise.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -17179,6 +17223,119 @@
           "catalog.publish_edition"
         ]
       }
+    },
+    "/auth/account-capacity": {
+      "post": {
+        "operationId": "declareIndependentAccountCapacity",
+        "summary": "Declare independent adult capacity for the same verified password account",
+        "tags": [
+          "Accounts"
+        ],
+        "security": [
+          {
+            "csrfToken": []
+          }
+        ],
+        "description": "India-only declaration route, not independently verified age. Current verified password, explicit password-purpose choice and adult declaration required. Revokes superseded guardian grants and sessions before requiring new sign-in. No new account or automatic private-data disclosure.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "authentication"
+        },
+        "responses": {
+          "202": {
+            "description": "Success",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+                },
+                "description": "Opaque correlation UUID; safe to show support."
+              },
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "maxLength": 180
+                },
+                "description": "private,no-store unless endpoint explicitly public."
+              },
+              "RateLimit-Limit": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "RateLimit-Remaining": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "RateLimit-Reset": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "description": "Seconds until applicable window resets."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Acknowledgement"
+                },
+                "example": {
+                  "status": "accepted",
+                  "request_id": "09000000-0000-4000-8000-000000000001",
+                  "message": "If the address is eligible, an email will arrive shortly."
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          },
+          "413": {
+            "$ref": "#/components/responses/413"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IndependentCapacityInput"
+              },
+              "example": {
+                "email": "reader@example.com",
+                "password": "ExampleOnlyPassphrase42!",
+                "password_purpose_consent": true,
+                "password_purpose_version": "password-account-v1"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -17553,6 +17710,26 @@
             "enum": [
               "password-account-v1"
             ]
+          },
+          "account_capacity": {
+            "type": "string",
+            "enum": [
+              "adult"
+            ],
+            "description": "Self-declared independent adult capacity for India-first new enrollment; not independently verified age."
+          },
+          "account_notice_version": {
+            "type": "string",
+            "enum": [
+              "india-account-v1"
+            ]
+          },
+          "account_terms_consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Affirmative acceptance of the free-account notice, necessary purposes and stated overseas processing; separate from optional choices."
           }
         },
         "required": [
@@ -17569,9 +17746,13 @@
             "display_name": "A fictional reader",
             "locale": "en",
             "password_purpose_consent": true,
-            "password_purpose_version": "password-account-v1"
+            "password_purpose_version": "password-account-v1",
+            "account_capacity": "adult",
+            "account_notice_version": "india-account-v1",
+            "account_terms_consent": true
           }
-        ]
+        ],
+        "description": "India-first new enrollment requires adult account_capacity, current account_notice_version and affirmative account_terms_consent before credentials are processed. Younger readers use parent-led enrollment."
       },
       "LoginInput": {
         "type": "object",
@@ -25317,9 +25498,21 @@
             "maxLength": 64
           },
           "max_lifetime_seconds": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "minimum": 60,
-            "maximum": 2592000
+            "maximum": 2592000,
+            "description": "Null for bound direct electronic permission lasting until withdrawal; an unclaimed permission slot remains limited to seven days."
+          },
+          "lifetime": {
+            "type": "string",
+            "enum": [
+              "until_withdrawn",
+              "bounded"
+            ],
+            "description": "Method-specific lifetime; does not override unclaimed-slot expiry."
           }
         },
         "required": [
@@ -25407,6 +25600,31 @@
           "source_authorization_id": {
             "type": "string",
             "format": "uuid"
+          },
+          "parent_declared_adult": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "guardian_permission": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "account_notice_version": {
+            "type": "string",
+            "enum": [
+              "india-account-v1"
+            ]
+          },
+          "account_terms_consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Affirmative acceptance of the free-account notice, necessary purposes and stated overseas processing; separate from optional choices."
           }
         },
         "required": [
@@ -25414,7 +25632,8 @@
           "purpose",
           "notice_version",
           "method"
-        ]
+        ],
+        "description": "The activated India direct method requires current versioned adult/legal-guardian permission before any child credentials. Only account_processing is activated; guardian privacy disclosures require proportionate grievance review."
       },
       "GuardianAuthorization": {
         "type": "object",
@@ -25516,8 +25735,12 @@
             "type": "boolean"
           },
           "expires_at": {
-            "type": "string",
-            "format": "date-time"
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Null only for a bound India direct permission continuing until withdrawal/supersession; unclaimed slots have bounded expiry."
           },
           "operational_only": {
             "const": true,
@@ -25542,7 +25765,7 @@
           "operational_only",
           "claim_submitted"
         ],
-        "description": "Operational metadata, never legal parental-consent proof. Random prospective slot contains no child identity. Expiry is authoritative even if persisted status still says authorized; current policy/session is rechecked at action time."
+        "description": "Method-specific authority metadata. India direct electronic permission records authenticated declarations and exact subject binding; it is not independent age/custody verification. Other methods retain existing approval controls."
       },
       "GuardianPolicyPage": {
         "type": "object",
@@ -26726,6 +26949,133 @@
           "source_unchanged"
         ],
         "description": "Exact original source blob/rawSHA stays unchanged. Only the Reader derivative uses existing Maison UnicodeNFC canonical text for unit titles and paragraphs; no spelling or whitespace edits. This is serialization provenance, not creative generation or clearance."
+      },
+      "IndependentCapacityInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "writeOnly": true
+          },
+          "password_purpose_consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Affirmative electronic choice for the disclosed password-account purpose. Optional marketing remains separate."
+          },
+          "password_purpose_version": {
+            "type": "string",
+            "enum": [
+              "password-account-v1"
+            ]
+          },
+          "account_capacity": {
+            "type": "string",
+            "enum": [
+              "adult"
+            ],
+            "description": "Self-declared independent adult capacity for India-first new enrollment; not independently verified age."
+          },
+          "account_notice_version": {
+            "type": "string",
+            "enum": [
+              "india-account-v1"
+            ]
+          },
+          "account_terms_consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Affirmative acceptance of the free-account notice, necessary purposes and stated overseas processing; separate from optional choices."
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "password_purpose_consent",
+          "password_purpose_version",
+          "account_capacity",
+          "account_notice_version",
+          "account_terms_consent"
+        ]
+      },
+      "GuardianClaimInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 12,
+            "writeOnly": true,
+            "description": "Validate with Django password validators; never log, echo or trim."
+          },
+          "display_name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "bn"
+            ]
+          },
+          "password_purpose_consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "Affirmative electronic choice for the disclosed password-account purpose. Optional marketing remains separate."
+          },
+          "password_purpose_version": {
+            "type": "string",
+            "enum": [
+              "password-account-v1"
+            ]
+          },
+          "account_notice_version": {
+            "type": "string",
+            "enum": [
+              "india-account-v1"
+            ]
+          },
+          "subject_confirmed": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Exact prospective_subject_id affirmed by this guardian for the intended account."
+          },
+          "guardian_permission": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "display_name",
+          "password_purpose_consent",
+          "password_purpose_version"
+        ],
+        "description": "India direct claim requires final exact subject confirmation and renewed permission before parsing child account fields; one-time parent-bound capability remains required."
       }
     },
     "parameters": {

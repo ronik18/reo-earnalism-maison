@@ -97,7 +97,9 @@ def _create_action(user,purpose,return_path='/',locale='en'):
     return action
 
 
-def register_member(email,password,display_name='',locale='en',return_path='/',*,password_consent=None,_return_created_user=False):
+def register_member(email,password,display_name='',locale='en',return_path='/',*,password_consent=None,_return_created_user=False,account_capacity=None,account_notice_version=None,account_terms_consent=None,_guardian_account=False):
+    from .enrollment import adult_declaration,record_adult
+    declaration=None if _guardian_account else adult_declaration({'account_capacity':account_capacity,'account_notice_version':account_notice_version,'account_terms_consent':account_terms_consent})
     email=_email(email);_password(password);check_rate('registration',email,3,3600)
     if locale not in ('en','bn') or not isinstance(display_name,str) or len(display_name)>100:
         raise DomainError('validation_error','Invalid profile fields.',422)
@@ -120,6 +122,7 @@ def register_member(email,password,display_name='',locale='en',return_path='/',*
         Preferences.objects.create(user=user,locale=locale);Consent.objects.create(user=user,necessary_notice_version=settings.PRIVACY_NOTICE_VERSION)
         _create_action(user,'verify_email',return_path,locale);audit(user,'account.registered',user)
         record_password_purpose_consent(user,'registration',password_consent)
+        record_adult(user,declaration,'registration')
     return user if _return_created_user else {'status':'delivery_pending'}
 
 
@@ -184,6 +187,8 @@ def confirm_email_verification(token,request=None):
     with transaction.atomic():
         action=consume_action(token,'verify_email');user=User.objects.select_for_update().get(pk=action.user_id)
         user.is_verified=True;user.version+=1;user.save(update_fields=['is_verified','version'])
+        from .guardian import confirm_direct_account_verification
+        confirm_direct_account_verification(user)
         from .email_identity import ensure_email_address
         ensure_email_address(user,verified=True)
         action.consumed_at=timezone.now();action.save(update_fields=['consumed_at']);audit(user,'account.email_verified',user)

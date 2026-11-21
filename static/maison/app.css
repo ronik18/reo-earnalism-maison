@@ -64,3 +64,6 @@ select{appearance:none;padding-right:42px;background-image:url("data:image/svg+x
 
 /* Connection state stays in flow so offline reading is never covered. */
 .connection-status{position:static;inset:auto;margin:0 0 24px}
+
+/* India-first service state reuses the restrained brand treatment. */
+.launch-unavailable{display:block}.launch-unavailable .brand-header{position:static;padding:20px clamp(20px,6vw,80px)}.launch-unavailable .brand-header img{width:240px;height:auto}.launch-unavailable main{max-width:960px;margin:clamp(28px,8vw,96px) auto;padding:0 20px}.launch-unavailable .ornamental-panel{max-width:760px}.launch-unavailable h1{max-width:15ch}.account-google-choice{margin:24px 0;padding:18px 0;border-block:1px solid var(--line)}.account-google-choice summary{min-height:44px;cursor:pointer}.account-google-choice form{margin-top:16px}.auth-panel .check-label{align-items:flex-start;flex-wrap:wrap}.auth-panel .check-label input{flex:0 0 auto;margin-top:6px}.auth-panel [data-account-preflight] .choice-card{align-items:flex-start;text-decoration:none}.auth-panel [data-account-preflight] h2{font-size:clamp(28px,4vw,38px)}

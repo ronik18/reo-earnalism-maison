@@ -5,7 +5,17 @@
   <p class="eyebrow">Children and guardians</p>
   <h1 id="guardian-heading">A thoughtful place for every reader.</h1>
   <p class="lead">Earnalism is intended for readers of any age. Reading access and permission to process a child’s account information need separate care.</p>
-  {% if guardian_journey %}<div id="guardian-island"><p role="status">Checking available authorization routes…</p></div>{% else %}
+  {% if india_first_launch %}
+  <section aria-labelledby="parent-explanation-heading">
+    <h2 id="parent-explanation-heading">Begin with a parent or guardian.</h2>
+    <p>If you are under 18, ask your parent or legal guardian to begin. Do not enter your name, email or password yet.</p>
+    {% if not request.user.is_authenticated %}<div class="actions"><a class="button" href="{% url 'web:sign-in' 'en' %}?return_to=%2Fen%2Fguardian%2F">Parent or guardian: sign in</a><a class="button secondary" href="{% url 'web:sign-up' 'en' %}?account_capacity=adult&amp;return_to=%2Fen%2Fguardian%2F">Create my parent account</a></div>{% endif %}
+    <p>For our free India-first service, a parent or legal guardian who is 18 or older signs in to their own verified account and gives electronic permission before entering the younger reader’s details. We do not ask for a date of birth, ID document, face scan or payment card. A verified mailbox confirms mailbox control; it is not an independent age or custody check.</p>
+    <p>The account uses an email and protected password for sign-in and security, plus saved books, reading progress, private notes and preferences for requested reading features. Our existing providers process information in Singapore and internationally, as explained in the <a href="{% url 'web:privacy' 'en' %}">privacy notice</a>. Parent permission includes these necessary purposes and described overseas processing; optional marketing and analytics remain separate.</p>
+    <p>Your reading stays personal. Being a parent does not automatically disclose a reader’s private notes. A request to act for another account needs the specific current authority for that request.</p>
+  </section>
+  {% endif %}
+  {% if guardian_journey %}<div id="guardian-island"><p role="status">Checking your account permissions…</p></div>{% elif not india_first_launch %}
   <section aria-labelledby="guardian-status-heading">
     <h2 id="guardian-status-heading">Guardian permissions are not available yet.</h2>
     <p class="notice" role="status">This is an information-only preview. The authorization method, storage safeguards and applicable legal route are still under review. No guardian request or permission is recorded here.</p>
@@ -30,4 +40,4 @@
 </article>
 {% endblock %}
 
-{% block bootstrap %}{% if guardian_journey %}{% island_script 'guardian' %}{% endif %}{% endblock %}
+{% block bootstrap %}{% if guardian_journey %}{{ guardian_bootstrap|json_script:'guardian-bootstrap' }}{% island_script 'guardian' %}{% endif %}{% endblock %}

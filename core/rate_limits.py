@@ -27,8 +27,8 @@ def _operations():
 
 def _policy_path(request):
     # SSR forms and JSON APIs share one budget, not parallel ways around it.
-    match=re.fullmatch(r'/(?:en|bn)/(sign-in|sign-up|password-reset|email-sign-in)/',request.path)
-    aliases={'sign-in':'login','sign-up':'register','password-reset':'password-resets/request','email-sign-in':'email-links/request'}
+    match=re.fullmatch(r'/(?:en|bn)/(sign-in|sign-up|password-reset|email-sign-in|independent-account)/',request.path)
+    aliases={'sign-in':'login','sign-up':'register','password-reset':'password-resets/request','email-sign-in':'email-links/request','independent-account':'account-capacity'}
     return '/api/v1/auth/'+aliases[match[1]] if match and request.method=='POST' else request.path
 
 
