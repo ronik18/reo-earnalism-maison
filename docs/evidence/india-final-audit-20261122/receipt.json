@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-22",
+  "scope": "Final isolated India-first free service P0 audit",
+  "result": "PASS; no additional concrete P0 defect found",
+  "application_commit": "516179fe5213da8a8f762797dee74c702cd377dc",
+  "main_at_audit": "ef19075f534b15259fadba1b7ebed5420846d33b",
+  "application_changes": false,
+  "new_deployment": false,
+  "deployment_reason": "Existing tested runtime retained; main differs only by accepted documentation receipts. No source, asset, schema or environment change requires redeployment.",
+  "fresh": {
+    "public_browser_checks": 117,
+    "recovery_checks": 18,
+    "native_safari_checks": 3,
+    "postgres_concurrency_tests": 1,
+    "postgres_concurrency_seconds": 1.908,
+    "all_passed": true,
+    "production_checks_read_only": true,
+    "new_accounts_or_child_fixtures": false
+  },
+  "reused_tests": {
+    "backend_ci_total": 861,
+    "unchanged_binary_tool_skips": 22,
+    "client": 37,
+    "voice_plan": 12,
+    "focused_postgresql": 107,
+    "rendered_web": 16,
+    "receipt": "../india-first-followup-20261121/release-receipt.json"
+  },
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false,
+    "tested": false
+  },
+  "book_legacy_DNS_mutations": false,
+  "new_provider_contract_or_spend": false,
+  "fresh_authenticated_operator_signin": false,
+  "legal_scope": "Existing India-first decisions and notices reviewed; no new blanket legal clearance, foreign service qualification or exact-title publication approval."
+}

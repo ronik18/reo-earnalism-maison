@@ -1,0 +1,100 @@
+{
+  "scope": "Actual deployed recovery GET/link flows; no Google provider call, account creation or personal-data mutation",
+  "application_commit": "516179fe5213da8a8f762797dee74c702cd377dc",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "engine": "chromium-desktop",
+      "id": "safe-reader-destination-survives-error-and-signup-link",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "recovery-keeps-capacity-preflight-before-account-fields",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "password-and-google-continuations-keep-destination",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "external-return-destination-rejected",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "no-overflow-or-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "chromium-desktop",
+      "id": "unchanged-qualified-static-release",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "safe-reader-destination-survives-error-and-signup-link",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "recovery-keeps-capacity-preflight-before-account-fields",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "password-and-google-continuations-keep-destination",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "external-return-destination-rejected",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "no-overflow-or-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "firefox-desktop",
+      "id": "unchanged-qualified-static-release",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "safe-reader-destination-survives-error-and-signup-link",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "recovery-keeps-capacity-preflight-before-account-fields",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "password-and-google-continuations-keep-destination",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "external-return-destination-rejected",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "no-overflow-or-page-errors",
+      "status": "PASS"
+    },
+    {
+      "engine": "webkit-phone",
+      "id": "unchanged-qualified-static-release",
+      "status": "PASS"
+    }
+  ]
+}
