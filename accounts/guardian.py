@@ -99,8 +99,24 @@ def prepare(request,child_id,guardian_id,*,jurisdiction,purpose,notice_version,m
     return apply_operation(request.user,operation_id,'guardian.prepare',payload,mutate)
 
 
+def _review_eligible(request):
+    # Check current reviewer eligibility without taking an early actor row lock.
+    # The existing sorted household locks recheck this before any mutation.
+    from .mfa import verified_device
+    from .models import Device
+    actor=User.objects.filter(pk=request.user.pk,is_active=True,is_verified=True,is_staff=True).first()
+    authority=getattr(request.user,'_maison_operation_authority',None)
+    valid=False
+    if actor is not None and isinstance(authority,tuple) and len(authority)==4:
+        epoch,device_id,session_id,binding=authority
+        valid=(actor.session_epoch==epoch and Device.objects.filter(pk=device_id,user=actor,session_id=session_id,token_binding_sha256=binding,revoked_at__isnull=True,expires_at__gt=timezone.now()).exists())
+    if not valid or not actor.has_perm('accounts.review_guardian_authorization') or not verified_device(request):
+        raise DomainError('permission_denied','Independent authorized staff MFA review is required.',403)
+
+
 @transaction.atomic
 def review(request,authorization_id,*,evidence_sha256,approve,expected_version,operation_id):
+    _review_eligible(request)
     row=_row(authorization_id)
     _locks(request,row.child_id,row.guardian_id,review=True)
     row=GuardianAuthorization.objects.select_for_update().get(pk=row.pk);_current(row)
@@ -119,9 +135,7 @@ def review(request,authorization_id,*,evidence_sha256,approve,expected_version,o
 
 @transaction.atomic
 def withdraw(request,authorization_id,*,expected_version,operation_id):
-    row=_row(authorization_id);actor=_locks(request,row.child_id,row.guardian_id)
-    if actor.pk!=row.guardian_id:raise DomainError('permission_denied','The bound guardian is required.',403)
-    row=GuardianAuthorization.objects.select_for_update().get(pk=row.pk)
+    row=_own_locked(request,authorization_id);actor=request.user
     def mutate():
         if row.version!=expected_version:raise DomainError('version_conflict','Authorization changed.',412)
         row.claim_sha256='';row.claim_expires_at=None;row.status='withdrawn';row.withdrawn_at=timezone.now();row.version+=1;row.save()
@@ -173,11 +187,19 @@ def policies():
     return items
 
 
+def _own_row(request,authorization_id):
+    # A member must not inspect or lock another household before ownership is
+    # established: foreign active/inactive/revoked records all remain not-found.
+    row=GuardianAuthorization.objects.filter(pk=public_uuid(authorization_id),guardian_id=request.user.pk).first()
+    if not row:raise DomainError('not_found','Authorization not found.',404)
+    return row
+
+
 def _own_locked(request,authorization_id):
-    row=_row(authorization_id)
+    row=_own_row(request,authorization_id)
     _locks(request,row.child_id,row.guardian_id)
-    if row.guardian_id!=request.user.pk:raise DomainError('not_found','Authorization not found.',404)
-    row=GuardianAuthorization.objects.select_for_update().get(pk=row.pk)
+    row=GuardianAuthorization.objects.select_for_update().filter(pk=row.pk,guardian_id=request.user.pk).first()
+    if not row:raise DomainError('not_found','Authorization not found.',404)
     return row
 
 
@@ -340,9 +362,8 @@ def process_privacy_job(job,max_seconds=45):
 def privacy_job(request,authorization_id,job_id):
     enabled()
     from core.models import OutboxJob
-    row=_row(authorization_id)
+    row=_own_row(request,authorization_id)
     _locks(request,None,row.guardian_id)
-    if row.guardian_id!=request.user.pk:raise DomainError('not_found','Request not found.',404)
     job=OutboxJob.objects.filter(pk=public_uuid(job_id),actor_id=row.child_id,kind__in=['privacy_export','privacy_delete'],payload__guardian_authorization_id=str(row.pk)).first()
     if not job:raise DomainError('not_found','Request not found.',404)
     if job.kind=='privacy_delete' and job.status=='done' and job.result.get('status') in ('anonymised','anonymised_financial_records_retained','already_removed'):
