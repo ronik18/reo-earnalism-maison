@@ -1,0 +1,159 @@
+{
+  "date": "2026-11-21",
+  "product": "Earnalism",
+  "operator": "Reo Enterprise",
+  "scope": "India-first free account and reading services on existing isolated host",
+  "source_pr": 37,
+  "tested_head": "7a89b236117440a3c33afdec1e59c39d6cd54e08",
+  "application_commit": "165edc91679207997a692672e781cdaef751d916",
+  "merge_tree_identical_to_tested_head": true,
+  "ci": {
+    "head_run": 44911936508,
+    "merge_validation_run": 44911970248,
+    "main_run": 44912627431,
+    "all_status": "PASS",
+    "backend_tests": 853,
+    "hosted_binary_tool_skips": 22,
+    "actual_local_image_tests": 853,
+    "actual_local_image_skips": 0,
+    "client_tests": 37,
+    "voice_plan_tests": 12
+  },
+  "deployments": {
+    "web": {
+      "service": "srv-dbunbd8jo6nc73akbng0",
+      "deployment": "dep-dc0qeme7bikc73bj80l0",
+      "status": "Live"
+    },
+    "maintenance": {
+      "service": "crn-dbv7bte7bikc73fpso3g",
+      "deployment": "dep-dc0qe0d9el5s73eu1lqg",
+      "status": "Live"
+    },
+    "archive": {
+      "service": "crn-dbv7agetlv9c7381is10",
+      "deployment": "dep-dc0qegivcj2c73bf2r5g",
+      "status": "Live",
+      "extra_backup_run": false
+    }
+  },
+  "assets": {
+    "release": "a9865d304bd665301cdf337e0e6a7f7de0e51f5731ac6afe604ace6b18c240f6",
+    "files": 202,
+    "bytes": 8830230,
+    "HTTPS_hash_MIME_immutable_cache": "PASS",
+    "saved_web_binding_reloaded_verified": true
+  },
+  "live_browser": {
+    "checks": 125,
+    "passed": 125,
+    "engines": [
+      "Chromium desktop",
+      "Firefox desktop",
+      "WebKit virtual phone"
+    ],
+    "native_safari_checks": 6,
+    "native_safari_version": "26.5",
+    "native_safari_status": "PASS"
+  },
+  "existing_operator": {
+    "authenticated": true,
+    "session_profile_preferences_consents_devices": 200,
+    "guardian_policy_and_authorizations": 200,
+    "guardian_UI_mounted": true,
+    "declarations_default_unchecked": true,
+    "overflow": false,
+    "static_binding_matches": true
+  },
+  "active_policy": {
+    "jurisdiction": "IN",
+    "purpose": "account_processing",
+    "notice_version": "india-parent-v1",
+    "method": "india-parent-electronic-v1",
+    "max_lifetime_seconds": 604800,
+    "lifetime": "until_withdrawn",
+    "assurance": "authenticated electronic declarations, not independently verified identity/custody"
+  },
+  "scheduled_maintenance": {
+    "maintenance_last_success": {
+      "commit": "165edc91679207997a692672e781cdaef751d916",
+      "counts": {
+        "processed": 0,
+        "retention": {
+          "dry_run": false,
+          "eligible": {
+            "devices": 0,
+            "receipts": 0,
+            "sessions": 0,
+            "action_tokens": 0,
+            "mail_payloads": 0,
+            "audit_outcomes": 0,
+            "support_payloads": 0,
+            "abandoned_signups": 0,
+            "guardian_authorizations": 0,
+            "guardian_accounts_suspended": 0
+          },
+          "time_budget_exhausted": false
+        },
+        "rate_counters": {
+          "deleted": 0
+        },
+        "expired_exports": {
+          "failed": 0,
+          "cleaned": 0
+        },
+        "cache_references": {
+          "deleted": 0
+        }
+      },
+      "run_id": "9b5846d9-9baa-47fb-b3ae-03e3a42ccd44",
+      "source": "scheduled",
+      "outcome": "success",
+      "error_code": "",
+      "started_at": "2026-11-21T14:16:13.746323Z",
+      "finished_at": "2026-11-21T14:16:13.827828Z"
+    },
+    "lease_clear": true,
+    "read_only": true
+  },
+  "protected_book_unchanged": {
+    "state": "draft",
+    "live_revision_id": null,
+    "version": 42,
+    "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+    "paragraphs": 32
+  },
+  "finance_counts": {
+    "maison_invoice": 0,
+    "maison_invoice_revision": 0,
+    "maison_finance_number_sequence": 0,
+    "maison_offer": 0
+  },
+  "guardian_rows": 0,
+  "managed_accounts": 0,
+  "accounts_schema_last": "0005_guardianauthorization_claim_expires_at_and_more",
+  "new_migrations": false,
+  "service_territories": [
+    "IN"
+  ],
+  "edition_publication_policy_unchanged": true,
+  "book_publication": false,
+  "legacy": {
+    "HTTPS": 200,
+    "source_data_DNS_writes": false
+  },
+  "provider_setup_or_new_contracts": false,
+  "KWS_Epic_used": false,
+  "real_child_or_new_production_accounts_created_for_tests": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false,
+    "tested": false
+  },
+  "method_limits": "Present-law purpose-specific India launch; no future DPDP VPC, independent custody, worldwide or title clearance claimed",
+  "source_image": {
+    "source_files": 284,
+    "frozen_image_source_match": true,
+    "source_tree_sha256": "73beef5b2e86783c15dd72c06251a45e369eec321adc631cf76cea9c03f02790"
+  }
+}
