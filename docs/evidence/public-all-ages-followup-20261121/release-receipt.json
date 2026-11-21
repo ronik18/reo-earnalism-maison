@@ -1,0 +1,152 @@
+{
+  "review_date": "2026-11-21",
+  "application_commit": "23f4f86fe62a21e5e918d4da52f3dae56bd62c0b",
+  "pr": 24,
+  "scope": "approved isolated technical workflow rollout; public/all-ages legal qualification remains incomplete",
+  "services": {
+    "web": {
+      "service": "srv-dbunbd8jo6nc73akbng0",
+      "deployment": "dep-dc0n2od9el5s73ekuev0",
+      "status": "live"
+    },
+    "maintenance": {
+      "service": "crn-dbv7bte7bikc73fpso3g",
+      "deployment": "dep-dc0n4q6c6qcc73esbfug",
+      "status": "live"
+    },
+    "archive": {
+      "service": "crn-dbv7agetlv9c7381is10",
+      "deployment": "dep-dc0n5j6k1f9s739m3640",
+      "status": "live",
+      "new_archive_or_restore_run_claimed": false
+    }
+  },
+  "ci": {
+    "run": 44893625917,
+    "status": "PASS",
+    "backend_tests_run": 818,
+    "skipped_tool_tests": 22,
+    "client_tests_pass": 37,
+    "voice_plan_tests_pass": 12
+  },
+  "actual_local_binary_acceptance": {
+    "tests": 40,
+    "status": "PASS",
+    "includes_CI_age_ffmpeg_skips": true,
+    "book_or_media_workflow_executed": false
+  },
+  "local_guardian_acceptance": {
+    "accounts_tests": 155,
+    "portable_journey_tests": 16,
+    "actual_browser_journeys": 6,
+    "layout_checks": 6,
+    "uniform_new_existing_email_checks": 2,
+    "scoped_real_export_worker_download": true,
+    "native_safari_policy_view": true,
+    "all_synthetic_not_legal_method": true
+  },
+  "live_browser_acceptance": {
+    "chromium_firefox_webkit_checks": 114,
+    "native_safari_checks": 6,
+    "status": "PASS"
+  },
+  "existing_operator": {
+    "session_present": true,
+    "profile_preferences_consents_devices_http": 200,
+    "account_island_mounted": true,
+    "guardian_api_and_page_http": 404,
+    "guardian_bundle_absent": true,
+    "private_profile_content_saved": false
+  },
+  "static_release": {
+    "id": "7cbf84d3124fa03c5606333df71ac6630b7d72660dd9a8cdb6b786c4f94679dd",
+    "files": 202,
+    "bytes": 8824431,
+    "https_hash_mime_immutable_metadata": "PASS",
+    "cache_states": [
+      "HIT",
+      "HIT"
+    ]
+  },
+  "maintenance": {
+    "maintenance_last_success": {
+      "commit": "23f4f86fe62a21e5e918d4da52f3dae56bd62c0b",
+      "counts": {
+        "processed": 0,
+        "retention": {
+          "dry_run": false,
+          "eligible": {
+            "devices": 0,
+            "receipts": 0,
+            "sessions": 0,
+            "action_tokens": 0,
+            "mail_payloads": 0,
+            "audit_outcomes": 0,
+            "support_payloads": 0,
+            "abandoned_signups": 0,
+            "guardian_authorizations": 0,
+            "guardian_accounts_suspended": 0
+          },
+          "time_budget_exhausted": false
+        },
+        "rate_counters": {
+          "deleted": 0
+        },
+        "expired_exports": {
+          "failed": 0,
+          "cleaned": 0
+        },
+        "cache_references": {
+          "deleted": 0
+        }
+      },
+      "run_id": "0e7863b2-ebd5-44b7-8da0-9331d3fd44c4",
+      "source": "scheduled",
+      "outcome": "success",
+      "error_code": "",
+      "started_at": "2026-11-21T10:33:13.754790Z",
+      "finished_at": "2026-11-21T10:33:13.813819Z"
+    },
+    "lease_clear": true,
+    "read_only": true
+  },
+  "protected_state": {
+    "status": "PASS",
+    "read_only": true,
+    "book": {
+      "state": "draft",
+      "live_revision_id": null,
+      "version": 42,
+      "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+      "paragraphs": 32
+    },
+    "counts": {
+      "maison_invoice": 0,
+      "maison_invoice_revision": 0,
+      "maison_finance_number_sequence": 0,
+      "maison_offer": 0
+    },
+    "credential_copy": false
+  },
+  "guardian_rows": 0,
+  "managed_accounts": 0,
+  "guardian_activation": false,
+  "guardian_policies": {},
+  "provider_inquiries": {
+    "exact_two_approved": true,
+    "SENT_headers_verified": true,
+    "quotes_eligibility_contracts_verified": false,
+    "new_purchases_appointments_filings": false,
+    "private_headers": "operator custody only"
+  },
+  "physical_android_ios_uat": {
+    "status": "deferred; not tested",
+    "blocking": false
+  },
+  "legacy": {
+    "https_status": 200,
+    "source_data_dns_changed": false
+  },
+  "book_publication": false,
+  "public_all_ages_47_country_legal_clearance": false
+}
