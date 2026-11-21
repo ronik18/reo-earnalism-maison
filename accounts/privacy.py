@@ -56,7 +56,7 @@ def _export_support_row(row):
     return row
 
 
-def _write_export(user,file,deadline):
+def _write_export(user,file,deadline,allowed_sections=None):
     from reader.models import Progress,Completion,Annotation,SavedItem,PersonalList,PersonalListItem,DownloadLicense
     from learning.models import LessonCompletion,QuizAttempt
     from billing.models import Order,Entitlement,Invoice,Refund,InvoiceRevision,Subscription,Mandate
@@ -92,12 +92,18 @@ def _write_export(user,file,deadline):
         'mandates':Mandate.objects.filter(user=user,subscription__user=user).values('id','status','revocation_pending','method','created_at','revoked_at','version',subscription_id=F('subscription__id')),
         'refunds':Refund.objects.filter(payment__order__user=user).values('id','amount_minor','proposed_amount_minor','currency','status','created_at','processed_at'),
     }
+    from .models import GuardianAuthorization
+    arrays['guardian_authorizations_given']=GuardianAuthorization.objects.filter(guardian=user).values('id','prospective_subject_id','jurisdiction','purpose','notice_version','method','status','created_at','reviewed_at','expires_at','withdrawn_at','claimed_at')
+    arrays['guardian_authorizations_received']=GuardianAuthorization.objects.filter(child=user).values('id','jurisdiction','purpose','notice_version','method','status','created_at','reviewed_at','expires_at','withdrawn_at','claimed_at')
     from django.apps import apps
     if apps.is_installed('allauth.account'):
         from allauth.account.models import EmailAddress
         from allauth.socialaccount.models import SocialAccount
         arrays['email_addresses']=EmailAddress.objects.filter(user=user).values('email','verified','primary')
         arrays['linked_identities']=SocialAccount.objects.filter(user=user).values('provider','uid','date_joined')
+    if allowed_sections is not None:
+        fields={k:v for k,v in fields.items() if k=='schema_version' or k in allowed_sections}
+        arrays={k:v for k,v in arrays.items() if k in allowed_sections}
     raw('{');first=True
     for name,item in fields.items():
         if not first:raw(',')
@@ -113,6 +119,9 @@ def _write_export(user,file,deadline):
 
 
 def create_export(job,max_seconds=45):
+    if job.payload.get('guardian_authorization_id'):
+        from .guardian import _job_authority
+        with transaction.atomic():_job_authority(job)
     from library import storage
     deadline=time.monotonic()+max_seconds
     user=User.objects.using(getattr(settings,'PRIVACY_EXPORT_DB_ALIAS','default')).filter(pk=job.actor_id,is_active=True).first()
@@ -122,14 +131,17 @@ def create_export(job,max_seconds=45):
     prepared=job.payload.get('prepared_export')
     if prepared and storage.private_exists(prepared['storage_key']):
         storage.verify_private(prepared['storage_key'],prepared['bytes'],prepared['sha256'],'application/json',max_seconds=max_seconds)
+        if job.payload.get('guardian_authorization_id'):
+            with transaction.atomic():_job_authority(job)
         return prepared
     # Scratch file is discarded after upload; immutable metadata is persisted before the provider call.
     with tempfile.TemporaryFile('w+b') as file:
-        size,sha=_write_export(user,file,deadline)
+        size,sha=_write_export(user,file,deadline,allowed_sections=job.payload.get('guardian_export_sections') if job.payload.get('guardian_authorization_id') else None)
         key=f'exports/{user.public_id}/{job.id}-{sha}.json'
         result={'storage_key':key,'sha256':sha,'bytes':size,'content_type':'application/json',
             'expires_at':_iso(timezone.now()+timedelta(seconds=getattr(settings,'PRIVACY_EXPORT_TTL_SECONDS',604800)))}
         with transaction.atomic():
+            if job.payload.get('guardian_authorization_id'):_job_authority(job)
             current_job=OutboxJob.objects.select_for_update().get(pk=job.pk)
             if current_job.status!='claimed' or current_job.lease_owner!=job.lease_owner:raise DomainError('job_lease_lost','The export was cancelled or reassigned.',409)
             payload=dict(current_job.payload);payload['prepared_export']=result;payload['export_keys']=sorted(set(payload.get('export_keys',[]))|{key})
@@ -142,6 +154,8 @@ def create_export(job,max_seconds=45):
     if not current:
         storage.delete_private(key)
         raise DomainError('account_changed','The account changed while preparing this export.',409)
+    if job.payload.get('guardian_authorization_id'):
+        with transaction.atomic():_job_authority(job)
     return result
 
 
@@ -152,6 +166,9 @@ def delete_account(job):
     from learning.models import LessonCompletion,QuizAttempt
     from library import storage
     with transaction.atomic():
+        if job.payload.get('guardian_authorization_id'):
+            from .guardian import _job_authority
+            _job_authority(job)
         user=User.objects.select_for_update().filter(pk=job.actor_id).first()
         if not user:return {'status':'already_removed','retained_categories':[]}
         from .retention import _held,_row_held
@@ -188,7 +205,8 @@ def delete_account(job):
             if artifact['result'].get('storage_key'):keys.add(artifact['result']['storage_key'])
             keys.update(artifact['payload'].get('export_keys',[]))
             if artifact['payload'].get('prepared_export',{}).get('storage_key'):keys.add(artifact['payload']['prepared_export']['storage_key'])
-        current.payload={'delete_export_keys':sorted(keys)};current.save(update_fields=['payload'])
+        authority={k:current.payload[k] for k in ('guardian_authorization_id','guardian_requester_id') if k in current.payload}
+        current.payload={'delete_export_keys':sorted(keys),'delete_retained_categories':retained_categories,**authority};current.save(update_fields=['payload'])
         now=timezone.now()
         delete_personal_data(user);LessonCompletion.objects.filter(user=user).delete();QuizAttempt.objects.filter(user=user).delete()
         DownloadLicense.objects.filter(user=user,revoked_at=None).update(revoked_at=now)
@@ -208,6 +226,12 @@ def delete_account(job):
         personal=Q(kind__startswith='annotation.')|Q(kind__startswith='list.')|Q(kind__startswith='progress.')|Q(kind__startswith='completion.')|Q(kind__startswith='saved.')
         OperationReceipt.objects.filter(actor=user).filter(personal).delete()
         OutboxJob.objects.filter(actor=user,kind__in=['email_action','privacy_export','contact_support']).update(status='cancelled',payload={},result={},lease_owner='',locked_until=None)
+        from .models import GuardianAuthorization
+        from .guardian import _revoke_child_sessions
+        managed_children=list(GuardianAuthorization.objects.filter(guardian=user,purpose='account_processing',child__guardian_managed=True).exclude(child=user).values_list('child_id',flat=True).distinct())
+        for child_id in sorted(managed_children):_revoke_child_sessions(child_id)
+        GuardianAuthorization.objects.filter(Q(child=user)|Q(guardian=user)).update(status='withdrawn',withdrawn_at=now,evidence_sha256='',claim_sha256='',claim_expires_at=None,reviewer=None)
+        GuardianAuthorization.objects.filter(reviewer=user).update(reviewer=None)
         audit(user,'privacy.account_anonymised',user)
     # Exact export keys survive provider failures in the deletion job payload; retries are idempotent.
     for key in keys:storage.delete_private(key)

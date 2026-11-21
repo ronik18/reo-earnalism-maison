@@ -15,7 +15,8 @@ _ALLOWED_COUNTS = {
     'processed', 'expired_exports', 'cleaned', 'failed', 'rate_counters', 'deleted',
     'cache_references', 'retention', 'dry_run', 'eligible', 'time_budget_exhausted',
     'busy', 'action_tokens', 'mail_payloads', 'sessions', 'devices', 'receipts',
-    'abandoned_signups', 'audit_outcomes', 'support_payloads',
+    'abandoned_signups', 'audit_outcomes', 'support_payloads', 'guardian_authorizations',
+    'guardian_accounts_suspended',
 }
 
 

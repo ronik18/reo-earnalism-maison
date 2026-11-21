@@ -1,0 +1,10 @@
+{
+  "browser": "native Safari",
+  "version": "26.5",
+  "scope": "actual local authenticated guardian policy selection; no child inputs before authority",
+  "status": "PASS",
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "engine": "chromium",
+    "viewport": "desktop",
+    "status": "PASS",
+    "scope": "actual local guardian login/request/independent-MFA-review/headerclaim/accountbinding; no legal provider acceptance"
+  },
+  {
+    "engine": "chromium",
+    "viewport": "phone",
+    "status": "PASS",
+    "scope": "actual local guardian login/request/independent-MFA-review/headerclaim/accountbinding; no legal provider acceptance"
+  },
+  {
+    "engine": "firefox",
+    "viewport": "desktop",
+    "status": "PASS",
+    "scope": "actual local guardian login/request/independent-MFA-review/headerclaim/accountbinding; no legal provider acceptance"
+  },
+  {
+    "engine": "firefox",
+    "viewport": "phone",
+    "status": "PASS",
+    "scope": "actual local guardian login/request/independent-MFA-review/headerclaim/accountbinding; no legal provider acceptance"
+  },
+  {
+    "engine": "webkit",
+    "viewport": "desktop",
+    "status": "PASS",
+    "scope": "actual local guardian login/request/independent-MFA-review/headerclaim/accountbinding; no legal provider acceptance"
+  },
+  {
+    "engine": "webkit",
+    "viewport": "phone",
+    "status": "PASS",
+    "scope": "actual local guardian login/request/independent-MFA-review/headerclaim/accountbinding; no legal provider acceptance"
+  }
+]

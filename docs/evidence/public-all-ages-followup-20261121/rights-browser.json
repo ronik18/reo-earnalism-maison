@@ -1,0 +1,8 @@
+[
+  {
+    "engine": "webkit",
+    "viewport": "phone",
+    "status": "PASS",
+    "scope": "actual local guardian login/request/independent-MFA-review/headerclaim/accountbinding; no legal provider acceptance"
+  }
+]

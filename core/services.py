@@ -27,6 +27,9 @@ def locked_actor(user):
     actor=get_user_model().objects.select_for_update().get(pk=user.pk)
     if not actor.is_active:
         raise DomainError('authentication_required','Sign in to continue.',401)
+    if getattr(actor,'guardian_managed',False):
+        from accounts.guardian import account_available
+        if not account_available(actor):raise DomainError('guardian_authority_required','Current account authorization is required.',403)
     authority=getattr(user,'_maison_operation_authority',None)
     if authority is not None:
         from accounts.models import Device

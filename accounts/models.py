@@ -30,6 +30,7 @@ class User(AbstractUser):
     public_id = models.UUIDField(default=uuid.uuid4,unique=True,editable=False)
     display_name = models.CharField(max_length=100,blank=True)
     is_verified = models.BooleanField(default=False)
+    guardian_managed = models.BooleanField(default=False)
     session_epoch = models.PositiveBigIntegerField(default=1)
     version = models.PositiveBigIntegerField(default=1)
     USERNAME_FIELD='email'
@@ -138,7 +139,12 @@ class MFARecoveryCode(models.Model):
 class GuardianAuthorization(models.Model):
     """Disabled operational foundation, not proof of legal parental consent."""
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
-    child=models.ForeignKey(User,on_delete=models.CASCADE,related_name='guardian_authorizations_received')
+    child=models.ForeignKey(User,on_delete=models.CASCADE,null=True,related_name='guardian_authorizations_received')
+    prospective_subject_id=models.UUIDField(default=uuid.uuid4,editable=False,unique=True)
+    claim_sha256=models.CharField(max_length=64,blank=True)
+    claim_expires_at=models.DateTimeField(null=True)
+    claimed_at=models.DateTimeField(null=True)
+    retain_until=models.DateTimeField(null=True)
     guardian=models.ForeignKey(User,on_delete=models.CASCADE,related_name='guardian_authorizations_given')
     reviewer=models.ForeignKey(User,on_delete=models.SET_NULL,null=True,related_name='guardian_authorizations_reviewed')
     jurisdiction=models.CharField(max_length=2)

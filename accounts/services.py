@@ -97,24 +97,30 @@ def _create_action(user,purpose,return_path='/',locale='en'):
     return action
 
 
-def register_member(email,password,display_name='',locale='en',return_path='/',*,password_consent=None):
+def register_member(email,password,display_name='',locale='en',return_path='/',*,password_consent=None,_return_created_user=False):
     email=_email(email);_password(password);check_rate('registration',email,3,3600)
     if locale not in ('en','bn') or not isinstance(display_name,str) or len(display_name)>100:
         raise DomainError('validation_error','Invalid profile fields.',422)
     with transaction.atomic():
         user=User.objects.filter(email=email).first()
-        if user:return {'status':'delivery_pending'}
+        if user:
+            if _return_created_user:return None
+            return {'status':'delivery_pending'}
         from django.apps import apps
         if apps.is_installed('allauth.account'):
             from allauth.account.models import EmailAddress
-            if EmailAddress.objects.filter(email__iexact=email,verified=True).exists():return {'status':'delivery_pending'}
+            if EmailAddress.objects.filter(email__iexact=email,verified=True).exists():
+                if _return_created_user:return None
+                return {'status':'delivery_pending'}
         try:
             with transaction.atomic():user=User.objects.create_user(email,password,display_name=display_name)
-        except IntegrityError:return {'status':'delivery_pending'}
+        except IntegrityError:
+            if _return_created_user:return None
+            return {'status':'delivery_pending'}
         Preferences.objects.create(user=user,locale=locale);Consent.objects.create(user=user,necessary_notice_version=settings.PRIVACY_NOTICE_VERSION)
         _create_action(user,'verify_email',return_path,locale);audit(user,'account.registered',user)
         record_password_purpose_consent(user,'registration',password_consent)
-    return {'status':'delivery_pending'}
+    return user if _return_created_user else {'status':'delivery_pending'}
 
 
 def request_email_verification(email,return_path='/',locale='en'):
@@ -302,6 +308,9 @@ def update_preferences(user,data,base_version):
 
 
 def process_outbox_job(job,max_seconds=45):
+    if job.kind in ('privacy_export','privacy_delete') and job.payload.get('guardian_authorization_id'):
+        from .guardian import process_privacy_job
+        return process_privacy_job(job,max_seconds=max_seconds)
     if job.kind=='email_action':
         from .email_delivery import deliver_action
         return deliver_action(job,max_seconds=max_seconds)

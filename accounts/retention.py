@@ -181,7 +181,7 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
         raise ValueError('require a positive time budget<=30 and boolean dry_run')
     now = timezone.now(); cutoff = now - timedelta(days=7)
     deadline = time.monotonic() + max_seconds
-    counts = dict(action_tokens=0, mail_payloads=0, sessions=0, devices=0, receipts=0, abandoned_signups=0, audit_outcomes=0, support_payloads=0)
+    counts = dict(guardian_accounts_suspended=0, guardian_authorizations=0, action_tokens=0, mail_payloads=0, sessions=0, devices=0, receipts=0, abandoned_signups=0, audit_outcomes=0, support_payloads=0)
     report = {'dry_run': dry_run, 'eligible': counts, 'time_budget_exhausted': False}
 
     cursors = cursors if cursors is not None else {}
@@ -245,6 +245,39 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
             if not dry_run:
                 job.payload = {'retention_cleaned': True}; job.result = {'status': 'retention_cleaned'}
                 job.error_code = ''; job.save(update_fields=['payload', 'result', 'error_code'])
+
+    # Expired account authority stops active managed-device/offline processing
+    # without waiting for its separately configured evidence-retention deadline.
+    from .guardian import account_available,_revoke_child_sessions
+    expired_managed=User.objects.filter(guardian_managed=True,is_active=True,guardian_authorizations_received__purpose='account_processing',guardian_authorizations_received__expires_at__lte=now).distinct()
+    for pk in ids(expired_managed,'guardian_expiry'):
+        if not remaining(): break
+        with transaction.atomic():
+            child=User.objects.select_for_update(skip_locked=True).filter(pk=pk,guardian_managed=True).first()
+            if not child or account_available(child):continue
+            from reader.models import DownloadLicense
+            if not Device.objects.filter(user=child,revoked_at=None).exists() and not DownloadLicense.objects.filter(user=child,revoked_at=None).exists():continue
+            counts['guardian_accounts_suspended']+=1
+            if not dry_run:_revoke_child_sessions(child.pk)
+
+    # Only rows carrying an explicit reviewed retention deadline are eligible.
+    # Legacy foundation rows with no deadline require review, never blind erasure.
+    from .models import GuardianAuthorization
+    for pk in ids(GuardianAuthorization.objects.filter(retain_until__lte=now,expires_at__lte=now), 'guardian_authorizations'):
+        if not remaining(): break
+        with transaction.atomic():
+            row=GuardianAuthorization.objects.select_for_update(skip_locked=True).filter(pk=pk,retain_until__lte=now,expires_at__lte=now).first()
+            if not row or _held(row.guardian_id) or row.child_id and _held(row.child_id):continue
+            if AuditEvent.objects.filter(action__in=['legal.hold','retention.hold'],entity_kind='GuardianAuthorization',entity_id=str(row.pk)).exists():continue
+            linked=OutboxJob.objects.filter(payload__guardian_authorization_id=str(row.pk))
+            if linked.exclude(status__in=['done','cancelled','dead']).exists():continue
+            blocked=False
+            for job in linked.iterator(chunk_size=100):
+                if not remaining() or _row_held(job,actor_held=False):
+                    blocked=True;break
+            if blocked:continue
+            counts['guardian_authorizations']+=1
+            if not dry_run:row.delete()
 
     candidates = User.objects.filter(is_verified=False, is_staff=False, is_superuser=False, is_active=True, last_login=None, date_joined__lte=cutoff)
     for pk in ids(candidates, 'signups'):

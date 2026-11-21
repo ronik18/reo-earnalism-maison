@@ -147,7 +147,8 @@ def guardian_guidance(request, locale):
     if not getattr(django_settings, "GUARDIAN_AUTHORIZATION_ENABLED", False):
         raise Http404
     return page(request, "en", "web/guardian.html",
-                return_to=reverse("web:guardian-guidance", args=["en"]))
+                return_to=reverse("web:guardian-guidance", args=["en"]),
+                guardian_journey=bool(getattr(django_settings,"GUARDIAN_AUTHORIZATION_POLICIES",{})) and request.user.is_authenticated)
 
 
 @require_GET

@@ -4,6 +4,7 @@ const outdir = "static/maison/dist";
 await mkdir(outdir, { recursive: true });
 const result = await build({
   entryPoints: {
+    guardian: "client/guardian.tsx",
     onboarding: "client/onboarding.tsx",
     home: "client/home.tsx",
     video: "client/video.tsx",
