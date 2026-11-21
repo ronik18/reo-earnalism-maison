@@ -1,6 +1,6 @@
 # Yandex reply review —21November2026
 
-The new support reply received13:11:04UTC is substantive technical guidance, unlike the earlier automated acknowledgement. Read-only Gmail retrieval verified its contents and passingDKIM/SPF/DMARC. Private message IDs/headers and personal recipient details are excluded here. No response was sent, consultation accepted, account created, contract signed or money spent.
+The new support reply received13:11:04UTC is substantive technical guidance, unlike the earlier automated acknowledgement. Read-only Gmail retrieval verified its contents and passingDKIM/SPF/DMARC. Private message IDs/headers and personal recipient details are excluded here. At the initial review, no response had been sent and no consultation accepted. The subsequently approved sending receipt is appended below; no account, contract or spending action occurred.
 
 ## What the provider actually answered
 
@@ -15,7 +15,7 @@ The new support reply received13:11:04UTC is substantive technical guidance, unl
 
 **Current decision:** technical feasibility narrowed; commercial eligibility, location/transfer guarantees, complete cost and applicable legal suitability remainOPEN. The consultation offer is not confirmed free, a contract, a regulator determination or legal clearance. Existing Singapore architecture is unchanged. No extra regional provider, country removal or production migration is implied. New spending remains$0; the$50pilot stays declined. The Selfish Giant remains draft.
 
-## Prepared reply —not sent
+## Exact approved reply —subsequently sent
 
 Reply only in the existing ticket thread to `support@yandex.cloud`, preserving the existing sender/Reply-To identity and ticket subject; noCC/BCC/attachments. Owner authority for this new message is required. Exact proposed body:
 
@@ -32,3 +32,9 @@ Reply only in the existing ticket thread to `support@yandex.cloud`, preserving t
 > Reo Enterprise / Earnalism
 
 A written reply can resolve the finite commercial questions before any provider adoption. Do not send a duplicate sales form, schedule a call or approve fees merely because support offered consultation. Any later quote must be checked against the exact regional legal design; provider availability alone does not establish compliance.
+
+## Approved follow-up executed
+
+The owner explicitly approved sending this prepared reply for written,no-charge answers. Root sent it once via the connected original Gmail account tosupport@yandex.cloud, preserving the originalReply-To and exact ticket subject/thread. [Redacted sending/readback receipt](followup-sent.json):SENT label, exact sender/recipient/Reply-To/subject/thread and authoredHTML were independently read back and matched. The Gmail reply tool automatically included the original provider message as a normal quotation; the authored approved text is unchanged. NoCC/BCC/attachments or new private files. Personal sender/messageIDs remain outside this receipt.
+
+Commercial eligibility, contractual location guarantees, complete quote and no-charge consultation confirmation remain unanswered. Sending is not delivery/read proof, a consultation acceptance, contract, signup or legal clearance. Do not resend, schedule a call, accept a fee or start provider setup without the applicable authority. New-spending limit stays$0; book and legacy are untouched.

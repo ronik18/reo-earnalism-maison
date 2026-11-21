@@ -15,9 +15,12 @@
   "complete_quote_received": false,
   "business_development_consultation_offered": true,
   "consultation_fee_status": "not confirmed",
-  "reply_sent": false,
+  "reply_sent": true,
   "new_spending_usd": 0,
   "dns_changes": false,
   "publication_clearance": false,
-  "private_headers_or_message_ids_in_receipt": false
+  "private_headers_or_message_ids_in_receipt": false,
+  "followup_sent_verified": true,
+  "followup_receipt": "followup-sent.json",
+  "commercial_answers_pending": true
 }
