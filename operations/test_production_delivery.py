@@ -19,6 +19,49 @@ class PrivateEntrypointTests(unittest.TestCase):
         self.root = Path(self.tmp.name); self.bundle = fixture(self.root)
         self.path = self.root / 'bundle.json'; self.path.write_text(json.dumps(self.bundle))
 
+    def source_inputs(self):
+        source = {'schema': 'earnalism.book_source.v1', 'language': 'bn', 'units': [
+            {'key': 'first', 'title': 'প্রথম', 'kind': 'chapter',
+             'paragraphs': [{'kind': 'paragraph', 'text': 'বইয়ের অক্ষর। Cafe\u0301'}]}]}
+        raw = json.dumps(source, ensure_ascii=False).encode()
+        path = self.root / 'original-source.json'; path.write_bytes(raw)
+        manifest = {'schema': 'earnalism.book_import_manifest.v1', 'project_id': 'local-source',
+            'work': {'slug': 'local-source', 'title': 'Local source', 'creators': ['Synthetic test author'], 'house': 'golpo'},
+            'edition': {'slug': 'local-source-bn', 'language': 'bn', 'title': 'স্থানীয়', 'description': ''},
+            'source': {'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw),
+                       'content_type': 'application/json', 'format': 'earnalism.book_source.v1'},
+            'provenance': {'source_ref': 'local:test', 'source_edition': 'synthetic',
+                           'rights_note': 'Test content only; no approval.', 'rights_evidence_refs': []}}
+        metadata = self.root / 'import-manifest.json'; metadata.write_text(json.dumps(manifest))
+        return metadata, path, raw
+
+    def test_general_import_default_verifies_original_without_provider_requests(self):
+        metadata, source, raw = self.source_inputs(); output = io.StringIO()
+        with patch.dict('os.environ', {}, clear=True), patch('socket.create_connection', side_effect=AssertionError('network')), \
+                contextlib.redirect_stdout(output):
+            self.assertEqual(main(['book-import', '--source', str(source), '--import-manifest', str(metadata)]), 0)
+        result = json.loads(output.getvalue())
+        self.assertEqual(result['state'], 'PREPARED_NO_PROVIDER_REQUESTS')
+        self.assertEqual(result['provider_requests'], 0)
+        self.assertFalse(result['publication'])
+        self.assertEqual(source.read_bytes(), raw)
+
+    def test_provider_acceptance_execute_is_rejected_before_bundle_or_network(self):
+        output = io.StringIO()
+        with patch('operations.production_delivery.load_bundle') as load, \
+                patch('socket.create_connection', side_effect=AssertionError('network')), contextlib.redirect_stdout(output):
+            self.assertEqual(main(['provider-acceptance', '--bundle', str(self.path), '--assets', str(self.root), '--execute']), 1)
+        load.assert_not_called()
+        self.assertEqual(json.loads(output.getvalue())['error_code'], 'LIVE_PROVIDER_ACCEPTANCE_EXECUTION_DISABLED')
+
+    def test_existing_receipt_holds_before_authorized_private_dispatch(self):
+        metadata, source, raw = self.source_inputs(); output = io.StringIO()
+        with patch('operations.production_delivery.execute_book_import') as execute, contextlib.redirect_stdout(output):
+            self.assertEqual(main(['book-import', '--source', str(source), '--import-manifest', str(metadata),
+                                   '--execute', '--output', str(source)]), 1)
+        execute.assert_not_called()
+        self.assertEqual(source.read_bytes(), raw)
+
     def test_default_preparation_has_zero_provider_or_model_requests(self):
         output = io.StringIO()
         with patch('socket.create_connection', side_effect=AssertionError('network')), contextlib.redirect_stdout(output):

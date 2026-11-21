@@ -19,17 +19,21 @@ covers and healthy media by hash. Keep rights/source evidence private; strip
 boilerplate from customer content only where permitted. Import-only creates draft;
 an explicit release request continues routine steps when actual title gates pass.
 
-Read `book_import_manifest.json` for identity where relevant, but do not assume
-every row has an importer. Current `POST /api/v1/staff/books/imports` accepts only
-the reviewed `EN-071` Selfish Giant packet and always creates a draft. General
-Colab book/episode import is not implemented by copying these skills. For an
-unsupported title prepare cleared source and a private hash-bound handoff.
+Use the [general source importer](https://github.com/ronik18/reo-earnalism-maison/blob/main/docs/EARNALISM_GENERAL_IMPORT.md)
+for retained English/Bengali books, lessons and episodes. The existing reviewed
+`EN-071` route stays unchanged. General import reserves a denied draft, uses
+existing private source Asset upload/completion, and verifies/packages its exact
+source under CAS. It supplies actual edition/revision/unit IDs and content hash;
+it creates no rights approval, preview, offered format or publication. Keep the
+original source bytes and declared NFC Reader derivative separately identified.
+Do not fetch or generate missing source from a title alone.
 
-Use existing staff/admin mechanisms for revision content, rights and factual
-validation evidence. Private R2 upload/state/completion and
-`python manage.py verify_media_asset` handle eligible prepared media.
-Already-uploaded signed Stream video has separate manifest verification; ordinary
-upload currently rejects video. None of these generates content or publishes it.
+Private R2 upload/state/completion and managed signed Stream TUS intake handle
+eligible prepared media. `python manage.py verify_media_asset` verifies actual
+processing; already-uploaded Stream has a separate source-manifest route. None
+of these generates content or publishes it. Prepare live-provider acceptance
+through the same notebook/common CLI, with execution disabled and actual account,
+source, rights and format holds retained.
 
 Use `GET /api/v1/staff/editions/<edition-id>/review` and existing `validate`,
 `mark-ready`, `publish`, `schedule`, `withdraw` operations with exact revision,

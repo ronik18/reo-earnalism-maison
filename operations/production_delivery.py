@@ -17,6 +17,25 @@ PRIVATE_SOCIAL_ACTIONS = ('start', 'upload', 'reconcile_upload', 'resume_upload'
 PRIVATE_CLI_ACTIONS = ('private-upload',) + PRIVATE_SOCIAL_ACTIONS
 
 
+def _maison_transport(environ):
+    from library.production_handoff import MaisonHTTP
+    names = ('MAISON_ORIGIN', 'MAISON_SESSION_COOKIE', 'MAISON_CSRF_TOKEN')
+    if not all(environ.get(name) for name in names):
+        raise BundleError('EXISTING_MAISON_STAFF_SESSION_REQUIRED')
+    return MaisonHTTP(*(environ[name] for name in names))
+
+
+def execute_book_import(manifest, source_path, *, journal_dir, reconcile=False, environ=None):
+    from .book_source import prepare_source
+    from library.book_import_client import import_private
+    prepare_source(manifest, source_path)
+    if not journal_dir:
+        raise BundleError('PRIVATE_JOURNAL_REQUIRED')
+    transport = _maison_transport(os.environ if environ is None else environ)
+    return import_private(manifest, source_path, transport, OperationJournal(journal_dir),
+                          execute=True, reconcile=reconcile)
+
+
 def prepare(manifest, asset_root):
     digest = verify_bundle(manifest, asset_root)
     maison = {'state': 'NOT_REQUESTED_NO_DRAFT_IDENTITY'}
@@ -43,11 +62,8 @@ def execute_private(manifest, asset_root, *, destination, journal_dir,
     env = os.environ if environ is None else environ
     journal = OperationJournal(journal_dir)
     if destination == 'maison':
-        from library.production_handoff import MaisonHTTP, stage_private
-        names = ('MAISON_ORIGIN', 'MAISON_SESSION_COOKIE', 'MAISON_CSRF_TOKEN')
-        if not all(env.get(name) for name in names):
-            raise BundleError('EXISTING_MAISON_STAFF_SESSION_REQUIRED')
-        transport = MaisonHTTP(*(env[name] for name in names))
+        from library.production_handoff import stage_private
+        transport = _maison_transport(env)
         return stage_private(manifest, asset_root, transport, journal,
                              execute=True, reconcile=reconcile)
     if destination != 'social' or action not in PRIVATE_CLI_ACTIONS:
@@ -107,9 +123,12 @@ def execute_private(manifest, asset_root, *, destination, journal_dir,
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=('prepare', 'maison-stage', 'social-stage'))
-    parser.add_argument('--bundle', required=True)
-    parser.add_argument('--assets', required=True)
+    parser.add_argument('operation', choices=('prepare', 'maison-stage', 'social-stage', 'book-import', 'provider-acceptance'))
+    parser.add_argument('--bundle')
+    parser.add_argument('--assets')
+    parser.add_argument('--source')
+    parser.add_argument('--import-manifest')
+    parser.add_argument('--acceptance-observations')
     parser.add_argument('--output')
     parser.add_argument('--journal')
     parser.add_argument('--execute', action='store_true')
@@ -119,15 +138,36 @@ def main(argv=None):
     parser.add_argument('--action', choices=PRIVATE_CLI_ACTIONS, default='private-upload')
     parser.add_argument('--meta-api-version')
     args = parser.parse_args(argv)
+    if args.operation == 'book-import':
+        if not args.source or not args.import_manifest:
+            parser.error('book-import requires --source and --import-manifest')
+    elif not args.bundle or not args.assets:
+        parser.error('this operation requires --bundle and --assets')
     try:
-        manifest = load_bundle(args.bundle)
-        if args.operation == 'prepare' or not args.execute:
-            result = prepare(manifest, args.assets)
+        if args.output:
+            output_path = Path(args.output)
+            if output_path.exists() or output_path.is_symlink() or not output_path.parent.is_dir():
+                raise BundleError('NEW_RECEIPT_PATH_REQUIRED_BEFORE_DISPATCH')
+        if args.operation == 'book-import':
+            from .book_source import load_manifest, prepare_source
+            manifest = load_manifest(args.import_manifest)
+            result = (execute_book_import(manifest, args.source, journal_dir=args.journal,
+                reconcile=args.reconcile) if args.execute else prepare_source(manifest, args.source))
+        elif args.operation == 'provider-acceptance':
+            from .provider_acceptance import AcceptanceError, prepare_acceptance
+            if args.execute:
+                raise AcceptanceError('LIVE_PROVIDER_ACCEPTANCE_EXECUTION_DISABLED')
+            observations = load_bundle(args.acceptance_observations) if args.acceptance_observations else None
+            result = prepare_acceptance(load_bundle(args.bundle), args.assets, observations=observations)
         else:
-            result = execute_private(manifest, args.assets,
-                destination='maison' if args.operation == 'maison-stage' else 'social',
-                journal_dir=args.journal, reconcile=args.reconcile, platform=args.platform,
-                account=args.account, action=args.action, graph_version=args.meta_api_version)
+            manifest = load_bundle(args.bundle)
+            if args.operation == 'prepare' or not args.execute:
+                result = prepare(manifest, args.assets)
+            else:
+                result = execute_private(manifest, args.assets,
+                    destination='maison' if args.operation == 'maison-stage' else 'social',
+                    journal_dir=args.journal, reconcile=args.reconcile, platform=args.platform,
+                    account=args.account, action=args.action, graph_version=args.meta_api_version)
         result = {**result, 'publication': False, 'model_calls': 0}
         raw = (json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n').encode()
         if args.output:
@@ -143,7 +183,10 @@ def main(argv=None):
         from library.production_handoff import HandoffError
         from .social_delivery import DeliveryError
         from .stream_delivery import StreamDeliveryError
-        known = isinstance(exc, (BundleError, JournalError, HandoffError, DeliveryError, StreamDeliveryError))
+        from .book_source import SourceError
+        from .provider_acceptance import AcceptanceError
+        known = isinstance(exc, (BundleError, JournalError, HandoffError, DeliveryError, StreamDeliveryError,
+                                 SourceError, AcceptanceError))
         value = str(exc) if known else ''
         code = value if known and re.fullmatch(r'[A-Za-z0-9_:-]{1,128}', value) else type(exc).__name__
         print(json.dumps({'state': 'HELD', 'error_code': code,

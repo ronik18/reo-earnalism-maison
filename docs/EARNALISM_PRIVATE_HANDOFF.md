@@ -89,8 +89,11 @@ verification. It does not create Rights grants, mark a revision ready or publish
 Platform staging is bounded to 100 uploaded assets, at most 64 MiB of staged R2
 bytes and a bounded metadata request. Stream video is excluded from the R2 download
 budget. Larger works need source-bound unit bundles; they are not silently trimmed.
-New-book HTTP import remains the reviewed `EN-071` packet. This bridge targets
-existing exact drafts and does not invent a general book-import endpoint.
+General English/Bengali intake is now available through the
+[source import workflow](EARNALISM_GENERAL_IMPORT.md), alongside the unchanged
+reviewed `EN-071` packet. Import returns actual draft/unit IDs, canonical source
+hash and ETag for subsequent media binding. It creates no rights or release
+approval. The source file hash and canonical revision hash are distinct.
 
 For social staging, select `SOCIAL_PLATFORM` and the exact `SOCIAL_ACCOUNT_ID`.
 `SOCIAL_ACTION = "private-upload"` performs the finite supported sequence in one
@@ -145,3 +148,18 @@ other notebook logic, changes only the embedded bridge snapshot/checksums, and
 refuses to reseal a notebook containing executed outputs. The tests compare the
 ZIP with actual canonical source and run the saved defaults in an isolated Python
 process with model imports, HTTP, credential prompts and child processes blocked.
+
+
+## General source and live-provider preparation
+
+In the same notebook choose `PRODUCTION_OPERATION = "book-import"`, provide the
+exact metadata/source JSON paths, and leave `ENABLE_PRIVATE_STAGING = False` for
+local source preparation. Existing authenticated private execution uses the same
+common CLI and journal. The exact original is retained; an explicit NFC Reader
+derivative matches Maison's existing serializer. See [source limits and recovery](EARNALISM_GENERAL_IMPORT.md).
+
+Choose `PRODUCTION_OPERATION = "provider-acceptance"` to prepare the retained
+media bundle's transport scope. Execution is disabled for this operation, including
+when an existing staging flag is accidentally left enabled. Preparation never
+allocates or uploads, inspects credentials, posts publicly or qualifies unheard
+audio. See the [private provider acceptance plan](EARNALISM_PRIVATE_PROVIDER_ACCEPTANCE.md).

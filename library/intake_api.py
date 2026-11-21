@@ -36,6 +36,9 @@ def reviewed_territories(packet, paragraphs_sha256):
 @json_endpoint(('POST',))
 def intake(request):
     staff_permission(request.user)
+    if "manifest" in json_body(request):
+        from .general_import_api import start
+        return start(request)
     data=json_body(request,{'manifest_id'},['manifest_id'])
     if data['manifest_id']!='EN-071':raise DomainError('not_found','No approved intake packet for this ID.',404)
     operation=operation_key(request)

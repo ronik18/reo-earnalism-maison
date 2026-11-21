@@ -111,7 +111,7 @@ the existing authentication, object permission and scope.
 
 | Operation | Current implementation and boundary |
 |---|---|
-| Draft import | `POST /api/v1/staff/books/imports` in `library/intake_api.py` accepts the reviewed `EN-071` Selfish Giant packet only. It creates draft Reader content; it is not a general arbitrary-book importer. |
+| Draft import | `POST /api/v1/staff/books/imports` preserves the reviewed `EN-071` route and accepts a general English/Bengali source manifest. General reservations create denied, actor/source-bound drafts with no rights approvals. Existing private `reader_source` upload/completion and `POST /staff/editions/<edition-id>/source-imports` verify/package the full source under CAS. See [general import](EARNALISM_GENERAL_IMPORT.md) for limits and original/NFC derivative provenance. |
 | Private asset intake | `POST /api/v1/staff/assets/uploads`, asset state and `/complete` use bounded, revision-bound direct R2 uploads. Current audio input is MP3; preserve native originals and create an explicitly identified derivative. Upload completion and provider processing must be verified. Video uses a private Stream TUS intent from the same endpoint, with revision/unit/source binding, encrypted short-lived capability and signed-URL privacy verified before returning the grant. |
 | Pre-produced media verification | `python manage.py verify_media_asset <asset-id>` verifies eligible private draft audio/sample/video; it does not generate or publish. Audio additionally needs prepared-rendition evidence and measured maps. |
 | Existing Stream video | `python manage.py verify_media_asset --stream-manifest <private.json> --actor-email <permitted-publisher>` verifies and registers an already-uploaded signed Stream rendition bound to its retained source and unit. This command does not upload video. The ordinary endpoint now also supports managed private video intake; neither route publishes. |
@@ -153,8 +153,10 @@ Source WAVs and thumbnails remain retained provenance; server verification cover
 only the exact staged subset. Stream verifies the original upload association,
 provider UID, privacy and duration; it does not hash adaptive rendition bytes.
 Unknown write outcomes require retained same-operation reconciliation; upload
-creation is never retried blindly. The general arbitrary-title/episode source
-importer remains unimplemented; the existing reviewed EN-071 import is unchanged.
+creation is never retried blindly. General title, chapter, lesson and episode intake now uses the
+[bounded source import](EARNALISM_GENERAL_IMPORT.md); the original reviewed EN-071
+route is unchanged. An exact source and provenance must be supplied; a title alone
+does not fetch, generate or clear missing text.
 
 Social adapters implement official YouTube private resumable video/captions/cover,
 Instagram nonpublic Reels containers, Facebook Page draft Reels and X nonpublic
@@ -165,8 +167,13 @@ feed-post equivalent. Separate cover/caption support varies by platform and is
 reported explicitly. These adapters have local/mocked protocol tests; authenticated
 live account permissions, real provider transfer/processing and served rendition
 acceptance remain **unqualified** until actually exercised under applicable authority.
+Use `provider-acceptance` in the same common CLI to prepare a finite, source-bound
+[private provider plan](EARNALISM_PRIVATE_PROVIDER_ACCEPTANCE.md). It has no execute
+path and makes zero provider/account/model requests. Retained technical/creative
+media may qualify transport only, with actual quality, rights, account and format
+holds preserved. Source/draft bindings must use actual imported IDs and hashes.
 No service, account, purchase, publication or provider resource is provisioned by
-this implementation. Never promote fixtures to customer-path acceptance.
+preparation. Never promote fixtures to customer-path acceptance.
 
 ## Finite review and reusable improvement
 
