@@ -1,0 +1,87 @@
+{
+  "status": "PASS",
+  "checked_at_utc": "2026-11-21T10:24:56.015049+00:00",
+  "read_only": true,
+  "tls": "verify-full",
+  "identity": {
+    "role": "maison_backup",
+    "read_only": "on",
+    "pg_version": "18.7 (84da7d8)"
+  },
+  "book": {
+    "state": "draft",
+    "live_revision_id": null,
+    "version": 42,
+    "content_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+    "paragraphs": 32,
+    "recomputed_content_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4"
+  },
+  "finance_counts": {
+    "maison_invoice": 0,
+    "maison_invoice_revision": 0,
+    "maison_finance_number_sequence": 0,
+    "maison_offer": 0
+  },
+  "maintenance": {
+    "last_success": {
+      "commit": "7297a9def8a8a6f989e66d0682cc232e084afb4a",
+      "counts": {
+        "processed": 0,
+        "retention": {
+          "dry_run": false,
+          "eligible": {
+            "devices": 0,
+            "receipts": 0,
+            "sessions": 0,
+            "action_tokens": 0,
+            "mail_payloads": 0,
+            "audit_outcomes": 0,
+            "support_payloads": 0,
+            "abandoned_signups": 0
+          },
+          "time_budget_exhausted": false
+        },
+        "rate_counters": {
+          "deleted": 0
+        },
+        "expired_exports": {
+          "failed": 0,
+          "cleaned": 0
+        },
+        "cache_references": {
+          "deleted": 0
+        }
+      },
+      "run_id": "1b2073b8-941b-43eb-a9e0-5add5bfc8b29",
+      "source": "scheduled",
+      "outcome": "success",
+      "error_code": "",
+      "started_at": "2026-11-21T10:24:05.807624Z",
+      "finished_at": "2026-11-21T10:24:05.897227Z"
+    },
+    "lease_owner_empty": true,
+    "lease_clear": true
+  },
+  "account_migrations": [
+    {
+      "app": "accounts",
+      "name": "0001_initial"
+    },
+    {
+      "app": "accounts",
+      "name": "0002_mfa_recovery_code"
+    },
+    {
+      "app": "accounts",
+      "name": "0003_allauth_email_authority"
+    },
+    {
+      "app": "accounts",
+      "name": "0004_guardian_authorization_foundation"
+    },
+    {
+      "app": "accounts",
+      "name": "0005_guardianauthorization_claim_expires_at_and_more"
+    }
+  ]
+}
