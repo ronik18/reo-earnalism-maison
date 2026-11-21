@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-21",
+  "method": "Read-only signed-in Render Compute page",
+  "service": "srv-dbunbd8jo6nc73akbng0",
+  "live_commit": "23f4f86fe62a21e5e918d4da52f3dae56bd62c0b",
+  "selected_compute": {
+    "monthly_usd": 7,
+    "cpu": 0.5,
+    "memory_mb": 512
+  },
+  "instances": 1,
+  "autoscaling_notice": "Requires Pro plan or higher",
+  "configuration_saved": false,
+  "spending_or_deployment": false
+}

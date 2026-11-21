@@ -1,0 +1,18 @@
+{
+  "checked_date": "2026-11-21",
+  "method": "Read-only connected mailbox search and thread reading",
+  "regional_hosting": {
+    "automated_acknowledgement_received": true,
+    "received_utc": "2026-11-21T09:54:05Z",
+    "substantive_eligibility_quote_location_or_contract_received": false
+  },
+  "representation": {
+    "sent_inquiry_found": true,
+    "substantive_reply_found": false
+  },
+  "limitations": "Narrow mailbox queries at check time; no claim of future reply absence or delivery beyond received acknowledgement",
+  "outbound_messages_sent": 0,
+  "contracts_or_terms_accepted": false,
+  "spending_or_signup": false,
+  "private_headers_ids_or_personal_recipient_in_receipt": false
+}
