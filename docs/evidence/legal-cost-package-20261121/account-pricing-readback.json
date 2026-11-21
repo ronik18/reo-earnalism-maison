@@ -1,0 +1,43 @@
+{
+  "date": "2026-11-21",
+  "method": "Signed-in read-only provider UI; no plan selected or payment submitted",
+  "render": {
+    "workspace": "earnalism",
+    "current_plan": "Hobby",
+    "pro_flat_usd_month": 25,
+    "compute_additional": true,
+    "pro_included_bandwidth_GB": 25,
+    "overage_usd_per_GB": 0.15,
+    "pro_build_minutes": 1000,
+    "tax_or_proration_total_exposed_before_action": false,
+    "bottom_select_plan_clicked": false
+  },
+  "neon": {
+    "organization": "org-misty-dew-00335964",
+    "projects_observed": 1,
+    "project": "quiet-cloud-63128335",
+    "region": "AWS Singapore",
+    "current_plan": "Launch",
+    "billing_period_displayed": "2026-11-19 to2026-12-01",
+    "launch_usd_CUh": 0.106,
+    "scale_usd_CUh": 0.222,
+    "storage_usd_GB_month": 0.35,
+    "history_usd_GB_month": 0.2,
+    "network_included_GB_project": 500,
+    "observed_project_storage_MB": 38.31,
+    "observed_history_MB": 19.21,
+    "spending_notification_usd": 20,
+    "notification_poll_minutes": 15,
+    "notification_is_hard_cap": false,
+    "plan_change_selected": false
+  },
+  "private_payment_details_in_receipt": false,
+  "business_sender": {
+    "configured_sender_verified": true,
+    "smtp_username_matches_sender": true,
+    "password_present": true,
+    "actual_delivery_or_auth_repeated": false
+  },
+  "spending": false,
+  "dns_changes": false
+}
