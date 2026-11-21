@@ -1,0 +1,320 @@
+{
+  "schema": "earnalism.apex_cutover_preparation.v1",
+  "recorded_at": "2026-11-21T17:20:55.867193+00:00",
+  "state": "PREPARING_OWNER_GOOGLE_DEVICE_VERIFICATION_REQUIRED",
+  "application_commit": "165edc91679207997a692672e781cdaef751d916",
+  "preparation_source_main": "125e48e",
+  "scope": "Existing India-first free service on existing capacity; no new purchases or content publication",
+  "sole_writer": "Root Integration",
+  "readiness": {
+    "http": 200,
+    "status": "ok",
+    "checked_at": "2026-11-21T16:49:06.162639+00:00",
+    "path": "/api/v1/health/ready",
+    "old_403_path": "/health/ready was not a defined health endpoint",
+    "credential_revealed_or_saved": false,
+    "mutations": 0
+  },
+  "read_only_draft_invariants": {
+    "observed_at": "2026-11-21T16:47:10.578266+00:00",
+    "role": "maison_backup",
+    "transaction_read_only": "on",
+    "drafts": [
+      {
+        "title": "The Open Window",
+        "edition_id": "a208c75d-7a70-4c85-84fc-f39c7034d271",
+        "revision_id": "2dfee35c-c16b-4b16-a0e4-98d66cc4b78f",
+        "state": "draft",
+        "version": 125,
+        "live_revision_id": null,
+        "content_sha256": "0e0caccb831d6d250d810eabbcf053523cee67835225931cea90faddcc06422c",
+        "paragraph_count": 109,
+        "paragraph_digest": "d73532cf06601fdea66715b9db95f587b31fa96c438ee3be59044258c4e870fa",
+        "asset_count": 7
+      },
+      {
+        "title": "The Selfish Giant",
+        "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+        "revision_id": "3988156b-2eee-4839-b542-2d3b8b253307",
+        "state": "draft",
+        "version": 42,
+        "live_revision_id": null,
+        "content_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+        "paragraph_count": 32,
+        "paragraph_digest": "9de3beb099e2fcfc1bcd29570509d1fc9aa8ebf54ccaee6cf8014652d0b03386",
+        "asset_count": 3
+      },
+      {
+        "title": "Maison Private Stream Qualification",
+        "edition_id": "d9f28c65-5e5a-45e2-a0a3-746963dd6bac",
+        "revision_id": "692a094d-5dd4-4659-b6b7-f7f63386f576",
+        "state": "draft",
+        "version": 5,
+        "live_revision_id": null,
+        "content_sha256": "7e06601473c68fe66e0a594169418ace6c17b0102066b9152dbed81e274bdd9d",
+        "paragraph_count": 0,
+        "paragraph_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "asset_count": 1
+      }
+    ],
+    "finance_counts": {
+      "maison_invoice": 0,
+      "maison_invoice_revision": 0,
+      "maison_offer": 0,
+      "maison_finance_number_sequence": 0
+    }
+  },
+  "maintenance": {
+    "checkpoint_status": "done",
+    "latest_outcome": "success",
+    "latest_source": "scheduled",
+    "last_success_run_id": "bb608506-c427-4e52-b848-f1cf27a53f1f",
+    "last_success_commit": "165edc91679207997a692672e781cdaef751d916",
+    "last_success_finished_at": "2026-11-21T16:54:05.968278Z",
+    "locked_until": null,
+    "lease_active": false,
+    "lease_clear": true
+  },
+  "daily_archive": {
+    "manifest_sha256": "10667794028ff910b9420368f062f850081294b2651274ec95219071bd8136f5",
+    "completed_at": "2026-11-21T03:00:39.044858+00:00",
+    "age_seconds": 50068.396292,
+    "within_existing_26h_threshold": true,
+    "ciphertext_bytes": 316752,
+    "ciphertext_sha256": "3de2130a0265bb0019c38d112f5b7d172885d24004e9fe98b0c6f3f5e6fe9e77",
+    "existing_object_head_metadata_matches": true,
+    "ciphertext_rehashed_or_restored_now": false
+  },
+  "public_asset_cors": {
+    "schema": "earnalism.apex_public_asset_cors_acceptance.v1",
+    "checked_at": "2026-11-21T16:59:20.740969+00:00",
+    "bucket": "reo-earnalism-maison-public",
+    "asset_url": "https://assets-maison.theearnalism.com/static/a9865d304bd665301cdf337e0e6a7f7de0e51f5731ac6afe604ace6b18c240f6/maison/app.js?v=2f04829f5f93",
+    "rows": [
+      {
+        "origin": "https://theearnalism.com",
+        "http": 200,
+        "allow_origin": "https://theearnalism.com",
+        "vary": "Origin",
+        "content_type": "text/javascript",
+        "cf_cache_status": "DYNAMIC"
+      },
+      {
+        "origin": "https://maison.theearnalism.com",
+        "http": 200,
+        "allow_origin": "https://maison.theearnalism.com",
+        "vary": "Origin",
+        "content_type": "text/javascript",
+        "cf_cache_status": "DYNAMIC"
+      },
+      {
+        "origin": "https://foreign.invalid",
+        "http": 200,
+        "allow_origin": null,
+        "vary": "Origin",
+        "content_type": "text/javascript",
+        "cf_cache_status": "DYNAMIC"
+      }
+    ],
+    "pass": true,
+    "private_bucket_changed": false,
+    "assets_reuploaded": false
+  },
+  "private_asset_cors": {
+    "schema": "earnalism.private_cors_cutover_acceptance.v1",
+    "checked_at": "2026-11-21T17:10:59.533368+00:00",
+    "rows": [
+      {
+        "origin": "https://theearnalism.com",
+        "http": 204,
+        "allow_origin": "https://theearnalism.com"
+      },
+      {
+        "origin": "https://maison.theearnalism.com",
+        "http": 204,
+        "allow_origin": "https://maison.theearnalism.com"
+      },
+      {
+        "origin": "https://foreign.invalid",
+        "http": 403,
+        "allow_origin": null
+      }
+    ],
+    "unsigned_nonexistent_object_head": 400,
+    "private_bucket_no_custom_domain_and_r2dev_disabled_observed": true,
+    "object_read_or_write": false,
+    "pass": true
+  },
+  "dns_rollback": {
+    "schema": "earnalism.apex_dns_rollback_snapshot.v1",
+    "observed_at": "2026-11-21T16:51:08.303Z",
+    "source": "Actual Cloudflare rendered DNS rows/cell record IDs",
+    "zone": "theearnalism.com",
+    "zone_id": "303b0b17a353a6fb65dfcadad5932214",
+    "records": [
+      {
+        "id": "a1116e07a5323e86bf55de871811206b",
+        "type": "A",
+        "name": "theearnalism.com",
+        "content": "76.76.21.21",
+        "proxied": false,
+        "ttl": 3600
+      },
+      {
+        "id": "09be17034adb274409db1615bd855816",
+        "type": "CNAME",
+        "name": "www.theearnalism.com",
+        "content": "cname.vercel-dns.com",
+        "proxied": false,
+        "ttl": 3600
+      },
+      {
+        "id": "b1ed1627ff8890090df8fa6af83e6e3f",
+        "type": "CNAME",
+        "name": "maison.theearnalism.com",
+        "content": "reo-earnalism-maison-qa.onrender.com",
+        "proxied": true,
+        "ttl": 1
+      },
+      {
+        "id": "84ca5e7b0af390e56f54dbb7a345c368",
+        "type": "CNAME",
+        "name": "api.theearnalism.com",
+        "content": "zg6cgit5.up.railway.app",
+        "proxied": false,
+        "ttl": 1
+      }
+    ],
+    "MX_API_assets_and_other_records": "PRESERVE",
+    "provider_mutations_at_snapshot": 0
+  },
+  "included_allowance": {
+    "schema": "earnalism.render_included_allowance_readback.v1",
+    "checked_at": "2026-11-21T16:54:04.488Z",
+    "workspace": "earnalism",
+    "plan": "Hobby",
+    "domains": {
+      "used": 1,
+      "included": 2,
+      "sole_binding": "maison.theearnalism.com",
+      "automatic_redirect_counting": "NOT_ASSUMED",
+      "bounded_replacement": "Remove sole old binding before adding at most apex+www2"
+    },
+    "bandwidth": {
+      "used_MB": 91,
+      "included_GB": 5
+    },
+    "pipeline_minutes": {
+      "used": 36,
+      "included": 500
+    },
+    "plan_purchase_or_change": false
+  },
+  "current_public_host_configuration": {
+    "schema": "earnalism.public_host_settings_snapshot.v1",
+    "source": "Actual selected nonsecret Render web setting fields",
+    "web_service_id": "srv-dbunbd8jo6nc73akbng0",
+    "application_commit": "165edc91679207997a692672e781cdaef751d916",
+    "ALLOWED_HOSTS": "reo-earnalism-maison-qa.onrender.com,maison.theearnalism.com",
+    "CSRF_TRUSTED_ORIGINS": "https://maison.theearnalism.com",
+    "PUBLIC_BASE_URL": "https://maison.theearnalism.com",
+    "GOOGLE_CLIENT_ID": "620834018736-nocgfen3oh5no0i3aorg3b314rinr0kj.apps.googleusercontent.com",
+    "secret_fields_read": false,
+    "saved_configuration_changes": false
+  },
+  "mutations_performed": [
+    "PUBLIC_UI_BUCKET_CORS_ADD_EXACT_APEX",
+    "PRIVATE_BUCKET_CORS_ADD_EXACT_APEX_KEEP_NONPUBLIC"
+  ],
+  "not_executed": [
+    "Googlecallbackchange",
+    "Renderenvsave",
+    "Renderdomainremoval/addition",
+    "DNS/TTLchange",
+    "Origin/cache/redirectactivation",
+    "Purchase",
+    "Contentpublication"
+  ],
+  "browser_handoff_active": true,
+  "browser_controls_paused": true,
+  "owner_only_dependency": "Google Cloud requires the business account device/passkey verification; no bypass or IAM/audience/scope change attempted",
+  "cutover_complete": false,
+  "new_purchases": false,
+  "content_publication": false,
+  "private_receipt_hashes": [
+    {
+      "path": "BEFORE-DRAFT-INVARIANTS.json",
+      "bytes": 6145,
+      "sha256": "77ad7d94fab4f98ed66f73e07fc2319ddacf836afb0810c5871d7dd369075901"
+    },
+    {
+      "path": "BEFORE-AUTHENTICATED-READINESS-CORRECT-ROUTE.json",
+      "bytes": 250,
+      "sha256": "eaa70bc67a8e66087289d0289f6e07fd374e6ad9e10d4394ee52596039d0137f"
+    },
+    {
+      "path": "BEFORE-EXISTING-OPERATIONS-READBACK.json",
+      "bytes": 1171,
+      "sha256": "468e80af26979889f04f6447aba31e63ae97a05416cb724323b2752a0f03fd94"
+    },
+    {
+      "path": "PUBLIC-ASSET-CORS.BEFORE.json",
+      "bytes": 401,
+      "sha256": "6fe2fc0ad83788adeabb4dbefc60d2c176bffde3e7c6d636b25591bd43c7728e"
+    },
+    {
+      "path": "PUBLIC-ASSET-CORS.PROPOSED.json",
+      "bytes": 435,
+      "sha256": "26b006c0f31e85054dac7ba4f27dad8f11769a7fa0a1285a2824bd17ce248901"
+    },
+    {
+      "path": "PUBLIC-ASSET-CORS.ACCEPTANCE.json",
+      "bytes": 1084,
+      "sha256": "c81cb46949b5bdb099e538b2bae6f4c9b6cfcaa72f83ea54024657a90f7d6374"
+    },
+    {
+      "path": "PRIVATE-ASSET-CORS.BEFORE.json",
+      "bytes": 951,
+      "sha256": "b8442b7801cd6246498089ec346a7ef17d267b0c63e0862c49291868e794320e"
+    },
+    {
+      "path": "PRIVATE-ASSET-CORS.PROPOSED.json",
+      "bytes": 985,
+      "sha256": "7031340f90341d3bde1383b965cc61f82690b435cd5cd1575bd28e1d9eee5026"
+    },
+    {
+      "path": "PRIVATE-ASSET-CORS.ACCEPTANCE.json",
+      "bytes": 660,
+      "sha256": "9d5794984eb0fa1f53d87e9c9a915c60e8e632502be0130b5c96fb5dadb69cbb"
+    },
+    {
+      "path": "DNS-ROLLBACK-BEFORE.json",
+      "bytes": 1174,
+      "sha256": "861272ff68400ec7da6a532129a875f337d6e5603f8fad527bd4892455bc3a61"
+    },
+    {
+      "path": "RENDER-PUBLIC-HOSTS.BEFORE.json",
+      "bytes": 613,
+      "sha256": "fdc7d5781015c47228af7c9764bb0228cd83f97179cbb5577605d16880fe991d"
+    },
+    {
+      "path": "RENDER-INCLUDED-ALLOWANCE.BEFORE.json",
+      "bytes": 556,
+      "sha256": "99e2f150878610373452dfae277103ad089207b6713c0a1fb444e508ef5a4e90"
+    }
+  ],
+  "isolated_anonymous_host_readback": {
+    "checked_at": "2026-11-21T17:20:58.624882+00:00",
+    "base": "https://maison.theearnalism.com",
+    "actual_aggregate_result": "FAIL",
+    "requests": 13,
+    "passed": 12,
+    "failed": [
+      "www_redirect"
+    ],
+    "expected_pre_cutover_reason": "www still serves legacy; no apex/www migration has executed",
+    "unknowns": [],
+    "receipt_sha256": "1b8a74baa717735f4c9a0f0e8dd3cc34312248bcd3f0c43c347db9de721ad685",
+    "full_package_pass_claimed": false
+  }
+}
