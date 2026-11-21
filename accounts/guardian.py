@@ -169,11 +169,12 @@ def withdraw(request,authorization_id,*,expected_version,operation_id):
     row=_own_locked(request,authorization_id);actor=request.user
     def mutate():
         if row.version!=expected_version:raise DomainError('version_conflict','Authorization changed.',412)
+        if row.status=='withdrawn':return 200,_data(row),row.version
         row.claim_sha256='';row.claim_expires_at=None;row.status='withdrawn';row.withdrawn_at=timezone.now();row.version+=1;row.save()
         if _direct_method(row.jurisdiction,row.method):
             policy,_=_policy(row.jurisdiction,row.purpose,row.notice_version,row.method)
             row.expires_at=timezone.now();row.retain_until=row.expires_at+timedelta(seconds=policy['record_retention_seconds']);row.save(update_fields=['expires_at','retain_until'])
-        if row.purpose=='account_processing' and row.child_id:
+        if row.purpose=='account_processing' and row.child_id and User.objects.filter(pk=row.child_id,guardian_managed=True).exists():
             _revoke_child_sessions(row.child_id)
         audit(actor,'guardian.withdrawn',row)
         return 200,_data(row),row.version

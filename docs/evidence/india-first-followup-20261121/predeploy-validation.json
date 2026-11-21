@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-21",
+  "scope": "India-first session authority and safe Google recovery follow-up",
+  "baseline_runtime": "165edc91679207997a692672e781cdaef751d916",
+  "targeted_postgresql": {
+    "tests": 107,
+    "seconds": 97.419,
+    "status": "PASS",
+    "both_renewal_independence_orderings": true,
+    "historical_guardian_cannot_revoke_independent_session": true,
+    "former_parent_delete_preserves_independent_session": true
+  },
+  "rendered_web_checks": {
+    "tests": 16,
+    "status": "PASS"
+  },
+  "schema": "PASS; no changes detected",
+  "image_source": {
+    "source_files": 285,
+    "frozen_image_source_match": true,
+    "source_tree_sha256": "eec1530a63f6458250de07b2d480a60ad1ab8d452d5de6960d37401a985a8f32"
+  },
+  "unchanged_static_manifest": {
+    "status": "prepared",
+    "release_id": "a9865d304bd665301cdf337e0e6a7f7de0e51f5731ac6afe604ace6b18c240f6",
+    "file_count": 202,
+    "bytes_total": 8830230
+  },
+  "existing_unchanged_acceptance": "../india-first-launch-20261121/release-receipt.json",
+  "source_migrations": false,
+  "provider_configuration_changes": false,
+  "book_legacy_changes": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false,
+    "tested": false
+  },
+  "exact_head_CI_deployment_live": "Pending; no pass claimed yet"
+}

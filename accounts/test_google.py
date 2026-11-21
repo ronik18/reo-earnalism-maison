@@ -166,7 +166,8 @@ class GoogleOIDCAcceptanceTests(TestCase):
         with mocked:
             response=self.client.get('/api/v1/auth/google/callback',{'state':params['state'],'code':'synthetic-code'},HTTP_HOST='localhost',HTTP_ACCEPT='text/html,application/xhtml+xml;q=0.9')
         self.assertEqual(response.status_code,303,response.content)
-        self.assertEqual(response['Location'],'/bn/sign-in/?google_error=identity_link_required')
+        self.assertEqual(urlsplit(response['Location']).path,'/bn/sign-in/')
+        self.assertEqual(parse_qs(urlsplit(response['Location']).query),{'google_error':['identity_link_required'],'return_to':['/bn/vault/']})
         self.assertEqual(response['Referrer-Policy'],'no-referrer');self.assertEqual(response['Cache-Control'],'private, no-store')
         self.assertNotIn(params['state'],response['Location']);self.assertNotIn(user.email,response['Location']);self.assertNotIn('synthetic-code',response['Location'])
         params=self.start(return_path='/bn/vault/');response,_=self.finish(params)
@@ -175,7 +176,7 @@ class GoogleOIDCAcceptanceTests(TestCase):
     def test_native_start_domain_error_redirects_but_api_keeps_json_status(self):
         with override_settings(FEATURES={**settings.FEATURES,'google_oauth':False}),patch('requests.sessions.Session.request',side_effect=AssertionError('No provider calls')):
             native=self.client.get('/api/v1/auth/google',{'return_path':'/bn/vault/'},HTTP_HOST='localhost',HTTP_ACCEPT='text/html')
-            self.assertEqual(native.status_code,303);self.assertEqual(native['Location'],'/en/sign-in/?google_error=feature_disabled')
+            self.assertEqual(native.status_code,303);self.assertEqual(urlsplit(native['Location']).path,'/bn/sign-in/');self.assertEqual(parse_qs(urlsplit(native['Location']).query),{'google_error':['feature_disabled'],'return_to':['/bn/vault/']})
             self.assertEqual(native['Referrer-Policy'],'no-referrer');self.assertEqual(native['Cache-Control'],'private, no-store')
             api=self.client.get('/api/v1/auth/google',HTTP_HOST='localhost',HTTP_ACCEPT='application/json')
             self.assertEqual(api.status_code,409);self.assertEqual(api.json()['code'],'feature_disabled')
@@ -242,6 +243,7 @@ class GoogleHTTPCompressionTests(SimpleTestCase):
         with patch('requests.sessions.Session.request',return_value=response):
             with self.assertRaises(GoogleProviderUnavailable):BoundedGoogleSession(time.monotonic()+8).get('https://www.googleapis.com/oauth2/v1/certs')
         self.assertTrue(response.raw.closed)
+
     def test_compressed_decoded_size_cap_is_still_enforced(self):
         import gzip
         from .google import BoundedGoogleSession
@@ -250,3 +252,42 @@ class GoogleHTTPCompressionTests(SimpleTestCase):
         with patch('requests.sessions.Session.request',return_value=response):
             with self.assertRaises(OAuth2Error):BoundedGoogleSession(time.monotonic()+8).get('https://www.googleapis.com/oauth2/v1/certs')
         self.assertTrue(response.raw.closed)
+
+
+class GoogleRecoveryDestinationTests(SimpleTestCase):
+    def response(self,destination,code='account_registration_required'):
+        from django.test import RequestFactory
+        from .google import oauth_problem
+        from core.api import DomainError
+        request=RequestFactory().get('/api/v1/auth/google/callback',HTTP_ACCEPT='text/html')
+        request._maison_google_state={'next':destination,'data':{'nonce':'private-recovery-nonce','state':'private-recovery-state','code':'private-recovery-code'}}
+        return oauth_problem(DomainError(code,'Private provider details must not appear.',403),request)
+
+    def test_local_reader_and_lesson_query_destinations_survive_error_recovery(self):
+        for destination in ['/en/reader/fixture-edition/?unit=chapter-2&paragraph=7','/en/learn/lesson/fixture-lesson/?step=2&mode=practice']:
+            r=self.response(destination)
+            self.assertEqual(r.status_code,303)
+            self.assertEqual(urlsplit(r['Location']).path,'/en/sign-in/')
+            self.assertEqual(parse_qs(urlsplit(r['Location']).query),{'google_error':['account_registration_required'],'return_to':[destination]})
+            self.assertEqual(r['Cache-Control'],'private, no-store');self.assertEqual(r['Referrer-Policy'],'no-referrer')
+            for private in ['private-recovery-nonce','private-recovery-state','private-recovery-code','Private provider details']:
+                self.assertNotIn(private,r['Location'])
+
+    def test_unsafe_destinations_fall_back_without_publicizing_private_error(self):
+        for destination in ['https://outside.example/reader/','//outside.example/reader/','/%2foutside.example/','/api/v1/me/profile','/en/reader/\r\nLocation: https://outside.example/']:
+            r=self.response(destination,'private_provider_payload')
+            self.assertEqual(parse_qs(urlsplit(r['Location']).query),{'google_error':['google_authentication_failed'],'return_to':['/en/vault/']})
+
+    def test_only_start_errors_can_use_validated_return_path_query_without_saved_state(self):
+        from django.test import RequestFactory
+        from .google import oauth_problem
+        from core.api import DomainError
+        error=DomainError('feature_disabled','Not available.',409)
+        for destination,expected in [('/bn/learn/lesson/fixture/?step=2','/bn/learn/lesson/fixture/?step=2'),('https://outside.example/','/en/vault/'),('//outside.example/','/en/vault/')]:
+            request=RequestFactory().get('/api/v1/auth/google',{'return_path':destination},HTTP_ACCEPT='text/html')
+            r=oauth_problem(error,request)
+            self.assertEqual(parse_qs(urlsplit(r['Location']).query)['return_to'],[expected])
+        callback=RequestFactory().get('/api/v1/auth/google/callback',{'return_path':'/bn/reader/untrusted/','code':'private-code','state':'private-state'},HTTP_ACCEPT='text/html')
+        r=oauth_problem(error,callback)
+        self.assertEqual(parse_qs(urlsplit(r['Location']).query)['return_to'],['/en/vault/'])
+        self.assertNotIn('private-code',r['Location']);self.assertNotIn('private-state',r['Location'])
