@@ -16,8 +16,8 @@ Bengali stories/male narration and Riya for Bengali tutorials/technical/female
 narration. Reuse compatible accepted title pins and healthy masters. Do not reopen
 voice search or silently substitute a provider/profile.
 
-For an offline casting proposal, use `scripts/plan_voice.py --title <title>
---language en|bn --kind story|tutorial|technical`. It reads the final-five snapshot
+Use `scripts/plan_voice.py` for an offline casting proposal with an exact title,
+English/Bengali language and story/tutorial/technical kind. It reads the final-five snapshot
 in `references/final-voice-roster.json`; historical roster data is retained only
 to locate existing title pins. A supplied source hash is declared metadata until
 the exact source bytes are verified. The planner never generates or accepts audio.
@@ -27,6 +27,8 @@ and use the [existing voice notebook](https://colab.research.google.com/drive/1D
 for actual model revisions, supported settings, runtime and qualification receipts.
 These are selected base-model profiles. Selection, loading or successful training
 does not accept a new recording; unassessed listening dimensions remain unassessed.
+Read the [latest completed diagnostic](references/voice-qualification-20261121.md)
+for its observed scope and unresolved English/Bengali evidence.
 
 Read the whole source and direct paragraph/sentence/phrase performance in context.
 Keep exact spoken text separate from unspoken performance captions. Use supported

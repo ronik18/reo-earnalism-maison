@@ -378,7 +378,7 @@ def measure_mp3(path, *, timeout_seconds=20):
     import math
     import subprocess
     try:
-        result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+        result = subprocess.run(["ffprobe", "-v", "error", "-protocol_whitelist", "file,pipe", "-show_entries",
             "format=duration:stream=codec_name,codec_type,bit_rate", "-of", "json", str(Path(path).resolve())],
             capture_output=True, check=True, timeout=max(.1, min(20, timeout_seconds)))
         if len(result.stdout) > 65536:

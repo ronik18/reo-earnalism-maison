@@ -6,15 +6,15 @@
   "notebook": {
     "same_drive_id": "1DTgjm3NeouooJ9ZVv6UIfYU0pvXtZiUy",
     "source": "notebooks/Earnalism_Production_Orchestrator.ipynb",
-    "sha256": "a11d61a761ad8c3682bd1c609f28edf284acb3b57b0f92d23a5da4519adef8a5",
+    "sha256": "79b67151c165ffb4188c40a11b07c911daa05c1ddb909087b0a00cba7fc09a4c",
     "original_nine_cells_preserved": true,
     "saved_execution_enabled": false,
     "RunAll_provider_model_auth_install_requests": 0
   },
   "verification": {
     "pure_bridge_and_notebook_tests": {
-      "passed": 61,
-      "method": "python3 -m unittest operations.test_production_notebook operations.test_production_bundle operations.test_production_delivery operations.social_delivery.test_bridge operations.test_stream_delivery -q"
+      "passed": 62,
+      "method": "python3 -m unittest operations.test_production_notebook operations.test_production_bundle operations.test_production_delivery operations.social_delivery.test_bridge operations.test_stream_delivery -q (plus operations.test_mp3_isolation)"
     },
     "Maison_handoff_PostgreSQL18_tests": {
       "passed": 25,
@@ -35,6 +35,10 @@
       "command": "MAISON_ENV_FILE=<private-loopback-env> MAISON_TEST_DB_NAME=<isolated> .venv/bin/python manage.py test --noinput --verbosity 0",
       "initial_setup_failure": "74missing local frontend manifest errors; all were FileNotFoundError, corrected by the existing npm build.",
       "exact_head_CI": "Required and tracked in private PR25."
+    },
+    "final_five_planner_tests": {
+      "passed": 12,
+      "network_requests": 0
     }
   },
   "recovery_regressions": [
@@ -44,7 +48,8 @@
     "YouTube_resumed_completion_restores_ID_without_capability_or_reupload",
     "provider_observed_nonprivate_visibility_holds",
     "unknown_provider_writes_never_blindly_retry",
-    "opaque_exception_text_is_redacted"
+    "opaque_exception_text_is_redacted",
+    "disguised_MP3_playlist_cannot_fetch_even_loopback"
   ],
   "unchanged": [
     "final_en_mary_en_raghav_en_tisha_bn_arnav_bn_riya_roster",
@@ -68,5 +73,17 @@
     "owner_only_permissions_verified": true,
     "source_archive_id": "1-wHAFvubPliSTmEDlvtmR74i8ZdTcnVw",
     "temporary_download_urls_retained": false
+  },
+  "voice_repair": {
+    "native_calls": 18,
+    "ASR_calls": 5,
+    "training_updates": 0,
+    "private_evidence_drive_id": "1i_NPTsr3SdvtUcmRZWrLy6ACHM5Eqr2r",
+    "model_unchanged": true,
+    "observed_token_caps": 0,
+    "new_performance_acceptance": false,
+    "sustained_qualification": "HELD",
+    "resource_debit_existing_CU": 0.77,
+    "runtime_closed": true
   }
 }
