@@ -11,6 +11,7 @@ urlpatterns = [
     path("auth/sign-in/", views.email_link_landing, name="email-link-landing"),
     path("<str:locale>/", views.home, name="home"),
     path("<str:locale>/welcome/", views.welcome, name="welcome"),
+    path("<str:locale>/guardian/", views.guardian_guidance, name="guardian-guidance"),
     path("<str:locale>/explore/", views.search, name="explore"),
     path("<str:locale>/collections/<uuid:collection_id>/", views.collection, name="collection"),
     path("<str:locale>/search/", views.search, name="search"),

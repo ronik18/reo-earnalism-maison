@@ -30,6 +30,7 @@ class User(AbstractUser):
     public_id = models.UUIDField(default=uuid.uuid4,unique=True,editable=False)
     display_name = models.CharField(max_length=100,blank=True)
     is_verified = models.BooleanField(default=False)
+    guardian_managed = models.BooleanField(default=False)
     session_epoch = models.PositiveBigIntegerField(default=1)
     version = models.PositiveBigIntegerField(default=1)
     USERNAME_FIELD='email'
@@ -133,3 +134,38 @@ class MFARecoveryCode(models.Model):
     used_at=models.DateTimeField(null=True)
     class Meta:
         db_table='maison_mfa_recovery_code'
+
+
+class GuardianAuthorization(models.Model):
+    """Disabled operational foundation, not proof of legal parental consent."""
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    child=models.ForeignKey(User,on_delete=models.CASCADE,null=True,related_name='guardian_authorizations_received')
+    prospective_subject_id=models.UUIDField(default=uuid.uuid4,editable=False,unique=True)
+    claim_sha256=models.CharField(max_length=64,blank=True)
+    claim_expires_at=models.DateTimeField(null=True)
+    claimed_at=models.DateTimeField(null=True)
+    retain_until=models.DateTimeField(null=True)
+    guardian=models.ForeignKey(User,on_delete=models.CASCADE,related_name='guardian_authorizations_given')
+    reviewer=models.ForeignKey(User,on_delete=models.SET_NULL,null=True,related_name='guardian_authorizations_reviewed')
+    jurisdiction=models.CharField(max_length=2)
+    purpose=models.CharField(max_length=24,choices=[(x,x) for x in ('account_processing','privacy_access','privacy_delete')])
+    notice_version=models.CharField(max_length=64)
+    method=models.CharField(max_length=64)
+    policy_sha256=models.CharField(max_length=64)
+    evidence_sha256=models.CharField(max_length=64,blank=True)
+    status=models.CharField(max_length=12,default='pending',choices=[(x,x) for x in ('pending','authorized','rejected','withdrawn')])
+    created_at=models.DateTimeField(auto_now_add=True)
+    reviewed_at=models.DateTimeField(null=True)
+    expires_at=models.DateTimeField()
+    withdrawn_at=models.DateTimeField(null=True)
+    version=models.PositiveBigIntegerField(default=1)
+    class Meta:
+        db_table='maison_guardian_authorization'
+        permissions=[('review_guardian_authorization','Review operational guardian authority evidence')]
+        constraints=[
+            models.CheckConstraint(condition=~models.Q(child=models.F('guardian')),name='maison_guardian_distinct_subjects'),
+            models.CheckConstraint(condition=~models.Q(reviewer=models.F('guardian')) & ~models.Q(reviewer=models.F('child')),name='maison_guardian_independent_review'),
+            models.CheckConstraint(condition=models.Q(status__in=['pending','authorized','rejected','withdrawn']),name='maison_guardian_status'),
+            models.CheckConstraint(condition=models.Q(version__gte=1),name='maison_guardian_version'),
+            models.CheckConstraint(condition=~models.Q(status='authorized') | (models.Q(reviewed_at__isnull=False) & ~models.Q(evidence_sha256='')),name='maison_guardian_review_evidence'),
+        ]

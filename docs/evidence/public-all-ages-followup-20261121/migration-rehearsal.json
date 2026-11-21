@@ -1,0 +1,1 @@
+{"status": "PASS", "scope": "local PostgreSQL18 historical-data rehearsal; not Neon branch", "forward": ["0004", "0005"], "distinct_prospective_backfill": true, "existing_users_unmanaged": true, "repeat_plan_empty": true, "child_cascade_and_reviewer_set_null": true, "old_model_read_compatible": true, "production_changed": false}

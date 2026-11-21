@@ -1,0 +1,14 @@
+[
+  {
+    "engine": "new",
+    "viewport": "phone",
+    "status": "PASS",
+    "scope": "actual new/existing email claim uniform response and hidden mint until verified; synthetic local only"
+  },
+  {
+    "engine": "duplicate",
+    "viewport": "phone",
+    "status": "PASS",
+    "scope": "actual new/existing email claim uniform response and hidden mint until verified; synthetic local only"
+  }
+]

@@ -14,6 +14,9 @@ class DeviceSessionMiddleware:
             device=Device.objects.filter(pk=request.session.get('device_id'),user=request.user,revoked_at__isnull=True).first()
             cookie=request.COOKIES.get(getattr(settings,'DEVICE_COOKIE_NAME','__Host-earnalism_device'),'')
             invalid=(not device or device.expires_at<=timezone.now() or request.session.get('session_epoch')!=request.user.session_epoch or not cookie or not hmac.compare_digest(device.token_binding_sha256,_digest(cookie)))
+            if getattr(request.user,'guardian_managed',False):
+                from .guardian import account_available
+                if not account_available(request.user):invalid=True
             if request.user.is_staff:
                 from django.utils.dateparse import parse_datetime
                 seen=parse_datetime(request.session.get('staff_last_seen',''))

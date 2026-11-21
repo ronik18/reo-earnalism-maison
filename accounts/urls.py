@@ -15,3 +15,20 @@ urlpatterns=[
 ]
 
 urlpatterns += [path("me/mfa/totp",views.mfa_totp),path("me/mfa/totp/confirm",views.mfa_confirm),path("me/mfa/verify",views.mfa_verify),path("me/mfa/recovery",views.mfa_recover)]
+
+from . import guardian_views
+urlpatterns += [
+ path('me/guardian/policies',guardian_views.policies),
+ path('me/guardian/authorizations',guardian_views.authorizations),
+ path('me/guardian/authorizations/<uuid:authorization_id>',guardian_views.detail),
+ path('me/guardian/authorizations/<uuid:authorization_id>/withdraw',guardian_views.withdraw),
+ path('me/guardian/authorizations/<uuid:authorization_id>/claim-capability',guardian_views.claim_capability),
+ path('me/guardian/authorizations/<uuid:authorization_id>/claim',guardian_views.claim),
+ path('staff/guardian/authorizations/<uuid:authorization_id>/review',guardian_views.review),
+]
+urlpatterns += [
+ path('me/guardian/authorizations/<uuid:authorization_id>/privacy-requests',guardian_views.privacy_requests),
+ path('me/guardian/authorizations/<uuid:authorization_id>/privacy-requests/<uuid:privacy_request_id>',guardian_views.privacy_request),
+ path('me/guardian/authorizations/<uuid:authorization_id>/privacy-requests/<uuid:privacy_request_id>/download',guardian_views.privacy_download),
+ path('me/guardian/authorizations/<uuid:authorization_id>/privacy-requests/<uuid:privacy_request_id>/file',guardian_views.privacy_file),
+]
