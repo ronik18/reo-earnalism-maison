@@ -1,0 +1,1339 @@
+{
+  "date": "2026-11-22",
+  "host": "https://maison.theearnalism.com",
+  "scope": "Live public pages and signed-out gates; no form submissions, account creation or book publication",
+  "physical_UAT": {
+    "owner_launch_signoff": true,
+    "tested": false,
+    "deferred": true,
+    "blocking": false
+  },
+  "rows": [
+    {
+      "device": "desktop",
+      "id": "01-home",
+      "label": "Public home",
+      "requested": "https://maison.theearnalism.com/en/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-01-home.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "02-welcome",
+      "label": "Reader welcome",
+      "requested": "https://maison.theearnalism.com/en/welcome/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/welcome/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-02-welcome.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "03-library",
+      "label": "Library: all languages",
+      "requested": "https://maison.theearnalism.com/en/explore/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/explore/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-03-library.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "04-search",
+      "label": "Search empty state",
+      "requested": "https://maison.theearnalism.com/en/search/?q=story",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/search/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-04-search.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "05-series",
+      "label": "Series empty state",
+      "requested": "https://maison.theearnalism.com/en/series/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/series/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-05-series.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "06-learn",
+      "label": "Learning library",
+      "requested": "https://maison.theearnalism.com/en/learn/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/learn/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-06-learn.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "07-interview",
+      "label": "Interview Studio",
+      "requested": "https://maison.theearnalism.com/en/interview/sde/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/interview/sde/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-07-interview.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "08-free-pass",
+      "label": "India free Pass",
+      "requested": "https://maison.theearnalism.com/en/pass/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/pass/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-08-free-pass.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "09-signup-choice",
+      "label": "Account capacity choice",
+      "requested": "https://maison.theearnalism.com/en/sign-up/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-up/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-09-signup-choice.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "10-adult-signup",
+      "label": "Adult account form; not submitted",
+      "requested": "https://maison.theearnalism.com/en/sign-up/?account_capacity=adult",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-up/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-10-adult-signup.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "11-parent-guidance",
+      "label": "Parent guidance; no child enrollment",
+      "requested": "https://maison.theearnalism.com/en/guardian/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/guardian/",
+      "title": "Children and guardian permissions · Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-11-parent-guidance.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "12-signin",
+      "label": "Existing-account sign-in",
+      "requested": "https://maison.theearnalism.com/en/sign-in/?return_to=%2Fen%2Fvault%2F",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-12-signin.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "13-email-signin",
+      "label": "Email sign-in; not submitted",
+      "requested": "https://maison.theearnalism.com/en/email-sign-in/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/email-sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-13-email-signin.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "14-password-reset",
+      "label": "Password recovery; not submitted",
+      "requested": "https://maison.theearnalism.com/en/password-reset/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/password-reset/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-14-password-reset.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "15-vault-gate",
+      "label": "Vault: signed-out access gate",
+      "requested": "https://maison.theearnalism.com/en/vault/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-15-vault-gate.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "16-downloads-gate",
+      "label": "Downloads: signed-out access gate",
+      "requested": "https://maison.theearnalism.com/en/vault/downloads/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-16-downloads-gate.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "17-settings-gate",
+      "label": "Settings: signed-out access gate",
+      "requested": "https://maison.theearnalism.com/en/settings/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-17-settings-gate.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "18-independence",
+      "label": "Independent account entry",
+      "requested": "https://maison.theearnalism.com/en/independent-account/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/independent-account/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-18-independence.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "19-contact",
+      "label": "Contact and grievance information",
+      "requested": "https://maison.theearnalism.com/en/contact/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/contact/",
+      "title": "Contact Earnalism · Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-19-contact.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "20-privacy",
+      "label": "Privacy notice",
+      "requested": "https://maison.theearnalism.com/en/privacy/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/privacy/",
+      "title": "Privacy notice · Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-20-privacy.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "21-terms",
+      "label": "Service terms",
+      "requested": "https://maison.theearnalism.com/en/terms/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/terms/",
+      "title": "Service terms · Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-21-terms.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "22-offline",
+      "label": "Explicit offline shell; online-rendered",
+      "requested": "https://maison.theearnalism.com/en/offline/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/offline/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-22-offline.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "23-not-found",
+      "label": "Not found state",
+      "requested": "https://maison.theearnalism.com/en/404/",
+      "physical_device": false,
+      "http_status": 404,
+      "final_path": "/en/404/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-23-not-found.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "24-practice-disabled",
+      "label": "Deferred practice unavailable",
+      "requested": "https://maison.theearnalism.com/en/practice/",
+      "physical_device": false,
+      "http_status": 410,
+      "final_path": "/en/practice/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 1440,
+        "width": 1440,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/desktop-24-practice-disabled.png",
+      "status": "PASS"
+    },
+    {
+      "device": "desktop",
+      "id": "live-api-boundaries",
+      "status": "PASS",
+      "health": 200,
+      "catalog": 200,
+      "catalog_items": 0,
+      "protected_draft": 404,
+      "physical_device": false
+    },
+    {
+      "device": "android-emulated",
+      "id": "01-home",
+      "label": "Public home",
+      "requested": "https://maison.theearnalism.com/en/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-01-home.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "02-welcome",
+      "label": "Reader welcome",
+      "requested": "https://maison.theearnalism.com/en/welcome/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/welcome/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-02-welcome.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "03-library",
+      "label": "Library: all languages",
+      "requested": "https://maison.theearnalism.com/en/explore/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/explore/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-03-library.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "04-search",
+      "label": "Search empty state",
+      "requested": "https://maison.theearnalism.com/en/search/?q=story",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/search/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-04-search.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "05-series",
+      "label": "Series empty state",
+      "requested": "https://maison.theearnalism.com/en/series/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/series/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-05-series.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "06-learn",
+      "label": "Learning library",
+      "requested": "https://maison.theearnalism.com/en/learn/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/learn/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-06-learn.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "07-interview",
+      "label": "Interview Studio",
+      "requested": "https://maison.theearnalism.com/en/interview/sde/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/interview/sde/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-07-interview.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "08-free-pass",
+      "label": "India free Pass",
+      "requested": "https://maison.theearnalism.com/en/pass/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/pass/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-08-free-pass.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "09-signup-choice",
+      "label": "Account capacity choice",
+      "requested": "https://maison.theearnalism.com/en/sign-up/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-up/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-09-signup-choice.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "10-adult-signup",
+      "label": "Adult account form; not submitted",
+      "requested": "https://maison.theearnalism.com/en/sign-up/?account_capacity=adult",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-up/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-10-adult-signup.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "11-parent-guidance",
+      "label": "Parent guidance; no child enrollment",
+      "requested": "https://maison.theearnalism.com/en/guardian/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/guardian/",
+      "title": "Children and guardian permissions · Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-11-parent-guidance.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "12-signin",
+      "label": "Existing-account sign-in",
+      "requested": "https://maison.theearnalism.com/en/sign-in/?return_to=%2Fen%2Fvault%2F",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-12-signin.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "13-email-signin",
+      "label": "Email sign-in; not submitted",
+      "requested": "https://maison.theearnalism.com/en/email-sign-in/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/email-sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-13-email-signin.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "14-password-reset",
+      "label": "Password recovery; not submitted",
+      "requested": "https://maison.theearnalism.com/en/password-reset/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/password-reset/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-14-password-reset.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "15-vault-gate",
+      "label": "Vault: signed-out access gate",
+      "requested": "https://maison.theearnalism.com/en/vault/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-15-vault-gate.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "16-downloads-gate",
+      "label": "Downloads: signed-out access gate",
+      "requested": "https://maison.theearnalism.com/en/vault/downloads/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-16-downloads-gate.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "17-settings-gate",
+      "label": "Settings: signed-out access gate",
+      "requested": "https://maison.theearnalism.com/en/settings/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-17-settings-gate.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "18-independence",
+      "label": "Independent account entry",
+      "requested": "https://maison.theearnalism.com/en/independent-account/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/independent-account/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-18-independence.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "19-contact",
+      "label": "Contact and grievance information",
+      "requested": "https://maison.theearnalism.com/en/contact/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/contact/",
+      "title": "Contact Earnalism · Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-19-contact.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "20-privacy",
+      "label": "Privacy notice",
+      "requested": "https://maison.theearnalism.com/en/privacy/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/privacy/",
+      "title": "Privacy notice · Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-20-privacy.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "21-terms",
+      "label": "Service terms",
+      "requested": "https://maison.theearnalism.com/en/terms/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/terms/",
+      "title": "Service terms · Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-21-terms.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "22-offline",
+      "label": "Explicit offline shell; online-rendered",
+      "requested": "https://maison.theearnalism.com/en/offline/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/offline/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-22-offline.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "23-not-found",
+      "label": "Not found state",
+      "requested": "https://maison.theearnalism.com/en/404/",
+      "physical_device": false,
+      "http_status": 404,
+      "final_path": "/en/404/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-23-not-found.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "24-practice-disabled",
+      "label": "Deferred practice unavailable",
+      "requested": "https://maison.theearnalism.com/en/practice/",
+      "physical_device": false,
+      "http_status": 410,
+      "final_path": "/en/practice/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 412,
+        "width": 412,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/android-emulated-24-practice-disabled.png",
+      "status": "PASS"
+    },
+    {
+      "device": "android-emulated",
+      "id": "live-api-boundaries",
+      "status": "PASS",
+      "health": 200,
+      "catalog": 200,
+      "catalog_items": 0,
+      "protected_draft": 404,
+      "physical_device": false
+    },
+    {
+      "device": "ios-emulated",
+      "id": "01-home",
+      "label": "Public home",
+      "requested": "https://maison.theearnalism.com/en/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-01-home.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "02-welcome",
+      "label": "Reader welcome",
+      "requested": "https://maison.theearnalism.com/en/welcome/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/welcome/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-02-welcome.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "03-library",
+      "label": "Library: all languages",
+      "requested": "https://maison.theearnalism.com/en/explore/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/explore/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-03-library.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "04-search",
+      "label": "Search empty state",
+      "requested": "https://maison.theearnalism.com/en/search/?q=story",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/search/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-04-search.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "05-series",
+      "label": "Series empty state",
+      "requested": "https://maison.theearnalism.com/en/series/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/series/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-05-series.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "06-learn",
+      "label": "Learning library",
+      "requested": "https://maison.theearnalism.com/en/learn/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/learn/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-06-learn.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "07-interview",
+      "label": "Interview Studio",
+      "requested": "https://maison.theearnalism.com/en/interview/sde/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/interview/sde/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-07-interview.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "08-free-pass",
+      "label": "India free Pass",
+      "requested": "https://maison.theearnalism.com/en/pass/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/pass/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-08-free-pass.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "09-signup-choice",
+      "label": "Account capacity choice",
+      "requested": "https://maison.theearnalism.com/en/sign-up/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-up/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-09-signup-choice.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "10-adult-signup",
+      "label": "Adult account form; not submitted",
+      "requested": "https://maison.theearnalism.com/en/sign-up/?account_capacity=adult",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-up/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-10-adult-signup.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "11-parent-guidance",
+      "label": "Parent guidance; no child enrollment",
+      "requested": "https://maison.theearnalism.com/en/guardian/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/guardian/",
+      "title": "Children and guardian permissions · Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-11-parent-guidance.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "12-signin",
+      "label": "Existing-account sign-in",
+      "requested": "https://maison.theearnalism.com/en/sign-in/?return_to=%2Fen%2Fvault%2F",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-12-signin.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "13-email-signin",
+      "label": "Email sign-in; not submitted",
+      "requested": "https://maison.theearnalism.com/en/email-sign-in/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/email-sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-13-email-signin.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "14-password-reset",
+      "label": "Password recovery; not submitted",
+      "requested": "https://maison.theearnalism.com/en/password-reset/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/password-reset/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-14-password-reset.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "15-vault-gate",
+      "label": "Vault: signed-out access gate",
+      "requested": "https://maison.theearnalism.com/en/vault/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-15-vault-gate.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "16-downloads-gate",
+      "label": "Downloads: signed-out access gate",
+      "requested": "https://maison.theearnalism.com/en/vault/downloads/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-16-downloads-gate.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "17-settings-gate",
+      "label": "Settings: signed-out access gate",
+      "requested": "https://maison.theearnalism.com/en/settings/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/sign-in/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-17-settings-gate.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "18-independence",
+      "label": "Independent account entry",
+      "requested": "https://maison.theearnalism.com/en/independent-account/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/independent-account/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-18-independence.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "19-contact",
+      "label": "Contact and grievance information",
+      "requested": "https://maison.theearnalism.com/en/contact/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/contact/",
+      "title": "Contact Earnalism · Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-19-contact.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "20-privacy",
+      "label": "Privacy notice",
+      "requested": "https://maison.theearnalism.com/en/privacy/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/privacy/",
+      "title": "Privacy notice · Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-20-privacy.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "21-terms",
+      "label": "Service terms",
+      "requested": "https://maison.theearnalism.com/en/terms/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/terms/",
+      "title": "Service terms · Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-21-terms.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "22-offline",
+      "label": "Explicit offline shell; online-rendered",
+      "requested": "https://maison.theearnalism.com/en/offline/",
+      "physical_device": false,
+      "http_status": 200,
+      "final_path": "/en/offline/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-22-offline.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "23-not-found",
+      "label": "Not found state",
+      "requested": "https://maison.theearnalism.com/en/404/",
+      "physical_device": false,
+      "http_status": 404,
+      "final_path": "/en/404/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-23-not-found.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "24-practice-disabled",
+      "label": "Deferred practice unavailable",
+      "requested": "https://maison.theearnalism.com/en/practice/",
+      "physical_device": false,
+      "http_status": 410,
+      "final_path": "/en/practice/",
+      "title": "Earnalism",
+      "layout": {
+        "viewport": 390,
+        "width": 390,
+        "broken_images": 0
+      },
+      "page_errors": [],
+      "screenshot": "screenshots/ios-emulated-24-practice-disabled.png",
+      "status": "PASS"
+    },
+    {
+      "device": "ios-emulated",
+      "id": "live-api-boundaries",
+      "status": "PASS",
+      "health": 200,
+      "catalog": 200,
+      "catalog_items": 0,
+      "protected_draft": 404,
+      "physical_device": false
+    }
+  ]
+}

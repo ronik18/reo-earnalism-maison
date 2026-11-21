@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-22",
+  "host": "https://maison.theearnalism.com/en/",
+  "service": "publicly reachable, owner authorized India-first free launch",
+  "complete_live_book_journey": false,
+  "runtime_commit": "516179fe5213da8a8f762797dee74c702cd377dc",
+  "primary_screenshots": 72,
+  "continuation_screenshots": 87,
+  "public_page_and_api_checks": 75,
+  "checks_result": "PASS",
+  "profiles": [
+    "Desktop Chromium 1440x1000",
+    "Pixel 7 Android browser emulation, Chromium",
+    "iPhone 13 iOS browser emulation, WebKit"
+  ],
+  "gallery": "/Users/ronikbasak/Documents/Codex/earnalism-india-public-launch-20261122/index.html",
+  "physical_UAT": {
+    "owner_signed_off_deferral_for_launch": true,
+    "deferred": true,
+    "blocking": false,
+    "performed": false
+  },
+  "pending": [
+    "Owner decision on separate original sample and scoped India-only publication exception; unchanged 47-country policy otherwise applies",
+    "Authenticated existing reader/operator session; current captures show signed-out gates"
+  ],
+  "new_book_publication": false,
+  "held_book_unchanged": true,
+  "provider_source_DNS_legacy_mutations_by_this_task": false,
+  "new_application_deploy": false,
+  "reason_no_deploy": "No application source, schema or asset change; current isolated service is already public."
+}
