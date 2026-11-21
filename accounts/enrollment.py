@@ -62,8 +62,13 @@ def become_independent_with_password(request,email,password,*,password_consent=N
     user=authenticate(request,email=email,password=password)
     if user is None or not user.is_verified:raise DomainError('invalid_credentials','Your account identity could not be confirmed.',403)
     with transaction.atomic():
-        user=User.objects.select_for_update().get(pk=user.pk)
-        if not user.is_active or not user.is_verified or not user.check_password(password):
+        # Renewal locks the existing household before its grant. Acquire those
+        # same User rows first: deferred grant FK checks can otherwise request a
+        # parent KEY SHARE at commit while renewal waits for our child row.
+        household=set(GuardianAuthorization.objects.filter(child_id=user.pk).values_list('guardian_id',flat=True))|{user.pk}
+        locked={row.pk:row for row in User.objects.select_for_update().filter(pk__in=household).order_by('pk')}
+        user=locked.get(user.pk)
+        if user is None or not user.is_active or not user.is_verified or not user.check_password(password):
             raise DomainError('invalid_credentials','Your account identity could not be confirmed.',403)
         if user.guardian_managed:
             rows=GuardianAuthorization.objects.select_for_update().filter(child=user,status__in=['pending','authorized'])

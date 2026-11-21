@@ -12,7 +12,7 @@ Google Cloud requires the business account's device verification before its exis
 
 ## Fixed source and recovery basis
 
-- Existing application `165edc91679207997a692672e781cdaef751d916`, with the853-test image,37client,12voice-plan,125live-browser and6Safari evidence retained. Relevant application source matches current preparation main`125e48e`.
+- Initial preflight observed application `165edc91679207997a692672e781cdaef751d916` and retained its853-test image/unchanged binary acceptance. Concurrent main now records the qualified follow-up `516179fe5213da8a8f762797dee74c702cd377dc`:861backend CI,107focused PostgreSQL,16rendered-web,18live recovery and3Safari checks pass, with the same37client/12voice-plan and static release. [Follow-up receipt](evidence/india-first-followup-20261121/release-receipt.json). Preserve that newer work; refresh the actual runtime identity before cutover and redeploy only the selected existing qualified build for environment changes. No application-source change is introduced by this cutover branch.
 - Existing immutable202-file release`a9865d304bd665301cdf337e0e6a7f7de0e51f5731ac6afe604ace6b18c240f6`; no new media, static release or schema is required.
 - Legacy apexA`76.76.21.21`, DNS-only, TTL3600; wwwCNAME`cname.vercel-dns.com`, DNS-only, TTL3600. API, MX/mail, assets, nameservers and legacy services/data remain outside the change.
 - Existing Maison CNAME`reo-earnalism-maison-qa.onrender.com`, proxied/Auto; Render service`srv-dbunbd8jo6nc73akbng0`, one existing instance.

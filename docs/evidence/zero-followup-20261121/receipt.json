@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "checked_at_utc": "2026-11-21T16:44:06.060519+00:00",
+  "source_commit": "125e48e34866eeced6f413adf7f60272f8e3c20d",
+  "scope": "Focused current India authority retention delayed-event and concurrency regression; actual local PostgreSQL only",
+  "suite": {
+    "tests_run": 10,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "test_labels": [
+    "accounts.test_india_enrollment.IndiaEnrollmentTests.test_missing_or_tampered_actual_permission_proof_cannot_authorize",
+    "accounts.test_india_enrollment.IndiaEnrollmentTests.test_active_permission_proof_survives_security_audit_cleanup_and_tampering_fails",
+    "accounts.test_india_enrollment.IndiaEnrollmentTests.test_expired_or_unbound_permission_is_not_revived_by_actual_email_verification",
+    "accounts.test_india_enrollment.IndiaEnrollmentTests.test_parent_renews_only_exact_owned_unverified_relation_without_duplicate_child",
+    "accounts.test_india_enrollment.IndiaEnrollmentTests.test_expired_unverified_claim_scaffolding_is_removed_after_permission_retention",
+    "accounts.test_india_enrollment.IndiaEnrollmentTests.test_own_privacy_delete_ends_indefinite_permission_then_hold_aware_proof_cleanup",
+    "accounts.test_india_enrollment.IndiaEnrollmentTests.test_independent_capacity_preserves_same_account_and_ends_old_guardian_power",
+    "accounts.test_india_enrollment.IndiaEnrollmentTests.test_actual_mailbox_verification_then_withdrawal_revokes_managed_device",
+    "accounts.test_guardian_journey.GuardianClaimConcurrencyTests.test_two_simultaneous_claims_create_exactly_one_bound_child",
+    "accounts.test_guardian_ownership.GuardianOwnershipTests.test_locked_review_rechecks_permission_after_precheck"
+  ],
+  "elapsed_seconds": 23.727,
+  "owned_test_database_removed": true,
+  "preexisting_maison_database_present": true,
+  "pg_server_version": "18.7 (Debian 18.7-1.pgdg13+2)",
+  "provider_calls": 0,
+  "new_spending_usd": 0,
+  "book_or_legacy_touched": false,
+  "hosted_ci_run": false,
+  "cloud_ha_or_native_pitr_qualified": false,
+  "image_id": "sha256:21eac0dc51df183a56ad6fcea54885fefa646c5b98d0e7ab8e45d8c621705e66",
+  "source_mount": "Current125e48e checkout read-only at/app; installed image supplies dependencies only",
+  "image_has_provider_credentials": false,
+  "local_runner_sha256": "e50a0c0b320e57a1c539d71e2000bb8b1d8bee5c07c0c66104230ce7f49a07ce"
+}

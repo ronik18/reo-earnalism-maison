@@ -1,0 +1,16 @@
+{
+  "checked_at_utc": "2026-11-21T16:44:15.200231+00:00",
+  "method": "Existing business inbox, read-only IMAP; no flags changed or mail sent",
+  "status": "READ_COMPLETE",
+  "clearance_achieved": false,
+  "new_spending_usd": 0,
+  "saudi": {
+    "matching_incoming_count": 0,
+    "requires_message_review": false
+  },
+  "yandex": {
+    "matching_incoming_count": 0,
+    "requires_message_review": false
+  },
+  "related_incoming_or_delivery_notice_matches": 0
+}

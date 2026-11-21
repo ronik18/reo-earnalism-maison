@@ -2,7 +2,6 @@
   "schema": "earnalism.apex_cutover_preparation.v1",
   "recorded_at": "2026-11-21T17:20:55.867193+00:00",
   "state": "PREPARING_OWNER_GOOGLE_DEVICE_VERIFICATION_REQUIRED",
-  "application_commit": "165edc91679207997a692672e781cdaef751d916",
   "preparation_source_main": "125e48e",
   "scope": "Existing India-first free service on existing capacity; no new purchases or content publication",
   "sole_writer": "Root Integration",
@@ -316,5 +315,19 @@
     "unknowns": [],
     "receipt_sha256": "1b8a74baa717735f4c9a0f0e8dd3cc34312248bcd3f0c43c347db9de721ad685",
     "full_package_pass_claimed": false
+  },
+  "initial_application_commit": "165edc91679207997a692672e781cdaef751d916",
+  "concurrent_main_integrated": "ef19075f534b15259fadba1b7ebed5420846d33b",
+  "latest_qualified_followup_record": {
+    "application_commit": "516179fe5213da8a8f762797dee74c702cd377dc",
+    "receipt": "../india-first-followup-20261121/release-receipt.json",
+    "backend_ci": 861,
+    "focused_postgresql": 107,
+    "rendered_web": 16,
+    "live_recovery": 18,
+    "native_safari": 3,
+    "scope_unchanged": true,
+    "same_static_release": true,
+    "fresh_runtime_readback_required_before_cutover": true
   }
 }

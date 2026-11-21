@@ -1,5 +1,8 @@
 """India-first account choices precede collection and share one reader journey."""
 from html.parser import HTMLParser
+import html
+import re
+from urllib.parse import parse_qs, urlsplit
 from unittest.mock import patch
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -54,6 +57,27 @@ class IndiaFirstScreensTests(TestCase):
         self.assertContains(response,'name="return_path" value="/en/learn/"')
         self.assertContains(response,'Helping someone under 18?')
         self.assertNotContains(response,'data-account-preflight')
+
+    @override_settings(FEATURES={**settings.FEATURES,'google_oauth':True})
+    def test_google_recovery_signup_preserves_safe_reader_destination_and_escapes_query(self):
+        destination='/bn/learn/?track=original&topic=streams#lesson'
+        expected='/en/learn/?track=original&topic=streams#lesson'
+        response=self.client.get('/en/sign-in/',{'google_error':'account_registration_required','return_to':destination})
+        self.assertContains(response,'No new account was created')
+        match=re.search(r'href="([^"]+)">Create a new account</a>',response.content.decode())
+        self.assertIsNotNone(match)
+        signup=html.unescape(match[1]);parsed=urlsplit(signup)
+        self.assertEqual(parsed.path,'/en/sign-up/')
+        self.assertEqual(parse_qs(parsed.query),{'return_to':[expected]})
+        self.assertNotIn('&topic=',match[1])
+        self.assertIn('%26topic%3Dstreams%23lesson',match[1])
+        choice=self.client.get(signup)
+        adult=re.search(r'href="([^"]*account_capacity=adult[^"]*)"',choice.content.decode())
+        self.assertIsNotNone(adult)
+        self.assertEqual(parse_qs(urlsplit(html.unescape(adult[1])).query)['return_to'],[expected])
+        unsafe=self.client.get('/en/sign-in/',{'google_error':'account_registration_required','return_to':'https://outside.example.test/collect'})
+        link=re.search(r'href="([^"]+)">Create a new account</a>',unsafe.content.decode())[1]
+        self.assertEqual(parse_qs(urlsplit(html.unescape(link)).query),{'return_to':['/en/']})
 
     def test_adult_form_submission_forwards_the_exact_account_permission(self):
         with patch('accounts.services.register_member') as register:

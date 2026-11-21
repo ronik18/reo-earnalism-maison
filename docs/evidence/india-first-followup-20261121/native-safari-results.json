@@ -1,0 +1,23 @@
+{
+  "browser": "native Safari",
+  "version": "26.5",
+  "scope": "Actual deployed recovery GET/link flows only; no provider or account mutation",
+  "rows": [
+    {
+      "id": "native-safe-recovery",
+      "status": "PASS"
+    },
+    {
+      "id": "native-recovery-preserves-no-collection-preflight",
+      "status": "PASS"
+    },
+    {
+      "id": "native-external-return-denied",
+      "status": "PASS"
+    }
+  ],
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

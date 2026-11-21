@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "source_commit": "125e48e34866eeced6f413adf7f60272f8e3c20d",
+  "checked_at_utc": "2026-11-21T16:43:34.584139+00:00",
+  "scope": "Bounded India-first source/notice/contract consistency; not runtime, operator SLA, actual consent/custody or legal certification",
+  "ast_files_parsed": 6,
+  "assertions": {
+    "india_free_service_separate_from_publication": true,
+    "content_policy_preserved_47": true,
+    "only_IN_account_processing_policy_active": true,
+    "adult_permission_strict_boolean_current_version": true,
+    "password_signup_declaration_precedes_email_password": true,
+    "google_declared_creation_precedes_redirect": true,
+    "withdrawal_revokes_claim_and_sessions_with_retention": true,
+    "active_permission_promotion_rechecks_current_authority": true,
+    "notice_has_grievance_and_honest_transfer_assurance": true,
+    "processing_record_supersedes_historical_scope": true
+  },
+  "assertion_count": 10,
+  "source_sha256": {
+    "config/settings.py": "d77add8794e99dc6229d1e5bbed9ab2d3a4332f8c54009fb57b56ba07ca125a1",
+    "accounts/enrollment.py": "e3bb58cce942371c94b5283c3b9d94b764eb1ef9ed2bd9e22dba5a747101c31a",
+    "accounts/services.py": "25e5c1e4343867cb2219a97a4bfbe7f33250a7ffcc97efb4d00880ef677a36b4",
+    "accounts/google.py": "1a937ae02b5ce5f646465642f8186550dad128539ffb6e03cebf4f66e16086e2",
+    "accounts/guardian.py": "119864705d261bbd84bd69355f80ab7483bbd1939ee8906030cdf3db054b14da",
+    "web/legal.py": "37c883b522e04ca2309b0db08efe0c19791a07c39398f8b6ce0899271773c305"
+  },
+  "live_queries": 0,
+  "provider_api_calls": 0,
+  "outgoing_messages": 0,
+  "new_spending_usd": 0,
+  "source_or_policy_edits": false
+}
