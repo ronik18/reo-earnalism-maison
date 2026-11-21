@@ -1,6 +1,10 @@
 """Small explicit UI catalogue; edition content never changes with UI locale."""
 
 STRINGS = {
+    'account_permission_required': ('Please confirm that you are 18 or older and accept the current account terms before creating your own account. A parent or guardian begins for a younger reader.', 'Please confirm that you are 18 or older and accept the current account terms before creating your own account. A parent or guardian begins for a younger reader.'),
+    'independent_account_updated': ('If the verified account and password matched, the account can now continue under your own permission, with previous guardian permissions and sessions ended. Sign in again to continue.', 'If the verified account and password matched, the account can now continue under your own permission, with previous guardian permissions and sessions ended. Sign in again to continue.'),
+    'independent_account_unavailable': ('We could not update the account. Check your existing verified account details and your own adult permission. Contact sales@reoenterprise.org if you need help.', 'We could not update the account. Check your existing verified account details and your own adult permission. Contact sales@reoenterprise.org if you need help.'),
+    'account_registration_required': ('No new account was created. Start from Create an account to choose your account or parent route.', 'No new account was created. Start from Create an account to choose your account or parent route.'),
     'invoice_document_changed': ('This invoice was updated. Review the new details, then request the PDF again.', 'এই চালান আপডেট হয়েছে। নতুন বিবরণ দেখে আবার পিডিএফ চান।'),
     'provider_request_recorded': ('Your request is recorded. Refresh the agreement status to check the outcome.', 'আপনার অনুরোধ নথিভুক্ত হয়েছে। ফল জানতে চুক্তির অবস্থা আবার দেখুন।'),
     'mandate_revoked_at': ('Revoked on', 'প্রত্যাহারের তারিখ'),

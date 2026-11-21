@@ -49,9 +49,19 @@ def session_view(request):
 
 @json_endpoint(('POST',),auth=False)
 def register_view(request):
-    d=json_body(request,{'email','password','display_name','locale','return_path'}|PASSWORD_PURPOSE_FIELDS,['email','password','display_name'])
+    from .enrollment import ACCOUNT_FIELDS
+    d=json_body(request,{'email','password','display_name','locale','return_path'}|PASSWORD_PURPOSE_FIELDS|ACCOUNT_FIELDS,['email','password','display_name'])
     consent=validate_password_purpose_consent(d)
     services.register_member(**{k:v for k,v in d.items() if k not in PASSWORD_PURPOSE_FIELDS},password_consent=consent);return api_response(acknowledgement(request),202)
+
+
+@json_endpoint(('POST',),auth=False)
+def independent_account(request):
+    from .enrollment import ACCOUNT_FIELDS,become_independent_with_password
+    d=json_body(request,{'email','password'}|PASSWORD_PURPOSE_FIELDS|ACCOUNT_FIELDS,['email','password'])
+    consent=validate_password_purpose_consent(d)
+    become_independent_with_password(request,**{k:v for k,v in d.items() if k not in PASSWORD_PURPOSE_FIELDS},password_consent=consent)
+    return api_response(acknowledgement(request),202)
 
 
 @json_endpoint(('POST',),auth=False)

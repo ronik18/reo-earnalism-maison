@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 urlpatterns=[
  path('session',views.session_view),path('auth/register',views.register_view),path('auth/login',views.login_view),
+ path('auth/account-capacity',views.independent_account),
  path('auth/<str:purpose>/request',views.request_action),path('auth/<str:purpose>/confirm',views.consume_action),
  path('auth/email-links/consume',views.consume_action,{'purpose':'email-links'}),
  path('auth/google',views.google_start,name='google_login'),path('auth/google/callback',views.google_callback,name='google_callback'),

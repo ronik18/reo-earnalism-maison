@@ -25,6 +25,9 @@ if ENVIRONMENT not in {'local', 'test', 'production'}:
     raise ImproperlyConfigured('MAISON_ENV must be local, test or production')
 LOCAL = ENVIRONMENT != 'production'
 MAISON_LOCAL_FIXTURES = LOCAL
+# Owner-approved India-first service launch; edition rights retain their own policy.
+INDIA_FIRST_LAUNCH_ENABLED = not LOCAL
+MAISON_SERVICE_TERRITORIES = ('IN',)
 STAFF_MFA_REQUIRED = not LOCAL
 DEBUG = LOCAL
 LOCAL_DIR = BASE_DIR / '.local'
@@ -246,11 +249,19 @@ if not LOCAL and (urlparse(PUBLIC_BASE_URL).scheme != 'https' or not urlparse(PU
     raise ImproperlyConfigured('A canonical HTTPS PUBLIC_BASE_URL is required')
 DEFAULT_FROM_EMAIL = os.getenv('EMAIL_FROM_ADDRESS', 'maison@localhost.test' if LOCAL else '')
 SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', '')
-PRIVACY_NOTICE_VERSION = 'earnalism-privacy-2026-11-20-r4'
-# Preparation only. Real jurisdiction/method policies require separate legal and
-# provider acceptance; an environment toggle must not invent that qualification.
-GUARDIAN_AUTHORIZATION_ENABLED = False
-GUARDIAN_AUTHORIZATION_POLICIES = {}
+PRIVACY_NOTICE_VERSION = 'earnalism-privacy-2026-11-21-india-v1'
+# Owner-authorized India-first direct electronic permission. This records the
+# authenticated adult/parent's declarations, not independently verified identity.
+# Other countries and automated guardian disclosure rights remain unactivated.
+GUARDIAN_AUTHORIZATION_ENABLED = INDIA_FIRST_LAUNCH_ENABLED
+GUARDIAN_AUTHORIZATION_POLICIES = ({
+    'IN:account_processing:india-parent-v1:india-parent-electronic-v1': {
+        'enabled': True, 'public_enabled': True, 'lifetime': 'until_withdrawn',
+        'max_lifetime_seconds': 604800, 'record_retention_seconds': 604800,
+        'legal_review_ref': 'india-first-launch-20261121/india-method-assessment',
+        'collection_route_ref': 'india-first-direct-parent-v1',
+    },
+} if INDIA_FIRST_LAUNCH_ENABLED else {})
 EARNALISM_PUBLIC_GRIEVANCE_OFFICER_NAME = os.getenv('EARNALISM_PUBLIC_GRIEVANCE_OFFICER_NAME', '').strip()
 if not LOCAL and (not EMAIL_BACKEND or not DEFAULT_FROM_EMAIL):
     raise ImproperlyConfigured('Production email configuration is required')

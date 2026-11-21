@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "owner_instruction_date": "2026-11-21",
+  "product": "Earnalism",
+  "operator": "Reo Enterprise",
+  "service_territories": ["IN"],
+  "price": "free",
+  "verification_provider_required": false,
+  "country_meaning": "Trusted connection location for the current service rollout; not citizenship or proof of capacity",
+  "content_publication_policy_unchanged": "contracts/publication-policy.json",
+  "book_publication_authorized": false,
+  "legacy_or_dns_change_authorized": false,
+  "physical_UAT": {"deferred": true, "blocking": false}
+}

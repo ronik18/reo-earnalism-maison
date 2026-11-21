@@ -1,0 +1,616 @@
+{
+  "review_date": "2026-11-21",
+  "meaning": "Published technical availability only; no real verification, relationship assurance or legal clearance",
+  "source": "https://dev.epicgames.com/docs/kids-web-services/parent-verification-service/pv-service-verification-methods",
+  "policy_sha256": "86eb3486667b22569bb23eeb6b7c7fc0d94ac29a194e9b3d2cb9d0f0c7795605",
+  "countries": [
+    {
+      "country": "AM",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "AZ",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "BD",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "BH",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "BN",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "BR",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan",
+        "cpf"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "BT",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "CA",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "CY",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "DE",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "DK",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "FR",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "GB",
+      "documented_methods": [
+        "credit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "GE",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "HK",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "ID",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "IL",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "IN",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "IQ",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "JO",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "JP",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "KH",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "KR",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "i_pin",
+        "cell_phone"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "KZ",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "LA",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "LB",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "LK",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "MM",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "MO",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "MV",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "MY",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "NL",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "NP",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "NZ",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "OM",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "PH",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "PK",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "QA",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "RU",
+      "documented_methods": [
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "SA",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "SG",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "TH",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "TR",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "TW",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "US",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "ssn"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "UZ",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    },
+    {
+      "country": "YE",
+      "documented_methods": [
+        "credit_card",
+        "debit_card",
+        "id_scan",
+        "face_scan"
+      ],
+      "provider_account_eligibility_verified": false,
+      "parent_relationship_verified": false,
+      "country_legal_qualification": false,
+      "production_enabled": false
+    }
+  ]
+}

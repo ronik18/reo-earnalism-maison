@@ -1,4 +1,4 @@
-"""Qualified-policy gated guardian workflow. No production method is supplied."""
+"""Policy-gated India account permission and separately authorized rights."""
 from core.api import json_endpoint,json_body,api_response,operation_key,DomainError
 from . import guardian
 from .views import require_fresh
@@ -13,7 +13,8 @@ def policies(request):
 def authorizations(request):
     guardian.enabled()
     if request.method=='GET':return api_response(guardian.list_authorizations(request))
-    d=json_body(request,{'jurisdiction','purpose','notice_version','method','source_authorization_id'},['jurisdiction','purpose','notice_version','method'])
+    from .enrollment import PARENT_FIELDS
+    d=json_body(request,{'jurisdiction','purpose','notice_version','method','source_authorization_id'}|PARENT_FIELDS,['jurisdiction','purpose','notice_version','method'])
     status,body=guardian.request_authorization(request,**d,operation_id=operation_key(request))
     return api_response(body,status,version=body['version'])
 

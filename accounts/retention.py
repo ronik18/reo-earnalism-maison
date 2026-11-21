@@ -136,6 +136,10 @@ def _abandoned(user, cutoff):
     ).exists():
         return False
     for event in AuditEvent.objects.filter(actor=user).exclude(action='account.registered'):
+        if (event.action=='account.capacity_declared' and event.entity_kind=='User' and event.entity_id==str(user.pk)
+            and event.detail=={'purpose':'registration','account_capacity':'adult','account_notice_version':'india-account-v1','account_terms_consent':True,'assurance':'self_declaration'}
+            and event.created_at<=user.date_joined+timedelta(minutes=5)):
+            continue
         if (not _password_purpose_receipt(event) or event.detail['purpose'] != 'registration'
                 or event.created_at > user.date_joined + timedelta(minutes=5)):
             return False
@@ -269,6 +273,11 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
             row=GuardianAuthorization.objects.select_for_update(skip_locked=True).filter(pk=pk,retain_until__lte=now,expires_at__lte=now).first()
             if not row or _held(row.guardian_id) or row.child_id and _held(row.child_id):continue
             if AuditEvent.objects.filter(action__in=['legal.hold','retention.hold'],entity_kind='GuardianAuthorization',entity_id=str(row.pk)).exists():continue
+            from .enrollment import DIRECT_PARENT_METHOD
+            proof_events=AuditEvent.objects.none()
+            if row.jurisdiction=='IN' and row.method==DIRECT_PARENT_METHOD:
+                proof_events=AuditEvent.objects.filter(entity_kind='GuardianAuthorization',entity_id=str(row.pk),action__in=['guardian.electronic_permission','guardian.subject_bound'])
+            if any(_row_held(event,actor_held=False) for event in proof_events):continue
             linked=OutboxJob.objects.filter(payload__guardian_authorization_id=str(row.pk))
             if linked.exclude(status__in=['done','cancelled','dead']).exists():continue
             blocked=False
@@ -277,7 +286,9 @@ def _cleanup_account_retention(limit=100, max_seconds=5, dry_run=True, cursors=N
                     blocked=True;break
             if blocked:continue
             counts['guardian_authorizations']+=1
-            if not dry_run:row.delete()
+            if not dry_run:
+                proof_events.update(detail={'retention_cleaned':True})
+                row.delete()
 
     candidates = User.objects.filter(is_verified=False, is_staff=False, is_superuser=False, is_active=True, last_login=None, date_joined__lte=cutoff)
     for pk in ids(candidates, 'signups'):

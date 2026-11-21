@@ -1,9 +1,9 @@
-"""Policy-gated operational guardian workflow, not a legal VPC certification.
+"""Policy-gated guardian permissions, not an independent identity certification.
 
-National methods, subject verification, collection grounds, retention and regional
-placement require actual acceptance evidence. An audit digest verifies neither
-parental relationship nor the identity associated with a future account email.
-Production settings remain disabled with no public methods configured.
+The India direct electronic account method records a verified mailbox holder's
+affirmative adult/guardian declaration and purpose-bound permission. An audit
+digest verifies neither independent age nor custody. Other national methods and
+parental access to child data require their own supported operational policy.
 
 Schema dependency: accounts migrations 0004 and 0005 must precede deploying this
 model code. Even with the feature off, User reverse relations are traversed by
@@ -15,7 +15,7 @@ import json
 import re
 import secrets
 import hmac
-from datetime import timedelta
+from datetime import timedelta,datetime,timezone as datetime_timezone
 from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
@@ -27,6 +27,22 @@ from .models import User,GuardianAuthorization
 PURPOSES={'account_processing','privacy_access','privacy_delete'}
 
 
+def _direct_method(jurisdiction,method):
+    from .enrollment import enabled,DIRECT_PARENT_METHOD
+    return enabled() and jurisdiction=='IN' and method==DIRECT_PARENT_METHOD
+
+
+def _direct_evidence(row):
+    # The digest records this exact authenticated declaration/subject/purpose.
+    # It must never be represented as independently verified identity or age.
+    from .enrollment import ACCOUNT_NOTICE_VERSION
+    payload={'authorization_id':str(row.pk),'prospective_subject_id':str(row.prospective_subject_id),
+        'guardian_id':row.guardian_id,'jurisdiction':row.jurisdiction,'purpose':row.purpose,
+        'notice_version':row.notice_version,'method':row.method,'policy_sha256':row.policy_sha256,
+        'account_notice_version':ACCOUNT_NOTICE_VERSION,'parent_declared_adult':True,'guardian_permission':True,'account_terms_consent':True}
+    return hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+
+
 def _policy(jurisdiction,purpose,notice,method):
     if not getattr(settings,'GUARDIAN_AUTHORIZATION_ENABLED',False):
         raise DomainError('feature_disabled','Guardian authority is not enabled.',409)
@@ -35,7 +51,8 @@ def _policy(jurisdiction,purpose,notice,method):
         raise DomainError('guardian_policy_unavailable','No qualified operational policy matches this request.',409)
     key=f'{jurisdiction}:{purpose}:{notice}:{method}'
     policy=getattr(settings,'GUARDIAN_AUTHORIZATION_POLICIES',{}).get(key)
-    if not isinstance(policy,dict) or policy.get('enabled') is not True or type(policy.get('max_lifetime_seconds')) is not int or not 60<=policy['max_lifetime_seconds']<=2592000:
+    direct_lifetime=(_direct_method(jurisdiction,method) and isinstance(policy,dict) and policy.get('lifetime')=='until_withdrawn')
+    if not isinstance(policy,dict) or policy.get('enabled') is not True or not direct_lifetime and (type(policy.get('max_lifetime_seconds')) is not int or not 60<=policy['max_lifetime_seconds']<=2592000):
         raise DomainError('guardian_policy_unavailable','No qualified operational policy matches this request.',409)
     digest=hashlib.sha256(json.dumps([key,policy],sort_keys=True,separators=(',',':')).encode()).hexdigest()
     return policy,digest
@@ -60,7 +77,20 @@ def _locks(request,child_id,guardian_id,review=False):
 
 def _current(row):
     _,digest=_policy(row.jurisdiction,row.purpose,row.notice_version,row.method)
-    if row.status=='authorized' and (not row.reviewer_id or not User.objects.filter(pk=row.reviewer_id,is_active=True).exists()):
+    direct=_direct_method(row.jurisdiction,row.method)
+    if row.status=='authorized' and direct:
+        from core.models import AuditEvent
+        if (row.reviewer_id is not None or not row.reviewed_at or not hmac.compare_digest(row.evidence_sha256,_direct_evidence(row))
+            or not AuditEvent.objects.filter(actor_id=row.guardian_id,action='guardian.electronic_permission',entity_kind='GuardianAuthorization',entity_id=str(row.pk),
+                detail__evidence_sha256=row.evidence_sha256,detail__parent_declared_adult=True,detail__guardian_permission=True,
+                detail__account_terms_consent=True,detail__account_notice_version='india-account-v1',
+                detail__prospective_subject_id=str(row.prospective_subject_id),detail__purpose=row.purpose,detail__notice_version=row.notice_version).exists()):
+            raise DomainError('guardian_authority_unavailable','Current electronic permission is unavailable.',403)
+        if row.child_id and not AuditEvent.objects.filter(actor_id=row.guardian_id,action='guardian.subject_bound',entity_kind='GuardianAuthorization',entity_id=str(row.pk),
+            detail__prospective_subject_id=str(row.prospective_subject_id),detail__child_id=str(row.child.public_id),detail__guardian_permission=True,
+            detail__account_notice_version='india-account-v1').exists():
+            raise DomainError('guardian_authority_unavailable','This account does not match a current permission binding.',403)
+    if row.status=='authorized' and not direct and (not row.reviewer_id or not User.objects.filter(pk=row.reviewer_id,is_active=True).exists()):
         raise DomainError('guardian_authority_unavailable','Review authority is unavailable.',403)
     if digest!=row.policy_sha256 or row.status in ('withdrawn','rejected') or row.expires_at<=timezone.now():
         raise DomainError('guardian_authority_unavailable','Authority is expired, withdrawn or superseded.',403)
@@ -69,8 +99,8 @@ def _current(row):
 def _data(row):
     return {'authorization_id':str(row.pk),'status':'expired' if row.expires_at<=timezone.now() and row.status not in ('withdrawn','rejected') else row.status,'purpose':row.purpose,
         'notice_version':row.notice_version,'jurisdiction':row.jurisdiction,'method':row.method,'version':row.version,
-        'prospective_subject_id':str(row.prospective_subject_id),'child_bound':bool(row.child_id and row.child.is_verified),'claim_submitted':row.claimed_at is not None,
-        'expires_at':row.expires_at.isoformat(),'operational_only':True}
+        'prospective_subject_id':str(row.prospective_subject_id),'child_bound':bool(row.child_id and row.child.is_verified),'claim_submitted':bool(row.claimed_at is not None or row.child_id is not None),
+        'expires_at':None if _direct_method(row.jurisdiction,row.method) and row.expires_at.year==9999 else row.expires_at.isoformat(),'operational_only':True}
 
 
 def _row(value):
@@ -118,6 +148,7 @@ def _review_eligible(request):
 def review(request,authorization_id,*,evidence_sha256,approve,expected_version,operation_id):
     _review_eligible(request)
     row=_row(authorization_id)
+    if _direct_method(row.jurisdiction,row.method):raise DomainError('guardian_permission_required','This method records the guardian’s direct electronic permission, not staff verification.',409)
     _locks(request,row.child_id,row.guardian_id,review=True)
     row=GuardianAuthorization.objects.select_for_update().get(pk=row.pk);_current(row)
     if row.reviewer_id not in (None,request.user.pk):raise DomainError('permission_denied','The assigned reviewer is required.',403)
@@ -139,6 +170,9 @@ def withdraw(request,authorization_id,*,expected_version,operation_id):
     def mutate():
         if row.version!=expected_version:raise DomainError('version_conflict','Authorization changed.',412)
         row.claim_sha256='';row.claim_expires_at=None;row.status='withdrawn';row.withdrawn_at=timezone.now();row.version+=1;row.save()
+        if _direct_method(row.jurisdiction,row.method):
+            policy,_=_policy(row.jurisdiction,row.purpose,row.notice_version,row.method)
+            row.expires_at=timezone.now();row.retain_until=row.expires_at+timedelta(seconds=policy['record_retention_seconds']);row.save(update_fields=['expires_at','retain_until'])
         if row.purpose=='account_processing' and row.child_id:
             _revoke_child_sessions(row.child_id)
         audit(actor,'guardian.withdrawn',row)
@@ -183,7 +217,9 @@ def policies():
             jurisdiction,purpose,notice,method=key.split(':')
             policy,_=_public_policy(jurisdiction,purpose,notice,method)
         except (ValueError,AttributeError,DomainError):continue
-        items.append({'jurisdiction':jurisdiction,'purpose':purpose,'notice_version':notice,'method':method,'max_lifetime_seconds':policy['max_lifetime_seconds']})
+        item={'jurisdiction':jurisdiction,'purpose':purpose,'notice_version':notice,'method':method,'max_lifetime_seconds':policy.get('max_lifetime_seconds')}
+        if _direct_method(jurisdiction,method):item['lifetime']='until_withdrawn'
+        items.append(item)
     return items
 
 
@@ -204,12 +240,21 @@ def _own_locked(request,authorization_id):
 
 
 @transaction.atomic
-def request_authorization(request,*,jurisdiction,purpose,notice_version,method,operation_id,source_authorization_id=None):
+def request_authorization(request,*,jurisdiction,purpose,notice_version,method,operation_id,source_authorization_id=None,parent_declared_adult=None,guardian_permission=None,account_notice_version=None,account_terms_consent=None):
     enabled()
     from .views import require_fresh
     require_fresh(request)
     policy,digest=_public_policy(jurisdiction,purpose,notice_version,method)
+    direct=_direct_method(jurisdiction,method)
+    declaration=None
+    if direct:
+        from .enrollment import parent_declaration,PARENT_NOTICE_VERSION
+        if purpose!='account_processing':raise DomainError('guardian_policy_unavailable','Guardian rights requests require a separate supported review.',409)
+        if notice_version!=PARENT_NOTICE_VERSION:raise DomainError('guardian_permission_required','Read the current parent notice before continuing.',422)
+        declaration=parent_declaration({'parent_declared_adult':parent_declared_adult,'guardian_permission':guardian_permission,'account_notice_version':account_notice_version,'account_terms_consent':account_terms_consent})
     _locks(request,None,request.user.pk)
+    if direct and request.user.guardian_managed:
+        raise DomainError('guardian_permission_required','First confirm your own independent account capacity before acting as a parent or guardian.',403)
     child_id=None
     if purpose!='account_processing':
         source=_own_locked(request,source_authorization_id)
@@ -220,17 +265,33 @@ def request_authorization(request,*,jurisdiction,purpose,notice_version,method,o
         # A historical opaque relation only routes a fresh independent review;
         # expired/withdrawn authority itself grants no renewed processing.
         source=_own_locked(request,source_authorization_id)
-        if source.purpose!='account_processing' or source.jurisdiction!=jurisdiction or not source.child_id or not source.child.is_verified:
+        if source.purpose!='account_processing' or source.jurisdiction!=jurisdiction or not source.child_id or (not direct and not source.child.is_verified):
             raise DomainError('guardian_authority_unavailable','A bound account relation is required.',403)
         child_id=source.child_id
+    if direct and child_id is not None and not source.child.guardian_managed:
+        raise DomainError('guardian_authority_unavailable','This account is managed independently.',403)
     old=OperationReceipt.objects.filter(actor=request.user,operation_id=operation_id,kind='guardian.request').first()
     if old:
         previous=GuardianAuthorization.objects.select_for_update().filter(pk=old.response['authorization_id']).first()
         if not previous:raise DomainError('guardian_authority_unavailable','Authorization no longer exists.',403)
         _current(previous)
     payload={'jurisdiction':jurisdiction,'purpose':purpose,'notice_version':notice_version,'method':method,'source_authorization_id':source_authorization_id}
+    if direct:payload['declaration']=declaration
     def mutate():
-        row=GuardianAuthorization.objects.create(guardian=request.user,child_id=child_id,jurisdiction=jurisdiction,purpose=purpose,notice_version=notice_version,method=method,policy_sha256=digest,expires_at=timezone.now()+timedelta(seconds=policy['max_lifetime_seconds']),retain_until=timezone.now()+timedelta(seconds=policy['max_lifetime_seconds']+policy['record_retention_seconds']))
+        until_withdrawn=direct and policy.get('lifetime')=='until_withdrawn'
+        bound_verified=bool(child_id and source.child.is_verified)
+        expiry=(datetime(9999,12,31,tzinfo=datetime_timezone.utc) if bound_verified else timezone.now()+timedelta(days=7)) if until_withdrawn else timezone.now()+timedelta(seconds=policy['max_lifetime_seconds'])
+        row=GuardianAuthorization(guardian=request.user,child_id=child_id,jurisdiction=jurisdiction,purpose=purpose,notice_version=notice_version,method=method,policy_sha256=digest,expires_at=expiry,retain_until=None if until_withdrawn and bound_verified else expiry+timedelta(seconds=policy['record_retention_seconds']))
+        if direct:
+            row.status='authorized';row.reviewed_at=timezone.now();row.evidence_sha256=_direct_evidence(row)
+        row.save()
+        if direct:audit(request.user,'guardian.electronic_permission',row,{**declaration,'prospective_subject_id':str(row.prospective_subject_id),'purpose':purpose,'notice_version':notice_version,'evidence_sha256':row.evidence_sha256,'assurance':'authenticated_declaration'})
+        if direct and child_id:
+            from .services import _digest
+            audit(request.user,'guardian.subject_bound',row,{'prospective_subject_id':str(row.prospective_subject_id),'child_id':str(row.child.public_id),'child_email_sha256':_digest(row.child.email),'guardian_permission':True,'account_notice_version':account_notice_version})
+            if not row.child.is_verified:
+                from .services import request_email_verification
+                request_email_verification(row.child.email,return_path='/en/vault/',locale='en')
         audit(request.user,'guardian.requested',row)
         return 201,_data(row),row.version
     return apply_operation(request.user,operation_id,'guardian.request',payload,mutate)
@@ -283,14 +344,39 @@ def claim_account(request,authorization_id):
     row=_own_locked(request,authorization_id)
     # This precedes application body parsing/persistence, not network intake.
     _claim_preflight(request,row)
-    d=json_body(request,{'email','password','display_name','locale','return_path'}|PASSWORD_PURPOSE_FIELDS,['email','password','display_name'])
+    direct=_direct_method(row.jurisdiction,row.method)
+    d=json_body(request,{'email','password','display_name','locale','return_path','subject_confirmed','guardian_permission','account_notice_version'}|PASSWORD_PURPOSE_FIELDS,['email','password','display_name'])
+    if direct:
+        from .enrollment import ACCOUNT_NOTICE_VERSION
+        if d.get('subject_confirmed')!=str(row.prospective_subject_id) or d.get('guardian_permission') is not True or d.get('account_notice_version')!=ACCOUNT_NOTICE_VERSION:
+            raise DomainError('guardian_permission_required','Confirm permission for this exact reader account before creating it.',422)
     consent=validate_password_purpose_consent(d)
-    user=register_member(**{k:v for k,v in d.items() if k not in PASSWORD_PURPOSE_FIELDS},password_consent=consent,_return_created_user=True)
+    user=register_member(**{k:v for k,v in d.items() if k not in PASSWORD_PURPOSE_FIELDS|{'subject_confirmed','guardian_permission','account_notice_version'}},password_consent=consent,_return_created_user=True,_guardian_account=True)
     if user is not None:
         user.guardian_managed=True;user.save(update_fields=['guardian_managed'])
     row.child=user;row.claimed_at=timezone.now();row.claim_sha256='';row.claim_expires_at=None;row.version+=1;row.save()
+    if direct and user is not None:
+        from .services import _digest
+        audit(request.user,'guardian.subject_bound',row,{'prospective_subject_id':str(row.prospective_subject_id),'child_id':str(user.public_id),'child_email_sha256':_digest(user.email),'guardian_permission':True,'account_notice_version':d['account_notice_version']})
     audit(request.user,'guardian.account_claim_submitted',row)
     return {'status':'delivery_pending'}
+
+
+def confirm_direct_account_verification(user):
+    """Extend only an exact current permission after actual mailbox proof.
+
+    Called inside email verification's existing transaction after its User lock.
+    Expired/withdrawn/unbound permission is never revived by a mail link.
+    """
+    from .enrollment import enabled as india_enabled,DIRECT_PARENT_METHOD
+    if not india_enabled() or not user.guardian_managed or not user.is_verified:return
+    for row in GuardianAuthorization.objects.select_for_update().filter(child=user,jurisdiction='IN',method=DIRECT_PARENT_METHOD,purpose='account_processing',status='authorized',expires_at__gt=timezone.now()):
+        try:
+            _current(row);policy,_=_public_policy(row.jurisdiction,row.purpose,row.notice_version,row.method)
+        except DomainError:continue
+        if (policy.get('lifetime')=='until_withdrawn'
+            and User.objects.filter(pk=row.guardian_id,is_active=True,is_verified=True).exists()):
+            row.expires_at=datetime(9999,12,31,tzinfo=datetime_timezone.utc);row.retain_until=None;row.save(update_fields=['expires_at','retain_until'])
 
 
 EXPORT_SECTIONS={'profile','preferences','consents','progress','completion','annotations','saved_items','lists','list_items','devices','downloads','learning_completion','quiz_attempts','email_addresses','linked_identities'}
@@ -300,6 +386,7 @@ def _rights_policy(row):
     _current(row)
     policy,_=_public_policy(row.jurisdiction,row.purpose,row.notice_version,row.method)
     if row.status!='authorized' or not row.child_id:raise DomainError('guardian_authority_unavailable','An exact reviewed child authority is required.',403)
+    if _direct_method(row.jurisdiction,row.method) and not row.child.guardian_managed:raise DomainError('guardian_authority_unavailable','This account is managed independently.',403)
     if row.purpose=='privacy_access':
         sections=policy.get('allowed_export_sections')
         if not isinstance(sections,list) or not sections or any(not isinstance(v,str) or v not in EXPORT_SECTIONS for v in sections):

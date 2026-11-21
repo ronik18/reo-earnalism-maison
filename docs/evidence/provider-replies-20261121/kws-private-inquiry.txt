@@ -1,0 +1,21 @@
+Subject: Nonbinding Parent Verification TEST eligibility and remaining technical/legal questions — Reo Enterprise / Earnalism
+
+Hello KWS Developer Support,
+
+Reo Enterprise is a registered Indian proprietorship operating Earnalism, a free-access digital reading application. Current access is limited to authorized adult staff/testers physically in India; there are no real customers or known child accounts. We are evaluating a minimum child/guardian authorization journey before any public child enrollment. No production verification or new contractual acceptance is requested by this inquiry.
+
+We reviewed the official KWS onboarding, testing and Parent Verification method documentation. Please confirm:
+
+1. Is this Indian proprietorship and software use eligible for Parent Verification, and which exact entity/agreements and declarations apply to TEST access? Is a product-level TEST configuration appropriate to isolate Earnalism from unrelated projects?
+2. Please confirm TEST credential availability, permitted developer/admin email aliases, documented synthetic success/failure/preverified cases, and that no real card authorization, identity/face data or production AgeGraph addition is required for the proposed tests.
+3. For the country codes below, does your published method table apply to this developer/account, including Russia's non-card routes and Korea's local methods? What account, sanctions, provider or location restrictions and unsupported-country responses apply? We are not asking KWS to certify our legal compliance.
+4. Does PV prove only adult status or also the parent/guardian relationship to a particular child? What claims, signed webhook/result authentication, environment/app/request binding, expiry, replay protection and revocation facilities are documented? Please identify any separate role/purpose permission service that would require additional terms rather than assuming it is included.
+5. What developer fees, paid-support costs and parent-side charges/authorizations apply? Please distinguish TEST from production, and identify any mandatory paid commitment before use.
+6. Please identify the current processor/independent-controller roles, processing/storage/subprocessor locations, retention/AgeGraph handling, deletion/withdrawal mechanisms and applicable transfer terms. Are there eligibility or routing limits for Russia/Kazakhstan or other listed countries?
+
+Country codes: AM, AZ, BD, BH, BN, BR, BT, CA, CY, DE, DK, FR, GB, GE, HK, ID, IL, IN, IQ, JO, JP, KH, KR, KZ, LA, LB, LK, MM, MO, MV, MY, NL, NP, NZ, OM, PH, PK, QA, RU, SA, SG, TH, TR, TW, US, UZ, YE.
+
+Business reply contact: sales@reoenterprise.org. Please reply through this private support discussion or to that business address. No purchase, provider appointment, filing, public launch, real identity processing or production activation is authorized by this inquiry.
+
+Thank you,
+Reo Enterprise — Earnalism

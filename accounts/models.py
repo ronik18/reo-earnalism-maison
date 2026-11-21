@@ -137,7 +137,7 @@ class MFARecoveryCode(models.Model):
 
 
 class GuardianAuthorization(models.Model):
-    """Disabled operational foundation, not proof of legal parental consent."""
+    """Purpose-bound operational permission, not independent identity proof."""
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     child=models.ForeignKey(User,on_delete=models.CASCADE,null=True,related_name='guardian_authorizations_received')
     prospective_subject_id=models.UUIDField(default=uuid.uuid4,editable=False,unique=True)

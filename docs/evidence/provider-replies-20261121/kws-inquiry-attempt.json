@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-21",
+  "inquiry_sha256": "b8c7b959b53776351eda5739110a60f8598c4f289c747a7cec0a7160f7a91001",
+  "owner_approved_exact_inquiry": true,
+  "submitted": false,
+  "submission_receipt": null,
+  "reason": "Official EOS Support redirects to /s/unauthorized and requires Epic Online Services organization membership",
+  "authentication": {
+    "epic_signed_in": true,
+    "two_factor_enabled": true,
+    "security_changes_by_agent": false
+  },
+  "devportal": {
+    "url": "https://dev.epicgames.com/portal/profile/signup",
+    "screen": "Create Your Organization",
+    "required_name": "Reo Enterprise (proposed, not submitted)",
+    "country_field_value": "IN",
+    "creator_becomes_owner": true,
+    "visible_owner_capabilities": [
+      "add members",
+      "manage seats",
+      "handle payments"
+    ],
+    "visible_terms_links": [],
+    "visible_agreement_checkboxes": [],
+    "created": false
+  },
+  "new_contracts_accepted": false,
+  "kws_service_or_product_created": false,
+  "runtime_changed": false,
+  "book_legacy_changes": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  }
+}

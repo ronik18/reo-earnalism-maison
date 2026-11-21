@@ -1,0 +1,82 @@
+{
+  "date": "2026-11-21",
+  "scope": "Public-document review only",
+  "country_count": 47,
+  "unique_country_count": 47,
+  "exact_policy_match": true,
+  "groups": {
+    "americas-europe-followup.md": [
+      "US",
+      "GB",
+      "BR",
+      "CA",
+      "DE",
+      "FR",
+      "DK",
+      "NL",
+      "CY"
+    ],
+    "emea-followup.md": [
+      "RU",
+      "KZ",
+      "UZ",
+      "TR",
+      "AM",
+      "AZ",
+      "BH",
+      "SA",
+      "OM",
+      "QA",
+      "JO",
+      "IL",
+      "GE",
+      "IQ",
+      "LB",
+      "YE"
+    ],
+    "apac-followup.md": [
+      "IN",
+      "BD",
+      "BN",
+      "BT",
+      "HK",
+      "ID",
+      "JP",
+      "KH",
+      "KR",
+      "LA",
+      "LK",
+      "MM",
+      "MO",
+      "MV",
+      "MY",
+      "NP",
+      "NZ",
+      "PH",
+      "PK",
+      "SG",
+      "TH",
+      "TW"
+    ]
+  },
+  "kws_required_by_identified_sources": false,
+  "fully_qualified_public_all_ages_countries_evidenced": 0,
+  "smallest_candidate_countries": [
+    "IN"
+  ],
+  "candidate_is_clearance": false,
+  "physical_UAT": {
+    "deferred": true,
+    "blocking": false
+  },
+  "provider_setup_messages_contracts": false,
+  "runtime_changes": false,
+  "book_legacy_changes": false,
+  "files": {
+    "americas-europe-followup.md": "f3a43c1acc71a08bc1d0eec582d57fb2ee3c70a78c3057450d3e148cf76d1019",
+    "provider-independent-child-design.md": "f69c7c3dcddcb7abf45366ec7a09caaec1e71234e872fcc533291c2cf16c4145",
+    "emea-followup.md": "11c7ceef49b807c2e85942711671e8a2df83811b2e98cd46336f4211c7a14755",
+    "apac-followup.md": "b87eb406d0210e05b83c4f1c7760988ba2e1b7b9a8400cca4e76502998874ce1",
+    "README.md": "8ef046f01ecab0a83505829aa2f517175bad989a1211855cff11dd3171245e5b"
+  }
+}
