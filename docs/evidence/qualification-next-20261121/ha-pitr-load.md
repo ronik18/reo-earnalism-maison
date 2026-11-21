@@ -39,3 +39,9 @@ A local synthetic restart/load repetition on a concurrently owned browser contai
 ## Integration live-settings snapshot
 
 Root read the existing signed-in Render Compute page after this lane completed: selected0.5CPU/512MB$7/month plan, one instance, and explicit “Autoscaling requires a Pro plan or higher.” Current live source is23f4f86. [Redacted settings](render-settings.json). No Edit/Save/upgrade action was taken. This closes the current Render settings readback only; actual Neon retention/compute settings and workload/SLO reconciliation remain required before the exact bounded drill-cost approval.
+
+## Integration Neon settings: concrete discrepancy
+
+Root subsequently read the existing project overview, Computes and Backup & Restore pages. [Actual redacted settings](neon-settings.json): Launch in AWS Singapore, primary compute ACTIVE at0.25–8CU; configured seven-day history, earliest available restore point17November2026 23:50GMT+05:30 (project creation). No snapshot/schedule is shown. No Preview/Restore/Create/Edit/Save action was taken. Absence of snapshots does not negate continuous history. This verifies settings/availability only, not successful PITR or a full elapsed seven-day history.
+
+**Resolve cap discrepancy before load:** actual8CUmaximum differs from the recorded isolated2CUapproval. Do not cost or run a drill as if2CU were enforced. Prepare owner-confirmed correction to2CU, leaving0.25minimum/history/branch unchanged, or obtain explicit authority for another cap. No correction is made here because the owner requested current-platform preservation. The approved future0.5–2CU/Scale baseline is distinct. Reconcile caps first, then approve one bounded load/recovery package; do not launch with an assumed cost ceiling.
