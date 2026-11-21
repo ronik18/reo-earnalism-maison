@@ -1,0 +1,11 @@
+{
+  "checked_at_utc": "2026-11-21 16:42:28 UTC",
+  "method": "Read-only original-sender inbox search by ticket/subject, excluding own sent mail",
+  "matching_incoming": 2,
+  "new_since_review": 0,
+  "prior_messages": "Earlier automatic acknowledgement and substantive technical reply",
+  "followup_answers_received": false,
+  "private_message_ids_or_personal_addresses_in_receipt": false,
+  "new_spending_usd": 0,
+  "message_sent": false
+}
