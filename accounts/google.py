@@ -156,7 +156,7 @@ class MaisonSocialAccountAdapter(DefaultSocialAccountAdapter):
         if enabled() and not sociallogin.is_existing:
             if data.get('create_account') is not True:
                 raise ImmediateHttpResponse(oauth_problem(DomainError('account_registration_required','Create your account first. A parent or legal guardian creates a younger reader’s account.',403),request))
-            try:adult_declaration(data.get('account_declaration',{}))
+            try:adult_declaration(data.get('account_declaration',{}),getattr(request,'territory',None))
             except DomainError as error:raise ImmediateHttpResponse(oauth_problem(error,request))
         if not sociallogin.is_existing and (User.objects.filter(email=email).exists() or EmailAddress.objects.filter(email__iexact=email).exists()):
             raise ImmediateHttpResponse(oauth_problem(DomainError('identity_link_required','Sign in to your existing account, then explicitly link Google in Settings.',409),request))
@@ -166,7 +166,7 @@ class MaisonSocialAccountAdapter(DefaultSocialAccountAdapter):
         if enabled():
             state=getattr(request,'_maison_google_state',{}).get('data',{})
             if state.get('create_account') is not True:raise DomainError('account_registration_required','Create your account through the permitted signup route first.',403)
-            declaration=adult_declaration(state.get('account_declaration',{}))
+            declaration=adult_declaration(state.get('account_declaration',{}),getattr(request,'territory',None))
         try:
             with transaction.atomic():
                 sociallogin.user.email=sociallogin.account.extra_data['email'];sociallogin.user.is_verified=True
@@ -236,7 +236,7 @@ def start(request):
             if intent!='sign_in':raise DomainError('validation_error','Account creation is available only through signup.',422)
             declaration={k:request.GET.get(k) for k in ACCOUNT_FIELDS}
             declaration['account_terms_consent']=declaration.get('account_terms_consent')=='true'
-            data.update(create_account=True,account_declaration=adult_declaration(declaration))
+            data.update(create_account=True,account_declaration=adult_declaration(declaration,getattr(request,'territory',None)))
         else:data['create_account']=False
     if intent!='sign_in':
         data.update(member=str(getattr(request.user,'public_id','')),device=str(getattr(getattr(request,'device',None),'pk','')))

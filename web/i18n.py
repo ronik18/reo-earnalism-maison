@@ -1,7 +1,8 @@
 """Small explicit UI catalogue; edition content never changes with UI locale."""
 
 STRINGS = {
-    'account_permission_required': ('Please confirm that you are 18 or older and accept the current account terms before creating your own account. A parent or guardian begins for a younger reader.', 'Please confirm that you are 18 or older and accept the current account terms before creating your own account. A parent or guardian begins for a younger reader.'),
+    'account_permission_required': ('Please accept the current service terms and account notice to create your account.', 'অ্যাকাউন্ট তৈরি করতে বর্তমান পরিষেবার শর্ত ও অ্যাকাউন্ট বিজ্ঞপ্তি মেনে নিন।'),
+    'adult_declaration_required': ('Please confirm that you are 18 or older to create an account here.', 'এখানে অ্যাকাউন্ট তৈরি করতে নিশ্চিত করুন যে আপনার বয়স ১৮ বা তার বেশি।'),
     'independent_account_updated': ('If the verified account and password matched, the account can now continue under your own permission, with previous guardian permissions and sessions ended. Sign in again to continue.', 'If the verified account and password matched, the account can now continue under your own permission, with previous guardian permissions and sessions ended. Sign in again to continue.'),
     'independent_account_unavailable': ('We could not update the account. Check your existing verified account details and your own adult permission. Contact sales@reoenterprise.org if you need help.', 'We could not update the account. Check your existing verified account details and your own adult permission. Contact sales@reoenterprise.org if you need help.'),
     'account_registration_required': ('No new account was created. Start from Create an account to choose your account or parent route.', 'No new account was created. Start from Create an account to choose your account or parent route.'),

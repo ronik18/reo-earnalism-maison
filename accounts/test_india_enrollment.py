@@ -20,7 +20,7 @@ POLICY={'enabled':True,'public_enabled':True,'lifetime':'until_withdrawn','recor
 POLICIES={'IN:account_processing:india-parent-v1:india-parent-electronic-v1':POLICY}
 
 
-@override_settings(LOCAL=True,INDIA_FIRST_LAUNCH_ENABLED=True,GUARDIAN_AUTHORIZATION_ENABLED=True,GUARDIAN_AUTHORIZATION_POLICIES=POLICIES)
+@override_settings(LOCAL=True,INDIA_FIRST_LAUNCH_ENABLED=True,GUARDIAN_AUTHORIZATION_ENABLED=True,GUARDIAN_AUTHORIZATION_POLICIES=POLICIES,MAISON_ACCOUNT_MODES={"IN":"adult_only"})
 class IndiaEnrollmentTests(TestCase):
     setUp=GuardianJourneyTests.setUp
     client_for=GuardianJourneyTests.client_for
@@ -43,7 +43,7 @@ class IndiaEnrollmentTests(TestCase):
             RateLimitBucket.objects.all().delete() # Separate invalid-input cases from the independently tested IP budget.
             with patch('accounts.services._email',side_effect=AssertionError('No account identity before declaration')):
                 r=self.client.post('/api/v1/auth/register',{**data,**change},content_type='application/json')
-            self.assertEqual(r.status_code,422,r.content);self.assertEqual(r.json()['code'],'account_permission_required')
+            self.assertEqual(r.status_code,422,r.content);self.assertIn(r.json()['code'],{'account_permission_required','adult_declaration_required'})
         self.assertFalse(User.objects.filter(email=data['email']).exists())
         RateLimitBucket.objects.all().delete()
         r=self.client.post('/api/v1/auth/register',{**data,**ADULT},content_type='application/json');self.assertEqual(r.status_code,202,r.content)

@@ -16,3 +16,14 @@ def parse_service_territories(raw, whitelist):
         if code not in codes:
             codes.append(code)
     return tuple(codes)
+
+
+ACCOUNT_MODES = ('open', 'adult_only')
+
+
+def validate_account_modes(modes, service_territories):
+    """Every active territory needs an explicit account mode."""
+    for code in service_territories:
+        if modes.get(code) not in ACCOUNT_MODES:
+            raise ImproperlyConfigured(f'Service territory {code} needs an account mode: open or adult_only')
+    return dict(modes)

@@ -73,6 +73,14 @@ class RetentionTests(TestCase):
         job.refresh_from_db(); self.assertIsNone(job.actor_id);self.assertEqual(job.payload,{'retention_cleaned':True})
         self.assertTrue(User.objects.filter(pk=self.member.pk).exists())
 
+    def test_abandoned_signup_from_open_territory_is_removed(self):
+        user=self.abandoned('open-territory'); self.action(user=user)
+        AuditEvent.objects.create(actor=user,action='account.capacity_declared',entity_kind='User',entity_id=str(user.pk),
+            detail={'purpose':'registration','account_capacity':'not_asked','account_notice_version':'india-account-v1','account_terms_consent':True,'assurance':'self_declaration'})
+        AuditEvent.objects.filter(actor=user).update(created_at=user.date_joined)
+        self.assertEqual(cleanup_account_retention(dry_run=False)['eligible']['abandoned_signups'],1)
+        self.assertFalse(User.objects.filter(pk=user.pk).exists())
+
     def test_account_activity_pending_mail_and_holds_preserve_accounts(self):
         activity=self.abandoned('activity')
         Device.objects.create(user=activity,token_binding_sha256='x'*64,expires_at=self.now-timedelta(days=1))
