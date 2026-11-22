@@ -67,3 +67,21 @@ class FinancialMaintenanceDispatchTests(TestCase):
         with patch('billing.refunds.process_refund_job',return_value={'status':'pending','awaiting_provider_confirmation':True}) as provider:
             self.maintain();self.maintain();provider.assert_called_once()
         job.refresh_from_db();self.assertEqual(job.status,'pending');self.assertEqual(job.error_code,'provider_confirmation_pending');self.assertGreater(job.not_before,before);self.assertEqual(job.attempts,0)
+
+
+class RetryJitterTests(TestCase):
+    """LLD 15: retry delays 30s, 2m, 10m... with jitter, so failed jobs do not retry in lockstep."""
+    def retry_delays(self):
+        delays=[]
+        for _ in range(8):
+            job=OutboxJob.objects.create(kind='catalog_cache_purge',dedupe_key=str(uuid.uuid4()),payload={},not_before=timezone.now())
+            with patch('operations.providers.purge_catalog_cache',side_effect=DomainError('provider_unavailable','Synthetic outage.',503)):
+                before=timezone.now();run_due_jobs(limit=1)
+            job.refresh_from_db();self.assertEqual(job.status,'pending')
+            delays.append((job.not_before-before).total_seconds())
+        return delays
+
+    def test_first_retry_is_jittered_around_thirty_seconds(self):
+        delays=self.retry_delays()
+        self.assertTrue(all(24<=d<=36.5 for d in delays),delays)
+        self.assertGreater(len({round(d) for d in delays}),1,delays)

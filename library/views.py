@@ -170,6 +170,7 @@ def cover(request,asset_id):
     response=HttpResponse(svc._asset_valid(asset),content_type=asset.content_type)
     response['Cache-Control']=f'public, max-age=0, s-maxage={svc.public_ttl(asset.revision,3600,territory=territory)}, must-revalidate'
     response['X-Content-Type-Options']='nosniff'
+    response['ETag']=f'"{asset.sha256}"'  # Lets the edge and browsers revalidate with 304, not bytes.
     return response
 
 @json_endpoint()

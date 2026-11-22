@@ -39,9 +39,10 @@ def cache_headers(request,response):
     response['Vary']=', '.join(sorted(p.strip() for p in response.get('Vary','').split(',') if p.strip() and p.strip().lower()!='cookie')) or 'Accept-Encoding'
     if response.get('Content-Type','').startswith('text/html'):response['Content-Language']='en'
     elif re.fullmatch('[a-z]{2}',request.GET.get('locale','')):response['Content-Language']=request.GET['locale']
-    if response.get('Content-Type','').split(';')[0] in {'application/json','text/html'}:
-        etag='W/"'+hashlib.sha256(response.content).hexdigest()+'"'
-        response['ETag']=etag
+    if not response.has_header('ETag') and response.get('Content-Type','').split(';')[0] in {'application/json','text/html'}:
+        response['ETag']='W/"'+hashlib.sha256(response.content).hexdigest()+'"'
+    etag=response.get('ETag')
+    if etag:
         if request.headers.get('If-None-Match')==etag:
             conditional=HttpResponseNotModified()
             for key,value in response.items():conditional[key]=value

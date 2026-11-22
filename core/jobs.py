@@ -1,3 +1,4 @@
+import random
 import time
 import uuid
 from datetime import timedelta
@@ -6,6 +7,14 @@ from django.db.models import Q
 from django.utils import timezone
 from .models import OutboxJob
 from .api import DomainError
+
+
+RETRY_SECONDS=(30,120,600,1800,7200,21600)
+
+
+def retry_delay(attempts):
+    """LLD 15 schedule with +/-20% jitter so a provider outage does not cause lockstep retries."""
+    return timedelta(seconds=RETRY_SECONDS[min(attempts-1,len(RETRY_SECONDS)-1)]*random.uniform(.8,1.2))
 
 
 def run_due_jobs(limit=25,max_seconds=45):
@@ -55,7 +64,7 @@ def run_due_jobs(limit=25,max_seconds=45):
                 if error in ['awaiting_resolution','privacy_hold','provider_not_enabled','handler_not_enabled','scheduled_publication_invalid','scheduled_publication_held','refund_review_required','provider_not_qualified','provider_token_identity_missing']:current.status='blocked'
                 elif current.attempts>=7:current.status='dead'
                 else:
-                    current.status='pending';delays=[30,120,600,1800,7200,21600];current.not_before=timezone.now()+timedelta(seconds=delays[min(current.attempts-1,5)])
+                    current.status='pending';current.not_before=timezone.now()+retry_delay(current.attempts)
             elif isinstance(result,dict) and result.get('awaiting_provider_confirmation') is True and (job.kind=='subscription_reconcile' or (job.kind in ['refund_reconcile','refund_review'] and job.payload.get('refund_id'))):
                 # Authoritative provider pending state is not a delivery failure.
                 # Keep the same durable obligation and mutation marker for GET-only

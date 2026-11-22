@@ -7,7 +7,7 @@ from django.test import TestCase,RequestFactory
 from django.utils import timezone
 from core.api import DomainError
 from core.pagination import paginate_queryset
-from library.models import Work,Edition,Revision
+from library.models import Work,Edition,Revision,Unit,Asset,Rights
 from .models import SavedItem,PersonalList,Progress,Completion
 from .services import vault_data
 
@@ -64,35 +64,42 @@ class PrivatePaginationTests(TestCase):
         response=annotations(self.request({'edition_revision_id':'bad'}))
         self.assertEqual(response.status_code,422)
 
+    def publish(self,edition,territories=('GB',)):
+        """A real catalog-eligible free Reader edition in the given territories."""
+        now=timezone.now()
+        revision=Revision.objects.create(edition=edition,title='Original paging fixture',access_policy={'reader':'free'})
+        Unit.objects.create(revision=revision,ordinal=1,title='Chapter')
+        Asset.objects.create(revision=revision,kind='reader_package',state='ready',storage_key=f'revisions/{revision.pk}/{uuid.uuid4()}',
+                             sha256='0'*64,bytes=20,content_type='application/json')
+        Rights.objects.create(revision=revision,format='reader',action='read',territories=list(territories),
+                              starts_at=now-timedelta(days=1),ends_at=now+timedelta(days=1),approved=True)
+        revision.state='live';revision.published_at=now;revision.save();edition.live_revision=revision;edition.save()
+        return revision
+
     def test_finished_section_pages_beyond20_with_trusted_territory(self):
         now=timezone.now()
         for edition in self.editions[:25]:
-            revision=Revision.objects.create(edition=edition,title='Original paging fixture',state='live',published_at=now)
-            edition.live_revision=revision;edition.save()
-            Completion.objects.create(user=self.user,edition=edition,revision=revision,format='reader',is_complete=True,completed_at=now)
+            Completion.objects.create(user=self.user,edition=edition,revision=self.publish(edition),format='reader',is_complete=True,completed_at=now)
         Completion.objects.all().update(updated_at=now)
-        with patch('library.services.catalog_card',side_effect=lambda edition,**kw:{'edition_id':str(edition.id),'formats':['reader']}) as cards:
-            first=vault_data(self.user,territory='GB',request=self.request({'section':'finished','limit':'20'},territory='GB'))
-            second=vault_data(self.user,territory='GB',request=self.request({'section':'finished','limit':'20','cursor':first['next_cursor']},territory='GB'))
+        first=vault_data(self.user,territory='GB',request=self.request({'section':'finished','limit':'20'},territory='GB'))
+        second=vault_data(self.user,territory='GB',request=self.request({'section':'finished','limit':'20','cursor':first['next_cursor']},territory='GB'))
         self.assertEqual(len(first['finished']),20);self.assertEqual(len(second['finished']),5)
-        self.assertFalse(second['has_more']);self.assertTrue(all(call.kwargs['territory']=='GB' for call in cards.call_args_list))
+        self.assertFalse(second['has_more'])
         self.assertEqual(len({row['card']['edition_id'] for row in first['finished']+second['finished']}),25)
+        elsewhere=vault_data(self.user,territory='IN',request=self.request({'section':'finished','limit':'20'}))
+        self.assertEqual(elsewhere['finished'],[])
 
     def test_summary_scan_is_bounded_and_explicit_section_reaches_later_items(self):
         now=timezone.now()
         for edition in self.editions[:26]:
-            revision=Revision.objects.create(edition=edition,title='Original summary fixture',state='live',published_at=now)
-            edition.live_revision=revision;edition.save()
+            revision=self.publish(edition,territories=('IN',))
             Completion.objects.create(user=self.user,edition=edition,revision=revision,format='reader',is_complete=True,completed_at=now)
         rows=list(Completion.objects.filter(user=self.user).order_by('-updated_at','-id'))
         target=rows[-1].edition_id
-        def card(edition,**kwargs):
-            if edition.id!=target:raise DomainError('rights_unavailable','Unavailable.',403)
-            return {'edition_id':str(edition.id),'formats':['reader']}
-        with patch('reader.services.VAULT_SUMMARY_SCAN_LIMIT',25),patch('library.services.catalog_card',side_effect=card) as cards:
+        self.publish(Edition.objects.get(pk=target))  # Only the oldest finished book is available in GB.
+        with patch('reader.services.VAULT_SUMMARY_SCAN_LIMIT',25):
             summary=vault_data(self.user,territory='GB',request=self.request(territory='GB'))
             self.assertEqual(summary['finished'],[])
-            self.assertEqual(cards.call_count,25)
             explicit=vault_data(self.user,territory='GB',request=self.request({'section':'finished'},territory='GB'))
             self.assertEqual([x['card']['edition_id'] for x in explicit['finished']],[str(target)])
 
