@@ -42,7 +42,7 @@ class StreamAdapterTests(SimpleTestCase):
         self.device=uuid.uuid4()
         self.expiry=timezone.now()+timedelta(minutes=10)
         self.auth=patch('library.services.authorize_revision',return_value=self.revision).start()
-        self.until=patch('library.services.authorized_until',side_effect=lambda *a,**kw:self.expiry).start()
+        self.until=patch('library.services.access_ends',side_effect=lambda *a,**kw:self.expiry).start()
         self.device_check=patch('library.services.validate_device',return_value=SimpleNamespace(id=self.device)).start()
         self.addCleanup(patch.stopall)
 

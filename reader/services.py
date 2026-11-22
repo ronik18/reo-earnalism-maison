@@ -1,9 +1,10 @@
 import hashlib
 import unicodedata
 import uuid
+from functools import lru_cache
 from decimal import Decimal
 from django.db import transaction
-from django.db.models import Sum,Q,Exists,OuterRef
+from django.db.models import Count,Exists,OuterRef
 from django.db.models.functions import Length
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -36,6 +37,29 @@ def _boundary(text,index):
         return not (unicodedata.category(text[index]).startswith('M') or text[index] in '\u200c\u200d' or text[index-1] in '\u200c\u200d' or 'VIRAMA' in unicodedata.name(text[index-1],''))
 
 
+def _layout(revision,key,table):
+    """Book-wide character/audio offsets. Frozen content is immutable (DB trigger), so it is cached
+    by revision and content hash; an unknown anchor or unit forces a fresh build."""
+    layout=None if revision.state=='draft' else _frozen_layout(revision.id,revision.content_sha256)
+    return layout if layout and key in layout[table] else _build_layout(revision.id)
+
+
+def _build_layout(revision_id):
+    units=list(Unit.objects.filter(revision_id=revision_id).order_by('ordinal').values_list('id','duration_ms'))
+    chars={};total_chars=0
+    for anchor,size in Paragraph.objects.filter(unit__revision_id=revision_id).order_by('unit__ordinal','ordinal').values_list('anchor_id',Length('text')):
+        chars[anchor]=total_chars;total_chars+=size
+    ms={};total_ms=0
+    for unit,duration in units:
+        ms[unit]=total_ms;total_ms+=duration or 0
+    return {'chars_before':chars,'total_chars':total_chars,'ms_before':ms,'total_ms':total_ms}
+
+
+@lru_cache(maxsize=32)  # ~1 MiB per 10k-paragraph book; bounded per worker
+def _frozen_layout(revision_id,content_sha256):
+    return _build_layout(revision_id)
+
+
 def _location(revision,format,loc):
     if not isinstance(loc,dict) or loc.get('format')!=format:raise DomainError('validation_error','Location format does not match.',422)
     allowed={'format','unit_id','anchor_id','offset_chars'} if format=='reader' else {'format','unit_id','position_ms'}
@@ -45,12 +69,12 @@ def _location(revision,format,loc):
     if format=='reader':
         para=Paragraph.objects.filter(anchor_id=public_uuid(loc['anchor_id']),unit=unit).first()
         if not para or not _boundary(para.text,loc['offset_chars']):raise DomainError('invalid_anchor','Invalid text boundary.',422)
-        total=Paragraph.objects.filter(unit__revision=revision).aggregate(n=Sum(Length('text')))['n'] or 1
-        before=Paragraph.objects.filter(unit__revision=revision).filter(Q(unit__ordinal__lt=unit.ordinal)|Q(unit=unit,ordinal__lt=para.ordinal)).aggregate(n=Sum(Length('text')))['n'] or 0
-        fraction=min(Decimal(1),Decimal(before+loc['offset_chars'])/Decimal(total))
+        layout=_layout(revision,para.anchor_id,'chars_before')
+        fraction=min(Decimal(1),Decimal(layout['chars_before'][para.anchor_id]+loc['offset_chars'])/Decimal(layout['total_chars'] or 1))
     else:
         if type(loc['position_ms'])!=int or loc['position_ms']<0 or unit.duration_ms is None or loc['position_ms']>unit.duration_ms:raise DomainError('invalid_position','Position exceeds known media duration.',422)
-        fraction=Decimal(loc['position_ms'])/Decimal(unit.duration_ms or 1)
+        layout=_layout(revision,unit.id,'ms_before')
+        fraction=min(Decimal(1),Decimal(layout['ms_before'][unit.id]+loc['position_ms'])/Decimal(layout['total_ms'] or 1))
     return {k:str(v) if k.endswith('_id') else v for k,v in loc.items()},fraction
 
 
@@ -186,10 +210,17 @@ def edition_summary(edition):
     return {'edition_id':str(edition.id),'work_id':str(edition.work_id),'slug':edition.slug,'title':edition.live_revision.title if edition.live_revision_id else edition.work.title,'locale':edition.locale,'available':bool(edition.live_revision_id)}
 
 
+def _savable(edition_id,adding):
+    """New saves need a published edition; removal works for anything already saved."""
+    rows=Edition.objects.filter(pk=public_uuid(edition_id))
+    edition=(rows.filter(live_revision__state='live') if adding else rows).first()
+    if not edition:raise DomainError('not_found','Edition not found.',404)
+    return edition
+
+
 def saved_set(user,edition_id,saved,operation_id):
     def mutate():
-        edition=Edition.objects.select_related('work','live_revision').filter(pk=public_uuid(edition_id)).first()
-        if not edition:raise DomainError('not_found','Edition not found.',404)
+        edition=_savable(edition_id,saved)
         if saved:
             row,_=SavedItem.objects.get_or_create(user=user,edition=edition)
             return 200,{'edition_id':str(edition.id),'saved_at':iso(row.created_at),'available':bool(edition.live_revision_id)},1
@@ -198,7 +229,8 @@ def saved_set(user,edition_id,saved,operation_id):
 
 
 def list_data(row,detail=False):
-    result={'list_id':str(row.id),'name':row.name,'version':row.version,'item_count':row.items.count(),'created_at':iso(row.created_at),'updated_at':iso(row.updated_at)}
+    count=row.item_total if hasattr(row,'item_total') else row.items.count()
+    result={'list_id':str(row.id),'name':row.name,'version':row.version,'item_count':count,'created_at':iso(row.created_at),'updated_at':iso(row.updated_at)}
     if detail:result['edition_ids']=[str(x) for x in row.items.order_by('sort_order').values_list('edition_id',flat=True)]
     return result
 
@@ -226,8 +258,7 @@ def mutate_list(user,list_id,operation_id,base_version,action,payload):
         else:
             ids=list(row.items.order_by('sort_order').values_list('edition_id',flat=True))
             if action in ['add','remove']:
-                eid=public_uuid(payload['edition_id'])
-                if not Edition.objects.filter(pk=eid).exists():raise DomainError('not_found','Edition not found.',404)
+                eid=_savable(payload['edition_id'],action=='add').pk
                 if action=='add' and eid not in ids:ids.append(eid)
                 if action=='remove' and eid in ids:ids.remove(eid)
             elif action=='reorder':
@@ -243,35 +274,78 @@ def mutate_list(user,list_id,operation_id,base_version,action,payload):
 VAULT_SUMMARY_SCAN_LIMIT=500
 
 
+class Shelf:
+    """Batch Vault serialization: one catalog query for all cards, one for corrected-edition resumes."""
+    def __init__(self,territory,user=None):
+        self.territory=territory;self.user=user;self.cards={};self.resume={}
+
+    def prepare(self,rows):
+        from library.catalog_query import catalog_queryset,card_from_edition
+        missing={row.edition_id for row in rows}-set(self.cards)
+        if missing:
+            for edition in catalog_queryset(None,self.territory).filter(pk__in=missing):
+                self.cards[edition.pk]=card_from_edition(edition)
+            self.cards.update({pk:None for pk in missing if pk not in self.cards})
+        if getattr(self.user,'is_staff',False):self._prepare_drafts(rows)
+        self._prepare_resume([row for row in rows if isinstance(row,Progress) and row.revision_id!=row.edition.live_revision_id
+                              and self.cards.get(row.edition_id) and row.location and row.pk not in self.resume])
+
+    def _prepare_drafts(self,rows):
+        """Authorized staff still see their own unpublished review copies (never cached publicly)."""
+        from library.services import catalog_card
+        for row in rows:
+            if self.cards.get(row.edition_id) is None and not row.edition.live_revision_id:
+                try:self.cards[row.edition_id]=catalog_card(row.edition,territory=self.territory,user=self.user)
+                except DomainError:pass
+
+    def _prepare_resume(self,stale):
+        """A correction keeps the book on the shelf and resumes at the same chapter's start (LLD 7, 10)."""
+        if not stale:return
+        old={str(pk):ordinal for pk,ordinal in Unit.objects.filter(pk__in=[r.location['unit_id'] for r in stale]).values_list('pk','ordinal')}
+        live=Unit.objects.filter(revision_id__in={r.edition.live_revision_id for r in stale}).order_by('revision_id','ordinal').prefetch_related('paragraphs')
+        chapters={}
+        for unit in live:chapters.setdefault(unit.revision_id,{})[unit.ordinal]=unit
+        for row in stale:
+            units=chapters.get(row.edition.live_revision_id,{})
+            unit=units.get(old.get(row.location['unit_id'])) or next(iter(units.values()),None)
+            first=next(iter(unit.paragraphs.all()),None) if unit else None
+            if unit is None or (row.format=='reader' and first is None):self.resume[row.pk]=None;continue
+            location={'format':'reader','unit_id':str(unit.pk),'anchor_id':str(first.anchor_id),'offset_chars':0} if row.format=='reader' else {'format':row.format,'unit_id':str(unit.pk),'position_ms':0}
+            self.resume[row.pk]={**progress_data(row),'edition_revision_id':str(row.edition.live_revision_id),'location':location}
+
+    def entry(self,row,kind):
+        card=self.cards.get(row.edition_id)
+        if card is None:return None
+        if kind=='completion':return {'card':card,'completion':completion_data(row)}
+        progress=self.resume[row.pk] if row.pk in self.resume else progress_data(row)
+        return {'card':card,'progress':progress} if progress else None
+
+    def take(self,rows,kind,bound=20):
+        rows=list(rows[:VAULT_SUMMARY_SCAN_LIMIT]);self.prepare(rows)
+        return [entry for row in rows if (entry:=self.entry(row,kind)) is not None][:bound]
+
+
 def vault_data(user,territory='IN',request=None):
-    from library.services import catalog_card
     from core.pagination import paginate_queryset
     from .models import DownloadLicense
     section=request.GET.get('section','summary') if request else 'summary'
     if section not in ('summary','continue','finished','lists'):raise DomainError('validation_error','Invalid Vault section.',422)
     if section=='summary' and request and any(k in request.GET for k in ('cursor','limit')):raise DomainError('validation_error','Choose an explicit Vault section to paginate.',422)
-    progress=Progress.objects.filter(user=user).annotate(finished=Exists(Completion.objects.filter(user=user,edition_id=OuterRef('edition_id'),format=OuterRef('format'),is_complete=True))).filter(finished=False).select_related('edition__work','edition__live_revision').order_by('-updated_at','-id')
-    completions=Completion.objects.filter(user=user,is_complete=True).select_related('edition__work','edition__live_revision').order_by('-updated_at','-id')
-    def serialize(row,kind):
-        try:card=catalog_card(row.edition,user=user,territory=territory)
-        except DomainError:return None
-        if row.revision_id!=row.edition.live_revision_id:return None
-        return {'card':card,kind:progress_data(row) if kind=='progress' else completion_data(row)}
-    def eligible(rows,kind,bound=20):
-        values=[]
-        for row in rows[:VAULT_SUMMARY_SCAN_LIMIT].iterator(chunk_size=100):
-            value=serialize(row,kind)
-            if value is not None:values.append(value)
-            if len(values)>=bound:break
-        return values
+    progress=Progress.objects.filter(user=user).annotate(finished=Exists(Completion.objects.filter(user=user,edition_id=OuterRef('edition_id'),format=OuterRef('format'),is_complete=True))).filter(finished=False).select_related('edition').order_by('-updated_at','-id')
+    completions=Completion.objects.filter(user=user,is_complete=True).select_related('edition').order_by('-updated_at','-id')
+    lists=PersonalList.objects.filter(user=user).annotate(item_total=Count('items'))
+    shelf=Shelf(territory,user)
     result={'continue':[],'saved_count':SavedItem.objects.filter(user=user).count(),'download_count':DownloadLicense.objects.filter(user=user,revoked_at=None,expires_at__gt=timezone.now()).count(),'finished_count':Completion.objects.filter(user=user,is_complete=True).count(),'finished':[],'lists':[],'legacy_obligations':[]}
     if section=='summary':
-        result.update({'continue':eligible(progress,'progress',20),'finished':eligible(completions,'completion',20),'lists':[list_data(x) for x in PersonalList.objects.filter(user=user).order_by('name','id')[:20]]})
+        result.update({'continue':shelf.take(progress,'progress'),'finished':shelf.take(completions,'completion'),'lists':[list_data(x) for x in lists.order_by('name','id')[:20]]})
     else:
         if section=='lists':
-            page=paginate_queryset(request,PersonalList.objects.filter(user=user),'vault:lists',ordering='name',maximum=20)
+            page=paginate_queryset(request,lists,'vault:lists',ordering='name',maximum=20)
             page['items']=[list_data(x) for x in page['items']]
-        else:page=paginate_queryset(request,progress if section=='continue' else completions,'vault:'+section+':'+territory,ordering='-updated_at',maximum=20,serialize=lambda row:serialize(row,'progress' if section=='continue' else 'completion'))
+        else:
+            kind='progress' if section=='continue' else 'completion'
+            page=paginate_queryset(request,progress if section=='continue' else completions,'vault:'+section+':'+territory,ordering='-updated_at',maximum=20,
+                                   prepare=shelf.prepare,serialize=lambda row:shelf.entry(row,kind))
         result[section]=page['items']
         result.update(section=section,next_cursor=page['next_cursor'],has_more=page['has_more'])
     return result

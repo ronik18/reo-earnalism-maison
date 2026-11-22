@@ -138,7 +138,14 @@ def reviewable_edition(edition, user):
 
 
 def authorize_revision(user, revision, format='reader', action='read', territory='IN'):
+    """Fresh fetch, then the single access check (LLD 6)."""
     revision = _revision(revision)
+    prefetch_public_rights([revision])
+    return check_access(user, revision, format, action, territory)
+
+
+def check_access(user, revision, format='reader', action='read', territory='IN'):
+    """Access check on a revision loaded in this request (with edition and, ideally, prefetched rights)."""
     if not getattr(user, 'is_authenticated', False) or not getattr(user, 'is_active', False):
         raise DomainError('authentication_required', 'Sign in to open the full edition.', 401)
     if not getattr(user, 'is_verified', False):
@@ -166,6 +173,11 @@ def authorize_revision(user, revision, format='reader', action='read', territory
 
 def authorized_until(user, revision, format='reader', action='read', territory='IN'):
     revision = authorize_revision(user, revision, format, action, territory)
+    return access_ends(user, revision, format, action, territory)
+
+
+def access_ends(user, revision, format='reader', action='read', territory='IN'):
+    """Earliest known end of an access that authorize_revision already allowed."""
     ends = [current_right(revision, format, 'read', territory).ends_at]
     if action == 'download':
         ends.append(current_right(revision, format, 'download', territory).ends_at)
@@ -187,15 +199,30 @@ def public_ttl(revision, class_seconds=30, action='read', territory='IN'):
     return max(0, min(class_seconds, math.floor((min(ends)-now).total_seconds()))) if ends else 0
 
 
-def available_formats(revision, territory='IN'):
-    return [f for f in FORMATS if revision.access_policy.get(f, 'deny') != 'deny'
-            and current_right(revision, f, 'read', territory)
-            and revision.assets.filter(state='ready',kind={'reader':'reader_package','audio':'audio_chapter','video':'video'}[f],provider='stream' if f=='video' else 'r2').exists()]
+FORMAT_ASSETS = {'reader': ('reader_package', 'r2'), 'audio': ('audio_chapter', 'r2'), 'video': ('video', 'stream')}
+
+
+def ready_assets(revision):
+    """Ready deliverable and cover rows of one revision, loaded once per revision object."""
+    if not hasattr(revision, '_maison_ready_assets'):
+        revision._maison_ready_assets = list(revision.assets.filter(
+            state='ready', kind__in=['reader_package', 'audio_chapter', 'video', 'cover']).order_by('created_at', 'id'))
+    return revision._maison_ready_assets
+
+
+def _offered(revision, territory):
+    return [f for f in FORMATS if revision.access_policy.get(f, 'deny') != 'deny' and current_right(revision, f, 'read', territory)]
+
+
+def available_formats(revision, territory='IN', unit=None):
+    present = {(a.kind, a.provider) for a in ready_assets(revision) if unit is None or a.unit_id == unit.pk}
+    return [f for f in _offered(revision, territory) if FORMAT_ASSETS[f] in present]
 
 
 def _cover(revision):
     selected=revision.validation_evidence.get('cover_pair',{}).get('front',{}).get('asset_id')
-    asset = revision.assets.filter(kind='cover',state='ready',pk=selected).first() if selected else revision.assets.filter(kind='cover',state='ready').first()
+    covers=[a for a in ready_assets(revision) if a.kind=='cover']
+    asset=next((a for a in covers if str(a.pk)==str(selected)),None) if selected else next(iter(covers),None)
     if not asset:
         return None
     base=getattr(settings,'PUBLIC_BASE_URL','http://127.0.0.1:8008' if getattr(settings,'LOCAL',False) else '').rstrip('/')
@@ -258,13 +285,21 @@ def catalog_card(edition,territory='IN',user=None):
     raise DomainError('content_unavailable','Edition is not currently available.',404)
 
 
-def edition_detail(edition_id, territory='IN', user=None):
+def _edition(edition_id, user=None):
     try:
         edition = Edition.objects.select_related('live_revision','work').get(pk=edition_id)
     except (Edition.DoesNotExist,ValueError,ValidationError):
         raise DomainError('not_found','Edition not found.',404)
-    edition=reviewable_edition(edition,user)
+    return reviewable_edition(edition,user)
+
+
+def edition_detail(edition_id, territory='IN', user=None):
+    return _edition_detail(_edition(edition_id,user), territory, user)
+
+
+def _edition_detail(edition, territory='IN', user=None):
     revision = edition.live_revision
+    if revision: prefetch_public_rights([revision])
     reviewing=can_review_draft(user,revision)
     if not revision or (not reviewing and (not _live(revision) or not available_formats(revision,territory))):
         raise DomainError('content_unavailable','Edition is not available.',404)
@@ -276,9 +311,7 @@ def edition_detail(edition_id, territory='IN', user=None):
     if reviewing and not formats: raise DomainError('rights_unavailable','Draft rights are unavailable.',403)
     cover=_cover(revision)
     if reviewing and cover:
-        selected=revision.validation_evidence.get('cover_pair',{}).get('front',{}).get('asset_id')
-        a=revision.assets.filter(kind='cover',state='ready',pk=selected).first() if selected else revision.assets.filter(kind='cover',state='ready').first()
-        cover={**cover,'url':f'/api/v1/staff/draft-covers/{a.id}'}
+        cover={**cover,'url':f"/api/v1/staff/draft-covers/{cover['url'].rsplit('/',1)[-1]}"}
     return {'edition_id':str(edition.id),'work_id':str(edition.work_id),'edition_revision_id':str(revision.id),
             'title':revision.title,'description':revision.description,'locale':edition.locale,'formats':formats,
             'content_sha256':revision.content_sha256,'anchor_revision':revision.anchor_revision,'cover':cover,
@@ -287,17 +320,18 @@ def edition_detail(edition_id, territory='IN', user=None):
             'published_at':iso(revision.published_at),'version':edition.version}
 
 
-def unit_dto(unit,territory='IN'):
-    kinds=set(unit.assets.filter(state='ready').values_list('kind','provider'))
+def unit_dto(unit,territory='IN',revision=None):
+    """revision: the already-loaded revision object, so its rights/assets load once for all units."""
+    revision=revision or unit.revision
     return {'unit_id':str(unit.id),'edition_revision_id':str(unit.revision_id),'title':unit.title,'ordinal':unit.ordinal,
-            'kind':unit.kind,'formats':[f for f in available_formats(unit.revision,territory)
-                                     if ({'reader':'reader_package','audio':'audio_chapter','video':'video'}[f],'stream' if f=='video' else 'r2') in kinds],
+            'kind':unit.kind,'formats':available_formats(revision,territory,unit=unit),
             'duration_ms':unit.duration_ms,'preview':unit.preview}
 
 
 def edition_units(edition_id,territory='IN',user=None):
-    detail = edition_detail(edition_id,territory,user=user)
-    return [unit_dto(u,territory) for u in Unit.objects.filter(revision_id=detail['edition_revision_id']).select_related('revision','revision__edition')]
+    edition=_edition(edition_id,user)
+    detail=_edition_detail(edition,territory,user)
+    return [unit_dto(u,territory,edition.live_revision) for u in edition.live_revision.units.all()]
 
 
 def paragraph_dto(paragraph):
@@ -305,13 +339,14 @@ def paragraph_dto(paragraph):
 
 
 def get_reader_document(user,edition_id,unit_id,territory='IN'):
-    detail = edition_detail(edition_id,territory,user=user)
-    revision = authorize_revision(user,detail['edition_revision_id'],territory=territory)
+    edition=_edition(edition_id,user)
+    detail=_edition_detail(edition,territory,user)
+    revision=authorize_revision(user,edition.live_revision,territory=territory)
     try:
         unit = revision.units.get(pk=unit_id)
     except (Unit.DoesNotExist,ValueError,ValidationError):
         raise DomainError('unit_not_found','Unit does not belong to this revision.',404)
-    return {'edition':detail,'unit':unit_dto(unit,territory),'paragraphs':[paragraph_dto(p) for p in unit.paragraphs.all()]}
+    return {'edition':detail,'unit':unit_dto(unit,territory,edition.live_revision),'paragraphs':[paragraph_dto(p) for p in unit.paragraphs.all()]}
 
 
 def get_preview_document(edition_id,unit_id,territory='IN'):
@@ -342,10 +377,11 @@ def get_reader_manifest(user,revision_id,territory='IN',cursor=None):
         except (signing.BadSignature,ValueError,KeyError,TypeError):
             raise DomainError('invalid_cursor','Invalid manifest cursor.',400)
     output=[]
+    packages=[a for a in ready_assets(revision) if a.kind=='reader_package']
     for unit in units[start:start+10]:
         chunks=[{'chunk_id':str(a.id),'asset_id':str(a.id),'sha256':a.sha256,'bytes':a.bytes,
                  'compressed_bytes':a.compressed_bytes or a.bytes,'content_type':'application/json'}
-                for a in unit.assets.filter(kind='reader_package',state='ready').order_by('created_at','id')]
+                for a in packages if a.unit_id==unit.pk]
         output.append({'unit_id':str(unit.id),'title':unit.title,'chunks':chunks})
     end = start+len(output)
     body={'schema_version':1,'edition_revision_id':str(revision.id),'content_sha256':revision.content_sha256,
@@ -379,35 +415,46 @@ def validate_device(user,device_id):
 
 
 def _asset_grant(user,asset,device_id,territory='IN',*,purpose='online',license_id=None):
-    format=DELIVERABLE_KINDS.get(asset.kind)
-    if not format or asset.state!='ready':
-        raise DomainError('asset_not_deliverable','This asset is not a deliverable output.',403)
+    """One asset: authorize, then sign. Package grants authorize once and sign many."""
+    format=_deliverable_format(asset)
     if purpose not in {'online','offline'}:raise DomainError('invalid_purpose','Unsupported content grant purpose.',422)
     action='download' if purpose=='offline' else 'read'
     revision=authorize_revision(user,asset.revision,format,action=action,territory=territory)
+    expiry=_grant_expiry(user,revision,format,action,device_id,territory)
+    if purpose=='offline':
+        from reader.download_services import validate_delivery_license
+        expiry=min(expiry,validate_delivery_license(user,license_id,asset,device_id,territory).expires_at)
+    return _signed_asset(user,asset,revision,device_id,expiry,territory,purpose=purpose,license_id=license_id),expiry
+
+
+def _deliverable_format(asset):
+    format=DELIVERABLE_KINDS.get(asset.kind)
+    if not format or asset.state!='ready':
+        raise DomainError('asset_not_deliverable','This asset is not a deliverable output.',403)
+    return format
+
+
+def _grant_expiry(user,revision,format,action,device_id,territory):
+    """Device check and latest permitted expiry for an already-authorized revision."""
     validate_device(user,device_id)
+    return min(timezone.now()+timedelta(seconds=GRANT_SECONDS),access_ends(user,revision,format,action,territory))
+
+
+def _signed_asset(user,asset,revision,device_id,expiry,territory,*,purpose='online',license_id=None):
     from . import storage
     remote=storage.is_r2()
     if asset.kind=='video' and remote:raise DomainError('provider_not_configured','Video requires its qualified Stream adapter.',503)
     if not remote:_asset_valid(asset)
-    now=timezone.now()
-    expiry=min(now+timedelta(seconds=GRANT_SECONDS),authorized_until(user,revision,format,action=action,territory=territory))
-    if purpose=='offline':
-        from reader.download_services import validate_delivery_license
-        license=validate_delivery_license(user,license_id,asset,device_id,territory)
-        expiry=min(expiry,license.expires_at)
-    if expiry<=now:
-        raise DomainError('rights_unavailable','Content rights have expired.',403)
-    payload={'asset':str(asset.id),'user':str(user.public_id),'device':str(device_id),'revision':str(revision.id),
-             'purpose':purpose,'license_id':str(license_id) if license_id else None,'territory':territory,'exp':int(expiry.timestamp())}
     seconds=math.floor((expiry-timezone.now()).total_seconds())
     if seconds<1:raise DomainError('rights_unavailable','Content authorization is expiring.',403)
+    payload={'asset':str(asset.id),'user':str(user.public_id),'device':str(device_id),'revision':str(revision.id),
+             'purpose':purpose,'license_id':str(license_id) if license_id else None,'territory':territory,'exp':int(expiry.timestamp())}
     token=signing.dumps(payload,salt='maison-private-asset',compress=True)
     url=storage.private_url(asset.storage_key,seconds,asset.content_type) if remote else f'/api/v1/content/local-assets/{asset.id}?token={token}'
     return {'asset_id':str(asset.id),'unit_id':str(asset.unit_id) if asset.unit_id else None,
             'chunk_id':str(asset.id) if asset.kind=='reader_package' else None,'sha256':asset.sha256,'bytes':asset.bytes,
             'content_type':asset.content_type,'url':url,
-            'range_supported':asset.kind=='audio_chapter'},expiry
+            'range_supported':asset.kind=='audio_chapter'}
 
 
 def package_grant(user,data,territory='IN'):
@@ -418,18 +465,21 @@ def package_grant(user,data,territory='IN'):
     chunks=data.get('chunk_ids',[])
     if not isinstance(units,list) or not 1<=len(units)<=10 or len(set(units))!=len(units) or not isinstance(chunks,list) or len(chunks)>100:
         raise DomainError('invalid_selection','Select 1–10 distinct units and at most 100 chunks.',400)
-    if revision.units.filter(pk__in=units).count()!=len(units):
+    try:selected=set(revision.units.filter(pk__in=units).values_list('pk',flat=True))
+    except (ValueError,ValidationError):selected=set()
+    if len(selected)!=len(units):
         raise DomainError('unit_revision_mismatch','Every unit must belong to this revision.',409)
-    assets=revision.assets.filter(unit_id__in=units,kind='reader_package',state='ready').order_by('created_at','id')
+    assets=[a for a in ready_assets(revision) if a.kind=='reader_package' and a.unit_id in selected]
     if chunks:
-        assets=assets.filter(pk__in=chunks)
-        if assets.count()!=len(set(chunks)):
+        wanted=set(map(str,chunks));assets=[a for a in assets if str(a.pk) in wanted]
+        if len(assets)!=len(wanted):
             raise DomainError('chunk_revision_mismatch','Every chunk must belong to the selected revision and units.',409)
-    if not assets.exists() or assets.count()>100:
+    if not assets or len(assets)>100:
         raise DomainError('invalid_selection','No ready chunks, or selection exceeds 100 chunks.',400)
-    grants=[_asset_grant(user,a,data.get('device_id'),territory) for a in assets]
+    expiry=_grant_expiry(user,revision,'reader','read',data.get('device_id'),territory)
     body={'grant_id':str(uuid.uuid4()),'edition_revision_id':str(revision.id),'issued_at':iso(timezone.now()),
-          'expires_at':iso(min(g[1] for g in grants)),'purpose':'online','assets':[g[0] for g in grants]}
+          'expires_at':iso(expiry),'purpose':'online',
+          'assets':[_signed_asset(user,a,revision,data.get('device_id'),expiry,territory) for a in assets]}
     if len(canonical_bytes(body))>65536:
         raise DomainError('grant_too_large','Select fewer chunks.',413)
     return body

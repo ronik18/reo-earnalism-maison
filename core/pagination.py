@@ -32,7 +32,8 @@ def _result(rows,limit,binding,position):
     return {'items':selected,'next_cursor':cursor,'has_more':more}
 
 
-def paginate_queryset(request,queryset,scope,ordering='-created_at',maximum=100,serialize=None,scan_limit=500):
+def paginate_queryset(request,queryset,scope,ordering='-created_at',maximum=100,serialize=None,scan_limit=500,prepare=None):
+    """prepare(rows), if given, runs once on the scanned batch so serialize avoids per-row queries."""
     limit,binding,data=_context(request,scope+':'+ordering,maximum)
     field=ordering.lstrip('-');descending=ordering.startswith('-');pk=queryset.model._meta.pk
     qs=queryset.order_by(ordering,('-' if descending else '')+pk.name) if field!=pk.name else queryset.order_by(ordering)
@@ -56,6 +57,7 @@ def paginate_queryset(request,queryset,scope,ordering='-created_at',maximum=100,
     position=lambda row:[str(getattr(row,field)),str(row.pk)]
     if serialize is None:return _result(list(qs[:limit+1]),limit,binding,position)
     batch=list(qs[:scan_limit+1]);selected=[];examined=None;count=0
+    if prepare:prepare(batch[:scan_limit])
     for row in batch[:scan_limit]:
         count+=1;examined=row
         value=serialize(row)

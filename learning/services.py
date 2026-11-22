@@ -8,27 +8,44 @@ from core.api import DomainError
 from library.services import authorize_revision, iso, content_locale
 from .models import Track,Lesson,LessonCompletion,InterviewQuestion,Quiz,QuizAttempt
 
+def _territory(user):
+    return getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ')
+
+
+def _free_rollout_gate(user):
+    if getattr(settings,'FREE_ACCESS_ENABLED',False):
+        if not getattr(user,'is_authenticated',False) or not getattr(user,'is_active',False):raise DomainError('authentication_required','Sign in to continue.',401)
+        if not getattr(user,'is_verified',False):raise DomainError('verification_required','Verify your account.',403)
+        if _territory(user) not in settings.MAISON_PUBLICATION_TERRITORIES:raise DomainError('region_unavailable','Learning is unavailable in this territory.',403)
+
+
 def _track(user,value,allow_locked=False):
     try: track=Track.objects.select_related('edition','edition__live_revision').get(pk=value,published=True)
     except (Track.DoesNotExist,ValueError,ValidationError): raise DomainError('not_found','Track not found.',404)
     if track.access=='deny': raise DomainError('access_denied','This track is not offered.',403)
-    if getattr(settings,'FREE_ACCESS_ENABLED',False):
-        if not getattr(user,'is_authenticated',False) or not getattr(user,'is_active',False):raise DomainError('authentication_required','Sign in to continue.',401)
-        if not getattr(user,'is_verified',False):raise DomainError('verification_required','Verify your account.',403)
-        if getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ') not in settings.MAISON_PUBLICATION_TERRITORIES:raise DomainError('region_unavailable','Learning is unavailable in this territory.',403)
+    _free_rollout_gate(user)
     if track.access=='paid':
         try:
             if not track.edition or not track.edition.live_revision: raise DomainError('access_denied','Track has no access authority.',403)
-            authorize_revision(user,track.edition.live_revision,territory=getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ'))
+            authorize_revision(user,track.edition.live_revision,territory=_territory(user))
         except DomainError:
             if not allow_locked: raise
     return track
 
+def _paid_included(user,track):
+    """Uses the list's already-loaded edition/revision/rights; no per-track re-fetch."""
+    from library.services import check_access
+    revision=track.edition.live_revision if track.edition_id else None
+    try:
+        _free_rollout_gate(user)
+        if not revision:return False
+        check_access(user,revision,territory=_territory(user));return True
+    except DomainError:return False
+
+
 def track_dto(user,track):
     access='free' if track.access=='free' else 'locked'
-    if track.access=='paid':
-        try: _track(user,track.id);access='included'
-        except DomainError: pass
+    if track.access=='paid' and _paid_included(user,track):access='included'
     return {'track_id':str(track.id),'title':track.title,'locale':track.locale,'kind':track.kind,'description':track.description,
             'duration_days':track.duration_days,'company_style':track.company_style or None,'access':access,
             'lesson_count':track.page_lesson_count if hasattr(track,'page_lesson_count') else track.lessons.count()}
@@ -37,21 +54,27 @@ def _track_rows(user,locale=None,kind=''):
     locale=content_locale(locale)
     if kind not in ('','learning','sde_interview'):
         raise DomainError('invalid_filter','Choose a supported track kind.',422)
-    rows=Track.objects.filter(published=True).exclude(access='deny').annotate(page_lesson_count=Count('lessons'))
+    rows=Track.objects.filter(published=True).exclude(access='deny').select_related('edition__live_revision__edition').annotate(page_lesson_count=Count('lessons'))
     if locale:rows=rows.filter(locale=locale)
     if kind:rows=rows.filter(kind=kind)
-    if getattr(settings,'FREE_ACCESS_ENABLED',False) and getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ') not in settings.MAISON_PUBLICATION_TERRITORIES:return rows.none()
+    if getattr(settings,'FREE_ACCESS_ENABLED',False) and _territory(user) not in settings.MAISON_PUBLICATION_TERRITORIES:return rows.none()
     return rows
 
 
+def _dtos(user,tracks):
+    from library.services import prefetch_public_rights
+    prefetch_public_rights([t.edition.live_revision for t in tracks if t.access=='paid' and t.edition_id and t.edition.live_revision_id])
+    return [track_dto(user,t) for t in tracks]
+
+
 def list_tracks(user,locale=None):
-    return [track_dto(user,t) for t in _track_rows(user,locale).order_by('title','id')]
+    return _dtos(user,list(_track_rows(user,locale).order_by('title','id')))
 
 
 def tracks_page(request,user,locale=None,kind=''):
     locale=content_locale(locale)
     result=paginate_queryset(request,_track_rows(user,locale,kind),f'tracks:{locale or "all"}:{kind}',ordering='title')
-    result['items']=[track_dto(user,row) for row in result['items']]
+    result['items']=_dtos(user,result['items'])
     return result
 
 def completion_is_current(record,lesson):
@@ -85,7 +108,7 @@ def _lesson(user,value):
     if lesson.unit_id:
         if lesson.track.edition_id and lesson.unit.revision.edition_id!=lesson.track.edition_id:
             raise DomainError('lesson_not_ready','Lesson media belongs to another edition.',409)
-        authorize_revision(user,lesson.unit.revision,territory=getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ'))
+        authorize_revision(user,lesson.unit.revision,territory=_territory(user))
     return lesson
 
 def lesson_detail(user,lesson_id):

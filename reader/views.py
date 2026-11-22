@@ -70,14 +70,10 @@ def annotation(request,annotation_id):
 
 @json_endpoint(('GET',))
 def saved_items(request):
-    from library.services import catalog_card
-    result=paginate_queryset(request,SavedItem.objects.filter(user=request.user).select_related('edition__work','edition__live_revision'),'saved-items')
-    values=[]
-    for row in result['items']:
-        try:catalog_card(row.edition,user=request.user,territory=territory(request));available=True
-        except DomainError:available=False
-        values.append({'edition_id':str(row.edition_id),'saved_at':services.iso(row.created_at),'available':available})
-    result['items']=values
+    result=paginate_queryset(request,SavedItem.objects.filter(user=request.user).select_related('edition'),'saved-items')
+    shelf=services.Shelf(territory(request),request.user);shelf.prepare(result['items'])
+    result['items']=[{'edition_id':str(row.edition_id),'saved_at':services.iso(row.created_at),'available':shelf.cards.get(row.edition_id) is not None}
+                     for row in result['items']]
     return api_response(result)
 
 
