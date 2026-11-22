@@ -44,7 +44,7 @@ a{color:var(--binding)}
 /* ---------- header ---------- */
 .top{position:relative;z-index:3}
 .top .wrap{display:flex;align-items:center;gap:32px;padding-top:20px;padding-bottom:20px}
-.top img{height:56px;width:auto}
+.top img{height:76px;width:auto}
 .top nav{margin-left:auto;display:flex;align-items:center;gap:28px}
 .top nav a{color:var(--ink);text-decoration:none;font-weight:500}
 .top nav a:hover{color:var(--binding);text-decoration:underline;text-underline-offset:4px}
@@ -55,14 +55,14 @@ a{color:var(--binding)}
 .btn-secondary:hover{background:var(--paper-deep)}
 .top nav .btn{color:var(--paper)}
 .top nav .btn:hover{text-decoration:none}
-@media (max-width:760px){.top nav a:not(.btn){display:none}.top img{height:44px}}
+@media (max-width:760px){.top nav a:not(.btn){display:none}.top img{height:56px}}
 
 /* ---------- hero ---------- */
 .hero{position:relative;overflow:hidden;padding:24px 0 120px}
 .hero::before{ /* rose wash, off-centre */
-  content:"";position:absolute;inset:-20% -10% auto 35%;height:120%;
-  background:radial-gradient(closest-side,rgba(235,211,207,.95),rgba(235,211,207,0));z-index:0}
-.binding-sweep{position:absolute;z-index:0;right:-6%;bottom:-38%;width:78%;height:70%;
+  content:"";position:absolute;inset:2% -8% 2% 36%;
+  background:radial-gradient(ellipse closest-side,rgba(235,211,207,.95),rgba(235,211,207,0));z-index:0}
+.binding-sweep{position:absolute;z-index:0;right:-6%;bottom:-40%;width:60%;height:72%;
   background:linear-gradient(160deg,var(--binding) 0%,var(--binding-deep) 100%);
   border-radius:58% 0 0 0 / 70% 0 0 0;transform:rotate(-4deg)}
 .binding-sweep::after{content:"";position:absolute;inset:-10px 0 auto 0;height:3px;background:var(--foil);border-radius:999px;opacity:.9}
@@ -123,10 +123,10 @@ h2{font:500 clamp(2.2rem,4.2vw,3.4rem)/1.05 var(--display);letter-spacing:-.01em
 .slip .title.bn{font-family:var(--bn);font-weight:600;line-height:1.35}
 .slip .by{color:var(--ink-soft);margin:0 0 24px}
 .slip blockquote{margin:0;font:400 1.125rem/1.75 var(--read);color:var(--ink);max-width:38ch}
-.slip blockquote.bn{font-family:var(--bn);font-weight:500;line-height:1.95}
+.slip .tagline{margin:0;font-size:1.125rem;color:var(--ink);font-family:var(--bn);font-weight:500;line-height:1.95}
 .slip .status{margin-top:28px;font-size:.9375rem;color:var(--ink-soft)}
 .filter{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;padding:4px;gap:4px;margin:0 0 40px}
-.filter button{all:unset;cursor:pointer;padding:8px 18px;border-radius:999px;font:500 .9375rem/1 var(--ui)}
+.filter button{all:unset;cursor:pointer;min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center;padding:8px 18px;border-radius:999px;font:500 .9375rem/1 var(--ui)}
 .filter button[aria-pressed="true"]{background:var(--binding);color:var(--paper)}
 .filter button:focus-visible{outline:3px solid var(--binding);outline-offset:2px}
 @media (max-width:820px){.pair{grid-template-columns:1fr}.slip:nth-child(2){margin-top:0}.slip{padding:32px 24px}}
@@ -145,13 +145,13 @@ h2{font:500 clamp(2.2rem,4.2vw,3.4rem)/1.05 var(--display);letter-spacing:-.01em
 .controls{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
 .device{background:var(--binding);border-radius:14px;padding:18px;box-shadow:var(--shadow)}
 .device .screen{background:var(--paper);border-radius:6px;aspect-ratio:16/10;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;position:relative}
-.device .pg{padding:28px 26px;font:400 .95rem/1.7 var(--read);color:var(--ink)}
+.device .pg{overflow:hidden;padding:28px 26px;font:400 .95rem/1.7 var(--read);color:var(--ink)}
 .device .pg + .pg{border-left:1px solid rgba(90,20,38,.15);background:linear-gradient(90deg,rgba(90,20,38,.06),transparent 18%)}
 .device .curl{position:absolute;right:0;bottom:0;width:64px;height:64px;background:linear-gradient(225deg,var(--paper-deep) 48%,rgba(90,20,38,.25) 50%,transparent 52%)}
 .keys{margin:0;padding:0;list-style:none;display:grid;gap:16px}
 .keys li{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:baseline;border-bottom:1px solid rgba(122,90,30,.3);padding-bottom:14px}
 .keys strong{font:600 1.25rem/1.2 var(--display)}
-@media (max-width:860px){.controls{grid-template-columns:1fr}.keys li{grid-template-columns:1fr;gap:4px}}
+@media (max-width:860px){.controls{grid-template-columns:1fr}.device .pg{padding:16px 14px;font-size:.8rem;line-height:1.55}.keys li{grid-template-columns:1fr;gap:4px}}
 
 /* ---------- final band ---------- */
 .band{background:linear-gradient(150deg,var(--binding),var(--binding-deep));color:var(--paper);position:relative;overflow:hidden}
@@ -168,7 +168,7 @@ h2{font:500 clamp(2.2rem,4.2vw,3.4rem)/1.05 var(--display);letter-spacing:-.01em
 footer{background:var(--binding-deep);color:#E6D3D6;font-size:.9375rem}
 footer .wrap{display:flex;flex-wrap:wrap;gap:16px 32px;justify-content:space-between;padding-top:32px;padding-bottom:32px}
 footer a{color:var(--gold-on-binding)}
-footer nav{display:flex;gap:24px}
+footer nav{display:flex;gap:24px}footer nav a{display:inline-flex;align-items:center;min-height:44px}
 </style>
 </head>
 <body>
@@ -298,7 +298,7 @@ footer nav{display:flex;gap:24px}
           <p class="lang" lang="en">Bengali · short story</p>
           <p class="title bn">বিচারক</p>
           <p class="by">রবীন্দ্রনাথ ঠাকুর</p>
-          <blockquote class="bn">একটি গল্প, যা পাতায় পড়া যায়, কানে শোনা যায়।</blockquote>
+          <p class="bn tagline">একটি গল্প, যা পাতায় পড়া যায়, কানে শোনা যায়।</p>
           <p class="status" lang="en">Arriving first on the shelf.</p>
         </article>
       </div>

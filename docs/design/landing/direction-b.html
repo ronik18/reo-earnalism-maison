@@ -1,0 +1,445 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Earnalism · Maison - Every story, three ways in.</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&amp;family=DM+Sans:wght@400;500;600&amp;family=Noto+Sans+Bengali:wght@400;500;600&amp;family=Noto+Serif+Bengali:wght@400;500;600&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FBF6EC;
+    --paper-deep: #F1E6D2;
+    --rose-wash: #EBD3CF;
+    --binding: #5A1426;
+    --binding-deep: #3A0C18;
+    --ink: #2A0B14;
+    --ink-soft: #5E4148;
+    --gold-text: #7A5A1E;
+    --gold-on-binding: #E9D29A;
+    --foil: linear-gradient(115deg, #8C6A2A, #E8CF8A 38%, #B58D3F 62%, #F3E2B0 80%, #9A7631);
+    
+    --font-display: 'Cormorant Garamond', serif;
+    --font-ui: 'DM Sans', sans-serif;
+    --font-reading: 'Source Serif 4', serif;
+    --font-bengali-serif: 'Noto Serif Bengali', serif;
+    --font-bengali-sans: 'Noto Sans Bengali', sans-serif;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    /* Simulating laid paper texture */
+    background-image: 
+      linear-gradient(90deg, rgba(42,11,20,0.01) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(42,11,20,0.02) 1px, transparent 1px);
+    background-size: 20px 2px;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  .reading-text {
+    font-family: var(--font-reading);
+  }
+
+  .bn-serif {
+    font-family: var(--font-bengali-serif);
+  }
+
+  .bn-sans {
+    font-family: var(--font-bengali-sans);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    background-color: var(--binding);
+    color: var(--paper);
+    transition: background-color 0.2s ease;
+  }
+  .btn-primary:hover {
+    background-color: var(--binding-deep);
+  }
+  .btn-primary:focus-visible {
+    outline: 3px solid var(--binding);
+    outline-offset: 2px;
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    transition: all 0.2s ease;
+  }
+  .btn-secondary:hover {
+    background-color: rgba(42,11,20,0.05);
+  }
+
+  .btn-secondary-gold {
+    background-color: transparent;
+    border: 1px solid var(--gold-on-binding);
+    color: var(--gold-on-binding);
+    transition: all 0.2s ease;
+  }
+  .btn-secondary-gold:hover {
+    background-color: rgba(233, 210, 154, 0.1);
+  }
+
+  .text-link {
+    text-decoration: underline;
+    text-decoration-color: rgba(42,11,20,0.3);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.2s ease;
+  }
+  .text-link:hover {
+    text-decoration-color: var(--ink);
+  }
+
+  .gold-foil-bg {
+    background: var(--foil);
+  }
+  .gold-foil-text {
+    background: var(--foil);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .paper-shadow {
+    box-shadow: 0 18px 40px -24px rgba(42,11,20,.45);
+  }
+
+  .spine-button[aria-expanded="true"] {
+    flex-grow: 1;
+    cursor: default;
+  }
+  .spine-button[aria-expanded="false"] {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .spine-button[aria-expanded="false"]:hover {
+    transform: translateY(-4px);
+  }
+
+  .bg-rose-wash {
+    background-color: var(--rose-wash);
+  }
+  .bg-paper-deep {
+    background-color: var(--paper-deep);
+  }
+  .bg-binding {
+    background-color: var(--binding);
+  }
+  .text-binding {
+    color: var(--binding);
+  }
+  .text-gold {
+    color: var(--gold-text);
+  }
+  .text-ink-soft {
+    color: var(--ink-soft);
+  }
+
+  .bg-paper{background-color:var(--paper)} .text-paper{color:var(--paper)} .text-ink{color:var(--ink)}
+  .border-ink{border-color:var(--ink)} .border-binding{border-color:var(--binding)} .text-binding-deep{color:var(--binding-deep)}
+  footer a[id^="link-"]{display:inline-flex;align-items:center;min-height:44px}
+</style>
+</head>
+<body>
+  <div class="min-h-screen relative overflow-x-hidden" data-sd-id="1">
+
+    <!-- Header -->
+    <header class="relative z-40 px-6 py-4 md:px-12 flex items-center justify-between" data-sd-id="2">
+      <a href="#" id="nav-logo" aria-label="Earnalism Home" data-sd-id="3">
+        <img src="https://vgbujcuwptvheqijyjbe.supabase.co/storage/v1/object/public/hmac-uploads/projects/8b0ec69b-a682-4150-8d77-a5aea85f5638/brand-assets/static-maison-logo.png/logo.png" alt="Earnalism Logo" class="h-8 object-contain" data-sd-id="4">
+      </a>
+      
+      <nav class="hidden md:flex items-center gap-8 font-medium text-[15px]" data-sd-id="5">
+        <a href="#explore" id="nav-explore" class="text-link" data-sd-id="6">Explore the library</a>
+        <a href="#learn" id="nav-learn" class="text-link" data-sd-id="7">Learn</a>
+        <a href="#signin" id="nav-signin" class="text-link" data-sd-id="8">Sign in</a>
+      </nav>
+
+      <div class="flex items-center gap-4" data-sd-id="9">
+        <a href="#signup" id="nav-signup" class="btn-primary px-5 py-2.5 rounded-sm font-medium text-[15px]" data-sd-id="10">Start reading free</a>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-12 pb-24 md:pt-24 md:pb-32 px-6 md:px-12 max-w-[1440px] mx-auto" data-sd-id="11">
+      <!-- Decorative Background Layers -->
+      <div class="absolute top-0 left-0 w-1/3 h-[120%] bg-binding rounded-r-[100px] -z-10 -translate-x-1/2 opacity-10" data-sd-id="12"></div>
+      <div class="absolute top-20 right-10 w-[40vw] h-[40vw] bg-rose-wash rounded-full blur-3xl -z-10 opacity-50" data-sd-id="13"></div>
+      
+      <!-- Fine gold arcs (Decorative) -->
+      <svg class="absolute top-0 right-0 w-full h-full -z-10 pointer-events-none" viewBox="0 0 1440 800" fill="none" xmlns="http://www.w3.org/2000/svg" data-sd-id="14">
+        <path d="M1440 200 A600 600 0 0 0 840 800" stroke="url(#gold-gradient)" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"></path>
+        <path d="M0 600 C400 600 600 400 800 0" stroke="url(#gold-gradient)" stroke-width="0.5" opacity="0.4"></path>
+        <defs>
+          <linearGradient id="gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#8C6A2A"></stop>
+            <stop offset="38%" stop-color="#E8CF8A"></stop>
+            <stop offset="62%" stop-color="#B58D3F"></stop>
+            <stop offset="100%" stop-color="#9A7631"></stop>
+          </linearGradient>
+        </defs>
+      </svg>
+
+      <div class="flex flex-col lg:flex-row items-center gap-16 lg:gap-24 max-w-[1180px] mx-auto" data-sd-id="15">
+        
+        <!-- Left: Copy -->
+        <div class="lg:w-1/2 space-y-8" data-sd-id="16">
+          <h1 class="font-display text-5xl md:text-[5.25rem] leading-[1.05] font-medium text-ink" data-sd-id="17">
+            Every story, three ways in.
+          </h1>
+          <p class="text-[1.125rem] md:text-[1.375rem] text-ink-soft leading-relaxed max-w-[48ch]" data-sd-id="18">
+            A free digital library where you can read, listen, or watch. Pick up a story or lesson in the format that suits the moment, and keep your place across devices.
+          </p>
+          
+          <div class="flex flex-col sm:flex-row gap-4 pt-4" data-sd-id="19">
+            <a href="#signup-hero" id="hero-signup" class="btn-primary px-8 py-4 rounded-sm font-medium text-[16px] text-center" data-sd-id="20">
+              Start reading free
+            </a>
+            <a href="#explore-hero" id="hero-explore" class="btn-secondary px-8 py-4 rounded-sm font-medium text-[16px] text-center" data-sd-id="21">
+              Explore the library
+            </a>
+          </div>
+
+          <p class="text-[0.875rem] text-ink-soft opacity-80 leading-normal max-w-[60ch] pt-6" data-sd-id="22">
+            Open now in India, the United States, the United Kingdom, Brazil, Singapore, Malaysia, Indonesia, the Philippines and Thailand. No payment card needed.
+          </p>
+        </div>
+
+        <!-- Right: Illuminated Initial -->
+        <div class="lg:w-1/2 flex justify-center lg:justify-end" data-sd-id="23">
+          <div class="relative w-[320px] h-[400px] md:w-[480px] md:h-[600px] flex items-center justify-center" data-sd-id="24">
+            <!-- Burgundy Medallion -->
+            <div class="absolute inset-0 bg-binding rounded-t-full rounded-b-[4px] paper-shadow" data-sd-id="25">
+              <!-- Double Gold Border -->
+              <div class="absolute inset-3 border border-[#E8CF8A] rounded-t-full rounded-b-[2px] opacity-80" data-sd-id="26"></div>
+              <div class="absolute inset-4 border border-[#8C6A2A] rounded-t-full rounded-b-[2px] opacity-40" data-sd-id="27"></div>
+              
+              <!-- Abstract 'E' Monogram SVG -->
+              <div class="absolute inset-0 flex items-center justify-center" data-sd-id="28">
+                <svg width="60%" height="60%" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" data-sd-id="29">
+                  <!-- Top arm: Text lines (Read) -->
+                  <path d="M40 60 L140 60" stroke="url(#foil-fill)" stroke-width="12" stroke-linecap="square"></path>
+                  <path d="M40 84 L100 84" stroke="url(#foil-fill)" stroke-width="12" stroke-linecap="square"></path>
+                  
+                  <!-- Middle arm: Soundwave (Listen) -->
+                  <path d="M40 112 L60 112 M70 100 L90 124 M100 90 L120 134 M130 112 L150 112" stroke="url(#foil-fill)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"></path>
+                  
+                  <!-- Bottom arm: Film frame + Subtitle (Watch) -->
+                  <rect x="40" y="160" width="120" height="50" stroke="url(#foil-fill)" stroke-width="8" fill="none"></rect>
+                  <path d="M85 175 L105 185 L85 195 Z" fill="url(#foil-fill)"></path>
+                  <rect x="60" y="200" width="80" height="4" fill="url(#foil-fill)"></rect>
+
+                  <!-- Spine -->
+                  <path d="M40 54 L40 216" stroke="url(#foil-fill)" stroke-width="20" stroke-linecap="square"></path>
+
+                  <defs>
+                    <linearGradient id="foil-fill" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#8C6A2A"></stop>
+                      <stop offset="38%" stop-color="#E8CF8A"></stop>
+                      <stop offset="62%" stop-color="#B58D3F"></stop>
+                      <stop offset="80%" stop-color="#F3E2B0"></stop>
+                      <stop offset="100%" stop-color="#9A7631"></stop>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 2: Pick how you take it in (Spines) -->
+    <section class="py-20 md:py-28 px-6 md:px-12 bg-paper-deep border-y border-opacity-10 border-ink relative" data-sd-id="30">
+      <div class="max-w-[1180px] mx-auto" data-sd-id="31">
+        <div class="mb-16 md:mb-20" data-sd-id="32">
+          <h2 class="font-display text-4xl md:text-[3.75rem] font-medium text-ink" data-sd-id="33">
+            Pick how you take it in
+          </h2>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-6 md:gap-8 h-auto md:h-[500px]" data-sd-id="34">
+          
+          <!-- Spine 1: Read (Active) -->
+          <div class="spine-button flex flex-col md:flex-row rounded-sm overflow-hidden paper-shadow" aria-expanded="true" style="flex-basis: 100%; md:flex-basis: auto;" data-sd-id="35">
+            <!-- Spine edge -->
+            <div class="bg-binding w-full md:w-[120px] p-6 flex flex-row md:flex-col items-center justify-between flex-shrink-0" data-sd-id="36">
+              <span class="font-display text-[1.75rem] text-[#FBF6EC] md:[writing-mode:vertical-rl] md:rotate-180" data-sd-id="37">Read</span>
+              <iconify-icon icon="ph:book-open-text-light" class="text-[#E9D29A] text-3xl"></iconify-icon>
+            </div>
+            <!-- Panel Content -->
+            <div class="bg-paper flex-1 p-8 md:p-12 flex flex-col justify-center" data-sd-id="38">
+              <h3 class="font-display text-3xl mb-6 text-ink" data-sd-id="39">The written word</h3>
+              <ul class="space-y-4 text-[1.0625rem] text-ink-soft" data-sd-id="40">
+                <li class="flex items-start gap-3" data-sd-id="41">
+                  <iconify-icon icon="ph:hand-swipe-right-light" class="text-gold text-xl mt-0.5"></iconify-icon>
+                  <span data-sd-id="42">Page turns by swipe, tap, or arrow keys</span>
+                </li>
+                <li class="flex items-start gap-3" data-sd-id="43">
+                  <iconify-icon icon="ph:text-a-underline-light" class="text-gold text-xl mt-0.5"></iconify-icon>
+                  <span data-sd-id="44">Adjustable text size and themes</span>
+                </li>
+                <li class="flex items-start gap-3" data-sd-id="45">
+                  <iconify-icon icon="ph:download-simple-light" class="text-gold text-xl mt-0.5"></iconify-icon>
+                  <span data-sd-id="46">Save for offline reading</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Spine 2: Listen -->
+          <button class="spine-button bg-paper-deep border-2 border-binding rounded-sm paper-shadow flex flex-row md:flex-col items-center justify-between p-6 w-full md:w-[120px] flex-shrink-0" aria-expanded="false" id="spine-listen" data-sd-id="47">
+             <span class="font-display text-[1.75rem] text-binding md:[writing-mode:vertical-rl] md:rotate-180" data-sd-id="48">Listen</span>
+             <iconify-icon icon="ph:headphones-light" class="text-binding text-3xl"></iconify-icon>
+          </button>
+
+          <!-- Spine 3: Watch -->
+          <button class="spine-button gold-foil-bg rounded-sm paper-shadow flex flex-row md:flex-col items-center justify-between p-6 w-full md:w-[120px] flex-shrink-0" aria-expanded="false" id="spine-watch" data-sd-id="49">
+             <span class="font-display text-[1.75rem] text-binding-deep md:[writing-mode:vertical-rl] md:rotate-180" data-sd-id="50">Watch</span>
+             <iconify-icon icon="ph:play-circle-light" class="text-binding-deep text-3xl"></iconify-icon>
+          </button>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: One library, every language -->
+    <section class="py-20 md:py-32 px-6 md:px-12 relative" data-sd-id="51">
+      <div class="max-w-[1180px] mx-auto" data-sd-id="52">
+        <div class="text-center mb-12" data-sd-id="53">
+          <h2 class="font-display text-4xl md:text-[3.75rem] font-medium text-ink mb-8" data-sd-id="54">
+            One library, every language
+          </h2>
+          
+          <!-- Filter Pills -->
+          <div class="inline-flex bg-paper-deep p-1 rounded-full border border-ink border-opacity-10" data-sd-id="55">
+            <button class="px-6 py-2 rounded-full bg-paper paper-shadow text-[15px] font-medium text-ink" id="filter-all" data-sd-id="56">All languages</button>
+            <button class="px-6 py-2 rounded-full text-[15px] font-medium text-ink-soft hover:text-ink" id="filter-en" data-sd-id="57">English</button>
+            <button class="px-6 py-2 rounded-full text-[15px] font-medium text-ink-soft hover:text-ink bn-sans" id="filter-bn" data-sd-id="58">বাংলা</button>
+          </div>
+        </div>
+
+        <!-- Specimen Cards -->
+        <div class="relative max-w-[800px] mx-auto h-[400px] md:h-[500px] mt-16" data-sd-id="59">
+          
+          <!-- Card 1: English -->
+          <div class="absolute top-0 left-0 md:left-[10%] w-[280px] md:w-[340px] bg-paper p-8 border border-[#E8CF8A] rounded-[2px] paper-shadow z-10 -rotate-3" data-sd-id="60">
+            <div class="border-b border-opacity-20 border-ink pb-4 mb-4" data-sd-id="61">
+              <p class="text-[13px] text-ink-soft mb-2" data-sd-id="62">Fairy Tale</p>
+              <h3 class="font-display text-3xl font-medium text-ink leading-tight" data-sd-id="63">The Selfish Giant</h3>
+              <p class="text-[16px] text-ink-soft mt-1" data-sd-id="64">Oscar Wilde</p>
+            </div>
+            <div class="reading-text text-[1.125rem] leading-[1.75] text-ink-soft line-clamp-4" data-sd-id="65">
+              Every afternoon, as they were coming from school, the children used to go and play in the Giant's garden. It was a large lovely garden, with soft green grass.
+            </div>
+            <div class="mt-6 pt-4 border-t border-opacity-10 border-ink" data-sd-id="66">
+              <p class="text-[13px] text-gold font-medium italic" data-sd-id="67">Arriving first on the shelf</p>
+            </div>
+          </div>
+
+          <!-- Card 2: Bengali -->
+          <div class="absolute top-20 md:top-12 right-0 md:right-[10%] w-[280px] md:w-[340px] bg-paper p-8 border border-[#E8CF8A] rounded-[2px] paper-shadow z-20 rotate-2" data-sd-id="68">
+            <div class="border-b border-opacity-20 border-ink pb-4 mb-4" data-sd-id="69">
+              <p class="text-[13px] text-ink-soft mb-2 bn-sans" data-sd-id="70">ছোট গল্প</p>
+              <h3 class="bn-serif text-3xl font-medium text-ink leading-tight" data-sd-id="71">বিচারক</h3>
+              <p class="bn-sans text-[16px] text-ink-soft mt-1" data-sd-id="72">রবীন্দ্রনাথ ঠাকুর</p>
+            </div>
+            <div class="bn-serif text-[1.125rem] leading-[1.8] text-ink-soft line-clamp-4" data-sd-id="73">
+              ক্ষীরোদার প্রতি যখন বিচারকের মৃত্যুদণ্ডাজ্ঞা প্রচারিত হইল, তখন সে একবার হাত জোড় করিয়া কেবল কহিল, “দোহাই হুজুর, আমার একটি ছেলে আছে।”
+            </div>
+            <div class="mt-6 pt-4 border-t border-opacity-10 border-ink" data-sd-id="74">
+              <p class="text-[13px] text-gold font-medium italic" data-sd-id="75">Arriving first on the shelf</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Knowledge Series -->
+    <section class="py-20 md:py-28 px-6 md:px-12 bg-rose-wash bg-opacity-20 border-t border-opacity-10 border-ink" data-sd-id="76">
+      <div class="max-w-[1180px] mx-auto" data-sd-id="77">
+        <div class="text-center mb-16" data-sd-id="78">
+          <h2 class="font-display text-4xl md:text-[3.75rem] font-medium text-ink" data-sd-id="79">
+            Knowledge series, one short step at a time
+          </h2>
+        </div>
+
+        <div class="relative pt-8" data-sd-id="80">
+          <!-- Gold Thread -->
+          <div class="absolute top-[44px] left-[10%] right-[10%] h-[2px] gold-foil-bg opacity-60 hidden md:block" data-sd-id="81"></div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative" data-sd-id="82">
+            
+            <!-- Step 1 -->
+            <div class="flex flex-col items-center text-center" data-sd-id="83">
+              <div class="w-12 h-12 rounded-full bg-paper border border-[#E8CF8A] text-gold font-display text-2xl flex items-center justify-center mb-6 z-10 paper-shadow" data-sd-id="84">1</div>
+              <iconify-icon icon="ph:video-camera-light" class="text-3xl text-ink-soft mb-3"></iconify-icon>
+              <h4 class="font-medium text-[16px] text-ink mb-2" data-sd-id="85">Watch a lesson</h4>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex flex-col items-center text-center" data-sd-id="86">
+              <div class="w-12 h-12 rounded-full bg-paper border border-[#E8CF8A] text-gold font-display text-2xl flex items-center justify-center mb-6 z-10 paper-shadow" data-sd-id="87">2</div>
+              <iconify-icon icon="ph:article-light" class="text-3xl text-ink-soft mb-3"></iconify-icon>
+              <h4 class="font-medium text-[16px] text-ink mb-2" data-sd-id="88">Read the notes</h4>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex flex-col items-center text-center" data-sd-id="89">
+              <div class="w-12 h-12 rounded-full bg-paper border border-[#E8CF8A] text-gold font-display text-2xl flex items-center justify-center mb-6 z-10 paper-shadow" data-sd-id="90">3</div>
+              <iconify-icon icon="ph:check-square-offset-light" class="text-3xl text-ink-soft mb-3"></iconify-icon>
+              <h4 class="font-medium text-[16px] text-ink mb-2" data-sd-id="91">Check what stuck</h4>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="flex flex-col items-center text-center" data-sd-id="92">
+              <div class="w-12 h-12 rounded-full bg-paper border border-[#E8CF8A] text-gold font-display text-2xl flex items-center justify-center mb-6 z-10 paper-shadow" data-sd-id="93">4</div>
+              <iconify-icon icon="ph:bookmark-simple-light" class="text-3xl text-ink-soft mb-3"></iconify-icon>
+              <h4 class="font-medium text-[16px] text-ink mb-2" data-sd-id="94">Carry on later</h4>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA / Footer Band -->
+    <footer class="bg-binding relative pt-20 pb-12 px-6 md:px-12 mt-12" data-sd-id="95">
+      <!-- Gold foil top edge -->
+      <div class="absolute top-0 left-0 right-0 h-1 gold-foil-bg" data-sd-id="96"></div>
+      
+      <div class="max-w-[1180px] mx-auto flex flex-col items-center text-center" data-sd-id="97">
+        <h2 class="font-display text-4xl md:text-[3.75rem] font-medium text-paper mb-8" data-sd-id="98">
+          Your place in the library is waiting.
+        </h2>
+        <a href="#signup-footer" id="footer-signup" class="bg-paper text-binding px-8 py-4 rounded-sm font-medium text-[16px] hover:bg-paper-deep transition-colors focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#E9D29A] focus-visible:outline-offset-2" data-sd-id="99">
+          Start reading free
+        </a>
+
+        <div class="w-full h-px bg-white bg-opacity-10 my-16" data-sd-id="100"></div>
+
+        <div class="w-full flex flex-col md:flex-row items-center justify-between text-[14px] text-[#EBD3CF] opacity-80 gap-6" data-sd-id="101">
+          <p data-sd-id="102">Earnalism is operated by Reo Enterprise.</p>
+          <div class="flex gap-6" data-sd-id="103">
+            <a href="#privacy" id="link-privacy" class="hover:text-paper transition-colors" data-sd-id="104">Privacy notice</a>
+            <a href="#terms" id="link-terms" class="hover:text-paper transition-colors" data-sd-id="105">Service terms</a>
+            <a href="#contact" id="link-contact" class="hover:text-paper transition-colors" data-sd-id="106">Contact</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+</body></html>
