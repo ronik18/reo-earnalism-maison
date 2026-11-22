@@ -427,7 +427,7 @@ footer.site{background:url(art/handmade-paper.png),var(--night)}
 
 /* ---------- landing carousel: taste-first page turner ---------- */
 .turner-band{padding:88px 0 96px;background:url(art/handmade-paper.png),var(--parchment)}
-.turn-stage{display:grid;grid-template-columns:minmax(0,1fr);perspective:1800px;perspective-origin:30% 50%;position:relative;padding-right:36px}
+.turn-stage{touch-action:pan-y;display:grid;grid-template-columns:minmax(0,1fr);perspective:1800px;perspective-origin:30% 50%;position:relative;padding-right:36px}
 .turn-card{grid-area:1/1;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;padding:44px 48px;border-radius:10px;
   background:url(art/handmade-paper.png),#FFFDF8;border:1px solid rgba(184,145,63,.3);
   box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(36,22,26,.08),0 20px 36px -16px rgba(36,22,26,.38),0 54px 80px -40px rgba(36,22,26,.45);
@@ -492,6 +492,7 @@ footer.site{background:url(art/handmade-paper.png),var(--night)}
   .dev.laptop .scr{width:132px;height:86px;border-width:6px;border-bottom-width:9px;padding:9px}.dev.laptop .scr em{display:none}
   .dev.laptop .base{width:154px;margin-left:-11px;height:8px}
   .art-path{padding-top:40px}.art-path .soon{top:6px;right:auto;left:16px;transform:rotate(-3deg)}}
+@media (max-width:400px){.turn-dot{width:28px}.turn-controls{gap:0}}
 </style>
 </head>
 <body>
@@ -582,11 +583,11 @@ footer.site{background:url(art/handmade-paper.png),var(--night)}
             <p class="turn-tag">About 5 minutes · English classic</p>
             <h3>Five spare minutes? Read a page, not a feed.</h3>
             <p class="muted">Oscar Wilde’s <i>The Selfish Giant</i> opens like this. Keep going from exactly here.</p>
-            <div class="turn-actions"><a class="btn btn-wine turn-cta" href="#signup">Start Chapter 1 free</a><a class="link" href="#explore">Explore the library</a></div>
+            <div class="turn-actions"><a class="btn btn-wine turn-cta" href="#signup?return=the-selfish-giant">Start Chapter 1 free</a><a class="link" href="#explore">Explore the library</a></div>
           </div>
           <div class="turn-art art-page" aria-hidden="true">
             <div class="sheet"><p class="sheet-title">The Selfish Giant</p><p class="sheet-chap">Chapter 1</p>
-            <p class="sheet-text"><span class="dropcap">E</span>very afternoon, as they were coming from school, the children used to go and play in the Giant’s garden. It was a large lovely garden, with soft green grass.</p><span class="sheet-time">4 min left in chapter</span></div>
+            <p class="sheet-text"><span class="dropcap">E</span>very afternoon, as they were coming from school, the children used to go and play in the Giant’s garden. It was a large lovely garden, with soft green grass.</p><span class="sheet-time">About 5 minutes to read</span></div>
           </div>
         </article>
         <article class="turn-card" data-card="c2" data-return="bicharak" role="group" aria-roledescription="card" aria-label="Card 2 of 4">
@@ -594,7 +595,7 @@ footer.site{background:url(art/handmade-paper.png),var(--night)}
             <p class="turn-tag">Bengali and English, one shelf</p>
             <h3>Your language, your shelf.</h3>
             <p class="muted">Read Tagore in Bengali and Wilde in English. The interface stays simple; you choose the books.</p>
-            <div class="turn-actions"><a class="btn btn-wine turn-cta" href="#signup">Start Chapter 1 free</a><a class="link" href="#explore">Explore the library</a></div>
+            <div class="turn-actions"><a class="btn btn-wine turn-cta" href="#signup?return=bicharak">Start Chapter 1 free</a><a class="link" href="#explore">Explore the library</a></div>
           </div>
           <div class="turn-art art-covers" aria-hidden="true">
             <div class="cover bn" lang="bn"><span class="t">বিচারক</span><span class="rule"></span><span class="a">রবীন্দ্রনাথ ঠাকুর</span></div>
@@ -606,7 +607,7 @@ footer.site{background:url(art/handmade-paper.png),var(--night)}
             <p class="turn-tag">Phone at lunch, laptop at night</p>
             <h3>Your place follows you.</h3>
             <p class="muted">Start a chapter on your phone and finish it on your laptop. Your page, highlights and notes are waiting.</p>
-            <div class="turn-actions"><a class="btn btn-wine turn-cta" href="#signup">Start Chapter 1 free</a><a class="link" href="#explore">Explore the library</a></div>
+            <div class="turn-actions"><a class="btn btn-wine turn-cta" href="#signup?return=the-selfish-giant">Start Chapter 1 free</a><a class="link" href="#explore">Explore the library</a></div>
           </div>
           <div class="turn-art art-devices" aria-hidden="true">
             <div class="dev phone"><span class="bar"><i style="width:46%"></i></span><span class="ln"></span><span class="ln"></span><span class="ln short"></span></div>
@@ -619,7 +620,7 @@ footer.site{background:url(art/handmade-paper.png),var(--night)}
             <p class="turn-tag">Knowledge series · <b>Coming soon</b></p>
             <h3>Learn one idea at a time.</h3>
             <p class="muted">Short lessons with notes and a quick check are on their way. Start with a story today — your account will be ready when they land.</p>
-            <div class="turn-actions"><a class="btn btn-wine turn-cta" href="#signup">Start Chapter 1 free</a><a class="link" href="#explore">Explore the library</a></div>
+            <div class="turn-actions"><a class="btn btn-wine turn-cta" href="#signup?return=the-selfish-giant">Start Chapter 1 free</a><a class="link" href="#explore">Explore the library</a></div>
           </div>
           <div class="turn-art art-path" aria-hidden="true">
             <ol><li><b>1</b>Watch a short lesson</li><li><b>2</b>Read the notes</li><li><b>3</b>Check what stuck</li></ol>
@@ -942,7 +943,7 @@ footer.site{background:url(art/handmade-paper.png),var(--night)}
 <script>
 const screens=[...document.querySelectorAll('.screen')];
 function route(){
-  const k=(location.hash||'#home').slice(1);
+  const k=(location.hash||'#home').slice(1).split('?')[0];
   const target=document.getElementById('screen-'+k)?k:(document.getElementById(k)?null:'home');
   if(!target) return;
   screens.forEach(s=>s.hidden=s.id!=='screen-'+target);
@@ -978,10 +979,11 @@ window.maisonEvents=window.maisonEvents||[];
   const reduce=matchMedia('(prefers-reduced-motion: reduce)'); const holds=new Set(); let i=0, timer=null, userPaused=false;
   const track=(event,card)=>window.maisonEvents.push({event,card});
   function show(k,fromUser){
-    i=((k%n)+n)%n;
+    i=((k%n)+n)%n;let moveFocus=false;
     cards.forEach((c,j)=>{const d=((j-i)%n+n)%n;c.classList.remove('is-active','is-next1','is-next2','is-past');
       c.classList.add(d===0?'is-active':d===1?'is-next1':d===2?'is-next2':'is-past');
-      const on=d===0;c.setAttribute('aria-hidden',String(!on));c.inert=!on;});
+      const on=d===0;if(!on&&c.contains(document.activeElement))moveFocus=true;c.setAttribute('aria-hidden',String(!on));c.inert=!on;});
+    if(moveFocus)cards[i].querySelector('.turn-cta').focus();
     dots.forEach((d,j)=>d.setAttribute('aria-current',String(j===i)));
     track('carousel_card_viewed',cards[i].dataset.card);
     if(fromUser) live.textContent='Card '+(i+1)+' of '+n+': '+cards[i].querySelector('h3').textContent;
@@ -993,12 +995,12 @@ window.maisonEvents=window.maisonEvents||[];
   root.querySelector('#turn-prev').addEventListener('click',()=>show(i-1,true));
   dots.forEach(d=>d.addEventListener('click',()=>show(+d.dataset.i,true)));
   pauseBtn.addEventListener('click',()=>{userPaused=!userPaused;pauseBtn.setAttribute('aria-pressed',String(userPaused));
-    pauseBtn.setAttribute('aria-label',userPaused?'Play automatic turning':'Pause automatic turning');
     pauseBtn.querySelector('use').setAttribute('href',userPaused?'#i-tri':'#i-pause');schedule();});
   stage.addEventListener('mouseenter',()=>hold('hover'));stage.addEventListener('mouseleave',()=>release('hover'));
   root.addEventListener('focusin',()=>hold('focus'));root.addEventListener('focusout',e=>{if(!root.contains(e.relatedTarget))release('focus')});
-  let x0=null;stage.addEventListener('pointerdown',e=>{x0=e.clientX;if(e.pointerType!=='mouse')hold('touch')});
-  stage.addEventListener('pointerup',e=>{if(x0!==null&&Math.abs(e.clientX-x0)>50)show(i+(e.clientX<x0?1:-1),true);x0=null;if(e.pointerType!=='mouse')release('touch')});
+  let x0=null;stage.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;x0=e.clientX;hold('touch')});
+  stage.addEventListener('pointerup',e=>{if(e.pointerType==='mouse')return;if(x0!==null&&Math.abs(e.clientX-x0)>50)show(i+(e.clientX<x0?1:-1),true);x0=null;release('touch')});
+  stage.addEventListener('pointercancel',()=>{x0=null;release('touch')});
   root.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){show(i+1,true);e.preventDefault()}else if(e.key==='ArrowLeft'){show(i-1,true);e.preventDefault()}});
   document.addEventListener('visibilitychange',()=>document.hidden?hold('hidden'):release('hidden'));
   reduce.addEventListener('change',schedule);
