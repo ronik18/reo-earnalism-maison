@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earnalism — gilded vault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Noto+Serif+Bengali:wght@500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FBF6EC;--paper-deep:#F1E6D2;--rose-wash:#EBD3CF;--binding:#5A1426;--binding-deep:#3A0C18;
+  --ink:#2A0B14;--ink-soft:#5E4148;--gold-text:#7A5A1E;--gold-on-binding:#E9D29A;
+  --foil:linear-gradient(115deg,#8C6A2A,#E8CF8A 38%,#B58D3F 62%,#F3E2B0 80%,#9A7631);
+  --display:"Cormorant Garamond",Georgia,serif;--ui:"DM Sans",system-ui,sans-serif;--read:"Source Serif 4",Georgia,serif;--bn:"Noto Serif Bengali",serif;
+  --shadow:0 18px 40px -24px rgba(42,11,20,.45);
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:400 1.0625rem/1.65 var(--ui);background:var(--paper);
+  background-image:repeating-linear-gradient(0deg,rgba(90,20,38,.028) 0 1px,transparent 1px 5px)}
+a{color:var(--binding)}
+:focus-visible{outline:3px solid var(--binding);outline-offset:3px;border-radius:2px}
+.dark :focus-visible{outline-color:var(--gold-on-binding)}
+.skip{position:absolute;left:-999px;top:8px;background:var(--binding);color:var(--paper);padding:12px 16px;z-index:10}.skip:focus{left:16px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+@media (max-width:640px){.wrap{padding:0 16px}}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:2px;font:600 1rem/1 var(--ui);text-decoration:none;border:1.5px solid transparent;cursor:pointer}
+.btn-primary{background:var(--binding);color:var(--paper)}.btn-primary:hover{background:var(--binding-deep)}
+.btn-secondary{border-color:var(--ink);color:var(--ink)}.btn-secondary:hover{background:var(--paper-deep)}
+.dark .btn-primary{background:var(--paper);color:var(--binding)}.dark .btn-primary:hover{background:var(--paper-deep)}
+.dark .btn-secondary{border-color:var(--gold-on-binding);color:var(--gold-on-binding)}.dark .btn-secondary:hover{background:rgba(233,210,154,.12)}
+h2{font:500 clamp(2.2rem,4.2vw,3.4rem)/1.05 var(--display);letter-spacing:-.01em;margin:0 0 16px}
+.intro{color:var(--ink-soft);max-width:56ch;margin:0 0 48px}
+section{position:relative}
+
+.top{background:var(--paper);position:relative;z-index:5;box-shadow:0 1px 0 rgba(122,90,30,.3)}
+.top .wrap{display:flex;align-items:center;gap:32px;min-height:96px}
+.top img{height:72px;width:auto}
+.top nav{margin-left:auto;display:flex;align-items:center;gap:28px}
+.top nav a:not(.btn){color:var(--ink);text-decoration:none;font-weight:500;min-height:44px;display:inline-flex;align-items:center}
+.top nav a:not(.btn):hover{text-decoration:underline;text-underline-offset:4px}
+@media (max-width:760px){.top nav a:not(.btn){display:none}.top img{height:52px}.top nav .btn{padding:0 16px}}
+
+/* ---------- HERO: vaulted corridor ---------- */
+.hero{position:relative;min-height:680px;overflow:hidden;background:radial-gradient(50% 60% at 68% 52%,#7A2236,var(--binding) 45%,var(--binding-deep) 100%)}
+.corridor{position:absolute;inset:0;perspective:900px;perspective-origin:68% 52%;pointer-events:none}
+.arch{position:absolute;left:68%;top:52%;width:520px;height:640px;margin:-320px 0 0 -260px;transform-style:preserve-3d}
+.arch svg{width:100%;height:100%;overflow:visible}
+.arch:nth-child(1){transform:translateZ(0)}
+.arch:nth-child(2){transform:translateZ(-260px);opacity:.92}
+.arch:nth-child(3){transform:translateZ(-520px);opacity:.82}
+.arch:nth-child(4){transform:translateZ(-780px);opacity:.72}
+.arch:nth-child(5){transform:translateZ(-1040px);opacity:.62}
+.arch:nth-child(6){transform:translateZ(-1300px);opacity:.55}
+.floor{position:absolute;left:0;right:0;bottom:0;height:46%;background:repeating-linear-gradient(90deg,transparent 0 118px,rgba(233,210,154,.12) 118px 120px),linear-gradient(180deg,rgba(58,12,24,0),rgba(58,12,24,.9));transform-origin:50% 100%;transform:perspective(600px) rotateX(62deg);}
+.door{position:absolute;left:68%;top:52%;width:150px;height:200px;margin:-80px 0 0 -75px;border-radius:75px 75px 2px 2px;
+  background:radial-gradient(70% 60% at 50% 45%,#FFFDF7,#F3E2B0 60%,#C9A24E);box-shadow:0 0 60px 20px rgba(243,226,176,.45),0 0 140px 40px rgba(233,210,154,.25);display:grid;place-items:center}
+.door svg{width:96px}
+@media (prefers-reduced-motion:no-preference){
+  .corridor{animation:approach 1400ms cubic-bezier(.2,.8,.2,1) both}
+  @keyframes approach{from{transform:scale(1.25);opacity:0}}
+  .door{animation:glow 1600ms ease-out both}@keyframes glow{from{opacity:0;transform:scale(.8)}}
+}
+.hero .wrap{position:relative;z-index:2;min-height:680px;display:flex;align-items:center}
+.plaque{background:var(--paper);max-width:520px;padding:48px 44px;border-radius:2px;box-shadow:0 40px 70px -30px rgba(0,0,0,.55);position:relative}
+.plaque::before{content:"";position:absolute;inset:10px;border:1px solid rgba(122,90,30,.45);pointer-events:none}
+.plaque::after{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--foil)}
+.plaque h1{font:500 clamp(2.7rem,5.4vw,4.6rem)/.98 var(--display);letter-spacing:-.015em;margin:0 0 20px}
+.lede{font-size:1.125rem;color:var(--ink-soft);margin:0 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.where{margin:24px 0 0;font-size:.9375rem;color:var(--ink-soft)}.where strong{color:var(--ink);font-weight:600}
+@media (max-width:900px){.hero{min-height:0}.corridor{position:relative;height:340px;perspective-origin:50% 52%}.arch,.door{left:50%}.arch{width:300px;height:370px;margin:-185px 0 0 -150px}.door{width:96px;height:128px;margin:-50px 0 0 -48px}.door svg{width:62px}
+  .hero .wrap{min-height:0;padding-bottom:48px;margin-top:-40px}.plaque{padding:36px 24px}}
+
+/* ---------- ALCOVES ---------- */
+.ways{padding:112px 0;background:linear-gradient(180deg,var(--paper),var(--paper-deep))}
+.alcoves{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.alcove{all:unset;box-sizing:border-box;cursor:pointer;position:relative;min-height:360px;border-radius:999px 999px 2px 2px;padding:6px;background:var(--foil);box-shadow:var(--shadow);transition:transform 300ms ease}
+.alcove .inner{height:100%;min-height:348px;border-radius:999px 999px 0 0;background:linear-gradient(180deg,var(--binding-deep),var(--binding));display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:12px;padding:32px 20px 36px;color:var(--gold-on-binding);
+  box-shadow:inset 0 30px 60px rgba(0,0,0,.45),inset 0 -20px 40px rgba(0,0,0,.25);transition:background 300ms}
+.alcove svg{width:72px;height:72px}
+.alcove b{font:600 2.25rem/1 var(--display)}
+.alcove span{font-size:.9375rem;color:#EBD9DC}
+.alcove[aria-expanded=true]{transform:translateY(-8px)}
+.alcove[aria-expanded=true] .inner{background:radial-gradient(70% 55% at 50% 38%,#FFFDF7,#F3E2B0 55%,#D9B867);color:var(--binding);box-shadow:inset 0 20px 50px rgba(122,90,30,.35)}
+.alcove[aria-expanded=true] span{color:var(--ink)}
+.alcove:focus-visible{outline:3px solid var(--binding);outline-offset:4px}
+.way-panel{margin-top:40px;background:var(--paper);border:1px solid rgba(122,90,30,.35);padding:36px 40px;display:grid;grid-template-columns:1fr 1fr;gap:32px;box-shadow:var(--shadow)}
+.way-panel h3{font:600 2rem/1.1 var(--display);margin:0 0 10px}
+.way-panel p{margin:0;color:var(--ink-soft)}
+.way-panel ul{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+.way-panel li{display:flex;gap:12px;align-items:baseline}
+.way-panel li::before{content:"";flex:0 0 18px;height:1.5px;background:var(--gold-text);transform:translateY(-4px)}
+@media (max-width:760px){.alcoves{gap:10px}.alcove{min-height:190px}.alcove .inner{min-height:178px;padding:18px 8px 20px}.alcove svg{width:40px;height:40px}.alcove b{font-size:1.5rem}.alcove span{display:none}.way-panel{grid-template-columns:1fr;padding:28px 22px}}
+
+/* ---------- LEDGE OF BOOKS ---------- */
+.langs{padding:112px 0}
+.filter{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;padding:4px;gap:4px;margin:0 0 48px}
+.filter button{all:unset;cursor:pointer;min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center;padding:0 18px;border-radius:999px;font:500 .9375rem/1 var(--ui)}
+.filter button[aria-pressed=true]{background:var(--binding);color:var(--paper)}
+.filter button:focus-visible{outline:3px solid var(--binding);outline-offset:2px}
+.shelf{display:grid;grid-template-columns:1fr 1fr;gap:40px;position:relative;padding-bottom:40px}
+.shelf::after{content:"";position:absolute;left:-16px;right:-16px;bottom:0;height:40px;background:linear-gradient(180deg,#FFFDF7,#E8DCC6);border-top:3px solid #C9A24E;box-shadow:0 30px 40px -26px rgba(42,11,20,.55);border-radius:0 0 4px 4px}
+.vol{display:flex;gap:28px;align-items:flex-end;position:relative;z-index:1}
+.vol .stand{flex:0 0 auto;width:170px;height:250px;border-radius:3px 8px 8px 3px;padding:26px 20px;display:flex;flex-direction:column;justify-content:space-between;
+  transform:perspective(900px) rotateY(18deg);transform-origin:left bottom;box-shadow:-10px 0 0 -4px rgba(0,0,0,.18) inset,24px 20px 30px -18px rgba(42,11,20,.5)}
+.vol.en .stand{background:linear-gradient(150deg,#6E1A30,var(--binding) 50%,var(--binding-deep));color:var(--gold-on-binding)}
+.vol.bn .stand{background:linear-gradient(150deg,#FFFDF7,var(--paper-deep));color:var(--ink);border:1px solid rgba(122,90,30,.35)}
+.stand .t{font:600 1.7rem/1.05 var(--display)}.vol.bn .stand .t{font:600 1.9rem/1.3 var(--bn)}
+.stand .rule{height:2px;width:48px;background:var(--foil)}
+.stand .a{font-size:.875rem}
+.vol .meta{padding-bottom:8px}
+.meta .kind{margin:0 0 6px;color:var(--gold-text);font-weight:500}
+.meta h3{font:600 1.9rem/1.1 var(--display);margin:0 0 4px}.meta h3.bn{font:600 1.7rem/1.4 var(--bn)}
+.meta .by{margin:0 0 12px;color:var(--ink-soft)}
+.meta blockquote{margin:0 0 12px;font:400 1rem/1.7 var(--read);max-width:30ch}
+.meta .status{margin:0;font-size:.9375rem;color:var(--ink-soft)}
+@media (max-width:860px){.shelf{grid-template-columns:1fr;gap:56px}.vol{flex-direction:column;align-items:flex-start}.vol .stand{width:140px;height:200px}.shelf::after{display:none}}
+
+/* ---------- ASCENDING ARCHES ---------- */
+.steps-sec{padding:40px 0 120px}
+.climb{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:end;margin:0;padding:0;list-style:none;counter-reset:s}
+.climb li{background:var(--paper);border:1.5px solid rgba(122,90,30,.45);border-radius:999px 999px 2px 2px;padding:56px 22px 26px;text-align:center;box-shadow:var(--shadow);position:relative}
+.climb li:nth-child(1){margin-bottom:0}.climb li:nth-child(2){margin-bottom:48px}.climb li:nth-child(3){margin-bottom:96px}.climb li:nth-child(4){margin-bottom:144px}
+.climb li::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:48px;height:48px;margin:0 auto 16px;border-radius:50%;background:var(--binding);color:var(--gold-on-binding);font:600 1.4rem/1 var(--display)}
+.climb h3{font:600 1.375rem/1.15 var(--display);margin:0 0 6px}
+.climb p{margin:0;color:var(--ink-soft);font-size:.9375rem}
+.climb-wrap{position:relative}
+.climb-wrap svg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:0}
+@media (max-width:820px){.climb{grid-template-columns:1fr 1fr}.climb li{margin-bottom:0!important}.climb-wrap svg{display:none}}
+@media (max-width:480px){.climb{grid-template-columns:1fr}}
+
+/* ---------- DOORS ---------- */
+.doors{position:relative;overflow:hidden;background:radial-gradient(40% 70% at 50% 50%,#FFF6DD,#F3E2B0 30%,#C9A24E 60%,var(--binding-deep) 61%);perspective:1400px}
+.leafd{position:absolute;top:0;bottom:0;width:50%;background:linear-gradient(160deg,#6E1A30,var(--binding) 50%,var(--binding-deep));box-shadow:inset 0 0 0 14px rgba(58,12,24,.6),inset 0 0 0 16px rgba(233,210,154,.6)}
+.leafd::before{content:"";position:absolute;inset:60px 50px;border:1.5px solid rgba(233,210,154,.45);border-radius:999px 999px 2px 2px}
+.leafd.l{left:0;transform-origin:0 50%;transform:rotateY(32deg)}
+.leafd.r{right:0;transform-origin:100% 50%;transform:rotateY(-32deg)}
+.leafd .handle{position:absolute;top:50%;width:14px;height:64px;margin-top:-32px;border-radius:999px;background:var(--foil)}
+.leafd.l .handle{right:34px}.leafd.r .handle{left:34px}
+.doors .wrap{position:relative;z-index:2;padding:120px 32px;display:grid;justify-items:center;text-align:center}
+.doors .card{background:var(--paper);padding:44px 40px;max-width:560px;border-radius:999px 999px 2px 2px;padding-top:80px;box-shadow:0 40px 60px -30px rgba(0,0,0,.6)}
+.doors h2{margin:0 auto 12px;max-width:14ch}
+.doors p{color:var(--ink-soft);margin:0 0 28px}
+.doors .cta{justify-content:center}
+@media (max-width:700px){.leafd{width:30%}.leafd.l{transform:rotateY(20deg)}.leafd.r{transform:rotateY(-20deg)}.doors .wrap{padding:72px 16px}.doors .card{padding:64px 22px 32px}}
+footer{background:var(--binding-deep);color:#E6D3D6;font-size:.9375rem}
+footer .wrap{display:flex;flex-wrap:wrap;gap:8px 32px;justify-content:space-between;align-items:center;padding-top:20px;padding-bottom:20px}
+footer a{color:var(--gold-on-binding);min-height:44px;display:inline-flex;align-items:center}
+footer nav{display:flex;gap:24px}
+</style>
+</head>
+<body>
+<div class="page">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap">
+  <a href="#home" aria-label="Earnalism home"><img src="../../../static/maison/logo.png" alt="Earnalism — A Reo Enterprise venture" width="280" height="100"></a>
+  <nav aria-label="Main"><a href="#explore">Explore the library</a><a href="#learn">Learn</a><a href="#sign-in">Sign in</a><a class="btn btn-primary" href="#sign-up">Start reading free</a></nav>
+</div></header>
+
+<main id="main">
+<section class="hero" aria-labelledby="hero-title">
+  <div class="corridor" aria-hidden="true">
+    <div class="floor"></div>
+    <div class="arch"><svg viewBox="0 0 520 640"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8C6A2A"/><stop offset=".38" stop-color="#E8CF8A"/><stop offset=".62" stop-color="#B58D3F"/><stop offset=".8" stop-color="#F3E2B0"/><stop offset="1" stop-color="#9A7631"/></linearGradient></defs><path d="M0 640 V260 A260 260 0 0 1 520 260 V640 H460 V268 A200 200 0 0 0 60 268 V640 Z" fill="#4A1020" stroke="url(#g)" stroke-width="4"/><path d="M60 640 V268 A200 200 0 0 1 460 268 V640" fill="none" stroke="url(#g)" stroke-width="1.5" opacity=".7"/></svg></div>
+    <div class="arch"><svg viewBox="0 0 520 640"><path d="M0 640 V260 A260 260 0 0 1 520 260 V640 H460 V268 A200 200 0 0 0 60 268 V640 Z" fill="#4A1020" stroke="url(#g)" stroke-width="4"/></svg></div>
+    <div class="arch"><svg viewBox="0 0 520 640"><path d="M0 640 V260 A260 260 0 0 1 520 260 V640 H460 V268 A200 200 0 0 0 60 268 V640 Z" fill="#4A1020" stroke="url(#g)" stroke-width="4"/></svg></div>
+    <div class="arch"><svg viewBox="0 0 520 640"><path d="M0 640 V260 A260 260 0 0 1 520 260 V640 H460 V268 A200 200 0 0 0 60 268 V640 Z" fill="#4A1020" stroke="url(#g)" stroke-width="4"/></svg></div>
+    <div class="arch"><svg viewBox="0 0 520 640"><path d="M0 640 V260 A260 260 0 0 1 520 260 V640 H460 V268 A200 200 0 0 0 60 268 V640 Z" fill="#4A1020" stroke="url(#g)" stroke-width="4"/></svg></div>
+    <div class="arch"><svg viewBox="0 0 520 640"><path d="M0 640 V260 A260 260 0 0 1 520 260 V640 H460 V268 A200 200 0 0 0 60 268 V640 Z" fill="#4A1020" stroke="url(#g)" stroke-width="4"/></svg></div>
+    <div class="door"><svg viewBox="0 0 96 120"><path d="M14 18h34M14 28h34M14 38h22" stroke="#5A1426" stroke-width="4" stroke-linecap="round"/><path d="M58 22v12M66 16v24M74 10v36M82 20v16" stroke="#7A5A1E" stroke-width="4" stroke-linecap="round"/><rect x="18" y="60" width="60" height="40" rx="4" fill="none" stroke="#5A1426" stroke-width="4"/><path d="M42 70l14 9-14 9z" fill="#5A1426"/><rect x="28" y="108" width="40" height="5" rx="2.5" fill="#7A5A1E"/></svg></div>
+  </div>
+  <div class="wrap">
+    <div class="plaque">
+      <h1 id="hero-title">Every story, three ways in.</h1>
+      <p class="lede">Read classics in English and Bengali, listen as they are told aloud, and learn through short video series — all in one library, free while we open its doors.</p>
+      <div class="cta"><a class="btn btn-primary" href="#sign-up">Start reading free</a><a class="btn btn-secondary" href="#explore">Explore the library</a></div>
+      <p class="where">Open now in <strong>India, the United States, the United Kingdom, Brazil, Singapore, Malaysia, Indonesia, the Philippines and Thailand.</strong> No payment card needed.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ways" aria-labelledby="ways-title"><div class="wrap">
+  <h2 id="ways-title">Choose a doorway.</h2>
+  <p class="intro">Every story waits behind all three. Step through one, and switch whenever you like — your place comes with you.</p>
+  <div class="alcoves">
+    <button class="alcove" data-way="read" aria-expanded="true" aria-controls="way-panel"><span class="inner"><svg viewBox="0 0 72 72" aria-hidden="true"><path d="M14 20h44M14 31h44M14 42h30M14 53h38" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg><b>Read</b><span>Pages that turn like paper</span></span></button>
+    <button class="alcove" data-way="listen" aria-expanded="false" aria-controls="way-panel"><span class="inner"><svg viewBox="0 0 72 72" aria-hidden="true"><path d="M14 30v12M24 22v28M36 12v48M48 24v24M58 31v10" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg><b>Listen</b><span>Stories told aloud</span></span></button>
+    <button class="alcove" data-way="watch" aria-expanded="false" aria-controls="way-panel"><span class="inner"><svg viewBox="0 0 72 72" aria-hidden="true"><rect x="10" y="14" width="52" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="3.5"/><path d="M31 23l13 9-13 9z" fill="currentColor"/><path d="M20 60h32" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg><b>Watch</b><span>Short lessons on video</span></span></button>
+  </div>
+  <div class="way-panel" id="way-panel" aria-live="polite"></div>
+</div></section>
+
+<section class="langs" aria-labelledby="lang-title"><div class="wrap">
+  <h2 id="lang-title">One library, every language on the shelf.</h2>
+  <p class="intro">The interface stays simple and in English. Choose the book language yourself, or keep them all.</p>
+  <div class="filter" role="group" aria-label="Book language"><button type="button" aria-pressed="true" data-lang="all">All languages</button><button type="button" aria-pressed="false" data-lang="en">English</button><button type="button" aria-pressed="false" data-lang="bn">বাংলা</button></div>
+  <div class="shelf">
+    <article class="vol en" data-lang="en" aria-labelledby="b1">
+      <div class="stand" aria-hidden="true"><span class="t">The Selfish Giant</span><span class="rule"></span><span class="a">Oscar Wilde</span></div>
+      <div class="meta"><p class="kind">English · fairy tale</p><h3 id="b1">The Selfish Giant</h3><p class="by">Oscar Wilde</p><blockquote>Every afternoon, as they were coming from school, the children used to go and play in the Giant’s garden.</blockquote><p class="status">Arriving first on the shelf.</p></div>
+    </article>
+    <article class="vol bn" data-lang="bn" aria-labelledby="b2">
+      <div class="stand" aria-hidden="true" lang="bn"><span class="t">বিচারক</span><span class="rule"></span><span class="a">রবীন্দ্রনাথ ঠাকুর</span></div>
+      <div class="meta"><p class="kind">Bengali · short story</p><h3 id="b2" class="bn" lang="bn">বিচারক</h3><p class="by" lang="bn">রবীন্দ্রনাথ ঠাকুর</p><p class="status">Arriving first on the shelf.</p></div>
+    </article>
+  </div>
+</div></section>
+
+<section class="steps-sec" aria-labelledby="learn-title"><div class="wrap">
+  <h2 id="learn-title">Knowledge series, one short step at a time.</h2>
+  <p class="intro">Each series is a path of short lessons that rises with you.</p>
+  <div class="climb-wrap">
+    <ol class="climb">
+      <li><h3>Watch a short lesson</h3><p>Adjustable speed, subtitles and a transcript you can search.</p></li>
+      <li><h3>Read the notes</h3><p>Highlight what matters and keep it.</p></li>
+      <li><h3>Check what stuck</h3><p>A few quiz questions with explanations.</p></li>
+      <li><h3>Carry on later</h3><p>Your progress follows you to every device.</p></li>
+    </ol>
+  </div>
+</div></section>
+
+<section class="doors dark" aria-labelledby="join-title">
+  <div class="leafd l" aria-hidden="true"><span class="handle"></span></div><div class="leafd r" aria-hidden="true"><span class="handle"></span></div>
+  <div class="wrap"><div class="card">
+    <h2 id="join-title">Your place in the library is waiting.</h2>
+    <p>Create a free account to save your place, keep highlights and pick up any story on any device.</p>
+    <div class="cta"><a class="btn btn-primary" style="background:var(--binding);color:var(--paper)" href="#sign-up">Start reading free</a><a class="btn btn-secondary" style="border-color:var(--ink);color:var(--ink)" href="#explore">Explore the library first</a></div>
+  </div></div>
+</section>
+</main>
+<footer class="dark"><div class="wrap"><span>Earnalism is operated by Reo Enterprise.</span><nav aria-label="Legal"><a href="#privacy">Privacy notice</a><a href="#terms">Service terms</a><a href="#contact">Contact</a></nav></div></footer>
+</div>
+<script>
+const W={read:['Read','Classics and storybooks laid out like real pages, with highlights, notes and bookmarks that follow you.',['Turn pages with a swipe, a tap or the arrow keys','Change the text size without losing your place','Download a book to read offline']],
+listen:['Listen','Stories told aloud by a narrator, chapter by chapter — for the commute, the kitchen or bedtime.',['Speed from slow to quick','A sleep timer that stops at the end of a chapter','Jump back to the page where the narrator is']],
+watch:['Watch','Short video tutorials and knowledge series that teach one idea at a time.',['Playback speed for every lesson','Subtitles and a transcript you can search','Lesson notes and a quick quiz after each step']]};
+const panel=document.getElementById('way-panel'),tabs=[...document.querySelectorAll('.alcove')];
+function show(k){const [t,d,i]=W[k];panel.innerHTML=`<div><h3>${t}</h3><p>${d}</p></div><ul>${i.map(x=>`<li>${x}</li>`).join('')}</ul>`;tabs.forEach(b=>b.setAttribute('aria-expanded',String(b.dataset.way===k)))}
+tabs.forEach(b=>b.addEventListener('click',()=>show(b.dataset.way)));show('read');
+const fb=[...document.querySelectorAll('.filter button')];fb.forEach(b=>b.addEventListener('click',()=>{fb.forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('.vol').forEach(s=>s.hidden=b.dataset.lang!=='all'&&s.dataset.lang!==b.dataset.lang)}));
+</script>
+</body>
+</html>

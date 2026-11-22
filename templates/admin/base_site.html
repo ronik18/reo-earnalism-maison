@@ -1,0 +1,6 @@
+{% extends "admin/base.html" %}{% load static %}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Earnalism staff{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'maison/fonts/typography.css' %}"><link rel="stylesheet" href="{% static 'maison/room/admin.css' %}">{% endblock %}
+{% block branding %}<div id="site-name"><a class="earnalism-admin-brand" href="{% url 'admin:index' %}"><span class="earnalism-admin-logo"><img src="{% static 'maison/logo.png' %}" alt="Earnalism" width="1400" height="500"></span><span class="earnalism-admin-label">Staff room</span></a></div>{% endblock %}
+{% block nav-global %}{% endblock %}
+{% block dark-mode-vars %}{% endblock %}

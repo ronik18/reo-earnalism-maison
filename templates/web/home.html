@@ -1,6 +1,148 @@
-{% extends 'web/base.html' %}{% load static maison %}{% block content %}
-{% if request.user.is_authenticated %}<div id="home-island"><p role="status">{% ui 'loading' %}</p><a href="{% url 'web:vault' ui_locale %}">{% ui 'vault' %}</a></div>{% endif %}
-<section class="home-hero"><div class="hero-copy"><p class="eyebrow">{% ui 'room_kicker' %}</p><h1>{% ui 'home_title' %}</h1><p class="lead">{% ui 'home_intro' %}</p>{% if featured %}<h2 lang="{{ featured.locale }}">{{ featured.title }}</h2><div class="actions">{% if not request.user.is_authenticated and reader_sample_available %}<a class="button" href="{% url 'web:reader-start' ui_locale featured.edition_id %}">{% ui 'preview' %}</a>{% else %}<a class="button" href="{% url 'web:title' ui_locale featured.edition_id %}">{% ui 'view_edition' %}</a>{% endif %}{% if audio_sample %}<a class="button secondary" href="{% url 'web:audio-preview' ui_locale featured.edition_id %}">{% ui 'listen_sample' %}</a>{% endif %}<a class="button secondary" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a></div>{% else %}<p>{% ui 'empty_catalog' %}</p><a class="button" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a>{% endif %}</div>
-<figure class="hero-art"><img src="{% static 'maison/art/hero.png' %}" alt="" width="1480" height="1063"></figure></section>
-<section><h2>{% ui 'new_titles' %}</h2>{% include 'web/includes/cards.html' %}</section>{% endblock %}
+{% extends 'web/base.html' %}{% load static maison %}
+{% block main_class %}room-home{% endblock %}
+{% block title %}Earnalism · Read, listen and learn{% endblock %}
+{% block content %}
+{% if request.user.is_authenticated %}
+<section class="room-band room-member" aria-label="Your reading">
+  <div class="room-wrap"><p class="room-kicker">Welcome back</p><h1 class="room-h1 room-h1-sm">Your evening, a little deeper.</h1>
+    <div id="home-island"><p role="status">{% ui 'loading' %}</p><a href="{% url 'web:vault' ui_locale %}">{% ui 'vault' %}</a></div></div>
+</section>
+{% endif %}
+
+<section class="room-hero" aria-labelledby="h-home">
+  <div class="room-wrap room-hero-grid">
+    <div>
+      <p class="room-kicker">The Earnalism reading room</p>
+      {% if request.user.is_authenticated %}<h2 class="room-h1" id="h-home">Carry a world of stories into your day.</h2>{% else %}<h1 class="room-h1" id="h-home">Carry a world of stories into your day.</h1>{% endif %}
+      <p class="room-lede">Read Bengali and English classics, listen as they are told aloud, and learn through short video series — on the page, in your ears, or on screen.</p>
+      <div class="room-cta-row">
+        {% if request.user.is_authenticated %}{% if featured %}<a class="room-btn room-btn-wine" href="{% url 'web:title' ui_locale featured.edition_id %}">{% ui 'view_edition' %}</a>{% endif %}
+        {% else %}<a class="room-btn room-btn-wine" href="{% url 'web:sign-up' ui_locale %}?return_to={% url 'web:explore' ui_locale %}">Start reading free</a>{% endif %}
+        <a class="room-btn room-btn-line" href="{% url 'web:explore' ui_locale %}">Explore the library</a>
+      </div>
+      {% if featured %}<div class="room-featured"><p class="room-lang">Now on the shelf</p><p class="room-featured-title" lang="{{ featured.locale }}">{{ featured.title }}</p>
+        <p class="room-featured-actions">{% if not request.user.is_authenticated and reader_sample_available %}<a class="room-link" href="{% url 'web:reader-start' ui_locale featured.edition_id %}"><svg aria-hidden="true"><use href="#i-book"/></svg>{% ui 'preview' %}</a>{% else %}<a class="room-link" href="{% url 'web:title' ui_locale featured.edition_id %}"><svg aria-hidden="true"><use href="#i-book"/></svg>{% ui 'view_edition' %}</a>{% endif %}{% if audio_sample %}<a class="room-link" href="{% url 'web:audio-preview' ui_locale featured.edition_id %}"><svg aria-hidden="true"><use href="#i-head"/></svg>{% ui 'listen_sample' %}</a>{% endif %}</p></div>{% endif %}
+      {% if free_access %}<p class="room-where">Free while we open our doors in {{ open_countries }}. No payment card needed.</p>{% else %}<p class="room-where">Open in {{ open_countries }}.</p>{% endif %}
+    </div>
+    <figure class="room-frame room-hero-art"><img src="{% static 'maison/art/hero.png' %}" alt="Illustration: a woman writing by lamplight on a veranda as monsoon rain falls over a river at dusk" width="1480" height="1063" fetchpriority="high">
+      <figcaption><svg aria-hidden="true"><use href="#i-head"/></svg><span><b>Evenings, a little deeper.</b> Read now, listen later.</span></figcaption></figure>
+  </div>
+  <div class="room-wrap"><ul class="room-promises">
+    <li><svg aria-hidden="true"><use href="#i-book"/></svg><span><b>Bengali &amp; English classics</b>Chosen and prepared one edition at a time.</span></li>
+    <li><svg aria-hidden="true"><use href="#i-head"/></svg><span><b>Read or listen</b>Switch between page and voice without losing your place.</span></li>
+    <li><svg aria-hidden="true"><use href="#i-play"/></svg><span><b>Short video lessons</b>Subtitles, transcripts and a quick quiz.</span></li>
+    <li><svg aria-hidden="true"><use href="#i-globe"/></svg><span><b>Every language on the shelf</b>The interface stays in English; you choose the books.</span></li>
+  </ul></div>
+</section>
+
+<section class="turner-band" id="turner" aria-labelledby="h-turner" aria-roledescription="carousel">
+  <div class="room-wrap">
+    <div class="room-split-head">
+      <div><p class="room-kicker">Make screen time count</p><h2 class="room-h2" id="h-turner">Swap one scroll for one story.</h2></div>
+      <p class="room-muted">Let the pages turn, or turn them yourself. Every card opens a real first chapter — free, and you keep your place.</p>
+    </div>
+    <div class="turn-stage">
+      <article class="turn-card" data-card="c1" role="group" aria-roledescription="card" aria-label="Card 1 of 4">
+        <div class="turn-copy"><p class="turn-tag">About 5 minutes · English classic</p><h3>Five spare minutes? Read a page, not a feed.</h3>
+          <p class="room-muted">Oscar Wilde’s <i>The Selfish Giant</i> opens like this. Keep going from exactly here.</p>
+          <div class="turn-actions"><a class="room-btn room-btn-wine turn-cta" href="{{ carousel.giant }}">Start Chapter 1 free</a><a class="room-link" href="{% url 'web:explore' ui_locale %}">Explore the library</a></div></div>
+        <div class="turn-art art-page" aria-hidden="true"><div class="sheet"><p class="sheet-title">The Selfish Giant</p><p class="sheet-chap">Chapter 1</p>
+          <p class="sheet-text"><span class="dropcap">E</span>very afternoon, as they were coming from school, the children used to go and play in the Giant’s garden. It was a large lovely garden, with soft green grass.</p><span class="sheet-time">About 5 minutes to read</span></div></div>
+      </article>
+      <article class="turn-card" data-card="c2" role="group" aria-roledescription="card" aria-label="Card 2 of 4">
+        <div class="turn-copy"><p class="turn-tag">Bengali and English, one shelf</p><h3>Your language, your shelf.</h3>
+          <p class="room-muted">Read Tagore in Bengali and Wilde in English. The interface stays simple; you choose the books.</p>
+          <div class="turn-actions"><a class="room-btn room-btn-wine turn-cta" href="{{ carousel.bicharak }}">Start Chapter 1 free</a><a class="room-link" href="{% url 'web:explore' ui_locale %}">Explore the library</a></div></div>
+        <div class="turn-art art-covers" aria-hidden="true">
+          <div class="room-cover bn" lang="bn"><span class="t">বিচারক</span><span class="rule"></span><span class="a">রবীন্দ্রনাথ ঠাকুর</span></div>
+          <div class="room-cover en"><span class="t">The Selfish Giant</span><span class="rule"></span><span class="a">Oscar Wilde</span></div></div>
+      </article>
+      <article class="turn-card" data-card="c3" role="group" aria-roledescription="card" aria-label="Card 3 of 4">
+        <div class="turn-copy"><p class="turn-tag">Phone at lunch, laptop at night</p><h3>Your place follows you.</h3>
+          <p class="room-muted">Start a chapter on your phone and finish it on your laptop. Your page, highlights and notes are waiting.</p>
+          <div class="turn-actions"><a class="room-btn room-btn-wine turn-cta" href="{{ carousel.giant }}">Start Chapter 1 free</a><a class="room-link" href="{% url 'web:explore' ui_locale %}">Explore the library</a></div></div>
+        <div class="turn-art art-devices" aria-hidden="true">
+          <div class="dev phone"><span class="bar"><i></i></span><span class="ln"></span><span class="ln"></span><span class="ln short"></span></div>
+          <svg class="hop" viewBox="0 0 120 40"><path d="M4 34 C40 2 80 2 116 30" fill="none" stroke="#B8913F" stroke-width="2" stroke-dasharray="4 5"/><path d="M108 22 l8 8 -11 3" fill="none" stroke="#B8913F" stroke-width="2"/></svg>
+          <div class="dev laptop"><div class="scr"><span class="bar"><i></i></span><span class="ln"></span><span class="ln"></span><span class="ln"></span><span class="ln short"></span><em>Page 4 · picked up where you left off</em></div><div class="base"></div></div></div>
+      </article>
+      <article class="turn-card" data-card="c4" role="group" aria-roledescription="card" aria-label="Card 4 of 4">
+        <div class="turn-copy"><p class="turn-tag">Knowledge series · <b>Coming soon</b></p><h3>Learn one idea at a time.</h3>
+          <p class="room-muted">Short lessons with notes and a quick check are on their way. Start with a story today — your account will be ready when they land.</p>
+          <div class="turn-actions"><a class="room-btn room-btn-wine turn-cta" href="{{ carousel.giant }}">Start Chapter 1 free</a><a class="room-link" href="{% url 'web:explore' ui_locale %}">Explore the library</a></div></div>
+        <div class="turn-art art-path" aria-hidden="true"><ol><li><b>1</b>Watch a short lesson</li><li><b>2</b>Read the notes</li><li><b>3</b>Check what stuck</li></ol><span class="soon">Coming soon</span></div>
+      </article>
+    </div>
+    <div class="turn-controls" role="group" aria-label="Carousel controls">
+      <button class="turn-btn" id="turn-prev" type="button" aria-label="Previous card"><svg aria-hidden="true"><use href="#i-back"/></svg></button>
+      <span class="turn-dots"><button class="turn-dot" data-i="0" type="button" aria-label="Show card 1"></button><button class="turn-dot" data-i="1" type="button" aria-label="Show card 2"></button><button class="turn-dot" data-i="2" type="button" aria-label="Show card 3"></button><button class="turn-dot" data-i="3" type="button" aria-label="Show card 4"></button></span>
+      <button class="turn-btn" id="turn-next" type="button" aria-label="Next card"><svg aria-hidden="true"><use href="#i-next"/></svg></button>
+      <button class="turn-btn turn-pause" id="turn-pause" type="button" aria-pressed="false" aria-label="Pause automatic turning"><svg aria-hidden="true"><use href="#i-pause"/></svg></button>
+    </div>
+    <p class="sr-live" aria-live="polite"></p>
+  </div>
+</section>
+
+<section class="room-band room-parchment" aria-labelledby="h-ways">
+  <div class="room-wrap">
+    <div class="room-split-head"><div><p class="room-kicker">A library within reach</p><h2 class="room-h2" id="h-ways">Read. Listen. Learn.</h2></div>
+      <p class="room-muted">A spare moment can become a doorway. Pick up a story on the page, hear it told in a quiet voice, or learn one idea at a time — and carry your place from one to the next.</p></div>
+    <div class="room-ways">
+      <a class="room-way" href="{% url 'web:explore' ui_locale %}"><div class="pic"><img src="{% static 'maison/room/read-desk.webp' %}" alt="" loading="lazy" width="1400" height="744"><span class="mark"><svg aria-hidden="true"><use href="#i-book"/></svg></span></div><div class="body"><h3>Read</h3><p>Pages that turn like paper, with highlights, notes and bookmarks that follow you.</p><span class="room-link">Open a classic <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></div></a>
+      <a class="room-way" href="{% url 'web:explore' ui_locale %}"><div class="pic"><img src="{% static 'maison/room/listening-room.webp' %}" alt="" loading="lazy" width="1400" height="933"><span class="mark"><svg aria-hidden="true"><use href="#i-head"/></svg></span></div><div class="body"><h3>Listen</h3><p>Stories told aloud, chapter by chapter, with speed control and a sleep timer.</p><span class="room-link">Enter the listening room <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></div></a>
+      <a class="room-way" href="{% url 'web:series' ui_locale %}"><div class="pic"><img src="{% static 'maison/room/learn-desk.webp' %}" alt="" loading="lazy" width="1400" height="612"><span class="mark"><svg aria-hidden="true"><use href="#i-play"/></svg></span></div><div class="body"><h3>Learn</h3><p>Knowledge series of short video lessons with notes, subtitles and a quick check.</p><span class="room-link">See the series <svg aria-hidden="true"><use href="#i-arrow"/></svg></span></div></a>
+    </div>
+  </div>
+</section>
+
+<section class="room-band" aria-labelledby="h-shelf">
+  <div class="room-wrap">
+    {% if shelf %}
+    <div class="room-split-head"><div><p class="room-kicker">On the shelf</p><h2 class="room-h2" id="h-shelf">{% ui 'new_titles' %}</h2></div><p class="room-muted">Every edition is prepared and checked before it goes on the shelf.</p></div>
+    <div class="room-shelf">{% for card in shelf %}
+      <a class="room-book" href="{% url 'web:title' ui_locale card.edition_id %}">
+        {% if card.cover %}<img class="room-cover-img" src="{{ card.cover.url }}" alt="{{ card.cover.alt }}" width="150" height="225" loading="lazy">{% else %}<div class="room-cover {% if card.locale == 'bn' %}bn{% else %}en{% endif %}" aria-hidden="true" lang="{{ card.locale }}"><span class="t">{{ card.title }}</span><span class="rule"></span><span class="a">{{ card.creators|join:', ' }}</span></div>{% endif %}
+        <div><p class="room-lang">{% if card.locale == 'bn' %}Bengali{% else %}English{% endif %}</p><h3 lang="{{ card.locale }}">{{ card.title }}</h3><p class="room-muted">{{ card.creators|join:', ' }}</p>
+          <p class="room-chips">{% for format in card.formats %}<span class="room-chip">{% ui format %}</span>{% endfor %}</p></div>
+      </a>{% endfor %}</div>
+    {% else %}
+    <div class="room-split-head"><div><p class="room-kicker">First on the shelf</p><h2 class="room-h2" id="h-shelf">Two stories open the doors.</h2></div><p class="room-muted">Every edition is prepared and checked before it goes on the shelf. These two arrive first; more follow as each is ready.</p></div>
+    <div class="room-shelf">
+      <div class="room-book"><div class="room-cover en" aria-hidden="true"><span class="t">The Selfish Giant</span><span class="rule"></span><span class="a">Oscar Wilde</span></div>
+        <div><p class="room-lang">English · fairy tale</p><h3>The Selfish Giant</h3><p class="room-muted">Oscar Wilde</p><p class="room-chips"><span class="room-chip soon">Arriving soon</span></p></div></div>
+      <div class="room-book"><div class="room-cover bn" aria-hidden="true" lang="bn"><span class="t">বিচারক</span><span class="rule"></span><span class="a">রবীন্দ্রনাথ ঠাকুর</span></div>
+        <div><p class="room-lang">Bengali · short story</p><h3 lang="bn">বিচারক</h3><p class="room-muted" lang="bn">রবীন্দ্রনাথ ঠাকুর</p><p class="room-chips"><span class="room-chip soon">Arriving soon</span></p></div></div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="room-band room-parchment" aria-labelledby="h-listen">
+  <div class="room-wrap room-listen">
+    <figure class="room-frame"><img src="{% static 'maison/room/listening-room.webp' %}" alt="Headphones resting on an open book beside a lamp on a wooden desk" loading="lazy" width="1400" height="933"></figure>
+    <div><p class="room-kicker">The listening room</p><h2 class="room-h2" id="h-listen">Some stories stay with you in voice.</h2>
+      <p class="room-lede">For walks, evenings and journeys — when a story is better heard than held.</p>
+      <ul><li><svg aria-hidden="true"><use href="#i-speed"/></svg><span>Slow a story down or speed it up.</span></li><li><svg aria-hidden="true"><use href="#i-moon"/></svg><span>A sleep timer that stops at the end of the chapter.</span></li><li><svg aria-hidden="true"><use href="#i-book"/></svg><span>Switch to the page at the line the narrator is reading.</span></li></ul></div>
+  </div>
+</section>
+
+<section class="room-band" aria-labelledby="h-learn">
+  <div class="room-wrap">
+    <div class="room-split-head"><div><p class="room-kicker">Knowledge series</p><h2 class="room-h2" id="h-learn">One short step at a time.</h2></div><p class="room-muted">Each series is a path of short lessons you can watch, read and check — at your own pace, on any device.</p></div>
+    <ol class="room-steps"><li><h3>Watch a short lesson</h3><p>Adjustable speed, subtitles, and a transcript you can search.</p></li><li><h3>Read the notes</h3><p>Highlight what matters and keep it in your Vault.</p></li><li><h3>Check what stuck</h3><p>A few questions, with an explanation after each answer.</p></li><li><h3>Carry on later</h3><p>Your progress follows you to every device you sign in to.</p></li></ol>
+  </div>
+</section>
+
+<section class="room-band room-dark" aria-labelledby="h-open">
+  <div class="room-wrap room-open">
+    <div><p class="room-kicker">{% if free_access %}Free while we open our doors{% else %}Your reading room{% endif %}</p><h2 class="room-h2" id="h-open">Make room for another chapter.</h2>
+      <p class="room-lede">Create a free account to keep your place, save highlights and pick up any story on any device.</p>
+      <ul><li><svg aria-hidden="true"><use href="#i-check"/></svg>No payment card, no subscription</li><li><svg aria-hidden="true"><use href="#i-check"/></svg>Your place saved across page and voice</li><li><svg aria-hidden="true"><use href="#i-check"/></svg>Highlights, notes and lists in your Vault</li></ul>
+      <div class="room-cta-row">{% if request.user.is_authenticated %}<a class="room-btn room-btn-gold" href="{% url 'web:vault' ui_locale %}">{% ui 'vault' %}</a>{% else %}<a class="room-btn room-btn-gold" href="{% url 'web:sign-up' ui_locale %}?return_to={% url 'web:explore' ui_locale %}">Start reading free</a>{% endif %}<a class="room-btn room-btn-line" href="{% url 'web:explore' ui_locale %}">Explore the library first</a></div></div>
+    <div class="room-gilt"><img src="{% static 'maison/room/bookshelf.webp' %}" alt="" loading="lazy" width="1400" height="744"></div>
+  </div>
+</section>
+
+<section class="room-quote" aria-label="A reflection from the reading room"><img src="{% static 'maison/room/river-quote.webp' %}" alt="" width="1400" height="487" loading="lazy"><div class="room-wrap"><p>“A good story has a gentle way of slowing a busy day.”</p></div></section>
+{% endblock %}
 {% block bootstrap %}{% if request.user.is_authenticated %}{% island_script 'home' %}{% endif %}{% endblock %}

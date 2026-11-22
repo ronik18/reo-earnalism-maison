@@ -2,24 +2,57 @@
 <html lang="en" data-ui-locale="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="{% if allow_index %}index,follow{% else %}noindex,nofollow{% endif %}"><title>{% block title %}{% ui 'site_name' %}{% endblock %}</title>
-<link rel="stylesheet" href="{% static 'maison/fonts/typography.css' %}"><link rel="stylesheet" href="{% static 'maison/app.css' %}?v={% asset_version 'maison/app.css' %}">
-<link rel="stylesheet" href="{% static 'maison/peacock/tokens.css' %}"><link rel="stylesheet" href="{% static 'maison/peacock/maison-theme.css' %}?v={% asset_version 'maison/peacock/maison-theme.css' %}">
-<script src="{% static 'maison/app.js' %}?v={% asset_version 'maison/app.js' %}" defer></script>{% block scripts %}{% endblock %}</head>
-<body data-route="{{ request.resolver_match.url_name }}" data-member-id="{{ request.user.public_id|default:'' }}" data-member="{{ request.user.is_authenticated|yesno:'true,false' }}" data-offline-enabled="{{ offline_enabled|yesno:'true,false' }}" class="maison theme-{{ app_theme }}{% if reduced_motion %} reduced-motion{% endif %}" lang="en">
-<div class="pc-halo" aria-hidden="true"></div>
+<meta name="description" content="{% block description %}Read Bengali and English classics, listen as they are told aloud, and learn through short video series on Earnalism.{% endblock %}">
+<link rel="stylesheet" href="{% static 'maison/fonts/typography.css' %}">
+<link rel="stylesheet" href="{% static 'maison/app.css' %}?v={% asset_version 'maison/app.css' %}">
+<link rel="stylesheet" href="{% static 'maison/room/room.css' %}?v={% asset_version 'maison/room/room.css' %}">
+<script src="{% static 'maison/app.js' %}?v={% asset_version 'maison/app.js' %}" defer></script>
+<script src="{% static 'maison/room/room.js' %}?v={% asset_version 'maison/room/room.js' %}" defer></script>{% block scripts %}{% endblock %}</head>
+<body data-route="{{ request.resolver_match.url_name }}" data-member-id="{{ request.user.public_id|default:'' }}" data-member="{{ request.user.is_authenticated|yesno:'true,false' }}" data-offline-enabled="{{ offline_enabled|yesno:'true,false' }}" class="room maison theme-{{ app_theme }}{% if focused %} room-focused{% endif %}{% if reduced_motion %} reduced-motion{% endif %}" lang="en">
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M3 5.5C5.5 4.5 8.5 4.5 12 6.5c3.5-2 6.5-2 9-1V19c-2.5-1-5.5-1-9 1-3.5-2-6.5-2-9-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 6.5V20" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-head" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="4.5" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="16.5" y="14" width="4.5" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 8.5l5 2.5-5 2.5z" fill="currentColor"/><path d="M7 21h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-speed" viewBox="0 0 24 24"><path d="M4 17a8 8 0 1 1 16 0" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 17l4-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/></symbol>
+  <symbol id="i-tri" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z" fill="currentColor"/></symbol>
+</svg>
 <a class="skip-link" href="#main">{% ui 'skip_content' %}</a>
-<header class="brand-header"><a class="brand-link" href="{% url 'web:home' ui_locale %}"><img src="{% static 'maison/logo.png' %}" alt="Earnalism · Where Learning Becomes Earning · A REO Enterprise Venture" width="1400" height="500"></a>
-<div class="immersive-tools"><a href="{% if edition.edition_id %}{% url 'web:title' ui_locale edition.edition_id %}{% else %}{% url 'web:home' ui_locale %}{% endif %}">{% ui 'back' %}</a><span>{{ edition.title|default:ui.site_name }}</span></div><div class="header-tools"><a href="{% url 'web:search' ui_locale %}">{% ui 'search' %}</a>{% if request.user.is_authenticated %}<a href="{% url 'web:vault' ui_locale %}">{% ui 'vault' %}</a>{% else %}<a href="{% url 'web:sign-in' ui_locale %}?return_to={{ return_to|urlencode }}">{% ui 'sign_in' %}</a>{% endif %}</div></header>
-<nav class="side-nav" aria-label="{% ui 'site_name' %}">
-<a {% if active_nav == 'home' %}aria-current="page"{% endif %} href="{% url 'web:home' ui_locale %}"><img class="nav-icon" src="{% static 'maison/peacock/icons/house.svg' %}" alt="" aria-hidden="true" width="22" height="22"><span>{% ui 'home' %}</span></a>
-<a {% if active_nav == 'explore' %}aria-current="page"{% endif %} href="{% url 'web:explore' ui_locale %}"><img class="nav-icon" src="{% static 'maison/peacock/icons/compass.svg' %}" alt="" aria-hidden="true" width="22" height="22"><span>{% ui 'explore' %}</span></a>
-<a {% if active_nav == 'learn' %}aria-current="page"{% endif %} href="{% url 'web:learn' ui_locale %}"><img class="nav-icon" src="{% static 'maison/peacock/icons/book-open.svg' %}" alt="" aria-hidden="true" width="22" height="22"><span>{% ui 'learn' %}</span></a>
-<a {% if active_nav == 'series' %}aria-current="page"{% endif %} href="{% url 'web:series' ui_locale %}"><img class="nav-icon" src="{% static 'maison/peacock/icons/stack.svg' %}" alt="" aria-hidden="true" width="22" height="22"><span>{% ui 'series' %}</span></a>
-<a {% if active_nav == 'vault' %}aria-current="page"{% endif %} href="{% url 'web:vault' ui_locale %}"><img class="nav-icon" src="{% static 'maison/peacock/icons/archive.svg' %}" alt="" aria-hidden="true" width="22" height="22"><span>{% ui 'vault' %}</span></a>
-<a class="pass-nav" {% if active_nav == 'pass' %}aria-current="page"{% endif %} href="{% url 'web:pass' ui_locale %}"><img class="nav-icon" src="{% static 'maison/peacock/icons/star.svg' %}" alt="" aria-hidden="true" width="22" height="22"><span>{% ui 'pass' %}</span></a>
-<span class="pc-jali" aria-hidden="true"></span><a class="settings-nav" {% if request.resolver_match.url_name == 'settings' %}aria-current="page"{% endif %} href="{% url 'web:settings' ui_locale %}"><img class="nav-icon" src="{% static 'maison/peacock/icons/gear.svg' %}" alt="" aria-hidden="true" width="22" height="22"><span>{% ui 'settings' %}</span></a></nav>
-<div class="web-stage {% if focused %}focused-stage{% endif %}"><div id="connection-status" class="connection-status" role="status" hidden>{% ui 'offline' %}</div><main id="main" tabindex="-1">{% block content %}{% endblock %}{% if request.resolver_match.url_name == 'settings' %}<nav class="account-legal-links footer-links" aria-label="{% ui 'footer_links' %}"><a href="{% url 'web:privacy' ui_locale %}">{% ui 'privacy_notice' %}</a><a href="{% url 'web:terms' ui_locale %}">{% ui 'service_terms' %}</a><a href="{% url 'web:contact' ui_locale %}">{% ui 'contact' %}</a></nav>{% endif %}</main>
-<footer><p>{% if local_build %}{% ui 'local_notice' %}{% elif india_first_launch %}Earnalism · Free access in India · A Reo Enterprise Venture{% else %}{% ui 'platform_footer' %}{% endif %}</p><nav class="footer-links" aria-label="{% ui 'footer_links' %}"><a href="{% url 'web:privacy' ui_locale %}">{% ui 'privacy_notice' %}</a><a href="{% url 'web:terms' ui_locale %}">{% ui 'service_terms' %}</a><a href="{% url 'web:contact' ui_locale %}">{% ui 'contact' %}</a><a href="{% url 'web:settings' ui_locale %}">{% ui 'settings' %}</a></nav></footer></div>
+{% if focused %}<header class="room-top room-evening"><div class="room-wrap">
+  <a class="room-back" href="{% if edition.edition_id %}{% url 'web:title' ui_locale edition.edition_id %}{% else %}{% url 'web:home' ui_locale %}{% endif %}"><svg aria-hidden="true"><use href="#i-back"/></svg><span>{% ui 'back' %}</span></a>
+  <span class="room-evening-title">{{ edition.title|default:ui.site_name }}</span>
+  <a class="room-logo room-logo-mini" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="" width="1400" height="500"></a>
+</div></header>{% else %}<header class="room-top"><div class="room-wrap">
+  <a class="room-logo" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="Earnalism — Where Learning Becomes Earning — A Reo Enterprise venture" width="1400" height="500"></a>
+  <nav class="room-nav" aria-label="Main">
+    <a href="{% url 'web:home' ui_locale %}"{% if request.resolver_match.url_name == 'home' %} aria-current="page"{% endif %}>Home</a><a href="{% url 'web:explore' ui_locale %}"{% if active_nav == 'explore' %} aria-current="page"{% endif %}>Explore</a><a href="{% url 'web:learn' ui_locale %}"{% if active_nav == 'learn' %} aria-current="page"{% endif %}>Learn</a><a href="{% url 'web:series' ui_locale %}"{% if active_nav == 'series' %} aria-current="page"{% endif %}>Series</a><a href="{% url 'web:vault' ui_locale %}"{% if active_nav == 'vault' %} aria-current="page"{% endif %}>Vault</a>
+  </nav>
+  <div class="room-tools">
+    <a class="room-search" href="{% url 'web:search' ui_locale %}" aria-label="Search books, authors and lessons"><svg aria-hidden="true"><use href="#i-search"/></svg><span>Search books, authors</span></a>
+    {% if request.user.is_authenticated %}<a class="room-who" href="{% url 'web:settings' ui_locale %}"><svg aria-hidden="true"><use href="#i-user"/></svg><span>Your account</span></a>
+    {% else %}<a class="room-who" href="{% url 'web:sign-in' ui_locale %}?return_to={{ return_to|urlencode }}"><svg aria-hidden="true"><use href="#i-user"/></svg><span>{% ui 'sign_in' %}</span></a>
+    <a class="room-cta" href="{% url 'web:sign-up' ui_locale %}?return_to={% url 'web:explore' ui_locale %}">Start reading free</a>{% endif %}
+  </div>
+</div></header>{% endif %}
+<div id="connection-status" class="connection-status" role="status" hidden>{% ui 'offline' %}</div>
+<main id="main" tabindex="-1" class="{% block main_class %}room-page{% endblock %}">{% block content %}{% endblock %}{% if request.resolver_match.url_name == 'settings' %}<nav class="account-legal-links footer-links" aria-label="{% ui 'footer_links' %}"><a href="{% url 'web:privacy' ui_locale %}">{% ui 'privacy_notice' %}</a><a href="{% url 'web:terms' ui_locale %}">{% ui 'service_terms' %}</a><a href="{% url 'web:contact' ui_locale %}">{% ui 'contact' %}</a></nav>{% endif %}</main>
+{% if not focused %}<footer class="room-footer"><div class="room-wrap">
+  <div class="room-footer-cols">
+    <div><p class="room-footer-brand">Earnalism</p><p>Good books. Wider horizons. A Reo Enterprise venture.</p></div>
+    <div><h2>Library</h2><ul><li><a href="{% url 'web:explore' ui_locale %}">Explore</a></li><li><a href="{% url 'web:learn' ui_locale %}">Learn</a></li><li><a href="{% url 'web:series' ui_locale %}">Series</a></li></ul></div>
+    <div><h2>Your account</h2><ul>{% if request.user.is_authenticated %}<li><a href="{% url 'web:vault' ui_locale %}">Vault</a></li>{% else %}<li><a href="{% url 'web:sign-up' ui_locale %}?return_to={% url 'web:explore' ui_locale %}">Start reading free</a></li>{% endif %}<li><a href="{% url 'web:pass' ui_locale %}">{% ui 'pass' %}</a></li><li><a href="{% url 'web:settings' ui_locale %}">{% ui 'settings' %}</a></li></ul></div>
+    <div><h2>Help</h2><ul><li><a href="{% url 'web:contact' ui_locale %}">{% ui 'contact' %}</a></li><li><a href="{% url 'web:privacy' ui_locale %}">{% ui 'privacy_notice' %}</a></li><li><a href="{% url 'web:terms' ui_locale %}">{% ui 'service_terms' %}</a></li></ul></div>
+  </div>
+  <p class="room-legal">{% if local_build %}{% ui 'local_notice' %}{% elif india_first_launch %}Earnalism · Free access in India · A Reo Enterprise Venture{% else %}© 2026 Earnalism · operated by Reo Enterprise. Public-domain works and licensed editions keep their own terms.{% endif %}</p>
+</div></footer>{% endif %}
 <div id="persistent-media" aria-label="{% ui 'audio' %}"></div>
 {{ ui|json_script:'ui-catalogue' }}{% island_script 'shell' %}{% block bootstrap %}{% endblock %}
 </body></html>

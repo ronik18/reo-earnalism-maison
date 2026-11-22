@@ -55,7 +55,7 @@ def context(request, locale, **extra):
         "adult_only_signup": __import__("accounts.enrollment", fromlist=["account_mode"]).account_mode(getattr(request, "territory", None)) == "adult_only",
         "email_link_enabled": django_settings.FEATURES.get("email_link", False),
         "google_oauth_enabled": django_settings.FEATURES.get("google_oauth", False),
-        "app_theme": prefs.theme if prefs and prefs.theme in ("light", "dark", "true_black") else "dark",
+        "app_theme": prefs.theme if prefs and prefs.theme in ("light", "dark", "true_black") else "light",
         "reduced_motion": bool(prefs and prefs.reduced_motion),
         "ui_locale": "en", "ui": catalogue("en"),
         "content_languages": [{"code":"en","label":"English"},{"code":"bn","label":"Bengali"}],
@@ -125,14 +125,33 @@ def root(request):
     return HttpResponseRedirect("/en/")
 
 
+CAROUSEL_TITLES = {"giant": "the selfish giant", "bicharak": "বিচারক"}
+
+
+def carousel_links(cards, locale, authenticated):
+    """Each carousel card opens its own book's first chapter; guests sign up on the way and return there."""
+    by_title = {str(card.get("title", "")).strip().casefold(): card for card in cards}
+    links = {}
+    for key, title in CAROUSEL_TITLES.items():
+        card = by_title.get(title)
+        target = reverse("web:reader-start", args=[locale, card["edition_id"]]) if card else reverse("web:explore", args=[locale])
+        links[key] = target if authenticated else reverse("web:sign-up", args=[locale]) + "?return_to=" + target
+    return links
+
+
 @require_GET
 @domain_view
 def home(request, locale):
     from library.services import catalog_cards
+    from .legal import active_countries
     cards = catalog_cards(locale=request.GET.get("content_locale") or None, territory=trusted_territory(request))
     featured = cards[0] if cards else None
     sample = public_preview_data(request, featured) if featured else {}
-    return page(request, locale, "web/home.html", cards=cards, featured=featured, reader_sample_available=bool(sample.get("units")), audio_sample=sample.get("audio") if django_settings.FEATURES.get("audio") else None, allow_index=not django_settings.LOCAL)
+    countries = active_countries()
+    return page(request, "en", "web/home.html", cards=cards, featured=featured, reader_sample_available=bool(sample.get("units")),
+                audio_sample=sample.get("audio") if django_settings.FEATURES.get("audio") else None, allow_index=not django_settings.LOCAL,
+                shelf=cards[:4], carousel=carousel_links(cards, "en", request.user.is_authenticated),
+                open_countries=", ".join(countries[:-1]) + (" and " + countries[-1] if len(countries) > 1 else "".join(countries)))
 
 
 @require_GET

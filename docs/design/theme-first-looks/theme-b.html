@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maison · Theme B · Burgundy Salon (first look)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500&family=Jost:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Tiro+Bangla&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   THEME B · BURGUNDY SALON · dark-first
+   Design tokens (first look; not yet approved)
+   ========================================================= */
+:root{
+  /* Burgundy (dark scale) */
+  --noir:#1A070D;        /* canvas */
+  --surface:#2A0D16;     /* cards, panels */
+  --raised:#3A1320;      /* menus, wells, hover */
+  --line:#5C2433;        /* hairlines (decorative) */
+  --velvet:#7A1F35;      /* selected states, secondary fill */
+  --velvet-hi:#94304A;   /* hover */
+  /* Ivory */
+  --ivory:#F5ECDA;       /* primary text, logo band */
+  --ivory-muted:#CBB8A6; /* secondary text */
+  --paper:#F7EFE0;       /* reader paper theme */
+  --ink:#22090F;         /* text on ivory / foil */
+  /* Metallic gold */
+  --gold:#D8B76A;        /* gold text on dark (AA) */
+  --gold-300:#E8CF8E;    /* focus ring, gold on velvet */
+  --gold-600:#A8833A;    /* strokes */
+  --foil:linear-gradient(120deg,#8A6A2E 0%,#C9A24F 24%,#F4E3AE 48%,#D2AC5C 66%,#96722F 86%,#C9A24F 100%);
+  --foil-fill:linear-gradient(120deg,#C9A24F 0%,#F4E3AE 46%,#D2AC5C 72%,#C9A24F 100%); /* surfaces carrying Noir text/icons: worst stop 8.11:1 */
+  --foil-text:linear-gradient(120deg,#C9A24F,#F4E3AE 45%,#D2AC5C 70%,#C9A24F); /* worst stop 8.1:1 on noir */
+  --foil-hair:linear-gradient(90deg,transparent,#C9A24F 20%,#F4E3AE 50%,#C9A24F 80%,transparent);
+  /* Status (dark-tuned) */
+  --ok:#8FD1A0; --warn:#F0C674; --bad:#F2A0AC; --info:#A9C6EA;
+  /* Type */
+  --font-display:'Bodoni Moda','Tiro Bangla',Didot,serif;
+  --font-ui:'Jost','Hind Siliguri',system-ui,sans-serif;
+  --font-reading:'Literata','Tiro Bangla',Georgia,serif;
+  --font-bn-read:'Tiro Bangla',serif; --font-bn-ui:'Hind Siliguri',sans-serif;
+  --t-display:60px/1.02; --t-h1:42px/1.08; --t-h2:30px/1.15; --t-h3:22px/1.25;
+  --t-body:16px/1.6; --t-small:14px/1.5; --t-micro:12px/1.4; --t-reading:19px/1.72;
+  /* Space (4pt) */
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;
+  /* Radius: squarer, couture */
+  --r-xs:2px;--r-sm:4px;--r-md:8px;--r-lg:12px;--r-pill:999px;
+  /* Shadow: glow + depth on dark */
+  --sh-1:0 1px 0 rgba(244,227,174,.06) inset,0 2px 6px rgba(0,0,0,.35);
+  --sh-2:0 1px 0 rgba(244,227,174,.08) inset,0 10px 24px rgba(0,0,0,.45);
+  --sh-3:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(201,162,79,.18);
+  --glow-gold:0 0 0 1px rgba(232,207,142,.5),0 0 24px rgba(232,207,142,.18);
+  /* Motion */
+  --ease-out:cubic-bezier(.16,1,.3,1); --ease-page:cubic-bezier(.6,.05,.25,1);
+  --d-fast:140ms; --d-base:260ms; --d-page:600ms; --d-shimmer:2400ms;
+}
+@media (prefers-reduced-motion:reduce){:root{--d-fast:0ms;--d-base:0ms;--d-page:0ms;--d-shimmer:0ms}*{animation:none!important;transition:none!important}}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#0F0407;color:var(--ivory);font:var(--t-body) var(--font-ui);-webkit-font-smoothing:antialiased;font-variant-numeric:lining-nums}
+.board{width:1560px;margin:0 auto;padding:56px 40px 80px}
+.board-head{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;margin-bottom:24px;padding-bottom:24px;position:relative}
+.board-head::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--foil-hair)}
+.board-head h1{font:500 66px/1 var(--font-display);margin:6px 0 0;letter-spacing:-.01em}
+.board-head h1 em{background:var(--foil-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.board-head p{margin:10px 0 0;color:var(--ivory-muted);max-width:72ch}
+.logo-band{background:var(--ivory);padding:10px 22px;border-radius:var(--r-md);box-shadow:var(--glow-gold)}
+.logo-band img{height:74px;width:auto;display:block}
+.eyebrow{font:600 11px/1 var(--font-ui);letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+.section{margin:64px 0 0}
+.section-label{display:flex;gap:18px;align-items:baseline;margin-bottom:18px}
+.section-label b{font:500 40px/1 var(--font-display);background:var(--foil-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.section-label span{font:italic 500 28px/1 var(--font-display)}
+.section-label small{color:var(--ivory-muted);font-size:14px;letter-spacing:.02em}
+.pair{display:grid;grid-template-columns:1060px 390px;gap:30px;align-items:start}
+.frame{background:var(--noir);border-radius:12px;box-shadow:var(--sh-3);overflow:hidden;position:relative}
+.frame.mobile{border-radius:38px;border:10px solid #050102;box-shadow:var(--sh-3),0 0 0 1px #3A1320}
+.cap{font:400 12px/1.5 var(--font-ui);color:var(--ivory-muted);margin:10px 4px 0;letter-spacing:.03em}
+.ico{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* Buttons & chips */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 24px;border-radius:var(--r-sm);font:500 13px/1 var(--font-ui);letter-spacing:.14em;text-transform:uppercase;text-decoration:none;border:1px solid transparent;white-space:nowrap}
+.btn-foil{background:var(--foil-fill);background-size:200% 100%;color:var(--ink);box-shadow:0 6px 18px rgba(201,162,79,.25)}
+.btn-velvet{background:var(--velvet);color:var(--ivory);border-color:rgba(232,207,142,.35)}
+.btn-line{color:var(--gold);border-color:rgba(216,183,106,.6)}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 14px;border-radius:var(--r-pill);border:1px solid var(--line);font:500 13px/1 var(--font-ui);color:var(--ivory-muted);white-space:nowrap}
+.chip[aria-pressed=true]{background:var(--velvet);border-color:var(--gold-600);color:var(--ivory)}
+.kbd{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;background:var(--raised);font:600 12px var(--font-ui);color:var(--ivory)}
+
+/* App shell */
+.shell{display:grid;grid-template-columns:84px 1fr}
+.rail{background:var(--surface);border-right:1px solid var(--line);display:grid;align-content:start;justify-items:center;gap:6px;padding:18px 0}
+.rail a{display:grid;justify-items:center;gap:4px;width:68px;padding:10px 0;border-radius:var(--r-md);color:var(--ivory-muted);text-decoration:none;font:500 11px var(--font-ui);letter-spacing:.04em}
+.rail a[aria-current]{color:var(--gold);background:var(--raised);box-shadow:inset 2px 0 0 var(--gold)}
+.rail .mono{width:44px;height:44px;border-radius:50%;background:var(--foil-fill);display:grid;place-items:center;color:var(--ink);font:600 18px var(--font-display);margin-bottom:12px}
+.appbar{display:flex;align-items:center;gap:18px;padding:0 28px;height:78px;background:var(--ivory);color:var(--ink)}
+.appbar img{height:56px}
+.appbar .search{margin-left:auto;display:flex;align-items:center;gap:8px;border:1px solid #D8C7A8;border-radius:var(--r-pill);padding:9px 16px;min-width:300px;color:#5A4148;font-size:14px;background:#FBF5E9}
+.appbar .who{width:38px;height:38px;border-radius:50%;background:var(--velvet);color:var(--gold-300);display:grid;place-items:center;font:600 15px var(--font-display)}
+.appbar-hair{height:2px;background:var(--foil)}
+.content{padding:26px 28px 32px;display:grid;gap:30px;background:radial-gradient(90% 50% at 70% 0%,rgba(122,31,53,.45),transparent 70%),var(--noir)}
+
+/* Covers */
+.cover{position:relative;aspect-ratio:2/3;border-radius:2px 6px 6px 2px;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;color:var(--ivory);overflow:hidden;box-shadow:0 12px 26px rgba(0,0,0,.5),inset 0 0 0 1px rgba(244,227,174,.12)}
+.cover::before{content:"";position:absolute;inset:0 auto 0 0;width:8px;background:linear-gradient(90deg,rgba(0,0,0,.35),transparent)}
+.cover::after{content:"";position:absolute;inset:8px;border:1px solid rgba(232,207,142,.35);pointer-events:none}
+.cover .ct{font:500 19px/1.1 var(--font-display);position:relative}
+.cover .ca{font:600 9px/1 var(--font-ui);letter-spacing:.2em;text-transform:uppercase;color:var(--gold-300);position:relative}
+.k1{background:radial-gradient(120% 80% at 70% 10%,#94304A,#3A1320)}
+.k2{background:linear-gradient(170deg,#1F3346,#0B1520)}
+.k3{background:linear-gradient(170deg,#F5ECDA,#D9C39A);color:var(--ink)}
+.k3 .ca{color:#6E5119}
+.k4{background:radial-gradient(100% 90% at 30% 0%,#2E5140,#0F2118)}
+.k5{background:linear-gradient(170deg,#5A3B1A,#1F1208)}
+.k6{background:radial-gradient(120% 80% at 50% 0%,#5B1830,#1A070D)}
+.lang{position:absolute;top:12px;right:12px;z-index:1;font:600 10px/1 var(--font-ui);letter-spacing:.1em;color:var(--ink);background:var(--gold-300);padding:4px 6px;border-radius:2px}
+
+/* ---------- 1 HOME ---------- */
+.feature{display:grid;grid-template-columns:230px 1fr 290px;gap:28px;align-items:center}
+.feature>.cover{width:230px;padding:22px 18px}
+.feature>.cover .ct{font-size:30px}
+.feature h2{font:500 50px/1.02 var(--font-display);margin:14px 0 12px}
+.feature h2 em{background:var(--foil-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.feature p{color:var(--ivory-muted);margin:0 0 20px;max-width:48ch}
+.formats{display:flex;gap:16px;color:var(--ivory-muted);font-size:13px;margin-bottom:22px}
+.formats span{display:inline-flex;gap:6px;align-items:center}
+.cont{border:1px solid var(--line);background:rgba(42,13,22,.75);border-radius:var(--r-lg);padding:18px;display:grid;gap:14px}
+.ci{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:center}
+.ci .cover{padding:4px}
+.ci .cover::after{inset:3px}
+.ci b{display:block;font:500 17px/1.2 var(--font-display)}
+.ci small{font-size:12px;color:var(--ivory-muted)}
+.ring{height:3px;background:var(--line);margin-top:6px;border-radius:3px;overflow:hidden}
+.ring i{display:block;height:100%;background:var(--foil)}
+.rowhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;gap:16px}
+.rowhead h3{font:500 30px/1 var(--font-display);margin:0}
+.rowhead a{color:var(--gold);font:500 12px var(--font-ui);letter-spacing:.18em;text-transform:uppercase;text-decoration:none}
+.shelf{display:grid;grid-template-columns:repeat(7,1fr);gap:18px}
+.shelf h5{margin:10px 0 2px;font:500 14px/1.3 var(--font-ui)}
+.shelf small{color:var(--ivory-muted);font-size:12px}
+.series{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:16px}
+.s-card{position:relative;border-radius:var(--r-lg);overflow:hidden;padding:20px;min-height:180px;display:flex;flex-direction:column;justify-content:flex-end;border:1px solid var(--line)}
+.s-card h4{font:500 26px/1.1 var(--font-display);margin:6px 0 4px}
+.s-card p{margin:0;color:var(--ivory-muted);font-size:13px}
+.s-card .steps{display:flex;gap:4px;margin-top:12px}
+.s-card .steps i{flex:1;height:3px;background:rgba(245,236,218,.18)}
+.s-card .steps i.d{background:var(--gold)}
+.ad{position:relative;border-radius:var(--r-lg);padding:22px 26px;display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;background:linear-gradient(100deg,#2A0D16,#3A1320 60%,#2A0D16);border:1px solid rgba(216,183,106,.45)}
+.ad .lbl{display:inline-flex;gap:8px;align-items:center;font:600 10px/1 var(--font-ui);letter-spacing:.24em;text-transform:uppercase;color:var(--ink);background:var(--gold-300);padding:5px 8px;border-radius:2px}
+.ad h4{font:500 26px/1.1 var(--font-display);margin:10px 0 4px}
+.ad p{margin:0;color:var(--ivory-muted);font-size:13px}
+.ad u{color:var(--gold)}
+
+/* mobile */
+.m{height:790px;display:flex;flex-direction:column;background:var(--noir);position:relative}
+.m-status{display:flex;justify-content:space-between;padding:10px 22px 6px;font:600 13px var(--font-ui);color:var(--ivory)}
+.m-band{background:var(--ivory);display:flex;align-items:center;justify-content:space-between;padding:6px 14px;color:var(--ink)}
+.m-band img{height:42px}
+.m-body{flex:1;overflow:hidden;padding:18px 16px;display:grid;gap:18px;align-content:start;grid-template-columns:minmax(0,1fr)}
+.tabbar{display:grid;grid-template-columns:repeat(5,1fr);padding:10px 4px 24px;border-top:1px solid var(--line);background:var(--surface)}
+.tabbar a{display:grid;justify-items:center;gap:4px;font:500 11px var(--font-ui);color:var(--ivory-muted);text-decoration:none}
+.tabbar a[aria-current]{color:var(--gold)}
+.hscroll{display:flex;gap:12px;overflow:hidden}
+.hscroll .cover{width:104px;flex:none}
+
+/* ---------- 2 READER ---------- */
+.reader{background:#120509;padding:20px 28px 26px}
+.r-bar{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.r-bar .t{font:italic 500 21px var(--font-display);margin-right:auto}
+.r-bar .t small{font:400 13px var(--font-ui);font-style:normal;color:var(--ivory-muted);margin-left:10px}
+.r-ico{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ivory)}
+.themes{display:flex;gap:6px;padding:4px;border:1px solid var(--line);border-radius:var(--r-pill)}
+.themes span{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:600 13px var(--font-display)}
+.book{position:relative;width:960px;height:560px;margin:24px auto 0;perspective:3000px}
+.leaf{position:absolute;top:0;bottom:0;width:50%;padding:46px 50px 40px;font:var(--t-reading) var(--font-reading)}
+.leaf p{margin:0 0 14px;text-align:justify;hyphens:auto}
+.leaf.l{left:0;background:#201014;color:#E9DCC4;border-radius:4px 0 0 4px;box-shadow:inset -30px 0 40px -30px rgba(0,0,0,.8)}
+.leaf.r{right:0;background:#201014;color:#E9DCC4;border-radius:0 4px 4px 0;box-shadow:inset 30px 0 40px -30px rgba(0,0,0,.8)}
+.leaf .chap{font:500 11px var(--font-ui);letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
+.leaf h3{font:400 36px/1.05 var(--font-display);margin:10px 0 20px;color:var(--ivory)}
+.leaf h3 em{color:var(--gold-300)}
+.leaf .fol{position:absolute;bottom:18px;font:500 12px var(--font-ui);color:var(--ivory-muted);letter-spacing:.1em}
+.leaf.l .fol{left:50px}.leaf.r .fol{right:50px}
+.turning{position:absolute;right:0;top:0;bottom:0;width:50%;transform-origin:left center;transform:rotateY(-22deg) scale(.96);background:linear-gradient(90deg,#2B171C 0%,#241216 60%,#3A2026 100%);border-radius:0 4px 4px 0;box-shadow:-30px 0 60px rgba(0,0,0,.55);padding:46px 50px;color:rgba(233,220,196,.45);font:var(--t-reading) var(--font-reading);overflow:hidden}
+.turning::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.35),transparent 30%,rgba(244,227,174,.08) 85%,transparent)}
+.hl{background:rgba(216,183,106,.28);color:#F5ECDA;box-shadow:0 2px 0 var(--gold)}
+.note-pin{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--gold-300);color:var(--ink);font:600 10px var(--font-ui);vertical-align:super}
+.gest{position:absolute;inset:0;display:grid;grid-template-columns:20% 1fr 20%;pointer-events:none}
+.gest div{display:grid;place-items:center}
+.gest div:first-child{background:linear-gradient(90deg,rgba(216,183,106,.12),transparent)}
+.gest div:last-child{background:linear-gradient(270deg,rgba(216,183,106,.12),transparent)}
+.gest span{background:rgba(26,7,13,.92);border:1px solid rgba(216,183,106,.55);color:var(--ivory);padding:10px 12px;border-radius:var(--r-md);font:500 12px/1.4 var(--font-ui);text-align:center}
+.swipe-arc{position:absolute;left:58%;top:47%;width:180px;height:60px;border-top:2px dashed var(--gold-300);border-radius:50% 50% 0 0;opacity:.8}
+.swipe-arc::after{content:"";position:absolute;left:-8px;top:-8px;border:7px solid transparent;border-right-color:var(--gold-300)}
+.finger{position:absolute;left:calc(58% + 170px);top:calc(47% - 18px);width:34px;height:34px;border-radius:50%;background:rgba(232,207,142,.25);border:2px solid var(--gold-300)}
+.r-foot{width:960px;margin:18px auto 0;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;font-size:13px;color:var(--ivory-muted)}
+.thumbs{display:flex;gap:4px;align-items:end;height:28px}
+.thumbs i{flex:1;height:18px;background:var(--raised);border-radius:1px}
+.thumbs i.on{height:28px;background:var(--gold)}
+.thumbs i.bm{background:var(--velvet);box-shadow:inset 0 2px 0 var(--gold-300)}
+.legend{width:960px;margin:14px auto 0;display:flex;gap:10px;flex-wrap:wrap}
+
+/* ---------- 3 AUDIO ---------- */
+.audio{display:grid;grid-template-columns:1fr 360px;min-height:580px;background:radial-gradient(70% 80% at 30% 30%,rgba(122,31,53,.55),transparent 70%),var(--noir)}
+.stage{padding:34px 40px;display:grid;grid-template-columns:300px 1fr;gap:36px;align-items:center}
+.disc{width:300px;height:300px;border-radius:50%;position:relative;display:grid;place-items:center;background:conic-gradient(from 200deg,#8A6A2E,#F4E3AE,#C9A24F,#96722F,#F4E3AE,#8A6A2E);padding:6px}
+.disc .in{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 50% 50%,#3A1320 0 30%,#2A0D16 31% 100%);display:grid;place-items:center;text-align:center;box-shadow:inset 0 0 0 1px rgba(244,227,174,.2)}
+.disc .bn{font:400 34px/1.25 var(--font-bn-read);color:var(--gold-300)}
+.disc small{display:block;font:600 9px var(--font-ui);letter-spacing:.28em;color:var(--ivory-muted);margin-top:8px}
+.arc-prog{position:absolute;inset:-14px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--gold-300);border-right-color:var(--gold-300);transform:rotate(-20deg)}
+.stage h3{font:500 40px/1.05 var(--font-display);margin:10px 0 6px}
+.stage .by{color:var(--ivory-muted);font-size:14px;margin:0 0 18px}
+.quote{font:italic 400 20px/1.6 var(--font-reading);color:var(--ivory);border-left:2px solid var(--gold);padding-left:16px;margin:0 0 22px}
+.quote .bn{font:400 20px/1.7 var(--font-bn-read);font-style:normal}
+.quote small{display:block;font:400 12px var(--font-ui);color:var(--ivory-muted);font-style:normal;margin-top:6px}
+.scrub{height:3px;background:var(--line);position:relative;margin:0 0 8px}
+.scrub i{position:absolute;inset:0 69% 0 0;background:var(--foil)}
+.scrub b{position:absolute;left:31%;top:-6px;width:15px;height:15px;border-radius:50%;background:var(--gold-300);box-shadow:var(--glow-gold)}
+.tm{display:flex;justify-content:space-between;font-size:12px;color:var(--ivory-muted);margin-bottom:18px}
+.tp{display:flex;align-items:center;gap:18px}
+.tb{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font:500 12px var(--font-ui);color:var(--ivory)}
+.tplay{width:74px;height:74px;border-radius:50%;background:var(--foil-fill);display:grid;place-items:center;color:var(--ink);box-shadow:0 10px 30px rgba(201,162,79,.35)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
+.opt{border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;background:rgba(42,13,22,.7)}
+.opt h5{margin:0 0 10px}
+.dial{display:flex;justify-content:space-between;align-items:center;font:500 13px var(--font-ui);color:var(--ivory-muted)}
+.dial b{font:500 26px var(--font-display);color:var(--ivory)}
+.ticks{display:flex;gap:4px;margin-top:8px}
+.ticks i{flex:1;height:6px;background:var(--raised);border-radius:1px}
+.ticks i.on{background:var(--gold)}
+.chlist{background:var(--surface);border-left:1px solid var(--line);padding:22px 18px;display:grid;align-content:start;gap:2px}
+.chlist h4{font:500 22px var(--font-display);margin:6px 0 12px}
+.ch{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:11px 8px;border-radius:var(--r-md)}
+.ch .n{font:400 20px var(--font-display);color:var(--gold)}
+.ch b{display:block;font:500 15px var(--font-ui)}
+.ch small{color:var(--ivory-muted);font-size:12px}
+.ch.now{background:var(--velvet);box-shadow:inset 2px 0 0 var(--gold-300)}
+.ch.now .n{color:var(--gold-300)}
+.ch.now small{color:var(--ivory)}
+.eq{display:flex;gap:2px;align-items:end;height:14px}
+.eq i{width:3px;background:var(--gold-300)}
+
+/* ---------- 4 VIDEO ---------- */
+.theatre{background:#0B0305;padding:22px 26px 26px}
+.vp{position:relative;aspect-ratio:21/9;border-radius:var(--r-md);overflow:hidden;background:radial-gradient(50% 70% at 30% 60%,rgba(244,227,174,.18),transparent),radial-gradient(60% 70% at 80% 30%,rgba(122,31,53,.6),transparent),#140608}
+.vp .label{position:absolute;left:24px;top:20px;font:500 13px var(--font-ui);color:var(--ivory-muted);letter-spacing:.06em}
+.vp .subs{position:absolute;left:33%;bottom:100px;transform:translateX(-50%);text-align:center;width:56%}
+.vp .subs span{background:rgba(11,3,5,.82);color:#FFF;font:500 21px/1.5 var(--font-ui);padding:4px 12px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.vp .subs span.bn{font-family:var(--font-bn-ui);font-size:19px;color:var(--gold-300)}
+.vbar{position:absolute;left:0;right:0;bottom:0;padding:12px 18px;background:linear-gradient(transparent,rgba(11,3,5,.92))}
+.vprog{height:4px;background:rgba(245,236,218,.2);position:relative;margin-bottom:12px}
+.vprog i{position:absolute;inset:0 58% 0 0;background:var(--foil)}
+.vprog s{position:absolute;top:-3px;width:2px;height:10px;background:var(--ivory);text-decoration:none}
+.vprog .tip{position:absolute;left:41%;bottom:14px;transform:translateX(-50%);background:var(--surface);border:1px solid var(--line);padding:6px 10px;font:500 12px var(--font-ui);color:var(--ivory);white-space:nowrap;border-radius:var(--r-sm)}
+.vrow{display:flex;align-items:center;gap:14px;font:500 13px var(--font-ui);color:var(--ivory)}
+.vrow .r{margin-left:auto;display:flex;gap:8px}
+.vbtn{border:1px solid rgba(245,236,218,.4);border-radius:var(--r-sm);padding:6px 10px;font:600 12px var(--font-ui);letter-spacing:.06em}
+.vbtn.on{background:var(--gold-300);border-color:var(--gold-300);color:var(--ink)}
+.vmenu{position:absolute;right:18px;bottom:64px;display:grid;grid-template-columns:150px 210px;background:var(--surface);border:1px solid rgba(216,183,106,.45);border-radius:var(--r-md);box-shadow:var(--sh-3);overflow:hidden}
+.vmenu .col{padding:12px;display:grid;gap:4px;align-content:start}
+.vmenu .col+.col{border-left:1px solid var(--line)}
+.vmenu .o{display:flex;justify-content:space-between;padding:6px 10px;border-radius:var(--r-sm);font-size:13px;color:var(--ivory-muted)}
+.vmenu .o.sel{background:var(--velvet);color:var(--ivory)}
+.vmenu .o.sel::after{content:"✓";color:var(--gold-300)}
+.below{display:grid;grid-template-columns:1fr 380px;gap:26px;margin-top:20px}
+.below h3{font:500 32px/1.1 var(--font-display);margin:8px 0 6px}
+.below p{color:var(--ivory-muted);margin:0 0 14px;font-size:14px}
+.chapters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.chapters div{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;font-size:13px;color:var(--ivory-muted)}
+.chapters div b{display:block;color:var(--ivory);font-weight:500}
+.chapters div.on{border-color:var(--gold);background:rgba(216,183,106,.08)}
+.transcript{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;display:grid;gap:4px;align-content:start}
+.tline{display:grid;grid-template-columns:46px 1fr;gap:8px;padding:7px 8px;border-radius:var(--r-sm);font-size:14px;line-height:1.5;color:var(--ivory-muted)}
+.tline time{color:var(--gold);font:600 12px var(--font-ui);padding-top:2px}
+.tline.now{background:var(--raised);color:var(--ivory);box-shadow:inset 2px 0 0 var(--gold-300)}
+
+/* ---------- 5 ADMIN ---------- */
+.admin{display:grid;grid-template-columns:220px 1fr;min-height:580px}
+.anav{background:var(--surface);border-right:1px solid var(--line);padding:22px 14px;display:grid;align-content:start;gap:2px}
+.anav .brand{font:500 24px var(--font-display);padding:0 10px 4px}
+.anav .env{font:600 10px var(--font-ui);letter-spacing:.2em;color:var(--gold);padding:0 10px 16px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+.anav a{padding:9px 10px;border-radius:var(--r-sm);color:var(--ivory-muted);text-decoration:none;font-size:14px;display:flex;justify-content:space-between}
+.anav a[aria-current]{background:var(--raised);color:var(--ivory);box-shadow:inset 2px 0 0 var(--gold)}
+.anav a em{font-style:normal;font:600 11px var(--font-ui);color:var(--ink);background:var(--gold-300);border-radius:var(--r-pill);padding:2px 7px}
+.amain{padding:24px;display:grid;gap:16px;align-content:start}
+.amain h3{margin:0;font:500 34px var(--font-display)}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px}
+.tile h4{margin:0 0 12px;display:flex;justify-content:space-between;align-items:baseline;font:500 21px var(--font-display)}
+.tile h4 a{font:500 11px var(--font-ui);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);text-decoration:none}
+.big{font:500 38px/1 var(--font-display)}
+.sub{font-size:12px;color:var(--ivory-muted)}
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.col h6{margin:0 0 8px;font:600 10px var(--font-ui);letter-spacing:.2em;text-transform:uppercase;color:var(--ivory-muted);display:flex;justify-content:space-between}
+.card{background:var(--raised);border:1px solid var(--line);border-radius:var(--r-md);padding:9px 10px;margin-bottom:8px;font-size:13px}
+.card small{display:block;color:var(--ivory-muted);font-size:11px;margin-top:2px}
+.pill{width:max-content;display:flex;align-items:center;gap:5px;font:600 11px var(--font-ui);padding:2px 8px;border-radius:var(--r-pill);border:1px solid currentColor;margin-top:6px;white-space:nowrap}
+.pill.ok{color:var(--ok)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}.pill.info{color:var(--info)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font:600 10px var(--font-ui);letter-spacing:.18em;text-transform:uppercase;color:var(--ivory-muted);padding:6px;border-bottom:1px solid var(--line)}
+td{padding:8px 6px;border-bottom:1px solid rgba(92,36,51,.6)}
+.meter{display:inline-block;width:80px;height:5px;background:var(--raised);vertical-align:middle;margin-right:6px}
+.meter i{display:block;height:100%;background:var(--foil)}
+.donut{width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--gold) 0 52%,var(--velvet-hi) 52% 80%,#6B8FB5 80% 100%);display:grid;place-items:center}
+.donut::after{content:"";width:62px;height:62px;border-radius:50%;background:var(--surface)}
+.key{display:grid;gap:6px;font-size:12px;color:var(--ivory-muted)}
+.key i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:middle}
+
+/* ---------- TOKENS ---------- */
+.tokens{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:32px;display:grid;grid-template-columns:1.1fr 1fr;gap:36px}
+.tokens h3{font:500 30px var(--font-display);margin:0 0 14px}
+.sws{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sw{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;font-size:12px;background:var(--noir)}
+.sw div{height:62px}
+.sw p{margin:0;padding:8px 10px;line-height:1.35;color:var(--ivory-muted)}
+.sw p b{display:block;color:var(--ivory);font-weight:500}
+.tr{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line)}
+.tr small{color:var(--ivory-muted);font-size:12px}
+.mt td,.mt th{padding:6px}
+.ctable td,.ctable th{padding:5px 8px}
+</style>
+</head>
+<body>
+<div class="board">
+
+<header class="board-head">
+  <div>
+    <span class="eyebrow">Maison · Theme first look · B of 2 · not yet approved</span>
+    <h1>Burgundy <em>Salon</em></h1>
+    <p>Dark-first. An evening salon: deep burgundy velvet as the room, ivory as the voice, metallic gold as jewellery. Cinematic for listening and watching, with a paper, sepia or night page in the Reader. The logo always sits on its own ivory band, never on burgundy.</p>
+  </div>
+  <div class="logo-band"><img src="../../../static/maison/logo.png" alt="Earnalism · Where Learning Becomes Earning · A REO Enterprise Venture"></div>
+</header>
+
+<!-- ============ 1 HOME ============ -->
+<section class="section">
+  <div class="section-label"><b>I</b><span>Home &amp; discovery</span><small>Featured title · continue · shelf with language filter · series · one sponsored placement</small></div>
+  <div class="pair">
+    <div>
+    <div class="frame">
+      <div class="appbar">
+        <img src="../../../static/maison/logo.png" alt="Earnalism">
+        <div class="search"><svg class="ico" viewBox="0 0 24 24" style="width:18px;height:18px"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search books, stories, lessons…</div>
+        <div class="who">R</div>
+      </div>
+      <div class="appbar-hair"></div>
+      <div class="shell">
+        <nav class="rail">
+          <span class="mono">M</span>
+          <a aria-current="page" href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9H3z"/></svg>Home</a>
+          <a href="#"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15 9-2 4-4 2 2-4z"/></svg>Explore</a>
+          <a href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/></svg>Read</a>
+          <a href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1"/><rect x="17" y="14" width="4" height="6" rx="1"/></svg>Listen</a>
+          <a href="#"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>Learn</a>
+          <a href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4z"/></svg>Vault</a>
+          <a href="#" style="margin-top:40px"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>Settings</a>
+        </nav>
+        <div class="content">
+          <div class="feature">
+            <div class="cover k1"><span class="ca">Storybook · Audio</span><span class="ct" lang="bn" style="font-family:var(--font-bn-read)">ঠাকুরমার ঝুলি</span><span class="lang">BN</span></div>
+            <div>
+              <span class="eyebrow">Tonight in the salon</span>
+              <h2>Grandmother's tales, <em>told aloud.</em></h2>
+              <p>Twenty-four Bengali folk tales with an illustrated storybook and a narrator in story-telling mode. Read, listen, or both at once.</p>
+              <div class="formats"><span>◆ Storybook</span><span>◆ Audiobook 9 h 40 m</span><span>◆ Read-along</span></div>
+              <div style="display:flex;gap:12px"><a class="btn btn-foil" href="#">Listen now</a><a class="btn btn-line" href="#">Open the book</a></div>
+            </div>
+            <div class="cont">
+              <span class="eyebrow">Continue</span>
+              <div class="ci"><div class="cover k3"></div><div><b>The Mango Orchard</b><small>Chapter 7 · 18 min left</small><div class="ring"><i style="width:58%"></i></div></div></div>
+              <div class="ci"><div class="cover k2"></div><div><b>Money Basics · Lesson 4</b><small>Video · 6:12 left</small><div class="ring"><i style="width:72%"></i></div></div></div>
+              <div class="ci"><div class="cover k5"></div><div><b lang="bn" style="font-family:var(--font-bn-read)">গল্পগুচ্ছ</b><small>Book · 41%</small><div class="ring"><i style="width:41%"></i></div></div></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="rowhead"><h3>The shelf</h3>
+              <div style="display:flex;gap:8px;align-items:center"><span class="sub" style="margin-right:4px">Book language</span><span class="chip" aria-pressed="true">All</span><span class="chip">English</span><span class="chip" lang="bn" style="font-family:var(--font-bn-ui)">বাংলা</span><span class="sub" style="margin:0 4px 0 14px">Format</span><span class="chip">Any ▾</span><span class="chip">Age ▾</span></div>
+            </div>
+            <div class="shelf">
+              <div><div class="cover k3"><span class="ca">Novel</span><span class="ct">The Mango Orchard</span><span class="lang">EN</span></div><h5>The Mango Orchard</h5><small>Book · Audio</small></div>
+              <div><div class="cover k1"><span class="ca">Storybook</span><span class="ct" lang="bn" style="font-family:var(--font-bn-read);font-size:17px">লাল কমল নীল কমল</span><span class="lang">BN</span></div><h5>Lal Kamal Neel Kamal</h5><small>Storybook · Audio</small></div>
+              <div><div class="cover k4"><span class="ca">Knowledge</span><span class="ct">Rivers of Bengal</span><span class="lang">EN</span></div><h5>Rivers of Bengal</h5><small>Book</small></div>
+              <div><div class="cover k5"><span class="ca">Classic</span><span class="ct" lang="bn" style="font-family:var(--font-bn-read)">গল্পগুচ্ছ</span><span class="lang">BN</span></div><h5>Galpaguchchha</h5><small>Book · Audio</small></div>
+              <div><div class="cover k2"><span class="ca">Course</span><span class="ct">Money Basics</span><span class="lang">EN</span></div><h5>Money Basics</h5><small>8 videos · quiz</small></div>
+              <div><div class="cover k6"><span class="ca">Storybook</span><span class="ct">The Clever Jackal</span><span class="lang">EN</span></div><h5>The Clever Jackal</h5><small>Storybook</small></div>
+              <div><div class="cover k4"><span class="ca">Poetry</span><span class="ct" lang="bn" style="font-family:var(--font-bn-read)">সঞ্চয়িতা</span><span class="lang">BN</span></div><h5>Sanchayita</h5><small>Book · Audio</small></div>
+            </div>
+          </div>
+
+          <div class="ad">
+            <div><span class="lbl">Sponsored</span><h4>Scholars Week: free certificate courses</h4><p>Partner foundation (sample) · Frequency-capped · Never shown in the Reader, a playing lesson, or children's titles · <u>Why this ad?</u></p></div>
+            <div style="display:flex;gap:10px"><a class="btn btn-line" href="#">Hide</a><a class="btn btn-velvet" href="#">Learn more</a></div>
+          </div>
+
+          <div>
+            <div class="rowhead"><h3>Knowledge series</h3><a href="#">All series</a></div>
+            <div class="series">
+              <div class="s-card" style="background:linear-gradient(0deg,rgba(26,7,13,.95) 30%,rgba(26,7,13,.2)),radial-gradient(80% 90% at 80% 10%,#1F3346,#0B1520)"><span class="eyebrow">Course · 8 lessons · quiz</span><h4>Money Basics</h4><p>Saving, interest and budgeting in plain words. EN audio · EN/BN subtitles.</p><div class="steps"><i class="d"></i><i class="d"></i><i class="d"></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="s-card" style="background:linear-gradient(0deg,rgba(26,7,13,.95) 30%,rgba(26,7,13,.2)),radial-gradient(80% 90% at 80% 10%,#94304A,#3A1320)"><span class="eyebrow">Story series · 24</span><h4>Grandmother's Tales</h4><p>Bengali folk tales, told aloud.</p><div class="steps"><i class="d"></i><i class="d"></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="s-card" style="background:linear-gradient(0deg,rgba(26,7,13,.95) 30%,rgba(26,7,13,.2)),radial-gradient(80% 90% at 80% 10%,#2E5140,#0F2118)"><span class="eyebrow">Knowledge · 6 books</span><h4>The Living Delta</h4><p>Geography and history, EN · BN.</p><div class="steps"><i class="d"></i><i></i><i></i><i></i><i></i><i></i></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="cap">Desktop · 1060 px. Navigation moves to a slim left rail; the ivory logo band doubles as the search bar. Language chips filter books, never people.</p>
+    </div>
+    <div>
+    <div class="frame mobile">
+      <div class="m">
+        <div class="m-status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="m-band"><img src="../../../static/maison/logo.png" alt="Earnalism"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
+        <div class="appbar-hair"></div>
+        <div class="m-body">
+          <div style="display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center">
+            <div class="cover k1"><span class="ca">Story</span><span class="ct" lang="bn" style="font-family:var(--font-bn-read);font-size:20px">ঠাকুরমার ঝুলি</span></div>
+            <div><span class="eyebrow">Tonight</span><h3 style="font:500 28px/1.05 var(--font-display);margin:8px 0 12px">Grandmother's tales, told aloud</h3><a class="btn btn-foil" href="#" style="padding:0 16px;min-height:40px">Listen</a></div>
+          </div>
+          <div class="cont" style="padding:14px"><span class="eyebrow">Continue</span><div class="ci"><div class="cover k3"></div><div><b>The Mango Orchard</b><small>Chapter 7 · 18 min left</small><div class="ring"><i style="width:58%"></i></div></div></div></div>
+          <div style="display:flex;gap:8px"><span class="chip" aria-pressed="true">All languages</span><span class="chip">English</span><span class="chip" style="font-family:var(--font-bn-ui)">বাংলা</span></div>
+          <div class="hscroll"><div class="cover k3"><span class="ct" style="font-size:15px">The Mango Orchard</span></div><div class="cover k4"><span class="ct" style="font-size:15px">Rivers of Bengal</span></div><div class="cover k5"><span class="ct" style="font-family:var(--font-bn-read)">গল্পগুচ্ছ</span></div><div class="cover k2"></div></div>
+          <div class="ad" style="grid-template-columns:1fr;padding:14px 16px;gap:6px"><div><span class="lbl">Sponsored</span><h4 style="font-size:20px;margin:8px 0 2px">Scholars Week</h4><p>Free certificate courses · <u>Why this ad?</u></p></div></div>
+        </div>
+        <nav class="tabbar">
+          <a aria-current="page" href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9H3z"/></svg>Home</a>
+          <a href="#"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15 9-2 4-4 2 2-4z"/></svg>Explore</a>
+          <a href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1"/><rect x="17" y="14" width="4" height="6" rx="1"/></svg>Listen</a>
+          <a href="#"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>Learn</a>
+          <a href="#"><svg class="ico" viewBox="0 0 24 24"><path d="M6 4h12v16l-6-4-6 4z"/></svg>Vault</a>
+        </nav>
+      </div>
+    </div>
+    <p class="cap">Mobile · 390 px</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2 READER ============ -->
+<section class="section">
+  <div class="section-label"><b>II</b><span>Reader spread</span><small>Night page shown mid-turn · swipe arc · edge tap zones · arrows · page-strip scrubber</small></div>
+  <div class="pair">
+    <div>
+    <div class="frame">
+      <div class="reader">
+        <div class="r-bar">
+          <span class="r-ico">←</span>
+          <span class="t">The Mango Orchard <small>Chapter 7 · The Long Monsoon</small></span>
+          <div class="themes" title="Page theme"><span style="background:#F7EFE0;color:#22090F">Aa</span><span style="background:#EAD9B8;color:#3A2418">Aa</span><span style="background:#201014;color:#E9DCC4;box-shadow:0 0 0 2px var(--gold-300)">Aa</span></div>
+          <span class="r-ico" title="Contents">☰</span><span class="r-ico" title="Bookmark" style="color:var(--gold-300)">◆</span><span class="r-ico" title="Notes">✎</span><span class="r-ico" title="Search in book">⌕</span><span class="r-ico" title="Listen from here">♪</span>
+        </div>
+        <div class="book">
+          <div class="leaf l">
+            <div class="chap">Chapter Seven</div>
+            <h3>The Long <em>Monsoon</em></h3>
+            <p>The rain came the way an old friend arrives: without knocking, already certain of its welcome. Mira stood at the edge of the orchard and counted the trees her grandfather had planted, one for every year of her mother's life.</p>
+            <p>“A tree is a promise you make to someone you will never meet,” he used to say. <span class="hl">She had not understood him then. She thought she was beginning to.</span><span class="note-pin">1</span></p>
+            <span class="fol">142</span>
+          </div>
+          <div class="leaf r">
+            <p>By noon the river had climbed two steps of the ghat. The ferryman tied his boat twice and sat under the banyan, peeling a green mango with a knife older than the village school.</p>
+            <p>Mira opened the ledger. Each column was a season; each row, a tree.</p>
+            <span class="fol">143</span>
+          </div>
+          <div class="turning"><p style="margin:0">Some rows ended early, in her grandfather's careful hand: lost to the storm of '91. Most ran on, year after year, the numbers growing quietly…</p></div>
+          <div class="gest"><div><span>◂ Tap edge<br>or swipe right<br>previous page</span></div><div></div><div><span>Tap edge ▸<br>or swipe left<br>next page</span></div></div>
+          <div class="swipe-arc"></div><div class="finger"></div>
+        </div>
+        <div class="r-foot">
+          <span>p. 142–143 · 39%</span>
+          <div class="thumbs"><i></i><i></i><i class="bm"></i><i></i><i></i><i></i><i></i><i></i><i class="bm"></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <span>18 min left in chapter</span>
+        </div>
+        <div class="legend">
+          <span class="chip"><span class="kbd">←</span><span class="kbd">→</span> turn</span>
+          <span class="chip"><span class="kbd">PgUp</span><span class="kbd">PgDn</span> turn</span>
+          <span class="chip"><span class="kbd">Home</span><span class="kbd">End</span> chapter start / end</span>
+          <span class="chip"><span class="kbd">B</span> bookmark</span>
+          <span class="chip"><span class="kbd">N</span> note on selection</span>
+          <span class="chip">Long-press a word: define · highlight · note</span>
+          <span class="chip">Two-finger swipe ↑: contents</span>
+        </div>
+      </div>
+    </div>
+    <p class="cap">The page itself carries no ornament, ads or foil. Gold marks bookmarks (strip), the active note and the chosen page theme. Reduced motion: the turning leaf becomes a 120 ms cross-fade.</p>
+    </div>
+    <div>
+    <div class="frame mobile">
+      <div class="m" style="background:#EAD9B8;color:#3A2418">
+        <div class="m-status" style="color:#3A2418"><span>9:41</span><span>●●● 5G</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 18px;font:500 13px var(--font-ui);color:#3A2418"><span>← Story 3</span><span>Sepia · Aa</span></div>
+        <div style="flex:1;position:relative;padding:20px 26px;overflow:hidden">
+          <p lang="bn" style="font:400 19px/1.95 var(--font-bn-read);margin:0 0 14px">এক যে ছিল রাজা। তার ছিল সাত রানি। বড়ো রানি, মেজো রানি, সেজো রানি, ন রানি, কনে রানি, দুয়োরানি আর সুয়োরানি।</p>
+          <p lang="bn" style="font:400 19px/1.95 var(--font-bn-read);margin:0 0 14px">রাজার সব আছে, কিন্তু মনে সুখ নাই। সাত রানির এক রানিরও ছেলে হয় নাই।</p>
+          <p lang="bn" style="font:400 19px/1.95 var(--font-bn-read);margin:0 0 16px">একদিন এক সন্ন্যাসী রাজবাড়ির দুয়ারে এসে দাঁড়াল।</p><div style="height:190px;border-radius:6px;background:radial-gradient(60% 70% at 30% 70%,rgba(122,31,53,.35),transparent),radial-gradient(50% 60% at 75% 30%,rgba(168,131,58,.35),transparent),#E0CBA3;display:grid;place-items:end start;padding:10px;font:500 11px var(--font-ui);color:#3A2418">Storybook illustration (placeholder) · pinch to zoom</div>
+          <div style="position:absolute;inset:0;display:grid;grid-template-columns:28% 1fr 28%">
+            <div style="background:linear-gradient(90deg,rgba(122,31,53,.14),transparent);display:grid;place-items:center"><span style="font:600 11px var(--font-ui);color:#7A1F35">‹ Back</span></div><div></div><div style="background:linear-gradient(270deg,rgba(122,31,53,.14),transparent);display:grid;place-items:center"><span style="font:600 11px var(--font-ui);color:#7A1F35">Next ›</span></div>
+          </div>
+        </div>
+        <div style="padding:10px 18px 28px;display:grid;gap:8px">
+          <div class="thumbs" style="height:20px"><i style="background:#D3BF98"></i><i style="background:#D3BF98"></i><i style="background:#D3BF98"></i><i class="on" style="height:20px;background:#7A1F35"></i><i style="background:#D3BF98"></i><i style="background:#D3BF98"></i><i style="background:#D3BF98"></i><i style="background:#D3BF98"></i><i style="background:#D3BF98"></i><i style="background:#D3BF98"></i></div>
+          <div style="display:flex;justify-content:space-between;font:500 12px var(--font-ui)"><span>p. 4 of 32</span><span>Swipe or tap edges</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="cap">Mobile · Bengali storybook on the sepia page theme</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 AUDIO ============ -->
+<section class="section">
+  <div class="section-label"><b>III</b><span>Audiobook · story-telling mode</span><small>Gold disc progress · live line · speed dial · sleep timer · tales list</small></div>
+  <div class="pair">
+    <div>
+    <div class="frame">
+      <div class="audio">
+        <div>
+          <div class="stage">
+            <div class="disc"><div class="arc-prog"></div><div class="in"><div><span class="bn" lang="bn">ঠাকুরমার<br>ঝুলি</span><small>STORY-TELLING</small></div></div></div>
+            <div>
+              <span class="eyebrow">Tale 3 of 24 · Narrated in Bengali</span>
+              <h3>Kalaboti Rajkanya</h3>
+              <p class="by">Thakurmar Jhuli · narrator: sample voice</p>
+              <p class="quote"><span class="bn" lang="bn">“রাজকন্যা বললেন, ‘আমি কলাবতী, বনের ভিতর আমার ঘর।’”</span><small>Now telling · line follows the voice · tap to open the storybook here</small></p>
+              <div class="scrub"><i></i><b></b></div>
+              <div class="tm"><span>05:48</span><span>Chapter −12:40 · Book 7 h 52 m left</span></div>
+              <div class="tp">
+                <span class="tb">⏮</span><span class="tb">−15</span>
+                <span class="tplay"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></span>
+                <span class="tb">+30</span><span class="tb">⏭</span>
+              </div>
+            </div>
+          </div>
+          <div class="opts" style="padding:0 40px 30px">
+            <div class="opt"><h5 class="eyebrow">Speed</h5><div class="dial"><span>0.5×</span><b>1.25×</b><span>3×</span></div><div class="ticks"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div><div class="sub" style="margin-top:8px">Steps of 0.05 · pitch kept · per-book memory</div></div>
+            <div class="opt"><h5 class="eyebrow">Sleep timer</h5><div class="dial"><span>☾</span><b>End of tale</b><span>14:21</span></div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><span class="chip">Off</span><span class="chip">10</span><span class="chip">20</span><span class="chip">30</span><span class="chip">60</span><span class="chip" aria-pressed="true">Tale end</span></div></div>
+          </div>
+        </div>
+        <aside class="chlist">
+          <span class="eyebrow">Tales</span>
+          <h4>In this collection</h4>
+          <div class="ch"><span class="n">1</span><div><b>Kiranmala</b><small>22:10 · finished</small></div><span style="color:var(--ok)">✓</span></div>
+          <div class="ch"><span class="n">2</span><div><b>Neelkamal and Lalkamal</b><small>31:04 · finished</small></div><span style="color:var(--ok)">✓</span></div>
+          <div class="ch now"><span class="n">3</span><div><b>Kalaboti Rajkanya</b><small>18:28 · playing</small></div><span class="eq"><i style="height:6px"></i><i style="height:12px"></i><i style="height:9px"></i><i style="height:14px"></i></span></div>
+          <div class="ch"><span class="n">4</span><div><b>Sheet Basanta</b><small>26:51 · downloaded</small></div><span class="sub">⤓</span></div>
+          <div class="ch"><span class="n">5</span><div><b>Dalim Kumar</b><small>24:15</small></div><span class="sub">⤓</span></div>
+          <div class="ch"><span class="n">6</span><div><b>Patal Kanya Manimala</b><small>29:40</small></div><span class="sub">⤓</span></div>
+          <div style="margin-top:14px;display:flex;gap:8px"><a class="btn btn-line" href="#" style="flex:1">Download all</a></div>
+        </aside>
+      </div>
+    </div>
+    <p class="cap">The disc’s gold arc is the chapter progress; it stops spinning entirely under reduced motion. Continues as a mini-player above the tab bar on every screen except the Reader.</p>
+    </div>
+    <div>
+    <div class="frame mobile">
+      <div class="m" style="background:radial-gradient(90% 60% at 50% 20%,rgba(148,48,74,.6),transparent),var(--noir)">
+        <div class="m-status"><span>9:41</span><span>●●● 5G</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 18px;color:var(--ivory-muted);font-size:13px"><span>⌄</span><span class="eyebrow">Now telling</span><span>☰</span></div>
+        <div style="flex:1;display:grid;justify-items:center;align-content:start;gap:12px;padding:20px;text-align:center">
+          <div class="disc" style="width:240px;height:240px"><div class="arc-prog" style="inset:-10px"></div><div class="in"><div><span class="bn" lang="bn" style="font-size:28px">ঠাকুরমার<br>ঝুলি</span></div></div></div>
+          <h3 style="font:500 30px/1.05 var(--font-display);margin:18px 0 0">Kalaboti Rajkanya</h3>
+          <div class="sub" style="font-size:13px">Tale 3 of 24 · Thakurmar Jhuli</div>
+          <div style="width:100%"><div class="scrub" style="margin-top:8px"><i></i><b></b></div><div class="tm" style="margin-bottom:6px"><span>05:48</span><span>−12:40</span></div></div>
+          <div class="tp"><span class="tb">−15</span><span class="tplay"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></span><span class="tb">+30</span></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;margin-top:10px">
+            <span class="chip" style="justify-content:center">1.25×</span><span class="chip" style="justify-content:center">☾ Tale end</span><span class="chip" style="justify-content:center" aria-pressed="true">Read along</span>
+          </div>
+          <div style="width:100%;text-align:left;border-top:1px solid var(--line);padding-top:12px;margin-top:6px;display:grid;gap:8px;font-size:13px;color:var(--ivory-muted)"><div style="display:flex;justify-content:space-between"><span><span class="eyebrow">Up next</span>  4 · Sheet Basanta</span><span>26:51</span></div><div style="display:flex;justify-content:space-between"><span>5 · Dalim Kumar</span><span>24:15</span></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="cap">Mobile full-screen player</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4 VIDEO ============ -->
+<section class="section">
+  <div class="section-label"><b>IV</b><span>Video tutorial · theatre</span><small>Speed · subtitles (dual-language option) · chapter scrub preview · transcript</small></div>
+  <div class="pair">
+    <div>
+    <div class="frame">
+      <div class="theatre">
+        <div class="vp">
+          <span class="label">Money Basics · Lesson 4 · Compounding</span>
+          <div class="subs"><span>If you plant one tree every year, by year ten you are counting shade.</span><br><span class="bn" lang="bn">প্রতি বছর একটি গাছ লাগালে, দশ বছরে তুমি ছায়া গুনবে।</span></div>
+          <div class="vmenu">
+            <div class="col"><span class="eyebrow" style="padding:4px 10px 6px">Speed</span><span class="o">0.75×</span><span class="o">1×</span><span class="o sel">1.25×</span><span class="o">1.5×</span><span class="o">2×</span></div>
+            <div class="col"><span class="eyebrow" style="padding:4px 10px 6px">Subtitles</span><span class="o">Off</span><span class="o">English</span><span class="o">বাংলা (Bengali)</span><span class="o sel">English + বাংলা</span><span class="o">Text size · Large ›</span></div>
+          </div>
+          <div class="vbar">
+            <div class="vprog"><i></i><s style="left:18%"></s><s style="left:41%"></s><s style="left:66%"></s><span class="tip">Ch. 3 · Interest on interest · 06:05</span></div>
+            <div class="vrow"><span>❚❚</span><span>↺ 10</span><span>↻ 10</span><span>Vol</span><span>08:41 / 14:53</span><span class="r"><span class="vbtn on">1.25×</span><span class="vbtn on">CC</span><span class="vbtn">Auto</span><span class="vbtn">PiP</span><span class="vbtn">⛶</span></span></div>
+          </div>
+        </div>
+        <div class="below">
+          <div>
+            <span class="eyebrow">Money Basics · Lesson 4 of 8</span>
+            <h3>Compounding, explained with a mango orchard</h3>
+            <p>Sample presenter · 14:53 · English audio · English and Bengali subtitles · quiz after the lesson</p>
+            <div class="chapters">
+              <div><b>1 · Why save</b>00:00</div><div><b>2 · Simple interest</b>02:40</div><div class="on"><b>3 · Interest on interest</b>06:05</div><div><b>4 · The rule of 72</b>09:50</div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px"><a class="btn btn-foil" href="#">Take the quiz</a><a class="btn btn-line" href="#">Save offline</a><a class="btn btn-line" href="#">Add note at 08:41</a></div>
+            <p style="margin-top:14px;font-size:13px">Keys: <span class="kbd">Space</span> play · <span class="kbd">J</span><span class="kbd">L</span> ±10 s · <span class="kbd">Shift</span>+<span class="kbd">&lt;</span><span class="kbd">&gt;</span> speed · <span class="kbd">C</span> subtitles · <span class="kbd">T</span> transcript · double-tap left/right edge to seek on touch.</p>
+          </div>
+          <div class="transcript">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="eyebrow">Transcript</span><span style="display:flex;gap:6px"><span class="chip" aria-pressed="true">EN</span><span class="chip" style="font-family:var(--font-bn-ui)">বাংলা</span><span class="chip">⌕</span></span></div>
+            <div class="tline"><time>08:15</time><span>Now imagine the interest itself starts earning.</span></div>
+            <div class="tline now"><time>08:37</time><span>If you plant one tree every year, by year ten you are not counting trees: you are counting shade.</span></div>
+            <div class="tline"><time>08:52</time><span>That is compounding. Let's put numbers on it.</span></div>
+            <div class="tline"><time>09:20</time><span>Year one: ₹1,000 at 8% becomes ₹1,080.</span></div>
+            <div class="tline"><time>09:41</time><span>Year two, the 8% applies to ₹1,080.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="cap">Theatre layout at 21:9. Dual-language subtitles stack English over Bengali, an option suited to bilingual learners. Hovering the scrubber shows the chapter.</p>
+    </div>
+    <div>
+    <div class="frame mobile">
+      <div class="m">
+        <div class="m-status"><span>9:41</span><span>●●● 5G</span></div>
+        <div class="vp" style="aspect-ratio:16/9;border-radius:0">
+          <div class="subs" style="bottom:42px;max-width:92%"><span style="font-size:13px">…you are counting shade.</span></div>
+          <div class="vbar" style="padding:8px 10px"><div class="vprog" style="margin-bottom:6px"><i></i></div><div class="vrow" style="font-size:11px;gap:8px"><span>❚❚</span><span>08:41</span><span class="r"><span class="vbtn on" style="padding:3px 6px">1.25×</span><span class="vbtn on" style="padding:3px 6px">CC</span><span class="vbtn" style="padding:3px 6px">⛶</span></span></div></div>
+        </div>
+        <div class="m-body" style="gap:12px">
+          <span class="eyebrow">Lesson 4 of 8</span>
+          <h3 style="font:500 25px/1.1 var(--font-display);margin:0">Compounding, explained with a mango orchard</h3>
+          <div class="transcript" style="padding:12px">
+            <div class="tline"><time>08:15</time><span>Now imagine the interest itself starts earning.</span></div>
+            <div class="tline now"><time>08:37</time><span>If you plant one tree every year…</span></div>
+            <div class="tline"><time>08:52</time><span>That is compounding.</span></div>
+          </div>
+          <div style="background:var(--raised);border:1px solid var(--line);border-radius:14px 14px 0 0;padding:14px;margin:0 -16px -18px">
+            <div style="width:40px;height:4px;background:var(--line);border-radius:4px;margin:0 auto 12px"></div>
+            <span class="eyebrow">Subtitles</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><span class="chip">Off</span><span class="chip">EN</span><span class="chip" style="font-family:var(--font-bn-ui)">বাংলা</span><span class="chip" aria-pressed="true">EN + বাংলা</span></div>
+            <span class="eyebrow" style="display:block;margin-top:14px">Speed</span>
+            <div style="display:flex;gap:6px;margin-top:10px"><span class="chip">0.75</span><span class="chip">1</span><span class="chip" aria-pressed="true">1.25</span><span class="chip">1.5</span><span class="chip">2</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="cap">Mobile · settings in a bottom sheet</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 ADMIN ============ -->
+<section class="section">
+  <div class="section-label"><b>V</b><span>Admin · control room</span><small>Publishing pipeline · campaigns · users &amp; devices · moderation</small></div>
+  <div class="pair">
+    <div>
+    <div class="frame">
+      <div class="admin">
+        <nav class="anav">
+          <div class="brand">Control Room</div>
+          <div class="env">STAGING · SAMPLE DATA</div>
+          <a aria-current="page" href="#">Overview</a><a href="#">Pipeline <em>7</em></a><a href="#">Rights &amp; regions <em>4</em></a><a href="#">Campaigns</a><a href="#">Users &amp; devices</a><a href="#">Moderation <em>3</em></a><a href="#">Analytics</a><a href="#">Support</a><a href="#">Audit log</a><a href="#">Settings</a>
+        </nav>
+        <div class="amain">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h3>Overview</h3><div style="display:flex;gap:8px"><span class="chip">This week ▾</span><a class="btn btn-foil" href="#" style="min-height:40px">New title</a></div></div>
+          <div class="tile" style="grid-column:1/-1">
+            <h4>Publishing pipeline <a href="#">Open board</a></h4>
+            <div class="kanban">
+              <div class="col"><h6>Draft <span>2</span></h6><div class="card">Sanchayita <span class="sub">BN</span><small>Book · Audio</small></div><div class="card">Money Basics L6<small>Video</small></div></div>
+              <div class="col"><h6>Rights check <span>2</span></h6><div class="card">Rivers of Bengal<small>Book · EN</small><span class="pill warn">41 / 47 regions</span></div><div class="card">The Clever Jackal<small>Storybook · Audio</small><span class="pill warn">Audio rights pending</span></div></div>
+              <div class="col"><h6>QA <span>2</span></h6><div class="card" lang="bn" style="font-family:var(--font-bn-ui)">গল্পগুচ্ছ<small style="font-family:var(--font-ui)">Book · Audio · EN UI</small><span class="pill info">Proofing</span></div><div class="card">Money Basics L5<small>Video</small><span class="pill bad">BN captions missing</span></div></div>
+              <div class="col"><h6>Scheduled <span>1</span></h6><div class="card">The Mango Orchard<small>Book · Audio · 24 Nov</small><span class="pill ok">47 / 47 · all formats</span></div></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:14px">
+            <div class="tile">
+              <h4>Campaigns <a href="#">Manage</a></h4>
+              <table>
+                <tr><th>Campaign</th><th>Pacing</th><th>State</th></tr>
+                <tr><td>Scholars Week <span class="sub">Sponsored</span></td><td><span class="meter"><i style="width:64%"></i></span>64%</td><td><span class="pill ok" style="margin:0">Live</span></td></tr>
+                <tr><td>Listen tonight <span class="sub">House</span></td><td><span class="meter"><i style="width:38%"></i></span>38%</td><td><span class="pill ok" style="margin:0">Live</span></td></tr>
+                <tr><td>Partner trial <span class="sub">Sponsored</span></td><td>—</td><td><span class="pill warn" style="margin:0">In review</span></td></tr>
+              </table>
+              <p class="sub" style="margin:10px 0 0">Excluded surfaces: Reader, Player, children’s titles. Frequency cap 2/day.</p>
+            </div>
+            <div class="tile">
+              <h4>Users &amp; devices <a href="#">Directory</a></h4>
+              <div style="display:flex;gap:16px;align-items:center">
+                <div class="donut"></div>
+                <div class="key"><span><i style="background:var(--gold)"></i>Web</span><span><i style="background:var(--velvet-hi)"></i>Android</span><span><i style="background:#6B8FB5"></i>iOS</span><span class="sub">Shares are placeholders</span></div>
+              </div>
+              <p class="sub" style="margin:12px 0 0">Device limit alerts · offline licences · sign-in anomalies</p>
+            </div>
+            <div class="tile">
+              <h4>Moderation <a href="#">Queue</a></h4>
+              <div class="card">Note reported as spam<span class="pill warn">New</span></div>
+              <div class="card">Ad complaint · Partner trial<span class="pill bad">Urgent</span></div>
+              <div class="card">Quiz answer dispute<span class="pill info">Assigned</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="cap">Admin is a dark control room with a kanban pipeline; the rights column makes the 47-region rule visible before anything can be scheduled. Values are layout samples.</p>
+    </div>
+    <div>
+    <div class="frame mobile">
+      <div class="m">
+        <div class="m-status"><span>9:41</span><span>●●● 5G</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)"><span style="font:500 22px var(--font-display)">Control Room</span><span class="eyebrow">Staging</span></div>
+        <div class="m-body" style="gap:12px">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <div class="tile" style="padding:12px"><div class="big" style="font-size:30px">7</div><div class="sub">In pipeline</div></div>
+            <div class="tile" style="padding:12px"><div class="big" style="font-size:30px;color:var(--warn)">4</div><div class="sub">Rights held</div></div>
+            <div class="tile" style="padding:12px"><div class="big" style="font-size:30px;color:var(--bad)">3</div><div class="sub">Reports</div></div>
+          </div>
+          <div class="tile"><h4 style="font-size:19px">Needs you</h4>
+            <div class="card">Rivers of Bengal<span class="pill warn">41 / 47 regions</span></div>
+            <div class="card">Money Basics L5<span class="pill bad">BN captions</span></div>
+            <div class="card">Ad complaint<span class="pill bad">Urgent</span></div>
+          </div>
+          <div class="tile"><h4 style="font-size:19px">Live campaigns</h4><div style="display:grid;gap:8px;font-size:13px"><span>Scholars Week <span class="meter" style="float:right;margin-top:8px"><i style="width:64%"></i></span></span><span>Listen tonight <span class="meter" style="float:right;margin-top:8px"><i style="width:38%"></i></span></span></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="cap">Mobile admin: triage and approvals only</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOKENS ============ -->
+<section class="section">
+  <div class="section-label"><b>VI</b><span>Design tokens</span><small>Colour roles · type · space · radius · shadow · motion</small></div>
+  <div class="tokens">
+    <div>
+      <h3>Colour roles</h3>
+      <div class="sws">
+        <div class="sw"><div style="background:#1A070D"></div><p><b>Noir · canvas</b>#1A070D</p></div>
+        <div class="sw"><div style="background:#2A0D16"></div><p><b>Surface</b>#2A0D16</p></div>
+        <div class="sw"><div style="background:#3A1320"></div><p><b>Raised</b>#3A1320</p></div>
+        <div class="sw"><div style="background:#5C2433"></div><p><b>Line</b>#5C2433</p></div>
+        <div class="sw"><div style="background:#7A1F35"></div><p><b>Velvet · selected</b>#7A1F35</p></div>
+        <div class="sw"><div style="background:#94304A"></div><p><b>Velvet hi · hover</b>#94304A</p></div>
+        <div class="sw"><div style="background:#F5ECDA"></div><p><b>Ivory · text, logo band</b>#F5ECDA</p></div>
+        <div class="sw"><div style="background:#CBB8A6"></div><p><b>Ivory muted</b>#CBB8A6</p></div>
+        <div class="sw"><div style="background:#D8B76A"></div><p><b>Gold · text on dark</b>#D8B76A</p></div>
+        <div class="sw"><div style="background:#E8CF8E"></div><p><b>Gold 300 · focus</b>#E8CF8E</p></div>
+        <div class="sw"><div style="background:#A8833A"></div><p><b>Gold 600 · stroke</b>#A8833A</p></div>
+        <div class="sw"><div style="background:var(--foil)"></div><p><b>Metallic foil</b>8A6A2E → C9A24F → F4E3AE → D2AC5C → 96722F</p></div>
+        <div class="sw"><div style="background:#F7EFE0"></div><p><b>Reader · Paper</b>#F7EFE0 / ink #22090F</p></div>
+        <div class="sw"><div style="background:#EAD9B8"></div><p><b>Reader · Sepia</b>#EAD9B8 / ink #3A2418</p></div>
+        <div class="sw"><div style="background:#201014"></div><p><b>Reader · Night</b>#201014 / text #E9DCC4</p></div>
+        <div class="sw"><div style="background:linear-gradient(90deg,#8FD1A0 25%,#F0C674 25% 50%,#F2A0AC 50% 75%,#A9C6EA 75%)"></div><p><b>Status</b>ok · warn · bad · info</p></div>
+      </div>
+      <p class="sub" style="margin-top:14px;font-size:13px">Rules: text/icons sit only on the contrast-safe foil-fill (C9A24F → F4E3AE → D2AC5C); the full foil is for hairlines, the disc and progress only. Foil-fill carries Noir (#1A070D) text only. Gold text uses #D8B76A. Focus ring 2 px Gold 300 + 2 px Noir gap. The logo always sits on the Ivory band.</p>
+    </div>
+    <div>
+      <h3>Type</h3>
+      <div class="tr"><small>Display 60/1.02</small><span style="font:500 44px/1 var(--font-display)">Bodoni Moda</span></div>
+      <div class="tr"><small>H2 30 · italic</small><span style="font:italic 400 30px/1.1 var(--font-display)">Grandmother's tales</span></div>
+      <div class="tr"><small>UI 16/14/12 · caps 11</small><span style="font:500 16px var(--font-ui)">Jost: menus, buttons <span class="eyebrow" style="margin-left:8px">Eyebrow</span></span></div>
+      <div class="tr"><small>Reading 19/1.72</small><span style="font:400 20px/1.5 var(--font-reading)">Literata for long reading</span></div>
+      <div class="tr"><small>Bengali</small><span><span style="font:400 24px/1.6 var(--font-bn-read)">ঠাকুরমার ঝুলি</span> <span style="font:500 15px var(--font-bn-ui)">· বাংলা (Hind Siliguri)</span></span></div>
+      <h3 style="margin-top:22px">Space · radius · shadow · motion</h3>
+      <table class="mt">
+        <tr><th>Space</th><td>4 · 8 · 12 · 16 · 24 · 32 · 48 · 64</td></tr>
+        <tr><th>Radius</th><td>2 · 4 (buttons) · 8 (cards) · 12 (panels) · pill (chips only)</td></tr>
+        <tr><th>Shadow</th><td>sh-1/2 = top inner gold highlight + black depth; sh-3 sheet; glow-gold for the logo band and active scrub knob</td></tr>
+        <tr><th>Motion</th><td>140 / 260 ms UI, 600 ms page turn (3D leaf), 2.4 s one-off foil shimmer on the primary CTA. Reduced motion: no shimmer, no disc spin, page turn becomes a 120 ms cross-fade, mini-player slides become fades.</td></tr>
+      </table>
+    </div>
+    <div style="grid-column:1/-1"><h3>WCAG 2.2 AA contrast (computed)</h3><table class="ctable" style="columns:2"><tr><th>Pair (background swatch, then foreground)</th><th style="text-align:right">Ratio</th><th>Needs</th><th>Result</th></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#1A070D;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#F5ECDA;margin-right:8px"></span>Ivory #F5ECDA on Noir #1A070D (canvas)</td><td style="text-align:right;font-weight:600">16.57:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#2A0D16;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#F5ECDA;margin-right:8px"></span>Ivory on Surface #2A0D16</td><td style="text-align:right;font-weight:600">15.32:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#3A1320;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#F5ECDA;margin-right:8px"></span>Ivory on Raised #3A1320</td><td style="text-align:right;font-weight:600">13.83:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#1A070D;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#CBB8A6;margin-right:8px"></span>Muted #CBB8A6 on Noir</td><td style="text-align:right;font-weight:600">10.13:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#2A0D16;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#CBB8A6;margin-right:8px"></span>Muted on Surface</td><td style="text-align:right;font-weight:600">9.37:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#3A1320;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#CBB8A6;margin-right:8px"></span>Muted on Raised</td><td style="text-align:right;font-weight:600">8.46:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#1A070D;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#D8B76A;margin-right:8px"></span>Gold text #D8B76A on Noir</td><td style="text-align:right;font-weight:600">10.09:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#2A0D16;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#D8B76A;margin-right:8px"></span>Gold text on Surface</td><td style="text-align:right;font-weight:600">9.34:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#3A1320;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#D8B76A;margin-right:8px"></span>Gold text on Raised</td><td style="text-align:right;font-weight:600">8.43:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#7A1F35;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#F5ECDA;margin-right:8px"></span>Ivory on Velvet #7A1F35 (secondary button / selected)</td><td style="text-align:right;font-weight:600">8.62:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#7A1F35;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#E8CF8E;margin-right:8px"></span>Gold 300 #E8CF8E on Velvet</td><td style="text-align:right;font-weight:600">6.63:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#C9A24F;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#1A070D;margin-right:8px"></span>Noir on foil-fill worst stop #C9A24F (primary CTA, play button)</td><td style="text-align:right;font-weight:600">8.11:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#8A6A2E;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#1A070D;margin-right:8px"></span>Full foil #8A6A2E stop behind Noir text (NOT allowed; rules, disc, progress only)</td><td style="text-align:right;font-weight:600">3.87:1</td><td>≥4.5</td><td style="color:var(--bad);font-weight:600">Fails: rule forbids this use</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#F5ECDA;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#22090F;margin-right:8px"></span>Header ink #22090F on Ivory band #F5ECDA</td><td style="text-align:right;font-weight:600">16.06:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#F5ECDA;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#7A1F35;margin-right:8px"></span>Velvet #7A1F35 nav text on Ivory band</td><td style="text-align:right;font-weight:600">8.62:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#201014;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#E9DCC4;margin-right:8px"></span>Night reader text #E9DCC4 on #201014</td><td style="text-align:right;font-weight:600">13.53:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#EAD9B8;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#3A2418;margin-right:8px"></span>Sepia reader text #3A2418 on #EAD9B8</td><td style="text-align:right;font-weight:600">10.46:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#F7EFE0;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#22090F;margin-right:8px"></span>Paper reader ink #22090F on #F7EFE0</td><td style="text-align:right;font-weight:600">16.50:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#EAD9B8;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#7A1F35;margin-right:8px"></span>Velvet #7A1F35 tap-zone label on Sepia #EAD9B8</td><td style="text-align:right;font-weight:600">7.28:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#120609;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#E8CF8E;margin-right:8px"></span>Gold 300 Bengali subtitle on caption box ~#120609</td><td style="text-align:right;font-weight:600">13.02:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#E8CF8E;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#1A070D;margin-right:8px"></span>Noir on Gold 300 (Sponsored label, lang badge, count pills)</td><td style="text-align:right;font-weight:600">12.73:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#1A070D;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#E8CF8E;margin-right:8px"></span>Focus ring Gold 300 on Noir (non-text)</td><td style="text-align:right;font-weight:600">12.73:1</td><td>≥3.0</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#1A070D;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#5C2433;margin-right:8px"></span>Line #5C2433 on Noir (decorative)</td><td style="text-align:right;font-weight:600">1.63:1</td><td>—</td><td style="color:var(--ok);font-weight:600">Decorative (exempt)</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#3A1320;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#8FD1A0;margin-right:8px"></span>Success #8FD1A0 on Raised</td><td style="text-align:right;font-weight:600">9.12:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#3A1320;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#F0C674;margin-right:8px"></span>Warning #F0C674 on Raised</td><td style="text-align:right;font-weight:600">10.07:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#3A1320;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#F2A0AC;margin-right:8px"></span>Danger #F2A0AC on Raised</td><td style="text-align:right;font-weight:600">8.04:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr><tr><td><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#3A1320;margin-right:2px"></span><span style="display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(128,128,128,.4);background:#A9C6EA;margin-right:8px"></span>Info #A9C6EA on Raised</td><td style="text-align:right;font-weight:600">9.24:1</td><td>≥4.5</td><td style="color:var(--ok);font-weight:600">Pass</td></tr></table><p style="font-size:12px;opacity:.8;margin:8px 0 0">Ratios computed with the WCAG 2.x relative-luminance formula. 4.5:1 body text, 3:1 large text (≥24 px or ≥18.7 px bold) and non-text UI. Rows marked “Fails” are documented to show why that use is forbidden by the token rules.</p></div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

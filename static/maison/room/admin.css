@@ -1,0 +1,44 @@
+/* Earnalism staff room: Django admin in the reading-room palette (same tokens as the public site). */
+:root,html[data-theme="light"],html[data-theme="dark"],html[data-theme="auto"]{
+  --primary:#4A1C27;--secondary:#6B2335;--accent:#E6C987;--primary-fg:#FBF6EC;
+  --body-fg:#24161A;--body-bg:#FBF6EC;--body-quiet-color:#5C4A4E;--body-loud-color:#1A0E12;
+  --header-color:#F6EEDF;--header-branding-color:#FBF6EC;--header-bg:#2A1820;--header-link-color:#F6EEDF;
+  --breadcrumbs-fg:#F3E8D4;--breadcrumbs-link-fg:#FFFFFF;--breadcrumbs-bg:#4A1C27;
+  --link-fg:#6B2335;--link-hover-color:#4A1C27;--link-selected-fg:#4A1C27;
+  --hairline-color:#E9DAC0;--border-color:#DCCAA8;
+  --error-fg:#8B2335;--message-success-bg:#EEF3E4;--message-warning-bg:#FBF1D9;--message-error-bg:#FBEDEE;
+  --darkened-bg:#F3E8D4;--selected-bg:#F1E2C4;--selected-row:#FBF1D9;
+  --button-fg:#FBF6EC;--button-bg:#4A1C27;--button-hover-bg:#6B2335;
+  --default-button-bg:#6B2335;--default-button-hover-bg:#4A1C27;
+  --close-button-bg:#5C4A4E;--close-button-hover-bg:#24161A;--delete-button-bg:#8B2335;--delete-button-hover-bg:#6E1A2A;
+  --object-tools-fg:#FBF6EC;--object-tools-bg:#5C4A4E;--object-tools-hover-bg:#4A1C27;
+  --font-family-primary:"DM Sans","Noto Sans Bengali",system-ui,sans-serif;color-scheme:light}
+body{background:url(handmade-paper.webp),#FBF6EC}
+#header{background:linear-gradient(180deg,#2A1820,#1A0E12);border-bottom:3px solid #B8913F;padding:10px 32px}
+#site-name a.earnalism-admin-brand{display:flex;align-items:center;gap:14px;text-decoration:none}
+.earnalism-admin-logo{--s:.16;display:block;overflow:hidden;width:calc(1114px*var(--s));height:calc(281px*var(--s));background:#FBF6EC;border-radius:6px;outline:6px solid #FBF6EC}
+.earnalism-admin-logo img{height:calc(500px*var(--s));width:auto;max-width:none;margin:calc(-102px*var(--s)) 0 0 calc(-83px*var(--s))}
+.earnalism-admin-label{font:600 .75rem/1 "DM Sans",sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#E6C987}
+#user-tools a{border-bottom-color:rgba(230,201,135,.5)}
+h1,#content h1,.module h2,.module caption,.inline-group h2{font-family:"Cormorant Garamond",Georgia,serif}
+#content h1{font-size:2.2rem;font-weight:500;color:#24161A}
+.module{background:#FFFDF8;border:1px solid rgba(184,145,63,.28);border-radius:8px;box-shadow:0 10px 20px -12px rgba(36,22,26,.25);overflow:hidden}
+.module h2,.module caption,.inline-group h2{background:#4A1C27;color:#FBF6EC;font-size:1.05rem;font-weight:600;letter-spacing:0;text-transform:none}
+#changelist-filter{background:#FFFDF8;border:1px solid #DCCAA8;border-radius:8px}
+#changelist-filter h2{background:#4A1C27;color:#FBF6EC}
+.button,input[type=submit],input[type=button],.submit-row input,a.button{border-radius:4px;font-weight:600}
+.submit-row{background:#F3E8D4;border:1px solid #DCCAA8;border-radius:8px}
+input[type=text],input[type=password],input[type=email],input[type=url],input[type=number],textarea,select,.vTextField{border:1px solid #DCCAA8;border-radius:4px;background:#fff}
+input:focus,textarea:focus,select:focus{border-color:#6B2335;outline:3px solid rgba(107,35,53,.25)}
+:focus-visible{outline:3px solid #6B2335;outline-offset:2px}
+#header :focus-visible{outline-color:#E6C987}
+.login #header{justify-content:center}
+.login #container{background:#FFFDF8;border:1px solid rgba(184,145,63,.3);border-radius:10px;box-shadow:0 30px 60px -30px rgba(36,22,26,.45);overflow:hidden}
+.login #content{padding:24px 28px 28px}
+.login .submit-row input{width:100%;min-height:46px;background:#4A1C27}
+.login .password-reset-link{text-align:center}
+#nav-sidebar{background:#FFFDF8;border-right:1px solid #DCCAA8}
+#nav-sidebar .current-model{background:#FBF1D9}
+.theme-toggle{display:none}
+.login .submit-row{background:none;border:0;padding:0;margin:8px 0 0}
+#content p a,#content .help a,.login #content a{text-decoration:underline;text-underline-offset:3px}
