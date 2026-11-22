@@ -27,7 +27,8 @@ LOCAL = ENVIRONMENT != 'production'
 MAISON_LOCAL_FIXTURES = LOCAL
 # Owner-approved India-first service launch; edition rights retain their own policy.
 INDIA_FIRST_LAUNCH_ENABLED = not LOCAL
-MAISON_SERVICE_TERRITORIES = ('IN',)
+from .territories import parse_service_territories
+MAISON_SERVICE_TERRITORIES = parse_service_territories(os.getenv('MAISON_SERVICE_TERRITORIES', ''), MAISON_PUBLICATION_TERRITORIES)
 STAFF_MFA_REQUIRED = not LOCAL
 DEBUG = LOCAL
 LOCAL_DIR = BASE_DIR / '.local'

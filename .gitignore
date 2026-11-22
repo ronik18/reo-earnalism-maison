@@ -13,3 +13,4 @@ node_modules/
 static/maison/dist/
 .neon
 test-results/
+.superpowers/

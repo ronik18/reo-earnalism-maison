@@ -130,9 +130,9 @@ class IndiaFirstScreensTests(TestCase):
         self.assertContains(self.client.get('/en/privacy/'),'specific current authority')
 
     def test_foreign_service_state_has_only_help_links_no_account_collection(self):
-        source=render_to_string('web/india_unavailable.html')
+        source=render_to_string('web/region_unavailable.html')
         self.assertFalse(Controls(source).controls)
-        self.assertIn('currently available from India',source)
+        self.assertIn('not yet available in your country',source)
         self.assertIn('mailto:sales@reoenterprise.org',source)
         self.assertIn('href="/en/privacy/"',source)
         self.assertNotIn('/sign-up/',source)
