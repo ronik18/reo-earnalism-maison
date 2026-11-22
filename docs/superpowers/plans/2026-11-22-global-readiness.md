@@ -8,13 +8,13 @@
 
 **Tech Stack:** Python 3.13, Django 5.2, PostgreSQL, Playwright 1.63 (`@playwright/test`), Cloudflare rulesets API, Render API.
 
-**Spec:** `AGENTS.md` (owner instructions), `contracts/LLD.md`, `contracts/publication-policy.json`, `contracts/india-first-service-policy.json`, `docs/evidence/public-doc-review-20261121/README.md`, `docs/APEX_CUTOVER_RUNBOOK.md`, `docs/PENDING_VALIDATIONS.md`.
+**Spec:** `docs/superpowers/specs/2026-11-22-territory-accounts-design.md` (approved 22 Nov 2026; supersedes Phase 0 D1–D6 below), `AGENTS.md` (owner instructions), `contracts/LLD.md`, `contracts/publication-policy.json`, `contracts/india-first-service-policy.json`, `docs/evidence/public-doc-review-20261121/README.md`, `docs/APEX_CUTOVER_RUNBOOK.md`, `docs/PENDING_VALIDATIONS.md`.
 
 ## Global Constraints
 
 - Approved stack only: Render + Neon + Cloudflare (CDN, R2, Stream). No Railway, Redis or new service; any new spend needs owner budget approval.
 - Target territories must be a subset of the 47-region whitelist. Southeast Asia in the whitelist = BN, ID, KH, LA, MM, MY, PH, SG, TH. **Vietnam and Timor-Leste are not in the whitelist** and are not added by this plan.
-- A book is published only with exact-edition compliance across every active publication region and offered format/action; incomplete titles stay draft.
+- A book is published only with exact-edition compliance across every active publication region (now IN, US, GB, BR, SG, MY, ID, PH, TH) and offered format/action; incomplete titles stay draft.
 - "Country" means trusted edge connection location, never citizenship or proof of age.
 - No legal clearance is claimed by code or tests. Notices and per-country conditions need owner/counsel sign-off recorded as evidence.
 - Free access stays on; paid checkout stays disabled (no merchant, tax or consumer-billing scope).
@@ -24,7 +24,7 @@
 ## Review Focus
 
 - A visitor from a territory not on the service list gets the unavailable page before any account or data collection (Task 1 test `test_unlisted_territory_is_refused_before_session`).
-- A minor or guardian signup from a non-India territory is refused with a clear message, including through Google sign-up (Task 2 tests).
+- In an `adult_only` territory, signup without the 18+ declaration is refused with a clear message, including through Google sign-up; in an `open` territory no capacity field is asked or required (Task 2 tests).
 - Enabling a territory without a signed-off notice fails at startup rather than silently serving no notice (Task 3 `test_active_territory_without_notice_fails_startup`).
 - Repeated sign-in attempts show a "please wait" message instead of failing silently (Task 5).
 - Old theearnalism.com links (`/book/<slug>`, `/privacy`, `/library?category=…`) land on a sensible Maison page or an honest 410 (Task 6).
@@ -60,21 +60,29 @@
 - [ ] **Step 4: Run** the test module plus `operations` and `web` suites — expect PASS.
 - [ ] **Step 5: Commit** `Configure service territories per deployment`.
 
-### Task 2: Per-territory account capacity
+### Task 2: Per-territory account mode
 
 **Files:**
-- Modify: `accounts/enrollment.py`, `accounts/google.py` (signup entry), `templates/web/auth.html` (capacity choices shown)
-- Test: `accounts/test_territory_capacity.py`
+- Modify: `config/settings.py`, `accounts/enrollment.py`, `accounts/google.py`, `accounts/views.py` (register), `templates/web/auth.html`
+- Test: `accounts/test_territory_accounts.py`
 
 **Interfaces:**
-- Consumes: Task 1 `settings.MAISON_SERVICE_TERRITORIES`.
-- Produces: `settings.MAISON_GUARDIAN_TERRITORIES: tuple[str, ...]` (default `('IN',)`); `enrollment.capacity_options(territory: str) -> tuple[str, ...]` returning `('adult','guardian')` for guardian territories and `('adult',)` otherwise; `adult_declaration(data, territory)` and `parent_declaration(data, territory)` raise `DomainError('capacity_unavailable', …, 403)` for an option not offered.
+- Consumes: Task 1 `settings.MAISON_SERVICE_TERRITORIES`, `request.territory`.
+- Produces: `settings.MAISON_ACCOUNT_MODES: dict[str, str]` = `{'IN':'open','US':'adult_only','GB':'adult_only','BR':'adult_only','SG':'adult_only','MY':'adult_only','ID':'adult_only','PH':'adult_only','TH':'adult_only'}` (startup error if an active territory has no mode or an unknown mode); `enrollment.account_mode(territory: str) -> str`; `enrollment.capacity_declaration(data: dict, territory: str) -> dict | None` (`open` → `None`, no fields required; `adult_only` → requires `account_capacity == 'adult'`, else `DomainError('adult_declaration_required', 'Confirm that you are 18 or older to create an account here.', 422)`).
 
-- [ ] **Step 1: Write failing tests** — `test_india_offers_adult_and_guardian`; `test_brazil_offers_adult_only`; `test_guardian_signup_outside_india_is_refused` (403 `capacity_unavailable`, no user row created); `test_google_signup_outside_india_requires_adult_declaration`; `test_signup_page_hides_guardian_option_outside_india`.
+- [ ] **Step 1: Failing tests** — `test_india_signup_needs_no_capacity_fields`; `test_brazil_signup_without_declaration_is_refused` (422, no user row); `test_brazil_signup_with_adult_declaration_records_audit`; `test_google_signup_in_adult_only_territory_requires_declaration`; `test_signup_page_shows_adult_checkbox_only_in_adult_only_territory`; `test_active_territory_without_mode_fails_startup`.
 - [ ] **Step 2: Run** — expect FAIL.
-- [ ] **Step 3: Implement** — thread `request.territory` into the declaration calls; template renders `capacity_options`.
-- [ ] **Step 4: Run** `accounts` suite — expect PASS (India guardian tests unchanged).
-- [ ] **Step 5: Commit** `Offer guardian accounts only where configured`.
+- [ ] **Step 3: Implement**; India's guardian signup is no longer offered while India is `open` (guardian code retained).
+- [ ] **Step 4: Run** `accounts` and `web` suites — expect PASS; update India-first tests that assumed the guardian signup.
+- [ ] **Step 5: Commit** `Choose account mode per territory`.
+
+### Task 2b: Publication scope to the nine launch territories
+
+**Files:** Modify `contracts/publication-policy.json` (`whitelist` → IN, US, GB, BR, SG, MY, ID, PH, TH; new `deferred` list holds the other 38), `config/settings.py` (accept `deferred`), `docs/BOOK_PUBLICATION_POLICY.md`; Test `operations/test_publication_policy.py`.
+
+- [ ] **Step 1: Failing tests** — `test_whitelist_is_the_nine_launch_territories`; `test_deferred_regions_are_not_publication_territories`; `test_deferred_and_whitelist_are_disjoint`.
+- [ ] **Step 2–4:** Run (FAIL), change policy and loader, run full suite (fix tests that hard-code 47).
+- [ ] **Step 5: Commit** `Limit active publication to the nine launch territories`.
 
 ### Task 3: Per-territory notices with a startup guard
 
@@ -120,7 +128,7 @@
 
 **Files:** Create `web/legacy_redirects.py`; Modify `web/urls.py`; Test `web/test_legacy_redirects.py`.
 
-**Interfaces:** Produces `LEGACY_PAGES: dict[str, str]` (`/privacy`→`/en/privacy/`, `/terms`→`/en/terms/`, `/contact`→`/en/contact/`, `/library`→`/en/explore/`, `/pricing`→`/en/pass/`, `/about`, `/copyright`, `/journal`, `/micro-story`→`/en/`) and `LEGACY_TITLES: dict[str, str]` (slug → Maison edition id, empty until republished).
+**Interfaces:** Produces `LEGACY_PAGES: dict[str, str]`; `LEGACY_TITLES` starts with `the-selfish-giant` → its Maison edition id once published (`/privacy`→`/en/privacy/`, `/terms`→`/en/terms/`, `/contact`→`/en/contact/`, `/library`→`/en/explore/`, `/pricing`→`/en/pass/`, `/about`, `/copyright`, `/journal`, `/micro-story`→`/en/`) and `LEGACY_TITLES: dict[str, str]` (slug → Maison edition id, empty until republished).
 
 - [ ] **Step 1: Failing tests** — `test_static_pages_redirect_301` (query dropped for `/library?category=…`); `test_unknown_book_slug_is_410`; `test_republished_book_slug_redirects_to_title`; `test_maison_routes_unaffected`.
 - [ ] **Step 2–4:** Run (FAIL), implement, run (PASS) — all 119 sitemap paths from the legacy `sitemap.xml` as a data-driven test.
