@@ -32,7 +32,7 @@ PROVIDER_URLS={'https://oauth2.googleapis.com/token','https://www.googleapis.com
 
 PUBLIC_GOOGLE_ERRORS=frozenset({'identity_link_required','identity_already_linked','reauthentication_required','authentication_required',
     'email_verification_required','identity_mismatch','account_unavailable','feature_disabled','provider_not_configured',
-    'google_provider_unavailable','google_authentication_failed','invalid_oauth_state','account_registration_required','account_permission_required'})
+    'google_provider_unavailable','google_authentication_failed','invalid_oauth_state','account_registration_required','account_permission_required','adult_declaration_required'})
 
 
 def oauth_problem(error,request):

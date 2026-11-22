@@ -24,6 +24,12 @@ class LegacyRedirectTests(TestCase):
             with self.subTest(path=path):
                 self.assertEqual(self.client.get(path).status_code, 410)
 
+    def test_gone_book_page_is_a_branded_page_into_the_library(self):
+        response = self.client.get('/book/dracula')
+        self.assertEqual(response.status_code, 410)
+        self.assertTrue(response['Content-Type'].startswith('text/html'))
+        self.assertContains(response, 'href="/en/explore/"', status_code=410)
+
     def test_republished_book_slug_redirects_to_title(self):
         with patch.dict('web.legacy_redirects.LEGACY_TITLES', {'the-selfish-giant': '20000000-0000-4000-8000-0000000000aa'}):
             for path in ['/book/the-selfish-giant', '/reader/the-selfish-giant']:

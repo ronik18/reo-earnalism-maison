@@ -27,6 +27,10 @@ from .models import User,GuardianAuthorization
 PURPOSES={'account_processing','privacy_access','privacy_delete'}
 
 
+def _request_territory(request):
+    return getattr(request,'territory',None)
+
+
 def _direct_method(jurisdiction,method):
     from .enrollment import enabled,DIRECT_PARENT_METHOD
     return enabled() and jurisdiction=='IN' and method==DIRECT_PARENT_METHOD
@@ -247,6 +251,9 @@ def request_authorization(request,*,jurisdiction,purpose,notice_version,method,o
     require_fresh(request)
     policy,digest=_public_policy(jurisdiction,purpose,notice_version,method)
     direct=_direct_method(jurisdiction,method)
+    if direct and _request_territory(request)!=jurisdiction:
+        # A parent route is a country's legal method; it cannot be borrowed from elsewhere.
+        raise DomainError('guardian_territory_mismatch','Parent permission is available only to a parent in the same country.',403)
     declaration=None
     if direct:
         from .enrollment import parent_declaration,PARENT_NOTICE_VERSION

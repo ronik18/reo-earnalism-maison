@@ -2,6 +2,12 @@
 
 Owner decisions, 22 November 2026. This narrows `docs/superpowers/plans/2026-11-22-global-readiness.md` (D1–D6). Research below is from public secondary and regulator sources; it is engineering input, **not legal clearance**. A territory is switched on only after the owner signs its notice row.
 
+## Owner directions after approval (22 November 2026)
+
+- No unnecessary guardrails or blockers: notice rows ship without an `approved_by` sign-off gate; production only refuses to start if an active territory has no notice row.
+- One English interface; the library holds every book language and readers filter by language themselves.
+- Books and audiobooks are onboarded from scratch; the legacy platform is retired after cutover (plan Phase 5).
+
 ## Intent
 
 All-ages, general content. Accounts need no age question where the law of the visitor's country does not require parental permission for a child's account; elsewhere accounts are adult-only (self-declared 18+). Reading content itself stays as approved (signed-in, free). Launch territories: IN, US, GB, BR, SG, MY, ID, PH, TH. Books publish when cleared for those nine countries only.
@@ -30,7 +36,7 @@ All-ages, general content. Accounts need no age question where the law of the vi
 
 ## Notices (D6)
 
-`contracts/territory-notices.json` holds one row per active territory: notice version, required privacy sections (controller identity and contact; purposes and legal bases; recipients and cross-border transfers to Render/Neon/Cloudflare; retention; rights and how to exercise them; grievance/DPO contact; children statement matching the account mode), and `approved_by`/`approved_on`. I draft each row's text from the regulator sources; production refuses to start with an active territory whose row is unapproved.
+`contracts/territory-notices.json` holds one row per active territory: notice version, required privacy sections (controller identity and contact; purposes and legal bases; recipients and cross-border transfers to Render/Neon/Cloudflare; retention; rights and how to exercise them; grievance/DPO contact; children statement matching the account mode), I draft each row's text from the regulator sources; production refuses to start with an active territory that has no row (no sign-off gate, per owner direction).
 
 ## Publication scope
 

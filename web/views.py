@@ -286,6 +286,7 @@ def sign_in(request, locale):
         'invalid_oauth_state': 'google_retry',
         'account_registration_required': 'account_registration_required',
         'account_permission_required': 'account_permission_required',
+        'adult_declaration_required': 'adult_declaration_required',
     }
     return page(request, locale, "web/auth.html", auth_mode="sign-in", error_key=google_errors.get(request.GET.get('google_error')))
 

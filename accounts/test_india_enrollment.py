@@ -37,6 +37,12 @@ class IndiaEnrollmentTests(TestCase):
         r=self.post(f'/me/guardian/authorizations/{aid}/claim',d,HTTP_X_GUARDIAN_CLAIM=token);self.assertEqual(r.status_code,202,r.content)
         child=User.objects.get(email=d['email']);return aid,child,token,d
 
+    def test_parent_permission_must_come_from_the_same_country(self):
+        with patch('accounts.guardian._request_territory',return_value='BR'):
+            r=self.request_permission()
+        self.assertEqual(r.status_code,403,r.content);self.assertEqual(r.json()['code'],'guardian_territory_mismatch')
+        self.assertFalse(GuardianAuthorization.objects.exists())
+
     def test_signup_strict_declaration_rejects_before_email_or_password_processing(self):
         data={'email':'new-india@example.test','password':PASS,'display_name':'Adult',**PASSWORD}
         for change in ({},{**ADULT,'account_terms_consent':'true'},{**ADULT,'account_capacity':'minor'},{**ADULT,'account_notice_version':'old'}):

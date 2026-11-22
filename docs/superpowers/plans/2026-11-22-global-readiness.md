@@ -139,7 +139,7 @@
 ### Task 7: Publish one cleared title through the existing staff flow
 
 - [ ] Import the chosen work with `library/general_import.py` (dry run first) into a draft edition; build Reader packages and cover.
-- [ ] Record per-region public-domain evidence for all 47 active regions (author death year, first publication year, original-language edition) in `docs/evidence/<title>-clearance/`, signed off by the owner.
+- [ ] Record per-region public-domain evidence for the nine active regions (IN, US, GB, BR, SG, MY, ID, PH, TH) (author death year, first publication year, original-language edition) in `docs/evidence/<title>-clearance/`, signed off by the owner.
 - [ ] Publish via `transition_revision` (staff MFA); then run `MAISON_E2E_REQUIRE_BOOK=1 npm run e2e:production` from India and expect all tests to pass.
 
 ## Phase 3 — Operational readiness ($0)

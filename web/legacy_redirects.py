@@ -3,7 +3,7 @@
 Static pages move permanently to their Maison equivalents. A legacy book slug
 redirects only once that title is republished on Maison; until then it is Gone.
 """
-from django.http import HttpResponseGone, HttpResponsePermanentRedirect
+from django.http import HttpResponsePermanentRedirect
 
 LEGACY_PAGES = {
     'privacy': '/en/privacy/', 'terms': '/en/terms/', 'contact': '/en/contact/', 'copyright': '/en/terms/',
@@ -21,4 +21,6 @@ def legacy_title(request, slug):
     edition_id = LEGACY_TITLES.get(slug)
     if edition_id:
         return HttpResponsePermanentRedirect(f'/en/titles/{edition_id}/')
-    return HttpResponseGone('This title is not available on Earnalism.', content_type='text/plain; charset=utf-8')
+    from .views import page
+    # 410 tells search engines the old page is gone; the branded page still leads into the library.
+    return page(request, 'en', 'web/status.html', status=410, error_key='not_found')

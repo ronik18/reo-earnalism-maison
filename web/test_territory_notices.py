@@ -36,3 +36,16 @@ class TerritoryNoticePageTests(TestCase):
         response = self.client.get('/en/terms/')
         self.assertContains(response, 'India and Brazil')
         self.assertNotContains(response, 'currently available from India')
+
+
+@override_settings(INDIA_FIRST_LAUNCH_ENABLED=True, GUARDIAN_AUTHORIZATION_ENABLED=True, MAISON_SERVICE_TERRITORIES=('IN',), TERRITORY_NOTICES=ROWS)
+class GuardianDisclosureTests(TestCase):
+    def test_privacy_describes_the_live_parent_route(self):
+        response = self.client.get('/en/privacy/')
+        self.assertContains(response, 'Parents and younger readers in India')
+        self.assertContains(response, 'specific current authority')
+        self.assertContains(response, 'I’m 18 now')
+
+    @override_settings(GUARDIAN_AUTHORIZATION_ENABLED=False)
+    def test_parent_route_disclosure_only_when_route_is_live(self):
+        self.assertNotContains(self.client.get('/en/privacy/'), 'Parents and younger readers in India')
