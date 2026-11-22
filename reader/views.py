@@ -70,9 +70,9 @@ def annotation(request,annotation_id):
 
 @json_endpoint(('GET',))
 def saved_items(request):
-    result=paginate_queryset(request,SavedItem.objects.filter(user=request.user).select_related('edition'),'saved-items')
-    shelf=services.Shelf(territory(request),request.user);shelf.prepare(result['items'])
-    result['items']=[{'edition_id':str(row.edition_id),'saved_at':services.iso(row.created_at),'available':shelf.cards.get(row.edition_id) is not None}
+    shelf=services.Shelf(territory(request),request.user)
+    result=paginate_queryset(request,SavedItem.objects.filter(user=request.user).select_related('edition'),'saved-items',prepare=shelf.prepare)
+    result['items']=[{'edition_id':str(row.edition_id),'saved_at':services.iso(row.created_at),'available':shelf.available(row.edition_id)}
                      for row in result['items']]
     return api_response(result)
 

@@ -55,10 +55,15 @@ def paginate_queryset(request,queryset,scope,ordering='-created_at',maximum=100,
             qs=qs.filter(Q(**{field+'__'+lookup:value}) | Q(**{field:value,pk.name+'__'+lookup:identity}))
         except (KeyError,ValueError,TypeError,OverflowError,FieldDoesNotExist,FieldError,ValidationError):raise DomainError('invalid_cursor','Invalid list position.',422)
     position=lambda row:[str(getattr(row,field)),str(row.pk)]
-    if serialize is None:return _result(list(qs[:limit+1]),limit,binding,position)
-    batch=list(qs[:scan_limit+1]);selected=[];examined=None;count=0
-    if prepare:prepare(batch[:scan_limit])
-    for row in batch[:scan_limit]:
+    if serialize is None:
+        rows=list(qs[:limit+1])
+        if prepare:prepare(rows[:limit])
+        return _result(rows,limit,binding,position)
+    batch=list(qs[:scan_limit+1]);scanned=batch[:scan_limit];selected=[];examined=None;count=0;prepared=0
+    for row in scanned:
+        if prepare and count==prepared:
+            # Prepare growing slices, so a page of eligible rows costs one slice, not the whole scan.
+            prepared=min(len(scanned),prepared+max(limit+1,prepared));prepare(scanned[count:prepared])
         count+=1;examined=row
         value=serialize(row)
         if value is not None:selected.append(value)

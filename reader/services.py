@@ -4,7 +4,7 @@ import uuid
 from functools import lru_cache
 from decimal import Decimal
 from django.db import transaction
-from django.db.models import Count,Exists,OuterRef
+from django.db.models import Count,Exists,OuterRef,Q
 from django.db.models.functions import Length
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -210,17 +210,17 @@ def edition_summary(edition):
     return {'edition_id':str(edition.id),'work_id':str(edition.work_id),'slug':edition.slug,'title':edition.live_revision.title if edition.live_revision_id else edition.work.title,'locale':edition.locale,'available':bool(edition.live_revision_id)}
 
 
-def _savable(edition_id,adding):
-    """New saves need a published edition; removal works for anything already saved."""
-    rows=Edition.objects.filter(pk=public_uuid(edition_id))
-    edition=(rows.filter(live_revision__state='live') if adding else rows).first()
+def _savable(edition_id,adding,user):
+    """New saves need a published (or reviewer-visible) edition; removal works for anything already saved."""
+    if adding:return _edition(edition_id,user)
+    edition=Edition.objects.filter(pk=public_uuid(edition_id)).first()
     if not edition:raise DomainError('not_found','Edition not found.',404)
     return edition
 
 
 def saved_set(user,edition_id,saved,operation_id):
     def mutate():
-        edition=_savable(edition_id,saved)
+        edition=_savable(edition_id,saved,user)
         if saved:
             row,_=SavedItem.objects.get_or_create(user=user,edition=edition)
             return 200,{'edition_id':str(edition.id),'saved_at':iso(row.created_at),'available':bool(edition.live_revision_id)},1
@@ -258,7 +258,7 @@ def mutate_list(user,list_id,operation_id,base_version,action,payload):
         else:
             ids=list(row.items.order_by('sort_order').values_list('edition_id',flat=True))
             if action in ['add','remove']:
-                eid=_savable(payload['edition_id'],action=='add').pk
+                eid=_savable(payload['edition_id'],action=='add',user).pk
                 if action=='add' and eid not in ids:ids.append(eid)
                 if action=='remove' and eid in ids:ids.remove(eid)
             elif action=='reorder':
@@ -275,43 +275,33 @@ VAULT_SUMMARY_SCAN_LIMIT=500
 
 
 class Shelf:
-    """Batch Vault serialization: one catalog query for all cards, one for corrected-edition resumes."""
+    """Batch shelf serialization: one catalog query per prepared slice, one for corrected-edition resumes."""
     def __init__(self,territory,user=None):
         self.territory=territory;self.user=user;self.cards={};self.resume={}
 
     def prepare(self,rows):
-        from library.catalog_query import catalog_queryset,card_from_edition
-        missing={row.edition_id for row in rows}-set(self.cards)
-        if missing:
-            for edition in catalog_queryset(None,self.territory).filter(pk__in=missing):
-                self.cards[edition.pk]=card_from_edition(edition)
-            self.cards.update({pk:None for pk in missing if pk not in self.cards})
-        if getattr(self.user,'is_staff',False):self._prepare_drafts(rows)
+        from library.services import catalog_cards_for
+        self.cards.update(catalog_cards_for([row.edition for row in rows if row.edition_id not in self.cards],self.territory,self.user))
         self._prepare_resume([row for row in rows if isinstance(row,Progress) and row.revision_id!=row.edition.live_revision_id
                               and self.cards.get(row.edition_id) and row.location and row.pk not in self.resume])
 
-    def _prepare_drafts(self,rows):
-        """Authorized staff still see their own unpublished review copies (never cached publicly)."""
-        from library.services import catalog_card
-        for row in rows:
-            if self.cards.get(row.edition_id) is None and not row.edition.live_revision_id:
-                try:self.cards[row.edition_id]=catalog_card(row.edition,territory=self.territory,user=self.user)
-                except DomainError:pass
+    def available(self,edition_id):
+        return self.cards.get(edition_id) is not None
 
     def _prepare_resume(self,stale):
         """A correction keeps the book on the shelf and resumes at the same chapter's start (LLD 7, 10)."""
         if not stale:return
-        old={str(pk):ordinal for pk,ordinal in Unit.objects.filter(pk__in=[r.location['unit_id'] for r in stale]).values_list('pk','ordinal')}
-        live=Unit.objects.filter(revision_id__in={r.edition.live_revision_id for r in stale}).order_by('revision_id','ordinal').prefetch_related('paragraphs')
-        chapters={}
-        for unit in live:chapters.setdefault(unit.revision_id,{})[unit.ordinal]=unit
+        old=dict(Unit.objects.filter(pk__in=[r.location['unit_id'] for r in stale]).values_list('pk','ordinal'))
+        wanted=Q()
+        for row in stale:wanted|=Q(revision_id=row.edition.live_revision_id,ordinal__in=[old.get(public_uuid(row.location['unit_id'])),1])
+        chapters={(u.revision_id,u.ordinal):u for u in Unit.objects.filter(wanted)}
+        first=dict(Paragraph.objects.filter(unit__in=list(chapters.values())).order_by('unit_id','ordinal').distinct('unit_id').values_list('unit_id','anchor_id'))
         for row in stale:
-            units=chapters.get(row.edition.live_revision_id,{})
-            unit=units.get(old.get(row.location['unit_id'])) or next(iter(units.values()),None)
-            first=next(iter(unit.paragraphs.all()),None) if unit else None
-            if unit is None or (row.format=='reader' and first is None):self.resume[row.pk]=None;continue
-            location={'format':'reader','unit_id':str(unit.pk),'anchor_id':str(first.anchor_id),'offset_chars':0} if row.format=='reader' else {'format':row.format,'unit_id':str(unit.pk),'position_ms':0}
-            self.resume[row.pk]={**progress_data(row),'edition_revision_id':str(row.edition.live_revision_id),'location':location}
+            revision=row.edition.live_revision_id
+            unit=chapters.get((revision,old.get(public_uuid(row.location['unit_id'])))) or chapters.get((revision,1))
+            if unit is None or (row.format=='reader' and unit.pk not in first):self.resume[row.pk]=None;continue
+            location={'format':'reader','unit_id':str(unit.pk),'anchor_id':str(first[unit.pk]),'offset_chars':0} if row.format=='reader' else {'format':row.format,'unit_id':str(unit.pk),'position_ms':0}
+            self.resume[row.pk]={**progress_data(row),'edition_revision_id':str(revision),'location':location}
 
     def entry(self,row,kind):
         card=self.cards.get(row.edition_id)
@@ -321,8 +311,13 @@ class Shelf:
         return {'card':card,'progress':progress} if progress else None
 
     def take(self,rows,kind,bound=20):
-        rows=list(rows[:VAULT_SUMMARY_SCAN_LIMIT]);self.prepare(rows)
-        return [entry for row in rows if (entry:=self.entry(row,kind)) is not None][:bound]
+        """First `bound` eligible entries, preparing growing slices so a full shelf costs one slice."""
+        rows=list(rows[:VAULT_SUMMARY_SCAN_LIMIT]);values=[];start=0;size=bound+1
+        while start<len(rows) and len(values)<bound:
+            chunk=rows[start:start+size];self.prepare(chunk)
+            values+=[entry for row in chunk if (entry:=self.entry(row,kind)) is not None]
+            start+=len(chunk);size*=2
+        return values[:bound]
 
 
 def vault_data(user,territory='IN',request=None):
