@@ -4,10 +4,10 @@
 // cover revalidation (ETag/304), Reader chapter open and chapter turn, progress
 // reaching Vault "Continue", save/unsave, and a learning track.
 //
-// Production is India-first: the edge returns 403 `service_region_unavailable`
-// outside India, so run this from an Indian network. Outside India only the
-// liveness check runs; every other test is skipped with that reason, never
-// reported as passed.
+// Production serves the launch countries (IN, US, GB, BR, SG, MY, ID, PH, TH):
+// elsewhere the edge returns 403 `service_region_unavailable`. From any other
+// country only the liveness check runs; every other test is skipped with that
+// reason, never reported as passed.
 //
 // Member tests need a dedicated, verified TEST account (never a customer
 // account). It must not hold paid access. The suite never buys anything and
@@ -26,7 +26,8 @@ let edition; // first published Reader edition in any content language
 
 test.beforeAll(async ({ request }) => {
   // No locale filter: the published book may be Bengali while the interface is English.
-  const catalog = await request.get(`${BASE}/api/v1/catalog?territory=IN&format=reader&limit=20`);
+  // No territory parameter: the server uses the visitor's trusted edge territory.
+  const catalog = await request.get(`${BASE}/api/v1/catalog?format=reader&limit=20`);
   if (catalog.status() === 403 && (await catalog.json()).code === 'service_region_unavailable') {
     regionBlocked = true;
     return;
@@ -35,7 +36,7 @@ test.beforeAll(async ({ request }) => {
   edition = (await catalog.json()).items.find((card) => card.formats.includes('reader'));
 });
 
-const needsIndia = () => test.skip(regionBlocked, 'Production serves India only: run this suite from an Indian network.');
+const needsIndia = () => test.skip(regionBlocked, 'Production is not available from this network\'s country: run the suite from a launch country.');
 const needsMember = () => {
   needsIndia();
   test.skip(!EMAIL || !PASSWORD, 'Set MAISON_E2E_EMAIL and MAISON_E2E_PASSWORD for the dedicated test account.');
