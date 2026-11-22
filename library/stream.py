@@ -190,12 +190,11 @@ def grant(user, asset, device_id, territory='IN'):
         raise DomainError('feature_disabled', 'Video is unavailable.', 503)
     uid = _asset_uid(asset, require_ready=True)
     duration_ms = _bound_duration(asset)
-    from .services import access_ends, authorize_revision, iso, validate_device
+    from .services import _grant_expiry, authorize_revision, iso
     revision = authorize_revision(user, asset.revision, 'video', territory=territory)
-    validate_device(user, device_id)
+    expiry = _grant_expiry(user, revision, 'video', 'read', device_id, territory)
     config = validate_configuration()
     now = timezone.now()
-    expiry = min(now+timedelta(seconds=GRANT_SECONDS), access_ends(user,revision,'video',territory=territory))
     epoch = math.floor(expiry.timestamp())
     if epoch <= math.floor(now.timestamp()):
         raise DomainError('rights_unavailable', 'Video authorization is expiring.', 403)

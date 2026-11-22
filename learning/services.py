@@ -32,20 +32,15 @@ def _track(user,value,allow_locked=False):
             if not allow_locked: raise
     return track
 
-def _paid_included(user,track):
-    """Uses the list's already-loaded edition/revision/rights; no per-track re-fetch."""
-    from library.services import check_access
-    revision=track.edition.live_revision if track.edition_id else None
-    try:
-        _free_rollout_gate(user)
-        if not revision:return False
-        check_access(user,revision,territory=_territory(user));return True
-    except DomainError:return False
-
-
-def track_dto(user,track):
+def track_dto(user,track,included=None):
+    """included: {revision_id: allowed} from one batch authorization; a single track authorizes itself."""
     access='free' if track.access=='free' else 'locked'
-    if track.access=='paid' and _paid_included(user,track):access='included'
+    if track.access=='paid':
+        revision_id=track.edition.live_revision_id if track.edition_id else None
+        if included is None and revision_id:
+            from library.services import authorize_revisions
+            included=authorize_revisions(user,[revision_id],territory=_territory(user))
+        if revision_id and (included or {}).get(revision_id):access='included'
     return {'track_id':str(track.id),'title':track.title,'locale':track.locale,'kind':track.kind,'description':track.description,
             'duration_days':track.duration_days,'company_style':track.company_style or None,'access':access,
             'lesson_count':track.page_lesson_count if hasattr(track,'page_lesson_count') else track.lessons.count()}
@@ -54,7 +49,7 @@ def _track_rows(user,locale=None,kind=''):
     locale=content_locale(locale)
     if kind not in ('','learning','sde_interview'):
         raise DomainError('invalid_filter','Choose a supported track kind.',422)
-    rows=Track.objects.filter(published=True).exclude(access='deny').select_related('edition__live_revision__edition').annotate(page_lesson_count=Count('lessons'))
+    rows=Track.objects.filter(published=True).exclude(access='deny').select_related('edition').annotate(page_lesson_count=Count('lessons'))
     if locale:rows=rows.filter(locale=locale)
     if kind:rows=rows.filter(kind=kind)
     if getattr(settings,'FREE_ACCESS_ENABLED',False) and _territory(user) not in settings.MAISON_PUBLICATION_TERRITORIES:return rows.none()
@@ -62,9 +57,9 @@ def _track_rows(user,locale=None,kind=''):
 
 
 def _dtos(user,tracks):
-    from library.services import prefetch_public_rights
-    prefetch_public_rights([t.edition.live_revision for t in tracks if t.access=='paid' and t.edition_id and t.edition.live_revision_id])
-    return [track_dto(user,t) for t in tracks]
+    from library.services import authorize_revisions
+    included=authorize_revisions(user,[t.edition.live_revision_id for t in tracks if t.access=='paid' and t.edition_id and t.edition.live_revision_id],territory=_territory(user))
+    return [track_dto(user,t,included) for t in tracks]
 
 
 def list_tracks(user,locale=None):
