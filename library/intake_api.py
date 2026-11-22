@@ -26,11 +26,12 @@ def reviewed_territories(packet, paragraphs_sha256):
     if (paragraphs_sha256!=review['paragraphs_sha256'] or digest(canonical_bytes(packet['paragraphs']))!=review['paragraphs_sha256'] or packet['rights'].get('review_id')!=review['review_id']
         or not isinstance(countries,list) or not countries or len(set(countries))!=len(countries)
         or set(countries)!=decisions or countries!=review['runtime_approved_territories']
-        or set(countries)!=set(settings.MAISON_PUBLICATION_TERRITORIES)
+        or not set(settings.MAISON_PUBLICATION_TERRITORIES)<=set(countries)
         or any(not isinstance(c,str) or len(c)!=2 or not c.isascii() or not c.isupper() or not c.isalpha() for c in countries)
         or set(countries)&set(review['held_territories']) or packet['rights'].get('commercial_use_allowed') is not True):
         raise DomainError('rights_review_mismatch','Intake text or territories differ from the private rights review.',409)
-    return countries
+    # Rights are granted only for the active publication territories the review approved.
+    return [c for c in countries if c in settings.MAISON_PUBLICATION_TERRITORIES]
 
 
 @json_endpoint(('POST',))
