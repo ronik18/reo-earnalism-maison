@@ -27,3 +27,13 @@ def validate_account_modes(modes, service_territories):
         if modes.get(code) not in ACCOUNT_MODES:
             raise ImproperlyConfigured(f'Service territory {code} needs an account mode: open or adult_only')
     return dict(modes)
+
+
+def validate_territory_notices(rows, service_territories):
+    """Every active territory needs a privacy section with a heading and body."""
+    for code in service_territories:
+        row = rows.get(code) or {}
+        sections = row.get('sections') or []
+        if not row.get('name') or not sections or any(not s.get('heading') or not s.get('body') for s in sections):
+            raise ImproperlyConfigured(f'Service territory {code} needs a privacy notice row')
+    return dict(rows)

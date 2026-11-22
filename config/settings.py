@@ -27,12 +27,13 @@ LOCAL = ENVIRONMENT != 'production'
 MAISON_LOCAL_FIXTURES = LOCAL
 # Owner-approved India-first service launch; edition rights retain their own policy.
 INDIA_FIRST_LAUNCH_ENABLED = not LOCAL
-from .territories import parse_service_territories, validate_account_modes
+from .territories import parse_service_territories, validate_account_modes, validate_territory_notices
 MAISON_SERVICE_TERRITORIES = parse_service_territories(os.getenv('MAISON_SERVICE_TERRITORIES', ''), MAISON_PUBLICATION_TERRITORIES)
 # 'open': no age question; 'adult_only': self-declared 18+. Owner-approved 22 Nov 2026
 # (docs/superpowers/specs/2026-11-22-territory-accounts-design.md).
 MAISON_ACCOUNT_MODES = validate_account_modes({'IN':'open','US':'adult_only','GB':'adult_only','BR':'adult_only','SG':'adult_only',
     'MY':'adult_only','ID':'adult_only','PH':'adult_only','TH':'adult_only'}, MAISON_SERVICE_TERRITORIES)
+TERRITORY_NOTICES = validate_territory_notices(json.loads((BASE_DIR / 'contracts/territory-notices.json').read_text()), MAISON_SERVICE_TERRITORIES)
 STAFF_MFA_REQUIRED = not LOCAL
 DEBUG = LOCAL
 LOCAL_DIR = BASE_DIR / '.local'
