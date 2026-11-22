@@ -11,23 +11,27 @@ from django.test import RequestFactory,SimpleTestCase
 from .views import context
 
 class PeacockShellTests(SimpleTestCase):
-    def test_legacy_routes_share_one_english_shell_keeps_real_navigation_and_local_assets(self):
+    def test_every_route_shares_the_reading_room_shell_with_real_navigation_and_local_assets(self):
+        # Owner-approved reading-room design (22 Nov 2026) replaces the dark Peacock shell on every route.
         for locale in ('en','bn'):
-            request=RequestFactory().get(f'/{locale}/')
-            request.user=AnonymousUser();request.resolver_match=SimpleNamespace(url_name='home')
-            html=render_to_string('web/home.html',context(request,locale),request=request)
-            self.assertIn('maison/peacock/maison-theme.css',html)
-            self.assertIn('maison/fonts/typography.css',html)
-            self.assertIn('maison/logo.png',html)
-            self.assertIn('/en/explore/',html)
-            self.assertIn('/en/settings/',html)
-            self.assertIn('class="pc-halo" aria-hidden="true"',html)
-            self.assertIn('class="pc-jali" aria-hidden="true"',html)
-            self.assertIn('data-route="home"',html)
-            self.assertIn('lang="en" data-ui-locale="en"',html)
-            self.assertNotIn('aria-label="Interface language"',html)
-            self.assertNotIn('fonts.googleapis',html)
-            self.assertNotIn('atelier.js',html)
+            for template,route,extra in (('web/home.html','home',{}),('web/status.html','not-found',{'error_key':'not_found'})):
+                request=RequestFactory().get(f'/{locale}/')
+                request.user=AnonymousUser();request.resolver_match=SimpleNamespace(url_name=route)
+                html=render_to_string(template,context(request,locale,**extra),request=request)
+                self.assertIn('maison/room/room.css',html)
+                self.assertIn('maison/app.css',html)
+                self.assertIn('maison/fonts/typography.css',html)
+                self.assertIn('maison/logo.png',html)
+                self.assertIn('class="room-nav"',html)
+                self.assertIn('/en/explore/',html)
+                self.assertIn('/en/settings/',html)
+                self.assertIn(f'data-route="{route}"',html)
+                self.assertIn('lang="en" data-ui-locale="en"',html)
+                self.assertIn('theme-light',html)
+                self.assertNotIn('maison/peacock/maison-theme.css',html)
+                self.assertNotIn('aria-label="Interface language"',html)
+                self.assertNotIn('fonts.googleapis',html)
+                self.assertNotIn('atelier.js',html)
     def test_ornament_assets_are_inert_and_local_references_resolve(self):
         root=Path(settings.BASE_DIR)/'static/maison/peacock'
         for path in (root/'svg').glob('*.svg'):

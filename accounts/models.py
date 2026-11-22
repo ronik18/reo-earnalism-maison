@@ -49,7 +49,7 @@ class User(AbstractUser):
 class Preferences(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE,related_name='preferences')
     locale=models.CharField(max_length=2,default='en',choices=[('en','English'),('bn','বাংলা')])
-    theme=models.CharField(max_length=12,default='dark',choices=[(x,x) for x in ['light','dark','true_black']])
+    theme=models.CharField(max_length=12,default='light',choices=[(x,x) for x in ['light','dark','true_black']])
     reader_theme=models.CharField(max_length=12,default='light',choices=[(x,x) for x in ['light','sepia','dark','true_black']])
     reader_font_size=models.PositiveSmallIntegerField(default=20)
     reader_typeface=models.CharField(max_length=12,default='serif',choices=[('serif','Serif'),('sans','Sans')])
