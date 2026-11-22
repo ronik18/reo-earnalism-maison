@@ -355,22 +355,22 @@ mark.hl{background:rgba(216,178,94,.38);color:inherit;padding:0 .1em;border-radi
 @media (max-width:900px){.review{top:92px;bottom:auto}}
 
 /* ---------- alpana / kantha texture, applied on every screen ---------- */
-body{background:url(art/alpana-tile.svg),url(art/handmade-paper.png),var(--ivory)}
-.hero{background:radial-gradient(70% 90% at 100% 0%,rgba(243,232,212,.92) 0%,transparent 60%),url(art/alpana-tile.svg),url(art/handmade-paper.png),var(--ivory);overflow:hidden}
+body{background:url(art/handmade-paper.png),var(--ivory)}
+.hero{background:radial-gradient(70% 90% at 100% 0%,rgba(243,232,212,.92) 0%,transparent 60%),url(art/handmade-paper.png),var(--ivory);overflow:hidden}
 .hero::before{content:"";position:absolute;width:620px;height:620px;left:-260px;bottom:-260px;background:url(art/alpana-halo.svg) center/contain no-repeat;opacity:.16;pointer-events:none}
 .hero .wrap{position:relative;z-index:1}
-.parchment{background:url(art/alpana-tile.svg),url(art/handmade-paper.png),var(--parchment)}
-.dark{background:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png),linear-gradient(160deg,var(--burgundy) 0%,var(--burgundy-deep) 100%);overflow:hidden}
+.parchment{background:url(art/handmade-paper.png),var(--parchment)}
+.dark{background:url(art/handmade-paper.png),linear-gradient(160deg,var(--burgundy) 0%,var(--burgundy-deep) 100%);overflow:hidden}
 .dark::before{content:"";position:absolute;width:680px;height:680px;right:-240px;top:-240px;background:url(art/alpana-halo.svg) center/contain no-repeat;opacity:.22;pointer-events:none}
 .dark .wrap{position:relative;z-index:1}
-.member-hero{background:radial-gradient(60% 80% at 0% 0%,rgba(243,232,212,.92),transparent 70%),url(art/alpana-tile.svg),url(art/handmade-paper.png),var(--ivory)}
-.title-hero{background:url(art/alpana-tile.svg),url(art/handmade-paper.png),linear-gradient(180deg,var(--parchment),var(--ivory))}
-.page-head{background:url(art/alpana-tile.svg),url(art/handmade-paper.png),var(--parchment)}
-.continue .left{background:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png),linear-gradient(160deg,var(--burgundy),var(--burgundy-deep))}
-.night{background:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png),radial-gradient(70% 60% at 50% 0%,#3A1A24,var(--night) 70%)}
-footer.site{background:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png),var(--night)}
-.reader{background-image:url(art/alpana-tile.svg),url(art/handmade-paper.png)}
-.reader[data-theme=ink]{background-image:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png)}
+.member-hero{background:radial-gradient(60% 80% at 0% 0%,rgba(243,232,212,.92),transparent 70%),url(art/handmade-paper.png),var(--ivory)}
+.title-hero{background:url(art/handmade-paper.png),linear-gradient(180deg,var(--parchment),var(--ivory))}
+.page-head{background:url(art/handmade-paper.png),var(--parchment)}
+.continue .left{background:url(art/handmade-paper.png),linear-gradient(160deg,var(--burgundy),var(--burgundy-deep))}
+.night{background:url(art/handmade-paper.png),radial-gradient(70% 60% at 50% 0%,#3A1A24,var(--night) 70%)}
+footer.site{background:url(art/handmade-paper.png),var(--night)}
+.reader{background-image:url(art/handmade-paper.png)}
+.reader[data-theme=ink]{background-image:url(art/handmade-paper.png)}
 .rtext{background:var(--rbg);margin-top:32px;margin-bottom:32px;border:1px solid var(--rline);border-radius:4px;box-shadow:0 20px 40px -30px rgba(36,22,26,.45)}
 .book,.way,.today,.facts,.coming{background-color:var(--ivory)}
 @media (max-width:640px){.rtext{margin:0;border:0;border-radius:0}}
@@ -407,6 +407,17 @@ footer.site{background:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png)
 .review a{color:var(--burgundy)}
 .review::before{content:"Design screens";align-self:center;font-size:.75rem;font-weight:600;color:var(--ink-soft);padding:0 8px 0 10px;white-space:nowrap}
 @media (max-width:900px){.review{top:auto;bottom:12px;right:8px;left:8px}}
+
+/* ---------- logo: crop the transparent padding (pixels untouched) so the mark reads large ---------- */
+.top .wrap{min-height:100px}
+.top .logo{--s:.25;display:block;flex:0 0 auto;overflow:hidden;width:calc(1114px*var(--s));height:calc(281px*var(--s))}
+.top .logo img{height:calc(500px*var(--s));width:auto;max-width:none;margin:calc(-102px*var(--s)) 0 0 calc(-83px*var(--s))}
+@media (max-width:1460px){.search{min-width:0;width:44px;padding:0;justify-content:center}.search span{display:none}}
+@media (max-width:1180px){.top .logo{--s:.21}}
+@media (max-width:1320px){.top .wrap{gap:14px}.nav a{padding:0 12px}.signin span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.signin{min-width:44px;justify-content:center}.tools .btn{padding:0 16px}}
+@media (max-width:900px){.top .logo{--s:.19}.top .wrap{min-height:0;padding-top:12px}}
+@media (max-width:400px){.top .logo{--s:.17}}
+@media (max-width:1060px){.top .wrap{flex-wrap:wrap;row-gap:10px;padding-bottom:12px}.nav{display:flex;order:3;width:100%}.nav a{flex:1 1 auto;justify-content:center}}
 </style>
 </head>
 <body>
