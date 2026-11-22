@@ -173,3 +173,15 @@
 - [ ] Remove DNS records `api` (Railway) and `_railway-verify.api`; detach the domain from the Vercel project.
 - [ ] Delete the Railway services/database and the Vercel project; cancel their plans. Archive (do not delete) legacy GitHub repositories.
 - [ ] Keep Hostinger mail records (MX, SPF, DKIM, DMARC, autodiscover/autoconfig) and `ftp` unless the owner retires them separately.
+
+## Phase 1b — Owner direction, 22 Nov 2026: one English interface, one all-language library
+
+### Task 12: English-only interface; readers choose the book language
+
+**Files:** Modify `web/views.py` (locale handling, `context()`), `web/urls.py`, `web/i18n.py` callers, `accounts/services.py` (post-sign-in redirect/locale preference); Test `web/test_english_interface.py`.
+
+**Interfaces:** Produces: every `/bn/<path>` UI route answers `301` to `/en/<path>` (query kept); `ui()` strings always English; the catalog/home/search default to all content languages, with `content_locale` as the reader's optional filter; sign-in never redirects by language preference.
+
+- [ ] **Step 1: Failing tests** — `test_bengali_ui_routes_redirect_to_english` (`/bn/`, `/bn/explore/?q=x`, `/bn/titles/<id>/` → 301 `/en/...`); `test_home_lists_books_in_all_languages_by_default`; `test_content_language_filter_is_optional_reader_choice` (`?content_locale=bn` shows only Bengali books, interface still English); `test_sign_in_does_not_route_by_language` (a member with preference `bn` lands on `/en/...`); `test_no_bengali_interface_strings_rendered` (no `lang="bn"` on `<html>`).
+- [ ] **Step 2–4:** Run (FAIL), implement, run `web` and `accounts` suites (PASS); update tests that asserted Bengali interface text.
+- [ ] **Step 5: Commit** `Serve one English interface over an all-language library`.
