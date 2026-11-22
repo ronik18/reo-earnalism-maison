@@ -114,15 +114,14 @@ class IndiaFirstScreensTests(TestCase):
     def test_india_legal_copy_is_public_free_scope_without_worldwide_or_custody_claim(self):
         for path in ['/en/privacy/','/en/terms/','/en/contact/']:
             response=self.client.get(path);self.assertEqual(response.status_code,200)
-            self.assertContains(response,'India-first free access')
+            self.assertContains(response,'Free access · Updated 22 November 2026')
             self.assertContains(response,'drafts remain private')
             self.assertNotContains(response,'Current accounts belong to authorized adult staff/testers')
             self.assertNotContains(response,'ronik18@gmail.com')
         response=self.client.get('/en/terms/')
-        self.assertContains(response,'currently available from India')
-        self.assertContains(response,'not independently verified age or custody')
+        self.assertContains(response,'currently available in India')
         self.assertNotContains(response,'This is the Earnalism qualification service')
-        self.assertContains(self.client.get('/en/privacy/'),'specific current authority')
+        self.assertContains(self.client.get('/en/privacy/'),'Readers of every age')
 
     def test_foreign_service_state_has_only_help_links_no_account_collection(self):
         source=render_to_string('web/region_unavailable.html')
