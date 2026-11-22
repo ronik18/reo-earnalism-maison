@@ -1,4 +1,5 @@
 import uuid,json,io,tempfile
+from django.conf import settings
 from django.test import TestCase,Client,override_settings
 from django.contrib.auth import get_user_model
 from .models import Edition,Revision
@@ -83,7 +84,7 @@ class ClearedDraftJourneyTests(TestCase):
         from .services import current_right,authorize_revision
         from core.api import DomainError
         r=Revision.objects.get()
-        approved={'TW', 'LK', 'FR', 'OM', 'AM', 'MV', 'KZ', 'ID', 'QA', 'MM', 'US', 'JP', 'IQ', 'AZ', 'LA', 'NP', 'TH', 'BT', 'GB', 'NL', 'SG', 'BD', 'MY', 'KH', 'BR', 'IL', 'SA', 'BN', 'TR', 'CY', 'DK', 'PH', 'IN', 'MO', 'CA', 'GE', 'DE', 'YE', 'JO', 'HK', 'PK', 'UZ', 'NZ', 'KR', 'BH', 'RU', 'LB'}
+        approved=set(settings.MAISON_PUBLICATION_TERRITORIES)  # Owner amendment 22 Nov 2026: active territories only.
         self.assertEqual(r.rights.count(),2)
         for right in r.rights.all():
             self.assertEqual(set(right.territories),approved)
@@ -110,14 +111,13 @@ class ClearedDraftJourneyTests(TestCase):
         from core.api import DomainError
         packet=json.loads(PACKET.read_text());review=json.loads(RIGHTS_REVIEW.read_text())
         expected=review['paragraphs_sha256']
-        self.assertEqual(reviewed_territories(packet,expected),packet['rights']['territories'])
+        self.assertEqual(reviewed_territories(packet,expected),[c for c in packet['rights']['territories'] if c in settings.MAISON_PUBLICATION_TERRITORIES])
         self.assertEqual(review['requested_place_aliases'],{'London':'GB','Scotland':'GB'})
         asia={row['territory'] for row in review['geographic_scope']['asian_jurisdictions']}
         self.assertEqual(len(asia),53)
         self.assertTrue({'CN','HK','MO','TW','RU','EG','PS','TL','KP'}.issubset(asia))
         self.assertEqual(set(review['historical_requested_territories']),asia|{'BR','US','NZ','GB','FR','DE','NL','DK','CA'})
-        from django.conf import settings
-        self.assertEqual(set(review['requested_territories']),set(settings.MAISON_PUBLICATION_TERRITORIES))
+        self.assertTrue(set(settings.MAISON_PUBLICATION_TERRITORIES)<=set(review['requested_territories']))
         self.assertEqual(review['held_territories'],[])
         self.assertEqual(set(review['out_of_scope_territories']),{'AE','CN'})
         self.assertFalse(set(review['requested_territories']) & set(review['excluded_pending_territories']))
@@ -132,7 +132,6 @@ class ClearedDraftJourneyTests(TestCase):
 
     def test_publication_checks_entire_whitelist_and_hash_bound_legal_evidence(self):
         self.test_draft_intake_review_integrity_replay_and_member_denial()
-        from django.conf import settings
         r=Revision.objects.get()
         def checks():return {c['code']:c['status'] for c in validate_revision(r)['checks']}
         self.assertEqual(checks()['publication_regions'],'pass')

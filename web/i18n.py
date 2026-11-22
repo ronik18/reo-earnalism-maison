@@ -1,7 +1,8 @@
 """Small explicit UI catalogue; edition content never changes with UI locale."""
 
 STRINGS = {
-    'account_permission_required': ('Please confirm that you are 18 or older and accept the current account terms before creating your own account. A parent or guardian begins for a younger reader.', 'Please confirm that you are 18 or older and accept the current account terms before creating your own account. A parent or guardian begins for a younger reader.'),
+    'account_permission_required': ('Please accept the current service terms and account notice to create your account.', 'অ্যাকাউন্ট তৈরি করতে বর্তমান পরিষেবার শর্ত ও অ্যাকাউন্ট বিজ্ঞপ্তি মেনে নিন।'),
+    'adult_declaration_required': ('Please confirm that you are 18 or older to create an account here.', 'এখানে অ্যাকাউন্ট তৈরি করতে নিশ্চিত করুন যে আপনার বয়স ১৮ বা তার বেশি।'),
     'independent_account_updated': ('If the verified account and password matched, the account can now continue under your own permission, with previous guardian permissions and sessions ended. Sign in again to continue.', 'If the verified account and password matched, the account can now continue under your own permission, with previous guardian permissions and sessions ended. Sign in again to continue.'),
     'independent_account_unavailable': ('We could not update the account. Check your existing verified account details and your own adult permission. Contact sales@reoenterprise.org if you need help.', 'We could not update the account. Check your existing verified account details and your own adult permission. Contact sales@reoenterprise.org if you need help.'),
     'account_registration_required': ('No new account was created. Start from Create an account to choose your account or parent route.', 'No new account was created. Start from Create an account to choose your account or parent route.'),
@@ -348,6 +349,7 @@ STRINGS = {
     "service_unavailable": ("This service is temporarily unavailable. Your task has not been confirmed.", "সেবাটি সাময়িকভাবে পাওয়া যাচ্ছে না। আপনার কাজ সম্পূর্ণ হয়েছে বলে নিশ্চিত করা যায়নি।"),
     "invalid_input": ("Check the information and try again.", "তথ্য ঠিক করে আবার চেষ্টা করুন।"),
     "invalid_credentials": ("The email or password could not be verified.", "ইমেল বা পাসওয়ার্ড যাচাই করা যায়নি।"),
+    "sign_in_rate_limited": ("Too many sign-in attempts. Wait a few minutes and try again.", "Too many sign-in attempts. Wait a few minutes and try again."),
     "email_unverified": ("Verify your email before signing in.", "প্রবেশের আগে ইমেল যাচাই করুন।"),
     "token_expired": ("This link is expired or already used. Request a new link.", "লিংকের মেয়াদ শেষ অথবা ব্যবহার হয়ে গেছে। নতুন লিংক চান।"),
     "error": ("We could not complete that action.", "কাজটি সম্পূর্ণ করা যায়নি।"),

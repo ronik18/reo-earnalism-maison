@@ -137,7 +137,8 @@ def _abandoned(user, cutoff):
         return False
     for event in AuditEvent.objects.filter(actor=user).exclude(action='account.registered'):
         if (event.action=='account.capacity_declared' and event.entity_kind=='User' and event.entity_id==str(user.pk)
-            and event.detail=={'purpose':'registration','account_capacity':'adult','account_notice_version':'india-account-v1','account_terms_consent':True,'assurance':'self_declaration'}
+            and event.detail in ({'purpose':'registration','account_capacity':capacity,'account_notice_version':'india-account-v1','account_terms_consent':True,'assurance':'self_declaration'}
+                                 for capacity in ('adult','not_asked'))
             and event.created_at<=user.date_joined+timedelta(minutes=5)):
             continue
         if (not _password_purpose_receipt(event) or event.detail['purpose'] != 'registration'

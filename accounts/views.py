@@ -52,7 +52,7 @@ def register_view(request):
     from .enrollment import ACCOUNT_FIELDS
     d=json_body(request,{'email','password','display_name','locale','return_path'}|PASSWORD_PURPOSE_FIELDS|ACCOUNT_FIELDS,['email','password','display_name'])
     consent=validate_password_purpose_consent(d)
-    services.register_member(**{k:v for k,v in d.items() if k not in PASSWORD_PURPOSE_FIELDS},password_consent=consent);return api_response(acknowledgement(request),202)
+    services.register_member(**{k:v for k,v in d.items() if k not in PASSWORD_PURPOSE_FIELDS},password_consent=consent,territory=request.territory);return api_response(acknowledgement(request),202)
 
 
 @json_endpoint(('POST',),auth=False)

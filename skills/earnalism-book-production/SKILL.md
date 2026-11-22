@@ -1,6 +1,6 @@
 ---
 name: earnalism-book-production
-description: Prepare and release Earnalism Reader editions, covers and pre-produced media through Maison's supported revision workflow, preserving exact editions, complete 47-region rights and verified assets.
+description: Prepare and release Earnalism Reader editions, covers and pre-produced media through Maison's supported revision workflow, preserving exact editions, complete active-region rights and verified assets.
 ---
 
 # Earnalism book production in Maison
@@ -41,7 +41,7 @@ expected hash, current ETag, operation ID and required reason. Scheduled publica
 rechecks the same gates. Reconcile uncertain writes before another mutation.
 
 Use [publication-policy.json](https://github.com/ronik18/reo-earnalism-maison/blob/main/contracts/publication-policy.json) as the
-authoritative **47-region whitelist** and [book policy](https://github.com/ronik18/reo-earnalism-maison/blob/main/docs/BOOK_PUBLICATION_POLICY.md).
+authoritative **active whitelist (nine launch territories since the 22 November 2026 owner amendment; 38 deferred)** and [book policy](https://github.com/ronik18/reo-earnalism-maison/blob/main/docs/BOOK_PUBLICATION_POLICY.md).
 Every offered format/action needs legal compliance for the exact text/assets in
 every active region, including applicable distribution/public-domain permissions.
 Keep private clearance hash-bound. Term expiry, artwork, draft review or CI is not

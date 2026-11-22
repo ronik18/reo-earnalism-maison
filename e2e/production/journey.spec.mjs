@@ -22,23 +22,32 @@ const PASSWORD = process.env.MAISON_E2E_PASSWORD;
 const LOCALE = 'en';
 
 let regionBlocked = false;
-let edition; // first available catalog card from Home
+let edition; // first published Reader edition in any content language
 
 test.beforeAll(async ({ request }) => {
-  const home = await request.get(`${BASE}/api/v1/home?locale=${LOCALE}&territory=IN`);
-  if (home.status() === 403 && (await home.json()).code === 'service_region_unavailable') {
+  // No locale filter: the published book may be Bengali while the interface is English.
+  const catalog = await request.get(`${BASE}/api/v1/catalog?territory=IN&format=reader&limit=20`);
+  if (catalog.status() === 403 && (await catalog.json()).code === 'service_region_unavailable') {
     regionBlocked = true;
     return;
   }
-  expect(home.status(), 'home API').toBe(200);
-  const body = await home.json();
-  edition = body.shelves.flatMap((shelf) => shelf.items).find((card) => card.formats.includes('reader'));
+  expect(catalog.status(), 'catalog API').toBe(200);
+  edition = (await catalog.json()).items.find((card) => card.formats.includes('reader'));
 });
 
 const needsIndia = () => test.skip(regionBlocked, 'Production serves India only: run this suite from an Indian network.');
 const needsMember = () => {
   needsIndia();
   test.skip(!EMAIL || !PASSWORD, 'Set MAISON_E2E_EMAIL and MAISON_E2E_PASSWORD for the dedicated test account.');
+};
+// Until a book is published the live catalog is empty by design. Once one is, set
+// MAISON_E2E_REQUIRE_BOOK=1 so an empty catalog fails as a regression instead of skipping.
+const needsBook = () => {
+  needsIndia();
+  if (process.env.MAISON_E2E_REQUIRE_BOOK === '1') {
+    expect(edition, 'the live catalog lists a published Reader edition in India').toBeTruthy();
+  }
+  test.skip(!edition, 'The live catalog has no published Reader edition in India yet.');
 };
 
 // Calls the API from inside the signed-in page, the way the Maison client does.
@@ -56,6 +65,21 @@ async function api(page, method, path, { body, key, version } = {}) {
   }, { method, path, body, key, version });
 }
 
+// Sign in ONCE per run and reuse the session: the server allows 5 sign-in attempts
+// per email per 15 minutes, so signing in for every test locks the account out.
+let memberState;
+async function memberPage(browser) {
+  if (!memberState) {
+    const context = await browser.newContext();
+    await signIn(await context.newPage());
+    memberState = await context.storageState();
+    await context.close();
+  }
+  const page = await (await browser.newContext({ storageState: memberState })).newPage();
+  await page.goto(`${BASE}/${LOCALE}/`); // api() calls are same-origin from this page
+  return page;
+}
+
 async function signIn(page) {
   await page.goto(`${BASE}/${LOCALE}/sign-in/`);
   await page.fill('#auth-email', EMAIL);
@@ -63,8 +87,15 @@ async function signIn(page) {
   const consent = page.locator('input[name="password_purpose_consent"]');
   if (await consent.count()) await consent.check(); // Members agree to password processing at sign-in.
   await page.locator('form button[type="submit"]').click();
-  await expect.poll(async () => (await api(page, 'GET', '/session')).json?.authenticated,
-    { message: 'test account signs in', timeout: 15_000 }).toBeTruthy();
+  const deadline = Date.now() + 15_000;
+  while (Date.now() < deadline) {
+    if ((await api(page, 'GET', '/session')).json?.authenticated) return;
+    await page.waitForTimeout(500);
+  }
+  // Report what the member would see instead of a bare timeout.
+  const shown = (await page.locator('[role="alert"], .error-notice, #auth-form-status').allInnerTexts())
+    .map((text) => text.trim()).filter(Boolean).join(' | ');
+  throw new Error(`Test account did not sign in. Page: ${new URL(page.url()).pathname}. Message: ${shown || '(none shown)'}`);
 }
 
 test('liveness endpoint answers', async ({ request }) => {
@@ -73,19 +104,23 @@ test('liveness endpoint answers', async ({ request }) => {
   expect((await response.json()).status).toBe('ok');
 });
 
-test('home and a title page render a published edition', async ({ page }) => {
+test('home page renders', async ({ page }) => {
   needsIndia();
-  expect(edition, 'Home lists at least one Reader edition').toBeTruthy();
-  await page.goto(`${BASE}/${LOCALE}/`);
-  await expect(page.locator('body')).toContainText(edition.title);
+  const home = await page.goto(`${BASE}/${LOCALE}/`);
+  expect(home.status()).toBe(200);
+  await expect(page.locator('main')).toBeVisible();
+});
+
+test('title page renders a published edition', async ({ page }) => {
+  needsBook();
   const title = await page.goto(`${BASE}/${LOCALE}/titles/${edition.edition_id}/`);
   expect(title.status()).toBe(200);
   await expect(page.locator('h1')).toContainText(edition.title);
 });
 
 test('cover revalidation returns 304 with a strong content ETag', async ({ request }) => {
-  needsIndia();
-  test.skip(!edition?.cover, 'The first edition has no cover.');
+  needsBook();
+  test.skip(!edition.cover, 'The first edition has no cover.');
   const first = await request.get(edition.cover.url);
   expect(first.status()).toBe(200);
   test.skip(first.headers()['cache-control'].includes('private'),
@@ -96,9 +131,17 @@ test('cover revalidation returns 304 with a strong content ETag', async ({ reque
   expect(again.status()).toBe(304);
 });
 
-test('member opens a chapter, turns the page and resumes from Vault', async ({ page }) => {
+test('test account signs in', async ({ browser }) => {
   needsMember();
-  await signIn(page);
+  const page = await memberPage(browser);
+  const session = (await api(page, 'GET', '/session')).json;
+  expect(session.member.email_verified, 'test account email is verified').toBe(true);
+});
+
+test('member opens a chapter, turns the page and resumes from Vault', async ({ browser }) => {
+  needsBook();
+  needsMember();
+  const page = await memberPage(browser);
   const boot = async () => JSON.parse(await page.locator('#reader-bootstrap').textContent());
   const opened = await page.goto(`${BASE}/${LOCALE}/read/${edition.edition_id}/`);
   expect(opened.status()).toBe(200);
@@ -131,9 +174,10 @@ test('member opens a chapter, turns the page and resumes from Vault', async ({ p
   expect((await page.goto(`${BASE}/${LOCALE}/vault/`)).status()).toBe(200);
 });
 
-test('member saves and unsaves a published edition', async ({ page }) => {
+test('member saves and unsaves a published edition', async ({ browser }) => {
+  needsBook();
   needsMember();
-  await signIn(page);
+  const page = await memberPage(browser);
   const put = await api(page, 'PUT', `/me/saved-items/${edition.edition_id}`, { key: crypto.randomUUID() });
   expect(put.status, JSON.stringify(put.json)).toBe(200);
   expect(put.json.available).toBe(true);
@@ -143,10 +187,10 @@ test('member saves and unsaves a published edition', async ({ page }) => {
   expect(removed.status).toBe(204);
 });
 
-test('member opens a learning track', async ({ page }) => {
+test('member opens a learning track', async ({ browser }) => {
   needsMember();
-  await signIn(page);
-  const tracks = (await api(page, 'GET', `/learning/tracks?locale=${LOCALE}`)).json;
+  const page = await memberPage(browser);
+  const tracks = (await api(page, 'GET', `/learning/tracks`)).json;
   test.skip(!tracks.items.length, 'No published learning track in this territory.');
   const track = tracks.items[0];
   expect(['free', 'included', 'locked']).toContain(track.access);

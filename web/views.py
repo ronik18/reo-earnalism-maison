@@ -52,6 +52,7 @@ def context(request, locale, **extra):
     return {
         "auth_bootstrap":{"mode":extra.get("auth_mode","sign-in"),"return_path":safe_return(request.POST.get("return_to",request.GET.get("return_to")),locale),"email":extra.get("values",{}).get("email","")},
         "india_first_launch": bool(getattr(django_settings, "INDIA_FIRST_LAUNCH_ENABLED", False)),
+        "adult_only_signup": __import__("accounts.enrollment", fromlist=["account_mode"]).account_mode(getattr(request, "territory", None)) == "adult_only",
         "email_link_enabled": django_settings.FEATURES.get("email_link", False),
         "google_oauth_enabled": django_settings.FEATURES.get("google_oauth", False),
         "app_theme": prefs.theme if prefs and prefs.theme in ("light", "dark", "true_black") else "dark",
@@ -266,7 +267,7 @@ def sign_in(request, locale):
                 credentials.pop("password_purpose_version")
                 login_member(request, **credentials, password_consent=consent)
             except DomainError as exc:
-                key = {"verification_required": "email_unverified", "email_verification_required": "email_unverified"}.get(exc.code, "invalid_credentials")
+                key = {"verification_required": "email_unverified", "email_verification_required": "email_unverified", "rate_limited": "sign_in_rate_limited"}.get(exc.code, "invalid_credentials")
                 return page(request, locale, "web/auth.html", status=exc.status, auth_mode="sign-in", error_key=key, values={"email": form.cleaned_data["email"]})
             return HttpResponseRedirect(safe_return(request.POST.get("return_to"), locale))
         return page(request, locale, "web/auth.html", status=400, auth_mode="sign-in", error_key="invalid_input", values=request.POST)
@@ -285,6 +286,7 @@ def sign_in(request, locale):
         'invalid_oauth_state': 'google_retry',
         'account_registration_required': 'account_registration_required',
         'account_permission_required': 'account_permission_required',
+        'adult_declaration_required': 'adult_declaration_required',
     }
     return page(request, locale, "web/auth.html", auth_mode="sign-in", error_key=google_errors.get(request.GET.get('google_error')))
 
@@ -293,11 +295,12 @@ def sign_in(request, locale):
 def sign_up(request, locale):
     from accounts.services import register_member
     from core.api import DomainError
+    from accounts.enrollment import account_mode
     india_first = bool(getattr(django_settings, "INDIA_FIRST_LAUNCH_ENABLED", False))
-    adult_choice = (request.POST if request.method == "POST" else request.GET).get("account_capacity") == "adult"
-    if india_first and not adult_choice:
-        return page(request, locale, "web/auth.html", status=422 if request.method == "POST" else 200,
-                    auth_mode="sign-up", capacity_preflight=True)
+    mode = account_mode(getattr(request, "territory", None))
+    if india_first and mode == "adult_only" and request.method == "POST" and request.POST.get("account_capacity") != "adult":
+        # Refuse before reading or echoing any account details.
+        return page(request, locale, "web/auth.html", status=422, auth_mode="sign-up", error_key="adult_declaration_required")
     if request.method == "POST":
         form = LoginForm(request.POST)
         if not form.is_valid():
@@ -312,9 +315,9 @@ def sign_up(request, locale):
                 "account_capacity": request.POST.get("account_capacity"),
                 "account_notice_version": request.POST.get("account_notice_version"),
                 "account_terms_consent": request.POST.get("account_terms_consent") == "on",
-            } if india_first else {}))
+            } if india_first else {}), territory=getattr(request, "territory", None))
         except DomainError as exc:
-            return page(request, locale, "web/auth.html", status=exc.status, auth_mode="sign-up", error_key=exc.code if exc.code == "account_permission_required" else "invalid_input", values={"email":form.cleaned_data["email"], "display_name":request.POST.get("display_name", "")})
+            return page(request, locale, "web/auth.html", status=exc.status, auth_mode="sign-up", error_key=exc.code if exc.code in ("account_permission_required", "adult_declaration_required") else "invalid_input", values={"email":form.cleaned_data["email"], "display_name":request.POST.get("display_name", "")})
         return page(request, locale, "web/auth.html", auth_mode="sign-up", notice_key="registration_sent")
     return page(request, locale, "web/auth.html", auth_mode="sign-up")
 

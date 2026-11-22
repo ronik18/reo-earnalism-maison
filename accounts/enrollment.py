@@ -18,12 +18,20 @@ def enabled():
     return getattr(settings,'INDIA_FIRST_LAUNCH_ENABLED',False) is True
 
 
-def adult_declaration(data):
+def account_mode(territory):
+    """'open' asks no age question; anything unconfigured fails closed to 'adult_only'."""
+    return getattr(settings,'MAISON_ACCOUNT_MODES',{}).get(territory,'adult_only')
+
+
+def adult_declaration(data,territory=None):
+    """Account notice consent everywhere; an 18+ declaration only in adult_only territories."""
     if not enabled():return None
-    if (data.get('account_capacity')!='adult'
-        or data.get('account_notice_version')!=ACCOUNT_NOTICE_VERSION
-        or data.get('account_terms_consent') is not True):
-        raise DomainError('account_permission_required','Confirm that you are18 or older and agree to the account notice. A parent or legal guardian can create a younger reader’s account.',422)
+    if data.get('account_notice_version')!=ACCOUNT_NOTICE_VERSION or data.get('account_terms_consent') is not True:
+        raise DomainError('account_permission_required','Agree to the service terms and account notice to continue.',422)
+    if account_mode(territory)=='open':
+        return {'account_capacity':'not_asked','account_notice_version':ACCOUNT_NOTICE_VERSION,'account_terms_consent':True}
+    if data.get('account_capacity')!='adult':
+        raise DomainError('adult_declaration_required','Confirm that you are 18 or older to create an account here.',422)
     return {'account_capacity':'adult','account_notice_version':ACCOUNT_NOTICE_VERSION,'account_terms_consent':True}
 
 

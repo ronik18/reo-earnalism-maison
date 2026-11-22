@@ -97,9 +97,9 @@ def _create_action(user,purpose,return_path='/',locale='en'):
     return action
 
 
-def register_member(email,password,display_name='',locale='en',return_path='/',*,password_consent=None,_return_created_user=False,account_capacity=None,account_notice_version=None,account_terms_consent=None,_guardian_account=False):
+def register_member(email,password,display_name='',locale='en',return_path='/',*,password_consent=None,_return_created_user=False,account_capacity=None,account_notice_version=None,account_terms_consent=None,_guardian_account=False,territory=None):
     from .enrollment import adult_declaration,record_adult
-    declaration=None if _guardian_account else adult_declaration({'account_capacity':account_capacity,'account_notice_version':account_notice_version,'account_terms_consent':account_terms_consent})
+    declaration=None if _guardian_account else adult_declaration({'account_capacity':account_capacity,'account_notice_version':account_notice_version,'account_terms_consent':account_terms_consent},territory)
     email=_email(email);_password(password);check_rate('registration',email,3,3600)
     if locale not in ('en','bn') or not isinstance(display_name,str) or len(display_name)>100:
         raise DomainError('validation_error','Invalid profile fields.',422)

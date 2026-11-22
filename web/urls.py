@@ -1,9 +1,13 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views, legal
+from .legacy_redirects import legacy_page, legacy_title
 
 app_name = "web"
 urlpatterns = [
     path("", views.root, name="root"),
+    re_path(r"^(?P<name>privacy|terms|contact|copyright|library|pricing|about|micro-story)/?$", legacy_page),
+    re_path(r"^(?P<name>journal)(?P<rest>/.*)?$", legacy_page),
+    re_path(r"^(?:book|reader)/(?P<slug>[A-Za-z0-9-]+)/?$", legacy_title),
     path("maison-sw.js",views.service_worker,name="service-worker"),
     path("<str:locale>/offline/",views.offline_shell,name="offline-shell"),
     path("auth/verify/", views.verify_landing, name="verify-landing"),

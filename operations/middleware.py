@@ -134,12 +134,12 @@ class OriginMiddleware:
             # Availability is based on trusted edge location, never citizenship.
             # Reject before session/authentication or request-body collection.
             if request.path.startswith('/api/'):
-                response=JsonResponse({'type':'about:blank','title':'India-first availability','status':403,
-                    'code':'service_region_unavailable','detail':'Earnalism account and reading services are currently available from India.',
+                response=JsonResponse({'type':'about:blank','title':'Not yet available','status':403,
+                    'code':'service_region_unavailable','detail':'Earnalism is not yet available in your country.',
                     'request_id':request.request_id,'retryable':False},status=403,content_type='application/problem+json')
             else:
                 from django.shortcuts import render
-                response=render(request,'web/india_unavailable.html',status=403)
+                response=render(request,'web/region_unavailable.html',status=403)
             response['Cache-Control']='private, no-store'
             return response
         return self.get_response(request)

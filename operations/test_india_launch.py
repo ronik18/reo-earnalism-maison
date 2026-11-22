@@ -43,7 +43,7 @@ class IndiaFirstServiceTests(SimpleTestCase):
         with patch('django.shortcuts.render',return_value=HttpResponse('India-first',status=403)) as render:
             handler=Mock();response=OriginMiddleware(handler)(self.request('/en/sign-up/',country='GB'))
         self.assertEqual(response.status_code,403);self.assertNotIn('Location',response)
-        self.assertEqual(render.call_args.args[1],'web/india_unavailable.html');handler.assert_not_called()
+        self.assertEqual(render.call_args.args[1],'web/region_unavailable.html');handler.assert_not_called()
 
     @override_settings(INDIA_FIRST_LAUNCH_ENABLED=False)
     def test_historical_local_fixture_scope_is_not_silently_rewritten(self):

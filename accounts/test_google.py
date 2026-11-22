@@ -273,6 +273,10 @@ class GoogleRecoveryDestinationTests(SimpleTestCase):
             for private in ['private-recovery-nonce','private-recovery-state','private-recovery-code','Private provider details']:
                 self.assertNotIn(private,r['Location'])
 
+    def test_missing_adult_declaration_is_reported_as_such(self):
+        r=self.response('/en/vault/','adult_declaration_required')
+        self.assertEqual(parse_qs(urlsplit(r['Location']).query)['google_error'],['adult_declaration_required'])
+
     def test_unsafe_destinations_fall_back_without_publicizing_private_error(self):
         for destination in ['https://outside.example/reader/','//outside.example/reader/','/%2foutside.example/','/api/v1/me/profile','/en/reader/\r\nLocation: https://outside.example/']:
             r=self.response(destination,'private_provider_payload')

@@ -17,27 +17,23 @@ class Controls(HTMLParser):
         if tag in {'input','form','select','textarea'}:self.controls.append((tag,dict(attrs)))
 
 
-@override_settings(INDIA_FIRST_LAUNCH_ENABLED=True,GUARDIAN_AUTHORIZATION_ENABLED=True)
+@override_settings(INDIA_FIRST_LAUNCH_ENABLED=True,GUARDIAN_AUTHORIZATION_ENABLED=True,MAISON_ACCOUNT_MODES={"IN":"adult_only"})
 class IndiaFirstScreensTests(TestCase):
     def test_initial_choice_collects_no_child_details_and_no_google_identity(self):
         for path in ['/en/sign-up/','/bn/sign-up/']:
             response=self.client.get(path,follow=True);self.assertEqual(response.status_code,200)
             source=response.content.decode();controls=Controls(source).controls
-            self.assertFalse(controls,controls)
-            self.assertContains(response,'data-account-preflight')
-            self.assertContains(response,'Help a younger reader')
-            self.assertContains(response,'Do not enter your name, email or password yet')
-            self.assertNotContains(response,'auth-help-island')
-            self.assertNotContains(response,'auth-bootstrap')
-            self.assertNotContains(response,'/api/v1/auth/google')
-            self.assertContains(response,'href="/en/guardian/"')
+            # No separate age-choice screen: the adult-only declaration sits on the signup form.
+            self.assertNotContains(response,'data-account-preflight')
+            self.assertNotContains(response,'Help a younger reader')
+            self.assertContains(response,'name="account_capacity" value="adult"')
+            self.assertContains(response,'I am 18 or older')
             self.assertEqual(response['Content-Language'],'en')
 
     def test_forged_underage_post_does_not_create_or_echo_account_data(self):
         data={'account_capacity':'under18','email':'never-collected-ui@example.test','display_name':'Do not echo me','password':'Never-UI-Collected-2026'}
         response=self.client.post('/en/sign-up/',data)
         self.assertEqual(response.status_code,422)
-        self.assertContains(response,'data-account-preflight',status_code=422)
         self.assertNotContains(response,data['email'],status_code=422)
         self.assertNotContains(response,data['display_name'],status_code=422)
         self.assertFalse(User.objects.filter(email=data['email']).exists())
@@ -55,7 +51,7 @@ class IndiaFirstScreensTests(TestCase):
         self.assertContains(response,'Render and Neon in Singapore')
         self.assertContains(response,'consent to the necessary account and overseas processing')
         self.assertContains(response,'name="return_path" value="/en/learn/"')
-        self.assertContains(response,'Helping someone under 18?')
+        self.assertNotContains(response,'Helping someone under 18?')
         self.assertNotContains(response,'data-account-preflight')
 
     @override_settings(FEATURES={**settings.FEATURES,'google_oauth':True})
@@ -72,9 +68,8 @@ class IndiaFirstScreensTests(TestCase):
         self.assertNotIn('&topic=',match[1])
         self.assertIn('%26topic%3Dstreams%23lesson',match[1])
         choice=self.client.get(signup)
-        adult=re.search(r'href="([^"]*account_capacity=adult[^"]*)"',choice.content.decode())
-        self.assertIsNotNone(adult)
-        self.assertEqual(parse_qs(urlsplit(html.unescape(adult[1])).query)['return_to'],[expected])
+        self.assertContains(choice,'name="account_capacity" value="adult"')
+        self.assertContains(choice,'name="return_to" value="'+html.escape(expected)+'"')
         unsafe=self.client.get('/en/sign-in/',{'google_error':'account_registration_required','return_to':'https://outside.example.test/collect'})
         link=re.search(r'href="([^"]+)">Create a new account</a>',unsafe.content.decode())[1]
         self.assertEqual(parse_qs(urlsplit(html.unescape(link)).query),{'return_to':['/en/']})
@@ -119,20 +114,19 @@ class IndiaFirstScreensTests(TestCase):
     def test_india_legal_copy_is_public_free_scope_without_worldwide_or_custody_claim(self):
         for path in ['/en/privacy/','/en/terms/','/en/contact/']:
             response=self.client.get(path);self.assertEqual(response.status_code,200)
-            self.assertContains(response,'India-first free access')
+            self.assertContains(response,'Free access · Updated 22 November 2026')
             self.assertContains(response,'drafts remain private')
             self.assertNotContains(response,'Current accounts belong to authorized adult staff/testers')
             self.assertNotContains(response,'ronik18@gmail.com')
         response=self.client.get('/en/terms/')
-        self.assertContains(response,'currently available from India')
-        self.assertContains(response,'not independently verified age or custody')
+        self.assertContains(response,'currently available in India')
         self.assertNotContains(response,'This is the Earnalism qualification service')
-        self.assertContains(self.client.get('/en/privacy/'),'specific current authority')
+        self.assertContains(self.client.get('/en/privacy/'),'Readers of every age')
 
     def test_foreign_service_state_has_only_help_links_no_account_collection(self):
-        source=render_to_string('web/india_unavailable.html')
+        source=render_to_string('web/region_unavailable.html')
         self.assertFalse(Controls(source).controls)
-        self.assertIn('currently available from India',source)
+        self.assertIn('not yet available in your country',source)
         self.assertIn('mailto:sales@reoenterprise.org',source)
         self.assertIn('href="/en/privacy/"',source)
         self.assertNotIn('/sign-up/',source)
