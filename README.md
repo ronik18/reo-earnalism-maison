@@ -63,3 +63,17 @@ MAISON_ENV_FILE=.env.local MAISON_DATABASE_ROLE=direct .venv/bin/python manage.p
 ```
 
 Pooled startup packets intentionally contain no timeout options. Database-scoped role defaults retain5s statement,2s lock and10s idle-transaction limits. Full certificate/hostname verification uses the platform CA bundle; `DATABASE_SSL_ROOT_CERT` may explicitly select a trusted bundle. Never disable TLS verification to fix a connection error.
+
+## Production regression suite
+
+`e2e/production/` is the browser regression suite for the live member journey. Run it after every production deploy:
+
+```sh
+npm ci
+npx playwright install chromium
+MAISON_E2E_EMAIL=<dedicated test account> MAISON_E2E_PASSWORD=<its password> npm run e2e:production
+```
+
+It covers liveness, the Home and title page, cover revalidation (`ETag` → `304`), opening a chapter and turning to the next one, progress reaching Vault "Continue", save/unsave and a learning track. Use a dedicated, verified test account without paid access, never a customer account; the suite never buys anything and removes its saved item.
+
+Production serves India only. Outside India only liveness runs and every other test is reported as skipped with that reason. `MAISON_E2E_BASE_URL` points the suite at another deployment, such as a local `runserver` with `seed_local_pilot` (cover revalidation is skipped there because covers are only edge-cacheable behind the HTTPS public origin). The HTML report is written to `.local/e2e-report`.
