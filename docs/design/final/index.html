@@ -182,8 +182,8 @@ section{position:relative}
 
 .quote{position:relative;min-height:260px;display:grid;align-items:center;overflow:hidden;color:var(--ivory)}
 .quote img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 60%}
-.quote::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(26,14,18,.15),rgba(26,14,18,.75))}
-.quote .wrap{position:relative;text-align:right}
+.quote::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(44,15,23,.08),rgba(44,15,23,.78) 72%)}
+.quote img{z-index:0}.quote::before{z-index:1}.quote .wrap{position:relative;z-index:2;text-align:right}
 .quote p{font:italic 500 clamp(1.6rem,3vw,2.3rem)/1.25 var(--display);margin:0 0 0 auto;max-width:28ch}
 
 footer.site{background:var(--night);color:var(--night-soft);padding:64px 0 28px;font-size:.9375rem}
@@ -353,6 +353,27 @@ mark.hl{background:rgba(216,178,94,.38);color:inherit;padding:0 .1em;border-radi
 .review a{color:var(--night-ink);text-decoration:none;font-size:.8125rem;font-weight:600;padding:0 14px;min-height:40px;display:inline-flex;align-items:center;border-radius:999px;white-space:nowrap}
 .review a[aria-current=true]{background:var(--gold);color:var(--burgundy-deep)}
 @media (max-width:900px){.review{top:92px;bottom:auto}}
+
+/* ---------- alpana / kantha texture, applied on every screen ---------- */
+body{background:url(art/alpana-tile.svg),var(--ivory)}
+.hero{background:radial-gradient(70% 90% at 100% 0%,rgba(243,232,212,.92) 0%,transparent 60%),url(art/alpana-tile.svg),var(--ivory);overflow:hidden}
+.hero::before{content:"";position:absolute;width:620px;height:620px;left:-260px;bottom:-260px;background:url(art/alpana-halo.svg) center/contain no-repeat;opacity:.16;pointer-events:none}
+.hero .wrap{position:relative;z-index:1}
+.parchment{background:url(art/alpana-tile.svg),var(--parchment)}
+.dark{background:url(art/alpana-tile-dark.svg),linear-gradient(160deg,var(--burgundy) 0%,var(--burgundy-deep) 100%);overflow:hidden}
+.dark::before{content:"";position:absolute;width:680px;height:680px;right:-240px;top:-240px;background:url(art/alpana-halo.svg) center/contain no-repeat;opacity:.22;pointer-events:none}
+.dark .wrap{position:relative;z-index:1}
+.member-hero{background:radial-gradient(60% 80% at 0% 0%,rgba(243,232,212,.92),transparent 70%),url(art/alpana-tile.svg),var(--ivory)}
+.title-hero{background:url(art/alpana-tile.svg),linear-gradient(180deg,var(--parchment),var(--ivory))}
+.page-head{background:url(art/alpana-tile.svg),var(--parchment)}
+.continue .left{background:url(art/alpana-tile-dark.svg),linear-gradient(160deg,var(--burgundy),var(--burgundy-deep))}
+.night{background:url(art/alpana-tile-dark.svg),radial-gradient(70% 60% at 50% 0%,#3A1A24,var(--night) 70%)}
+footer.site{background:url(art/alpana-tile-dark.svg),var(--night)}
+.reader{background-image:url(art/alpana-tile.svg)}
+.reader[data-theme=ink]{background-image:url(art/alpana-tile-dark.svg)}
+.rtext{background:var(--rbg);margin-top:32px;margin-bottom:32px;border:1px solid var(--rline);border-radius:4px;box-shadow:0 20px 40px -30px rgba(36,22,26,.45)}
+.book,.way,.today,.facts,.coming{background-color:var(--ivory)}
+@media (max-width:640px){.rtext{margin:0;border:0;border-radius:0}}
 </style>
 </head>
 <body>
@@ -438,9 +459,9 @@ mark.hl{background:rgba(216,178,94,.38);color:inherit;padding:0 .1em;border-radi
         <p class="muted" style="margin:0">A spare moment can become a doorway. Pick up a story on the page, hear it told in a quiet voice, or learn one idea at a time — and carry your place from one to the next.</p>
       </div>
       <div class="ways">
-        <a class="way" href="#title"><div class="pic"><img src="art/read-open-book.jpg" alt="" loading="lazy"><span class="mark"><svg aria-hidden="true"><use href="#i-book"/></svg></span></div><div class="body"><h3 class="h3">Read</h3><p>Pages that turn like paper, with highlights, notes and bookmarks that follow you.</p><span class="link">Open a classic <svg width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></span></div></a>
-        <a class="way" href="#listen"><div class="pic"><img src="../../../static/maison/art/hero.png" alt="" loading="lazy" style="object-position:22% 30%"><span class="mark"><svg aria-hidden="true"><use href="#i-head"/></svg></span></div><div class="body"><h3 class="h3">Listen</h3><p>Stories told aloud, chapter by chapter, with speed control and a sleep timer.</p><span class="link">Enter the listening room <svg width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></span></div></a>
-        <a class="way" href="#explore"><div class="pic"><img src="../../../static/maison/art/river.png" alt="" loading="lazy"><span class="mark"><svg aria-hidden="true"><use href="#i-play"/></svg></span></div><div class="body"><h3 class="h3">Learn</h3><p>Knowledge series of short video lessons with notes, subtitles and a quick check.</p><span class="link">See the series <svg width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></span></div></a>
+        <a class="way" href="#title"><div class="pic"><img src="art/read-desk.jpg" alt="" loading="lazy"><span class="mark"><svg aria-hidden="true"><use href="#i-book"/></svg></span></div><div class="body"><h3 class="h3">Read</h3><p>Pages that turn like paper, with highlights, notes and bookmarks that follow you.</p><span class="link">Open a classic <svg width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></span></div></a>
+        <a class="way" href="#listen"><div class="pic"><img src="art/listening-room.jpg" alt="" loading="lazy" style="object-position:40% 60%"><span class="mark"><svg aria-hidden="true"><use href="#i-head"/></svg></span></div><div class="body"><h3 class="h3">Listen</h3><p>Stories told aloud, chapter by chapter, with speed control and a sleep timer.</p><span class="link">Enter the listening room <svg width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></span></div></a>
+        <a class="way" href="#explore"><div class="pic"><img src="art/learn-desk.jpg" alt="" loading="lazy" style="object-position:70% 60%"><span class="mark"><svg aria-hidden="true"><use href="#i-play"/></svg></span></div><div class="body"><h3 class="h3">Learn</h3><p>Knowledge series of short video lessons with notes, subtitles and a quick check.</p><span class="link">See the series <svg width="18" height="18" aria-hidden="true"><use href="#i-arrow"/></svg></span></div></a>
       </div>
     </div>
   </section>
@@ -466,7 +487,7 @@ mark.hl{background:rgba(216,178,94,.38);color:inherit;padding:0 .1em;border-radi
 
   <section class="band parchment" aria-labelledby="h-listen">
     <div class="wrap listen">
-      <figure class="frame" style="margin:0"><img src="../../../static/maison/art/river.png" alt="Illustration: a wooden boat resting on a still river at sunset" loading="lazy"></figure>
+      <figure class="frame" style="margin:0"><img src="art/listening-room.jpg" alt="Headphones resting on an open book beside a lamp on a wooden desk" loading="lazy"></figure>
       <div>
         <p class="kicker">The listening room</p>
         <h2 class="h2" id="h-listen">Some stories stay with you in voice.</h2>
@@ -508,12 +529,12 @@ mark.hl{background:rgba(216,178,94,.38);color:inherit;padding:0 .1em;border-radi
         </ul>
         <div style="display:flex;flex-wrap:wrap;gap:12px"><a class="btn btn-gold" href="#signup">Start reading free</a><a class="btn btn-line" href="#explore">Explore the library first</a></div>
       </div>
-      <div class="gilt"><img src="../../../static/maison/art/gold-pages.jpg" alt="" loading="lazy"></div>
+      <div class="gilt"><img src="art/bookshelf.jpg" alt="" loading="lazy"></div>
     </div>
   </section>
 
   <section class="quote" aria-label="A reflection from the reading room">
-    <img src="../../../static/maison/art/river.png" alt="" loading="lazy">
+    <img src="art/river-quote.jpg" alt="">
     <div class="wrap"><p>“A good story has a gentle way of slowing a busy day.”</p></div>
   </section>
 </div>
@@ -633,7 +654,7 @@ mark.hl{background:rgba(216,178,94,.38);color:inherit;padding:0 .1em;border-radi
         </div>
         <div class="right"><img src="../../../static/maison/art/hero.png" alt="" ></div>
       </div>
-      <a class="today" href="#explore"><img src="../../../static/maison/art/river.png" alt=""><div><span class="k">Next on your shelf</span><h3 lang="bn" style="font-family:var(--bn);font-size:1.3rem">বিচারক</h3><span class="muted" style="font-size:.9375rem">Rabindranath Tagore · Bengali · Read</span></div><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="today" href="#explore"><img src="art/bookshelf.jpg" alt=""><div><span class="k">Next on your shelf</span><h3 lang="bn" style="font-family:var(--bn);font-size:1.3rem">বিচারক</h3><span class="muted" style="font-size:.9375rem">Rabindranath Tagore · Bengali · Read</span></div><svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
     </div>
   </section>
   <section class="band parchment" aria-labelledby="h-vault" style="padding-top:72px">
@@ -682,7 +703,7 @@ mark.hl{background:rgba(216,178,94,.38);color:inherit;padding:0 .1em;border-radi
 <div class="screen night" id="screen-listen" data-focus="1" hidden>
   <div class="rbar"><a class="ibtn" href="#member" aria-label="Back"><svg aria-hidden="true"><use href="#i-back"/></svg></a><span class="t">The listening room</span><a class="switch" href="#read" style="border-color:var(--night-line);color:var(--night-ink)"><svg aria-hidden="true"><use href="#i-book"/></svg>Read</a></div>
   <div class="player">
-    <figure class="frame" style="margin:0"><img src="../../../static/maison/art/river.png" alt="Cover art: a boat on a river at sunset"></figure>
+    <figure class="frame" style="margin:0"><img src="art/listening-room.jpg" alt="Headphones resting on an open book on a wooden desk"></figure>
     <div>
       <p class="kicker">Chapter 2 · The long winter</p>
       <h2>The Selfish Giant</h2>
