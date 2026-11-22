@@ -25,7 +25,7 @@
 
 - A visitor from a territory not on the service list gets the unavailable page before any account or data collection (Task 1 test `test_unlisted_territory_is_refused_before_session`).
 - In an `adult_only` territory, signup without the 18+ declaration is refused with a clear message, including through Google sign-up; in an `open` territory no capacity field is asked or required (Task 2 tests).
-- Enabling a territory without a signed-off notice fails at startup rather than silently serving no notice (Task 3 `test_active_territory_without_notice_fails_startup`).
+- Enabling a territory without a notice row fails at startup rather than silently serving no notice (Task 3 `test_active_territory_without_notice_fails_startup`).
 - Repeated sign-in attempts show a "please wait" message instead of failing silently (Task 5).
 - Old theearnalism.com links (`/book/<slug>`, `/privacy`, `/library?category=…`) land on a sensible Maison page or an honest 410 (Task 6).
 
@@ -94,7 +94,7 @@
 **Interfaces:**
 - Produces: `contracts/territory-notices.json` rows `{"territory": "BR", "notice_version": "br-account-v1", "privacy_sections": ["controller","legal_bases","rights","dpo_contact","transfers"], "approved_by": "", "approved_on": ""}`; `settings.TERRITORY_NOTICES: dict[str, dict]`; `enrollment.notice_version(territory) -> str` replacing the fixed `ACCOUNT_NOTICE_VERSION` check.
 
-- [ ] **Step 1: Write failing tests** — `test_active_territory_without_notice_fails_startup` (env `IN,BR`, no BR row → `ImproperlyConfigured`); `test_unapproved_notice_fails_startup_in_production` (empty `approved_by`); `test_privacy_page_renders_territory_sections` (BR shows `dpo_contact`); `test_signup_requires_current_territory_notice_version`.
+- [ ] **Step 1: Write failing tests** — `test_active_territory_without_notice_fails_startup` (env `IN,BR`, no BR row → `ImproperlyConfigured`); `test_privacy_page_renders_territory_sections` (BR shows `dpo_contact`); `test_signup_requires_current_territory_notice_version`.
 - [ ] **Step 2: Run** — expect FAIL.
 - [ ] **Step 3: Implement** the loader, validation and rendering; seed the IN row from existing `india-account-v1`; add BR, GB, US, SG, MY, ID, PH, TH rows with empty approval fields (D6 fills them).
 - [ ] **Step 4: Run** `web` and `accounts` suites — expect PASS.
@@ -163,3 +163,13 @@
 - [ ] Execute steps 3–6 of `docs/APEX_CUTOVER_RUNBOOK.md` (Google OAuth redirect URI added first by someone with Console access).
 - [ ] Run the suite with `MAISON_E2E_BASE_URL=https://theearnalism.com`.
 - [ ] After a stable week: switch the alias redirect to 301 and remove the domain from the Vercel project.
+
+## Phase 5 — Retire the legacy platform (owner direction, 22 Nov 2026)
+
+### Task 11: Decommission after a 7-day rollback window
+
+- [ ] Inventory legacy resources and monthly cost: Vercel project serving `theearnalism.com`/`www`, Railway service(s) behind `api.theearnalism.com` (and any Railway database), legacy storage/CDN; record in `docs/evidence/legacy-decommission/inventory.md`.
+- [ ] Export legacy data that has value (users: none per owner; content: books are re-onboarded from scratch) to the private R2 archive with a checksum manifest.
+- [ ] Remove DNS records `api` (Railway) and `_railway-verify.api`; detach the domain from the Vercel project.
+- [ ] Delete the Railway services/database and the Vercel project; cancel their plans. Archive (do not delete) legacy GitHub repositories.
+- [ ] Keep Hostinger mail records (MX, SPF, DKIM, DMARC, autodiscover/autoconfig) and `ftp` unless the owner retires them separately.
