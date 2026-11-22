@@ -349,6 +349,7 @@ STRINGS = {
     "service_unavailable": ("This service is temporarily unavailable. Your task has not been confirmed.", "সেবাটি সাময়িকভাবে পাওয়া যাচ্ছে না। আপনার কাজ সম্পূর্ণ হয়েছে বলে নিশ্চিত করা যায়নি।"),
     "invalid_input": ("Check the information and try again.", "তথ্য ঠিক করে আবার চেষ্টা করুন।"),
     "invalid_credentials": ("The email or password could not be verified.", "ইমেল বা পাসওয়ার্ড যাচাই করা যায়নি।"),
+    "sign_in_rate_limited": ("Too many sign-in attempts. Wait a few minutes and try again.", "Too many sign-in attempts. Wait a few minutes and try again."),
     "email_unverified": ("Verify your email before signing in.", "প্রবেশের আগে ইমেল যাচাই করুন।"),
     "token_expired": ("This link is expired or already used. Request a new link.", "লিংকের মেয়াদ শেষ অথবা ব্যবহার হয়ে গেছে। নতুন লিংক চান।"),
     "error": ("We could not complete that action.", "কাজটি সম্পূর্ণ করা যায়নি।"),

@@ -267,7 +267,7 @@ def sign_in(request, locale):
                 credentials.pop("password_purpose_version")
                 login_member(request, **credentials, password_consent=consent)
             except DomainError as exc:
-                key = {"verification_required": "email_unverified", "email_verification_required": "email_unverified"}.get(exc.code, "invalid_credentials")
+                key = {"verification_required": "email_unverified", "email_verification_required": "email_unverified", "rate_limited": "sign_in_rate_limited"}.get(exc.code, "invalid_credentials")
                 return page(request, locale, "web/auth.html", status=exc.status, auth_mode="sign-in", error_key=key, values={"email": form.cleaned_data["email"]})
             return HttpResponseRedirect(safe_return(request.POST.get("return_to"), locale))
         return page(request, locale, "web/auth.html", status=400, auth_mode="sign-in", error_key="invalid_input", values=request.POST)

@@ -32,6 +32,17 @@ def _policy_path(request):
     return '/api/v1/auth/'+aliases[match[1]] if match and request.method=='POST' else request.path
 
 
+FORM_MODES={'sign-in':'sign-in','sign-up':'sign-up','password-reset':'reset','email-sign-in':'email-link','independent-account':'independent'}
+
+
+def _web_form_problem(error,request):
+    """Server-rendered auth forms get a readable page, not raw problem JSON."""
+    match=re.fullmatch(r'/(?:en|bn)/(sign-in|sign-up|password-reset|email-sign-in|independent-account)/',request.path)
+    if not match or error.code!='rate_limited':return None
+    from web.views import page,error_locale
+    return page(request,error_locale(request),'web/auth.html',status=error.status,auth_mode=FORM_MODES[match[1]],error_key='sign_in_rate_limited')
+
+
 def _policy(request):
     for expression,method,name,policy in _operations():
         if method==request.method and expression.fullmatch(_policy_path(request)):return name,policy
@@ -88,7 +99,7 @@ class MemberRateLimitMiddleware:
                 from accounts.services import check_rate
                 metadata=check_rate('api_'+name,identifier,policy['requests'],policy['window_seconds'])
         except DomainError as error:
-            response=problem(error,request);metadata=getattr(error,'rate_limit',None)
+            response=_web_form_problem(error,request) or problem(error,request);metadata=getattr(error,'rate_limit',None)
         except DatabaseError:
             return problem(DomainError('temporarily_unavailable','Please retry this operation.',503),request)
         else:response=self.get_response(request)
