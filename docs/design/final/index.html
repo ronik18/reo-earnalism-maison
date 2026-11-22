@@ -355,25 +355,58 @@ mark.hl{background:rgba(216,178,94,.38);color:inherit;padding:0 .1em;border-radi
 @media (max-width:900px){.review{top:92px;bottom:auto}}
 
 /* ---------- alpana / kantha texture, applied on every screen ---------- */
-body{background:url(art/alpana-tile.svg),var(--ivory)}
-.hero{background:radial-gradient(70% 90% at 100% 0%,rgba(243,232,212,.92) 0%,transparent 60%),url(art/alpana-tile.svg),var(--ivory);overflow:hidden}
+body{background:url(art/alpana-tile.svg),url(art/handmade-paper.png),var(--ivory)}
+.hero{background:radial-gradient(70% 90% at 100% 0%,rgba(243,232,212,.92) 0%,transparent 60%),url(art/alpana-tile.svg),url(art/handmade-paper.png),var(--ivory);overflow:hidden}
 .hero::before{content:"";position:absolute;width:620px;height:620px;left:-260px;bottom:-260px;background:url(art/alpana-halo.svg) center/contain no-repeat;opacity:.16;pointer-events:none}
 .hero .wrap{position:relative;z-index:1}
-.parchment{background:url(art/alpana-tile.svg),var(--parchment)}
-.dark{background:url(art/alpana-tile-dark.svg),linear-gradient(160deg,var(--burgundy) 0%,var(--burgundy-deep) 100%);overflow:hidden}
+.parchment{background:url(art/alpana-tile.svg),url(art/handmade-paper.png),var(--parchment)}
+.dark{background:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png),linear-gradient(160deg,var(--burgundy) 0%,var(--burgundy-deep) 100%);overflow:hidden}
 .dark::before{content:"";position:absolute;width:680px;height:680px;right:-240px;top:-240px;background:url(art/alpana-halo.svg) center/contain no-repeat;opacity:.22;pointer-events:none}
 .dark .wrap{position:relative;z-index:1}
-.member-hero{background:radial-gradient(60% 80% at 0% 0%,rgba(243,232,212,.92),transparent 70%),url(art/alpana-tile.svg),var(--ivory)}
-.title-hero{background:url(art/alpana-tile.svg),linear-gradient(180deg,var(--parchment),var(--ivory))}
-.page-head{background:url(art/alpana-tile.svg),var(--parchment)}
-.continue .left{background:url(art/alpana-tile-dark.svg),linear-gradient(160deg,var(--burgundy),var(--burgundy-deep))}
-.night{background:url(art/alpana-tile-dark.svg),radial-gradient(70% 60% at 50% 0%,#3A1A24,var(--night) 70%)}
-footer.site{background:url(art/alpana-tile-dark.svg),var(--night)}
-.reader{background-image:url(art/alpana-tile.svg)}
-.reader[data-theme=ink]{background-image:url(art/alpana-tile-dark.svg)}
+.member-hero{background:radial-gradient(60% 80% at 0% 0%,rgba(243,232,212,.92),transparent 70%),url(art/alpana-tile.svg),url(art/handmade-paper.png),var(--ivory)}
+.title-hero{background:url(art/alpana-tile.svg),url(art/handmade-paper.png),linear-gradient(180deg,var(--parchment),var(--ivory))}
+.page-head{background:url(art/alpana-tile.svg),url(art/handmade-paper.png),var(--parchment)}
+.continue .left{background:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png),linear-gradient(160deg,var(--burgundy),var(--burgundy-deep))}
+.night{background:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png),radial-gradient(70% 60% at 50% 0%,#3A1A24,var(--night) 70%)}
+footer.site{background:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png),var(--night)}
+.reader{background-image:url(art/alpana-tile.svg),url(art/handmade-paper.png)}
+.reader[data-theme=ink]{background-image:url(art/alpana-tile-dark.svg),url(art/handmade-paper.png)}
 .rtext{background:var(--rbg);margin-top:32px;margin-bottom:32px;border:1px solid var(--rline);border-radius:4px;box-shadow:0 20px 40px -30px rgba(36,22,26,.45)}
 .book,.way,.today,.facts,.coming{background-color:var(--ivory)}
 @media (max-width:640px){.rtext{margin:0;border:0;border-radius:0}}
+
+/* ---------- 3D paper cards ---------- */
+.way,.book,.today,.facts,.coming,.format,.panel,.consent{
+  background:url(art/handmade-paper.png),#FFFDF8;
+  border:1px solid rgba(184,145,63,.28);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 2px rgba(36,22,26,.08),0 10px 20px -10px rgba(36,22,26,.28),0 28px 50px -28px rgba(36,22,26,.38);
+  transform:perspective(1000px) translateZ(0);transition:transform 260ms ease,box-shadow 260ms ease}
+.way:hover,.book:hover,.today:hover{transform:perspective(1000px) translateY(-6px) rotateX(2deg);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 4px rgba(36,22,26,.1),0 18px 30px -12px rgba(36,22,26,.32),0 44px 70px -30px rgba(36,22,26,.45)}
+.continue,.frame,.gilt,.player .frame{box-shadow:0 2px 4px rgba(36,22,26,.12),0 18px 34px -14px rgba(36,22,26,.45),0 50px 80px -40px rgba(36,22,26,.55)}
+.cover{box-shadow:inset 6px 0 0 rgba(0,0,0,.18),inset -1px 0 0 rgba(255,255,255,.25),3px 4px 0 -1px #EDE2CC,6px 8px 0 -2px #E2D3B6,14px 18px 28px -14px rgba(36,22,26,.6)}
+.steps li{background:url(art/handmade-paper.png),#FFFDF8;border:1px solid rgba(184,145,63,.28);border-top:2px solid var(--gold-deep);padding:20px;border-radius:6px;box-shadow:inset 0 1px 0 #fff,0 10px 20px -10px rgba(36,22,26,.25),0 26px 46px -28px rgba(36,22,26,.32)}
+.rtext{background:url(art/handmade-paper.png),var(--rbg)}
+@media (prefers-reduced-motion:reduce){.way:hover,.book:hover,.today:hover{transform:none}}
+
+/* ---------- pill menu (dark capsule, gold active) ---------- */
+.nav{background:linear-gradient(180deg,#2A1820,#1A0E12);border-radius:999px;padding:5px;gap:2px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 24px -12px rgba(26,14,18,.6)}
+.nav a{color:var(--night-ink);border-radius:999px;padding:0 18px;font-size:.9375rem;font-weight:600}
+.nav a::after{display:none!important}
+.nav a:hover{background:rgba(255,255,255,.08)}
+.nav a[aria-current=page]{background:linear-gradient(180deg,#E8C676,var(--gold));color:var(--burgundy-deep);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 6px rgba(0,0,0,.35)}
+.tabbar{display:none!important}
+@media (max-width:900px){
+  body{padding-bottom:0}
+  .top .wrap{flex-wrap:wrap;row-gap:10px;padding-bottom:12px}
+  .nav{display:flex;order:3;width:100%;overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav a{flex:1 1 auto;justify-content:center;padding:0 8px;font-size:.875rem}
+}
+.review{left:auto;right:16px;transform:none;background:rgba(251,246,236,.95);border:1px solid var(--line)}
+.review a{color:var(--burgundy)}
+.review::before{content:"Design screens";align-self:center;font-size:.75rem;font-weight:600;color:var(--ink-soft);padding:0 8px 0 10px;white-space:nowrap}
+@media (max-width:900px){.review{top:auto;bottom:12px;right:8px;left:8px}}
 </style>
 </head>
 <body>
