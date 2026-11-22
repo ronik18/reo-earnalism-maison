@@ -22,17 +22,17 @@ const PASSWORD = process.env.MAISON_E2E_PASSWORD;
 const LOCALE = 'en';
 
 let regionBlocked = false;
-let edition; // first available catalog card from Home
+let edition; // first published Reader edition in any content language
 
 test.beforeAll(async ({ request }) => {
-  const home = await request.get(`${BASE}/api/v1/home?locale=${LOCALE}&territory=IN`);
-  if (home.status() === 403 && (await home.json()).code === 'service_region_unavailable') {
+  // No locale filter: the published book may be Bengali while the interface is English.
+  const catalog = await request.get(`${BASE}/api/v1/catalog?territory=IN&format=reader&limit=20`);
+  if (catalog.status() === 403 && (await catalog.json()).code === 'service_region_unavailable') {
     regionBlocked = true;
     return;
   }
-  expect(home.status(), 'home API').toBe(200);
-  const body = await home.json();
-  edition = body.shelves.flatMap((shelf) => shelf.items).find((card) => card.formats.includes('reader'));
+  expect(catalog.status(), 'catalog API').toBe(200);
+  edition = (await catalog.json()).items.find((card) => card.formats.includes('reader'));
 });
 
 const needsIndia = () => test.skip(regionBlocked, 'Production serves India only: run this suite from an Indian network.');
@@ -63,8 +63,15 @@ async function signIn(page) {
   const consent = page.locator('input[name="password_purpose_consent"]');
   if (await consent.count()) await consent.check(); // Members agree to password processing at sign-in.
   await page.locator('form button[type="submit"]').click();
-  await expect.poll(async () => (await api(page, 'GET', '/session')).json?.authenticated,
-    { message: 'test account signs in', timeout: 15_000 }).toBeTruthy();
+  const deadline = Date.now() + 15_000;
+  while (Date.now() < deadline) {
+    if ((await api(page, 'GET', '/session')).json?.authenticated) return;
+    await page.waitForTimeout(500);
+  }
+  // Report what the member would see instead of a bare timeout.
+  const shown = (await page.locator('[role="alert"], .error-notice, #auth-form-status').allInnerTexts())
+    .map((text) => text.trim()).filter(Boolean).join(' | ');
+  throw new Error(`Test account did not sign in. Page: ${new URL(page.url()).pathname}. Message: ${shown || '(none shown)'}`);
 }
 
 test('liveness endpoint answers', async ({ request }) => {
@@ -75,9 +82,9 @@ test('liveness endpoint answers', async ({ request }) => {
 
 test('home and a title page render a published edition', async ({ page }) => {
   needsIndia();
-  expect(edition, 'Home lists at least one Reader edition').toBeTruthy();
-  await page.goto(`${BASE}/${LOCALE}/`);
-  await expect(page.locator('body')).toContainText(edition.title);
+  expect(edition, 'the catalog lists at least one published Reader edition in India').toBeTruthy();
+  const home = await page.goto(`${BASE}/${LOCALE}/`);
+  expect(home.status()).toBe(200);
   const title = await page.goto(`${BASE}/${LOCALE}/titles/${edition.edition_id}/`);
   expect(title.status()).toBe(200);
   await expect(page.locator('h1')).toContainText(edition.title);
@@ -146,7 +153,7 @@ test('member saves and unsaves a published edition', async ({ page }) => {
 test('member opens a learning track', async ({ page }) => {
   needsMember();
   await signIn(page);
-  const tracks = (await api(page, 'GET', `/learning/tracks?locale=${LOCALE}`)).json;
+  const tracks = (await api(page, 'GET', `/learning/tracks`)).json;
   test.skip(!tracks.items.length, 'No published learning track in this territory.');
   const track = tracks.items[0];
   expect(['free', 'included', 'locked']).toContain(track.access);
