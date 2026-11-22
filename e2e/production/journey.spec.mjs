@@ -40,6 +40,15 @@ const needsMember = () => {
   needsIndia();
   test.skip(!EMAIL || !PASSWORD, 'Set MAISON_E2E_EMAIL and MAISON_E2E_PASSWORD for the dedicated test account.');
 };
+// Until a book is published the live catalog is empty by design. Once one is, set
+// MAISON_E2E_REQUIRE_BOOK=1 so an empty catalog fails as a regression instead of skipping.
+const needsBook = () => {
+  needsIndia();
+  if (process.env.MAISON_E2E_REQUIRE_BOOK === '1') {
+    expect(edition, 'the live catalog lists a published Reader edition in India').toBeTruthy();
+  }
+  test.skip(!edition, 'The live catalog has no published Reader edition in India yet.');
+};
 
 // Calls the API from inside the signed-in page, the way the Maison client does.
 async function api(page, method, path, { body, key, version } = {}) {
@@ -54,6 +63,21 @@ async function api(page, method, path, { body, key, version } = {}) {
     const text = await response.text();
     return { status: response.status, json: text ? JSON.parse(text) : null };
   }, { method, path, body, key, version });
+}
+
+// Sign in ONCE per run and reuse the session: the server allows 5 sign-in attempts
+// per email per 15 minutes, so signing in for every test locks the account out.
+let memberState;
+async function memberPage(browser) {
+  if (!memberState) {
+    const context = await browser.newContext();
+    await signIn(await context.newPage());
+    memberState = await context.storageState();
+    await context.close();
+  }
+  const page = await (await browser.newContext({ storageState: memberState })).newPage();
+  await page.goto(`${BASE}/${LOCALE}/`); // api() calls are same-origin from this page
+  return page;
 }
 
 async function signIn(page) {
@@ -80,19 +104,23 @@ test('liveness endpoint answers', async ({ request }) => {
   expect((await response.json()).status).toBe('ok');
 });
 
-test('home and a title page render a published edition', async ({ page }) => {
+test('home page renders', async ({ page }) => {
   needsIndia();
-  expect(edition, 'the catalog lists at least one published Reader edition in India').toBeTruthy();
   const home = await page.goto(`${BASE}/${LOCALE}/`);
   expect(home.status()).toBe(200);
+  await expect(page.locator('main')).toBeVisible();
+});
+
+test('title page renders a published edition', async ({ page }) => {
+  needsBook();
   const title = await page.goto(`${BASE}/${LOCALE}/titles/${edition.edition_id}/`);
   expect(title.status()).toBe(200);
   await expect(page.locator('h1')).toContainText(edition.title);
 });
 
 test('cover revalidation returns 304 with a strong content ETag', async ({ request }) => {
-  needsIndia();
-  test.skip(!edition?.cover, 'The first edition has no cover.');
+  needsBook();
+  test.skip(!edition.cover, 'The first edition has no cover.');
   const first = await request.get(edition.cover.url);
   expect(first.status()).toBe(200);
   test.skip(first.headers()['cache-control'].includes('private'),
@@ -103,9 +131,17 @@ test('cover revalidation returns 304 with a strong content ETag', async ({ reque
   expect(again.status()).toBe(304);
 });
 
-test('member opens a chapter, turns the page and resumes from Vault', async ({ page }) => {
+test('test account signs in', async ({ browser }) => {
   needsMember();
-  await signIn(page);
+  const page = await memberPage(browser);
+  const session = (await api(page, 'GET', '/session')).json;
+  expect(session.member.email_verified, 'test account email is verified').toBe(true);
+});
+
+test('member opens a chapter, turns the page and resumes from Vault', async ({ browser }) => {
+  needsBook();
+  needsMember();
+  const page = await memberPage(browser);
   const boot = async () => JSON.parse(await page.locator('#reader-bootstrap').textContent());
   const opened = await page.goto(`${BASE}/${LOCALE}/read/${edition.edition_id}/`);
   expect(opened.status()).toBe(200);
@@ -138,9 +174,10 @@ test('member opens a chapter, turns the page and resumes from Vault', async ({ p
   expect((await page.goto(`${BASE}/${LOCALE}/vault/`)).status()).toBe(200);
 });
 
-test('member saves and unsaves a published edition', async ({ page }) => {
+test('member saves and unsaves a published edition', async ({ browser }) => {
+  needsBook();
   needsMember();
-  await signIn(page);
+  const page = await memberPage(browser);
   const put = await api(page, 'PUT', `/me/saved-items/${edition.edition_id}`, { key: crypto.randomUUID() });
   expect(put.status, JSON.stringify(put.json)).toBe(200);
   expect(put.json.available).toBe(true);
@@ -150,9 +187,9 @@ test('member saves and unsaves a published edition', async ({ page }) => {
   expect(removed.status).toBe(204);
 });
 
-test('member opens a learning track', async ({ page }) => {
+test('member opens a learning track', async ({ browser }) => {
   needsMember();
-  await signIn(page);
+  const page = await memberPage(browser);
   const tracks = (await api(page, 'GET', `/learning/tracks`)).json;
   test.skip(!tracks.items.length, 'No published learning track in this territory.');
   const track = tracks.items[0];
