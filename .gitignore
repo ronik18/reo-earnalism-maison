@@ -12,3 +12,4 @@ node_modules/
 !.env.example
 static/maison/dist/
 .neon
+test-results/
