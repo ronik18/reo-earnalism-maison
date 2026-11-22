@@ -60,7 +60,7 @@
 
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:#E9E0CF;color:var(--ink);font:var(--t-body) var(--font-ui);-webkit-font-smoothing:antialiased}
+body{font-variant-numeric:lining-nums;background:#E9E0CF;color:var(--ink);font:var(--t-body) var(--font-ui);-webkit-font-smoothing:antialiased}
 .board{width:1560px;margin:0 auto;padding:56px 40px 80px}
 .board-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px;border-bottom:1px solid #CDBB98;padding-bottom:24px}
 .board-head h1{font:600 60px/1 var(--font-display);margin:0;letter-spacing:-.01em}
@@ -81,7 +81,7 @@ body{background:#E9E0CF;color:var(--ink);font:var(--t-body) var(--font-ui);-webk
 .topbar{display:flex;align-items:center;gap:28px;padding:14px 32px;background:var(--ivory-50);border-bottom:1px solid var(--line)}
 .topbar .logo{height:58px;width:auto}
 .nav{display:flex;gap:4px;margin-left:8px}
-.nav a{font:500 14px/1 var(--font-ui);color:var(--ink-muted);text-decoration:none;padding:10px 14px;border-radius:var(--r-pill)}
+.nav a{white-space:nowrap;font:500 14px/1 var(--font-ui);color:var(--ink-muted);text-decoration:none;padding:10px 14px;border-radius:var(--r-pill)}
 .nav a[aria-current]{color:var(--burgundy-700);background:var(--burgundy-100)}
 .search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--ivory-100);border:1px solid var(--line);border-radius:var(--r-pill);padding:9px 16px;color:var(--ink-muted);font-size:14px;min-width:260px}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--burgundy-700);color:var(--gold-200);display:grid;place-items:center;font:600 14px var(--font-display);box-shadow:0 0 0 2px var(--ivory-50),0 0 0 3px var(--gold-600)}
@@ -117,7 +117,7 @@ body{background:#E9E0CF;color:var(--ink);font:var(--t-body) var(--font-ui);-webk
 .hero{display:grid;grid-template-columns:1.25fr 1fr;gap:28px;background:var(--burgundy-800);border-radius:var(--r-lg);padding:32px;color:var(--ivory-50);position:relative;overflow:hidden}
 .hero::after{content:"";position:absolute;inset:12px;border:1px solid rgba(238,217,162,.35);border-radius:16px;pointer-events:none}
 .hero .tag{color:var(--gold-200)}
-.hero h2{font:500 46px/1.04 var(--font-display);margin:10px 0 12px}
+.hero h2{font:500 42px/1.04 var(--font-display);margin:10px 0 12px}
 .hero h2 i{background:var(--gold-foil);-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p{color:#EBDDD6;margin:0 0 20px;max-width:46ch}
 .hero .btn-primary{background:var(--ivory-50);color:var(--burgundy-800)}
@@ -158,7 +158,7 @@ body{background:#E9E0CF;color:var(--ink);font:var(--t-body) var(--font-ui);-webk
 .m-status{display:flex;justify-content:space-between;padding:10px 22px 4px;font:600 13px var(--font-ui)}
 .m-head{display:flex;align-items:center;justify-content:space-between;padding:6px 16px 10px;border-bottom:1px solid var(--line)}
 .m-head .logo{height:40px}
-.m-body{flex:1;overflow:hidden;padding:16px}
+.m-body{flex:1;overflow:hidden;padding:16px;grid-template-columns:minmax(0,1fr)}
 .tabbar{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);background:var(--ivory-50);padding:8px 4px 22px}
 .tabbar a{display:grid;justify-items:center;gap:4px;font:500 11px var(--font-ui);color:var(--ink-muted);text-decoration:none}
 .tabbar a[aria-current]{color:var(--burgundy-700)}
@@ -226,7 +226,7 @@ mark.hl{background:#F3E1A6;color:inherit;padding:0 2px;border-radius:2px}
 .chapters b{font:600 15px var(--font-ui)}
 .chapters small{display:block;color:var(--ink-muted);font-size:12px}
 .mode{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink-muted)}
-.switch{width:40px;height:24px;border-radius:12px;background:var(--burgundy-700);position:relative}
+.switch{flex:none;width:40px;height:24px;border-radius:12px;background:var(--burgundy-700);position:relative}
 .switch::after{content:"";position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:var(--ivory-50)}
 
 /* ---------- 4 VIDEO ---------- */
@@ -235,7 +235,7 @@ mark.hl{background:#F3E1A6;color:inherit;padding:0 2px;border-radius:2px}
 .v-player{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:radial-gradient(80% 90% at 70% 30%,#4A2A1E,#120709);}
 .v-player .scene{position:absolute;inset:0;background:radial-gradient(30% 40% at 30% 60%,rgba(238,217,162,.25),transparent),radial-gradient(40% 50% at 75% 40%,rgba(138,44,67,.5),transparent)}
 .v-player .scene::after{content:"Lesson 4 · Compounding, explained with a mango orchard";position:absolute;left:28px;top:24px;font:500 13px var(--font-ui);color:#EBDDD6;letter-spacing:.04em}
-.subs{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);background:rgba(18,7,9,.78);color:#FFF;padding:8px 14px;border-radius:6px;font:500 20px/1.35 var(--font-ui);text-align:center;max-width:76%}
+.subs{position:absolute;left:36%;bottom:86px;transform:translateX(-50%);background:rgba(18,7,9,.78);color:#FFF;padding:8px 14px;border-radius:6px;font:500 20px/1.35 var(--font-ui);text-align:center;max-width:76%}
 .v-controls{position:absolute;left:0;right:0;bottom:0;padding:14px 18px 14px;background:linear-gradient(transparent,rgba(18,7,9,.88));color:#FFF}
 .v-prog{height:4px;background:rgba(255,255,255,.25);border-radius:4px;position:relative;margin-bottom:12px}
 .v-prog i{position:absolute;inset:0 58% 0 0;background:var(--gold-foil-soft);border-radius:4px}
@@ -244,9 +244,9 @@ mark.hl{background:#F3E1A6;color:inherit;padding:0 2px;border-radius:2px}
 .v-row .sp{margin-left:auto}
 .v-pill{border:1px solid rgba(255,255,255,.5);border-radius:var(--r-pill);padding:5px 10px;font:600 12px var(--font-ui)}
 .v-pill.on{background:#FFF;color:var(--burgundy-950)}
-.menu{position:absolute;right:18px;bottom:62px;width:250px;background:var(--ivory-50);color:var(--ink);border-radius:14px;box-shadow:var(--sh-3);padding:12px;display:grid;gap:10px}
+.menu{position:absolute;right:18px;bottom:62px;width:236px;font-size:13px;background:var(--ivory-50);color:var(--ink);border-radius:14px;box-shadow:var(--sh-3);padding:12px;display:grid;gap:10px}
 .menu h5{margin:0;font:600 11px var(--font-ui);letter-spacing:.14em;text-transform:uppercase;color:var(--gold-800)}
-.menu .opt{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-radius:8px;font-size:14px}
+.menu .opt{display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-radius:8px;font-size:14px}
 .menu .opt.sel{background:var(--burgundy-100);color:var(--burgundy-700);font-weight:600}
 .v-info{display:flex;align-items:flex-start;gap:16px;margin-top:16px}
 .v-info h3{margin:0;font:600 28px/1.1 var(--font-display)}
@@ -279,7 +279,7 @@ mark.hl{background:#F3E1A6;color:inherit;padding:0 2px;border-radius:2px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;font:600 11px var(--font-ui);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);padding:6px 6px;border-bottom:1px solid var(--line)}
 td{padding:8px 6px;border-bottom:1px solid var(--ivory-200);vertical-align:middle}
-.st{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:var(--r-pill);font:600 11px var(--font-ui)}
+.st{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:var(--r-pill);font:600 11px var(--font-ui)}
 .st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .st.ok{background:#E3EEE4;color:var(--success)}
 .st.warn{background:#F6E8CC;color:var(--warning)}
@@ -470,7 +470,7 @@ td{padding:8px 6px;border-bottom:1px solid var(--ivory-200);vertical-align:middl
         <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 16px;color:var(--ink-muted);font-size:13px"><span>←  Chapter 7</span><span style="font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--ink)">Aa</span></div>
         <div style="flex:1;padding:18px 26px;font:19px/1.7 var(--font-reading);position:relative;overflow:hidden">
           <p style="margin:0 0 14px" lang="bn"><span style="font-family:'Noto Serif Bengali';font-size:18px;line-height:1.9">এক যে ছিল রাজা। তার ছিল সাত রানি। বড়ো রানি, মেজো রানি, সেজো রানি, ন রানি, কনে রানি, দুয়োরানি আর সুয়োরানি।</span></p>
-          <p style="margin:0;color:var(--ink-muted);font:13px/1.5 var(--font-ui)">Bengali edition shown: the reading font switches per book language; the interface stays English.</p>
+          <p style="margin:0 0 14px" lang="bn"><span style="font-family:'Noto Serif Bengali';font-size:18px;line-height:1.9">রাজার সব আছে, কিন্তু মনে সুখ নাই। সাত রানির এক রানিরও ছেলে হয় নাই। একদিন এক সন্ন্যাসী রাজবাড়ির দুয়ারে এসে দাঁড়াল।</span></p><p style="margin:0 0 14px" lang="bn"><span style="font-family:'Noto Serif Bengali';font-size:18px;line-height:1.9">সন্ন্যাসী বলল, “মহারাজ, আমবাগানের শেষ গাছটির একটি আম রানিদের দিও।”</span></p><p style="margin:0;color:var(--ink-muted);font:13px/1.5 var(--font-ui)">Bengali edition shown: the reading font switches per book language; the interface stays English.</p>
           <div style="position:absolute;inset:0;display:grid;grid-template-columns:30% 1fr 30%">
             <div class="zone" style="font-size:11px"><span>‹ Back</span></div><div class="zone mid"><span style="font-size:11px">Menu</span></div><div class="zone" style="font-size:11px"><span>Next ›</span></div>
           </div>
@@ -547,6 +547,7 @@ td{padding:8px 6px;border-bottom:1px solid var(--ivory-200);vertical-align:middl
           <div class="times"><span>05:48</span><span>−12:40</span></div>
           <div class="transport" style="gap:16px"><span class="t-btn" style="font:600 12px var(--font-ui)">−15</span><span class="t-play"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></span><span class="t-btn" style="font:600 12px var(--font-ui)">+30</span></div>
           <div style="display:flex;gap:8px;margin-top:6px"><span class="chip" style="background:transparent;color:var(--gold-200);border-color:rgba(238,217,162,.5)">1.25×</span><span class="chip" style="background:transparent;color:var(--gold-200);border-color:rgba(238,217,162,.5)">☾ End of tale</span><span class="chip" style="background:transparent;color:var(--gold-200);border-color:rgba(238,217,162,.5)">Read along</span></div>
+          <div style="width:100%;text-align:left;border-top:1px solid rgba(238,217,162,.25);padding-top:10px;font-size:13px;color:#E0CFC6;display:grid;gap:8px"><div style="display:flex;justify-content:space-between"><span><b style="color:var(--gold-200)">Up next</b> · 4 Sheet Basanta</span><span>26:51</span></div><div style="display:flex;justify-content:space-between"><span>5 Dalim Kumar</span><span>24:15</span></div></div>
         </div>
       </div>
     </div>
@@ -568,17 +569,16 @@ td{padding:8px 6px;border-bottom:1px solid var(--ivory-200);vertical-align:middl
             <div class="subs">If you plant one tree every year, by year ten<br>you are not counting trees: you are counting shade.</div>
             <div class="menu">
               <h5>Playback speed</h5>
-              <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip">0.5</span><span class="chip">0.75</span><span class="chip">1</span><span class="chip" aria-pressed="true">1.25</span><span class="chip">1.5</span><span class="chip">1.75</span><span class="chip">2</span></div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap"><span class="chip" style="min-height:26px;padding:0 9px">0.75</span><span class="chip" style="min-height:26px;padding:0 9px">1</span><span class="chip" aria-pressed="true" style="min-height:26px;padding:0 9px">1.25</span><span class="chip" style="min-height:26px;padding:0 9px">1.5</span><span class="chip" style="min-height:26px;padding:0 9px">2×</span></div>
               <h5 style="margin-top:4px">Subtitles</h5>
-              <div class="opt">Off</div>
-              <div class="opt sel">English <span>✓</span></div>
+              <div class="opt">Off</div>              <div class="opt sel">English <span>✓</span></div>
               <div class="opt"><span lang="bn" style="font-family:'Noto Sans Bengali'">বাংলা</span> Bengali</div>
-              <div class="opt" style="color:var(--ink-muted)">Size: M · Background: 78% · Position: bottom</div>
+              <div class="opt" style="color:var(--ink-muted)">Style: M · 78% backing ›</div>
             </div>
             <div class="v-controls">
               <div class="v-prog"><i></i><span class="chap-tick" style="left:18%"></span><span class="chap-tick" style="left:41%"></span><span class="chap-tick" style="left:66%"></span></div>
               <div class="v-row">
-                <span>▶︎ / ❚❚</span><span>↺10</span><span>↻10</span><span>🔈︎ ▬▬▬</span><span>08:41 / 14:53 · Chapter 3: Interest on interest</span>
+                <span>❚❚</span><span>↺10</span><span>↻10</span><span>Vol</span><span>08:41 / 14:53 · Ch. 3 Interest on interest</span>
                 <span class="sp v-pill on">1.25×</span><span class="v-pill on">CC</span><span class="v-pill">HD</span><span class="v-pill">⛶</span>
               </div>
             </div>
