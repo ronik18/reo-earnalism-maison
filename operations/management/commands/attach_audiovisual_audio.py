@@ -29,7 +29,8 @@ earnalism.audiovisual-clearance-evidence.v1) naming edition_slug, source_content
 text the narration speaks), territories (= the active whitelist), formats ["reader", "audio"] and
 audio_sha256 (exactly the bundle MP3 hashes), the completed per-title record (term_per_territory for every
 whitelisted territory, text_source_licence, cover_provenance, and music {route, licence,
-source_and_licence} unless dry_narration is true), plus owner_approval {"by": <who>, "at": <when>}; a
+source_and_licence} unless dry_narration is true; dry_narration is refused when timing.json's eav provenance
+shows a score mixed under any unit), plus owner_approval {"by": <who>, "at": <when>}; a
 status starting with "DRAFT" is refused (the skill drafts the record, only the owner approves it). The live revision must already carry passing
 public-domain publication_clearance; other titles are refused.
 
@@ -127,7 +128,18 @@ def read_bundle(folder):
             raise CommandError(f"{name}: {exc}") from None
         files[name] = {"path": path, "sha256": file_sha256(path), "bytes": path.stat().st_size, **measured}
     bundle_sha = digest(canonical_bytes({"timing_sha256": sha256(raw), "mp3": {n: f["sha256"] for n, f in files.items()}}))
-    return {"rows": rows, "files": files, "bundle_sha256": bundle_sha}
+    provenance = timing.get("provenance") if isinstance(timing, dict) else None
+    return {"rows": rows, "files": files, "bundle_sha256": bundle_sha,
+            "provenance": provenance if isinstance(provenance, dict) else {}}
+
+
+def score_mixed(bundle):
+    """Units whose eav provenance shows a score bed was mixed under the narration."""
+    units = bundle.get("provenance", {}).get("units")
+    if not isinstance(units, dict):
+        return []
+    return sorted(u for u, row in units.items() if isinstance(row, dict) and (
+        row.get("score_sha256") or row.get("mastered_with") == "eav.mix.duck_and_master"))
 
 
 def read_report(relative):
@@ -175,6 +187,10 @@ def check_evidence(doc, slug, live, bundle):
     if not isinstance(doc.get("audio_sha256"), list) or sorted(doc["audio_sha256"]) != sorted(f["sha256"] for f in bundle["files"].values()):
         raise CommandError("Clearance evidence audio_sha256 differs from the bundle MP3 hashes.")
     check_record_complete(doc)
+    mixed = score_mixed(bundle)
+    if doc.get("dry_narration") is True and mixed:
+        raise CommandError(f"Clearance evidence claims dry_narration, but the bundle provenance shows a score mixed "
+                           f"under unit(s) {', '.join(mixed)}; the music record and licence are required.")
 
 
 def _filled(value):

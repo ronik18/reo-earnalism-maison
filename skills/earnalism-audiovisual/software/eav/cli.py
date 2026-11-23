@@ -211,13 +211,50 @@ def _misfits(rec) -> set:
             if e["stage"] == "reel" and e["result"] == "narration_misfit"}
 
 
-def _planned_shots(rec, n):
-    """shots.json, but only when planned from this script's measured narration (R20)."""
+def _plan_event(rec, n):
+    """(index, detail) of the current shots_planned event for reel n, or (-1, None)."""
     t = f"reel-{n}"
     planned = _last_event(rec, "reel", "shots_planned", t)
     if planned < 0 or planned < _last_event(rec, "reel", "scripted", t):
+        return -1, None
+    return planned, rec.data["events"][planned]["detail"]
+
+
+def _planned_shots(rec, n):
+    """shots.json, but only when planned from this script's measured narration (R20)."""
+    planned, _ = _plan_event(rec, n)
+    if planned < 0:
         return None, -1
-    return _json(rec.root / "reels" / t / "shots.json"), planned
+    return _json(rec.root / "reels" / f"reel-{n}" / "shots.json"), planned
+
+
+def _bound_plan(rec, n):
+    """R27: the current shot plan, checked to be exactly what --plan-shots wrote and still bound
+    to the narration it was planned from (the latest imported reel narration, not ended)."""
+    t = f"reel-{n}"
+    planned, detail = _plan_event(rec, n)
+    if detail is None:
+        raise Stop(f"{t} has no shot plan from its measured narration", next_action(rec.root))
+    path = rec.root / "reels" / t / "shots.json"
+    want = detail.get("shots_sha256")
+    if want is None:  # plans before R27: the shot_list artifact recorded with the plan
+        arts = [a for a in rec.data["artifacts"] if a["kind"] == "shot_list"
+                and a["meta"].get("target") == t and a["meta"].get("narration_job_id")]
+        want = arts[-1]["sha256"] if arts else None
+    if not path.is_file() or sha256_file(path) != want:
+        raise Stop(f"reels/{t}/shots.json is not the plan --plan-shots wrote; it is never edited by hand",
+                   "Report this; restore it from git, never re-plan around it")
+    narr_id = detail["narration_job_id"]
+    job = next((j for j in _jobs(rec) if j["job_id"] == narr_id), None)
+    latest = _reel_narration(rec, n)
+    if job is None or _ended(job) or not job["imported"] or latest is None or latest["job_id"] != narr_id:
+        raise Stop(f"{t} shots were planned from narration {narr_id}, but the latest imported reel "
+                   f"narration is {latest['job_id'] if latest else 'missing'}; clips and assembly stay "
+                   "bound to the planned narration",
+                   "Re-voicing a reel: supersede (never ran) or close (ran) every reel_clips batch of "
+                   f"the plan, then {PROG} reel {n} --root {rec.root} --script <script>, new reel "
+                   "narration, a fresh --plan-shots and new batches (references/reel-recipe.md)")
+    return _json(path), planned, narr_id
 
 
 def _clip_jobs(rec, n, after, imported=False) -> list:
@@ -237,9 +274,7 @@ def _covered(rec, n, after) -> dict:
 
 def _check_clip_batch(rec, n, spec):
     """A reel_clips batch names only planned shots not already held by another batch."""
-    shots, planned = _planned_shots(rec, n)
-    if shots is None:
-        raise Stop(f"reel {n} has no shot plan from its measured narration", next_action(rec.root))
+    shots, planned, _ = _bound_plan(rec, n)
     ids = [sh.get("id") for sh in spec.get("shots") or []]
     known = {sh["id"] for sh in shots}
     unknown = [i for i in ids if i not in known]
@@ -524,6 +559,14 @@ def _job_spec(rec, args, kind, target):
     lang = plan["language"]
     if kind == "narration":
         if args.reel:
+            planned, detail = _plan_event(rec, args.reel)
+            if detail is not None:  # R27
+                raise Stop(f"reel {args.reel} shots are already planned from narration "
+                           f"{detail['narration_job_id']}; new narration would unbind them",
+                           "Re-voicing a reel: supersede (never ran) or close (ran) every reel_clips "
+                           f"batch of the plan, then {PROG} reel {args.reel} --root {rec.root} --script "
+                           "<script>, build the new reel narration, run a fresh --plan-shots and "
+                           "re-batch (references/reel-recipe.md)")
             script = _reel_script(rec, args.reel)
             if script is None:
                 raise Stop(f"reel {args.reel} has no script", f"{PROG} reel {args.reel} --root {rec.root} --script <file>")
@@ -779,7 +822,15 @@ def _reel_set_script(rec, args, n, t, folder):
     except ValueError as e:
         raise Stop(f"reel script rejected: {e}", "Fix the script per references/reel-recipe.md")
     built = _reel_narration(rec, n, imported=False)
-    if built and built["job_id"] not in _misfits(rec):
+    planned, detail = _plan_event(rec, n)
+    if detail is not None:  # R27: re-voicing retires the plan only once none of its batches is active
+        live = [j["job_id"] for j in _jobs(rec) if j["kind"] == "reel_clips" and j["target"] == t
+                and j["order"] > planned and not _ended(j)]
+        if live:
+            raise Stop(f"{t} has active reel_clips batch(es) {', '.join(live)} of its shot plan",
+                       "Re-voicing: supersede (never ran) or close (ran) each of them first; imported "
+                       "clips cannot be retired, so re-voice as a new reel number instead")
+    elif built and built["job_id"] not in _misfits(rec):
         raise Stop(f"{t} narration was already built from its script", f"{PROG} status --root {rec.root}")
     _write_json(folder / "script.json", script)
     (folder / "caption.txt").write_text(reel.caption(script, args.hashtags or []) + "\n", encoding="utf-8")
@@ -812,7 +863,8 @@ def _reel_plan_shots(rec, n, t, folder):
     _write_json(folder / "shots.json", shots)
     rec.add_artifact("shot_list", folder / "shots.json", {"target": t, "narration_job_id": narr["job_id"]})
     rec.event("reel", "shots_planned", {"target": t, "shots": len(shots), "clip_seconds": clip,
-                                        "narration_seconds": seconds, "narration_job_id": narr["job_id"]})
+                                        "narration_seconds": seconds, "narration_job_id": narr["job_id"],
+                                        "shots_sha256": sha256_file(folder / "shots.json")})
     print(f"Reel {n}: measured narration {seconds:.2f} s -> {len(shots)} shots of {clip:.4f} s "
           f"(last {shots[-1]['seconds']:.2f} s), in batches of at most {colab_jobs.MAX_CLIPS_PER_BATCH}.")
 
@@ -825,10 +877,11 @@ def cmd_reel(args):
         return _reel_set_script(rec, args, n, t, folder)
     if args.plan_shots:
         return _reel_plan_shots(rec, n, t, folder)
-    script, narr = _reel_script(rec, n), _reel_narration(rec, n)
-    shots, planned = _planned_shots(rec, n)
-    if script is None or narr is None or shots is None:
+    script = _reel_script(rec, n)
+    if script is None or _plan_event(rec, n)[1] is None:
         raise Stop(f"{t} needs a script, its imported narration and a shot plan", next_action(rec.root))
+    shots, planned, narr_id = _bound_plan(rec, n)  # R27: exactly the planned narration
+    narr = next(j for j in _jobs(rec) if j["job_id"] == narr_id)
     by_scene, jobs = {}, []
     for j in _clip_jobs(rec, n, planned, imported=True):
         jobs.append(j["job_id"])

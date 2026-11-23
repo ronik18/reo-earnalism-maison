@@ -69,6 +69,21 @@ or 120 s (200–245). Each reel is its own 9:16 composition, never a crop of the
 6. `reel N --score <bed> --score-route ...` assembles from every imported batch, in
    `shots.json` order, once every planned shot has a clip.
 
+### The plan is bound to its narration (R27)
+
+`--plan-shots` records the narration job it measured and the sha256 of `shots.json`.
+From then on `reel_clips` batches and `reel N` use exactly that narration and that file:
+they refuse if `shots.json` changed, if that narration job ended, or if a newer reel
+narration was imported. `job narration --reel N` is refused once shots are planned.
+
+**Re-voicing a reel** (a new take of its narration) therefore means:
+1. `supersede` (never ran) or `close` (ran, with the CU Colab shows) every `reel_clips`
+   batch of the current plan. Imported clips cannot be retired: re-voice as a new reel
+   number instead.
+2. `reel N --script <script>` (the same or a revised script) retires the old plan.
+3. Build and import the new reel narration, run a fresh `reel N --plan-shots`, build the
+   keyframes and the clip batches again from the new `shots.json`.
+
 ## Pictures
 
 1. Keyframes (`job stills --reel N`): one FLUX still per shot from the title's world

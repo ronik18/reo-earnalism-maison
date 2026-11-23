@@ -310,6 +310,28 @@ class AudiovisualCommandTests(TestCase):
         self.assertEqual(staged["status"], "staged")
         self.assertNotEqual(staged["revision_id"], str(old.id))
 
+    def with_provenance(self, folder, score_sha):
+        """Add eav's per-unit provenance to timing.json (score_sha None = narration only)."""
+        timing = json.loads((folder / "timing.json").read_text())
+        unit_id = timing["units"][0]["unit_id"]
+        timing["provenance"] = {"method": "eav.film.narration_track", "units": {unit_id: {
+            "mastered_with": "eav.mix.duck_and_master" if score_sha else "eav.mix.master",
+            "score_sha256": score_sha}}}
+        (folder / "timing.json").write_text(json.dumps(timing))
+
+    def test_attach_refuses_dry_claim_when_the_bundle_mixed_a_score(self):
+        """R27 (minor 2): dry_narration true must match the bundle's per-unit score provenance."""
+        live = self.publish_bicharak()
+        source = self.export()
+        folder, audio_sha = self.bundle(source)
+        self.with_provenance(folder, "b" * 64)
+        with self.assertRaisesMessage(CommandError, "dry_narration"):
+            self.stage(folder, self.evidence(source, audio_sha, tag="drymixed", dry_narration=True, music=None))
+        self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)
+        self.with_provenance(folder, None)
+        staged = self.stage(folder, self.evidence(source, audio_sha, tag="dryok", dry_narration=True, music=None))
+        self.assertEqual(staged["status"], "staged")
+
     def test_attach_refuses_without_evidence_file(self):
         live = self.publish_bicharak()
         source = self.export()

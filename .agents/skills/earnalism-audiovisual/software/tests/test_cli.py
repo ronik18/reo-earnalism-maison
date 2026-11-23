@@ -483,6 +483,61 @@ class RoundTwo:
         self.assertAlmostEqual(reel_art["meta"]["seconds"], sum(x["seconds"] for x in shots), delta=0.05)
         self.assertGreaterEqual(reel_art["meta"]["seconds"], 60.05)
 
+    # --- R27: assembly and clips are bound to the narration the shots were planned from -------
+    def test_new_reel_narration_after_shots_planned_is_refused(self):
+        self.planned_reel()
+        code, out = run("job", "narration", "--reel", 1, "--root", self.root, "--rates", self.rates)
+        self.assertNotEqual(code, 0)
+        for key in ("planned", "supersede", "close", "--plan-shots"):
+            self.assertIn(key, out, key)
+        self.assertEqual(len([j for j in cli._jobs(Record.load(self.root)) if j["target"] == "reel-1"
+                              and j["kind"] == "narration"]), 1)
+
+    def test_reel_refuses_narration_other_than_the_planned_one(self):
+        shots, stills = self.planned_reel()
+        ids = [x["id"] for x in shots]
+        for i in range(0, len(ids), 5):
+            self.clip_batch(ids[i:i + 5])
+        from eav.voice import voice_units
+        units = voice_units(cli._reel_scene(REEL, 1), {"description": ""}, None, "en")
+
+        def narr(rec, job_id, job_dir, out):  # a newer reel narration slipped in past the gate
+            for u in units:
+                self.wav(out / f"{u['unit_key']}.wav", 4.3)
+        newer = self.fake_job("narration", "reel-1", narr)
+        code, out = run("reel", 1, "--root", self.root)
+        self.assertNotEqual(code, 0)
+        self.assertIn(newer, out)
+        self.assertIn("planned", out)
+        self.assertFalse(any(a["kind"] == "reel" for a in Record.load(self.root).data["artifacts"]))
+
+    def test_reel_clips_refused_when_shots_json_is_not_the_planned_one(self):
+        shots, stills = self.planned_reel()
+        self.reel_rates()
+        path = self.root / "reels" / "reel-1" / "shots.json"
+        path.write_text(json.dumps(shots[:3]))
+        code, out = run("job", "reel_clips", "--reel", 1, "--root", self.root, "--rates", self.rates,
+                        "--spec", self.clips_spec(stills, [x["id"] for x in shots[:3]]))
+        self.assertNotEqual(code, 0)
+        self.assertIn("shots.json", out)
+        self.assertFalse(self.ledger.exists())  # nothing reserved
+
+    def test_revoicing_a_reel_retires_its_plan_first(self):
+        shots, stills = self.planned_reel()
+        self.reel_rates()
+        code, out = run("job", "reel_clips", "--reel", 1, "--root", self.root, "--rates", self.rates,
+                        "--spec", self.clips_spec(stills, [x["id"] for x in shots[:5]]), "--job-id", "rc-b1")
+        self.assertEqual(code, 0, out)
+        path = self.d / "reel.json"
+        code, out = run("reel", 1, "--root", self.root, "--script", path)
+        self.assertNotEqual(code, 0)  # an active batch of the plan blocks re-voicing
+        self.assertIn("rc-b1", out)
+        self.assertEqual(run("supersede", "rc-b1", "--root", self.root, "--reason", "re-voice")[0], 0)
+        code, out = run("reel", 1, "--root", self.root, "--script", path)
+        self.assertEqual(code, 0, out)
+        code, out = run("job", "narration", "--reel", 1, "--root", self.root, "--rates", self.rates)
+        self.assertEqual(code, 0, out)
+
     def test_reel_refuses_until_every_planned_shot_has_a_clip(self):
         shots, stills = self.planned_reel()
         self.clip_batch([x["id"] for x in shots[:5]])
