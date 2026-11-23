@@ -368,3 +368,4 @@ body.room-focused{background:var(--paper),#1A0E12;--surface:#2A1820;--raised:#35
 .room-page form button:not([type=button]):not([type=reset]):not(.secondary),.room-page button.primary{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--ivory)!important;min-height:48px;padding:0 24px}
 .room-page form button:not([type=button]):not([type=reset]):not(.secondary):hover{background:var(--wine)!important}
 .room-focused .room-page form button:not([type=button]):not([type=reset]):not(.secondary){background:var(--gold)!important;border-color:var(--gold-deep)!important;color:var(--burgundy-deep)!important}
+@media(max-width:767px){.room-page .title-art{height:auto;max-height:none;text-align:center}.room-page .title-art img{display:inline-block;width:auto;height:auto;max-height:420px;max-width:100%}}
