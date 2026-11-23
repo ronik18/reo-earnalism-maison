@@ -1,0 +1,21 @@
+# Stills: FLUX.1-schnell, 4 steps. The exact revision is resolved now and recorded.
+if RUN is not True:
+    raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
+import subprocess, sys
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "diffusers", "transformers",
+                "accelerate", "sentencepiece", "protobuf"], check=True)
+import torch
+from diffusers import FluxPipeline
+from huggingface_hub import HfApi
+
+revision = HfApi().model_info(MODEL_REPO).sha
+MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "steps": STEPS}
+pipe = FluxPipeline.from_pretrained(MODEL_REPO, revision=revision, torch_dtype=torch.bfloat16)
+pipe.enable_model_cpu_offload()
+for item in JOB["items"]:
+    gen = torch.Generator("cpu").manual_seed(item["seed"])
+    image = pipe(item["prompt"], num_inference_steps=STEPS, guidance_scale=0.0,
+                 max_sequence_length=256, width=item["width"], height=item["height"],
+                 generator=gen).images[0]
+    image.save(OUT_DIR / (item["key"] + ".png"))
+    print("wrote", item["key"])
