@@ -21,3 +21,14 @@ Prerequisite: add `https://theearnalism.com/api/v1/auth/google/callback` to the 
 ## Rollback
 
 Restore the apex record to `A 76.76.21.21` DNS-only and `www` to DNS-only `CNAME cname.vercel-dns.com`; disable the redirect rule; revert the three Render variables and redeploy. DNS propagation is asynchronous.
+
+## Executed on 23 November 2026 (owner instruction: cut over once verified)
+
+| Step | Change | Readback |
+|---|---|---|
+| 3 | Apex and `www`: proxied `CNAME → reo-earnalism-maison-qa.onrender.com` (previous `A 76.76.21.21` / `CNAME cname.vercel-dns.com`, DNS-only, recorded in each record's comment). | Render: `theearnalism.com`, `www.theearnalism.com` and `maison.theearnalism.com` all `verified`. |
+| 4 | `PUBLIC_BASE_URL=https://theearnalism.com`; `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` already included the apex and `www`. Redeployed `972b496`. | Deploy `live`; apex liveness 200. |
+| 5 | Redirect rule "Maison and www canonical alias - GET HEAD" enabled (302, query preserved). | `maison.` and `www.` → apex with path and query. |
+| 6 | Production suite against `https://theearnalism.com` with `MAISON_E2E_REQUIRE_BOOK=1`: 11 passed, 5 skipped (no test-account credentials; cover revalidation skipped because covers are private). Guest check, desktop and mobile: carousel links to The Selfish Giant and বিচারক Chapter 1 via sign-up, title pages 200 with covers, previews 200, no overflow or page errors. | Pass. |
+
+**Open:** the Google OAuth client `620834018736-…` still needs `https://theearnalism.com/api/v1/auth/google/callback` as an authorized redirect URI (console access only). Until the owner adds it, Google sign-in on the apex fails; email/password sign-in works. Change the redirect to 301 after a stable period.
