@@ -1,4 +1,8 @@
-"""Attach owner-cleared chapter narration to a live edition and publish it (server job, 23 Nov 2026).
+"""Stage owner-cleared chapter narration on a clone of a live edition, then publish it after a fresh
+browser acceptance of that exact staged revision (server job, 23 Nov 2026; controller ruling R6).
+
+  attach_audiovisual_audio stage <slug> --publisher <public_id> --bundle <dir> --evidence <docs/evidence/...json>
+  attach_audiovisual_audio publish <slug> --publisher <public_id> --browser-report <repo-relative json>
 
 Same audited path as publish_cleared_editions: a named active verified staff publisher, private
 storage, rights rows, validation evidence and library.services.transition_revision. Nothing here
@@ -26,14 +30,26 @@ text the narration speaks), territories (= the active whitelist), formats ["read
 audio_sha256 (exactly the bundle MP3 hashes). The live revision must already carry passing
 public-domain publication_clearance; other titles are refused.
 
-Steps: clone the live revision; store each MP3 privately as an audio_chapter asset bound to its
-unit; record ffprobe measurement and offline piece proofs; create one measured TimingMap per asset
+stage: clone the live revision; store each MP3 privately as an audio_chapter asset bound to its unit
+(storage.put_private_file: streamed and create-once, because chapter MP3s exceed put_private's 4 MiB
+cap); record ffprobe measurement and offline piece proofs; create one measured TimingMap per asset
 (anchors remapped to the clone by unit/paragraph ordinal); set access audio=free; re-approve the
-copied non-test reader rights and add approved audio read rights for the whitelist; carry the live
-browser acceptance only when the clone's text is identical apart from regenerated identifiers;
-record publication_clearance for formats reader+audio bound to every ready asset hash and the
-evidence document sha256; then mark-ready and publish. A rerun resumes an unfinished clone of the
-same bundle, and reports an already-live identical bundle without creating anything.
+copied reader rights that were approved and non-test on the live revision, citing the new evidence
+document (clone_revision resets approval by design), and add approved non-test audio read rights for
+the whitelist (no audio preview); record publication_clearance for formats reader+audio bound to every
+ready asset hash and the evidence document sha256. The clone stays a DRAFT with no browser evidence;
+stage prints its revision_id, content_sha256 and ready-asset hashes. A rerun with the same bundle
+reports the existing staged draft (resuming an unfinished one) and never makes a second clone; once
+published it reports already_live. Replacing audio that a live revision already carries is refused.
+
+Export the staged draft with `export_audiovisual_source <slug> --revision <revision_id>` to rebuild an
+identical replica and browser-test the reader and the audio player against the same content_sha256.
+
+publish: --browser-report is a repo-relative JSON {"sha256": <staged content_sha256>, "status": "pass",
+"scope": "...", "checks": {"audio_playback": true, ...}}. It must name the staged revision's exact hash,
+pass, and cover audio playback; it is then recorded as the draft's browser evidence, and mark-ready and
+publish run through transition_revision (full validate_revision) in one transaction. Any mismatch or
+failed check raises CommandError and changes nothing.
 """
 import hashlib
 import json
@@ -68,13 +84,6 @@ def file_sha256(path):
         while block := stream.read(storage.CHUNK_BYTES):
             hasher.update(block)
     return hasher.hexdigest()
-
-
-def text_fingerprint(revision):
-    """Text identity without generated unit/anchor ids (clone_revision regenerates both)."""
-    return digest(canonical_bytes([{"title": u.title, "ordinal": u.ordinal, "kind": u.kind,
-        "paragraphs": [{"ordinal": p.ordinal, "kind": p.kind, "text": p.text} for p in u.paragraphs.order_by("ordinal")]}
-        for u in revision.units.order_by("ordinal")]))
 
 
 def read_bundle(folder):
@@ -116,6 +125,18 @@ def read_bundle(folder):
         files[name] = {"path": path, "sha256": file_sha256(path), "bytes": path.stat().st_size, **measured}
     bundle_sha = digest(canonical_bytes({"timing_sha256": sha256(raw), "mp3": {n: f["sha256"] for n, f in files.items()}}))
     return {"rows": rows, "files": files, "bundle_sha256": bundle_sha}
+
+
+def read_report(relative):
+    path = (ROOT / relative).resolve()
+    if Path(relative).is_absolute() or not path.is_relative_to(ROOT.resolve()) or not path.is_file():
+        raise CommandError(f"browser report not found as a repo-relative file: {relative}")
+    raw = path.read_bytes()
+    try:
+        report = json.loads(raw)
+    except ValueError:
+        raise CommandError("browser report is not JSON.") from None
+    return report, f"{relative}#sha256={sha256(raw)}"
 
 
 def read_evidence(relative):
@@ -172,17 +193,28 @@ class Command(BaseCommand):
     help = __doc__.split("\n\n", 1)[0] + " Bundle layout and evidence schema: see this module's docstring."
 
     def add_arguments(self, parser):
+        parser.add_argument("phase", choices=("stage", "publish"))
         parser.add_argument("edition_slug")
         parser.add_argument("--publisher", required=True, help="public_id of an active verified staff publisher")
-        parser.add_argument("--bundle", required=True, help="directory holding timing.json and the chapter MP3s only")
-        parser.add_argument("--evidence", required=True, help="repo-relative clearance JSON under docs/evidence/")
+        parser.add_argument("--bundle", help="stage: directory holding timing.json and the chapter MP3s only")
+        parser.add_argument("--evidence", help="stage: repo-relative clearance JSON under docs/evidence/")
+        parser.add_argument("--browser-report", help="publish: repo-relative browser acceptance JSON for the staged hash")
 
     def handle(self, *args, **options):
         actor = get_user_model().objects.filter(public_id=options["publisher"], is_active=True, is_staff=True).first()
         if actor is None or not actor.is_verified or not actor.has_perm("library.publish_revision"):
             raise CommandError("An active verified staff publisher with library.publish_revision is required.")
-        slug = options["edition_slug"]
-        edition, live = live_revision(slug)
+        edition, live = live_revision(options["edition_slug"])
+        if options["phase"] == "stage":
+            if not options.get("bundle") or not options.get("evidence"):
+                raise CommandError("stage requires --bundle and --evidence.")
+            return self.stage(actor, edition, live, options)
+        if not options.get("browser_report"):
+            raise CommandError("publish requires --browser-report.")
+        return self.publish_staged(actor, edition, live, options["browser_report"])
+
+    def stage(self, actor, edition, live, options):
+        slug = edition.slug
         bundle = read_bundle(options["bundle"])
         doc, doc_sha, evidence_ref = read_evidence(options["evidence"])
         shas = sorted(f["sha256"] for f in bundle["files"].values())
@@ -199,14 +231,46 @@ class Command(BaseCommand):
         draft = self.find_or_clone(actor, edition, live, bundle)
         if draft.state == "draft" and not draft.assets.filter(kind="audio_chapter").exists():
             self.attach(actor, live, draft, bundle, plan, evidence_ref)
-        steps = self.publish(actor, draft, evidence_ref)
         draft.refresh_from_db()
-        report = validate_revision(draft, prepared=prepare_revision_validation(draft.id))
-        self.emit({"status": "published", "edition_id": str(edition.id), "revision_id": str(draft.id),
-            "retired_revision_id": str(live.id), "state": draft.state, "bundle_sha256": bundle["bundle_sha256"],
-            "evidence_ref": evidence_ref, "steps": steps,
+        self.emit({"status": "staged", "edition_id": str(edition.id), "revision_id": str(draft.id), "state": draft.state,
+            "content_sha256": draft.content_sha256, "source_revision_id": str(live.id), "bundle_sha256": bundle["bundle_sha256"],
+            "evidence_ref": evidence_ref,
+            "asset_sha256": {str(a.id): a.sha256 for a in draft.assets.filter(state="ready")},
             "audio": [{"unit_id": str(a.unit_id), "asset_id": str(a.id), "sha256": a.sha256, "duration_ms": a.duration_ms}
-                      for a in draft.assets.filter(kind="audio_chapter").order_by("unit__ordinal")],
+                      for a in draft.assets.filter(kind="audio_chapter").order_by("unit__ordinal")]})
+
+    def publish_staged(self, actor, edition, live, report_path):
+        draft = (Revision.objects.filter(edition=edition, state__in=["draft", "ready"],
+                 validation_evidence__audiovisual_audio__source_revision_id=str(live.id), assets__kind="audio_chapter")
+                 .distinct().order_by("-created_at").first())
+        if draft is None:
+            if live.validation_evidence.get("audiovisual_audio") and live.assets.filter(kind="audio_chapter").exists():
+                return self.emit({"status": "already_live", "edition_id": str(edition.id), "revision_id": str(live.id)})
+            raise CommandError(f"{edition.slug}: no staged audio draft of the live revision; run the stage phase first.")
+        report, report_ref = read_report(report_path)
+        checks = report.get("checks") if isinstance(report, dict) else None
+        if not isinstance(report, dict) or report.get("status") != "pass" or report.get("sha256") != draft.content_sha256:
+            raise CommandError("browser report does not pass for the staged revision's exact content_sha256.")
+        if not isinstance(checks, dict) or checks.get("audio_playback") is not True:
+            raise CommandError("browser report does not cover audio playback (checks.audio_playback must be true).")
+        if not isinstance(report.get("scope"), str) or not report["scope"].strip():
+            raise CommandError("browser report must name its release scope.")
+        browser = {"status": "pass", "sha256": draft.content_sha256, "scope": report["scope"], "checks": checks,
+                   "report": report_ref, "recorded_at": timezone.now().isoformat()}
+        with transaction.atomic():
+            current = Revision.objects.select_for_update().get(pk=draft.pk)
+            if current.content_sha256 != draft.content_sha256:
+                raise CommandError("Staged draft changed while recording browser evidence.")
+            if current.state == "draft":
+                current.validation_evidence = {**current.validation_evidence, "browser": browser}
+                current.version += 1
+                current.save()
+                audit(actor, "revision.evidence", current, {"browser": report_ref, "channel": "server_job"})
+            steps = self.publish(actor, current, report_ref)
+        current.refresh_from_db()
+        report = validate_revision(current, prepared=prepare_revision_validation(current.id))
+        self.emit({"status": "published", "edition_id": str(edition.id), "revision_id": str(current.id),
+            "retired_revision_id": str(live.id), "state": current.state, "browser_report": report_ref, "steps": steps,
             "checks": {c["code"]: c["status"] for c in report["checks"]}})
 
     def emit(self, out):
@@ -271,7 +335,6 @@ class Command(BaseCommand):
             except DomainError as exc:
                 raise CommandError(f"{exc.code}: {exc.message}") from None
             prepared.append((item, unit, asset, pieces))
-        browser = self.carried_browser(live, draft)
         now = timezone.now()
         with transaction.atomic():
             current = Revision.objects.select_for_update().get(pk=draft.pk)
@@ -293,8 +356,6 @@ class Command(BaseCommand):
                 pieces_proofs[str(asset.id)] = pieces
             evidence["media_assets"] = media
             evidence["offline_piece_manifests"] = pieces_proofs
-            if browser:
-                evidence["browser"] = browser
             current.validation_evidence = evidence
             current.access_policy = {**current.access_policy, "audio": "free"}
             current.save()
@@ -321,17 +382,7 @@ class Command(BaseCommand):
             current.validation_evidence = {**current.validation_evidence, "publication_clearance": clearance}
             current.version += 1
             current.save()
-            audit(actor, "revision.evidence", current, {"publication_clearance": evidence_ref,
-                  "browser": browser and browser["report"], "channel": "server_job"})
-
-    def carried_browser(self, live, draft):
-        browser = live.validation_evidence.get("browser", {})
-        if (browser.get("status") != "pass" or browser.get("sha256") != live.content_sha256
-                or text_fingerprint(live) != text_fingerprint(draft)):
-            return None
-        return {**browser, "sha256": draft.content_sha256,
-                "carried_from": {"revision_id": str(live.id), "sha256": live.content_sha256, "text_fingerprint": text_fingerprint(draft),
-                                 "reason": "clone_revision regenerated unit/anchor ids only; text identical"}}
+            audit(actor, "revision.evidence", current, {"publication_clearance": evidence_ref, "channel": "server_job"})
 
     def approve_rights(self, actor, live, current, evidence_ref, now):
         cleared = {(r.format, r.action, tuple(r.territories), r.starts_at, r.ends_at)
@@ -353,9 +404,9 @@ class Command(BaseCommand):
             audit(actor, "rights.create", right, {"format": "audio", "action": "read", "territories": territories(),
                   "channel": "server_job"})
 
-    # --- publish (same as publish_cleared_editions.publish) -----------------------------------
-    def publish(self, actor, revision, evidence_ref):
-        reason = f"Owner-cleared narration audio attached by server job ({evidence_ref})."
+    # --- mark-ready + publish (same as publish_cleared_editions.publish) -----------------------------------
+    def publish(self, actor, revision, report_ref):
+        reason = f"Owner-cleared narration audio; fresh browser acceptance {report_ref}."
         steps = []
         for action in ("mark-ready", "publish"):
             revision.refresh_from_db()
