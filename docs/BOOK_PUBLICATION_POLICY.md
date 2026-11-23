@@ -15,3 +15,13 @@ The installed `earnalism-book-production` skill and its release-workflow referen
 Next integration action: continue the approved implementation sequence for these47 regions and collect the exact book's complete whitelisted-region publication evidence before invoking the existing mark-ready/publish transition. No paid infrastructure, legacy application mutation or publication occurs in this policy update.
 
 Verification: all80 PostgreSQL tests passed; both installed and tracked skill folders validate and their entry/reference bytes match. The restarted loopback Maison server returns HTTP200. Actual draft inspection confirms all47 Reader grants remain, every excluded code is denied, the live pointer is null and missing all-region publication evidence blocks release. See docs/evidence/publication-whitelist-application.json and publication-whitelist-full-suite.log.
+
+## Owner clearance decision, 23 November 2026: The Selfish Giant and বিচারক
+
+The owner directed that the staff web sign-in is not required for these two editions. The owner also authorised the integration lane to make the clearance call from the legacy library records. For these two exact editions only, three things together are the publication clearance across the nine active launch territories for Reader read/preview:
+
+- the per-territory public-domain term evidence;
+- the text-source licence: Project Gutenberg #902 for The Selfish Giant, and Bengali Wikisource under CC BY-SA 4.0 for বিচারক;
+- the owner-held cover provenance.
+
+This does not cover downloads, audio, video, other editions or other territories. Evidence: `docs/evidence/publication-clearance-20261123.json`, bound in each revision's `publication_clearance` by document SHA256, exact text hash and every ready asset hash. Browser acceptance is in `docs/evidence/publication-browser-20261123.json`. Publication runs `python manage.py publish_cleared_editions {import|evidence|publish|status} --publisher <public_id>`, which uses the same audited services and validation gates as the staff API. বিচারক's source, manifest, cover pair and legacy rights records are in `library/intake/bicharak/`.

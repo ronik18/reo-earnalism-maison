@@ -1,0 +1,194 @@
+{
+ "schema": "earnalism.publication-clearance-evidence.v1",
+ "recorded_on": "2026-11-23",
+ "owner_instruction": {
+  "date": "2026-11-23",
+  "text": "Owner instructed: remove the staff sign-in complexity for The Selfish Giant and বিচারক and go live; then, in reply to the request for a clearance call, instructed the integration lane to figure out all the needful autonomously from the earnalism-digital-library repository and unblock the clearance call (option: public-domain term evidence is enough for the 9 launch territories and offered formats), commit the বিচারক cover pair and text under library/intake/, and publish.",
+  "effect": "Owner-authorized policy decision for these two exact editions only: per-territory public-domain term evidence, the text source licence and owner-held cover provenance together constitute publication clearance for the 9 active launch territories and the offered Reader read/preview actions. No lawyer sign-off is implied; no other title, format, territory, audio or video use is covered."
+ },
+ "territories": [
+  "IN",
+  "US",
+  "GB",
+  "BR",
+  "SG",
+  "MY",
+  "ID",
+  "PH",
+  "TH"
+ ],
+ "formats": [
+  "reader"
+ ],
+ "actions": [
+  "read",
+  "preview"
+ ],
+ "downloads": false,
+ "books": {
+  "the-selfish-giant": {
+   "work": "The Selfish Giant",
+   "author": "Oscar Wilde",
+   "author_died": 1900,
+   "first_published": 1888,
+   "text_source": "Project Gutenberg eBook #902 (The Happy Prince and Other Tales); public-domain text, Project Gutenberg trademark/licence boilerplate removed so no PG licence terms attach to the reader edition",
+   "text_source_ref": "https://www.gutenberg.org/ebooks/902",
+   "maison_revision_content_sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+   "territory_terms": {
+    "IN": {
+     "region": "India",
+     "rule": "Copyright Act 1957 s.22: life + 60 years from the year following death",
+     "source": "https://copyright.gov.in/Copyright_Act_1957/chapter_v.html",
+     "expired_end_of": 1960,
+     "status": "public_domain"
+    },
+    "US": {
+     "region": "United States",
+     "rule": "17 U.S.C. 304 / Circular 15a: works first published before 1 January 1931 are in the public domain",
+     "source": "https://www.copyright.gov/circs/circ15a.pdf",
+     "expired_end_of": "n/a: first published 1888, before 1931",
+     "status": "public_domain"
+    },
+    "GB": {
+     "region": "United Kingdom",
+     "rule": "CDPA 1988 s.12: life + 70 years from the end of the calendar year of death",
+     "source": "https://www.legislation.gov.uk/ukpga/1988/48/section/12",
+     "expired_end_of": 1970,
+     "status": "public_domain"
+    },
+    "BR": {
+     "region": "Brazil",
+     "rule": "Law 9610/1998 art.41: life + 70 years from 1 January following death",
+     "source": "https://www.planalto.gov.br/ccivil_03/leis/l9610.htm",
+     "expired_end_of": 1970,
+     "status": "public_domain"
+    },
+    "SG": {
+     "region": "Singapore",
+     "rule": "Copyright Act 2021 s.114: life + 70; terms already expired under the earlier life + 50 rule (before the 2004 extension) are not revived",
+     "source": "https://sso.agc.gov.sg/Act/CA2021?ProvIds=P13-&ViewType=Advance&WiAl=1",
+     "expired_end_of": 1970,
+     "status": "public_domain"
+    },
+    "MY": {
+     "region": "Malaysia",
+     "rule": "Copyright Act 1987 s.17: life + 50 years from the year following death",
+     "source": "https://www.myipo.gov.my/faq/",
+     "expired_end_of": 1950,
+     "status": "public_domain"
+    },
+    "ID": {
+     "region": "Indonesia",
+     "rule": "Law 28/2014 art.58: life + 70 years from 1 January following death",
+     "source": "https://www.wipo.int/wipolex/en/legislation/details/15600",
+     "expired_end_of": 1970,
+     "status": "public_domain"
+    },
+    "PH": {
+     "region": "Philippines",
+     "rule": "IP Code s.213.1: life + 50 years from the year following death",
+     "source": "https://ilaw.ipophil.gov.ph/pluginfile.php/146/mod_resource/content/2/Philippine%20IP%20Code.pdf",
+     "expired_end_of": 1950,
+     "status": "public_domain"
+    },
+    "TH": {
+     "region": "Thailand",
+     "rule": "Copyright Act B.E. 2537 s.19: life + 50 years from the death of the author",
+     "source": "https://web2026.ipthailand.go.th/wp-content/uploads/2025/05/COPYRIGHT-ACT-B.E.-2537-1994.pdf",
+     "expired_end_of": 1950,
+     "status": "public_domain"
+    }
+   },
+   "covers": {
+    "provenance": "library/intake/covers/provenance.json",
+    "front_jpg_sha256": "ccc7923a5dc0d52b2b684a6a0be99de4140849e7a13ca2ebe3618590e13ac32d",
+    "back_jpg_sha256": "04fbc420d4db3f51b14955d01d957e2991bd2b78dc8fa15ffeb31f9245b99366",
+    "basis": "Original Earnalism cover pair created 17 Nov 2026 for the owner with the owner-requested publisher footer; no historical or third-party illustration reused."
+   }
+  },
+  "bicharak": {
+   "work": "বিচারক",
+   "author": "রবীন্দ্রনাথ ঠাকুর (Rabindranath Tagore)",
+   "author_died": 1941,
+   "first_published": 1895,
+   "text_source": "Bengali Wikisource, গল্প-দশক/বিচারক oldid 1624865; transcription layer under CC BY-SA 4.0 (attribution and ShareAlike carried by the edition licence notice); underlying literary text public domain",
+   "text_source_ref": "https://bn.wikisource.org/w/index.php?title=%E0%A6%97%E0%A6%B2%E0%A7%8D%E0%A6%AA-%E0%A6%A6%E0%A6%B6%E0%A6%95%2F%E0%A6%AC%E0%A6%BF%E0%A6%9A%E0%A6%BE%E0%A6%B0%E0%A6%95&oldid=1624865",
+   "source_json_sha256": "605628ac1392764be43837c63840f5dc1c78794c59dd7d90bf1a2c3c89835b6a",
+   "legacy_licensed_content_sha256": "c9e4ed3927535c11a5d1d5a4729f0c8a1371952a33a6e0e6d36514b3d249b089",
+   "legacy_rights_decision": "library/intake/bicharak/legacy-rights_decision.json (India, ACCEPTED, valid to 2036-10-02)",
+   "territory_terms": {
+    "IN": {
+     "region": "India",
+     "rule": "Copyright Act 1957 s.22: life + 60 years from the year following death",
+     "source": "https://copyright.gov.in/Copyright_Act_1957/chapter_v.html",
+     "expired_end_of": 2001,
+     "status": "public_domain"
+    },
+    "US": {
+     "region": "United States",
+     "rule": "17 U.S.C. 304 / Circular 15a: works first published before 1 January 1931 are in the public domain",
+     "source": "https://www.copyright.gov/circs/circ15a.pdf",
+     "expired_end_of": "n/a: first published 1895, before 1931",
+     "status": "public_domain"
+    },
+    "GB": {
+     "region": "United Kingdom",
+     "rule": "CDPA 1988 s.12: life + 70 years from the end of the calendar year of death",
+     "source": "https://www.legislation.gov.uk/ukpga/1988/48/section/12",
+     "expired_end_of": 2011,
+     "status": "public_domain"
+    },
+    "BR": {
+     "region": "Brazil",
+     "rule": "Law 9610/1998 art.41: life + 70 years from 1 January following death",
+     "source": "https://www.planalto.gov.br/ccivil_03/leis/l9610.htm",
+     "expired_end_of": 2011,
+     "status": "public_domain"
+    },
+    "SG": {
+     "region": "Singapore",
+     "rule": "Copyright Act 2021 s.114: life + 70; terms already expired under the earlier life + 50 rule (before the 2004 extension) are not revived",
+     "source": "https://sso.agc.gov.sg/Act/CA2021?ProvIds=P13-&ViewType=Advance&WiAl=1",
+     "expired_end_of": 2011,
+     "status": "public_domain"
+    },
+    "MY": {
+     "region": "Malaysia",
+     "rule": "Copyright Act 1987 s.17: life + 50 years from the year following death",
+     "source": "https://www.myipo.gov.my/faq/",
+     "expired_end_of": 1991,
+     "status": "public_domain"
+    },
+    "ID": {
+     "region": "Indonesia",
+     "rule": "Law 28/2014 art.58: life + 70 years from 1 January following death",
+     "source": "https://www.wipo.int/wipolex/en/legislation/details/15600",
+     "expired_end_of": 2011,
+     "status": "public_domain"
+    },
+    "PH": {
+     "region": "Philippines",
+     "rule": "IP Code s.213.1: life + 50 years from the year following death",
+     "source": "https://ilaw.ipophil.gov.ph/pluginfile.php/146/mod_resource/content/2/Philippine%20IP%20Code.pdf",
+     "expired_end_of": 1991,
+     "status": "public_domain"
+    },
+    "TH": {
+     "region": "Thailand",
+     "rule": "Copyright Act B.E. 2537 s.19: life + 50 years from the death of the author",
+     "source": "https://web2026.ipthailand.go.th/wp-content/uploads/2025/05/COPYRIGHT-ACT-B.E.-2537-1994.pdf",
+     "expired_end_of": 1991,
+     "status": "public_domain"
+    }
+   },
+   "covers": {
+    "provenance": "library/intake/bicharak/legacy-cover_provenance.json",
+    "owner_declaration": "library/intake/bicharak/legacy-owner_artwork_declaration.json",
+    "front_jpg_sha256": "a6cac9c9cab2b1b6ec9355e29432f55f42c95ad956b6492683a527046d79e519",
+    "back_jpg_sha256": "bb0f98a310c5e83d7bd9220f0ee834dbf5739873698933eed3cae15ac4b0d845",
+    "basis": "Owner-created front/back artwork with owner-held copyright, accepted in the legacy rights decision by exact delivery hash."
+   }
+  }
+ },
+ "binding": "The database publication_clearance record binds this document by SHA256 to the exact revision content_sha256 and every ready asset SHA256 at publication time."
+}

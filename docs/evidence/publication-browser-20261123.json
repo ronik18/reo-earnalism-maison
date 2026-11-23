@@ -1,0 +1,115 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-23",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the production release code (main 5904309) serving a PostgreSQL replica whose revisions reproduce production byte-for-byte: Selfish Giant rows exported from production with identical unit/paragraph/anchor IDs and recomputed text hash; বিচারক imported with the same publisher identity and deterministic operation IDs the production job uses. Signed in as a staff publisher; desktop 1440x900 and mobile 390x844.",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "the-selfish-giant": {
+   "status": "pass",
+   "sha256": "8431612b87bf77f609c4f2f6944d185fa7ea69709b10d6be259e85f27c8165d4",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 32,
+     "paragraphs_expected": 32,
+     "text_and_anchor_order_exact": true,
+     "first": "EVERY afternoon, as they were coming from school, the childr",
+     "last": " lying dead under the tree, all covered with white blossoms.",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 32,
+     "paragraphs_expected": 32,
+     "text_and_anchor_order_exact": true,
+     "first": "EVERY afternoon, as they were coming from school, the childr",
+     "last": " lying dead under the tree, all covered with white blossoms.",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  },
+  "bicharak": {
+   "status": "pass",
+   "sha256": "400c8b98521511a8a50de510b346b7f4c2f9422be333518fa98d6fe6e440e74d",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 39,
+     "paragraphs_expected": 39,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "জ্বল প্রভায় স্বর্ণময়ী দেবীপ্রতিমার মত উদ্ভাসিত হইয়া উঠিল।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 39,
+     "paragraphs_expected": 39,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "জ্বল প্রভায় স্বর্ণময়ী দেবীপ্রতিমার মত উদ্ভাসিত হইয়া উঠিল।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  }
+ },
+ "post_publication": "Production serving is verified separately after publish (anonymous preview, member reader, covers, carousel links)."
+}
