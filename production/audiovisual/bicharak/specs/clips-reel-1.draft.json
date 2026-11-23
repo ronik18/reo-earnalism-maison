@@ -5,16 +5,25 @@
     "run_ids": [
       "diwali-wan22-pilot-v2"
     ],
-    "related_runs": "owner-authorized v3 sweets recovery and the fresh two-start Diwali pilot (WAN22_COLAB.md: 'Verified selective sweets recovery'); their run ids are not written in WAN22_COLAB.md — copy them from the retained Wan journals before building",
+    "run_ids_to_copy_from_retained_journals_before_build": [
+      "v3 selective sweets recovery (512x896, 24 steps, completed 495.04 s) — WAN22_COLAB.md 'Verified selective sweets recovery'",
+      "v14 homecoming + native portrait family (completed 479.08 s and 490.90 s) — WAN22_COLAB.md v14 section",
+      "v16 native 512x896 family attempt (completed 470.89 s) — WAN22_COLAB.md v16 section"
+    ],
+    "note": "Only diwali-wan22-pilot-v2 is written literally in WAN22_COLAB.md; no Wan journal is present in this checkout. Do not use diwali-wan22-pilot-v3 (it appears only in tests and the recipe example).",
     "profile": "l4-balanced-v2",
     "observed_step_seconds": 11.4,
-    "observed_clip_seconds_end_to_end": [
-      476.34,
+    "observed_clip_seconds_512x896": {
+      "v2 homecoming": 476.34,
+      "v3 sweets": 495.04,
+      "v14 homecoming": 479.08,
+      "v14 family": 490.9,
+      "v16 family": 470.89
+    },
+    "observed_clip_seconds_896x512_landscape_v12": [
       484.71,
-      495.04,
       499.95
     ],
-    "completed_clips": 4,
     "failed_attempts": "v2 sweets attempt stopped by the original forecast (37.34 s/step warm-up bias), retained as failed",
     "source": "skills/earnalism-video/software/WAN22_COLAB.md"
   },

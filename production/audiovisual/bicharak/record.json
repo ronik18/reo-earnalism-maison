@@ -38,33 +38,6 @@
       "sha256": "92d58fc80fc5240956f455d5663f4f5fa5c4cb48096358d2dc72fa2d45d1bc30"
     },
     {
-      "bytes": 1917,
-      "kind": "caption",
-      "meta": {
-        "target": "reel-1"
-      },
-      "path": "reels/reel-1/caption.txt",
-      "sha256": "5bf9d21d74d2686919dddcc26473c28845dcbf4c2d2ed08db5ccf58dc339a064"
-    },
-    {
-      "bytes": 2308,
-      "kind": "reel_script",
-      "meta": {
-        "target": "reel-1"
-      },
-      "path": "reels/reel-1/script.json",
-      "sha256": "41cf865dde7602ec8cd79c60a7d09f564ec9b4e950660324c0cb2a4700154bd0"
-    },
-    {
-      "bytes": 1619,
-      "kind": "shot_list",
-      "meta": {
-        "target": "reel-1"
-      },
-      "path": "reels/reel-1/shots.json",
-      "sha256": "92d58fc80fc5240956f455d5663f4f5fa5c4cb48096358d2dc72fa2d45d1bc30"
-    },
-    {
       "bytes": 1981,
       "kind": "caption",
       "meta": {
@@ -130,10 +103,10 @@
       "sha256": "1fa249c880fde84f7edde45ed56050f7072c80e9d31763b69c0038c8ede3c835"
     }
   ],
-  "created_at": "2026-11-23T09:44:49.365154+00:00",
+  "created_at": "2026-11-23T09:57:44.658578+00:00",
   "events": [
     {
-      "at": "2026-11-23T09:44:49.366314+00:00",
+      "at": "2026-11-23T09:57:44.660295+00:00",
       "detail": {
         "audio_rights_on_maison": false,
         "slug": "bicharak"
@@ -142,7 +115,7 @@
       "stage": "init"
     },
     {
-      "at": "2026-11-23T09:44:49.485876+00:00",
+      "at": "2026-11-23T09:57:44.776370+00:00",
       "detail": {
         "films": 1,
         "flags": [],
@@ -152,7 +125,7 @@
       "stage": "plan"
     },
     {
-      "at": "2026-11-23T09:46:38.939708+00:00",
+      "at": "2026-11-23T09:57:44.916124+00:00",
       "detail": {
         "shots": 10,
         "target": "reel-1"
@@ -161,16 +134,7 @@
       "stage": "reel"
     },
     {
-      "at": "2026-11-23T09:46:46.984054+00:00",
-      "detail": {
-        "shots": 10,
-        "target": "reel-1"
-      },
-      "result": "scripted",
-      "stage": "reel"
-    },
-    {
-      "at": "2026-11-23T09:47:00.483678+00:00",
+      "at": "2026-11-23T09:57:45.029644+00:00",
       "detail": {
         "forecast_units": 2.6400166666666665,
         "job_id": "narration-film-01",
@@ -180,7 +144,7 @@
       "stage": "job"
     },
     {
-      "at": "2026-11-23T09:47:00.484256+00:00",
+      "at": "2026-11-23T09:57:45.034155+00:00",
       "detail": {
         "job_id": "narration-film-01",
         "kind": "narration",
@@ -190,7 +154,7 @@
       "stage": "cli"
     },
     {
-      "at": "2026-11-23T09:48:41.042454+00:00",
+      "at": "2026-11-23T09:57:45.152995+00:00",
       "detail": {
         "forecast_units": 2.540861111111111,
         "job_id": "stills-film-01",
@@ -200,7 +164,7 @@
       "stage": "job"
     },
     {
-      "at": "2026-11-23T09:48:41.043699+00:00",
+      "at": "2026-11-23T09:57:45.155823+00:00",
       "detail": {
         "job_id": "stills-film-01",
         "kind": "stills",
@@ -210,7 +174,7 @@
       "stage": "cli"
     },
     {
-      "at": "2026-11-23T09:48:41.194454+00:00",
+      "at": "2026-11-23T09:57:45.280990+00:00",
       "detail": {
         "forecast_units": 0.8800055555555554,
         "job_id": "stills-reel-1",
@@ -220,7 +184,7 @@
       "stage": "job"
     },
     {
-      "at": "2026-11-23T09:48:41.195190+00:00",
+      "at": "2026-11-23T09:57:45.281383+00:00",
       "detail": {
         "job_id": "stills-reel-1",
         "kind": "stills",
@@ -230,7 +194,7 @@
       "stage": "cli"
     },
     {
-      "at": "2026-11-23T09:48:52.954995+00:00",
+      "at": "2026-11-23T09:57:45.434757+00:00",
       "detail": {
         "forecast_units": 1.0411333333333332,
         "job_id": "music-film-01",
@@ -240,7 +204,7 @@
       "stage": "job"
     },
     {
-      "at": "2026-11-23T09:48:52.955720+00:00",
+      "at": "2026-11-23T09:57:45.436175+00:00",
       "detail": {
         "job_id": "music-film-01",
         "kind": "music",
@@ -250,7 +214,7 @@
       "stage": "cli"
     }
   ],
-  "ledger": "/home/user/reo-earnalism-maison/production/audiovisual/allowance-ledger.json",
+  "ledger": "../allowance-ledger.json",
   "schema": "earnalism.audiovisual_record.v1",
   "source": {
     "content_sha256": "400c8b98521511a8a50de510b346b7f4c2f9422be333518fa98d6fe6e440e74d",

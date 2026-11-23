@@ -367,7 +367,18 @@
       "forecast_cu_takes_1": 4.8,
       "forecast_cu_takes_2": 9.41,
       "forecast_cu_at_measured_balanced_rate_11_5": 1.9,
-      "title_total_if_built_cu": 12.89
+      "title_total_if_built_cu": 12.89,
+      "wan_prior_evidence": {
+        "literal_run_ids_in_repo": [
+          "diwali-wan22-pilot-v2"
+        ],
+        "owner_must_copy_run_ids_from_retained_journals": [
+          "v3 selective sweets recovery (512x896, 24 steps, completed 495.04 s) — WAN22_COLAB.md 'Verified selective sweets recovery'",
+          "v14 homecoming + native portrait family (completed 479.08 s and 490.90 s) — WAN22_COLAB.md v14 section",
+          "v16 native 512x896 family attempt (completed 470.89 s) — WAN22_COLAB.md v16 section"
+        ],
+        "why": "no Wan journal is in this checkout and WAN22_COLAB.md names those runs only by version label; ids are not invented. diwali-wan22-pilot-v3 appears only in tests and the recipe example and must not be used unless a journal confirms it."
+      }
     }
   },
   "owner_next_steps": {
@@ -382,14 +393,47 @@
       "Fetch the bundles from GitHub at the committed paths above; run each notebook on an L4 in the existing Colab Pro account.",
       "Record the CU each session used (Colab usage panel) for --units; if sessions overlap, record the session's own observation.",
       "Review the five anchor stills listed in specs/world-bible.json before trusting the rest; regenerate only failing stills with a new small stills job.",
-      "After stills-reel-1 is imported: copy real Wan run ids into specs/clips-reel-1.draft.json prior_attempt_evidence, then job reel_clips --reel 1 --spec <that file>.",
+      "After stills-reel-1 is imported: copy the Wan run ids listed under reel_1.reel_clips_projected_forecast.wan_prior_evidence.owner_must_copy_run_ids_from_retained_journals into specs/clips-reel-1.draft.json prior_attempt_evidence.run_ids, then job reel_clips --reel 1 --spec <that file>.",
       "Replace the ESTIMATE rates in production/audiovisual/rates.json with measured values from these first runs before building further jobs."
-    ]
+    ],
+    "status_command": "cd skills/earnalism-audiovisual/software && python3 -m eav.cli status --root ../../../production/audiovisual/bicharak"
   },
   "not_certified": [
     "no GPU output exists yet",
     "listening and visual review unassessed",
     "Maison audio not cleared; Stream video held",
     "no publication of any kind"
-  ]
+  ],
+  "export_sha256_check": "12fc3cb0b8cde802c6a03d4a336c88b64bd2f8f4f96964bce4e8edb86e47a440",
+  "ledger_pin": {
+    "record_json_ledger": "../allowance-ledger.json",
+    "resolves_to": "production/audiovisual/allowance-ledger.json",
+    "rule": "R17 (commit a185d80): relative to the title root; absolute pins are refused"
+  },
+  "regenerated": {
+    "at": "2026-11-23",
+    "reason": "R17: the first pilot commit 2efea6e pinned the ledger by absolute container path",
+    "removed": [
+      "production/audiovisual/bicharak/",
+      "production/audiovisual/allowance-ledger.json"
+    ],
+    "removed_content_preserved_in_git": "2efea6e",
+    "inputs_unchanged": "same source export (sha256 12fc3cb0…a440), same rates.json, same specs and reel script, same job ids",
+    "old_ledger_entries_equal_new": true,
+    "bundle_files_changed": [],
+    "bundle_files_unchanged": [
+      "production/audiovisual/bicharak/jobs/music-film-01/build-manifest.json",
+      "production/audiovisual/bicharak/jobs/music-film-01/inputs.zip",
+      "production/audiovisual/bicharak/jobs/music-film-01/music.ipynb",
+      "production/audiovisual/bicharak/jobs/narration-film-01/build-manifest.json",
+      "production/audiovisual/bicharak/jobs/narration-film-01/inputs.zip",
+      "production/audiovisual/bicharak/jobs/narration-film-01/narration.ipynb",
+      "production/audiovisual/bicharak/jobs/stills-film-01/build-manifest.json",
+      "production/audiovisual/bicharak/jobs/stills-film-01/inputs.zip",
+      "production/audiovisual/bicharak/jobs/stills-film-01/stills.ipynb",
+      "production/audiovisual/bicharak/jobs/stills-reel-1/build-manifest.json",
+      "production/audiovisual/bicharak/jobs/stills-reel-1/inputs.zip",
+      "production/audiovisual/bicharak/jobs/stills-reel-1/stills.ipynb"
+    ]
+  }
 }
