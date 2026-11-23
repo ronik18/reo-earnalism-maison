@@ -133,6 +133,32 @@ class ImporterTests(unittest.TestCase):
             self.run_import()
         self.assert_nothing_changed()
 
+    def test_missing_model_holds(self):
+        self.download()
+        m = json.loads((self.dl / "manifest.json").read_text())
+        del m["model"]
+        (self.dl / "manifest.json").write_text(json.dumps(m))
+        with self.assertRaises(ImportHeld):
+            self.run_import()
+        self.assert_nothing_changed()
+
+    def test_record_failure_is_all_or_nothing(self):
+        self.download()
+        real = self.record.add_artifact
+        n = []
+
+        def flaky(*a, **k):
+            n.append(1)
+            if len(n) == 2:
+                raise OSError("disk full")
+            return real(*a, **k)
+        with patch.object(self.record, "add_artifact", flaky):
+            with self.assertRaises(OSError):
+                self.run_import()
+        self.assert_nothing_changed()
+        self.assertEqual(len(Record.load(self.record.root).data["artifacts"]), 1)
+        self.assertEqual(len(self.run_import()), 2)
+
     def test_invalid_units_and_double_import_hold(self):
         self.download()
         with self.assertRaises(ImportHeld):
@@ -154,7 +180,7 @@ class ReelImportTests(unittest.TestCase):
         self.ledger.reserve("garden-book", "2026-11", 5, "reel-clips-1")
         d = self.root / "rec" / "jobs" / "reel-clips-1"
         d.mkdir(parents=True)
-        (d / "job.json").write_text('{"scenes": []}')
+        (d / "job.json").write_text(json.dumps({"scenes": [{"id": "s1"}, {"id": "s2"}]}))
         (d / "wan22-batch-inputs.zip").write_bytes(b"zip")
         (d / "build-manifest.json").write_text(json.dumps(
             {"schema": "earnalism.wan22-batch-build.v1"}))
@@ -165,7 +191,7 @@ class ReelImportTests(unittest.TestCase):
         self.archive.write_bytes(b"archive")
         self.calls = []
 
-    def fake_batch(self, clips=None, error=None):
+    def fake_batch(self, clips=None, error=None, rejected=()):
         calls = self.calls
 
         class Batch:
@@ -178,12 +204,14 @@ class ReelImportTests(unittest.TestCase):
                 out = Path(destination) / "outputs"
                 out.mkdir()
                 rows = []
-                for sid in clips if clips is not None else ["s1"]:
+                for sid in clips if clips is not None else ["s1", "s2"]:
                     (out / f"{sid}.mp4").write_bytes(b"mp4-" + sid.encode())
                     rows.append({"scene": sid, "file": str(out / f"{sid}.mp4"),
                                  "sha256": sha(b"mp4-" + sid.encode()),
                                  "source_image_sha256": "i" * 64,
                                  "technical_verified": True, "motion_accepted": False})
+                (Path(destination) / "import-receipt.json").write_text(
+                    json.dumps({"clips": rows, "rejected": list(rejected)}))
                 return rows
         return patch.object(importer, "_load_wan_batch", return_value=Batch)
 
@@ -216,10 +244,65 @@ class ReelImportTests(unittest.TestCase):
         with self.fake_batch(error=ValueError("Export archive hash mismatch")):
             with self.assertRaises(ImportHeld):
                 self.run_import()
-        self.assertFalse((self.record.root / "reel_clips").exists() and
-                         any((self.record.root / "reel_clips").iterdir()))
+        self.assertFalse((self.record.root / "reel_clips" / "reel-clips-1").exists())
         self.assertEqual(self.record.data["artifacts"], [])
         self.assertEqual(self.ledger._load()[0]["state"], "reserved")
+
+    def assert_reel_unchanged(self):
+        self.assertFalse((self.record.root / "reel_clips" / "reel-clips-1").exists())
+        self.assertEqual(self.record.data["artifacts"], [])
+        self.assertEqual(self.record.data["events"], [])
+        self.assertEqual(self.ledger._load()[0]["state"], "reserved")
+
+    def test_reel_missing_scene_holds(self):
+        with self.fake_batch(clips=["s1"]):
+            with self.assertRaises(ImportHeld):
+                self.run_import()
+        self.assert_reel_unchanged()
+
+    def test_reel_rejected_clip_holds(self):
+        with self.fake_batch(rejected=[{"scene": "s3", "reason": "bad"}]):
+            with self.assertRaises(ImportHeld):
+                self.run_import()
+        self.assert_reel_unchanged()
+
+    def test_reel_preexisting_destination_is_preserved(self):
+        dest = self.record.root / "reel_clips" / "reel-clips-1"
+        dest.mkdir(parents=True)
+        (dest / "keep.txt").write_text("x")
+        with self.fake_batch():
+            with self.assertRaises(ImportHeld):
+                self.run_import()
+        self.assertTrue((dest / "keep.txt").exists())
+
+    def test_reel_unexpected_error_cleans_up_and_propagates(self):
+        with self.fake_batch(error=KeyboardInterrupt()):
+            with self.assertRaises(KeyboardInterrupt):
+                self.run_import()
+        self.assert_reel_unchanged()
+
+    def test_reel_record_failure_is_all_or_nothing(self):
+        real = self.record.add_artifact
+        n = []
+
+        def flaky(*a, **k):
+            n.append(1)
+            if len(n) == 2:
+                raise OSError("disk full")
+            return real(*a, **k)
+        with self.fake_batch(), patch.object(self.record, "add_artifact", flaky):
+            with self.assertRaises(Exception):
+                self.run_import()
+        self.assert_reel_unchanged()
+        self.assertEqual(Record.load(self.record.root).data["artifacts"], [])
+        with self.fake_batch():
+            self.assertEqual(len(self.run_import()), 3)
+
+    def test_reel_real_import_export_wrong_sha_holds(self):
+        with patch.object(importer, "_load_wan_batch", colab_jobs._load_wan_batch):
+            with self.assertRaises(ImportHeld):
+                self.run_import(sha="0" * 64)
+        self.assert_reel_unchanged()
 
     def test_reel_with_no_accepted_clips_holds(self):
         with self.fake_batch(clips=[]):

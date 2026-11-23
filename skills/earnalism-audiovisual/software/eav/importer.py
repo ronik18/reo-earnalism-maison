@@ -65,21 +65,39 @@ def import_job(record, job: dict, downloaded_dir, ledger, actual_units: float,
     if build.get("job_id", job_id) != job_id:
         raise ImportHeld("build manifest belongs to a different job")
     _preflight_ledger(ledger, job_id, actual_units)
-    if kind == "reel_clips":
-        artifacts, detail = _import_reel(record, job, job_id, archive, archive_sha256)
-    elif kind in ("narration", "stills", "music"):
-        artifacts, detail = _import_notebook(record, job, job_id, kind, build,
-                                             Path(downloaded_dir))
-    else:
+    if kind not in ("narration", "stills", "music", "reel_clips"):
         raise ImportHeld(f"unknown job kind: {kind!r}")
-    ledger.settle(job_id, actual_units)
-    record.event("import", "accepted", {"job_id": job_id, "kind": kind,
-                                        "actual_units": actual_units,
-                                        "files": [a["path"] for a in artifacts], **detail})
+    dest = record.root / kind / job_id
+    if dest.exists():
+        raise ImportHeld(f"already imported: {dest}")
+    parent_existed = dest.parent.exists()
+    snapshot = (list(record.data["artifacts"]), list(record.data["events"]))
+    try:  # all or nothing: files, record rows and ledger
+        if kind == "reel_clips":
+            artifacts, detail = _import_reel(record, job, job_id, dest, archive, archive_sha256)
+        else:
+            artifacts, detail = _import_notebook(record, job, job_id, kind, build,
+                                                 Path(downloaded_dir), dest)
+        record.event("import", "accepted", {"job_id": job_id, "kind": kind,
+                                            "actual_units": actual_units,
+                                            "files": [a["path"] for a in artifacts], **detail})
+        ledger.settle(job_id, actual_units)
+    except BaseException:
+        record.data["artifacts"], record.data["events"] = snapshot
+        try:
+            record._save()
+        finally:
+            shutil.rmtree(dest, ignore_errors=True)
+            if not parent_existed:
+                try:
+                    dest.parent.rmdir()
+                except OSError:
+                    pass
+        raise
     return artifacts
 
 
-def _import_notebook(record, job, job_id, kind, build, folder: Path):
+def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path):
     if not folder.is_dir():
         raise ImportHeld(f"downloaded folder not found: {folder}")
     manifest = _read_json(folder / "manifest.json", "manifest.json")
@@ -112,10 +130,9 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path):
     for name, digest in outputs.items():
         if sha256_file(present[name]) != digest:
             raise ImportHeld(f"sha256 mismatch: {name}")
-    dest = record.root / kind / job_id
-    if dest.exists():
-        raise ImportHeld(f"already imported: {dest}")
     model = manifest.get("model")
+    if not isinstance(model, dict) or not model:
+        raise ImportHeld("manifest.json has no MODEL_INFO (model)")
     staging = Path(tempfile.mkdtemp(dir=record.root, prefix=".import-"))
     try:
         for name in outputs:
@@ -134,35 +151,30 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path):
     return artifacts, {"model": model, "input_zip_sha256": zip_sha}
 
 
-def _import_reel(record, job, job_id, archive, archive_sha256):
+def _import_reel(record, job, job_id, dest: Path, archive, archive_sha256):
     if archive is None or not archive_sha256:
         raise ImportHeld("reel_clips import needs archive and archive_sha256")
     job_path = Path(job["inputs_zip"]).parent / "job.json"
     if not job_path.is_file():
         raise ImportHeld("built job.json not found next to the inputs zip")
-    dest = record.root / "reel_clips" / job_id
-    if dest.exists():
-        raise ImportHeld(f"already imported: {dest}")
+    expected = [s["id"] for s in _read_json(job_path, "job.json").get("scenes", [])]
     batch = _load_wan_batch()
-    try:
+    try:  # import_export creates dest; the caller removes it on any failure
         clips = batch.import_export(Path(archive), dest, archive_sha256, job_path)
-        if not clips:
-            raise ImportHeld("export contained no technically accepted clips")
         rows = [dict(c) for c in clips]
-        meta_base = {"job_id": job_id, "job_kind": "reel_clips",
-                     "archive_sha256": archive_sha256}
-        artifacts = [record.add_artifact("reel_clip", Path(c["file"]), {
-            **meta_base, "scene": c["scene"],
-            "source_image_sha256": c.get("source_image_sha256"),
-            "technical_verified": bool(c.get("technical_verified")),
-            "motion_accepted": False}) for c in rows]
-        receipt = dest / "import-receipt.json"
-        if receipt.is_file():
-            artifacts.append(record.add_artifact("import_receipt", receipt, meta_base))
-    except ImportHeld:
-        shutil.rmtree(dest, ignore_errors=True)
-        raise
+        receipt = _read_json(dest / "import-receipt.json", "import-receipt.json")
     except (ValueError, OSError, KeyError, RuntimeError, zipfile.BadZipFile) as e:
-        shutil.rmtree(dest, ignore_errors=True)
         raise ImportHeld(f"reel export rejected: {e}") from None
+    if receipt.get("rejected") != []:
+        raise ImportHeld(f"export rejected clips: {receipt.get('rejected')!r}")
+    if sorted(c["scene"] for c in rows) != sorted(expected) or not expected:
+        raise ImportHeld("accepted clips do not cover exactly the job's scenes")
+    meta_base = {"job_id": job_id, "job_kind": "reel_clips", "archive_sha256": archive_sha256}
+    artifacts = [record.add_artifact("reel_clip", Path(c["file"]), {
+        **meta_base, "scene": c["scene"],
+        "source_image_sha256": c.get("source_image_sha256"),
+        "technical_verified": bool(c.get("technical_verified")),
+        "motion_accepted": False}) for c in rows]
+    artifacts.append(record.add_artifact("import_receipt", dest / "import-receipt.json",
+                                         meta_base))
     return artifacts, {"archive_sha256": archive_sha256}
