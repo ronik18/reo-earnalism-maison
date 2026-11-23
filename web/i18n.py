@@ -249,7 +249,7 @@ STRINGS = {
     "draft_review_notice": ("Staff draft review · not published · customer access remains blocked", "কর্মীদের খসড়া পর্যালোচনা · প্রকাশিত নয় · পাঠকের প্রবেশ বন্ধ রয়েছে"),
     "back_cover": ("Back cover", "পিছনের প্রচ্ছদ"),
     "draft_edition": ("Reader · draft edition", "পাঠকক্ষ · খসড়া সংস্করণ"),
-    "local_edition": ("Original local test edition", "মৌলিক স্থানীয় পরীক্ষার বই"),
+    "local_edition": ("Earnalism edition", "আর্নালিজম সংস্করণ"),
     "read": ("Read", "পড়ুন"), "listen": ("Listen", "শুনুন"), "watch": ("Watch", "দেখুন"),
     "preview": ("Read the free preview", "বিনামূল্যে নমুনা পড়ুন"),
     "read_edition": ("Open this edition", "এই সংস্করণ খুলুন"),
