@@ -58,6 +58,17 @@ class SkillFileTests(unittest.TestCase):
                        "stream", "public-domain"):
             self.assertIn(phrase, low, phrase)
 
+    def test_reel_recipe_documents_clips_spec(self):
+        text = (SKILL / "references" / "reel-recipe.md").read_text(encoding="utf-8")
+        self.assertIn("## Clips spec", text)
+        for key in ("art_dir", "prior_attempt_evidence", "shots", '"id"', '"image"', '"seed"',
+                    '"prompt"', "l4-balanced-v2"):
+            self.assertIn(key, text, key)
+
+    def test_pressure_results_recorded(self):
+        text = (SKILL / "references" / "pressure-tests.md").read_text(encoding="utf-8")
+        self.assertEqual(text.count("Observed with the skill (2026-11-23): PASS"), 3)
+
     def test_mirror_identical(self):
         canon, mirror = _files(CANONICAL), _files(MIRROR)
         self.assertTrue(canon, "canonical skill folder is empty")

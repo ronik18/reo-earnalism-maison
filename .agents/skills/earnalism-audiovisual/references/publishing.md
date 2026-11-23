@@ -16,19 +16,23 @@ Root/Integration owns provider mutations; this skill prepares and stages.
    writes one 96 kbps MP3 per Maison unit: the narration with its best-fit background
    score (`<unit_id>.wav` per chapter from `earnalism-audiobook-score`), ducked under
    speech and mastered to −16 LUFS by `eav.mix.duck_and_master`. It refuses without a
-   score; `--dry` (narration only) is allowed only when the owner asks for it and is
+   score, or when a bed is shorter than its chapter. `--dry` (narration only) is allowed
+   only when the owner asks for it, is mastered to the same −16 LUFS / −1 dBTP gate and is
    recorded in the evidence draft. It also writes `timing.json` (paragraph segments
    measured by `eav.film.narration_track`, plus a `provenance` block). It also writes
    `<root>/maison/audiovisual-clearance-evidence.draft.json`
-   (schema `earnalism.audiovisual-clearance-evidence.v1`) with `territories: []` and
-   `owner_approval: null`, so `stage` refuses it as written.
+   (schema `earnalism.audiovisual-clearance-evidence.v1`) with `status: DRAFT_NOT_APPROVED`,
+   `territories: []` and `owner_approval: null`. `stage` refuses it as written.
 2. **Clearance (per title).** The owner pre-authorised the public-domain pattern of
-   `docs/evidence/publication-clearance-20261123.json` for audio and video. Complete the
-   draft: territories = the active whitelist, term per territory, text-source licence,
-   cover provenance, generator and music licences, asset hashes. Get the owner's approval
-   and save it under `docs/evidence/`. Claude never marks clearance on its own, never
-   edits `publication_clearance` or rights rows by hand. Non-public-domain titles are
-   refused.
+   `docs/evidence/publication-clearance-20261123.json` for audio and video. The agent
+   prepares the draft: territories = the active whitelist, term per territory,
+   text-source licence, cover provenance, generator and music licences, asset hashes.
+   **The owner approves it**: the owner (not the agent) sets `owner_approval`
+   `{"by": <who>, "at": <ISO time>}` and a non-draft `status`; it is saved under
+   `docs/evidence/`. **`stage` enforces this**: it refuses a status starting with
+   `DRAFT` or a missing/blank `owner_approval`, and changes nothing. The agent never
+   fills in the approval, never edits `publication_clearance` or rights rows by hand.
+   Non-public-domain titles are refused.
 3. Server (root lane): `python manage.py attach_audiovisual_audio stage <slug> --publisher
    <public_id> --bundle <bundle dir> --evidence docs/evidence/<file>.json`. It clones the
    live revision into a draft, stores the MP3s privately and validates the timing.

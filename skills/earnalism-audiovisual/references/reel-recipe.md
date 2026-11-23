@@ -65,6 +65,38 @@ or 120 s (200–245). Each reel is its own 9:16 composition, never a crop of the
    designed match-cut or a short dissolve into frame 1 where the action resolves back into
    the hook image. QC checks that the join reads as continuous, not pixel-identical.
 
+## Clips spec (`job reel_clips --reel N --spec clips.json`)
+
+Example shape (replace the evidence values with the actual journal entries):
+
+```json
+{"art_dir": "<title root>/stills/<reel-N stills job_id>",
+ "prior_attempt_evidence": {"run_ids": ["diwali-wan22-pilot-v2", "diwali-wan22-pilot-v3"],
+                            "profile": "l4-balanced-v2", "observed_step_seconds": 11.4,
+                            "completed_clips": 2, "source": "earnalism-video/software/WAN22_COLAB.md"},
+ "shots": [{"id": "shot-01", "image": "reel-1-shot-01.png", "seed": 4101,
+            "prompt": "<what moves and how; camera locked-off; negatives>"}]}
+```
+
+- `art_dir`: the folder holding the imported keyframe stills (`<root>/stills/<job_id>/`
+  after `import`). Relative paths resolve against the spec file's folder.
+- `prior_attempt_evidence` (required by the `wan22` batch contract, non-empty): the
+  retained provenance that qualifies the `l4-balanced-v2` profile for this run. It names
+  the earlier Wan runs this one builds on (their run ids, observed s/step, completed and
+  failed clips), copied from the Wan journals recorded in
+  `earnalism-video/software/WAN22_COLAB.md`. For a recovery of a failed reel clip it
+  names that job id and its import receipt instead. It is evidence, never invented
+  numbers.
+- `shots`: one entry per line of `reels/reel-N/shots.json`, in order.
+  - `id`: lowercase letters, digits and hyphens, unique.
+  - `image`: the keyframe's basename inside `art_dir` (hashed into the job).
+  - `seed`: an integer, kept in the record.
+  - `prompt`: the subject's motion (10–3000 characters); no end frame can be set.
+- The profile is fixed by the CLI to `l4-balanced-v2` (512×896, 121 frames, 24 fps,
+  24 steps, guidance 5). The spec cannot change it; to fit the budget, cut takes or shots.
+- `compute` is optional: without it the CLI uses the measured `reel_clips` rates and
+  counts the shots.
+
 ## Sound
 
 Reel narration is its own narration job (`job narration --reel N`), same voice and

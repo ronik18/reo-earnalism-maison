@@ -27,7 +27,8 @@ Stream hosting is held until the owner approves its cost.
 --evidence is a repo-relative JSON under docs/evidence/ (schema
 earnalism.audiovisual-clearance-evidence.v1) naming edition_slug, source_content_sha256 (the live
 text the narration speaks), territories (= the active whitelist), formats ["reader", "audio"] and
-audio_sha256 (exactly the bundle MP3 hashes). The live revision must already carry passing
+audio_sha256 (exactly the bundle MP3 hashes), plus owner_approval {"by": <who>, "at": <when>}; a
+status starting with "DRAFT" is refused (the skill drafts the record, only the owner approves it). The live revision must already carry passing
 public-domain publication_clearance; other titles are refused.
 
 stage: clone the live revision; store each MP3 privately as an audio_chapter asset bound to its unit
@@ -156,6 +157,13 @@ def read_evidence(relative):
 def check_evidence(doc, slug, live, bundle):
     if not isinstance(doc, dict) or doc.get("schema") != EVIDENCE_SCHEMA or doc.get("edition_slug") != slug:
         raise CommandError(f"Clearance evidence must be {EVIDENCE_SCHEMA} for edition {slug}.")
+    status = doc.get("status")
+    if isinstance(status, str) and status.strip().upper().startswith("DRAFT"):
+        raise CommandError("Clearance evidence is still a draft; the owner must complete and approve it first.")
+    approval = doc.get("owner_approval")
+    if (not isinstance(approval, dict) or not isinstance(approval.get("by"), str) or not approval["by"].strip()
+            or not isinstance(approval.get("at"), str) or not approval["at"].strip()):
+        raise CommandError('Clearance evidence needs owner_approval {"by": <who>, "at": <when>} from the owner.')
     if doc.get("source_content_sha256") != live.content_sha256:
         raise CommandError("Clearance evidence names a different live text hash.")
     if not isinstance(doc.get("territories"), list) or sorted(doc["territories"]) != sorted(territories()):

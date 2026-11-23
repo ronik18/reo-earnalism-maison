@@ -72,12 +72,17 @@ class AudiovisualCommandTests(TestCase):
             (folder / name).write_bytes(b"\x00\x00\x00\x18ftypmp42 synthetic test video")
         return folder, hashlib.sha256(mp3.read_bytes()).hexdigest()
 
-    def evidence(self, source, audio_sha):
-        name = "audiovisual-clearance-test-only-" + self.id().rsplit(".", 1)[-1] + ".json"
+    APPROVAL = {"by": "owner (synthetic test only)", "at": "2026-11-23T10:00:00+05:30"}
+
+    def evidence(self, source, audio_sha, tag="ok", **override):
+        name = f"audiovisual-clearance-test-only-{self.id().rsplit('.', 1)[-1]}-{tag}.json"
         path = EVIDENCE_DIR / name
-        path.write_text(json.dumps({"schema": "earnalism.audiovisual-clearance-evidence.v1", "edition_slug": "bicharak",
+        doc = {"schema": "earnalism.audiovisual-clearance-evidence.v1", "edition_slug": "bicharak",
             "source_content_sha256": source["content_sha256"], "territories": list(settings.MAISON_PUBLICATION_TERRITORIES),
-            "formats": ["reader", "audio"], "audio_sha256": [audio_sha], "basis": "synthetic isolated test only"}))
+            "formats": ["reader", "audio"], "audio_sha256": [audio_sha], "basis": "synthetic isolated test only",
+            "status": "OWNER_APPROVED", "owner_approval": dict(self.APPROVAL)}
+        doc.update(override)
+        path.write_text(json.dumps(doc))
         self.addCleanup(path.unlink, missing_ok=True)
         return "docs/evidence/" + name
 
@@ -239,6 +244,30 @@ class AudiovisualCommandTests(TestCase):
         (folder / "timing.json").write_text(json.dumps(timing))
         with self.assertRaisesMessage(CommandError, "timing.json unit 1"):
             self.stage(folder, self.evidence(source, audio_sha))
+        self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)
+
+    def test_attach_refuses_evidence_without_owner_approval(self):
+        """R12: owner approval is enforced in code; a draft or unapproved record changes nothing."""
+        live = self.publish_bicharak()
+        source = self.export()
+        folder, audio_sha = self.bundle(source)
+        cases = [("draft", {"status": "DRAFT_NOT_APPROVED: complete it"}, "draft"),
+                 ("null", {"owner_approval": None}, "owner_approval"),
+                 ("missing", {"owner_approval": "yes"}, "owner_approval"),
+                 ("nowho", {"owner_approval": {"at": "2026-11-23T10:00:00+05:30"}}, "owner_approval"),
+                 ("nowhen", {"owner_approval": {"by": "owner"}}, "owner_approval"),
+                 ("blank", {"owner_approval": {"by": " ", "at": ""}}, "owner_approval")]
+        for tag, override, message in cases:
+            with self.subTest(tag), self.assertRaisesMessage(CommandError, message):
+                self.stage(folder, self.evidence(source, audio_sha, tag=tag, **override))
+        unapproved = self.evidence(source, audio_sha, tag="dropped")
+        path = EVIDENCE_DIR / unapproved.rsplit("/", 1)[1]
+        doc = json.loads(path.read_text())
+        del doc["owner_approval"]
+        path.write_text(json.dumps(doc))
+        with self.assertRaisesMessage(CommandError, "owner_approval"):
+            self.stage(folder, unapproved)
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
         self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)
 
     def test_attach_refuses_without_evidence_file(self):

@@ -30,6 +30,14 @@ class BudgetTests(unittest.TestCase):
             self.ledger.reserve("a", "2026-11", 61, "j1")
         self.ledger.reserve("a", "2026-11", 60, "j2")
 
+    def test_title_cap_is_lifetime_across_months(self):
+        """R11: 60 CU per title over its whole life; only the 100 CU cap resets monthly."""
+        self.ledger.reserve("A", "2026-10", 40, "j1")
+        with self.assertRaises(BudgetExceeded):
+            self.ledger.reserve("A", "2026-11", 25, "j2")
+        self.assertEqual(self.ledger.spent("A", None), 40)
+        self.ledger.reserve("B", "2026-11", 25, "j3")  # another title is unaffected
+
     def test_month_cap_100_across_titles(self):
         self.ledger.reserve("A", "2026-11", 55, "j1")
         with self.assertRaises(BudgetExceeded):

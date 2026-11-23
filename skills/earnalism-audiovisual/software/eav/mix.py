@@ -129,21 +129,37 @@ def duck_and_master(speech: Path, score: Path, out: Path, target_lufs: float,
         finally:
             _close(w_stem)
             _close(w_pre)
-        tp = TRUE_PEAK_LIMIT
-        r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(pre), "-af",
-                            f"loudnorm=I={target_lufs}:TP={tp}:LRA=11:print_format=json",
-                            "-f", "null", "-"], check=True, capture_output=True, text=True)
-        stats = json.loads(r.stderr[r.stderr.rindex("{"):])
-        f = (f"loudnorm=I={target_lufs}:TP={tp}:LRA=11:"
-             f"measured_I={stats['input_i']}:measured_TP={stats['input_tp']}:"
-             f"measured_LRA={stats['input_lra']}:measured_thresh={stats['input_thresh']}:"
-             f"offset={stats['target_offset']}:linear=true")
-        _run(["-i", str(pre), "-af", f, "-ar", str(RATE), "-ac", "2",
-              "-c:a", "pcm_s16le", str(out)])
+        res = _loudnorm_gated(pre, out, target_lufs)
+    res.update({"score_stem": str(stem), "duck_db": duck_db, "target_lufs": target_lufs})
+    return res
+
+
+def _loudnorm_gated(pre: Path, out: Path, target_lufs: float) -> dict:
+    """Two-pass linear loudnorm to target_lufs; raises ValueError unless the result meets
+    target +-1 LU and true peak <= -1.0 dBTP."""
+    tp = TRUE_PEAK_LIMIT
+    r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(pre), "-af",
+                        f"loudnorm=I={target_lufs}:TP={tp}:LRA=11:print_format=json",
+                        "-f", "null", "-"], check=True, capture_output=True, text=True)
+    stats = json.loads(r.stderr[r.stderr.rindex("{"):])
+    if any(str(stats[k]).strip("-+").lower() in ("inf", "nan") for k in ("input_i", "input_tp")):
+        raise ValueError("master misses gate: input is silent or unmeasurable")
+    f = (f"loudnorm=I={target_lufs}:TP={tp}:LRA=11:"
+         f"measured_I={stats['input_i']}:measured_TP={stats['input_tp']}:"
+         f"measured_LRA={stats['input_lra']}:measured_thresh={stats['input_thresh']}:"
+         f"offset={stats['target_offset']}:linear=true")
+    _run(["-i", str(pre), "-af", f, "-ar", str(RATE), "-ac", "2",
+          "-c:a", "pcm_s16le", str(out)])
     res = measure(out)
     if res["true_peak"] > -1.0 or abs(res["lufs"] - target_lufs) > 1:
         raise ValueError(f"master misses gate: {res} (target {target_lufs} LUFS, TP <= -1.0)")
-    res.update({"score_stem": str(stem), "duck_db": duck_db, "target_lufs": target_lufs})
+    return res
+
+
+def master(speech: Path, out: Path, target_lufs: float) -> dict:
+    """Narration-only master with the same gate as duck_and_master (no score)."""
+    res = _loudnorm_gated(Path(speech), Path(out), target_lufs)
+    res["target_lufs"] = target_lufs
     return res
 
 

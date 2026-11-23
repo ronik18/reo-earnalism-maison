@@ -6,10 +6,15 @@ import json
 import subprocess
 import tempfile
 import unittest
+import os
 import zipfile
 from pathlib import Path
+from unittest import mock
+
+from PIL import Image
 
 from eav import cli, mix
+from eav.record import Record
 from eav.text import sentences
 
 PARAS = [
@@ -39,7 +44,218 @@ def run(*argv):
     return code, out.getvalue()
 
 
-class CliTests(unittest.TestCase):
+REEL = {"length": 60, "language": "en", "hook": "This giant built a wall against children.",
+        "loop_close": "And the wall rose again around the garden."}
+REEL["lines"] = ([REEL["hook"]] + ["The children played in the garden every single afternoon."] * 11
+                 + [REEL["loop_close"]])
+
+
+class RoundTwo:
+    """Fix round 2: pinned ledger, no --month, spec docs, dry mastering, score provenance."""
+
+    def fake_job(self, kind, target, files):
+        """A built-and-imported job as the record sees it (no Colab)."""
+        rec = Record.load(self.root)
+        job_id = f"{kind.replace('_', '-')}-{len(rec.data['artifacts']):04d}"
+        job_dir = self.root / "jobs" / job_id
+        job_dir.mkdir(parents=True)
+        for name in ("inputs.zip", "build-manifest.json", "nb.ipynb"):
+            (job_dir / name).write_text("{}")
+        rec.add_artifact("colab_job", job_dir / "nb.ipynb", {
+            "job_id": job_id, "job_kind": kind, "forecast_units": 0.0, "month": "2026-11",
+            "inputs_zip": f"jobs/{job_id}/inputs.zip", "manifest": f"jobs/{job_id}/build-manifest.json"})
+        rec.event("cli", "job_target", {"job_id": job_id, "target": target, "kind": kind})
+        out = self.root / kind / job_id
+        out.mkdir(parents=True)
+        files(rec, job_id, job_dir, out)
+        rec.event("import", "accepted", {"job_id": job_id})
+        return job_id
+
+    def wav(self, path, seconds, freq=300):
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
+                        f"sine=f={freq}:d={seconds}:r=24000", "-ac", "1", str(path)], check=True)
+
+    def noise(self, path, seconds):
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
+                        f"anoisesrc=d={seconds}:c=pink:r=48000:a=0.2", "-ac", "2", str(path)], check=True)
+
+    def film_ready(self):
+        self.init_and_plan()
+        plan = json.loads((self.root / "plan.json").read_text())
+        scenes = plan["plan"]["films"][0]["scenes"]
+        from eav.voice import voice_units
+
+        def narr(rec, job_id, job_dir, out):
+            for sc in scenes:
+                for u in voice_units(sc, {"description": ""}, None, "en"):
+                    self.wav(out / f"{u['unit_key']}.wav", 0.8)
+
+        def stills(rec, job_id, job_dir, out):
+            for i, sc in enumerate(scenes):
+                Image.new("RGB", (320, 180), (60 * i, 90, 120)).save(out / f"{sc['scene_id']}-1.png")
+
+        self.fake_job("narration", "film-01", narr)
+        self.fake_job("stills", "film-01", stills)
+        Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(self.d / "logo.png")
+        Image.new("RGB", (320, 180), (0, 0, 0)).save(self.d / "end.png")
+
+    # --- R11: pinned ledger, lifetime cap, no --month --------------------------------------
+    def test_ledger_is_pinned_at_init(self):
+        pinned = self.d / "shared" / "ledger.json"
+        code, out = run("init", self.src, "--root", self.root, "--ledger", pinned)
+        self.assertEqual(code, 0, out)
+        self.assertEqual(json.loads((self.root / "record.json").read_text())["ledger"],
+                         str(pinned.resolve()))
+        self.assertEqual(run("plan", "--root", self.root)[0], 0)
+        other = self.d / "other-ledger.json"
+        code, out = run("job", "narration", "--root", self.root, "--rates", self.rates,
+                        "--ledger", other)
+        self.assertNotEqual(code, 0)
+        self.assertIn("pinned", out)
+        with mock.patch.dict(os.environ, {"EAV_LEDGER": str(other)}):
+            code, out = run("job", "narration", "--root", self.root, "--rates", self.rates)
+        self.assertNotEqual(code, 0)
+        self.assertIn("pinned", out)
+        self.assertFalse(other.exists())
+        code, out = run("job", "narration", "--root", self.root, "--rates", self.rates)
+        self.assertEqual(code, 0, out)
+        self.assertEqual(len(json.loads(pinned.read_text())), 1)
+
+    def test_job_has_no_month_flag(self):
+        self.init_and_plan()
+        with self.assertRaises(SystemExit):
+            run("job", "narration", "--root", self.root, "--rates", self.rates, "--month", "2026-10")
+
+    def test_title_cap_counts_earlier_months(self):
+        self.init_and_plan()
+        ledger = Record.load(self.root).data["ledger"]
+        from eav.budget import Ledger
+        Ledger(Path(ledger)).reserve("selfish-giant", "2026-01", 59.99, "old-job")
+        code, out = run("job", "narration", "--root", self.root, "--rates", self.rates)
+        self.assertEqual(code, 3, out)
+        self.assertIn("Budget exceeded", out)
+
+    # --- item 1: reel_clips next action names the spec keys -----------------------------------
+    def test_reel_clips_next_action_names_spec_keys(self):
+        self.film_ready()
+        rec = Record.load(self.root)
+        (self.root / "film" / "film-01").mkdir(parents=True)
+        (self.root / "film" / "film-01" / "film-01.mp4").write_bytes(b"x")
+        rec.add_artifact("film", self.root / "film" / "film-01" / "film-01.mp4", {"target": "film-01"})
+        script = self.d / "reel.json"
+        script.write_text(json.dumps(REEL))
+        self.assertEqual(run("reel", 1, "--root", self.root, "--script", script)[0], 0)
+        self.fake_job("stills", "reel-1", lambda *a: None)
+        nxt = cli.next_action(self.root)
+        for key in ("job reel_clips", "art_dir", "prior_attempt_evidence", "shots", "id", "image",
+                    "seed", "prompt", "reel-recipe.md"):
+            self.assertIn(key, nxt, key)
+
+    # --- item 4: --dry is mastered with the same gate ----------------------------------------
+    def test_bundle_audio_dry_is_mastered_to_film_target(self):
+        self.imported()
+        bundle = self.d / "bundle"
+        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")
+        self.assertEqual(code, 0, out)
+        for mp3 in bundle.glob("*.mp3"):
+            m = mix.measure(mp3)
+            self.assertAlmostEqual(m["lufs"], -16.0, delta=1.0)
+            self.assertLessEqual(m["true_peak"], -1.0)
+        prov = json.loads((bundle / "timing.json").read_text())["provenance"]
+        self.assertTrue(all(u["mastered_with"] == "eav.mix.master" for u in prov["units"].values()))
+
+    def test_bundle_audio_dry_gate_miss_exits_with_gate_error(self):
+        self.imported()
+        bundle = self.d / "bundle"
+        with mock.patch.object(cli.mix, "master",
+                               side_effect=ValueError("master misses gate: {'true_peak': -0.2}")):
+            code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")
+        self.assertEqual(code, 5)
+        self.assertIn("misses gate", out)
+        self.assertFalse(bundle.exists())
+
+    # --- item 5 ---------------------------------------------------------------------------------
+    def test_bundle_audio_refuses_score_shorter_than_chapter(self):
+        self.imported()
+        scores = self.d / "short"
+        scores.mkdir()
+        for u in SOURCE["units"]:
+            self.noise(scores / f"{u['unit_id']}.wav", 0.5)
+        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "bundle",
+                        "--score-dir", scores)
+        self.assertNotEqual(code, 0)
+        self.assertIn("shorter", out)
+        self.assertFalse((self.d / "bundle").exists())
+
+    def test_unexpected_value_error_prints_next_not_traceback(self):
+        def boom(args):
+            raise ValueError("bad value from a helper")
+        with mock.patch.dict(cli.COMMANDS, {"status": boom}):
+            code, out = run("status", "--root", self.root)
+        self.assertEqual(code, 2)
+        self.assertIn("STOP: bad value from a helper", out)
+        self.assertIn("Next:", out)
+        self.assertNotIn("Traceback", out)
+
+    def test_film_records_score_provenance(self):
+        self.film_ready()
+        bed = self.d / "bed.wav"
+        self.noise(bed, 30)
+        base = ("film", "--root", self.root, "--logo", self.d / "logo.png",
+                "--end-card", self.d / "end.png", "--score", bed)
+        code, out = run(*base)
+        self.assertNotEqual(code, 0)
+        self.assertIn("--score-route", out)
+        short = self.d / "short.wav"
+        self.noise(short, 1)
+        code, out = run("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card",
+                        self.d / "end.png", "--score", short, "--score-route", "vcsl")
+        self.assertNotEqual(code, 0)
+        self.assertIn("shorter", out)
+        code, out = run(*base, "--score-route", "vcsl")
+        self.assertEqual(code, 0, out)
+        film_art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
+        self.assertEqual(film_art["meta"]["score"], {
+            "route": "vcsl", "sha256": hashlib.sha256(bed.read_bytes()).hexdigest()})
+
+    def test_reel_records_narration_and_score_provenance(self):
+        self.init_and_plan()
+        script = self.d / "reel.json"
+        script.write_text(json.dumps(REEL))
+        self.assertEqual(run("reel", 1, "--root", self.root, "--script", script)[0], 0)
+        from eav.voice import voice_units
+        units = voice_units(cli._reel_scene(REEL, 1), {"description": ""}, None, "en")
+
+        def narr(rec, job_id, job_dir, out):
+            for u in units:
+                self.wav(out / f"{u['unit_key']}.wav", 3.0)
+
+        def clips(rec, job_id, job_dir, out):
+            ids = [f"shot-{i:02d}" for i in range(10)]
+            (job_dir / "job.json").write_text(json.dumps({"scenes": [{"id": i} for i in ids]}))
+            for k, i in enumerate(ids):
+                clip = out / f"{i}.mp4"
+                subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
+                                f"color=c=0x{20 * k:02x}4060:s=180x320:d=6:r=24", "-pix_fmt", "yuv420p",
+                                str(clip)], check=True)
+                rec.add_artifact("reel_clip", clip, {"job_id": job_id, "scene": i})
+
+        narr_id = self.fake_job("narration", "reel-1", narr)
+        self.fake_job("reel_clips", "reel-1", clips)
+        bed = self.d / "bed.wav"
+        self.noise(bed, 70)
+        code, out = run("reel", 1, "--root", self.root, "--score", bed, "--score-route", "vcsl")
+        self.assertEqual(code, 0, out)
+        rec = Record.load(self.root)
+        prov = [a for a in rec.data["artifacts"] if a["kind"] == "narration_provenance"]
+        self.assertEqual(len(prov), 1)
+        self.assertEqual(json.loads((self.root / prov[0]["path"]).read_text())["narration_job_id"], narr_id)
+        reel_art = [a for a in rec.data["artifacts"] if a["kind"] == "reel"][-1]
+        self.assertEqual(reel_art["meta"]["score"]["sha256"], hashlib.sha256(bed.read_bytes()).hexdigest())
+        self.assertEqual(reel_art["meta"]["score"]["route"], "vcsl")
+
+
+class CliTests(RoundTwo, unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
@@ -190,7 +406,8 @@ class CliTests(unittest.TestCase):
         code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "bundle", "--dry")
         self.assertEqual(code, 0, out)
         timing = json.loads((self.d / "bundle" / "timing.json").read_text())
-        self.assertTrue(all(u["mastered_with"] is None for u in timing["provenance"]["units"].values()))
+        self.assertTrue(all(u["mastered_with"] == "eav.mix.master"
+                            for u in timing["provenance"]["units"].values()))
         ev = json.loads((self.root / "maison" / "audiovisual-clearance-evidence.draft.json").read_text())
         self.assertIs(ev["dry_narration"], True)
         self.assertIsNone(ev["music"])

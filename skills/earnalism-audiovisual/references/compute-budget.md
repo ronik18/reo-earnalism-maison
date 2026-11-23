@@ -1,7 +1,7 @@
 # Compute budget
 
-Standing owner allowance: **60 Colab compute units (CU) per title** and **100 CU per
-calendar month** across all titles. Every GPU batch is forecast before it is built; the
+Standing owner allowance: **60 Colab compute units (CU) per title over the title's whole
+life** (every month counts) and **100 CU per calendar month** across all titles. Every GPU batch is forecast before it is built; the
 forecast is reserved on the ledger; the actual units are settled on import.
 
 ## Forecast
@@ -31,10 +31,14 @@ reel clips ~20–40 CU (the largest). About 30–60 CU per title, two titles a m
 
 ## The ledger
 
-- Shared by every title: `--ledger`, else `$EAV_LEDGER`, else
-  `<title root>/../allowance-ledger.json`. Keep all title roots under one parent.
-- Reservations count as spent until settled. Spend from another month does not count.
-- One writer at a time.
+- Shared by every title and **pinned at `init`**: `--ledger`, else `$EAV_LEDGER`, else
+  `<title root>/../allowance-ledger.json`, written into `record.json`. Every later command
+  uses only that path and refuses a different `--ledger` or `$EAV_LEDGER`. Keep all title
+  roots on the same ledger.
+- The title cap sums every month of that title. Only the 100 CU monthly cap resets: other
+  months' spend does not count against it.
+- The month is always the current UTC month; there is no flag to choose another one.
+- Reservations count as spent until settled. One writer at a time.
 
 ## Over a cap (exit 3)
 
@@ -46,7 +50,7 @@ reel clips ~20–40 CU (the largest). About 30–60 CU per title, two titles a m
 
 Never: lower steps, resolution or frames of a prepared job; split a job to slip under a
 cap; shrink a measured rate; edit, delete or reset the ledger; run on another account;
-buy units; retry a failed job past its forecast.
+buy units; retry a failed job past its forecast; point a title at a fresh ledger.
 
 ## Actuals
 

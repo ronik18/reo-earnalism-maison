@@ -1,7 +1,8 @@
 """Compute-unit forecast and the standing Colab Pro allowance ledger.
 
-Allowance: 60 units per title and 100 units per calendar month. Reservations
-count as spent until settled with the actual units.
+Allowance: 60 units per title over the title's whole life (all months) and 100
+units per calendar month across titles. Reservations count as spent until
+settled with the actual units.
 The ledger assumes one writer process at a time.
 """
 import json
@@ -70,10 +71,12 @@ class Ledger:
 
     @staticmethod
     def _sum(entries, title, month) -> float:
+        """Units for one title (None = all titles) in one month (None = all months)."""
         return float(sum(e["units"] for e in entries
-                         if e["month"] == month and (title is None or e["title"] == title)))
+                         if (month is None or e["month"] == month)
+                         and (title is None or e["title"] == title)))
 
-    def spent(self, title, month: str) -> float:
+    def spent(self, title, month) -> float:
         return self._sum(self._load(), title, month)
 
     def reserve(self, title, month: str, units: float, job_id: str) -> None:
@@ -81,7 +84,7 @@ class Ledger:
         entries = self._load()
         if any(e["job_id"] == job_id for e in entries):
             raise ValueError(f"duplicate job_id: {job_id!r}")
-        if self._sum(entries, title, month) + units > TITLE_CAP:
+        if self._sum(entries, title, None) + units > TITLE_CAP:  # lifetime, all months
             raise BudgetExceeded(f"title cap {TITLE_CAP:g} units exceeded for {title!r}")
         if self._sum(entries, None, month) + units > MONTH_CAP:
             raise BudgetExceeded(f"month cap {MONTH_CAP:g} units exceeded for {month}")

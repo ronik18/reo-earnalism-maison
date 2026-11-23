@@ -32,7 +32,7 @@ owner's applicable release authority and the supported destination operation.
 
 For a whole book package, start from the `earnalism-audiovisual` skill
 (`skills/earnalism-audiovisual/SKILL.md`). It does not replace the stage skills: it
-orders them, prepares inert hash-bound Colab jobs within the owner's 60 CU per title and
+orders them, prepares inert hash-bound Colab jobs within the owner's 60 CU lifetime per title and
 100 CU per month allowance, imports and verifies their outputs, assembles and checks the
 film and reels, and drafts the per-title audio clearance evidence that Maison's
 `attach_audiovisual_audio` command requires. Its `status` command prints the next action.

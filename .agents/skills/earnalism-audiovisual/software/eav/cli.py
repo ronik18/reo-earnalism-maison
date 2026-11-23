@@ -6,8 +6,10 @@
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
                          [--archive-sha256 <sha>]           (reel_clips)
-  python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png> (--score <wav> | --cues-job <id>)
-  python3 -m eav.cli reel <n> --root <dir> [--script <script.json>] [--score <wav>] [--hashtags ...]
+  python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
+                         (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
+  python3 -m eav.cli reel <n> --root <dir> [--script <script.json>] [--score <wav> --score-route ...]
+                         [--hashtags ...]
   python3 -m eav.cli qc --root <dir>
   python3 -m eav.cli status --root <dir>
   python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir> (--score-dir <dir> | --dry)
@@ -15,8 +17,9 @@
 Every command ends with "Next: ..." -- the one action the owner (or Claude) takes next.
 The CLI wraps the eav modules; it spends nothing, runs no GPU work, never marks legal clearance
 and never publishes. Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held, 5 QC failure.
-The allowance ledger is shared by every title: --ledger, else $EAV_LEDGER, else
-<root>/../allowance-ledger.json.
+The allowance ledger is shared by every title and pinned in record.json at init (--ledger,
+else $EAV_LEDGER, else <root>/../allowance-ledger.json); later commands refuse any other path.
+The 60 CU title cap is lifetime; the 100 CU cap is per calendar month.
 """
 import argparse
 import json
@@ -54,13 +57,48 @@ class Stop(Exception):
 
 
 # ---------------------------------------------------------------- state helpers
-def _ledger(args) -> budget.Ledger:
-    path = args.ledger or os.environ.get("EAV_LEDGER") or Path(args.root).parent / "allowance-ledger.json"
-    return budget.Ledger(Path(path))
+_MONTH = None  # test injection only; there is deliberately no --month flag
 
 
-def _month(args) -> str:
-    return args.month or datetime.now(timezone.utc).strftime("%Y-%m")
+def _requested_ledger(args):
+    path = args.ledger or os.environ.get("EAV_LEDGER")
+    return Path(path).resolve() if path else None
+
+
+def _ledger(rec, args) -> budget.Ledger:
+    """The ledger pinned in record.json at init; any other path is refused."""
+    pinned = rec.data.get("ledger")
+    if not pinned:
+        raise Stop("this record has no pinned allowance ledger", "Re-initialise the title root")
+    asked = _requested_ledger(args)
+    if asked is not None and str(asked) != pinned:
+        raise Stop(f"ledger {asked} differs from the ledger pinned at init ({pinned}); the "
+                   "allowance cannot be split across ledgers",
+                   "Drop --ledger / unset EAV_LEDGER and rerun")
+    return budget.Ledger(Path(pinned))
+
+
+def _month() -> str:
+    return _MONTH or datetime.now(timezone.utc).strftime("%Y-%m")
+
+
+def _score_route(rec, route) -> str:
+    """vcsl (cleared VCSL editorial score) or ace-step:<imported music job id>."""
+    if route == "vcsl":
+        return route
+    m = re.fullmatch(r"ace-step:([a-z0-9][a-z0-9-]*)", route or "")
+    if m and any(j["job_id"] == m.group(1) and j["kind"] == "music" and j["imported"]
+                 for j in _jobs(rec)):
+        return route
+    raise Stop(f"score route {route!r} is not vcsl or ace-step:<imported music job id>",
+               "Pass --score-route vcsl or --score-route ace-step:<job_id>")
+
+
+def _check_bed(bed: Path, needed_s: float, what: str) -> None:
+    have = film._duration(bed)
+    if have + 0.05 < needed_s:
+        raise Stop(f"score bed {bed} ({have:.2f} s) is shorter than the {what} ({needed_s:.2f} s)",
+                   "Extend the bed in `earnalism-audiobook-score` so it covers the narration, then rerun")
 
 
 def _record(root) -> Record:
@@ -140,7 +178,7 @@ def _story_preset(language: str) -> dict:
 
 
 def _remaining(ledger, title, month) -> float:
-    return min(budget.TITLE_CAP - ledger.spent(title, month),
+    return min(budget.TITLE_CAP - ledger.spent(title, None),  # title cap: lifetime
                budget.MONTH_CAP - ledger.spent(None, month))
 
 
@@ -196,7 +234,8 @@ def next_action(root) -> str:
                     f"--film {i} --rates <rates.json> --spec stills.json")
         if not _artifacts(rec, "film", target=t):
             return (f"{PROG} film {r} --film {i} --logo <approved logo lockup> --end-card <approved END> "
-                    f"--score <score bed from earnalism-audiobook-score> (or --cues-job <music job_id>)")
+                    f"--score <score bed from earnalism-audiobook-score> --score-route vcsl "
+                    f"(or --cues-job <imported ACE-Step music job_id>)")
     n = 1
     while True:
         script = _reel_script(rec, n)
@@ -210,13 +249,16 @@ def next_action(root) -> str:
             return (f"Write one keyframe prompt per shot in reels/reel-{n}/shots.json into stills.json, "
                     f"then: {PROG} job stills {r} --reel {n} --rates <rates.json> --spec stills.json")
         if not _latest_job(rec, "reel_clips", t):
-            return (f"Write the Wan shot spec (art_dir = the imported reel-{n} stills, one motion prompt "
-                    f"per shot), then: {PROG} job reel_clips {r} --reel {n} --rates <rates.json> "
-                    f"--spec clips.json")
+            stills_job = _latest_job(rec, "stills", t)["job_id"]
+            return (f"Write clips.json per references/reel-recipe.md (Clips spec): art_dir = "
+                    f"{root / 'stills' / stills_job}, prior_attempt_evidence = the retained Wan "
+                    f"l4-balanced-v2 provenance (prior run ids, observed s/step, completed clips), "
+                    f"shots = one {{id, image, seed, prompt}} per entry of reels/reel-{n}/shots.json, "
+                    f"then: {PROG} job reel_clips {r} --reel {n} --rates <rates.json> --spec clips.json")
         if not _latest_job(rec, "narration", t):
             return f"{PROG} job narration {r} --reel {n} --rates <rates.json>"
         if not _artifacts(rec, "reel", target=t):
-            return f"{PROG} reel {n} {r} --score <reel score bed>"
+            return f"{PROG} reel {n} {r} --score <reel score bed> --score-route vcsl|ace-step:<job_id>"
         n += 1
     last_media = max((i for i, e in enumerate(rec.data["events"])
                       if e["stage"] in ("film", "reel") and e["result"] == "assembled"), default=-1)
@@ -266,6 +308,8 @@ def cmd_init(args):
         "content_sha256": src["content_sha256"], "language": src["language"],
         "rights": src.get("rights", {}), "public_domain_evidence": True,
         "state": src.get("state"), "export_sha256": sha256_file(src_path)})
+    rec.data["ledger"] = str(_requested_ledger(args) or (root.parent / "allowance-ledger.json").resolve())
+    rec._save()
     shutil.copyfile(src_path, root / "source.json")
     rec.add_artifact("source", root / "source.json", {"revision_id": src["revision_id"]})
     audio_read = "read" in (src.get("rights") or {}).get("audio", [])
@@ -358,7 +402,7 @@ def cmd_job(args):
                        "(references/compute-budget.md)")
         spec["compute"] = {"steps": rate["steps"], "items": items, "takes": rate.get("takes", 1),
                            "decode_s": rate["decode_s"], "export_s": rate["export_s"]}
-    ledger, month, title = _ledger(args), _month(args), rec.data["title_slug"]
+    ledger, month, title = _ledger(rec, args), _month(), rec.data["title_slug"]
     try:
         units = budget.forecast({"kind": kind, **spec["compute"]}, rates)
     except (KeyError, TypeError) as e:
@@ -400,7 +444,7 @@ def cmd_import(args):
     try:
         arts = importer.import_job(rec, {k: job[k] for k in ("job_id", "kind", "notebook",
                                                              "inputs_zip", "manifest")},
-                                   args.source, _ledger(args), args.units, **extra)
+                                   args.source, _ledger(rec, args), args.units, **extra)
     except importer.ImportHeld as e:
         raise Stop(f"Import held: {e}. Nothing was imported; the reservation stays open.",
                    "Re-download the complete output folder (or archive) of this exact job and rerun "
@@ -431,6 +475,11 @@ def cmd_film(args):
     _write_json(out / "timing.json", {"units": timing, "provenance": prov})
     (out / f"{t}.srt").write_text(film.subtitles(timing, units), encoding="utf-8")
     if args.score:  # the bed never outlasts the narration; the END card follows it
+        if not args.score_route:
+            raise Stop("--score needs --score-route vcsl or ace-step:<music job id> for the record",
+                       "Rerun with --score-route")
+        score_info = {"route": _score_route(rec, args.score_route), "sha256": sha256_file(args.score)}
+        _check_bed(Path(args.score), timing[-1]["end"], "narration")
         score = out / "score.wav"
         _ff("-i", args.score, "-t", f"{timing[-1]['end']:.3f}", "-ar", 48000, "-ac", 2, score)
     elif args.cues_job:
@@ -444,6 +493,9 @@ def cmd_film(args):
         bounds = [starts[(i * len(starts)) // k] for i in range(k)]
         bounds[0] = 0.0
         score = mix.arrange_cues(cues[:k], bounds, timing[-1]["end"], out / "score.wav")
+        score_info = {"route": _score_route(rec, f"ace-step:{args.cues_job}"),
+                      "sha256": sha256_file(score),
+                      "cues_sha256": {c.name: sha256_file(c) for c in cues[:k]}}
     else:
         raise Stop("the film needs a score", "Pass --score <bed from earnalism-audiobook-score> "
                    "or --cues-job <imported ACE-Step music job>")
@@ -458,7 +510,8 @@ def cmd_film(args):
                     ("mix", out / "mix.wav")):
         rec.add_artifact(kind, p, {"target": t})
     rec.add_artifact("film", out / f"{t}.mp4", {"target": t, "lufs": m["lufs"],
-                                                "true_peak": m["true_peak"], **info})
+                                                "true_peak": m["true_peak"], "score": score_info,
+                                                "narration_job_id": narr["job_id"], **info})
     rec.event("film", "assembled", {"target": t, "duration": info["duration"]})
     print(f"Assembled {out / (t + '.mp4')}: {info['duration']:.1f} s, {m['lufs']:.1f} LUFS, "
           f"TP {m['true_peak']:.1f} dBTP. Maison video stays held (Stream cost not approved).")
@@ -504,8 +557,13 @@ def cmd_reel(args):
                    "narration is never trimmed", "Add or lengthen a shot, then rerun", code=5)
     _ff("-i", folder / "narration.wav", "-af", f"apad=whole_dur={total:.3f}", "-ar", 48000,
         folder / "narration-padded.wav")
-    audio = folder / "narration-padded.wav"
+    audio, score_info = folder / "narration-padded.wav", None
     if args.score:
+        if not args.score_route:
+            raise Stop("--score needs --score-route vcsl or ace-step:<music job id> for the record",
+                       "Rerun with --score-route")
+        score_info = {"route": _score_route(rec, args.score_route), "sha256": sha256_file(args.score)}
+        _check_bed(Path(args.score), total, "reel")
         _ff("-i", args.score, "-t", f"{total:.3f}", "-ar", 48000, folder / "score-cut.wav")
         try:
             mix.duck_and_master(audio, folder / "score-cut.wav", folder / "mix.wav", REEL_LUFS)
@@ -516,8 +574,10 @@ def cmd_reel(args):
         info = reel.assemble(clips, audio, folder / f"{t}.mp4")
     except ValueError as e:
         raise Stop(f"QC failure: {e}", "Fix the failing input and rerun", code=5)
-    _write_json(folder / "narration-provenance.json", prov)
-    rec.add_artifact("reel", folder / f"{t}.mp4", {"target": t, **info})
+    rec.add_artifact("narration_provenance", _write_json(folder / "narration-provenance.json", prov),
+                     {"target": t, "narration_job_id": narr["job_id"]})
+    rec.add_artifact("reel", folder / f"{t}.mp4", {"target": t, "score": score_info,
+                                                   "narration_job_id": narr["job_id"], **info})
     rec.event("reel", "assembled", {"target": t, "seconds": info["seconds"]})
     print(f"Assembled {folder / (t + '.mp4')}: {info['seconds']:.1f} s, {info['lufs']:.1f} LUFS.")
 
@@ -629,22 +689,24 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
             chapter = td / f"unit-{n:03d}.wav"
             timing, prov = _measured_track(units, rec.root / "narration" / job["job_id"], chapter,
                                            job["job_id"])
-            master, mastered, score_sha = chapter, None, None
-            if not args.dry:  # R10: narration + best-fit score, ducked, -16 LUFS
-                bed = Path(args.score_dir) / f"{unit['unit_id']}.wav"
-                score_sha = sha256_file(bed)
-                cut = td / f"unit-{n:03d}-score.wav"
-                _ff("-i", bed, "-t", f"{timing[-1]['end']:.3f}", "-ar", 48000, "-ac", 2, cut)
-                master = td / f"unit-{n:03d}-mix.wav"
-                try:
+            master, score_sha = td / f"unit-{n:03d}-master.wav", None
+            try:
+                if args.dry:  # narration only, same -16 LUFS / -1 dBTP gate
+                    mix.master(chapter, master, FILM_LUFS)
+                    mastered = "eav.mix.master"
+                else:  # R10: narration + best-fit score, ducked, -16 LUFS
+                    bed = Path(args.score_dir) / f"{unit['unit_id']}.wav"
+                    _check_bed(bed, timing[-1]["end"], f"chapter {unit['unit_id']} narration")
+                    score_sha = sha256_file(bed)
+                    cut = td / f"unit-{n:03d}-score.wav"
+                    _ff("-i", bed, "-t", f"{timing[-1]['end']:.3f}", "-ar", 48000, "-ac", 2, cut)
                     mix.duck_and_master(chapter, cut, master, FILM_LUFS)
-                except ValueError as e:
-                    raise Stop(f"QC failure: {unit['unit_id']}: {e}",
-                               "Re-balance that chapter's score bed and rerun", code=5)
-                mastered = "eav.mix.duck_and_master"
-            mp3 = bundle / f"unit-{n:03d}.mp3"
-            channels = 1 if args.dry else 2  # keep the stereo master's loudness intact
-            _ff("-i", master, "-ar", 48000, "-ac", channels, "-c:a", "libmp3lame", "-b:a", "96k", mp3)
+                    mastered = "eav.mix.duck_and_master"
+            except ValueError as e:
+                raise Stop(f"QC failure: {unit['unit_id']}: {e}",
+                           "Re-balance that chapter (score bed or narration level) and rerun", code=5)
+            mp3 = bundle / f"unit-{n:03d}.mp3"  # stereo keeps the master's measured loudness
+            _ff("-i", master, "-ar", 48000, "-ac", 2, "-c:a", "libmp3lame", "-b:a", "96k", mp3)
             dur_ms = round(film._duration(mp3) * 1000)
             segs = []
             for p in unit["paragraphs"]:
@@ -662,7 +724,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                 "chapter_wav_sha256": prov["track_sha256"], "mastered_with": mastered,
                 "score_sha256": score_sha,
                 "mp3_sha256": sha256_file(mp3), "mp3_duration_ms": dur_ms,
-                "encoder": f"ffmpeg libmp3lame 96 kbps CBR {'mono' if args.dry else 'stereo'} 48 kHz"}
+                "encoder": "ffmpeg libmp3lame 96 kbps CBR stereo 48 kHz"}
     ids = sorted(job_ids)
     provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
                   "narration_job_id": ids[0] if len(ids) == 1 else ids, "units": prov_units}
@@ -688,7 +750,8 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
             "route": "per-chapter score bed, ducked under speech (eav.mix.duck_and_master, -16 LUFS)",
             "score_sha256": {u: v["score_sha256"] for u, v in prov_units.items()},
             "source_and_licence": None},
-        "owner_approval": None})
+        "owner_approval": None,
+        "owner_approval_required": {"by": "<who approved>", "at": "<ISO 8601 time>"}})
     rec.add_artifact("evidence_draft", draft, {"bundle": str(bundle), "audio_sha256": audio})
     rec.event("bundle_audio", "drafted", {"bundle": str(bundle), "audio_sha256": audio,
                                           "timing_json_sha256": sha256_file(timing_path)})
@@ -704,10 +767,11 @@ def cmd_status(args):
     root = Path(args.root)
     if (root / "record.json").is_file():
         rec = Record.load(root)
-        s, title, month = rec.data["source"], rec.data["title_slug"], _month(args)
-        ledger = _ledger(args)
+        s, title, month = rec.data["source"], rec.data["title_slug"], _month()
+        ledger = _ledger(rec, args)
         print(f"{title}: revision {s['revision_id']} ({s['language']}), "
-              f"{ledger.spent(title, month):.2f} CU spent/reserved this month for this title, "
+              f"{ledger.spent(title, None):.2f} CU spent/reserved for this title (lifetime cap "
+              f"{budget.TITLE_CAP:g}), {ledger.spent(None, month):.2f} CU this month (all titles), "
               f"{_remaining(ledger, title, month):.2f} CU remaining ({month}).")
         for j in _jobs(rec):
             print(f"  {j['job_id']} {j['kind']} {j['target']}: "
@@ -727,8 +791,7 @@ def _parser():
     def add(name, **kw):
         s = sub.add_parser(name, **kw)
         s.add_argument("--root", required=True)
-        s.add_argument("--ledger")
-        s.add_argument("--month", help="YYYY-MM (default: current UTC month)")
+        s.add_argument("--ledger", help="init pins it in record.json; later commands refuse any other")
         return s
 
     s = add("init")
@@ -753,11 +816,13 @@ def _parser():
     s.add_argument("--logo", required=True)
     s.add_argument("--end-card", required=True)
     s.add_argument("--score")
+    s.add_argument("--score-route", help="vcsl or ace-step:<imported music job id>")
     s.add_argument("--cues-job")
     s = add("reel")
     s.add_argument("n", type=int)
     s.add_argument("--script")
     s.add_argument("--score")
+    s.add_argument("--score-route", help="vcsl or ace-step:<imported music job id>")
     s.add_argument("--hashtags", nargs="*")
     add("qc")
     add("status")
@@ -779,6 +844,10 @@ def main(argv=None) -> int:
     except (OSError, json.JSONDecodeError, subprocess.CalledProcessError) as e:
         print(f"STOP: {type(e).__name__}: {e}")
         print("Next: fix the named file or input and rerun the same command")
+        return 2
+    except ValueError as e:  # a helper refused its input: report it, never a traceback
+        print(f"STOP: {e}")
+        print(f"Next: fix the input it names, then rerun; {PROG} status --root {args.root}")
         return 2
     print(f"Next: {next_action(args.root)}")
     return 0
