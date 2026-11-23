@@ -18,3 +18,5 @@ test-results/
 
 # Colab R2 exchange: signed URLs are capabilities, never committed
 production/**/exchange.json
+# Imported Colab media lives in R2 (exports/audiovisual-archive/); only its hash manifest is committed
+production/audiovisual/*/narration/*/
