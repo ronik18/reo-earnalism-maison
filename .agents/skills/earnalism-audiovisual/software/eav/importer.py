@@ -125,7 +125,7 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     if not isinstance(outputs, dict) or not outputs:
         raise ImportHeld("manifest lists no outputs")
     for name, digest in outputs.items():
-        if not _NAME.fullmatch(name) or name in ("manifest.json", "inputs.zip") \
+        if not _NAME.fullmatch(name) or name in ("manifest.json", "inputs.zip", "exchange.json") \
                 or not isinstance(digest, str) or not _SHA.fullmatch(digest):
             raise ImportHeld(f"invalid manifest entry: {name!r}")
     present = {}
@@ -135,6 +135,7 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
         present[p.name] = p
     copy_zip = present.pop("inputs.zip", None)
     present.pop("manifest.json")
+    present.pop("exchange.json", None)  # R2 exchange capabilities in a Drive download: never imported
     if copy_zip is not None and sha256_file(copy_zip) != zip_sha:
         raise ImportHeld("inputs.zip in the download differs from the built inputs")
     if set(present) != set(outputs):

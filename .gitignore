@@ -15,3 +15,6 @@ static/maison/dist/
 test-results/
 .superpowers/
 .superdesign/
+
+# Colab R2 exchange: signed URLs are capabilities, never committed
+production/**/exchange.json

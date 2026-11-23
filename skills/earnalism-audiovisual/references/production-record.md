@@ -36,7 +36,9 @@ One title root, one record, one writer. `record.json` (schema
 Job endings are events too: `import/accepted`, `job/superseded` (never ran, 0 CU),
 `job/closed` (ran, not imported, actual CU) and their pending forms `job/superseding`,
 `job/closing` while one is under way. Reel planning adds `reel/scripted`,
-`reel/narration_misfit` and `reel/shots_planned`.
+`reel/narration_misfit` and `reel/shots_planned`. The R2 exchange
+(`references/colab-exchange.md`) adds `job/exchange_uploaded`, `job/exchange_staged` and
+`job/exchange_collected`: object keys, hashes and expiry only, never a signed URL.
 
 Events are append-only. Failed and held attempts stay in the record; never delete or
 rewrite them to make the history look clean.

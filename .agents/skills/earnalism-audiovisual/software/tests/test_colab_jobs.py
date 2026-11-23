@@ -1,5 +1,8 @@
+import contextlib
 import hashlib
+import io
 import json
+import tarfile
 import tempfile
 import unittest
 import zipfile
@@ -332,6 +335,150 @@ class ColabJobTests(unittest.TestCase):
         r = self.build("reel_clips", self._reel_spec())
         self.assertTrue(Path(r["inputs_zip"]).is_file())
         self.assertTrue(Path(r["notebook"]).is_file())
+
+
+class _Response:
+    def __init__(self, status, body=b""):
+        self.status, self._body = status, body
+
+    def read(self, *a):
+        body, self._body = self._body, b""
+        return body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+class ExchangeNotebookTests(unittest.TestCase):
+    """The R2 exchange inside the built notebooks (inputs download, outputs upload)."""
+    setUp, build, nb = ColabJobTests.setUp, ColabJobTests.build, ColabJobTests.nb
+    kinds, cells = ColabJobTests.kinds, ColabJobTests.cells
+
+    def run_cell(self, cell, g, urlopen):
+        import sys
+        import types
+        drive = types.SimpleNamespace(mount=lambda path: None)
+        colab = types.ModuleType("google.colab")
+        colab.drive = drive
+        with patch.dict(sys.modules, {"google": types.ModuleType("google"), "google.colab": colab}), \
+                patch("urllib.request.urlopen", urlopen):
+            exec(cell, g)
+
+    def setup_job(self, kind="stills"):
+        r = self.build(kind, dict(self.kinds())[kind])
+        cells = self.cells(r)
+        config = next(c for c in cells if "DRIVE_JOB_DIR =" in c)
+        verify = next(c for c in cells if "INPUT_ZIP_SHA256:" in c or "!= INPUT_ZIP_SHA256" in c)
+        manifest = next(c for c in cells if "manifest.json" in c and "write_text" in c)
+        drive_dir = self.root / "drive" / r["job_id"]
+        drive_dir.mkdir(parents=True)
+        g = {"RUN": True}
+        exec(config, g)
+        g["DRIVE_JOB_DIR"] = str(drive_dir)
+        g["JOB_STARTED"] = __import__("time").time()
+        return r, verify, manifest, drive_dir, g
+
+    def exchange(self, drive_dir, r, hours=6, url="https://acc.r2.cloudflarestorage.com/b/in?sig"):
+        raw = Path(r["inputs_zip"]).read_bytes()
+        from datetime import datetime, timedelta, timezone
+        data = {"schema": "earnalism.colab-exchange.v1", "job_id": r["job_id"], "title": "garden-book",
+                "inputs": {"url": url, "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw)},
+                "outputs": {"url": "https://acc.r2.cloudflarestorage.com/b/out?sig", "method": "PUT",
+                            "headers": {"Content-Type": "application/x-tar"}},
+                "expires_at": (datetime.now(timezone.utc) + timedelta(hours=hours)).isoformat()}
+        (drive_dir / "exchange.json").write_text(json.dumps(data))
+        return raw
+
+    def test_every_notebook_carries_the_exchange_code(self):
+        for kind, spec in self.kinds():
+            src = "\n".join(self.cells(self.build(kind, spec)))
+            self.assertIn("exchange.json", src, kind)
+            self.assertIn('EXCHANGE["inputs"]["url"]', src, kind)
+            self.assertIn('EXCHANGE["outputs"]["url"]', src, kind)
+            self.assertIn("tarfile", src, kind)
+            # the unchanged sha256 check still runs after any download
+            self.assertGreater(src.index("hashlib.sha256(INPUT_ZIP.read_bytes())"),
+                               src.index('EXCHANGE["inputs"]["url"]'), kind)
+
+    def test_inputs_are_downloaded_then_verified(self):
+        r, verify, _, drive_dir, g = self.setup_job()
+        raw = self.exchange(drive_dir, r)
+        seen = []
+
+        def urlopen(req, timeout=None):
+            seen.append(getattr(req, "full_url", req))
+            return _Response(200, raw)
+        self.run_cell(verify, g, urlopen)
+        self.assertEqual(seen, ["https://acc.r2.cloudflarestorage.com/b/in?sig"])
+        self.assertEqual((drive_dir / "inputs.zip").read_bytes(), raw)
+        self.assertEqual(g["JOB"]["job_id"], r["job_id"])
+
+    def test_tampered_download_is_refused_and_not_kept(self):
+        r, verify, _, drive_dir, g = self.setup_job()
+        self.exchange(drive_dir, r)
+        with self.assertRaises(RuntimeError) as ctx:
+            self.run_cell(verify, g, lambda req, timeout=None: _Response(200, b"PK-not-the-zip"))
+        self.assertIn("sha256", str(ctx.exception))
+        self.assertFalse((drive_dir / "inputs.zip").exists())
+
+    def test_present_inputs_zip_is_not_downloaded_again(self):
+        r, verify, _, drive_dir, g = self.setup_job()
+        self.exchange(drive_dir, r)
+        (drive_dir / "inputs.zip").write_bytes(Path(r["inputs_zip"]).read_bytes())
+
+        def urlopen(req, timeout=None):
+            raise AssertionError("no download when inputs.zip is present")
+        self.run_cell(verify, g, urlopen)
+
+    def test_expired_exchange_stops_before_any_gpu_work(self):
+        r, verify, _, drive_dir, g = self.setup_job()
+        self.exchange(drive_dir, r, hours=0.01)
+        with self.assertRaises(RuntimeError) as ctx:
+            self.run_cell(verify, g, lambda req, timeout=None: _Response(200, b""))
+        self.assertIn("expire", str(ctx.exception))
+
+    def manifest_run(self, status_code):
+        r, verify, manifest, drive_dir, g = self.setup_job()
+        raw = self.exchange(drive_dir, r)
+        self.run_cell(verify, g, lambda req, timeout=None: _Response(200, raw))
+        (drive_dir / "a.png").write_bytes(b"png-a")
+        g.update(OUT_DIR=drive_dir, EXPECTED=["a.png"], MODEL_INFO={"repo": "x"}, INCOMPLETE=False)
+        sent = []
+
+        def urlopen(req, timeout=None):
+            body = req.data.read() if hasattr(req.data, "read") else req.data
+            sent.append((req.full_url, req.get_method(), dict(req.header_items()), body))
+            if status_code >= 400:
+                import urllib.error
+                raise urllib.error.HTTPError(req.full_url, status_code, "denied", {}, io.BytesIO(b""))
+            return _Response(status_code)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.run_cell(manifest, g, urlopen)
+        return sent, out.getvalue(), drive_dir
+
+    def test_outputs_are_tarred_and_put_to_the_signed_url(self):
+        sent, out, drive_dir = self.manifest_run(200)
+        [(url, method, headers, body)] = sent
+        self.assertEqual((url, method), ("https://acc.r2.cloudflarestorage.com/b/out?sig", "PUT"))
+        headers = {k.lower(): v for k, v in headers.items()}
+        self.assertEqual(headers["content-type"], "application/x-tar")
+        self.assertEqual(int(headers["content-length"]), len(body))
+        with tarfile.open(fileobj=io.BytesIO(body), mode="r:") as tar:
+            members = tar.getmembers()
+        self.assertEqual(sorted(m.name for m in members), ["a.png", "manifest.json"])
+        self.assertTrue(all(m.isreg() for m in members))
+        self.assertIn("200", out)
+        manifest = json.loads((drive_dir / "manifest.json").read_text())
+        self.assertEqual(set(manifest["outputs"]), {"a.png"})  # not exchange.json, not inputs.zip
+
+    def test_failed_upload_raises_and_never_claims_success(self):
+        with self.assertRaises(RuntimeError) as ctx:
+            self.manifest_run(403)
+        self.assertIn("403", str(ctx.exception))
 
 
 if __name__ == "__main__":

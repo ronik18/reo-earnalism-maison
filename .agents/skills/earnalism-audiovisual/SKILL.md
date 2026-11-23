@@ -25,9 +25,9 @@ cd skills/earnalism-audiovisual/software
 python3 -m eav.cli status --root <title root>      # prints the next owner action
 ```
 
-Commands: `init`, `plan`, `job`, `import`, `supersede` (never ran), `close` (ran, not
-imported: settles the actual CU), `film`, `reel`, `qc`, `status`, `bundle-audio`
-(usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
+Commands: `init`, `plan`, `job`, `exchange-stage`, `exchange-collect`, `import`,
+`supersede` (never ran), `close` (ran, not imported: settles the actual CU), `film`,
+`reel`, `qc`, `status`, `bundle-audio` (usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
 inputs to get past it.
 
@@ -48,7 +48,7 @@ inputs to get past it.
 Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 [voice](references/earnalism-voice.md), [free stack](references/free-stack.md),
 [budget](references/compute-budget.md), [record](references/production-record.md),
-[publishing](references/publishing.md). Pressure scenarios this skill must pass:
+[publishing](references/publishing.md), [Colab R2 exchange](references/colab-exchange.md). Pressure scenarios this skill must pass:
 [references/pressure-tests.md](references/pressure-tests.md).
 
 ## Stop conditions (exact behaviour)
@@ -76,7 +76,9 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   No paid generator or credit-spending connector (Kling, ElevenLabs, Suno, Runway,
   Adobe/Canva credits): not for "just one test" either.
 - **Colab.** The owner runs every job. Narration, stills and music notebooks are inert
-  until `RUN = True` and stop at their forecast seconds (hard stop). Reel clips use the
+  until `RUN = True` and stop at their forecast seconds (hard stop). Their default route
+  is the R2 exchange (`exchange-stage` → Maison `presign_colab_exchange` → owner: RUN = True,
+  Run all → `exchange-collect`); signed URLs live only in the gitignored `exchange.json`. Reel clips use the
   Wan batch notebook: its own flags plus an authority file
   (`/content/wan22-batch-authority.json`) that **the owner writes and signs. Claude never
   writes, edits, drafts or fills in Wan authority files**, never supplies an observed rate,

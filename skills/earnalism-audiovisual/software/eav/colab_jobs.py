@@ -37,6 +37,7 @@ DRIVE_ROOT = "/content/drive/MyDrive/earnalism-audiovisual"
 
 KINDS = ("narration", "stills", "music", "reel_clips")
 JOB_SCHEMA = "earnalism.audiovisual-job.v1"
+EXCHANGE_SCHEMA = "earnalism.colab-exchange.v1"
 _TEMPLATES = Path(__file__).with_name("templates")
 _WAN_DIR = Path(__file__).resolve().parents[3] / "earnalism-video" / "software" / "wan22"
 _SAFE = re.compile(r"[a-z0-9][a-z0-9-]*")
@@ -95,6 +96,30 @@ from google.colab import drive
 drive.mount("/content/drive")
 OUT_DIR = pathlib.Path(DRIVE_JOB_DIR)
 INPUT_ZIP = OUT_DIR / "inputs.zip"
+# R2 exchange (references/colab-exchange.md): exchange.json in this Drive folder carries two
+# short-lived single-object URLs (GET inputs.zip, PUT outputs.tar). They are capabilities: never
+# print them, never copy them elsewhere.
+EXCHANGE = None
+if (OUT_DIR / "exchange.json").is_file():
+    import time, urllib.request
+    from datetime import datetime
+    EXCHANGE = json.loads((OUT_DIR / "exchange.json").read_text())
+    if EXCHANGE.get("schema") != EXCHANGE_SCHEMA or EXCHANGE.get("job_id") != JOB_ID:
+        raise RuntimeError("exchange.json belongs to a different job; ask Claude for this job's exchange.json")
+    _left = datetime.fromisoformat(EXCHANGE["expires_at"].replace("Z", "+00:00")).timestamp() - time.time()
+    if _left < DEADLINE_SECONDS + MANIFEST_RESERVE_S + 300:
+        raise RuntimeError("the exchange URLs expire before this job's hard stop (%.0f s left); "
+                           "ask Claude to re-sign them before running" % _left)
+    if not INPUT_ZIP.is_file():
+        with urllib.request.urlopen(EXCHANGE["inputs"]["url"], timeout=600) as _r:
+            if not 200 <= _r.status < 300:
+                raise RuntimeError("inputs.zip download failed: HTTP %d" % _r.status)
+            _data = _r.read()
+        _sha = hashlib.sha256(_data).hexdigest()
+        if _sha != INPUT_ZIP_SHA256 or _sha != EXCHANGE["inputs"]["sha256"]:
+            raise RuntimeError("downloaded inputs.zip sha256 mismatch: " + _sha + " (not kept)")
+        INPUT_ZIP.write_bytes(_data)
+        print("inputs.zip downloaded from the exchange:", len(_data), "bytes")
 if not INPUT_ZIP.is_file():
     raise RuntimeError("Copy inputs.zip into " + str(OUT_DIR) + " first")
 actual = hashlib.sha256(INPUT_ZIP.read_bytes()).hexdigest()
@@ -138,7 +163,7 @@ _MANIFEST = _GUARD + '''import hashlib, json, time
 import importlib.metadata as _md
 outputs = {}
 for p in sorted(OUT_DIR.iterdir()):
-    if p.is_file() and p.name not in ("manifest.json", "inputs.zip"):
+    if p.is_file() and p.name not in ("manifest.json", "inputs.zip", "exchange.json"):
         outputs[p.name] = hashlib.sha256(p.read_bytes()).hexdigest()
 if not outputs:
     raise RuntimeError("no outputs were produced")
@@ -162,6 +187,29 @@ manifest = {"schema": "earnalism.audiovisual-outputs.v1", "job_id": JOB_ID, "tit
 print("manifest.json written:", manifest["status"], len(outputs), "files")
 if not complete:
     print("INCOMPLETE: import refuses this folder; close the job with the CU Colab shows")
+if globals().get("EXCHANGE") is not None:  # R2 exchange: one uncompressed tar, PUT once
+    import os, tarfile, tempfile, urllib.error, urllib.request
+    _fd, _tar = tempfile.mkstemp(suffix=".tar")  # local disk, never the Drive job folder
+    os.close(_fd)
+    with tarfile.open(_tar, "w", format=tarfile.PAX_FORMAT) as _t:
+        for _name in ["manifest.json"] + sorted(outputs):
+            _t.add(str(OUT_DIR / _name), arcname=_name, recursive=False)
+    _size = os.path.getsize(_tar)
+    _headers = dict(EXCHANGE["outputs"]["headers"], **{"Content-Length": str(_size)})
+    with open(_tar, "rb") as _body:
+        _req = urllib.request.Request(EXCHANGE["outputs"]["url"], data=_body, method="PUT",
+                                      headers=_headers)
+        try:
+            with urllib.request.urlopen(_req, timeout=1800) as _r:
+                _status = _r.status
+        except urllib.error.HTTPError as _e:
+            _status = _e.code
+    os.unlink(_tar)
+    print("outputs.tar upload: HTTP", _status, "(%d bytes)" % _size)
+    if not 200 <= _status < 300:
+        raise RuntimeError("outputs.tar upload failed: HTTP %d; the outputs stay in Drive, tell Claude"
+                           % _status)
+    print("outputs uploaded to the exchange; tell Claude the CU Colab shows")
 '''
 
 # Distributions whose resolved versions each manifest records (R26).
@@ -179,10 +227,12 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
               f"DRIVE_JOB_DIR = {DRIVE_ROOT + '/' + title + '/' + job_id!r}\n"
               f"# Hard wall-clock stop = the forecast seconds reserved on the ledger (R25)\n"
               f"DEADLINE_SECONDS = {int(deadline_s)}\nMANIFEST_RESERVE_S = {MANIFEST_RESERVE_S}\n"
-              f"PACKAGES = {PACKAGES[kind]!r}\n")
+              f"PACKAGES = {PACKAGES[kind]!r}\nEXCHANGE_SCHEMA = {EXCHANGE_SCHEMA!r}\n")
     intro = (f"# Earnalism {kind} job `{job_id}`\n\n**Prepared, not run.** Input zip SHA256 "
-             f"`{zip_sha}`. Copy `inputs.zip` to `{DRIVE_ROOT}/{title}/{job_id}/` in Drive, set "
-             f"`RUN = True` in the first cell, then run all. Outputs and `manifest.json` "
+             f"`{zip_sha}`. Set `RUN = True` in the first cell, then run all. With the R2 exchange "
+             f"(`exchange.json` in `{DRIVE_ROOT}/{title}/{job_id}/`) the notebook downloads "
+             f"`inputs.zip` itself and uploads the outputs when it finishes; without it, copy "
+             f"`inputs.zip` into that Drive folder first. Outputs and `manifest.json` "
              f"(sha256 of every output) land in the same folder.\n\n**Hard stop:** "
              f"{int(deadline_s)} s (the reserved forecast) from the clock cell. No item starts after "
              f"it and the runtime is unassigned at it; a stopped run's manifest says INCOMPLETE and "

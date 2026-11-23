@@ -126,6 +126,21 @@ class ImporterTests(unittest.TestCase):
         (self.dl / "inputs.zip").write_bytes(Path(self.job["inputs_zip"]).read_bytes())
         self.assertEqual(len(self.run_import()), 2)
 
+    def test_exchange_json_in_a_drive_download_is_never_an_output(self):
+        """A manually downloaded Drive folder carries exchange.json (capability URLs): it is
+        skipped, never imported, and can never be listed as an output."""
+        self.download()
+        (self.dl / "exchange.json").write_text('{"inputs": {"url": "https://x"}}')
+        arts = self.run_import()
+        self.assertNotIn("exchange.json", [Path(a["path"]).name for a in arts])
+        self.assertFalse((self.record.root / "stills" / self.job["job_id"] / "exchange.json").exists())
+
+    def test_exchange_json_listed_as_output_holds(self):
+        self.download(files={"a.png": b"png-a", "exchange.json": b"{}"})
+        with self.assertRaises(ImportHeld):
+            self.run_import()
+        self.assert_nothing_changed()
+
     def test_inputs_zip_copy_changed_holds(self):
         self.download()
         (self.dl / "inputs.zip").write_bytes(b"different")

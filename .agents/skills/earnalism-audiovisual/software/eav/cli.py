@@ -6,6 +6,12 @@
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
                          [--archive-sha256 <sha>]           (reel_clips)
+  python3 -m eav.cli exchange-stage <job_id> --root <dir> [--account <id> --bucket <name>]
+                         (uploads inputs.zip to R2, prints the two Maison presign commands)
+  python3 -m eav.cli exchange-stage <job_id> --root <dir> --signed <presign output file>
+                         (checks the signed URLs, writes jobs/<job_id>/exchange.json)
+  python3 -m eav.cli exchange-collect <job_id> --root <dir> --units <CU Colab shows>
+                         [--account <id> --bucket <name>]   (downloads outputs.tar, then import)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
   python3 -m eav.cli close <job_id> --root <dir> --units <CU Colab shows> --reason "<what happened>"
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
@@ -38,7 +44,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
-from . import budget, colab_jobs, film, importer, mix, qc, reel, scenes
+from . import budget, colab_jobs, exchange, film, importer, mix, qc, reel, scenes
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import voice_units
@@ -369,11 +375,33 @@ def _wan_action(rec, job) -> str:
             '--reason "<what happened>"')
 
 
+def _exchange_events(rec, job_id, result) -> list:
+    return [e for e in rec.data["events"] if e["stage"] == "job" and e["result"] == result
+            and e["detail"].get("job_id") == job_id]
+
+
 def _colab_action(rec, job) -> str:
     if job["kind"] == "reel_clips":
         return _wan_action(rec, job)
     drive = _json(job["manifest"]).get("drive_dir", colab_jobs.DRIVE_ROOT)
-    return (f"Run the {job['kind']} notebook in Colab: copy {job['inputs_zip']} to Drive {drive}/, "
+    r = f"--root {rec.root}"
+    staged = _exchange_events(rec, job["job_id"], "exchange_staged")
+    if staged:
+        ex = job["notebook"].parent / exchange.FILENAME
+        return (f"R2 exchange staged (URLs expire {staged[-1]['detail']['expires_at']}): put {ex} and "
+                f"{job['notebook']} in Drive {drive}/; the owner opens that notebook in Colab, sets "
+                f"RUN = True in the first cell and runs all (inputs download and outputs upload "
+                f"themselves). Then: {PROG} exchange-collect {job['job_id']} {r} --units <CU shown in "
+                f"Colab>. If it ran but cannot be imported: {PROG} close {job['job_id']} {r} --units "
+                '<CU shown in Colab> --reason "<what happened>" (references/colab-exchange.md)')
+    if _exchange_events(rec, job["job_id"], "exchange_uploaded"):
+        return (f"Sign the two exchange URLs printed by {PROG} exchange-stage {job['job_id']} {r} with "
+                f"Maison (Render one-off job: presign_colab_exchange), save both JSON lines to a file "
+                f"outside the repo, then: {PROG} exchange-stage {job['job_id']} {r} --signed <that file> "
+                "(references/colab-exchange.md)")
+    return (f"Default (R2 exchange, references/colab-exchange.md): {PROG} exchange-stage "
+            f"{job['job_id']} {r} --account <cloudflare account id> --bucket <private bucket>. "
+            f"Manual fallback: run the {job['kind']} notebook in Colab: copy {job['inputs_zip']} to Drive {drive}/, "
             f"open {job['notebook']}, set RUN = True in the first cell, Run all; download that Drive "
             f"folder, then: {PROG} import {job['job_id']} --root {rec.root} --from <downloaded folder> "
             f"--units <CU shown in Colab>. If it ran but cannot be imported (crash, hard stop, lost "
@@ -659,6 +687,124 @@ def cmd_import(args):
                    code=4)
     print(f"Imported {len(arts)} verified file(s) from {job['kind']} job {args.job_id}; "
           f"settled {args.units:g} CU.")
+
+
+def _exchange_job(rec, job_id):
+    """A pending narration/stills/music job the exchange may still serve."""
+    job = next((j for j in _jobs(rec) if j["job_id"] == job_id), None)
+    if job is None:
+        raise Stop(f"unknown job {job_id}", f"{PROG} status --root {rec.root}")
+    if job["kind"] not in exchange.KINDS:
+        raise Stop(f"{job['kind']} jobs have their own Colab route (the Wan batch builder), not the "
+                   "R2 exchange", f"{PROG} status --root {rec.root}")
+    if job["imported"]:
+        raise Stop(f"job {job_id} is already imported", f"{PROG} status --root {rec.root}")
+    if _ended(job) or job["unfinished"]:
+        raise Stop(f"job {job_id} is superseded or closed (or that is under way); the exchange never "
+                   "serves it", f"{PROG} status --root {rec.root}")
+    return job
+
+
+def _r2_target(args):
+    account = args.account or os.environ.get("EAV_R2_ACCOUNT", "")
+    bucket = args.bucket or os.environ.get("EAV_R2_BUCKET", "")
+    token = os.environ.get("CLOUDFLARE_API_TOKEN", "")
+    try:
+        exchange.endpoint(account, bucket)
+    except exchange.ExchangeError as e:
+        raise Stop(str(e), "Pass --account and --bucket (or set EAV_R2_ACCOUNT / EAV_R2_BUCKET)")
+    if not token:
+        raise Stop("CLOUDFLARE_API_TOKEN is not set",
+                   "Export CLOUDFLARE_API_TOKEN (where the egress proxy injects the real token, any "
+                   "placeholder value works); never paste a token into a file or the record")
+    return account, bucket, token
+
+
+def cmd_exchange_stage(args):
+    """Upload inputs.zip and print the presign requests, or (--signed) write exchange.json."""
+    rec = _record(args.root)
+    job = _exchange_job(rec, args.job_id)
+    title, job_id = rec.data["title_slug"], job["job_id"]
+    zip_path = job["inputs_zip"]
+    zip_sha, zip_bytes = sha256_file(zip_path), zip_path.stat().st_size
+    if zip_sha != _json(job["manifest"]).get("inputs_sha256"):
+        raise Stop(f"{zip_path} differs from its build manifest", "Report this; never rebuild to get past it")
+    if not args.signed:
+        account, bucket, token = _r2_target(args)
+        k = exchange.key(title, job_id, exchange.INPUTS)
+        try:
+            exchange.cloudflare_upload(account, bucket, k, zip_path, exchange.INPUT_TYPE, token)
+        except exchange.ExchangeError as e:
+            raise Stop(f"exchange not staged: {e}", "Check the account, bucket and token, then rerun")
+        rec.event("job", "exchange_uploaded", {"job_id": job_id, "key": k, "sha256": zip_sha,
+                                               "bytes": zip_bytes})
+        print(f"Uploaded {zip_path.name} ({zip_bytes} bytes, sha256 {zip_sha}) to R2 key {k}.")
+        print("Sign these two requests with Maison where the R2 credentials live (Render one-off job), "
+              "and save both printed JSON lines to one file outside the repository:")
+        for req in exchange.presign_requests(title, job_id):
+            print("  " + exchange.presign_command(req))
+        return
+    uploads = [e for e in _exchange_events(rec, job_id, "exchange_uploaded")
+               if e["detail"].get("sha256") == zip_sha]
+    if not uploads:
+        raise Stop(f"inputs.zip of {job_id} has not been uploaded to the exchange",
+                   f"{PROG} exchange-stage {job_id} --root {rec.root} --account <id> --bucket <name>")
+    try:
+        rows = exchange.parse_signed(Path(args.signed).read_text(encoding="utf-8"))
+        checked = exchange.check_signed(rows, title, job_id)
+    except exchange.ExchangeError as e:
+        raise Stop(f"exchange not staged: {e}", "Re-run the two presign_colab_exchange commands and pass "
+                   "their exact output with --signed")
+    doc = exchange.exchange_document(title, job_id, checked, zip_sha, zip_bytes)
+    path = job["notebook"].parent / exchange.FILENAME
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(tmp, path)
+    # Keys and expiry only: the URLs are capabilities and never enter record.json.
+    rec.event("job", "exchange_staged", {"job_id": job_id, "inputs_key": checked["inputs_key"],
+                                         "outputs_key": checked["outputs_key"],
+                                         "inputs_sha256": zip_sha, "expires_at": doc["expires_at"]})
+    print(f"Wrote {path} (gitignored; URLs expire {doc['expires_at']}). Put it next to the notebook in "
+          "the job's Drive folder; never commit or paste it.")
+
+
+def cmd_exchange_collect(args):
+    """Download outputs.tar, safe-extract it inside the title root, then the normal import."""
+    rec = _record(args.root)
+    job = _exchange_job(rec, args.job_id)
+    staged = _exchange_events(rec, job["job_id"], "exchange_staged")
+    if not staged:
+        raise Stop(f"job {job['job_id']} has no staged R2 exchange",
+                   f"{PROG} exchange-stage {job['job_id']} --root {rec.root} --account <id> --bucket <name>")
+    account, bucket, token = _r2_target(args)
+    k = staged[-1]["detail"]["outputs_key"]
+    ledger = _ledger(rec, args)
+    work = Path(tempfile.mkdtemp(dir=rec.root, prefix=".exchange-"))
+    try:
+        tar_path = work / exchange.OUTPUTS
+        try:
+            exchange.cloudflare_download(account, bucket, k, tar_path, token, exchange.MAX_OUTPUT_BYTES)
+            tar_sha = sha256_file(tar_path)
+            names = exchange.safe_extract(tar_path, work / "outputs")
+        except exchange.ExchangeError as e:
+            raise Stop(f"Import held: {e}. Nothing was imported; the reservation stays open.",
+                       f"Check the notebook printed a 2xx upload, then rerun {PROG} exchange-collect "
+                       f"{job['job_id']} ...; never rebuild or rerun the job to get past it.", code=4)
+        try:
+            arts = importer.import_job(rec, {kk: job[kk] for kk in ("job_id", "kind", "notebook",
+                                                                    "inputs_zip", "manifest")},
+                                       work / "outputs", ledger, args.units)
+        except importer.ImportHeld as e:
+            raise Stop(f"Import held: {e}. Nothing was imported; the reservation stays open.",
+                       f"If the run ended INCOMPLETE or its outputs are wrong: {PROG} close "
+                       f"{job['job_id']} --root {rec.root} --units <CU shown in Colab> --reason "
+                       '"<what happened>"; never rebuild or rerun the job to get past it.', code=4)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    rec.event("job", "exchange_collected", {"job_id": job["job_id"], "outputs_key": k,
+                                            "outputs_tar_sha256": tar_sha, "members": sorted(names)})
+    print(f"Collected {k} (sha256 {tar_sha}) and imported {len(arts)} verified file(s) from "
+          f"{job['kind']} job {job['job_id']}; settled {args.units:g} CU.")
 
 
 _ENDINGS = {"supersede": ("superseding", "superseded"), "close": ("closing", "closed")}
@@ -1159,6 +1305,7 @@ def cmd_status(args):
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "supersede": cmd_supersede, "close": cmd_close,
+            "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio}
 
@@ -1190,6 +1337,16 @@ def _parser():
     s.add_argument("--from", dest="source", required=True)
     s.add_argument("--units", type=float, required=True)
     s.add_argument("--archive-sha256")
+    s = add("exchange-stage")
+    s.add_argument("job_id")
+    s.add_argument("--signed", help="file with the two JSON lines presign_colab_exchange printed")
+    s.add_argument("--account", help="Cloudflare account id (else $EAV_R2_ACCOUNT)")
+    s.add_argument("--bucket", help="private R2 bucket (else $EAV_R2_BUCKET)")
+    s = add("exchange-collect")
+    s.add_argument("job_id")
+    s.add_argument("--units", type=float, required=True, help="the CU Colab shows the run used")
+    s.add_argument("--account", help="Cloudflare account id (else $EAV_R2_ACCOUNT)")
+    s.add_argument("--bucket", help="private R2 bucket (else $EAV_R2_BUCKET)")
     s = add("supersede")
     s.add_argument("job_id")
     s.add_argument("--reason", required=True)

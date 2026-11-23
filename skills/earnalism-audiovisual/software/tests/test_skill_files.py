@@ -11,7 +11,8 @@ STAGE_SKILLS = ("earnalism-book-production", "earnalism-audiobook-go-live",
                 "earnalism-audiobook-score", "earnalism-video", "earnalism-covers",
                 "earnalism-book-audiovisual")
 REFERENCES = ("earnalism-voice.md", "film-recipe.md", "reel-recipe.md", "free-stack.md",
-              "compute-budget.md", "production-record.md", "publishing.md", "pressure-tests.md")
+              "compute-budget.md", "production-record.md", "publishing.md", "pressure-tests.md",
+              "colab-exchange.md")
 
 
 def _frontmatter(text: str) -> dict:
@@ -75,6 +76,16 @@ class SkillFileTests(unittest.TestCase):
         self.assertEqual(sorted(canon), sorted(mirror))
         for rel, path in canon.items():
             self.assertEqual(path.read_bytes(), mirror[rel].read_bytes(), rel)
+
+    def test_colab_exchange_documented_and_never_committed(self):
+        text = (SKILL / "references" / "colab-exchange.md").read_text(encoding="utf-8")
+        for phrase in ("RUN = True", "exchange-stage", "presign_colab_exchange", "--signed",
+                       "exchange-collect", "Render one-off job", "never in record.json",
+                       "reel_clips"):
+            self.assertIn(phrase, text, phrase)
+        self.assertIn("exchange", self.text.lower())
+        ignored = (REPO / ".gitignore").read_text(encoding="utf-8").splitlines()
+        self.assertIn("production/**/exchange.json", ignored)
 
     def test_pipeline_doc_points_to_entry_point(self):
         doc = (REPO / "docs" / "EARNALISM_AUDIOVISUAL_PIPELINE.md").read_text(encoding="utf-8")
