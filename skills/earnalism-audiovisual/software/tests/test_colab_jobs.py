@@ -12,6 +12,7 @@ from eav.record import Record
 
 RATES = {k: {"s_per_step": 1.0, "units_per_hour": 10.0}
          for k in ("narration", "stills", "music", "reel_clips")}
+COMPUTE = {"steps": 1, "items": 2, "takes": 1, "decode_s": 30, "export_s": 20}
 PRESET = {"description": "A calm warm female voice, very clear, close to the microphone."}
 SCENE = {"scene_id": "s01", "text": "The morning was quiet. Rain fell on the roof."}
 
@@ -31,17 +32,17 @@ class ColabJobTests(unittest.TestCase):
                                     self.out, month="2026-11")
 
     def narration(self, **kw):
-        return self.build("narration", {"scenes": [SCENE], "preset": PRESET, **kw})
+        return self.build("narration", {"scenes": [SCENE], "preset": PRESET, "compute": COMPUTE, **kw})
 
     def nb(self, result):
         return json.loads(Path(result["notebook"]).read_text())
 
     def test_notebook_is_inert_by_default(self):
         for kind, spec in [
-                ("narration", {"scenes": [SCENE], "preset": PRESET}),
-                ("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]}),
+                ("narration", {"scenes": [SCENE], "preset": PRESET, "compute": COMPUTE}),
+                ("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}], "compute": COMPUTE}),
                 ("music", {"items": [{"key": "m", "prompt": "soft piano", "seed": 2,
-                                      "duration_s": 60}]})]:
+                                      "duration_s": 60}], "compute": COMPUTE})]:
             nb = self.nb(self.build(kind, spec))
             code = [c for c in nb["cells"] if c["cell_type"] == "code"]
             self.assertEqual("".join(code[0]["source"]), "RUN = False")
@@ -71,12 +72,12 @@ class ColabJobTests(unittest.TestCase):
             self.assertTrue(u["description"].startswith(PRESET["description"]))
 
     def test_stills_and_music_pins(self):
-        s = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]})
+        s = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}], "compute": COMPUTE})
         src = "".join("".join(c["source"]) for c in self.nb(s)["cells"])
         self.assertIn("black-forest-labs/FLUX.1-schnell", src)
         self.assertIn("STEPS = 4", src)
         m = self.build("music", {"items": [{"key": "m", "prompt": "p", "seed": 2,
-                                            "duration_s": 30}]})
+                                            "duration_s": 30}], "compute": COMPUTE})
         src = "".join("".join(c["source"]) for c in self.nb(m)["cells"])
         self.assertIn("ACE-Step/ACE-Step-v1-3.5B", src)
         self.assertIn("weight_sha256", src)
@@ -85,10 +86,10 @@ class ColabJobTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.build("music", {"model": "facebook/musicgen-small",
                                  "items": [{"key": "m", "prompt": "p", "seed": 1,
-                                            "duration_s": 5}]})
+                                            "duration_s": 5}], "compute": COMPUTE})
         with self.assertRaises(ValueError):
             self.build("stills", {"model": "black-forest-labs/FLUX.1-dev",
-                                  "items": [{"key": "a", "prompt": "p", "seed": 1}]})
+                                  "items": [{"key": "a", "prompt": "p", "seed": 1}], "compute": COMPUTE})
         self.assertEqual(list(self.out.iterdir()), [])
         self.assertFalse(self.ledger.path.exists())
 
@@ -97,7 +98,7 @@ class ColabJobTests(unittest.TestCase):
         before = self.ledger.path.read_bytes()
         rates = {"narration": {"s_per_step": 1000.0, "units_per_hour": 10.0}}
         with self.assertRaises(BudgetExceeded):
-            self.build("narration", {"scenes": [SCENE], "preset": PRESET}, rates)
+            self.build("narration", {"scenes": [SCENE], "preset": PRESET, "compute": COMPUTE}, rates)
         self.assertEqual(list(self.out.iterdir()), [])
         self.assertEqual(self.ledger.path.read_bytes(), before)
 
@@ -108,11 +109,47 @@ class ColabJobTests(unittest.TestCase):
         ev = self.record.data["events"][-1]
         self.assertEqual((ev["stage"], ev["result"]), ("job", "built"))
 
+    def test_missing_compute_fields_rejected(self):
+        base = {"scenes": [SCENE], "preset": PRESET}
+        bad = [None] + [{k: v for k, v in COMPUTE.items() if k != drop}
+                        for drop in ("steps", "items", "decode_s", "export_s")]
+        for compute in bad:
+            spec = dict(base) if compute is None else dict(base, compute=compute)
+            with self.assertRaises(ValueError):
+                self.build("narration", spec)
+        self.assertEqual(list(self.out.iterdir()), [])
+        self.assertFalse(self.ledger.path.exists())
+
+    def test_write_failure_cleans_up_and_settles_zero(self):
+        def boom(kind, plan, job_id, title, job_dir):
+            job_dir.mkdir(parents=True)
+            (job_dir / "partial.txt").write_text("x")
+            raise OSError("disk full")
+
+        with patch.object(colab_jobs, "_write_notebook_bundle", side_effect=boom), \
+                patch.object(Ledger, "settle", side_effect=RuntimeError("settle broke")):
+            with self.assertRaises(OSError):
+                self.narration(job_id="job-a")
+        self.assertEqual(list(self.out.iterdir()), [])
+        with patch.object(colab_jobs, "_write_notebook_bundle", side_effect=boom):
+            with self.assertRaises(OSError):
+                self.narration(job_id="job-b")
+        entry = [e for e in json.loads(self.ledger.path.read_text())
+                 if e["job_id"] == "job-b"][0]
+        self.assertEqual((entry["state"], entry["units"]), ("settled", 0))
+        self.assertEqual(list(self.out.iterdir()), [])
+
+    def test_artifact_meta_paths_relative(self):
+        meta = self.narration()
+        a = self.record.data["artifacts"][-1]["meta"]
+        self.assertFalse(Path(a["inputs_zip"]).is_absolute())
+        self.assertFalse(Path(a["manifest"]).is_absolute())
+
     def _reel_spec(self):
         art = self.root / "art"
         art.mkdir()
         (art / "a.png").write_bytes(b"fixture-image")
-        return {"art_dir": str(art), "prior_attempt_evidence": {"scope": "test only"},
+        return {"art_dir": str(art), "prior_attempt_evidence": {"scope": "test only"}, "compute": COMPUTE,
                 "shots": [{"id": "garden", "image": "a.png", "seed": 7,
                            "prompt": "Notice the bird, lean gently and smile softly."}]}
 

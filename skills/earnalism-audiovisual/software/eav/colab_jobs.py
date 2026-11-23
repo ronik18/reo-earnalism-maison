@@ -9,6 +9,7 @@ import importlib.util
 import io
 import json
 import re
+import shutil
 import tempfile
 import uuid
 import zipfile
@@ -137,11 +138,24 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template) -> 
     return (json.dumps(nb, indent=1, ensure_ascii=False) + "\n").encode("utf-8")
 
 
-def _compute(kind: str, spec: dict, items: int, steps: int, takes: int = 1) -> dict:
-    c = dict(spec.get("compute") or {})
-    return {"kind": kind, "steps": c.get("steps", steps), "items": c.get("items", items),
-            "takes": c.get("takes", takes), "decode_s": c.get("decode_s", 0),
-            "export_s": c.get("export_s", 0)}
+def _compute(kind: str, spec: dict) -> dict:
+    """Forecast inputs must be measured by the caller; nothing is defaulted
+    except takes (1), so a missing block can never under-reserve."""
+    c = spec.get("compute")
+    if not isinstance(c, dict):
+        raise ValueError("spec['compute'] with steps, items, decode_s and export_s is required")
+    missing = [k for k in ("steps", "items", "decode_s", "export_s") if k not in c]
+    if missing:
+        raise ValueError(f"spec['compute'] missing: {', '.join(missing)}")
+    out = {"kind": kind, "takes": c.get("takes", 1)}
+    for k in ("steps", "items", "takes", "decode_s", "export_s"):
+        v = out[k] if k in out else c[k]
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or v != v \
+                or v in (float("inf"), float("-inf")) or v < 0 or (
+                k in ("steps", "items", "takes") and v <= 0):
+            raise ValueError(f"spec['compute'][{k!r}] invalid: {v!r}")
+        out[k] = v
+    return out
 
 
 def _plan(kind: str, record, spec: dict) -> dict:
@@ -156,7 +170,7 @@ def _plan(kind: str, record, spec: dict) -> dict:
             raise ValueError("no voice units")
         return {"payload": {"units": units}, "repo": NARRATION_REPO,
                 "revision": NARRATION_REVISION, "steps": 1,
-                "compute": _compute(kind, spec, len(units), 1)}
+                "compute": _compute(kind, spec)}
     if kind == "stills":
         _check_model(kind, spec, STILLS_REPO)
         items = [{"key": s["key"], "prompt": s["prompt"], "seed": int(s["seed"]),
@@ -166,7 +180,7 @@ def _plan(kind: str, record, spec: dict) -> dict:
             raise ValueError("no stills requested")
         return {"payload": {"items": items}, "repo": STILLS_REPO,
                 "revision": "resolved-at-run-time", "steps": STILLS_STEPS,
-                "compute": _compute(kind, spec, len(items), STILLS_STEPS)}
+                "compute": _compute(kind, spec)}
     if kind == "music":
         _check_model(kind, spec, MUSIC_REPO)
         items = [{"key": t["key"], "prompt": t["prompt"], "seed": int(t["seed"]),
@@ -176,7 +190,7 @@ def _plan(kind: str, record, spec: dict) -> dict:
             raise ValueError("no tracks requested")
         return {"payload": {"items": items}, "repo": MUSIC_REPO,
                 "revision": "resolved-at-run-time", "steps": 60,
-                "compute": _compute(kind, spec, len(items), 60)}
+                "compute": _compute(kind, spec)}
     raise ValueError(f"unknown job kind: {kind!r}")
 
 
@@ -209,6 +223,13 @@ def _reel_job(spec: dict, job_id: str) -> dict:
 
 def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
               month: str = None) -> dict:
+    """Build an inert bundle under out/<job_id>/.
+
+    The forecast is reserved on the ledger before anything is written. If the
+    write fails, the partial directory is removed and the reservation settled
+    at 0 units; the settled entry stays in the ledger, so a retry needs a new
+    job_id. spec['compute'] (measured steps, items, decode_s, export_s) is required.
+    """
     if kind not in KINDS:
         raise ValueError(f"unknown job kind: {kind!r}")
     title = record.data["title_slug"]
@@ -229,7 +250,7 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
     if kind == "reel_clips":
         _check_model(kind, spec, _load_wan_batch().w.MODEL)
         job = _reel_job(spec, job_id)
-        plan = {"compute": _compute(kind, spec, len(job["scenes"]), 24)}
+        plan = {"compute": _compute(kind, spec)}
     else:
         plan = _plan(kind, record, spec)
     units = forecast(plan["compute"], rates)
@@ -241,12 +262,19 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
         else:
             result = _write_notebook_bundle(kind, plan, job_id, title, job_dir)
     except BaseException:
-        ledger.settle(job_id, 0)  # release the reservation; nothing ran
+        shutil.rmtree(job_dir, ignore_errors=True)
+        try:
+            ledger.settle(job_id, 0)  # release the reservation; nothing ran
+        except Exception:
+            pass  # never mask the original error
         raise
     result.update(job_id=job_id, forecast_units=units)
     record.add_artifact("colab_job", Path(result["notebook"]), {
         "job_id": job_id, "job_kind": kind, "forecast_units": units, "month": month,
-        "inputs_zip": str(result["inputs_zip"]), "manifest": str(result["manifest"])})
+        "inputs_zip": Path(result["inputs_zip"]).resolve().relative_to(
+            record.root.resolve()).as_posix(),
+        "manifest": Path(result["manifest"]).resolve().relative_to(
+            record.root.resolve()).as_posix()})
     record.event("job", "built", {"job_id": job_id, "kind": kind, "forecast_units": units})
     return {"job_id": job_id, "notebook": result["notebook"],
             "inputs_zip": result["inputs_zip"], "manifest": result["manifest"],
