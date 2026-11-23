@@ -34,8 +34,8 @@ shifts of pace and intensity, never by character impersonation.
 3. **Pauses in the edit, once.** Colab writes dry per-unit WAVs with no added silence;
    `eav.film.narration_track` is the only place pauses are inserted, so measured unit ends
    are speech ends. 400 ms between sentences, 800 ms at a paragraph end,
-   1200 ms after a heading. Silence is never added anywhere else, and a held breath is
-   never written as spoken text.
+   1200 ms after a heading; in a reel, 400 ms between lines (Squint pacing). Silence is
+   never added anywhere else, and a held breath is never written as spoken text.
 4. **Context.** Read the whole work first and keep the context map from
    `earnalism-audiobook-go-live/references/narrative-performance.md`: who speaks, what
    turns, where the reveal lands, how it ends. A suspenseful word does not make a calm

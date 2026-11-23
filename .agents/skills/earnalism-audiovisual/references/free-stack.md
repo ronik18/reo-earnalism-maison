@@ -30,10 +30,24 @@ licence that permits commercial output.
 
 - One notebook per job, inert: first cell `RUN = False`; every later cell refuses to run
   until the owner sets `RUN = True`.
+- **Hard stop** (narration, stills, music): `DEADLINE_SECONDS` = the forecast seconds the
+  ledger reserved, counted from the clock cell. An item starts only if it (and the
+  manifest) can finish before it, and a timer unassigns the runtime at it. A stopped or
+  short run writes `manifest.json` with `status: INCOMPLETE`, which `import` refuses;
+  end that job with `close --units <CU Colab shows>`.
+- **Package versions**: the notebooks still `pip install` parler-tts and ACE-Step from
+  git and diffusers/transformers unpinned. Every output manifest records the resolved
+  versions (and VCS commits) under `packages`, and `import` refuses a manifest without
+  them. Exact pins follow the owner's first successful run: copy those versions into
+  the templates before the next build.
 - Inputs travel as one zip whose sha256 is checked in Colab; outputs land in
   `/content/drive/MyDrive/earnalism-audiovisual/<title>/<job_id>/` with `manifest.json`
   (sha256 of every output and the model info).
-- Reel clips use the `wan22` batch notebook and return as its export archive.
+- Reel clips use the `wan22` batch notebook and return as its export archive. That
+  notebook has no `RUN` flag: the owner enables `RUN_BATCH`, `VERIFY_INPUTS`,
+  `BEGIN_ALLOCATION`, `SETUP_BATCH`, `GENERATE_BATCH`, `EXPORT_AND_DOWNLOAD` in order
+  and writes `/content/wan22-batch-authority.json` (reel-recipe.md). Claude never
+  writes that file.
 - Upscaling: lanczos to 1080×1920 plus mild unsharp in `eav.reel.assemble`; no new
   upscaler model or licence. The hook shot may use the 704×1280 detail profile when the
   forecast fits.

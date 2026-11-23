@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from eav.budget import BudgetExceeded, Ledger, fit_reel_job, forecast
+from eav.budget import BudgetExceeded, Ledger, fit_reel_job, forecast, forecast_seconds
 
 RATES = {"reel": {"s_per_step": 1.0, "units_per_hour": 10.0}}
 
@@ -74,9 +74,20 @@ class BudgetTests(unittest.TestCase):
         out = fit_reel_job(j, RATES, tight + 0.001)
         self.assertEqual((out["takes"], out["items"]), (1, 9))
 
-    def test_fit_returns_none_below_8_shots(self):
-        tiny = forecast(job(takes=1, items=7), RATES)
-        self.assertIsNone(fit_reel_job(job(), RATES, tiny))
+    def test_fit_cuts_shots_down_to_one_then_none(self):
+        one = forecast(job(takes=1, items=1), RATES)
+        out = fit_reel_job(job(), RATES, one + 1e-9)
+        self.assertEqual((out["takes"], out["items"]), (1, 1))
+        self.assertIsNone(fit_reel_job(job(), RATES, one - 1e-9))
+
+    def test_reel_clips_forecast_uses_measured_seconds_per_clip(self):
+        """R20: Wan clips are forecast at the measured end-to-end seconds per finished clip."""
+        rates = {"reel_clips": {"clip_s": 500.0, "units_per_hour": 1.94}}
+        j = {"kind": "reel_clips", "steps": 24, "items": 5, "takes": 1}
+        self.assertAlmostEqual(forecast_seconds(j, rates), 5 * 500 * 1.15)
+        self.assertAlmostEqual(forecast(j, rates), 5 * 500 * 1.15 / 3600 * 1.94)
+        # the Wan contract's minimum allocation is 600 s, so a tiny batch reserves at least that
+        self.assertAlmostEqual(forecast_seconds({**j, "items": 1}, rates), 600)
 
     def test_reserve_rejects_nan_inf_negative(self):
         for bad in (float("nan"), float("inf"), -1, -0.5, "5", True):

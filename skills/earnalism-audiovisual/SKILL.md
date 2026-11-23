@@ -25,8 +25,8 @@ cd skills/earnalism-audiovisual/software
 python3 -m eav.cli status --root <title root>      # prints the next owner action
 ```
 
-Commands: `init`, `plan`, `job`, `import`, `supersede`, `film`, `reel`, `qc`, `status`,
-`bundle-audio`
+Commands: `init`, `plan`, `job`, `import`, `supersede` (never ran), `close` (ran, not
+imported: settles the actual CU), `film`, `reel`, `qc`, `status`, `bundle-audio`
 (usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
 inputs to get past it.
@@ -41,7 +41,7 @@ inputs to get past it.
 | 4 | World bible, anchor stills, film keyframes (FLUX.1-schnell) | `job stills --spec` → Colab → `import` | `earnalism-video`, `earnalism-covers` (cover/thumbnail) |
 | 5 | Score: VCSL editorial route by default, ACE-Step cues for colour | score bed or `job music` → Colab → `import` | `earnalism-audiobook-score` |
 | 6 | Film assembly (measured timing, ducked mix, motion, logo, END) | `film` | `earnalism-video` |
-| 7 | Reels: script, keyframes, Wan clips, narration, assembly | `reel N --script`, `job stills/reel_clips/narration --reel N`, `reel N` | `earnalism-video` (Wan22 route) |
+| 7 | Reels: script, narration (measured), shot plan, keyframes, Wan clips in batches of ≤ 5, assembly | `reel N --script`, `job narration --reel N`, `reel N --plan-shots`, `job stills --reel N`, `job reel_clips --reel N` per batch, `reel N` | `earnalism-video` (Wan22 route) |
 | 8 | Review: automated checks, contact sheets, owner review | `qc`; owner watches the first package | `earnalism-book-audiovisual` |
 | 9 | Publish, only when told and only where told | `bundle-audio` → Maison `attach_audiovisual_audio stage|publish`; social private staging | `earnalism-book-audiovisual`, `earnalism-book-production` |
 
@@ -58,9 +58,9 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 | **No cleared source** (no export, missing text/hash, title not imported) | Stop. Say which edition is missing what. Route to `earnalism-book-production`. | Fetch or type the text yourself, pick another edition, "start with the reels". |
 | **Non-public-domain title** (`public_domain_evidence` false) | `init` refuses. Hold the title; it is out of scope. | Draft clearance for it, or produce social reels of it anyway. |
 | **Audio format not cleared on Maison** (only Reader read/preview) | Keep producing: film, reels and review need no Maison grant. `bundle-audio` drafts the per-title evidence; the owner completes and approves it; only then `stage`. | Write `publication_clearance` or rights rows by hand, call the draft "cleared", or publish audio before stage + fresh browser report. |
-| **Budget exceeded** (exit 3: forecast over 60 CU per title for its whole life, or 100 CU per calendar month) | Stop. For `reel_clips`, cut takes, then shots, in the spec as the CLI suggests and re-forecast. Anything else: hold for the owner. | Lower steps/resolution of a prepared job, split a job to slip under the cap, shrink measured rates, edit, reset or swap the ledger pinned at `init`, use another Colab account, or spend money. |
-| **Import held** (exit 4: missing, extra or mismatched file) | Re-download the complete output of that exact job and re-run `import`. | Rebuild/rerun the GPU job, copy files in by hand, or edit `manifest.json`. |
-| **QC failure** (exit 5: loudness, true peak, loop close, size, narration longer than clips) | Fix only the failing item (one shot, one still, the mix), re-assemble, re-run `qc`. | Lower a gate, trim narration, or call unheard audio "reviewed". |
+| **Budget exceeded** (exit 3: forecast over 60 CU per title (keyed by edition) for its whole life, or 100 CU per calendar month) | Stop. Hold for the owner with the forecast, the remaining allowance and the CLI's fit (for `reel_clips`: how many of the batch's shots still fit). | Write or edit a spec `compute` block (it is derived and refused if it differs), lower steps/resolution of a prepared job, split a job to slip under the cap, shrink measured rates, edit, reset or swap the ledger pinned at `init`, init a second root for the edition, use another Colab account, or spend money. |
+| **Import held** (exit 4: missing, extra or mismatched file, or an `INCOMPLETE` manifest) | Re-download the complete output of that exact job and re-run `import`. A job that ran but can never be imported (crash, hard stop, lost download): `close <job_id> --units <CU Colab shows> --reason "..."`, then hold for the owner. | Rebuild/rerun the GPU job, copy files in by hand, edit `manifest.json`, or `supersede` a job that ran (supersede is for never-run jobs only). |
+| **QC failure** (exit 5: loudness, true peak, loop close, size, hook onset, reel narration that does not fit its length ± 3 s) | Fix only the failing item (one shot, one still, the mix), re-assemble, re-run `qc`. Reel narration that does not fit: rewrite the script's words, `reel N --script`, new reel narration. | Lower a gate, trim narration, or call unheard audio "reviewed". |
 | **Stream video held** | The film goes to owner review and to social destinations the owner names. Maison gets audio only. | Upload video to Maison/Stream; `attach_audiovisual_audio` refuses it anyway. |
 
 ## Non-negotiables
@@ -75,8 +75,13 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   forbidden even if the owner names them; offer the licensed equivalent instead.
   No paid generator or credit-spending connector (Kling, ElevenLabs, Suno, Runway,
   Adobe/Canva credits): not for "just one test" either.
-- **Colab.** The owner runs every job; bundles are inert until `RUN = True`. Claude
-  never claims a GPU run it did not import and verify.
+- **Colab.** The owner runs every job. Narration, stills and music notebooks are inert
+  until `RUN = True` and stop at their forecast seconds (hard stop). Reel clips use the
+  Wan batch notebook: its own flags plus an authority file
+  (`/content/wan22-batch-authority.json`) that **the owner writes and signs. Claude never
+  writes, edits, drafts or fills in Wan authority files**, never supplies an observed rate,
+  allocation time or approval for one. Claude never claims a GPU run it did not import
+  and verify.
 - **Listening.** Automated checks are advisory. Owner review of the first package is
   the listening assessment; anything not reviewed stays `unassessed`.
 - **Publishing.** Only after an explicit owner instruction naming the destination.
@@ -96,6 +101,10 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   composition.)
 - "Colab is slow, I'll simulate the WAVs to finish the package." (Fixtures never become
   release media.)
+- "I'll write the Wan authority JSON so the owner only has to press Run." (Owner
+  evidence is the owner's; Claude prints what it must contain, nothing more.)
+- "The job crashed, so it cost nothing: supersede it." (It ran: `close` it with the CU
+  Colab shows.)
 
 ## Rationalizations
 

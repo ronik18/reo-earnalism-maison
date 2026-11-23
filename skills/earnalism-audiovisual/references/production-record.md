@@ -13,7 +13,8 @@ One title root, one record, one writer. `record.json` (schema
 <root>/narration|stills|music/<job_id>/   verified Colab outputs
 <root>/reel_clips/<job_id>/ verified Wan clips + import receipt
 <root>/film/film-NN/        narration.wav, timing.json (+provenance), .srt, mix.wav, film-NN.mp4
-<root>/reels/reel-N/        script.json, shots.json, caption.txt, reel-N.mp4
+<root>/reels/reel-N/        script.json, caption.txt, narration.wav, shots.json (planned from the
+                            measured narration by --plan-shots), reel-N.mp4
 <root>/qc/                  report.json, contact sheets
 <root>/maison/              audiovisual-clearance-evidence.draft.json
 <root>/../allowance-ledger.json   shared CU ledger (all titles)
@@ -31,6 +32,11 @@ One title root, one record, one writer. `record.json` (schema
 - **Renditions**: film and reel hashes, durations, loudness, true peak, loop score.
 - **Review**: QC report, owner review result, everything not reviewed marked `unassessed`.
 - **Licences**: Apache-2.0 (Parler, FLUX.1-schnell, Wan, ACE-Step), CC0 (VCSL).
+
+Job endings are events too: `import/accepted`, `job/superseded` (never ran, 0 CU),
+`job/closed` (ran, not imported, actual CU) and their pending forms `job/superseding`,
+`job/closing` while one is under way. Reel planning adds `reel/scripted`,
+`reel/narration_misfit` and `reel/shots_planned`.
 
 Events are append-only. Failed and held attempts stay in the record; never delete or
 rewrite them to make the history look clean.

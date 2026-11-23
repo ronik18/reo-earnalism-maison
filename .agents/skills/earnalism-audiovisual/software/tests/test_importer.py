@@ -10,8 +10,8 @@ from eav.budget import Ledger
 from eav.importer import ImportHeld
 from eav.record import Record
 
-RATES = {k: {"s_per_step": 1.0, "units_per_hour": 10.0}
-         for k in ("narration", "stills", "music", "reel_clips")}
+RATES = {k: {"s_per_step": 1.0, "units_per_hour": 10.0, "decode_s": 30, "export_s": 20}
+         for k in ("narration", "stills", "music")}
 COMPUTE = {"steps": 1, "items": 2, "takes": 1, "decode_s": 30, "export_s": 20}
 PRESET = {"description": "A calm warm female voice, very clear, close to the microphone."}
 SCENE = {"scene_id": "s01", "text": "The morning was quiet. Rain fell on the roof."}
@@ -32,8 +32,7 @@ class ImporterTests(unittest.TestCase):
         out = self.root / "rec" / "jobs"
         out.mkdir()
         self.job = colab_jobs.build_job(
-            "stills", self.record, {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}],
-                                    "compute": COMPUTE}, self.ledger, RATES, out, month="2026-11")
+            "stills", self.record, {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]}, self.ledger, RATES, out, month="2026-11")
         self.zip_sha = sha(Path(self.job["inputs_zip"]).read_bytes())
         self.dl = self.root / "download"
         self.dl.mkdir()
@@ -44,7 +43,8 @@ class ImporterTests(unittest.TestCase):
             (self.dl / name).write_bytes(data)
         manifest = {"schema": "earnalism.audiovisual-outputs.v1",
                     "job_id": self.job["job_id"], "kind": "stills",
-                    "input_zip_sha256": self.zip_sha, "model": MODEL_INFO,
+                    "input_zip_sha256": self.zip_sha, "model": MODEL_INFO, "status": "COMPLETE",
+                    "packages": {"diffusers": "0.31.0"},
                     "outputs": {n: sha(d) for n, d in files.items()}}
         manifest.update(manifest_over)
         (self.dl / "manifest.json").write_text(json.dumps(manifest))
@@ -158,6 +158,30 @@ class ImporterTests(unittest.TestCase):
         self.assert_nothing_changed()
         self.assertEqual(len(Record.load(self.record.root).data["artifacts"]), 1)
         self.assertEqual(len(self.run_import()), 2)
+
+    def test_incomplete_or_unmarked_manifest_holds(self):
+        """R25: a hard-stopped run writes an INCOMPLETE manifest; import refuses it."""
+        for status in ("INCOMPLETE", None, "complete"):
+            with self.subTest(status):
+                self.download(status=status)
+                with self.assertRaisesRegex(ImportHeld, "COMPLETE"):
+                    self.run_import()
+                self.assert_nothing_changed()
+
+    def test_manifest_without_package_versions_holds(self):
+        """R26: every output manifest records the resolved package versions that ran."""
+        for packages in (None, {}, {"diffusers": None}):
+            with self.subTest(packages):
+                self.download(packages=packages)
+                with self.assertRaisesRegex(ImportHeld, "package"):
+                    self.run_import()
+                self.assert_nothing_changed()
+
+    def test_manifest_missing_a_job_item_holds(self):
+        self.download(files={"b.png": b"png-b"})  # the job asked for key "a"
+        with self.assertRaisesRegex(ImportHeld, "a"):
+            self.run_import()
+        self.assert_nothing_changed()
 
     def test_invalid_units_and_double_import_hold(self):
         self.download()

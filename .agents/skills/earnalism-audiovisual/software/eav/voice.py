@@ -4,6 +4,7 @@ from .text import sentences, words
 SENTENCE_PAUSE_MS = 400
 PARAGRAPH_PAUSE_MS = 800
 HEADING_PAUSE_MS = 1200
+REEL_LINE_PAUSE_MS = 400  # Squint pacing between reel lines (block kind "line")
 MAX_CLAUSE_WORDS = 12
 
 
@@ -26,6 +27,8 @@ def voice_units(scene: dict, preset: dict, clause=None, language: str = "en") ->
                 pause = SENTENCE_PAUSE_MS
             elif block.get("kind") == "heading":
                 pause = HEADING_PAUSE_MS
+            elif block.get("kind") == "line":
+                pause = REEL_LINE_PAUSE_MS
             else:
                 pause = PARAGRAPH_PAUSE_MS
             units.append({

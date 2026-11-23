@@ -7,15 +7,20 @@
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
+  python3 -m eav.cli close <job_id> --root <dir> --units <CU Colab shows> --reason "<what happened>"
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
-  python3 -m eav.cli reel <n> --root <dir> [--script <script.json>] [--score <wav> --score-route ...]
-                         [--hashtags ...]
+  python3 -m eav.cli reel <n> --root <dir> --script <script.json> [--hashtags ...]
+  python3 -m eav.cli reel <n> --root <dir> --plan-shots           (after reel narration import)
+  python3 -m eav.cli reel <n> --root <dir> [--score <wav> --score-route ...]
   python3 -m eav.cli qc --root <dir>
   python3 -m eav.cli status --root <dir>
-  python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir> (--score-dir <dir> | --dry)
+  python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir>
+                         (--score-dir <dir> --score-route vcsl|ace-step:<job_id> | --dry)
 
 Every command ends with "Next: ..." -- the one action the owner (or Claude) takes next.
+Reels: script -> reel narration (measured) -> --plan-shots (ceil(narration / 5.04 s) Wan clips)
+-> keyframe stills -> reel_clips batches of <= 5 shots (one Wan job each) -> reel.
 The CLI wraps the eav modules; it spends nothing, runs no GPU work, never marks legal clearance
 and never publishes. Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held, 5 QC failure.
 The allowance ledger is shared by every title and pinned in record.json at init (--ledger,
@@ -48,6 +53,7 @@ SLUG = re.compile(r"[a-z0-9][a-z0-9-]*")
 SHA = re.compile(r"[0-9a-f]{64}")
 FILM_LUFS, REEL_LUFS, LUFS_TOL, TP_MAX = -16.0, -14.0, 1.0, -1.0
 LOOP_MIN = 0.8
+HOOK_ONSET_MAX_S = 0.2
 MP3_END_SLACK_MS = 50
 
 
@@ -102,6 +108,19 @@ def _score_route(rec, route) -> str:
                "Pass --score-route vcsl or --score-route ace-step:<job_id>")
 
 
+def _music_licence(route) -> dict:
+    """Route and licence of a score for the clearance record (R24)."""
+    if route == "vcsl":
+        return {"route": route, "licence": "CC0-1.0", "music_job_id": None,
+                "source_and_licence": "VCSL (Versilian Community Sample Library) piano/harp samples, CC0-1.0, "
+                                      "via earnalism-audiobook-score editorial_score.py "
+                                      "(earnalism-video/software/assets/music/vcsl-piano-harp-v1)"}
+    job_id = route.split(":", 1)[1]
+    return {"route": route, "licence": "Apache-2.0", "music_job_id": job_id,
+            "source_and_licence": f"ACE-Step {colab_jobs.MUSIC_REPO}, Apache-2.0, instrumental cues from "
+                                  f"imported music job {job_id} (revision, seeds and hashes in its manifest)"}
+
+
 def _check_bed(bed: Path, needed_s: float, what: str) -> None:
     have = film._duration(bed)
     if have + 0.05 < needed_s:
@@ -136,29 +155,106 @@ def _plan(rec) -> dict:
 
 
 def _jobs(rec) -> list:
-    targets = {e["detail"]["job_id"]: e["detail"]["target"] for e in rec.data["events"]
-               if e["stage"] == "cli" and e["result"] == "job_target"}
-    imported = {e["detail"]["job_id"] for e in rec.data["events"]
-                if e["stage"] == "import" and e["result"] == "accepted"}
-    superseded = {e["detail"]["job_id"] for e in rec.data["events"]
-                  if e["stage"] == "job" and e["result"] == "superseded"}
+    """Every built job with its target, its build order and how it ended (if it has)."""
+    events = rec.data["events"]
+    targets, order = {}, {}
+    for i, e in enumerate(events):
+        if e["stage"] == "cli" and e["result"] == "job_target":
+            targets[e["detail"]["job_id"]], order[e["detail"]["job_id"]] = e["detail"]["target"], i
+    done = {r: {e["detail"]["job_id"] for e in events if e["stage"] == s_ and e["result"] == r}
+            for s_, r in (("import", "accepted"), ("job", "superseded"), ("job", "closed"),
+                          ("job", "superseding"), ("job", "closing"))}
     out = []
     for a in rec.data["artifacts"]:
         if a["kind"] != "colab_job":
             continue
         m = a["meta"]
-        out.append({"job_id": m["job_id"], "kind": m["job_kind"], "target": targets.get(m["job_id"]),
+        jid = m["job_id"]
+        out.append({"job_id": jid, "kind": m["job_kind"], "target": targets.get(jid),
+                    "order": order.get(jid, -1),
                     "notebook": rec.root / a["path"], "inputs_zip": rec.root / m["inputs_zip"],
                     "manifest": rec.root / m["manifest"], "forecast_units": m["forecast_units"],
-                    "imported": m["job_id"] in imported,
-                    "superseded": m["job_id"] in superseded})
+                    "imported": jid in done["accepted"],
+                    "superseded": jid in done["superseded"],
+                    "closed": jid in done["closed"],
+                    # a supersede/close that recorded its intent but has not finished (R23)
+                    "unfinished": (jid in done["superseding"] and jid not in done["superseded"])
+                    or (jid in done["closing"] and jid not in done["closed"])})
     return out
 
 
-def _latest_job(rec, kind, target, imported=True):
+def _ended(j) -> bool:
+    """Superseded (never ran) or closed (ran, not imported): it produces nothing more."""
+    return j["superseded"] or j["closed"]
+
+
+def _latest_job(rec, kind, target, imported=True, after=-1):
     found = [j for j in _jobs(rec) if j["kind"] == kind and j["target"] == target
-             and not j["superseded"] and (j["imported"] or not imported)]
+             and not _ended(j) and j["order"] > after and (j["imported"] or not imported)]
     return found[-1] if found else None
+
+
+def _last_event(rec, stage, result, target) -> int:
+    """Index of the last stage/result event for target, or -1."""
+    return max((i for i, e in enumerate(rec.data["events"]) if e["stage"] == stage
+                and e["result"] == result and e["detail"].get("target") == target), default=-1)
+
+
+def _reel_narration(rec, n, imported=True):
+    """The reel's narration job built after its current script (R20)."""
+    t = f"reel-{n}"
+    return _latest_job(rec, "narration", t, imported, after=_last_event(rec, "reel", "scripted", t))
+
+
+def _misfits(rec) -> set:
+    return {e["detail"]["narration_job_id"] for e in rec.data["events"]
+            if e["stage"] == "reel" and e["result"] == "narration_misfit"}
+
+
+def _planned_shots(rec, n):
+    """shots.json, but only when planned from this script's measured narration (R20)."""
+    t = f"reel-{n}"
+    planned = _last_event(rec, "reel", "shots_planned", t)
+    if planned < 0 or planned < _last_event(rec, "reel", "scripted", t):
+        return None, -1
+    return _json(rec.root / "reels" / t / "shots.json"), planned
+
+
+def _clip_jobs(rec, n, after, imported=False) -> list:
+    t = f"reel-{n}"
+    return [j for j in _jobs(rec) if j["kind"] == "reel_clips" and j["target"] == t
+            and not _ended(j) and j["order"] > after and (j["imported"] or not imported)]
+
+
+def _covered(rec, n, after) -> dict:
+    """shot id -> the active reel_clips job that holds it."""
+    out = {}
+    for j in _clip_jobs(rec, n, after):
+        for sc in _json(j["inputs_zip"].parent / "job.json")["scenes"]:
+            out[sc["id"]] = j["job_id"]
+    return out
+
+
+def _check_clip_batch(rec, n, spec):
+    """A reel_clips batch names only planned shots not already held by another batch."""
+    shots, planned = _planned_shots(rec, n)
+    if shots is None:
+        raise Stop(f"reel {n} has no shot plan from its measured narration", next_action(rec.root))
+    ids = [sh.get("id") for sh in spec.get("shots") or []]
+    known = {sh["id"] for sh in shots}
+    unknown = [i for i in ids if i not in known]
+    if unknown:
+        raise Stop(f"shot id(s) {', '.join(map(str, unknown))} are not planned in reels/reel-{n}/shots.json",
+                   "Use the ids from shots.json")
+    taken = _covered(rec, n, planned)
+    clash = [f"{i} ({taken[i]})" for i in ids if i in taken]
+    if clash:
+        raise Stop(f"shot(s) {', '.join(clash)} are already in another reel_clips batch",
+                   "Batch only the uncovered shots: " + next_action(rec.root))
+    if len(ids) > colab_jobs.MAX_CLIPS_PER_BATCH:
+        raise Stop(f"{len(ids)} shots in one batch: one Wan job holds at most "
+                   f"{colab_jobs.MAX_CLIPS_PER_BATCH} (2700 s wall at ~500 s per clip)",
+                   f"Split the shots into batches of at most {colab_jobs.MAX_CLIPS_PER_BATCH}")
 
 
 def _artifacts(rec, kind, **meta):
@@ -171,7 +267,7 @@ def _film_target(n: int) -> str:
 
 
 def _reel_scene(script: dict, n: int) -> dict:
-    return {"scene_id": f"r{n}", "blocks": [{"anchor_id": None, "kind": "paragraph", "text": line}
+    return {"scene_id": f"r{n}", "blocks": [{"anchor_id": None, "kind": "line", "text": line}
                                             for line in reel.spoken(script)]}
 
 
@@ -188,8 +284,13 @@ def _story_preset(language: str) -> dict:
             **{k: preset[k] for k in colab_jobs.GENERATION_KEYS if k in preset}}
 
 
-def _remaining(ledger, title, month) -> float:
-    return min(budget.TITLE_CAP - ledger.spent(title, None),  # title cap: lifetime
+def _title_spent(ledger, rec) -> float:
+    """Lifetime spend of this title, keyed by the export's edition_id (R26)."""
+    return ledger.spent(rec.data["title_slug"], None, rec.data["source"].get("edition_id"))
+
+
+def _remaining(ledger, rec, month) -> float:
+    return min(budget.TITLE_CAP - _title_spent(ledger, rec),  # title cap: lifetime
                budget.MONTH_CAP - ledger.spent(None, month))
 
 
@@ -209,17 +310,40 @@ def _ff(*args):
 
 
 # ---------------------------------------------------------------- next action
+def _wan_action(rec, job) -> str:
+    """The wan22 batch notebook's own flags and the owner-written authority file (R22)."""
+    job_json = job["inputs_zip"].parent / "job.json"
+    wall = _json(job_json)["wall_seconds"]
+    return (f"Owner runs the Wan 2.2 batch notebook {job['notebook']} in Colab (L4). It has no RUN flag; "
+            "set each flag to True in its cell only after the previous step succeeded: RUN_BATCH "
+            f"(prepare the bound software); upload {job['inputs_zip']} with Colab Files as "
+            "/content/wan22-batch-inputs.zip, then VERIFY_INPUTS; the OWNER (Claude never writes or "
+            "edits this file) writes and signs /content/wan22-batch-authority.json for this exact job: "
+            '{"schema": "earnalism.wan22-batch-authority.v1", "owner_authorized": true, '
+            f'"job_sha256": "{sha256_file(job_json)}", "evidence_ref": "<the owner\'s own approval '
+            'record>", "observed_units_per_hour": <the rate Colab shows for this allocation>, '
+            '"approved_compute_units": <at most 5 and at least 2 x that rate x '
+            f'{wall} / 3600>, "free_runtime_confirmed": false, "allocation_started_at": <unix time this '
+            f"allocation started>}}; then BEGIN_ALLOCATION (binds the {wall} s wall, within the Wan "
+            "contract's 2700 s, and arms the runtime unassign guard), SETUP_BATCH, GENERATE_BATCH "
+            "(RESUME_UNATTEMPTED stays False), EXPORT_AND_DOWNLOAD; then: "
+            f"{PROG} import {job['job_id']} --root {rec.root} --from <downloaded export archive.zip> "
+            "--archive-sha256 <archive_sha256 from the printed export-receipt.json> --units <CU shown in "
+            "Colab>; then LOCAL_IMPORT_VERIFIED and DISCONNECT_RUNTIME. If it ran but cannot be "
+            f"imported: {PROG} close {job['job_id']} --root {rec.root} --units <CU shown in Colab> "
+            '--reason "<what happened>"')
+
+
 def _colab_action(rec, job) -> str:
     if job["kind"] == "reel_clips":
-        return (f"Run the reel_clips (Wan 2.2) notebook in Colab: open {job['notebook']}, upload "
-                f"{job['inputs_zip']}, set RUN = True in the first cell, Run all, download the export "
-                f"archive, then: {PROG} import {job['job_id']} --root {rec.root} --from <archive.zip> "
-                f"--archive-sha256 <sha256 printed by the notebook> --units <CU shown in Colab>")
+        return _wan_action(rec, job)
     drive = _json(job["manifest"]).get("drive_dir", colab_jobs.DRIVE_ROOT)
     return (f"Run the {job['kind']} notebook in Colab: copy {job['inputs_zip']} to Drive {drive}/, "
             f"open {job['notebook']}, set RUN = True in the first cell, Run all; download that Drive "
             f"folder, then: {PROG} import {job['job_id']} --root {rec.root} --from <downloaded folder> "
-            f"--units <CU shown in Colab>")
+            f"--units <CU shown in Colab>. If it ran but cannot be imported (crash, hard stop, lost "
+            f"download): {PROG} close {job['job_id']} --root {rec.root} --units <CU shown in Colab> "
+            '--reason "<what happened>"')
 
 
 def next_action(root) -> str:
@@ -229,7 +353,13 @@ def next_action(root) -> str:
     rec = Record.load(root)
     if not (root / "plan.json").is_file():
         return f"{PROG} plan --root {root}"
-    pending = [j for j in _jobs(rec) if not j["imported"] and not j["superseded"]]
+    jobs = _jobs(rec)
+    unfinished = [j for j in jobs if j["unfinished"]]
+    if unfinished:
+        j = unfinished[0]
+        return (f"Finish the interrupted supersede/close of {j['job_id']}: rerun the same "
+                f"{PROG} supersede|close {j['job_id']} --root {root} command")
+    pending = [j for j in jobs if not j["imported"] and not _ended(j)]
     if pending:
         return _colab_action(rec, pending[0])
     r = f"--root {root}"
@@ -256,18 +386,34 @@ def next_action(root) -> str:
                         f"reel-1.json, then: {PROG} reel 1 {r} --script reel-1.json")
             break
         t = f"reel-{n}"
-        if not _latest_job(rec, "stills", t):
-            return (f"Write one keyframe prompt per shot in reels/reel-{n}/shots.json into stills.json, "
-                    f"then: {PROG} job stills {r} --reel {n} --rates <rates.json> --spec stills.json")
-        if not _latest_job(rec, "reel_clips", t):
-            stills_job = _latest_job(rec, "stills", t)["job_id"]
+        folder = root / "reels" / t
+        narr = _reel_narration(rec, n)
+        if narr is None:
+            return (f"Owner approves the reel {n} script ({folder / 'script.json'}); then: {PROG} job "
+                    f"narration {r} --reel {n} --rates <rates.json>")
+        if narr["job_id"] in _misfits(rec):
+            return (f"The measured reel {n} narration does not fit {script['length']} s +- "
+                    f"{reel.FIT_TOLERANCE_S:g} s: rewrite the script's words (references/reel-recipe.md), "
+                    f"then: {PROG} reel {n} {r} --script <new script.json>, and build new reel narration")
+        shots, planned = _planned_shots(rec, n)
+        if shots is None:
+            return f"{PROG} reel {n} {r} --plan-shots"
+        stills = _latest_job(rec, "stills", t, after=planned)
+        if not stills:
+            return (f"Write one keyframe prompt per shot of {folder / 'shots.json'} into stills.json "
+                    f"(key = the shot id, e.g. shot-01; references/reel-recipe.md), then: {PROG} job "
+                    f"stills {r} --reel {n} --rates <rates.json> --spec stills.json")
+        covered = _covered(rec, n, planned)
+        todo = [sh["id"] for sh in shots if sh["id"] not in covered]
+        if todo:
+            batch = todo[:colab_jobs.MAX_CLIPS_PER_BATCH]
             return (f"Write clips.json per references/reel-recipe.md (Clips spec): art_dir = "
-                    f"{root / 'stills' / stills_job}, prior_attempt_evidence = the retained Wan "
+                    f"{root / 'stills' / stills['job_id']}, prior_attempt_evidence = the retained Wan "
                     f"l4-balanced-v2 provenance (prior run ids, observed s/step, completed clips), "
-                    f"shots = one {{id, image, seed, prompt}} per entry of reels/reel-{n}/shots.json, "
-                    f"then: {PROG} job reel_clips {r} --reel {n} --rates <rates.json> --spec clips.json")
-        if not _latest_job(rec, "narration", t):
-            return f"{PROG} job narration {r} --reel {n} --rates <rates.json>"
+                    f"shots = one {{id, image, seed, prompt}} for each of the next shots "
+                    f"{', '.join(batch)} ({len(todo)} of {len(shots)} still need clips; at most "
+                    f"{colab_jobs.MAX_CLIPS_PER_BATCH} per batch, one Wan job each), then: {PROG} job "
+                    f"reel_clips {r} --reel {n} --rates <rates.json> --spec clips.json")
         if not _artifacts(rec, "reel", target=t):
             return f"{PROG} reel {n} {r} --score <reel score bed> --score-route vcsl|ace-step:<job_id>"
         n += 1
@@ -282,9 +428,11 @@ def next_action(root) -> str:
     if not _artifacts(rec, "evidence_draft"):
         return ("Owner reviews the first package (opening, every join, climax, full ending); that review "
                 f"is the listening assessment. Then for Maison audio: {PROG} bundle-audio {r} --out "
-                f"{root / 'maison' / 'bundle'} --score-dir <one score bed per chapter>. Maison video stays held (Stream cost not approved). "
+                f"{root / 'maison' / 'bundle'} --score-dir <one score bed per chapter> --score-route "
+                f"vcsl|ace-step:<music job_id>. Maison video stays held (Stream cost not approved). "
                 "Social posting only to destinations the owner names (references/publishing.md).")
-    return (f"Complete and owner-approve {root / 'maison' / EVIDENCE_DRAFT}, save it under docs/evidence/, "
+    return (f"Owner completes (territories, term_per_territory for every territory, text_source_licence, "
+            f"cover_provenance) and approves {root / 'maison' / EVIDENCE_DRAFT}, saves it under docs/evidence/, "
             "then on the server: python manage.py attach_audiovisual_audio stage <slug> --publisher "
             "<public_id> --bundle <bundle dir> --evidence docs/evidence/<file>.json (references/publishing.md)")
 
@@ -304,6 +452,9 @@ def cmd_init(args):
         raise Stop("no cleared source: the export lacks language en/bn, units, paragraph text, "
                    "revision_id or content_sha256",
                    "Import and clear the edition with `earnalism-book-production`, then re-export it")
+    if not isinstance(src.get("edition_id"), str) or not src["edition_id"].strip():
+        raise Stop("no cleared source: the export has no edition_id (the allowance is keyed by it)",
+                   "Re-export it on the server: python manage.py export_audiovisual_source <slug> --out <path>")
     if src.get("public_domain_evidence") is not True:
         raise Stop("the revision carries no passing public-domain publication clearance; "
                    "non-public-domain titles are out of scope for this skill",
@@ -314,12 +465,18 @@ def cmd_init(args):
     root = Path(args.root)
     if (root / "record.json").exists():
         raise Stop(f"{root} already holds a production record", f"{PROG} status --root {root}")
+    ledger = _requested_ledger(args) or (root.parent / "allowance-ledger.json").resolve()
+    here = Path(os.path.relpath(root.resolve(), ledger.parent)).as_posix()
+    others = sorted(budget.Ledger(ledger).roots(src["edition_id"]) - {here})
+    if others:  # R26: a second root would restart the title's lifetime cap
+        raise Stop(f"edition {src['edition_id']} already has a title root on this ledger "
+                   f"({', '.join(others)}); one production record per edition",
+                   f"Continue that root: {PROG} status --root {ledger.parent / others[0]}")
     rec = Record.create(root, slug, {
         "edition_id": src.get("edition_id"), "revision_id": src["revision_id"],
         "content_sha256": src["content_sha256"], "language": src["language"],
         "rights": src.get("rights", {}), "public_domain_evidence": True,
         "state": src.get("state"), "export_sha256": sha256_file(src_path)})
-    ledger = _requested_ledger(args) or (root.parent / "allowance-ledger.json").resolve()
     rec.data["ledger"] = Path(os.path.relpath(ledger, root.resolve())).as_posix()  # R17: relative pin
     rec._save()
     shutil.copyfile(src_path, root / "source.json")
@@ -380,7 +537,6 @@ def _job_spec(rec, args, kind, target):
                   if k == "description" or k in colab_jobs.GENERATION_KEYS}
         spec = {"scenes": todo, "preset": preset,
                 "language": lang, "clause": args.clause}
-        items = sum(len(voice_units(s, spec["preset"], args.clause, lang)) for s in todo)
     else:
         if not args.spec:
             raise Stop(f"a {kind} job needs --spec (prompts, seeds{', shots' if kind == 'reel_clips' else ''})",
@@ -388,10 +544,11 @@ def _job_spec(rec, args, kind, target):
         spec = _json(args.spec)
         if kind == "reel_clips" and not Path(spec.get("art_dir", ".")).is_absolute():
             spec["art_dir"] = str((Path(args.spec).parent / spec.get("art_dir", ".")).resolve())
-        items = len(spec.get("shots" if kind == "reel_clips" else "items") or [])
+        if kind == "reel_clips":
+            _check_clip_batch(rec, args.reel, spec)
     if args.job_id:
         spec["job_id"] = args.job_id
-    return spec, items
+    return spec, colab_jobs.job_items(kind, spec)
 
 
 def cmd_job(args):
@@ -401,32 +558,24 @@ def cmd_job(args):
         raise Stop("reel_clips jobs belong to one reel", "Pass --reel <n>")
     target = f"reel-{args.reel}" if args.reel else _film_target(args.film)
     rates = _json(args.rates)
-    rate = rates.get(kind) or {}
-    if not all(isinstance(rate.get(k), (int, float)) for k in ("s_per_step", "units_per_hour")):
-        raise Stop(f"rates.json has no measured s_per_step/units_per_hour for {kind}",
-                   "Take them from the last Colab run (references/compute-budget.md)")
     spec, items = _job_spec(rec, args, kind, target)
-    if "compute" not in spec:
-        missing = [k for k in ("steps", "decode_s", "export_s") if k not in rate]
-        if missing:
-            raise Stop(f"no measured {', '.join(missing)} for {kind} in rates.json; forecasts are "
-                       "never defaulted", "Add the values measured on the last Colab run "
-                       "(references/compute-budget.md)")
-        spec["compute"] = {"steps": rate["steps"], "items": items, "takes": rate.get("takes", 1),
-                           "decode_s": rate["decode_s"], "export_s": rate["export_s"]}
-    ledger, month, title = _ledger(rec, args), _month(), rec.data["title_slug"]
-    try:
-        units = budget.forecast({"kind": kind, **spec["compute"]}, rates)
-    except (KeyError, TypeError) as e:
-        raise Stop(f"cannot forecast {kind}: {e}", "Fix rates.json / spec compute block")
-    remaining = _remaining(ledger, title, month)
+    try:  # R21: items and steps come from the job itself, rates from the last measured run
+        compute = colab_jobs.derive_compute(kind, spec, rates, items)
+    except ValueError as e:
+        raise Stop(f"job not built: {e}", "Use the values measured on the last Colab run "
+                   "(references/compute-budget.md) and never a compute block that differs from the job")
+    ledger, month = _ledger(rec, args), _month()
+    units = budget.forecast(compute, rates)
+    remaining = _remaining(ledger, rec, month)
     if units > remaining:
         hint = "Hold the job and ask the owner; never retry past a cap."
         if kind == "reel_clips":
-            fit = budget.fit_reel_job({"kind": kind, **spec["compute"]}, rates, remaining)
+            fit = budget.fit_reel_job(compute, rates, remaining)
             if fit:
-                hint = (f"Cut the spec to takes={fit['takes']}, shots={fit['items']} "
-                        f"(takes first, then shots), then rerun; or hold for the owner.")
+                hint = (f"The allowance covers {fit['items']} of these {items} shots: cut the clips "
+                        f"spec's shots list to {fit['items']} entries and rerun (takes are fixed at 1 by "
+                        "the Wan contract). The reel needs every planned shot, so the rest wait for "
+                        "allowance; or hold for the owner.")
         raise Stop(f"Budget exceeded: forecast {units:.2f} CU > remaining {remaining:.2f} CU "
                    f"(caps {budget.TITLE_CAP:g}/title, {budget.MONTH_CAP:g}/month, {month}). "
                    "Nothing was reserved or written.", hint, code=3)
@@ -440,7 +589,7 @@ def cmd_job(args):
     rec.event("cli", "job_target", {"job_id": result["job_id"], "target": target, "kind": kind})
     print(f"Built {kind} job {result['job_id']} for {target}: forecast {result['forecast_units']:.2f} CU "
           f"reserved ({remaining - result['forecast_units']:.2f} CU left under the title and month caps). "
-          "Inert until RUN = True.")
+          "Inert until the owner enables it in Colab.")
 
 
 def cmd_import(args):
@@ -450,6 +599,9 @@ def cmd_import(args):
         raise Stop(f"unknown job {args.job_id}", f"{PROG} status --root {rec.root}")
     if job["imported"]:
         raise Stop(f"job {args.job_id} is already imported", f"{PROG} status --root {rec.root}")
+    if _ended(job) or job["unfinished"]:
+        raise Stop(f"job {args.job_id} is superseded or closed (or that is under way); it is never "
+                   "imported", f"{PROG} status --root {rec.root}")
     extra = {}
     if job["kind"] == "reel_clips":
         extra = {"archive": Path(args.source), "archive_sha256": args.archive_sha256}
@@ -466,8 +618,15 @@ def cmd_import(args):
           f"settled {args.units:g} CU.")
 
 
-def cmd_supersede(args):
-    """Release a never-run job: settle its reservation at 0 and record job/superseded (R19)."""
+_ENDINGS = {"supersede": ("superseding", "superseded"), "close": ("closing", "closed")}
+
+
+def _end_job(args, how):
+    """supersede (never ran: settle 0) or close (ran, not imported: settle the ACTUAL units).
+
+    R23: the intent is recorded first as a pending event, then the ledger is settled, then the
+    final event is written; rerunning the same command after any failure finishes it."""
+    pending_result, final = _ENDINGS[how]
     rec = _record(args.root)
     job = next((j for j in _jobs(rec) if j["job_id"] == args.job_id), None)
     if job is None:
@@ -475,20 +634,60 @@ def cmd_supersede(args):
     if job["imported"]:
         raise Stop(f"job {args.job_id} was imported; its outputs and spend stay on record",
                    f"{PROG} status --root {rec.root}")
-    if job["superseded"]:
-        raise Stop(f"job {args.job_id} is already superseded", f"{PROG} status --root {rec.root}")
+    if _ended(job):
+        raise Stop(f"job {args.job_id} is already {'superseded' if job['superseded'] else 'closed'}",
+                   f"{PROG} status --root {rec.root}")
+    events = rec.data["events"]
+    pending = [e for e in events if e["stage"] == "job" and e["detail"].get("job_id") == args.job_id
+               and e["result"] in ("superseding", "closing")]
+    if pending and pending[-1]["result"] != pending_result:
+        raise Stop(f"job {args.job_id} has an unfinished {pending[-1]['result'][:-3]}e; finish that one",
+                   f"Rerun {PROG} {'close' if how == 'supersede' else 'supersede'} {args.job_id} "
+                   f"--root {rec.root}")
     if not args.reason.strip():
-        raise Stop("a reason is required", "Pass --reason \"<why it never ran>\"")
+        raise Stop("a reason is required", f"Pass --reason \"<{'why it never ran' if how == 'supersede' else 'what happened'}>\"")
+    units = 0 if how == "supersede" else budget._check_units(args.units)
     ledger = _ledger(rec, args)
     entry = next((e for e in ledger._load() if e["job_id"] == args.job_id), None)
-    if entry is None or entry["state"] != "reserved":
-        raise Stop(f"job {args.job_id} has no open reservation on the ledger "
-                   f"({'missing' if entry is None else entry['state']}); nothing to release",
-                   f"{PROG} status --root {rec.root}")
-    ledger.settle(args.job_id, 0)
-    rec.event("job", "superseded", {"job_id": args.job_id, "reason": args.reason})
-    print(f"Superseded {job['kind']} job {args.job_id}: reservation of {entry['units']:.2f} CU "
-          "released (settled at 0). Do not run its notebook.")
+    if pending:
+        recorded = pending[-1]["detail"]["units"]
+        if recorded != units:
+            raise Stop(f"the interrupted {how} of {args.job_id} recorded {recorded:g} CU; it is finished "
+                       "with the recorded units, never re-decided",
+                       f"Rerun with --units {recorded:g}" if how == "close" else "Rerun supersede")
+    else:
+        if entry is None or entry["state"] != "reserved":
+            raise Stop(f"job {args.job_id} has no open reservation on the ledger "
+                       f"({'missing' if entry is None else entry['state']}); nothing to settle",
+                       f"{PROG} status --root {rec.root}")
+        rec.event("job", pending_result, {"job_id": args.job_id, "units": units, "reason": args.reason})
+    if entry is None:
+        raise Stop(f"job {args.job_id} is missing from the ledger", f"{PROG} status --root {rec.root}")
+    if entry["state"] == "reserved":
+        ledger.settle(args.job_id, units)
+    elif entry["units"] != units:
+        raise Stop(f"ledger entry {args.job_id} was settled at {entry['units']:g} CU, not {units:g}",
+                   "Report this; never edit the ledger by hand")
+    reason = pending[-1]["detail"]["reason"] if pending else args.reason
+    if how == "supersede":
+        rec.event("job", final, {"job_id": args.job_id, "reason": reason})
+        print(f"Superseded {job['kind']} job {args.job_id}: reservation of {entry['units']:.2f} CU "
+              "released (settled at 0). Do not run its notebook.")
+    else:
+        rec.event("job", final, {"job_id": args.job_id, "units": units, "ran": True,
+                                 "imported": False, "reason": reason})
+        print(f"Closed {job['kind']} job {args.job_id}: it ran but is not imported; settled at the "
+              f"actual {units:g} CU (reserved {entry['units']:.2f} CU). Its outputs are not on record.")
+
+
+def cmd_supersede(args):
+    """Release a never-run job: settle its reservation at 0 and record job/superseded (R19)."""
+    _end_job(args, "supersede")
+
+
+def cmd_close(args):
+    """A job that ran but cannot be imported: settle its actual units, record job/closed (R23)."""
+    _end_job(args, "close")
 
 
 def cmd_film(args):
@@ -554,44 +753,101 @@ def cmd_film(args):
           f"TP {m['true_peak']:.1f} dBTP. Maison video stays held (Stream cost not approved).")
 
 
+def _line_ends(script, units, timing) -> list:
+    """Measured end time of each reel line (a line may hold several sentences/units)."""
+    lang = script["language"]
+    ends, k = [], 0
+    for line in reel.spoken(script):
+        k += len(sentences(line, lang))
+        ends.append(timing[k - 1]["end"])
+    if k != len(units):
+        raise Stop("reel narration units do not match the script lines", "Report this as a bug")
+    return ends
+
+
+def _reel_track(rec, n, script, narr, folder):
+    units = voice_units(_reel_scene(script, n), {"description": ""}, None, script["language"])
+    timing, prov = _measured_track(units, rec.root / "narration" / narr["job_id"],
+                                   folder / "narration.wav", narr["job_id"])
+    return units, timing, prov
+
+
+def _reel_set_script(rec, args, n, t, folder):
+    script = _json(args.script)
+    try:
+        reel.validate_script(script)
+    except ValueError as e:
+        raise Stop(f"reel script rejected: {e}", "Fix the script per references/reel-recipe.md")
+    built = _reel_narration(rec, n, imported=False)
+    if built and built["job_id"] not in _misfits(rec):
+        raise Stop(f"{t} narration was already built from its script", f"{PROG} status --root {rec.root}")
+    _write_json(folder / "script.json", script)
+    (folder / "caption.txt").write_text(reel.caption(script, args.hashtags or []) + "\n", encoding="utf-8")
+    for kind, name in (("reel_script", "script.json"), ("caption", "caption.txt")):
+        rec.add_artifact(kind, folder / name, {"target": t})
+    rec.event("reel", "scripted", {"target": t, "shots": "planned from the measured narration"})
+    print(f"Reel {n}: script and caption written. Shots are planned after its narration is imported "
+          f"and measured ({PROG} reel {n} --plan-shots).")
+
+
+def _reel_plan_shots(rec, n, t, folder):
+    script = _reel_script(rec, n)
+    narr = _reel_narration(rec, n)
+    if script is None or narr is None:
+        raise Stop(f"{t} needs a script and its imported narration before shots are planned",
+                   next_action(rec.root))
+    if _planned_shots(rec, n)[0] is not None:
+        raise Stop(f"{t} shots are already planned; re-planning would desynchronise its stills and clips",
+                   f"{PROG} status --root {rec.root}")
+    units, timing, prov = _reel_track(rec, n, script, narr, folder)
+    seconds = timing[-1]["end"]
+    try:
+        reel.validate_script(script, narration_seconds=seconds)
+    except ValueError as e:
+        rec.event("reel", "narration_misfit", {"target": t, "narration_job_id": narr["job_id"],
+                                               "narration_seconds": seconds})
+        raise Stop(f"QC failure: {e}", next_action(rec.root), code=5)
+    clip = colab_jobs.reel_clip_seconds()
+    shots = reel.shot_list(script, clip, seconds, _line_ends(script, units, timing))
+    _write_json(folder / "shots.json", shots)
+    rec.add_artifact("shot_list", folder / "shots.json", {"target": t, "narration_job_id": narr["job_id"]})
+    rec.event("reel", "shots_planned", {"target": t, "shots": len(shots), "clip_seconds": clip,
+                                        "narration_seconds": seconds, "narration_job_id": narr["job_id"]})
+    print(f"Reel {n}: measured narration {seconds:.2f} s -> {len(shots)} shots of {clip:.4f} s "
+          f"(last {shots[-1]['seconds']:.2f} s), in batches of at most {colab_jobs.MAX_CLIPS_PER_BATCH}.")
+
+
 def cmd_reel(args):
     rec = _record(args.root)
     n, t = args.n, f"reel-{args.n}"
     folder = rec.root / "reels" / t
     if args.script:
-        script = _json(args.script)
-        try:
-            reel.validate_script(script)
-            shots = reel.shot_list(script)
-        except ValueError as e:
-            raise Stop(f"reel script rejected: {e}", "Fix the script per references/reel-recipe.md")
-        if _latest_job(rec, "narration", t, imported=False):
-            raise Stop(f"{t} narration was already built from its script", f"{PROG} status --root {rec.root}")
-        _write_json(folder / "script.json", script)
-        _write_json(folder / "shots.json", shots)
-        (folder / "caption.txt").write_text(reel.caption(script, args.hashtags or []) + "\n", encoding="utf-8")
-        for kind, name in (("reel_script", "script.json"), ("shot_list", "shots.json"),
-                           ("caption", "caption.txt")):
-            rec.add_artifact(kind, folder / name, {"target": t})
-        rec.event("reel", "scripted", {"target": t, "shots": len(shots)})
-        print(f"Reel {n}: {len(shots)} shots of {shots[0]['seconds']} s; caption written.")
-        return
-    script = _reel_script(rec, n)
-    narr, clips_job = _latest_job(rec, "narration", t), _latest_job(rec, "reel_clips", t)
-    if script is None or not narr or not clips_job:
-        raise Stop(f"{t} needs a script plus imported narration and reel_clips jobs", next_action(rec.root))
-    order = [s["id"] for s in _json(clips_job["inputs_zip"].parent / "job.json")["scenes"]]
-    by_scene = {a["meta"]["scene"]: rec.root / a["path"]
-                for a in _artifacts(rec, "reel_clip", job_id=clips_job["job_id"])}
-    clips = [by_scene[s] for s in order]
-    units = voice_units(_reel_scene(script, n), {"description": ""}, None, script["language"])
-    _, prov = _measured_track(units, rec.root / "narration" / narr["job_id"],
-                              folder / "narration.wav", narr["job_id"])
-    total = sum(film._duration(c) for c in clips)
+        return _reel_set_script(rec, args, n, t, folder)
+    if args.plan_shots:
+        return _reel_plan_shots(rec, n, t, folder)
+    script, narr = _reel_script(rec, n), _reel_narration(rec, n)
+    shots, planned = _planned_shots(rec, n)
+    if script is None or narr is None or shots is None:
+        raise Stop(f"{t} needs a script, its imported narration and a shot plan", next_action(rec.root))
+    by_scene, jobs = {}, []
+    for j in _clip_jobs(rec, n, planned, imported=True):
+        jobs.append(j["job_id"])
+        for a in _artifacts(rec, "reel_clip", job_id=j["job_id"]):
+            if a["meta"]["scene"] in by_scene:
+                raise Stop(f"shot {a['meta']['scene']} has clips in two batches", "Report this as a bug")
+            by_scene[a["meta"]["scene"]] = rec.root / a["path"]
+    missing = [sh["id"] for sh in shots if sh["id"] not in by_scene]
+    if missing:
+        raise Stop(f"{t}: no imported clip yet for shot(s) {', '.join(missing)}", next_action(rec.root))
+    clips = [by_scene[sh["id"]] for sh in shots]
+    _, _, prov = _reel_track(rec, n, script, narr, folder)
+    durs = [film._duration(c) for c in clips]
+    last = min(durs[-1], shots[-1]["seconds"])
+    total = sum(durs[:-1]) + last
     spoken = film._duration(folder / "narration.wav")
     if spoken > total + reel.AUDIO_TOLERANCE_S:
         raise Stop(f"QC failure: narration {spoken:.2f} s is longer than the clips {total:.2f} s; "
-                   "narration is never trimmed", "Add or lengthen a shot, then rerun", code=5)
+                   "narration is never trimmed", "Report this as a bug: shots are planned from it", code=5)
     _ff("-i", folder / "narration.wav", "-af", f"apad=whole_dur={total:.3f}", "-ar", 48000,
         folder / "narration-padded.wav")
     audio, score_info = folder / "narration-padded.wav", None
@@ -608,15 +864,17 @@ def cmd_reel(args):
             raise Stop(f"QC failure: {e}", "Re-balance the reel score and rerun", code=5)
         audio = folder / "mix.wav"
     try:
-        info = reel.assemble(clips, audio, folder / f"{t}.mp4")
+        info = reel.assemble(clips, audio, folder / f"{t}.mp4", last_seconds=last)
     except ValueError as e:
         raise Stop(f"QC failure: {e}", "Fix the failing input and rerun", code=5)
     rec.add_artifact("narration_provenance", _write_json(folder / "narration-provenance.json", prov),
                      {"target": t, "narration_job_id": narr["job_id"]})
     rec.add_artifact("reel", folder / f"{t}.mp4", {"target": t, "score": score_info,
-                                                   "narration_job_id": narr["job_id"], **info})
+                                                   "narration_job_id": narr["job_id"],
+                                                   "clip_jobs": jobs, **info})
     rec.event("reel", "assembled", {"target": t, "seconds": info["seconds"]})
-    print(f"Assembled {folder / (t + '.mp4')}: {info['seconds']:.1f} s, {info['lufs']:.1f} LUFS.")
+    print(f"Assembled {folder / (t + '.mp4')}: {info['seconds']:.1f} s from {len(clips)} clips in "
+          f"{len(jobs)} batch(es), {info['lufs']:.1f} LUFS.")
 
 
 def cmd_qc(args):
@@ -643,6 +901,11 @@ def cmd_qc(args):
         if a["kind"] == "reel":
             item["loop_ssim"] = qc.loop_score(video)
             checks["loop_close"] = item["loop_ssim"] >= LOOP_MIN
+            # R26: the hook is spoken from 0.0-0.2 s (Parler's leading silence can delay it)
+            narration = rec.root / "reels" / target / "narration.wav"
+            onset = qc.speech_onset(narration) if narration.is_file() else None
+            item["hook_onset_s"] = onset
+            checks["hook_onset"] = onset is not None and 0.0 <= onset <= HOOK_ONSET_MAX_S
             checks["size_1080x1920"] = (a["meta"].get("width"), a["meta"].get("height")) == (1080, 1920)
         item["checks"] = {k: "pass" if v else "fail" for k, v in checks.items()}
         failed += [f"{target}:{k}" for k, v in checks.items() if not v]
@@ -657,6 +920,15 @@ def cmd_qc(args):
         raise Stop("QC failure: " + ", ".join(failed), next_action(rec.root), code=5)
 
 
+def _qc_passed(rec) -> bool:
+    """The latest qc came after the last film/reel assembly and passed (R26)."""
+    events = rec.data["events"]
+    last_media = max((i for i, e in enumerate(events)
+                      if e["stage"] in ("film", "reel") and e["result"] == "assembled"), default=-1)
+    qcs = [(i, e) for i, e in enumerate(events) if e["stage"] == "qc"]
+    return bool(qcs) and qcs[-1][0] > last_media and qcs[-1][1]["result"] == "pass"
+
+
 def cmd_bundle_audio(args):
     rec = _record(args.root)
     plan, src = _plan(rec), _json(rec.root / "source.json")
@@ -668,14 +940,23 @@ def cmd_bundle_audio(args):
     for i, f in enumerate(plan["plan"]["films"], 1):
         for sc in f["scenes"]:
             scene_film[sc["scene_id"]] = (i, sc)
-    if args.dry and args.score_dir:
-        raise Stop("--dry and --score-dir exclude each other", "Choose one")
+    films = [_film_target(i) for i in range(1, len(plan["plan"]["films"]) + 1)]
+    if not all(_artifacts(rec, "film", target=t) for t in films) or not _qc_passed(rec):
+        raise Stop("bundle-audio needs every film assembled and a passing qc after the last assembly",
+                   f"{PROG} qc --root {rec.root}, fix any failure, then the owner's review")
+    if args.dry and (args.score_dir or args.score_route):
+        raise Stop("--dry excludes --score-dir and --score-route", "Choose one")
     if not args.dry:
         if not args.score_dir:
             raise Stop("Maison audio carries narration with its background score: pass --score-dir "
                        "<dir> holding <unit_id>.wav per chapter (from `earnalism-audiobook-score`), or "
                        "--dry for narration only (recorded in the evidence draft)",
                        "Prepare one score bed per chapter, then rerun bundle-audio --score-dir <dir>")
+        if not args.score_route:
+            raise Stop("the evidence record must name the score's route and licence: pass --score-route "
+                       "vcsl (CC0 VCSL editorial score) or ace-step:<imported music job id> (Apache-2.0)",
+                       "Rerun bundle-audio with --score-route")
+        args.score_route = _score_route(rec, args.score_route)
         missing = [u["unit_id"] for u in src["units"]
                    if not (Path(args.score_dir) / f"{u['unit_id']}.wav").is_file()]
         if missing:
@@ -784,9 +1065,11 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                         "voice": plan["voice"]["preset_key"]}],
         "dry_narration": bool(args.dry),
         "music": None if args.dry else {
-            "route": "per-chapter score bed, ducked under speech (eav.mix.duck_and_master, -16 LUFS)",
-            "score_sha256": {u: v["score_sha256"] for u, v in prov_units.items()},
-            "source_and_licence": None},
+            **_music_licence(args.score_route),
+            "mix": "per-chapter score bed, ducked under speech (eav.mix.duck_and_master, -16 LUFS)",
+            "score_sha256": {u: v["score_sha256"] for u, v in prov_units.items()}},
+        "owner_must_complete": ["territories", "term_per_territory", "text_source_licence",
+                                "cover_provenance", "status", "owner_approval"],
         "owner_approval": None,
         "owner_approval_required": {"by": "<who approved>", "at": "<ISO 8601 time>"}})
     rec.add_artifact("evidence_draft", draft, {"bundle": str(bundle), "audio_sha256": audio})
@@ -807,18 +1090,22 @@ def cmd_status(args):
         s, title, month = rec.data["source"], rec.data["title_slug"], _month()
         ledger = _ledger(rec, args)
         print(f"{title}: revision {s['revision_id']} ({s['language']}), "
-              f"{ledger.spent(title, None):.2f} CU spent/reserved for this title (lifetime cap "
+              f"{_title_spent(ledger, rec):.2f} CU spent/reserved for this title (lifetime cap "
               f"{budget.TITLE_CAP:g}), {ledger.spent(None, month):.2f} CU this month (all titles), "
-              f"{_remaining(ledger, title, month):.2f} CU remaining ({month}).")
+              f"{_remaining(ledger, rec, month):.2f} CU remaining ({month}).")
         for j in _jobs(rec):
+            closed = next((e["detail"]["units"] for e in rec.data["events"] if e["result"] == "closed"
+                           and e["detail"].get("job_id") == j["job_id"]), None)
             state = ("imported" if j["imported"] else "superseded" if j["superseded"]
+                     else f"closed (ran, not imported; {closed:.2f} CU settled)" if j["closed"]
+                     else "supersede/close unfinished: rerun it" if j["unfinished"]
                      else "waiting for Colab")
             print(f"  {j['job_id']} {j['kind']} {j['target']}: {state} "
                   f"(forecast {j['forecast_units']:.2f} CU)")
 
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
-            "supersede": cmd_supersede,
+            "supersede": cmd_supersede, "close": cmd_close,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio}
 
@@ -853,6 +1140,10 @@ def _parser():
     s = add("supersede")
     s.add_argument("job_id")
     s.add_argument("--reason", required=True)
+    s = add("close")
+    s.add_argument("job_id")
+    s.add_argument("--units", type=float, required=True, help="the CU Colab shows the run used")
+    s.add_argument("--reason", required=True)
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)
@@ -863,6 +1154,8 @@ def _parser():
     s = add("reel")
     s.add_argument("n", type=int)
     s.add_argument("--script")
+    s.add_argument("--plan-shots", action="store_true",
+                   help="plan the shots from the imported, measured reel narration")
     s.add_argument("--score")
     s.add_argument("--score-route", help="vcsl or ace-step:<imported music job id>")
     s.add_argument("--hashtags", nargs="*")
@@ -871,6 +1164,7 @@ def _parser():
     s = add("bundle-audio")
     s.add_argument("--out", required=True)
     s.add_argument("--score-dir", help="<unit_id>.wav score bed per chapter (default route)")
+    s.add_argument("--score-route", help="with --score-dir: vcsl or ace-step:<imported music job id>")
     s.add_argument("--dry", action="store_true", help="narration only; recorded in the evidence draft")
     return p
 

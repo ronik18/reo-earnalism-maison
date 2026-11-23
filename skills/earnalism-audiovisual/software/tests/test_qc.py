@@ -29,5 +29,18 @@ class QcTests(unittest.TestCase):
             self.assertGreater(sheet.stat().st_size, 0)
 
 
+class OnsetTests(unittest.TestCase):
+    def test_speech_onset_measures_leading_silence(self):
+        with tempfile.TemporaryDirectory() as td:
+            for lead in (0.0, 0.3):
+                wav = Path(td) / f"{lead}.wav"
+                ff("-f", "lavfi", "-i", "sine=f=300:d=1:r=24000", "-af", f"adelay={int(lead * 1000)}",
+                   "-ac", "1", str(wav))
+                self.assertAlmostEqual(qc.speech_onset(wav), lead, delta=0.02)
+            silent = Path(td) / "silent.wav"
+            ff("-f", "lavfi", "-i", "anullsrc=r=24000:cl=mono:d=1", str(silent))
+            self.assertIsNone(qc.speech_onset(silent))
+
+
 if __name__ == "__main__":
     unittest.main()

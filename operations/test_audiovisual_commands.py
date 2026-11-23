@@ -80,11 +80,19 @@ class AudiovisualCommandTests(TestCase):
         doc = {"schema": "earnalism.audiovisual-clearance-evidence.v1", "edition_slug": "bicharak",
             "source_content_sha256": source["content_sha256"], "territories": list(settings.MAISON_PUBLICATION_TERRITORIES),
             "formats": ["reader", "audio"], "audio_sha256": [audio_sha], "basis": "synthetic isolated test only",
-            "status": "OWNER_APPROVED", "owner_approval": dict(self.APPROVAL)}
+            "status": "OWNER_APPROVED", "owner_approval": dict(self.APPROVAL), **self.complete_record()}
         doc.update(override)
         path.write_text(json.dumps(doc))
         self.addCleanup(path.unlink, missing_ok=True)
         return "docs/evidence/" + name
+
+    @staticmethod
+    def complete_record():
+        """The per-title fields the owner completes (spec owner answer 4); synthetic test values."""
+        return {"term_per_territory": {t: "synthetic test only: public domain" for t in settings.MAISON_PUBLICATION_TERRITORIES},
+                "text_source_licence": "synthetic test only", "cover_provenance": "synthetic test only",
+                "dry_narration": False,
+                "music": {"route": "vcsl", "licence": "CC0-1.0", "source_and_licence": "synthetic test only: VCSL CC0"}}
 
     def attach(self, *args):
         out = io.StringIO()
@@ -269,6 +277,38 @@ class AudiovisualCommandTests(TestCase):
             self.stage(folder, unapproved)
         self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
         self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)
+
+    def test_attach_refuses_incomplete_clearance_record(self):
+        """R24: term per territory, text-source licence, cover provenance and music licence are all required."""
+        live = self.publish_bicharak()
+        source = self.export()
+        folder, audio_sha = self.bundle(source)
+        first = list(settings.MAISON_PUBLICATION_TERRITORIES)[0]
+        partial_terms = {t: "public domain" for t in list(settings.MAISON_PUBLICATION_TERRITORIES)[1:]}
+        cases = [("noterms", {"term_per_territory": {}}, "term_per_territory"),
+                 ("oneterm", {"term_per_territory": partial_terms}, first),
+                 ("blankterm", {"term_per_territory": {**partial_terms, first: " "}}, first),
+                 ("termlist", {"term_per_territory": ["public domain"]}, "term_per_territory"),
+                 ("notext", {"text_source_licence": None}, "text_source_licence"),
+                 ("blanktext", {"text_source_licence": ""}, "text_source_licence"),
+                 ("nocover", {"cover_provenance": None}, "cover_provenance"),
+                 ("nomusic", {"music": None}, "music"),
+                 ("nomusiclicence", {"music": {"route": "vcsl", "licence": "CC0-1.0", "source_and_licence": None}}, "music"),
+                 ("noroute", {"music": {"licence": "CC0-1.0", "source_and_licence": "VCSL"}}, "music"),
+                 ("nodryflag", {"dry_narration": None, "music": None}, "music")]
+        for tag, override, message in cases:
+            with self.subTest(tag), self.assertRaisesMessage(CommandError, message):
+                self.stage(folder, self.evidence(source, audio_sha, tag=tag, **override))
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
+        self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)
+
+    def test_attach_accepts_dry_narration_without_music(self):
+        old = self.publish_bicharak()
+        source = self.export()
+        folder, audio_sha = self.bundle(source)
+        staged = self.stage(folder, self.evidence(source, audio_sha, tag="dry", dry_narration=True, music=None))
+        self.assertEqual(staged["status"], "staged")
+        self.assertNotEqual(staged["revision_id"], str(old.id))
 
     def test_attach_refuses_without_evidence_file(self):
         live = self.publish_bicharak()

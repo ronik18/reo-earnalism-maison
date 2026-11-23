@@ -21,7 +21,12 @@ if GENERATION and "do_sample" not in GENERATION:
 MODEL_INFO = {"repo": MODEL_REPO, "revision": MODEL_REVISION, "generation": GENERATION}
 
 rate = model.config.sampling_rate
+EXPECTED = [unit["unit_key"] + ".wav" for unit in JOB["units"]]
+last = 0.0  # seconds the previous unit took; the next starts only if it fits (R25)
 for unit in JOB["units"]:
+    if not may_start(last):
+        break
+    started = time.time()
     d = desc_tokenizer(unit["description"], return_tensors="pt").to(device)
     p = tokenizer(unit["text"], return_tensors="pt").to(device)
     audio = model.generate(input_ids=d.input_ids, attention_mask=d.attention_mask,
@@ -29,4 +34,5 @@ for unit in JOB["units"]:
                            prompt_attention_mask=p.attention_mask, **GENERATION)
     wav = audio.cpu().numpy().squeeze().astype("float32")
     sf.write(str(OUT_DIR / (unit["unit_key"] + ".wav")), wav, rate)
-    print("wrote", unit["unit_key"])
+    last = time.time() - started
+    print("wrote", unit["unit_key"], "in %.1f s" % last)

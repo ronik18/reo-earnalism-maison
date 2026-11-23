@@ -37,6 +37,14 @@ class VoiceTests(unittest.TestCase):
         units = voice_units(scene, PRESET, None)
         self.assertEqual([u["pause_after_ms"] for u in units], [1200, 400, 800, 800])
 
+    def test_reel_lines_pause_400_ms(self):
+        """R20: reel pacing is Squint pacing, 400 ms between lines (not the film's 800 ms)."""
+        from eav import cli
+        script = {"language": "en", "hook": "One line.", "loop_close": "Three. Four.",
+                  "lines": ["One line.", "Two line.", "Three. Four."]}
+        units = voice_units(cli._reel_scene(script, 1), PRESET, None)
+        self.assertEqual([u["pause_after_ms"] for u in units], [400, 400, 400, 400])
+
     def test_plan_film_scene_feeds_voice(self):
         src = {"language": "en", "units": [{"unit_id": "u", "title": "T", "paragraphs": [
             {"anchor_id": "h", "kind": "heading", "text": "Chapter"},

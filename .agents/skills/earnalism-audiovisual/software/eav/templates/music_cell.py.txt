@@ -27,8 +27,14 @@ MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "weight_sha256": weight_
 from acestep.pipeline_ace_step import ACEStepPipeline
 
 pipe = ACEStepPipeline(checkpoint_dir=weights_dir, dtype="bfloat16")
+EXPECTED = [t["key"] + ".wav" for t in JOB["items"]]
+last = 0.0  # seconds the previous cue took; the next starts only if it fits (R25)
 for t in JOB["items"]:
+    if not may_start(last):
+        break
+    started = time.time()
     pipe(prompt=t["prompt"], lyrics=t.get("lyrics", "[instrumental]"),
          audio_duration=t["duration_s"], infer_step=60, guidance_scale=15.0,
          manual_seeds=[t["seed"]], save_path=str(OUT_DIR / (t["key"] + ".wav")))
-    print("wrote", t["key"])
+    last = time.time() - started
+    print("wrote", t["key"], "in %.1f s" % last)

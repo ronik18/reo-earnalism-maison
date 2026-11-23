@@ -97,6 +97,17 @@ def import_job(record, job: dict, downloaded_dir, ledger, actual_units: float,
     return artifacts
 
 
+def _job_keys(inputs_zip, kind) -> list:
+    """The item keys the job asked for: every one needs an output."""
+    try:
+        with zipfile.ZipFile(inputs_zip) as z:
+            data = json.loads(z.read("job.json"))
+    except (OSError, KeyError, ValueError, zipfile.BadZipFile) as e:
+        raise ImportHeld(f"cannot read the built job.json: {e}") from None
+    rows = data.get("units") if kind == "narration" else data.get("items")
+    return [r["unit_key" if kind == "narration" else "key"] for r in rows or []]
+
+
 def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path):
     if not folder.is_dir():
         raise ImportHeld(f"downloaded folder not found: {folder}")
@@ -104,6 +115,9 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     if (manifest.get("schema") != OUTPUTS_SCHEMA or manifest.get("job_id") != job_id
             or manifest.get("kind") != kind):
         raise ImportHeld("manifest.json does not belong to this job")
+    if manifest.get("status") != "COMPLETE":
+        raise ImportHeld(f"manifest.json status is {manifest.get('status')!r}, not COMPLETE (a hard stop "
+                         "or failed run): nothing is imported; close the job with its actual units")
     zip_sha = sha256_file(job["inputs_zip"])
     if manifest.get("input_zip_sha256") != zip_sha or build.get("inputs_sha256", zip_sha) != zip_sha:
         raise ImportHeld("input zip sha256 mismatch")
@@ -133,6 +147,13 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     model = manifest.get("model")
     if not isinstance(model, dict) or not model:
         raise ImportHeld("manifest.json has no MODEL_INFO (model)")
+    packages = manifest.get("packages")
+    if not isinstance(packages, dict) or not any(packages.values()):
+        raise ImportHeld("manifest.json records no resolved package versions (packages)")
+    missing = [k for k in _job_keys(job["inputs_zip"], kind)
+               if not any(Path(name).stem == k for name in outputs)]
+    if missing:
+        raise ImportHeld(f"outputs miss job item(s): {', '.join(missing)}")
     staging = Path(tempfile.mkdtemp(dir=record.root, prefix=".import-"))
     try:
         for name in outputs:
@@ -145,10 +166,10 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     except BaseException:
         shutil.rmtree(staging, ignore_errors=True)
         raise
-    meta = {"job_id": job_id, "job_kind": kind, "model": model,
+    meta = {"job_id": job_id, "job_kind": kind, "model": model, "packages": packages,
             "input_zip_sha256": zip_sha}
     artifacts = [record.add_artifact(kind, dest / name, meta) for name in sorted(outputs)]
-    return artifacts, {"model": model, "input_zip_sha256": zip_sha}
+    return artifacts, {"model": model, "packages": packages, "input_zip_sha256": zip_sha}
 
 
 def _import_reel(record, job, job_id, dest: Path, archive, archive_sha256):

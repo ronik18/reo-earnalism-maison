@@ -12,6 +12,16 @@ def _duration(video) -> float:
     return float(r.stdout.strip())
 
 
+def speech_onset(audio, threshold_db=-40.0, rate=16000):
+    """Seconds before the first sample louder than threshold_db (None if it never is)."""
+    import numpy as np
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(audio), "-ac", "1", "-ar", str(rate),
+                          "-f", "f32le", "-"], check=True, capture_output=True).stdout
+    samples = np.abs(np.frombuffer(raw, np.float32))
+    loud = np.nonzero(samples >= 10 ** (threshold_db / 20))[0]
+    return round(float(loud[0]) / rate, 4) if loud.size else None
+
+
 def contact_sheet(video, out, every_s=1.0, cols=5, thumb_h=320):
     """Tile one thumbnail per `every_s` seconds into a single image."""
     n = max(1, int(math.ceil(_duration(video) / every_s)))

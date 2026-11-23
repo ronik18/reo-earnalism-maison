@@ -12,10 +12,16 @@ revision = HfApi().model_info(MODEL_REPO).sha
 MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "steps": STEPS}
 pipe = FluxPipeline.from_pretrained(MODEL_REPO, revision=revision, torch_dtype=torch.bfloat16)
 pipe.enable_model_cpu_offload()
+EXPECTED = [item["key"] + ".png" for item in JOB["items"]]
+last = 0.0  # seconds the previous still took; the next starts only if it fits (R25)
 for item in JOB["items"]:
+    if not may_start(last):
+        break
+    started = time.time()
     gen = torch.Generator("cpu").manual_seed(item["seed"])
     image = pipe(item["prompt"], num_inference_steps=STEPS, guidance_scale=0.0,
                  max_sequence_length=256, width=item["width"], height=item["height"],
                  generator=gen).images[0]
     image.save(OUT_DIR / (item["key"] + ".png"))
-    print("wrote", item["key"])
+    last = time.time() - started
+    print("wrote", item["key"], "in %.1f s" % last)

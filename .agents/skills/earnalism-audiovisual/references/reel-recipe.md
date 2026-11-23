@@ -12,7 +12,7 @@ or 120 s (200–245). Each reel is its own 9:16 composition, never a crop of the
 - **One subject in one continuous world.** Same people, same place, same light family,
   shot after shot, as if one camera stayed there. Continuity makes AI footage feel like
   cinema instead of a slideshow.
-- **Time moves forward every 5–7.5 s.** Each shot is the next step of the story. Novelty
+- **Time moves forward every ~5 s.** Each shot is the next step of the story. Novelty
   keeps the thumb still; the steady rhythm never feels frantic.
 - **A loop.** The story opens at its most striking moment, runs its arc, and the last line
   and last image lead back into the first. Replays feel like continuation.
@@ -48,8 +48,26 @@ or 120 s (200–245). Each reel is its own 9:16 composition, never a crop of the
 - Short declarative sentences, present tense, concrete verbs, one idea each. Bengali is
   written in Bengali, not translated from an English draft.
 - Write five hooks, keep the truest, shortest and most visual. No question marks.
-- `validate_script` enforces length, word budget and hook length; `shot_list` cuts
-  ~6 s shots, each tied to the line spoken at its midpoint.
+- `validate_script` enforces length, word budget and hook length; once the reel
+  narration is imported it also checks the **measured** narration fits the length ± 3 s.
+- Lines are paced like Squint: 400 ms between lines.
+
+## Order of work (R20: timing is measured, never assumed)
+
+1. `reel N --script reel-N.json`: script and caption. No shots yet.
+2. The owner approves the script; then `job narration --reel N` → Colab → `import`.
+3. `reel N --plan-shots`: measures the imported narration and plans
+   `ceil(narration / 5.0417 s)` shots, one real Wan clip each (121 frames at 24 fps).
+   Only the last shot is trimmed (picture ends 0.5 s after the last word, at least
+   1.5 s), never stretched; each shot carries the line spoken at its midpoint, from the
+   measured line timings. If the measured narration does not fit the length ± 3 s, it
+   stops (exit 5): rewrite the script's words, `reel N --script` again (allowed after a
+   misfit) and build new reel narration. Example: 60 s of speech → 12 shots; 120 s → 24.
+4. Keyframes: `job stills --reel N` with one prompt per shot of `shots.json` (key = shot id).
+5. Clips: `job reel_clips --reel N` once per batch of **at most 5 shots** (next section);
+   each batch is one Wan job, forecast and reserved in full.
+6. `reel N --score <bed> --score-route ...` assembles from every imported batch, in
+   `shots.json` order, once every planned shot has a clip.
 
 ## Pictures
 
@@ -65,7 +83,7 @@ or 120 s (200–245). Each reel is its own 9:16 composition, never a crop of the
    designed match-cut or a short dissolve into frame 1 where the action resolves back into
    the hook image. QC checks that the join reads as continuous, not pixel-identical.
 
-## Clips spec (`job reel_clips --reel N --spec clips.json`)
+## Clips spec (`job reel_clips --reel N --spec clips.json`, one per batch)
 
 Example shape (replace the evidence values with the actual journal entries):
 
@@ -87,22 +105,61 @@ Example shape (replace the evidence values with the actual journal entries):
   `earnalism-video/software/WAN22_COLAB.md`. For a recovery of a failed reel clip it
   names that job id and its import receipt instead. It is evidence, never invented
   numbers.
-- `shots`: one entry per line of `reels/reel-N/shots.json`, in order.
-  - `id`: lowercase letters, digits and hyphens, unique.
+- `shots`: the next **at most 5** uncovered shots of `reels/reel-N/shots.json` (the CLI's
+  `Next:` line names them). A batch must fit one Wan job: 2700 s wall at the measured
+  ~500 s per clip, and an owner authority of at most 5 CU. Ids not in `shots.json`, or
+  already in another active batch, are refused.
+  - `id`: the shot's id from `shots.json` (`shot-01`, `shot-02`, ...).
   - `image`: the keyframe's basename inside `art_dir` (hashed into the job).
   - `seed`: an integer, kept in the record.
   - `prompt`: the subject's motion (10–3000 characters); no end frame can be set.
 - The profile is fixed by the CLI to `l4-balanced-v2` (512×896, 121 frames, 24 fps,
-  24 steps, guidance 5). The spec cannot change it; to fit the budget, cut takes or shots.
-- `compute` is optional: without it the CLI uses the measured `reel_clips` rates and
-  counts the shots.
+  24 steps, guidance 5). The spec cannot change it, and takes are 1 (one start per shot).
+- No `compute` block and no `wall_seconds`: the forecast is the batch's shot count × the
+  measured `clip_s` × 1.15 (rates.json), and the Wan wall is bound to that forecast
+  (600–2700 s). A `compute` block that disagrees with the shots is refused (R21).
+
+## Running a batch in Colab (the owner; R22)
+
+The Wan batch notebook (`Earnalism_Wan22_Warm_Batch.ipynb` in `jobs/<job_id>/`) has **no
+`RUN` flag**. Its config cell holds independent flags, all `False`; the owner sets each to
+`True` only after the previous cell succeeded:
+
+1. `RUN_BATCH`: writes the bound software and job into `/content/earnalism-<job_id>`.
+2. Upload `wan22-batch-inputs.zip` with Colab Files as `/content/wan22-batch-inputs.zip`;
+   `VERIFY_INPUTS` checks its sha256 and every source image hash.
+3. **The owner writes and signs** `/content/wan22-batch-authority.json` for this exact job.
+   Claude never writes, edits, drafts or fills in this file:
+   ```json
+   {"schema": "earnalism.wan22-batch-authority.v1", "owner_authorized": true,
+    "job_sha256": "<sha256 of jobs/<job_id>/job.json; the CLI's Next: line prints it>",
+    "evidence_ref": "<the owner's own approval record for this batch>",
+    "observed_units_per_hour": <the rate Colab shows for this allocation>,
+    "approved_compute_units": <at most 5, and at least 2 x that rate x wall_seconds / 3600>,
+    "free_runtime_confirmed": false,
+    "allocation_started_at": <unix time this allocation started>}
+   ```
+   `batch.py` refuses anything else (a different job hash, an expired allocation, more
+   than 5 CU or less than twice the wall at the observed rate).
+4. `BEGIN_ALLOCATION`: binds the authority and the job's wall (the forecast, ≤ 2700 s),
+   arms the runtime unassign guard and runs the hardware preflight.
+5. `SETUP_BATCH`, then `GENERATE_BATCH` (leave `RESUME_UNATTEMPTED` False).
+6. `EXPORT_AND_DOWNLOAD`: prints `export-receipt.json` (with `archive_sha256`) and
+   downloads the archive. Then locally: `import <job_id> --from <archive.zip>
+   --archive-sha256 <archive_sha256> --units <CU shown in Colab>`.
+7. After the import verified, `LOCAL_IMPORT_VERIFIED` and `DISCONNECT_RUNTIME`.
+
+A batch that ran but cannot be imported (partial export, crash, lost download) is ended
+with `close <job_id> --units <CU shown in Colab> --reason "..."`; its shots stay
+uncovered, and rebuilding them is a new batch the owner decides on.
 
 ## Sound
 
 Reel narration is its own narration job (`job narration --reel N`), same voice and
-preset. The hook is spoken from 0.0–0.2 s. Bed: a quiet score cue, no drums or vocals.
-Master: −14 LUFS, true peak ≤ −1 dBTP. Narration is never trimmed: if it is longer than
-the clips, add or lengthen a shot.
+preset, 400 ms between lines. The hook is spoken from 0.0–0.2 s (`qc` measures the
+onset on the reel narration and fails `hook_onset` otherwise). Bed: a quiet score cue,
+no drums or vocals. Master: −14 LUFS, true peak ≤ −1 dBTP. Narration is never trimmed:
+the shots are planned from it, so the picture always covers it.
 
 ## On-screen text
 

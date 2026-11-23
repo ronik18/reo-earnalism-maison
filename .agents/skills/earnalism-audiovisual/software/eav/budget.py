@@ -14,22 +14,33 @@ from pathlib import Path
 TITLE_CAP = 60.0
 MONTH_CAP = 100.0
 MARGIN = 1.15
-MIN_ITEMS = 8
+MIN_ITEMS = 1
+# The wan22 batch contract allocates at least 600 s per job, so a reel batch reserves at least that.
+REEL_MIN_SECONDS = 600
 
 
 class BudgetExceeded(Exception):
     pass
 
 
-def forecast(job: dict, rates: dict) -> float:
+def forecast_seconds(job: dict, rates: dict) -> float:
+    """Wall-clock seconds the job may use, margin included; the notebooks stop at this time.
+
+    reel_clips is forecast from the measured end-to-end seconds per finished Wan clip
+    (rates clip_s: load, denoise, decode and export), never from a step count alone."""
     rate = rates[job["kind"]]
-    seconds = (job["steps"] * rate["s_per_step"] * job["items"] * job["takes"]
-               + job["decode_s"] + job["export_s"]) * MARGIN
-    return seconds / 3600 * rate["units_per_hour"]
+    if job["kind"] == "reel_clips":
+        return max(job["items"] * job["takes"] * rate["clip_s"] * MARGIN, REEL_MIN_SECONDS)
+    return (job["steps"] * rate["s_per_step"] * job["items"] * job["takes"]
+            + job["decode_s"] + job["export_s"]) * MARGIN
+
+
+def forecast(job: dict, rates: dict) -> float:
+    return forecast_seconds(job, rates) / 3600 * rates[job["kind"]]["units_per_hour"]
 
 
 def fit_reel_job(job: dict, rates: dict, remaining_units: float):
-    """Cut takes to 1 first, then items (down to 8). Returns a copy or None."""
+    """Cut takes to 1 first, then items (shots, down to 1). Returns a copy or None."""
     fitted = dict(job)
     while True:
         if forecast(fitted, rates) <= remaining_units:
@@ -70,26 +81,51 @@ class Ledger:
                 os.unlink(tmp)
 
     @staticmethod
-    def _sum(entries, title, month) -> float:
+    def _mine(e, title, edition_id) -> bool:
+        """The title cap is keyed by the export's edition_id (R26); an entry written before
+        edition keying (no edition_id) is matched by its slug."""
+        if title is None and edition_id is None:
+            return True
+        if e.get("edition_id") is not None:
+            return edition_id is not None and e["edition_id"] == edition_id
+        return title is not None and e["title"] == title
+
+    @classmethod
+    def _sum(cls, entries, title, month, edition_id=None) -> float:
         """Units for one title (None = all titles) in one month (None = all months)."""
         return float(sum(e["units"] for e in entries
                          if (month is None or e["month"] == month)
-                         and (title is None or e["title"] == title)))
+                         and cls._mine(e, title, edition_id)))
 
-    def spent(self, title, month) -> float:
-        return self._sum(self._load(), title, month)
+    def spent(self, title, month, edition_id=None) -> float:
+        return self._sum(self._load(), title, month, edition_id)
 
-    def reserve(self, title, month: str, units: float, job_id: str) -> None:
+    def roots(self, edition_id) -> set:
+        """Title roots (relative to the ledger's folder) that reserved for this edition."""
+        return {e["root"] for e in self._load()
+                if e.get("edition_id") == edition_id and e.get("root") is not None}
+
+    def reserve(self, title, month: str, units: float, job_id: str, edition_id=None,
+                root=None) -> None:
         _check_units(units)
         entries = self._load()
         if any(e["job_id"] == job_id for e in entries):
             raise ValueError(f"duplicate job_id: {job_id!r}")
-        if self._sum(entries, title, None) + units > TITLE_CAP:  # lifetime, all months
+        if edition_id is not None and root is not None:
+            others = {e.get("root") for e in entries
+                      if e.get("edition_id") == edition_id and e.get("root") not in (None, root)}
+            if others:
+                raise ValueError(f"edition {edition_id} already has a title root on this ledger "
+                                 f"({', '.join(sorted(others))}); one root per edition")
+        if self._sum(entries, title, None, edition_id) + units > TITLE_CAP:  # lifetime, all months
             raise BudgetExceeded(f"title cap {TITLE_CAP:g} units exceeded for {title!r}")
         if self._sum(entries, None, month) + units > MONTH_CAP:
             raise BudgetExceeded(f"month cap {MONTH_CAP:g} units exceeded for {month}")
-        entries.append({"job_id": job_id, "title": title, "month": month,
-                        "units": units, "state": "reserved"})
+        entry = {"job_id": job_id, "title": title, "month": month, "units": units,
+                 "state": "reserved"}
+        if edition_id is not None:
+            entry.update(edition_id=edition_id, root=root)
+        entries.append(entry)
         self._save(entries)
 
     def settle(self, job_id: str, actual_units: float) -> None:

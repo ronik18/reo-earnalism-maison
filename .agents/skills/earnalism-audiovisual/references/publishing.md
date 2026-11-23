@@ -12,8 +12,9 @@ Root/Integration owns provider mutations; this skill prepares and stages.
 
 ### Steps
 
-1. `python3 -m eav.cli bundle-audio --root <root> --out <bundle dir> --score-dir <dir>`
-   writes one 96 kbps MP3 per Maison unit: the narration with its best-fit background
+1. After a passing `qc` of the assembled film (and the owner's review),
+   `python3 -m eav.cli bundle-audio --root <root> --out <bundle dir> --score-dir <dir>
+   --score-route vcsl|ace-step:<music job_id>` writes one 96 kbps MP3 per Maison unit: the narration with its best-fit background
    score (`<unit_id>.wav` per chapter from `earnalism-audiobook-score`), ducked under
    speech and mastered to −16 LUFS by `eav.mix.duck_and_master`. It refuses without a
    score, or when a bed is shorter than its chapter. `--dry` (narration only) is allowed
@@ -22,7 +23,10 @@ Root/Integration owns provider mutations; this skill prepares and stages.
    measured by `eav.film.narration_track`, plus a `provenance` block). It also writes
    `<root>/maison/audiovisual-clearance-evidence.draft.json`
    (schema `earnalism.audiovisual-clearance-evidence.v1`) with `status: DRAFT_NOT_APPROVED`,
-   `territories: []` and `owner_approval: null`. `stage` refuses it as written.
+   `territories: []`, `term_per_territory: {}`, `text_source_licence: null`,
+   `cover_provenance: null` and `owner_approval: null`; the score's route and licence
+   (VCSL CC0-1.0, or ACE-Step Apache-2.0 with its music job id) are filled in.
+   `stage` refuses it as written.
 2. **Clearance (per title).** The owner pre-authorised the public-domain pattern of
    `docs/evidence/publication-clearance-20261123.json` for audio and video. The agent
    prepares the draft: territories = the active whitelist, term per territory,
@@ -30,7 +34,10 @@ Root/Integration owns provider mutations; this skill prepares and stages.
    **The owner approves it**: the owner (not the agent) sets `owner_approval`
    `{"by": <who>, "at": <ISO time>}` and a non-draft `status`; it is saved under
    `docs/evidence/`. **`stage` enforces this**: it refuses a status starting with
-   `DRAFT` or a missing/blank `owner_approval`, and changes nothing. The agent never
+   `DRAFT`, a missing/blank `owner_approval`, a `term_per_territory` that misses any
+   whitelisted territory, a missing `text_source_licence` or `cover_provenance`, or a
+   `music` record without route, licence and source (unless `dry_narration` is true),
+   and changes nothing. The agent never
    fills in the approval, never edits `publication_clearance` or rights rows by hand.
    Non-public-domain titles are refused.
 3. Server (root lane): `python manage.py attach_audiovisual_audio stage <slug> --publisher

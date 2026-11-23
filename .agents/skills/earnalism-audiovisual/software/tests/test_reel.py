@@ -1,3 +1,4 @@
+import math
 import subprocess
 import tempfile
 import unittest
@@ -61,7 +62,48 @@ class ScriptTests(unittest.TestCase):
 
     def test_shot_one_carries_hook(self):
         s = _script()
-        self.assertEqual(reel.shot_list(s)[0]["line"], s["hook"])
+        self.assertEqual(reel.shot_list(s, narration_seconds=58.0)[0]["line"], s["hook"])
+
+    # --- R20: shots come from MEASURED narration and the ACTUAL Wan clip length -----------
+    def test_clip_seconds_is_the_pinned_wan_profile(self):
+        from eav import colab_jobs
+        self.assertAlmostEqual(reel.CLIP_SECONDS, 121 / 24)
+        self.assertAlmostEqual(colab_jobs.reel_clip_seconds(), reel.CLIP_SECONDS)
+
+    def test_shot_list_needs_measured_narration(self):
+        with self.assertRaisesRegex(ValueError, "measured"):
+            reel.shot_list(_script())
+
+    def test_shot_count_is_ceil_of_narration_over_clip(self):
+        clip = 121 / 24
+        for narration in (50.0, 58.4, 60.0, 60.6, 62.9, 118.0):
+            shots = reel.shot_list(_script(), clip_seconds=clip, narration_seconds=narration)
+            self.assertEqual(len(shots), math.ceil(narration / clip), narration)
+            self.assertTrue(all(abs(x["seconds"] - clip) < 1e-3 for x in shots[:-1]))
+            last = shots[-1]["seconds"]
+            self.assertLessEqual(last, clip + 1e-9)  # trimmed, never stretched
+            total = sum(x["seconds"] for x in shots)
+            self.assertGreaterEqual(total + 1e-6, narration)  # narration is never trimmed
+            self.assertLess(total - narration, clip)
+            self.assertEqual([x["id"] for x in shots],
+                             [f"shot-{i:02d}" for i in range(1, len(shots) + 1)])
+
+    def test_shot_lines_follow_measured_line_ends(self):
+        s = _script()
+        n = len(s["lines"])
+        ends = [5.0 * (i + 1) for i in range(n)]  # line k is spoken from 5k to 5k+5 s
+        shots = reel.shot_list(s, clip_seconds=5.0, narration_seconds=ends[-1], line_ends=ends)
+        for i, shot in enumerate(shots[1:], 1):
+            self.assertEqual(shot["line"], s["lines"][i], i)
+
+    def test_measured_narration_must_fit_length(self):
+        s = _script()
+        reel.validate_script(s)
+        for ok in (57.0, 60.0, 63.0):
+            reel.validate_script(s, narration_seconds=ok)
+        for bad in (56.9, 63.1, 74.0):
+            with self.assertRaisesRegex(ValueError, "measured narration"):
+                reel.validate_script(s, narration_seconds=bad)
 
     def test_caption_does_not_repeat_hook(self):
         s = _script()
@@ -79,12 +121,11 @@ class ScriptTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             reel.validate_script(_script(110, length=120))
 
-    def test_shot_lengths_in_range(self):
-        for length in (60, 120):
+    def test_shot_counts_for_60_and_120_s_reels(self):
+        for length, shots_expected in ((60, 12), (120, 24)):
             s = _script(110 if length == 60 else 220, length=length)
-            shots = reel.shot_list(s)
-            self.assertTrue(all(5.0 <= x["seconds"] <= 7.5 for x in shots))
-            self.assertAlmostEqual(sum(x["seconds"] for x in shots), length, delta=1)
+            shots = reel.shot_list(s, narration_seconds=length - 0.5)
+            self.assertEqual(len(shots), shots_expected)
             self.assertEqual([x["shot"] for x in shots], list(range(1, len(shots) + 1)))
 
     def test_caption_hashtags(self):
@@ -155,6 +196,16 @@ class AssembleTests(unittest.TestCase):
 
     def test_loop_score_high_after_dissolve(self):
         self.assertGreater(qc.loop_score(self.out), 0.9)
+
+    def test_last_clip_trimmed_to_planned_seconds(self):
+        out = Path(self.td.name) / "trim.mp4"
+        audio = Path(self.td.name) / "n4.wav"
+        noise_wav(audio, 4.5)
+        info = reel.assemble(self.clips, audio, out, last_seconds=1.5)
+        self.assertAlmostEqual(info["seconds"], 4.5, places=3)
+        self.assertAlmostEqual(qc._duration(out), 4.5, delta=0.1)
+        with self.assertRaises(ValueError):  # never stretched past the real clip
+            reel.assemble(self.clips, self.audio, Path(self.td.name) / "z.mp4", last_seconds=4.0)
 
 
 if __name__ == "__main__":

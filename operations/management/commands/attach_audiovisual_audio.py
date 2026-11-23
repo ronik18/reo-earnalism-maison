@@ -27,7 +27,9 @@ Stream hosting is held until the owner approves its cost.
 --evidence is a repo-relative JSON under docs/evidence/ (schema
 earnalism.audiovisual-clearance-evidence.v1) naming edition_slug, source_content_sha256 (the live
 text the narration speaks), territories (= the active whitelist), formats ["reader", "audio"] and
-audio_sha256 (exactly the bundle MP3 hashes), plus owner_approval {"by": <who>, "at": <when>}; a
+audio_sha256 (exactly the bundle MP3 hashes), the completed per-title record (term_per_territory for every
+whitelisted territory, text_source_licence, cover_provenance, and music {route, licence,
+source_and_licence} unless dry_narration is true), plus owner_approval {"by": <who>, "at": <when>}; a
 status starting with "DRAFT" is refused (the skill drafts the record, only the owner approves it). The live revision must already carry passing
 public-domain publication_clearance; other titles are refused.
 
@@ -172,6 +174,33 @@ def check_evidence(doc, slug, live, bundle):
         raise CommandError('Clearance evidence formats must be exactly ["reader", "audio"].')
     if not isinstance(doc.get("audio_sha256"), list) or sorted(doc["audio_sha256"]) != sorted(f["sha256"] for f in bundle["files"].values()):
         raise CommandError("Clearance evidence audio_sha256 differs from the bundle MP3 hashes.")
+    check_record_complete(doc)
+
+
+def _filled(value):
+    """A completed evidence field: a non-blank string or a non-empty object/list."""
+    if isinstance(value, str):
+        return bool(value.strip())
+    return isinstance(value, (dict, list)) and bool(value)
+
+
+def check_record_complete(doc):
+    """The per-title record the owner approves is complete (spec owner answer 4; R24)."""
+    terms = doc.get("term_per_territory")
+    if not isinstance(terms, dict) or not terms:
+        raise CommandError("Clearance evidence term_per_territory must give the term evidence for every whitelisted territory.")
+    missing = [t for t in territories() if not _filled(terms.get(t))]
+    if missing:
+        raise CommandError(f"Clearance evidence term_per_territory lacks: {', '.join(missing)}.")
+    for field in ("text_source_licence", "cover_provenance"):
+        if not _filled(doc.get(field)):
+            raise CommandError(f"Clearance evidence {field} is missing.")
+    if doc.get("dry_narration") is True:
+        return
+    music = doc.get("music")
+    if (not isinstance(music, dict) or not _filled(music.get("route")) or not _filled(music.get("licence"))
+            or not _filled(music.get("source_and_licence"))):
+        raise CommandError("Clearance evidence music needs route, licence and source_and_licence (or dry_narration true).")
 
 
 def in_memory_check(revision, unit, segments, measured, sha, evidence):

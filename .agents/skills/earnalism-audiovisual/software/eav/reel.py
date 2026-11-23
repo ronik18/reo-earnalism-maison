@@ -1,5 +1,6 @@
 """Squint-grade reel: script rules, shot list, 9:16 assembly with loop dissolve, caption."""
 import json
+import math
 import re
 import subprocess
 import tempfile
@@ -15,6 +16,11 @@ REQUIRED_TAGS = ["#earnalism", "#learnalism", "#theearnalism"]
 MAX_TAGS = 5
 LABEL_SECONDS = 3.0
 AUDIO_TOLERANCE_S = 0.25
+# One pinned Wan l4-balanced-v2 clip: 121 frames at 24 fps (eav.colab_jobs.reel_clip_seconds).
+CLIP_SECONDS = 121 / 24
+FIT_TOLERANCE_S = 3.0  # measured reel narration must land within length +- 3 s
+TAIL_S = 0.5  # picture after the last word (the loop dissolve)
+MIN_LAST_S = 1.5  # a trimmed last shot is never shorter than this (or the full clip)
 _FONTS = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
           "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"]
 _EMOJI = re.compile("[\U0001F300-\U0001FAFF☀-➿]️?")
@@ -34,7 +40,8 @@ def spoken(script: dict) -> list:
     return list(lines)
 
 
-def validate_script(script: dict) -> None:
+def validate_script(script: dict, narration_seconds=None) -> None:
+    """Script rules; once the reel narration is measured, it must also fit length +- 3 s."""
     length = script.get("length")
     if length not in BUDGET:
         raise ValueError(f"length must be 60 or 120, got {length!r}")
@@ -45,29 +52,40 @@ def validate_script(script: dict) -> None:
     lo, hi = BUDGET[length]
     if not lo <= total <= hi:
         raise ValueError(f"{total} spoken words outside {lo}-{hi} for a {length}s reel")
+    if narration_seconds is not None and abs(narration_seconds - length) > FIT_TOLERANCE_S:
+        raise ValueError(f"measured narration {narration_seconds:.2f} s does not fit a {length} s reel "
+                         f"(+- {FIT_TOLERANCE_S:g} s); change the script's words, never the narration")
 
 
-def shot_list(script: dict) -> list:
-    """Uniform shots of about 6 s; each shot is tied to the script line spoken at its midpoint."""
-    length = script["length"]
+def shot_list(script: dict, clip_seconds: float = CLIP_SECONDS, narration_seconds=None,
+              line_ends=None) -> list:
+    """ceil(narration / clip) shots of one real Wan clip each; only the last is trimmed (never
+    stretched) so the picture ends TAIL_S after the last word. Each shot carries the line spoken
+    at its midpoint: line_ends are the measured end times per line (else word-proportional)."""
     lines = spoken(script)
-    n = max(1, round(length / 6.0))
-    sec = length / n
-    if not 5.0 <= sec <= 7.5:
-        raise ValueError("cannot split into 5-7.5 s shots")
-    counts = [max(1, words(x)) for x in lines]
-    total = float(sum(counts))
-    ends, acc = [], 0
-    for c in counts:
-        acc += c
-        ends.append(acc / total * length)
-    shots = []
+    if not isinstance(narration_seconds, (int, float)) or not narration_seconds > 0:
+        raise ValueError("shots are planned from the measured reel narration: pass narration_seconds")
+    if not clip_seconds > 0:
+        raise ValueError("clip_seconds must be positive")
+    n = max(1, math.ceil(narration_seconds / clip_seconds - 1e-9))
+    rest = narration_seconds - (n - 1) * clip_seconds
+    last = min(clip_seconds, max(rest + TAIL_S, MIN_LAST_S))
+    if line_ends is None:
+        counts = [max(1, words(x)) for x in lines]
+        acc, line_ends = 0, []
+        for c in counts:
+            acc += c
+            line_ends.append(acc / sum(counts) * narration_seconds)
+    if len(line_ends) != len(lines):
+        raise ValueError("line_ends must give one end time per line")
+    shots, start = [], 0.0
     for i in range(n):
-        mid = (i + 0.5) * sec
-        idx = next((k for k, e in enumerate(ends) if mid <= e), len(lines) - 1)
-        if i == 0:
-            idx = 0  # frame 1 carries the hook
-        shots.append({"shot": i + 1, "line": lines[idx], "seconds": round(sec, 3)})
+        sec = clip_seconds if i < n - 1 else last
+        mid = start + sec / 2
+        idx = 0 if i == 0 else next((k for k, e in enumerate(line_ends) if mid <= e), len(lines) - 1)
+        shots.append({"shot": i + 1, "id": f"shot-{i + 1:02d}", "line": lines[idx],
+                      "seconds": math.floor(sec * 1e6) / 1e6})  # never above the clip
+        start += sec
     return shots
 
 
@@ -139,12 +157,18 @@ def _master_audio(audio: Path, seconds: float, out: Path):
 
 
 def assemble(clips: list, audio, out, label_text="AI-generated visuals",
-             loop_dissolve_s=0.5) -> dict:
+             loop_dissolve_s=0.5, last_seconds=None) -> dict:
+    """last_seconds trims the last clip to the planned shot (shot_list); it is never stretched."""
     clips = [Path(c) for c in clips]
     audio, out = Path(audio), Path(out)
     if not clips:
         raise ValueError("no clips")
     durs = [_probe(c)["duration"] for c in clips]
+    if last_seconds is not None:
+        if last_seconds > durs[-1] + 1 / FPS:
+            raise ValueError(f"last shot {last_seconds:.3f} s is longer than its clip "
+                             f"{durs[-1]:.3f} s; a clip is never stretched")
+        durs[-1] = min(durs[-1], last_seconds)
     d = loop_dissolve_s
     if durs[-1] <= d:
         raise ValueError("last clip shorter than the loop dissolve")
@@ -157,7 +181,7 @@ def assemble(clips: list, audio, out, label_text="AI-generated visuals",
     for i in range(n - 1):
         parts.append(f"[{i}:v]{norm},setpts=PTS-STARTPTS[v{i}]")
         labels.append(f"[v{i}]")
-    parts.append(f"[{n - 1}:v]{norm},setpts=PTS-STARTPTS[vl]")
+    parts.append(f"[{n - 1}:v]{norm},trim=duration={durs[-1]:.4f},setpts=PTS-STARTPTS[vl]")
     # still of clip 1's first frame to dissolve into
     parts.append(f"[{n}:v]{norm},trim=end_frame=1,loop=loop=-1:size=1,"
                  f"trim=duration={d + 1:.3f},setpts=PTS-STARTPTS[st]")
