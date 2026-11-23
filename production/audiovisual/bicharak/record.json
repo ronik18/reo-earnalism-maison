@@ -641,6 +641,17 @@
       },
       "result": "job_target",
       "stage": "cli"
+    },
+    {
+      "at": "2026-11-23T17:46:05.107987+00:00",
+      "detail": {
+        "bytes": 122447,
+        "job_id": "narration-film-01-r3",
+        "key": "exports/colab-exchange/bicharak/narration-film-01-r3/inputs.zip",
+        "sha256": "16068174fa99dba5495bb39fde1f2cab90ed9a6df346af040facb5e0051cb981"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
