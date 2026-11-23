@@ -9,7 +9,7 @@ import unittest
 import zipfile
 from pathlib import Path
 
-from eav import cli
+from eav import cli, mix
 from eav.text import sentences
 
 PARAS = [
@@ -95,6 +95,14 @@ class CliTests(unittest.TestCase):
         self.assertNotEqual(code, 0)
         self.assertIn("measured", out)
 
+    def test_plan_and_narration_job_carry_roster_temperature(self):
+        job_id, job_dir = self.build_narration()
+        plan = json.loads((self.root / "plan.json").read_text())
+        self.assertEqual(plan["voice"]["preset_key"], "en_tisha::story")
+        self.assertEqual(plan["voice"]["temperature"], 0.91)
+        with zipfile.ZipFile(job_dir / "inputs.zip") as z:
+            self.assertEqual(json.loads(z.read("job.json"))["generation"], {"temperature": 0.91})
+
     def build_narration(self):
         self.init_and_plan()
         code, out = run("job", "narration", "--root", self.root, "--rates", self.rates)
@@ -141,22 +149,66 @@ class CliTests(unittest.TestCase):
         code, out = run("status", "--root", self.root)
         self.assertIn(f"import {job_id}", out)
 
+    def imported(self):
+        job_id, job_dir = self.build_narration()
+        folder, units = self.fake_colab_outputs(job_id, job_dir)
+        code, out = run("import", job_id, "--root", self.root, "--from", folder, "--units", 1.5)
+        self.assertEqual(code, 0, out)
+        return job_id, folder, units
+
+    def scores(self):
+        d = self.d / "scores"
+        d.mkdir()
+        for u in SOURCE["units"]:
+            subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
+                            "anoisesrc=d=8:c=pink:r=48000:a=0.2", "-ac", "2",
+                            str(d / f"{u['unit_id']}.wav")], check=True)
+        return d
+
+    def test_bundle_audio_refuses_without_score_unless_dry(self):
+        self.imported()
+        bundle = self.d / "bundle"
+        code, out = run("bundle-audio", "--root", self.root, "--out", bundle)
+        self.assertNotEqual(code, 0)
+        self.assertIn("score", out)
+        self.assertIn("--dry", out)
+        self.assertFalse(bundle.exists())
+        self.assertFalse((self.root / "maison").exists())
+
+    def test_bundle_audio_refuses_missing_chapter_score(self):
+        self.imported()
+        scores = self.scores()
+        (scores / "u-2.wav").unlink()
+        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "bundle",
+                        "--score-dir", scores)
+        self.assertNotEqual(code, 0)
+        self.assertIn("u-2", out)
+        self.assertFalse((self.d / "bundle").exists())
+
+    def test_bundle_audio_dry_is_recorded(self):
+        self.imported()
+        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "bundle", "--dry")
+        self.assertEqual(code, 0, out)
+        timing = json.loads((self.d / "bundle" / "timing.json").read_text())
+        self.assertTrue(all(u["mastered_with"] is None for u in timing["provenance"]["units"].values()))
+        ev = json.loads((self.root / "maison" / "audiovisual-clearance-evidence.draft.json").read_text())
+        self.assertIs(ev["dry_narration"], True)
+        self.assertIsNone(ev["music"])
+
     def test_bundle_audio_before_narration_import_stops_and_writes_nothing(self):
         self.build_narration()
         bundle = self.d / "bundle"
-        code, out = run("bundle-audio", "--root", self.root, "--out", bundle)
+        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")
         self.assertNotEqual(code, 0)
         self.assertIn("narration not imported", out)
         self.assertFalse(bundle.exists())
         self.assertFalse((self.root / "maison").exists())
 
     def test_bundle_audio_writes_measured_timing_with_provenance(self):
-        job_id, job_dir = self.build_narration()
-        folder, units = self.fake_colab_outputs(job_id, job_dir)
-        code, out = run("import", job_id, "--root", self.root, "--from", folder, "--units", 1.5)
-        self.assertEqual(code, 0, out)
+        job_id, folder, units = self.imported()
+        scores = self.scores()
         bundle = self.d / "bundle"
-        code, out = run("bundle-audio", "--root", self.root, "--out", bundle)
+        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--score-dir", scores)
         self.assertEqual(code, 0, out)
         self.assertEqual(sorted(p.name for p in bundle.iterdir()),
                          ["timing.json", "unit-001.mp3", "unit-002.mp3"])
@@ -205,6 +257,18 @@ class CliTests(unittest.TestCase):
         self.assertEqual(evidence["owner_approval"], None)
         self.assertIn("DRAFT", evidence["status"])
         self.assertIn("attach_audiovisual_audio stage", out)
+        # R10: scored by default, mastered to the film target
+        for unit_id, row in prov["units"].items():
+            self.assertEqual(row["mastered_with"], "eav.mix.duck_and_master")
+            self.assertEqual(row["score_sha256"], hashlib.sha256(
+                (scores / f"{unit_id}.wav").read_bytes()).hexdigest())
+        for row in timing["units"]:
+            lufs = mix.measure(bundle / row["mp3"])["lufs"]
+            self.assertAlmostEqual(lufs, -16.0, delta=1.0)
+        self.assertIs(evidence["dry_narration"], False)
+        self.assertEqual(sorted(evidence["music"]["score_sha256"].values()), sorted(
+            hashlib.sha256((scores / f"{u['unit_id']}.wav").read_bytes()).hexdigest()
+            for u in SOURCE["units"]))
 
 
 class SentenceSanity(unittest.TestCase):

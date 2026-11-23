@@ -10,7 +10,7 @@
   python3 -m eav.cli reel <n> --root <dir> [--script <script.json>] [--score <wav>] [--hashtags ...]
   python3 -m eav.cli qc --root <dir>
   python3 -m eav.cli status --root <dir>
-  python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir> [--score-dir <dir>]
+  python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir> (--score-dir <dir> | --dry)
 
 Every command ends with "Next: ..." -- the one action the owner (or Claude) takes next.
 The CLI wraps the eav modules; it spends nothing, runs no GPU work, never marks legal clearance
@@ -135,7 +135,8 @@ def _story_preset(language: str) -> dict:
     profile = STORY_PROFILE[language]
     preset = _json(ROSTER)["profiles"][profile]["presets"]["story"]
     return {"profile": profile, "preset_key": preset["preset_key"],
-            "description": preset["description"], "roster_sha256": sha256_file(ROSTER)}
+            "description": preset["description"], "roster_sha256": sha256_file(ROSTER),
+            **{k: preset[k] for k in colab_jobs.GENERATION_KEYS if k in preset}}
 
 
 def _remaining(ledger, title, month) -> float:
@@ -228,7 +229,7 @@ def next_action(root) -> str:
     if not _artifacts(rec, "evidence_draft"):
         return ("Owner reviews the first package (opening, every join, climax, full ending); that review "
                 f"is the listening assessment. Then for Maison audio: {PROG} bundle-audio {r} --out "
-                f"{root / 'maison' / 'bundle'}. Maison video stays held (Stream cost not approved). "
+                f"{root / 'maison' / 'bundle'} --score-dir <one score bed per chapter>. Maison video stays held (Stream cost not approved). "
                 "Social posting only to destinations the owner names (references/publishing.md).")
     return (f"Complete and owner-approve {root / 'maison' / EVIDENCE_DRAFT}, save it under docs/evidence/, "
             "then on the server: python manage.py attach_audiovisual_audio stage <slug> --publisher "
@@ -319,7 +320,9 @@ def _job_spec(rec, args, kind, target):
             if not 1 <= args.film <= len(films):
                 raise Stop(f"film {args.film} is not in the plan ({len(films)} films)", f"{PROG} status --root {rec.root}")
             todo = films[args.film - 1]["scenes"]
-        spec = {"scenes": todo, "preset": {"description": plan["voice"]["description"]},
+        preset = {k: v for k, v in plan["voice"].items()
+                  if k == "description" or k in colab_jobs.GENERATION_KEYS}
+        spec = {"scenes": todo, "preset": preset,
                 "language": lang, "clause": args.clause}
         items = sum(len(voice_units(s, spec["preset"], args.clause, lang)) for s in todo)
     else:
@@ -568,6 +571,19 @@ def cmd_bundle_audio(args):
     for i, f in enumerate(plan["plan"]["films"], 1):
         for sc in f["scenes"]:
             scene_film[sc["scene_id"]] = (i, sc)
+    if args.dry and args.score_dir:
+        raise Stop("--dry and --score-dir exclude each other", "Choose one")
+    if not args.dry:
+        if not args.score_dir:
+            raise Stop("Maison audio carries narration with its background score: pass --score-dir "
+                       "<dir> holding <unit_id>.wav per chapter (from `earnalism-audiobook-score`), or "
+                       "--dry for narration only (recorded in the evidence draft)",
+                       "Prepare one score bed per chapter, then rerun bundle-audio --score-dir <dir>")
+        missing = [u["unit_id"] for u in src["units"]
+                   if not (Path(args.score_dir) / f"{u['unit_id']}.wav").is_file()]
+        if missing:
+            raise Stop(f"no chapter score for unit(s) {', '.join(missing)} in {args.score_dir}",
+                       "Add <unit_id>.wav for every chapter, or rerun with --dry")
     created = not bundle.exists()
     try:
         return _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args)
@@ -613,14 +629,22 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
             chapter = td / f"unit-{n:03d}.wav"
             timing, prov = _measured_track(units, rec.root / "narration" / job["job_id"], chapter,
                                            job["job_id"])
-            master, mastered = chapter, None
-            if args.score_dir and (Path(args.score_dir) / f"{unit['unit_id']}.wav").is_file():
+            master, mastered, score_sha = chapter, None, None
+            if not args.dry:  # R10: narration + best-fit score, ducked, -16 LUFS
+                bed = Path(args.score_dir) / f"{unit['unit_id']}.wav"
+                score_sha = sha256_file(bed)
+                cut = td / f"unit-{n:03d}-score.wav"
+                _ff("-i", bed, "-t", f"{timing[-1]['end']:.3f}", "-ar", 48000, "-ac", 2, cut)
                 master = td / f"unit-{n:03d}-mix.wav"
-                mix.duck_and_master(chapter, Path(args.score_dir) / f"{unit['unit_id']}.wav", master,
-                                    FILM_LUFS)
+                try:
+                    mix.duck_and_master(chapter, cut, master, FILM_LUFS)
+                except ValueError as e:
+                    raise Stop(f"QC failure: {unit['unit_id']}: {e}",
+                               "Re-balance that chapter's score bed and rerun", code=5)
                 mastered = "eav.mix.duck_and_master"
             mp3 = bundle / f"unit-{n:03d}.mp3"
-            _ff("-i", master, "-ar", 48000, "-ac", 1, "-c:a", "libmp3lame", "-b:a", "96k", mp3)
+            channels = 1 if args.dry else 2  # keep the stereo master's loudness intact
+            _ff("-i", master, "-ar", 48000, "-ac", channels, "-c:a", "libmp3lame", "-b:a", "96k", mp3)
             dur_ms = round(film._duration(mp3) * 1000)
             segs = []
             for p in unit["paragraphs"]:
@@ -636,8 +660,9 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
             prov_units[unit["unit_id"]] = {
                 "narration_job_id": job["job_id"], "wav_sha256": prov["wav_sha256"],
                 "chapter_wav_sha256": prov["track_sha256"], "mastered_with": mastered,
+                "score_sha256": score_sha,
                 "mp3_sha256": sha256_file(mp3), "mp3_duration_ms": dur_ms,
-                "encoder": "ffmpeg libmp3lame 96 kbps CBR mono 48 kHz"}
+                "encoder": f"ffmpeg libmp3lame 96 kbps CBR {'mono' if args.dry else 'stereo'} 48 kHz"}
     ids = sorted(job_ids)
     provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
                   "narration_job_id": ids[0] if len(ids) == 1 else ids, "units": prov_units}
@@ -658,7 +683,11 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
         "generators": [{"model": colab_jobs.NARRATION_REPO, "revision": colab_jobs.NARRATION_REVISION,
                         "licence": "Apache-2.0", "job_ids": ids,
                         "voice": plan["voice"]["preset_key"]}],
-        "music": "per-unit score supplied; record its source and licence" if args.score_dir else None,
+        "dry_narration": bool(args.dry),
+        "music": None if args.dry else {
+            "route": "per-chapter score bed, ducked under speech (eav.mix.duck_and_master, -16 LUFS)",
+            "score_sha256": {u: v["score_sha256"] for u, v in prov_units.items()},
+            "source_and_licence": None},
         "owner_approval": None})
     rec.add_artifact("evidence_draft", draft, {"bundle": str(bundle), "audio_sha256": audio})
     rec.event("bundle_audio", "drafted", {"bundle": str(bundle), "audio_sha256": audio,
@@ -734,7 +763,8 @@ def _parser():
     add("status")
     s = add("bundle-audio")
     s.add_argument("--out", required=True)
-    s.add_argument("--score-dir")
+    s.add_argument("--score-dir", help="<unit_id>.wav score bed per chapter (default route)")
+    s.add_argument("--dry", action="store_true", help="narration only; recorded in the evidence draft")
     return p
 
 

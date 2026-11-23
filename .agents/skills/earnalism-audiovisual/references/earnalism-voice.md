@@ -13,7 +13,9 @@ plus a direction method**, not a new voice.
 The roster is `skills/earnalism-audiobook-go-live/references/final-voice-roster.json`
 (Indic Parler-TTS `ai4bharat/indic-parler-tts` at revision
 `7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca`). `eav.cli plan` copies the preset
-description into `plan.json`; `job narration` sends it unchanged. Explicit owner routes
+description into `plan.json`; `job narration` sends it unchanged, together with the preset's pinned generation
+settings (e.g. `temperature: 0.91` for both story presets), which reach Parler's
+`generate` call and are recorded in the job's build manifest and output model info. Explicit owner routes
 (e.g. `en_raghav` for an English male narrator) still apply; ask, never substitute.
 
 ## The performance we want
@@ -29,9 +31,11 @@ shifts of pace and intensity, never by character impersonation.
    "slightly slower, hushed, for the reveal". The CLI rejects longer clauses.
 2. **Sentence grouping.** One voice unit per sentence (`eav.voice.voice_units`); the
    scene plan keeps paragraphs and turns together.
-3. **Pauses in the edit.** 400 ms between sentences, 800 ms at a paragraph end,
-   1200 ms after a heading. A longer held breath before a turn is added in the edit,
-   never as spoken text.
+3. **Pauses in the edit, once.** Colab writes dry per-unit WAVs with no added silence;
+   `eav.film.narration_track` is the only place pauses are inserted, so measured unit ends
+   are speech ends. 400 ms between sentences, 800 ms at a paragraph end,
+   1200 ms after a heading. Silence is never added anywhere else, and a held breath is
+   never written as spoken text.
 4. **Context.** Read the whole work first and keep the context map from
    `earnalism-audiobook-go-live/references/narrative-performance.md`: who speaks, what
    turns, where the reveal lands, how it ends. A suspenseful word does not make a calm

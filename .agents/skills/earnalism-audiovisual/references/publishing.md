@@ -12,9 +12,13 @@ Root/Integration owns provider mutations; this skill prepares and stages.
 
 ### Steps
 
-1. `python3 -m eav.cli bundle-audio --root <root> --out <bundle dir>` writes one 96 kbps
-   MP3 per Maison unit and `timing.json` (paragraph segments measured by
-   `eav.film.narration_track`, plus a `provenance` block). It also writes
+1. `python3 -m eav.cli bundle-audio --root <root> --out <bundle dir> --score-dir <dir>`
+   writes one 96 kbps MP3 per Maison unit: the narration with its best-fit background
+   score (`<unit_id>.wav` per chapter from `earnalism-audiobook-score`), ducked under
+   speech and mastered to −16 LUFS by `eav.mix.duck_and_master`. It refuses without a
+   score; `--dry` (narration only) is allowed only when the owner asks for it and is
+   recorded in the evidence draft. It also writes `timing.json` (paragraph segments
+   measured by `eav.film.narration_track`, plus a `provenance` block). It also writes
    `<root>/maison/audiovisual-clearance-evidence.draft.json`
    (schema `earnalism.audiovisual-clearance-evidence.v1`) with `territories: []` and
    `owner_approval: null`, so `stage` refuses it as written.

@@ -138,6 +138,31 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template) -> 
     return (json.dumps(nb, indent=1, ensure_ascii=False) + "\n").encode("utf-8")
 
 
+# Pinned Parler generation settings a roster preset may carry (R9). Anything else in the
+# preset (keys, hashes, status) is metadata and never reaches generate().
+GENERATION_KEYS = ("temperature", "top_p", "top_k", "do_sample", "repetition_penalty",
+                   "max_new_tokens", "min_new_tokens")
+
+
+def _generation(preset: dict) -> dict:
+    out = {}
+    for k in GENERATION_KEYS:
+        if k not in preset:
+            continue
+        v = preset[k]
+        if k == "do_sample":
+            ok = isinstance(v, bool)
+        elif k in ("top_k", "max_new_tokens", "min_new_tokens"):
+            ok = isinstance(v, int) and not isinstance(v, bool) and v > 0
+        else:
+            ok = (isinstance(v, (int, float)) and not isinstance(v, bool) and v == v
+                  and 0 < v <= (1 if k == "top_p" else 5))
+        if not ok:
+            raise ValueError(f"preset generation setting {k!r} invalid: {v!r}")
+        out[k] = v
+    return out
+
+
 def _compute(kind: str, spec: dict) -> dict:
     """Forecast inputs must be measured by the caller; nothing is defaulted
     except takes (1), so a missing block can never under-reserve."""
@@ -168,7 +193,8 @@ def _plan(kind: str, record, spec: dict) -> dict:
                                  spec.get("language", "en"))
         if not units:
             raise ValueError("no voice units")
-        return {"payload": {"units": units}, "repo": NARRATION_REPO,
+        return {"payload": {"units": units, "generation": _generation(spec["preset"])},
+                "repo": NARRATION_REPO,
                 "revision": NARRATION_REVISION, "steps": 1,
                 "compute": _compute(kind, spec)}
     if kind == "stills":
@@ -295,6 +321,8 @@ def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path) -> dict:
                 "model": {"repo": plan["repo"], "revision": plan["revision"]},
                 "drive_dir": f"{DRIVE_ROOT}/{title}/{job_id}",
                 "authority_created": False}
+    if "generation" in plan["payload"]:
+        manifest["generation"] = plan["payload"]["generation"]
     job_dir.mkdir(parents=True)
     paths = {"notebook": job_dir / f"{kind}.ipynb", "inputs_zip": job_dir / "inputs.zip",
              "manifest": job_dir / "build-manifest.json"}

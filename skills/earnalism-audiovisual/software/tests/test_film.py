@@ -53,6 +53,18 @@ class FilmTests(unittest.TestCase):
         self.assertAlmostEqual(t[1]["start"], 1.9, delta=0.02)
         self.assertAlmostEqual(m.samples(self.d / "n.wav").size / 48000, t[-1]["end"], delta=0.05)
 
+    def test_pause_inserted_once_total_is_speech_plus_pauses(self):
+        """R8: narration_track is the only place pauses are added; ends are speech ends."""
+        durs = [1.2, 0.7, 0.9]
+        for u, d in zip(UNITS, durs):
+            m.sine_wav(self.wavs / f"{u['unit_key']}.wav", d)
+        t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
+        for row, d in zip(t, durs):
+            self.assertAlmostEqual(row["end"] - row["start"], d, delta=0.02)
+        total = m.samples(self.d / "n.wav").size / 48000
+        self.assertAlmostEqual(total, sum(durs) + 0.4 + 0.8, delta=0.03)  # no pause after last
+        self.assertAlmostEqual(t[-1]["end"], total, delta=0.03)
+
     def test_subtitles_cover_timing(self):
         t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
         srt = film.subtitles(t, UNITS)

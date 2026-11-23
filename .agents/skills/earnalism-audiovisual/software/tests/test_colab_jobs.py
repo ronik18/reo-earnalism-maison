@@ -71,6 +71,33 @@ class ColabJobTests(unittest.TestCase):
         for u in job["units"]:
             self.assertTrue(u["description"].startswith(PRESET["description"]))
 
+    def test_narration_cell_writes_dry_units_without_pause(self):
+        """R8: Colab writes dry per-unit WAVs; film.narration_track inserts every pause."""
+        cell = (colab_jobs._TEMPLATES / "narration_cell.py.txt").read_text()
+        self.assertNotIn("pause_after_ms", cell)
+        self.assertNotIn("np.zeros", cell)
+        self.assertNotIn("concatenate", cell)
+
+    def test_narration_job_carries_preset_generation_settings(self):
+        """R9: the roster preset's temperature reaches job.json, Parler's generate and the manifest."""
+        r = self.build("narration", {"scenes": [SCENE], "compute": COMPUTE,
+                                     "preset": {**PRESET, "temperature": 0.91}})
+        with zipfile.ZipFile(r["inputs_zip"]) as z:
+            job = json.loads(z.read("job.json"))
+        self.assertEqual(job["generation"], {"temperature": 0.91})
+        manifest = json.loads(Path(r["manifest"]).read_text())
+        self.assertEqual(manifest["generation"], {"temperature": 0.91})
+        src = "".join("".join(c["source"]) for c in self.nb(r)["cells"])
+        self.assertIn('JOB.get("generation"', src)
+        self.assertIn("**GENERATION", src)
+        self.assertIn('"generation": GENERATION', src)
+
+    def test_narration_generation_settings_validated(self):
+        for bad in ({"temperature": 0}, {"temperature": "hot"}, {"temperature": float("nan")}):
+            with self.assertRaises(ValueError):
+                self.build("narration", {"scenes": [SCENE], "compute": COMPUTE,
+                                         "preset": {**PRESET, **bad}})
+
     def test_stills_and_music_pins(self):
         s = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}], "compute": COMPUTE})
         src = "".join("".join(c["source"]) for c in self.nb(s)["cells"])

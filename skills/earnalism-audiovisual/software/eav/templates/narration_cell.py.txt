@@ -1,10 +1,11 @@
-# Narration: one WAV per voice unit with Indic Parler-TTS (revision pinned at build time).
+# Narration: one DRY WAV per voice unit with Indic Parler-TTS (revision pinned at build time).
+# No pause is written here: eav.film.narration_track inserts every pause exactly once (R8).
 if RUN is not True:
     raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
 import subprocess, sys
 subprocess.run([sys.executable, "-m", "pip", "install", "-q",
                 "git+https://github.com/huggingface/parler-tts.git", "soundfile"], check=True)
-import numpy as np, soundfile as sf, torch
+import soundfile as sf, torch
 from parler_tts import ParlerTTSForConditionalGeneration
 from transformers import AutoTokenizer
 
@@ -14,7 +15,10 @@ model = ParlerTTSForConditionalGeneration.from_pretrained(
 tokenizer = AutoTokenizer.from_pretrained(MODEL_REPO, revision=MODEL_REVISION)
 desc_tokenizer = AutoTokenizer.from_pretrained(
     model.config.text_encoder._name_or_path)
-MODEL_INFO = {"repo": MODEL_REPO, "revision": MODEL_REVISION}
+GENERATION = dict(JOB.get("generation", {}))  # pinned roster preset settings (R9)
+if GENERATION and "do_sample" not in GENERATION:
+    GENERATION["do_sample"] = True  # a temperature only applies when sampling
+MODEL_INFO = {"repo": MODEL_REPO, "revision": MODEL_REVISION, "generation": GENERATION}
 
 rate = model.config.sampling_rate
 for unit in JOB["units"]:
@@ -22,8 +26,7 @@ for unit in JOB["units"]:
     p = tokenizer(unit["text"], return_tensors="pt").to(device)
     audio = model.generate(input_ids=d.input_ids, attention_mask=d.attention_mask,
                            prompt_input_ids=p.input_ids,
-                           prompt_attention_mask=p.attention_mask)
+                           prompt_attention_mask=p.attention_mask, **GENERATION)
     wav = audio.cpu().numpy().squeeze().astype("float32")
-    pause = np.zeros(int(rate * unit["pause_after_ms"] / 1000), dtype="float32")
-    sf.write(str(OUT_DIR / (unit["unit_key"] + ".wav")), np.concatenate([wav, pause]), rate)
+    sf.write(str(OUT_DIR / (unit["unit_key"] + ".wav")), wav, rate)
     print("wrote", unit["unit_key"])
