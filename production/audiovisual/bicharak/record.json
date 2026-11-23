@@ -3061,6 +3061,34 @@
       },
       "path": "narration/narration-film-01-r4/narration.ipynb",
       "sha256": "0adb4717b1d7b8d9569c8890176fb3a95876e5c0779c7d829c95c0dac130670e"
+    },
+    {
+      "bytes": 13501,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 2.540861111111111,
+        "inputs_zip": "jobs/stills-film-01-r5/inputs.zip",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r5/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r5/stills.ipynb",
+      "sha256": "b9153cb8c727128046437faa68c6c6fc3b2bcfa8ceecc27a3669e9f76b2afdb2"
+    },
+    {
+      "bytes": 14973,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.0411333333333332,
+        "inputs_zip": "jobs/music-film-01-r4/inputs.zip",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "manifest": "jobs/music-film-01-r4/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/music-film-01-r4/music.ipynb",
+      "sha256": "2562eb18ad34d046e652537819a56a52d179fd3af6e31d0b82499780d6a7760f"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -3835,6 +3863,130 @@
         "units": 0.5
       },
       "result": "closed",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T20:27:28.303442+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r4",
+        "reason": "superseded before any run: model access preflight and Python 3.13 install fixes",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T20:27:28.311000+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r4",
+        "reason": "superseded before any run: model access preflight and Python 3.13 install fixes"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T20:27:28.502298+00:00",
+      "detail": {
+        "job_id": "music-film-01-r3",
+        "reason": "superseded before any run: model access preflight and Python 3.13 install fixes",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T20:27:28.507728+00:00",
+      "detail": {
+        "job_id": "music-film-01-r3",
+        "reason": "superseded before any run: model access preflight and Python 3.13 install fixes"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T20:27:28.671247+00:00",
+      "detail": {
+        "forecast_units": 2.540861111111111,
+        "job_id": "stills-film-01-r5",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T20:27:28.675064+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r5",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-23T20:27:28.849810+00:00",
+      "detail": {
+        "forecast_units": 1.0411333333333332,
+        "job_id": "music-film-01-r4",
+        "kind": "music"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T20:27:28.855360+00:00",
+      "detail": {
+        "job_id": "music-film-01-r4",
+        "kind": "music",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-23T20:27:39.462267+00:00",
+      "detail": {
+        "bytes": 50662,
+        "job_id": "stills-film-01-r5",
+        "key": "exports/colab-exchange/bicharak/stills-film-01-r5/inputs.zip",
+        "sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T20:27:40.593871+00:00",
+      "detail": {
+        "bytes": 1837,
+        "job_id": "music-film-01-r4",
+        "key": "exports/colab-exchange/bicharak/music-film-01-r4/inputs.zip",
+        "sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T20:28:25.583417+00:00",
+      "detail": {
+        "expires_at": "2026-11-24T02:27:53.815167+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-film-01-r5/inputs.zip",
+        "inputs_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r5/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T20:28:26.453327+00:00",
+      "detail": {
+        "expires_at": "2026-11-24T02:27:54+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/music-film-01-r4/inputs.zip",
+        "inputs_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "outputs_key": "exports/colab-exchange/bicharak/music-film-01-r4/outputs.tar"
+      },
+      "result": "exchange_staged",
       "stage": "job"
     }
   ],
