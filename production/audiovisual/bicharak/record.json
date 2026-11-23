@@ -652,6 +652,18 @@
       },
       "result": "exchange_uploaded",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-23T17:47:17.883158+00:00",
+      "detail": {
+        "expires_at": "2026-11-23T23:46:37.580723+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/narration-film-01-r3/inputs.zip",
+        "inputs_sha256": "16068174fa99dba5495bb39fde1f2cab90ed9a6df346af040facb5e0051cb981",
+        "job_id": "narration-film-01-r3",
+        "outputs_key": "exports/colab-exchange/bicharak/narration-film-01-r3/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
