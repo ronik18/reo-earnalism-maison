@@ -70,6 +70,26 @@ class BudgetTests(unittest.TestCase):
         tiny = forecast(job(takes=1, items=7), RATES)
         self.assertIsNone(fit_reel_job(job(), RATES, tiny))
 
+    def test_reserve_rejects_nan_inf_negative(self):
+        for bad in (float("nan"), float("inf"), -1, -0.5, "5", True):
+            with self.assertRaises(ValueError):
+                self.ledger.reserve("a", "2026-11", bad, "jx")
+        self.assertEqual(self.ledger.spent(None, "2026-11"), 0)
+
+    def test_settle_rejects_nan_inf_negative(self):
+        self.ledger.reserve("a", "2026-11", 10, "j1")
+        for bad in (float("nan"), float("inf"), -1, "5"):
+            with self.assertRaises(ValueError):
+                self.ledger.settle("j1", bad)
+        self.assertEqual(self.ledger.spent("a", "2026-11"), 10)
+
+    def test_settle_twice_rejected(self):
+        self.ledger.reserve("a", "2026-11", 10, "j1")
+        self.ledger.settle("j1", 4)
+        with self.assertRaises(ValueError):
+            self.ledger.settle("j1", 9)
+        self.assertEqual(self.ledger.spent("a", "2026-11"), 4)
+
 
 if __name__ == "__main__":
     unittest.main()

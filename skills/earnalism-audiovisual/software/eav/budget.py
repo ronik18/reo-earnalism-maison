@@ -2,8 +2,10 @@
 
 Allowance: 60 units per title and 100 units per calendar month. Reservations
 count as spent until settled with the actual units.
+The ledger assumes one writer process at a time.
 """
 import json
+import math
 import os
 import tempfile
 from pathlib import Path
@@ -39,6 +41,13 @@ def fit_reel_job(job: dict, rates: dict, remaining_units: float):
             return None
 
 
+def _check_units(units) -> float:
+    if isinstance(units, bool) or not isinstance(units, (int, float)) \
+            or not math.isfinite(units) or units < 0:
+        raise ValueError(f"units must be a finite number >= 0, got {units!r}")
+    return units
+
+
 class Ledger:
     def __init__(self, path: Path):
         self.path = Path(path)
@@ -68,6 +77,7 @@ class Ledger:
         return self._sum(self._load(), title, month)
 
     def reserve(self, title, month: str, units: float, job_id: str) -> None:
+        _check_units(units)
         entries = self._load()
         if any(e["job_id"] == job_id for e in entries):
             raise ValueError(f"duplicate job_id: {job_id!r}")
@@ -80,9 +90,12 @@ class Ledger:
         self._save(entries)
 
     def settle(self, job_id: str, actual_units: float) -> None:
+        _check_units(actual_units)
         entries = self._load()
         for e in entries:
             if e["job_id"] == job_id:
+                if e["state"] == "settled":
+                    raise ValueError(f"job already settled: {job_id!r}")
                 e["units"] = actual_units
                 e["state"] = "settled"
                 self._save(entries)
