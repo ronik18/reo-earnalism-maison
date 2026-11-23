@@ -41,6 +41,9 @@ reel clips ~20–40 CU (the largest). About 30–60 CU per title, two titles a m
   months' spend does not count against it.
 - The month is always the current UTC month; there is no flag to choose another one.
 - Reservations count as spent until settled. One writer at a time.
+- A built job that will never run (replaced before its Colab run) is released only with
+  `supersede <job_id> --root <root> --reason "..."`: it settles the reservation at 0 and
+  records `job/superseded`; imported jobs and settled entries are refused.
 
 ## Over a cap (exit 3)
 

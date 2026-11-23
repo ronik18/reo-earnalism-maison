@@ -6,6 +6,7 @@
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
                          [--archive-sha256 <sha>]           (reel_clips)
+  python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
   python3 -m eav.cli reel <n> --root <dir> [--script <script.json>] [--score <wav> --score-route ...]
@@ -139,6 +140,8 @@ def _jobs(rec) -> list:
                if e["stage"] == "cli" and e["result"] == "job_target"}
     imported = {e["detail"]["job_id"] for e in rec.data["events"]
                 if e["stage"] == "import" and e["result"] == "accepted"}
+    superseded = {e["detail"]["job_id"] for e in rec.data["events"]
+                  if e["stage"] == "job" and e["result"] == "superseded"}
     out = []
     for a in rec.data["artifacts"]:
         if a["kind"] != "colab_job":
@@ -147,13 +150,14 @@ def _jobs(rec) -> list:
         out.append({"job_id": m["job_id"], "kind": m["job_kind"], "target": targets.get(m["job_id"]),
                     "notebook": rec.root / a["path"], "inputs_zip": rec.root / m["inputs_zip"],
                     "manifest": rec.root / m["manifest"], "forecast_units": m["forecast_units"],
-                    "imported": m["job_id"] in imported})
+                    "imported": m["job_id"] in imported,
+                    "superseded": m["job_id"] in superseded})
     return out
 
 
 def _latest_job(rec, kind, target, imported=True):
     found = [j for j in _jobs(rec) if j["kind"] == kind and j["target"] == target
-             and (j["imported"] or not imported)]
+             and not j["superseded"] and (j["imported"] or not imported)]
     return found[-1] if found else None
 
 
@@ -225,7 +229,7 @@ def next_action(root) -> str:
     rec = Record.load(root)
     if not (root / "plan.json").is_file():
         return f"{PROG} plan --root {root}"
-    pending = [j for j in _jobs(rec) if not j["imported"]]
+    pending = [j for j in _jobs(rec) if not j["imported"] and not j["superseded"]]
     if pending:
         return _colab_action(rec, pending[0])
     r = f"--root {root}"
@@ -460,6 +464,31 @@ def cmd_import(args):
                    code=4)
     print(f"Imported {len(arts)} verified file(s) from {job['kind']} job {args.job_id}; "
           f"settled {args.units:g} CU.")
+
+
+def cmd_supersede(args):
+    """Release a never-run job: settle its reservation at 0 and record job/superseded (R19)."""
+    rec = _record(args.root)
+    job = next((j for j in _jobs(rec) if j["job_id"] == args.job_id), None)
+    if job is None:
+        raise Stop(f"unknown job {args.job_id}", f"{PROG} status --root {rec.root}")
+    if job["imported"]:
+        raise Stop(f"job {args.job_id} was imported; its outputs and spend stay on record",
+                   f"{PROG} status --root {rec.root}")
+    if job["superseded"]:
+        raise Stop(f"job {args.job_id} is already superseded", f"{PROG} status --root {rec.root}")
+    if not args.reason.strip():
+        raise Stop("a reason is required", "Pass --reason \"<why it never ran>\"")
+    ledger = _ledger(rec, args)
+    entry = next((e for e in ledger._load() if e["job_id"] == args.job_id), None)
+    if entry is None or entry["state"] != "reserved":
+        raise Stop(f"job {args.job_id} has no open reservation on the ledger "
+                   f"({'missing' if entry is None else entry['state']}); nothing to release",
+                   f"{PROG} status --root {rec.root}")
+    ledger.settle(args.job_id, 0)
+    rec.event("job", "superseded", {"job_id": args.job_id, "reason": args.reason})
+    print(f"Superseded {job['kind']} job {args.job_id}: reservation of {entry['units']:.2f} CU "
+          "released (settled at 0). Do not run its notebook.")
 
 
 def cmd_film(args):
@@ -782,12 +811,14 @@ def cmd_status(args):
               f"{budget.TITLE_CAP:g}), {ledger.spent(None, month):.2f} CU this month (all titles), "
               f"{_remaining(ledger, title, month):.2f} CU remaining ({month}).")
         for j in _jobs(rec):
-            print(f"  {j['job_id']} {j['kind']} {j['target']}: "
-                  f"{'imported' if j['imported'] else 'waiting for Colab'} "
+            state = ("imported" if j["imported"] else "superseded" if j["superseded"]
+                     else "waiting for Colab")
+            print(f"  {j['job_id']} {j['kind']} {j['target']}: {state} "
                   f"(forecast {j['forecast_units']:.2f} CU)")
 
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
+            "supersede": cmd_supersede,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio}
 
@@ -819,6 +850,9 @@ def _parser():
     s.add_argument("--from", dest="source", required=True)
     s.add_argument("--units", type=float, required=True)
     s.add_argument("--archive-sha256")
+    s = add("supersede")
+    s.add_argument("job_id")
+    s.add_argument("--reason", required=True)
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)

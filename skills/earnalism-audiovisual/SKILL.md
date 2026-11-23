@@ -25,7 +25,8 @@ cd skills/earnalism-audiovisual/software
 python3 -m eav.cli status --root <title root>      # prints the next owner action
 ```
 
-Commands: `init`, `plan`, `job`, `import`, `film`, `reel`, `qc`, `status`, `bundle-audio`
+Commands: `init`, `plan`, `job`, `import`, `supersede`, `film`, `reel`, `qc`, `status`,
+`bundle-audio`
 (usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
 inputs to get past it.

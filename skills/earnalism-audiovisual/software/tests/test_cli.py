@@ -152,6 +152,38 @@ class RoundTwo:
             self.assertIn("Next:", out)
             self.assertIn("init", out)
 
+    def test_supersede_releases_reservation_and_is_never_next(self):
+        """R19: a never-run job can be superseded; it is shown as such and never offered."""
+        job_id, _ = self.build_narration()
+        code, out = run("supersede", job_id, "--root", self.root, "--reason", "replaced before any run")
+        self.assertEqual(code, 0, out)
+        entry = next(e for e in json.loads(self.ledger.read_text()) if e["job_id"] == job_id)
+        self.assertEqual((entry["state"], entry["units"]), ("settled", 0))
+        rec = Record.load(self.root)
+        ev = [e for e in rec.data["events"] if e["stage"] == "job" and e["result"] == "superseded"]
+        self.assertEqual(ev[-1]["detail"], {"job_id": job_id, "reason": "replaced before any run"})
+        nxt = cli.next_action(self.root)
+        self.assertNotIn(job_id, nxt)
+        self.assertIn("job narration", nxt)
+        code, out = run("status", "--root", self.root)
+        self.assertIn(f"{job_id} narration film-01: superseded", out)
+        self.assertNotIn("waiting for Colab", out)
+        code, out = run("supersede", job_id, "--root", self.root, "--reason", "again")
+        self.assertNotEqual(code, 0)
+
+    def test_supersede_refuses_imported_job(self):
+        job_id, folder, _ = self.imported()
+        before = self.ledger.read_text()
+        code, out = run("supersede", job_id, "--root", self.root, "--reason", "oops")
+        self.assertNotEqual(code, 0)
+        self.assertIn("imported", out)
+        self.assertEqual(self.ledger.read_text(), before)
+
+    def test_supersede_needs_a_reason(self):
+        job_id, _ = self.build_narration()
+        with self.assertRaises(SystemExit):
+            run("supersede", job_id, "--root", self.root)
+
     def test_job_has_no_month_flag(self):
         self.init_and_plan()
         with self.assertRaises(SystemExit):
