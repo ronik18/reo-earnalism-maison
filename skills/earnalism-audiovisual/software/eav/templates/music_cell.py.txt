@@ -2,8 +2,18 @@
 if RUN is not True:
     raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
 import hashlib, subprocess, sys
+# ACE-Step pinned to a commit, installed without its own pins: its requirements.txt pins
+# spacy at 3.8.4, which has no Python 3.13 build (Colab runs 3.13). Same set, spacy relaxed.
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "--no-deps",
+                "git+https://github.com/ace-step/ACE-Step.git@1bee4c9f5b43e30995f8d4d33b3919197ce1bd68"],
+               check=True)
 subprocess.run([sys.executable, "-m", "pip", "install", "-q",
-                "git+https://github.com/ace-step/ACE-Step.git"], check=True)
+                "datasets==3.4.1", "diffusers>=0.33.0", "gradio", "librosa==0.11.0", "loguru==0.7.3",
+                "matplotlib==3.10.1", "numpy", "pypinyin==0.53.0", "pytorch_lightning==2.5.1",
+                "soundfile==0.13.1", "torch", "torchaudio", "torchvision", "tqdm", "transformers==4.50.0",
+                "py3langid==0.3.0", "hangul-romanize==0.1.0", "num2words==0.5.14", "spacy>=3.8.5,<3.9",
+                "accelerate==1.6.0", "cutlet", "fugashi[unidic-lite]", "click", "peft", "tensorboard",
+                "tensorboardX"], check=True)
 from huggingface_hub import HfApi, snapshot_download
 
 revision = HfApi().model_info(MODEL_REPO).sha

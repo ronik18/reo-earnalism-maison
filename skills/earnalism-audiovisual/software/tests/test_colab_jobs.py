@@ -497,3 +497,89 @@ class ExchangeNotebookTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MusicInstallTests(unittest.TestCase):
+    """ACE-Step pins spacy==3.8.4, which has no Python 3.13 build (Colab runs 3.13 since 2026)."""
+
+    def test_music_installs_pinned_ace_step_without_its_unbuildable_pins(self):
+        cell = (colab_jobs._TEMPLATES / "music_cell.py.txt").read_text()
+        self.assertIn('"--no-deps"', cell)
+        self.assertIn("ACE-Step.git@1bee4c9f5b43e30995f8d4d33b3919197ce1bd68", cell)
+        self.assertIn('"spacy>=3.8.5,<3.9"', cell)
+        self.assertNotIn("spacy==3.8.4", cell)
+        self.assertIn('"transformers==4.50.0"', cell)
+        # the dependencies are installed before the package is imported
+        self.assertLess(cell.index('"spacy>=3.8.5,<3.9"'), cell.index("from acestep"))
+
+
+class AccessPreflightTests(unittest.TestCase):
+    """Colab 2026-11-23: a gated model failed only after the install; check access first."""
+    setUp, build, nb = ColabJobTests.setUp, ColabJobTests.build, ColabJobTests.nb
+    kinds, cells = ColabJobTests.kinds, ColabJobTests.cells
+
+    def access_cell(self, kind):
+        cells = self.cells(self.build(kind, dict(self.kinds())[kind]))
+        index = next(i for i, c in enumerate(cells) if "auth_check(MODEL_REPO" in c)
+        clock = next(i for i, c in enumerate(cells) if "STOP_GUARD" in c)
+        config = next(c for c in cells if "DRIVE_JOB_DIR =" in c)
+        return cells[index], index, clock, config
+
+    def run_access(self, kind, secret=None, secret_error=None, auth_error=None):
+        import sys
+        import types
+        cell, _, _, config = self.access_cell(kind)
+        g = {"RUN": True}
+        exec(config, g)
+        userdata = types.SimpleNamespace()
+
+        def get(name):
+            if secret_error:
+                raise secret_error
+            return secret
+        userdata.get = get
+        colab = types.ModuleType("google.colab")
+        colab.userdata = userdata
+        seen = {}
+
+        class Api:
+            def auth_check(self, repo, token=None):
+                seen["call"] = (repo, token)
+                if auth_error:
+                    raise auth_error
+        hub = types.ModuleType("huggingface_hub")
+        hub.HfApi = Api
+        with patch.dict(sys.modules, {"google": types.ModuleType("google"), "google.colab": colab,
+                                      "huggingface_hub": hub}), patch.dict("os.environ", {}, clear=False):
+            import os
+            os.environ.pop("HF_TOKEN", None)
+            exec(cell, g)
+            return seen, os.environ.get("HF_TOKEN")
+
+    def test_every_notebook_checks_model_access_before_the_clock(self):
+        for kind in ("narration", "stills", "music"):
+            cell, index, clock, _ = self.access_cell(kind)
+            self.assertLess(index, clock, kind)
+            self.assertNotIn("pip", cell, kind)
+
+    def test_gated_model_without_access_stops_with_the_fix(self):
+        with self.assertRaises(RuntimeError) as caught:
+            self.run_access("stills", secret="hf_x", auth_error=PermissionError("403 gated"))
+        message = str(caught.exception)
+        self.assertIn("https://huggingface.co/black-forest-labs/FLUX.1-schnell", message)
+        self.assertIn("HF_TOKEN", message)
+
+    def test_missing_secret_on_a_gated_model_names_the_colab_secret(self):
+        with self.assertRaises(RuntimeError) as caught:
+            self.run_access("narration", secret_error=KeyError("HF_TOKEN"),
+                            auth_error=PermissionError("401"))
+        self.assertIn("key icon", str(caught.exception))
+
+    def test_access_ok_exports_the_token_for_later_downloads(self):
+        seen, token = self.run_access("stills", secret="hf_token_value")
+        self.assertEqual(seen["call"], ("black-forest-labs/FLUX.1-schnell", "hf_token_value"))
+        self.assertEqual(token, "hf_token_value")
+
+    def test_open_model_runs_without_a_secret(self):
+        seen, token = self.run_access("music", secret_error=KeyError("HF_TOKEN"))
+        self.assertEqual(seen["call"], ("ACE-Step/ACE-Step-v1-3.5B", None))

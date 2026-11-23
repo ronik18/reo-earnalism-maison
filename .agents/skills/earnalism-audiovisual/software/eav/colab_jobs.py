@@ -135,6 +135,33 @@ print("inputs verified for", JOB_ID)
 # R25: the hard stop counts from this cell (run right after the config) and equals the forecast
 # seconds the ledger reserved. Items start only while they can still finish before it; a Timer
 # unassigns the runtime at the stop itself, as the Wan notebook does.
+# Model access, checked before the clock starts and before any install (Colab 2026-11-23: a gated
+# model failed only after the install). Gated repos need their terms accepted on Hugging Face and a
+# token in the Colab secret HF_TOKEN; the token is exported so every later download uses it.
+_ACCESS = _GUARD + '''import os
+_token, _secret_problem = None, None
+try:
+    from google.colab import userdata
+    _token = userdata.get("HF_TOKEN") or None
+except Exception as _e:  # no secret, notebook access not granted, or the prompt timed out
+    _secret_problem = type(_e).__name__
+    _token = os.environ.get("HF_TOKEN") or None
+if _token:
+    os.environ["HF_TOKEN"] = _token
+from huggingface_hub import HfApi
+try:
+    HfApi().auth_check(MODEL_REPO, token=_token)
+except Exception as _e:
+    _fix = ("accept the model's terms at https://huggingface.co/" + MODEL_REPO + " with your Hugging "
+            "Face account, put a Read token from https://huggingface.co/settings/tokens in the Colab "
+            "secret HF_TOKEN (key icon in the left sidebar, Notebook access on), then Runtime > "
+            "Restart session and Run all")
+    if _secret_problem:
+        _fix += " (the HF_TOKEN secret could not be read: %s; grant access if Colab asks)" % _secret_problem
+    raise RuntimeError("No access to " + MODEL_REPO + " (" + type(_e).__name__ + "): " + _fix) from None
+print("model access OK:", MODEL_REPO, "(token from HF_TOKEN)" if _token else "(public)")
+'''
+
 _CLOCK = _GUARD + '''import threading, time
 if "JOB_STARTED" not in globals():
     JOB_STARTED = time.time()
@@ -238,7 +265,8 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
              f"it and the runtime is unassigned at it; a stopped run's manifest says INCOMPLETE and "
              f"cannot be imported.\n")
     # The generation cell may call setup that sets OUT_DIR; the verify cell sets JOB/OUT_DIR.
-    parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _CLOCK),
+    parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _ACCESS),
+             ("code", _CLOCK),
              ("code", _VERIFY), ("code", template.read_text(encoding="utf-8")),
              ("code", _MANIFEST)]
     nb = {"nbformat": 4, "nbformat_minor": 5,
