@@ -1,0 +1,33 @@
+{
+  "theme_brief": "বিচারক: one quiet Bengali chamber palette (tanpura, esraj, sitar, bansuri, harmonium). Four 240 s beds, one per quarter of film-01's scenes as `film --cues-job` spreads them (scenes 1-4, 5-9, 10-14, 15-19); looped by eav.mix.arrange_cues if narration runs longer. Ducked 19 dB under speech; silence at turns is the edit's job.",
+  "items": [
+    {
+      "key": "cue-1-kshiroda-night",
+      "prompt": "low tanpura drone with a solo esraj, sorrowful, dark and very sparse, Bengali chamber music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7101,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    },
+    {
+      "key": "cue-2-window-and-judge",
+      "prompt": "soft sitar phrases over gentle harmonium and tanpura, wistful, dreamy, faintly warm, Bengali chamber music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7102,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    },
+    {
+      "key": "cue-3-dream-and-carriage",
+      "prompt": "tender esraj and bansuri flute over tanpura drone, longing, nostalgic, Bengali chamber music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7103,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    },
+    {
+      "key": "cue-4-prison-and-ring",
+      "prompt": "slow low bowed strings with tanpura drone, hushed tension resolving into stillness, Bengali chamber music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7104,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    }
+  ]
+}

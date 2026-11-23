@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 4899,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/narration-film-01-r2",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "7122cbed6de3ca732b0a15dd649349c376ffb9c9481950576070f94b847e3af5",
+  "job_id": "narration-film-01-r2",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "90dd1d06fa61cb17b46cfe6fe1210d3cac663874c83ea31453f53efb30c72ef5",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}

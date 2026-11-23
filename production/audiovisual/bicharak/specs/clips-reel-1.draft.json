@@ -1,0 +1,92 @@
+{
+  "_status": "PROJECTED DRAFT, superseded by the R20 batch flow — not built, nothing reserved. The shot count is set only after the reel narration is imported (reel 1 --plan-shots); each reel_clips batch then holds at most 5 of the planned shot ids (shot-01, ...), with art_dir = the imported reel keyframe stills job. Use these prompts as reference only, re-matched to the planned lines; fill prior_attempt_evidence.run_ids from the retained journals; no compute or wall_seconds keys.",
+  "art_dir": "../stills/stills-reel-1-r2",
+  "prior_attempt_evidence": {
+    "run_ids": [
+      "diwali-wan22-pilot-v2"
+    ],
+    "run_ids_to_copy_from_retained_journals_before_build": [
+      "v3 selective sweets recovery (512x896, 24 steps, completed 495.04 s) — WAN22_COLAB.md 'Verified selective sweets recovery'",
+      "v14 homecoming + native portrait family (completed 479.08 s and 490.90 s) — WAN22_COLAB.md v14 section",
+      "v16 native 512x896 family attempt (completed 470.89 s) — WAN22_COLAB.md v16 section"
+    ],
+    "note": "Only diwali-wan22-pilot-v2 is written literally in WAN22_COLAB.md; no Wan journal is present in this checkout. Do not use diwali-wan22-pilot-v3 (it appears only in tests and the recipe example).",
+    "profile": "l4-balanced-v2",
+    "observed_step_seconds": 11.4,
+    "observed_clip_seconds_512x896": {
+      "v2 homecoming": 476.34,
+      "v3 sweets": 495.04,
+      "v14 homecoming": 479.08,
+      "v14 family": 490.9,
+      "v16 family": 470.89
+    },
+    "observed_clip_seconds_896x512_landscape_v12": [
+      484.71,
+      499.95
+    ],
+    "failed_attempts": "v2 sweets attempt stopped by the original forecast (37.34 s/step warm-up bias), retained as failed",
+    "source": "skills/earnalism-video/software/WAN22_COLAB.md"
+  },
+  "shots": [
+    {
+      "id": "shot-01",
+      "image": "reel-1-shot-01.png",
+      "seed": 8101,
+      "prompt": "Only the hand and the ring in frame: the fingers close slowly around the small gold ring; window light glints across the gold. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-02",
+      "image": "reel-1-shot-02.png",
+      "seed": 8102,
+      "prompt": "The young man's pen moves across the letter; the oil-lamp flame flickers; his spectacles catch the light. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-03",
+      "image": "reel-1-shot-03.png",
+      "seed": 8103,
+      "prompt": "The young widow lifts her white sari hem and steps up into the dark carriage; the carriage lamp sways gently. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-04",
+      "image": "reel-1-shot-04.png",
+      "seed": 8104,
+      "prompt": "The carriage rocks; the young man's hand stays pressed over her mouth; a tear runs down her cheek; her eyes close. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-05",
+      "image": "reel-1-shot-05.png",
+      "seed": 8105,
+      "prompt": "The judge on the bench lowers his gaze and sets down his pen; dust motes drift in the courtroom light. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-06",
+      "image": "reel-1-shot-06.png",
+      "seed": 8106,
+      "prompt": "The guard raises the ring higher out of reach; the woman stretches her arm toward it; the guard's turban end sways. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-07",
+      "image": "reel-1-shot-07.png",
+      "seed": 8107,
+      "prompt": "The woman's joined palms tremble; she lifts her face slowly; a loose strand of hair moves. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-08",
+      "image": "reel-1-shot-08.png",
+      "seed": 8108,
+      "prompt": "The tiny ivory portrait in the ring catches a slow sweep of warm light; the ring turns very slightly in the palm. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-09",
+      "image": "reel-1-shot-09.png",
+      "seed": 8109,
+      "prompt": "The double-exposed faces hold still; the younger face fades very slowly while the older tearful face stays; a tear gathers; soft light breathes across both faces. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-10",
+      "image": "reel-1-shot-10.png",
+      "seed": 8101,
+      "prompt": "Only the hand and the ring in frame: the fingers tilt the palm slightly toward the light, holding the small gold ring; window light glints across the gold. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    }
+  ]
+}
