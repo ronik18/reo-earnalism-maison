@@ -82,6 +82,20 @@ class ColabJobTests(unittest.TestCase):
         self.assertNotIn("np.zeros", cell)
         self.assertNotIn("concatenate", cell)
 
+    def test_narration_install_pins_parler_and_restores_protobuf_before_import(self):
+        """Colab 2026-11-23: parler-tts pulls descript-audiotools, which resolves protobuf 4.25,
+        and transformers then fails on `google.protobuf.runtime_version` (added in 5.26)."""
+        cell = (colab_jobs._TEMPLATES / "narration_cell.py.txt").read_text()
+        self.assertIn("parler-tts.git@d108732cd57788ec86bc857d99a6cabd66663d68", cell)
+        upgrade = cell.index('"protobuf>=5.26,<7"')
+        self.assertLess(cell.index("parler-tts.git@"), upgrade)
+        self.assertLess(upgrade, cell.index("from parler_tts import"))
+        self.assertLess(upgrade, cell.index("from transformers import"))
+        # An old protobuf already imported in this process cannot be replaced: stop with the fix.
+        self.assertIn('"google.protobuf" in sys.modules', cell)
+        self.assertIn("Runtime > Restart session", cell)
+        self.assertIn("protobuf", colab_jobs.PACKAGES["narration"])
+
     def test_narration_job_carries_preset_generation_settings(self):
         """R9: the roster preset's temperature reaches job.json, Parler's generate and the manifest."""
         r = self.build("narration", {"scenes": [SCENE], "compute": COMPUTE,

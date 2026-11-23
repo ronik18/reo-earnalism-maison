@@ -4,7 +4,16 @@ if RUN is not True:
     raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
 import subprocess, sys
 subprocess.run([sys.executable, "-m", "pip", "install", "-q",
-                "git+https://github.com/huggingface/parler-tts.git", "soundfile"], check=True)
+                "git+https://github.com/huggingface/parler-tts.git@d108732cd57788ec86bc857d99a6cabd66663d68",
+                "soundfile"], check=True)
+# parler-tts pulls descript-audiotools, which resolves protobuf 4.25; transformers then fails on
+# google.protobuf.runtime_version (protobuf >= 5.26). Restore a current protobuf before any import.
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "protobuf>=5.26,<7"], check=True)
+if "google.protobuf" in sys.modules:
+    _loaded = tuple(int(x) for x in sys.modules["google.protobuf"].__version__.split(".")[:2])
+    if _loaded < (5, 26):
+        raise RuntimeError("An old protobuf (%s) is already loaded in this session. Choose "
+                           "Runtime > Restart session, then Run all again." % ".".join(map(str, _loaded)))
 import soundfile as sf, torch
 from parler_tts import ParlerTTSForConditionalGeneration
 from transformers import AutoTokenizer

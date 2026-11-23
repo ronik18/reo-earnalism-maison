@@ -213,6 +213,20 @@
       },
       "path": "jobs/music-film-01-r3/music.ipynb",
       "sha256": "1e977935e446ef38bbdfec8822f39370089dca9d6f5901ea49115c8a44b9da70"
+    },
+    {
+      "bytes": 13544,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 2.6400166666666665,
+        "inputs_zip": "jobs/narration-film-01-r4/inputs.zip",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-film-01-r4/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-film-01-r4/narration.ipynb",
+      "sha256": "1633f08ecbfef07775c7a3b625fc5df633a21cf4e49e6bc357ef51be4277506e"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -661,6 +675,49 @@
         "inputs_sha256": "16068174fa99dba5495bb39fde1f2cab90ed9a6df346af040facb5e0051cb981",
         "job_id": "narration-film-01-r3",
         "outputs_key": "exports/colab-exchange/bicharak/narration-film-01-r3/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T18:16:32.864341+00:00",
+      "detail": {
+        "forecast_units": 2.6400166666666665,
+        "job_id": "narration-film-01-r4",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T18:16:32.865412+00:00",
+      "detail": {
+        "job_id": "narration-film-01-r4",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-23T18:16:41.393696+00:00",
+      "detail": {
+        "bytes": 122447,
+        "job_id": "narration-film-01-r4",
+        "key": "exports/colab-exchange/bicharak/narration-film-01-r4/inputs.zip",
+        "sha256": "0d2822939b59cdd0937b000d34e619a5ec64cf866db455e19d77ee757716a185"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T18:17:30.282506+00:00",
+      "detail": {
+        "expires_at": "2026-11-24T00:16:53.937758+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/narration-film-01-r4/inputs.zip",
+        "inputs_sha256": "0d2822939b59cdd0937b000d34e619a5ec64cf866db455e19d77ee757716a185",
+        "job_id": "narration-film-01-r4",
+        "outputs_key": "exports/colab-exchange/bicharak/narration-film-01-r4/outputs.tar"
       },
       "result": "exchange_staged",
       "stage": "job"
