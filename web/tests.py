@@ -161,6 +161,7 @@ class ExperienceTests(TestCase):
         self.assertContains(response, 'type="radio"')
         self.assertContains(response, "<fieldset")
         self.assertNotContains(response, '"is_correct"')
+        self.assertNotContains(response, "<p>Answers are graded by the server")  # only the quiz island's offline notice may show this
 
     def test_vault_lists_and_saved_have_distinct_views(self):
         self.login()
