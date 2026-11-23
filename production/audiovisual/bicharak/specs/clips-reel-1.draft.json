@@ -1,0 +1,83 @@
+{
+  "_status": "PROJECTED DRAFT — not built, nothing reserved. Build only after stills-reel-1 is imported; art_dir then exists.",
+  "art_dir": "../stills/stills-reel-1",
+  "prior_attempt_evidence": {
+    "run_ids": [
+      "diwali-wan22-pilot-v2"
+    ],
+    "related_runs": "owner-authorized v3 sweets recovery and the fresh two-start Diwali pilot (WAN22_COLAB.md: 'Verified selective sweets recovery'); their run ids are not written in WAN22_COLAB.md — copy them from the retained Wan journals before building",
+    "profile": "l4-balanced-v2",
+    "observed_step_seconds": 11.4,
+    "observed_clip_seconds_end_to_end": [
+      476.34,
+      484.71,
+      495.04,
+      499.95
+    ],
+    "completed_clips": 4,
+    "failed_attempts": "v2 sweets attempt stopped by the original forecast (37.34 s/step warm-up bias), retained as failed",
+    "source": "skills/earnalism-video/software/WAN22_COLAB.md"
+  },
+  "shots": [
+    {
+      "id": "shot-01",
+      "image": "reel-1-shot-01.png",
+      "seed": 8101,
+      "prompt": "The judge's fingers tighten slowly around the small gold ring; lamplight glints across the gold; his blurred face behind leans in slightly. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-02",
+      "image": "reel-1-shot-02.png",
+      "seed": 8102,
+      "prompt": "The young man's pen moves across the letter; the oil-lamp flame flickers; his spectacles catch the light. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-03",
+      "image": "reel-1-shot-03.png",
+      "seed": 8103,
+      "prompt": "The young widow lifts her white sari hem and steps up into the dark carriage; the carriage lamp sways gently. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-04",
+      "image": "reel-1-shot-04.png",
+      "seed": 8104,
+      "prompt": "The carriage rocks; the young man's hand stays pressed over her mouth; a tear runs down her cheek; her eyes close. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-05",
+      "image": "reel-1-shot-05.png",
+      "seed": 8105,
+      "prompt": "The judge on the bench lowers his gaze and sets down his pen; dust motes drift in the courtroom light. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-06",
+      "image": "reel-1-shot-06.png",
+      "seed": 8106,
+      "prompt": "The guard raises the ring higher out of reach; the woman stretches her arm toward it; the guard's turban end sways. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-07",
+      "image": "reel-1-shot-07.png",
+      "seed": 8107,
+      "prompt": "The woman's joined palms tremble; she lifts her face slowly; a loose strand of hair moves. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-08",
+      "image": "reel-1-shot-08.png",
+      "seed": 8108,
+      "prompt": "The tiny ivory portrait in the ring catches a slow sweep of warm light; the ring turns very slightly in the palm. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-09",
+      "image": "reel-1-shot-09.png",
+      "seed": 8109,
+      "prompt": "The woman's wet eyes blink once; a tear gathers; soft light breathes across her face. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    },
+    {
+      "id": "shot-10",
+      "image": "reel-1-shot-10.png",
+      "seed": 8110,
+      "prompt": "The judge's palm holding the ring tilts slightly toward the light; his gaze lowers to it again; lamplight glints on the gold. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+    }
+  ]
+}

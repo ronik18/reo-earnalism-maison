@@ -1,0 +1,39 @@
+{
+  "narration": {
+    "s_per_step": 30.0,
+    "units_per_hour": 1.94,
+    "steps": 1,
+    "decode_s": 900,
+    "export_s": 120,
+    "source": "ESTIMATE — replace with measured values after the first run",
+    "basis": "Indic Parler-TTS on L4 has no measured run in this repo. One step = one voice unit (one sentence); 30 s per unit is a conservative allowance for long Bengali sentences. decode_s covers pip install, model download and load. units_per_hour 1.94 is the L4 rate observed in skills/earnalism-video/software/WAN22_COLAB.md (v17: 'one L4 at 1.94CU/hour')."
+  },
+  "stills": {
+    "s_per_step": 10.0,
+    "units_per_hour": 1.94,
+    "steps": 4,
+    "decode_s": 900,
+    "export_s": 120,
+    "source": "ESTIMATE — replace with measured values after the first run",
+    "basis": "FLUX.1-schnell, 4 steps, guidance 0, enable_model_cpu_offload on L4: no measured run in this repo. 10 s/step (40 s per image incl. offload swaps) is a conservative allowance. decode_s covers pip install, the ~33 GB weight download and load. units_per_hour 1.94 as for narration."
+  },
+  "music": {
+    "s_per_step": 3.0,
+    "units_per_hour": 1.94,
+    "steps": 60,
+    "decode_s": 900,
+    "export_s": 60,
+    "source": "ESTIMATE — replace with measured values after the first run",
+    "basis": "ACE-Step v1 3.5B, 60 inference steps per cue (music_cell infer_step=60), up to 240 s cues on L4: no measured run in this repo. 3 s/step (180 s per cue) is a conservative allowance. decode_s covers pip install from git, weight download, hashing and load."
+  },
+  "reel_clips": {
+    "s_per_step": 31.0,
+    "units_per_hour": 1.94,
+    "steps": 24,
+    "decode_s": 180,
+    "export_s": 120,
+    "takes": 1,
+    "source": "MEASURED (conservative upper bound) — skills/earnalism-video/software/WAN22_COLAB.md",
+    "basis": "Profile l4-balanced-v2 (512x896, 121 frames, 24 fps, 24 steps, guidance 5). s_per_step 31.0 is the full-size 704x1280/50-step L4 observation (31.09 s/step, 7 Nov pilot), applied as a conservative upper bound: the measured l4-balanced-v2 steady rate is 11.3-11.5 s/step and 470-500 s end to end per finished clip (476.34, 484.71, 495.04, 499.95 s). decode_s 180 and export_s 120 are the corrected guard's decode allowance and separate export reserve. takes 1: the wan22 batch contract allows one start per shot (max_attempts = number of shots). units_per_hour 1.94 is the observed L4 session rate."
+  }
+}

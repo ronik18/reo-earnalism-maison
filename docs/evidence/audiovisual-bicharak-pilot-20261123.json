@@ -1,0 +1,395 @@
+{
+  "schema": "earnalism.audiovisual-pilot-snapshot.v1",
+  "title": "বিচারক",
+  "slug": "bicharak",
+  "created": "2026-11-23",
+  "status": "PREPARED — bundles inert (RUN = False); no GPU work has run; nothing imported; listening and visual review unassessed",
+  "source": {
+    "exported_from": "local replica (controller ruling R14; identical ids/content to production)",
+    "command": "manage.py export_audiovisual_source bicharak --out <path>",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "revision_id": "5206c8ca-c195-44fa-aa37-711c764bb400",
+    "state": "live",
+    "content_sha256": "400c8b98521511a8a50de510b346b7f4c2f9422be333518fa98d6fe6e440e74d",
+    "content_sha256_expected": "400c8b98521511a8a50de510b346b7f4c2f9422be333518fa98d6fe6e440e74d",
+    "content_sha256_match": true,
+    "export_sha256": "12fc3cb0b8cde802c6a03d4a336c88b64bd2f8f4f96964bce4e8edb86e47a440",
+    "rights_at_export": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "public_domain_evidence": true,
+    "maison_audio_cleared": false
+  },
+  "title_root": "production/audiovisual/bicharak",
+  "ledger": "production/audiovisual/allowance-ledger.json",
+  "rates": "production/audiovisual/rates.json",
+  "rates_provenance": {
+    "narration": "ESTIMATE — replace with measured values after the first run",
+    "stills": "ESTIMATE — replace with measured values after the first run",
+    "music": "ESTIMATE — replace with measured values after the first run",
+    "reel_clips": "MEASURED (conservative upper bound) — skills/earnalism-video/software/WAN22_COLAB.md"
+  },
+  "plan": {
+    "films": 1,
+    "series": false,
+    "scenes": 19,
+    "keyframes": 77,
+    "voice_units": 108,
+    "estimated_minutes": 16.6,
+    "wpm": 120,
+    "flags": [],
+    "anchors_total": 39,
+    "anchors_covered": 39,
+    "anchor_coverage": "complete, in order",
+    "scenes_detail": [
+      {
+        "scene_id": "f01s001",
+        "seconds_estimate": 77.5,
+        "keyframes": 6,
+        "anchors": 3
+      },
+      {
+        "scene_id": "f01s002",
+        "seconds_estimate": 53.0,
+        "keyframes": 4,
+        "anchors": 1
+      },
+      {
+        "scene_id": "f01s003",
+        "seconds_estimate": 79.0,
+        "keyframes": 6,
+        "anchors": 1
+      },
+      {
+        "scene_id": "f01s004",
+        "seconds_estimate": 31.5,
+        "keyframes": 3,
+        "anchors": 2
+      },
+      {
+        "scene_id": "f01s005",
+        "seconds_estimate": 46.0,
+        "keyframes": 4,
+        "anchors": 4
+      },
+      {
+        "scene_id": "f01s006",
+        "seconds_estimate": 39.5,
+        "keyframes": 3,
+        "anchors": 2
+      },
+      {
+        "scene_id": "f01s007",
+        "seconds_estimate": 76.0,
+        "keyframes": 6,
+        "anchors": 2
+      },
+      {
+        "scene_id": "f01s008",
+        "seconds_estimate": 45.0,
+        "keyframes": 3,
+        "anchors": 2
+      },
+      {
+        "scene_id": "f01s009",
+        "seconds_estimate": 50.5,
+        "keyframes": 4,
+        "anchors": 2
+      },
+      {
+        "scene_id": "f01s010",
+        "seconds_estimate": 68.0,
+        "keyframes": 5,
+        "anchors": 1
+      },
+      {
+        "scene_id": "f01s011",
+        "seconds_estimate": 73.0,
+        "keyframes": 5,
+        "anchors": 2
+      },
+      {
+        "scene_id": "f01s012",
+        "seconds_estimate": 36.0,
+        "keyframes": 3,
+        "anchors": 2
+      },
+      {
+        "scene_id": "f01s013",
+        "seconds_estimate": 66.0,
+        "keyframes": 5,
+        "anchors": 1
+      },
+      {
+        "scene_id": "f01s014",
+        "seconds_estimate": 44.5,
+        "keyframes": 3,
+        "anchors": 1
+      },
+      {
+        "scene_id": "f01s015",
+        "seconds_estimate": 34.0,
+        "keyframes": 3,
+        "anchors": 2
+      },
+      {
+        "scene_id": "f01s016",
+        "seconds_estimate": 46.5,
+        "keyframes": 4,
+        "anchors": 3
+      },
+      {
+        "scene_id": "f01s017",
+        "seconds_estimate": 40.0,
+        "keyframes": 3,
+        "anchors": 2
+      },
+      {
+        "scene_id": "f01s018",
+        "seconds_estimate": 36.5,
+        "keyframes": 3,
+        "anchors": 3
+      },
+      {
+        "scene_id": "f01s019",
+        "seconds_estimate": 51.5,
+        "keyframes": 4,
+        "anchors": 4
+      }
+    ],
+    "voice": {
+      "preset_key": "bn_arnav::story",
+      "profile": "bn_arnav",
+      "description": "Arnav speaks in fluent, natural standard Bengali in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "temperature": 0.91,
+      "roster_sha256": "37607117fedfc95c9b8ee2d6544f1721f7f7f57cbfa3addd3466e1cce2ebbd61"
+    },
+    "clause": null
+  },
+  "ledger_reservations": [
+    {
+      "job_id": "narration-film-01",
+      "title": "bicharak",
+      "month": "2026-11",
+      "units": 2.64,
+      "state": "reserved"
+    },
+    {
+      "job_id": "stills-film-01",
+      "title": "bicharak",
+      "month": "2026-11",
+      "units": 2.5409,
+      "state": "reserved"
+    },
+    {
+      "job_id": "stills-reel-1",
+      "title": "bicharak",
+      "month": "2026-11",
+      "units": 0.88,
+      "state": "reserved"
+    },
+    {
+      "job_id": "music-film-01",
+      "title": "bicharak",
+      "month": "2026-11",
+      "units": 1.0411,
+      "state": "reserved"
+    }
+  ],
+  "reserved_total_cu": 7.102,
+  "title_cap_cu": 60.0,
+  "month_cap_cu": 100.0,
+  "remaining_cu": 52.898,
+  "bundles": [
+    {
+      "job_id": "narration-film-01",
+      "kind": "narration",
+      "target": "film-01",
+      "forecast_units": 2.64,
+      "state": "reserved, waiting for Colab",
+      "files": {
+        "production/audiovisual/bicharak/jobs/narration-film-01/build-manifest.json": "2e11dffa22d06cdd56ccd6d92f5cdd82a4f84b333ce334305c0c7c45fe236aff",
+        "production/audiovisual/bicharak/jobs/narration-film-01/inputs.zip": "2b427306d2b9b2c62bfd168f4013ab4f6d84094d04d3b6364dfc4e294e37cad4",
+        "production/audiovisual/bicharak/jobs/narration-film-01/narration.ipynb": "fea73d08db4f456c7b01a189b2478b0bfaab8f11a373db4f749e0fcfa16063a4"
+      }
+    },
+    {
+      "job_id": "stills-film-01",
+      "kind": "stills",
+      "target": "film-01",
+      "forecast_units": 2.5409,
+      "state": "reserved, waiting for Colab",
+      "files": {
+        "production/audiovisual/bicharak/jobs/stills-film-01/build-manifest.json": "489fc4f34d6bcd040c1496f78796ce34c726a302c8728029c838c89a4b331c8f",
+        "production/audiovisual/bicharak/jobs/stills-film-01/inputs.zip": "36c37fb2f11af397a5488a050681df1c87edd6b60c2d71cd30a4de00f6ca403e",
+        "production/audiovisual/bicharak/jobs/stills-film-01/stills.ipynb": "05d257742fa236137d6b0d417155e81454e3be2539a34f851b9af67c11fcabdc"
+      }
+    },
+    {
+      "job_id": "stills-reel-1",
+      "kind": "stills",
+      "target": "reel-1",
+      "forecast_units": 0.88,
+      "state": "reserved, waiting for Colab",
+      "files": {
+        "production/audiovisual/bicharak/jobs/stills-reel-1/build-manifest.json": "172e9b39028d36707c39c34c25eedd00dca29a2538e3d9c4dde018228ab1b6fb",
+        "production/audiovisual/bicharak/jobs/stills-reel-1/inputs.zip": "461d9f1d616376b46d0fe9f1ab1a08337f0d4e054142599175afeeeb95572aac",
+        "production/audiovisual/bicharak/jobs/stills-reel-1/stills.ipynb": "dd8e16d1d6d504c305d38b492bcbce488932ca5211b98c09870a6867744e9a7a"
+      }
+    },
+    {
+      "job_id": "music-film-01",
+      "kind": "music",
+      "target": "film-01",
+      "forecast_units": 1.0411,
+      "state": "reserved, waiting for Colab",
+      "files": {
+        "production/audiovisual/bicharak/jobs/music-film-01/build-manifest.json": "6e1d8d0fca63c00bdf3d777f5c6131b96627f7af4c69cab5572676ae75dc9dcc",
+        "production/audiovisual/bicharak/jobs/music-film-01/inputs.zip": "fc1627594b74358d428713ed20c602a8517ee1263ea6fab23462dea87623c2f3",
+        "production/audiovisual/bicharak/jobs/music-film-01/music.ipynb": "1fa249c880fde84f7edde45ed56050f7072c80e9d31763b69c0038c8ede3c835"
+      }
+    }
+  ],
+  "score_route": {
+    "built": "ACE-Step cue job music-film-01 (4 x 240 s instrumental beds, Apache-2.0) because the forecast left room",
+    "fallback": "VCSL editorial route (earnalism-audiobook-score editorial_score.py, CC0) stays available: film --score <bed> --score-route vcsl"
+  },
+  "reel_1": {
+    "script": {
+      "hook": "ফাঁসির আসামির আংটিতে খোদাই জজের ছদ্মনাম।",
+      "language": "bn",
+      "length": 60,
+      "lines": [
+        "ফাঁসির আসামির আংটিতে খোদাই জজের ছদ্মনাম।",
+        "জজ মোহিতমোহন আংটিটা হাতে ধরে আছেন।",
+        "সোনার গায়ে খোদাই, বিনোদচন্দ্র।",
+        "যৌবনে এই নামেই তিনি চিঠি লিখতেন।",
+        "জানলায় বসে থাকা এক কিশোরী বিধবাকে।",
+        "এক গভীর রাতে মেয়েটি তাঁর গাড়িতে ওঠে।",
+        "কেঁদে বলে, আমাকে বাড়ি রেখে এসো।",
+        "তিনি তার মুখ চেপে ধরেন।",
+        "কিছুদিন পরে তিনি তাকে ফেলে চলে যান।",
+        "আজ তিনি কঠোর বিচারক।",
+        "ক্ষীরোদাকে তিনি ফাঁসির হুকুম দিয়েছেন।",
+        "জেলখানায় প্রহরী ক্ষীরোদার চুলে লুকোনো আংটি কেড়ে নিয়েছে।",
+        "সে হাতজোড় করে জজের কাছে আংটিটা ফেরত চায়।",
+        "আংটিটা হাতে নিয়েই তিনি চমকে ওঠেন।",
+        "অন্য পিঠে গোঁফদাড়িওয়ালা এক যুবকের ছোট্ট ছবি।",
+        "তিনি ক্ষীরোদার মুখের দিকে ভালো করে তাকান।",
+        "মনে পড়ে চব্বিশ বছর আগের এক অশ্রুভেজা মুখ।",
+        "এই মুখের সঙ্গে তার মিল আছে।",
+        "মোহিত আর একবার সোনার আংটির দিকে তাকান।"
+      ],
+      "loop_close": "মোহিত আর একবার সোনার আংটির দিকে তাকান।"
+    },
+    "word_count": 119,
+    "validated_with": "python3 -m eav.cli reel 1 --script (validate_script + shot_list): exit 0",
+    "shot_list": [
+      {
+        "line": "ফাঁসির আসামির আংটিতে খোদাই জজের ছদ্মনাম।",
+        "seconds": 6.0,
+        "shot": 1
+      },
+      {
+        "line": "যৌবনে এই নামেই তিনি চিঠি লিখতেন।",
+        "seconds": 6.0,
+        "shot": 2
+      },
+      {
+        "line": "এক গভীর রাতে মেয়েটি তাঁর গাড়িতে ওঠে।",
+        "seconds": 6.0,
+        "shot": 3
+      },
+      {
+        "line": "তিনি তার মুখ চেপে ধরেন।",
+        "seconds": 6.0,
+        "shot": 4
+      },
+      {
+        "line": "আজ তিনি কঠোর বিচারক।",
+        "seconds": 6.0,
+        "shot": 5
+      },
+      {
+        "line": "জেলখানায় প্রহরী ক্ষীরোদার চুলে লুকোনো আংটি কেড়ে নিয়েছে।",
+        "seconds": 6.0,
+        "shot": 6
+      },
+      {
+        "line": "সে হাতজোড় করে জজের কাছে আংটিটা ফেরত চায়।",
+        "seconds": 6.0,
+        "shot": 7
+      },
+      {
+        "line": "অন্য পিঠে গোঁফদাড়িওয়ালা এক যুবকের ছোট্ট ছবি।",
+        "seconds": 6.0,
+        "shot": 8
+      },
+      {
+        "line": "মনে পড়ে চব্বিশ বছর আগের এক অশ্রুভেজা মুখ।",
+        "seconds": 6.0,
+        "shot": 9
+      },
+      {
+        "line": "মোহিত আর একবার সোনার আংটির দিকে তাকান।",
+        "seconds": 6.0,
+        "shot": 10
+      }
+    ],
+    "caption_path": "production/audiovisual/bicharak/reels/reel-1/caption.txt",
+    "keyframe_stills_job": "stills-reel-1 (built, reserved)",
+    "narration_job": "not built yet (projected 0.99 CU at current rates); building it locks the script, so it waits for owner sign-off on the script",
+    "reel_clips_projected_forecast": {
+      "reserved": false,
+      "built": false,
+      "why_not_built": "the clips spec hashes the keyframe images, which exist only after the owner runs stills-reel-1 and it is imported",
+      "draft_spec": "production/audiovisual/bicharak/specs/clips-reel-1.draft.json",
+      "shape": {
+        "profile": "l4-balanced-v2",
+        "width": 512,
+        "height": 896,
+        "frames": 121,
+        "fps": 24,
+        "steps": 24,
+        "guidance": 5,
+        "shots": 10
+      },
+      "inputs": {
+        "s_per_step": 31.0,
+        "units_per_hour": 1.94,
+        "decode_s": 180,
+        "export_s": 120,
+        "margin": 1.15
+      },
+      "forecast_cu_takes_1": 4.8,
+      "forecast_cu_takes_2": 9.41,
+      "forecast_cu_at_measured_balanced_rate_11_5": 1.9,
+      "title_total_if_built_cu": 12.89
+    }
+  },
+  "owner_next_steps": {
+    "cli_status_next": "Run the narration notebook in Colab: copy production/audiovisual/bicharak/jobs/narration-film-01/inputs.zip to Drive /content/drive/MyDrive/earnalism-audiovisual/bicharak/narration-film-01/, open production/audiovisual/bicharak/jobs/narration-film-01/narration.ipynb, set RUN = True in the first cell, Run all; download that Drive folder, then: python3 -m eav.cli import narration-film-01 --root production/audiovisual/bicharak --from <downloaded folder> --units <CU shown in Colab>",
+    "each_job": [
+      "Run the narration notebook in Colab: copy production/audiovisual/bicharak/jobs/narration-film-01/inputs.zip to Drive /content/drive/MyDrive/earnalism-audiovisual/bicharak/narration-film-01/, open production/audiovisual/bicharak/jobs/narration-film-01/narration.ipynb, set RUN = True in the first cell, Run all; download that Drive folder, then: python3 -m eav.cli import narration-film-01 --root production/audiovisual/bicharak --from <downloaded folder> --units <CU shown in Colab>",
+      "Run the stills notebook in Colab: copy production/audiovisual/bicharak/jobs/stills-film-01/inputs.zip to Drive /content/drive/MyDrive/earnalism-audiovisual/bicharak/stills-film-01/, open production/audiovisual/bicharak/jobs/stills-film-01/stills.ipynb, set RUN = True in the first cell, Run all; download that Drive folder, then: python3 -m eav.cli import stills-film-01 --root production/audiovisual/bicharak --from <downloaded folder> --units <CU shown in Colab>",
+      "Run the stills notebook in Colab: copy production/audiovisual/bicharak/jobs/stills-reel-1/inputs.zip to Drive /content/drive/MyDrive/earnalism-audiovisual/bicharak/stills-reel-1/, open production/audiovisual/bicharak/jobs/stills-reel-1/stills.ipynb, set RUN = True in the first cell, Run all; download that Drive folder, then: python3 -m eav.cli import stills-reel-1 --root production/audiovisual/bicharak --from <downloaded folder> --units <CU shown in Colab>",
+      "Run the music notebook in Colab: copy production/audiovisual/bicharak/jobs/music-film-01/inputs.zip to Drive /content/drive/MyDrive/earnalism-audiovisual/bicharak/music-film-01/, open production/audiovisual/bicharak/jobs/music-film-01/music.ipynb, set RUN = True in the first cell, Run all; download that Drive folder, then: python3 -m eav.cli import music-film-01 --root production/audiovisual/bicharak --from <downloaded folder> --units <CU shown in Colab>"
+    ],
+    "notes": [
+      "Fetch the bundles from GitHub at the committed paths above; run each notebook on an L4 in the existing Colab Pro account.",
+      "Record the CU each session used (Colab usage panel) for --units; if sessions overlap, record the session's own observation.",
+      "Review the five anchor stills listed in specs/world-bible.json before trusting the rest; regenerate only failing stills with a new small stills job.",
+      "After stills-reel-1 is imported: copy real Wan run ids into specs/clips-reel-1.draft.json prior_attempt_evidence, then job reel_clips --reel 1 --spec <that file>.",
+      "Replace the ESTIMATE rates in production/audiovisual/rates.json with measured values from these first runs before building further jobs."
+    ]
+  },
+  "not_certified": [
+    "no GPU output exists yet",
+    "listening and visual review unassessed",
+    "Maison audio not cleared; Stream video held",
+    "no publication of any kind"
+  ]
+}
