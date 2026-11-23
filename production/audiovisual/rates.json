@@ -33,7 +33,8 @@
     "decode_s": 180,
     "export_s": 120,
     "takes": 1,
-    "source": "MEASURED (conservative upper bound) — skills/earnalism-video/software/WAN22_COLAB.md",
-    "basis": "Profile l4-balanced-v2 (512x896, 121 frames, 24 fps, 24 steps, guidance 5). s_per_step 31.0 is the full-size 704x1280/50-step L4 observation (31.09 s/step, 7 Nov pilot), applied as a conservative upper bound: the measured l4-balanced-v2 steady rate is 11.3-11.5 s/step and 470-500 s end to end per finished clip (476.34, 484.71, 495.04, 499.95 s). decode_s 180 and export_s 120 are the corrected guard's decode allowance and separate export reserve. takes 1: the wan22 batch contract allows one start per shot (max_attempts = number of shots). units_per_hour 1.94 is the observed L4 session rate."
+    "source": "MEASURED — skills/earnalism-video/software/WAN22_COLAB.md (l4-balanced-v2 end-to-end clip times)",
+    "basis": "Profile l4-balanced-v2 (512x896, 121 frames, 24 fps = 5.041667 s per clip, 24 steps, guidance 5). Since R20 the reel_clips forecast is clip_s x shots x 1.15 margin: clip_s 500 s is the measured end-to-end time per finished clip, rounded up from the slowest observation (476.34, 479.08, 484.71, 490.90, 495.04, 499.95 s). One batch holds at most 5 shots so it fits one Wan job's 2700 s wall. s_per_step 31.0, decode_s 180 and export_s 120 are the earlier step-based inputs, kept for the record and no longer used for reel_clips. takes 1: the wan22 batch contract allows one start per shot. units_per_hour 1.94 is the observed L4 session rate.",
+    "clip_s": 500.0
   }
 }

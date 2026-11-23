@@ -129,6 +129,48 @@
       },
       "path": "jobs/stills-reel-1-r2/stills.ipynb",
       "sha256": "a82f5e686bc4636d542e369bdde11f19d372dcdd4d4db9a02e670ed40a4328c1"
+    },
+    {
+      "bytes": 9124,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 2.6400166666666665,
+        "inputs_zip": "jobs/narration-film-01-r2/inputs.zip",
+        "job_id": "narration-film-01-r2",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-film-01-r2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-film-01-r2/narration.ipynb",
+      "sha256": "90dd1d06fa61cb17b46cfe6fe1210d3cac663874c83ea31453f53efb30c72ef5"
+    },
+    {
+      "bytes": 8263,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 2.540861111111111,
+        "inputs_zip": "jobs/stills-film-01-r3/inputs.zip",
+        "job_id": "stills-film-01-r3",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r3/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r3/stills.ipynb",
+      "sha256": "5e7eea93eb5b84ea61c29ffe297f3170250766f16bff03d5a6ed7e6c43989896"
+    },
+    {
+      "bytes": 8714,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.0411333333333332,
+        "inputs_zip": "jobs/music-film-01-r2/inputs.zip",
+        "job_id": "music-film-01-r2",
+        "job_kind": "music",
+        "manifest": "jobs/music-film-01-r2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/music-film-01-r2/music.ipynb",
+      "sha256": "8aa3c9603c5ec77c539eb213d2103bdf261b07fb2c3ce5d525a4766474704bc7"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -301,6 +343,142 @@
         "job_id": "stills-reel-1-r2",
         "kind": "stills",
         "target": "reel-1"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-23T10:54:41.792849+00:00",
+      "detail": {
+        "job_id": "narration-film-01",
+        "reason": "R25/R26 (final review): built from the pre-hard-stop template whose manifest lacks status and package versions, so it could never be imported; superseded before any run and rebuilt as narration-film-01-r2",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:41.795639+00:00",
+      "detail": {
+        "job_id": "narration-film-01",
+        "reason": "R25/R26 (final review): built from the pre-hard-stop template whose manifest lacks status and package versions, so it could never be imported; superseded before any run and rebuilt as narration-film-01-r2"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:41.914829+00:00",
+      "detail": {
+        "job_id": "music-film-01",
+        "reason": "R25/R26 (final review): built from the pre-hard-stop template whose manifest lacks status and package versions, so it could never be imported; superseded before any run and rebuilt as music-film-01-r2",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:41.917117+00:00",
+      "detail": {
+        "job_id": "music-film-01",
+        "reason": "R25/R26 (final review): built from the pre-hard-stop template whose manifest lacks status and package versions, so it could never be imported; superseded before any run and rebuilt as music-film-01-r2"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:42.029966+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r2",
+        "reason": "R25/R26 (final review): built from the pre-hard-stop template whose manifest lacks status and package versions, so it could never be imported; superseded before any run and rebuilt as stills-film-01-r3 from the same spec",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:42.031771+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r2",
+        "reason": "R25/R26 (final review): built from the pre-hard-stop template whose manifest lacks status and package versions, so it could never be imported; superseded before any run and rebuilt as stills-film-01-r3 from the same spec"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:42.143590+00:00",
+      "detail": {
+        "job_id": "stills-reel-1-r2",
+        "reason": "R20 (final review): its 10 keyframes follow the old 6 s shot list; reel shots are now planned from the measured reel narration (reel 1 --plan-shots), so the reel keyframes are rebuilt per planned shot after the reel narration is imported",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:42.145708+00:00",
+      "detail": {
+        "job_id": "stills-reel-1-r2",
+        "reason": "R20 (final review): its 10 keyframes follow the old 6 s shot list; reel shots are now planned from the measured reel narration (reel 1 --plan-shots), so the reel keyframes are rebuilt per planned shot after the reel narration is imported"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:45.902477+00:00",
+      "detail": {
+        "forecast_units": 2.6400166666666665,
+        "job_id": "narration-film-01-r2",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:45.908209+00:00",
+      "detail": {
+        "job_id": "narration-film-01-r2",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-23T10:54:46.018523+00:00",
+      "detail": {
+        "forecast_units": 2.540861111111111,
+        "job_id": "stills-film-01-r3",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:46.023142+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r3",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-23T10:54:46.150487+00:00",
+      "detail": {
+        "forecast_units": 1.0411333333333332,
+        "job_id": "music-film-01-r2",
+        "kind": "music"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:54:46.153578+00:00",
+      "detail": {
+        "job_id": "music-film-01-r2",
+        "kind": "music",
+        "target": "film-01"
       },
       "result": "job_target",
       "stage": "cli"

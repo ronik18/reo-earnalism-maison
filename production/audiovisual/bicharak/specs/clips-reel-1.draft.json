@@ -1,5 +1,5 @@
 {
-  "_status": "PROJECTED DRAFT — not built, nothing reserved. Build only after stills-reel-1-r2 is imported; then save it as clips-reel-1.json with the journal run ids filled in.",
+  "_status": "PROJECTED DRAFT, superseded by the R20 batch flow — not built, nothing reserved. The shot count is set only after the reel narration is imported (reel 1 --plan-shots); each reel_clips batch then holds at most 5 of the planned shot ids (shot-01, ...), with art_dir = the imported reel keyframe stills job. Use these prompts as reference only, re-matched to the planned lines; fill prior_attempt_evidence.run_ids from the retained journals; no compute or wall_seconds keys.",
   "art_dir": "../stills/stills-reel-1-r2",
   "prior_attempt_evidence": {
     "run_ids": [
