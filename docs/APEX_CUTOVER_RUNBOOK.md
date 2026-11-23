@@ -31,4 +31,6 @@ Restore the apex record to `A 76.76.21.21` DNS-only and `www` to DNS-only `CNAME
 | 5 | Redirect rule "Maison and www canonical alias - GET HEAD" enabled (302, query preserved). | `maison.` and `www.` → apex with path and query. |
 | 6 | Production suite against `https://theearnalism.com` with `MAISON_E2E_REQUIRE_BOOK=1`: 11 passed, 5 skipped (no test-account credentials; cover revalidation skipped because covers are private). Guest check, desktop and mobile: carousel links to The Selfish Giant and বিচারক Chapter 1 via sign-up, title pages 200 with covers, previews 200, no overflow or page errors. | Pass. |
 
-**Google OAuth:** the owner added `https://theearnalism.com/api/v1/auth/google/callback` to client `620834018736-…` on 23 November 2026. Starting Google sign-in from the apex reaches Google's account chooser for that callback with no `redirect_uri_mismatch`. Change the redirect to 301 after a stable period.
+**Google OAuth:** the owner added `https://theearnalism.com/api/v1/auth/google/callback` to client `620834018736-…` on 23 November 2026. Starting Google sign-in from the apex reaches Google's account chooser for that callback with no `redirect_uri_mismatch`.
+
+**Permanent redirect:** on 23 November 2026 the owner asked for the canonical-alias rule to change from 302 to 301 (query still preserved). `maison.` and `www.` now return 301 to the apex. Browsers cache 301s, so a rollback should first set the rule back to 302 or disable it, and visitors may keep the cached redirect for a while.
