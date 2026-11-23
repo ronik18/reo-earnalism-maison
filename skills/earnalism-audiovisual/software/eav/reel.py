@@ -147,7 +147,7 @@ def _master_audio(audio: Path, seconds: float, out: Path):
     r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(pre), "-af",
                         base + ":print_format=json", "-f", "null", "-"],
                        check=True, capture_output=True, text=True)
-    s = json.loads(r.stderr[r.stderr.rindex("{"):])
+    s = mix.loudnorm_stats(r.stderr)
     if any(str(s[k]).strip("-+").lower() in ("inf", "nan") for k in ("input_i", "input_tp")):
         raise ValueError("audio is silent or unmeasurable; cannot master to -14 LUFS")
     f = (f"{base}:measured_I={s['input_i']}:measured_TP={s['input_tp']}:"

@@ -94,3 +94,22 @@ class MixTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LoudnormStatsTests(unittest.TestCase):
+    BLOCK = ('{\n\t"input_i" : "-20.1",\n\t"input_tp" : "-3.0",\n\t"target_offset" : "0.2"\n}')
+
+    def test_ffmpeg6_json_last(self):
+        err = "size=N/A time=00:00:08\n[Parsed_loudnorm_0 @ 0x55d]\n" + self.BLOCK + "\n"
+        self.assertEqual(mix.loudnorm_stats(err)["input_i"], "-20.1")
+
+    def test_ffmpeg8_trailing_summary_with_stray_brace(self):
+        err = ("[Parsed_loudnorm_0 @ 0x55d]\n" + self.BLOCK + "\n"
+               "[out#0/null @ 0x1] video:0KiB audio:2KiB {muxing overhead: unknown}\n"
+               "size=N/A time=00:00:08 {x}\n")
+        s = mix.loudnorm_stats(err)
+        self.assertEqual(s["input_tp"], "-3.0")
+
+    def test_no_block_raises(self):
+        with self.assertRaises(ValueError):
+            mix.loudnorm_stats("[out#0/null] nothing here {stray}\n")

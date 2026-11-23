@@ -18,6 +18,21 @@ def _run(args, **kw):
                           capture_output=True, text=kw.pop("text", True), **kw)
 
 
+def loudnorm_stats(stderr: str) -> dict:
+    """Parse the print_format=json block emitted by ffmpeg's loudnorm filter on stderr.
+
+    Locates the last "[Parsed_loudnorm" marker, then the first "{" after it, and decodes one
+    JSON object, ignoring any trailing text (ffmpeg 8 appends an output summary)."""
+    i = stderr.rfind("[Parsed_loudnorm")
+    j = stderr.find("{", i) if i >= 0 else -1
+    if j < 0:
+        raise ValueError("no loudnorm JSON block found in ffmpeg stderr")
+    try:
+        return json.JSONDecoder().raw_decode(stderr[j:])[0]
+    except json.JSONDecodeError as e:
+        raise ValueError(f"unparseable loudnorm JSON block: {e}") from e
+
+
 def measure(path) -> dict:
     """Integrated loudness and true peak via ebur128."""
     r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(path), "-af",
@@ -141,7 +156,7 @@ def _loudnorm_gated(pre: Path, out: Path, target_lufs: float) -> dict:
     r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(pre), "-af",
                         f"loudnorm=I={target_lufs}:TP={tp}:LRA=11:print_format=json",
                         "-f", "null", "-"], check=True, capture_output=True, text=True)
-    stats = json.loads(r.stderr[r.stderr.rindex("{"):])
+    stats = loudnorm_stats(r.stderr)
     if any(str(stats[k]).strip("-+").lower() in ("inf", "nan") for k in ("input_i", "input_tp")):
         raise ValueError("master misses gate: input is silent or unmeasurable")
     f = (f"loudnorm=I={target_lufs}:TP={tp}:LRA=11:"
