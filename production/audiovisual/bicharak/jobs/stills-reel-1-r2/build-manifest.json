@@ -1,0 +1,14 @@
+{
+  "authority_created": false,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/stills-reel-1-r2",
+  "inputs_sha256": "0c692f5ce91bfec6b721395e7dd861f5fda03783957928e03459a2bb1b2f1727",
+  "job_id": "stills-reel-1-r2",
+  "kind": "stills",
+  "model": {
+    "repo": "black-forest-labs/FLUX.1-schnell",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "a82f5e686bc4636d542e369bdde11f19d372dcdd4d4db9a02e670ed40a4328c1",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}

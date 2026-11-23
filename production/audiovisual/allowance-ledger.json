@@ -10,21 +10,35 @@
     "job_id": "stills-film-01",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 2.540861111111111,
-    "state": "reserved"
+    "units": 0,
+    "state": "settled"
   },
   {
     "job_id": "stills-reel-1",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 0.8800055555555554,
-    "state": "reserved"
+    "units": 0,
+    "state": "settled"
   },
   {
     "job_id": "music-film-01",
     "title": "bicharak",
     "month": "2026-11",
     "units": 1.0411333333333332,
+    "state": "reserved"
+  },
+  {
+    "job_id": "stills-film-01-r2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 2.540861111111111,
+    "state": "reserved"
+  },
+  {
+    "job_id": "stills-reel-1-r2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.8800055555555554,
     "state": "reserved"
   }
 ]

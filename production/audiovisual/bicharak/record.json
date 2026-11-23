@@ -101,6 +101,34 @@
       },
       "path": "jobs/music-film-01/music.ipynb",
       "sha256": "1fa249c880fde84f7edde45ed56050f7072c80e9d31763b69c0038c8ede3c835"
+    },
+    {
+      "bytes": 5192,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 2.540861111111111,
+        "inputs_zip": "jobs/stills-film-01-r2/inputs.zip",
+        "job_id": "stills-film-01-r2",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r2/stills.ipynb",
+      "sha256": "05af34189e1515588d84f06e4d26fa2d078d6c9b4bff8c175e0a5aee41f6813a"
+    },
+    {
+      "bytes": 5187,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.8800055555555554,
+        "inputs_zip": "jobs/stills-reel-1-r2/inputs.zip",
+        "job_id": "stills-reel-1-r2",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-reel-1-r2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-reel-1-r2/stills.ipynb",
+      "sha256": "a82f5e686bc4636d542e369bdde11f19d372dcdd4d4db9a02e670ed40a4328c1"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -209,6 +237,70 @@
         "job_id": "music-film-01",
         "kind": "music",
         "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-23T10:04:37.701335+00:00",
+      "detail": {
+        "job_id": "stills-film-01",
+        "reason": "superseded before any run (R18)",
+        "released_units": 2.540861111111111,
+        "settled_units": 0,
+        "superseded_by": "stills-film-01-r2"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:04:37.702589+00:00",
+      "detail": {
+        "job_id": "stills-reel-1",
+        "reason": "superseded before any run (R18)",
+        "released_units": 0.8800055555555554,
+        "settled_units": 0,
+        "superseded_by": "stills-reel-1-r2"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:04:37.836804+00:00",
+      "detail": {
+        "forecast_units": 2.540861111111111,
+        "job_id": "stills-film-01-r2",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:04:37.838411+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r2",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-23T10:04:37.977111+00:00",
+      "detail": {
+        "forecast_units": 0.8800055555555554,
+        "job_id": "stills-reel-1-r2",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-23T10:04:37.977744+00:00",
+      "detail": {
+        "job_id": "stills-reel-1-r2",
+        "kind": "stills",
+        "target": "reel-1"
       },
       "result": "job_target",
       "stage": "cli"

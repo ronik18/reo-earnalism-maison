@@ -1,6 +1,6 @@
 {
-  "_status": "PROJECTED DRAFT — not built, nothing reserved. Build only after stills-reel-1 is imported; art_dir then exists.",
-  "art_dir": "../stills/stills-reel-1",
+  "_status": "PROJECTED DRAFT — not built, nothing reserved. Build only after stills-reel-1-r2 is imported; then save it as clips-reel-1.json with the journal run ids filled in.",
+  "art_dir": "../stills/stills-reel-1-r2",
   "prior_attempt_evidence": {
     "run_ids": [
       "diwali-wan22-pilot-v2"
@@ -32,7 +32,7 @@
       "id": "shot-01",
       "image": "reel-1-shot-01.png",
       "seed": 8101,
-      "prompt": "The judge's fingers tighten slowly around the small gold ring; lamplight glints across the gold; his blurred face behind leans in slightly. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+      "prompt": "Only the hand and the ring in frame: the fingers close slowly around the small gold ring; window light glints across the gold. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
     },
     {
       "id": "shot-02",
@@ -80,13 +80,13 @@
       "id": "shot-09",
       "image": "reel-1-shot-09.png",
       "seed": 8109,
-      "prompt": "The woman's wet eyes blink once; a tear gathers; soft light breathes across her face. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+      "prompt": "The double-exposed faces hold still; the younger face fades very slowly while the older tearful face stays; a tear gathers; soft light breathes across both faces. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
     },
     {
       "id": "shot-10",
       "image": "reel-1-shot-10.png",
-      "seed": 8110,
-      "prompt": "The judge's palm holding the ring tilts slightly toward the light; his gaze lowers to it again; lamplight glints on the gold. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
+      "seed": 8101,
+      "prompt": "Only the hand and the ring in frame: the fingers tilt the palm slightly toward the light, holding the small gold ring; window light glints across the gold. Camera locked-off or a very slow push-in. No text, no letters, no morphing faces, no extra limbs, no extra fingers, no cuts, no scene change."
     }
   ]
 }
