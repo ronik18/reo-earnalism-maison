@@ -4,6 +4,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from .voice import voice_units
+
 RATE = 48000
 FPS = 25
 FADE_S = 0.8
@@ -79,10 +81,34 @@ def subtitles(timing: list, units: list) -> str:
     return "\n".join(cues)
 
 
-def _scenes(plan: dict) -> list:
+def _scenes(plan: dict, film=None) -> list:
+    """Scenes of exactly one film: a film dict, or a plan plus a film index."""
     if "scenes" in plan:
+        if film not in (None, 0):
+            raise ValueError("film index given for a single-film dict")
         return plan["scenes"]
-    return [s for f in plan["films"] for s in f["scenes"]]
+    films = plan["films"]
+    if film is None:
+        if len(films) != 1:
+            raise ValueError("series plan has several films: pass film=<index>")
+        film = 0
+    if not isinstance(film, int) or not 0 <= film < len(films):
+        raise ValueError(f"film index {film!r} out of range")
+    return films[film]["scenes"]
+
+
+def _check_timing(scenes: list, timing: list, language: str):
+    """Timing must be unique and cover exactly the units the plan's scenes produce."""
+    keys = [t["unit_key"] for t in timing]
+    if len(set(keys)) != len(keys):
+        raise ValueError("duplicate unit_key in timing")
+    expected = []
+    for sc in scenes:
+        expected += [u["unit_key"] for u in voice_units(sc, {"description": ""}, None, language)]
+    if set(keys) != set(expected):
+        missing, extra = set(expected) - set(keys), set(keys) - set(expected)
+        raise ValueError(f"timing does not match plan units: missing {sorted(missing)}, "
+                         f"unexpected {sorted(extra)}")
 
 
 def _stills(stills_dir: Path, scene_id: str) -> list:
@@ -96,13 +122,15 @@ def _stills(stills_dir: Path, scene_id: str) -> list:
 
 
 def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
-             out: Path, size=(1920, 1080)) -> dict:
+             out: Path, size=(1920, 1080), film=None, language: str = "en") -> dict:
     """Zoompan-pushed stills joined by xfade on narration boundaries, logo top-right,
-    END card appended once; audio is the mixed track (padded under the end card)."""
+    END card appended once; exactly one film per call (film=index for a series plan);
+    timing must match the plan's voice units exactly; audio is the mixed track (padded under the end card)."""
     W, H = size
-    scenes = _scenes(plan)
+    scenes = _scenes(plan, film)
     if not scenes:
         raise ValueError("plan has no scenes")
+    _check_timing(scenes, timing, language)
     narr_end = timing[-1]["end"] if timing else 0.0
     total = max(narr_end, _duration(mixed_audio))
 

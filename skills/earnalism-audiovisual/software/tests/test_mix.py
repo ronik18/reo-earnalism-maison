@@ -1,5 +1,9 @@
 import tempfile
+import tracemalloc
 import unittest
+from unittest import mock
+
+import numpy as np
 from pathlib import Path
 
 from eav import mix
@@ -40,6 +44,36 @@ class MixTests(unittest.TestCase):
         pause = m.rms_db(win(0.5, 2.5))
         speaking = m.rms_db(win(3.5, 5.5))
         self.assertGreaterEqual(pause - speaking, 18)
+
+    def test_duck_db_out_of_range_refuses(self):
+        for bad in (10, 25):
+            with self.assertRaises(ValueError):
+                mix.duck_and_master(self.speech, self.score, self.d / "o.wav", -16, duck_db=bad)
+
+    def test_gate_miss_raises(self):
+        with mock.patch.object(mix, "measure", return_value={"lufs": -16.0, "true_peak": -0.2}):
+            with self.assertRaises(ValueError):
+                mix.duck_and_master(self.speech, self.score, self.d / "o.wav", -16)
+        with mock.patch.object(mix, "measure", return_value={"lufs": -12.0, "true_peak": -3.0}):
+            with self.assertRaises(ValueError):
+                mix.duck_and_master(self.speech, self.score, self.d / "o.wav", -16)
+
+    def test_envelope_float32_and_bounded_memory(self):
+        fr = mix._frame_gain_db(self.speech, 19)
+        self.assertEqual(fr.dtype, np.float32)
+        self.assertEqual(mix._gain_for(0, 1000, fr).dtype, np.float32)
+        long_s, long_c = self.d / "ls.wav", self.d / "lc.wav"
+        m.speech_gap_wav(long_s, 150, 10, 140)
+        m.noise_wav(long_c, 150)
+        full_stereo_f32 = 150 * 48000 * 2 * 4  # ~57 MB per whole-file array
+        with mock.patch.object(mix, "CHUNK_FRAMES", 300):  # 3 s chunks
+            tracemalloc.start()
+            try:
+                mix.duck_and_master(long_s, long_c, self.d / "lo.wav", -16)
+                peak = tracemalloc.get_traced_memory()[1]
+            finally:
+                tracemalloc.stop()
+        self.assertLess(peak, full_stereo_f32 // 4)
 
     def test_arrange_cues(self):
         a, b = self.d / "a.wav", self.d / "b.wav"

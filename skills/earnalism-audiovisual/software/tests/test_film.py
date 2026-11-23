@@ -89,6 +89,43 @@ class FilmTests(unittest.TestCase):
         self.assertAlmostEqual(v, a, delta=0.1)
         self.assertAlmostEqual(v, info["duration"], delta=0.15)
 
+    def _assemble_inputs(self):
+        t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
+        stills = self.d / "stills"
+        stills.mkdir(exist_ok=True)
+        for name in ("s1", "s2"):
+            Image.new("RGB", (64, 36), "red").save(stills / f"{name}.png")
+        logo = self.d / "logo.png"
+        Image.new("RGBA", (16, 16), (255, 255, 255, 255)).save(logo)
+        return t, stills, logo
+
+    def _call(self, plan, timing, **kw):
+        _, stills, logo = self._assemble_inputs()
+        return film.assemble(plan, timing, stills, self.d / "n.wav", logo, logo,
+                             self.d / "f.mp4", size=(320, 180), **kw)
+
+    def test_assemble_omitted_unit_refuses(self):
+        t, _, _ = self._assemble_inputs()
+        with self.assertRaises(ValueError):
+            self._call(PLAN, t[:-1])
+        with self.assertRaises(ValueError):
+            self._call(PLAN, [t[0], t[2]])
+
+    def test_assemble_duplicate_timing_key_refuses(self):
+        t, _, _ = self._assemble_inputs()
+        with self.assertRaises(ValueError):
+            self._call(PLAN, t + [dict(t[0])])
+
+    def test_assemble_series_plan_needs_film_selection(self):
+        t, _, _ = self._assemble_inputs()
+        series = {"series": "x", "films": PLAN["films"] + PLAN["films"]}
+        with self.assertRaises(ValueError):
+            self._call(series, t)
+        info = self._call(series, t, film=0)
+        self.assertEqual(info["scenes"], 2)
+        with self.assertRaises(ValueError):
+            self._call(series, t, film=5)
+
     def test_assemble_missing_still_refuses(self):
         t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
         (self.d / "stills").mkdir()
