@@ -30,7 +30,7 @@ import subprocess
 import sys
 import tempfile
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, film, importer, mix, qc, reel, scenes
 from .record import Record, sha256_file
@@ -66,16 +66,23 @@ def _requested_ledger(args):
 
 
 def _ledger(rec, args) -> budget.Ledger:
-    """The ledger pinned in record.json at init; any other path is refused."""
+    """The ledger pinned in record.json at init, relative to the record root (R17); any other
+    path is refused, so a moved or copied checkout keeps the same caps."""
     pinned = rec.data.get("ledger")
     if not pinned:
-        raise Stop("this record has no pinned allowance ledger", "Re-initialise the title root")
+        raise Stop("this record has no pinned allowance ledger", "Re-run init for this title root")
+    if Path(pinned).is_absolute() or PureWindowsPath(pinned).is_absolute():
+        raise Stop(f"record.json pins the ledger by an absolute path ({pinned}); it would be missed "
+                   "from another checkout and the caps would read 0",
+                   f"Re-run init for this title root so the ledger is pinned relative to it: "
+                   f"{PROG} init <source.json> --root <new root> --ledger <the shared ledger>")
+    path = (rec.root / pinned).resolve()
     asked = _requested_ledger(args)
-    if asked is not None and str(asked) != pinned:
-        raise Stop(f"ledger {asked} differs from the ledger pinned at init ({pinned}); the "
+    if asked is not None and asked != path:
+        raise Stop(f"ledger {asked} differs from the ledger pinned at init ({path}); the "
                    "allowance cannot be split across ledgers",
                    "Drop --ledger / unset EAV_LEDGER and rerun")
-    return budget.Ledger(Path(pinned))
+    return budget.Ledger(path)
 
 
 def _month() -> str:
@@ -308,7 +315,8 @@ def cmd_init(args):
         "content_sha256": src["content_sha256"], "language": src["language"],
         "rights": src.get("rights", {}), "public_domain_evidence": True,
         "state": src.get("state"), "export_sha256": sha256_file(src_path)})
-    rec.data["ledger"] = str(_requested_ledger(args) or (root.parent / "allowance-ledger.json").resolve())
+    ledger = _requested_ledger(args) or (root.parent / "allowance-ledger.json").resolve()
+    rec.data["ledger"] = Path(os.path.relpath(ledger, root.resolve())).as_posix()  # R17: relative pin
     rec._save()
     shutil.copyfile(src_path, root / "source.json")
     rec.add_artifact("source", root / "source.json", {"revision_id": src["revision_id"]})

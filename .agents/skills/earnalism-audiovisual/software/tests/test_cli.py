@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import unittest
 import os
+import shutil
 import zipfile
 from pathlib import Path
 from unittest import mock
@@ -105,7 +106,7 @@ class RoundTwo:
         code, out = run("init", self.src, "--root", self.root, "--ledger", pinned)
         self.assertEqual(code, 0, out)
         self.assertEqual(json.loads((self.root / "record.json").read_text())["ledger"],
-                         str(pinned.resolve()))
+                         "../../shared/ledger.json")
         self.assertEqual(run("plan", "--root", self.root)[0], 0)
         other = self.d / "other-ledger.json"
         code, out = run("job", "narration", "--root", self.root, "--rates", self.rates,
@@ -121,6 +122,36 @@ class RoundTwo:
         self.assertEqual(code, 0, out)
         self.assertEqual(len(json.loads(pinned.read_text())), 1)
 
+    def test_moved_title_root_still_sees_its_ledger(self):
+        """R17: the pin is relative to the record root, so a checkout elsewhere keeps the caps."""
+        self.init_and_plan()
+        self.assertEqual(Record.load(self.root).data["ledger"], "../allowance-ledger.json")
+        from eav.budget import Ledger
+        Ledger(self.ledger).reserve("selfish-giant", "2026-01", 59.99, "old-job")
+        moved = self.d / "owner-mac" / "titles"
+        shutil.copytree(self.d / "titles", moved)
+        shutil.rmtree(self.d / "titles")
+        code, out = run("job", "narration", "--root", moved / "selfish-giant", "--rates", self.rates)
+        self.assertEqual(code, 3, out)
+        self.assertIn("Budget exceeded", out)
+        code, out = run("status", "--root", moved / "selfish-giant")
+        self.assertIn("59.99 CU spent/reserved for this title", out)
+        code, out = run("status", "--root", moved / "selfish-giant", "--ledger", moved / "allowance-ledger.json")
+        self.assertEqual(code, 0, out)
+
+    def test_absolute_ledger_pin_is_refused(self):
+        self.init_and_plan()
+        data = json.loads((self.root / "record.json").read_text())
+        data["ledger"] = str(self.ledger.resolve())
+        (self.root / "record.json").write_text(json.dumps(data))
+        for argv in (("status", "--root", self.root),
+                     ("job", "narration", "--root", self.root, "--rates", self.rates)):
+            code, out = run(*argv)
+            self.assertNotEqual(code, 0, argv)
+            self.assertIn("absolute", out)
+            self.assertIn("Next:", out)
+            self.assertIn("init", out)
+
     def test_job_has_no_month_flag(self):
         self.init_and_plan()
         with self.assertRaises(SystemExit):
@@ -128,9 +159,9 @@ class RoundTwo:
 
     def test_title_cap_counts_earlier_months(self):
         self.init_and_plan()
-        ledger = Record.load(self.root).data["ledger"]
+        ledger = self.root / Record.load(self.root).data["ledger"]
         from eav.budget import Ledger
-        Ledger(Path(ledger)).reserve("selfish-giant", "2026-01", 59.99, "old-job")
+        Ledger(ledger).reserve("selfish-giant", "2026-01", 59.99, "old-job")
         code, out = run("job", "narration", "--root", self.root, "--rates", self.rates)
         self.assertEqual(code, 3, out)
         self.assertIn("Budget exceeded", out)

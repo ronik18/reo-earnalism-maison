@@ -32,7 +32,9 @@ reel clips ~20–40 CU (the largest). About 30–60 CU per title, two titles a m
 ## The ledger
 
 - Shared by every title and **pinned at `init`**: `--ledger`, else `$EAV_LEDGER`, else
-  `<title root>/../allowance-ledger.json`, written into `record.json`. Every later command
+  `<title root>/../allowance-ledger.json`, written into `record.json` as a path relative to
+  the title root, so a checkout at another location (keep the ledger beside the roots) sees
+  the same reservations; an absolute pin is refused and needs a fresh `init`. Every later command
   uses only that path and refuses a different `--ledger` or `$EAV_LEDGER`. Keep all title
   roots on the same ledger.
 - The title cap sums every month of that title. Only the 100 CU monthly cap resets: other
