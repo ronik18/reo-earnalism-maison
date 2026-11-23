@@ -1,0 +1,34 @@
+# Music: ACE-Step. The exact commit and weight hashes are resolved now and recorded.
+if RUN is not True:
+    raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
+import hashlib, subprocess, sys
+subprocess.run([sys.executable, "-m", "pip", "install", "-q",
+                "git+https://github.com/ace-step/ACE-Step.git"], check=True)
+from huggingface_hub import HfApi, snapshot_download
+
+revision = HfApi().model_info(MODEL_REPO).sha
+weights_dir = snapshot_download(MODEL_REPO, revision=revision)
+
+
+def _sha(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+weight_hashes = {}
+for p in sorted(pathlib.Path(weights_dir).rglob("*")):
+    if p.is_file() and p.suffix in (".safetensors", ".bin", ".pt", ".pth"):
+        weight_hashes[p.relative_to(weights_dir).as_posix()] = _sha(p)
+MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "weight_sha256": weight_hashes}
+
+from acestep.pipeline_ace_step import ACEStepPipeline
+
+pipe = ACEStepPipeline(checkpoint_dir=weights_dir, dtype="bfloat16")
+for t in JOB["items"]:
+    pipe(prompt=t["prompt"], lyrics=t.get("lyrics", "[instrumental]"),
+         audio_duration=t["duration_s"], infer_step=60, guidance_scale=15.0,
+         manual_seeds=[t["seed"]], save_path=str(OUT_DIR / (t["key"] + ".wav")))
+    print("wrote", t["key"])

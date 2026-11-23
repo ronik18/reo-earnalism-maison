@@ -28,6 +28,14 @@ owner's applicable release authority and the supported destination operation.
 | Visuals | `earnalism-video`: source-bound shot plan, stable characters/settings, demonstrated actions and frame transitions, content-accurate diagrams and captions. |
 | Covers | `earnalism-covers`: content-themed front/back pair, exact verified text/branding, editable masters and delivery derivatives. |
 | Integration | `earnalism-book-audiovisual`: synchronized candidate, platform renditions, evidence, private review and one destination-bound release decision. |
+| Single entry point | `earnalism-audiovisual`: one book title (English or Bengali) to an audiobook film plus one or two Squint-grade story reels at zero extra spend; conducts the six stage skills above through the `eav` CLI, Colab Pro jobs the owner runs and the compute allowance. |
+
+For a whole book package, start from the `earnalism-audiovisual` skill
+(`skills/earnalism-audiovisual/SKILL.md`). It does not replace the stage skills: it
+orders them, prepares inert hash-bound Colab jobs within the owner's 60 CU per title and
+100 CU per month allowance, imports and verifies their outputs, assembles and checks the
+film and reels, and drafts the per-title audio clearance evidence that Maison's
+`attach_audiovisual_audio` command requires. Its `status` command prints the next action.
 
 Read the complete content before directing performance. Keep a compact context
 map from whole work and chapter through paragraph, sentence and phrase: speaker,

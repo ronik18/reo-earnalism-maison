@@ -1,0 +1,29 @@
+# Narration: one WAV per voice unit with Indic Parler-TTS (revision pinned at build time).
+if RUN is not True:
+    raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
+import subprocess, sys
+subprocess.run([sys.executable, "-m", "pip", "install", "-q",
+                "git+https://github.com/huggingface/parler-tts.git", "soundfile"], check=True)
+import numpy as np, soundfile as sf, torch
+from parler_tts import ParlerTTSForConditionalGeneration
+from transformers import AutoTokenizer
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = ParlerTTSForConditionalGeneration.from_pretrained(
+    MODEL_REPO, revision=MODEL_REVISION).to(device)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_REPO, revision=MODEL_REVISION)
+desc_tokenizer = AutoTokenizer.from_pretrained(
+    model.config.text_encoder._name_or_path)
+MODEL_INFO = {"repo": MODEL_REPO, "revision": MODEL_REVISION}
+
+rate = model.config.sampling_rate
+for unit in JOB["units"]:
+    d = desc_tokenizer(unit["description"], return_tensors="pt").to(device)
+    p = tokenizer(unit["text"], return_tensors="pt").to(device)
+    audio = model.generate(input_ids=d.input_ids, attention_mask=d.attention_mask,
+                           prompt_input_ids=p.input_ids,
+                           prompt_attention_mask=p.attention_mask)
+    wav = audio.cpu().numpy().squeeze().astype("float32")
+    pause = np.zeros(int(rate * unit["pause_after_ms"] / 1000), dtype="float32")
+    sf.write(str(OUT_DIR / (unit["unit_key"] + ".wav")), np.concatenate([wav, pause]), rate)
+    print("wrote", unit["unit_key"])
