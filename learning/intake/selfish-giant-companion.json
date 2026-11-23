@@ -1,0 +1,91 @@
+{
+ "schema": "earnalism.learning_track.v1",
+ "slug": "selfish-giant-companion",
+ "title": "Reading The Selfish Giant",
+ "locale": "en",
+ "kind": "learning",
+ "access": "free",
+ "duration_days": 4,
+ "edition_slug": "the-selfish-giant-en",
+ "description": "A four-day companion to Oscar Wilde's The Selfish Giant. Read the story, then spend a few minutes a day with one idea: the garden as a mirror of the Giant's heart, the seasons that refuse to come, the small boy who changes everything, and how a fairy tale can carry a grown-up meaning. Written by Earnalism; the story text is in the public domain.",
+ "provenance": "Original lesson text written for Earnalism on 23 November 2026. Quotations are short phrases from Wilde's public-domain text (Project Gutenberg #902).",
+ "lessons": [
+  {
+   "title": "A garden that belongs to everyone",
+   "body": [
+    "The story opens not with the Giant but with his garden, and with the children who play there every afternoon on their way home from school. Wilde fills it with soft grass, flowers like stars and twelve peach-trees that blossom pink and pearl in spring. Before we meet its owner, we already know what the garden is for: it is where the children are happy.",
+    "Then the Giant comes home after seven years away and finds them there. His first words are a claim of ownership — the garden is his own, and no one else may play in it. He builds a high wall and puts up a notice board: TRESPASSERS WILL BE PROSECUTED.",
+    "Notice how quickly the mood changes. The children now play on a dusty road full of hard stones, and they wander round the wall talking about the beautiful garden inside. Nothing about the garden itself has changed yet; what has changed is who is allowed to share it.",
+    "As you read, keep one question in mind: is the garden more beautiful when it is protected, or when it is shared? Wilde answers it slowly, season by season."
+   ]
+  },
+  {
+   "title": "The winter that would not leave",
+   "body": [
+    "When Spring comes to the country, it skips the Giant's garden. The birds will not sing there because there are no children, and the trees forget to blossom. One flower puts its head out, sees the notice board, feels sorry for the children and slips back into the ground.",
+    "Instead, Snow and Frost move in and invite the North Wind and the Hail to stay. Wilde gives them personalities: the North Wind roars about the garden all day and blows the chimney-pots down; the Hail rattles on the castle roof. Summer and Autumn pass the garden by too, because the Giant is too selfish.",
+    "This is the heart of the fairy tale's logic. The weather is not just weather. The garden's endless winter is the outward picture of the Giant's cold, closed heart. The wall he built to keep others out has shut the warmth out as well.",
+    "Try this: list three things the Giant gains by building the wall and three things he loses. Which list does Wilde spend more words on?"
+   ]
+  },
+  {
+   "title": "The little boy in the corner",
+   "body": [
+    "Spring returns in a single morning, and not because the Giant has changed his mind. The children creep in through a little hole in the wall, and every tree they climb bursts into blossom. A linnet sings outside the Giant's window, and he thinks it is the most beautiful music in the world.",
+    "Only one corner is still winter. A very small boy stands there, too little to reach the branches of his tree, crying. The tree bends down as low as it can, but he cannot climb it.",
+    "Seeing him, the Giant's heart melts. He understands why Spring would not come, steals out to lift the boy into the tree, and then knocks the wall down with a great axe. The change in the garden follows the change in the Giant, not the other way round.",
+    "Notice that the boy kisses the Giant and then disappears; the other children never knew him and cannot say where he lives. Keep him in mind — Wilde has not finished with him."
+   ]
+  },
+  {
+   "title": "An ending in white blossom",
+   "body": [
+    "Many years pass. The Giant grows old and no longer minds the winter, because he knows it is only Spring asleep. One winter morning he sees, in the farthest corner, a tree covered with white blossoms, its branches golden and hung with silver fruit, and under it the little boy he loved.",
+    "The child carries the prints of two nails on his hands and feet. When the Giant, furious, wants to punish whoever has hurt him, the child answers that these are the wounds of Love. He tells the Giant that because he once let him play in his garden, today the Giant will come with him to his own garden, which is Paradise.",
+    "That afternoon the children find the Giant lying dead under the tree, all covered with white blossoms. The ending gathers up the whole story: the man who once fenced off his garden is welcomed into another, freely given.",
+    "Wilde published the story for children in 1888, but its ending speaks to adults too. It is a parable about generosity and grace, told with the simple images of a fairy tale. Take the short quiz to finish the track."
+   ],
+   "quiz": {
+    "pass_score": 75,
+    "questions": [
+     {
+      "prompt": "Why does Spring refuse to come to the Giant's garden?",
+      "explanation": "The flower and the birds stay away because the wall and the notice board have shut the children out; the endless winter mirrors the Giant's selfishness.",
+      "options": [
+       {"text": "Because the Giant has shut the children out", "correct": true},
+       {"text": "Because the garden is too far north", "correct": false},
+       {"text": "Because the Giant forgot to plant flowers", "correct": false}
+      ]
+     },
+     {
+      "prompt": "What did the Giant's notice board say?",
+      "explanation": "He put up the notice board as soon as he had built the high wall around the garden.",
+      "options": [
+       {"text": "KEEP OFF THE GRASS", "correct": false},
+       {"text": "TRESPASSERS WILL BE PROSECUTED", "correct": true},
+       {"text": "PRIVATE GARDEN — NO CHILDREN", "correct": false}
+      ]
+     },
+     {
+      "prompt": "What changes the Giant's heart?",
+      "explanation": "Seeing the very small boy crying beneath a tree he cannot climb makes the Giant understand why Spring would not come.",
+      "options": [
+       {"text": "The North Wind blowing down his chimney-pots", "correct": false},
+       {"text": "A visit from his friend the ogre", "correct": false},
+       {"text": "A little boy too small to climb his tree", "correct": true}
+      ]
+     },
+     {
+      "prompt": "How do the children find the Giant at the end of the story?",
+      "explanation": "The ending answers the wall of the opening: the Giant is welcomed into another garden, and his body is covered with white blossoms.",
+      "options": [
+       {"text": "Lying dead under the tree, covered with white blossoms", "correct": true},
+       {"text": "Rebuilding the wall around his garden", "correct": false},
+       {"text": "Asleep in his castle during the winter", "correct": false}
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}
