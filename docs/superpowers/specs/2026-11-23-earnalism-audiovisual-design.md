@@ -149,6 +149,40 @@ That works out to roughly 30–60 CU per title, so about two titles a month insi
 - The film plays end to end on Maison with correct narration, synced subtitles and no masked speech.
 - No new spend appears on any account.
 
+
+## Owner answers to the builder check (23 Nov 2026)
+
+1. **Colab is run by the owner (1a).** The skill prepares each Colab job (a self-contained notebook section plus an input bundle with hashes). The owner runs it in Colab Pro and leaves outputs in the agreed Drive folder, then the skill imports and hash-verifies them. Claude driving Colab through a connected browser is a later add-on, not part of this build.
+2. **Standing compute allowance: yes.** Up to **60 Colab compute units per title and 100 per calendar month**. Each GPU batch is forecast before it runs, from measured seconds per step, decode and export, plus a 15% margin. Batches that would cross either cap are cut down (fewer reel takes, then fewer shots) or held for the owner. Never retried past the cap. Spend is logged in the production record.
+3. **Hosting cost: unsure.** Treated as unresolved:
+   - **Maison video via Cloudflare Stream is held** until the owner confirms Stream's per-minute storage and delivery cost is within budget. The film is still produced, reviewed and posted to the social destinations the owner names.
+   - **Maison audio is allowed:** chapter MP3s plus measured timing maps, through the existing private R2 intake. R2 is already in use for covers and reader packages, and a title's audio is tens of MB. *Builder's call; the owner may veto.*
+4. **Clearance and music: yes to all.**
+   - For public-domain titles, the owner pre-authorises the same clearance pattern used for Reader (`docs/evidence/publication-clearance-20261123.json`), extended to the **audio and video** formats. The skill still writes a per-title evidence record:
+     - term per territory;
+     - text-source licence;
+     - cover provenance;
+     - generator and music licences;
+     - asset hashes.
+
+     It binds that record to the exact revision and assets, then sets `publication_clearance` for the offered formats. Non-public-domain titles are out of scope.
+   - ACE-Step output is accepted for commercial use. Its record carries model revision, licence, seed, prompt and output hashes, alongside the existing VCSL route.
+
+## Builder-check items settled as the builder's call
+
+- **Reel loop close.** The Wan 2.2 TI2V-5B route that has been qualified cannot target an end frame. The loop closes in the edit with a designed match-cut, or a short dissolve from the last shot into frame 1 where the action resolves back into the hook image. The loop QC checks that this transition reads as continuous, not that the pixels are identical.
+- **Earnalism Voice.** The pinned Parler roster descriptions (`en_tisha::story`, `bn_arnav::story`) stay byte-for-byte. The Earnalism Voice adds only controls that are compatible with them:
+  - sentence grouping;
+  - pauses inserted in the edit;
+  - per-unit context;
+  - at most a short pace or intensity clause appended where the preset's qualification allows it.
+
+  Owner review of the first package counts as that title's listening assessment. Dimensions it doesn't cover stay marked unassessed.
+- **Reel visual baseline.** Shots use the `l4-balanced-v2` profile (512×896, 24 steps), upscaled to 1080×1920 with ffmpeg lanczos plus mild sharpening. No new upscaler licence is needed. The hook shot may use the 704×1280 detail profile when the forecast fits the allowance.
+- **Long books.** If narration would run past about 40 minutes, the film becomes a chapter-by-chapter series: one film per chapter or unit, sharing one world bible, voice and score palette. Reels draw from the whole book.
+- **Maison formats.** Audio is offered as chapter MP3s with measured timing maps. Video is offered per unit only once Stream hosting is confirmed (owner answer 3). Access defaults to `free`, matching the Reader offering for these titles, unless the owner says otherwise.
+- **AI disclosure.** Reels carry a small "AI-generated visuals" label for the first 3 seconds, placed in the safe area. This follows India's 2026 IT Rules disclosure requirement, as recorded in the `earnalism-reels` compliance reference, and is the only on-screen text. The film credits AI-generated illustration in its end card and description.
+
 ## Left to the builder
 
 - **Assembly tooling.** Exact ffmpeg filter graphs, and whether Remotion or plain ffmpeg does the film motion.
