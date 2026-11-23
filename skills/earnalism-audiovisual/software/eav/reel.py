@@ -14,27 +14,43 @@ BUDGET = {60: (100, 125), 120: (200, 245)}
 REQUIRED_TAGS = ["#earnalism", "#learnalism", "#theearnalism"]
 MAX_TAGS = 5
 LABEL_SECONDS = 3.0
+AUDIO_TOLERANCE_S = 0.25
 _FONTS = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
           "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"]
 _EMOJI = re.compile("[\U0001F300-\U0001FAFF☀-➿]️?")
+
+
+def spoken(script: dict) -> list:
+    """The narrated lines, defined once: lines[0] is the hook, lines[-1] the loop close."""
+    lines = script.get("lines")
+    if not isinstance(lines, list) or not lines or not all(isinstance(x, str) for x in lines):
+        raise ValueError("lines must be a non-empty list of strings")
+    if not script.get("language"):
+        raise ValueError("language is required")
+    if lines[0] != script.get("hook"):
+        raise ValueError("lines[0] must equal hook")
+    if lines[-1] != script.get("loop_close"):
+        raise ValueError("lines[-1] must equal loop_close")
+    return list(lines)
 
 
 def validate_script(script: dict) -> None:
     length = script.get("length")
     if length not in BUDGET:
         raise ValueError(f"length must be 60 or 120, got {length!r}")
-    if words(script.get("hook", "")) > 8 or not script.get("hook", "").strip():
+    lines = spoken(script)
+    if words(script["hook"]) > 8 or not script["hook"].strip():
         raise ValueError("hook must be 1-8 words")
-    total = sum(words(x) for x in script.get("lines", []))
+    total = sum(words(x) for x in lines)
     lo, hi = BUDGET[length]
     if not lo <= total <= hi:
-        raise ValueError(f"{total} words outside {lo}-{hi} for a {length}s reel")
+        raise ValueError(f"{total} spoken words outside {lo}-{hi} for a {length}s reel")
 
 
 def shot_list(script: dict) -> list:
     """Uniform shots of about 6 s; each shot is tied to the script line spoken at its midpoint."""
     length = script["length"]
-    lines = script["lines"]
+    lines = spoken(script)
     n = max(1, round(length / 6.0))
     sec = length / n
     if not 5.0 <= sec <= 7.5:
@@ -49,6 +65,8 @@ def shot_list(script: dict) -> list:
     for i in range(n):
         mid = (i + 0.5) * sec
         idx = next((k for k, e in enumerate(ends) if mid <= e), len(lines) - 1)
+        if i == 0:
+            idx = 0  # frame 1 carries the hook
         shots.append({"shot": i + 1, "line": lines[idx], "seconds": round(sec, 3)})
     return shots
 
@@ -86,16 +104,34 @@ def _ff(*args):
     subprocess.run(["ffmpeg", "-y", "-hide_banner", "-v", "error", *args], check=True)
 
 
+def _audio_seconds(path) -> float:
+    r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a:0", "-show_entries",
+                        "stream=duration:format=duration", "-of", "json", str(path)],
+                       check=True, capture_output=True, text=True)
+    j = json.loads(r.stdout)
+    vals = [x.get("duration") for x in (j.get("streams") or [{}]) + [j.get("format", {})]]
+    vals = [float(v) for v in vals if v not in (None, "N/A")]
+    if not vals:
+        raise ValueError("audio has no readable duration")
+    return vals[0]
+
+
 def _master_audio(audio: Path, seconds: float, out: Path):
-    """Trim/pad to the video length and land at -14 LUFS / <= -1.5 dBTP (two-pass loudnorm)."""
+    """Pad (within tolerance) to the video length and land at -14 LUFS / <= -2.0 dBTP."""
+    have = _audio_seconds(audio)
+    if abs(have - seconds) > AUDIO_TOLERANCE_S:
+        raise ValueError(f"audio is {have:.2f}s but video is {seconds:.2f}s "
+                         f"(tolerance {AUDIO_TOLERANCE_S}s); narration is never trimmed")
     pre = out.with_name("pre.wav")
     _ff("-i", str(audio), "-af", f"apad,atrim=0:{seconds:.3f},asetpts=PTS-STARTPTS",
         "-ar", "48000", "-ac", "2", "-c:a", "pcm_s16le", str(pre))
-    base = "loudnorm=I=-14:TP=-1.5:LRA=11"
+    base = "loudnorm=I=-14:TP=-2.0:LRA=11"
     r = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(pre), "-af",
                         base + ":print_format=json", "-f", "null", "-"],
                        check=True, capture_output=True, text=True)
     s = json.loads(r.stderr[r.stderr.rindex("{"):])
+    if any(str(s[k]).strip("-+").lower() in ("inf", "nan") for k in ("input_i", "input_tp")):
+        raise ValueError("audio is silent or unmeasurable; cannot master to -14 LUFS")
     f = (f"{base}:measured_I={s['input_i']}:measured_TP={s['input_tp']}:"
          f"measured_LRA={s['input_lra']}:measured_thresh={s['input_thresh']}:"
          f"offset={s['target_offset']}:linear=true")
@@ -157,7 +193,7 @@ def assemble(clips: list, audio, out, label_text="AI-generated visuals",
     if abs(m["lufs"] + 14) > 1 or m["true_peak"] > -1.0:
         raise ValueError(f"reel audio misses gate: {m}")
     return {"width": W, "height": H, "seconds": total, "lufs": m["lufs"],
-            "true_peak": m["true_peak"], "label_box": label_box, "clips": n}
+            "true_peak": m["true_peak"], "bytes": out.stat().st_size, "label_box": label_box, "clips": n}
 
 
 def _title(s: str) -> str:
@@ -166,11 +202,12 @@ def _title(s: str) -> str:
 
 def caption(script: dict, hashtags: list) -> str:
     hook = script["hook"]
-    emoji = next(iter(_EMOJI.findall(" ".join([hook] + list(script["lines"])))), "\U0001F4D6")
+    lines = spoken(script)
+    emoji = next(iter(_EMOJI.findall(" ".join(lines))), "\U0001F4D6")
     head = _title(_EMOJI.sub("", hook).strip()) + " " + emoji
     tags = list(REQUIRED_TAGS)
     for t in hashtags:
         t = "#" + t.strip().lstrip("#").lower()
         if len(t) > 1 and t not in tags and len(tags) < MAX_TAGS:
             tags.append(t)
-    return head + "\n\n" + "\n".join(script["lines"]) + "\n\n" + " ".join(tags)
+    return head + "\n\n" + "\n".join(lines[1:]) + "\n\n" + " ".join(tags)
