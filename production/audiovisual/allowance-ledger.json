@@ -45,13 +45,40 @@
     "job_id": "narration-film-01-r2",
     "title": "bicharak",
     "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "stills-film-01-r3",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "music-film-01-r2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "narration-film-01-r3",
+    "title": "bicharak",
+    "month": "2026-11",
     "units": 2.6400166666666665,
     "state": "reserved",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   },
   {
-    "job_id": "stills-film-01-r3",
+    "job_id": "stills-film-01-r4",
     "title": "bicharak",
     "month": "2026-11",
     "units": 2.540861111111111,
@@ -60,7 +87,7 @@
     "root": "bicharak"
   },
   {
-    "job_id": "music-film-01-r2",
+    "job_id": "music-film-01-r3",
     "title": "bicharak",
     "month": "2026-11",
     "units": 1.0411333333333332,
