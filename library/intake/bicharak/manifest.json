@@ -1,0 +1,34 @@
+{
+ "schema": "earnalism.book_import_manifest.v1",
+ "project_id": "bicharak-golpo-dashak-20261123",
+ "work": {
+  "slug": "bicharak",
+  "title": "বিচারক",
+  "creators": [
+   "রবীন্দ্রনাথ ঠাকুর"
+  ],
+  "house": "golpo"
+ },
+ "edition": {
+  "slug": "bicharak",
+  "language": "bn",
+  "title": "বিচারক",
+  "description": "বিচারকের আসনে বসা মানুষটিই যখন বিচার্য হয়ে পড়েন, তখন ন্যায়বিচারের স্বরূপ উন্মোচিত হয়।"
+ },
+ "source": {
+  "sha256": "605628ac1392764be43837c63840f5dc1c78794c59dd7d90bf1a2c3c89835b6a",
+  "bytes": 38908,
+  "content_type": "application/json",
+  "format": "earnalism.book_source.v1"
+ },
+ "provenance": {
+  "source_ref": "https://bn.wikisource.org/w/index.php?title=%E0%A6%97%E0%A6%B2%E0%A7%8D%E0%A6%AA-%E0%A6%A6%E0%A6%B6%E0%A6%95%2F%E0%A6%AC%E0%A6%BF%E0%A6%9A%E0%A6%BE%E0%A6%B0%E0%A6%95&oldid=1624865",
+  "source_edition": "Galpa-Dashak original 1302/1895 sole-author Rabindranath Tagore edition; legacy controlled publication book-5704b31005 chapter-001 sanitized content sha256 c9e4ed3927535c11a5d1d5a4729f0c8a1371952a33a6e0e6d36514b3d249b089; leading duplicate title line omitted, three section headings marked as headings.",
+  "rights_note": "Rabindranath Tagore died 1941; first published 1895/1900. Literary text public domain in every Maison launch territory. Wikisource transcription layer reused under CC BY-SA 4.0 with attribution; ShareAlike applies to the delivered transcription only.",
+  "rights_evidence_refs": [
+   "earnalism-digital-library:backend/data/controlled_publications/book-5704b31005/rights_decision.json",
+   "earnalism-digital-library:backend/data/controlled_publications/book-5704b31005/license_notice.json",
+   "reo-earnalism-maison:docs/evidence/publication-clearance-20261123.json"
+  ]
+ }
+}
