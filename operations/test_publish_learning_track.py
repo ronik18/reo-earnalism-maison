@@ -56,3 +56,9 @@ class PublishLearningTrackTests(TestCase):
     def test_shipped_intake_names_the_selfish_giant_edition(self):
         data = json.loads(INTAKE.read_text())
         self.assertEqual((data["edition_slug"], data["access"], len(data["lessons"])), ("the-selfish-giant-en", "free", 4))
+
+    def test_shipped_bengali_intake_names_the_bicharak_edition(self):
+        data = json.loads((INTAKE.parent / "bicharak-companion.json").read_text())
+        self.assertEqual((data["edition_slug"], data["locale"], data["access"], len(data["lessons"])), ("bicharak", "bn", "free", 4))
+        quiz = data["lessons"][-1]["quiz"]
+        self.assertTrue(all(sum(o["correct"] for o in q["options"]) == 1 for q in quiz["questions"]))
