@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .budget import BudgetExceeded, forecast, forecast_seconds
-from .voice import voice_units
+from .voice import audition_units, validate_directions, voice_units
 
 NARRATION_REPO = "ai4bharat/indic-parler-tts"
 NARRATION_REVISION = "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
@@ -374,11 +374,30 @@ def derive_compute(kind: str, spec: dict, rates: dict, items: int) -> dict:
     return compute
 
 
+def narration_units(spec: dict) -> list:
+    """Every voice unit of a narration spec: film/reel scenes, or an audition's variants."""
+    if "audition" in spec:
+        a = spec["audition"]
+        return audition_units(a["passages"], [(v["name"], v["preset"], v.get("style"))
+                                              for v in a["variants"]],
+                              a.get("language", "en"), a.get("directions"))
+    lang, style, directions = spec.get("language", "en"), spec.get("style"), spec.get("directions")
+    units = []
+    for scene in spec["scenes"]:
+        units += voice_units(scene, spec["preset"], spec.get("clause"), lang, style,
+                             {} if directions is not None else None)
+    if directions is not None:
+        validate_directions(directions, units)
+        units = []
+        for scene in spec["scenes"]:
+            units += voice_units(scene, spec["preset"], spec.get("clause"), lang, style, directions)
+    return units
+
+
 def job_items(kind: str, spec: dict) -> int:
     """How many items the job really generates (voice units, stills, cues or shots)."""
     if kind == "narration":
-        return sum(len(voice_units(scene, spec["preset"], spec.get("clause"),
-                                   spec.get("language", "en"))) for scene in spec["scenes"])
+        return len(narration_units(spec))
     return len(spec.get("shots" if kind == "reel_clips" else "items") or [])
 
 
@@ -387,13 +406,27 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
     compute = derive_compute(kind, spec, rates, job_items(kind, spec))
     if kind == "narration":
         _check_model(kind, spec, NARRATION_REPO)
-        units = []
-        for scene in spec["scenes"]:
-            units += voice_units(scene, spec["preset"], spec.get("clause"),
-                                 spec.get("language", "en"))
+        units = narration_units(spec)
         if not units:
             raise ValueError("no voice units")
-        return {"payload": {"units": units, "generation": _generation(spec["preset"])},
+        payload = {"units": units}
+        if "audition" in spec:
+            variants = spec["audition"]["variants"]
+            gens = [_generation(v["preset"]) for v in variants]
+            if any(g != gens[0] for g in gens):
+                raise ValueError("audition variants must share the control's pinned generation "
+                                 "settings, so only the description differs")
+            payload.update(generation=gens[0], audition={
+                "variants": {v["name"]: v["preset_key"] for v in variants},
+                "passages": sorted(spec["audition"]["passages"]),
+                "film_narration": False})
+        else:
+            payload["generation"] = _generation(spec["preset"])
+            if spec.get("style"):
+                payload["voice_style"] = spec["style"]
+            if spec.get("directions"):
+                payload["directions"] = spec["directions"]
+        return {"payload": payload,
                 "repo": NARRATION_REPO,
                 "revision": NARRATION_REVISION, "steps": 1, "compute": compute}
     if kind == "stills":

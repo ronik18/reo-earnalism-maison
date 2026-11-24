@@ -113,14 +113,14 @@ def _scenes(plan: dict, film=None) -> list:
     return films[film]["scenes"]
 
 
-def _check_timing(scenes: list, timing: list, language: str):
+def _check_timing(scenes: list, timing: list, language: str, style=None):
     """Timing must be unique and cover exactly the units the plan's scenes produce."""
     keys = [t["unit_key"] for t in timing]
     if len(set(keys)) != len(keys):
         raise ValueError("duplicate unit_key in timing")
     expected = []
     for sc in scenes:
-        expected += [u["unit_key"] for u in voice_units(sc, {"description": ""}, None, language)]
+        expected += [u["unit_key"] for u in voice_units(sc, {"description": ""}, None, language, style)]
     if set(keys) != set(expected):
         missing, extra = set(expected) - set(keys), set(keys) - set(expected)
         raise ValueError(f"timing does not match plan units: missing {sorted(missing)}, "
@@ -138,7 +138,7 @@ def _stills(stills_dir: Path, scene_id: str) -> list:
 
 
 def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
-             out: Path, size=(1920, 1080), film=None, language: str = "en") -> dict:
+             out: Path, size=(1920, 1080), film=None, language: str = "en", style=None) -> dict:
     """Zoompan-pushed stills joined by xfade on narration boundaries, logo top-right,
     END card appended once; exactly one film per call (film=index for a series plan);
     timing must match the plan's voice units exactly; audio is the mixed track (padded under the end card)."""
@@ -146,7 +146,7 @@ def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
     scenes = _scenes(plan, film)
     if not scenes:
         raise ValueError("plan has no scenes")
-    _check_timing(scenes, timing, language)
+    _check_timing(scenes, timing, language, style)  # style: the narration job's voice style
     narr_end = timing[-1]["end"] if timing else 0.0
     total = max(narr_end, _duration(mixed_audio))
 

@@ -1021,6 +1021,181 @@ class CliTests(RoundTwo, unittest.TestCase):
             for u in SOURCE["units"]))
 
 
+class StorytellerCliTests(unittest.TestCase):
+    """Owner 2026-11-24: expressive storytelling, candidate presets and the audition job."""
+    setUp = CliTests.setUp
+    fake_job, noise = RoundTwo.fake_job, RoundTwo.noise
+    init_and_plan = CliTests.init_and_plan
+    fake_colab_outputs = CliTests.fake_colab_outputs
+
+    def job(self, *flags):
+        return run("job", "narration", "--root", self.root, "--rates", self.rates, *flags)
+
+    def job_json(self, job_dir):
+        with zipfile.ZipFile(job_dir / "inputs.zip") as z:
+            return json.loads(z.read("job.json"))
+
+    def only_job(self):
+        return next((self.root / "jobs").iterdir())
+
+    def test_expressive_job_records_its_style(self):
+        self.init_and_plan()
+        code, out = self.job("--expressive")
+        self.assertEqual(code, 0, out)
+        job = self.job_json(self.only_job())
+        self.assertEqual(job["voice_style"], {"group": True, "pauses": True, "direct": True})
+        texts = [u["text"] for u in job["units"]]
+        self.assertIn("Every afternoon the children played in the garden. It was large and lovely.", texts)
+        self.assertTrue(all("speaks in a" in u["description"] for u in job["units"]))
+        ev = [e for e in Record.load(self.root).data["events"] if e["result"] == "job_target"][-1]
+        self.assertEqual(ev["detail"]["voice_style"], job["voice_style"])
+
+    def test_directions_need_expressive_and_known_units(self):
+        self.init_and_plan()
+        d = self.d / "directions.json"
+        d.write_text(json.dumps({"s001-002": {"emotion": "Sad"}}))
+        code, out = self.job("--directions", d)
+        self.assertNotEqual(code, 0)
+        self.assertIn("--expressive", out)
+        d.write_text(json.dumps({"nope-001": {"emotion": "Sad"}}))
+        code, out = self.job("--expressive", "--directions", d)
+        self.assertNotEqual(code, 0)
+        self.assertIn("unknown unit", out)
+        self.assertFalse((self.root / "jobs").exists())
+
+    def test_list_units_prints_keys_and_builds_nothing(self):
+        self.init_and_plan()
+        code, out = self.job("--expressive", "--list-units")
+        self.assertEqual(code, 0, out)
+        self.assertIn("-001", out)
+        self.assertIn("It was large and lovely.", out)
+        self.assertFalse((self.root / "jobs").exists())
+
+    def test_candidate_storyteller_preset_is_refused_for_production(self):
+        self.init_and_plan()
+        code, out = self.job("--voice", "mary::storyteller")
+        self.assertNotEqual(code, 0)
+        self.assertIn("audition", out)
+        code, out = self.job("--voice", "arjun::storyteller")
+        self.assertNotEqual(code, 0)
+        self.assertIn("language", out)
+        self.assertFalse((self.root / "jobs").exists())
+
+    def test_owner_selected_storyteller_preset_is_used(self):
+        self.init_and_plan()
+        roster = json.loads(cli.STORYTELLER_ROSTER.read_text(encoding="utf-8"))
+        mary = next(p for p in roster["presets"]["en"] if p["preset_key"] == "mary::storyteller")
+        mary["status"] = "OWNER_SELECTED"
+        path = self.d / "storyteller.json"
+        path.write_text(json.dumps(roster), encoding="utf-8")
+        with mock.patch.object(cli, "STORYTELLER_ROSTER", path):
+            code, out = self.job("--voice", "mary::storyteller", "--expressive")
+        self.assertEqual(code, 0, out)
+        job = self.job_json(self.only_job())
+        self.assertTrue(all(u["description"].startswith(mary["description"] + " Mary speaks in a")
+                            for u in job["units"]))
+        ev = [e for e in Record.load(self.root).data["events"] if e["result"] == "job_target"][-1]
+        self.assertEqual(ev["detail"]["voice"], "mary::storyteller")
+
+    def test_storyteller_roster_candidates(self):
+        roster = json.loads(cli.STORYTELLER_ROSTER.read_text(encoding="utf-8"))
+        keys = {lang: [p["preset_key"] for p in roster["presets"][lang]] for lang in ("bn", "en")}
+        self.assertEqual(keys, {"bn": ["arjun::storyteller", "aditi::storyteller", "arnav::storyteller"],
+                                "en": ["thoma::storyteller", "mary::storyteller", "tisha::storyteller"]})
+        for lang, presets in roster["presets"].items():
+            for p in presets:
+                self.assertEqual(p["status"], "CANDIDATE \u2014 owner audition required")
+                low = p["description"].lower()
+                for phrase in ("highly expressive", "very clear audio", "no background noise",
+                               "storyteller"):
+                    self.assertIn(phrase, low, p["preset_key"])
+                self.assertNotIn("even manner", low)
+                self.assertTrue(p["description"].startswith(p["speaker"] + " "))
+                self.assertEqual(p["temperature"], 0.91)
+        self.assertEqual(roster["model"]["revision"], "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca")
+
+    def audition_file(self):
+        path = self.d / "audition.json"
+        path.write_text(json.dumps({"passages": {
+            "narration": "The giant came home. He was tired.",
+            "dialogue": "\u201cWho are you?\u201d he asked. \u201cA child.\u201d",
+            "emotional": "She wept. The garden was gone forever."},
+            "directions": {"emotional-001": {"emotion": "Sad", "clause": "Slower, close to tears."}}}))
+        return path
+
+    def test_audition_job_builds_imports_and_never_narrates_a_film(self):
+        self.init_and_plan()
+        code, out = self.job("--audition", self.audition_file())
+        self.assertEqual(code, 0, out)
+        self.assertIn("audition", out)
+        job_dir = self.only_job()
+        job = self.job_json(job_dir)
+        variants = job["audition"]["variants"]
+        self.assertEqual(variants, {"control": "en_tisha::story",
+                                    "thoma-storyteller": "thoma::storyteller",
+                                    "mary-storyteller": "mary::storyteller",
+                                    "tisha-storyteller": "tisha::storyteller"})
+        self.assertIs(job["audition"]["film_narration"], False)
+        keys = {u["unit_key"] for u in job["units"]}
+        for v in variants:
+            for passage in ("narration", "dialogue", "emotional"):
+                self.assertIn(f"{v}__{passage}-001", keys)
+        ev = [e for e in Record.load(self.root).data["events"] if e["result"] == "job_target"][-1]
+        self.assertEqual(ev["detail"]["target"], "audition")
+        folder, _ = self.fake_colab_outputs(job_dir.name, job_dir)
+        code, out = run("import", job_dir.name, "--root", self.root, "--from", folder, "--units", 0.5)
+        self.assertEqual(code, 0, out)
+        self.assertTrue((self.root / "narration" / job_dir.name / "mary-storyteller__dialogue-001.wav").is_file())
+        code, out = run("status", "--root", self.root)
+        self.assertIn("job narration", out.split("Next:")[-1])  # film narration still to build
+        code, out = run("film", "--root", self.root, "--logo", self.d / "l.png", "--end-card",
+                        self.d / "e.png", "--score", self.d / "s.wav", "--score-route", "vcsl")
+        self.assertNotEqual(code, 0)
+        self.assertIn("needs imported narration", out)
+
+    def test_audition_refuses_film_or_reel_flags_and_unknown_candidates(self):
+        self.init_and_plan()
+        code, out = self.job("--audition", self.audition_file(), "--expressive")
+        self.assertNotEqual(code, 0)
+        bad = json.loads(self.audition_file().read_text())
+        bad["candidates"] = ["arjun::storyteller"]
+        path = self.d / "bad.json"
+        path.write_text(json.dumps(bad))
+        code, out = self.job("--audition", path)
+        self.assertNotEqual(code, 0)
+        self.assertIn("language", out)
+        self.assertFalse((self.root / "jobs").exists())
+
+    def test_expressive_narration_assembles_film_and_bundles_audio(self):
+        self.init_and_plan()
+        code, out = self.job("--expressive")
+        self.assertEqual(code, 0, out)
+        job_dir = self.only_job()
+        folder, units = self.fake_colab_outputs(job_dir.name, job_dir)
+        code, out = run("import", job_dir.name, "--root", self.root, "--from", folder, "--units", 1)
+        self.assertEqual(code, 0, out)
+        plan = json.loads((self.root / "plan.json").read_text())
+        scenes = plan["plan"]["films"][0]["scenes"]
+
+        def stills(rec, job_id, jd, out):
+            for i, sc in enumerate(scenes):
+                Image.new("RGB", (320, 180), (60 * i, 90, 120)).save(out / f"{sc['scene_id']}-1.png")
+        self.fake_job("stills", "film-01", stills)
+        Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(self.d / "logo.png")
+        Image.new("RGB", (320, 180), (0, 0, 0)).save(self.d / "end.png")
+        bed = self.d / "bed.wav"
+        self.noise(bed, 30)
+        code, out = run("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card",
+                        self.d / "end.png", "--score", bed, "--score-route", "vcsl")
+        self.assertEqual(code, 0, out)
+        timing = json.loads((self.root / "film" / "film-01" / "timing.json").read_text())
+        self.assertEqual([t["unit_key"] for t in timing["units"]], [u["unit_key"] for u in units])
+        rec = Record.load(self.root)
+        rec.event("qc", "pass", {"failed": []})
+        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry")
+        self.assertEqual(code, 0, out)
+
+
 class SentenceSanity(unittest.TestCase):
     def test_fixture_a2_has_two_sentences(self):
         self.assertEqual(len(sentences(PARAS[1][2])), 2)

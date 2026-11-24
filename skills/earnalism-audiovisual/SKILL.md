@@ -68,8 +68,11 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
 - **Words.** Film narration speaks the book's exact text, every unit once. Reels may
   condense, but every claim is true to the book; prefer the book's own sentences.
 - **Voice.** `en_tisha::story` for English, `bn_arnav::story` for Bengali, description
-  byte-for-byte from the roster plus at most one clause of ≤ 12 words. No new voice
-  search, no impersonation, no spoken stage directions.
+  byte-for-byte from the roster plus at most one clause of ≤ 12 words. To fix flat,
+  robotic delivery: audition first (`job narration --audition audition.json`; candidates in
+  `references/storyteller-voices.json`), the owner picks (`OWNER_SELECTED`), then narrate with
+  `--voice <pick> --expressive` (grouping, emotion direction, varied pauses; exact text
+  kept). Candidates never voice production. No impersonation, no spoken stage directions.
 - **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0) and
   VCSL samples (CC0). MusicGen (CC-BY-NC weights) and FLUX.1-dev (non-commercial) are
   forbidden even if the owner names them; offer the licensed equivalent instead.

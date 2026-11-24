@@ -110,6 +110,55 @@ class ColabJobTests(unittest.TestCase):
         self.assertIn("**GENERATION", src)
         self.assertIn('"generation": GENERATION', src)
 
+    def job_json(self, r):
+        with zipfile.ZipFile(r["inputs_zip"]) as z:
+            return json.loads(z.read("job.json"))
+
+    def test_default_narration_job_json_has_no_style_fields(self):
+        job = self.job_json(self.narration())
+        self.assertEqual(sorted(job), ["generation", "job_id", "kind", "model", "schema", "title", "units"])
+
+    def test_expressive_narration_groups_directs_and_records_the_style(self):
+        style = {"group": True, "pauses": True, "direct": True}
+        r = self.narration(style=style, compute={**COMPUTE, "items": 1},
+                           directions={"s01-001": {"emotion": "Sad", "clause": "Softly."}})
+        job = self.job_json(r)
+        self.assertEqual(job["voice_style"], style)
+        self.assertEqual(len(job["units"]), 1)  # the two short sentences are one unit
+        self.assertEqual(job["units"][0]["text"], SCENE["text"])
+        self.assertIn("sad tone. Softly.", job["units"][0]["description"])
+        self.assertEqual(job["directions"], {"s01-001": {"emotion": "Sad", "clause": "Softly."}})
+
+    def test_directions_for_unknown_units_are_refused_before_anything_is_written(self):
+        with self.assertRaisesRegex(ValueError, "unknown unit"):
+            self.narration(style={"group": True, "direct": True}, compute={**COMPUTE, "items": 1},
+                           directions={"s01-002": {"emotion": "Sad"}})
+        self.assertEqual(list(self.out.iterdir()), [])
+        self.assertFalse(self.ledger.path.exists())
+
+    def test_audition_job_renders_every_variant_and_is_marked(self):
+        passages = {"narration": "The giant came home. He was tired.",
+                    "dialogue": "\u201cWho are you?\u201d he asked.",
+                    "emotional": "She wept."}
+        spec = {"audition": {"passages": passages, "language": "en", "variants": [
+            {"name": "control", "preset_key": "en_tisha::story",
+             "preset": {**PRESET, "temperature": 0.91}, "style": None},
+            {"name": "mary-storyteller", "preset_key": "mary::storyteller",
+             "preset": {"description": "Mary speaks warmly.", "speaker": "Mary", "temperature": 0.91},
+             "style": {"group": True, "pauses": True, "direct": True}}]}}
+        r = self.build("narration", spec)
+        job = self.job_json(r)
+        self.assertEqual(job["audition"]["variants"],
+                         {"control": "en_tisha::story", "mary-storyteller": "mary::storyteller"})
+        keys = [u["unit_key"] for u in job["units"]]
+        self.assertIn("control__narration-002", keys)
+        self.assertIn("mary-storyteller__narration-001", keys)
+        self.assertEqual(job["generation"], {"temperature": 0.91})
+        bad = json.loads(json.dumps(spec))
+        bad["audition"]["variants"][1]["preset"]["temperature"] = 1.2
+        with self.assertRaisesRegex(ValueError, "generation"):
+            self.build("narration", bad)
+
     def test_narration_generation_settings_validated(self):
         for bad in ({"temperature": 0}, {"temperature": "hot"}, {"temperature": float("nan")}):
             with self.assertRaises(ValueError):

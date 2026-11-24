@@ -201,6 +201,29 @@ class FilmTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self._call(series, t, film=5)
 
+    def test_grouped_storyteller_units_time_and_subtitle(self):
+        """Grouped units keep stable keys; timing, subtitles and the plan check follow them."""
+        from eav.voice import EXPRESSIVE, voice_units
+        units = [u for sc in PLAN["films"][0]["scenes"]
+                 for u in voice_units(sc, {"description": "d"}, None, "en", EXPRESSIVE)]
+        self.assertEqual([u["unit_key"] for u in units], ["s1-001", "s2-001"])
+        self.assertEqual(units[0]["text"], "One. Two.")
+        t = film.narration_track(units, self.wavs, self.d / "n.wav")
+        self.assertEqual(len(film.subtitles(t, units).strip().split("\n\n")), 2)
+        film._check_timing(PLAN["films"][0]["scenes"], t, "en", EXPRESSIVE)
+        with self.assertRaises(ValueError):  # the default style expects s1-002 too
+            film._check_timing(PLAN["films"][0]["scenes"], t, "en")
+        stills = self.d / "stills"
+        stills.mkdir()
+        for name in ("s1", "s2"):
+            Image.new("RGB", (320, 180), "red").save(stills / f"{name}.png")
+        logo, card = self.d / "logo.png", self.d / "card.png"
+        Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(logo)
+        Image.new("RGB", (320, 180), "black").save(card)
+        info = film.assemble(PLAN, t, stills, self.d / "n.wav", logo, card, self.d / "f.mp4",
+                             size=(320, 180), style=EXPRESSIVE)
+        self.assertEqual(info["scenes"], 2)
+
     def test_assemble_missing_still_refuses(self):
         t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
         (self.d / "stills").mkdir()

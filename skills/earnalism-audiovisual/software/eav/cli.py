@@ -4,6 +4,11 @@
   python3 -m eav.cli plan --root <dir>
   python3 -m eav.cli job <narration|stills|music|reel_clips> --root <dir> --rates <rates.json>
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
+  python3 -m eav.cli job narration --root <dir> --rates <rates.json> [--film N | --reel N]
+                         --expressive [--directions <directions.json>] [--voice <OWNER_SELECTED
+                         storyteller preset>] [--list-units]   (storyteller style, references/earnalism-voice.md)
+  python3 -m eav.cli job narration --root <dir> --rates <rates.json> --audition <audition.json>
+                         (one Colab job: 3 passages x candidate storyteller presets + the current preset)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli exchange-stage <job_id> --root <dir> [--account <id> --bucket <name>]
@@ -47,12 +52,15 @@ from pathlib import Path, PureWindowsPath
 from . import budget, colab_jobs, exchange, film, importer, mix, qc, reel, scenes
 from .record import Record, sha256_file
 from .text import sentences
-from .voice import voice_units
+from .voice import EXPRESSIVE, unit_anchors, voice_units
 
 PROG = "python3 -m eav.cli"
 ROSTER = (Path(__file__).resolve().parents[3] / "earnalism-audiobook-go-live" / "references"
           / "final-voice-roster.json")
 STORY_PROFILE = {"en": "en_tisha", "bn": "bn_arnav"}
+STORYTELLER_ROSTER = Path(__file__).resolve().parents[2] / "references" / "storyteller-voices.json"
+OWNER_SELECTED = "OWNER_SELECTED"
+AUDITION_TARGET = "audition"
 EVIDENCE_SCHEMA = "earnalism.audiovisual-clearance-evidence.v1"
 EVIDENCE_DRAFT = "audiovisual-clearance-evidence.draft.json"
 SLUG = re.compile(r"[a-z0-9][a-z0-9-]*")
@@ -163,10 +171,11 @@ def _plan(rec) -> dict:
 def _jobs(rec) -> list:
     """Every built job with its target, its build order and how it ended (if it has)."""
     events = rec.data["events"]
-    targets, order = {}, {}
+    targets, order, details = {}, {}, {}
     for i, e in enumerate(events):
         if e["stage"] == "cli" and e["result"] == "job_target":
             targets[e["detail"]["job_id"]], order[e["detail"]["job_id"]] = e["detail"]["target"], i
+            details[e["detail"]["job_id"]] = e["detail"]
     done = {r: {e["detail"]["job_id"] for e in events if e["stage"] == s_ and e["result"] == r}
             for s_, r in (("import", "accepted"), ("job", "superseded"), ("job", "closed"),
                           ("job", "superseding"), ("job", "closing"))}
@@ -178,6 +187,9 @@ def _jobs(rec) -> list:
         jid = m["job_id"]
         out.append({"job_id": jid, "kind": m["job_kind"], "target": targets.get(jid),
                     "order": order.get(jid, -1),
+                    # narration voice style and storyteller preset (None: the default style/plan voice)
+                    "style": details.get(jid, {}).get("voice_style"),
+                    "voice": details.get(jid, {}).get("voice"),
                     "notebook": rec.root / a["path"], "inputs_zip": rec.root / m["inputs_zip"],
                     "manifest": rec.root / m["manifest"], "forecast_units": m["forecast_units"],
                     "imported": jid in done["accepted"],
@@ -323,6 +335,67 @@ def _story_preset(language: str) -> dict:
     return {"profile": profile, "preset_key": preset["preset_key"],
             "description": preset["description"], "roster_sha256": sha256_file(ROSTER),
             **{k: preset[k] for k in colab_jobs.GENERATION_KEYS if k in preset}}
+
+
+def _storyteller(language: str, key=None) -> list:
+    """Storyteller presets of the title language (all, or the one named)."""
+    roster = _json(STORYTELLER_ROSTER)
+    found = [p for lang, ps in roster["presets"].items() for p in ps if key in (None, p["preset_key"])
+             and (key is not None or lang == language)]
+    if key is not None and not found:
+        raise Stop(f"{key} is not in {STORYTELLER_ROSTER.name}",
+                   "Use a preset_key from references/storyteller-voices.json")
+    for p in found:
+        if p["language"] != language:
+            raise Stop(f"{p['preset_key']} is a {p['language']} preset; this title's language is {language}",
+                       "Use a storyteller preset of the title's language")
+    return found
+
+
+def _voice_preset(p: dict) -> dict:
+    return {"description": p["description"], "speaker": p["speaker"],
+            **{k: p[k] for k in colab_jobs.GENERATION_KEYS if k in p}}
+
+
+def _production_storyteller(language: str, key: str) -> dict:
+    p = _storyteller(language, key)[0]
+    if p.get("status") != OWNER_SELECTED:
+        raise Stop(f"{key} is {p.get('status')!r}, not {OWNER_SELECTED}: a storyteller preset voices "
+                   "production narration only after the owner picks it from an audition",
+                   f"{PROG} job narration --root <dir> --rates <rates.json> --audition <audition.json>, "
+                   "then the owner listens and selects (references/earnalism-voice.md)")
+    return p
+
+
+def _plan_preset(plan: dict) -> dict:
+    preset = {k: v for k, v in plan["voice"].items()
+              if k == "description" or k in colab_jobs.GENERATION_KEYS}
+    profile = (_json(ROSTER)["profiles"].get(plan["voice"].get("profile")) or {})
+    if profile.get("speaker"):
+        preset["speaker"] = profile["speaker"]
+    return preset
+
+
+def _audition_spec(rec, args, plan) -> dict:
+    if args.reel or args.expressive or args.directions or args.voice or args.clause:
+        raise Stop("--audition takes no --reel, --expressive, --directions, --voice or --clause: it "
+                   "renders the control as production does today and every candidate in the storyteller style",
+                   "Put the passages, optional candidates and optional directions in audition.json")
+    lang = plan["language"]
+    a = _json(args.audition)
+    unknown = sorted(set(a) - {"passages", "candidates", "directions"})
+    if unknown:
+        raise Stop(f"audition.json has unknown field(s) {', '.join(unknown)}",
+                   "Use passages {narration, dialogue, emotional}, optional candidates and directions")
+    keys = a.get("candidates")
+    candidates = ([_storyteller(lang, k)[0] for k in keys] if keys else _storyteller(lang))
+    control = _plan_preset(plan)
+    variants = [{"name": "control", "preset_key": plan["voice"]["preset_key"], "preset": control,
+                 "style": None}]
+    variants += [{"name": p["preset_key"].replace("::", "-"), "preset_key": p["preset_key"],
+                  "preset": _voice_preset(p), "style": dict(EXPRESSIVE)} for p in candidates]
+    return {"audition": {"passages": a.get("passages"), "language": lang, "variants": variants,
+                         "directions": a.get("directions")}}
 
 
 def _title_spent(ledger, rec) -> float:
@@ -585,7 +658,9 @@ def cmd_plan(args):
 def _job_spec(rec, args, kind, target):
     plan = _plan(rec)
     lang = plan["language"]
-    if kind == "narration":
+    if kind == "narration" and args.audition:
+        spec = _audition_spec(rec, args, plan)
+    elif kind == "narration":
         if args.reel:
             planned, detail = _plan_event(rec, args.reel)
             if detail is not None:  # R27
@@ -604,11 +679,21 @@ def _job_spec(rec, args, kind, target):
             if not 1 <= args.film <= len(films):
                 raise Stop(f"film {args.film} is not in the plan ({len(films)} films)", f"{PROG} status --root {rec.root}")
             todo = films[args.film - 1]["scenes"]
-        preset = {k: v for k, v in plan["voice"].items()
-                  if k == "description" or k in colab_jobs.GENERATION_KEYS}
+        if args.directions and not args.expressive:
+            raise Stop("--directions needs --expressive (the direction mode)",
+                       "Rerun with --expressive --directions <file>")
+        preset = (_voice_preset(_production_storyteller(lang, args.voice)) if args.voice
+                  else _plan_preset(plan))
         spec = {"scenes": todo, "preset": preset,
                 "language": lang, "clause": args.clause}
+        if args.expressive:
+            spec["style"] = dict(EXPRESSIVE)
+        if args.directions:
+            spec["directions"] = _json(args.directions)
     else:
+        if args.audition or args.expressive or args.directions or args.voice or args.list_units:
+            raise Stop("--audition, --expressive, --directions, --voice and --list-units are narration "
+                       "options", f"Drop them from the {kind} job")
         if not args.spec:
             raise Stop(f"a {kind} job needs --spec (prompts, seeds{', shots' if kind == 'reel_clips' else ''})",
                        "Write it per references/film-recipe.md or references/reel-recipe.md")
@@ -619,7 +704,10 @@ def _job_spec(rec, args, kind, target):
             _check_clip_batch(rec, args.reel, spec)
     if args.job_id:
         spec["job_id"] = args.job_id
-    return spec, colab_jobs.job_items(kind, spec)
+    try:
+        return spec, colab_jobs.job_items(kind, spec)
+    except ValueError as e:
+        raise Stop(f"job not built: {e}", "Fix the directions, audition or clause and rerun")
 
 
 def cmd_job(args):
@@ -627,9 +715,14 @@ def cmd_job(args):
     kind = args.kind
     if kind == "reel_clips" and not args.reel:
         raise Stop("reel_clips jobs belong to one reel", "Pass --reel <n>")
-    target = f"reel-{args.reel}" if args.reel else _film_target(args.film)
-    rates = _json(args.rates)
+    target = (AUDITION_TARGET if kind == "narration" and args.audition
+              else f"reel-{args.reel}" if args.reel else _film_target(args.film))
     spec, items = _job_spec(rec, args, kind, target)
+    if args.list_units:  # for writing directions.json: the keys this job would use; nothing built
+        for u in colab_jobs.narration_units(spec):
+            print(f"{u['unit_key']}\t{u['text']}")
+        return
+    rates = _json(args.rates)
     try:  # R21: items and steps come from the job itself, rates from the last measured run
         compute = colab_jobs.derive_compute(kind, spec, rates, items)
     except ValueError as e:
@@ -657,7 +750,17 @@ def cmd_job(args):
                    "Hold the job and ask the owner; never retry past a cap.", code=3)
     except (ValueError, FileExistsError, KeyError) as e:
         raise Stop(f"job not built: {e}", "Fix the spec and rerun")
-    rec.event("cli", "job_target", {"job_id": result["job_id"], "target": target, "kind": kind})
+    detail = {"job_id": result["job_id"], "target": target, "kind": kind}
+    if spec.get("style"):
+        detail["voice_style"] = spec["style"]
+    if kind == "narration" and args.voice:
+        detail["voice"] = args.voice
+    rec.event("cli", "job_target", detail)
+    if target == AUDITION_TARGET:
+        print("Audition job: the same passages in "
+              + ", ".join(v["name"] for v in spec["audition"]["variants"])
+              + ". Files <variant>__<unit_key>.wav; it is never film narration. After import the owner "
+              "listens and selects a preset (references/earnalism-voice.md).")
     print(f"Built {kind} job {result['job_id']} for {target}: forecast {result['forecast_units']:.2f} CU "
           f"reserved ({remaining - result['forecast_units']:.2f} CU left under the title and month caps). "
           "Inert until the owner enables it in Colab.")
@@ -892,7 +995,7 @@ def cmd_film(args):
         raise Stop(f"{t} needs imported narration and stills jobs", next_action(rec.root))
     lang = plan["language"]
     scs = films[args.film - 1]["scenes"]
-    units = [u for sc in scs for u in voice_units(sc, {"description": ""}, None, lang)]
+    units = [u for sc in scs for u in voice_units(sc, {"description": ""}, None, lang, narr["style"])]
     out = rec.root / "film" / t
     out.mkdir(parents=True, exist_ok=True)
     timing, prov = _measured_track(units, rec.root / "narration" / narr["job_id"],
@@ -931,7 +1034,7 @@ def cmd_film(args):
     stills_dir, stills_info = _film_stills(rec, t, out)
     info = film.assemble(plan["plan"], timing, stills_dir, out / "mix.wav",
                          Path(args.logo), Path(args.end_card), out / f"{t}.mp4",
-                         film=args.film - 1, language=lang)
+                         film=args.film - 1, language=lang, style=narr["style"])
     for kind, p in (("timing", out / "timing.json"), ("subtitles", out / f"{t}.srt"),
                     ("mix", out / "mix.wav")):
         rec.add_artifact(kind, p, {"target": t})
@@ -987,7 +1090,8 @@ def _line_ends(script, units, timing) -> list:
 
 
 def _reel_track(rec, n, script, narr, folder):
-    units = voice_units(_reel_scene(script, n), {"description": ""}, None, script["language"])
+    units = voice_units(_reel_scene(script, n), {"description": ""}, None, script["language"],
+                        narr.get("style"))
     timing, prov = _measured_track(units, rec.root / "narration" / narr["job_id"],
                                    folder / "narration.wav", narr["job_id"])
     return units, timing, prov
@@ -1222,8 +1326,8 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
             job_ids.add(job["job_id"])
             units, tags = [], []
             for _, sc in mine:
-                vus = voice_units(sc, {"description": ""}, None, lang)
-                tg = [b["anchor_id"] for b in sc["blocks"] for _ in sentences(b["text"], lang)]
+                vus = voice_units(sc, {"description": ""}, None, lang, job["style"])
+                tg = unit_anchors(sc, lang, job["style"])
                 if len(tg) != len(vus):
                     raise Stop(f"scene {sc['scene_id']}: unit/anchor mismatch", "Report as a bug")
                 units += vus
@@ -1278,6 +1382,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
     provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
                   "narration_job_id": ids[0] if len(ids) == 1 else ids, "units": prov_units}
     timing_path = _write_json(bundle / "timing.json", {"units": rows, "provenance": provenance})
+    voices = sorted({j["voice"] or plan["voice"]["preset_key"] for j in _jobs(rec) if j["job_id"] in job_ids})
     audio = [v["mp3_sha256"] for v in prov_units.values()]
     draft = _write_json(rec.root / "maison" / EVIDENCE_DRAFT, {
         "schema": EVIDENCE_SCHEMA,
@@ -1293,7 +1398,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
         "text_source_licence": None, "cover_provenance": None,
         "generators": [{"model": colab_jobs.NARRATION_REPO, "revision": colab_jobs.NARRATION_REVISION,
                         "licence": "Apache-2.0", "job_ids": ids,
-                        "voice": plan["voice"]["preset_key"]}],
+                        "voice": voices[0] if len(voices) == 1 else voices}],
         "dry_narration": bool(args.dry),
         "music": None if args.dry else {
             **_music_licence(args.score_route),
@@ -1363,6 +1468,13 @@ def _parser():
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--reel", type=int)
     s.add_argument("--clause", help="optional appended voice clause, <= 12 words")
+    s.add_argument("--expressive", action="store_true",
+                   help="narration: storyteller style (grouping, emotion direction, varied pauses)")
+    s.add_argument("--directions", help="narration with --expressive: {unit_key: {emotion, clause}}")
+    s.add_argument("--voice", help="narration: an OWNER_SELECTED storyteller preset_key")
+    s.add_argument("--audition", help="narration: audition.json (3 passages x candidate presets)")
+    s.add_argument("--list-units", action="store_true",
+                   help="narration: print the unit keys and texts this job would use; build nothing")
     s.add_argument("--job-id")
     s = add("import")
     s.add_argument("job_id")

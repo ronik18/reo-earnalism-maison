@@ -1,0 +1,92 @@
+{
+  "schema": "earnalism.storyteller-voices.v1",
+  "owner_request": "2026-11-24: the voiceover seems mechanical and robotic, lacking natural human expressive story-telling; optimize the skills",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca",
+    "change_requires": "owner approval and licence review"
+  },
+  "selection_rule": "Candidates are auditioned (job narration --audition) against the current story preset as control; the owner listens and picks. Only an entry whose status is exactly OWNER_SELECTED may voice production narration (job narration --voice <preset_key>); the CLI refuses any other. This file never edits the go-live roster (final-voice-roster.json).",
+  "direction_mode": "Use with job narration --expressive: each unit's description becomes this description plus '<Speaker> speaks in a <emotion> tone.' and at most one clause of <= 12 words.",
+  "emotions": [
+    "Command",
+    "Anger",
+    "Narration",
+    "Conversation",
+    "Disgust",
+    "Fear",
+    "Happy",
+    "Neutral",
+    "News",
+    "Sad",
+    "Surprise"
+  ],
+  "emotions_note": "Officially documented for Bengali on the model card; for English the effect is unverified until auditioned.",
+  "presets": {
+    "bn": [
+      {
+        "preset_key": "arjun::storyteller",
+        "speaker": "Arjun",
+        "language": "bn",
+        "gender_presentation": "male",
+        "status": "CANDIDATE — owner audition required",
+        "description": "Arjun speaks in fluent, natural standard Bengali as an expressive, captivating storyteller, with a warm, intimate voice and highly expressive, animated intonation with natural rises and falls, at a varied pace that slows for tender or tense moments. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+        "temperature": 0.91,
+        "source": "Indic Parler-TTS model card: recommended Bengali male speaker"
+      },
+      {
+        "preset_key": "aditi::storyteller",
+        "speaker": "Aditi",
+        "language": "bn",
+        "gender_presentation": "female",
+        "status": "CANDIDATE — owner audition required",
+        "description": "Aditi speaks in fluent, natural standard Bengali as an expressive, captivating storyteller, with a warm, intimate voice and highly expressive, animated intonation with natural rises and falls, at a varied pace that slows for tender or tense moments. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+        "temperature": 0.91,
+        "source": "Indic Parler-TTS model card: recommended Bengali female speaker"
+      },
+      {
+        "preset_key": "arnav::storyteller",
+        "speaker": "Arnav",
+        "language": "bn",
+        "gender_presentation": "male",
+        "status": "CANDIDATE — owner audition required",
+        "description": "Arnav speaks in fluent, natural standard Bengali as an expressive, captivating storyteller, with a warm, intimate voice and highly expressive, animated intonation with natural rises and falls, at a varied pace that slows for tender or tense moments. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+        "temperature": 0.91,
+        "source": "current Earnalism story speaker (bn_arnav::story), storyteller wording replaces the calm, even-manner story preset"
+      }
+    ],
+    "en": [
+      {
+        "preset_key": "thoma::storyteller",
+        "speaker": "Thoma",
+        "language": "en",
+        "gender_presentation": "male",
+        "status": "CANDIDATE — owner audition required",
+        "description": "Thoma speaks with a natural Indian English accent as an expressive, captivating storyteller, with a warm, intimate voice and highly expressive, animated intonation with natural rises and falls, at a varied pace that slows for tender or tense moments. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+        "temperature": 0.91,
+        "source": "Indic Parler-TTS model card: recommended English male speaker"
+      },
+      {
+        "preset_key": "mary::storyteller",
+        "speaker": "Mary",
+        "language": "en",
+        "gender_presentation": "female",
+        "status": "CANDIDATE — owner audition required",
+        "description": "Mary speaks with a natural Indian English accent as an expressive, captivating storyteller, with a warm, intimate voice and highly expressive, animated intonation with natural rises and falls, at a varied pace that slows for tender or tense moments. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+        "temperature": 0.91,
+        "source": "Indic Parler-TTS model card: recommended English female speaker"
+      },
+      {
+        "preset_key": "tisha::storyteller",
+        "speaker": "Tisha",
+        "language": "en",
+        "gender_presentation": "female",
+        "status": "CANDIDATE — owner audition required",
+        "description": "Tisha speaks with a natural Indian English accent as an expressive, captivating storyteller, with a warm, intimate voice and highly expressive, animated intonation with natural rises and falls, at a varied pace that slows for tender or tense moments. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+        "temperature": 0.91,
+        "source": "current Earnalism story speaker (en_tisha::story), storyteller wording replaces the calm, even-manner story preset"
+      }
+    ]
+  },
+  "listening_evidence": null
+}
