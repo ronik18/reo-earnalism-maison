@@ -1166,7 +1166,7 @@ def cmd_social(args):
     """Write the posting kit: tagged links, film descriptions, reel posts and quote cards."""
     rec = _record(args.root)
     plan = _plan(rec)
-    src = rec.data["source"]
+    src = _json(rec.root / "source.json")  # the cleared export init copied in (units and text)
     lang, campaign = plan["language"], rec.data["title_slug"]
     url = lambda source, content: social.campaign_url(args.site, src["edition_id"], campaign, source, content)
     out = rec.root / "social"
