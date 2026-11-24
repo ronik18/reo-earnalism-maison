@@ -122,6 +122,17 @@ class FilmTests(unittest.TestCase):
         self.assertGreater(m.rms_db(m.samples(tail)), -30)   # the END's own sound
         self.assertLess(m.rms_db(m.samples(body)), -60)      # the silent bed stays silent
 
+    def test_encoded_film_keeps_the_true_peak_gate(self):
+        """বিচারক film-01: a -1.5 dBTP mix came out of the AAC encode at -0.9 dBTP and failed QC.
+        The encoded film is measured and, if over -1 dBTP, its body audio is lowered to fit."""
+        t, stills, logo = self._assemble_inputs()
+        hot = self.d / "hot.wav"
+        m.ff("-f", "lavfi", "-i", f"aevalsrc=0.97*sin(2*PI*997*t)|0.97*sin(2*PI*997*t):s=48000:d={t[-1]['end']}",
+             str(hot))  # stereo, about -0.3 dBTP before encoding
+        out = self.d / "film-hot.mp4"
+        film.assemble(PLAN, t, stills, hot, logo, logo, out, size=(320, 180))
+        self.assertLessEqual(mix.measure(out)["true_peak"], -1.0)
+
     def _assemble_inputs(self):
         t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
         stills = self.d / "stills"

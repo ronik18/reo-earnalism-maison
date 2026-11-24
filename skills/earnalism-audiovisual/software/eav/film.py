@@ -10,6 +10,8 @@ RATE = 48000
 FPS = 25
 FADE_S = 0.8
 END_CARD_S = 3.0
+TP_MAX = -1.0      # dBTP gate the encoded film must meet (eav.cli TP_MAX)
+TP_MARGIN = 0.2
 ZOOM_END = 0.06  # 1.00 -> 1.06
 LOGO_WIDTH_FRAC = 0.09
 LOGO_MARGIN_FRAC = 0.03
@@ -203,15 +205,8 @@ def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
     graph.append("[main]format=yuv420p[mainf]")
     graph.append("[mainf][end]concat=n=2:v=1:a=0[v]")
     full = total + end_s
-    if end_audio:
-        graph.append(f"[{base + 2}:a]aresample={RATE},aformat=channel_layouts=stereo,"
-                     f"atrim=0:{total:.3f},apad=whole_dur={total:.3f}[am]")
-        graph.append(f"[{base + 1}:a]aresample={RATE},aformat=channel_layouts=stereo,"
-                     f"atrim=0:{end_s:.3f},apad=whole_dur={end_s:.3f}[ae]")
-        graph.append("[am][ae]concat=n=2:v=0:a=1[a]")
-    else:
-        graph.append(f"[{base + 2}:a]aresample={RATE},aformat=channel_layouts=stereo,"
-                     f"atrim=0:{total:.3f},apad=whole_dur={full:.3f}[a]")
+    gain_db = _body_gain_for_true_peak(mixed_audio, end_card if end_audio else None, total, end_s)
+    graph += _audio_graph(base + 2, base + 1 if end_audio else None, total, end_s, gain_db)
     with tempfile.TemporaryDirectory() as td:
         script = Path(td) / "graph.txt"
         script.write_text(";".join(graph))
@@ -220,4 +215,37 @@ def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
                  "-c:a", "aac", "-b:a", "192k", "-t", f"{full:.3f}",
                  "-movflags", "+faststart", str(out)])
     return {"duration": full, "narration_end": narr_end, "scenes": len(scenes),
-            "clips": n, "size": list(size), "path": str(out)}
+            "clips": n, "size": list(size), "path": str(out), "body_gain_db": gain_db}
+
+
+def _audio_graph(mixed_idx, end_idx, total, end_s, gain_db):
+    """The film's audio: the mixed body (with `gain_db`), then the END's own sound or silence."""
+    gain = f",volume={gain_db:.2f}dB" if gain_db else ""
+    if end_idx is None:
+        return [f"[{mixed_idx}:a]aresample={RATE},aformat=channel_layouts=stereo{gain},"
+                f"atrim=0:{total:.3f},apad=whole_dur={total + end_s:.3f}[a]"]
+    return [f"[{mixed_idx}:a]aresample={RATE},aformat=channel_layouts=stereo{gain},"
+            f"atrim=0:{total:.3f},apad=whole_dur={total:.3f}[am]",
+            f"[{end_idx}:a]aresample={RATE},aformat=channel_layouts=stereo,"
+            f"atrim=0:{end_s:.3f},apad=whole_dur={end_s:.3f}[ae]",
+            "[am][ae]concat=n=2:v=0:a=1[a]"]
+
+
+def _body_gain_for_true_peak(mixed_audio, end_video, total, end_s, tries=4) -> float:
+    """AAC encoding raises inter-sample peaks (বিচারক film-01: -1.5 dBTP mix, -0.9 encoded).
+    Encode the audio alone, measure it, and lower the body until the encoded track meets
+    TP_MAX; the END's own sound is never changed. Returns the body gain in dB (0 or less)."""
+    from .mix import measure
+    gain = 0.0
+    with tempfile.TemporaryDirectory() as td:
+        trial = Path(td) / "audio.m4a"
+        inputs = ["-i", str(mixed_audio)] + (["-i", str(end_video)] if end_video else [])
+        for _ in range(tries):
+            graph = _audio_graph(0, 1 if end_video else None, total, end_s, gain)
+            _ffmpeg([*inputs, "-filter_complex", ";".join(graph), "-map", "[a]",
+                     "-c:a", "aac", "-b:a", "192k", str(trial)])
+            tp = measure(trial)["true_peak"]
+            if tp <= TP_MAX:
+                return gain
+            gain -= tp - TP_MAX + TP_MARGIN
+    raise RuntimeError(f"encoded audio stays above {TP_MAX} dBTP after {tries} attempts")
