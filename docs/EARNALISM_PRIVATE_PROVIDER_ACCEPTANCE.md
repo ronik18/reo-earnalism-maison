@@ -114,3 +114,11 @@ Actual quality/listening, complete source and rights for every offered format an
 the full active publication whitelist remain separate. A transport test cannot
 accept Open Window's soundtrack/style, a voice, a full film or GO LIVE. No customer
 publication or physical-device acceptance is implied by fixtures or protocol tests.
+
+## YouTube OAuth setup — 25 November 2026 (verification pending)
+
+- Project: **Earnalism** (`earnalism`, number `620834018736`); YouTube Data API v3 enabled in Console. The original web sign-in client is preserved.
+- A separate Desktop client, **Earnalism private YouTube delivery**, was created. Consent remains External/Testing; `sales@reoenterprise.org`, identified in Studio as the account for `theearnalism`, is an added test user. Only `https://www.googleapis.com/auth/youtube.upload` and `https://www.googleapis.com/auth/youtube.force-ssl` were added. Configured scopes are not yet a verified token grant.
+- Local helper: `~/bin/earnalism-youtube-token.py` (mode 700), with isolated dependencies under `~/.config/earnalism/youtube-venv/`. Intended credential paths: `~/.config/earnalism/youtube-client.json` and `~/.config/earnalism/youtube-refresh.json` (mode 600, parent mode 700). Client download is awaiting owner save; no refresh token or verified access token has been produced. Nothing secret is stored in this repository.
+- **HOLD:** OAuth authorization and `GET channels?part=id,snippet&mine=true` must confirm exactly `UCw-UnAXdRzqij8_B2TlgQjQ` before use. Studio access is not API verification. The helper rejects an unexpected channel or scopes and emits no access token in verify/authorize modes; export is for local shell capture only. The delivery CLI reads `EARNALISM_YOUTUBE_ACCESS_TOKEN`. No upload, video mutation or channel-settings change was performed.
+- Audit: no audit form submitted in this task; prior audit status unverified. Owner review before any public release remains required. [Current Google documentation](https://developers.google.com/youtube/data/guides/quota_and_compliance_audits) now describes 100 daily `videos.insert` calls plus 10,000 units for other endpoints, and says unaudited projects are not automatically private-only. Explicit private upload settings remain necessary; project-specific quota must be checked before future execution.
