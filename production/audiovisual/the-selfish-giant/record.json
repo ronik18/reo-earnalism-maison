@@ -62,7 +62,7 @@
       "sha256": "2cb427245c1c5606d4359b9adce4a662897aeac5b74122f9558d06c89a403af4"
     },
     {
-      "bytes": 14698,
+      "bytes": 16898,
       "kind": "colab_job",
       "meta": {
         "forecast_units": 2.1690277777777776,
@@ -73,7 +73,7 @@
         "month": "2026-11"
       },
       "path": "jobs/selfish-giant-stills-film-01-house/stills.ipynb",
-      "sha256": "06109a3cf82a2df5946904655d9059f21d25d916d91776c680f3d1b4c7edc6d3"
+      "sha256": "15322969bc8123c0075396ce4f0439f82e684defd55e414c36f0157ee9479e33"
     },
     {
       "bytes": 15349,
@@ -3336,6 +3336,18 @@
         "notebook_sha256": "06109a3cf82a2df5946904655d9059f21d25d916d91776c680f3d1b4c7edc6d3",
         "old_notebook_sha256": "d4559415c63f658b26c1a5dcfefbbc09056048757418727fb91c37e024364d43",
         "reason": "CUDA OOM on L4: FLUX bf16 transformer exceeds 22 GB; load 8-bit below 30 GB VRAM"
+      },
+      "result": "notebook_rebuilt",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T16:33:24.364387+00:00",
+      "detail": {
+        "inputs_unchanged": true,
+        "job_id": "selfish-giant-stills-film-01-house",
+        "notebook_sha256": "15322969bc8123c0075396ce4f0439f82e684defd55e414c36f0157ee9479e33",
+        "old_notebook_sha256": "06109a3cf82a2df5946904655d9059f21d25d916d91776c680f3d1b4c7edc6d3",
+        "reason": "CUDA OOM on L4 with 8-bit transformer under model CPU offload: encode prompts first, free the text encoders, then load the transformer alone; house style moved first so CLIP/T5 truncation never drops it"
       },
       "result": "notebook_rebuilt",
       "stage": "job"

@@ -1,30 +1,65 @@
 # Stills: FLUX.1-schnell, 4 steps. The exact revision is resolved now and recorded.
 if RUN is not True:
     raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
-import subprocess, sys
+import os, gc, subprocess, sys
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "diffusers", "transformers",
                 "accelerate", "sentencepiece", "protobuf", "bitsandbytes"], check=True)
 import torch
-from diffusers import FluxPipeline
+from diffusers import BitsAndBytesConfig, FluxPipeline, FluxTransformer2DModel
 from huggingface_hub import HfApi
 
 revision = HfApi().model_info(MODEL_REPO).sha
-# The FLUX transformer is ~24 GB in bf16, more than an L4 holds (22 GB): below 30 GB of VRAM
-# it loads 8-bit (~12 GB, near-lossless); an A100 keeps bf16. CPU offload moves one part at a time.
+# Two phases so the text encoders (~10 GB) and the transformer never share the GPU.
+# The transformer is ~24 GB in bf16, more than an L4 holds (22 GB): below 30 GB of VRAM
+# it loads 8-bit (~12 GB, near-lossless); an A100/H100 keeps bf16.
 gpu = torch.cuda.get_device_properties(0)
 QUANT = "bf16" if gpu.total_memory >= 30 * 2**30 else "int8"
 print("GPU", gpu.name, "%.1f GiB;" % (gpu.total_memory / 2**30), "transformer", QUANT)
-MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "steps": STEPS,
-              "gpu": gpu.name, "transformer_precision": QUANT}
-extra = {}
+T5_MAX = 256  # FLUX.1-schnell's T5 limit
+
+
+def look_first(prompt):
+    """CLIP reads only 77 tokens and T5 256: put the house style first so it is never cut."""
+    k = prompt.lower().find("earnalism house style")
+    if k <= 0:
+        return prompt
+    return prompt[k:].rstrip() + " " + prompt[:k].rstrip(" ,;")
+
+
+# Phase 1: encode every prompt with only the text encoders on the GPU.
+enc = FluxPipeline.from_pretrained(MODEL_REPO, revision=revision, transformer=None, vae=None,
+                                   torch_dtype=torch.bfloat16).to("cuda")
+EMBEDS, t5_cut = {}, []
+with torch.no_grad():
+    for item in JOB["items"]:
+        text = look_first(item["prompt"])
+        if len(enc.tokenizer_2(text).input_ids) > T5_MAX:
+            t5_cut.append(item["key"])
+        pe, pooled, _ = enc.encode_prompt(prompt=text, prompt_2=text, device="cuda",
+                                          max_sequence_length=T5_MAX)
+        EMBEDS[item["key"]] = (pe.cpu(), pooled.cpu())
+print("encoded", len(EMBEDS), "prompts; T5 tail cut on", len(t5_cut), t5_cut)
+del enc
+gc.collect()
+torch.cuda.empty_cache()
+
+# Phase 2: the transformer (and the small VAE) alone on the GPU.
+kw = {"revision": revision, "torch_dtype": torch.bfloat16}
 if QUANT == "int8":
-    from diffusers import BitsAndBytesConfig, FluxTransformer2DModel
-    extra["transformer"] = FluxTransformer2DModel.from_pretrained(
-        MODEL_REPO, subfolder="transformer", revision=revision, torch_dtype=torch.bfloat16,
-        quantization_config=BitsAndBytesConfig(load_in_8bit=True))
-pipe = FluxPipeline.from_pretrained(MODEL_REPO, revision=revision, torch_dtype=torch.bfloat16,
-                                    **extra)
-pipe.enable_model_cpu_offload()
+    kw["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
+transformer = FluxTransformer2DModel.from_pretrained(MODEL_REPO, subfolder="transformer", **kw)
+if QUANT == "bf16":
+    transformer.to("cuda")
+assert next(transformer.parameters()).device.type == "cuda", "transformer is not on the GPU"
+pipe = FluxPipeline.from_pretrained(MODEL_REPO, revision=revision, transformer=transformer,
+                                    text_encoder=None, text_encoder_2=None, tokenizer=None,
+                                    tokenizer_2=None, torch_dtype=torch.bfloat16)
+pipe.vae.to("cuda")
+print("GPU memory after load: %.1f GiB" % (torch.cuda.memory_allocated() / 2**30))
+MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "steps": STEPS, "gpu": gpu.name,
+              "transformer_precision": QUANT, "prompt_order": "house style first",
+              "t5_truncated": t5_cut}
 EXPECTED = [item["key"] + ".png" for item in JOB["items"]]
 last = 0.0  # seconds the previous still took; the next starts only if it fits (R25)
 for item in JOB["items"]:
@@ -32,9 +67,11 @@ for item in JOB["items"]:
         break
     started = time.time()
     gen = torch.Generator("cpu").manual_seed(item["seed"])
-    image = pipe(item["prompt"], num_inference_steps=STEPS, guidance_scale=0.0,
-                 max_sequence_length=256, width=item["width"], height=item["height"],
-                 generator=gen).images[0]
+    pe, pooled = EMBEDS[item["key"]]
+    with torch.no_grad():
+        image = pipe(prompt_embeds=pe.to("cuda"), pooled_prompt_embeds=pooled.to("cuda"),
+                     num_inference_steps=STEPS, guidance_scale=0.0, max_sequence_length=T5_MAX,
+                     width=item["width"], height=item["height"], generator=gen).images[0]
     image.save(OUT_DIR / (item["key"] + ".png"))
     last = time.time() - started
     print("wrote", item["key"], "in %.1f s" % last)

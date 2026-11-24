@@ -5407,7 +5407,7 @@
       "sha256": "d5de63814aa1a7fa5a852f347bcea82d668a0fa4caa7cd76ac8a4b51d030c9f9"
     },
     {
-      "bytes": 14616,
+      "bytes": 16816,
       "kind": "colab_job",
       "meta": {
         "forecast_units": 2.416916666666667,
@@ -5418,7 +5418,7 @@
         "month": "2026-11"
       },
       "path": "jobs/stills-film-01-r8-house/stills.ipynb",
-      "sha256": "89b824efa96728b3160b22036251035408f809aae3627587397e72be9d6553ee"
+      "sha256": "dd18d3f50c3f1827141e29ed2387072492391bdf79f85490f9e0dd7899816b82"
     },
     {
       "bytes": 15297,
@@ -9498,6 +9498,18 @@
         "notebook_sha256": "89b824efa96728b3160b22036251035408f809aae3627587397e72be9d6553ee",
         "old_notebook_sha256": "c55cc8e99bf76ad24fe4d40125d7d971809bc615916e1c1842732facb7e51039",
         "reason": "CUDA OOM on L4: FLUX bf16 transformer exceeds 22 GB; load 8-bit below 30 GB VRAM"
+      },
+      "result": "notebook_rebuilt",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T16:33:24.348300+00:00",
+      "detail": {
+        "inputs_unchanged": true,
+        "job_id": "stills-film-01-r8-house",
+        "notebook_sha256": "dd18d3f50c3f1827141e29ed2387072492391bdf79f85490f9e0dd7899816b82",
+        "old_notebook_sha256": "89b824efa96728b3160b22036251035408f809aae3627587397e72be9d6553ee",
+        "reason": "CUDA OOM on L4 with 8-bit transformer under model CPU offload: encode prompts first, free the text encoders, then load the transformer alone; house style moved first so CLIP/T5 truncation never drops it"
       },
       "result": "notebook_rebuilt",
       "stage": "job"

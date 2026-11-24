@@ -9,7 +9,7 @@
     "repo": "black-forest-labs/FLUX.1-schnell",
     "revision": "resolved-at-run-time"
   },
-  "notebook_sha256": "06109a3cf82a2df5946904655d9059f21d25d916d91776c680f3d1b4c7edc6d3",
+  "notebook_sha256": "15322969bc8123c0075396ce4f0439f82e684defd55e414c36f0157ee9479e33",
   "schema": "earnalism.audiovisual-build.v1",
   "title": "the-selfish-giant"
 }
