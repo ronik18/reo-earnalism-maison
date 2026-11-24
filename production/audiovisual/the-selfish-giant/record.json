@@ -88,6 +88,1046 @@
       },
       "path": "jobs/selfish-giant-voice-audition/narration.ipynb",
       "sha256": "af09c2733f97484d5bfec2b7c7e6f74d87cef77bd1eae65beb99b6fa0c87f399"
+    },
+    {
+      "bytes": 724012,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/control__dialogue-001.wav",
+      "sha256": "281218f30b2385fae382fce33e9db6e1852a73f869e45fbc16239cd8b72a0c74"
+    },
+    {
+      "bytes": 377900,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/control__dialogue-002.wav",
+      "sha256": "7443c4d18af0a949ada67d7e71b08a106b800efa762605a65974ce3a7c89af96"
+    },
+    {
+      "bytes": 133164,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/control__emotional-001.wav",
+      "sha256": "93877d9edac74ccf3327b8ce09473084f8ba17b26ee2d8e9adaff740adfbf853"
+    },
+    {
+      "bytes": 482348,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/control__emotional-002.wav",
+      "sha256": "97c647f69ff44c496966db96585d4a8e66e02670396cf756be368a47bbb4a54f"
+    },
+    {
+      "bytes": 845868,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/control__emotional-003.wav",
+      "sha256": "c755381efb805d141f3c0e07be17f6d34be07c829cfba1ea371bf382d9b12c26"
+    },
+    {
+      "bytes": 372780,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/control__narration-001.wav",
+      "sha256": "dc4db72e14b0f57972ef3ce9f87c79a64f0834f4bae8d7fe0f68a1a5e0edb464"
+    },
+    {
+      "bytes": 1256492,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/control__narration-002.wav",
+      "sha256": "a2e506e856d735aba145b6b43ae9e0633a558792dd1613334d881e2066b1b7cd"
+    },
+    {
+      "bytes": 754732,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/control__narration-003.wav",
+      "sha256": "c9288ec53f0c8f658e409784739cb34b04468311d140e297a94d7bbc6f7fa1a7"
+    },
+    {
+      "bytes": 201772,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/control__narration-004.wav",
+      "sha256": "9c6e6fafc8e80a3c125b9ed33958c0f4c0c60aa29bc6577c6c2c2e851d27d2b4"
+    },
+    {
+      "bytes": 147500,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/control__narration-005.wav",
+      "sha256": "11590261dcb15fefc04eaca01c0f460efe6cac4e63e3b404b291e581a6ad33b7"
+    },
+    {
+      "bytes": 845868,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/mary-storyteller__dialogue-001.wav",
+      "sha256": "5ad10a44458113bd84863e11e340698fa53725107d2fdc12c1f33571acaf26b0"
+    },
+    {
+      "bytes": 398380,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/mary-storyteller__dialogue-002.wav",
+      "sha256": "d72bf7b8c7e49dcbb34b2557160eb1d2a2699dccec62d8e9b96ee1c44b5c2bda"
+    },
+    {
+      "bytes": 139308,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/mary-storyteller__emotional-001.wav",
+      "sha256": "81aff5e8da2e978fad610cd11c2b895d9c73680d83db127507cec571c7f446ea"
+    },
+    {
+      "bytes": 441388,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/mary-storyteller__emotional-002.wav",
+      "sha256": "ed79d1931c9c1950672dfe6ed9d160d6a327d66f15181a678ef04d6365d33de8"
+    },
+    {
+      "bytes": 880684,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/mary-storyteller__emotional-003.wav",
+      "sha256": "81d44f97067bbaad85039a0e3471839382245cf23d8296386234b33187a7b641"
+    },
+    {
+      "bytes": 331820,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/mary-storyteller__narration-001.wav",
+      "sha256": "979181579b4ce1f2efc37affef75e4bc827f13ddf0f29a99b321ac8efa1efca1"
+    },
+    {
+      "bytes": 1159212,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/mary-storyteller__narration-002.wav",
+      "sha256": "73f751efa04c7995789c18f0f43046a5624edb4f66f151fc5a2a9396d856e7f0"
+    },
+    {
+      "bytes": 620588,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/mary-storyteller__narration-003.wav",
+      "sha256": "f49dff84b4c18fa9448b1da0a00b93b67b013bf10de499e5e0b2a1fd3e335862"
+    },
+    {
+      "bytes": 178220,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/mary-storyteller__narration-004.wav",
+      "sha256": "a92c287d0dd8fbace97653b68445e5230c959a9c700b00a9605514b6629ae45e"
+    },
+    {
+      "bytes": 157740,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/mary-storyteller__narration-005.wav",
+      "sha256": "cf6533996e8ff4691d07057875a5a6447fa3ba6c0b1ef86de9a849e43db2466e"
+    },
+    {
+      "bytes": 775212,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/thoma-storyteller__dialogue-001.wav",
+      "sha256": "4f1629142d8d2d624238c178600c180ea3ef737890ec6fc2929488519d05f9b8"
+    },
+    {
+      "bytes": 376876,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/thoma-storyteller__dialogue-002.wav",
+      "sha256": "e2f8be264e11f5d24550fea3c28d804570a1f946c2cda8ac667a048f804065b4"
+    },
+    {
+      "bytes": 134188,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/thoma-storyteller__emotional-001.wav",
+      "sha256": "fbee7c6b9cd67bb289185f52d27d770626cc6a3e44d80a3dcb81603fe63e8e05"
+    },
+    {
+      "bytes": 499756,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/thoma-storyteller__emotional-002.wav",
+      "sha256": "43ae0cbb0a0799b0c6bbd92e748058a44c444d67be1e3290be86e8e7f3ee3705"
+    },
+    {
+      "bytes": 819244,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/thoma-storyteller__emotional-003.wav",
+      "sha256": "2fa890eeacb4b966bd62607622bc5a0f01c26ad4f54e1ffb45b46f936fa51bee"
+    },
+    {
+      "bytes": 324652,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/thoma-storyteller__narration-001.wav",
+      "sha256": "e18c3270216f4d70913b2cf8fea3a8444340833b88b086416e1282d4515eaff0"
+    },
+    {
+      "bytes": 1002540,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/thoma-storyteller__narration-002.wav",
+      "sha256": "e10aafee0220d7b14a4b39722c665ab54113bd72ca5253df7d33bb6229bce1ed"
+    },
+    {
+      "bytes": 556076,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/thoma-storyteller__narration-003.wav",
+      "sha256": "0d457c221bbcdc54bd575fa43c378879a347592cf1c8e701e351eac28113ed6b"
+    },
+    {
+      "bytes": 160812,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/thoma-storyteller__narration-004.wav",
+      "sha256": "af5673a4243266617e16b3fb57ac4f7c5c8c6eb14303d5da39c52ba2e4f05808"
+    },
+    {
+      "bytes": 171052,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/thoma-storyteller__narration-005.wav",
+      "sha256": "8cf1ad7b7327c743b78e10191230884a51e33c17bc6364795074c5dbf36702d1"
+    },
+    {
+      "bytes": 857132,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/tisha-storyteller__dialogue-001.wav",
+      "sha256": "34bdcb2a25f7215d5ac4a864f7ad8f95cfee270e29b91133ceb951de2b6d8155"
+    },
+    {
+      "bytes": 504876,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/tisha-storyteller__dialogue-002.wav",
+      "sha256": "697b1f96f3c262247dba40bdf59af8b477db3fb3350f32d1a9b55c2d5a9a6858"
+    },
+    {
+      "bytes": 155692,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/tisha-storyteller__emotional-001.wav",
+      "sha256": "1607a0c1805679851e5ccc118feb7620bb7afca03a79577b887e60b632458571"
+    },
+    {
+      "bytes": 493612,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/tisha-storyteller__emotional-002.wav",
+      "sha256": "308e136efd32b912a0625aac536fa13eb2034950a8df582d36a904fe05018a67"
+    },
+    {
+      "bytes": 967724,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/tisha-storyteller__emotional-003.wav",
+      "sha256": "4c9280faa08a56702a77d7875c3d0cdc39edf21e495cea09ca0ea6d0900a69df"
+    },
+    {
+      "bytes": 376876,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/tisha-storyteller__narration-001.wav",
+      "sha256": "751de1b4c76a9fdb868619e48816688510cdb9d7efb988dc7bbc333ee755127b"
+    },
+    {
+      "bytes": 1388588,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/tisha-storyteller__narration-002.wav",
+      "sha256": "e4b7e8d09af93dae9903e4c1ed57209c1a29e3afa090b8b1a4d749eac637a426"
+    },
+    {
+      "bytes": 814124,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/tisha-storyteller__narration-003.wav",
+      "sha256": "54cc3c67972ec2c786dfa349306e393fee7aa3a78e534e19614c177716bd6213"
+    },
+    {
+      "bytes": 186412,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/tisha-storyteller__narration-004.wav",
+      "sha256": "50b5b3c663e7c8ab8843b4c4e6ebc9a5d4ddaf691c09973d3e13727813e363ae"
+    },
+    {
+      "bytes": 159788,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/selfish-giant-voice-audition/tisha-storyteller__narration-005.wav",
+      "sha256": "b98afd0815a24bac1c4b87f23419da32d90890b311d1b86a06e36488818e42b0"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -343,6 +1383,127 @@
         "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-voice-audition/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T05:14:39.466160+00:00",
+      "detail": {
+        "actual_units": 0.4,
+        "files": [
+          "narration/selfish-giant-voice-audition/control__dialogue-001.wav",
+          "narration/selfish-giant-voice-audition/control__dialogue-002.wav",
+          "narration/selfish-giant-voice-audition/control__emotional-001.wav",
+          "narration/selfish-giant-voice-audition/control__emotional-002.wav",
+          "narration/selfish-giant-voice-audition/control__emotional-003.wav",
+          "narration/selfish-giant-voice-audition/control__narration-001.wav",
+          "narration/selfish-giant-voice-audition/control__narration-002.wav",
+          "narration/selfish-giant-voice-audition/control__narration-003.wav",
+          "narration/selfish-giant-voice-audition/control__narration-004.wav",
+          "narration/selfish-giant-voice-audition/control__narration-005.wav",
+          "narration/selfish-giant-voice-audition/mary-storyteller__dialogue-001.wav",
+          "narration/selfish-giant-voice-audition/mary-storyteller__dialogue-002.wav",
+          "narration/selfish-giant-voice-audition/mary-storyteller__emotional-001.wav",
+          "narration/selfish-giant-voice-audition/mary-storyteller__emotional-002.wav",
+          "narration/selfish-giant-voice-audition/mary-storyteller__emotional-003.wav",
+          "narration/selfish-giant-voice-audition/mary-storyteller__narration-001.wav",
+          "narration/selfish-giant-voice-audition/mary-storyteller__narration-002.wav",
+          "narration/selfish-giant-voice-audition/mary-storyteller__narration-003.wav",
+          "narration/selfish-giant-voice-audition/mary-storyteller__narration-004.wav",
+          "narration/selfish-giant-voice-audition/mary-storyteller__narration-005.wav",
+          "narration/selfish-giant-voice-audition/thoma-storyteller__dialogue-001.wav",
+          "narration/selfish-giant-voice-audition/thoma-storyteller__dialogue-002.wav",
+          "narration/selfish-giant-voice-audition/thoma-storyteller__emotional-001.wav",
+          "narration/selfish-giant-voice-audition/thoma-storyteller__emotional-002.wav",
+          "narration/selfish-giant-voice-audition/thoma-storyteller__emotional-003.wav",
+          "narration/selfish-giant-voice-audition/thoma-storyteller__narration-001.wav",
+          "narration/selfish-giant-voice-audition/thoma-storyteller__narration-002.wav",
+          "narration/selfish-giant-voice-audition/thoma-storyteller__narration-003.wav",
+          "narration/selfish-giant-voice-audition/thoma-storyteller__narration-004.wav",
+          "narration/selfish-giant-voice-audition/thoma-storyteller__narration-005.wav",
+          "narration/selfish-giant-voice-audition/tisha-storyteller__dialogue-001.wav",
+          "narration/selfish-giant-voice-audition/tisha-storyteller__dialogue-002.wav",
+          "narration/selfish-giant-voice-audition/tisha-storyteller__emotional-001.wav",
+          "narration/selfish-giant-voice-audition/tisha-storyteller__emotional-002.wav",
+          "narration/selfish-giant-voice-audition/tisha-storyteller__emotional-003.wav",
+          "narration/selfish-giant-voice-audition/tisha-storyteller__narration-001.wav",
+          "narration/selfish-giant-voice-audition/tisha-storyteller__narration-002.wav",
+          "narration/selfish-giant-voice-audition/tisha-storyteller__narration-003.wav",
+          "narration/selfish-giant-voice-audition/tisha-storyteller__narration-004.wav",
+          "narration/selfish-giant-voice-audition/tisha-storyteller__narration-005.wav"
+        ],
+        "input_zip_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-24T05:14:39.471314+00:00",
+      "detail": {
+        "job_id": "selfish-giant-voice-audition",
+        "members": [
+          "control__dialogue-001.wav",
+          "control__dialogue-002.wav",
+          "control__emotional-001.wav",
+          "control__emotional-002.wav",
+          "control__emotional-003.wav",
+          "control__narration-001.wav",
+          "control__narration-002.wav",
+          "control__narration-003.wav",
+          "control__narration-004.wav",
+          "control__narration-005.wav",
+          "manifest.json",
+          "mary-storyteller__dialogue-001.wav",
+          "mary-storyteller__dialogue-002.wav",
+          "mary-storyteller__emotional-001.wav",
+          "mary-storyteller__emotional-002.wav",
+          "mary-storyteller__emotional-003.wav",
+          "mary-storyteller__narration-001.wav",
+          "mary-storyteller__narration-002.wav",
+          "mary-storyteller__narration-003.wav",
+          "mary-storyteller__narration-004.wav",
+          "mary-storyteller__narration-005.wav",
+          "thoma-storyteller__dialogue-001.wav",
+          "thoma-storyteller__dialogue-002.wav",
+          "thoma-storyteller__emotional-001.wav",
+          "thoma-storyteller__emotional-002.wav",
+          "thoma-storyteller__emotional-003.wav",
+          "thoma-storyteller__narration-001.wav",
+          "thoma-storyteller__narration-002.wav",
+          "thoma-storyteller__narration-003.wav",
+          "thoma-storyteller__narration-004.wav",
+          "thoma-storyteller__narration-005.wav",
+          "tisha-storyteller__dialogue-001.wav",
+          "tisha-storyteller__dialogue-002.wav",
+          "tisha-storyteller__emotional-001.wav",
+          "tisha-storyteller__emotional-002.wav",
+          "tisha-storyteller__emotional-003.wav",
+          "tisha-storyteller__narration-001.wav",
+          "tisha-storyteller__narration-002.wav",
+          "tisha-storyteller__narration-003.wav",
+          "tisha-storyteller__narration-004.wav",
+          "tisha-storyteller__narration-005.wav"
+        ],
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-voice-audition/outputs.tar",
+        "outputs_tar_sha256": "e2eac4bf89d1fcb3d965282eba062158376cd1dc1ecaf57777d97a845648adca"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],

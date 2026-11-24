@@ -5433,6 +5433,604 @@
       },
       "path": "jobs/bicharak-voice-audition/narration.ipynb",
       "sha256": "d717574a1d33810e06cad59c6ea4e8263422444514d7082c8741800adaff2f97"
+    },
+    {
+      "bytes": 1210412,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/aditi-storyteller__dialogue-001.wav",
+      "sha256": "4433d4883f038ffcae1697d2d216d3509da84967aeca21bfc54b2036983e2cb8"
+    },
+    {
+      "bytes": 1083436,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/aditi-storyteller__dialogue-002.wav",
+      "sha256": "443b3259f8eb0c783244917418f82c551e4bff4ab2afe82f3006a185e8040376"
+    },
+    {
+      "bytes": 603180,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/aditi-storyteller__emotional-001.wav",
+      "sha256": "ae24b24a72da8100b8567cd8803d98b96588959d84a02a5e0257b281b29f8dd7"
+    },
+    {
+      "bytes": 1106988,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/aditi-storyteller__emotional-002.wav",
+      "sha256": "388f9a05c97df31e5eec236be5e5386826ce8a5ec3a89af898c527ee7c16fdd4"
+    },
+    {
+      "bytes": 1025068,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/aditi-storyteller__narration-001.wav",
+      "sha256": "c8907ef232008c72355e36c7c9614d7f926b63c1ce390d266cc9fa915d44eddd"
+    },
+    {
+      "bytes": 1169452,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/arjun-storyteller__dialogue-001.wav",
+      "sha256": "c4ba4e384ccc8c5af672a8d132fbd929f378d2f5a46d921a5bc841f4ce16a7b4"
+    },
+    {
+      "bytes": 1113132,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/arjun-storyteller__dialogue-002.wav",
+      "sha256": "157d5b190a802cc25a3a405d6f1c1eb1674ee5da8a27c82190970139ab7f2c70"
+    },
+    {
+      "bytes": 614444,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/arjun-storyteller__emotional-001.wav",
+      "sha256": "022c9e28b320761827575d4b99d3c97ac86ba80b7af7baccbb586b391438c907"
+    },
+    {
+      "bytes": 853036,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/arjun-storyteller__emotional-002.wav",
+      "sha256": "faec177b85aad62eb1091febc35b7be1decc9529f61e2c7ea31378b6f52fba80"
+    },
+    {
+      "bytes": 563244,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/arjun-storyteller__narration-001.wav",
+      "sha256": "f264e47fdf9d04c83e2b780cc811451b9f245a0ccd3fd8e66f42a0f848f525d9"
+    },
+    {
+      "bytes": 1367084,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/arnav-storyteller__dialogue-001.wav",
+      "sha256": "29764cb400e26681925efa0795835fce6a36851bd7f9e217890b9fdcab91ea0a"
+    },
+    {
+      "bytes": 1038380,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/arnav-storyteller__dialogue-002.wav",
+      "sha256": "0166e0c043bc0f27da2378369348e97d4e8cc4fff70ae4620a0f94d2bfdc3ba0"
+    },
+    {
+      "bytes": 538668,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/arnav-storyteller__emotional-001.wav",
+      "sha256": "469ae2fe9c7805218fa00f300d73e8bc089c733503153edcfb93aa7d7447fbb0"
+    },
+    {
+      "bytes": 852012,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/arnav-storyteller__emotional-002.wav",
+      "sha256": "e5e8e4e3a80cdb9751e7306ac98be3aab2a9b127bec9938dfc0542ee2580cf83"
+    },
+    {
+      "bytes": 978988,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/arnav-storyteller__narration-001.wav",
+      "sha256": "bb4d67586667b3ea31fcf4180c7b0e2f723faba3d2dae7d7fbd1ad73b62f9f8b"
+    },
+    {
+      "bytes": 1269804,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/control__dialogue-001.wav",
+      "sha256": "32e5962d9d906381caee5928ae2b08e30d50efaffe86fea97abebe40548a84a8"
+    },
+    {
+      "bytes": 1079340,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/control__dialogue-002.wav",
+      "sha256": "a27cc8e1dbf39e9a76fe61b90842f39b8a9e83847098c86461fa864442c7d494"
+    },
+    {
+      "bytes": 521260,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/control__emotional-001.wav",
+      "sha256": "2889542d80491a317214a4b5af28ecf2adfe3b79c6c32ee097a1eced9e256848"
+    },
+    {
+      "bytes": 907308,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/control__emotional-002.wav",
+      "sha256": "329c7dd7f289faf8a6d4730ec0b3d0ae259e6645e891cbd14686ca3a73c3ef3d"
+    },
+    {
+      "bytes": 237612,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/control__narration-001.wav",
+      "sha256": "3568214dd0c61f0ea26b2dcd5db4e8d26b99f43cb419b1d82fc9886052c46a88"
+    },
+    {
+      "bytes": 300076,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/control__narration-002.wav",
+      "sha256": "c3938b0c0efbb8d2ac0d979d9b688b85961d7deb66a93634e4c059a9217604f6"
+    },
+    {
+      "bytes": 201772,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/control__narration-003.wav",
+      "sha256": "801ab2228043412cbf9f3c1f8c8adf760089375bcba3be7739a4b6f22fbf9126"
+    },
+    {
+      "bytes": 228396,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/bicharak-voice-audition/control__narration-004.wav",
+      "sha256": "f6aea21291135e3814cee45d1d8fb24f191e3f0837fcf0ab7081219676440562"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -6843,6 +7441,93 @@
         "outputs_key": "exports/colab-exchange/bicharak/bicharak-voice-audition/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T05:14:38.235451+00:00",
+      "detail": {
+        "actual_units": 0.35,
+        "files": [
+          "narration/bicharak-voice-audition/aditi-storyteller__dialogue-001.wav",
+          "narration/bicharak-voice-audition/aditi-storyteller__dialogue-002.wav",
+          "narration/bicharak-voice-audition/aditi-storyteller__emotional-001.wav",
+          "narration/bicharak-voice-audition/aditi-storyteller__emotional-002.wav",
+          "narration/bicharak-voice-audition/aditi-storyteller__narration-001.wav",
+          "narration/bicharak-voice-audition/arjun-storyteller__dialogue-001.wav",
+          "narration/bicharak-voice-audition/arjun-storyteller__dialogue-002.wav",
+          "narration/bicharak-voice-audition/arjun-storyteller__emotional-001.wav",
+          "narration/bicharak-voice-audition/arjun-storyteller__emotional-002.wav",
+          "narration/bicharak-voice-audition/arjun-storyteller__narration-001.wav",
+          "narration/bicharak-voice-audition/arnav-storyteller__dialogue-001.wav",
+          "narration/bicharak-voice-audition/arnav-storyteller__dialogue-002.wav",
+          "narration/bicharak-voice-audition/arnav-storyteller__emotional-001.wav",
+          "narration/bicharak-voice-audition/arnav-storyteller__emotional-002.wav",
+          "narration/bicharak-voice-audition/arnav-storyteller__narration-001.wav",
+          "narration/bicharak-voice-audition/control__dialogue-001.wav",
+          "narration/bicharak-voice-audition/control__dialogue-002.wav",
+          "narration/bicharak-voice-audition/control__emotional-001.wav",
+          "narration/bicharak-voice-audition/control__emotional-002.wav",
+          "narration/bicharak-voice-audition/control__narration-001.wav",
+          "narration/bicharak-voice-audition/control__narration-002.wav",
+          "narration/bicharak-voice-audition/control__narration-003.wav",
+          "narration/bicharak-voice-audition/control__narration-004.wav"
+        ],
+        "input_zip_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "kind": "narration",
+        "model": {
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "protobuf": "6.33.6",
+          "soundfile": "0.14.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.46.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-24T05:14:38.243804+00:00",
+      "detail": {
+        "job_id": "bicharak-voice-audition",
+        "members": [
+          "aditi-storyteller__dialogue-001.wav",
+          "aditi-storyteller__dialogue-002.wav",
+          "aditi-storyteller__emotional-001.wav",
+          "aditi-storyteller__emotional-002.wav",
+          "aditi-storyteller__narration-001.wav",
+          "arjun-storyteller__dialogue-001.wav",
+          "arjun-storyteller__dialogue-002.wav",
+          "arjun-storyteller__emotional-001.wav",
+          "arjun-storyteller__emotional-002.wav",
+          "arjun-storyteller__narration-001.wav",
+          "arnav-storyteller__dialogue-001.wav",
+          "arnav-storyteller__dialogue-002.wav",
+          "arnav-storyteller__emotional-001.wav",
+          "arnav-storyteller__emotional-002.wav",
+          "arnav-storyteller__narration-001.wav",
+          "control__dialogue-001.wav",
+          "control__dialogue-002.wav",
+          "control__emotional-001.wav",
+          "control__emotional-002.wav",
+          "control__narration-001.wav",
+          "control__narration-002.wav",
+          "control__narration-003.wav",
+          "control__narration-004.wav",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/bicharak-voice-audition/outputs.tar",
+        "outputs_tar_sha256": "86aaf688cfcce7367f04843709577d12b8ead54e8ce36355c060bf38c7d1fc82"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],
