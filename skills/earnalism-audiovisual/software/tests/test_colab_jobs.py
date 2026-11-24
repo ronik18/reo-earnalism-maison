@@ -345,6 +345,32 @@ class ColabJobTests(unittest.TestCase):
         exec(manifest, g)  # a missing expected output is never COMPLETE
         self.assertEqual(json.loads((out_dir / "manifest.json").read_text())["status"], "INCOMPLETE")
 
+    def test_the_notebook_itself_is_never_an_output(self):
+        """Colab 2026-11-23: the job's notebook lives in the Drive job folder and was listed as an
+        output of every run (narration-film-01-r4, stills-film-01-r5, music-film-01-r4)."""
+        import sys
+        import types
+        r = self.build(*self.kinds()[1])
+        config, clock, manifest = [c for c in self.cells(r) if "DEADLINE_SECONDS =" in c or "def may_start" in c
+                                   or "manifest.json" in c and "write_text" in c]
+        colab = types.ModuleType("google.colab")
+        colab.runtime = types.SimpleNamespace(unassign=lambda: None)
+        out_dir = self.root / "drive-job"
+        out_dir.mkdir()
+        (out_dir / "a.png").write_bytes(b"png")
+        (out_dir / "stills.ipynb").write_text("{}")
+        (out_dir / "Copy of stills.ipynb").write_text("{}")
+        with patch.dict(sys.modules, {"google": types.ModuleType("google"), "google.colab": colab}):
+            g = {"RUN": True}
+            exec(config, g)
+            exec(clock, g)
+            g["STOP_GUARD"].cancel()
+            g.update(OUT_DIR=out_dir, EXPECTED=["a.png"], MODEL_INFO={"repo": "x"})
+            exec(manifest, g)
+        data = json.loads((out_dir / "manifest.json").read_text())
+        self.assertEqual(sorted(data["outputs"]), ["a.png"])
+        self.assertEqual(data["status"], "COMPLETE")
+
     def test_reel_clips_real_builder_is_contract_valid(self):
         r = self.build("reel_clips", self._reel_spec())
         self.assertTrue(Path(r["inputs_zip"]).is_file())

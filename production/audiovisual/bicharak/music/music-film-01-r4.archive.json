@@ -1,0 +1,19 @@
+{
+  "bucket": "reo-earnalism-maison-private",
+  "files": {
+    "cue-1-kshiroda-night.wav": "168d3d271b6b4872b9727227c7e8cba60392f7dba6db9b5617216e9eb25f201e",
+    "cue-1-kshiroda-night_input_params.json": "9ee093100015d9b87bac1960569a1790d53b6d0cf02dde1585b58581d546a53e",
+    "cue-2-window-and-judge.wav": "832b8c47bc9e98f6dcaf816ab379c24b4b97114dcc22fe02bdfa14f95d03f99b",
+    "cue-2-window-and-judge_input_params.json": "325f5352a20579c6a4373c7db6d5d680121d8b74c7f914255f539b1d4a599c97",
+    "cue-3-dream-and-carriage.wav": "c41fcd765b569fa308dfb6023ba6d0773bb9f84b02a3787f5fbfb5d258bcf207",
+    "cue-3-dream-and-carriage_input_params.json": "4db15444b0e46a41adc3bd757bba55e101f6bfeb60aa9a61c99028e10849ccd7",
+    "cue-4-prison-and-ring.wav": "8afff9cb2960a6ea71e5b38ea10ad3ecd3022114b375aaedabcae85e64475b48",
+    "cue-4-prison-and-ring_input_params.json": "608bddbed9eb281790301987c0ae357d4e6ffdc8b362babad3e1b01159ed9561",
+    "music.ipynb": "f749360ad31a08f93856414787910f83f8c53067eb021aa05901c12d8dbc14f7"
+  },
+  "job_id": "music-film-01-r4",
+  "key": "exports/audiovisual-archive/bicharak/music-film-01-r4.tar",
+  "schema": "earnalism.audiovisual-archive.v1",
+  "tar_bytes": 184412160,
+  "tar_sha256": "5af1a657e3650824352b5cb0d4171c19bba31f368586d7aaa8aa0b46806b65c7"
+}

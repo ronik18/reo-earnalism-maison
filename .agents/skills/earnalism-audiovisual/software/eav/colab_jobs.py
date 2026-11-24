@@ -190,7 +190,8 @@ _MANIFEST = _GUARD + '''import hashlib, json, time
 import importlib.metadata as _md
 outputs = {}
 for p in sorted(OUT_DIR.iterdir()):
-    if p.is_file() and p.name not in ("manifest.json", "inputs.zip", "exchange.json"):
+    if (p.is_file() and p.name not in ("manifest.json", "inputs.zip", "exchange.json")
+            and p.suffix != ".ipynb"):  # Colab keeps the job notebook in this folder
         outputs[p.name] = hashlib.sha256(p.read_bytes()).hexdigest()
 if not outputs:
     raise RuntimeError("no outputs were produced")

@@ -3089,6 +3089,2139 @@
       },
       "path": "jobs/music-film-01-r4/music.ipynb",
       "sha256": "2562eb18ad34d046e652537819a56a52d179fd3af6e31d0b82499780d6a7760f"
+    },
+    {
+      "bytes": 943572,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s001-1.png",
+      "sha256": "242cbf483aace61192b182a0893e945b3843d4cb59bee80b3ce8b579d7c8b966"
+    },
+    {
+      "bytes": 1186471,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s001-2.png",
+      "sha256": "ed4a5c40e212bf4865643754eada87475b2cb4f4f001d6d8e180b1575063f77a"
+    },
+    {
+      "bytes": 1086048,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s001-3.png",
+      "sha256": "9aabdd5973d04f6c07e448b8b25b38c09f3623d2c7d985fa4c2e828ba3686cfa"
+    },
+    {
+      "bytes": 1301776,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s001-4.png",
+      "sha256": "9c70bde401bcf5fa5117d59bd86355c920891a197f4a59ee3971a50dd1d5a53c"
+    },
+    {
+      "bytes": 1063741,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s001-5.png",
+      "sha256": "bcfebf3b747b55116d36631e86234ae18ad21d9b3529c8577082457d6459108e"
+    },
+    {
+      "bytes": 1015297,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s001-6.png",
+      "sha256": "9d1365f54cbb9a5521a94f5aca0b9fd382d9b679b11263b7498727b559800555"
+    },
+    {
+      "bytes": 975950,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s002-1.png",
+      "sha256": "2f5a1364e813851f290acededd9e9d0d4644c7116f250bb8f0eced4dce8a39a1"
+    },
+    {
+      "bytes": 1337418,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s002-2.png",
+      "sha256": "15c9cddcca563f232d264f451d7c85514b152269fff51e656a3d2869f8919127"
+    },
+    {
+      "bytes": 1022748,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s002-3.png",
+      "sha256": "4bd165f5108cc5b133b45c71b2de8fb49f2b2fb65715f4cd82c01cbd17ec9ba9"
+    },
+    {
+      "bytes": 880897,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s002-4.png",
+      "sha256": "df45713e562bfb8f17ce60244259ae270565d310ee954001d6be6038fa0d0f87"
+    },
+    {
+      "bytes": 920848,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s003-1.png",
+      "sha256": "7914de7ac07d079252d8374c54452cec7de51c5e0e0f046de0cd00b7ab4031cd"
+    },
+    {
+      "bytes": 955904,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s003-2.png",
+      "sha256": "73479427ef67881e283087625296137fecf39bfb8d3313fe0a4880fd6eee0545"
+    },
+    {
+      "bytes": 1096108,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s003-3.png",
+      "sha256": "40ecd6e45e0f4a49dee63e2513b7b01f8fbb0c70fd0f44cf772c4e2ab215c979"
+    },
+    {
+      "bytes": 1121175,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s003-4.png",
+      "sha256": "ef4f61725ad858ffb3f26bfc8aa02ad3dc7c3b26e36d731ae955789e09e06c30"
+    },
+    {
+      "bytes": 696720,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s003-5.png",
+      "sha256": "d4cae9820379f2cac1aeef2aa6fcfc7e5e64447f1277e58530a37ba9ae16570f"
+    },
+    {
+      "bytes": 1139155,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s003-6.png",
+      "sha256": "2565fb33e39994404dbe30b798c90a0b36489ae5ec939edaf2b6a25d1a1aba07"
+    },
+    {
+      "bytes": 981750,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s004-1.png",
+      "sha256": "55d10c734da3766a62a110f4fd790af0c4f65d0ee328f8ac41d2b7449a13634a"
+    },
+    {
+      "bytes": 1040903,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s004-2.png",
+      "sha256": "414e337959d15f2e633b08e2edede0f019d4352d0039d417351a5f846fe0d047"
+    },
+    {
+      "bytes": 1315439,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s004-3.png",
+      "sha256": "681c151762f6bbb834a8f0c30a505bc0bbaa5da2493279564543adc5c4d6341f"
+    },
+    {
+      "bytes": 912136,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s005-1.png",
+      "sha256": "41ef24e17205e4473a81029527a8e746b3451b90207815be5c442f9ce9b0f7cf"
+    },
+    {
+      "bytes": 869613,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s005-2.png",
+      "sha256": "3d896e65983a2e328747f1e089736aea7fc42a7831e0aced66215f21b8d62049"
+    },
+    {
+      "bytes": 1042960,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s005-3.png",
+      "sha256": "24e40a07df66c3dc884fa338785dea23e587f7002a39f21f275b9624b1c53863"
+    },
+    {
+      "bytes": 1051812,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s005-4.png",
+      "sha256": "83092a1b2c09aac4aa91b1284398834dba7b07559f75511ebdf41d8dea696c0f"
+    },
+    {
+      "bytes": 969614,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s006-1.png",
+      "sha256": "36ca366c323b520eb77c09f42a1d9ce25608b17ba0a7e6280a8a69c5f6d43cf2"
+    },
+    {
+      "bytes": 1180152,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s006-2.png",
+      "sha256": "349db87c50ab8bdc30f8e1367037d33d4e43754c66ffea91bcfc88737c31777a"
+    },
+    {
+      "bytes": 1058036,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s006-3.png",
+      "sha256": "02118e91784a57a29dc274359cbc349b943db282f7c4e2c23714a5dfa5c0beb7"
+    },
+    {
+      "bytes": 1038089,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s007-1.png",
+      "sha256": "25a1dd807dfb03c38ab603fc04e8324d9a6c713f9de8c0cb1a5fd21f1e3ab85c"
+    },
+    {
+      "bytes": 866481,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s007-2.png",
+      "sha256": "cb6515eeb53439e2d95c4761bd618c40bf46c4fa3f71e12e92096c79128dae2f"
+    },
+    {
+      "bytes": 1081512,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s007-3.png",
+      "sha256": "f1c9f0e023627abcddbfac11b1d6def51903574b8c477f2e1a71406f3a23a27f"
+    },
+    {
+      "bytes": 898201,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s007-4.png",
+      "sha256": "c201bbe8dfe743e92d8cf4d41b1dc31fca8bae319fa121c96dcff6160fbb8001"
+    },
+    {
+      "bytes": 869894,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s007-5.png",
+      "sha256": "333ef03b84ec7ec8ff99bcbb36703a9a7e75c1003ce8a8a8517499dd0da2d78a"
+    },
+    {
+      "bytes": 954377,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s007-6.png",
+      "sha256": "60c43e94cdea7fadebdaa6e9a9610e0bb277358aa5294518af2c32888af18180"
+    },
+    {
+      "bytes": 1021275,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s008-1.png",
+      "sha256": "865cdee6f6683b1990e4a865a07c5944570382c9436a501940d0294e0418c512"
+    },
+    {
+      "bytes": 1095740,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s008-2.png",
+      "sha256": "261cd991e63cdb030cd1291eef35dfb92ad63969aea5bb1916514d666d0a54ed"
+    },
+    {
+      "bytes": 1055878,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s008-3.png",
+      "sha256": "02de3b230b6285cf72f00520c7ce2763d168a98c2cdf3f7c20f665ecaf80c353"
+    },
+    {
+      "bytes": 980563,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s009-1.png",
+      "sha256": "3f4c53fe05da8e7c9c81f1b08f1fca530e10c79e4abe53e2e526ba03a2ecec2d"
+    },
+    {
+      "bytes": 899943,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s009-2.png",
+      "sha256": "147f8fec3c2032fe78a7be4d6a09ce00bc563a0d723e43df7d632783f2067c0b"
+    },
+    {
+      "bytes": 832316,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s009-3.png",
+      "sha256": "62bc1d8aba9baf38f69f272c235a6f7f71df067b986d4e58987dffcca9d3aa5f"
+    },
+    {
+      "bytes": 1083577,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s009-4.png",
+      "sha256": "6cab3aa4e439c925d7d40bd0e8d059c2495227f24ae5f8b8096df4b89cc5cbee"
+    },
+    {
+      "bytes": 668287,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s010-1.png",
+      "sha256": "e4ef9cb32be4750d63e7e7c7b1b730708dfae60dd3e91dc0ca17648637629bcf"
+    },
+    {
+      "bytes": 580007,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s010-2.png",
+      "sha256": "e549f1fda605e00fe2285fb6e992b9da2e1d1e57c61ab09763d28f84faba2605"
+    },
+    {
+      "bytes": 993602,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s010-3.png",
+      "sha256": "d2e0d44b1b7578eceacacbc843946bf395c6ceb1cf1f9ccaad6bbf004fe87699"
+    },
+    {
+      "bytes": 1007679,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s010-4.png",
+      "sha256": "905dc4fc4fbaba477bb421f28dfa8282e8ecfd8a6ec6e1ab20058ef56d2dacd9"
+    },
+    {
+      "bytes": 1287043,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s010-5.png",
+      "sha256": "669f36c2a32e04afe36d84c6410270218cc489ff69b529ceb45403c5442cbbb9"
+    },
+    {
+      "bytes": 896592,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s011-1.png",
+      "sha256": "feaf3ef5033872b02cd4eb3ae62e629c41b3786a037d5371dd18f3f1e8098245"
+    },
+    {
+      "bytes": 797556,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s011-2.png",
+      "sha256": "818956daa7e6c458c5133e2817c85219e73c1aa41843313ad9abf93063bd0f74"
+    },
+    {
+      "bytes": 935126,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s011-3.png",
+      "sha256": "42542c94c1d4e4cb2b1b6afda691796050ffce3e76c84049eb4089c70475f943"
+    },
+    {
+      "bytes": 1235536,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s011-4.png",
+      "sha256": "762356289532b014d5d18c3a6beefb2a6cf33850f8ae16d9ee1605d25674c8dd"
+    },
+    {
+      "bytes": 1286732,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s011-5.png",
+      "sha256": "a9fd748c6c18e04be25e2e3a739f429b739331bddfe32ae04d8a6dccee77af8d"
+    },
+    {
+      "bytes": 918284,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s012-1.png",
+      "sha256": "8e49855d201c72fde6750e7f2d5d18e16d15ce54077dc825ac1a8d5361f3c38a"
+    },
+    {
+      "bytes": 1167232,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s012-2.png",
+      "sha256": "8726c5ec20475874338af4482cafaac0966d9b9735f54b5c401b3b19c9b3464a"
+    },
+    {
+      "bytes": 937732,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s012-3.png",
+      "sha256": "4ee5a8aa129a0eafc4fc2a73aab9fb292ae25988083d8d003aa7e607b33099ca"
+    },
+    {
+      "bytes": 939499,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s013-1.png",
+      "sha256": "e010015d347b38b76aec42252c9cf4b1c93433f9cf4ff82910218b2cd2a2a784"
+    },
+    {
+      "bytes": 1084899,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s013-2.png",
+      "sha256": "027a956f0246473247e4a284ed8ba2e995974a9fccac1e5182f44bbbb8124aea"
+    },
+    {
+      "bytes": 1110814,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s013-3.png",
+      "sha256": "ef47e62d3f933a40d20a32feefec5c99f86539f98b6557402d87c09525e0edbf"
+    },
+    {
+      "bytes": 1236950,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s013-4.png",
+      "sha256": "7b37b1d6e08e7e977fff4b676c05e23bc733cb977a69717120f1f0cf43bac59f"
+    },
+    {
+      "bytes": 1062447,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s013-5.png",
+      "sha256": "ef1cbfc4e254fcef952052a95367ee1abb3979c30b9a6e9ac1a489b9a5525320"
+    },
+    {
+      "bytes": 1041776,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s014-1.png",
+      "sha256": "0b019ae6c445fab6baa30161385708907327ce0d28ffd41a39f0c057094f6cb3"
+    },
+    {
+      "bytes": 868417,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s014-2.png",
+      "sha256": "00bfd3cb235e37e93f3dd614ad9c1a75317e14a6e421118d0d0ec46ca0695741"
+    },
+    {
+      "bytes": 1143963,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s014-3.png",
+      "sha256": "21c15096f2c201b45749d0342b6c3edffd128463b9d50ad9fc858454dcc1247c"
+    },
+    {
+      "bytes": 1071009,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s015-1.png",
+      "sha256": "70dc0404da64aec2f66fa5ef6984739e1f5ec5d8e5b2672098d9b98ae7d86ec7"
+    },
+    {
+      "bytes": 1109819,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s015-2.png",
+      "sha256": "a36486c81fe83d20b7c4381bcbaf4400f1aa4edd4bdcfceeada4c636690d0ee9"
+    },
+    {
+      "bytes": 1236744,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s015-3.png",
+      "sha256": "4c9c29ec71ca033bff02773e65b28bf72dc2261577eeff06fe1ec54c4fc627f5"
+    },
+    {
+      "bytes": 1117497,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s016-1.png",
+      "sha256": "51b85489c0274c29d7974644984198c166b8acf1c681401a42819feb28ae7307"
+    },
+    {
+      "bytes": 954845,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s016-2.png",
+      "sha256": "a5578f46c1b63672de49cfcd797e456e5ccf2c8853eb4757800719f7d12ea351"
+    },
+    {
+      "bytes": 1192332,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s016-3.png",
+      "sha256": "875091a2c05f0df5dc0b362e9fa2958de253439cad8c4ffe6679abe9feba0036"
+    },
+    {
+      "bytes": 973296,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s016-4.png",
+      "sha256": "bdf40a6d6cbd9bcd7f85027b10b6ba5aa70b653a4458f9748719d0d6068fcc9b"
+    },
+    {
+      "bytes": 1272871,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s017-1.png",
+      "sha256": "6bdbd1d40f252e99b1ec130d2cc3622bef08b856885b568acc4bd4d115286870"
+    },
+    {
+      "bytes": 595444,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s017-2.png",
+      "sha256": "4e9685e72baf222bad0edd09ed82c4361f9601c2cad06719eae5515ccc2a84fe"
+    },
+    {
+      "bytes": 1005835,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s017-3.png",
+      "sha256": "e9b4a8779d5a06848b3b876dfb55741614f42802a0551b06293dfd86ac3f782f"
+    },
+    {
+      "bytes": 953557,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s018-1.png",
+      "sha256": "b29dd9d9c71531a562f5a82ff307b31a990b4a51d819b7c2f6573e8d6c0fc654"
+    },
+    {
+      "bytes": 1009943,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s018-2.png",
+      "sha256": "f96c3da9847a81d180f436b53fe65848ecd25a010ae016a4c62aa7a009d29428"
+    },
+    {
+      "bytes": 1007022,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s018-3.png",
+      "sha256": "b295086386116222c88123772c1321bbd827b4d498a850249fe4c00e0bfd27eb"
+    },
+    {
+      "bytes": 805326,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s019-1.png",
+      "sha256": "c31e9c094c387e2167225a17063b35b189ab8e98796947e1cbd6bd598f295301"
+    },
+    {
+      "bytes": 1147619,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s019-2.png",
+      "sha256": "19275c44bef300ff3bf8c2461502f1dda79efdc4afda0c078662fa35951e1a17"
+    },
+    {
+      "bytes": 1097521,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s019-3.png",
+      "sha256": "0206ee629272d8b2786d2648c35df73a12128ac48c8a7d5ad2cffe3a98ee89f2"
+    },
+    {
+      "bytes": 988518,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/f01s019-4.png",
+      "sha256": "0d4b6a56bce9c2286b4f4357b2b496f02be79c3c5e7e7eb78555d28833f1c86d"
+    },
+    {
+      "bytes": 733452,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5/stills.ipynb",
+      "sha256": "ec91afdc9888878545c6eb3ce7e83419fb08afc6e693d9ddc1f945825145044d"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-1-kshiroda-night.wav",
+      "sha256": "168d3d271b6b4872b9727227c7e8cba60392f7dba6db9b5617216e9eb25f201e"
+    },
+    {
+      "bytes": 1490,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-1-kshiroda-night_input_params.json",
+      "sha256": "9ee093100015d9b87bac1960569a1790d53b6d0cf02dde1585b58581d546a53e"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-2-window-and-judge.wav",
+      "sha256": "832b8c47bc9e98f6dcaf816ab379c24b4b97114dcc22fe02bdfa14f95d03f99b"
+    },
+    {
+      "bytes": 1508,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-2-window-and-judge_input_params.json",
+      "sha256": "325f5352a20579c6a4373c7db6d5d680121d8b74c7f914255f539b1d4a599c97"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-3-dream-and-carriage.wav",
+      "sha256": "c41fcd765b569fa308dfb6023ba6d0773bb9f84b02a3787f5fbfb5d258bcf207"
+    },
+    {
+      "bytes": 1497,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-3-dream-and-carriage_input_params.json",
+      "sha256": "4db15444b0e46a41adc3bd757bba55e101f6bfeb60aa9a61c99028e10849ccd7"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-4-prison-and-ring.wav",
+      "sha256": "8afff9cb2960a6ea71e5b38ea10ad3ecd3022114b375aaedabcae85e64475b48"
+    },
+    {
+      "bytes": 1506,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-4-prison-and-ring_input_params.json",
+      "sha256": "608bddbed9eb281790301987c0ae357d4e6ffdc8b362babad3e1b01159ed9561"
+    },
+    {
+      "bytes": 143137,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/music.ipynb",
+      "sha256": "f749360ad31a08f93856414787910f83f8c53067eb021aa05901c12d8dbc14f7"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -3987,6 +6120,263 @@
         "outputs_key": "exports/colab-exchange/bicharak/music-film-01-r4/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T02:47:27.188851+00:00",
+      "detail": {
+        "actual_units": 1.8,
+        "files": [
+          "stills/stills-film-01-r5/f01s001-1.png",
+          "stills/stills-film-01-r5/f01s001-2.png",
+          "stills/stills-film-01-r5/f01s001-3.png",
+          "stills/stills-film-01-r5/f01s001-4.png",
+          "stills/stills-film-01-r5/f01s001-5.png",
+          "stills/stills-film-01-r5/f01s001-6.png",
+          "stills/stills-film-01-r5/f01s002-1.png",
+          "stills/stills-film-01-r5/f01s002-2.png",
+          "stills/stills-film-01-r5/f01s002-3.png",
+          "stills/stills-film-01-r5/f01s002-4.png",
+          "stills/stills-film-01-r5/f01s003-1.png",
+          "stills/stills-film-01-r5/f01s003-2.png",
+          "stills/stills-film-01-r5/f01s003-3.png",
+          "stills/stills-film-01-r5/f01s003-4.png",
+          "stills/stills-film-01-r5/f01s003-5.png",
+          "stills/stills-film-01-r5/f01s003-6.png",
+          "stills/stills-film-01-r5/f01s004-1.png",
+          "stills/stills-film-01-r5/f01s004-2.png",
+          "stills/stills-film-01-r5/f01s004-3.png",
+          "stills/stills-film-01-r5/f01s005-1.png",
+          "stills/stills-film-01-r5/f01s005-2.png",
+          "stills/stills-film-01-r5/f01s005-3.png",
+          "stills/stills-film-01-r5/f01s005-4.png",
+          "stills/stills-film-01-r5/f01s006-1.png",
+          "stills/stills-film-01-r5/f01s006-2.png",
+          "stills/stills-film-01-r5/f01s006-3.png",
+          "stills/stills-film-01-r5/f01s007-1.png",
+          "stills/stills-film-01-r5/f01s007-2.png",
+          "stills/stills-film-01-r5/f01s007-3.png",
+          "stills/stills-film-01-r5/f01s007-4.png",
+          "stills/stills-film-01-r5/f01s007-5.png",
+          "stills/stills-film-01-r5/f01s007-6.png",
+          "stills/stills-film-01-r5/f01s008-1.png",
+          "stills/stills-film-01-r5/f01s008-2.png",
+          "stills/stills-film-01-r5/f01s008-3.png",
+          "stills/stills-film-01-r5/f01s009-1.png",
+          "stills/stills-film-01-r5/f01s009-2.png",
+          "stills/stills-film-01-r5/f01s009-3.png",
+          "stills/stills-film-01-r5/f01s009-4.png",
+          "stills/stills-film-01-r5/f01s010-1.png",
+          "stills/stills-film-01-r5/f01s010-2.png",
+          "stills/stills-film-01-r5/f01s010-3.png",
+          "stills/stills-film-01-r5/f01s010-4.png",
+          "stills/stills-film-01-r5/f01s010-5.png",
+          "stills/stills-film-01-r5/f01s011-1.png",
+          "stills/stills-film-01-r5/f01s011-2.png",
+          "stills/stills-film-01-r5/f01s011-3.png",
+          "stills/stills-film-01-r5/f01s011-4.png",
+          "stills/stills-film-01-r5/f01s011-5.png",
+          "stills/stills-film-01-r5/f01s012-1.png",
+          "stills/stills-film-01-r5/f01s012-2.png",
+          "stills/stills-film-01-r5/f01s012-3.png",
+          "stills/stills-film-01-r5/f01s013-1.png",
+          "stills/stills-film-01-r5/f01s013-2.png",
+          "stills/stills-film-01-r5/f01s013-3.png",
+          "stills/stills-film-01-r5/f01s013-4.png",
+          "stills/stills-film-01-r5/f01s013-5.png",
+          "stills/stills-film-01-r5/f01s014-1.png",
+          "stills/stills-film-01-r5/f01s014-2.png",
+          "stills/stills-film-01-r5/f01s014-3.png",
+          "stills/stills-film-01-r5/f01s015-1.png",
+          "stills/stills-film-01-r5/f01s015-2.png",
+          "stills/stills-film-01-r5/f01s015-3.png",
+          "stills/stills-film-01-r5/f01s016-1.png",
+          "stills/stills-film-01-r5/f01s016-2.png",
+          "stills/stills-film-01-r5/f01s016-3.png",
+          "stills/stills-film-01-r5/f01s016-4.png",
+          "stills/stills-film-01-r5/f01s017-1.png",
+          "stills/stills-film-01-r5/f01s017-2.png",
+          "stills/stills-film-01-r5/f01s017-3.png",
+          "stills/stills-film-01-r5/f01s018-1.png",
+          "stills/stills-film-01-r5/f01s018-2.png",
+          "stills/stills-film-01-r5/f01s018-3.png",
+          "stills/stills-film-01-r5/f01s019-1.png",
+          "stills/stills-film-01-r5/f01s019-2.png",
+          "stills/stills-film-01-r5/f01s019-3.png",
+          "stills/stills-film-01-r5/f01s019-4.png",
+          "stills/stills-film-01-r5/stills.ipynb"
+        ],
+        "input_zip_sha256": "54f53d7496a8712d2d6ef50170099946bc0a4cb5e7f55b79ad3dc6005c1e226d",
+        "job_id": "stills-film-01-r5",
+        "kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-24T02:47:27.202965+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r5",
+        "members": [
+          "f01s001-1.png",
+          "f01s001-2.png",
+          "f01s001-3.png",
+          "f01s001-4.png",
+          "f01s001-5.png",
+          "f01s001-6.png",
+          "f01s002-1.png",
+          "f01s002-2.png",
+          "f01s002-3.png",
+          "f01s002-4.png",
+          "f01s003-1.png",
+          "f01s003-2.png",
+          "f01s003-3.png",
+          "f01s003-4.png",
+          "f01s003-5.png",
+          "f01s003-6.png",
+          "f01s004-1.png",
+          "f01s004-2.png",
+          "f01s004-3.png",
+          "f01s005-1.png",
+          "f01s005-2.png",
+          "f01s005-3.png",
+          "f01s005-4.png",
+          "f01s006-1.png",
+          "f01s006-2.png",
+          "f01s006-3.png",
+          "f01s007-1.png",
+          "f01s007-2.png",
+          "f01s007-3.png",
+          "f01s007-4.png",
+          "f01s007-5.png",
+          "f01s007-6.png",
+          "f01s008-1.png",
+          "f01s008-2.png",
+          "f01s008-3.png",
+          "f01s009-1.png",
+          "f01s009-2.png",
+          "f01s009-3.png",
+          "f01s009-4.png",
+          "f01s010-1.png",
+          "f01s010-2.png",
+          "f01s010-3.png",
+          "f01s010-4.png",
+          "f01s010-5.png",
+          "f01s011-1.png",
+          "f01s011-2.png",
+          "f01s011-3.png",
+          "f01s011-4.png",
+          "f01s011-5.png",
+          "f01s012-1.png",
+          "f01s012-2.png",
+          "f01s012-3.png",
+          "f01s013-1.png",
+          "f01s013-2.png",
+          "f01s013-3.png",
+          "f01s013-4.png",
+          "f01s013-5.png",
+          "f01s014-1.png",
+          "f01s014-2.png",
+          "f01s014-3.png",
+          "f01s015-1.png",
+          "f01s015-2.png",
+          "f01s015-3.png",
+          "f01s016-1.png",
+          "f01s016-2.png",
+          "f01s016-3.png",
+          "f01s016-4.png",
+          "f01s017-1.png",
+          "f01s017-2.png",
+          "f01s017-3.png",
+          "f01s018-1.png",
+          "f01s018-2.png",
+          "f01s018-3.png",
+          "f01s019-1.png",
+          "f01s019-2.png",
+          "f01s019-3.png",
+          "f01s019-4.png",
+          "manifest.json",
+          "stills.ipynb"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r5/outputs.tar",
+        "outputs_tar_sha256": "983f356902451737a8b3d77979b3467aae42618db78f8aa91309f68b408ffd40"
+      },
+      "result": "exchange_collected",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T02:47:32.278303+00:00",
+      "detail": {
+        "actual_units": 0.3,
+        "files": [
+          "music/music-film-01-r4/cue-1-kshiroda-night.wav",
+          "music/music-film-01-r4/cue-1-kshiroda-night_input_params.json",
+          "music/music-film-01-r4/cue-2-window-and-judge.wav",
+          "music/music-film-01-r4/cue-2-window-and-judge_input_params.json",
+          "music/music-film-01-r4/cue-3-dream-and-carriage.wav",
+          "music/music-film-01-r4/cue-3-dream-and-carriage_input_params.json",
+          "music/music-film-01-r4/cue-4-prison-and-ring.wav",
+          "music/music-film-01-r4/cue-4-prison-and-ring_input_params.json",
+          "music/music-film-01-r4/music.ipynb"
+        ],
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-24T02:47:32.298664+00:00",
+      "detail": {
+        "job_id": "music-film-01-r4",
+        "members": [
+          "cue-1-kshiroda-night.wav",
+          "cue-1-kshiroda-night_input_params.json",
+          "cue-2-window-and-judge.wav",
+          "cue-2-window-and-judge_input_params.json",
+          "cue-3-dream-and-carriage.wav",
+          "cue-3-dream-and-carriage_input_params.json",
+          "cue-4-prison-and-ring.wav",
+          "cue-4-prison-and-ring_input_params.json",
+          "manifest.json",
+          "music.ipynb"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/music-film-01-r4/outputs.tar",
+        "outputs_tar_sha256": "23ad285dac6be5cdce5085537a50b1e69ebbf9000703d1782b343f468092052b"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],
