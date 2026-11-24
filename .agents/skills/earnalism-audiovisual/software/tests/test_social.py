@@ -89,7 +89,9 @@ class QuoteTests(unittest.TestCase):
                 self.assertGreaterEqual(info["font_size"], 34)
 
 
-class SocialCommandTests(RoundTwo, unittest.TestCase):
+class SocialCommandTests(unittest.TestCase):
+    fake_job, wav, noise, film_ready = RoundTwo.fake_job, RoundTwo.wav, RoundTwo.noise, RoundTwo.film_ready
+
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
