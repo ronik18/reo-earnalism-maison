@@ -4925,18 +4925,76 @@
       "sha256": "b82322475b195a09a86026aa427604ac3c565c39b253aeaf43acd75eb3b2a8e0"
     },
     {
-      "bytes": 17200,
-      "kind": "colab_job",
+      "bytes": 18686,
+      "kind": "timing",
       "meta": {
-        "forecast_units": 5.094116666666666,
-        "inputs_zip": "jobs/selfish-giant-stills-film-01-r9/inputs.zip",
-        "job_id": "selfish-giant-stills-film-01-r9",
-        "job_kind": "stills",
-        "manifest": "jobs/selfish-giant-stills-film-01-r9/build-manifest.json",
-        "month": "2026-11"
+        "target": "film-01"
       },
-      "path": "jobs/selfish-giant-stills-film-01-r9/stills.ipynb",
-      "sha256": "ecb6273ae1781559114746ce906a89aa0f9dc5e1037843f70c19144b788e64d5"
+      "path": "film/film-01/timing.json",
+      "sha256": "75301687bb87c9f2d7941cff18a276f11473f99da963ea0f2413265bb87eba43"
+    },
+    {
+      "bytes": 12208,
+      "kind": "subtitles",
+      "meta": {
+        "target": "film-01"
+      },
+      "path": "film/film-01/film-01.srt",
+      "sha256": "56b656e86feda46f027dc221441082d3da1fc4f02bbdd62ba5d48516a39cb2d3"
+    },
+    {
+      "bytes": 174689474,
+      "kind": "mix",
+      "meta": {
+        "target": "film-01"
+      },
+      "path": "film/film-01/mix.wav",
+      "sha256": "e46e7fecc6dc1c1afbe2997b2e5fc617246f34b9b06e76931c94e0601090fecf"
+    },
+    {
+      "bytes": 298724056,
+      "kind": "film",
+      "meta": {
+        "body_gain_db": 0.0,
+        "clips": 62,
+        "duration": 912.840604,
+        "lufs": -16.0,
+        "narration_end": 909.84,
+        "narration_job_id": "narration-elevenlabs-db5b38b5",
+        "path": "/home/user/reo-earnalism-maison/production/audiovisual/the-selfish-giant/film/film-01/film-01.mp4",
+        "scenes": 15,
+        "score": {
+          "cues_sha256": {
+            "cue-1-the-garden.wav": "174b6d514dacb3d25676b87dfdcff98ca69addc167d2515dfcb71a0385d40666",
+            "cue-2-the-long-winter.wav": "605181bbe877f944176642da3646897aa33dcd0b1d628bf9d6c4aed9799e9853",
+            "cue-3-spring-returns.wav": "1f9e831fbede9cd812bc22a036f2480ff105dd6d6170573795ebb00ed3b1aff6",
+            "cue-4-paradise.wav": "e843dd1dafde573eb9fb4d5e900178717e60c1afb7ffe801b564a036d7feb143"
+          },
+          "route": "ace-step:selfish-giant-music-film-01",
+          "sha256": "f32bc548954df1ab03c7d6781c989941662b6039be213f2c8a87ec01d0cdc73e"
+        },
+        "size": [
+          1920,
+          1080
+        ],
+        "stills": {
+          "base": "selfish-giant-stills-film-01-house",
+          "patches": []
+        },
+        "target": "film-01",
+        "true_peak": -1.5
+      },
+      "path": "film/film-01/film-01.mp4",
+      "sha256": "bd3c7f58a67ea73ea4ec5345b7e0684ef1ac61bd8722f472ff73e067f160c579"
+    },
+    {
+      "bytes": 495,
+      "kind": "qc_report",
+      "meta": {
+        "failed": []
+      },
+      "path": "qc/report.json",
+      "sha256": "cf0f0d930efe7f30313c6a778e7b1aa647023a7ec6b4c6cc49b475d8920e0792"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -5751,47 +5809,21 @@
       "stage": "job"
     },
     {
-      "at": "2026-11-24T18:18:29.112083+00:00",
+      "at": "2026-11-24T18:35:30.712658+00:00",
       "detail": {
-        "forecast_units": 5.094116666666666,
-        "job_id": "selfish-giant-stills-film-01-r9",
-        "kind": "stills"
-      },
-      "result": "built",
-      "stage": "job"
-    },
-    {
-      "at": "2026-11-24T18:18:29.119804+00:00",
-      "detail": {
-        "job_id": "selfish-giant-stills-film-01-r9",
-        "kind": "stills",
+        "duration": 912.840604,
         "target": "film-01"
       },
-      "result": "job_target",
-      "stage": "cli"
+      "result": "assembled",
+      "stage": "film"
     },
     {
-      "at": "2026-11-24T18:18:46.695647+00:00",
+      "at": "2026-11-24T18:38:16.810532+00:00",
       "detail": {
-        "bytes": 232692,
-        "job_id": "selfish-giant-stills-film-01-r9",
-        "key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r9/inputs.zip",
-        "sha256": "a7a685e5fcbfa09a8ae466c0d5e96b874802537b4d51a8f7fc4fea52846286c1"
+        "failed": []
       },
-      "result": "exchange_uploaded",
-      "stage": "job"
-    },
-    {
-      "at": "2026-11-24T18:19:38.745034+00:00",
-      "detail": {
-        "expires_at": "2026-11-25T18:19:06+00:00",
-        "inputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r9/inputs.zip",
-        "inputs_sha256": "a7a685e5fcbfa09a8ae466c0d5e96b874802537b4d51a8f7fc4fea52846286c1",
-        "job_id": "selfish-giant-stills-film-01-r9",
-        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r9/outputs.tar"
-      },
-      "result": "exchange_staged",
-      "stage": "job"
+      "result": "pass",
+      "stage": "qc"
     }
   ],
   "ledger": "../allowance-ledger.json",

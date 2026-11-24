@@ -1,0 +1,20 @@
+{
+  "advisory_only": [
+    "contact sheets need a human/visual check",
+    "ASR comparison not run here"
+  ],
+  "items": {
+    "film-01": {
+      "checks": {
+        "loudness": "pass",
+        "true_peak": "pass"
+      },
+      "contact_sheet": "film-01-contact.jpg",
+      "lufs": -16.0,
+      "sha256": "bd3c7f58a67ea73ea4ec5345b7e0684ef1ac61bd8722f472ff73e067f160c579",
+      "true_peak": -1.4
+    }
+  },
+  "listening": "unassessed until the owner reviews the package",
+  "result": "pass"
+}
