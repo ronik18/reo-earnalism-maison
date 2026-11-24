@@ -90,3 +90,15 @@ class SearchContractTests(TestCase):
             with self.assertRaises(DomainError): self.results(value)
         found=self.results('journey')
         self.assertTrue(found and all(isinstance(row.search_score, float) for row in found))
+
+
+class FilmGrantContractExampleTests(TestCase):
+    def test_r2_film_grant_example_validates_against_media_grant(self):
+        import json
+        from pathlib import Path
+        from django.conf import settings
+        from .validation import validate_schema
+        examples=json.loads((Path(settings.BASE_DIR)/'contracts'/'payload-examples.json').read_text())
+        grant=examples['video_grant_r2']['response']
+        validate_schema(grant,'MediaGrant')
+        self.assertEqual((grant['transport'],grant['content_type'],grant['range_supported']),('r2_s3_presigned','video/mp4',True))

@@ -14546,6 +14546,77 @@
         ]
       }
     },
+    "/content/video-captions/{asset_id}": {
+      "get": {
+        "operationId": "getVideoCaptions",
+        "summary": "Deliver WebVTT captions for an authorized video asset",
+        "tags": [
+          "Content"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "description": "asset_id is the video asset id. Returns the ready WebVTT caption track for that video after the same account, device, Live revision, territory, per-format rights and effective entitlement checks as grantMedia. 404 not_found when the video has no ready captions or does not exist; 403 rights_unavailable/entitlement_required as for media grants; 503 feature_disabled when film delivery is off. Captions are text served by Django, never a byte proxy for the film.",
+        "x-phase": "P0",
+        "x-cache-policy": "private_no_store",
+        "x-rate-limit": {
+          "policy": "media_grant"
+        },
+        "responses": {
+          "200": {
+            "description": "WebVTT caption track",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "const": "private, no-store, max-age=0"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "const": "nosniff"
+                }
+              }
+            },
+            "content": {
+              "text/vtt": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "429": {
+            "$ref": "#/components/responses/429"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          }
+        },
+        "parameters": [
+          {
+            "name": "asset_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          }
+        ]
+      }
+    },
     "/commerce/credit-notes": {
       "get": {
         "operationId": "listCreditNotes",
@@ -19783,7 +19854,7 @@
           "quality_kbps",
           "duration_ms"
         ],
-        "description": "URL/token lifetime<=120s for both transports. Player requests renewal online before expiry and resumes at validated position; renew does not extend entitlement. R2 signed S3 URL is direct delivery, not custom-domain CDN. Stream manifest/segment requests must use the refreshed token; feature spike must verify seamless refresh. Local-only development may use local_signed on loopback; production must reject that variant. This does not certify the provider transport."
+        "description": "URL/token lifetime<=120s for both transports. Player requests renewal online before expiry and resumes at validated position; renew does not extend entitlement. R2 signed S3 URL is direct delivery, not custom-domain CDN. Stream manifest/segment requests must use the refreshed token; feature spike must verify seamless refresh. Local-only development may use local_signed on loopback; production must reject that variant. This does not certify the provider transport. For `video` with `provider` r2, `transport` is `r2_s3_presigned`, the URL is a presigned GET of at most 120 s, and `range_supported` is true."
       },
       "TextLocation": {
         "type": "object",

@@ -322,6 +322,40 @@
     },
     "service_worker_cache": false
   },
+  "video_grant_r2": {
+    "request": {
+      "method": "POST",
+      "path": "/api/v1/media/grants",
+      "body": {
+        "asset_id": "10000000-0000-4000-8000-000000000013",
+        "device_id": "10000000-0000-4000-8000-000000000010",
+        "purpose": "online"
+      }
+    },
+    "response": {
+      "grant_id": "10000000-0000-4000-8000-000000000019",
+      "asset_id": "10000000-0000-4000-8000-000000000013",
+      "edition_revision_id": "10000000-0000-4000-8000-000000000004",
+      "transport": "r2_s3_presigned",
+      "url": "https://account.example.invalid/private/opaque-film-object?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=120&X-Amz-Signature=INERT_EXAMPLE",
+      "content_type": "video/mp4",
+      "sha256": "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae",
+      "issued_at": "2026-11-17T00:00:00Z",
+      "expires_at": "2026-11-17T00:02:00Z",
+      "range_supported": true,
+      "quality_kbps": null,
+      "duration_ms": 600000
+    },
+    "headers": {
+      "Cache-Control": "private, no-store, max-age=0",
+      "CDN-Cache-Control": "no-store",
+      "Cloudflare-CDN-Cache-Control": "no-store",
+      "Pragma": "no-cache",
+      "Vary": "Cookie, Authorization",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    },
+    "service_worker_cache": false
+  },
   "measured_mapping_shape": {
     "map_id": "10000000-0000-4000-8000-000000000018",
     "edition_revision_id": "10000000-0000-4000-8000-000000000004",
@@ -802,6 +836,14 @@
     },
     {
       "json_pointer": "/stream_media_grant/response",
+      "schema": "MediaGrant"
+    },
+    {
+      "json_pointer": "/video_grant_r2/request/body",
+      "schema": "MediaGrantInput"
+    },
+    {
+      "json_pointer": "/video_grant_r2/response",
       "schema": "MediaGrant"
     },
     {
