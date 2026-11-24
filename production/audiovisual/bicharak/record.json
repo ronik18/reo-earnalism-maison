@@ -9477,6 +9477,18 @@
       },
       "result": "accepted",
       "stage": "import"
+    },
+    {
+      "at": "2026-11-24T15:25:24.121514+00:00",
+      "detail": {
+        "expires_at": "2026-11-25T15:24:28+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-film-01-r8-house/inputs.zip",
+        "inputs_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r8-house/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",

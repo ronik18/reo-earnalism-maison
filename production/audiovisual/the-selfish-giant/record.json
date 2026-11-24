@@ -3303,6 +3303,30 @@
       },
       "result": "accepted",
       "stage": "import"
+    },
+    {
+      "at": "2026-11-24T15:25:24.903012+00:00",
+      "detail": {
+        "expires_at": "2026-11-25T15:24:28+00:00",
+        "inputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-house/inputs.zip",
+        "inputs_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-house/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T15:25:25.509008+00:00",
+      "detail": {
+        "expires_at": "2026-11-25T15:24:28+00:00",
+        "inputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-music-film-01/inputs.zip",
+        "inputs_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+        "job_id": "selfish-giant-music-film-01",
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-music-film-01/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
