@@ -133,6 +133,12 @@ class FilmTests(unittest.TestCase):
         film.assemble(PLAN, t, stills, hot, logo, logo, out, size=(320, 180))
         self.assertLessEqual(mix.measure(out)["true_peak"], -1.0)
 
+    def test_logo_lockup_matches_the_approved_landscape_placement(self):
+        """earnalism-video EDITORIAL_PRESENTATION: landscape lockup at x1510/y48, about 362 px
+        of the 2400x720 lockup on 1920x1080 (the first film used 9 %, 173 px: barely legible)."""
+        self.assertAlmostEqual(film.LOGO_WIDTH_FRAC * 1920, 362, delta=10)
+        self.assertAlmostEqual(film.LOGO_MARGIN_FRAC * 1920, 48, delta=2)
+
     def _assemble_inputs(self):
         t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
         stills = self.d / "stills"

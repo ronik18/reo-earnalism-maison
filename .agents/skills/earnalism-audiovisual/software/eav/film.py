@@ -13,8 +13,8 @@ END_CARD_S = 3.0
 TP_MAX = -1.0      # dBTP gate the encoded film must meet (eav.cli TP_MAX)
 TP_MARGIN = 0.2
 ZOOM_END = 0.06  # 1.00 -> 1.06
-LOGO_WIDTH_FRAC = 0.09
-LOGO_MARGIN_FRAC = 0.03
+LOGO_WIDTH_FRAC = 0.19   # ~365 px at 1920: earnalism-video landscape lockup (x1510/y48)
+LOGO_MARGIN_FRAC = 0.025
 STILL_EXTS = (".png", ".jpg", ".jpeg", ".webp")
 
 
