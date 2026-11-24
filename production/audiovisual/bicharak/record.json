@@ -5291,6 +5291,20 @@
       },
       "path": "qc/report.json",
       "sha256": "86fb4c90e5a61b3e11c674862b114c67c0cfb670dd594ed73b3da8160e37036b"
+    },
+    {
+      "bytes": 13628,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.8552166666666665,
+        "inputs_zip": "jobs/stills-film-01-r6-judge/inputs.zip",
+        "job_id": "stills-film-01-r6-judge",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r6-judge/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r6-judge/stills.ipynb",
+      "sha256": "a62029bfab4b30c2874cbb98c1e45cff2b1ee0cc8d6a5d4684aff3247bb20e15"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -6466,6 +6480,49 @@
       },
       "result": "fail",
       "stage": "qc"
+    },
+    {
+      "at": "2026-11-24T03:20:18.857389+00:00",
+      "detail": {
+        "forecast_units": 0.8552166666666665,
+        "job_id": "stills-film-01-r6-judge",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T03:20:18.863603+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r6-judge",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-24T03:20:31.390146+00:00",
+      "detail": {
+        "bytes": 7326,
+        "job_id": "stills-film-01-r6-judge",
+        "key": "exports/colab-exchange/bicharak/stills-film-01-r6-judge/inputs.zip",
+        "sha256": "abfe287891909b393ef04dc8dc717ded727d9f8ea45c29a72f73e65aba826f6c"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T03:21:18.882120+00:00",
+      "detail": {
+        "expires_at": "2026-11-24T09:20:46+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-film-01-r6-judge/inputs.zip",
+        "inputs_sha256": "abfe287891909b393ef04dc8dc717ded727d9f8ea45c29a72f73e65aba826f6c",
+        "job_id": "stills-film-01-r6-judge",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r6-judge/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
