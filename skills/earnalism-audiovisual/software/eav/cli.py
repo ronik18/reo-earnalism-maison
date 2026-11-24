@@ -928,7 +928,8 @@ def cmd_film(args):
         m = mix.duck_and_master(out / "narration.wav", score, out / "mix.wav", FILM_LUFS)
     except ValueError as e:
         raise Stop(f"QC failure: {e}", "Re-balance the score bed and rerun film", code=5)
-    info = film.assemble(plan["plan"], timing, rec.root / "stills" / stills["job_id"], out / "mix.wav",
+    stills_dir, stills_info = _film_stills(rec, t, out)
+    info = film.assemble(plan["plan"], timing, stills_dir, out / "mix.wav",
                          Path(args.logo), Path(args.end_card), out / f"{t}.mp4",
                          film=args.film - 1, language=lang)
     for kind, p in (("timing", out / "timing.json"), ("subtitles", out / f"{t}.srt"),
@@ -936,10 +937,41 @@ def cmd_film(args):
         rec.add_artifact(kind, p, {"target": t})
     rec.add_artifact("film", out / f"{t}.mp4", {"target": t, "lufs": m["lufs"],
                                                 "true_peak": m["true_peak"], "score": score_info,
-                                                "narration_job_id": narr["job_id"], **info})
+                                                "narration_job_id": narr["job_id"],
+                                                "stills": stills_info, **info})
     rec.event("film", "assembled", {"target": t, "duration": info["duration"]})
     print(f"Assembled {out / (t + '.mp4')}: {info['duration']:.1f} s, {m['lufs']:.1f} LUFS, "
           f"TP {m['true_peak']:.1f} dBTP. Maison video stays held (Stream cost not approved).")
+
+
+def _film_stills(rec, t, out):
+    """The film's stills: the latest complete stills job, with any later imported job whose
+    keys are all already in it applied as a patch (it replaces just those stills, e.g. one
+    character regenerated). Linked into film/<t>/stills so the film reads one folder."""
+    def keyed(job):
+        folder = rec.root / "stills" / job["job_id"]
+        return {p.stem: p for p in sorted(folder.iterdir()) if p.suffix.lower() in film.STILL_EXTS}
+    jobs = [(j, keyed(j)) for j in _jobs(rec) if j["kind"] == "stills" and j["target"] == t
+            and j["imported"] and not _ended(j)]
+    base = None
+    for i, (job, keys) in enumerate(jobs):
+        if base is None or not set(keys) <= set(jobs[base][1]):
+            base = i
+    files = dict(jobs[base][1])
+    patches = []
+    for job, keys in jobs[base + 1:]:
+        files.update(keys)
+        patches.append(job["job_id"])
+    merged = out / "stills"
+    if merged.exists():
+        shutil.rmtree(merged)
+    merged.mkdir()
+    for src in files.values():
+        try:
+            os.link(src, merged / src.name)  # same disk: no copy of the image bytes
+        except OSError:
+            shutil.copy2(src, merged / src.name)
+    return merged, {"base": jobs[base][0]["job_id"], "patches": patches}
 
 
 def _line_ends(script, units, timing) -> list:

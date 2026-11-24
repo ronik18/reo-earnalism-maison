@@ -613,6 +613,35 @@ class RoundTwo:
             "route": "vcsl", "sha256": hashlib.sha256(bed.read_bytes()).hexdigest()})
 
 
+    def test_film_applies_a_later_partial_stills_job_as_a_patch(self):
+        """বিচারক film-01: nine Judge Mohit stills came out bearded. A later stills job that
+        regenerates only some keys replaces those keys; every other still stays from the base."""
+        self.film_ready()
+        rec = Record.load(self.root)
+        base = [j for j in cli._jobs(rec) if j["kind"] == "stills"][-1]["job_id"]
+        scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+        first = scenes[0]["scene_id"]
+
+        def patch(rec, job_id, job_dir, out):
+            Image.new("RGB", (320, 180), (255, 0, 0)).save(out / f"{first}-1.png")
+        fix = self.fake_job("stills", "film-01", patch)
+        bed = self.d / "bed.wav"
+        self.noise(bed, 30)
+        code, out = run("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card",
+                        self.d / "end.png", "--score", bed, "--score-route", "vcsl")
+        self.assertEqual(code, 0, out)
+        art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
+        self.assertEqual(art["meta"]["stills"], {"base": base, "patches": [fix]})
+        merged = self.root / "film" / "film-01" / "stills"
+        self.assertEqual(sorted(p.stem for p in merged.iterdir()),
+                         sorted(f"{sc['scene_id']}-1" for sc in scenes))
+        self.assertEqual((merged / f"{first}-1.png").read_bytes(),
+                         (self.root / "stills" / fix / f"{first}-1.png").read_bytes())
+        if len(scenes) > 1:
+            other = f"{scenes[1]['scene_id']}-1.png"
+            self.assertEqual((merged / other).read_bytes(),
+                             (self.root / "stills" / base / other).read_bytes())
+
 class CliTests(RoundTwo, unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()

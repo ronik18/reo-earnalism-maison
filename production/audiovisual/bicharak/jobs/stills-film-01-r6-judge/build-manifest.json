@@ -1,0 +1,15 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 1586,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/stills-film-01-r6-judge",
+  "inputs_sha256": "abfe287891909b393ef04dc8dc717ded727d9f8ea45c29a72f73e65aba826f6c",
+  "job_id": "stills-film-01-r6-judge",
+  "kind": "stills",
+  "model": {
+    "repo": "black-forest-labs/FLUX.1-schnell",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "a62029bfab4b30c2874cbb98c1e45cff2b1ee0cc8d6a5d4684aff3247bb20e15",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}
