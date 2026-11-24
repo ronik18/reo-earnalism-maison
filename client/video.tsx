@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { mountIsland } from "./lifecycle";
 import { api, ApiError, errorText, readBootstrap, session, t } from "./api";
 import { validReturnPath } from "./state";
-import { approvedStreamURL, type StreamGrant } from "./media-state";
+import { approvedFilmURL, approvedStreamURL, renewExpiredFilm, type FilmGrant, type StreamGrant } from "./media-state";
 import { loadStreamSDK, type StreamPlayerAPI, type StreamFactory } from "./stream-sdk";
 
-interface Chapter { asset_id: string; unit_id: string; duration_ms: number; title: string }
+interface Chapter { asset_id: string; unit_id: string; duration_ms: number; title: string; provider?: "r2" | "stream"; sha256?: string | null; captions_url?: string | null }
 interface Boot {
   edition_id: string; edition_revision_id: string; title: string; locale: string;
   enabled: boolean; authenticated?: boolean; stream_customer_host?: string;
@@ -13,7 +13,8 @@ interface Boot {
   chapters?: Chapter[]; reader_url?: string; player_url?: string; sign_in_url?: string;
 }
 interface Progress { version: number; location?: { unit_id: string; position_ms: number } }
-interface Source { url: string; chapter: Chapter; generation: number; at: number; resume: boolean }
+interface Source { url: string; chapter: Chapter; generation: number; at: number; resume: boolean; film: boolean }
+const captionsPath = /^\/api\/v1\/content\/video-captions\/[0-9a-f-]+$/;
 /** A new iframe can expose cached duration before its media is loaded. */
 export function streamRestoration(sdk:StreamPlayerAPI, at:number, resume:boolean, current:()=>boolean, failed:()=>void, restoredPosition:()=>void) {
   let restored=false;
@@ -31,7 +32,7 @@ function Video({boot}: {boot: Boot}) {
   const chapters = boot.chapters || (boot.asset_id && boot.unit_id && boot.duration_ms ? [{asset_id:boot.asset_id,unit_id:boot.unit_id,duration_ms:boot.duration_ms,title:boot.title}] : []);
   const [online, setOnline] = useState(navigator.onLine), [status, setStatus] = useState(""), [busy, setBusy] = useState(false);
   const [source, setSource] = useState<Source>(), [index, setIndex] = useState(0), [conflict, setConflict] = useState(false);
-  const iframe = useRef<HTMLIFrameElement>(null), player = useRef<StreamPlayerAPI | undefined>(undefined), factory = useRef<StreamFactory | undefined>(undefined);
+  const iframe = useRef<HTMLIFrameElement>(null), video = useRef<HTMLVideoElement>(null), filmGrant = useRef<FilmGrant | undefined>(undefined), renewing = useRef(false), swapping = useRef(false), player = useRef<StreamPlayerAPI | undefined>(undefined), factory = useRef<StreamFactory | undefined>(undefined);
   const restorationPending = useRef(false);
   const active = useRef(0), position = useRef(0), playing = useRef(false), progress = useRef<Progress | undefined>(undefined);
   const pending = useRef<{key:string;version:number;body:unknown} | undefined>(undefined);
@@ -40,7 +41,7 @@ function Video({boot}: {boot: Boot}) {
   const path = `/me/progress/${boot.edition_id}/video`;
   const chapter = chapters[index];
   function point(c = chapters[active.current]) {
-    const value = restorationPending.current ? undefined : player.current?.currentTime;
+    const value = restorationPending.current || swapping.current ? undefined : player.current?.currentTime;
     return {unit_id:c?.unit_id,position_ms:Math.max(0,Math.min(c?.duration_ms || 0,Number.isFinite(value) ? Math.round(value! * 1000) : position.current))};
   }
   async function save(c = chapters[active.current], at = point(c).position_ms, keepalive = false) {
@@ -60,14 +61,15 @@ function Video({boot}: {boot: Boot}) {
   }
   async function load(i: number, at?: number, resume = false, manual = false) {
     if (!boot.enabled || !navigator.onLine || loading.current || !chapters[i]) return;
-    if (!boot.stream_customer_host || !/^customer-[a-z0-9]+\.cloudflarestream\.com$/.test(boot.stream_customer_host)) {setStatus(t("media_changed"));return;}
+    const film = chapters[i].provider === "r2";
+    if (!film && (!boot.stream_customer_host || !/^customer-[a-z0-9]+\.cloudflarestream\.com$/.test(boot.stream_customer_host))) {setStatus(t("media_changed"));return;}
     loading.current = true; setBusy(true); setStatus("");
     if (manual) errorRetried.current = false;
     const run = ++generation.current;
     controller.current?.abort(); const abort = new AbortController(); controller.current = abort;
     try {
-      const [sdk, identity] = await Promise.all([loadStreamSDK(),session()]);
-      factory.current = sdk;
+      const [sdk, identity] = await Promise.all([film ? undefined : loadStreamSDK(),session()]);
+      if (sdk) factory.current = sdk;
       if (!progress.current) {
         const latest = await api<Progress>(path,{signal:abort.signal}); progress.current = latest;
         const desired = boot.start_asset_id ? chapters.findIndex(c=>c.asset_id===boot.start_asset_id) : at === undefined ? chapters.findIndex(c=>c.unit_id===latest.location?.unit_id) : -1;
@@ -76,15 +78,17 @@ function Video({boot}: {boot: Boot}) {
       }
       const c = chapters[i];
       if (!player.current) {active.current = i;setIndex(i);position.current = Math.max(0,Math.min(c.duration_ms,at || 0));}
-      const grant = await api<StreamGrant>("/media/grants",{method:"POST",key:crypto.randomUUID(),signal:abort.signal,body:{asset_id:c.asset_id,purpose:"online",device_id:identity.device_id}});
-      const url = approvedStreamURL(grant,c.asset_id,boot.edition_revision_id,Date.now(),boot.stream_customer_host);
+      const grant = await api<StreamGrant & FilmGrant>("/media/grants",{method:"POST",key:crypto.randomUUID(),signal:abort.signal,body:{asset_id:c.asset_id,purpose:"online",device_id:identity.device_id}});
+      const url = film ? approvedFilmURL(grant,{asset_id:c.asset_id,sha256:c.sha256 || "",duration_ms:c.duration_ms},boot.edition_revision_id,location.origin) : approvedStreamURL(grant,c.asset_id,boot.edition_revision_id,Date.now(),boot.stream_customer_host);
       if (!url || grant.duration_ms !== c.duration_ms) throw new Error("media_changed");
       if (!mounted.current || run !== generation.current) return;
       const remaining = Date.parse(grant.expires_at)-Date.now();
-      renewAt.current = performance.now()+Math.max(250,remaining-Math.min(15000,remaining/3));
+      /* A film keeps one signed URL; an expired-grant element error renews it in place. */
+      if (film) {filmGrant.current = grant; renewAt.current = Infinity;}
+      else {filmGrant.current = undefined; renewAt.current = performance.now()+Math.max(250,remaining-Math.min(15000,remaining/3));}
       if (resume && player.current && chapters[active.current]?.asset_id === c.asset_id) at = point(c).position_ms;
       active.current = i; setIndex(i); position.current = Math.max(0,Math.min(c.duration_ms,at || 0));
-      setSource({url,chapter:c,generation:run,at:position.current,resume:resume && playing.current});
+      setSource({url,chapter:c,generation:run,at:position.current,resume:resume && playing.current,film});
     } catch(error) {
       if (!mounted.current || run !== generation.current || abort.signal.aborted) return;
       playing.current = false; renewAt.current = Infinity; setSource(undefined); setStatus(errorText(error));
@@ -96,18 +100,44 @@ function Video({boot}: {boot: Boot}) {
     errorRetried.current = true;
     await load(active.current,point().position_ms,playing.current);
   }
+  async function recoverFilm(el: HTMLVideoElement, current: Source) {
+    if (renewing.current) return;
+    const live = () => mounted.current && generation.current === current.generation;
+    const retry = () => {if(!live())return;playing.current=false;swapping.current=false;setStatus(t("media_retry"));};
+    try {
+      const renewed = await renewExpiredFilm({
+        grant:()=>filmGrant.current, renewing, now:()=>Date.now(),
+        request:async()=>{const identity=await session();return api<FilmGrant>("/media/grants",{method:"POST",key:crypto.randomUUID(),body:{asset_id:current.chapter.asset_id,purpose:"online",device_id:identity.device_id}});},
+        approve:grant=>approvedFilmURL(grant,{asset_id:current.chapter.asset_id,sha256:current.chapter.sha256 || "",duration_ms:current.chapter.duration_ms},boot.edition_revision_id,location.origin),
+        currentTime:()=>Number.isFinite(el.currentTime) && el.currentTime>0 ? el.currentTime : position.current/1000,
+        playing:()=>playing.current,
+        apply:async(url,grant,at,resume)=>{
+          if(!live())return;
+          filmGrant.current=grant; swapping.current=true; position.current=Math.max(0,Math.min(current.chapter.duration_ms,Math.round(at*1000)));
+          const seek=()=>{if(Number.isFinite(el.duration)&&Math.abs(el.currentTime-at)>0.5)el.currentTime=Math.min(at,el.duration);swapping.current=false;};
+          el.addEventListener("loadedmetadata",seek,{once:true});
+          el.src=url; el.currentTime=at;
+          if(resume)await el.play().catch(()=>retry());
+        },
+      });
+      if (!renewed) retry();
+    } catch(error) { if(live()){playing.current=false;swapping.current=false;setStatus(errorText(error));} }
+  }
   useEffect(()=>{
-    if (!source || !iframe.current || !factory.current) return;
-    const sdk = factory.current(iframe.current); player.current = sdk; sdk.controls = true;
+    if (!source) return;
+    const sdk: StreamPlayerAPI | undefined = source.film ? video.current || undefined : iframe.current && factory.current ? factory.current(iframe.current) : undefined;
+    if (!sdk) return;
+    player.current = sdk; sdk.controls = true; swapping.current = false;
     restorationPending.current=true;
     const restoration=streamRestoration(sdk,source.at,source.resume,
       ()=>mounted.current && generation.current===source.generation,
       ()=>setStatus(t("media_retry")),()=>{restorationPending.current=false;});
     const store = () => {position.current = Math.max(0,Math.min(source.chapter.duration_ms,Math.round((sdk.currentTime || 0)*1000)));};
-    const update = () => {if(!restoration.ready())return;store();if(performance.now()-lastSaved.current>=15000)void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
-    const paused = () => {playing.current=false;if(!restoration.ready())return;store();void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
+    const ready = () => restoration.ready() && !swapping.current;
+    const update = () => {if(!ready())return;store();if(performance.now()-lastSaved.current>=15000)void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
+    const paused = () => {playing.current=false;if(!ready())return;store();void save(source.chapter,position.current).catch(e=>{if(mounted.current)setStatus(errorText(e));});};
     const play = () => {playing.current=true;if(performance.now()>=renewAt.current)void load(active.current,point().position_ms,true);};
-    const error = () => {void recover();};
+    const error = () => {if(source.film)void recoverFilm(sdk as HTMLVideoElement,source);else void recover();};
     const handlers: [string,()=>void][] = [["loadedmetadata",restoration.metadata],["canplay",restoration.metadata],["timeupdate",update],["play",play],["pause",paused],["ended",paused],["error",error]];
     for(const [event,handler] of handlers)sdk.addEventListener(event,handler);
     restoration.prime();
@@ -135,7 +165,7 @@ function Video({boot}: {boot: Boot}) {
   }
   return <section className="video-room" aria-labelledby="video-title">
     <p className="eyebrow">{t("video")}</p><h1 id="video-title" lang={boot.locale}>{boot.title}</h1>
-    {source && online ? <iframe ref={iframe} title={chapter?.title || boot.title} src={source.url} referrerPolicy="no-referrer" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen className="stream-frame" /> : <div className="media-unavailable"><h2>{t(!online?"video_offline_title":"video_unavailable_title")}</h2><p>{t(!online?"video_offline_help":"video_unavailable_help")}</p></div>}
+    {source && online ? source.film ? <video ref={video} className="stream-frame" title={chapter?.title || boot.title} controls playsInline preload="metadata" src={source.url}>{source.chapter.captions_url && captionsPath.test(source.chapter.captions_url) ? <track kind="subtitles" default srcLang={boot.locale} src={source.chapter.captions_url} /> : null}</video> : <iframe ref={iframe} title={chapter?.title || boot.title} src={source.url} referrerPolicy="no-referrer" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen className="stream-frame" /> : <div className="media-unavailable"><h2>{t(!online?"video_offline_title":"video_unavailable_title")}</h2><p>{t(!online?"video_offline_help":"video_unavailable_help")}</p></div>}
     <p role="status" aria-live="polite">{busy?t("loading"):status}</p>
     {boot.enabled && chapter && online ? <button disabled={busy||conflict} onClick={()=>void load(active.current,progress.current?point().position_ms:undefined,playing.current,true)}>{t(source?"retry":"watch")}</button> : null}
     {boot.authenticated===false && boot.sign_in_url ? <a className="button" href={validReturnPath(boot.sign_in_url)}>{t("sign_in")}</a>:null}

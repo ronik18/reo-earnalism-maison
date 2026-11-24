@@ -50,3 +50,49 @@ export function approvedAudioURL(grant: AudioGrant, expected: {asset_id:string;s
     return url.href;
   } catch { return undefined; }
 }
+
+export interface FilmGrant {
+  asset_id: string; edition_revision_id: string; transport: string; content_type: string;
+  url: string; expires_at: string; sha256: string; duration_ms: number;
+}
+/** Mirrors approvedAudioURL: exact asset/revision/bytes, at most 120 s ahead, private R2 over https or same-origin local dev. */
+export function approvedFilmURL(grant: FilmGrant, expected: {asset_id:string;sha256:string;duration_ms:number}, revisionId: string, origin: string, now = Date.now()): string | undefined {
+  try {
+    const url = new URL(grant.url, origin), page = new URL(origin);
+    const expiry = Date.parse(grant.expires_at);
+    const local = grant.transport === "local_signed" && ["localhost", "127.0.0.1", "[::1]"].includes(page.hostname) && url.origin === page.origin;
+    if (grant.asset_id !== expected.asset_id || grant.edition_revision_id !== revisionId || !/^[a-f0-9]{64}$/.test(grant.sha256) || grant.sha256 !== expected.sha256 || !Number.isInteger(grant.duration_ms) || grant.duration_ms <= 0 || grant.duration_ms !== expected.duration_ms || grant.content_type !== "video/mp4" || !Number.isFinite(expiry) || expiry <= now || expiry > now + 120000 || url.username || url.password || !(local || (grant.transport === "r2_s3_presigned" && url.protocol === "https:"))) return undefined;
+    return url.href;
+  } catch { return undefined; }
+}
+/** An element error renews only an expired grant, and only once at a time. */
+export function shouldRenewFilm(expiresAt: string, now: number, renewing: boolean): boolean {
+  const expiry = Date.parse(expiresAt);
+  return !renewing && Number.isFinite(expiry) && expiry <= now;
+}
+export interface FilmRenewalIO {
+  grant(): FilmGrant | undefined;
+  renewing: {current: boolean};
+  now(): number;
+  request(): Promise<FilmGrant>;
+  approve(grant: FilmGrant): string | undefined;
+  /** Element position in seconds. */
+  currentTime(): number;
+  playing(): boolean;
+  /** Swap the element source, seek to `at` seconds and resume when it was playing. */
+  apply(url: string, grant: FilmGrant, at: number, resume: boolean): void | Promise<void>;
+}
+/** Replace an expired film grant and resume at the same position; false means show media_retry. */
+export async function renewExpiredFilm(io: FilmRenewalIO): Promise<boolean> {
+  const current = io.grant();
+  if (!current || !shouldRenewFilm(current.expires_at, io.now(), io.renewing.current)) return false;
+  io.renewing.current = true;
+  try {
+    const at = io.currentTime(), resume = io.playing();
+    const next = await io.request();
+    const url = io.approve(next);
+    if (!url) throw new Error("media_changed");
+    await io.apply(url, next, Number.isFinite(at) && at > 0 ? at : 0, resume);
+    return true;
+  } finally { io.renewing.current = false; }
+}
