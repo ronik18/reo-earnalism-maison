@@ -135,9 +135,10 @@ class FilmDeliveryTests(TestCase):
         self.publish()
         self.entitle()
         with override_settings(MEDIA_STORAGE_BACKEND='local'), patch('library.services._asset_valid') as valid, \
-                patch('library.storage.private_url') as signer:
+                patch('library.storage.verify_local_size') as present, patch('library.storage.private_url') as signer:
             grant = svc.media_grant(self.user, self.request(asset), 'IN')
-        valid.assert_called_once()
+        valid.assert_not_called()  # a film is never loaded into memory or re-hashed to be granted
+        present.assert_called_once_with(asset.storage_key, asset.bytes)
         signer.assert_not_called()
         self.assertEqual(grant['transport'], 'local_signed')
         self.assertTrue(grant['url'].startswith(f'/api/v1/content/local-assets/{asset.pk}?token='))
@@ -160,21 +161,72 @@ class FilmDeliveryTests(TestCase):
             grant = svc.media_grant(self.user, {**self.request(asset), 'device_id': login.json()['device_id']}, 'IN')
             self.assertEqual(grant['transport'], 'local_signed')
             whole = self.client.get(grant['url'], HTTP_RANGE='bytes=0-')
-            self.assertEqual(whole.status_code, 206, whole.content[:200])
+            self.assertEqual(whole.status_code, 206, whole.status_code)
             self.assertEqual(whole['Content-Range'], f'bytes 0-{len(raw) - 1}/{len(raw)}')
             self.assertEqual(whole['Accept-Ranges'], 'bytes')
             self.assertEqual(whole['Content-Type'], 'video/mp4')
             self.assertIn('no-store', whole['Cache-Control'])
-            self.assertEqual(whole.content, raw)
+            self.assertEqual(whole.getvalue(), raw)
             part = self.client.get(grant['url'], HTTP_RANGE='bytes=10-19')
-            self.assertEqual((part.status_code, part.content, part['Content-Range']),
+            self.assertEqual((part.status_code, part.getvalue(), part['Content-Range']),
                              (206, raw[10:20], f'bytes 10-19/{len(raw)}'))
             plain = self.client.get(grant['url'])
-            self.assertEqual((plain.status_code, plain['Accept-Ranges'], plain.content), (200, 'bytes', raw))
+            self.assertEqual((plain.status_code, plain['Accept-Ranges'], plain.getvalue()), (200, 'bytes', raw))
             outside = self.client.get(grant['url'], HTTP_RANGE=f'bytes={len(raw)}-')
             self.assertEqual(outside.status_code, 416)
             multi = self.client.get(grant['url'], HTTP_RANGE='bytes=0-1,4-5')
             self.assertEqual(multi.status_code, 416)
+
+    def test_local_large_film_grant_and_open_range_stream_without_loading_or_hashing(self):
+        """A 700 MiB film (sparse file) far above MAX_INLINE_BYTES: granted by recorded size, served by seek+read."""
+        import tempfile
+        from pathlib import Path
+        from . import storage
+        size = 734_003_200
+        self.assertGreater(size, storage.MAX_INLINE_BYTES)
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        with override_settings(MEDIA_STORAGE_BACKEND='local', MEDIA_ROOT=directory.name):
+            asset = self.film(bytes=size)
+            path = Path(directory.name) / asset.storage_key
+            path.parent.mkdir(parents=True)
+            with path.open('wb') as stream:
+                stream.write(b'ftyp-head')
+                stream.truncate(size)
+                stream.seek(size - 9)
+                stream.write(b'moov-tail')
+            self.publish()
+            self.entitle()
+            login = self.client.post('/api/v1/auth/login', {
+                'email': self.user.email, 'password': 'Synthetic-Film-Passphrase-47', 'password_purpose_consent': True,
+                'password_purpose_version': 'password-account-v1'}, content_type='application/json')
+            self.assertEqual(login.status_code, 200, login.content)
+            device = login.json()['device_id']
+            with patch('library.storage.verify_private', side_effect=AssertionError('film re-hashed per request')):
+                grant = svc.media_grant(self.user, {**self.request(asset), 'device_id': device}, 'IN')
+                self.assertEqual(grant['transport'], 'local_signed')
+                whole = self.client.get(grant['url'], HTTP_RANGE='bytes=0-')
+                self.assertEqual(whole.status_code, 206)
+                self.assertEqual(whole['Content-Range'], f'bytes 0-{size - 1}/{size}')
+                self.assertEqual(whole['Content-Length'], str(size))
+                self.assertEqual((whole['Accept-Ranges'], whole['Content-Type']), ('bytes', 'video/mp4'))
+                self.assertEqual(whole['Cache-Control'], 'private, no-store, max-age=0')
+                chunks = iter(whole.streaming_content)
+                first = next(chunks)
+                self.assertLessEqual(len(first), storage.CHUNK_BYTES)
+                self.assertTrue(first.startswith(b'ftyp-head'))
+                del chunks, whole  # never read the remaining ~700 MiB; the generator closes its file when collected
+                tail = self.client.get(grant['url'], HTTP_RANGE=f'bytes={size - 9}-')
+                self.assertEqual((tail.status_code, tail.getvalue(), tail['Content-Range']),
+                                 (206, b'moov-tail', f'bytes {size - 9}-{size - 1}/{size}'))
+                outside = self.client.get(grant['url'], HTTP_RANGE=f'bytes={size}-')
+                self.assertEqual(outside.status_code, 416)
+            # A film whose stored size differs from its recorded size is never granted.
+            with path.open('r+b') as stream:
+                stream.truncate(size - 1)
+            with self.assertRaises(DomainError) as refused:
+                svc.media_grant(self.user, {**self.request(asset), 'device_id': device}, 'IN')
+            self.assertEqual((refused.exception.code, refused.exception.status), ('asset_integrity_failed', 503))
 
     def test_film_grant_refuses_outside_whitelist_and_without_entitlement(self):
         asset = self.film()
@@ -365,3 +417,128 @@ class FilmCaptionsEndpointTests(TestCase):
             response, read = self.get()
         self.assertEqual((response.status_code, response.json()['code']), (503, 'feature_disabled'))
         read.assert_not_called()
+
+
+MIB = 1024 * 1024
+ZERO_MIB = bytes(MIB)
+
+
+def zeros_sha256(mib):
+    import hashlib
+    hasher = hashlib.sha256()
+    for _ in range(mib):
+        hasher.update(ZERO_MIB)
+    return hasher.hexdigest()
+
+
+class SlowLargeObject:
+    """A provider body of `mib` zero MiB whose every read advances a fake clock: models a large, slow film."""
+
+    def __init__(self, mib, clock, seconds_per_read):
+        self.left = mib * MIB
+        self.clock = clock
+        self.seconds_per_read = seconds_per_read
+
+    def read(self, n):
+        self.clock[0] += self.seconds_per_read
+        size = min(n, self.left, MIB)
+        self.left -= size
+        return ZERO_MIB[:size]
+
+    def close(self):
+        pass
+
+
+@override_settings(LOCAL=True, MAISON_LOCAL_FIXTURES=False, FREE_ACCESS_ENABLED=False,
+                   FEATURES={'video': True}, VIDEO_PROVIDER='r2')
+class FilmVerificationBudgetTests(TestCase):
+    """Controller ruling: full sha256 for films, with max(8, ceil(bytes/16 MiB)) seconds; other kinds keep 8 s."""
+
+    film = FilmDeliveryTests.film
+    captions = FilmDeliveryTests.captions
+
+    def setUp(self):
+        FilmDeliveryTests.setUp(self)
+
+    def slow_open(self, mib, seconds_per_read, content_type='video/mp4'):
+        clock = [0.0]
+        opened = patch('library.storage._open', side_effect=lambda key: (
+            SlowLargeObject(mib, clock, seconds_per_read), mib * MIB, content_type))
+        ticking = patch('library.storage.time.monotonic', side_effect=lambda: clock[0])
+        return opened, ticking
+
+    def test_video_budget_formula(self):
+        from . import storage
+        self.assertEqual(storage.verification_budget_seconds('video', 1), 8)
+        self.assertEqual(storage.verification_budget_seconds('video', 128 * MIB), 8)
+        self.assertEqual(storage.verification_budget_seconds('video', 128 * MIB + 1), 9)
+        self.assertEqual(storage.verification_budget_seconds('video', 1073741824), 64)
+        self.assertEqual(storage.verification_budget_seconds('audio_chapter', 1073741824), 8)
+        self.assertEqual(storage.verification_budget_seconds('video_captions', 1048576), 8)
+
+    def test_validation_verifies_large_slow_film_within_scaled_budget(self):
+        mib = 400  # 400 MiB film -> 25 s budget; at 40 ms per 1 MiB read it takes 16 s (> the old 8 s)
+        self.film(bytes=mib * MIB, sha256=zeros_sha256(mib))
+        opened, ticking = self.slow_open(mib, 0.04)
+        with opened, ticking:
+            self.assertIs(svc.prepare_revision_validation(self.revision.pk)['integrity'], True)
+
+    def test_validation_large_film_integrity_mismatch_still_fails(self):
+        mib = 400
+        self.film(bytes=mib * MIB, sha256='c' * 64)
+        opened, ticking = self.slow_open(mib, 0.04)
+        from . import storage
+        real = storage.verify_private
+        seen = []
+
+        def spy(*args, **kwargs):
+            try:
+                return real(*args, **kwargs)
+            except DomainError as exc:
+                seen.append(exc.code)
+                raise
+        with opened, ticking, patch('library.storage.verify_private', side_effect=spy):
+            self.assertIs(svc.prepare_revision_validation(self.revision.pk)['integrity'], False)
+        self.assertEqual(seen, ['asset_integrity_failed'])
+
+    def test_validation_film_slower_than_scaled_budget_times_out(self):
+        mib = 400  # 25 s budget; 100 ms per read needs 40 s
+        self.film(bytes=mib * MIB, sha256=zeros_sha256(mib))
+        opened, ticking = self.slow_open(mib, 0.1)
+        with opened, ticking:
+            self.assertIs(svc.prepare_revision_validation(self.revision.pk)['integrity'], False)
+
+    def test_validation_non_video_assets_keep_eight_seconds(self):
+        self.film(bytes=1073741824)
+        self.captions()
+        with patch('library.storage.verify_asset') as verify:
+            svc.prepare_revision_validation(self.revision.pk)
+        budgets = {call.args[0].kind: call.kwargs['max_seconds'] for call in verify.call_args_list}
+        self.assertEqual(budgets, {'video': 64, 'video_captions': 8})
+
+    def test_clone_copies_film_with_scaled_budget(self):
+        self.film(bytes=1073741824)
+        self.captions()
+        with patch('library.storage.copy_verified') as copy, patch('library.services.prepare_reader_package') as package:
+            package.side_effect = lambda unit, paragraphs: Asset(
+                id=uuid.uuid4(), revision=unit.revision, unit=unit, kind='reader_package', state='ready',
+                storage_key=f'revisions/{unit.revision.id}/{uuid.uuid4()}', sha256='d' * 64, bytes=10,
+                content_type='application/json')
+            try:
+                svc.clone_revision(self.revision.pk)
+            except Exception:
+                pass  # persistence of the synthetic clone is out of scope; the copy budgets are the claim
+        budgets = {call.args[0].kind: call.kwargs.get('max_seconds', 8) for call in copy.call_args_list}
+        self.assertEqual(budgets, {'video': 64, 'video_captions': 8})
+
+    def test_copy_verified_large_slow_film_mismatch_fails_within_scaled_budget(self):
+        from . import storage
+        mib = 200  # 13 s budget; 50 ms per read takes 10 s, so the read completes and the hash decides
+        source = self.film(bytes=mib * MIB, sha256='e' * 64)
+        opened, ticking = self.slow_open(mib, 0.05)
+        with opened, ticking, patch('library.storage.private_exists', return_value=False), \
+                patch('library.storage.put_private_file') as upload, self.assertRaises(DomainError) as refused:
+            storage.copy_verified(source, f'revisions/{self.revision.pk}/copy',
+                                  max_seconds=storage.verification_budget_seconds('video', source.bytes))
+        upload.assert_not_called()
+        self.assertEqual(refused.exception.code, 'asset_integrity_failed')

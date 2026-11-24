@@ -487,7 +487,10 @@ def _signed_asset(user,asset,revision,device_id,expiry,territory,*,purpose='onli
     from . import storage
     remote=storage.is_r2()
     if asset.kind=='video' and asset.provider=='stream':raise DomainError('provider_not_configured','Stream video is granted only by its Stream adapter.',503)
-    if not remote:_asset_valid(asset)
+    if not remote:
+        # Local films are checked by recorded size; their bytes were hashed when stored.
+        if asset.kind=='video':storage.verify_local_size(asset.storage_key,asset.bytes)
+        else:_asset_valid(asset)
     seconds=math.floor((expiry-timezone.now()).total_seconds())
     if seconds<1:raise DomainError('rights_unavailable','Content authorization is expiring.',403)
     payload={'asset':str(asset.id),'user':str(user.public_id),'device':str(device_id),'revision':str(revision.id),
@@ -604,6 +607,11 @@ def resolve_signed_asset(user,asset_id,token):
     if data['purpose']=='offline':
         from reader.download_services import validate_delivery_license
         validate_delivery_license(user,data.get('license_id'),asset,data.get('device'),territory)
+    if asset.kind=='video':
+        # The local route streams films by range; never load or re-hash the whole film per request.
+        from .storage import verify_local_size
+        verify_local_size(asset.storage_key,asset.bytes)
+        return asset,None
     return asset,_asset_valid(asset)
 
 
@@ -677,13 +685,13 @@ def prepare_revision_validation(revision):
     identity=[(str(a.id),a.version,a.state,a.sha256,a.bytes,a.storage_key,a.content_type,a.provider,a.duration_ms) for a in assets]
     integrity=True
     try:
-        from .storage import verify_asset
+        from .storage import verification_budget_seconds,verify_asset
         for asset in assets:
             if asset.state=='ready':
                 if asset.provider=='stream':
                     from .stream import verify_video_metadata
                     verify_video_metadata(asset,max_seconds=8)
-                else:verify_asset(asset,max_seconds=8)
+                else:verify_asset(asset,max_seconds=verification_budget_seconds(asset.kind,asset.bytes))
     except DomainError:integrity=False
     coverage=_reader_package_coverage(revision,[a for a in assets if a.state=='ready']) if revision.access_policy.get('reader','deny')!='deny' else True
     current=Revision.objects.only('version','content_sha256').get(pk=revision.pk)
@@ -865,12 +873,12 @@ def clone_revision(source_id):
             paragraphs.append(paragraph);unit_paragraphs.append(paragraph);anchor_map[str(original.anchor_id)]=str(paragraph.anchor_id)
         assets.append(prepare_reader_package(unit,unit_paragraphs))
         content.append({'unit_id':str(unit.id),'title':unit.title,'ordinal':unit.ordinal,'paragraphs':[paragraph_dto(p) for p in unit_paragraphs]})
-    from .storage import copy_verified
+    from .storage import copy_verified,verification_budget_seconds
     for old in source.assets.exclude(kind__in=['reader_package','timing_map']):
         if old.state!='ready':raise DomainError('source_asset_not_ready','Finish source uploads before cloning this revision.',409)
         if old.provider=='stream':raise DomainError('stream_reimport_required','Prepare a separately approved Stream asset for the new revision.',409)
         aid=uuid.uuid4();key=f'revisions/{clone.id}/{aid}';asset_map[str(old.id)]=str(aid)
-        copy_verified(old,key)
+        copy_verified(old,key,max_seconds=verification_budget_seconds(old.kind,old.bytes))
         assets.append(Asset(id=aid,revision=clone,unit=unit_map.get(old.unit_id),kind=old.kind,state='ready',storage_key=key,
                             sha256=old.sha256,bytes=old.bytes,content_type=old.content_type,copy_verified_bytes=old.bytes,provider=old.provider,duration_ms=old.duration_ms))
     selected=source.validation_evidence.get('cover_pair',{})

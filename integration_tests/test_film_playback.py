@@ -18,7 +18,8 @@ expired: the seek past the watermark then genuinely reaches the server with an e
 client must renew the grant to resume. Every byte still comes from the real signed route.
 
 Run: ``MAISON_TEST_DB_NAME=maison_test_t9 python3 manage.py test integration_tests.test_film_playback``.
-Evidence: ``docs/evidence/film-delivery-20261124/browser.json`` (paths only; queries and tokens redacted).
+Evidence: ``docs/evidence/film-delivery-20261124/browser.json`` (paths only; queries and tokens redacted), written only
+with ``MAISON_WRITE_EVIDENCE=1``. With ``MAISON_REQUIRE_BROWSER=1`` (CI) a missing playwright or client bundle fails.
 """
 import hashlib
 import json
@@ -36,7 +37,7 @@ from urllib.parse import urlsplit
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from django.test import override_settings
+from django.test import SimpleTestCase, override_settings
 from django.utils import timezone
 
 from billing.models import Entitlement
@@ -55,6 +56,29 @@ STATE = """() => { const v = document.querySelector('video'); const s = document
                 status: s && s.textContent} : {status: s && s.textContent, video: false}; }"""
 
 
+def browser_prerequisites(manifest=None):
+    """Skip locally when playwright or the built bundle is absent; with MAISON_REQUIRE_BROWSER=1 (CI) fail instead."""
+    required = os.getenv('MAISON_REQUIRE_BROWSER') == '1'
+    manifest = manifest or Path(settings.BASE_DIR) / 'static/maison/dist/manifest.json'
+
+    def missing(reason):
+        if required:
+            raise AssertionError(f'MAISON_REQUIRE_BROWSER=1: {reason}')
+        raise SkipTest(reason)
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        missing('Python playwright is required for browser acceptance (pip install playwright==1.63.0)')
+    if not manifest.exists():
+        missing('Build the client first: npm run build')
+    return sync_playwright
+
+
+def write_evidence_enabled():
+    """Evidence is rewritten only on request (MAISON_WRITE_EVIDENCE=1), never as a side effect of a test run."""
+    return os.getenv('MAISON_WRITE_EVIDENCE', '0') == '1'
+
+
 def redact(url):
     return urlsplit(url).path + ('?<redacted>' if urlsplit(url).query else '')
 
@@ -66,12 +90,7 @@ class FilmPlaybackBrowserTests(StaticLiveServerTestCase):
 
     @classmethod
     def setUpClass(cls):
-        try:
-            from playwright.sync_api import sync_playwright
-        except ImportError as error:
-            raise SkipTest('Python playwright is required for browser acceptance') from error
-        if not (Path(settings.BASE_DIR) / 'static/maison/dist/manifest.json').exists():
-            raise SkipTest('Build the client first: npm run build')
+        sync_playwright = browser_prerequisites()
         super().setUpClass()
         # Playwright's sync API keeps an event loop on this thread; Django's documented opt-out for browser tests.
         cls.async_unsafe = os.environ.get('DJANGO_ALLOW_ASYNC_UNSAFE')
@@ -259,6 +278,49 @@ class FilmPlaybackBrowserTests(StaticLiveServerTestCase):
         }
         text = json.dumps(result, indent=2, ensure_ascii=False) + '\n'
         self.assertNotIn('token=', text)
-        if os.getenv('MAISON_WRITE_EVIDENCE', '1') == '1':
+        if write_evidence_enabled():
             EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
             EVIDENCE.write_text(text)
+
+
+class BrowserGateTests(SimpleTestCase):
+    """CI sets MAISON_REQUIRE_BROWSER=1: a missing playwright or client bundle must fail, never skip."""
+
+    def missing_playwright(self):
+        import builtins
+        real = builtins.__import__
+
+        def refuse(name, *args, **kwargs):
+            if name.startswith('playwright'):
+                raise ImportError('synthetic: playwright absent')
+            return real(name, *args, **kwargs)
+        return patch('builtins.__import__', side_effect=refuse)
+
+    def test_missing_playwright_skips_by_default(self):
+        with patch.dict(os.environ, {}, clear=False), self.missing_playwright():
+            os.environ.pop('MAISON_REQUIRE_BROWSER', None)
+            with self.assertRaises(SkipTest):
+                browser_prerequisites()
+
+    def test_missing_playwright_fails_when_browser_required(self):
+        with patch.dict(os.environ, {'MAISON_REQUIRE_BROWSER': '1'}), self.missing_playwright():
+            with self.assertRaises(AssertionError) as failed:
+                browser_prerequisites()
+        self.assertNotIsInstance(failed.exception, SkipTest)
+        self.assertIn('playwright', str(failed.exception))
+
+    def test_missing_bundle_fails_when_browser_required(self):
+        with TemporaryDirectory() as empty, patch.dict(os.environ, {'MAISON_REQUIRE_BROWSER': '1'}):
+            with self.assertRaises(AssertionError) as failed:
+                browser_prerequisites(Path(empty) / 'manifest.json')
+        self.assertIn('npm run build', str(failed.exception))
+        with TemporaryDirectory() as empty, patch.dict(os.environ, {'MAISON_REQUIRE_BROWSER': '0'}):
+            with self.assertRaises(SkipTest):
+                browser_prerequisites(Path(empty) / 'manifest.json')
+
+    def test_evidence_write_defaults_off(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop('MAISON_WRITE_EVIDENCE', None)
+            self.assertIs(write_evidence_enabled(), False)
+        with patch.dict(os.environ, {'MAISON_WRITE_EVIDENCE': '1'}):
+            self.assertIs(write_evidence_enabled(), True)

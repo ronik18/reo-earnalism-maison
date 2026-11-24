@@ -69,7 +69,9 @@ SHA-256 matches the current film MP4, when the MP4 is not faststart (moov before
 when it is not exactly one H.264 video stream plus one AAC audio stream, or when it is over
 1 073 741 824 bytes. The server step `attach_audiovisual_film` (root lane) stages this
 bundle; it publishes nothing by itself, and publication still needs exact-edition clearance
-for the `video` format in every active region.
+for the `video` format in every active region. Validate and publish a film only through
+`attach_audiovisual_film publish`, never the staff web publish action: validation hashes the
+whole film, which can outlast a web request.
 
 ## Social
 

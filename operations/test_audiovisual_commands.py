@@ -423,6 +423,32 @@ class FilmCommandTests(AudiovisualFixture):
         self.assertTrue(AuditEvent.objects.filter(actor=self.publisher, action="asset.complete", entity_id=str(video.id),
                                                   detail__channel="server_job").exists())
 
+    def test_film_upload_budget_scales_with_size(self):
+        from operations.management.commands.attach_audiovisual_film import film_upload_seconds
+        self.assertEqual(film_upload_seconds(1), 300)
+        self.assertEqual(film_upload_seconds(600 * 1024 * 1024), 300)
+        self.assertEqual(film_upload_seconds(600 * 1024 * 1024 + 1), 301)
+        self.assertEqual(film_upload_seconds(1073741824), 512)  # a 1 GiB film at a 2 MiB/s floor
+
+    def test_stage_passes_scaled_upload_budget_and_reports_progress(self):
+        from unittest.mock import patch
+        from library import storage
+        from operations.management.commands.attach_audiovisual_film import film_upload_seconds
+        self.publish_bicharak()
+        source = self.export()
+        folder, unit = self.film_bundle(source["units"][0]["unit_id"])
+        evidence = self.film_evidence(source, [unit["mp4_sha256"]])
+        real = storage.put_private_file
+        with patch("library.storage.put_private_file", side_effect=real) as upload:
+            out = io.StringIO()
+            call_command("attach_audiovisual_film", "stage", "bicharak", "--publisher", str(self.publisher.public_id),
+                         "--bundle", str(folder), "--evidence", evidence, stdout=out)
+        budgets = {call.args[2]: call.kwargs.get("max_seconds") for call in upload.call_args_list}
+        self.assertEqual(budgets["video/mp4"], film_upload_seconds(unit["bytes"]))
+        progress = out.getvalue().split("MAISON_OUT ", 1)[0]
+        self.assertRegex(progress, r"film upload start: unit 1, [0-9.]+ MB, budget \d+ s")
+        self.assertRegex(progress, r"film upload done: unit 1, [0-9.]+ MB in [0-9.]+ s")
+
     def test_stage_refuses_non_faststart(self):
         live = self.publish_bicharak()
         source = self.export()

@@ -5,7 +5,7 @@ permissions:
 jobs:
   postgres-acceptance:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     services:
       postgres:
         image: postgres:18@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
@@ -20,6 +20,8 @@ jobs:
     env:
       MAISON_ENV: test
       DATABASE_URL: postgres://maison:ephemeral-ci-only@127.0.0.1:5432/maison?sslmode=disable
+      # integration_tests.test_film_playback fails (never skips) without playwright or the built client.
+      MAISON_REQUIRE_BROWSER: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,6 +41,7 @@ jobs:
       - run: python manage.py check
       - run: python -m unittest discover -s skills/earnalism-audiobook-go-live/scripts -p 'test_plan_voice.py'
       - run: pip install numpy==2.5.3 && python -m unittest discover -s skills/earnalism-audiovisual/software/tests -t skills/earnalism-audiovisual/software
+      - run: pip install playwright==1.63.0 && python -m playwright install --with-deps chromium
       - run: python manage.py makemigrations --check --dry-run
       - run: python manage.py migrate --noinput
       - run: python manage.py test --noinput --verbosity 2

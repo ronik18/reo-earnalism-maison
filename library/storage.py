@@ -1,5 +1,6 @@
 """Private local/R2 object adapter. Immutable keys; bounded reads, no byte proxy for media."""
 import hashlib
+import math
 import re
 import time
 import tempfile
@@ -11,6 +12,13 @@ from core.api import DomainError
 
 CHUNK_BYTES = 1024 * 1024
 MAX_INLINE_BYTES = 4 * CHUNK_BYTES
+VIDEO_VERIFY_BYTES_PER_SECOND = 16 * CHUNK_BYTES
+
+
+def verification_budget_seconds(kind,bytes):
+    """Full-hash budget: films scale with size (max(8, ceil(bytes/16 MiB))); every other kind keeps 8 s."""
+    if kind!='video':return 8
+    return max(8,math.ceil(bytes/VIDEO_VERIFY_BYTES_PER_SECOND))
 
 
 def _key(value):
@@ -68,7 +76,7 @@ def private_url(key,expires_seconds=120,content_type=None):
         raise DomainError('invalid_grant','Private URLs last at most120 seconds.',422)
     if not is_r2():
         raise DomainError('provider_not_configured','Use the account-bound local asset route in development.',503)
-    params=_params(key);params['ResponseCacheControl']='private, no-store'
+    params=_params(key);params['ResponseCacheControl']='private, no-store, max-age=0'
     if content_type:params['ResponseContentType']=content_type
     return _provider_call(_client().generate_presigned_url,'get_object',Params=params,ExpiresIn=expires_seconds,HttpMethod='GET')
 
@@ -127,6 +135,31 @@ def read_verified(asset):
 
 def verify_asset(asset,max_seconds=8):
     return verify_private(asset.storage_key,asset.bytes,asset.sha256,asset.content_type,max_seconds=max_seconds)
+
+
+def verify_local_size(key,expected_bytes):
+    """Local film presence by recorded size only: its SHA256 was verified when stored, and a film
+    (hundreds of MiB) is never loaded into memory or re-hashed per grant or request."""
+    path=_local_path(key)
+    try:size=path.stat().st_size if path.is_file() else None
+    except OSError as exc:raise DomainError('asset_unavailable','Private object bytes are unavailable.',503) from exc
+    if size is None:raise DomainError('asset_unavailable','Private object bytes are unavailable.',503)
+    if size!=expected_bytes:raise DomainError('asset_integrity_failed','Private object size differs from its record.',503)
+    return size
+
+
+def stream_local_range(key,start,end):
+    """Bounded-memory local byte range [start, end]: seek once, then read at most CHUNK_BYTES at a time."""
+    stream=_local_path(key).open('rb')
+    def chunks():
+        try:
+            stream.seek(start);remaining=end-start+1
+            while remaining>0:
+                block=stream.read(min(CHUNK_BYTES,remaining))
+                if not block:break
+                remaining-=len(block);yield block
+        finally:stream.close()
+    return chunks()
 
 
 def put_private(key,raw,content_type='application/octet-stream'):

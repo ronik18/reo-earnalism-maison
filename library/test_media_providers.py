@@ -28,7 +28,7 @@ class PrivateStorageContractTests(SimpleTestCase):
             storage.private_url(asset.storage_key,75,'audio/mpeg')
             args=client.generate_presigned_url.call_args.kwargs
             self.assertEqual(args['ExpiresIn'],75);self.assertEqual(args['HttpMethod'],'GET')
-            self.assertEqual(args['Params']['ResponseCacheControl'],'private, no-store')
+            self.assertEqual(args['Params']['ResponseCacheControl'],'private, no-store, max-age=0')
         with self.assertRaises(DomainError):storage.private_url(asset.storage_key,121)
 
     def test_streamed_verifier_hashes_all_bytes_and_rejects_corruption(self):

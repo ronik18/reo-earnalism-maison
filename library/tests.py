@@ -110,7 +110,7 @@ class LibraryAcceptanceTests(TestCase):
         self.assertEqual(response.status_code,200,response.content);grant=response.json();validate_schema(grant,'PackageGrant')
         descriptor=grant['assets'][0];url=urlsplit(descriptor['url']);path=url.path+'?'+url.query
         result=self.client.get(path);self.assertEqual(result.status_code,200,result.content)
-        self.assertEqual(result['Cache-Control'],'private, no-store');self.assertEqual(svc.digest(result.content),descriptor['sha256'])
+        self.assertEqual(result['Cache-Control'],'private, no-store, max-age=0');self.assertEqual(svc.digest(result.content),descriptor['sha256'])
         validate_schema(result.json(),'ReaderChunk')
         self.client.delete('/api/v1/session')
         self.assertEqual(self.client.get(path).status_code,401)

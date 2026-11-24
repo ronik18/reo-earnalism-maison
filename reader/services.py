@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from core.api import DomainError,public_uuid
 from core.services import apply_operation
-from library.models import Edition,Revision,Unit,Paragraph
+from library.models import Asset,Edition,Revision,Unit,Paragraph
 from library.services import authorize_revision
 from .models import Progress,Completion,Annotation,SavedItem,PersonalList,PersonalListItem
 
@@ -60,6 +60,14 @@ def _frozen_layout(revision_id,content_sha256):
     return _build_layout(revision_id)
 
 
+def _film_durations(revision):
+    """Unit id -> (ordinal, duration) of its ready film from the configured provider (one query)."""
+    from library.services import video_provider
+    rows=Asset.objects.filter(revision=revision,kind='video',state='ready',provider=video_provider(),
+                              unit__isnull=False,duration_ms__isnull=False).values_list('unit_id','unit__ordinal','duration_ms')
+    return {unit:(ordinal,duration) for unit,ordinal,duration in rows}
+
+
 def _location(revision,format,loc):
     if not isinstance(loc,dict) or loc.get('format')!=format:raise DomainError('validation_error','Location format does not match.',422)
     allowed={'format','unit_id','anchor_id','offset_chars'} if format=='reader' else {'format','unit_id','position_ms'}
@@ -71,6 +79,12 @@ def _location(revision,format,loc):
         if not para or not _boundary(para.text,loc['offset_chars']):raise DomainError('invalid_anchor','Invalid text boundary.',422)
         layout=_layout(revision,para.anchor_id,'chars_before')
         fraction=min(Decimal(1),Decimal(layout['chars_before'][para.anchor_id]+loc['offset_chars'])/Decimal(layout['total_chars'] or 1))
+    elif format=='video':
+        # Films carry their own duration on the ready film asset; unit.duration_ms belongs to audio.
+        films=_film_durations(revision)
+        if type(loc['position_ms'])!=int or loc['position_ms']<0 or unit.id not in films or loc['position_ms']>films[unit.id][1]:raise DomainError('invalid_position','Position exceeds known media duration.',422)
+        before=sum(duration for ordinal,duration in films.values() if ordinal<unit.ordinal)
+        fraction=min(Decimal(1),Decimal(before+loc['position_ms'])/Decimal(sum(d for _,d in films.values()) or 1))
     else:
         if type(loc['position_ms'])!=int or loc['position_ms']<0 or unit.duration_ms is None or loc['position_ms']>unit.duration_ms:raise DomainError('invalid_position','Position exceeds known media duration.',422)
         layout=_layout(revision,unit.id,'ms_before')

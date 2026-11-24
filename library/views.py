@@ -6,13 +6,14 @@ from django.conf import settings
 from django.core import signing
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import HttpResponse,StreamingHttpResponse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from core.api import (DomainError,api_response,json_endpoint,expected_version,operation_key)
 from core.services import apply_operation,audit
 from .models import Work,Edition,Revision,Asset,Unit,TimingMap
 from . import services as svc
+from . import storage
 from .validation import body,validate_schema
 
 def context(request):
@@ -208,17 +209,22 @@ RANGE_KINDS={'audio_chapter','video'}
 def local_asset(request,asset_id):
     if not getattr(settings,'LOCAL',False): raise DomainError('feature_disabled','Local storage is unavailable.',404)
     asset,raw=svc.resolve_signed_asset(request.user,asset_id,request.GET.get('token',''))
-    status=200;headers={}
+    total=asset.bytes if raw is None else len(raw)
+    status=200;headers={};start,end=0,total-1
     if request.headers.get('Range'):
         if asset.kind not in RANGE_KINDS: raise DomainError('range_not_supported','This asset does not support ranges.',416)
         match=re.fullmatch(r'bytes=(\d+)-(\d*)',request.headers['Range'])
         if not match: raise DomainError('invalid_range','Use one bounded bytes range.',416)
-        start=int(match[1]);end=int(match[2]) if match[2] else len(raw)-1
-        if start>end or start>=len(raw) or end>=len(raw): raise DomainError('invalid_range','Range lies outside the asset.',416)
-        total=len(raw);raw=raw[start:end+1];status=206;headers['Content-Range']=f'bytes {start}-{end}/{total}'
-    response=HttpResponse(raw,status=status,content_type=asset.content_type)
-    response['Cache-Control']='private, no-store';response['X-Content-Type-Options']='nosniff'
-    response['Content-Length']=str(len(raw));response['Content-Disposition']='inline'
+        start=int(match[1]);end=int(match[2]) if match[2] else total-1
+        if start>end or start>=total or end>=total: raise DomainError('invalid_range','Range lies outside the asset.',416)
+        status=206;headers['Content-Range']=f'bytes {start}-{end}/{total}'
+    if raw is None:
+        # Films stream from the file by seek + bounded reads (size checked; hashed when stored).
+        response=StreamingHttpResponse(storage.stream_local_range(asset.storage_key,start,end),status=status,content_type=asset.content_type)
+    else:
+        response=HttpResponse(raw[start:end+1],status=status,content_type=asset.content_type)
+    response['Cache-Control']='private, no-store, max-age=0';response['X-Content-Type-Options']='nosniff'
+    response['Content-Length']=str(end-start+1);response['Content-Disposition']='inline'
     if asset.kind in RANGE_KINDS: response['Accept-Ranges']='bytes'
     for key,value in headers.items(): response[key]=value
     return response

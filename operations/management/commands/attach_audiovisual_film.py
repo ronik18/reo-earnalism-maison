@@ -43,6 +43,7 @@ import math
 import re
 import struct
 import subprocess
+import time
 from pathlib import Path
 
 from django.core.management.base import CommandError
@@ -65,6 +66,12 @@ MAX_VTT_BYTES = 1_048_576
 MAX_MANIFEST_BYTES = 1_048_576
 HEX64 = re.compile(r"[a-f0-9]{64}")
 WEBVTT = re.compile(rb"\A(?:\xef\xbb\xbf)?WEBVTT(?:[ \t\r\n]|\Z)")
+FILM_UPLOAD_FLOOR_BYTES_PER_SECOND = 2 * 1024 * 1024
+
+
+def film_upload_seconds(size):
+    """Upload + verification budget for one film: max(300, ceil(bytes / 2 MiB)) seconds."""
+    return max(300, math.ceil(size / FILM_UPLOAD_FLOOR_BYTES_PER_SECOND))
 
 
 def is_faststart(path):
@@ -249,7 +256,10 @@ class Command(audio.Command):
             captions_id = stable_id(draft.id, "video_captions", unit.ordinal, vtt["sha256"])
             video_key, captions_key = f"revisions/{draft.id}/{video_id}.mp4", f"revisions/{draft.id}/{captions_id}.vtt"
             try:
-                storage.put_private_file(video_key, mp4["path"], "video/mp4", mp4["bytes"], mp4["sha256"])
+                budget, megabytes, started = film_upload_seconds(mp4["bytes"]), mp4["bytes"] / 1_000_000, time.monotonic()
+                self.stdout.write(f"film upload start: unit {unit.ordinal}, {megabytes:.1f} MB, budget {budget} s")
+                storage.put_private_file(video_key, mp4["path"], "video/mp4", mp4["bytes"], mp4["sha256"], max_seconds=budget)
+                self.stdout.write(f"film upload done: unit {unit.ordinal}, {megabytes:.1f} MB in {time.monotonic() - started:.1f} s")
                 storage.put_private_file(captions_key, vtt["path"], "text/vtt", vtt["bytes"], vtt["sha256"])
             except DomainError as exc:
                 raise CommandError(f"{exc.code}: {exc.message}") from None
