@@ -180,6 +180,33 @@ class ExpressiveVoiceTests(unittest.TestCase):
         self.assertEqual([u["text"] for u in units], ["One line.", "Two line!", "Three.", "Four?"])
         self.assertEqual([u["pause_after_ms"] for u in units], [400, 400, 400, 400])
 
+    def test_continuous_take_style_adds_only_the_scene_end_pause(self):
+        """ElevenLabs takes carry their own pauses: none inside a scene, 1200 ms at its end."""
+        from eav.voice import CONTINUOUS, TAKE_SCENE_PAUSE_MS
+        scene = {"scene_id": "s1", "text": "Title\n\nA one. A two?\n\nB one...",
+                 "blocks": [{"anchor_id": "h", "kind": "heading", "text": "Title"},
+                            {"anchor_id": "a", "kind": "paragraph", "text": "A one. A two?"},
+                            {"anchor_id": "b", "kind": "paragraph", "text": "B one..."}]}
+        plain = voice_units(scene, PRESET, None)
+        units = voice_units(scene, PRESET, None, "en", style=CONTINUOUS)
+        self.assertEqual(TAKE_SCENE_PAUSE_MS, 1200)
+        self.assertEqual([u["unit_key"] for u in units], [u["unit_key"] for u in plain])
+        self.assertEqual([u["text"] for u in units], [u["text"] for u in plain])  # never grouped
+        self.assertEqual([u["pause_after_ms"] for u in units], [0, 0, 0, 1200])
+
+    def test_continuous_reel_take_adds_no_pause(self):
+        from eav import cli
+        from eav.voice import CONTINUOUS
+        script = {"language": "en", "hook": "One line.", "loop_close": "Three. Four?",
+                  "lines": ["One line.", "Two line!", "Three. Four?"]}
+        units = voice_units(cli._reel_scene(script, 1), PRESET, None, "en", style=CONTINUOUS)
+        self.assertEqual([u["pause_after_ms"] for u in units], [0, 0, 0, 0])
+
+    def test_continuous_excludes_the_parler_storyteller_modes(self):
+        for other in ("group", "pauses", "direct"):
+            with self.assertRaises(ValueError):
+                voice_units(para("One. Two."), PRESET, None, "en", style={"continuous": True, other: True})
+
     def test_unknown_style_key_refused(self):
         with self.assertRaises(ValueError):
             voice_units(para("One."), PRESET, None, "en", style={"group": True, "loud": True})

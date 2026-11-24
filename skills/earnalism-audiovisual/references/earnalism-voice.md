@@ -134,6 +134,55 @@ after the free Parler storyteller audition fell short of a natural, dramatic sto
   picks one per language. The pick is recorded here before narration.
 - **Audio is fetched from `elevenlabsusercontent.com`** (allowed in this environment) and imported
   with its sha256 like every other output.
+- **Owner picks (24 Nov 2026).** বিচারক: "Subhajit – Grounded Bengali Storyteller"
+  (`j5PhP1QJv2DvlhRv3mEv`). The Selfish Giant: "Sakshi – Warm Bedtime Storyteller"
+  (`XdbTvfQSkW1sgZYKdZdF`). Another title or voice needs a new audition and pick.
+
+### The ElevenLabs route, end to end
+
+1. **Units first.** `job narration --root <root> --rates <rates.json> --film N --list-units`
+   (builds nothing) prints the plan's sentence units; a scene's text is its units joined by
+   one space. A reel's text is its script lines (`reels/reel-N/script.json`).
+2. **One tagged script per scene**, `<scene_id>.txt` (a reel: one script `reel-N.txt` for the
+   whole reel). It is the scene's exact text with Eleven v3 audio tags between the words.
+   Direction rules: a tag describes *delivery* (`[softly]`, `[sad]`, `[warmly]`,
+   `[trembling voice]`, `[whispers]`, `[pause]`, `[long pause]`), never action, sound effects
+   or stage directions (`[the giant walks in]` is forbidden); tag only where the delivery
+   changes, from the context map, not on every sentence; tags never replace punctuation and
+   never touch the words. Put a tag between spaces or against punctuation
+   (`garden [pause].`, `“[whispers] Who`), never inside a word. Square brackets that are part
+   of the book text stay exactly where they are.
+3. **Generate one take per scene** with the owner-picked voice, `model eleven_v3`,
+   generations 1 (never a second generation as a "retry": each one spends credits), the whole
+   tagged script in one call. Check the month stays within 60,000 credits first.
+4. **Download** each take as `<scene_id>.mp3` (a reel: `reel-N.mp3`) into one folder, and
+   note the credits the generations used (account usage before and after).
+5. **Import:**
+
+   ```
+   python3 -m eav.cli import-take film-01 --root <root> --scripts <scripts dir> \
+     --audio <takes dir> --engine elevenlabs --model eleven_v3 \
+     --voice-id <voice id> --voice-name "<voice name>" --credits <credits used>
+   ```
+
+   (`reel-N` instead of `film-NN` for a reel.) It refuses a missing script or take, a script
+   whose words differ from the book in any character once tags are removed, an unknown
+   target, a target whose Colab narration job is still open (supersede or close it first) and a
+   reel whose shots are already planned. It slices each take at its own silences into
+   `narration/<job_id>/<unit_key>.wav` (`eav.take.slice_take`: for each join the silence
+   nearest the character-proportional time, monotonic, one cut per silence, at its midpoint;
+   joined, the WAVs are the decoded take sample for sample). A join with no usable silence is
+   cut at the quietest 20 ms within ±400 ms and listed as **estimated** (listen there first).
+   It keeps the takes and scripts in `jobs/<job_id>/` with `take-manifest.json` (sha256 of
+   every WAV, take and script) and files a narration job: engine, model, voice, voice id,
+   credits, estimated joins, imported, 0 Colab CU on the ledger.
+6. **Then as usual:** `film --film N ...` or `reel N --plan-shots` picks it as the latest
+   narration of the target. Its voice style is `continuous`: the takes carry their own
+   pauses, so no pause is added inside a scene or between reel lines, and only 1200 ms
+   between two scenes of a film. Timing and subtitles stay per sentence.
+
+A take that sounds wrong is regenerated from the same tagged script and imported again as a
+new job (the newer import wins); never edit or trim a take by hand.
 
 ## Never
 

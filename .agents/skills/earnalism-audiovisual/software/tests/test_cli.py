@@ -1196,6 +1196,179 @@ class StorytellerCliTests(unittest.TestCase):
         self.assertEqual(code, 0, out)
 
 
+class ImportTakeCliTests(unittest.TestCase):
+    """Owner 2026-11-24: ElevenLabs Eleven v3 narration, one take per scene, sliced and filed."""
+    setUp = CliTests.setUp
+    fake_job, noise, wav = RoundTwo.fake_job, RoundTwo.noise, RoundTwo.wav
+    init_and_plan = CliTests.init_and_plan
+    VOICE = ("--engine", "elevenlabs", "--model", "eleven_v3", "--voice-id", "XdbTvfQSkW1sgZYKdZdF",
+             "--voice-name", "Sakshi \u2013 Warm Bedtime Storyteller")
+
+    def scenes(self):
+        return json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+
+    def write_take(self, key, units, seconds=0.9, gap_s=0.35, tags=True):
+        """<key>.txt tagged script and <key>.mp3: one tone per unit, separated by silences."""
+        from tests.test_take import gap, tone, write_wav
+        import numpy as np
+        self.scripts.mkdir(exist_ok=True)
+        self.audio.mkdir(exist_ok=True)
+        text = " ".join(u["text"] for u in units)
+        script = " [pause] ".join(u["text"] for u in units) if tags else text
+        (self.scripts / f"{key}.txt").write_text("[softly] " + script + "\n", encoding="utf-8")
+        parts = []
+        for i, u in enumerate(units):
+            parts += [tone(seconds, 200 + 30 * i)] + ([gap(gap_s)] if i < len(units) - 1 else [])
+        wav = self.d / f"{key}-src.wav"
+        write_wav(wav, np.concatenate([gap(0.05)] + parts + [gap(0.05)]))
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(wav), "-c:a", "libmp3lame", "-b:a",
+                        "128k", str(self.audio / f"{key}.mp3")], check=True)
+
+    def film_takes(self):
+        from eav.voice import voice_units
+        self.scripts, self.audio = self.d / "scripts", self.d / "takes"
+        for sc in self.scenes():
+            self.write_take(sc["scene_id"], voice_units(sc, {"description": ""}, None, "en"))
+
+    def import_take(self, target="film-01", *extra):
+        return run("import-take", target, "--root", self.root, "--scripts", self.scripts,
+                   "--audio", self.audio, *self.VOICE, "--credits", 812, *extra)
+
+    def test_film_take_imports_and_assembles_with_scene_end_pauses_only(self):
+        self.init_and_plan()
+        self.film_takes()
+        code, out = self.import_take()
+        self.assertEqual(code, 0, out)
+        rec = Record.load(self.root)
+        job = [e for e in rec.data["events"] if e["result"] == "job_target"][-1]["detail"]
+        self.assertEqual(job["target"], "film-01")
+        self.assertEqual(job["engine"], "elevenlabs")
+        self.assertEqual(job["model"], "eleven_v3")
+        self.assertEqual(job["voice_id"], "XdbTvfQSkW1sgZYKdZdF")
+        self.assertEqual(job["credits"], 812)
+        self.assertEqual(job["voice_style"], {"continuous": True})
+        self.assertEqual(job["estimated_boundaries"], [])
+        job_id = job["job_id"]
+        accepted = [e for e in rec.data["events"] if e["result"] == "accepted"][-1]["detail"]
+        self.assertEqual((accepted["job_id"], accepted["actual_units"]), (job_id, 0))
+        ledger = json.loads(self.ledger.read_text())
+        self.assertEqual([(e["job_id"], e["units"], e["state"]) for e in ledger], [(job_id, 0, "settled")])
+        from eav.voice import voice_units
+        units = [u for sc in self.scenes() for u in voice_units(sc, {"description": ""}, None, "en")]
+        wav_dir = self.root / "narration" / job_id
+        self.assertEqual(sorted(p.stem for p in wav_dir.glob("*.wav")), sorted(u["unit_key"] for u in units))
+        manifest = json.loads((self.root / "jobs" / job_id / "take-manifest.json").read_text())
+        for name, digest in manifest["files"].items():
+            self.assertEqual(hashlib.sha256((self.root / name).read_bytes()).hexdigest(), digest, name)
+        for sc in manifest["scenes"]:
+            self.assertEqual(sc["audio_sha256"],
+                             hashlib.sha256((self.audio / f"{sc['key']}.mp3").read_bytes()).hexdigest())
+            self.assertEqual(sc["script_sha256"],
+                             hashlib.sha256((self.scripts / f"{sc['key']}.txt").read_bytes()).hexdigest())
+        code, out = run("status", "--root", self.root)
+        self.assertIn(f"{job_id} narration film-01: imported", out)
+
+        scenes = self.scenes()
+
+        def stills(rec, jid, jd, o):
+            for i, sc in enumerate(scenes):
+                Image.new("RGB", (320, 180), (60 * i, 90, 120)).save(o / f"{sc['scene_id']}-1.png")
+        self.fake_job("stills", "film-01", stills)
+        Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(self.d / "logo.png")
+        Image.new("RGB", (320, 180), (0, 0, 0)).save(self.d / "end.png")
+        bed = self.d / "bed.wav"
+        self.noise(bed, 30)
+        code, out = run("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card",
+                        self.d / "end.png", "--score", bed, "--score-route", "vcsl")
+        self.assertEqual(code, 0, out)
+        timing = json.loads((self.root / "film" / "film-01" / "timing.json").read_text())["units"]
+        self.assertEqual([t["unit_key"] for t in timing], [u["unit_key"] for u in units])
+        durs = {u["unit_key"]: cli.film._duration(wav_dir / f"{u['unit_key']}.wav") for u in units}
+        last_of_first = [u["unit_key"] for u in units if u["unit_key"].startswith(scenes[0]["scene_id"])][-1]
+        for a, b in zip(timing, timing[1:]):
+            gap_s = b["start"] - a["end"]
+            self.assertAlmostEqual(gap_s, 1.2 if a["unit_key"] == last_of_first else 0.0, delta=0.002)
+        self.assertAlmostEqual(timing[-1]["end"], sum(durs.values()) + 1.2, delta=0.01)
+        srt = (self.root / "film" / "film-01" / "film-01.srt").read_text()
+        self.assertEqual(srt.count(" --> "), len(units))
+        Record.load(self.root).event("qc", "pass", {"failed": []})
+        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry")
+        self.assertEqual(code, 0, out)
+        draft = json.loads((self.root / "maison" / cli.EVIDENCE_DRAFT).read_text())
+        self.assertEqual(draft["generators"], [{
+            "model": "elevenlabs/eleven_v3", "engine": "elevenlabs", "job_ids": [job_id],
+            "licence": "ElevenLabs paid-plan commercial licence (owner decision 2026-11-24)",
+            "voice": "Sakshi \u2013 Warm Bedtime Storyteller", "voice_id": "XdbTvfQSkW1sgZYKdZdF",
+            "credits": 812}])
+
+    def test_refusals_leave_nothing_behind(self):
+        self.init_and_plan()
+        self.film_takes()
+        first = self.scenes()[0]["scene_id"]
+        cases = []
+        (self.audio / f"{first}.mp3").rename(self.d / "held.mp3")
+        cases.append(("missing audio", "film-01"))
+        cases.append(("unknown target", "film-09"))
+        for what, target in cases:
+            code, out = self.import_take(target)
+            self.assertNotEqual(code, 0, what)
+            self.assertIn("STOP", out, what)
+        (self.d / "held.mp3").rename(self.audio / f"{first}.mp3")
+        good = (self.scripts / f"{first}.txt").read_text(encoding="utf-8")
+        (self.scripts / f"{first}.txt").write_text(good.replace("garden", "yard"), encoding="utf-8")
+        code, out = self.import_take()
+        self.assertNotEqual(code, 0)
+        self.assertIn("differs from the book text", out)
+        (self.scripts / f"{first}.txt").unlink()
+        code, out = self.import_take()
+        self.assertNotEqual(code, 0)
+        self.assertIn("script", out)
+        (self.scripts / f"{first}.txt").write_text(good, encoding="utf-8")
+        code, out = run("import-take", "film-01", "--root", self.root, "--scripts", self.scripts,
+                        "--audio", self.audio, *self.VOICE, "--credits", -3)
+        self.assertNotEqual(code, 0)
+        self.assertFalse((self.root / "narration").exists())
+        self.assertFalse(self.ledger.exists() and json.loads(self.ledger.read_text()))
+        self.assertFalse([e for e in Record.load(self.root).data["events"] if e["result"] == "job_target"])
+
+    def test_refused_while_a_colab_narration_job_waits(self):
+        self.init_and_plan()
+        code, out = run("job", "narration", "--root", self.root, "--rates", self.rates)
+        self.assertEqual(code, 0, out)
+        self.film_takes()
+        code, out = self.import_take()
+        self.assertNotEqual(code, 0)
+        self.assertIn("supersede", out)
+        self.assertFalse((self.root / "narration").exists())
+        job_id = next((self.root / "jobs").iterdir()).name
+        self.assertEqual(run("supersede", job_id, "--root", self.root, "--reason", "ElevenLabs")[0], 0)
+        code, out = self.import_take()
+        self.assertEqual(code, 0, out)
+
+    def test_reel_take_is_one_continuous_take(self):
+        self.init_and_plan()
+        path = self.d / "reel.json"
+        path.write_text(json.dumps(REEL))
+        self.assertEqual(run("reel", 1, "--root", self.root, "--script", path)[0], 0)
+        from eav.voice import voice_units
+        units = voice_units(cli._reel_scene(REEL, 1), {"description": ""}, None, "en")
+        self.scripts, self.audio = self.d / "scripts", self.d / "takes"
+        self.write_take("reel-1", units, seconds=4.3, gap_s=0.35)  # 13 x 4.3 + 12 x 0.35 + 0.1
+        code, out = self.import_take("reel-1")
+        self.assertEqual(code, 0, out)
+        code, out = run("reel", 1, "--root", self.root, "--plan-shots")
+        self.assertEqual(code, 0, out)
+        narr = self.root / "reels" / "reel-1" / "narration.wav"
+        take = cli.film._duration(self.d / "reel-1-src.wav")  # the decoded take, without mp3 padding
+        self.assertAlmostEqual(cli.film._duration(narr), take, delta=0.03)  # nothing added
+
+    def test_reel_take_refused_once_shots_are_planned(self):
+        self.test_reel_take_is_one_continuous_take()
+        code, out = self.import_take("reel-1")
+        self.assertNotEqual(code, 0)
+        self.assertIn("planned", out)
+
+
 class SentenceSanity(unittest.TestCase):
     def test_fixture_a2_has_two_sentences(self):
         self.assertEqual(len(sentences(PARAS[1][2])), 2)

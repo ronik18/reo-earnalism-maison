@@ -9,6 +9,11 @@
                          storyteller preset>] [--list-units]   (storyteller style, references/earnalism-voice.md)
   python3 -m eav.cli job narration --root <dir> --rates <rates.json> --audition <audition.json>
                          (one Colab job: 3 passages x candidate storyteller presets + the current preset)
+  python3 -m eav.cli import-take <film-NN|reel-N> --root <dir> --scripts <dir of <key>.txt> --audio
+                         <dir of <key>.mp3> --engine elevenlabs --model eleven_v3 --voice-id <id>
+                         --voice-name "<name>" --credits <credits used>
+                         (ElevenLabs: one tagged-script take per scene, key = scene_id; a reel's
+                         one take is keyed by its target; references/earnalism-voice.md)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli exchange-stage <job_id> --root <dir> [--account <id> --bucket <name>]
@@ -46,13 +51,14 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
-from . import budget, colab_jobs, exchange, film, importer, mix, qc, reel, scenes
+from . import budget, colab_jobs, exchange, film, importer, mix, qc, reel, scenes, take
 from .record import Record, sha256_file
 from .text import sentences
-from .voice import EXPRESSIVE, unit_anchors, voice_units
+from .voice import CONTINUOUS, EXPRESSIVE, unit_anchors, voice_units
 
 PROG = "python3 -m eav.cli"
 ROSTER = (Path(__file__).resolve().parents[3] / "earnalism-audiobook-go-live" / "references"
@@ -69,6 +75,10 @@ FILM_LUFS, REEL_LUFS, LUFS_TOL, TP_MAX = -16.0, -14.0, 1.0, -1.0
 LOOP_MIN = 0.8
 HOOK_ONSET_MAX_S = 0.2
 MP3_END_SLACK_MS = 50
+TAKE_JOB = "narration_take"   # artifact kind of an imported ElevenLabs take job (its manifest)
+TAKE_ENGINES = {"elevenlabs": ("eleven_v3",)}  # owner decision 2026-11-24
+TAKE_AUDIO = (".mp3", ".wav")
+TAKE_SCHEMA = "earnalism.audiovisual-take-import.v1"
 
 
 class Stop(Exception):
@@ -181,16 +191,19 @@ def _jobs(rec) -> list:
                           ("job", "superseding"), ("job", "closing"))}
     out = []
     for a in rec.data["artifacts"]:
-        if a["kind"] != "colab_job":
+        if a["kind"] not in ("colab_job", TAKE_JOB):
             continue
         m = a["meta"]
         jid = m["job_id"]
+        colab = a["kind"] == "colab_job"  # an imported take has no notebook or inputs zip
         out.append({"job_id": jid, "kind": m["job_kind"], "target": targets.get(jid),
+                    "engine": details.get(jid, {}).get("engine", "parler"),
                     "order": order.get(jid, -1),
                     # narration voice style and storyteller preset (None: the default style/plan voice)
                     "style": details.get(jid, {}).get("voice_style"),
                     "voice": details.get(jid, {}).get("voice"),
-                    "notebook": rec.root / a["path"], "inputs_zip": rec.root / m["inputs_zip"],
+                    "notebook": rec.root / a["path"] if colab else None,
+                    "inputs_zip": rec.root / m["inputs_zip"] if colab else None,
                     "manifest": rec.root / m["manifest"], "forecast_units": m["forecast_units"],
                     "imported": jid in done["accepted"],
                     "superseded": jid in done["superseded"],
@@ -503,7 +516,11 @@ def next_action(root) -> str:
     for i in range(1, len(plan["plan"]["films"]) + 1):
         t = _film_target(i)
         if not _latest_job(rec, "narration", t):
-            return (f"{PROG} job narration {r} --film {i} --rates <rates.json with measured "
+            return (f"ElevenLabs route (owner decision 2026-11-24, references/earnalism-voice.md): one "
+                    f"tagged-script Eleven v3 take per scene of film {i}, then {PROG} import-take "
+                    f"{t} {r} --scripts <dir> --audio <dir> --engine elevenlabs --model eleven_v3 "
+                    f"--voice-id <id> --voice-name \"<name>\" --credits <credits used>. Parler route: "
+                    f"{PROG} job narration {r} --film {i} --rates <rates.json with measured "
                     f"s_per_step, units_per_hour, steps, decode_s, export_s>")
         if not _latest_job(rec, "stills", t):
             return (f"Write the world bible and one FLUX prompt per keyframe (keys <scene_id>-<k>, "
@@ -525,8 +542,11 @@ def next_action(root) -> str:
         folder = root / "reels" / t
         narr = _reel_narration(rec, n)
         if narr is None:
-            return (f"Owner approves the reel {n} script ({folder / 'script.json'}); then: {PROG} job "
-                    f"narration {r} --reel {n} --rates <rates.json>")
+            return (f"Owner approves the reel {n} script ({folder / 'script.json'}); then one tagged "
+                    f"Eleven v3 take of the whole reel and {PROG} import-take {t} {r} --scripts <dir "
+                    f"with {t}.txt> --audio <dir with {t}.mp3> --engine elevenlabs --model eleven_v3 "
+                    f"--voice-id <id> --voice-name \"<name>\" --credits <credits used> (Parler route: "
+                    f"{PROG} job narration {r} --reel {n} --rates <rates.json>)")
         if narr["job_id"] in _misfits(rec):
             return (f"The measured reel {n} narration does not fit {script['length']} s +- "
                     f"{reel.FIT_TOLERANCE_S:g} s: rewrite the script's words (references/reel-recipe.md), "
@@ -790,6 +810,189 @@ def cmd_import(args):
                    code=4)
     print(f"Imported {len(arts)} verified file(s) from {job['kind']} job {args.job_id}; "
           f"settled {args.units:g} CU.")
+
+
+# ---------------------------------------------------------------- ElevenLabs takes
+def _take_target(rec, plan, target: str):
+    """(canonical target, [(key, scene)]): a film's plan scenes keyed by scene_id, or a reel's one
+    take keyed by the reel target (its lines are the units)."""
+    m = re.fullmatch(r"(film|reel)-0*([1-9][0-9]*)", target or "")
+    if not m:
+        raise Stop(f"unknown target {target!r}", "Pass film-NN (a planned film) or reel-N (a scripted reel)")
+    n = int(m.group(2))
+    if m.group(1) == "film":
+        films = plan["plan"]["films"]
+        if n > len(films):
+            raise Stop(f"unknown target {target!r}: the plan has {len(films)} film(s)",
+                       f"{PROG} status --root {rec.root}")
+        return _film_target(n), [(sc["scene_id"], sc) for sc in films[n - 1]["scenes"]]
+    t = f"reel-{n}"
+    script = _reel_script(rec, n)
+    if script is None:
+        raise Stop(f"unknown target {target!r}: reel {n} has no script",
+                   f"{PROG} reel {n} --root {rec.root} --script <file>")
+    if _plan_event(rec, n)[1] is not None:  # R27: new narration would unbind planned shots
+        raise Stop(f"{t} shots are already planned from narration "
+                   f"{_plan_event(rec, n)[1]['narration_job_id']}; new narration would unbind them",
+                   "Re-voicing a reel: supersede (never ran) or close (ran) every reel_clips batch, "
+                   f"then {PROG} reel {n} --root {rec.root} --script <script>, import the new take, "
+                   "a fresh --plan-shots and new batches (references/reel-recipe.md)")
+    return t, [(t, _reel_scene(script, n))]
+
+
+def _take_inputs(args, todo, lang) -> list:
+    """Every scene's tagged script checked against the plan text, and its one take found."""
+    scripts, audio = Path(args.scripts), Path(args.audio)
+    for d, what in ((scripts, "--scripts"), (audio, "--audio")):
+        if not d.is_dir():
+            raise Stop(f"{what} {d} is not a folder", f"Pass {what} <folder>")
+    rows = []
+    for key, sc in todo:
+        units = voice_units(sc, {"description": ""}, None, lang, CONTINUOUS)
+        script = scripts / f"{key}.txt"
+        if not script.is_file():
+            raise Stop(f"no tagged script {script.name} for {key} in {scripts}",
+                       "Write one tagged script per scene (references/earnalism-voice.md)")
+        try:
+            take.check_script(" ".join(u["text"] for u in units), script.read_text(encoding="utf-8"))
+        except ValueError as e:
+            raise Stop(f"script {script.name} rejected: {e}",
+                       "Fix the tagged script so its words are exactly the book's, then regenerate "
+                       "that scene's take from the fixed script")
+        found = [audio / f"{key}{ext}" for ext in TAKE_AUDIO if (audio / f"{key}{ext}").is_file()]
+        if len(found) != 1:
+            raise Stop(f"{'no' if not found else 'more than one'} take for {key} in {audio} "
+                       f"(expected {key}.mp3 or {key}.wav)",
+                       "Download exactly one take per scene, named <scene_id>.mp3")
+        rows.append({"key": key, "units": units, "script": script, "audio": found[0]})
+    return rows
+
+
+def cmd_import_take(args):
+    """File an ElevenLabs narration job: one continuous take per scene, sliced per voice unit."""
+    rec = _record(args.root)
+    plan = _plan(rec)
+    lang = plan["language"]
+    if args.model not in TAKE_ENGINES.get(args.engine, ()):
+        raise Stop(f"engine/model {args.engine}/{args.model} is not the approved narration engine",
+                   "Use --engine elevenlabs --model eleven_v3 (references/earnalism-voice.md)")
+    if not re.fullmatch(r"[A-Za-z0-9]{8,64}", args.voice_id or "") or not (args.voice_name or "").strip():
+        raise Stop("--voice-id must be the ElevenLabs voice id and --voice-name its name",
+                   "Pass the owner-picked voice (references/earnalism-voice.md)")
+    try:
+        credits = budget._check_units(args.credits)
+    except ValueError:
+        raise Stop(f"--credits must be the credits the generations used (>= 0), got {args.credits!r}",
+                   "Read them from the ElevenLabs usage and rerun")
+    target, todo = _take_target(rec, plan, args.target)
+    waiting = [j["job_id"] for j in _jobs(rec) if j["kind"] == "narration" and j["target"] == target
+               and (j["unfinished"] or (not j["imported"] and not _ended(j)))]
+    if waiting:
+        raise Stop(f"{target} has narration job(s) {', '.join(waiting)} built and not ended (or a "
+                   "supersede/close under way); two narrations of one target would conflict",
+                   f"{PROG} supersede <job_id> --root {rec.root} --reason \"<why it never ran>\" (or close "
+                   "it with its actual units if it ran), then rerun import-take")
+    rows = _take_inputs(args, todo, lang)
+    job_id = args.job_id or f"narration-{args.engine}-{uuid.uuid4().hex[:8]}"
+    if not SLUG.fullmatch(job_id) or any(j["job_id"] == job_id for j in _jobs(rec)):
+        raise Stop(f"job id {job_id!r} is not new or not lowercase letters, digits and hyphens",
+                   "Drop --job-id or pass a new one")
+    wav_dest, job_dest = rec.root / "narration" / job_id, rec.root / "jobs" / job_id
+    if wav_dest.exists() or job_dest.exists():
+        raise Stop(f"{wav_dest} or {job_dest} already exists", "Drop --job-id or pass a new one")
+    ledger = _ledger(rec, args)
+    stage = Path(tempfile.mkdtemp(dir=rec.root, prefix=".take-"))
+    try:
+        (stage / "wav").mkdir()
+        for sub in ("scripts", "takes"):
+            (stage / "job" / sub).mkdir(parents=True)
+        scenes_out = []
+        for r in rows:
+            try:
+                info = take.slice_take(r["audio"], r["units"], stage / "wav")
+            except (ValueError, subprocess.CalledProcessError) as e:
+                raise Stop(f"take {r['audio'].name} not sliced: {e}",
+                           "Check it is the complete downloaded take of that scene, then rerun")
+            shutil.copy2(r["script"], stage / "job" / "scripts" / r["script"].name)
+            shutil.copy2(r["audio"], stage / "job" / "takes" / r["audio"].name)
+            scenes_out.append({"key": r["key"], "audio": f"jobs/{job_id}/takes/{r['audio'].name}",
+                               "audio_sha256": sha256_file(r["audio"]),
+                               "script": f"jobs/{job_id}/scripts/{r['script'].name}",
+                               "script_sha256": sha256_file(r["script"]), **info})
+        estimated = [k for sc in scenes_out for k in sc["estimated"]]
+        files = {f"narration/{job_id}/{p.name}": sha256_file(p) for p in sorted((stage / "wav").iterdir())}
+        for sc in scenes_out:
+            for k in ("audio", "script"):
+                path = stage / "job" / Path(sc[k]).relative_to(f"jobs/{job_id}")
+                if sha256_file(path) != sc[f"{k}_sha256"]:
+                    raise Stop(f"copy of {sc[k]} differs from its source", "Rerun import-take")
+                files[sc[k]] = sc[f"{k}_sha256"]
+        manifest = {"schema": TAKE_SCHEMA, "job_id": job_id, "target": target, "kind": "narration",
+                    "engine": args.engine, "model": args.model, "voice_id": args.voice_id,
+                    "voice_name": args.voice_name, "credits": credits, "voice_style": CONTINUOUS,
+                    "method": "eav.take.slice_take", "estimated_boundaries": estimated,
+                    "scenes": scenes_out, "files": files}
+        _write_json(stage / "job" / "take-manifest.json", manifest)
+    except BaseException:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise
+    month = _month()
+    edition_id = rec.data["source"].get("edition_id")
+    here = Path(os.path.relpath(rec.root.resolve(), ledger.path.parent.resolve())).as_posix()
+    try:  # 0 Colab CU: the ledger records the job; the credits stay on the job
+        ledger.reserve(rec.data["title_slug"], month, 0, job_id, edition_id=edition_id,
+                       root=here if edition_id else None)
+    except (ValueError, budget.BudgetExceeded) as e:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise Stop(f"take not filed: {e}", f"{PROG} status --root {rec.root}")
+    snapshot = (list(rec.data["artifacts"]), list(rec.data["events"]))
+    parents = {p: p.exists() for p in (wav_dest.parent, job_dest.parent)}
+    try:  # all or nothing: files, record rows; the 0 CU entry is settled either way
+        for p in parents:
+            p.mkdir(parents=True, exist_ok=True)
+        (stage / "wav").rename(wav_dest)
+        (stage / "job").rename(job_dest)
+        meta = {"job_id": job_id, "job_kind": "narration", "engine": args.engine, "model": args.model}
+        rec.add_artifact(TAKE_JOB, job_dest / "take-manifest.json",
+                         {**meta, "forecast_units": 0.0, "month": month,
+                          "manifest": f"jobs/{job_id}/take-manifest.json"})
+        rec.event("cli", "job_target", {"job_id": job_id, "target": target, "kind": "narration",
+                                        "voice_style": dict(CONTINUOUS), "engine": args.engine,
+                                        "model": args.model, "voice": args.voice_name,
+                                        "voice_id": args.voice_id, "credits": credits,
+                                        "estimated_boundaries": estimated})
+        arts = [rec.add_artifact("narration", wav_dest / p.name, meta) for p in sorted(wav_dest.iterdir())]
+        for sc in scenes_out:
+            rec.add_artifact("take_audio", rec.root / sc["audio"], {**meta, "key": sc["key"]})
+            rec.add_artifact("take_script", rec.root / sc["script"], {**meta, "key": sc["key"]})
+        rec.event("import", "accepted", {"job_id": job_id, "kind": "narration", "actual_units": 0,
+                                         "engine": args.engine, "credits": credits,
+                                         "manifest_sha256": sha256_file(job_dest / "take-manifest.json"),
+                                         "files": [a["path"] for a in arts],
+                                         "estimated_boundaries": estimated})
+    except BaseException:
+        rec.data["artifacts"], rec.data["events"] = snapshot
+        try:
+            rec._save()
+        finally:
+            for p in (wav_dest, job_dest, stage):
+                shutil.rmtree(p, ignore_errors=True)
+            for p, existed in parents.items():
+                if not existed:
+                    try:
+                        p.rmdir()
+                    except OSError:
+                        pass
+            ledger.settle(job_id, 0)
+        raise
+    ledger.settle(job_id, 0)
+    shutil.rmtree(stage, ignore_errors=True)
+    n_units = sum(len(r["units"]) for r in rows)
+    print(f"Imported ElevenLabs narration job {job_id} for {target}: {len(rows)} take(s) "
+          f"({args.model}, voice {args.voice_name}), {n_units} unit WAVs sliced sample-exactly, "
+          f"{credits:g} credits recorded on the job, 0 Colab CU.")
+    if estimated:
+        print("Estimated joins (no usable silence; listen there): after " + ", ".join(estimated))
 
 
 def _exchange_job(rec, job_id):
@@ -1309,6 +1512,26 @@ def cmd_bundle_audio(args):
         raise
 
 
+def _narration_generators(rec, plan, job_ids) -> list:
+    """The evidence draft's narration generators: Parler jobs as one row, each ElevenLabs take
+    job as its own row (model, voice id and credits from the job)."""
+    jobs = [j for j in _jobs(rec) if j["job_id"] in job_ids]
+    rows, parler = [], sorted(j["job_id"] for j in jobs if j["engine"] == "parler")
+    if parler:
+        voices = sorted({j["voice"] or plan["voice"]["preset_key"] for j in jobs if j["job_id"] in parler})
+        rows.append({"model": colab_jobs.NARRATION_REPO, "revision": colab_jobs.NARRATION_REVISION,
+                     "licence": "Apache-2.0", "job_ids": parler,
+                     "voice": voices[0] if len(voices) == 1 else voices})
+    details = {e["detail"]["job_id"]: e["detail"] for e in rec.data["events"]
+               if e["stage"] == "cli" and e["result"] == "job_target"}
+    for j in sorted((j for j in jobs if j["engine"] != "parler"), key=lambda j: j["job_id"]):
+        d = details[j["job_id"]]
+        rows.append({"model": f"{d['engine']}/{d['model']}", "engine": d["engine"], "job_ids": [j["job_id"]],
+                     "licence": "ElevenLabs paid-plan commercial licence (owner decision 2026-11-24)",
+                     "voice": d["voice"], "voice_id": d["voice_id"], "credits": d["credits"]})
+    return rows
+
+
 def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
     rows, prov_units, job_ids = [], {}, set()
     with tempfile.TemporaryDirectory() as td:
@@ -1382,7 +1605,6 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
     provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
                   "narration_job_id": ids[0] if len(ids) == 1 else ids, "units": prov_units}
     timing_path = _write_json(bundle / "timing.json", {"units": rows, "provenance": provenance})
-    voices = sorted({j["voice"] or plan["voice"]["preset_key"] for j in _jobs(rec) if j["job_id"] in job_ids})
     audio = [v["mp3_sha256"] for v in prov_units.values()]
     draft = _write_json(rec.root / "maison" / EVIDENCE_DRAFT, {
         "schema": EVIDENCE_SCHEMA,
@@ -1396,9 +1618,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
         "formats": ["reader", "audio"], "audio_sha256": audio,
         "timing_json_sha256": sha256_file(timing_path), "term_per_territory": {},
         "text_source_licence": None, "cover_provenance": None,
-        "generators": [{"model": colab_jobs.NARRATION_REPO, "revision": colab_jobs.NARRATION_REVISION,
-                        "licence": "Apache-2.0", "job_ids": ids,
-                        "voice": voices[0] if len(voices) == 1 else voices}],
+        "generators": _narration_generators(rec, plan, job_ids),
         "dry_narration": bool(args.dry),
         "music": None if args.dry else {
             **_music_licence(args.score_route),
@@ -1441,6 +1661,7 @@ def cmd_status(args):
 
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
+            "import-take": cmd_import_take,
             "supersede": cmd_supersede, "close": cmd_close,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
@@ -1475,6 +1696,16 @@ def _parser():
     s.add_argument("--audition", help="narration: audition.json (3 passages x candidate presets)")
     s.add_argument("--list-units", action="store_true",
                    help="narration: print the unit keys and texts this job would use; build nothing")
+    s.add_argument("--job-id")
+    s = add("import-take", help="file an ElevenLabs narration job from one take per scene")
+    s.add_argument("target", help="film-NN or reel-N")
+    s.add_argument("--scripts", required=True, help="folder of <scene_id>.txt tagged scripts")
+    s.add_argument("--audio", required=True, help="folder of <scene_id>.mp3 takes")
+    s.add_argument("--engine", required=True)
+    s.add_argument("--model", required=True)
+    s.add_argument("--voice-id", required=True)
+    s.add_argument("--voice-name", required=True)
+    s.add_argument("--credits", type=float, required=True, help="credits the generations used")
     s.add_argument("--job-id")
     s = add("import")
     s.add_argument("job_id")

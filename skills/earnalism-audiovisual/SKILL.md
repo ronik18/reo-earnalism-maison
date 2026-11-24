@@ -25,7 +25,7 @@ cd skills/earnalism-audiovisual/software
 python3 -m eav.cli status --root <title root>      # prints the next owner action
 ```
 
-Commands: `init`, `plan`, `job`, `exchange-stage`, `exchange-collect`, `import`,
+Commands: `init`, `plan`, `job`, `exchange-stage`, `exchange-collect`, `import`, `import-take`,
 `supersede` (never ran), `close` (ran, not imported: settles the actual CU), `film`,
 `reel`, `qc`, `status`, `bundle-audio` (usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
@@ -37,7 +37,7 @@ inputs to get past it.
 |---|---|---|---|
 | 1 | Resolve exact edition and cleared text | server: `python manage.py export_audiovisual_source <slug> --out src.json`; then `init src.json --root <dir> --slug <slug>` | `earnalism-book-production` |
 | 2 | Read the whole work; context map (speakers, turns, reveals, ending) | `plan` (30–90 s scenes, 1 still per 8–15 s; series past 40 min) | `earnalism-audiobook-go-live` (`references/narrative-performance.md`) |
-| 3 | Earnalism Voice narration (dry, frozen before timing) | `job narration` → owner runs Colab → `import` | `earnalism-audiobook-go-live` |
+| 3 | Earnalism Voice narration (dry, frozen before timing) | ElevenLabs (owner decision 24 Nov 2026): tagged script per scene → one Eleven v3 take per scene → `import-take film-NN\|reel-N`; Parler: `job narration` → owner runs Colab → `import` | `earnalism-audiobook-go-live`, `references/earnalism-voice.md` |
 | 4 | World bible, anchor stills, film keyframes (FLUX.1-schnell) | `job stills --spec` → Colab → `import` | `earnalism-video`, `earnalism-covers` (cover/thumbnail) |
 | 5 | Score: VCSL editorial route by default, ACE-Step cues for colour | score bed or `job music` → Colab → `import` | `earnalism-audiobook-score` |
 | 6 | Film assembly (measured timing, ducked mix, motion, logo, END) | `film` | `earnalism-video` |
@@ -73,11 +73,15 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
   `references/storyteller-voices.json`), the owner picks (`OWNER_SELECTED`), then narrate with
   `--voice <pick> --expressive` (grouping, emotion direction, varied pauses; exact text
   kept). Candidates never voice production. No impersonation, no spoken stage directions.
+  ElevenLabs route: the owner-picked voice of the title, one tagged-script take per scene,
+  `import-take` (refuses any script whose words differ from the book).
 - **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0) and
   VCSL samples (CC0). MusicGen (CC-BY-NC weights) and FLUX.1-dev (non-commercial) are
   forbidden even if the owner names them; offer the licensed equivalent instead.
-  No paid generator or credit-spending connector (Kling, ElevenLabs, Suno, Runway,
-  Adobe/Canva credits): not for "just one test" either.
+  No paid generator or credit-spending connector (Kling, Suno, Runway, Adobe/Canva
+  credits): not for "just one test" either. The one exception is ElevenLabs Eleven v3
+  narration within the plan's included credits (owner decision 24 Nov 2026,
+  `references/earnalism-voice.md`).
 - **Colab.** The owner runs every job. Narration, stills and music notebooks are inert
   until `RUN = True` and stop at their forecast seconds (hard stop). Their default route
   is the R2 exchange (`exchange-stage` → Maison `presign_colab_exchange` → owner: RUN = True,

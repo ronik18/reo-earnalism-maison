@@ -55,7 +55,9 @@ or 120 s (200–245). Each reel is its own 9:16 composition, never a crop of the
 ## Order of work (R20: timing is measured, never assumed)
 
 1. `reel N --script reel-N.json`: script and caption. No shots yet.
-2. The owner approves the script; then `job narration --reel N` → Colab → `import`.
+2. The owner approves the script; then one tagged Eleven v3 take of the whole reel and
+   `import-take reel-N` (references/earnalism-voice.md; no pauses are added between its lines),
+   or the Parler route `job narration --reel N` → Colab → `import`.
 3. `reel N --plan-shots`: measures the imported narration and plans
    `ceil(narration / 5.0417 s)` shots, one real Wan clip each (121 frames at 24 fps).
    Only the last shot is trimmed (picture ends 0.5 s after the last word, at least
@@ -170,8 +172,9 @@ uncovered, and rebuilding them is a new batch the owner decides on.
 
 ## Sound
 
-Reel narration is its own narration job (`job narration --reel N`), same voice and
-preset, 400 ms between lines. The hook is spoken from 0.0–0.2 s (`qc` measures the
+Reel narration is its own narration job (`import-take reel-N` from one ElevenLabs take, its
+own pauses kept and none added; or `job narration --reel N`, same voice and preset, 400 ms
+between lines). The hook is spoken from 0.0–0.2 s (`qc` measures the
 onset on the reel narration and fails `hook_onset` otherwise). Bed: a quiet score cue,
 no drums or vocals. Master: −14 LUFS, true peak ≤ −1 dBTP. Narration is never trimmed:
 the shots are planned from it, so the picture always covers it.

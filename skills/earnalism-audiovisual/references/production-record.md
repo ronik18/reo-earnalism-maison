@@ -10,7 +10,8 @@ One title root, one record, one writer. `record.json` (schema
 <root>/source.json          the exact Maison export (edition, revision, content_sha256)
 <root>/plan.json            scene plan + the voice preset used
 <root>/jobs/<job_id>/       inert Colab bundle: notebook, inputs zip, build-manifest.json
-<root>/narration|stills|music/<job_id>/   verified Colab outputs
+<root>/narration|stills|music/<job_id>/   verified Colab outputs (or sliced ElevenLabs takes)
+<root>/jobs/<job_id>/take-manifest.json   import-take: takes/, scripts/ and every sha256
 <root>/reel_clips/<job_id>/ verified Wan clips + import receipt
 <root>/film/film-NN/        narration.wav, timing.json (+provenance), .srt, mix.wav, film-NN.mp4
 <root>/reels/reel-N/        script.json, caption.txt, narration.wav, shots.json (planned from the
@@ -24,6 +25,10 @@ One title root, one record, one writer. `record.json` (schema
 
 - **Source**: edition id, revision id, content_sha256, export sha256, rights at export.
 - **Voice**: model repo and revision, preset key and the exact description, clause if any.
+  ElevenLabs narration (`import-take`): engine, model (`eleven_v3`), voice name and id,
+  credits used (on the job, never the CU ledger, which records the job at 0 CU), the tagged
+  scripts and source takes with their sha256, the cut of every join and which joins were
+  estimated, voice style `continuous`.
 - **Every generator output**: job id, model and revision (resolved at run time for FLUX and
   ACE-Step), seeds and prompts (inside the inputs zip), output hashes, forecast and actual CU.
 - **Score**: route (VCSL editorial or ACE-Step cues), licence, cue hashes.

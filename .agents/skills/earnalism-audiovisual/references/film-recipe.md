@@ -54,7 +54,8 @@ No drums or vocals under narration; silence at turns.
 What the CLI does, in order:
 
 1. Concatenates the imported narration WAVs with the voice pauses (the narration job's own
-   voice style: a `--expressive` job's grouped units and varied pauses,
+   voice style: a `--expressive` job's grouped units and varied pauses; an `import-take`
+   ElevenLabs job's `continuous` style adds nothing inside a scene and 1200 ms between scenes,
    references/earnalism-voice.md) and **measures** every unit boundary (`eav.film.narration_track`, ffprobe) → `film/film-NN/timing.json` with
    a provenance block (method, measured_with, WAV hashes, narration job id).
 2. Writes SRT subtitles from that measured timing.

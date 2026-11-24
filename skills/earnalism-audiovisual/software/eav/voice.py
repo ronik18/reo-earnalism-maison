@@ -15,6 +15,12 @@ Storyteller style (owner 2026-11-24, "the voiceover seems mechanical"), each par
             (Indic Parler-TTS emotion words), then one optional clause of <= 12 words. Default
             emotion: Conversation for quoted speech, Narration otherwise; a directions map
             {unit_key: {"emotion", "clause"}} written from the context map overrides it.
+
+Continuous-take style (owner 2026-11-24, ElevenLabs narration; eav.take, `import-take`):
+  continuous -- one Eleven v3 take per scene (per reel) sliced at its own silences, so every
+            sentence unit already carries its natural pause. The units are the default sentence
+            units (never grouped); no pause is added inside a scene or between reel lines, and
+            only TAKE_SCENE_PAUSE_MS after a film scene's last unit. Excludes the other modes.
 """
 from .text import estimate_seconds, sentences, words
 
@@ -25,8 +31,10 @@ REEL_LINE_PAUSE_MS = 400  # Squint pacing between reel lines (block kind "line")
 MAX_CLAUSE_WORDS = 12
 
 # Storyteller style
-STYLE_KEYS = ("group", "pauses", "direct")
+STYLE_KEYS = ("group", "pauses", "direct", "continuous")
 EXPRESSIVE = {"group": True, "pauses": True, "direct": True}
+CONTINUOUS = {"continuous": True}
+TAKE_SCENE_PAUSE_MS = 1200  # between two scene takes of a film (continuous style)
 MAX_GROUP_WORDS = 28
 MAX_GROUP_SECONDS = 18.0
 GROUP_WPM = 100  # conservative speaking rate for the length cap (Bengali words are long)
@@ -55,7 +63,11 @@ def _style(style) -> dict:
         raise ValueError(f"unknown voice style key(s): {', '.join(unknown)}")
     if any(not isinstance(v, bool) for v in style.values()):
         raise ValueError("voice style values must be true or false")
-    return {k: v for k, v in style.items() if v}
+    on = {k: v for k, v in style.items() if v}
+    if on.get("continuous") and len(on) > 1:
+        raise ValueError("the continuous-take style (imported ElevenLabs takes) excludes group, "
+                         "pauses and direct")
+    return on
 
 
 def _dialogue(text: str) -> bool:
@@ -121,6 +133,9 @@ def _segments(scene: dict, language: str, style: dict) -> list:
                 if not last and _turn_break(g[-1], groups[i + 1][0]):
                     pause = max(pause, DIALOGUE_TURN_PAUSE_MS)
             segs.append((block, text, pause))
+    if style.get("continuous"):  # the take holds its own pauses; only a film scene end is added
+        return [(block, text, TAKE_SCENE_PAUSE_MS if i == len(segs) - 1 and block.get("kind") != "line"
+                 else 0) for i, (block, text, _) in enumerate(segs)]
     if style.get("pauses") and segs and segs[-1][0].get("kind") == "paragraph":
         block, text, pause = segs[-1]
         segs[-1] = (block, text, max(pause, SCENE_PAUSE_MS))
