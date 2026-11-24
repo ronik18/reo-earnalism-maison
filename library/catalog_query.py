@@ -17,6 +17,7 @@ from core.api import DomainError
 from core.pagination import paginate_queryset
 from .models import Asset, Edition, Rights, Unit
 from .search import normalize_search_text, search_editions
+from .services import video_provider
 
 FORMATS = {'reader': 'reader_package', 'audio': 'audio_chapter', 'video': 'video'}
 
@@ -98,7 +99,7 @@ def catalog_queryset(locale=None, territory='IN', query='', house='', format='',
     for fmt, kind in FORMATS.items():
         right = rights.filter(revision_id=OuterRef('live_revision_id'), format=fmt)
         asset = Asset.objects.filter(revision_id=OuterRef('live_revision_id'), state='ready', kind=kind,
-                                     provider='stream' if fmt == 'video' else 'r2')
+                                     provider=video_provider() if fmt == 'video' else 'r2')
         editions = editions.annotate(**{'catalog_right_'+fmt: Exists(right), 'catalog_asset_'+fmt: Exists(asset)})
         fmt_offered = Q(**{'catalog_right_'+fmt: True, 'catalog_asset_'+fmt: True,
                           'live_revision__access_policy__'+fmt+'__in': ['free', 'paid']})

@@ -184,7 +184,7 @@ from billing.models import Entitlement
 from .models import Asset,Edition,Revision,Rights,Unit,Work
 
 
-@override_settings(LOCAL=True,MAISON_LOCAL_FIXTURES=False,FEATURES={'video':True},
+@override_settings(LOCAL=True,MAISON_LOCAL_FIXTURES=False,FEATURES={'video':True},VIDEO_PROVIDER='stream',
                    STREAM_ACCOUNT_ID=ACCOUNT,STREAM_API_TOKEN='synthetic-read-token',STREAM_CUSTOMER_HOST=CUSTOMER,
                    STREAM_SIGNING_KEY_ID=KEY_ID)
 class StreamAuthorityIntegrationTests(TestCase):
@@ -352,7 +352,7 @@ class StreamPreparationTests(TestCase):
         self.assertEqual(login.status_code,200,login.content);device=login.json()['device_id']
         key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
         pem=key.private_bytes(serialization.Encoding.PEM,serialization.PrivateFormat.PKCS8,serialization.NoEncryption()).decode()
-        with override_settings(FEATURES={'video':True},STAFF_MFA_REQUIRED=True,STREAM_SIGNING_KEY_ID=KEY_ID,STREAM_SIGNING_PRIVATE_KEY=pem):
+        with override_settings(FEATURES={'video':True},VIDEO_PROVIDER='stream',STAFF_MFA_REQUIRED=True,STREAM_SIGNING_KEY_ID=KEY_ID,STREAM_SIGNING_PRIVATE_KEY=pem):
             with self.assertRaises(DomainError):svc.authorize_revision(self.actor,self.revision,'video')
             self.actor.staff_mfa_verified=True
             self.assertEqual(svc.authorize_revision(self.actor,self.revision,'video').pk,self.revision.pk)

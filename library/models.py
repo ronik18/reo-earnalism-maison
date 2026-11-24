@@ -127,7 +127,9 @@ class Paragraph(RevisionContent):
 
 
 class Asset(RevisionContent):
-    KINDS = ('cover','reader_source','reader_package','audio_chapter','preview_audio','video','timing_map','rights_document')
+    KINDS = ('cover','reader_source','reader_package','audio_chapter','preview_audio','video','timing_map','rights_document','video_captions')
+    R2_VIDEO_MAX_BYTES = 1073741824
+    CAPTIONS_MAX_BYTES = 1048576
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     revision = models.ForeignKey(Revision, on_delete=models.PROTECT, related_name='assets')
     unit = models.ForeignKey(Unit, null=True, blank=True, on_delete=models.PROTECT, related_name='assets')
@@ -149,7 +151,9 @@ class Asset(RevisionContent):
             models.CheckConstraint(condition=Q(provider__in=['r2','stream']),name='maison_asset_provider'),
             models.CheckConstraint(condition=Q(duration_ms__isnull=True)|Q(duration_ms__gt=0),name='maison_asset_duration'),
             models.CheckConstraint(condition=Q(provider='r2')|Q(provider='stream',kind='video',storage_key__regex=r'^[a-f0-9]{32}$',duration_ms__isnull=False,duration_ms__gt=0),name='maison_stream_asset_identity'),
-            models.CheckConstraint(condition=~Q(kind='preview_audio')|Q(provider='r2',unit__isnull=False,duration_ms__isnull=False,duration_ms__gt=0,duration_ms__lte=120000,bytes__lte=2097152,content_type='audio/mpeg'),name='maison_audio_preview_bounds')]
+            models.CheckConstraint(condition=~Q(kind='preview_audio')|Q(provider='r2',unit__isnull=False,duration_ms__isnull=False,duration_ms__gt=0,duration_ms__lte=120000,bytes__lte=2097152,content_type='audio/mpeg'),name='maison_audio_preview_bounds'),
+            models.CheckConstraint(condition=~Q(kind='video',provider='r2')|Q(unit__isnull=False,content_type='video/mp4',duration_ms__isnull=False,duration_ms__gt=0,bytes__lte=1073741824),name='maison_r2_video_bounds'),
+            models.CheckConstraint(condition=~Q(kind='video_captions')|Q(provider='r2',unit__isnull=False,content_type='text/vtt',bytes__lte=1048576),name='maison_video_captions_bounds')]
 
     def clean(self):
         if self.unit_id and self.unit.revision_id != self.revision_id:
@@ -160,6 +164,12 @@ class Asset(RevisionContent):
                 raise ValidationError('Stream video requires an exact provider UID and measured duration.')
         elif not self.storage_key.startswith(f'revisions/{self.revision_id}/'):
             raise ValidationError('Storage key must be revision scoped.')
+        if self.kind=='video' and self.provider=='r2' and not (self.unit_id and self.content_type=='video/mp4'
+                and self.duration_ms and self.bytes is not None and self.bytes<=self.R2_VIDEO_MAX_BYTES):
+            raise ValidationError('A private R2 film requires a unit, video/mp4, a measured duration and at most 1 GiB.')
+        if self.kind=='video_captions' and not (self.provider=='r2' and self.unit_id and self.content_type=='text/vtt'
+                and self.bytes is not None and self.bytes<=self.CAPTIONS_MAX_BYTES):
+            raise ValidationError('Film captions require a private R2 unit WebVTT file of at most 1 MiB.')
 
 
 class Rights(models.Model):

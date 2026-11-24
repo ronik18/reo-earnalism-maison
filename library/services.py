@@ -209,7 +209,19 @@ def public_ttl(revision, class_seconds=30, action='read', territory='IN'):
     return max(0, min(class_seconds, math.floor((min(ends)-now).total_seconds()))) if ends else 0
 
 
-FORMAT_ASSETS = {format: (kind, 'stream' if format == 'video' else 'r2') for kind, format in DELIVERABLE_KINDS.items()}
+# Reader and audio presence is one (kind, provider) pair; video follows the configured provider.
+FORMAT_ASSETS = {format: (kind, 'r2') for kind, format in DELIVERABLE_KINDS.items() if format != 'video'}
+
+
+def video_provider():
+    """The one configured film provider: private R2 (default) or Cloudflare Stream."""
+    return getattr(settings, 'VIDEO_PROVIDER', 'r2')
+
+
+def video_formats_present(assets):
+    """A ready film exists from the configured provider; other providers' rows are inert."""
+    provider = video_provider()
+    return any(a.kind == 'video' and a.state == 'ready' and a.provider == provider for a in assets)
 
 
 def prefetch_ready_assets(revisions):
@@ -218,7 +230,7 @@ def prefetch_ready_assets(revisions):
     rows=[r for r in revisions if not hasattr(r,'_maison_ready_assets')]
     # Presence/cover checks need only these columns, not storage or provider metadata.
     prefetch_related_objects(rows,Prefetch('assets',queryset=Asset.objects.filter(
-        state='ready',kind__in=[*DELIVERABLE_KINDS,'cover']).only('id','revision_id','unit_id','kind','provider')
+        state='ready',kind__in=[*DELIVERABLE_KINDS,'cover']).only('id','revision_id','unit_id','kind','provider','state')
         .order_by('created_at','id'),to_attr='_maison_ready_assets'))
     return revisions
 
@@ -232,8 +244,10 @@ def _offered(revision, territory):
 
 
 def available_formats(revision, territory='IN', unit=None):
-    present = {(a.kind, a.provider) for a in ready_assets(revision) if unit is None or a.unit_id == unit.pk}
-    return [f for f in _offered(revision, territory) if FORMAT_ASSETS[f] in present]
+    assets = [a for a in ready_assets(revision) if unit is None or a.unit_id == unit.pk]
+    present = {(a.kind, a.provider) for a in assets}
+    return [f for f in _offered(revision, territory)
+            if (video_formats_present(assets) if f == 'video' else FORMAT_ASSETS[f] in present)]
 
 
 def _cover(revision, path='/api/v1/content/covers/'):
@@ -472,7 +486,7 @@ def _grant_expiry(user,revision,format,action,device_id,territory):
 def _signed_asset(user,asset,revision,device_id,expiry,territory,*,purpose='online',license_id=None):
     from . import storage
     remote=storage.is_r2()
-    if asset.kind=='video' and remote:raise DomainError('provider_not_configured','Video requires its qualified Stream adapter.',503)
+    if asset.kind=='video' and asset.provider=='stream':raise DomainError('provider_not_configured','Stream video is granted only by its Stream adapter.',503)
     if not remote:_asset_valid(asset)
     seconds=math.floor((expiry-timezone.now()).total_seconds())
     if seconds<1:raise DomainError('rights_unavailable','Content authorization is expiring.',403)
@@ -483,7 +497,7 @@ def _signed_asset(user,asset,revision,device_id,expiry,territory,*,purpose='onli
     return {'asset_id':str(asset.id),'unit_id':str(asset.unit_id) if asset.unit_id else None,
             'chunk_id':str(asset.id) if asset.kind=='reader_package' else None,'sha256':asset.sha256,'bytes':asset.bytes,
             'content_type':asset.content_type,'url':url,
-            'range_supported':asset.kind=='audio_chapter'}
+            'range_supported':asset.kind in {'audio_chapter','video'}}
 
 
 def package_grant(user,data,territory='IN'):
@@ -527,8 +541,12 @@ def media_grant(user,data,territory='IN'):
         if data.get('quality_kbps',prepared['quality_kbps'])!=prepared['quality_kbps']:
             raise DomainError('quality_unavailable','The requested prepared audio rendition is unavailable.',409)
     else:
-        from .stream import grant
-        return grant(user,asset,data.get('device_id'),territory)
+        if asset.provider!=video_provider():
+            raise DomainError('provider_not_configured','This video provider is not configured.',503)
+        if asset.provider=='stream':
+            from .stream import grant
+            return grant(user,asset,data.get('device_id'),territory)
+        return _film_grant(user,asset,data,territory)
     descriptor,expiry=_asset_grant(user,asset,data.get('device_id'),territory)
     from .storage import is_r2
     return {'grant_id':str(uuid.uuid4()),'asset_id':str(asset.id),'edition_revision_id':str(asset.revision_id),
@@ -536,6 +554,19 @@ def media_grant(user,data,territory='IN'):
             'content_type':asset.content_type,'sha256':asset.sha256,'range_supported':descriptor['range_supported'],
             'quality_kbps':prepared['quality_kbps'],
             'duration_ms':prepared['duration_ms']}
+
+
+def _film_grant(user,asset,data,territory):
+    """Private R2 film: the audio authorization path, one <=120 s signed GET, Range-capable."""
+    if settings.FEATURES.get('video') is not True:raise DomainError('feature_disabled','Video is unavailable.',503)
+    if data.get('quality_kbps') is not None:
+        raise DomainError('quality_unavailable','Films have one prepared rendition.',409)
+    descriptor,expiry=_asset_grant(user,asset,data.get('device_id'),territory)
+    from .storage import is_r2
+    return {'grant_id':str(uuid.uuid4()),'asset_id':str(asset.id),'edition_revision_id':str(asset.revision_id),
+            'transport':'r2_s3_presigned' if is_r2() else 'local_signed','url':descriptor['url'],'issued_at':iso(timezone.now()),'expires_at':iso(expiry),
+            'content_type':'video/mp4','sha256':asset.sha256,'range_supported':True,
+            'quality_kbps':None,'duration_ms':asset.duration_ms}
 
 
 def resolve_signed_asset(user,asset_id,token):
@@ -697,8 +728,13 @@ def validate_revision(revision,territory='IN',*,prepared=None):
         add('publication_clearance',clearance_ok,'Private exact-text/asset legal evidence must cover all whitelisted regions and offered formats, including applicable distribution permissions; draft term research is insufficient.')
     integrity=prepared['integrity']
     for fmt in formats:
-        kind={'reader':'reader_package','audio':'audio_chapter','video':'video'}[fmt]
-        if not any(a.kind==kind and a.provider==('stream' if fmt=='video' else 'r2') for a in ready_assets):integrity=False
+        if fmt=='video':
+            if not video_formats_present(ready_assets):integrity=False
+            # Synced subtitles are part of a private film: every R2 film unit needs its ready captions.
+            captioned={a.unit_id for a in ready_assets if a.kind=='video_captions'}
+            if any(a.kind=='video' and a.provider=='r2' and a.unit_id not in captioned for a in ready_assets):integrity=False
+            continue
+        if FORMAT_ASSETS[fmt] not in {(a.kind,a.provider) for a in ready_assets}:integrity=False
     if 'reader' in formats and not prepared['coverage']:
         integrity=False
     add('media',integrity and all(a.state=='ready' for a in revision.assets.all()),

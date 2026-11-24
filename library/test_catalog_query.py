@@ -124,7 +124,7 @@ class CatalogQueryTests(TestCase):
         with self.assertRaises(DomainError):
             catalog_page(self.request(limit=51,q='garden'),'en','IN',query='garden')
 
-    def test_video_candidates_require_stream_provider_in_both_listing_and_format_filter(self):
+    def test_video_candidates_require_configured_provider_in_both_listing_and_format_filter(self):
         editions={}
         for provider in ('r2','stream'):
             key=uuid.uuid4().hex
@@ -134,17 +134,19 @@ class CatalogQueryTests(TestCase):
             unit=Unit.objects.create(revision=revision,ordinal=1,title='Video unit',duration_ms=1000)
             Asset.objects.create(revision=revision,unit=unit,kind='video',state='ready',provider=provider,duration_ms=1000,
                                  storage_key=key if provider=='stream' else f'revisions/{revision.pk}/{key}',
-                                 sha256='0'*64,bytes=0,content_type='application/vnd.apple.mpegurl')
+                                 sha256='0'*64,bytes=0,content_type='application/vnd.apple.mpegurl' if provider=='stream' else 'video/mp4')
             Rights.objects.create(revision=revision,format='video',action='read',territories=['IN'],
                                   starts_at=timezone.now()-timedelta(days=1),ends_at=self.expiry,approved=True,test_only=False)
             revision.state='live';revision.save();edition.live_revision=revision;edition.save()
             editions[provider]=edition
-        video=list(catalog_queryset('en','IN',format='video'))
-        self.assertEqual([row.pk for row in video],[editions['stream'].pk])
-        self.assertEqual(card_from_edition(video[0])['formats'],['video'])
-        all_ids=set(catalog_queryset('en','IN').values_list('id',flat=True))
-        self.assertIn(editions['stream'].pk,all_ids)
-        self.assertNotIn(editions['r2'].pk,all_ids)
         from .services import available_formats
-        self.assertEqual(available_formats(editions['r2'].live_revision,'IN'),[])
-        self.assertEqual(available_formats(editions['stream'].live_revision,'IN'),['video'])
+        for configured,other in (('stream','r2'),('r2','stream')):
+            with self.subTest(configured=configured),override_settings(VIDEO_PROVIDER=configured):
+                video=list(catalog_queryset('en','IN',format='video'))
+                self.assertEqual([row.pk for row in video],[editions[configured].pk])
+                self.assertEqual(card_from_edition(video[0])['formats'],['video'])
+                all_ids=set(catalog_queryset('en','IN').values_list('id',flat=True))
+                self.assertIn(editions[configured].pk,all_ids)
+                self.assertNotIn(editions[other].pk,all_ids)
+                self.assertEqual(available_formats(Revision.objects.get(pk=editions[other].live_revision_id),'IN'),[])
+                self.assertEqual(available_formats(Revision.objects.get(pk=editions[configured].live_revision_id),'IN'),['video'])
