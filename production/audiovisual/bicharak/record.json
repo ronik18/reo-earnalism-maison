@@ -5293,6 +5293,74 @@
       "sha256": "86fb4c90e5a61b3e11c674862b114c67c0cfb670dd594ed73b3da8160e37036b"
     },
     {
+      "bytes": 19707,
+      "kind": "timing",
+      "meta": {
+        "target": "film-01"
+      },
+      "path": "film/film-01/timing.json",
+      "sha256": "e5d559dfde5d076a3e822939ae383b031ecc7303e22490459651003e88aa9cec"
+    },
+    {
+      "bytes": 40291,
+      "kind": "subtitles",
+      "meta": {
+        "target": "film-01"
+      },
+      "path": "film/film-01/film-01.srt",
+      "sha256": "885607876eb98cb3e0910cd15452f67d9187b1c1f1b2843d65a662010e4b9bc3"
+    },
+    {
+      "bytes": 213680010,
+      "kind": "mix",
+      "meta": {
+        "target": "film-01"
+      },
+      "path": "film/film-01/mix.wav",
+      "sha256": "e1f91e33f1178a5a7155790fe4a4bd124b5da4655c1d99da08022e777636e470"
+    },
+    {
+      "bytes": 162548171,
+      "kind": "film",
+      "meta": {
+        "body_gain_db": -0.3,
+        "clips": 77,
+        "duration": 1115.916313,
+        "lufs": -15.9,
+        "narration_end": 1112.915,
+        "narration_job_id": "narration-film-01-r4",
+        "path": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/film/film-01/film-01.mp4",
+        "scenes": 19,
+        "score": {
+          "cues_sha256": {
+            "cue-1-kshiroda-night.wav": "168d3d271b6b4872b9727227c7e8cba60392f7dba6db9b5617216e9eb25f201e",
+            "cue-2-window-and-judge.wav": "832b8c47bc9e98f6dcaf816ab379c24b4b97114dcc22fe02bdfa14f95d03f99b",
+            "cue-3-dream-and-carriage.wav": "c41fcd765b569fa308dfb6023ba6d0773bb9f84b02a3787f5fbfb5d258bcf207",
+            "cue-4-prison-and-ring.wav": "8afff9cb2960a6ea71e5b38ea10ad3ecd3022114b375aaedabcae85e64475b48"
+          },
+          "route": "ace-step:music-film-01-r4",
+          "sha256": "a7a583b9882e21d5939a16df7c25b4a75d3bf31dffc25bbf39f360337db09493"
+        },
+        "size": [
+          1920,
+          1080
+        ],
+        "target": "film-01",
+        "true_peak": -1.5
+      },
+      "path": "film/film-01/film-01.mp4",
+      "sha256": "8192e12ee182ad4ff6f5e1fcda341525e2e96e225d602ff75894c9b5ff92c70b"
+    },
+    {
+      "bytes": 495,
+      "kind": "qc_report",
+      "meta": {
+        "failed": []
+      },
+      "path": "qc/report.json",
+      "sha256": "da447258e5d527119dc3513416ab8ec129c2780cbe2120def54803f315085ce6"
+    },
+    {
       "bytes": 13628,
       "kind": "colab_job",
       "meta": {
@@ -6523,6 +6591,23 @@
       },
       "result": "exchange_staged",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-24T03:30:24.826707+00:00",
+      "detail": {
+        "duration": 1115.916313,
+        "target": "film-01"
+      },
+      "result": "assembled",
+      "stage": "film"
+    },
+    {
+      "at": "2026-11-24T03:31:47.862891+00:00",
+      "detail": {
+        "failed": []
+      },
+      "result": "pass",
+      "stage": "qc"
     }
   ],
   "ledger": "../allowance-ledger.json",
