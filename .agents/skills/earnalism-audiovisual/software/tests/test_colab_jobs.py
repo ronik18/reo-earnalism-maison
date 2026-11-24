@@ -176,6 +176,16 @@ class ColabJobTests(unittest.TestCase):
         self.assertIn("ACE-Step/ACE-Step-v1-3.5B", src)
         self.assertIn("weight_sha256", src)
 
+    def test_stills_fit_an_l4(self):
+        # FLUX's bf16 transformer (~24 GB) does not fit an L4 (22 GB): load it 8-bit there
+        s = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]})
+        src = "".join("".join(c["source"]) for c in self.nb(s)["cells"])
+        self.assertIn("gpu.total_memory >= 30 * 2**30", src)
+        self.assertIn("BitsAndBytesConfig(load_in_8bit=True)", src)
+        self.assertIn('"bitsandbytes"', src)
+        self.assertIn("transformer_precision", src)
+        self.assertLess(src.index("**extra)"), src.index("enable_model_cpu_offload"))
+
     def test_forbidden_models_rejected(self):
         with self.assertRaises(ValueError):
             self.build("music", {"model": "facebook/musicgen-small",

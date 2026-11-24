@@ -251,7 +251,8 @@ if globals().get("EXCHANGE") is not None:  # R2 exchange: one uncompressed tar, 
 
 # Distributions whose resolved versions each manifest records (R26).
 PACKAGES = {"narration": ("parler_tts", "transformers", "torch", "soundfile", "protobuf"),
-            "stills": ("diffusers", "transformers", "accelerate", "sentencepiece", "protobuf", "torch"),
+            "stills": ("diffusers", "transformers", "accelerate", "sentencepiece", "protobuf",
+                       "bitsandbytes", "torch"),
             "music": ("ace-step", "acestep", "torch", "transformers", "diffusers", "huggingface_hub")}
 MANIFEST_RESERVE_S = 60
 

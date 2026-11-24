@@ -3,14 +3,27 @@ if RUN is not True:
     raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
 import subprocess, sys
 subprocess.run([sys.executable, "-m", "pip", "install", "-q", "diffusers", "transformers",
-                "accelerate", "sentencepiece", "protobuf"], check=True)
+                "accelerate", "sentencepiece", "protobuf", "bitsandbytes"], check=True)
 import torch
 from diffusers import FluxPipeline
 from huggingface_hub import HfApi
 
 revision = HfApi().model_info(MODEL_REPO).sha
-MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "steps": STEPS}
-pipe = FluxPipeline.from_pretrained(MODEL_REPO, revision=revision, torch_dtype=torch.bfloat16)
+# The FLUX transformer is ~24 GB in bf16, more than an L4 holds (22 GB): below 30 GB of VRAM
+# it loads 8-bit (~12 GB, near-lossless); an A100 keeps bf16. CPU offload moves one part at a time.
+gpu = torch.cuda.get_device_properties(0)
+QUANT = "bf16" if gpu.total_memory >= 30 * 2**30 else "int8"
+print("GPU", gpu.name, "%.1f GiB;" % (gpu.total_memory / 2**30), "transformer", QUANT)
+MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "steps": STEPS,
+              "gpu": gpu.name, "transformer_precision": QUANT}
+extra = {}
+if QUANT == "int8":
+    from diffusers import BitsAndBytesConfig, FluxTransformer2DModel
+    extra["transformer"] = FluxTransformer2DModel.from_pretrained(
+        MODEL_REPO, subfolder="transformer", revision=revision, torch_dtype=torch.bfloat16,
+        quantization_config=BitsAndBytesConfig(load_in_8bit=True))
+pipe = FluxPipeline.from_pretrained(MODEL_REPO, revision=revision, torch_dtype=torch.bfloat16,
+                                    **extra)
 pipe.enable_model_cpu_offload()
 EXPECTED = [item["key"] + ".png" for item in JOB["items"]]
 last = 0.0  # seconds the previous still took; the next starts only if it fits (R25)

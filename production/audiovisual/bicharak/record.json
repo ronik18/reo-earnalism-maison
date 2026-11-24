@@ -5407,7 +5407,7 @@
       "sha256": "d5de63814aa1a7fa5a852f347bcea82d668a0fa4caa7cd76ac8a4b51d030c9f9"
     },
     {
-      "bytes": 13628,
+      "bytes": 14616,
       "kind": "colab_job",
       "meta": {
         "forecast_units": 2.416916666666667,
@@ -5418,7 +5418,7 @@
         "month": "2026-11"
       },
       "path": "jobs/stills-film-01-r8-house/stills.ipynb",
-      "sha256": "c55cc8e99bf76ad24fe4d40125d7d971809bc615916e1c1842732facb7e51039"
+      "sha256": "89b824efa96728b3160b22036251035408f809aae3627587397e72be9d6553ee"
     },
     {
       "bytes": 15297,
@@ -9488,6 +9488,18 @@
         "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r8-house/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T15:53:41.412070+00:00",
+      "detail": {
+        "inputs_unchanged": true,
+        "job_id": "stills-film-01-r8-house",
+        "notebook_sha256": "89b824efa96728b3160b22036251035408f809aae3627587397e72be9d6553ee",
+        "old_notebook_sha256": "c55cc8e99bf76ad24fe4d40125d7d971809bc615916e1c1842732facb7e51039",
+        "reason": "CUDA OOM on L4: FLUX bf16 transformer exceeds 22 GB; load 8-bit below 30 GB VRAM"
+      },
+      "result": "notebook_rebuilt",
       "stage": "job"
     }
   ],

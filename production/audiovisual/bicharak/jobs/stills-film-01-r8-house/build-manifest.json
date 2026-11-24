@@ -9,7 +9,7 @@
     "repo": "black-forest-labs/FLUX.1-schnell",
     "revision": "resolved-at-run-time"
   },
-  "notebook_sha256": "c55cc8e99bf76ad24fe4d40125d7d971809bc615916e1c1842732facb7e51039",
+  "notebook_sha256": "89b824efa96728b3160b22036251035408f809aae3627587397e72be9d6553ee",
   "schema": "earnalism.audiovisual-build.v1",
   "title": "bicharak"
 }
