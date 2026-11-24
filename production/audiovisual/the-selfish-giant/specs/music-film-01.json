@@ -1,0 +1,33 @@
+{
+ "theme_brief": "The Selfish Giant: one English chamber palette (celesta, harp, solo clarinet, strings, soft piano). Four 240 s beds, one per quarter of film-01's scenes as `film --cues-job` spreads them; looped by eav.mix.arrange_cues if narration runs longer. Ducked 19 dB under speech; silence at turns is the edit's job.",
+ "items": [
+  {
+   "key": "cue-1-the-garden",
+   "prompt": "gentle celesta and harp with light pizzicato strings, playful, warm, innocent, English fairy-tale chamber music, instrumental, slow tempo around 66 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+   "seed": 8101,
+   "duration_s": 240.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "cue-2-the-long-winter",
+   "prompt": "cold sustained high strings and low clarinet, wintry, lonely, glassy, English chamber music, instrumental, slow tempo around 66 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+   "seed": 8102,
+   "duration_s": 240.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "cue-3-spring-returns",
+   "prompt": "solo clarinet and harp blooming into warm strings, tender, hopeful, gently joyful, English chamber music, instrumental, slow tempo around 66 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+   "seed": 8103,
+   "duration_s": 240.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "cue-4-paradise",
+   "prompt": "soft piano and hushed strings with a distant celesta, serene, luminous, peaceful, reverent, English chamber music, instrumental, slow tempo around 66 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+   "seed": 8104,
+   "duration_s": 240.0,
+   "lyrics": "[instrumental]"
+  }
+ ]
+}

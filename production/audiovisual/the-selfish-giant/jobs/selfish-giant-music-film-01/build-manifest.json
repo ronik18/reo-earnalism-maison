@@ -1,0 +1,15 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 1931,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/the-selfish-giant/selfish-giant-music-film-01",
+  "inputs_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+  "job_id": "selfish-giant-music-film-01",
+  "kind": "music",
+  "model": {
+    "repo": "ACE-Step/ACE-Step-v1-3.5B",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "2cb427245c1c5606d4359b9adce4a662897aeac5b74122f9558d06c89a403af4",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "the-selfish-giant"
+}

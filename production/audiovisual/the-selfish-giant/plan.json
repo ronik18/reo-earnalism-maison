@@ -1,0 +1,398 @@
+{
+  "language": "en",
+  "plan": {
+    "films": [
+      {
+        "scenes": [
+          {
+            "anchor_ids": [
+              "1e7fad4b-9022-47be-ba5d-cc2821902afd",
+              "5743532d-24a8-4645-8add-1232d8b57674"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "1e7fad4b-9022-47be-ba5d-cc2821902afd",
+                "kind": "paragraph",
+                "text": "EVERY afternoon, as they were coming from school, the children used to go and play in the Giant’s garden."
+              },
+              {
+                "anchor_id": "5743532d-24a8-4645-8add-1232d8b57674",
+                "kind": "paragraph",
+                "text": "It was a large lovely garden, with soft green grass. Here and there over the grass stood beautiful flowers like stars, and there were twelve peach-trees that in the spring-time broke out into delicate blossoms of pink and pearl, and in the autumn bore rich fruit. The birds sat on the trees and sang so sweetly that the children used to stop their games in order to listen to them. “How happy we are here!” they cried to each other."
+              }
+            ],
+            "flag": null,
+            "keyframes": 4,
+            "scene_id": "f01s001",
+            "seconds": 49.5,
+            "text": "EVERY afternoon, as they were coming from school, the children used to go and play in the Giant’s garden.\n\nIt was a large lovely garden, with soft green grass. Here and there over the grass stood beautiful flowers like stars, and there were twelve peach-trees that in the spring-time broke out into delicate blossoms of pink and pearl, and in the autumn bore rich fruit. The birds sat on the trees and sang so sweetly that the children used to stop their games in order to listen to them. “How happy we are here!” they cried to each other."
+          },
+          {
+            "anchor_ids": [
+              "1548aa54-7670-4eac-ba98-e84c5331a2c6"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "1548aa54-7670-4eac-ba98-e84c5331a2c6",
+                "kind": "paragraph",
+                "text": "One day the Giant came back. He had been to visit his friend the Cornish ogre, and had stayed with him for seven years. After the seven years were over he had said all that he had to say, for his conversation was limited, and he determined to return to his own castle. When he arrived he saw the children playing in the garden."
+              }
+            ],
+            "flag": null,
+            "keyframes": 3,
+            "scene_id": "f01s002",
+            "seconds": 32.0,
+            "text": "One day the Giant came back. He had been to visit his friend the Cornish ogre, and had stayed with him for seven years. After the seven years were over he had said all that he had to say, for his conversation was limited, and he determined to return to his own castle. When he arrived he saw the children playing in the garden."
+          },
+          {
+            "anchor_ids": [
+              "df377a8a-5e91-48d4-905f-bbeacb41bab3",
+              "a8018d7a-bd1f-43c4-b9d7-feeff408bd80",
+              "f9c87634-bdd8-4f1a-92a4-fc523623a007",
+              "5134267e-f5e8-4b37-9884-fadc281fea1f"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "df377a8a-5e91-48d4-905f-bbeacb41bab3",
+                "kind": "paragraph",
+                "text": "“What are you doing here?” he cried in a very gruff voice, and the children ran away."
+              },
+              {
+                "anchor_id": "a8018d7a-bd1f-43c4-b9d7-feeff408bd80",
+                "kind": "paragraph",
+                "text": "“My own garden is my own garden,” said the Giant; “any one can understand that, and I will allow nobody to play in it but myself.” So he built a high wall all round it, and put up a notice-board."
+              },
+              {
+                "anchor_id": "f9c87634-bdd8-4f1a-92a4-fc523623a007",
+                "kind": "paragraph",
+                "text": "TRESPASSERS"
+              },
+              {
+                "anchor_id": "5134267e-f5e8-4b37-9884-fadc281fea1f",
+                "kind": "paragraph",
+                "text": "WILL BE"
+              }
+            ],
+            "flag": null,
+            "keyframes": 2,
+            "scene_id": "f01s003",
+            "seconds": 30.0,
+            "text": "“What are you doing here?” he cried in a very gruff voice, and the children ran away.\n\n“My own garden is my own garden,” said the Giant; “any one can understand that, and I will allow nobody to play in it but myself.” So he built a high wall all round it, and put up a notice-board.\n\nTRESPASSERS\n\nWILL BE"
+          },
+          {
+            "anchor_ids": [
+              "34935aa5-6fd8-4557-b316-11eaae35fd51",
+              "254b8735-784e-4fe6-8ef8-3afbd8aeac06",
+              "d18ba0a1-110c-4fe3-b2ea-0e6437a48cfe"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "34935aa5-6fd8-4557-b316-11eaae35fd51",
+                "kind": "paragraph",
+                "text": "PROSECUTED"
+              },
+              {
+                "anchor_id": "254b8735-784e-4fe6-8ef8-3afbd8aeac06",
+                "kind": "paragraph",
+                "text": "He was a very selfish Giant."
+              },
+              {
+                "anchor_id": "d18ba0a1-110c-4fe3-b2ea-0e6437a48cfe",
+                "kind": "paragraph",
+                "text": "The poor children had now nowhere to play. They tried to play on the road, but the road was very dusty and full of hard stones, and they did not like it. They used to wander round the high wall when their lessons were over, and talk about the beautiful garden inside. “How happy we were there,” they said to each other."
+              }
+            ],
+            "flag": null,
+            "keyframes": 3,
+            "scene_id": "f01s004",
+            "seconds": 34.5,
+            "text": "PROSECUTED\n\nHe was a very selfish Giant.\n\nThe poor children had now nowhere to play. They tried to play on the road, but the road was very dusty and full of hard stones, and they did not like it. They used to wander round the high wall when their lessons were over, and talk about the beautiful garden inside. “How happy we were there,” they said to each other."
+          },
+          {
+            "anchor_ids": [
+              "7234811e-8f61-482e-a8dc-59025eef56d5"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "7234811e-8f61-482e-a8dc-59025eef56d5",
+                "kind": "paragraph",
+                "text": "Then the Spring came, and all over the country there were little blossoms and little birds. Only in the garden of the Selfish Giant it was still winter. The birds did not care to sing in it as there were no children, and the trees forgot to blossom. Once a beautiful flower put its head out from the grass, but when it saw the notice-board it was so sorry for the children that it slipped back into the ground again, and went off to sleep. The only people who were pleased were the Snow and the Frost. “Spring has forgotten this garden,” they cried, “so we will live here all the year round.” The Snow covered up the grass with her great white cloak, and the Frost painted all the trees silver. Then they invited the North Wind to stay with them, and he came. He was wrapped in furs, and he roared all day about the garden, and blew the chimney-pots down. “This is a delightful spot,” he said, “we must ask the Hail on a visit.”"
+              }
+            ],
+            "flag": null,
+            "keyframes": 6,
+            "scene_id": "f01s005",
+            "seconds": 89.0,
+            "text": "Then the Spring came, and all over the country there were little blossoms and little birds. Only in the garden of the Selfish Giant it was still winter. The birds did not care to sing in it as there were no children, and the trees forgot to blossom. Once a beautiful flower put its head out from the grass, but when it saw the notice-board it was so sorry for the children that it slipped back into the ground again, and went off to sleep. The only people who were pleased were the Snow and the Frost. “Spring has forgotten this garden,” they cried, “so we will live here all the year round.” The Snow covered up the grass with her great white cloak, and the Frost painted all the trees silver. Then they invited the North Wind to stay with them, and he came. He was wrapped in furs, and he roared all day about the garden, and blew the chimney-pots down. “This is a delightful spot,” he said, “we must ask the Hail on a visit.”"
+          },
+          {
+            "anchor_ids": [
+              "7234811e-8f61-482e-a8dc-59025eef56d5",
+              "35ee97cb-0c97-4801-958b-736fe7dedccf"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "7234811e-8f61-482e-a8dc-59025eef56d5",
+                "kind": "paragraph",
+                "text": "So the Hail came. Every day for three hours he rattled on the roof of the castle till he broke most of the slates, and then he ran round and round the garden as fast as he could go. He was dressed in grey, and his breath was like ice."
+              },
+              {
+                "anchor_id": "35ee97cb-0c97-4801-958b-736fe7dedccf",
+                "kind": "paragraph",
+                "text": "“I cannot understand why the Spring is so late in coming,” said the Selfish Giant, as he sat at the window and looked out at his cold white garden; “I hope there will be a change in the weather.”"
+              }
+            ],
+            "flag": null,
+            "keyframes": 3,
+            "scene_id": "f01s006",
+            "seconds": 44.5,
+            "text": "So the Hail came. Every day for three hours he rattled on the roof of the castle till he broke most of the slates, and then he ran round and round the garden as fast as he could go. He was dressed in grey, and his breath was like ice.\n\n“I cannot understand why the Spring is so late in coming,” said the Selfish Giant, as he sat at the window and looked out at his cold white garden; “I hope there will be a change in the weather.”"
+          },
+          {
+            "anchor_ids": [
+              "b9815e05-8b6b-4e6d-b275-b806d02c7d89",
+              "05051903-f904-4b80-8497-50a78f7af568"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "b9815e05-8b6b-4e6d-b275-b806d02c7d89",
+                "kind": "paragraph",
+                "text": "But the Spring never came, nor the Summer. The Autumn gave golden fruit to every garden, but to the Giant’s garden she gave none. “He is too selfish,” she said. So it was always Winter there, and the North Wind, and the Hail, and the Frost, and the Snow danced about through the trees."
+              },
+              {
+                "anchor_id": "05051903-f904-4b80-8497-50a78f7af568",
+                "kind": "paragraph",
+                "text": "One morning the Giant was lying awake in bed when he heard some lovely music. It sounded so sweet to his ears that he thought it must be the King’s musicians passing by. It was really only a little linnet singing outside his window, but it was so long since he had heard a bird sing in his garden that it seemed to him to be the most beautiful music in the world. Then the Hail stopped dancing over his head, and the North Wind ceased roaring, and a delicious perfume came to him through the open casement. “I believe the Spring has come at last,” said the Giant; and he jumped out of bed and looked out."
+              }
+            ],
+            "flag": null,
+            "keyframes": 6,
+            "scene_id": "f01s007",
+            "seconds": 86.0,
+            "text": "But the Spring never came, nor the Summer. The Autumn gave golden fruit to every garden, but to the Giant’s garden she gave none. “He is too selfish,” she said. So it was always Winter there, and the North Wind, and the Hail, and the Frost, and the Snow danced about through the trees.\n\nOne morning the Giant was lying awake in bed when he heard some lovely music. It sounded so sweet to his ears that he thought it must be the King’s musicians passing by. It was really only a little linnet singing outside his window, but it was so long since he had heard a bird sing in his garden that it seemed to him to be the most beautiful music in the world. Then the Hail stopped dancing over his head, and the North Wind ceased roaring, and a delicious perfume came to him through the open casement. “I believe the Spring has come at last,” said the Giant; and he jumped out of bed and looked out."
+          },
+          {
+            "anchor_ids": [
+              "2f3c4a11-e33f-4cd4-8762-d3dd96043ae4",
+              "1c4d6204-db23-4c7a-a65a-352873cd9e82"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "2f3c4a11-e33f-4cd4-8762-d3dd96043ae4",
+                "kind": "paragraph",
+                "text": "What did he see?"
+              },
+              {
+                "anchor_id": "1c4d6204-db23-4c7a-a65a-352873cd9e82",
+                "kind": "paragraph",
+                "text": "He saw a most wonderful sight. Through a little hole in the wall the children had crept in, and they were sitting in the branches of the trees. In every tree that he could see there was a little child. And the trees were so glad to have the children back again that they had covered themselves with blossoms, and were waving their arms gently above the children’s heads. The birds were flying about and twittering with delight, and the flowers were looking up through the green grass and laughing. It was a lovely scene, only in one corner it was still winter. It was the farthest corner of the garden, and in it was standing a little boy. He was so small that he could not reach up to the branches of the tree, and he was wandering all round it, crying bitterly. The poor tree was still quite covered with frost and snow, and the North Wind was blowing and roaring above it. “Climb up!"
+              }
+            ],
+            "flag": null,
+            "keyframes": 6,
+            "scene_id": "f01s008",
+            "seconds": 85.5,
+            "text": "What did he see?\n\nHe saw a most wonderful sight. Through a little hole in the wall the children had crept in, and they were sitting in the branches of the trees. In every tree that he could see there was a little child. And the trees were so glad to have the children back again that they had covered themselves with blossoms, and were waving their arms gently above the children’s heads. The birds were flying about and twittering with delight, and the flowers were looking up through the green grass and laughing. It was a lovely scene, only in one corner it was still winter. It was the farthest corner of the garden, and in it was standing a little boy. He was so small that he could not reach up to the branches of the tree, and he was wandering all round it, crying bitterly. The poor tree was still quite covered with frost and snow, and the North Wind was blowing and roaring above it. “Climb up!"
+          },
+          {
+            "anchor_ids": [
+              "1c4d6204-db23-4c7a-a65a-352873cd9e82",
+              "3a0288b0-2e39-49e1-8e76-803ae50620cd"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "1c4d6204-db23-4c7a-a65a-352873cd9e82",
+                "kind": "paragraph",
+                "text": "little boy,” said the Tree, and it bent its branches down as low as it could; but the boy was too tiny."
+              },
+              {
+                "anchor_id": "3a0288b0-2e39-49e1-8e76-803ae50620cd",
+                "kind": "paragraph",
+                "text": "And the Giant’s heart melted as he looked out. “How selfish I have been!” he said; “now I know why the Spring would not come here. I will put that poor little boy on the top of the tree, and then I will knock down the wall, and my garden shall be the children’s playground for ever and ever.” He was really very sorry for what he had done."
+              }
+            ],
+            "flag": null,
+            "keyframes": 4,
+            "scene_id": "f01s009",
+            "seconds": 45.5,
+            "text": "little boy,” said the Tree, and it bent its branches down as low as it could; but the boy was too tiny.\n\nAnd the Giant’s heart melted as he looked out. “How selfish I have been!” he said; “now I know why the Spring would not come here. I will put that poor little boy on the top of the tree, and then I will knock down the wall, and my garden shall be the children’s playground for ever and ever.” He was really very sorry for what he had done."
+          },
+          {
+            "anchor_ids": [
+              "cb9f7685-e3b0-4d53-a4b5-6edd144d3ab6"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "cb9f7685-e3b0-4d53-a4b5-6edd144d3ab6",
+                "kind": "paragraph",
+                "text": "So he crept downstairs and opened the front door quite softly, and went out into the garden. But when the children saw him they were so frightened that they all ran away, and the garden became winter again. Only the little boy did not run, for his eyes were so full of tears that he did not see the Giant coming. And the Giant stole up behind him and took him gently in his hand, and put him up into the tree. And the tree broke at once into blossom, and the birds came and sang on it, and the little boy stretched out his two arms and flung them round the Giant’s neck, and kissed him. And the other children, when they saw that the Giant was not wicked any longer, came running back, and with them came the Spring. “It is your garden now, little children,” said the Giant, and he took a great axe and knocked down the wall."
+              }
+            ],
+            "flag": null,
+            "keyframes": 6,
+            "scene_id": "f01s010",
+            "seconds": 81.0,
+            "text": "So he crept downstairs and opened the front door quite softly, and went out into the garden. But when the children saw him they were so frightened that they all ran away, and the garden became winter again. Only the little boy did not run, for his eyes were so full of tears that he did not see the Giant coming. And the Giant stole up behind him and took him gently in his hand, and put him up into the tree. And the tree broke at once into blossom, and the birds came and sang on it, and the little boy stretched out his two arms and flung them round the Giant’s neck, and kissed him. And the other children, when they saw that the Giant was not wicked any longer, came running back, and with them came the Spring. “It is your garden now, little children,” said the Giant, and he took a great axe and knocked down the wall."
+          },
+          {
+            "anchor_ids": [
+              "cb9f7685-e3b0-4d53-a4b5-6edd144d3ab6",
+              "ff8dd922-34db-4281-bc48-032c374f96ad",
+              "34ac476d-f3fb-4dba-a19b-3128593b838f"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "cb9f7685-e3b0-4d53-a4b5-6edd144d3ab6",
+                "kind": "paragraph",
+                "text": "And when the people were going to market at twelve o’clock they found the Giant playing with the children in the most beautiful garden they had ever seen."
+              },
+              {
+                "anchor_id": "ff8dd922-34db-4281-bc48-032c374f96ad",
+                "kind": "paragraph",
+                "text": "All day long they played, and in the evening they came to the Giant to bid him good-bye."
+              },
+              {
+                "anchor_id": "34ac476d-f3fb-4dba-a19b-3128593b838f",
+                "kind": "paragraph",
+                "text": "“But where is your little companion?” he said: “the boy I put into the tree.” The Giant loved him the best because he had kissed him."
+              }
+            ],
+            "flag": null,
+            "keyframes": 3,
+            "scene_id": "f01s011",
+            "seconds": 36.0,
+            "text": "And when the people were going to market at twelve o’clock they found the Giant playing with the children in the most beautiful garden they had ever seen.\n\nAll day long they played, and in the evening they came to the Giant to bid him good-bye.\n\n“But where is your little companion?” he said: “the boy I put into the tree.” The Giant loved him the best because he had kissed him."
+          },
+          {
+            "anchor_ids": [
+              "44a15cd7-9493-4003-8904-2ba2c3e6d268",
+              "6c3719b9-cf3c-427f-b5e8-d46922162168",
+              "93b5721a-e8fc-494e-8529-8a76f9c0284e"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "44a15cd7-9493-4003-8904-2ba2c3e6d268",
+                "kind": "paragraph",
+                "text": "“We don’t know,” answered the children; “he has gone away.”"
+              },
+              {
+                "anchor_id": "6c3719b9-cf3c-427f-b5e8-d46922162168",
+                "kind": "paragraph",
+                "text": "“You must tell him to be sure and come here to-morrow,” said the Giant. But the children said that they did not know where he lived, and had never seen him before; and the Giant felt very sad."
+              },
+              {
+                "anchor_id": "93b5721a-e8fc-494e-8529-8a76f9c0284e",
+                "kind": "paragraph",
+                "text": "Every afternoon, when school was over, the children came and played with the Giant. But the little boy whom the Giant loved was never seen again. The Giant was very kind to all the children, yet he longed for his first little friend, and often spoke of him. “How I would like to see him!” he used to say."
+              }
+            ],
+            "flag": null,
+            "keyframes": 4,
+            "scene_id": "f01s012",
+            "seconds": 53.5,
+            "text": "“We don’t know,” answered the children; “he has gone away.”\n\n“You must tell him to be sure and come here to-morrow,” said the Giant. But the children said that they did not know where he lived, and had never seen him before; and the Giant felt very sad.\n\nEvery afternoon, when school was over, the children came and played with the Giant. But the little boy whom the Giant loved was never seen again. The Giant was very kind to all the children, yet he longed for his first little friend, and often spoke of him. “How I would like to see him!” he used to say."
+          },
+          {
+            "anchor_ids": [
+              "6d2fbb5c-feb4-4b89-bab7-116118ab1f85",
+              "32d7ef30-e007-4b34-9371-e55776258dda"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "6d2fbb5c-feb4-4b89-bab7-116118ab1f85",
+                "kind": "paragraph",
+                "text": "Years went over, and the Giant grew very old and feeble. He could not play about any more, so he sat in a huge armchair, and watched the children at their games, and admired his garden. “I have many beautiful flowers,” he said; “but the children are the most beautiful flowers of all.”"
+              },
+              {
+                "anchor_id": "32d7ef30-e007-4b34-9371-e55776258dda",
+                "kind": "paragraph",
+                "text": "One winter morning he looked out of his window as he was dressing. He did not hate the Winter now, for he knew that it was merely the Spring asleep, and that the flowers were resting."
+              }
+            ],
+            "flag": null,
+            "keyframes": 3,
+            "scene_id": "f01s013",
+            "seconds": 44.5,
+            "text": "Years went over, and the Giant grew very old and feeble. He could not play about any more, so he sat in a huge armchair, and watched the children at their games, and admired his garden. “I have many beautiful flowers,” he said; “but the children are the most beautiful flowers of all.”\n\nOne winter morning he looked out of his window as he was dressing. He did not hate the Winter now, for he knew that it was merely the Spring asleep, and that the flowers were resting."
+          },
+          {
+            "anchor_ids": [
+              "6afc736a-2a4c-4346-9d96-b44bfe9a2ab7",
+              "d80b93f0-2ed2-4e4b-a2f5-1e4f85680445"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "6afc736a-2a4c-4346-9d96-b44bfe9a2ab7",
+                "kind": "paragraph",
+                "text": "Suddenly he rubbed his eyes in wonder, and looked and looked. It certainly was a marvellous sight. In the farthest corner of the garden was a tree quite covered with lovely white blossoms. Its branches were all golden, and silver fruit hung down from them, and underneath it stood the little boy he had loved."
+              },
+              {
+                "anchor_id": "d80b93f0-2ed2-4e4b-a2f5-1e4f85680445",
+                "kind": "paragraph",
+                "text": "Downstairs ran the Giant in great joy, and out into the garden. He hastened across the grass, and came near to the child. And when he came quite close his face grew red with anger, and he said, “Who hath dared to wound thee?” For on the palms of the child’s hands were the prints of two nails, and the prints of two nails were on the little feet."
+              }
+            ],
+            "flag": null,
+            "keyframes": 5,
+            "scene_id": "f01s014",
+            "seconds": 62.00000000000001,
+            "text": "Suddenly he rubbed his eyes in wonder, and looked and looked. It certainly was a marvellous sight. In the farthest corner of the garden was a tree quite covered with lovely white blossoms. Its branches were all golden, and silver fruit hung down from them, and underneath it stood the little boy he had loved.\n\nDownstairs ran the Giant in great joy, and out into the garden. He hastened across the grass, and came near to the child. And when he came quite close his face grew red with anger, and he said, “Who hath dared to wound thee?” For on the palms of the child’s hands were the prints of two nails, and the prints of two nails were on the little feet."
+          },
+          {
+            "anchor_ids": [
+              "518717c7-efb9-4472-a116-4b0b9754cfd5",
+              "ef1659f6-6cae-4d9b-997e-0ffee86205ef",
+              "63d15f5e-3a88-4b59-9109-a6dc8e50e6b6",
+              "d2378984-52b0-49d1-95fa-716e845c1cd4",
+              "0b7ac488-4277-4fe1-bb1e-87aa33997c12"
+            ],
+            "blocks": [
+              {
+                "anchor_id": "518717c7-efb9-4472-a116-4b0b9754cfd5",
+                "kind": "paragraph",
+                "text": "“Who hath dared to wound thee?” cried the Giant; “tell me, that I may take my big sword and slay him.”"
+              },
+              {
+                "anchor_id": "ef1659f6-6cae-4d9b-997e-0ffee86205ef",
+                "kind": "paragraph",
+                "text": "“Nay!” answered the child; “but these are the wounds of Love.”"
+              },
+              {
+                "anchor_id": "63d15f5e-3a88-4b59-9109-a6dc8e50e6b6",
+                "kind": "paragraph",
+                "text": "“Who art thou?” said the Giant, and a strange awe fell on him, and he knelt before the little child."
+              },
+              {
+                "anchor_id": "d2378984-52b0-49d1-95fa-716e845c1cd4",
+                "kind": "paragraph",
+                "text": "And the child smiled on the Giant, and said to him, “You let me play once in your garden, to-day you shall come with me to my garden, which is Paradise.”"
+              },
+              {
+                "anchor_id": "0b7ac488-4277-4fe1-bb1e-87aa33997c12",
+                "kind": "paragraph",
+                "text": "And when the children ran in that afternoon, they found the Giant lying dead under the tree, all covered with white blossoms."
+              }
+            ],
+            "flag": null,
+            "keyframes": 4,
+            "scene_id": "f01s015",
+            "seconds": 52.5,
+            "text": "“Who hath dared to wound thee?” cried the Giant; “tell me, that I may take my big sword and slay him.”\n\n“Nay!” answered the child; “but these are the wounds of Love.”\n\n“Who art thou?” said the Giant, and a strange awe fell on him, and he knelt before the little child.\n\nAnd the child smiled on the Giant, and said to him, “You let me play once in your garden, to-day you shall come with me to my garden, which is Paradise.”\n\nAnd when the children ran in that afternoon, they found the Giant lying dead under the tree, all covered with white blossoms."
+          }
+        ],
+        "unit_ids": [
+          "463e87aa-967c-4763-b815-1c9d926f514f"
+        ]
+      }
+    ],
+    "series": false
+  },
+  "voice": {
+    "description": "Tisha speaks with a natural Indian English accent in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+    "preset_key": "en_tisha::story",
+    "profile": "en_tisha",
+    "roster_sha256": "37607117fedfc95c9b8ee2d6544f1721f7f7f57cbfa3addd3466e1cce2ebbd61",
+    "temperature": 0.91
+  },
+  "wpm": 120
+}
