@@ -118,3 +118,22 @@ class QuizAttempt(models.Model):
     class Meta:
         db_table='maison_quiz_attempt'
         constraints=[models.CheckConstraint(condition=Q(score__isnull=True)|Q(score__lte=100),name='maison_score_range')]
+
+
+class Certificate(models.Model):
+    """Completion certificate for one published track; its id is the public verification code.
+
+    Holds only the name the member typed for it. Shown at /<locale>/certificates/<id>/ to anyone
+    with the link; withdrawn (deleted) by its owner, and removed when the account is deleted.
+    """
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='certificates')
+    track=models.ForeignKey(Track,on_delete=models.PROTECT,related_name='certificates')
+    display_name=models.CharField(max_length=100)
+    lessons_completed=models.PositiveIntegerField()
+    issued_at=models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table='maison_certificate'
+        constraints=[models.UniqueConstraint(fields=['user','track'],name='maison_certificate_user_track'),
+                     models.CheckConstraint(condition=~Q(display_name=''),name='maison_certificate_named'),
+                     models.CheckConstraint(condition=Q(lessons_completed__gte=1),name='maison_certificate_lessons')]

@@ -139,6 +139,8 @@ Files to touch: `accounts/`, `learning/`, `billing/`, `templates/`
 | Header CTA on tagged pages | "Start reading free" returns to the tagged page instead of Explore | Found while testing: the header link dropped the tags, losing YouTube visitors who click it |
 | Term screen (2.1) | Code the 9 territory rules once and screen every candidate; reproduce the two approved evidence records as a test | Removes hand arithmetic; caught Thakurmar Jhuli (compiler died 1956/57: in copyright in GB/BR/SG/ID until 2027) |
 | Quote cards (2.2) | Only the book's exact words; Bengali subset font for text, Latin font for the address | Truth rule; the Bengali font subset has no Latin glyphs |
+| Certificates (3.3) | One per member and track, only after every current lesson (and current quiz pass); public by unguessable link; member-chosen name; withdrawable; none for guardian-managed accounts; free while free access is on | Shareable proof of learning that doubles as free marketing; minimal personal data |
+| Pass split (3.1) | Use the existing per-format policy and platform entitlement; no new gate | The approved design already supports it; less code to qualify |
 | Attribution privacy | Allow-listed sources and slugs only; exported with the account, deleted on account deletion, treated as registration scaffolding by abandoned-signup cleanup; none for guardian-managed accounts | Minimal data that still answers "which content brings members" |
 
 ## Not yet specified (Gate 0 questions for the owner)
@@ -164,5 +166,5 @@ Files to touch: `accounts/`, `learning/`, `billing/`, `templates/`
 | Gate 0 | Approved 24 Nov 2026 |
 | 1 Measure | Implemented 24 Nov 2026: `accounts/attribution.py`, migration `accounts/0007`, `funnel_report` command, header CTA keeps tags on tagged pages, guide in `docs/CAMPAIGN_LINKS.md`. Verified by `accounts.test_attribution` (13 tests) and the full suite. Not yet deployed. |
 | 2 Flywheel | In progress (24 Nov 2026). 2.1: `library/term_check.py` + `term_check` command; 14-title screen in `library/intake/candidates-20261124.json` (11 pass, 2 illustration review, 1 hold). 2.2: `eav social` posting kit (tagged links, YouTube descriptions/chapters, reel posts, exact-word quote cards). 2.3 blocked on owner: first film must be produced (Colab jobs for বিচারক are prepared, none run) and the YouTube channel and upload access named. 2.4 blocked on audio clearance and a Google Play Books partner account. |
-| 3 Pass | Not started |
+| 3 Pass | In progress (24 Nov 2026). 3.1: no code needed: per-format `free`/`paid` policy plus a platform Pass entitlement already gives "read free, audio with Pass"; proven by `library/test_pass_split.py`; switched on later by content policy and turning `MAISON_FREE_ACCESS` off at the G0.5 threshold. 3.3: completion certificates (model, issue/withdraw, public page, export/deletion), free for all while free access is on. 3.2 waits on the first translated edition pair; 3.4 and 3.5 wait on the G0.5 traffic threshold and Razorpay test keys. |
 | 4 Classroom | Not started |

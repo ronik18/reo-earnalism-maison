@@ -461,3 +461,17 @@ STRINGS.update({
 })
 
 STRINGS.update({'support_not_collected': ('The contact form is unavailable. No message was collected. Please email sales@reoenterprise.org.', 'যোগাযোগের ফর্ম এখন উপলব্ধ নয়। কোনো বার্তা সংগ্রহ করা হয়নি। sales@reoenterprise.org-এ ইমেল করুন।')})
+
+STRINGS.update({
+    "certificate": ("Certificate of completion", "সমাপ্তির শংসাপত্র"),
+    "certificate_completed": ("completed every lesson of", "সম্পূর্ণ করেছেন সব পাঠ"),
+    "certificate_lessons": ("Lessons completed", "সম্পন্ন পাঠ"),
+    "certificate_issued": ("Issued", "প্রদানের তারিখ"),
+    "certificate_verify": ("Anyone with this link can check this certificate.", "এই লিঙ্ক থাকলে যে কেউ শংসাপত্রটি যাচাই করতে পারবেন।"),
+    "certificate_get": ("Get your certificate", "আপনার শংসাপত্র নিন"),
+    "certificate_name": ("Name to show on the certificate", "শংসাপত্রে যে নাম দেখাবে"),
+    "certificate_name_help": ("Anyone you share the link with will see this name.", "লিঙ্কটি যাঁদের দেবেন, তাঁরা এই নাম দেখবেন।"),
+    "certificate_view": ("View your certificate", "আপনার শংসাপত্র দেখুন"),
+    "certificate_withdraw": ("Withdraw certificate", "শংসাপত্র প্রত্যাহার করুন"),
+    "certificate_ready": ("You finished every lesson.", "আপনি সব পাঠ শেষ করেছেন।"),
+})

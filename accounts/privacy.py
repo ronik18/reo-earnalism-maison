@@ -92,6 +92,8 @@ def _write_export(user,file,deadline,allowed_sections=None):
         'mandates':Mandate.objects.filter(user=user,subscription__user=user).values('id','status','revocation_pending','method','created_at','revoked_at','version',subscription_id=F('subscription__id')),
         'refunds':Refund.objects.filter(payment__order__user=user).values('id','amount_minor','proposed_amount_minor','currency','status','created_at','processed_at'),
     }
+    from learning.models import Certificate
+    arrays['certificates']=Certificate.objects.filter(user=user).values('id','track_id','display_name','lessons_completed','issued_at')
     from .models import SignupAttribution
     arrays['signup_attribution']=SignupAttribution.objects.filter(user=user).values('source','campaign','content','landing_path','created_at')
     from .models import GuardianAuthorization
@@ -210,6 +212,8 @@ def delete_account(job):
         authority={k:current.payload[k] for k in ('guardian_authorization_id','guardian_requester_id') if k in current.payload}
         current.payload={'delete_export_keys':sorted(keys),'delete_retained_categories':retained_categories,**authority};current.save(update_fields=['payload'])
         now=timezone.now()
+        from learning.models import Certificate
+        Certificate.objects.filter(user=user).delete()
         delete_personal_data(user);LessonCompletion.objects.filter(user=user).delete();QuizAttempt.objects.filter(user=user).delete()
         DownloadLicense.objects.filter(user=user,revoked_at=None).update(revoked_at=now)
         Session.objects.filter(session_key__in=user.devices.exclude(session_id=None).values_list('session_id',flat=True)).delete()

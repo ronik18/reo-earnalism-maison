@@ -6,7 +6,7 @@ from core.pagination import paginate_queryset
 from django.utils import timezone
 from core.api import DomainError
 from library.services import authorize_revision, iso, content_locale
-from .models import Track,Lesson,LessonCompletion,InterviewQuestion,Quiz,QuizAttempt
+from .models import Track,Lesson,LessonCompletion,InterviewQuestion,Quiz,QuizAttempt,Certificate
 
 def _territory(user):
     return getattr(user,'request_territory','IN' if settings.LOCAL else 'ZZ')
@@ -90,7 +90,51 @@ def track_detail(user,track_id):
     result=track_dto(user,track)
     completed={row.lesson_id:row for row in LessonCompletion.objects.filter(user=user,lesson__track=track)} if getattr(user,'is_authenticated',False) else {}
     result['lessons']=[{'lesson_id':str(l.id),'title':l.title,'ordinal':l.ordinal,'completed':completion_is_current(completed.get(l.id),l)} for l in track.lessons.select_related('quiz').all()]
+    existing=Certificate.objects.filter(user=user,track=track).first() if getattr(user,'is_authenticated',False) else None
+    result['certificate']={'certificate_id':str(existing.id) if existing else None,
+                           'eligible':bool(result['lessons']) and all(l['completed'] for l in result['lessons'])
+                                      and result['access']!='locked' and not getattr(user,'guardian_managed',False)}
     return result
+
+
+def _certificate_name(value):
+    name=' '.join(str(value or '').split())
+    if not 1<=len(name)<=100 or any(ord(c)<32 or 0x7f<=ord(c)<0xa0 for c in name):
+        raise DomainError('validation_error','Enter the name to show on the certificate (up to 100 characters).',422)
+    return name
+
+
+@transaction.atomic
+def issue_certificate(user,track_id,display_name):
+    """One certificate per member and track, only after every current lesson is complete."""
+    track=_track(user,track_id)
+    if not getattr(user,'is_authenticated',False):raise DomainError('authentication_required','Sign in to continue.',401)
+    if getattr(user,'guardian_managed',False):
+        raise DomainError('certificate_unavailable','Certificates are not offered for accounts managed by a parent or guardian.',403)
+    name=_certificate_name(display_name)
+    from django.contrib.auth import get_user_model
+    get_user_model().objects.select_for_update().get(pk=user.pk)
+    existing=Certificate.objects.filter(user=user,track=track).first()
+    if existing:return existing
+    lessons=list(track.lessons.select_related('quiz').all())
+    done={row.lesson_id:row for row in LessonCompletion.objects.filter(user=user,lesson__track=track)}
+    if not lessons or not all(completion_is_current(done.get(l.id),l) for l in lessons):
+        raise DomainError('completion_rule_unmet','Finish every lesson in this track first.',409)
+    return Certificate.objects.create(user=user,track=track,display_name=name,lessons_completed=len(lessons))
+
+
+def withdraw_certificate(user,certificate_id):
+    deleted,_=Certificate.objects.filter(pk=certificate_id,user=user).delete() if getattr(user,'is_authenticated',False) else (0,None)
+    if not deleted:raise DomainError('not_found','Certificate not found.',404)
+
+
+def certificate_public(certificate_id):
+    """Public verification view: the chosen name, the track and the date; nothing else."""
+    try:cert=Certificate.objects.select_related('track').get(pk=certificate_id,user__is_active=True)
+    except (Certificate.DoesNotExist,ValueError,ValidationError):raise DomainError('not_found','Certificate not found.',404)
+    return {'certificate_id':str(cert.id),'display_name':cert.display_name,'track_id':str(cert.track_id),
+            'track_title':cert.track.title,'track_locale':cert.track.locale,'lessons_completed':cert.lessons_completed,
+            'issued_at':cert.issued_at,'owner_id':cert.user_id}
 
 def _lesson(user,value):
     try: lesson=Lesson.objects.select_related('track','track__edition').get(pk=value)

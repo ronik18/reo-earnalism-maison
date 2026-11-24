@@ -27,7 +27,7 @@ PASS = 'Local-Journey-Passphrase-47'
 EN = '20000000-0000-4000-8000-000000000001'
 
 
-def make_book(units=3, paragraphs=2, durations=None, title='Journey book', edition=None):
+def make_book(units=3, paragraphs=2, durations=None, title='Journey book', edition=None, policy=None):
     """A live free edition with ready Reader packages (and audio when durations given).
 
     Passing an existing edition publishes a new correction revision and retires the old one.
@@ -38,7 +38,7 @@ def make_book(units=3, paragraphs=2, durations=None, title='Journey book', editi
         edition = Edition.objects.create(work=work, slug='journey-'+key, locale='en')
     elif edition.live_revision_id:
         Revision.objects.filter(pk=edition.live_revision_id).update(state='retired')
-    policy = {'reader': 'free', **({'audio': 'free'} if durations else {})}
+    policy = policy or {'reader': 'free', **({'audio': 'free'} if durations else {})}
     revision = Revision.objects.create(edition=edition, title=title, access_policy=policy)
     for n in range(units):
         unit = Unit.objects.create(revision=revision, ordinal=n+1, title=f'Chapter {n+1}',

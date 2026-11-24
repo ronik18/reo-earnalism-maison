@@ -531,6 +531,36 @@ def track(request, locale, track_id):
     return page(request, locale, "web/track.html", track=data, questions=result["items"], next_cursor=result["next_cursor"], active_nav="learn")
 
 
+@require_POST
+@member_required
+@domain_view
+def certificate_issue(request, locale, track_id):
+    request.user.request_territory = trusted_territory(request)
+    from learning.services import issue_certificate
+    cert = issue_certificate(request.user, track_id, request.POST.get("display_name", ""))
+    return HttpResponseRedirect(reverse("web:certificate", args=[locale, cert.id]))
+
+
+@require_GET
+@domain_view
+def certificate(request, locale, certificate_id):
+    from learning.services import certificate_public
+    data = certificate_public(certificate_id)
+    owner = data.pop("owner_id")
+    own = request.user.is_authenticated and owner == request.user.pk
+    return page(request, locale, "web/certificate.html", certificate=data, own_certificate=own,
+                share_url=django_settings.PUBLIC_BASE_URL.rstrip("/") + request.path, active_nav="learn")
+
+
+@require_POST
+@member_required
+@domain_view
+def certificate_withdraw(request, locale, certificate_id):
+    from learning.services import withdraw_certificate
+    withdraw_certificate(request.user, certificate_id)
+    return HttpResponseRedirect(reverse("web:learn", args=[locale]))
+
+
 @require_GET
 @domain_view
 def lesson(request, locale, lesson_id):
