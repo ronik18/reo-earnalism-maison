@@ -21,7 +21,9 @@ from library.services import prepare_revision_validation, revision_hash, validat
 EVIDENCE_DIR = Path(settings.BASE_DIR) / "docs" / "evidence"
 
 
-class AudiovisualCommandTests(TestCase):
+class AudiovisualFixture(TestCase):
+    """Shared seed: the real cleared bicharak edition, an audio bundle and synthetic evidence."""
+
     def setUp(self):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
@@ -121,6 +123,8 @@ class AudiovisualCommandTests(TestCase):
         evidence = self.evidence(source, audio_sha)
         return old, folder, audio_sha, evidence, self.stage(folder, evidence)
 
+
+class AudiovisualCommandTests(AudiovisualFixture):
     # --- export -----------------------------------------------------------------------------------
     def test_export_refuses_without_live_revision(self):
         self.publish_stage("import")
@@ -340,3 +344,220 @@ class AudiovisualCommandTests(TestCase):
             self.stage(folder, "docs/evidence/audiovisual-clearance-missing-test-only.json")
         self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
         self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)
+
+
+class FilmCommandTests(AudiovisualFixture):
+    """attach_audiovisual_film: a faststart H.264/AAC film plus captions on private R2, same gates as audio."""
+
+    def film_bundle(self, unit_id, *, faststart=True, video_codec="libx264", vtt=b"WEBVTT\n\n00:00.000 --> 00:01.000\nHello\n",
+                    folder_name="film-bundle", **override):
+        folder = self.tmp / folder_name
+        if folder.exists():
+            shutil.rmtree(folder)
+        folder.mkdir()
+        mp4 = folder / "film.mp4"
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "color=c=black:s=64x64:d=1:r=10",
+                        "-f", "lavfi", "-i", "sine=frequency=440:duration=1", "-c:v", video_codec, "-pix_fmt", "yuv420p",
+                        "-c:a", "aac", "-shortest", *(["-movflags", "+faststart"] if faststart else []), str(mp4)], check=True)
+        (folder / "film.vtt").write_bytes(vtt)
+        unit = {"unit_id": unit_id, "mp4": "film.mp4", "vtt": "film.vtt",
+                "mp4_sha256": hashlib.sha256(mp4.read_bytes()).hexdigest(),
+                "vtt_sha256": hashlib.sha256(vtt).hexdigest(),
+                "duration_ms": 987654, "bytes": mp4.stat().st_size}  # a wrong duration claim: the command measures
+        unit.update(override)
+        (folder / "film.json").write_text(json.dumps({"schema": "earnalism.audiovisual-film-bundle.v1", "units": [unit]}))
+        return folder, unit
+
+    def film_evidence(self, source, video_shas, tag="film", **override):
+        return self.evidence(source, None, tag=tag, **{"formats": ["reader", "video"], "video_sha256": list(video_shas),
+                                                       "audio_sha256": None, **override})
+
+    def film(self, *args):
+        out = io.StringIO()
+        call_command("attach_audiovisual_film", *args, stdout=out)
+        return json.loads(out.getvalue().split("MAISON_OUT ", 1)[1])
+
+    def stage_film(self, folder, evidence):
+        return self.film("stage", "bicharak", "--publisher", str(self.publisher.public_id),
+                         "--bundle", str(folder), "--evidence", evidence)
+
+    def publish_film(self, report):
+        return self.film("publish", "bicharak", "--publisher", str(self.publisher.public_id), "--browser-report", report)
+
+    def staged_film(self):
+        old = self.publish_bicharak()
+        source = self.export()
+        folder, unit = self.film_bundle(source["units"][0]["unit_id"])
+        evidence = self.film_evidence(source, [unit["mp4_sha256"]])
+        return old, source, folder, unit, evidence, self.stage_film(folder, evidence)
+
+    def assert_nothing_staged(self, live):
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
+        self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)
+        self.assertFalse(Asset.objects.filter(kind__in=["video", "video_captions"]).exists())
+
+    # --- stage --------------------------------------------------------------------------------------
+    def test_stage_creates_r2_video_and_captions_on_draft(self):
+        old, source, _, unit, _, staged = self.staged_film()
+        self.assertEqual(staged["status"], "staged")
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, old.id)
+        draft = Revision.objects.get(pk=staged["revision_id"])
+        self.assertEqual((draft.state, staged["content_sha256"]), ("draft", draft.content_sha256))
+        self.assertNotIn("browser", draft.validation_evidence)
+        video = Asset.objects.get(revision=draft, kind="video")
+        self.assertEqual((video.provider, video.state, video.content_type, video.sha256, video.bytes, video.unit.ordinal),
+                         ("r2", "ready", "video/mp4", unit["mp4_sha256"], unit["bytes"], 1))
+        self.assertTrue(900 <= video.duration_ms <= 1200, video.duration_ms)  # ffprobe-measured, not the bundle's 987654
+        captions = Asset.objects.get(revision=draft, kind="video_captions")
+        self.assertEqual((captions.provider, captions.state, captions.content_type, captions.sha256, captions.unit_id),
+                         ("r2", "ready", "text/vtt", unit["vtt_sha256"], video.unit_id))
+        self.assertEqual(draft.access_policy["video"], "free")
+        self.assertEqual(staged["asset_sha256"], {str(a.id): a.sha256 for a in draft.assets.filter(state="ready")})
+        clearance = draft.validation_evidence["publication_clearance"]
+        self.assertEqual((clearance["formats"], clearance["asset_sha256"]), (["reader", "video"], staged["asset_sha256"]))
+        self.assertTrue(draft.rights.filter(format="video", action="read", approved=True, test_only=False).exists())
+        proof = draft.validation_evidence["media_assets"][str(video.id)]
+        self.assertEqual((proof["sha256"], proof["duration_ms"], proof["faststart"]), (video.sha256, video.duration_ms, True))
+        checks = {c["code"]: c["status"] for c in validate_revision(draft, prepared=prepare_revision_validation(draft.id))["checks"]}
+        self.assertEqual({k for k, v in checks.items() if v == "fail"}, {"browser"}, checks)
+        self.assertTrue(AuditEvent.objects.filter(actor=self.publisher, action="asset.complete", entity_id=str(video.id),
+                                                  detail__channel="server_job").exists())
+
+    def test_stage_refuses_non_faststart(self):
+        live = self.publish_bicharak()
+        source = self.export()
+        folder, unit = self.film_bundle(source["units"][0]["unit_id"], faststart=False)
+        with self.assertRaisesMessage(CommandError, "faststart"):
+            self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]]))
+        self.assert_nothing_staged(live)
+
+    def test_stage_refuses_hash_mismatch(self):
+        live = self.publish_bicharak()
+        source = self.export()
+        unit_id = source["units"][0]["unit_id"]
+        folder, unit = self.film_bundle(unit_id, mp4_sha256="a" * 64)
+        with self.subTest("bundle mp4"), self.assertRaisesMessage(CommandError, "mp4_sha256"):
+            self.stage_film(folder, self.film_evidence(source, ["a" * 64], tag="mp4"))
+        folder, unit = self.film_bundle(unit_id, vtt_sha256="b" * 64)
+        with self.subTest("bundle vtt"), self.assertRaisesMessage(CommandError, "vtt_sha256"):
+            self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag="vtt"))
+        folder, unit = self.film_bundle(unit_id)
+        with self.subTest("evidence"), self.assertRaisesMessage(CommandError, "video_sha256"):
+            self.stage_film(folder, self.film_evidence(source, ["c" * 64], tag="evidence"))
+        self.assert_nothing_staged(live)
+
+    def test_stage_refuses_evidence_without_video_format(self):
+        live = self.publish_bicharak()
+        source = self.export()
+        folder, unit = self.film_bundle(source["units"][0]["unit_id"])
+        with self.assertRaisesMessage(CommandError, "video"):
+            self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], formats=["reader", "audio"]))
+        self.assert_nothing_staged(live)
+
+    def test_stage_refuses_bad_media(self):
+        live = self.publish_bicharak()
+        source = self.export()
+        unit_id = source["units"][0]["unit_id"]
+        cases = [("codec", {"video_codec": "mpeg4"}, "H.264"),
+                 ("vtt", {"vtt": b"1\n00:00:00,000 --> 00:00:01,000\nHello\n"}, "WEBVTT"),
+                 ("bytes", {"bytes": 1}, "bytes")]
+        for tag, kwargs, message in cases:
+            folder, unit = self.film_bundle(unit_id, **kwargs)
+            with self.subTest(tag), self.assertRaisesMessage(CommandError, message):
+                self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag=tag))
+        folder, unit = self.film_bundle(unit_id)
+        (folder / "notes.txt").write_text("not part of the bundle")
+        with self.assertRaisesMessage(CommandError, "notes.txt"):
+            self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag="extra"))
+        self.assert_nothing_staged(live)
+
+    def test_stage_rerun_is_idempotent(self):
+        _, _, folder, _, evidence, staged = self.staged_film()
+        revisions, assets, rights = Revision.objects.count(), Asset.objects.count(), self.count_rights()
+        again = self.stage_film(folder, evidence)
+        self.assertEqual((again["status"], again["revision_id"], again["content_sha256"], again["asset_sha256"]),
+                         ("staged", staged["revision_id"], staged["content_sha256"], staged["asset_sha256"]))
+        self.assertEqual((Revision.objects.count(), Asset.objects.count(), self.count_rights()), (revisions, assets, rights))
+
+    @staticmethod
+    def count_rights():
+        from library.models import Rights
+        return Rights.objects.count()
+
+    # --- publish ------------------------------------------------------------------------------------
+    def film_browser(self, sha, checks=None, tag="film"):
+        return self.browser(sha, checks={"video_playback": True} if checks is None else checks, tag=tag)
+
+    def test_publish_refuses_without_browser_report(self):
+        old, _, _, _, _, staged = self.staged_film()
+        cases = [("missing", "docs/evidence/audiovisual-browser-missing-test-only.json", "browser report"),
+                 ("otherhash", self.film_browser(old.content_sha256, tag="otherhash"), "browser report"),
+                 ("failed", self.browser(staged["content_sha256"], status="fail", checks={"video_playback": True}, tag="failed"),
+                  "browser report"),
+                 ("audioonly", self.film_browser(staged["content_sha256"], checks={"audio_playback": True}, tag="audioonly"),
+                  "video playback"),
+                 ("videofalse", self.film_browser(staged["content_sha256"], checks={"video_playback": False}, tag="videofalse"),
+                  "video playback")]
+        for tag, report, message in cases:
+            with self.subTest(tag), self.assertRaisesMessage(CommandError, message):
+                self.publish_film(report)
+        with self.assertRaises(CommandError):
+            self.film("publish", "bicharak", "--publisher", str(self.publisher.public_id))
+        draft = Revision.objects.get(pk=staged["revision_id"])
+        self.assertEqual(draft.state, "draft")
+        self.assertNotIn("browser", draft.validation_evidence)
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, old.id)
+
+    def test_publish_with_matching_report_goes_live_with_film(self):
+        old, _, folder, unit, evidence, staged = self.staged_film()
+        result = self.publish_film(self.film_browser(staged["content_sha256"]))
+        live = Edition.objects.get(slug="bicharak").live_revision
+        self.assertEqual((result["status"], str(live.id), live.state), ("published", staged["revision_id"], "live"))
+        self.assertEqual(Revision.objects.get(pk=old.id).state, "retired")
+        self.assertEqual(Asset.objects.get(revision=live, kind="video").sha256, unit["mp4_sha256"])
+        report = validate_revision(live, prepared=prepare_revision_validation(live.id))
+        checks = {c["code"]: c["status"] for c in report["checks"]}
+        self.assertEqual(report["status"], "pass", checks)
+        self.assertEqual((checks["publication_clearance"], checks["media"], checks["publication_regions"]), ("pass", "pass", "pass"))
+        revisions, assets = Revision.objects.count(), Asset.objects.count()
+        self.assertEqual(self.stage_film(folder, evidence)["status"], "already_live")
+        self.assertEqual(self.publish_film(self.film_browser(staged["content_sha256"], tag="again"))["status"], "already_live")
+        self.assertEqual((Revision.objects.count(), Asset.objects.count()), (revisions, assets))
+
+    # --- audio and film share one draft -------------------------------------------------------------
+    def assert_combined(self, draft_id):
+        draft = Revision.objects.get(pk=draft_id)
+        self.assertEqual(Revision.objects.filter(edition=draft.edition, state="draft").count(), 1)
+        self.assertEqual(sorted(draft.assets.filter(kind__in=["audio_chapter", "video", "video_captions"]).values_list("kind", flat=True)),
+                         ["audio_chapter", "video", "video_captions"])
+        self.assertEqual((draft.access_policy["audio"], draft.access_policy["video"]), ("free", "free"))
+        clearance = draft.validation_evidence["publication_clearance"]
+        self.assertEqual(clearance["formats"], ["reader", "audio", "video"])
+        self.assertEqual(clearance["asset_sha256"], {str(a.id): a.sha256 for a in draft.assets.filter(state="ready")})
+        checks = {c["code"]: c["status"] for c in validate_revision(draft, prepared=prepare_revision_validation(draft.id))["checks"]}
+        self.assertEqual({k for k, v in checks.items() if v == "fail"}, {"browser"}, checks)
+        return draft
+
+    def test_audio_then_film_share_one_draft_and_publish_together(self):
+        old, _, _, _, audio = self.staged()
+        source = self.export()
+        folder, unit = self.film_bundle(source["units"][0]["unit_id"])
+        film = self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]]))
+        self.assertEqual(film["revision_id"], audio["revision_id"])
+        draft = self.assert_combined(film["revision_id"])
+        with self.assertRaisesMessage(CommandError, "audio playback"):
+            self.publish_film(self.film_browser(draft.content_sha256, tag="videoonly"))
+        with self.assertRaisesMessage(CommandError, "video playback"):
+            self.publish(self.browser(draft.content_sha256, tag="audioonly"))
+        result = self.publish_film(self.film_browser(draft.content_sha256, checks={"audio_playback": True, "video_playback": True}))
+        live = Edition.objects.get(slug="bicharak").live_revision
+        self.assertEqual((result["status"], str(live.id)), ("published", str(draft.id)))
+        self.assertEqual(validate_revision(live, prepared=prepare_revision_validation(live.id))["status"], "pass")
+        self.assertEqual(Revision.objects.get(pk=old.id).state, "retired")
+
+    def test_film_then_audio_share_one_draft(self):
+        _, source, _, _, _, film = self.staged_film()
+        folder, audio_sha = self.bundle(source)
+        audio = self.stage(folder, self.evidence(source, audio_sha, tag="audio"))
+        self.assertEqual(audio["revision_id"], film["revision_id"])
+        self.assert_combined(audio["revision_id"])

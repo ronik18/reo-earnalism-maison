@@ -45,14 +45,17 @@ ready asset hash and the evidence document sha256. The clone stays a DRAFT with 
 stage prints its revision_id, content_sha256 and ready-asset hashes. A rerun with the same bundle
 reports the existing staged draft (resuming an unfinished one) and never makes a second clone; once
 published it reports already_live. Replacing audio that a live revision already carries is refused.
+When attach_audiovisual_film has already staged a draft of the same live revision, stage joins that draft
+(and vice versa), so audio and film publish together; publication_clearance then lists every offered format
+with the evidence document that cleared each (format_evidence) and binds every ready asset hash.
 
 Export the staged draft with `export_audiovisual_source <slug> --revision <revision_id>` to rebuild an
 identical replica and browser-test the reader and the audio player against the same content_sha256.
 
 publish: --browser-report is a repo-relative JSON {"sha256": <staged content_sha256>, "status": "pass",
 "scope": "...", "checks": {"audio_playback": true, ...}}. It must name the staged revision's exact hash,
-pass, and cover audio playback; it is then recorded as the draft's browser evidence, and mark-ready and
-publish run through transition_revision (full validate_revision) in one transaction. Any mismatch or
+pass, and cover audio playback (and video_playback when a film is staged on the same draft); it is then
+recorded as the draft's browser evidence, and mark-ready and publish run through transition_revision (full validate_revision) in one transaction. Any mismatch or
 failed check raises CommandError and changes nothing.
 """
 import hashlib
@@ -63,6 +66,7 @@ from pathlib import Path
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from core.api import DomainError
@@ -70,8 +74,8 @@ from core.services import audit
 from library import storage
 from library.models import Asset, Paragraph, Revision, Rights, TimingMap
 from library.production_handoff import HandoffError, measure_mp3
-from library.services import (canonical_bytes, clone_revision, digest, prepare_revision_validation, transition_revision,
-                              validate_revision)
+from library.services import (FORMATS, canonical_bytes, clone_revision, digest, prepare_revision_validation,
+                              transition_revision, validate_revision)
 from library.timing import validated_segments
 from operations.management.commands.export_audiovisual_source import has_public_domain_evidence, live_revision
 from operations.management.commands.publish_cleared_editions import ROOT, sha256, stable_id, territories
@@ -80,6 +84,9 @@ EVIDENCE_SCHEMA = "earnalism.audiovisual-clearance-evidence.v1"
 STREAM_HELD = ("Stream hosting held: the owner has not approved Stream hosting cost, so only timing.json and chapter "
                "MP3 files are accepted; remove {name!r} from the bundle.")
 MAX_TIMING_BYTES = 4 * 1024 * 1024
+# Staged media sharing one draft of a live revision: validation_evidence marker -> (asset kind, browser check).
+# attach_audiovisual_audio and attach_audiovisual_film stage into the same draft and publish it together.
+STAGED_MEDIA = {"audiovisual_audio": ("audio_chapter", "audio_playback"), "audiovisual_film": ("video", "video_playback")}
 
 
 def file_sha256(path):
@@ -168,7 +175,8 @@ def read_evidence(relative):
     return doc, sha256(raw), f"{relative}#sha256={sha256(raw)}"
 
 
-def check_evidence(doc, slug, live, bundle):
+def check_evidence_identity(doc, slug, live):
+    """Schema, owner approval, live text hash and whitelist: common to the audio and film records."""
     if not isinstance(doc, dict) or doc.get("schema") != EVIDENCE_SCHEMA or doc.get("edition_slug") != slug:
         raise CommandError(f"Clearance evidence must be {EVIDENCE_SCHEMA} for edition {slug}.")
     status = doc.get("status")
@@ -182,6 +190,10 @@ def check_evidence(doc, slug, live, bundle):
         raise CommandError("Clearance evidence names a different live text hash.")
     if not isinstance(doc.get("territories"), list) or sorted(doc["territories"]) != sorted(territories()):
         raise CommandError("Clearance evidence territories differ from the active whitelist.")
+
+
+def check_evidence(doc, slug, live, bundle):
+    check_evidence_identity(doc, slug, live)
     if not isinstance(doc.get("formats"), list) or sorted(doc["formats"]) != ["audio", "reader"]:
         raise CommandError('Clearance evidence formats must be exactly ["reader", "audio"].')
     if not isinstance(doc.get("audio_sha256"), list) or sorted(doc["audio_sha256"]) != sorted(f["sha256"] for f in bundle["files"].values()):
@@ -244,12 +256,16 @@ def media_value(asset, measured, bundle_sha):
 
 class Command(BaseCommand):
     help = __doc__.split("\n\n", 1)[0] + " Bundle layout and evidence schema: see this module's docstring."
+    MARKER = "audiovisual_audio"  # a key of STAGED_MEDIA
+    FORMAT = "audio"
+    BUNDLE_HELP = "stage: directory holding timing.json and the chapter MP3s only"
+    REASON = "Owner-cleared narration audio"
 
     def add_arguments(self, parser):
         parser.add_argument("phase", choices=("stage", "publish"))
         parser.add_argument("edition_slug")
         parser.add_argument("--publisher", required=True, help="public_id of an active verified staff publisher")
-        parser.add_argument("--bundle", help="stage: directory holding timing.json and the chapter MP3s only")
+        parser.add_argument("--bundle", help=self.BUNDLE_HELP)
         parser.add_argument("--evidence", help="stage: repo-relative clearance JSON under docs/evidence/")
         parser.add_argument("--browser-report", help="publish: repo-relative browser acceptance JSON for the staged hash")
 
@@ -293,19 +309,22 @@ class Command(BaseCommand):
                       for a in draft.assets.filter(kind="audio_chapter").order_by("unit__ordinal")]})
 
     def publish_staged(self, actor, edition, live, report_path):
-        draft = (Revision.objects.filter(edition=edition, state__in=["draft", "ready"],
-                 validation_evidence__audiovisual_audio__source_revision_id=str(live.id), assets__kind="audio_chapter")
+        kind = STAGED_MEDIA[self.MARKER][0]
+        draft = (Revision.objects.filter(edition=edition, state__in=["draft", "ready"], assets__kind=kind,
+                 **{f"validation_evidence__{self.MARKER}__source_revision_id": str(live.id)})
                  .distinct().order_by("-created_at").first())
         if draft is None:
-            if live.validation_evidence.get("audiovisual_audio") and live.assets.filter(kind="audio_chapter").exists():
+            if live.validation_evidence.get(self.MARKER) and live.assets.filter(kind=kind).exists():
                 return self.emit({"status": "already_live", "edition_id": str(edition.id), "revision_id": str(live.id)})
-            raise CommandError(f"{edition.slug}: no staged audio draft of the live revision; run the stage phase first.")
+            raise CommandError(f"{edition.slug}: no staged {self.FORMAT} draft of the live revision; run the stage phase first.")
         report, report_ref = read_report(report_path)
         checks = report.get("checks") if isinstance(report, dict) else None
         if not isinstance(report, dict) or report.get("status") != "pass" or report.get("sha256") != draft.content_sha256:
             raise CommandError("browser report does not pass for the staged revision's exact content_sha256.")
-        if not isinstance(checks, dict) or checks.get("audio_playback") is not True:
-            raise CommandError("browser report does not cover audio playback (checks.audio_playback must be true).")
+        # Every medium staged on this draft (audio and/or film) must have been played in the browser.
+        for staged_kind, check in STAGED_MEDIA.values():
+            if draft.assets.filter(kind=staged_kind).exists() and (not isinstance(checks, dict) or checks.get(check) is not True):
+                raise CommandError(f"browser report does not cover {check.replace('_', ' ')} (checks.{check} must be true).")
         if not isinstance(report.get("scope"), str) or not report["scope"].strip():
             raise CommandError("browser report must name its release scope.")
         browser = {"status": "pass", "sha256": draft.content_sha256, "scope": report["scope"], "checks": checks,
@@ -351,19 +370,35 @@ class Command(BaseCommand):
     def find_or_clone(self, actor, edition, live, bundle):
         marker = {"bundle_sha256": bundle["bundle_sha256"], "source_revision_id": str(live.id),
                   "source_content_sha256": live.content_sha256}
-        draft = (Revision.objects.filter(edition=edition, state__in=["draft", "ready"],
-                 validation_evidence__audiovisual_audio__bundle_sha256=marker["bundle_sha256"],
-                 validation_evidence__audiovisual_audio__source_revision_id=marker["source_revision_id"])
+        drafts = Revision.objects.filter(edition=edition, state__in=["draft", "ready"])
+        draft = (drafts.filter(**{f"validation_evidence__{self.MARKER}__bundle_sha256": marker["bundle_sha256"],
+                                  f"validation_evidence__{self.MARKER}__source_revision_id": marker["source_revision_id"]})
                  .order_by("-created_at").first())
         if draft is not None:
             return draft
+        # Join a draft of the same live revision staged by the other audiovisual command (audio + film together).
+        sibling = Q()
+        for key in STAGED_MEDIA:
+            sibling |= Q(**{f"validation_evidence__{key}__source_revision_id": marker["source_revision_id"]})
+        draft = (drafts.filter(sibling, state="draft")
+                 .exclude(validation_evidence__has_key=self.MARKER).order_by("-created_at").first())
+        if draft is not None:
+            with transaction.atomic():
+                current = Revision.objects.select_for_update().get(pk=draft.pk)
+                if current.state != "draft" or self.MARKER in current.validation_evidence:
+                    raise CommandError("Staged draft changed while joining it; rerun stage.")
+                current.validation_evidence = {**current.validation_evidence, self.MARKER: marker}
+                current.version += 1
+                current.save()
+                audit(actor, "revision.evidence", current, {self.MARKER: marker["bundle_sha256"], "channel": "server_job"})
+            return current
         try:
             clone = clone_revision(live.id)
         except DomainError as exc:
             raise CommandError(f"{exc.code}: {exc.message}") from None
         with transaction.atomic():
             current = Revision.objects.select_for_update().get(pk=clone.pk)
-            current.validation_evidence = {**current.validation_evidence, "audiovisual_audio": marker}
+            current.validation_evidence = {**current.validation_evidence, self.MARKER: marker}
             current.version += 1
             current.save()
             audit(actor, "revision.clone", current, {"source_revision_id": str(live.id),
@@ -427,15 +462,36 @@ class Command(BaseCommand):
                 audit(actor, "timing_map.create", mapping, {"asset_id": str(asset.id), "asset_sha256": asset.sha256,
                       "text_sha256": current.content_sha256, "channel": "server_job"})
             self.approve_rights(actor, live, current, evidence_ref, now)
-            ready = list(current.assets.filter(state="ready"))
-            clearance = {"status": "pass", "sha256": current.content_sha256, "territories": territories(),
-                "formats": ["reader", "audio"], "asset_sha256": {str(a.id): a.sha256 for a in ready},
-                "evidence_ref": evidence_ref, "basis": "owner_authorized_public_domain_term_evidence_audio",
-                "source_revision_id": str(live.id), "recorded_by": str(actor.public_id), "recorded_at": now.isoformat()}
-            current.validation_evidence = {**current.validation_evidence, "publication_clearance": clearance}
-            current.version += 1
-            current.save()
-            audit(actor, "revision.evidence", current, {"publication_clearance": evidence_ref, "channel": "server_job"})
+            self.record_clearance(actor, live, current, evidence_ref, now)
+
+    def record_clearance(self, actor, live, current, evidence_ref, now):
+        """publication_clearance for every offered format and every ready asset hash of the draft.
+
+        library.services.publication_clearance_matches demands formats == the offered formats and asset_sha256 ==
+        all ready assets (film captions included). This command's evidence clears reader + its own format; a format
+        staged earlier on this draft by the other audiovisual command keeps the evidence that cleared it.
+        """
+        prior = current.validation_evidence.get("publication_clearance")
+        covered = {}
+        if (isinstance(prior, dict) and prior.get("status") == "pass" and prior.get("sha256") == current.content_sha256
+                and prior.get("source_revision_id") == str(live.id)):
+            by_format = prior.get("format_evidence")
+            covered = dict(by_format) if isinstance(by_format, dict) else {f: prior["evidence_ref"] for f in prior.get("formats", [])}
+        covered.update({"reader": evidence_ref, self.FORMAT: evidence_ref})
+        offered = [f for f in FORMATS if current.access_policy.get(f, "deny") != "deny"]
+        missing = [f for f in offered if not covered.get(f)]
+        if missing:
+            raise CommandError(f"No owner-approved clearance evidence covers offered format(s) {', '.join(missing)}.")
+        ready = list(current.assets.filter(state="ready"))
+        clearance = {"status": "pass", "sha256": current.content_sha256, "territories": territories(),
+            "formats": offered, "format_evidence": {f: covered[f] for f in offered},
+            "asset_sha256": {str(a.id): a.sha256 for a in ready},
+            "evidence_ref": evidence_ref, "basis": f"owner_authorized_public_domain_term_evidence_{self.FORMAT}",
+            "source_revision_id": str(live.id), "recorded_by": str(actor.public_id), "recorded_at": now.isoformat()}
+        current.validation_evidence = {**current.validation_evidence, "publication_clearance": clearance}
+        current.version += 1
+        current.save()
+        audit(actor, "revision.evidence", current, {"publication_clearance": evidence_ref, "channel": "server_job"})
 
     def approve_rights(self, actor, live, current, evidence_ref, now):
         cleared = {(r.format, r.action, tuple(r.territories), r.starts_at, r.ends_at)
@@ -449,17 +505,17 @@ class Command(BaseCommand):
             right.version += 1
             right.save()
             audit(actor, "rights.approve", right, {"format": right.format, "action": right.action, "channel": "server_job"})
-        if not current.rights.filter(format="audio", action="read", approved=True, test_only=False).exists():
+        if not current.rights.filter(format=self.FORMAT, action="read", approved=True, test_only=False).exists():
             evidence = json.dumps({"territories": territories(), "evidence_ref": evidence_ref,
                                    "basis": "owner-authorized public-domain term evidence"}, ensure_ascii=False)
-            right = Rights.objects.create(revision=current, format="audio", action="read", territories=territories(),
+            right = Rights.objects.create(revision=current, format=self.FORMAT, action="read", territories=territories(),
                 starts_at=now, ends_at=now + timedelta(days=3650), approved=True, test_only=False, evidence=evidence)
-            audit(actor, "rights.create", right, {"format": "audio", "action": "read", "territories": territories(),
+            audit(actor, "rights.create", right, {"format": self.FORMAT, "action": "read", "territories": territories(),
                   "channel": "server_job"})
 
     # --- mark-ready + publish (same as publish_cleared_editions.publish) -----------------------------------
     def publish(self, actor, revision, report_ref):
-        reason = f"Owner-cleared narration audio; fresh browser acceptance {report_ref}."
+        reason = f"{self.REASON}; fresh browser acceptance {report_ref}."
         steps = []
         for action in ("mark-ready", "publish"):
             revision.refresh_from_db()
