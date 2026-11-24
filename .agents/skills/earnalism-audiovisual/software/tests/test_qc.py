@@ -29,6 +29,22 @@ class QcTests(unittest.TestCase):
             self.assertGreater(sheet.stat().st_size, 0)
 
 
+    def test_contact_sheet_of_a_long_film_stays_encodable(self):
+        """বিচারক film-01 (1116 s) at one thumb per second made a 224-row sheet that JPEG
+        cannot encode (> 65500 px). Long videos are sampled more sparsely, capped tiles."""
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            v = td / "long.mp4"
+            ff("-f", "lavfi", "-i", "color=c=navy:s=64x36:r=1:d=1500", "-pix_fmt", "yuv420p", str(v))
+            sheet = td / "sheet.jpg"
+            qc.contact_sheet(v, sheet)
+            out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=width,height",
+                                  "-of", "csv=p=0", str(sheet)], check=True, capture_output=True,
+                                 text=True).stdout.strip()
+            width, height = map(int, out.split(","))
+            self.assertLessEqual(height, 20 * 320)
+            self.assertGreaterEqual(height, 320)
+
 class OnsetTests(unittest.TestCase):
     def test_speech_onset_measures_leading_silence(self):
         with tempfile.TemporaryDirectory() as td:

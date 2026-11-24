@@ -22,9 +22,12 @@ def speech_onset(audio, threshold_db=-40.0, rate=16000):
     return round(float(loud[0]) / rate, 4) if loud.size else None
 
 
-def contact_sheet(video, out, every_s=1.0, cols=5, thumb_h=320):
-    """Tile one thumbnail per `every_s` seconds into a single image."""
-    n = max(1, int(math.ceil(_duration(video) / every_s)))
+def contact_sheet(video, out, every_s=1.0, cols=5, thumb_h=320, max_tiles=100):
+    """Tile one thumbnail per `every_s` seconds into a single image; a long video is sampled
+    more sparsely so the sheet holds at most `max_tiles` thumbnails (JPEG caps at 65500 px)."""
+    duration = _duration(video)
+    every_s = max(every_s, duration / max_tiles)
+    n = max(1, int(math.ceil(duration / every_s)))
     rows = math.ceil(n / cols)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(video), "-vf",
                     f"fps=1/{every_s},scale=-2:{thumb_h},tile={min(cols, n)}x{rows}",
