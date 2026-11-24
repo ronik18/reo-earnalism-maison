@@ -1,0 +1,249 @@
+{
+  "schema": "maison-film-browser-acceptance-v1",
+  "date": "2026-11-24",
+  "status": "pass",
+  "scope": "Synthetic local fixture film; covers no staged title, so it carries no staged content sha256.",
+  "test": "integration_tests.test_film_playback.FilmPlaybackBrowserTests.test_film_plays_with_captions_and_survives_grant_expiry",
+  "browser": "chromium 157.0.8103.78",
+  "storage_backend": "local",
+  "transport": "local_signed",
+  "provider": "r2",
+  "fixture": {
+    "film": "library/fixtures/film/synthetic-film.mp4",
+    "film_bytes": 155773,
+    "film_sha256": "2ece89ec515164d44bdca28b5db0cd7ee0905675c90aa67c019d6c44f67c728a",
+    "captions": "library/fixtures/film/synthetic-film.vtt",
+    "captions_sha256": "1b1d79b88ea7aa0c108e77caed1ab8f022a0e69aa8d3db396c8809bb08919462",
+    "synthetic": true
+  },
+  "forced_grant_seconds": 4,
+  "range_cap_bytes": 16384,
+  "observations": {
+    "first_time_s": 0.527,
+    "advanced_time_s": 0.913,
+    "active_cue": "Synthetic Maison test film, part one.",
+    "seek_target_s": 6.0,
+    "resumed_time_s": 6.105,
+    "after_resume_s": 6.33,
+    "paused_at_s": 6.332,
+    "saved_position_ms": 6332,
+    "grants_issued": 2,
+    "expired_film_requests_403": 1,
+    "service_worker_controlled": true,
+    "service_worker_cache_entries_checked": 55
+  },
+  "checks": {
+    "video_playback": true,
+    "captions_active_cue": true,
+    "grant_expiry_renewed_and_resumed": true,
+    "film_range_206": true,
+    "no_store_responses": true,
+    "not_from_service_worker": true,
+    "not_in_service_worker_cache": true,
+    "progress_saved_on_pause": true
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/api/v1/me/progress/12f2ae0f-7296-426b-bb66-a293d60d6750/video",
+      "status": 200,
+      "range": null,
+      "content_range": null,
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media/grants",
+      "status": 200,
+      "range": null,
+      "content_range": null,
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/video-captions/74e36be8-1bed-4992-917e-523663ffe07f",
+      "status": 200,
+      "range": null,
+      "content_range": null,
+      "cache_control": "private, no-store, max-age=0",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=0-",
+      "content_range": "bytes 0-16383/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=16384-",
+      "content_range": "bytes 16384-32767/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=32768-",
+      "content_range": "bytes 32768-49151/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=49152-",
+      "content_range": "bytes 49152-65535/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=65536-",
+      "content_range": "bytes 65536-81919/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 403,
+      "range": "bytes=81920-",
+      "content_range": null,
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media/grants",
+      "status": 200,
+      "range": null,
+      "content_range": null,
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/me/progress/12f2ae0f-7296-426b-bb66-a293d60d6750/video",
+      "status": 200,
+      "range": null,
+      "content_range": null,
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=0-",
+      "content_range": "bytes 0-16383/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=16384-",
+      "content_range": "bytes 16384-32767/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=32768-",
+      "content_range": "bytes 32768-49151/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=49152-",
+      "content_range": "bytes 49152-65535/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=65536-",
+      "content_range": "bytes 65536-81919/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=81920-",
+      "content_range": "bytes 81920-98303/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=98304-",
+      "content_range": "bytes 98304-114687/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=114688-",
+      "content_range": "bytes 114688-131071/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=131072-",
+      "content_range": "bytes 131072-147455/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/content/local-assets/74e36be8-1bed-4992-917e-523663ffe07f?<redacted>",
+      "status": 206,
+      "range": "bytes=147456-",
+      "content_range": "bytes 147456-155772/155773",
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/me/progress/12f2ae0f-7296-426b-bb66-a293d60d6750/video",
+      "status": 200,
+      "range": null,
+      "content_range": null,
+      "cache_control": "private, no-store",
+      "from_service_worker": false
+    }
+  ],
+  "console_errors": [
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "scope_note": "Local fixture success does not certify R2/CDN, real devices, rights or production release."
+}
