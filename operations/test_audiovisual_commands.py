@@ -561,3 +561,31 @@ class FilmCommandTests(AudiovisualFixture):
         audio = self.stage(folder, self.evidence(source, audio_sha, tag="audio"))
         self.assertEqual(audio["revision_id"], film["revision_id"])
         self.assert_combined(audio["revision_id"])
+
+    # --- a live revision already offering the other medium is refused before any mutation ----------
+    def test_film_refused_when_live_revision_offers_audio(self):
+        _, _, _, _, staged = self.staged()
+        self.publish(self.browser(staged["content_sha256"]))
+        live = Edition.objects.get(slug="bicharak").live_revision
+        source = self.export()
+        folder, unit = self.film_bundle(source["units"][0]["unit_id"])
+        revisions, assets = Revision.objects.count(), Asset.objects.count()
+        with self.assertRaisesMessage(CommandError, "already offers audio"):
+            self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]]))
+        self.assertEqual((Revision.objects.count(), Asset.objects.count()), (revisions, assets))
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
+        self.assertFalse(Asset.objects.filter(kind__in=["video", "video_captions"]).exists())
+        self.assertEqual(list(Path(settings.MEDIA_ROOT).rglob("*.mp4")), [])  # nothing uploaded
+
+    def test_audio_refused_when_live_revision_offers_film(self):
+        _, _, _, _, _, staged = self.staged_film()
+        self.publish_film(self.film_browser(staged["content_sha256"]))
+        live = Edition.objects.get(slug="bicharak").live_revision
+        source = self.export()
+        folder, audio_sha = self.bundle(source)
+        revisions, assets = Revision.objects.count(), Asset.objects.count()
+        with self.assertRaisesMessage(CommandError, "already offers video"):
+            self.stage(folder, self.evidence(source, audio_sha, tag="audio"))
+        self.assertEqual((Revision.objects.count(), Asset.objects.count()), (revisions, assets))
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
+        self.assertFalse(Asset.objects.filter(kind="audio_chapter").exists())

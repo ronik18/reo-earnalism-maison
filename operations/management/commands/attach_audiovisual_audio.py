@@ -44,7 +44,8 @@ the whitelist (no audio preview); record publication_clearance for formats reade
 ready asset hash and the evidence document sha256. The clone stays a DRAFT with no browser evidence;
 stage prints its revision_id, content_sha256 and ready-asset hashes. A rerun with the same bundle
 reports the existing staged draft (resuming an unfinished one) and never makes a second clone; once
-published it reports already_live. Replacing audio that a live revision already carries is refused.
+published it reports already_live. Replacing audio that a live revision already carries is refused, as is
+staging onto a live revision that already offers video.
 When attach_audiovisual_film has already staged a draft of the same live revision, stage joins that draft
 (and vice versa), so audio and film publish together; publication_clearance then lists every offered format
 with the evidence document that cleared each (format_evidence) and binds every ready asset hash.
@@ -293,6 +294,7 @@ class Command(BaseCommand):
                 return self.emit({"status": "already_live", "edition_id": str(edition.id), "revision_id": str(live.id),
                                   "bundle_sha256": bundle["bundle_sha256"], "audio_sha256": shas})
             raise CommandError(f"{slug}: the live revision already carries different audio; replacing audio is not supported here.")
+        self.refuse_other_live_media(slug, live)
         if not has_public_domain_evidence(live):
             raise CommandError(f"{slug}: live revision lacks passing public-domain publication clearance; refused.")
         check_evidence(doc, slug, live, bundle)
@@ -307,6 +309,18 @@ class Command(BaseCommand):
             "asset_sha256": {str(a.id): a.sha256 for a in draft.assets.filter(state="ready")},
             "audio": [{"unit_id": str(a.unit_id), "asset_id": str(a.id), "sha256": a.sha256, "duration_ms": a.duration_ms}
                       for a in draft.assets.filter(kind="audio_chapter").order_by("unit__ordinal")]})
+
+    def refuse_other_live_media(self, slug, live):
+        """Refuse before any mutation when the live revision offers a format this run cannot clear.
+
+        clone_revision copies access_policy and the live audio/film assets but resets validation_evidence, so the
+        clone would offer that medium without its clearance, measurement evidence or timing maps.
+        """
+        other = [f for f in FORMATS if f not in {"reader", self.FORMAT} and live.access_policy.get(f, "deny") != "deny"]
+        if other:
+            raise CommandError(f"{slug}: the live revision already offers {', '.join(other)}; staging {self.FORMAT} onto a "
+                               f"clone of it is unsupported. Stage audio and film together from a reader-only live revision "
+                               f"(attach_audiovisual_audio and attach_audiovisual_film into the same draft).")
 
     def publish_staged(self, actor, edition, live, report_path):
         kind = STAGED_MEDIA[self.MARKER][0]

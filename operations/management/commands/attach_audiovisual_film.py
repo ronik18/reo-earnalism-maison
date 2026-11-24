@@ -32,7 +32,8 @@ each VTT as kind=video_captions (text/vtt); record measurement evidence; set acc
 copied cleared rights and add approved non-test video read rights for the whitelist; record publication_clearance
 for every offered format bound to every ready asset hash (captions included). The draft stays a DRAFT with no
 browser evidence. Reruns report the same draft; once published they report already_live. Replacing a film that
-the live revision already carries is refused.
+the live revision already carries is refused, and so is staging onto a live revision that already offers audio
+(the clone would offer it without its evidence): stage audio and film together from a reader-only live revision.
 
 publish: --browser-report {"sha256": <staged content_sha256>, "status": "pass", "scope": "...",
 "checks": {"video_playback": true, ...}} (plus audio_playback when audio is staged on the same draft).
@@ -214,6 +215,7 @@ class Command(audio.Command):
                 return self.emit({"status": "already_live", "edition_id": str(edition.id), "revision_id": str(live.id),
                                   "bundle_sha256": bundle["bundle_sha256"], "video_sha256": shas})
             raise CommandError(f"{slug}: the live revision already carries a different film; replacing it is not supported here.")
+        self.refuse_other_live_media(slug, live)
         if not has_public_domain_evidence(live):
             raise CommandError(f"{slug}: live revision lacks passing public-domain publication clearance; refused.")
         check_film_evidence(doc, slug, live, bundle)
