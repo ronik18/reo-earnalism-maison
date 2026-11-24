@@ -1,7 +1,7 @@
 # Earnalism revenue growth: feature and task plan
 
 Strategy and evidence: `docs/superpowers/specs/2026-11-24-earnalism-revenue-strategy-design.md`
-Status: **PROPOSED. Waiting for owner approval at Gate 0.** No step starts before approval.
+Status: **APPROVED by the owner on 24 Nov 2026 ("Yes to all decisions, start Phase 1").** G0.1–G0.6 accepted as recommended.
 
 Lane ownership follows AGENTS.md: Frontend (`client/`, `web/`, `templates/`, `static/`), Backend (`accounts/`, `reader/`, `core/`), Media/commerce (`library/`, `billing/`, `learning/`), Root (`config/`, `operations/`, `contracts/`, docs, CI, final commits).
 
@@ -22,10 +22,10 @@ Files to touch: `accounts/`, `core/`, `operations/`, `templates/`
 - Test seams: signup view integration test
 - Blocked by: G0.2
 
-#### Step 1.2: Funnel events and a staff funnel report (Size: M), Backend + Root
-- Acceptance criteria: aggregate counts of visit → signup → verified → first story started → first story completed → Pass start, by source and title, per week; no per-person export in the report.
-- Verification command: `.venv/bin/python manage.py test operations core --noinput`
-- Files likely touched: `core/` event model, `operations/management/commands/funnel_report.py`
+#### Step 1.2: Aggregate funnel report (Size: S), Backend + Root
+- Acceptance criteria: weekly signup cohorts by source (and optionally campaign) counted through verified → started reading → completed a story → Pass started, from existing records; cells under 5 suppressed; no per-person output.
+- Verification command: `.venv/bin/python manage.py test accounts.test_attribution --noinput`
+- Files likely touched: `accounts/attribution.py`, `operations/management/commands/funnel_report.py`
 - Test seams: management command output on PostgreSQL fixtures
 - Blocked by: 1.1
 
@@ -134,6 +134,10 @@ Files to touch: `accounts/`, `learning/`, `billing/`, `templates/`
 | Analytics | First-party, server-side, aggregate only | No third-party trackers; fits the privacy and consent posture |
 | Schools | Teacher-only licence, no student accounts | Avoids new child-data processing under DPDP |
 | Price | Keep the planned INR 99 / INR 999 | Already designed; below Storytel and Kuku; test before changing |
+| Attribution transport (1.1) | Carry `utm_*` inside the existing `return_to` link; capture at registration | No new cookie for anonymous visitors; tagged URLs already bypass the public cache; almost no template changes |
+| Funnel data (1.2) | Derive stages from existing Progress/Completion/Subscription rows; no new event table | Simpler; nothing new to retain or delete; "visit" counts are left to provider analytics |
+| Header CTA on tagged pages | "Start reading free" returns to the tagged page instead of Explore | Found while testing: the header link dropped the tags, losing YouTube visitors who click it |
+| Attribution privacy | Allow-listed sources and slugs only; exported with the account, deleted on account deletion, treated as registration scaffolding by abandoned-signup cleanup; none for guardian-managed accounts | Minimal data that still answers "which content brings members" |
 
 ## Not yet specified (Gate 0 questions for the owner)
 
@@ -155,8 +159,8 @@ Files to touch: `accounts/`, `learning/`, `billing/`, `templates/`
 
 | Phase | Status |
 | --- | --- |
-| Gate 0 | Waiting for owner |
-| 1 Measure | Not started |
+| Gate 0 | Approved 24 Nov 2026 |
+| 1 Measure | Implemented 24 Nov 2026: `accounts/attribution.py`, migration `accounts/0007`, `funnel_report` command, header CTA keeps tags on tagged pages, guide in `docs/CAMPAIGN_LINKS.md`. Verified by `accounts.test_attribution` (13 tests) and the full suite. Not yet deployed. |
 | 2 Flywheel | Not started |
 | 3 Pass | Not started |
 | 4 Classroom | Not started |

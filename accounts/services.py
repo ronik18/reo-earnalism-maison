@@ -123,6 +123,9 @@ def register_member(email,password,display_name='',locale='en',return_path='/',*
         _create_action(user,'verify_email',return_path,locale);audit(user,'account.registered',user)
         record_password_purpose_consent(user,'registration',password_consent)
         record_adult(user,declaration,'registration')
+        if not _guardian_account:
+            from .attribution import record as record_attribution
+            record_attribution(user,return_path)
     return user if _return_created_user else {'status':'delivery_pending'}
 
 

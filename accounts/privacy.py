@@ -92,6 +92,8 @@ def _write_export(user,file,deadline,allowed_sections=None):
         'mandates':Mandate.objects.filter(user=user,subscription__user=user).values('id','status','revocation_pending','method','created_at','revoked_at','version',subscription_id=F('subscription__id')),
         'refunds':Refund.objects.filter(payment__order__user=user).values('id','amount_minor','proposed_amount_minor','currency','status','created_at','processed_at'),
     }
+    from .models import SignupAttribution
+    arrays['signup_attribution']=SignupAttribution.objects.filter(user=user).values('source','campaign','content','landing_path','created_at')
     from .models import GuardianAuthorization
     arrays['guardian_authorizations_given']=GuardianAuthorization.objects.filter(guardian=user).values('id','prospective_subject_id','jurisdiction','purpose','notice_version','method','status','created_at','reviewed_at','expires_at','withdrawn_at','claimed_at')
     arrays['guardian_authorizations_received']=GuardianAuthorization.objects.filter(child=user).values('id','jurisdiction','purpose','notice_version','method','status','created_at','reviewed_at','expires_at','withdrawn_at','claimed_at')
@@ -218,6 +220,8 @@ def delete_account(job):
             from allauth.account.models import EmailAddress
             from allauth.socialaccount.models import SocialAccount
             SocialAccount.objects.filter(user=user).delete();EmailAddress.objects.filter(user=user).delete()
+        from .models import SignupAttribution
+        SignupAttribution.objects.filter(user=user).delete()
         Preferences.objects.filter(user=user).delete();Consent.objects.filter(user=user).delete();EmailActionToken.objects.filter(user=user).delete();MFARecoveryCode.objects.filter(user=user).delete()
         from django.apps import apps
         if apps.is_installed('django_otp.plugins.otp_totp'):

@@ -61,6 +61,9 @@ def context(request, locale, **extra):
         "content_languages": [{"code":"en","label":"English"},{"code":"bn","label":"Bengali"}],
         "return_to": safe_return(request.POST.get("return_to", request.GET.get("return_to", request.get_full_path())), locale),
         "next_page_url":None,
+        # A visitor who arrived on a tagged campaign link returns to that page after signing up,
+        # which also carries the first-party attribution tags (docs/CAMPAIGN_LINKS.md).
+        "signup_return_to": safe_return(request.get_full_path(), locale) if request.method == "GET" and request.GET.get("utm_source") else reverse("web:explore", args=["en"]),
         "safe_request_id":str(getattr(request,"request_id","")), "retry_url":safe_return(request.get_full_path(),locale) if request.method=="GET" else "",
         "free_access":getattr(django_settings,"FREE_ACCESS_ENABLED",False),
         "free_access_available":getattr(django_settings,"FREE_ACCESS_ENABLED",False) and trusted_territory(request) in django_settings.MAISON_PUBLICATION_TERRITORIES,
