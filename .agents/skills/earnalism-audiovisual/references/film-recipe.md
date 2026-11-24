@@ -20,7 +20,8 @@ Write it once per title and reuse it in every prompt:
 
 - **Period and place**: era, region, architecture, clothing, objects that must be right.
 - **Palette and light**: 3–5 colours, one light family (e.g. "late afternoon, warm low sun").
-- **Lens and look**: "painterly illustrated cinema, soft grain, 35 mm, shallow depth".
+- **Lens and look**: the house style ([visual-style.md](visual-style.md)), 2D animated feature-film
+  illustration; the job builder appends it to every prompt, so never write a second style.
 - **Character sheets**: for each recurring person a fixed one-line description (age, face,
   hair, clothing, one distinguishing detail), repeated word-for-word in every prompt.
 - **2–3 anchor stills** generated first and reviewed; later prompts quote the same bible.
@@ -29,7 +30,7 @@ Write it once per title and reuse it in every prompt:
 ## 3. Stills spec (`job stills --film N --spec stills.json`)
 
 ```json
-{"items": [{"key": "f01s001-1", "prompt": "<bible preamble>. <what the text shows at this beat>",
+{"items": [{"key": "f01s001-1", "prompt": "<character lines>. <what the text shows at this beat>. <period, palette, light>",
             "seed": 101, "width": 1344, "height": 768}]}
 ```
 

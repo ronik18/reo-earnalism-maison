@@ -35,6 +35,15 @@ MAX_CLIPS_PER_BATCH = 5
 MAX_APPROVED_UNITS = 5.0
 DRIVE_ROOT = "/content/drive/MyDrive/earnalism-audiovisual"
 
+# Owner 2026-11-24: one look for every book's stills, the 2D animated feature-film illustration
+# of the বিচারক stills he chose. Appended to every stills prompt by the job builder (prompts carry
+# content, period, palette and light only); a prompt asking for another look is refused.
+HOUSE_STYLE = ("Earnalism house style: 2D animated feature-film illustration, clean confident line art, "
+               "soft cel shading with gentle painterly gradients, expressive faces with large luminous eyes, "
+               "consistent character designs, cinematic composition. No text, no letters, no signage, "
+               "no watermark, no logos, no extra fingers; not photorealistic, not a 3D render.")
+STYLE_CONFLICTS = ("photoreal", "photograph", "oil-on-canvas", "realism", "watercolour", "watercolor",
+                   "gouache", "3d render", "not a cartoon", "not anime", "not a flat illustration")
 KINDS = ("narration", "stills", "music", "reel_clips")
 JOB_SCHEMA = "earnalism.audiovisual-job.v1"
 EXCHANGE_SCHEMA = "earnalism.colab-exchange.v1"
@@ -389,7 +398,12 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                 "revision": NARRATION_REVISION, "steps": 1, "compute": compute}
     if kind == "stills":
         _check_model(kind, spec, STILLS_REPO)
-        items = [{"key": s["key"], "prompt": s["prompt"], "seed": int(s["seed"]),
+        for s in spec["items"]:
+            clash = [w for w in STYLE_CONFLICTS if w in s["prompt"].lower()]
+            if clash:
+                raise ValueError(f"stills prompt {s['key']!r} asks for {clash[0]!r}, which conflicts with "
+                                 f"the house style (references/visual-style.md); describe the content only")
+        items = [{"key": s["key"], "prompt": s["prompt"].rstrip() + " " + HOUSE_STYLE, "seed": int(s["seed"]),
                   "width": int(s.get("width", 1024)), "height": int(s.get("height", 1024))}
                  for s in spec["items"]]
         if not items:
