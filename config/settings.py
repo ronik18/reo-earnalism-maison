@@ -347,12 +347,30 @@ STREAM_API_TOKEN = os.getenv('STREAM_API_TOKEN', '')
 STREAM_SIGNING_KEY_ID = os.getenv('STREAM_SIGNING_KEY_ID', '')
 STREAM_SIGNING_PRIVATE_KEY = os.getenv('STREAM_SIGNING_PRIVATE_KEY', '')
 STREAM_CUSTOMER_HOST = os.getenv('STREAM_CUSTOMER_HOST', '')
-if FEATURES['video']:
-    import re
-    if (not re.fullmatch(r'[a-f0-9]{32}', STREAM_ACCOUNT_ID)
-            or not re.fullmatch(r'customer-[a-z0-9]+\.cloudflarestream\.com', STREAM_CUSTOMER_HOST)
-            or not all([STREAM_API_TOKEN, STREAM_SIGNING_KEY_ID, STREAM_SIGNING_PRIVATE_KEY])):
-        raise ImproperlyConfigured('Video requires its configured signed Stream profile and exact customer host')
+VIDEO_PROVIDER = os.getenv('MAISON_VIDEO_PROVIDER', 'r2')
+
+
+def video_configuration_error(video_enabled, provider, media_backend, local, stream_ok):
+    """Return the startup refusal message for a video configuration, or None when acceptable."""
+    if provider not in {'r2', 'stream'}:
+        return 'MAISON_VIDEO_PROVIDER must be r2 or stream'
+    if not video_enabled:
+        return None
+    if provider == 'stream':
+        return None if stream_ok else 'Video requires its configured signed Stream profile and exact customer host'
+    if not local and media_backend != 'r2':
+        return 'Production video delivery from R2 requires configured private R2 storage'
+    return None
+
+
+import re as _re
+_video_error = video_configuration_error(
+    FEATURES['video'], VIDEO_PROVIDER, MEDIA_STORAGE_BACKEND, LOCAL,
+    bool(_re.fullmatch(r'[a-f0-9]{32}', STREAM_ACCOUNT_ID)
+         and _re.fullmatch(r'customer-[a-z0-9]+\.cloudflarestream\.com', STREAM_CUSTOMER_HOST)
+         and all([STREAM_API_TOKEN, STREAM_SIGNING_KEY_ID, STREAM_SIGNING_PRIVATE_KEY])))
+if _video_error:
+    raise ImproperlyConfigured(_video_error)
 if not LOCAL and (FEATURES['audio'] or FEATURES['offline_text_audio']) and MEDIA_STORAGE_BACKEND != 'r2':
     raise ImproperlyConfigured('Production audio/offline delivery requires configured private R2 storage')
 # Email links use the same authenticated TLS SMTP profile validated above.
