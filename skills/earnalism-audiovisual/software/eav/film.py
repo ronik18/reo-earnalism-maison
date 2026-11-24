@@ -22,6 +22,16 @@ def _duration(path) -> float:
     return float(json.loads(r.stdout)["format"]["duration"])
 
 
+VIDEO_SUFFIXES = (".mp4", ".mov", ".m4v", ".webm", ".mkv")
+
+
+def _has_audio(path) -> bool:
+    out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries",
+                          "stream=index", "-of", "csv=p=0", str(path)],
+                         check=True, capture_output=True, text=True).stdout
+    return bool(out.strip())
+
+
 def _ffmpeg(args):
     subprocess.run(["ffmpeg", "-y", "-hide_banner", "-v", "error", *args], check=True)
 
@@ -177,8 +187,14 @@ def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
     lw = int(W * LOGO_WIDTH_FRAC)
     mg = int(W * LOGO_MARGIN_FRAC)
     base = n  # input indices after clips
-    args += ["-i", str(logo), "-loop", "1", "-framerate", str(FPS),
-             "-t", f"{END_CARD_S:.3f}", "-i", str(end_card), "-i", str(mixed_audio)]
+    # The approved END is a video with its own sound (earnalism-video): append it whole and keep
+    # its audio; a still card is held END_CARD_S over silence.
+    end_video = Path(end_card).suffix.lower() in VIDEO_SUFFIXES
+    end_s = _duration(end_card) if end_video else END_CARD_S
+    end_audio = end_video and _has_audio(end_card)
+    end_input = ["-i", str(end_card)] if end_video else [
+        "-loop", "1", "-framerate", str(FPS), "-t", f"{END_CARD_S:.3f}", "-i", str(end_card)]
+    args += ["-i", str(logo), *end_input, "-i", str(mixed_audio)]
     graph.append(f"[{base}:v]scale={lw}:-1[lg]")
     graph.append(f"[{cur}][lg]overlay=x=W-w-{mg}:y={mg}:format=auto,fps={FPS},"
                  f"trim=0:{total:.3f},setpts=PTS-STARTPTS[main]")
@@ -186,9 +202,16 @@ def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
                  f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2,fps={FPS},format=yuv420p,setsar=1[end]")
     graph.append("[main]format=yuv420p[mainf]")
     graph.append("[mainf][end]concat=n=2:v=1:a=0[v]")
-    full = total + END_CARD_S
-    graph.append(f"[{base + 2}:a]aresample={RATE},aformat=channel_layouts=stereo,"
-                 f"atrim=0:{total:.3f},apad=whole_dur={full:.3f}[a]")
+    full = total + end_s
+    if end_audio:
+        graph.append(f"[{base + 2}:a]aresample={RATE},aformat=channel_layouts=stereo,"
+                     f"atrim=0:{total:.3f},apad=whole_dur={total:.3f}[am]")
+        graph.append(f"[{base + 1}:a]aresample={RATE},aformat=channel_layouts=stereo,"
+                     f"atrim=0:{end_s:.3f},apad=whole_dur={end_s:.3f}[ae]")
+        graph.append("[am][ae]concat=n=2:v=0:a=1[a]")
+    else:
+        graph.append(f"[{base + 2}:a]aresample={RATE},aformat=channel_layouts=stereo,"
+                     f"atrim=0:{total:.3f},apad=whole_dur={full:.3f}[a]")
     with tempfile.TemporaryDirectory() as td:
         script = Path(td) / "graph.txt"
         script.write_text(";".join(graph))

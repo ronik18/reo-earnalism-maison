@@ -101,6 +101,27 @@ class FilmTests(unittest.TestCase):
         self.assertAlmostEqual(v, a, delta=0.1)
         self.assertAlmostEqual(v, info["duration"], delta=0.15)
 
+    def test_video_end_card_is_appended_whole_with_its_own_sound(self):
+        """The approved END is a 3 s video with its own sound (earnalism-video): it is appended
+        unchanged in length, its audio follows the film's, and nothing of the score bleeds in."""
+        t, stills, logo = self._assemble_inputs()
+        mixed = self.d / "mixed.wav"
+        m.ff("-f", "lavfi", "-i", f"anullsrc=r=48000:cl=mono:d={t[-1]['end']}", str(mixed))  # silent bed
+        end = self.d / "END.mp4"
+        m.ff("-f", "lavfi", "-i", "color=c=navy:s=320x180:r=30:d=2", "-f", "lavfi",
+             "-i", "sine=frequency=1000:sample_rate=48000:duration=2", "-shortest",
+             "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", str(end))
+        out = self.d / "film-end.mp4"
+        info = film.assemble(PLAN, t, stills, mixed, logo, end, out, size=(320, 180))
+        self.assertAlmostEqual(info["duration"], t[-1]["end"] + 2.0, delta=0.1)
+        self.assertAlmostEqual(float(probe(out, "v:0", "duration")), info["duration"], delta=0.15)
+        self.assertAlmostEqual(float(probe(out, "a:0", "duration")), info["duration"], delta=0.15)
+        tail, body = self.d / "tail.wav", self.d / "body.wav"
+        m.ff("-ss", f"{t[-1]['end'] + 0.5:.3f}", "-t", "1", "-i", str(out), "-ac", "1", str(tail))
+        m.ff("-ss", "0.5", "-t", "1", "-i", str(out), "-ac", "1", str(body))
+        self.assertGreater(m.rms_db(m.samples(tail)), -30)   # the END's own sound
+        self.assertLess(m.rms_db(m.samples(body)), -60)      # the silent bed stays silent
+
     def _assemble_inputs(self):
         t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
         stills = self.d / "stills"
