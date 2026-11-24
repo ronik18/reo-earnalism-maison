@@ -1128,6 +1128,1647 @@
       },
       "path": "narration/selfish-giant-voice-audition/tisha-storyteller__narration-005.wav",
       "sha256": "b98afd0815a24bac1c4b87f23419da32d90890b311d1b86a06e36488818e42b0"
+    },
+    {
+      "bytes": 60364,
+      "kind": "narration_take",
+      "meta": {
+        "engine": "elevenlabs",
+        "forecast_units": 0.0,
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-elevenlabs-db5b38b5/take-manifest.json",
+        "model": "eleven_v3",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/take-manifest.json",
+      "sha256": "21ae68028583892d9e2d3b8844b113b8b502798960d33778b8c572d8c37eb47e"
+    },
+    {
+      "bytes": 1033748,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s001-001.wav",
+      "sha256": "bf3c2693ecbecd45eefb8a4cb79f9373add159c8f3218eae4a8911f292ead501"
+    },
+    {
+      "bytes": 264202,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s001-002.wav",
+      "sha256": "b9b1a307dc37bd3184eef833b8afec5b094cd79c19cb2191825d0730daabedf4"
+    },
+    {
+      "bytes": 1803294,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s001-003.wav",
+      "sha256": "d1e9be75d24e662654888a9b1f5e34ac461ad3eb7dc046bd880778eb4bea7fb0"
+    },
+    {
+      "bytes": 930554,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s001-004.wav",
+      "sha256": "3588e8576ac8c1128970127ffa2b716b6ab4dbb813482f44133324ea0840912f"
+    },
+    {
+      "bytes": 310066,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s001-005.wav",
+      "sha256": "006fe86e397a8a61e64353e6a8acc6d3a60bd3bba5c48e255ae8662bccda1c7e"
+    },
+    {
+      "bytes": 160128,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s001-006.wav",
+      "sha256": "52a44d31dff7c6c4e5592be76ac9cfc336a0c1f89c8f1c40a52f08a9c42d4676"
+    },
+    {
+      "bytes": 270376,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s002-001.wav",
+      "sha256": "52364788d017a928ab9f779e1b1d6a21355efac84c7a512fcd018d40793b8135"
+    },
+    {
+      "bytes": 805310,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s002-002.wav",
+      "sha256": "c2a4b3accc7dc93ed6d51e7b1bd35344b32ba67a30ac1803ca0abaa9e4b321d4"
+    },
+    {
+      "bytes": 1238372,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s002-003.wav",
+      "sha256": "d1ccc6e2ce24240447d54eb578daab453895615f302e83900098ada466a0a453"
+    },
+    {
+      "bytes": 466182,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s002-004.wav",
+      "sha256": "dfb414b9f8c98e8c42f9f1c98ba4c3ee8c24a34ec215718bf6ba70851f0ca3da"
+    },
+    {
+      "bytes": 220102,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s003-001.wav",
+      "sha256": "8d3f3737200dc8e427334c18e5151680379d230a1d73f60864e6e6449f3b040d"
+    },
+    {
+      "bytes": 718434,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s003-002.wav",
+      "sha256": "3be261771d60cbedad953a442f2cc16a4907d59c92796a8db67c95779d3bfb1a"
+    },
+    {
+      "bytes": 1231316,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s003-003.wav",
+      "sha256": "aaed8ea21c83748ca3702228931977ea630897bf4d62889d7c85cd682431bb30"
+    },
+    {
+      "bytes": 645226,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s003-004.wav",
+      "sha256": "96375324601bc6998481cf92c689d87e09a1b77154d62ae157f31ddcf65f2fac"
+    },
+    {
+      "bytes": 179532,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s003-005.wav",
+      "sha256": "6dfa3a3abf99a0f40279e60123a79b677e3b644620c3cbe75c9e238746b2d6a3"
+    },
+    {
+      "bytes": 124406,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s003-006.wav",
+      "sha256": "420b0225b788f3b05feed19ba7e4d47e67acc460e5cb786c49406b2ddd9f468d"
+    },
+    {
+      "bytes": 198494,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s004-001.wav",
+      "sha256": "a30ae2f6842960319012e1bfc6b1d0c65df71674aeca03a2090cda410f79aa01"
+    },
+    {
+      "bytes": 190114,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s004-002.wav",
+      "sha256": "93532f909fc4b2a1c4549199f7b874ebb710290aca651b432d4a495c6b1165c2"
+    },
+    {
+      "bytes": 296838,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s004-003.wav",
+      "sha256": "85be1495165601a6c8af7ad2770ba618a9b37784b009eae18cab63bab872a02b"
+    },
+    {
+      "bytes": 1161196,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s004-004.wav",
+      "sha256": "3ff3f6a3f37dc92515a7ed17acd0f87812a15f70019c2d3f0250b2c2e0c59bab"
+    },
+    {
+      "bytes": 1095488,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s004-005.wav",
+      "sha256": "630de9accd1347bab30e9c3627848ae1906b48cbe889189aa89f30ec43da8343"
+    },
+    {
+      "bytes": 452070,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s004-006.wav",
+      "sha256": "85c0ef30e29dd7b3d62749c0ede9f1e929044bf4baf268b2c424f83f560da921"
+    },
+    {
+      "bytes": 822950,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s005-001.wav",
+      "sha256": "8e5803289d52ada6dd18c129b9935dd4aa5e30ea6e604a8ee8ec2eb5d357d79e"
+    },
+    {
+      "bytes": 633320,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s005-002.wav",
+      "sha256": "0fb440688cba54d8847e9e65e84e0908f4e874e6c6ad77c2cd50734ee763c1e8"
+    },
+    {
+      "bytes": 968038,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s005-003.wav",
+      "sha256": "66f449d13270dbcd48cb03cf0331826d2907a658dddb497229b8280f63959590"
+    },
+    {
+      "bytes": 1638800,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s005-004.wav",
+      "sha256": "2c7adb0429783ba9f951917d524169a64c6c8c218a6320df95fcba617f9c5135"
+    },
+    {
+      "bytes": 912474,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s005-005.wav",
+      "sha256": "89ba360a2d1be3bea33e69e5e9588a4f2a5aa065fcc5315060a2b78192eb8c2f"
+    },
+    {
+      "bytes": 807956,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s005-006.wav",
+      "sha256": "1fba4ae1ab48a6c42c18be36caa00e732fafb8710c18f07b067693c9133b341b"
+    },
+    {
+      "bytes": 995380,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s005-007.wav",
+      "sha256": "18ca9d174b39591a4db237a95c47366305af0fe72338778bf67f67b09e3b45ed"
+    },
+    {
+      "bytes": 520866,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s005-008.wav",
+      "sha256": "fb0a7e8fe27c874c2fe93ecb233d0202b39add1ae745b0351b9477b6a48cc7db"
+    },
+    {
+      "bytes": 916442,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s005-009.wav",
+      "sha256": "9465bed03c828322a11b6d99e042ff1b7f0319abdfc726a9b250d32bc5ecac22"
+    },
+    {
+      "bytes": 752390,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s005-010.wav",
+      "sha256": "7f435dd9a14ab4ce3a0d42880dc28369610fc70788a700f5ad8f7084535a4e93"
+    },
+    {
+      "bytes": 225394,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s006-001.wav",
+      "sha256": "c6e5c705a77d496e663b8ac704ef57b2011b778cee4e5ae21b16398bd3deeda5"
+    },
+    {
+      "bytes": 1368908,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s006-002.wav",
+      "sha256": "f0e25a6b2b41fa1ec85783a10b6ba4654e254e55b1cd677b10d9bea6d5e0df26"
+    },
+    {
+      "bytes": 448100,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s006-003.wav",
+      "sha256": "8af65644952ef082d4a57e8a3fe70a3927a7d43b8cf6ec7867ff0b7090ed5ec4"
+    },
+    {
+      "bytes": 1817406,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s006-004.wav",
+      "sha256": "9bc068457bcd9534b02155044d74affe3b52a587d1b3fae08a7b18d9466fbbf2"
+    },
+    {
+      "bytes": 377980,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s007-001.wav",
+      "sha256": "9dbb4eca9407d4ef3aefb2be73d3459216a6ae4cead97cdbb731b753f1916e0a"
+    },
+    {
+      "bytes": 842796,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s007-002.wav",
+      "sha256": "46ded65cb194d020f6d20304eb7432fe3016340968e4159749bf81b8dae61353"
+    },
+    {
+      "bytes": 324620,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s007-003.wav",
+      "sha256": "2db3b03651846a53571703930beb4d4a078f464b3c4b070bc676df35118f7ee0"
+    },
+    {
+      "bytes": 1110922,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s007-004.wav",
+      "sha256": "0991dc89ef80b6b796866612429994381c267cfcca0d8c8fb5e3cae9941b309c"
+    },
+    {
+      "bytes": 782820,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s007-005.wav",
+      "sha256": "328884f18f682cf38017e32ff36af90b05e86a7b135f92dad80d321ca698a4e2"
+    },
+    {
+      "bytes": 1044332,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s007-006.wav",
+      "sha256": "a3cc6e6bfbe4872583f2cb61a1f6f48c9b5033ceec131c848cbd484d0f9c5fef"
+    },
+    {
+      "bytes": 1701422,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s007-007.wav",
+      "sha256": "9ef41650c9b54d34690e548bb5f664dbab0399454115dca3fbb9899f2aec0636"
+    },
+    {
+      "bytes": 1363174,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s007-008.wav",
+      "sha256": "014325fb715cc9914b695b3b133e80e64d8f23b8a434de48c042ebd7907e63bb"
+    },
+    {
+      "bytes": 884250,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s007-009.wav",
+      "sha256": "ec450cd07811424b60e319228d112c448352c8f3e266f42a1aaeaddbf72adb88"
+    },
+    {
+      "bytes": 260674,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-001.wav",
+      "sha256": "877ccb6bde5f79896427de92c771d1d4f2ca0d2ff13eadd4bb3581cd02ae64a3"
+    },
+    {
+      "bytes": 218780,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-002.wav",
+      "sha256": "3e930f44cbd036615cbbe01a65df16d1145c98288ea62e4751a90389d4ab78c9"
+    },
+    {
+      "bytes": 1051388,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-003.wav",
+      "sha256": "71272f5d29fdaa7562a8ebf456bd79b286bf20fd6e309b5ffacfd6fd537cb524"
+    },
+    {
+      "bytes": 303452,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-004.wav",
+      "sha256": "708b282d02d399aaefb9019b71bda780bbdb4e3f3097ca95d8c6576196102380"
+    },
+    {
+      "bytes": 1454462,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-005.wav",
+      "sha256": "c6722e5999d316b6ddcc33fa3f9dd5c90b8291428f5b212b34e61d88e5b460cd"
+    },
+    {
+      "bytes": 1186334,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-006.wav",
+      "sha256": "eefcf16fcbfbca38769610d1456f3300bc43905a48d554803a6d744d57058fb3"
+    },
+    {
+      "bytes": 502344,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-007.wav",
+      "sha256": "da9d82a3afa820e32377b6607ab0bde3b3cd20eb687d7c57b3da9aa39f795a98"
+    },
+    {
+      "bytes": 675214,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-008.wav",
+      "sha256": "697faa896c658ae378ac0ddfbbd20525169b85c45ec1510ada5a5ef7ea087dfc"
+    },
+    {
+      "bytes": 1097252,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-009.wav",
+      "sha256": "3ca639a136316f320f1aed487c003a09b3ded2469ad8691f12f638f29d45bc2b"
+    },
+    {
+      "bytes": 1175310,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-010.wav",
+      "sha256": "bc0d34b3cba02f68b94bc9f97ad3da14fbef2ad8ce32b58ede1a90f83acdf623"
+    },
+    {
+      "bytes": 69722,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s008-011.wav",
+      "sha256": "28b548bc09af2477f598d760e0778ccc1dc251a3525d6be4f0edf9bfb1c55c62"
+    },
+    {
+      "bytes": 1147526,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s009-001.wav",
+      "sha256": "ff94d20d94078f1f22673cb53ab93f8427425d5b4e967c70ffcb3b0bd96b4dc7"
+    },
+    {
+      "bytes": 407086,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s009-002.wav",
+      "sha256": "fafbeb14310f2791bb5c6ed3888d6c47b482c4f45945132f3b8b0043a6e47729"
+    },
+    {
+      "bytes": 383714,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s009-003.wav",
+      "sha256": "931b2154494c2c58e9aa8dcb85252fb2a046829a4030cd9f6e4226a622d1ca6d"
+    },
+    {
+      "bytes": 591426,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s009-004.wav",
+      "sha256": "b9a3183388da8822e85ee402397b9d5d62b585e83ca33bf1d3e3ac3b37e7e54b"
+    },
+    {
+      "bytes": 1461076,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s009-005.wav",
+      "sha256": "db120151fc53ee9c466002f238167998ecb2053779dbef3563929fedd6cbc9d6"
+    },
+    {
+      "bytes": 567612,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s009-006.wav",
+      "sha256": "d01beb655f5f35ff3305c3eb0a91a65a851df7e7d271989ff83f120898ca8af7"
+    },
+    {
+      "bytes": 859994,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s010-001.wav",
+      "sha256": "d634790e36b1e0481c90df0ce36dc101495e94804d9845a205171d7874ce9c84"
+    },
+    {
+      "bytes": 929230,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s010-002.wav",
+      "sha256": "2bd6ce2706af78e2a68da35ae4d56e551b3af15d488c02874ff071e5421a29b4"
+    },
+    {
+      "bytes": 1003760,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s010-003.wav",
+      "sha256": "c411a80901c18f6a3e08f603207e3c6c57c775076e125f94c6bb1c4a0e9e592a"
+    },
+    {
+      "bytes": 778410,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s010-004.wav",
+      "sha256": "29bfc0ccb716ffa39ebe85ad6e7e4b9db71cd87c652ec53b738f3ffa3ef8f9f9"
+    },
+    {
+      "bytes": 1408156,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s010-005.wav",
+      "sha256": "ce9387400faa42d42ef87a13df415964345693953deb276b104995478688fa27"
+    },
+    {
+      "bytes": 1245870,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s010-006.wav",
+      "sha256": "c0bb2ae7a15fd344679749337321a692e9264ce27fe5969c0649db5498c715fe"
+    },
+    {
+      "bytes": 880280,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s010-007.wav",
+      "sha256": "ee0d4e576f25daab200146fe56a291ba52966e2dd46e7b574174ea154177c924"
+    },
+    {
+      "bytes": 1372876,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s011-001.wav",
+      "sha256": "294dcdeacc69bccd18a9a277169f6df8da2e10fb6585d9211517af6678127a87"
+    },
+    {
+      "bytes": 793404,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s011-002.wav",
+      "sha256": "68db47f57716de13709705ecb6a101dc3e231c79246b359fcd275825be4f83c7"
+    },
+    {
+      "bytes": 120878,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s011-003.wav",
+      "sha256": "b6396c5f803a6e52f2dafcf82481f70e7b26ff4f64565855189bea156ec9b87d"
+    },
+    {
+      "bytes": 366514,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s011-004.wav",
+      "sha256": "9f5961b07852cbf305711c89439c53912f970b35cc51b8320ac917f7bdbb29fd"
+    },
+    {
+      "bytes": 472356,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s011-005.wav",
+      "sha256": "010af7441b7f2ff8b8f546b6b386a17e84be114dbf9150d45186d805050432ee"
+    },
+    {
+      "bytes": 522628,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s012-001.wav",
+      "sha256": "8b4c13ad4735f356a0a8cc0c149d05c5d3139b034813e51cb617d614b4e47c9b"
+    },
+    {
+      "bytes": 714464,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s012-002.wav",
+      "sha256": "c57661f627d84610afa7f42c9cf005a50f9d357eab6a43977f6814fc182bb4da"
+    },
+    {
+      "bytes": 1044332,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s012-003.wav",
+      "sha256": "9d48031fc9f82ff5a702578f41370937ab8009fd7285d2f9e7bdaad5d7676084"
+    },
+    {
+      "bytes": 714906,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s012-004.wav",
+      "sha256": "4f12208e78111cb6dbe25aa45155d2d065b43946f5eb05d2499efeeea07871a5"
+    },
+    {
+      "bytes": 600686,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s012-005.wav",
+      "sha256": "c88b464e5426e5ef9a13c83cf023141f8eda5ebae292a99484e04f52b2e62642"
+    },
+    {
+      "bytes": 1038158,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s012-006.wav",
+      "sha256": "6e4ea1031346284713b12b9d95dba531b915f76fbca77b2bf5ac639985287950"
+    },
+    {
+      "bytes": 392092,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s012-007.wav",
+      "sha256": "e1fd296bb70b5af0042f9ece9eea93a52b18e7b87aad0a5f832d6e6ad79abfb7"
+    },
+    {
+      "bytes": 131022,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s012-008.wav",
+      "sha256": "0158ceea27fe9e5d7ab82921f245c601f1bed71e8a78b297b5adae90fbbe2a77"
+    },
+    {
+      "bytes": 557468,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s013-001.wav",
+      "sha256": "8430d9bf8eb9eba2f331deacc526cd2d01d5026893ad4e8ba34a6ba213ae7e9c"
+    },
+    {
+      "bytes": 1190744,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s013-002.wav",
+      "sha256": "d4d3b9a01462f2b2996558f895a5fb9966bdc5d4c1498d5f112cf7d6bca98f83"
+    },
+    {
+      "bytes": 1215880,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s013-003.wav",
+      "sha256": "391a1b3236440064c6643a79f04e3f69e08d00a7c0dc307aeed2d54c8f005694"
+    },
+    {
+      "bytes": 317124,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s013-004.wav",
+      "sha256": "280a4237c73bbe8a497798fb1600cd998cd8ad8b08ba5764b3451c7733701539"
+    },
+    {
+      "bytes": 1199564,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s013-005.wav",
+      "sha256": "8992b495c93d030f10f58f1e59bc3b4fac3dfefc4408615769fff3f240d5bcdc"
+    },
+    {
+      "bytes": 565846,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s014-001.wav",
+      "sha256": "fa3e10bf2209349d8d83cbed9d8ee36fd910366a5cdfe2e3f273bb1807a8a0ba"
+    },
+    {
+      "bytes": 413262,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s014-002.wav",
+      "sha256": "f6437f1ebcdf86a634018d27a015e30b9cdd42da4962eddde67977ce76e3009e"
+    },
+    {
+      "bytes": 893068,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s014-003.wav",
+      "sha256": "d7df7726808d15adc531f0b613abad5c715438839e19819c1f53484509eb9723"
+    },
+    {
+      "bytes": 1196918,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s014-004.wav",
+      "sha256": "e91e6d11158908cfafe8bc93238da964ef476d1830241e62a20617bf0a8f7e08"
+    },
+    {
+      "bytes": 491318,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s014-005.wav",
+      "sha256": "85a0578e391c178972cbe6299b8a7a76c3184ba55d94e2a235dd1d9520de468e"
+    },
+    {
+      "bytes": 614798,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s014-006.wav",
+      "sha256": "0774a83b39c80111485d3c0cb36ad11dac83d0895b22827fc475be17a74f102a"
+    },
+    {
+      "bytes": 905858,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s014-007.wav",
+      "sha256": "4f26a58d5ff12c8fc8d4e444d60f6ebe71f13e718c456a2c81143f22c4f20fe8"
+    },
+    {
+      "bytes": 1255572,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s014-008.wav",
+      "sha256": "ac39640e87740ffc89a6ac8130040da4ab905e418981043539da0f1d8520a41f"
+    },
+    {
+      "bytes": 262880,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s015-001.wav",
+      "sha256": "86e5b080e32258d1f7320e14dbf9e01237fc4740800352e3cc8fc909360e8256"
+    },
+    {
+      "bytes": 632878,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s015-002.wav",
+      "sha256": "704464b1b5b2435df7a8de556d44ee63508458972c3d6618813c5f208e9ab0cf"
+    },
+    {
+      "bytes": 142488,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s015-003.wav",
+      "sha256": "9e9bd547023970ef371f0dea274823411d59772b18ab0e9f88f3e37989c4c85d"
+    },
+    {
+      "bytes": 508516,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s015-004.wav",
+      "sha256": "719c9dc9dfdd0d5f5a5f9531ec3d9f2ea8341817e7a95fbcda78c449179341fc"
+    },
+    {
+      "bytes": 204228,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s015-005.wav",
+      "sha256": "d5b08be00817727061b09e72b6fddca2104534e997a90b823b33dae65647574d"
+    },
+    {
+      "bytes": 755918,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s015-006.wav",
+      "sha256": "c49623c15ca2b852b6663f3d49f53df46366e411bfa4ba602aed3bcda701bb9f"
+    },
+    {
+      "bytes": 1414330,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s015-007.wav",
+      "sha256": "ebbf6f3d8b7241cafc3f16cf6f0d4377893363337fd9c676b3a06e661fc1d569"
+    },
+    {
+      "bytes": 1032426,
+      "kind": "narration",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "model": "eleven_v3"
+      },
+      "path": "narration/narration-elevenlabs-db5b38b5/f01s015-008.wav",
+      "sha256": "e2542b9702eec24e356d113fb13276bf6f437bad760a6a7ffe7a4dc9e61f25c3"
+    },
+    {
+      "bytes": 834697,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s001",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s001.mp3",
+      "sha256": "85c9aba3d49a370eec2057bed7ad6b6fdd390f437197da0dd9a895beaf0cffa5"
+    },
+    {
+      "bytes": 562,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s001",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s001.txt",
+      "sha256": "8596a6dd9814bbf5feaf40bdd85ab2f377a211da511c79f864b24282ff0060ff"
+    },
+    {
+      "bytes": 522481,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s002",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s002.mp3",
+      "sha256": "faec5e1ff2d4ff902a0b375dd5972096a3a6da47ad9eba4218b6a516582e0da8"
+    },
+    {
+      "bytes": 355,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s002",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s002.txt",
+      "sha256": "e35b813501af6a81e6ce8cd4674c817053f99323f8a0ce1cbd90f7b76e8350ec"
+    },
+    {
+      "bytes": 583921,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s003",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s003.mp3",
+      "sha256": "fe8af4be21a6e9b0da783c581a00366cc575dc95e42863d088f129f0a5419b7e"
+    },
+    {
+      "bytes": 388,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s003",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s003.txt",
+      "sha256": "9c5a8459f2f9b5d0d2603a1ba7c611f8739a6628aca99a5621d3dce2a572d89e"
+    },
+    {
+      "bytes": 634076,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s004",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s004.mp3",
+      "sha256": "9b27a5920c7713611cd380838333815f36d968201eacec6ef8ed5858af38294b"
+    },
+    {
+      "bytes": 415,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s004",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s004.txt",
+      "sha256": "871d89955ef5d424b76134ddd2a62a128c0454e6e203e60f34c9c0159b205417"
+    },
+    {
+      "bytes": 1645120,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s005",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s005.mp3",
+      "sha256": "80131a0f4dd07ff22b47b186ee762ddc9677cb7f09294d89f91d5c02064d4381"
+    },
+    {
+      "bytes": 1039,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s005",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s005.txt",
+      "sha256": "c5aeb7198a422b463368c14931128042d6155159c53beef0c9aa62de360e5c97"
+    },
+    {
+      "bytes": 718504,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s006",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s006.mp3",
+      "sha256": "ecb9487eaabaf844bcfae7acacf9319a6ee54a5a2a529ae6506015c84c993466"
+    },
+    {
+      "bytes": 486,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s006",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s006.txt",
+      "sha256": "8c70163bf062cdd05bfa8cc0ee5a881751d1a59ff1ea7ab748d550765f8fe4d9"
+    },
+    {
+      "bytes": 1547735,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s007",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s007.mp3",
+      "sha256": "022fba5e08c8fbe8167f2ebb2407a16555a4e3c70a5a09c4d2163d952075fe48"
+    },
+    {
+      "bytes": 984,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s007",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s007.txt",
+      "sha256": "fc0ed31a9f4c8780236820a7882fce4b981d67feb363e65dd4651b5182134d45"
+    },
+    {
+      "bytes": 1468323,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s008",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s008.mp3",
+      "sha256": "24f1386229ae848a8e14ebb1a2b143a1a357011a226d0bb8edd6a3b94d94c8f3"
+    },
+    {
+      "bytes": 976,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s008",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s008.txt",
+      "sha256": "eef8dfd104630b8fbc33c4556e68f098e64c992b3782ae25d20eb2d5365afc2f"
+    },
+    {
+      "bytes": 845146,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s009",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s009.mp3",
+      "sha256": "7cfcf844bcf957269af7dbd93f342c49e3ce180b98caf819db86581adf08d5fb"
+    },
+    {
+      "bytes": 534,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s009",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s009.txt",
+      "sha256": "db1102812b4fdd6170113daa84a8178529064970e6bb38bd7d1b20267ab8dc7c"
+    },
+    {
+      "bytes": 1306991,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s010",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s010.mp3",
+      "sha256": "9eeb4785ee7e95aa25c5048d5ff1a06de0881a6dd48179bdbea49fdc85458220"
+    },
+    {
+      "bytes": 894,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s010",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s010.txt",
+      "sha256": "c002470d49cc334bc61499d5084c85547c3b9dea35a27e58ba0fa06f7c8bc2aa"
+    },
+    {
+      "bytes": 585175,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s011",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s011.mp3",
+      "sha256": "5227d75d9eef5236cda2966b26e0545d929b844791149820a1bbf92546f9ec61"
+    },
+    {
+      "bytes": 433,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s011",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s011.txt",
+      "sha256": "ef4218c1298561ec07263148d692951a45e528807ec2a4abb1ab131be6d4c6ff"
+    },
+    {
+      "bytes": 953815,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s012",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s012.mp3",
+      "sha256": "51c33f3748a08d976c9f038c5e28dcec0d182142e869308e33ed0735bb5b54e0"
+    },
+    {
+      "bytes": 641,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s012",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s012.txt",
+      "sha256": "ce43db7ee86f972d435e1a6a15abcd730f169ad87738db762ef88e392920e439"
+    },
+    {
+      "bytes": 830935,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s013",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s013.mp3",
+      "sha256": "d2956816d499966f015385c6820fd492b0d2e3f60c890f44b9d6841c011238fb"
+    },
+    {
+      "bytes": 534,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s013",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s013.txt",
+      "sha256": "076eab133ee8590a8ea13f2843dd00bb2d1ef1425995698a2f4eeb26c16ac583"
+    },
+    {
+      "bytes": 1167810,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s014",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s014.mp3",
+      "sha256": "124fb01b5104116c1c177f5eff1c1aae96414aa7477df49e70f4c6d31aea1772"
+    },
+    {
+      "bytes": 748,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s014",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s014.txt",
+      "sha256": "b73458363e999f6b69ee5d692d4b70d15e2dd66a04c2ef3eea3fcf00552c2a1e"
+    },
+    {
+      "bytes": 916617,
+      "kind": "take_audio",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s015",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/takes/f01s015.mp3",
+      "sha256": "4d5550ee67d1de11e03c4ea0ceae91e4e136482cd3c8b8067eb1aaa1f2cb835a"
+    },
+    {
+      "bytes": 709,
+      "kind": "take_script",
+      "meta": {
+        "engine": "elevenlabs",
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "job_kind": "narration",
+        "key": "f01s015",
+        "model": "eleven_v3"
+      },
+      "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s015.txt",
+      "sha256": "a30fa77897c45a0d580d784b069b407ea3252b472381821f171c0eaadc81127a"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -1505,6 +3146,163 @@
       },
       "result": "exchange_collected",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-24T15:22:46.764267+00:00",
+      "detail": {
+        "job_id": "narration-55c7f7cc",
+        "reason": "superseded before any run: narration moved to ElevenLabs (owner, 24 Nov 2026)",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T15:22:46.766934+00:00",
+      "detail": {
+        "job_id": "narration-55c7f7cc",
+        "reason": "superseded before any run: narration moved to ElevenLabs (owner, 24 Nov 2026)"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T15:23:07.905222+00:00",
+      "detail": {
+        "credits": 9550.0,
+        "engine": "elevenlabs",
+        "estimated_boundaries": [],
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "kind": "narration",
+        "model": "eleven_v3",
+        "target": "film-01",
+        "voice": "Sakshi \u2013 Warm Bedtime Storyteller",
+        "voice_id": "XdbTvfQSkW1sgZYKdZdF",
+        "voice_style": {
+          "continuous": true
+        }
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-24T15:23:08.387484+00:00",
+      "detail": {
+        "actual_units": 0,
+        "credits": 9550.0,
+        "engine": "elevenlabs",
+        "estimated_boundaries": [],
+        "files": [
+          "narration/narration-elevenlabs-db5b38b5/f01s001-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s001-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s001-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s001-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s001-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s001-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s002-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s002-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s002-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s002-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s003-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s003-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s003-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s003-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s003-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s003-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s004-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s004-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s004-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s004-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s004-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s004-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s005-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s005-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s005-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s005-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s005-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s005-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s005-007.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s005-008.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s005-009.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s005-010.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s006-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s006-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s006-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s006-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s007-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s007-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s007-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s007-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s007-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s007-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s007-007.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s007-008.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s007-009.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-007.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-008.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-009.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-010.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s008-011.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s009-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s009-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s009-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s009-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s009-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s009-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s010-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s010-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s010-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s010-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s010-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s010-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s010-007.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s011-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s011-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s011-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s011-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s011-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s012-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s012-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s012-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s012-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s012-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s012-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s012-007.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s012-008.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s013-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s013-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s013-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s013-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s013-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s014-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s014-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s014-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s014-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s014-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s014-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s014-007.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s014-008.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s015-001.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s015-002.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s015-003.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s015-004.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s015-005.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s015-006.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s015-007.wav",
+          "narration/narration-elevenlabs-db5b38b5/f01s015-008.wav"
+        ],
+        "job_id": "narration-elevenlabs-db5b38b5",
+        "kind": "narration",
+        "manifest_sha256": "21ae68028583892d9e2d3b8844b113b8b502798960d33778b8c572d8c37eb47e"
+      },
+      "result": "accepted",
+      "stage": "import"
     }
   ],
   "ledger": "../allowance-ledger.json",

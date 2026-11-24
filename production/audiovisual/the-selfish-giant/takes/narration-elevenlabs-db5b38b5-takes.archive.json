@@ -1,0 +1,25 @@
+{
+  "bucket": "reo-earnalism-maison-private",
+  "files": {
+    "f01s001.mp3": "85c9aba3d49a370eec2057bed7ad6b6fdd390f437197da0dd9a895beaf0cffa5",
+    "f01s002.mp3": "faec5e1ff2d4ff902a0b375dd5972096a3a6da47ad9eba4218b6a516582e0da8",
+    "f01s003.mp3": "fe8af4be21a6e9b0da783c581a00366cc575dc95e42863d088f129f0a5419b7e",
+    "f01s004.mp3": "9b27a5920c7713611cd380838333815f36d968201eacec6ef8ed5858af38294b",
+    "f01s005.mp3": "80131a0f4dd07ff22b47b186ee762ddc9677cb7f09294d89f91d5c02064d4381",
+    "f01s006.mp3": "ecb9487eaabaf844bcfae7acacf9319a6ee54a5a2a529ae6506015c84c993466",
+    "f01s007.mp3": "022fba5e08c8fbe8167f2ebb2407a16555a4e3c70a5a09c4d2163d952075fe48",
+    "f01s008.mp3": "24f1386229ae848a8e14ebb1a2b143a1a357011a226d0bb8edd6a3b94d94c8f3",
+    "f01s009.mp3": "7cfcf844bcf957269af7dbd93f342c49e3ce180b98caf819db86581adf08d5fb",
+    "f01s010.mp3": "9eeb4785ee7e95aa25c5048d5ff1a06de0881a6dd48179bdbea49fdc85458220",
+    "f01s011.mp3": "5227d75d9eef5236cda2966b26e0545d929b844791149820a1bbf92546f9ec61",
+    "f01s012.mp3": "51c33f3748a08d976c9f038c5e28dcec0d182142e869308e33ed0735bb5b54e0",
+    "f01s013.mp3": "d2956816d499966f015385c6820fd492b0d2e3f60c890f44b9d6841c011238fb",
+    "f01s014.mp3": "124fb01b5104116c1c177f5eff1c1aae96414aa7477df49e70f4c6d31aea1772",
+    "f01s015.mp3": "4d5550ee67d1de11e03c4ea0ceae91e4e136482cd3c8b8067eb1aaa1f2cb835a"
+  },
+  "job_id": "narration-elevenlabs-db5b38b5",
+  "key": "exports/audiovisual-archive/the-selfish-giant/narration-elevenlabs-db5b38b5-takes.tar",
+  "schema": "earnalism.audiovisual-archive.v1",
+  "tar_bytes": 14581760,
+  "tar_sha256": "2e055e7de13a2484a93bddbf1a4926ca994ceb9678126191662a496d65eeef26"
+}
