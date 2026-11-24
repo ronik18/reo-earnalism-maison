@@ -13,6 +13,10 @@ FADE_S = 0.8
 END_CARD_S = 3.0
 TP_MAX = -1.0      # dBTP gate the encoded film must meet (eav.cli TP_MAX)
 TP_MARGIN = 0.2
+LIMITER_START_MARGIN = 0.5   # first limiter ceiling: TP_MAX - this (dB)
+LIMITER_RATE = 192000        # oversampled limiting so inter-sample peaks are caught
+LIMITER_ATTACK_MS = 1
+LIMITER_RELEASE_MS = 50
 ZOOM_END = 0.06  # 1.00 -> 1.06
 LOGO_WIDTH_FRAC = 0.19   # ~365 px at 1920: earnalism-video landscape lockup (x1510/y48)
 LOGO_MARGIN_FRAC = 0.025
@@ -218,8 +222,9 @@ def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
     graph.append("[main]format=yuv420p[mainf]")
     graph.append("[mainf][end]concat=n=2:v=1:a=0[v]")
     full = total + end_s
-    gain_db = _body_gain_for_true_peak(mixed_audio, end_card if end_audio else None, total, end_s)
-    graph += _audio_graph(base + 2, base + 1 if end_audio else None, total, end_s, gain_db)
+    lim = _body_ceiling_for_true_peak(mixed_audio, end_card if end_audio else None, total, end_s)
+    graph += _audio_graph(base + 2, base + 1 if end_audio else None, total, end_s,
+                          lim["ceiling_db"], lim["gain_db"])
     with tempfile.TemporaryDirectory() as td:
         script = Path(td) / "graph.txt"
         script.write_text(";".join(graph))
@@ -229,7 +234,8 @@ def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
                  "-movflags", "+faststart", str(out)])
     shutil.rmtree(glow_png.parent, ignore_errors=True)
     return {"duration": full, "narration_end": narr_end, "scenes": len(scenes),
-            "clips": n, "size": list(size), "path": str(out), "body_gain_db": gain_db}
+            "clips": n, "size": list(size), "path": str(out), "body_ceiling_db": lim["ceiling_db"],
+            "body_gain_db": lim["gain_db"], "body_gain_fallback": lim["fallback"]}
 
 
 def _logo_glow(lw: int, lh: int):
@@ -248,34 +254,51 @@ def _logo_glow(lw: int, lh: int):
     return Image.fromarray(rgba, "RGBA")
 
 
-def _audio_graph(mixed_idx, end_idx, total, end_s, gain_db):
-    """The film's audio: the mixed body (with `gain_db`), then the END's own sound or silence."""
-    gain = f",volume={gain_db:.2f}dB" if gain_db else ""
+def _audio_graph(mixed_idx, end_idx, total, end_s, ceiling_db=None, gain_db=0.0):
+    """The film's audio: the mixed body, then the END's own sound or silence. The body goes through
+    an oversampled true-peak limiter at `ceiling_db` (transient peaks only; integrated loudness is
+    kept), and a broadband `gain_db` only as the last-resort fallback. The END is never touched."""
+    chain = f"aresample={RATE},aformat=channel_layouts=stereo"
+    if ceiling_db is not None:
+        lin = 10 ** (ceiling_db / 20)
+        chain += (f",aresample={LIMITER_RATE},alimiter=limit={lin:.5f}:attack={LIMITER_ATTACK_MS}"
+                  f":release={LIMITER_RELEASE_MS}:level=disabled,aresample={RATE}")
+    if gain_db:
+        chain += f",volume={gain_db:.2f}dB"
     if end_idx is None:
-        return [f"[{mixed_idx}:a]aresample={RATE},aformat=channel_layouts=stereo{gain},"
-                f"atrim=0:{total:.3f},apad=whole_dur={total + end_s:.3f}[a]"]
-    return [f"[{mixed_idx}:a]aresample={RATE},aformat=channel_layouts=stereo{gain},"
-            f"atrim=0:{total:.3f},apad=whole_dur={total:.3f}[am]",
+        return [f"[{mixed_idx}:a]{chain},atrim=0:{total:.3f},apad=whole_dur={total + end_s:.3f}[a]"]
+    return [f"[{mixed_idx}:a]{chain},atrim=0:{total:.3f},apad=whole_dur={total:.3f}[am]",
             f"[{end_idx}:a]aresample={RATE},aformat=channel_layouts=stereo,"
             f"atrim=0:{end_s:.3f},apad=whole_dur={end_s:.3f}[ae]",
             "[am][ae]concat=n=2:v=0:a=1[a]"]
 
 
-def _body_gain_for_true_peak(mixed_audio, end_video, total, end_s, tries=4) -> float:
-    """AAC encoding raises inter-sample peaks (বিচারক film-01: -1.5 dBTP mix, -0.9 encoded).
-    Encode the audio alone, measure it, and lower the body until the encoded track meets
-    TP_MAX; the END's own sound is never changed. Returns the body gain in dB (0 or less)."""
+def _body_ceiling_for_true_peak(mixed_audio, end_video, total, end_s, tries=4) -> dict:
+    """AAC encoding raises inter-sample peaks (বিচারক film-01: -1.5 dBTP mix, -0.9 encoded), and
+    peaky narration used to force a broadband gain cut that dropped the film below the loudness
+    target. Encode the audio alone, measure it, and lower the body's limiter ceiling (not its
+    gain) until the encoded track meets TP_MAX; the END's own sound is never changed. Only if the
+    limiter cannot get there is a gain cut applied. Returns {"ceiling_db", "gain_db", "fallback"}."""
     from .mix import measure
-    gain = 0.0
+    ceiling, gain = TP_MAX - LIMITER_START_MARGIN, 0.0
     with tempfile.TemporaryDirectory() as td:
         trial = Path(td) / "audio.m4a"
         inputs = ["-i", str(mixed_audio)] + (["-i", str(end_video)] if end_video else [])
-        for _ in range(tries):
-            graph = _audio_graph(0, 1 if end_video else None, total, end_s, gain)
+
+        def encoded_tp():
+            graph = _audio_graph(0, 1 if end_video else None, total, end_s, ceiling, gain)
             _ffmpeg([*inputs, "-filter_complex", ";".join(graph), "-map", "[a]",
                      "-c:a", "aac", "-b:a", "192k", str(trial)])
-            tp = measure(trial)["true_peak"]
+            return measure(trial)["true_peak"]
+
+        for _ in range(tries):
+            tp = encoded_tp()
             if tp <= TP_MAX:
-                return gain
+                return {"ceiling_db": round(ceiling, 2), "gain_db": gain, "fallback": False}
+            ceiling -= tp - TP_MAX + TP_MARGIN
+        for _ in range(tries):  # the limiter alone cannot reach TP_MAX: cut the gain, and say so
+            tp = encoded_tp()
+            if tp <= TP_MAX:
+                return {"ceiling_db": round(ceiling, 2), "gain_db": gain, "fallback": True}
             gain -= tp - TP_MAX + TP_MARGIN
-    raise RuntimeError(f"encoded audio stays above {TP_MAX} dBTP after {tries} attempts")
+    raise RuntimeError(f"encoded audio stays above {TP_MAX} dBTP after {2 * tries} attempts")

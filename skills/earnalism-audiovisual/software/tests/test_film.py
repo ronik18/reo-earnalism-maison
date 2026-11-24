@@ -133,6 +133,26 @@ class FilmTests(unittest.TestCase):
         film.assemble(PLAN, t, stills, hot, logo, logo, out, size=(320, 180))
         self.assertLessEqual(mix.measure(out)["true_peak"], -1.0)
 
+    def test_peaky_mix_keeps_loudness_with_a_true_peak_limiter_not_a_gain_cut(self):
+        """A quiet bed with a few full-scale clicks (peaky narration) used to force a broadband
+        gain cut that cost more than 0.5 LU; the body limiter must trim only the peaks."""
+        t, stills, logo = self._assemble_inputs()
+        dur = t[-1]["end"]
+        peaky = self.d / "peaky.wav"
+        click = "if(lt(mod(t,0.5),0.0005),0.95,0)"
+        m.ff("-f", "lavfi", "-i", f"aevalsrc='0.16*sin(2*PI*220*t)+{click}|0.16*sin(2*PI*220*t)+{click}'"
+             f":s=48000:d={dur}", str(peaky))
+        before = mix.measure(peaky)
+        self.assertGreater(before["true_peak"], film.TP_MAX)
+        out = self.d / "film-peaky.mp4"
+        info = film.assemble(PLAN, t, stills, peaky, logo, logo, out, size=(320, 180))
+        after = mix.measure(out)
+        self.assertLessEqual(after["true_peak"], film.TP_MAX)
+        self.assertAlmostEqual(after["lufs"], before["lufs"], delta=0.5)
+        self.assertEqual(info["body_gain_db"], 0)
+        self.assertFalse(info["body_gain_fallback"])
+        self.assertLess(info["body_ceiling_db"], 0)
+
     def test_logo_lockup_matches_the_approved_landscape_placement(self):
         """earnalism-video EDITORIAL_PRESENTATION: landscape lockup at x1510/y48, about 362 px
         of the 2400x720 lockup on 1920x1080 (the first film used 9 %, 173 px: barely legible)."""

@@ -589,7 +589,7 @@ def next_action(root) -> str:
         return ("Owner reviews the first package (opening, every join, climax, full ending); that review "
                 f"is the listening assessment. Then for Maison audio: {PROG} bundle-audio {r} --out "
                 f"{root / 'maison' / 'bundle'} --score-dir <one score bed per chapter> --score-route "
-                f"vcsl|ace-step:<music job_id>. Maison video stays held (Stream cost not approved). "
+                f"vcsl|ace-step:<music job_id>. For Maison video (full films, private R2): {PROG} bundle-film. "
                 "Social posting only to destinations the owner names (references/publishing.md).")
     return (f"Owner completes (territories, term_per_territory for every territory, text_source_licence, "
             f"cover_provenance) and approves {root / 'maison' / EVIDENCE_DRAFT}, saves it under docs/evidence/, "
@@ -1251,7 +1251,8 @@ def cmd_film(args):
                                                 "stills": stills_info, **info})
     rec.event("film", "assembled", {"target": t, "duration": info["duration"]})
     print(f"Assembled {out / (t + '.mp4')}: {info['duration']:.1f} s, {m['lufs']:.1f} LUFS, "
-          f"TP {m['true_peak']:.1f} dBTP. Maison video stays held (Stream cost not approved).")
+          f"TP {m['true_peak']:.1f} dBTP. "
+          "Maison video: eav bundle-film (full films go to Maison from private R2).")
 
 
 _CANDIDATE = re.compile(r"(?P<key>.+)--c(?P<n>[1-9][0-9]*)$")
