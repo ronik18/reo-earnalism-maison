@@ -4,13 +4,34 @@
  "palette_and_light": "indigo night, lamp amber, faded vermilion, ivory white, old gold; one light family: warm low oil-lamp light against deep blue dusk",
  "lens_and_look": "Earnalism house style (references/visual-style.md): 2D animated feature-film illustration, appended by the job builder",
  "characters": {
-  "kshiroda": "Kshiroda, a beautiful 38-year-old Bengali woman with a graceful, dignified oval face, fine features, smooth skin, softly arched heavy brows and a small dark mole just below the left eye, large dark sorrowful eyes, glossy black hair in a loose low bun, faded maroon cotton sari with a thin black border",
-  "hemshashi": "Hemshashi, a 14-year-old Bengali widow with a gentle, shy, tender oval face, softly arched heavy brows and a small dark mole just below the left eye, slender, large dark eyes, long loose black hair, a plain pure-white widow's sari with no border and no coloured edge, a bare forehead with no bindi, no earrings, no jewellery",
-  "young_mohit": "young Mohit, a 20-year-old Bengali college student of 1880s Calcutta with round gold-rimmed spectacles, a moustache and short beard, hair parted and combed in the Victorian English style, a long dark Victorian frock coat with a high stiff collar over a white shirt",
-  "judge_mohit": "Judge Mohit, a 44-year-old Bengali man with a completely clean-shaven face, no beard, no moustache, no stubble, smooth bare chin, cheeks and upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti",
-  "boy": "a thin three-year-old Bengali boy",
-  "ring": "a small gold ring set with a tiny oil portrait on ivory of a young man with moustache and beard",
-  "judge_hand": "a middle-aged Bengali man's open hand, the cuff of a dark buttoned chapkan sleeve at the wrist"
+  "kshiroda": {
+   "description": "Kshiroda, a beautiful 38-year-old Bengali woman with a graceful, dignified oval face, fine features, smooth skin, softly arched heavy brows and a small dark mole just below the left eye, large dark sorrowful eyes, glossy black hair in a loose low bun, faded maroon cotton sari with a thin black border",
+   "appearance": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border"
+  },
+  "hemshashi": {
+   "description": "Hemshashi, a 14-year-old Bengali widow with a gentle, shy, tender oval face, softly arched heavy brows and a small dark mole just below the left eye, slender, large dark eyes, long loose black hair, a plain pure-white widow's sari, white to the very edge, a bare forehead, bare earlobes, bare wrists and a bare neck",
+   "appearance": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse"
+  },
+  "young_mohit": {
+   "description": "young Mohit, a 20-year-old Bengali college student of 1880s Calcutta with round gold-rimmed spectacles, a moustache and short beard, hair parted and combed in the Victorian English style, a long dark Victorian frock coat with a high stiff collar over a white shirt",
+   "appearance": "young Mohit, a 20-year-old Bengali college student, round gold-rimmed spectacles, black hair parted and combed in the Victorian English style, black moustache and short black beard, 1880s Bengali gentleman's frock coat, long and dark with a high stiff white collar over a white shirt"
+  },
+  "judge_mohit": {
+   "description": "Judge Mohit, a 44-year-old Bengali man with a smooth, fully clean-shaven face: smooth chin, cheeks and clean upper lip; bald crown with a small tuft of hair at the back, dark brown eyes, stern mouth, dark buttoned chapkan coat over a white dhoti",
+   "appearance": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti"
+  },
+  "boy": {
+   "description": "a thin three-year-old Bengali boy",
+   "appearance": "a thin three-year-old Bengali toddler boy with short black hair"
+  },
+  "ring": {
+   "description": "a small gold ring set with a tiny oil portrait on ivory of a young man with moustache and beard",
+   "appearance": "a small round gold finger-ring whose bezel holds a tiny oval painted miniature on ivory of a young man with moustache and beard"
+  },
+  "judge_hand": {
+   "description": "a middle-aged Bengali man's open hand, the cuff of a dark buttoned chapkan sleeve at the wrist",
+   "appearance": "a middle-aged Bengali man's open hand, the cuff of a dark buttoned chapkan sleeve at the wrist"
+  }
  },
  "anchor_stills": [
   "f01s003-1 (Kshiroda)",
@@ -19,17 +40,18 @@
   "f01s005-3 (Judge Mohit)",
   "f01s019-1 (hand and ring)"
  ],
- "negatives": "no text, no letters, no lettering, no signage, no captions, no logos, no watermark, no signature, no extra fingers, no modern objects, no cars, no wristwatches",
  "shared_facial_signature": {
   "women": [
    "kshiroda",
    "hemshashi"
   ],
   "signature": "an oval face, softly arched heavy brows and a small dark mole just below the left eye",
-  "why": "¶ cf5c4424: the judge remembers a tearful face from twenty-four years before and sees that it resembles Kshiroda's ('সে মুখের সহিত ইহার সাদৃশ্য আছে'). A shared signature makes that resemblance visible without stating they are the same person.",
+  "why": "¶ cf5c4424: the judge remembers a tearful face from twenty-four years before and sees that it resembles Kshiroda's ('সে মুখের সহিত ইহার সাদৃশ্য আছে'). A shared signature makes that resemblance visible while leaving their identity for the viewer to infer.",
   "seed_family": "both women draw seeds from one shared family (2100 series); the resemblance composites reuse the two anchor seeds"
  },
- "judge_attire": "dark buttoned chapkan coat over a white dhoti in every scene, the court included; no gown (one consistent period-accurate outfit for a Bengali official of the 1880s)",
- "prompt_order": "subject first, then the style preamble, then the negatives",
- "revision_note": "2026-11-24 owner: house style 2D animated; character lines corrected (see stills-film-01-r8-house.json note)"
+ "judge_attire": "dark buttoned chapkan coat over a white dhoti in every scene, the court included, the same one consistent period-accurate outfit for a Bengali official of the 1880s",
+ "prompt_order": "subject and character appearance lines first, then the period setting and the shot's own light, then the palette; the house style is appended by the job builder; every prompt describes what is present",
+ "revision_note": "2026-11-24 owner: house style 2D animated; character lines corrected (see stills-film-01-r8-house.json note). Round 9: positive-only wording and verbatim per-character appearance lines (see stills-film-01-r9.json note)",
+ "clean_frame": "a clean picture surface with plain unlettered walls and clean corners, five natural fingers per hand, period objects of the 1880s oil-lamp era: bullock carts, horse carriages, palanquins, gas lamps on wooden posts, kerosene and clay oil lamps, brick lanes, bare wrists or period bangles",
+ "light_by_time": "night and dusk shots use warm oil-lamp light against deep blue dusk; day shots state their own light (bright midday daylight with blue sky, warm early morning sunlight, pale grey-gold dawn light, golden afternoon sunlight)"
 }

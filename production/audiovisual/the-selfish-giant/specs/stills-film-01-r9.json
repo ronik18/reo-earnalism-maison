@@ -1,0 +1,485 @@
+{
+ "note": "Round 9 (24 Nov 2026), after the full-size art-direction review (.superpowers/sdd/stills-review-selfish-giant.md): positive-only prompts for FLUX.1-schnell (guidance 0, empty negative prompt), so every prompt describes only what is in frame; the palette uses colour words with a named real light source per shot; every season states its tree state; each character appearance line is copied verbatim from world-bible.json 'appearance'; the Giant's scale against the wall and children is restated per shot; the job builder appends the house style. Candidates: 3 per shot, seeds = round-8 seed + 400, same 1344x768 size. Keys = every REDO and FIX key in the review (60 of 62); f01s004-3 and f01s008-3 are KEEP and stay as they are. Pick boy and old-Giant anchors from these candidates (review section 3).",
+ "items": [
+  {
+   "key": "f01s001-1",
+   "prompt": "Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, running in through the open wooden garden gate after school, satchels swinging, laughing, into a large lovely garden of soft green grass with small star-shaped flowers. The high grey stone garden wall stands twice a grown man's height. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: soft amber afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3601,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s001-2",
+   "prompt": "A large lovely walled garden, wide establishing view: soft green grass dotted with small star-shaped flowers, twelve peach trees with slender branches covered in loose sprays of small five-petalled pale pink peach blossom and fresh small green leaves. The high grey stone garden wall stands twice a grown man's height. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: soft morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3602,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s001-3",
+   "prompt": "Peach trees inside the walled garden heavy with ripe round fuzzy peaches, golden-orange with a rosy blush, long narrow leaves turning yellow, songbirds perched on the branches singing. Autumn: peach trees heavy with ripe golden peaches among yellowing leaves. Light: low amber autumn sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3603,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s001-4",
+   "prompt": "Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, pausing their games on the grass, heads tilted up, listening happily to small songbirds sitting still on the branches of the peach trees above them. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: soft amber afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3604,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s002-1",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, walking home along a long empty dirt country road between green hedgerows, a large rough canvas sack slung over one shoulder, his grey stone castle far in the distance; a farm cart and a haystack beside the road reach only his knee. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: green hedgerows and fields. Light: soft amber dusk sunlight low on the horizon. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3605,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s002-2",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, standing at the edge of his garden in front of his grey stone castle, head bowed, looking straight down in surprise at small children playing on the grass around his boots. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: clear midday sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3606,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s002-3",
+   "prompt": "High overhead view looking steeply down from the Giant's towering height onto Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, playing far below on the green grass among peach trees in pink blossom; the top of the frame shows the long solid grey garden wall, intact and whole. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: soft amber afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3607,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s003-1",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, standing upright at full height beside the high garden wall and its gate, mouth open shouting, one arm pointing to the gate; small Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, running away across the grass toward the gate, each child separate and well apart from the Giant. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: soft amber afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3608,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s003-2",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, lifting a great grey stone in both hands onto a half-built high stone wall around the garden, more stones stacked at his boots, the finished part of the wall already up to his chest. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: bright morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3609,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s004-1",
+   "prompt": "A high grey stone wall around the garden seen from the dusty road outside, the closed wooden gate, and beside it a plain wooden board on a post seen from behind, showing only its bare plank back and crossbars in shadow; peach blossom just visible above the wall top. The high grey stone garden wall stands twice a grown man's height. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: soft hazy afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3610,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s004-2",
+   "prompt": "Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, trying to play on a dusty road full of hard stones outside a high grey wall, looking unhappy, one girl kicking a pebble, two boys sitting on the grassy verge with chins in their hands; along the road only rough grass, hedgerows and dry stones. The high grey stone garden wall stands twice a grown man's height. Spring hedgerows along the road; the peach trees stay hidden behind the wall. Light: soft amber afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3611,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s005-1",
+   "prompt": "Foreground: spring meadows and hedgerows in fresh green with small blossoms and little birds. Middle distance: one high grey stone-walled garden whose trees and ground are entirely white with snow, a sharp clean line where the snow stops at the wall. Spring outside the wall; inside the wall winter with bare frost-covered branches. Light: soft spring sunlight on the meadows, cold blue shade over the walled garden. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3613,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s005-2",
+   "prompt": "Inside a walled garden in deep winter: leafless bare grey peach trees with empty frost-covered branches, frozen grey grass, a low grey overcast sky, a silent empty garden. The high grey stone garden wall stands twice a grown man's height. Winter: bare frost-covered branches, white snow on the ground. Light: cold slate-blue overcast daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3614,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s005-3",
+   "prompt": "Ground-level close-up of one small white flower pushing up through frosty grass, drooping its head sadly, beside the foot of a plain weathered wooden post; the frame shows only grass, frost, the flower and the post. Winter: bare frost-covered branches, white snow on the ground. Light: cold pale morning daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3615,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s005-4",
+   "prompt": "the Snow, a tall pale woman in a great sweeping white cloak, spreading her great white cloak over the garden grass like a blanket of snow; beside her the Frost, a small child-sized sprite with silver skin and a silver tunic, holding a fine paintbrush, painting the bare branches of a leafless peach tree silver with long strokes; both figures clearly visible together. Winter: bare frost-covered branches, white snow on the ground. Light: pale silver winter daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3616,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s005-5",
+   "prompt": "the North Wind, a huge bearded man with a human face, wrapped in grey furs, cheeks puffed, blowing, flying in the grey sky above the snowy walled garden, both hands open and empty, blowing a roaring gale; two brick chimney-pots tumbling off the castle roof in mid-air. Winter: bare frost-covered branches, white snow on the ground. Light: cold grey stormy daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3617,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s005-6",
+   "prompt": "Three winter spirits standing together in the frozen garden, looking pleased: on the left the Snow, a tall pale woman in a great sweeping white cloak; in the centre the Frost, a small child-sized sprite with silver skin and a silver tunic, holding a fine paintbrush; on the right the North Wind, a huge bearded man with a human face, wrapped in grey furs, cheeks puffed, blowing. Behind them a plain smooth grey stone castle wall. Winter: bare frost-covered branches, white snow on the ground. Light: pale silver winter daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3618,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s006-1",
+   "prompt": "the Hail, a lean man in a ragged grey hooded cloak, frosted breath like ice, crouched on the slate castle roof in a storm, white ice pellets bouncing everywhere, slates cracking and flying; below, the snowy garden with bare frost-covered trees. Winter: bare frost-covered branches, white snow on the ground. Light: dark grey stormy winter daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3619,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s006-2",
+   "prompt": "the Hail, a lean man in a ragged grey hooded cloak, frosted breath like ice, running in a wide circle at great speed around the frozen garden, motion streaks behind him, a spray of white ice pellets around him, bare frost-covered trees on white ground. Winter: bare frost-covered branches, white snow on the ground. Light: cold grey winter daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3620,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s006-3",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, sitting indoors at a tall castle window wrapped in a thick brown wool blanket, puzzled, looking out at his garden lying entirely white under snow, bare frost-covered trees outside. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered branches, white snow on the ground. Light: cold pale daylight through the window, a hearth fire glowing behind him. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3621,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-1",
+   "prompt": "Autumn, a gentle woman in russet robes with loose auburn hair and plain bare hands, carrying a basket of golden fruit, walking along the country road handing golden fruit over the hedges into the village gardens, passing by the high grey wall of the Giant's garden, which stays white and wintry inside. The high grey stone garden wall stands twice a grown man's height. Autumn in the countryside, orchards with ripe golden fruit; inside the Giant's wall, bare frost-covered branches. Light: warm amber autumn sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3622,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-2",
+   "prompt": "Four winter spirits dancing hand in hand in a ring among bare white frost-covered trees in the endless winter garden: the North Wind, a huge bearded man with a human face, wrapped in grey furs, cheeks puffed, blowing; the Hail, a lean man in a ragged grey hooded cloak, frosted breath like ice; the Frost, a small child-sized sprite with silver skin and a silver tunic, holding a fine paintbrush; the Snow, a tall pale woman in a great sweeping white cloak. Only these four figures in the scene, the snowy ground open and empty around them. Winter: bare frost-covered branches, white snow on the ground. Light: pale silver winter daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3623,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-3",
+   "prompt": "Interior of a stone bedchamber: the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, here lying under the covers of a huge wooden bed in a long white linen nightshirt, his tunic and belt hanging on a wooden peg, head on the pillow, eyes wide, listening, rounded human ears; stone walls on all sides. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered branches, white snow on the ground. Light: soft morning sunlight through a tall window. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3624,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-4",
+   "prompt": "A little linnet singing on a frosted stone windowsill outside a tall castle window; beyond it the garden still white with snow and bare frost-covered trees. Winter: bare frost-covered branches, white snow on the ground. Light: soft early morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3625,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-5",
+   "prompt": "View from inside a stone room through an open iron casement window: outside, the winter garden going quiet, the last few snowflakes drifting down past bare frost-covered branches, a first soft beam of pale spring sunlight falling across the plain bare stone sill. Late winter: bare frost-covered branches, snow on the ground. Light: pale morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3626,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-6",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, leaping out of a huge wooden bed toward a tall window, hopeful, wearing a long white linen nightshirt, barefoot, his brown tunic, belt and boots hanging on a wooden peg by the bed; a plain wooden nightstand with a pewter jug. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered branches, white snow on the ground. Light: soft morning sunlight through the window. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3627,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s008-1",
+   "prompt": "Close view at the foot of the high grey stone garden wall: a small child-sized hole where a few stones have fallen out at the base, little footprints in the dewy grass leading into it, the lawn around it smooth and level. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: fresh early morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3628,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s008-2",
+   "prompt": "Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, sitting high up in the branches of the peach trees, one child perched on a branch of each tree, legs dangling, joyful; the green grass below open and empty. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: bright morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3629,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s008-4",
+   "prompt": "Wide high view of the whole walled garden in spring, Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, one sitting in each peach tree; in the far top-left corner one single leafless tree and its patch of ground still white with snow. Spring: peach trees in pink spring blossom, flowers only on every branch; one far corner still in winter. Light: bright morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3631,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s008-5",
+   "prompt": "one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, crying with tears on his cheeks, walking round a leafless snow-covered tree in the farthest snowy corner of the garden, the bare frost-covered branches far above his reach. Exactly one child in the scene. Winter: bare frost-covered branches, white snow on the ground. Light: cold pale morning daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3632,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s008-6",
+   "prompt": "one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, standing beneath a leafless tree covered with frost and snow, both arms reaching up; above the tree the North Wind, a huge bearded man with a human face, wrapped in grey furs, cheeks puffed, blowing, appearing as a great translucent face in the grey clouds; behind them only the grey stone garden wall and a plain English stone castle. Winter: bare frost-covered branches, white snow on the ground. Light: cold pale morning daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3633,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s009-1",
+   "prompt": "one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, standing on tiptoe with both arms reaching up beneath a leafless frost-covered tree that bends its branches down in a deep arch toward him, the lowest twig just above his fingertips. Exactly one child in the scene. Winter: bare frost-covered branches, white snow on the ground. Light: soft pale morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3634,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s009-2",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, looking out of a tall castle window, his face softening, eyes wet with tears, heart melting; outside in the sunny garden Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, sitting in the peach trees. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: morning sunlight on his face. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3635,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s009-3",
+   "prompt": "Close portrait of the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, remorseful, one hand on his chest, a plain grey stone wall behind him. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch glimpsed behind him. Light: soft morning sunlight on his face. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3636,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s009-4",
+   "prompt": "The high stone wall seen from inside the garden, Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, sitting in the branches of the peach trees beyond it, a quiet promise. The high grey stone garden wall stands twice a grown man's height. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: soft morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3637,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s010-1",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, creeping softly down a great wide indoor stone staircase inside his castle and gently pushing open a heavy oak front door with one open hand; the doorway is twice the height of an ordinary door, tall enough for him. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch glimpsed through the door. Light: morning sunlight streaming in through the opening door. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3638,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s010-2",
+   "prompt": "Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, running away in fright across the garden, mouths open, looking back over their shoulders at the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, standing in the castle doorway; behind them the peach trees turning white with snow under a soft cloudy sky. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring turning back to winter: blossom fading and frost spreading over the branches. Light: cool overcast morning daylight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3639,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s010-3",
+   "prompt": "Exactly one child. the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, tiptoeing up behind one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, who stands alone crying with his face in his hands in a snowy corner, facing away from the Giant. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered branches, white snow on the ground. Light: soft pale morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3640,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s010-4",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, bending down, gently lifting one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet in one enormous hand and setting him on a low branch of a peach tree; the tree bursting into pink and white blossom, flowers only; small birds flying in. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: bright morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3641,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s010-5",
+   "prompt": "one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, sitting on a branch in pink blossom, both arms flung round the neck of the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, kissing his brown-bearded cheek; the Giant's eyes closed, deeply moved. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: soft morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3642,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s010-6",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, standing clear of the wall, swinging one single great wooden-handled axe at the high stone wall, grey stones tumbling; Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, all empty-handed, running back in through the gap. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: bright morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3643,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s011-1",
+   "prompt": "Country people on their way to market at noon with wicker baskets and a horse-drawn cart, standing on the road outside the broken-open garden wall, looking in with wonder at the most beautiful garden. The high grey stone garden wall stands twice a grown man's height. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: clear noon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3644,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s011-2",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, sitting on the grass, laughing with his head thrown back, Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, climbing on his knees and shoulders; his two arms and two legs fully visible and joined to his body. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: soft amber afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3645,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s011-3",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, standing at the open garden gate, waving good-bye; Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, waving good-bye as they walk out through the gate. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: warm amber evening sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3646,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s012-1",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, young and strong, bending down to ask a question; Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, shaking their heads and shrugging, facing the Giant, their backs half turned to the viewer. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Spring: peach trees in pink spring blossom, flowers only on every branch. Light: soft amber evening sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3647,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s012-2",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, sitting alone on a plain grey stone step of the castle, elbows on his knees, sad, gazing toward a far corner of the garden. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Summer: peach trees in summer green leaves. Light: fading violet dusk sky. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3648,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s012-3",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, playing ring-a-roses with Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots on the lawn, everyone holding hands in a moving circle, skipping and laughing. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Summer: peach trees in summer green leaves. Light: warm mid-afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3649,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s012-4",
+   "prompt": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, standing among the peach trees, gazing past the playing children toward a distant corner of the garden, a faint wistful smile, longing; Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, running and playing on the grass at his feet. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Summer: peach trees in summer green leaves. Light: soft amber afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3650,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s013-1",
+   "prompt": "the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, sitting in a huge carved wooden armchair on the lawn, open empty hands resting on the chair arms, smiling at Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, playing on the grass in front of him. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Summer: peach trees in summer green leaves. Light: soft amber afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3651,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s013-2",
+   "prompt": "the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, leaning on a stout wooden walking stick in a garden full of flower-beds planted in the ground, Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, standing among the flowers, a child's face beside each flower. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Summer: peach trees in summer green leaves, flower-beds in full bloom. Light: soft amber afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3652,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s013-3",
+   "prompt": "the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, standing indoors at his tall bedroom window on a winter morning while dressing, buttoning his tunic with both hands, calm and unafraid; outside the glass the garden sleeps under snow; the room dry and warm. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered branches, white snow on the ground. Light: a hearth fire glowing indoors, pale winter daylight outside. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3653,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-1",
+   "prompt": "the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, standing indoors at his tall bedroom window, rubbing his eyes in wonder with both hands, looking and looking out through the glass at the snowy garden; behind him his stone bedchamber. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered trees across the snowy garden, and in the far corner one tree with white blossom, golden branches and silver fruit. Light: soft winter morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3654,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-2",
+   "prompt": "In the farthest corner of the snowy garden a tree covered with lovely white blossoms, its trunk and branches shining pure gold, round silver fruit hanging down; one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, standing beneath it. Winter: bare frost-covered trees across the snowy garden, and in the far corner one tree with white blossom, golden branches and silver fruit. Light: a soft radiant golden glow around the tree in pale winter morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3655,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-3",
+   "prompt": "the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, running out through the castle door down the stone steps, arms open, face bright with joy, grey shawl flying out behind him. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered trees across the snowy garden, and in the far corner one tree with white blossom, golden branches and silver fruit. Light: bright winter morning sunlight on snow. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3656,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-4",
+   "prompt": "Snowy lawn; the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, hurrying across the grass toward one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, who stands alone beneath the tree with white blossoms, golden branches and silver fruit in the far corner. Exactly one child in the scene. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered trees across the snowy garden, and in the far corner one tree with white blossom, golden branches and silver fruit. Light: bright winter morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3657,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-5",
+   "prompt": "Reverent medium shot: one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, beneath the white-blossomed golden tree, his open palms held out toward us, a small soft rose-coloured mark in the centre of each palm and one on the top of each small bare foot; face clean and serene. the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, kneeling before him in awe. Marks only on palms and feet. Winter: snowy garden around the one white-blossomed golden tree. Light: gentle golden light. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3658,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s015-1",
+   "prompt": "the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, face flushed red with anger, fists clenched, crying out in protective fury; one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, standing calmly on the grass in front of him at child scale, reaching just below the Giant's knee, under white blossom. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered trees across the snowy garden, and in the far corner one tree with white blossom, golden branches and silver fruit. Light: soft winter morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3659,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s015-2",
+   "prompt": "one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, standing under the white-blossomed tree with golden branches and silver fruit, smiling gently, a soft golden halo of light around him. Exactly one child in the scene. Winter: bare frost-covered trees across the snowy garden, and in the far corner one tree with white blossom, golden branches and silver fruit. Light: soft radiant golden glow in pale winter sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3660,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s015-3",
+   "prompt": "the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, kneeling on both knees in awe, head bowed, before one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, beneath the white-blossomed golden tree; the garden wall behind them plain grey stone. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered trees across the snowy garden, and in the far corner one tree with white blossom, golden branches and silver fruit. Light: gentle golden light in winter morning sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3661,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s015-4",
+   "prompt": "the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, lying on his back under the white-blossomed tree with golden branches, eyes closed, peaceful smile, at rest in death, his whole body covered with fallen white blossoms, eyes gently closed; Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots, arriving quietly in the background, hushed. Scale: the Giant stands three times a man's height, the high garden wall reaches his chest, and the children reach his knee. Winter: bare frost-covered trees across the snowy garden, and in the far corner one tree with white blossom, golden branches and silver fruit. Light: soft amber afternoon sunlight. Late-Victorian English countryside, 1880s, grey stone castle, walled garden. Palette: spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light. Flat 2D hand-drawn cel look, full-bleed frame, plain uncluttered corners.",
+   "seed": 3662,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  }
+ ]
+}

@@ -1,21 +1,32 @@
 {
  "title": "The Selfish Giant (Oscar Wilde), Maison revision 3988156b-2eee-4839-b542-2d3b8b253307",
- "period_and_place": "Late-Victorian English countryside, 1880s: a grey stone castle, a walled garden with twelve peach trees, a dusty road, a village market",
- "palette_and_light": "spring green, blossom pink and pearl, winter silver and slate blue, warm candle gold; soft diffused daylight",
+ "period_and_place": "Late-Victorian English countryside, 1880s: a grey stone castle, a walled garden with twelve peach trees (pink blossom in spring, summer green leaves, ripe golden peaches in autumn, bare frost-covered branches in winter), a dusty road, a village market",
+ "palette_and_light": "spring green, blossom pink and pearl, winter silver and slate blue, honey-gold light; soft diffused daylight; each shot names its real light source (sunlight, moonlight, or a hearth fire indoors)",
  "lens_and_look": "Earnalism house style (references/visual-style.md): 2D animated feature-film illustration, appended by the job builder",
  "characters": {
   "giant": "the Giant, an enormous man three times a grown man's height, broad shoulders, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic with a wide leather belt, great boots",
   "old_giant": "the Giant grown very old and feeble, the same enormous man with a long snow-white beard, thin white hair, gentle tired eyes, a grey woollen shawl over a brown tunic",
   "children": "a small group of Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots",
-  "boy": "a tiny four-year-old boy with fair curly hair, pale round cheeks and a plain white smock",
+  "boy": "a tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet",
   "snow": "the Snow, a tall pale woman in a great sweeping white cloak",
-  "frost": "the Frost, a thin silver-skinned sprite with a fine brush, painting the bare branches silver",
-  "north_wind": "the North Wind, a huge bearded figure wrapped in grey furs, cheeks puffed, blowing",
-  "hail": "the Hail, a lean figure dressed in grey, frosted breath like ice",
-  "autumn": "Autumn, a gentle woman in russet robes carrying a basket of golden fruit"
+  "frost": "the Frost, a thin silver-skinned sprite, small and child-sized, in a silver tunic, with a fine brush, painting the bare branches silver",
+  "north_wind": "the North Wind, a huge bearded man with a human face, wrapped in grey furs, cheeks puffed, blowing",
+  "hail": "the Hail, a lean figure dressed in a ragged grey hooded cloak, frosted breath like ice",
+  "autumn": "Autumn, a gentle woman in russet robes with loose auburn hair and plain bare hands, carrying a basket of golden fruit"
  },
- "negatives": "no text, no letters, no words, no logos, no watermark, no extra fingers, no modern objects",
- "sensitive_handling": "the wounds of Love are shown only as faint marks on open palms, from a respectful distance, never graphic; the Giant's death is peaceful rest under blossom",
+ "appearance": {
+  "giant": "the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots",
+  "old_giant": "the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic",
+  "children": "Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots",
+  "boy": "one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet",
+  "snow": "the Snow, a tall pale woman in a great sweeping white cloak",
+  "frost": "the Frost, a small child-sized sprite with silver skin and a silver tunic, holding a fine paintbrush",
+  "north_wind": "the North Wind, a huge bearded man with a human face, wrapped in grey furs, cheeks puffed, blowing",
+  "hail": "the Hail, a lean man in a ragged grey hooded cloak, frosted breath like ice",
+  "autumn": "Autumn, a gentle woman in russet robes with loose auburn hair and plain bare hands, carrying a basket of golden fruit"
+ },
+ "clean_frame": "plain uncluttered corners and unlettered surfaces throughout; five fingers on each hand; every object belongs to 1880s rural England; full-bleed frame",
+ "sensitive_handling": "the wounds of Love appear solely as small soft rose-coloured marks in the centre of each open palm and on the top of each small foot, in a reverent medium shot with gentle golden light, the face clean and serene, the image gentle and quiet; the Giant's death is peaceful rest under blossom, eyes closed",
  "anchor_stills": [
   "f01s002-2 (Giant)",
   "f01s008-5 (little boy)",

@@ -1,0 +1,549 @@
+{
+ "note": "Round 9 after the full-size art-direction review (.superpowers/sdd/stills-review-bicharak.md): positive-only prompts, since FLUX.1-schnell at guidance 0 draws any item a prompt names. Each character carries one fixed appearance line, repeated word for word in every shot (world-bible characters.*.appearance). Day shots carry their own light; lane shots name period street furniture. Items cover the 68 REDO and FIX keys from the review, using the r8 key names so they patch the film; the four KEEP stills (f01s002-1, f01s006-2, f01s008-2, f01s016-4) stay at r8. Seeds are r8 + 400; three candidates per shot for selection.",
+ "items": [
+  {
+   "key": "f01s001-1",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, standing alone at dawn in a bare rented room, weary face, the wooden door left open onto the brick lane, through it the back of a departing Bengali man in a white dhoti and draped cotton shawl walking away, pale dawn light spilling through the doorway. Bengal, 1880s Calcutta. Palette pale gold, ivory, soft indigo, faded vermilion; pale grey-gold dawn light.",
+   "seed": 2811,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s001-2",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, inside a bare rented room by day, standing beside an empty wooden chair, one hand resting on a torn, worn man's cotton shawl draped over its back, plain limewashed wall, soft daylight from a small window. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; soft daylight.",
+   "seed": 2812,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s001-3",
+   "prompt": "A wide empty landscape of golden autumn paddy fields, ripe grain bowing, a few thatched village huts far off, pale lavender evening sky, soft low sun veiled in haze, deep calm stillness. Bengal, 1880s. Palette old gold, ivory, soft lavender, faded vermilion; gentle evening light.",
+   "seed": 5801,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s001-4",
+   "prompt": "An elderly Bengali husband in a white dhoti and shawl and his elderly wife in a white sari with a red border, sitting side by side on a low wooden bench in a settled old household courtyard at dusk, gentle smiling faces, warm dark-brown eyes, bare feet on the beaten-earth floor, a clay oil lamp glowing beside them, warm and safe. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 5802,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s001-5",
+   "prompt": "Full-figure Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, walking away down a dusk brick lane, looking back over her shoulder, past glowing windows of other homes, plain limewashed walls, a gas lamp on a wooden post, a bullock cart resting at the far end. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2813,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s001-6",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, sitting on the stone step of a dark doorway, cold blue darkness inside the house behind her, a bare wall niche beside the door, the only warm light coming from distant neighbours' windows far down the brick lane. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow, faint distant amber.",
+   "seed": 2814,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s002-2",
+   "prompt": "A small woven bird's nest in the branches of a mango tree at dusk, a pair of small brown sparrows settled inside, natural bird beaks and round black bird eyes, dark green mango leaves, deep blue evening sky. Bengal, 1880s Calcutta. Palette indigo dusk, old gold, ivory, faded vermilion; soft last light of evening, deep blue sky.",
+   "seed": 5804,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s002-3",
+   "prompt": "Close-up of a woman's hand and bare forearm in a red-bordered white sari, lighting a small clay diya at a tulsi plant on a raised clay altar, beaten-earth courtyard, plain limewashed wall behind; the frame holds the hand, the diya and the tulsi plant. Bengal, 1880s. Palette indigo dusk, lamp amber, faded vermilion, ivory; warm flame light against deep blue dusk.",
+   "seed": 5805,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s002-4",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, standing alone in a dark quiet brick lane at night, looking up at one lit upstairs window, plain limewashed walls, a bullock cart resting by the wall, a gas lamp on a wooden post far down the lane. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2815,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s003-1",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, waking at dawn on a plain wooden bed in a bare room, bare neck, an empty carved wooden jewellery box lying open beside her, the other half of the bed empty, pale dawn light falling across the floor from a small window. Bengal, 1880s Calcutta. Palette pale gold, ivory, soft indigo, faded vermilion; pale grey-gold dawn light.",
+   "seed": 2801,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s003-2",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, sitting on a reed mat holding a thin three-year-old Bengali toddler boy with short black hair and dark brown eyes, bony and frail, on her lap, a dry upturned brass bowl beside them, a poor bare room. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2816,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s003-3",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, seated, her left hand holding one small round brass hand mirror, her right hand holding a thin black kohl stick at her eye, tears on her cheeks, a single mirror in the scene, plain limewashed wall behind her. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2817,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s003-4",
+   "prompt": "Seen from above, Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, lying face down on the bare stone floor of a bolted room, her face hidden in her folded arms, her bun come undone, black hair spread over her back, exhausted. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow, faint distant amber.",
+   "seed": 2818,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s003-5",
+   "prompt": "A bare empty room at dusk, mud-plastered walls, a cold dark clay lamp standing on the floor, a single small window showing the last blue dusk, deep shadow pooling in the corner, bare beaten-earth floor. Bengal, 1880s Calcutta. Palette indigo, deep blue dusk, cold grey shadows.",
+   "seed": 5806,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s003-6",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, in a fierce lunge out of a doorway, face blazing with anger like a tigress, a broom of coconut ribs swung high overhead; a young Bengali dandy in a dhoti and shawl running away in fright down the brick lane, plain limewashed walls, a gas lamp on a wooden post, a bullock cart. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2819,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s004-1",
+   "prompt": "a thin three-year-old Bengali toddler boy with short black hair, curled up asleep on the earthen floor under a low wooden string-bed, eyes closed, dried tear streaks on his cheeks, a dim bare room, moonlight from a small barred window. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow, faint distant amber.",
+   "seed": 5807,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s004-2",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, running through a dark yard toward an old round brick well, clutching a thin three-year-old Bengali toddler boy with short black hair against her chest with both arms, his head on her shoulder, moonlit night. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2820,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s004-3",
+   "prompt": "Bengali neighbours, men in dhotis and women in saris, holding hanging lanterns at arm's length, gathered around an old round open brick well with a low circular parapet at night, anxious faces. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 5808,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s005-1",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, lying on an iron cot in a whitewashed colonial hospital ward, her hands resting on a white sheet, natural fingernails, a Bengali police constable in a white tunic and red turban standing at the door. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2821,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s005-2",
+   "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti, seated high on the raised wooden bench of a colonial sessions courtroom, Bengali and English lawyers in black barrister's gowns and white bands pleading below him, tall shuttered windows, a cloth punkah fan overhead. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; bright midday daylight, blue sky.",
+   "seed": 4801,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s005-3",
+   "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti, pronouncing a sentence from the bench, stern face, holding a slender wooden dip pen over a brass inkwell, papers before him. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; bright midday daylight, blue sky.",
+   "seed": 4802,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s005-4",
+   "prompt": "Women of the household standing behind carved wooden latticed screens, their faces seen dimly through the lattice gaps, an inner courtyard of an old Bengali house with closed wooden doors. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 5809,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s006-1",
+   "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti, seated at a wooden desk in the morning, a dab of white lather on his smooth jaw, a folding straight razor and a brass bowl on the desk, a small hand mirror, warm morning window light. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; warm early morning sunlight, pale blue sky.",
+   "seed": 4803,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s006-3",
+   "prompt": "young Mohit, a 20-year-old Bengali college student, round gold-rimmed spectacles, black hair parted and combed in the Victorian English style, black moustache and short black beard, 1880s Bengali gentleman's frock coat, long and dark with a high stiff white collar over a white shirt, laughing at a table lit by a brass oil lamp, a wine glass and plates of meat, his Bengali college friends in dhotis and draped shawls laughing around him. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 3802,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-1",
+   "prompt": "A quiet narrow Calcutta brick lane at dusk, a lime-washed two-storey house with green wooden shutters and an iron-barred upstairs window, plain limewashed walls, a gas lamp on a wooden post, a bullock cart resting by the wall. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 5810,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-2",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, sitting at an iron-barred upstairs window, chin on her hand, gazing out at the lane. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; warm golden afternoon sunlight.",
+   "seed": 2802,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-3",
+   "prompt": "Seen from the deck of a wooden sailing ship far out on the open sea, a distant green forested shore on the horizon, dreamlike luminous haze, calm glittering water, wide view. Bengal coast, 1880s. Palette sea blue, ivory, old gold; bright soft daylight, blue sky.",
+   "seed": 5811,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-4",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, at the barred window, the world beyond glowing like a far mysterious pleasure garden of golden light and trees. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2822,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-5",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, standing on a flat rooftop, a soft spring wind lifting the end of her white sari, the sky full of light, distant palm trees. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; bright midday daylight, blue sky.",
+   "seed": 2823,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s007-6",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, dreamlike, red lotus petals unfolding layer on layer around her, soft glowing light. Bengal, 1880s Calcutta. Palette old gold, ivory, faded vermilion; soft warm golden memory light.",
+   "seed": 2824,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s008-1",
+   "prompt": "Two small Bengali brothers in white kurtas carrying slates, running off to school down a brick lane, plain limewashed walls, a gas lamp on a wooden post, a bullock cart, their mother in a cotton sari at the wooden door, bright morning sun. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; bright midday daylight, blue sky.",
+   "seed": 5812,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s008-3",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, at the barred window looking down at the brick lane below, passers-by in dhotis, a hawker with a basket on his head, a palanquin carried by bearers, plain limewashed walls. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; warm golden afternoon sunlight.",
+   "seed": 2825,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s009-1",
+   "prompt": "High-angle view looking down through iron window bars onto the brick lane below, young Mohit, a 20-year-old Bengali college student, round gold-rimmed spectacles, black hair parted and combed in the Victorian English style, black moustache and short black beard, 1880s Bengali gentleman's frock coat, long and dark with a high stiff white collar over a white shirt, walking proudly, plain limewashed walls, a horse carriage at the corner. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; warm golden afternoon sunlight.",
+   "seed": 3803,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s009-3",
+   "prompt": "A house across the brick lane at night, its windows blazing with lamplight, the silhouette of a dancer behind a curtain, a horse carriage waiting at the door, a gas lamp on a wooden post. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 5814,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s009-4",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, awake late at night in her dark room, lamp-thrown shadows of passers-by moving across the plain limewashed wall, a small live myna bird in a bamboo cage hanging by her window. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2827,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s010-1",
+   "prompt": "A small grey-brown moth with natural insect features and delicate dusty wings circling the flame of a clay oil lamp at night, close-up, tragic and fragile. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 5815,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s010-2",
+   "prompt": "Seen from far away across dark tiled rooftops, one small distant lit window glowing like a golden mirage, rooftops and palm trees in silhouette, clear deep blue night sky. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow, faint distant amber.",
+   "seed": 5816,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s010-4",
+   "prompt": "A fantastical palace of golden light floating high among night clouds, one crescent moon, a vast quiet sky. Bengal, 1880s Calcutta. Palette indigo night, old gold, ivory; dreamlike glow.",
+   "seed": 5817,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s010-5",
+   "prompt": "A Bengali baithak-khana sitting room after a party: weary men in dhotis and draped shawls slumped on a white floor-sheet with bolsters, bare forearms, brass and glass decanters, spilled wine, guttering oil lamps, joyless. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 5818,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s011-1",
+   "prompt": "young Mohit, a 20-year-old Bengali college student, round gold-rimmed spectacles, black hair parted and combed in the Victorian English style, black moustache and short black beard, 1880s Bengali gentleman's frock coat, long and dark with a high stiff white collar over a white shirt, standing in the brick lane at dusk, looking up at an iron-barred upstairs window, plain limewashed wall. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 3804,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s011-2",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, taking a folded letter through the iron window bars at dusk, startled, a man's hand in a dark sleeve offering it from outside. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2829,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s011-4",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, in a whirl of wind and scattered blank letters, the room blurring around her, dreamlike. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2831,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s011-5",
+   "prompt": "A palace of golden light breaking into fragments and crumbling to glowing dust against a vast quiet night sky. Bengal, 1880s Calcutta. Palette indigo night, old gold, ivory; dreamlike glow.",
+   "seed": 5819,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s012-1",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, slipping out of her house's wooden door at deep night, looking back over her shoulder, brick lane, plain limewashed walls. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2832,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s012-2",
+   "prompt": "Inside a closed wooden horse carriage at night, dark wood panels, slatted shutters; Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, shrinking away beside young Mohit, a 20-year-old Bengali college student, round gold-rimmed spectacles, black hair parted and combed in the Victorian English style, black moustache and short black beard, 1880s Bengali gentleman's frock coat, long and dark with a high stiff white collar over a white shirt. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2833,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s012-3",
+   "prompt": "A closed box-shaped palki-gari horse carriage with shuttered sides speeding through a dark brick lane at night, its side lamp swinging, plain limewashed house fronts, a gas lamp on a wooden post. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 5820,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s013-1",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, weeping inside a closed wooden horse carriage with slatted shutters and dark wood panels, eyes shut in memory. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow, faint distant amber.",
+   "seed": 2834,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s013-2",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, sitting before her father, a thin Bengali clerk in a white dhoti with dark brown eyes, as he eats rice from a brass plate with his right hand, a memory in warm golden light, a simple home. Bengal, 1880s Calcutta. Palette old gold, ivory, faded vermilion; soft warm golden memory light.",
+   "seed": 2835,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s013-3",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, sitting on a mat with her mother, a Bengali woman in a plain cotton sari, both folding green betel leaves together, a memory. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; warm early morning sunlight, pale blue sky.",
+   "seed": 2836,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s013-4",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, sitting on a mat while her mother sits behind her braiding her long black hair, a simple courtyard, a memory. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; warm golden afternoon sunlight.",
+   "seed": 2837,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s013-5",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, fanning her father, a thin Bengali clerk in a white dhoti, with a round palm-leaf hand fan, while feeding a small brother rice from her hand, a memory. Bengal, 1880s Calcutta. Palette old gold, ivory, faded vermilion; soft warm golden memory light.",
+   "seed": 2838,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-1",
+   "prompt": "A quiet lane of small brick houses asleep under stars, every window dark and shuttered, a bullock cart resting by a plain limewashed wall, deep blue night sky full of stars. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow, faint distant amber.",
+   "seed": 5821,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-2",
+   "prompt": "Early morning sunlight falling into a small beaten-earth courtyard of a lane house, a tulsi plant on a clay pedestal, a brass water pot, a clothesline with a white cloth, plain limewashed walls, blue sky above. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; warm early morning sunlight, pale blue sky.",
+   "seed": 5822,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-3",
+   "prompt": "A Bengali mother in a plain cotton sari at an iron-barred window at dawn, both hands pressed to her mouth in shock, the room behind her quiet. Bengal, 1880s Calcutta. Palette pale gold, ivory, soft indigo, faded vermilion; pale grey-gold dawn light.",
+   "seed": 5823,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s015-1",
+   "prompt": "Inside a cramped wooden horse carriage, dark wood bench, small shuttered window; Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, pleading with folded hands; young Mohit, a 20-year-old Bengali college student, round gold-rimmed spectacles, black hair parted and combed in the Victorian English style, black moustache and short black beard, 1880s Bengali gentleman's frock coat, long and dark with a high stiff white collar over a white shirt, turned away from her, staring out of the window. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow, faint distant amber.",
+   "seed": 2839,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s015-2",
+   "prompt": "A worn second-class palki-gari horse carriage driving away down an unpaved earth country road at dawn, palm trees and paddy fields on both sides, open countryside. Bengal, 1880s Calcutta. Palette pale gold, ivory, soft indigo, faded vermilion; pale grey-gold dawn light.",
+   "seed": 5824,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s015-3",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, standing alone in a muddy rain-wet earth lane at dawn, the hem of her white sari splashed brown with mud, bare feet, plain limewashed walls, a bullock cart far behind. Bengal, 1880s Calcutta. Palette pale gold, ivory, soft indigo, faded vermilion; pale grey-gold dawn light.",
+   "seed": 2840,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s016-1",
+   "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti, standing on the lowest stone step of a river ghat at sunrise, offering water from both cupped hands, golden sunrise over the river. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; warm early morning sunlight, pale blue sky.",
+   "seed": 4804,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s016-2",
+   "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti, seated cross-legged reading a palm-leaf scripture manuscript at a low wooden desk, a brass oil lamp. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 4805,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s016-3",
+   "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti, seated cross-legged with both hands resting on his knees, leading small Bengali boys fully dressed in white cotton kurtas and dhotis who sit cross-legged in prayer before him. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; warm early morning sunlight, pale blue sky.",
+   "seed": 4806,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s017-1",
+   "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti, standing in a jail vegetable garden, a basket of gourds and greens beside him, whitewashed jail wall behind. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; bright midday daylight, blue sky.",
+   "seed": 4807,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s017-2",
+   "prompt": "A quiet deserted colonial jail corridor, whitewashed walls, a row of iron-barred cell doors, hard white noon light and sharp black shadows on the stone floor. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; bright midday daylight, blue sky.",
+   "seed": 5826,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s018-2",
+   "prompt": "A turbaned Bengali jail warder in a white tunic holding up between finger and thumb a small round gold finger-ring whose bezel holds a tiny oval painted miniature on ivory of a young man with moustache and beard; beside him Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, looking at it; the two of them alone in a whitewashed jail cell. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2843,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s018-3",
+   "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti, standing inside an open jail cell, the barred door swung open behind him, a faint scornful smile. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 4808,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s019-1",
+   "prompt": "Extreme close-up of a middle-aged Bengali man's open hand, the cuff of a dark buttoned chapkan sleeve at the wrist, open palm facing up, a small round gold finger-ring whose bezel holds a tiny oval painted miniature on ivory of a young man with moustache and beard lying in the palm, plain dark background, warm window light. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 4901,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s019-2",
+   "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti, alone in frame, startled as if holding a burning coal, staring at a small round gold finger-ring whose bezel holds a tiny oval painted miniature on ivory of a young man with moustache and beard held in his fingers, bare jail wall behind. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 4809,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s019-3",
+   "prompt": "A single translucent double-exposure portrait in soft focus: the tearful face of Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, blending into the frightened tearful face of Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2801,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s019-4",
+   "prompt": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, bare earlobes, bare wrists, faded maroon cotton sari with a thin black border, lit by a strong warm golden glow like a golden goddess image, a radiant halo of golden light; Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti, standing before her in the jail cell. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp light against deep blue dusk.",
+   "seed": 2844,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  }
+ ]
+}
