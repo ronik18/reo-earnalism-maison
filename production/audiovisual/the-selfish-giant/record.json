@@ -4923,6 +4923,20 @@
       },
       "path": "music/selfish-giant-music-film-01/cue-4-paradise_input_params.json",
       "sha256": "b82322475b195a09a86026aa427604ac3c565c39b253aeaf43acd75eb3b2a8e0"
+    },
+    {
+      "bytes": 17200,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 5.094116666666666,
+        "inputs_zip": "jobs/selfish-giant-stills-film-01-r9/inputs.zip",
+        "job_id": "selfish-giant-stills-film-01-r9",
+        "job_kind": "stills",
+        "manifest": "jobs/selfish-giant-stills-film-01-r9/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/selfish-giant-stills-film-01-r9/stills.ipynb",
+      "sha256": "ecb6273ae1781559114746ce906a89aa0f9dc5e1037843f70c19144b788e64d5"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -5734,6 +5748,49 @@
         "outputs_tar_sha256": "cc0e9d1297fef4f295052a705997832401eb29eba5624c48a7f000593ccb4369"
       },
       "result": "exchange_collected",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T18:18:29.112083+00:00",
+      "detail": {
+        "forecast_units": 5.094116666666666,
+        "job_id": "selfish-giant-stills-film-01-r9",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T18:18:29.119804+00:00",
+      "detail": {
+        "job_id": "selfish-giant-stills-film-01-r9",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-24T18:18:46.695647+00:00",
+      "detail": {
+        "bytes": 232692,
+        "job_id": "selfish-giant-stills-film-01-r9",
+        "key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r9/inputs.zip",
+        "sha256": "a7a685e5fcbfa09a8ae466c0d5e96b874802537b4d51a8f7fc4fea52846286c1"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T18:19:38.745034+00:00",
+      "detail": {
+        "expires_at": "2026-11-25T18:19:06+00:00",
+        "inputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r9/inputs.zip",
+        "inputs_sha256": "a7a685e5fcbfa09a8ae466c0d5e96b874802537b4d51a8f7fc4fea52846286c1",
+        "job_id": "selfish-giant-stills-film-01-r9",
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r9/outputs.tar"
+      },
+      "result": "exchange_staged",
       "stage": "job"
     }
   ],

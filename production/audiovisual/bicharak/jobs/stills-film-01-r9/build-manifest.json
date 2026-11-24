@@ -1,0 +1,15 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 10557,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/stills-film-01-r9",
+  "inputs_sha256": "2a7aa28edc584f89e3b7535bb4ce2b326579ec07c6ce186047a7ac6f56b057b4",
+  "job_id": "stills-film-01-r9",
+  "kind": "stills",
+  "model": {
+    "repo": "black-forest-labs/FLUX.1-schnell",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "0f3528fc46a9bcb2ddfb115aa8787349f111b3d0dbb1048eeddc2b67eb90ea23",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}

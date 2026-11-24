@@ -11148,6 +11148,20 @@
       },
       "path": "stills/stills-film-01-r8-house/f01s019-4.png",
       "sha256": "8577e53a7c9f1cafbaf5005324f6536e840403750f5d76195a7a09a2d8d43104"
+    },
+    {
+      "bytes": 17105,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 5.68905,
+        "inputs_zip": "jobs/stills-film-01-r9/inputs.zip",
+        "job_id": "stills-film-01-r9",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r9/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r9/stills.ipynb",
+      "sha256": "0f3528fc46a9bcb2ddfb115aa8787349f111b3d0dbb1048eeddc2b67eb90ea23"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -13029,6 +13043,49 @@
         "outputs_tar_sha256": "73fec0fc7a46ed354e4cf96387b4ce74f3715cb0ff83e06c4ba44196f6dc6586"
       },
       "result": "exchange_collected",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T18:18:28.732215+00:00",
+      "detail": {
+        "forecast_units": 5.68905,
+        "job_id": "stills-film-01-r9",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T18:18:28.745172+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r9",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-24T18:18:45.517379+00:00",
+      "detail": {
+        "bytes": 200341,
+        "job_id": "stills-film-01-r9",
+        "key": "exports/colab-exchange/bicharak/stills-film-01-r9/inputs.zip",
+        "sha256": "2a7aa28edc584f89e3b7535bb4ce2b326579ec07c6ce186047a7ac6f56b057b4"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T18:19:38.400211+00:00",
+      "detail": {
+        "expires_at": "2026-11-25T18:19:05.915057+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-film-01-r9/inputs.zip",
+        "inputs_sha256": "2a7aa28edc584f89e3b7535bb4ce2b326579ec07c6ce186047a7ac6f56b057b4",
+        "job_id": "stills-film-01-r9",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r9/outputs.tar"
+      },
+      "result": "exchange_staged",
       "stage": "job"
     }
   ],
