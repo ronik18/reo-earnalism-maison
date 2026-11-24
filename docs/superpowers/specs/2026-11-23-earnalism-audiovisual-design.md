@@ -190,3 +190,7 @@ That works out to roughly 30–60 CU per title, so about two titles a month insi
 - **FLUX settings.** The prompt template wording, and the scheduler and steps within the schnell licence.
 - **Scene splitting.** Thresholds within the 30–90 s target.
 - **Skill copy.** Reference file wording, following writing-skills conventions.
+
+## Owner amendment, 24 November 2026: film hosting
+
+The owner chose to host full films on Maison from the private R2 bucket instead of Cloudflare Stream, and to use YouTube and the other named social destinations for reels, Shorts and trailers that point to Maison. Where this document holds Maison video until Stream's cost is confirmed, that hold is replaced by this decision: films are served as progressive MP4 through a short-lived signed R2 GET after an entitlement check, with no caching (`contracts/cache-policy.json` `private_r2_film`). Publication still needs the owner's instruction naming the destinations, and the 47-region policy still applies.

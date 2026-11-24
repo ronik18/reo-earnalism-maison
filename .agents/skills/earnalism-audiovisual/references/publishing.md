@@ -3,11 +3,19 @@
 Publish only when the owner says so, and only to the destinations the owner names.
 Root/Integration owns provider mutations; this skill prepares and stages.
 
-## Maison: audio yes, video held
+## Maison: audio and full films (R2); social: reels and trailers
 
 - **Audio** (chapter MP3s plus measured timing maps, private R2 intake) is allowed.
-- **Video via Cloudflare Stream is held** until the owner confirms Stream's cost. The film
-  is still produced, reviewed and offered to the social destinations the owner names.
+- **Full films go to Maison from private R2** (owner decision, 24 November 2026; this
+  replaces the earlier Cloudflare Stream route, which stays unprovisioned). The film is a
+  progressive faststart MP4 in the private bucket, served only through a short-lived signed
+  GET after an entitlement check, never cached (`contracts/cache-policy.json`
+  `private_r2_film`). Films built from stills and narration are small (the 21-minute
+  বিচারক film-01 is about 13 MB), so adaptive streaming is not needed.
+- **YouTube and other social destinations get reels, Shorts and trailers**, each pointing to
+  the full film on Maison. Full films are not posted to social platforms.
+- Maison's film delivery path (grant endpoint and player) is not built yet; until it is,
+  films are produced, reviewed and archived but not offered on Maison.
 - Access defaults to `free`, matching the Reader offering.
 
 ### Steps

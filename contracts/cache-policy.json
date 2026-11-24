@@ -198,7 +198,19 @@
       "swr_seconds": 0,
       "stale_if_error_seconds": 0,
       "headers_ref": "cache_admission.private_headers applies to grant response; provider controls its own segments",
-      "sw": "never intercept/cache video manifest/segments/tokens in P0"
+      "sw": "never intercept/cache video manifest/segments/tokens in P0",
+      "superseded_for": "audiovisual films: owner decision 2026-11-24 delivers full films from private R2 (private_r2_film); Stream stays unprovisioned"
+    },
+    {
+      "id": "private_r2_film",
+      "scope": "full audiovisual films (progressive faststart MP4) from the private R2 bucket via short-lived signed GET; entitlement-checked grant per unit; Range requests passed through",
+      "browser_ttl_seconds": 0,
+      "edge_ttl_seconds": 0,
+      "swr_seconds": 0,
+      "stale_if_error_seconds": 0,
+      "headers_ref": "cache_admission.private_headers applies to grant response; the signed object response carries Cache-Control: private, no-store, max-age=0",
+      "sw": "never intercept/cache film bytes, grant responses or signed URLs in P0",
+      "decision": "owner 2026-11-24: full films on Maison via R2; reels/Shorts/trailers on YouTube and other named social destinations"
     }
   ],
   "cdn_configuration": {
