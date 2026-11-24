@@ -33,6 +33,8 @@
   python3 -m eav.cli status --root <dir>
   python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir>
                          (--score-dir <dir> --score-route vcsl|ace-step:<job_id> | --dry)
+  python3 -m eav.cli bundle-film --root <dir> --film film-NN --unit-id <uuid> --out <bundle dir>
+                         (faststart MP4 + WebVTT + film.json for Maison private R2)
 
 Every command ends with "Next: ..." -- the one action the owner (or Claude) takes next.
 Reels: script -> reel narration (measured) -> --plan-shots (ceil(narration / 5.04 s) Wan clips)
@@ -55,7 +57,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
-from . import budget, colab_jobs, exchange, film, importer, mix, qc, reel, scenes, take
+from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, unit_anchors, voice_units
@@ -1660,12 +1662,50 @@ def cmd_status(args):
                   f"(forecast {j['forecast_units']:.2f} CU)")
 
 
+def cmd_bundle_film(args):
+    """Bundle one assembled, qc-passed film for Maison's private R2 delivery."""
+    rec = _record(args.root)
+    try:
+        uuid.UUID(args.unit_id)
+    except ValueError:
+        raise Stop(f"--unit-id {args.unit_id!r} is not a UUID", "Pass the Maison unit's UUID")
+    t = args.film
+    films = _artifacts(rec, "film", target=t)
+    subs = _artifacts(rec, "subtitles", target=t)
+    if not films or not subs:
+        raise Stop(f"{t} has no assembled film and subtitles in the record",
+                   f"{PROG} film --root {rec.root}")
+    mp4, srt = rec.root / films[-1]["path"], rec.root / subs[-1]["path"]
+    reports = _artifacts(rec, "qc_report")
+    item = None
+    if _qc_passed(rec) and reports:
+        report = _json(rec.root / reports[-1]["path"])
+        item = report.get("items", {}).get(t)
+    if (not item or report.get("result") != "pass"
+            or any(v != "pass" for v in item.get("checks", {}).values())):
+        raise Stop(f"bundle-film needs a passing film qc for {t} after its last assembly",
+                   f"{PROG} qc --root {rec.root}")
+    if item.get("sha256") != sha256_file(mp4) or films[-1]["sha256"] != item["sha256"]:
+        raise Stop(f"the qc sha256 for {t} does not match the current film MP4",
+                   f"{PROG} qc --root {rec.root}")
+    bundle = Path(args.out)
+    if bundle.exists() and any(bundle.iterdir()):
+        raise Stop(f"{bundle} is not empty", "Pass a new --out directory")
+    manifest = film_bundle.build(mp4, srt, args.unit_id, bundle)
+    u = manifest["units"][0]
+    rec.event("bundle_film", "bundled", {"target": t, "bundle": str(bundle),
+                                         "mp4_sha256": u["mp4_sha256"]})
+    print(f"Bundled {t}: {u['bytes']} bytes, {u['duration_ms']} ms, mp4 {u['mp4_sha256'][:12]}. "
+          f"Stage it with attach_audiovisual_film.")
+
+
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take,
             "supersede": cmd_supersede, "close": cmd_close,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
-            "bundle-audio": cmd_bundle_audio}
+            "bundle-audio": cmd_bundle_audio,
+            "bundle-film": cmd_bundle_film}
 
 
 def _parser():
@@ -1751,6 +1791,10 @@ def _parser():
     s.add_argument("--score-dir", help="<unit_id>.wav score bed per chapter (default route)")
     s.add_argument("--score-route", help="with --score-dir: vcsl or ace-step:<imported music job id>")
     s.add_argument("--dry", action="store_true", help="narration only; recorded in the evidence draft")
+    s = add("bundle-film")
+    s.add_argument("--film", required=True, help="film id, e.g. film-01")
+    s.add_argument("--unit-id", required=True, help="the Maison unit UUID the film belongs to")
+    s.add_argument("--out", required=True)
     return p
 
 

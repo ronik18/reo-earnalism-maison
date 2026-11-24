@@ -58,6 +58,19 @@ Root/Integration owns provider mutations; this skill prepares and stages.
 5. `attach_audiovisual_audio publish <slug> --publisher <public_id> --browser-report
    <report.json>` runs full validation and publishes, or changes nothing.
 
+### Film bundle (full film to private R2)
+
+After the film's `qc` passes (and the owner's review):
+`python3 -m eav.cli bundle-film --root <root> --film film-NN --unit-id <Maison unit UUID>
+--out <bundle dir>` writes `film.mp4` (copy), `film.vtt` (the SRT with WebVTT timestamps)
+and `film.json` (schema `earnalism.audiovisual-film-bundle.v1`: unit id, file names, SHA-256
+of each, `duration_ms`, `bytes`). It refuses without a passing film `qc` whose recorded
+SHA-256 matches the current film MP4, when the MP4 is not faststart (moov before mdat),
+when it is not exactly one H.264 video stream plus one AAC audio stream, or when it is over
+1 073 741 824 bytes. The server step `attach_audiovisual_film` (root lane) stages this
+bundle; it publishes nothing by itself, and publication still needs exact-edition clearance
+for the `video` format in every active region.
+
 ## Social
 
 - Private staging first through the official adapters:
