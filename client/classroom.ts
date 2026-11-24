@@ -18,7 +18,7 @@ if (root) {
   };
   const fullScreen = () => {
     if (document.fullscreenElement) void document.exitFullscreen();
-    else void root.requestFullscreen?.();
+    else void document.documentElement.requestFullscreen?.();  // keeps the toolbar toggle visible
   };
   document.getElementById("classroom-next")?.addEventListener("click", () => show(current + 1));
   document.getElementById("classroom-previous")?.addEventListener("click", () => show(current - 1));

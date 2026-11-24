@@ -1,5 +1,6 @@
 """Classroom licence pilot: teacher-only projection, usage counting, worksheets, audited role."""
 import io
+from unittest import mock
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
@@ -81,6 +82,10 @@ class ClassroomTests(TestCase):
             classroom.open_classroom(teacher, self.edition.pk, self.units[0].pk, 'GB')  # rights are IN only
         self.assertIn(caught.exception.code, {'rights_unavailable', 'content_unavailable'})
         self.assertEqual(ClassroomSession.objects.filter(teacher=teacher).count(), 1)  # the denied open is not counted
+        with mock.patch('library.services.get_reader_document', return_value={'edition': {'published_at': None}}):
+            with self.assertRaises(DomainError) as caught:
+                classroom.open_classroom(teacher, self.edition.pk, self.units[0].pk, 'IN')
+        self.assertEqual(caught.exception.code, 'content_unavailable')  # drafts are never projected
 
     def test_sessions_count_once_per_half_hour_and_report_by_week(self):
         self.grant()

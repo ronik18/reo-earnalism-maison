@@ -35,6 +35,9 @@ def open_classroom(user, edition_id, unit_id, territory):
     require_teacher(user)
     from library.services import get_reader_document
     document = get_reader_document(user, edition_id, unit_id, territory=territory)
+    if not document['edition'].get('published_at'):
+        # Staff reviewers can read drafts; classroom projection is for published editions only.
+        raise DomainError('content_unavailable', 'This edition is not published.', 404)
     with transaction.atomic():
         recent = ClassroomSession.objects.select_for_update().filter(
             teacher=user, edition_id=edition_id, unit_id=unit_id, started_at__gte=timezone.now() - REPEAT_WINDOW).exists()
