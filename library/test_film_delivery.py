@@ -142,6 +142,40 @@ class FilmDeliveryTests(TestCase):
         self.assertEqual(grant['transport'], 'local_signed')
         self.assertTrue(grant['url'].startswith(f'/api/v1/content/local-assets/{asset.pk}?token='))
 
+    def test_local_film_url_serves_bounded_ranges_for_browser_video(self):
+        import hashlib, tempfile
+        from . import storage
+        raw = bytes(range(256)) * 4
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        with override_settings(MEDIA_STORAGE_BACKEND='local', MEDIA_ROOT=directory.name):
+            asset = self.film(sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw))
+            storage.put_private(asset.storage_key, raw, 'video/mp4')
+            self.publish()
+            self.entitle()
+            login = self.client.post('/api/v1/auth/login', {
+                'email': self.user.email, 'password': 'Synthetic-Film-Passphrase-47', 'password_purpose_consent': True,
+                'password_purpose_version': 'password-account-v1'}, content_type='application/json')
+            self.assertEqual(login.status_code, 200, login.content)
+            grant = svc.media_grant(self.user, {**self.request(asset), 'device_id': login.json()['device_id']}, 'IN')
+            self.assertEqual(grant['transport'], 'local_signed')
+            whole = self.client.get(grant['url'], HTTP_RANGE='bytes=0-')
+            self.assertEqual(whole.status_code, 206, whole.content[:200])
+            self.assertEqual(whole['Content-Range'], f'bytes 0-{len(raw) - 1}/{len(raw)}')
+            self.assertEqual(whole['Accept-Ranges'], 'bytes')
+            self.assertEqual(whole['Content-Type'], 'video/mp4')
+            self.assertIn('no-store', whole['Cache-Control'])
+            self.assertEqual(whole.content, raw)
+            part = self.client.get(grant['url'], HTTP_RANGE='bytes=10-19')
+            self.assertEqual((part.status_code, part.content, part['Content-Range']),
+                             (206, raw[10:20], f'bytes 10-19/{len(raw)}'))
+            plain = self.client.get(grant['url'])
+            self.assertEqual((plain.status_code, plain['Accept-Ranges'], plain.content), (200, 'bytes', raw))
+            outside = self.client.get(grant['url'], HTTP_RANGE=f'bytes={len(raw)}-')
+            self.assertEqual(outside.status_code, 416)
+            multi = self.client.get(grant['url'], HTTP_RANGE='bytes=0-1,4-5')
+            self.assertEqual(multi.status_code, 416)
+
     def test_film_grant_refuses_outside_whitelist_and_without_entitlement(self):
         asset = self.film()
         self.publish()

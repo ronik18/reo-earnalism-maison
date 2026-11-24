@@ -193,13 +193,16 @@ def media(request):
     result=svc.media_grant(request.user,data,territory);result['url']=request.build_absolute_uri(result['url'])
     return api_response(result)
 
+# Audio and full films are played by browser media elements, which always request byte ranges.
+RANGE_KINDS={'audio_chapter','video'}
+
 @json_endpoint()
 def local_asset(request,asset_id):
     if not getattr(settings,'LOCAL',False): raise DomainError('feature_disabled','Local storage is unavailable.',404)
     asset,raw=svc.resolve_signed_asset(request.user,asset_id,request.GET.get('token',''))
     status=200;headers={}
     if request.headers.get('Range'):
-        if asset.kind!='audio_chapter': raise DomainError('range_not_supported','This asset does not support ranges.',416)
+        if asset.kind not in RANGE_KINDS: raise DomainError('range_not_supported','This asset does not support ranges.',416)
         match=re.fullmatch(r'bytes=(\d+)-(\d*)',request.headers['Range'])
         if not match: raise DomainError('invalid_range','Use one bounded bytes range.',416)
         start=int(match[1]);end=int(match[2]) if match[2] else len(raw)-1
@@ -208,7 +211,7 @@ def local_asset(request,asset_id):
     response=HttpResponse(raw,status=status,content_type=asset.content_type)
     response['Cache-Control']='private, no-store';response['X-Content-Type-Options']='nosniff'
     response['Content-Length']=str(len(raw));response['Content-Disposition']='inline'
-    if asset.kind=='audio_chapter': response['Accept-Ranges']='bytes'
+    if asset.kind in RANGE_KINDS: response['Accept-Ranges']='bytes'
     for key,value in headers.items(): response[key]=value
     return response
 
