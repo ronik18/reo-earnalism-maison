@@ -6,15 +6,15 @@
   "items": {
     "film-01": {
       "checks": {
-        "loudness": "pass",
+        "loudness": "fail",
         "true_peak": "pass"
       },
       "contact_sheet": "film-01-contact.jpg",
-      "lufs": -16.3,
-      "sha256": "8192e12ee182ad4ff6f5e1fcda341525e2e96e225d602ff75894c9b5ff92c70b",
-      "true_peak": -1.4
+      "lufs": -17.2,
+      "sha256": "e601f746dfb5f516f989cc01aa28848bd9ab88cf90c69e0c30151c73b3899a6b",
+      "true_peak": -2.5
     }
   },
   "listening": "unassessed until the owner reviews the package",
-  "result": "pass"
+  "result": "fail"
 }

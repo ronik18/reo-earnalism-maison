@@ -11150,18 +11150,80 @@
       "sha256": "8577e53a7c9f1cafbaf5005324f6536e840403750f5d76195a7a09a2d8d43104"
     },
     {
-      "bytes": 17105,
-      "kind": "colab_job",
+      "bytes": 19631,
+      "kind": "timing",
       "meta": {
-        "forecast_units": 5.68905,
-        "inputs_zip": "jobs/stills-film-01-r9/inputs.zip",
-        "job_id": "stills-film-01-r9",
-        "job_kind": "stills",
-        "manifest": "jobs/stills-film-01-r9/build-manifest.json",
-        "month": "2026-11"
+        "target": "film-01"
       },
-      "path": "jobs/stills-film-01-r9/stills.ipynb",
-      "sha256": "0f3528fc46a9bcb2ddfb115aa8787349f111b3d0dbb1048eeddc2b67eb90ea23"
+      "path": "film/film-01/timing.json",
+      "sha256": "c11a2800bc06f8c4de8d043ebde3241e6479b021dff3765e2236322f10f87b21"
+    },
+    {
+      "bytes": 40291,
+      "kind": "subtitles",
+      "meta": {
+        "target": "film-01"
+      },
+      "path": "film/film-01/film-01.srt",
+      "sha256": "0847afb36f055f21f80a9e1f1e3f5d68e7ff51b2e63933dc79cb999e882e352d"
+    },
+    {
+      "bytes": 249784510,
+      "kind": "mix",
+      "meta": {
+        "target": "film-01"
+      },
+      "path": "film/film-01/mix.wav",
+      "sha256": "e94bd3b346381b0509cf7008248d13046de32e419e6ddcdab0cb002bdce874c4"
+    },
+    {
+      "bytes": 202672596,
+      "kind": "film",
+      "meta": {
+        "body_gain_db": -1.2,
+        "clips": 77,
+        "duration": 1303.960583,
+        "lufs": -16.0,
+        "narration_end": 1300.96,
+        "narration_job_id": "narration-elevenlabs-0bca7520",
+        "path": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/film/film-01/film-01.mp4",
+        "scenes": 19,
+        "score": {
+          "cues_sha256": {
+            "cue-1-kshiroda-night.wav": "168d3d271b6b4872b9727227c7e8cba60392f7dba6db9b5617216e9eb25f201e",
+            "cue-2-window-and-judge.wav": "832b8c47bc9e98f6dcaf816ab379c24b4b97114dcc22fe02bdfa14f95d03f99b",
+            "cue-3-dream-and-carriage.wav": "c41fcd765b569fa308dfb6023ba6d0773bb9f84b02a3787f5fbfb5d258bcf207",
+            "cue-4-prison-and-ring.wav": "8afff9cb2960a6ea71e5b38ea10ad3ecd3022114b375aaedabcae85e64475b48"
+          },
+          "route": "ace-step:music-film-01-r4",
+          "sha256": "b7f204ae72f8e9bbb746cb37746ed1fe25e82d3d921f705e12e713c2827eeef0"
+        },
+        "size": [
+          1920,
+          1080
+        ],
+        "stills": {
+          "base": "stills-film-01-r5",
+          "patches": [
+            "stills-film-01-r8-house"
+          ]
+        },
+        "target": "film-01",
+        "true_peak": -1.5
+      },
+      "path": "film/film-01/film-01.mp4",
+      "sha256": "e601f746dfb5f516f989cc01aa28848bd9ab88cf90c69e0c30151c73b3899a6b"
+    },
+    {
+      "bytes": 495,
+      "kind": "qc_report",
+      "meta": {
+        "failed": [
+          "film-01:loudness"
+        ]
+      },
+      "path": "qc/report.json",
+      "sha256": "7cf934200d6c6be1770cca32105dd62564e362b96d407dd3733b4089f68c2e76"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -13046,47 +13108,23 @@
       "stage": "job"
     },
     {
-      "at": "2026-11-24T18:18:28.732215+00:00",
+      "at": "2026-11-24T18:42:06.170167+00:00",
       "detail": {
-        "forecast_units": 5.68905,
-        "job_id": "stills-film-01-r9",
-        "kind": "stills"
-      },
-      "result": "built",
-      "stage": "job"
-    },
-    {
-      "at": "2026-11-24T18:18:28.745172+00:00",
-      "detail": {
-        "job_id": "stills-film-01-r9",
-        "kind": "stills",
+        "duration": 1303.960583,
         "target": "film-01"
       },
-      "result": "job_target",
-      "stage": "cli"
+      "result": "assembled",
+      "stage": "film"
     },
     {
-      "at": "2026-11-24T18:18:45.517379+00:00",
+      "at": "2026-11-24T18:44:10.417844+00:00",
       "detail": {
-        "bytes": 200341,
-        "job_id": "stills-film-01-r9",
-        "key": "exports/colab-exchange/bicharak/stills-film-01-r9/inputs.zip",
-        "sha256": "2a7aa28edc584f89e3b7535bb4ce2b326579ec07c6ce186047a7ac6f56b057b4"
+        "failed": [
+          "film-01:loudness"
+        ]
       },
-      "result": "exchange_uploaded",
-      "stage": "job"
-    },
-    {
-      "at": "2026-11-24T18:19:38.400211+00:00",
-      "detail": {
-        "expires_at": "2026-11-25T18:19:05.915057+00:00",
-        "inputs_key": "exports/colab-exchange/bicharak/stills-film-01-r9/inputs.zip",
-        "inputs_sha256": "2a7aa28edc584f89e3b7535bb4ce2b326579ec07c6ce186047a7ac6f56b057b4",
-        "job_id": "stills-film-01-r9",
-        "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r9/outputs.tar"
-      },
-      "result": "exchange_staged",
-      "stage": "job"
+      "result": "fail",
+      "stage": "qc"
     }
   ],
   "ledger": "../allowance-ledger.json",
