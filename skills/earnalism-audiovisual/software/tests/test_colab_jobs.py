@@ -525,6 +525,29 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class HouseStyleTests(unittest.TestCase):
+    """Owner 2026-11-24: every book's stills use the 2D animated feature-film look of the বিচারক
+    stills he picked (f01s007-6, f01s012-2, f01s018-1, f01s017-3, f01s007-2)."""
+    setUp, build, nb = ColabJobTests.setUp, ColabJobTests.build, ColabJobTests.nb
+
+    def payload(self, r):
+        with zipfile.ZipFile(r["inputs_zip"]) as z:
+            return json.loads(z.read("job.json"))
+
+    def test_every_stills_prompt_carries_the_house_style(self):
+        r = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp on a sill", "seed": 1}]})
+        prompt = self.payload(r)["items"][0]["prompt"]
+        self.assertTrue(prompt.startswith("a lamp on a sill"))
+        self.assertTrue(prompt.endswith(colab_jobs.HOUSE_STYLE))
+        self.assertIn("2D animated", colab_jobs.HOUSE_STYLE)
+
+    def test_a_prompt_asking_for_another_style_is_refused(self):
+        for clash in ("oil-on-canvas realism", "photorealistic portrait", "storybook watercolour",
+                      "not a cartoon"):
+            with self.assertRaises(ValueError) as caught:
+                self.build("stills", {"items": [{"key": "a", "prompt": f"a lamp, {clash}", "seed": 1}]})
+            self.assertIn("house style", str(caught.exception))
+
 class MusicInstallTests(unittest.TestCase):
     """ACE-Step pins spacy==3.8.4, which has no Python 3.13 build (Colab runs 3.13 since 2026)."""
 
