@@ -119,6 +119,22 @@ Dialogue coloured by small shifts of pace and intensity, never by character impe
    turns, where the reveal lands, how it ends. A suspenseful word does not make a calm
    paragraph frightening.
 
+## Owner decision, 24 November 2026: ElevenLabs narration
+
+The owner approved ElevenLabs (Eleven v3, his Creator plan, whose paid tier carries the
+commercial licence for generated audio) as the narration engine for these and future books,
+after the free Parler storyteller audition fell short of a natural, dramatic storytelling voice.
+
+- **Credits only, never money.** Use only the plan's included credits; at most 60,000 credits in a
+  calendar month without asking again; no top-ups, no overage, no usage-based billing.
+- **Words are the book's, exactly.** Eleven v3 audio tags (`[softly]`, `[sad]`, `[whispers]`,
+  `[trembling voice]`, `[pause]` …) are inserted between the words as performance direction;
+  no word is added, dropped, changed or reordered, and tags are stripped before any text check.
+- **Voice by audition.** Library storyteller voices are auditioned on the same passages; the owner
+  picks one per language. The pick is recorded here before narration.
+- **Audio is fetched from `elevenlabsusercontent.com`** (allowed in this environment) and imported
+  with its sha256 like every other output.
+
 ## Never
 
 - Add, drop, repeat or reorder words. Stage directions are never spoken.
