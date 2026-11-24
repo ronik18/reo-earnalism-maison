@@ -139,6 +139,31 @@ class FilmTests(unittest.TestCase):
         self.assertAlmostEqual(film.LOGO_WIDTH_FRAC * 1920, 362, delta=10)
         self.assertAlmostEqual(film.LOGO_MARGIN_FRAC * 1920, 48, delta=2)
 
+    def test_scene_is_lightened_softly_behind_the_logo(self):
+        """Owner 2026-11-24: lighten the area behind the logo. earnalism-video forbids a solid,
+        feathered or translucent rectangular backing, so the scene gets a soft oval glow that
+        fades to nothing: bright at the lockup, untouched away from it, no hard edge."""
+        t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
+        stills = self.d / "dark"
+        stills.mkdir()
+        for name in ("s1", "s2"):
+            Image.new("RGB", (640, 360), (10, 10, 12)).save(stills / f"{name}.png")
+        clear = self.d / "clear.png"
+        Image.new("RGBA", (240, 72), (0, 0, 0, 0)).save(clear)  # invisible lockup: only the glow shows
+        out = self.d / "glow.mp4"
+        W, H = 640, 360
+        film.assemble(PLAN, t, stills, self.d / "n.wav", clear, clear, out, size=(W, H))
+        frame = self.d / "glow.png"
+        m.ff("-ss", "1", "-i", str(out), "-frames:v", "1", str(frame))
+        img = Image.open(frame).convert("L")
+        lw = int(W * film.LOGO_WIDTH_FRAC)
+        mg = int(W * film.LOGO_MARGIN_FRAC)
+        cx, cy = W - mg - lw // 2, mg + int(lw * 0.3) // 2
+        self.assertGreater(img.getpixel((cx, cy)), 70)                # lightened behind the logo
+        self.assertLess(img.getpixel((20, H - 20)), 25)               # far corner untouched
+        row = [img.getpixel((x, cy)) for x in range(cx - lw, cx + 1)]
+        self.assertLess(max(abs(a - b) for a, b in zip(row, row[1:])), 12)  # no hard edge
+
     def _assemble_inputs(self):
         t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
         stills = self.d / "stills"

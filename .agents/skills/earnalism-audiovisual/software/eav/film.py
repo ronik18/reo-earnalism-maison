@@ -1,5 +1,6 @@
 """Narration track, SRT subtitles and illustrated film assembly (ffmpeg subprocess)."""
 import json
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -15,6 +16,9 @@ TP_MARGIN = 0.2
 ZOOM_END = 0.06  # 1.00 -> 1.06
 LOGO_WIDTH_FRAC = 0.19   # ~365 px at 1920: earnalism-video landscape lockup (x1510/y48)
 LOGO_MARGIN_FRAC = 0.025
+LOGO_ASPECT = 720 / 2400   # the production lockup is 2400x720
+GLOW_ALPHA = 0.5           # peak strength of the light behind the lockup
+GLOW_RGB = (246, 237, 220) # warm ivory
 STILL_EXTS = (".png", ".jpg", ".jpeg", ".webp")
 
 
@@ -197,8 +201,17 @@ def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
     end_input = ["-i", str(end_card)] if end_video else [
         "-loop", "1", "-framerate", str(FPS), "-t", f"{END_CARD_S:.3f}", "-i", str(end_card)]
     args += ["-i", str(logo), *end_input, "-i", str(mixed_audio)]
+    lh = int(lw * LOGO_ASPECT)
+    gx, gy = W - mg - lw // 2, mg + lh // 2  # the lockup's centre
+    glow_png = Path(tempfile.mkdtemp()) / "logo-glow.png"
+    glow = _logo_glow(lw, lh)
+    glow.save(glow_png)
+    args += ["-loop", "1", "-framerate", str(FPS), "-i", str(glow_png)]
     graph.append(f"[{base}:v]scale={lw}:-1[lg]")
-    graph.append(f"[{cur}][lg]overlay=x=W-w-{mg}:y={mg}:format=auto,fps={FPS},"
+    # A soft oval of ivory light under the lockup, fading into the scene (never a box).
+    graph.append(f"[{cur}][{base + 3}:v]overlay=x={gx - glow.width // 2}:y={gy - glow.height // 2}"
+                 f":format=auto:shortest=1[lit]")
+    graph.append(f"[lit][lg]overlay=x=W-w-{mg}:y={mg}:format=auto,fps={FPS},"
                  f"trim=0:{total:.3f},setpts=PTS-STARTPTS[main]")
     graph.append(f"[{base + 1}:v]scale={W}:{H}:force_original_aspect_ratio=decrease,"
                  f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2,fps={FPS},format=yuv420p,setsar=1[end]")
@@ -214,8 +227,25 @@ def assemble(plan, timing, stills_dir, mixed_audio, logo: Path, end_card: Path,
                  "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
                  "-c:a", "aac", "-b:a", "192k", "-t", f"{full:.3f}",
                  "-movflags", "+faststart", str(out)])
+    shutil.rmtree(glow_png.parent, ignore_errors=True)
     return {"duration": full, "narration_end": narr_end, "scenes": len(scenes),
             "clips": n, "size": list(size), "path": str(out), "body_gain_db": gain_db}
+
+
+def _logo_glow(lw: int, lh: int):
+    """Owner 2026-11-24: lighten the scene behind the lockup. A Gaussian oval of warm ivory,
+    strongest at the lockup's centre and fading to nothing well before the image edge, so
+    there is no rectangle, plate or feathered box (earnalism-video EDITORIAL_PRESENTATION)."""
+    import numpy as np
+    from PIL import Image
+    gw, gh = max(4, 4 * lw), max(4, int(2.2 * lw))
+    rx, ry = 0.8 * lw, 1.4 * lh
+    y, x = np.mgrid[0:gh, 0:gw]
+    a = GLOW_ALPHA * np.exp(-(((x - gw / 2) / rx) ** 2 + ((y - gh / 2) / ry) ** 2))
+    rgba = np.zeros((gh, gw, 4), np.uint8)
+    rgba[..., :3] = GLOW_RGB
+    rgba[..., 3] = np.round(a * 255).astype(np.uint8)
+    return Image.fromarray(rgba, "RGBA")
 
 
 def _audio_graph(mixed_idx, end_idx, total, end_s, gain_db):
