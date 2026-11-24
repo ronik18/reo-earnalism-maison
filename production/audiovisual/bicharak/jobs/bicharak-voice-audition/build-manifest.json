@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 1966,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/bicharak-voice-audition",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+  "job_id": "bicharak-voice-audition",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "d717574a1d33810e06cad59c6ea4e8263422444514d7082c8741800adaff2f97",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}

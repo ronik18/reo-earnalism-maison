@@ -5419,6 +5419,20 @@
       },
       "path": "jobs/stills-film-01-r8-house/stills.ipynb",
       "sha256": "c55cc8e99bf76ad24fe4d40125d7d971809bc615916e1c1842732facb7e51039"
+    },
+    {
+      "bytes": 15297,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.0597249999999998,
+        "inputs_zip": "jobs/bicharak-voice-audition/inputs.zip",
+        "job_id": "bicharak-voice-audition",
+        "job_kind": "narration",
+        "manifest": "jobs/bicharak-voice-audition/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/bicharak-voice-audition/narration.ipynb",
+      "sha256": "d717574a1d33810e06cad59c6ea4e8263422444514d7082c8741800adaff2f97"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -6784,6 +6798,49 @@
         "inputs_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
         "job_id": "stills-film-01-r8-house",
         "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r8-house/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:27:16.686382+00:00",
+      "detail": {
+        "forecast_units": 1.0597249999999998,
+        "job_id": "bicharak-voice-audition",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:27:16.691249+00:00",
+      "detail": {
+        "job_id": "bicharak-voice-audition",
+        "kind": "narration",
+        "target": "audition"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-24T04:27:28.234124+00:00",
+      "detail": {
+        "bytes": 25810,
+        "job_id": "bicharak-voice-audition",
+        "key": "exports/colab-exchange/bicharak/bicharak-voice-audition/inputs.zip",
+        "sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:28:11.471705+00:00",
+      "detail": {
+        "expires_at": "2026-11-24T10:27:41.539306+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/bicharak-voice-audition/inputs.zip",
+        "inputs_sha256": "734c1935115852afc3044e78d616c418ee34e312e21921ff56b1442684043f28",
+        "job_id": "bicharak-voice-audition",
+        "outputs_key": "exports/colab-exchange/bicharak/bicharak-voice-audition/outputs.tar"
       },
       "result": "exchange_staged",
       "stage": "job"

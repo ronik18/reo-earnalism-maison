@@ -74,6 +74,20 @@
       },
       "path": "jobs/selfish-giant-stills-film-01-house/stills.ipynb",
       "sha256": "d4559415c63f658b26c1a5dcfefbbc09056048757418727fb91c37e024364d43"
+    },
+    {
+      "bytes": 15349,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.3757833333333331,
+        "inputs_zip": "jobs/selfish-giant-voice-audition/inputs.zip",
+        "job_id": "selfish-giant-voice-audition",
+        "job_kind": "narration",
+        "manifest": "jobs/selfish-giant-voice-audition/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/selfish-giant-voice-audition/narration.ipynb",
+      "sha256": "af09c2733f97484d5bfec2b7c7e6f74d87cef77bd1eae65beb99b6fa0c87f399"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -284,6 +298,49 @@
         "inputs_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
         "job_id": "selfish-giant-stills-film-01-house",
         "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-house/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:27:16.843290+00:00",
+      "detail": {
+        "forecast_units": 1.3757833333333331,
+        "job_id": "selfish-giant-voice-audition",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:27:16.844886+00:00",
+      "detail": {
+        "job_id": "selfish-giant-voice-audition",
+        "kind": "narration",
+        "target": "audition"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-24T04:27:29.369763+00:00",
+      "detail": {
+        "bytes": 25962,
+        "job_id": "selfish-giant-voice-audition",
+        "key": "exports/colab-exchange/the-selfish-giant/selfish-giant-voice-audition/inputs.zip",
+        "sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:28:12.302470+00:00",
+      "detail": {
+        "expires_at": "2026-11-24T10:27:42+00:00",
+        "inputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-voice-audition/inputs.zip",
+        "inputs_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+        "job_id": "selfish-giant-voice-audition",
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-voice-audition/outputs.tar"
       },
       "result": "exchange_staged",
       "stage": "job"

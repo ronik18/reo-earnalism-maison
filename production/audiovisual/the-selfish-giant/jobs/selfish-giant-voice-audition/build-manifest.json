@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 2553,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/the-selfish-giant/selfish-giant-voice-audition",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "ea174566c91c92982e419a9b16181a932803998ba0c8facd7d6c59f88c180365",
+  "job_id": "selfish-giant-voice-audition",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "af09c2733f97484d5bfec2b7c7e6f74d87cef77bd1eae65beb99b6fa0c87f399",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "the-selfish-giant"
+}
