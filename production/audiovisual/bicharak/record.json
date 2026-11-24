@@ -5373,6 +5373,38 @@
       },
       "path": "jobs/stills-film-01-r6-judge/stills.ipynb",
       "sha256": "a62029bfab4b30c2874cbb98c1e45cff2b1ee0cc8d6a5d4684aff3247bb20e15"
+    },
+    {
+      "bytes": 13633,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.7724055555555551,
+        "inputs_zip": "jobs/stills-film-01-r7-review/inputs.zip",
+        "job_id": "stills-film-01-r7-review",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r7-review/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r7-review/stills.ipynb",
+      "sha256": "8cafbd74e7f2cd55a3a6284f162ea5f9352ba51b10ae2b2001c9bf27fd240865"
+    },
+    {
+      "bytes": 2039,
+      "kind": "reel_script",
+      "meta": {
+        "target": "reel-1"
+      },
+      "path": "reels/reel-1/script.json",
+      "sha256": "927f7109dab4eae4edca14cd6228d7a2eec3c79da43ec3c4ee0a90277c6e3c18"
+    },
+    {
+      "bytes": 1733,
+      "kind": "caption",
+      "meta": {
+        "target": "reel-1"
+      },
+      "path": "reels/reel-1/caption.txt",
+      "sha256": "d5de63814aa1a7fa5a852f347bcea82d668a0fa4caa7cd76ac8a4b51d030c9f9"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -6608,6 +6640,58 @@
       },
       "result": "pass",
       "stage": "qc"
+    },
+    {
+      "at": "2026-11-24T04:00:39.014592+00:00",
+      "detail": {
+        "forecast_units": 1.7724055555555551,
+        "job_id": "stills-film-01-r7-review",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:00:39.020206+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r7-review",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-24T04:00:39.309702+00:00",
+      "detail": {
+        "shots": "planned from the measured narration",
+        "target": "reel-1"
+      },
+      "result": "scripted",
+      "stage": "reel"
+    },
+    {
+      "at": "2026-11-24T04:00:52.082192+00:00",
+      "detail": {
+        "bytes": 47450,
+        "job_id": "stills-film-01-r7-review",
+        "key": "exports/colab-exchange/bicharak/stills-film-01-r7-review/inputs.zip",
+        "sha256": "03c0ed219290a1a3ae867c0ceff9bf0debaeb3ab89d4904ddade1202ba9b1ac0"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:01:44.643419+00:00",
+      "detail": {
+        "expires_at": "2026-11-24T10:01:14.430976+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-film-01-r7-review/inputs.zip",
+        "inputs_sha256": "03c0ed219290a1a3ae867c0ceff9bf0debaeb3ab89d4904ddade1202ba9b1ac0",
+        "job_id": "stills-film-01-r7-review",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r7-review/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
