@@ -59,6 +59,14 @@ Root/Integration owns provider mutations; this skill prepares and stages.
   not authorise social posting, and a finished package does not either.
 - Social posting of a public-domain story adaptation needs no Maison format grant, but it
   does need the owner's destination instruction.
+- Posting kit: `python3 -m eav.cli social --root <root> --site https://theearnalism.com
+  --title "<edition title>" --author "<author>" [--quote "<exact words>" ...] [--background
+  <imported still>]` writes `social/`: `links.json` (campaign-tagged title links per
+  [docs/CAMPAIGN_LINKS.md](../../../docs/CAMPAIGN_LINKS.md), so Maison attributes signups to
+  the post), `youtube-film-NN.txt` (description, credits and YouTube chapters taken only from
+  the book's own unit titles, omitted when YouTube would reject them), `<platform>-reel-N.txt`
+  per finished reel, and 1080×1080 `quote-N.png` cards. A quote must be the book's exact
+  words or the command refuses it. Writing the kit posts nothing.
 - Caption: the reel's `caption.txt`. Turn on each platform's AI-content label; the reel
   already carries "AI-generated visuals" for 3 s. Cover = frame 1. Music: "Original
   audio", licence recorded in the production record.

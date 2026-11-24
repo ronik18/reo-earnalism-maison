@@ -61,6 +61,9 @@ def context(request, locale, **extra):
         "content_languages": [{"code":"en","label":"English"},{"code":"bn","label":"Bengali"}],
         "return_to": safe_return(request.POST.get("return_to", request.GET.get("return_to", request.get_full_path())), locale),
         "next_page_url":None,
+        # A visitor who arrived on a tagged campaign link returns to that page after signing up,
+        # which also carries the first-party attribution tags (docs/CAMPAIGN_LINKS.md).
+        "signup_return_to": safe_return(request.get_full_path(), locale) if request.method == "GET" and request.GET.get("utm_source") else reverse("web:explore", args=["en"]),
         "safe_request_id":str(getattr(request,"request_id","")), "retry_url":safe_return(request.get_full_path(),locale) if request.method=="GET" else "",
         "free_access":getattr(django_settings,"FREE_ACCESS_ENABLED",False),
         "free_access_available":getattr(django_settings,"FREE_ACCESS_ENABLED",False) and trusted_territory(request) in django_settings.MAISON_PUBLICATION_TERRITORIES,
@@ -220,7 +223,8 @@ def title(request, locale, identifier):
         if pair.get('back'):back_cover='/api/v1/staff/draft-covers/'+pair['back']['asset_id']
     download_bootstrap = {"edition_revision_id":edition["edition_revision_id"],"unit_ids":[u["unit_id"] for u in units],"units":[{"unit_id":u["unit_id"],"title":u["title"]} for u in units],"formats":edition["downloadable_formats"],"title":edition["title"],"locale":edition["locale"]} if django_settings.FEATURES.get("offline_text_audio") and edition["published_at"] and request.user.is_authenticated else None
     sample = public_preview_data(request, edition) if django_settings.FEATURES.get("audio") else {}
-    return page(request, locale, "web/title.html", edition=edition, units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
+    from learning.classroom import is_teacher
+    return page(request, locale, "web/title.html", teacher=is_teacher(request.user), edition=edition, units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
 
 
 @require_GET
@@ -525,7 +529,67 @@ def track(request, locale, track_id):
     from learning.services import track_detail, interview_questions_page
     data = track_detail(request.user, track_id)
     result = interview_questions_page(request,request.user,track_id) if data.get("kind") == "sde_interview" and data.get("access") != "locked" else {"items":[],"next_cursor":None}
-    return page(request, locale, "web/track.html", track=data, questions=result["items"], next_cursor=result["next_cursor"], active_nav="learn")
+    from learning.classroom import is_teacher
+    return page(request, locale, "web/track.html", track=data, questions=result["items"], next_cursor=result["next_cursor"], active_nav="learn", teacher=is_teacher(request.user))
+
+
+@require_GET
+@member_required
+@domain_view
+def classroom(request, locale, edition_id, unit_id):
+    from learning.classroom import open_classroom
+    from library.services import edition_units
+    document = open_classroom(request.user, edition_id, unit_id, trusted_territory(request))
+    units = edition_units(edition_id, territory=trusted_territory(request), user=request.user)
+    index = next((i for i, u in enumerate(units) if u["unit_id"] == str(unit_id)), 0)
+    step = lambda i: reverse("web:classroom", args=[locale, edition_id, units[i]["unit_id"]]) if 0 <= i < len(units) else None
+    return page(request, locale, "web/classroom.html", document=document, edition=document["edition"],
+                previous_unit_url=step(index - 1), next_unit_url=step(index + 1), focused=True, active_nav="explore")
+
+
+@require_GET
+@member_required
+@domain_view
+def worksheet(request, locale, track_id):
+    from django.http import HttpResponse
+    from learning.classroom import require_teacher
+    from learning.worksheet import render
+    require_teacher(request.user)
+    answers = request.GET.get("answers") == "1"
+    response = HttpResponse(render(track_id, answers=answers), content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="earnalism-{"answer-key" if answers else "worksheet"}-{track_id}.pdf"'
+    response["Cache-Control"] = "private, no-store"
+    return response
+
+
+@require_POST
+@member_required
+@domain_view
+def certificate_issue(request, locale, track_id):
+    request.user.request_territory = trusted_territory(request)
+    from learning.services import issue_certificate
+    cert = issue_certificate(request.user, track_id, request.POST.get("display_name", ""))
+    return HttpResponseRedirect(reverse("web:certificate", args=[locale, cert.id]))
+
+
+@require_GET
+@domain_view
+def certificate(request, locale, certificate_id):
+    from learning.services import certificate_public
+    data = certificate_public(certificate_id)
+    owner = data.pop("owner_id")
+    own = request.user.is_authenticated and owner == request.user.pk
+    return page(request, locale, "web/certificate.html", certificate=data, own_certificate=own,
+                share_url=django_settings.PUBLIC_BASE_URL.rstrip("/") + request.path, active_nav="learn")
+
+
+@require_POST
+@member_required
+@domain_view
+def certificate_withdraw(request, locale, certificate_id):
+    from learning.services import withdraw_certificate
+    withdraw_certificate(request.user, certificate_id)
+    return HttpResponseRedirect(reverse("web:learn", args=[locale]))
 
 
 @require_GET

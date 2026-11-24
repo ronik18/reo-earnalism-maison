@@ -461,3 +461,27 @@ STRINGS.update({
 })
 
 STRINGS.update({'support_not_collected': ('The contact form is unavailable. No message was collected. Please email sales@reoenterprise.org.', 'যোগাযোগের ফর্ম এখন উপলব্ধ নয়। কোনো বার্তা সংগ্রহ করা হয়নি। sales@reoenterprise.org-এ ইমেল করুন।')})
+
+STRINGS.update({
+    "certificate": ("Certificate of completion", "সমাপ্তির শংসাপত্র"),
+    "certificate_completed": ("completed every lesson of", "সম্পূর্ণ করেছেন সব পাঠ"),
+    "certificate_lessons": ("Lessons completed", "সম্পন্ন পাঠ"),
+    "certificate_issued": ("Issued", "প্রদানের তারিখ"),
+    "certificate_verify": ("Anyone with this link can check this certificate.", "এই লিঙ্ক থাকলে যে কেউ শংসাপত্রটি যাচাই করতে পারবেন।"),
+    "certificate_get": ("Get your certificate", "আপনার শংসাপত্র নিন"),
+    "certificate_name": ("Name to show on the certificate", "শংসাপত্রে যে নাম দেখাবে"),
+    "certificate_name_help": ("Anyone you share the link with will see this name.", "লিঙ্কটি যাঁদের দেবেন, তাঁরা এই নাম দেখবেন।"),
+    "certificate_view": ("View your certificate", "আপনার শংসাপত্র দেখুন"),
+    "certificate_withdraw": ("Withdraw certificate", "শংসাপত্র প্রত্যাহার করুন"),
+    "certificate_ready": ("You finished every lesson.", "আপনি সব পাঠ শেষ করেছেন।"),
+})
+
+STRINGS.update({
+    "classroom_mode": ("Classroom mode", "শ্রেণিকক্ষ মোড"),
+    "classroom_help": ("Use → or Space for the next paragraph, ← for the previous one, F for full screen.", "পরের অনুচ্ছেদের জন্য → বা স্পেস, আগেরটির জন্য ←, পূর্ণ পর্দার জন্য F চাপুন।"),
+    "classroom_previous": ("Previous paragraph", "আগের অনুচ্ছেদ"),
+    "classroom_next": ("Next paragraph", "পরের অনুচ্ছেদ"),
+    "classroom_full_screen": ("Full screen", "পূর্ণ পর্দা"),
+    "worksheet": ("Printable worksheet", "ছাপার অনুশীলনী"),
+    "answer_key": ("Answer key", "উত্তরমালা"),
+})

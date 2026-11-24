@@ -92,6 +92,12 @@ def _write_export(user,file,deadline,allowed_sections=None):
         'mandates':Mandate.objects.filter(user=user,subscription__user=user).values('id','status','revocation_pending','method','created_at','revoked_at','version',subscription_id=F('subscription__id')),
         'refunds':Refund.objects.filter(payment__order__user=user).values('id','amount_minor','proposed_amount_minor','currency','status','created_at','processed_at'),
     }
+    from learning.models import ClassroomSession
+    arrays['classroom_sessions']=ClassroomSession.objects.filter(teacher=user).values('edition_id','unit_id','started_at')
+    from learning.models import Certificate
+    arrays['certificates']=Certificate.objects.filter(user=user).values('id','track_id','display_name','lessons_completed','issued_at')
+    from .models import SignupAttribution
+    arrays['signup_attribution']=SignupAttribution.objects.filter(user=user).values('source','campaign','content','landing_path','created_at')
     from .models import GuardianAuthorization
     arrays['guardian_authorizations_given']=GuardianAuthorization.objects.filter(guardian=user).values('id','prospective_subject_id','jurisdiction','purpose','notice_version','method','status','created_at','reviewed_at','expires_at','withdrawn_at','claimed_at')
     arrays['guardian_authorizations_received']=GuardianAuthorization.objects.filter(child=user).values('id','jurisdiction','purpose','notice_version','method','status','created_at','reviewed_at','expires_at','withdrawn_at','claimed_at')
@@ -208,6 +214,10 @@ def delete_account(job):
         authority={k:current.payload[k] for k in ('guardian_authorization_id','guardian_requester_id') if k in current.payload}
         current.payload={'delete_export_keys':sorted(keys),'delete_retained_categories':retained_categories,**authority};current.save(update_fields=['payload'])
         now=timezone.now()
+        from learning.models import Certificate
+        Certificate.objects.filter(user=user).delete()
+        from learning.models import ClassroomSession
+        ClassroomSession.objects.filter(teacher=user).delete()
         delete_personal_data(user);LessonCompletion.objects.filter(user=user).delete();QuizAttempt.objects.filter(user=user).delete()
         DownloadLicense.objects.filter(user=user,revoked_at=None).update(revoked_at=now)
         Session.objects.filter(session_key__in=user.devices.exclude(session_id=None).values_list('session_id',flat=True)).delete()
@@ -218,6 +228,8 @@ def delete_account(job):
             from allauth.account.models import EmailAddress
             from allauth.socialaccount.models import SocialAccount
             SocialAccount.objects.filter(user=user).delete();EmailAddress.objects.filter(user=user).delete()
+        from .models import SignupAttribution
+        SignupAttribution.objects.filter(user=user).delete()
         Preferences.objects.filter(user=user).delete();Consent.objects.filter(user=user).delete();EmailActionToken.objects.filter(user=user).delete();MFARecoveryCode.objects.filter(user=user).delete()
         from django.apps import apps
         if apps.is_installed('django_otp.plugins.otp_totp'):

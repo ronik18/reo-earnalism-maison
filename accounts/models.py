@@ -169,3 +169,29 @@ class GuardianAuthorization(models.Model):
             models.CheckConstraint(condition=models.Q(version__gte=1),name='maison_guardian_version'),
             models.CheckConstraint(condition=~models.Q(status='authorized') | (models.Q(reviewed_at__isnull=False) & ~models.Q(evidence_sha256='')),name='maison_guardian_review_evidence'),
         ]
+
+
+ATTRIBUTION_SOURCES=('youtube','instagram','facebook','x','whatsapp','newsletter','google_play','podcast','school','partner','other')
+
+
+class SignupAttribution(models.Model):
+    """First-touch campaign for one self-registered member, from our own tagged links only.
+
+    Captured from the allow-listed utm_* values that travel inside return_to; no cookie,
+    fingerprint or third-party identifier. Reported only as aggregates (accounts.attribution).
+    """
+    user=models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True,related_name='signup_attribution')
+    source=models.CharField(max_length=16,choices=[(x,x) for x in ATTRIBUTION_SOURCES])
+    campaign=models.CharField(max_length=64,blank=True)
+    content=models.CharField(max_length=64,blank=True)
+    landing_path=models.CharField(max_length=200,blank=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table='maison_signup_attribution'
+        indexes=[models.Index(fields=['created_at','source'],name='maison_attribution_week_idx')]
+        constraints=[
+            models.CheckConstraint(condition=models.Q(source__in=ATTRIBUTION_SOURCES),name='maison_attribution_source'),
+            models.CheckConstraint(condition=models.Q(campaign__regex=r'^([a-z0-9][a-z0-9-]{0,63})?$'),name='maison_attribution_campaign_slug'),
+            models.CheckConstraint(condition=models.Q(content__regex=r'^([a-z0-9][a-z0-9-]{0,63})?$'),name='maison_attribution_content_slug'),
+            models.CheckConstraint(condition=models.Q(landing_path='')|models.Q(landing_path__regex=r'^/(en|bn)/[A-Za-z0-9/_.-]{0,196}$'),name='maison_attribution_landing_path'),
+        ]

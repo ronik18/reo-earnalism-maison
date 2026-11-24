@@ -150,7 +150,9 @@ def _abandoned(user, cutoff):
         return False
     # Only untouched registration scaffolding may cascade. Every other known or
     # future FK/M2M relationship conservatively means activity or an obligation.
-    allowed = {Preferences, Consent, EmailActionToken, OutboxJob, AuditEvent}
+    from .models import SignupAttribution
+    # First-touch campaign attribution is written with registration; it is not activity.
+    allowed = {Preferences, Consent, EmailActionToken, OutboxJob, AuditEvent, SignupAttribution}
     from django.apps import apps
     if apps.is_installed('allauth.account'):
         from allauth.account.models import EmailAddress

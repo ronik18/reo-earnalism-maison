@@ -17,6 +17,7 @@ const result = await build({
     account: "client/account.tsx",
     shell: "client/shell.ts",
     commerce: "client/commerce.tsx",
+    classroom: "client/classroom.ts",
   },
   outdir,
   bundle: true,

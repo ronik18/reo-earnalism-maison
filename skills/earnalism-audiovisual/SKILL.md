@@ -26,8 +26,8 @@ python3 -m eav.cli status --root <title root>      # prints the next owner actio
 ```
 
 Commands: `init`, `plan`, `job`, `import`, `supersede` (never ran), `close` (ran, not
-imported: settles the actual CU), `film`, `reel`, `qc`, `status`, `bundle-audio`
-(usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
+imported: settles the actual CU), `film`, `reel`, `qc`, `status`, `bundle-audio`,
+`social` (posting kit; see [publishing](references/publishing.md)) (usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
 inputs to get past it.
 

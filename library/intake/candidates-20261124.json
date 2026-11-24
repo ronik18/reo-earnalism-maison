@@ -1,0 +1,21 @@
+{
+  "schema": "earnalism.title-candidates.v1",
+  "status": "RESEARCH_SCREEN_NOT_CLEARANCE",
+  "note": "Bengali short works for the content flywheel (revenue plan Step 2.1). Years are from public reference sources and must be confirmed against the exact source edition; every title still needs a licensed text source, cover provenance and the owner-approved per-title evidence record before import or publication.",
+  "candidates": [
+    {"slug": "kabuliwala", "title": "কাবুলিওয়ালা", "author": "রবীন্দ্রনাথ ঠাকুর", "author_died": 1941, "first_published": 1892, "first_published_ref": "Sadhana, 1892 (Daily Star Bangla)", "form": "short story", "audience": "family"},
+    {"slug": "postmaster", "title": "পোস্টমাস্টার", "author": "রবীন্দ্রনাথ ঠাকুর", "author_died": 1941, "first_published": 1891, "first_published_ref": "Hitabadi, 1891", "form": "short story", "audience": "family"},
+    {"slug": "chhuti", "title": "ছুটি", "author": "রবীন্দ্রনাথ ঠাকুর", "author_died": 1941, "first_published": 1893, "first_published_ref": "Sadhana, 1892-93; confirm against source edition", "form": "short story", "audience": "family"},
+    {"slug": "samapti", "title": "সমাপ্তি", "author": "রবীন্দ্রনাথ ঠাকুর", "author_died": 1941, "first_published": 1893, "first_published_ref": "Sadhana, 1893", "form": "short story", "audience": "family"},
+    {"slug": "kshudhita-pashan", "title": "ক্ষুধিত পাষাণ", "author": "রবীন্দ্রনাথ ঠাকুর", "author_died": 1941, "first_published": 1895, "first_published_ref": "Sadhana, 1895", "form": "short story", "audience": "teen-adult"},
+    {"slug": "tuntunir-boi", "title": "টুনটুনির বই", "author": "উপেন্দ্রকিশোর রায়চৌধুরী", "author_died": 1915, "first_published": 1911, "first_published_ref": "collection, 1911", "form": "children's tales (series)", "audience": "children-family", "illustrated": true, "review_flags": ["author's own illustrations; screen any later illustrator separately"]},
+    {"slug": "goopy-gyne-bagha-byne", "title": "গুপী গাইন ও বাঘা বাইন", "author": "উপেন্দ্রকিশোর রায়চৌধুরী", "author_died": 1915, "first_published": 1915, "first_published_ref": "Sandesh, 1915", "form": "children's tale", "audience": "children-family"},
+    {"slug": "ha-ja-ba-ra-la", "title": "হ য ব র ল", "author": "সুকুমার রায়", "author_died": 1923, "first_published": 1921, "first_published_ref": "Sandesh, serialised 1921-22", "form": "nonsense novella", "audience": "family"},
+    {"slug": "abol-tabol", "title": "আবোল তাবোল", "author": "সুকুমার রায়", "author_died": 1923, "first_published": 1923, "first_published_ref": "book, 1923", "form": "verse (series of short films)", "audience": "family", "illustrated": true, "review_flags": ["author's own illustrations; screen any later illustrator separately"]},
+    {"slug": "mahesh", "title": "মহেশ", "author": "শরৎচন্দ্র চট্টোপাধ্যায়", "author_died": 1938, "first_published": 1926, "first_published_ref": "collected in Harilakshmi, 1926; confirm first magazine appearance", "form": "short story", "audience": "teen-adult"},
+    {"slug": "ramer-sumati", "title": "রামের সুমতি", "author": "শরৎচন্দ্র চট্টোপাধ্যায়", "author_died": 1938, "first_published": 1914, "first_published_ref": "1914", "form": "novella", "audience": "family"},
+    {"slug": "khirer-putul", "title": "ক্ষীরের পুতুল", "author": "অবনীন্দ্রনাথ ঠাকুর", "author_died": 1951, "first_published": 1896, "first_published_ref": "1896 (Wikipedia: Khirer Putul)", "form": "children's novella", "audience": "children-family"},
+    {"slug": "pather-panchali", "title": "পথের পাঁচালী", "author": "বিভূতিভূষণ বন্দ্যোপাধ্যায়", "author_died": 1950, "first_published": 1929, "first_published_ref": "book, 1929", "form": "novel (multi-part series)", "audience": "teen-adult"},
+    {"slug": "thakurmar-jhuli", "title": "ঠাকুরমার ঝুলি", "author": "দক্ষিণারঞ্জন মিত্র মজুমদার", "author_died": 1957, "first_published": 1907, "first_published_ref": "1907; death year 1956 (Wikipedia) or 1957 (Banglapedia), screened at the later year", "form": "folk tales (compiled)", "audience": "children-family", "review_flags": ["death year disputed (1956/1957)"]}
+  ]
+}
