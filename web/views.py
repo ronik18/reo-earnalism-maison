@@ -646,7 +646,11 @@ def video(request,locale,edition_id):
             from reader.models import Progress
             try:
                 revision = authorize_revision(request.user, edition["edition_revision_id"], "video", territory=trusted_territory(request))
-                rows = Asset.objects.filter(revision=revision, kind="video", provider="stream", state="ready", unit__isnull=False, duration_ms__gt=0, duration_ms=F("unit__duration_ms")).select_related("unit").annotate(video_ordinal=F("unit__ordinal"))
+                from library.services import video_provider
+                provider = video_provider()
+                rows = Asset.objects.filter(revision=revision, kind="video", provider=provider, state="ready", unit__isnull=False, duration_ms__gt=0).select_related("unit").annotate(video_ordinal=F("unit__ordinal"))
+                if provider == "stream":
+                    rows = rows.filter(duration_ms=F("unit__duration_ms"))
                 selected = None
                 if request.GET.get("asset"):
                     selected = rows.filter(pk=UUID(request.GET["asset"])).first()
@@ -660,10 +664,15 @@ def video(request,locale,edition_id):
                 assets = chapter_page["items"]
                 if selected is not None and all(asset.id != selected.id for asset in assets):
                     assets = [selected, *assets]
-                chapters = [{"asset_id":str(asset.id), "unit_id":str(asset.unit_id), "duration_ms":asset.duration_ms, "title":asset.unit.title} for asset in assets]
+                captioned = set(Asset.objects.filter(revision=revision, kind="video_captions", state="ready", unit_id__in=[asset.unit_id for asset in assets]).values_list("unit_id", flat=True))
+                chapters = [{"asset_id":str(asset.id), "unit_id":str(asset.unit_id), "duration_ms":asset.duration_ms, "title":asset.unit.title, "provider":asset.provider,
+                             "sha256":asset.sha256 if asset.provider == "r2" else None,
+                             "captions_url":f"/api/v1/content/video-captions/{asset.id}" if asset.provider == "r2" and asset.unit_id in captioned else None} for asset in assets]
                 next_cursor = chapter_page["next_cursor"]
                 if chapters:
-                    boot.update(enabled=True, chapters=chapters, asset_id=chapters[0]["asset_id"], unit_id=chapters[0]["unit_id"], duration_ms=chapters[0]["duration_ms"], stream_customer_host=customer_host())
+                    boot.update(enabled=True, chapters=chapters, asset_id=chapters[0]["asset_id"], unit_id=chapters[0]["unit_id"], duration_ms=chapters[0]["duration_ms"])
+                    if provider == "stream":
+                        boot["stream_customer_host"] = customer_host()
                     if selected:
                         boot["start_asset_id"] = str(selected.id)
             except DomainError as exc:

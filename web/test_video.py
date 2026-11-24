@@ -20,7 +20,7 @@ class VideoScreensTests(TestCase):
         self.revision.state='live';self.revision.published_at=timezone.now();self.revision.save()
         self.revision.edition.live_revision=self.revision;self.revision.edition.save()
         self.path=f'/en/watch/{self.revision.edition_id}/'
-        self.override_video=override_settings(FEATURES={**settings.FEATURES,'video':True},STREAM_CUSTOMER_HOST='customer-fixture.cloudflarestream.com')
+        self.override_video=override_settings(VIDEO_PROVIDER='stream',FEATURES={**settings.FEATURES,'video':True},STREAM_CUSTOMER_HOST='customer-fixture.cloudflarestream.com')
         self.override_video.enable();self.addCleanup(self.override_video.disable)
 
     def login(self):
