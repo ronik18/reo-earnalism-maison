@@ -5405,6 +5405,20 @@
       },
       "path": "reels/reel-1/caption.txt",
       "sha256": "d5de63814aa1a7fa5a852f347bcea82d668a0fa4caa7cd76ac8a4b51d030c9f9"
+    },
+    {
+      "bytes": 13628,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 2.416916666666667,
+        "inputs_zip": "jobs/stills-film-01-r8-house/inputs.zip",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r8-house/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r8-house/stills.ipynb",
+      "sha256": "c55cc8e99bf76ad24fe4d40125d7d971809bc615916e1c1842732facb7e51039"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -6689,6 +6703,87 @@
         "inputs_sha256": "03c0ed219290a1a3ae867c0ceff9bf0debaeb3ab89d4904ddade1202ba9b1ac0",
         "job_id": "stills-film-01-r7-review",
         "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r7-review/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:11:46.392228+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r6-judge",
+        "reason": "superseded before any run: house style (owner, 24 Nov 2026)",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:11:46.398895+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r6-judge",
+        "reason": "superseded before any run: house style (owner, 24 Nov 2026)"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:11:46.533519+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r7-review",
+        "reason": "superseded before any run: house style (owner, 24 Nov 2026)",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:11:46.540949+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r7-review",
+        "reason": "superseded before any run: house style (owner, 24 Nov 2026)"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:11:46.846224+00:00",
+      "detail": {
+        "forecast_units": 2.416916666666667,
+        "job_id": "stills-film-01-r8-house",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:11:46.851942+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r8-house",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-24T04:11:59.286952+00:00",
+      "detail": {
+        "bytes": 67482,
+        "job_id": "stills-film-01-r8-house",
+        "key": "exports/colab-exchange/bicharak/stills-film-01-r8-house/inputs.zip",
+        "sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T04:12:38.614248+00:00",
+      "detail": {
+        "expires_at": "2026-11-24T10:12:13.939122+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-film-01-r8-house/inputs.zip",
+        "inputs_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r8-house/outputs.tar"
       },
       "result": "exchange_staged",
       "stage": "job"

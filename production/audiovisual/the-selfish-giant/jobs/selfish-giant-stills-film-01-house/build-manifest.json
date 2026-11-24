@@ -1,0 +1,15 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 4024,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/the-selfish-giant/selfish-giant-stills-film-01-house",
+  "inputs_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+  "job_id": "selfish-giant-stills-film-01-house",
+  "kind": "stills",
+  "model": {
+    "repo": "black-forest-labs/FLUX.1-schnell",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "d4559415c63f658b26c1a5dcfefbbc09056048757418727fb91c37e024364d43",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "the-selfish-giant"
+}
