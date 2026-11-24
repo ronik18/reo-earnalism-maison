@@ -150,7 +150,7 @@ Files to touch: `accounts/`, `learning/`, `billing/`, `templates/`
 
 - G0.1 Approve the flywheel title list approach (pre-1931, author died 1955 or earlier, new in-house English translations)?
 - G0.2 Approve first-party UTM attribution (Phase 1)?
-- G0.3 Grant publication authority for YouTube and social posts of cleared titles, and name the channel?
+- G0.3 Grant publication authority for YouTube and social posts of cleared titles, and name the channel? **Answered 24 Nov 2026:** channel `UCw-UnAXdRzqij8_B2TlgQjQ` (https://www.youtube.com/channel/UCw-UnAXdRzqij8_B2TlgQjQ). Uploading still needs the channel owner to authorize upload access (OAuth) for `operations/social_delivery`, and a finished film.
 - G0.4 Distribute audiobooks on Google Play Books (52% share) and approach Storytel, Kuku or Pocket FM for licensing?
 - G0.5 Re-enable the paid Pass (INR 99 / INR 999) once Phase 2 reaches a traffic threshold (proposed: 10,000 monthly title-page visits)?
 - G0.6 Approve a teacher-only classroom licence pilot at about INR 200 per student per year, free for the pilot?
