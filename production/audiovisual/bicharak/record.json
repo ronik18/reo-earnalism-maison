@@ -7836,6 +7836,3318 @@
       },
       "path": "jobs/narration-elevenlabs-0bca7520/scripts/f01s019.txt",
       "sha256": "abdcf665c0e5c703a4977d02218f25b352c765dfa24c409c4ba8c705dc8eeccd"
+    },
+    {
+      "bytes": 780874,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s001-1.png",
+      "sha256": "f9a25fc3f32ff6a3ccb841274e1714024bc6adec94c90d029b4dd7393ea86b64"
+    },
+    {
+      "bytes": 943524,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s001-2.png",
+      "sha256": "0f7e13be602d603fab7a8fd6be511c9947b618be27c593a378af903c4fa6f36a"
+    },
+    {
+      "bytes": 1113260,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s001-3.png",
+      "sha256": "52271d0c1ad6f80ca311fb91bf580c7a044ecbcbff400811e7e1b20d2e57409a"
+    },
+    {
+      "bytes": 1102343,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s001-4.png",
+      "sha256": "a85fee93c4a32fad9f5902f4bcda790af0d618c206be1cb23d00df11d11b91bf"
+    },
+    {
+      "bytes": 891103,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s001-5.png",
+      "sha256": "900969f268c6d0014cdad3b38a017a9572746a615f2c9d8907715edc5bc8ac94"
+    },
+    {
+      "bytes": 921822,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s001-6.png",
+      "sha256": "4674bb2a0f331e53421a245ed1759c5649c65c5b8a351be935ac66221f44f2c6"
+    },
+    {
+      "bytes": 990396,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s002-1.png",
+      "sha256": "3c7a9f4d77b22c9a94b7fbd2ff41667eadf2bee47decf99e0afd9945923e5660"
+    },
+    {
+      "bytes": 1061542,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s002-2.png",
+      "sha256": "e8457be6530848bc7cb3a9ae931ae29397c1d165dfd9a95e9a2fbd34868658dd"
+    },
+    {
+      "bytes": 812940,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s002-3.png",
+      "sha256": "4af789d2e293fc46e2c31415eb43db82a93881665cfe4fdc19cde77ef41bc72e"
+    },
+    {
+      "bytes": 882452,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s002-4.png",
+      "sha256": "cd0bc68b943403d72e06e2f1e89d95f5deaa2a8e754a4c1967d1f786cc035ab0"
+    },
+    {
+      "bytes": 811473,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s003-1.png",
+      "sha256": "b289b190346b30f7b79098c035919c1ba60b11b0a36684e03bd6f7de3a7096db"
+    },
+    {
+      "bytes": 880612,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s003-2.png",
+      "sha256": "e01364d3bb9c3d232b272f8e1b06333f027e8af5ea07a8455bd5936c9f9425a7"
+    },
+    {
+      "bytes": 835768,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s003-3.png",
+      "sha256": "79c24939f958842a748181185696a8e73821afca3777ef9ec39eeb9dbd1e1555"
+    },
+    {
+      "bytes": 880446,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s003-4.png",
+      "sha256": "a59802213c701c30f7f91a12fe9d8409bb32840446520bb9c61ef1c3635b1661"
+    },
+    {
+      "bytes": 680478,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s003-5.png",
+      "sha256": "896012c25a74da46651e83badfbedcebb21f914c2042111a31d2ad891c0f9fd1"
+    },
+    {
+      "bytes": 861423,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s003-6.png",
+      "sha256": "bae1e1f931264200524afb1c26ff0fc415370b62bac309cef45bb9d82cfb5f45"
+    },
+    {
+      "bytes": 952092,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s004-1.png",
+      "sha256": "9b68febd4cc48ac63e8780d30ad7faf536f69b8ab19d4fc09e3b414554b56c57"
+    },
+    {
+      "bytes": 942665,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s004-2.png",
+      "sha256": "796f99513299e7b0bb5eada2254551e95454ea2d2e7a132126447ba5d90d29d0"
+    },
+    {
+      "bytes": 1039284,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s004-3.png",
+      "sha256": "7e22a74732b8bbe18f0cb7ac512fc97b8873a7b8b535db5a7227bc06535cddcf"
+    },
+    {
+      "bytes": 911088,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s005-1.png",
+      "sha256": "baf7d541742020918ff4ea94861431be064311389cf8965d34637926fe731be5"
+    },
+    {
+      "bytes": 999275,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s005-2.png",
+      "sha256": "82feaaf93e3bd8cad5d0c0f823aca56357ed904c93fd5aaaa32c8509e1397f73"
+    },
+    {
+      "bytes": 878246,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s005-3.png",
+      "sha256": "1d4055af880c577c0b9df765ba1d4acc1e95e3d49606809a532d777e042dbd14"
+    },
+    {
+      "bytes": 1224669,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s005-4.png",
+      "sha256": "c0154c637408d37ba1c88928126e78bfc4fc43097837f9759922903729765b91"
+    },
+    {
+      "bytes": 864048,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s006-1.png",
+      "sha256": "2ee9faf3397056a971fa7c3db739bc1b007a8559ad6c1816a90c92c55e37a196"
+    },
+    {
+      "bytes": 836820,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s006-2.png",
+      "sha256": "2ee508c05504f6a8e33f9a0676b7ff916b2ca028c2b1f2e4b6d384b06d3aeb7c"
+    },
+    {
+      "bytes": 1054528,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s006-3.png",
+      "sha256": "aaf963f7085c36a1f0074af8e2d0e175db49b3188c234cf22ec9e9d35c8c3a89"
+    },
+    {
+      "bytes": 852651,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s007-1.png",
+      "sha256": "1b4ddb0f6ee396b72af853fd07dfe48bc18a275ba1b9f3eb2d1cf0d6fa7871c2"
+    },
+    {
+      "bytes": 996639,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s007-2.png",
+      "sha256": "0e382566b0cad9a7457bae6c1fd0f0dc07741e68a2e1965d3c7773276a88bee7"
+    },
+    {
+      "bytes": 677067,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s007-3.png",
+      "sha256": "f9df02fb0947d53766bb2a615283e49fef518645e6101dc05b83d7a8e7be9b66"
+    },
+    {
+      "bytes": 1030733,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s007-4.png",
+      "sha256": "ff4e491cce5f3aedb5ef389ee2af124ed0080b01ee0a2faee0983fd345cf9802"
+    },
+    {
+      "bytes": 1095178,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s007-5.png",
+      "sha256": "95d91b9e644abadd72f860939f2d9e82aed45356e46fe002ff10bae0c320346b"
+    },
+    {
+      "bytes": 1071434,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s007-6.png",
+      "sha256": "5b9846a5ffea4f1f2c40ea11283f14e73eaaa3067dc140d21eeeccb8f8fca73f"
+    },
+    {
+      "bytes": 939571,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s008-1.png",
+      "sha256": "0b20e872a8b82e4dba9918135c33c425ebe9bd5a3bbf990d5be7b70e12383b7f"
+    },
+    {
+      "bytes": 853917,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s008-2.png",
+      "sha256": "b06a7d0f3ff68937cb7c5794aa1bdea558b9543710d1b05e44099e54db6f444f"
+    },
+    {
+      "bytes": 952352,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s008-3.png",
+      "sha256": "8e0008b94dd2a01b0679d3afca27d9fcf3f2c0966cb02109d9960f1009f386b4"
+    },
+    {
+      "bytes": 921713,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s009-1.png",
+      "sha256": "4c297dd29727fc8aef39cdba0def2ecee290b9f858a38505c18b77d28d50e5d8"
+    },
+    {
+      "bytes": 1008960,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s009-3.png",
+      "sha256": "3ecd6764215e72c37d2f1b3d554acc664cfd3ad93bc983d3c865ce69a9ee8a50"
+    },
+    {
+      "bytes": 1168690,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s009-4.png",
+      "sha256": "d236ae418ed09856b398fe6be1a5922342ca2ecdc4a6328e121d1e83612551f6"
+    },
+    {
+      "bytes": 869692,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s010-1.png",
+      "sha256": "ce7c4df92470fdbbdf598cd946805d0e90e1ced7305845e624ef1bf4523bddd3"
+    },
+    {
+      "bytes": 659425,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s010-2.png",
+      "sha256": "e178ede081fbd79a108dd5cf4a5f35cb132e9701bc303516b5874e4a4c46b78e"
+    },
+    {
+      "bytes": 954704,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s010-4.png",
+      "sha256": "51e850f7de18d4a80ac555adf721b8dd31e585f5c61c5c8c4b5762be09ae3748"
+    },
+    {
+      "bytes": 1216732,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s010-5.png",
+      "sha256": "6ea844ef2329f79743ee3455db30156a66cd518572e20834acca7fdfa040bcbb"
+    },
+    {
+      "bytes": 807544,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s011-1.png",
+      "sha256": "bf1ec4b0ecf562087b451eeb844798f6cb707bae1002e347ced54279462387d9"
+    },
+    {
+      "bytes": 784883,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s011-2.png",
+      "sha256": "1e74bfa5aaa44fd8aca38a7fdf21479de44ff12373aabcdc17eafb9bc752a381"
+    },
+    {
+      "bytes": 1158434,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s011-4.png",
+      "sha256": "86acfe8e02ff2bfecfa8fb61b5ff63116dbde92401a18f2f4fb23c07bfe76eff"
+    },
+    {
+      "bytes": 1126966,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s011-5.png",
+      "sha256": "8c815175538c94c4911fd2fe8c0ab1254db28b6f57a8d779bda413f42e2b88ad"
+    },
+    {
+      "bytes": 858935,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s012-1.png",
+      "sha256": "48520b70f8e865d83e28f438324f3bf4a291e92198b33662187452ca9c0ea82d"
+    },
+    {
+      "bytes": 1162894,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s012-2.png",
+      "sha256": "9fa712e5340069278b4db84efb7239cff66bb5cb3744e6d48540b8a34b03feeb"
+    },
+    {
+      "bytes": 1055066,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s012-3.png",
+      "sha256": "12769155cfdff87d841408794627af833127ac80bace22dc7d4c8bded43b5be5"
+    },
+    {
+      "bytes": 852245,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s013-1.png",
+      "sha256": "610171b3be06c269b2ea3116c534d509ff9a157513aca877b606ff89f770f3bf"
+    },
+    {
+      "bytes": 1079161,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s013-2.png",
+      "sha256": "5f54863645a10814ec96009191569089e9b28689eafbbb590742fd5890fa0093"
+    },
+    {
+      "bytes": 895898,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s013-3.png",
+      "sha256": "dbfa6f689da4af6344879671df97dbdbd2df86efcec9df970f2d2c1cb3f96320"
+    },
+    {
+      "bytes": 876908,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s013-4.png",
+      "sha256": "484d751fbed9e82da6a2c8de64cb84a3f8674fcfa4018552c9124bdd29d7df0e"
+    },
+    {
+      "bytes": 1166225,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s013-5.png",
+      "sha256": "f8453042df604149a45b6ed531b0faed7d64ebcd25c9501375987c7d5b84198f"
+    },
+    {
+      "bytes": 966468,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s014-1.png",
+      "sha256": "c67dfde3df76eed4889a4a4ed07a3164919d24ce555cd23da8ced3094b253da6"
+    },
+    {
+      "bytes": 1018013,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s014-2.png",
+      "sha256": "8d147fb281bf117a3cc8b2f34a6b9b05e4bb8233bcb844956ee30a2e2dd87c5a"
+    },
+    {
+      "bytes": 809623,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s014-3.png",
+      "sha256": "8aab90cf7cefda80b8158b39f7da9ae16d2d21dec6c323dbce6d3ae3e7f43861"
+    },
+    {
+      "bytes": 1028305,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s015-1.png",
+      "sha256": "92d3bcd23071710be3b394da01565e125416fd8a057f6fde06ad536112216f24"
+    },
+    {
+      "bytes": 905782,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s015-2.png",
+      "sha256": "20872461b979c37395cc03054f295c449407c1276dc48ac3ed2097741b6f20f3"
+    },
+    {
+      "bytes": 1007649,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s015-3.png",
+      "sha256": "bd9c3bd56554c265865c1857e1b98658c4bca91e85a60684b232a6edfec15037"
+    },
+    {
+      "bytes": 954755,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s016-1.png",
+      "sha256": "a165700e2a9067c19b4868fd5e50e5e45796ab2c2bafaa9b8a9d90cf24d42983"
+    },
+    {
+      "bytes": 849379,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s016-2.png",
+      "sha256": "2e2b1e8b92b3755081ca1386e19abb69c6be1fa5e05cc82004409fa1f4da82d8"
+    },
+    {
+      "bytes": 1182352,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s016-3.png",
+      "sha256": "6d1e4d65ca7797aacbea6c237dc381f4ed55e8f7abab6af3859ac9f27fe0541a"
+    },
+    {
+      "bytes": 734863,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s016-4.png",
+      "sha256": "1bb835d7691a6eb06ca0c34ad278eeda5457ed42d0684b562a423323ef3db579"
+    },
+    {
+      "bytes": 948734,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s017-1.png",
+      "sha256": "88c0b1b675f21e3658220b703e5140fa4bdb075c655e15acd97ab60cdd6491f9"
+    },
+    {
+      "bytes": 1330187,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s017-2.png",
+      "sha256": "0c08bad763400c5ac8f125bc994e66afe654ae98426a6c6f8fe5c4938388f9f9"
+    },
+    {
+      "bytes": 1041233,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s018-2.png",
+      "sha256": "de620e208355c41559397d4e520433697c67dbf90b12d72a3b7f1222739ce028"
+    },
+    {
+      "bytes": 818936,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s018-3.png",
+      "sha256": "0c7400a476bcb23abfe8f337511c71818533278c8e32755172db48cf612232f2"
+    },
+    {
+      "bytes": 803708,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s019-1.png",
+      "sha256": "bfe52e298e629364fe1f48292d3404acb2073b26d917ef2a6790653c7487164f"
+    },
+    {
+      "bytes": 966835,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s019-2.png",
+      "sha256": "91478e9f94cc40dc66b315fd6314f5637bdccc78b7aa189d52fcd309d2677f7d"
+    },
+    {
+      "bytes": 925533,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s019-3.png",
+      "sha256": "4c8c2c23f6f51619e66e8efdddf87400b732e9afb83bd28c891d522562e1774e"
+    },
+    {
+      "bytes": 935101,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-film-01-r8-house/f01s019-4.png",
+      "sha256": "8577e53a7c9f1cafbaf5005324f6536e840403750f5d76195a7a09a2d8d43104"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -9512,6 +12824,211 @@
         "reason": "CUDA OOM on L4 with 8-bit transformer under model CPU offload: encode prompts first, free the text encoders, then load the transformer alone; house style moved first so CLIP/T5 truncation never drops it"
       },
       "result": "notebook_rebuilt",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T17:56:34.603591+00:00",
+      "detail": {
+        "actual_units": 2.4,
+        "files": [
+          "stills/stills-film-01-r8-house/f01s001-1.png",
+          "stills/stills-film-01-r8-house/f01s001-2.png",
+          "stills/stills-film-01-r8-house/f01s001-3.png",
+          "stills/stills-film-01-r8-house/f01s001-4.png",
+          "stills/stills-film-01-r8-house/f01s001-5.png",
+          "stills/stills-film-01-r8-house/f01s001-6.png",
+          "stills/stills-film-01-r8-house/f01s002-1.png",
+          "stills/stills-film-01-r8-house/f01s002-2.png",
+          "stills/stills-film-01-r8-house/f01s002-3.png",
+          "stills/stills-film-01-r8-house/f01s002-4.png",
+          "stills/stills-film-01-r8-house/f01s003-1.png",
+          "stills/stills-film-01-r8-house/f01s003-2.png",
+          "stills/stills-film-01-r8-house/f01s003-3.png",
+          "stills/stills-film-01-r8-house/f01s003-4.png",
+          "stills/stills-film-01-r8-house/f01s003-5.png",
+          "stills/stills-film-01-r8-house/f01s003-6.png",
+          "stills/stills-film-01-r8-house/f01s004-1.png",
+          "stills/stills-film-01-r8-house/f01s004-2.png",
+          "stills/stills-film-01-r8-house/f01s004-3.png",
+          "stills/stills-film-01-r8-house/f01s005-1.png",
+          "stills/stills-film-01-r8-house/f01s005-2.png",
+          "stills/stills-film-01-r8-house/f01s005-3.png",
+          "stills/stills-film-01-r8-house/f01s005-4.png",
+          "stills/stills-film-01-r8-house/f01s006-1.png",
+          "stills/stills-film-01-r8-house/f01s006-2.png",
+          "stills/stills-film-01-r8-house/f01s006-3.png",
+          "stills/stills-film-01-r8-house/f01s007-1.png",
+          "stills/stills-film-01-r8-house/f01s007-2.png",
+          "stills/stills-film-01-r8-house/f01s007-3.png",
+          "stills/stills-film-01-r8-house/f01s007-4.png",
+          "stills/stills-film-01-r8-house/f01s007-5.png",
+          "stills/stills-film-01-r8-house/f01s007-6.png",
+          "stills/stills-film-01-r8-house/f01s008-1.png",
+          "stills/stills-film-01-r8-house/f01s008-2.png",
+          "stills/stills-film-01-r8-house/f01s008-3.png",
+          "stills/stills-film-01-r8-house/f01s009-1.png",
+          "stills/stills-film-01-r8-house/f01s009-3.png",
+          "stills/stills-film-01-r8-house/f01s009-4.png",
+          "stills/stills-film-01-r8-house/f01s010-1.png",
+          "stills/stills-film-01-r8-house/f01s010-2.png",
+          "stills/stills-film-01-r8-house/f01s010-4.png",
+          "stills/stills-film-01-r8-house/f01s010-5.png",
+          "stills/stills-film-01-r8-house/f01s011-1.png",
+          "stills/stills-film-01-r8-house/f01s011-2.png",
+          "stills/stills-film-01-r8-house/f01s011-4.png",
+          "stills/stills-film-01-r8-house/f01s011-5.png",
+          "stills/stills-film-01-r8-house/f01s012-1.png",
+          "stills/stills-film-01-r8-house/f01s012-2.png",
+          "stills/stills-film-01-r8-house/f01s012-3.png",
+          "stills/stills-film-01-r8-house/f01s013-1.png",
+          "stills/stills-film-01-r8-house/f01s013-2.png",
+          "stills/stills-film-01-r8-house/f01s013-3.png",
+          "stills/stills-film-01-r8-house/f01s013-4.png",
+          "stills/stills-film-01-r8-house/f01s013-5.png",
+          "stills/stills-film-01-r8-house/f01s014-1.png",
+          "stills/stills-film-01-r8-house/f01s014-2.png",
+          "stills/stills-film-01-r8-house/f01s014-3.png",
+          "stills/stills-film-01-r8-house/f01s015-1.png",
+          "stills/stills-film-01-r8-house/f01s015-2.png",
+          "stills/stills-film-01-r8-house/f01s015-3.png",
+          "stills/stills-film-01-r8-house/f01s016-1.png",
+          "stills/stills-film-01-r8-house/f01s016-2.png",
+          "stills/stills-film-01-r8-house/f01s016-3.png",
+          "stills/stills-film-01-r8-house/f01s016-4.png",
+          "stills/stills-film-01-r8-house/f01s017-1.png",
+          "stills/stills-film-01-r8-house/f01s017-2.png",
+          "stills/stills-film-01-r8-house/f01s018-2.png",
+          "stills/stills-film-01-r8-house/f01s018-3.png",
+          "stills/stills-film-01-r8-house/f01s019-1.png",
+          "stills/stills-film-01-r8-house/f01s019-2.png",
+          "stills/stills-film-01-r8-house/f01s019-3.png",
+          "stills/stills-film-01-r8-house/f01s019-4.png"
+        ],
+        "input_zip_sha256": "b71acceb26c4fe62e748df2eb8bb0717e819484c3ec94d0b0a2ab7f7bdf56b31",
+        "job_id": "stills-film-01-r8-house",
+        "kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s003-6",
+            "f01s007-2",
+            "f01s007-5",
+            "f01s008-3",
+            "f01s009-4",
+            "f01s011-2",
+            "f01s011-4",
+            "f01s012-2",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-3",
+            "f01s018-2",
+            "f01s019-3",
+            "f01s019-4"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-24T17:56:34.623852+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r8-house",
+        "members": [
+          "f01s001-1.png",
+          "f01s001-2.png",
+          "f01s001-3.png",
+          "f01s001-4.png",
+          "f01s001-5.png",
+          "f01s001-6.png",
+          "f01s002-1.png",
+          "f01s002-2.png",
+          "f01s002-3.png",
+          "f01s002-4.png",
+          "f01s003-1.png",
+          "f01s003-2.png",
+          "f01s003-3.png",
+          "f01s003-4.png",
+          "f01s003-5.png",
+          "f01s003-6.png",
+          "f01s004-1.png",
+          "f01s004-2.png",
+          "f01s004-3.png",
+          "f01s005-1.png",
+          "f01s005-2.png",
+          "f01s005-3.png",
+          "f01s005-4.png",
+          "f01s006-1.png",
+          "f01s006-2.png",
+          "f01s006-3.png",
+          "f01s007-1.png",
+          "f01s007-2.png",
+          "f01s007-3.png",
+          "f01s007-4.png",
+          "f01s007-5.png",
+          "f01s007-6.png",
+          "f01s008-1.png",
+          "f01s008-2.png",
+          "f01s008-3.png",
+          "f01s009-1.png",
+          "f01s009-3.png",
+          "f01s009-4.png",
+          "f01s010-1.png",
+          "f01s010-2.png",
+          "f01s010-4.png",
+          "f01s010-5.png",
+          "f01s011-1.png",
+          "f01s011-2.png",
+          "f01s011-4.png",
+          "f01s011-5.png",
+          "f01s012-1.png",
+          "f01s012-2.png",
+          "f01s012-3.png",
+          "f01s013-1.png",
+          "f01s013-2.png",
+          "f01s013-3.png",
+          "f01s013-4.png",
+          "f01s013-5.png",
+          "f01s014-1.png",
+          "f01s014-2.png",
+          "f01s014-3.png",
+          "f01s015-1.png",
+          "f01s015-2.png",
+          "f01s015-3.png",
+          "f01s016-1.png",
+          "f01s016-2.png",
+          "f01s016-3.png",
+          "f01s016-4.png",
+          "f01s017-1.png",
+          "f01s017-2.png",
+          "f01s018-2.png",
+          "f01s018-3.png",
+          "f01s019-1.png",
+          "f01s019-2.png",
+          "f01s019-3.png",
+          "f01s019-4.png",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r8-house/outputs.tar",
+        "outputs_tar_sha256": "73fec0fc7a46ed354e4cf96387b4ce74f3715cb0ff83e06c4ba44196f6dc6586"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],

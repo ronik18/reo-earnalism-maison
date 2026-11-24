@@ -144,8 +144,8 @@
     "job_id": "selfish-giant-music-film-01",
     "title": "the-selfish-giant",
     "month": "2026-11",
-    "units": 1.0411333333333332,
-    "state": "reserved",
+    "units": 0.7,
+    "state": "settled",
     "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
     "root": "the-selfish-giant"
   },
@@ -171,8 +171,8 @@
     "job_id": "stills-film-01-r8-house",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 2.416916666666667,
-    "state": "reserved",
+    "units": 2.4,
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   },
@@ -180,8 +180,8 @@
     "job_id": "selfish-giant-stills-film-01-house",
     "title": "the-selfish-giant",
     "month": "2026-11",
-    "units": 2.1690277777777776,
-    "state": "reserved",
+    "units": 1.4,
+    "state": "settled",
     "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
     "root": "the-selfish-giant"
   },

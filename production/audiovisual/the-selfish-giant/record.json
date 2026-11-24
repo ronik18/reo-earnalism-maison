@@ -2769,6 +2769,2160 @@
       },
       "path": "jobs/narration-elevenlabs-db5b38b5/scripts/f01s015.txt",
       "sha256": "a30fa77897c45a0d580d784b069b407ea3252b472381821f171c0eaadc81127a"
+    },
+    {
+      "bytes": 1528761,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s001-1.png",
+      "sha256": "f4787f84e38ca6b01b113a086c4430cbb5cd969b2628809ffd1580cbf822b2c7"
+    },
+    {
+      "bytes": 1794012,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s001-2.png",
+      "sha256": "8d135c7e8b4c384ae323dc7b24df6ab1a176dcbb1c02c589a16ccece2837582b"
+    },
+    {
+      "bytes": 1857694,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s001-3.png",
+      "sha256": "796c8f9f16bb215000e1e270bd3eea9dd92c3081dd254b7c8564d6d2c6070b91"
+    },
+    {
+      "bytes": 1643827,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s001-4.png",
+      "sha256": "e77c62ebb193d38868d79966b7407bc2c7d935d195032814028acf9e88a8780b"
+    },
+    {
+      "bytes": 1593201,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s002-1.png",
+      "sha256": "48b2f6819ecbe9731ff13b7ff83be5678e06a61320527a313b3212a3b71ecf35"
+    },
+    {
+      "bytes": 1762349,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s002-2.png",
+      "sha256": "609300d2306efbc002b87e5c72656531ea28082ee78e59810f2fadc3ae33ee1d"
+    },
+    {
+      "bytes": 1580433,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s002-3.png",
+      "sha256": "9913360e8bb0304b24485d2915009a6ed8bc5877b6ecf761528c477d23499aee"
+    },
+    {
+      "bytes": 1739429,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s003-1.png",
+      "sha256": "5ece1ead729a8c391510f3bcb7966660dcb8e68726b55a4824d394d8bd0bb2aa"
+    },
+    {
+      "bytes": 1589510,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s003-2.png",
+      "sha256": "65edfe633e29e91220304aa0e649344fdf6ac6a4658bc154b02f85af69accb3a"
+    },
+    {
+      "bytes": 1373190,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s004-1.png",
+      "sha256": "a6d0fd75d8b944c8cf6e6e0b27e82270c93b6b2fd87c6989f60e2627d331d72b"
+    },
+    {
+      "bytes": 1962170,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s004-2.png",
+      "sha256": "88da83220fd0c45d7db24dd93494dc6a545e50fe8a666ddd0d74f8f4a1ebec88"
+    },
+    {
+      "bytes": 1512640,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s004-3.png",
+      "sha256": "8f9cfe295c30711579afd39e215c1d54b8e2ea0a9e70313cd26f45366ae39115"
+    },
+    {
+      "bytes": 2055572,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s005-1.png",
+      "sha256": "d6c405cce5544aef6b8e80a0b7e2eeea0324abb163baa610c59bf393985b9295"
+    },
+    {
+      "bytes": 2211286,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s005-2.png",
+      "sha256": "f0c23ac6f3a9e4cf11182c26f4bb8d1acc8e4311a30199cd388df16e507a97da"
+    },
+    {
+      "bytes": 1712578,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s005-3.png",
+      "sha256": "c961f9c04c9721e211c36ff29dc078a2600054ce648d62d8a82f3d5afa4b09b4"
+    },
+    {
+      "bytes": 2132441,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s005-4.png",
+      "sha256": "a1346a2e172c34dc59a94746cff32c848cb9999c5f8fd953b215b45c01659661"
+    },
+    {
+      "bytes": 1731666,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s005-5.png",
+      "sha256": "0b50c6537d1b3a711a8bd461e5ec45064ccaedecb0b5f69695bc50a85ae289f9"
+    },
+    {
+      "bytes": 1847200,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s005-6.png",
+      "sha256": "baa9e802909282873ec7f746a3fc77aa42d610de0e3b0bd2692c6550e3cedd3f"
+    },
+    {
+      "bytes": 1701238,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s006-1.png",
+      "sha256": "02b0a55f8c1addebaa7063431dd59db31d62c54434107f5345016bc9e3cb7537"
+    },
+    {
+      "bytes": 2027604,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s006-2.png",
+      "sha256": "d18ee36755c5eed46aeafe9792771d619c955ba0eebce6d191744087de2f8a9e"
+    },
+    {
+      "bytes": 1549578,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s006-3.png",
+      "sha256": "3cf94a919578de075c4e343828a3054481a3b22e3178a9a9289fc498ede287e1"
+    },
+    {
+      "bytes": 1685734,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s007-1.png",
+      "sha256": "03d1621770d4860c9c3fa1b7af9542a4b174f3c3e5573bc128c5a42787a5fea1"
+    },
+    {
+      "bytes": 2103663,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s007-2.png",
+      "sha256": "3ac4fd4e1b671b937aaf99291348ebd867150e64147f5ffdf98fd99775c5f88e"
+    },
+    {
+      "bytes": 1200675,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s007-3.png",
+      "sha256": "3fcf72ebcc9883e2dfaba3c7dd2d1b90606ff2d7f345749945f6862404005b2f"
+    },
+    {
+      "bytes": 1154017,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s007-4.png",
+      "sha256": "d2bf20d120f716bd7fca6d58c7058cfd9037b4c1276d3b86c43b5736cc057888"
+    },
+    {
+      "bytes": 1615832,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s007-5.png",
+      "sha256": "127abd3b72bcde809bafe95058fb6c063501182745849a1e05ce09a2c6dab854"
+    },
+    {
+      "bytes": 1455326,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s007-6.png",
+      "sha256": "1f1d3f2d0447269dbb0c3dc1f65ba51532aaa2594b8da17e419609d56e557335"
+    },
+    {
+      "bytes": 1611863,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s008-1.png",
+      "sha256": "5bca0ba8e6edc80d22ac4758ea42f07f48a02c3f68f192c2d7d68307ffbdabb6"
+    },
+    {
+      "bytes": 1661687,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s008-2.png",
+      "sha256": "f0c847c12016715329911bf785429236347300db7643f6f30752ed2e60c9fc28"
+    },
+    {
+      "bytes": 1801400,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s008-3.png",
+      "sha256": "0ee8220cfd6a36a1a43dbdf1b996cc6f0e5bcfb423fd5b9c1a598c0cf9a7b45d"
+    },
+    {
+      "bytes": 2119616,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s008-4.png",
+      "sha256": "8f6c67306dfc5bddc2991d8e1d9f06f114b779bd6ada1766bb6182bf0248cbae"
+    },
+    {
+      "bytes": 1802416,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s008-5.png",
+      "sha256": "b8b065866becdd7dcfd11ac8a8b857c48e8cf694f4619acce2868e8b1eddad5a"
+    },
+    {
+      "bytes": 1968078,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s008-6.png",
+      "sha256": "62b074575132678fd80ff3b1ca95cf26e7367dab3dcf0ff0c5e2aa5bf68ce2b2"
+    },
+    {
+      "bytes": 2067096,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s009-1.png",
+      "sha256": "f6f1ebc24cb82ee11ecc22e662ca884907ac796e5e840a23ef014ac2c2a0057b"
+    },
+    {
+      "bytes": 1627648,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s009-2.png",
+      "sha256": "860d26cd5e194e7a739c7ae4e6ed0282f46552e003098a2b298cdff2e6d84c3e"
+    },
+    {
+      "bytes": 1529031,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s009-3.png",
+      "sha256": "7e77cbb601405d0426b34311cf9679ad5fab7195f9569398aca2ff33533fcbab"
+    },
+    {
+      "bytes": 1339355,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s009-4.png",
+      "sha256": "277c2500e8faf78fcfadde08c12bab583d65af1aab6e22a88ec701576df16369"
+    },
+    {
+      "bytes": 1717230,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s010-1.png",
+      "sha256": "9472e168525d819007eaa6a8476ea01a90b8d5224cc9ce8567aa7c24a2457a9c"
+    },
+    {
+      "bytes": 1877345,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s010-2.png",
+      "sha256": "a043c2a8263c44f48c00ab1e768978d8f8cf396413b110c12159d3320f264255"
+    },
+    {
+      "bytes": 1543827,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s010-3.png",
+      "sha256": "0e3528a899cb724ddc903984f23f0c3a52c8f885ccbe19fac5f2198a6c72c777"
+    },
+    {
+      "bytes": 1537606,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s010-4.png",
+      "sha256": "5b79e16ba4db627d2b5b44515656901a90c091c7554c61defae704a19d4910a0"
+    },
+    {
+      "bytes": 1356730,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s010-5.png",
+      "sha256": "d8b234acec7fb20ef4aa3874de8e830d43a0363e160d5e997d41ac4f33372af6"
+    },
+    {
+      "bytes": 1435143,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s010-6.png",
+      "sha256": "5037455ed85caf994a14a885c0c3047fc4303b8e414ac48066ee9e810b77f529"
+    },
+    {
+      "bytes": 2106694,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s011-1.png",
+      "sha256": "25eb54953a2ad48764d2c6aa7e157edfae4ecbc75d53611a7c3451a5229ac3be"
+    },
+    {
+      "bytes": 1893134,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s011-2.png",
+      "sha256": "3b38597e295b8849447e7f7214d26a47b516f48f05d20249521120a46db7e948"
+    },
+    {
+      "bytes": 1545400,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s011-3.png",
+      "sha256": "9e8a79002656dd7b0ba9b31e4b8cd53c058ea4d0eac1917c62ee01671100bbdf"
+    },
+    {
+      "bytes": 1598398,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s012-1.png",
+      "sha256": "b6ec09f972c0892276a60ca814350ca96d42348805bfce98307e0099f1f53fb1"
+    },
+    {
+      "bytes": 1595588,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s012-2.png",
+      "sha256": "5b1872bd94891c2cd29910c81f6045009ee24395e03657a3027d7f9f084b2566"
+    },
+    {
+      "bytes": 1867762,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s012-3.png",
+      "sha256": "c7e5e1bb53537174d0cff491fdf9951a1c2e213992ae60b7aa0cffc3f5a9d2cf"
+    },
+    {
+      "bytes": 1530829,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s012-4.png",
+      "sha256": "ceb3baac635d06d9262b596a4ce42503f31b4efde3592a0fb48a353326e22d39"
+    },
+    {
+      "bytes": 1777430,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s013-1.png",
+      "sha256": "e32f3a2c1003134f193b009a208755d3cf937428748d8317834d9f8d0ede0f69"
+    },
+    {
+      "bytes": 1894660,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s013-2.png",
+      "sha256": "a4b8d8e90fa86b1e19c4d8f15e4123a378117a62f03660f19d0fabdbd826b181"
+    },
+    {
+      "bytes": 1521538,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s013-3.png",
+      "sha256": "58461a1899c07f70fd99992230df963c4f3d7fbd812c70ff0b673c991b13d95e"
+    },
+    {
+      "bytes": 1515831,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s014-1.png",
+      "sha256": "e7ebe0ecd4eae490d5d5d816a9d5c7e0b2c563e142d4fa89c86c2d6aadeb4c74"
+    },
+    {
+      "bytes": 2076190,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s014-2.png",
+      "sha256": "f5d131c13bbe7fa1607c4dd5410be95a867228c07aac4784c4ac0230c3c39308"
+    },
+    {
+      "bytes": 1787412,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s014-3.png",
+      "sha256": "797efa47d33c101389fc240d8756ce919c3cfc6027f6abe91392989209e422bf"
+    },
+    {
+      "bytes": 1672039,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s014-4.png",
+      "sha256": "ef212e6eec58c859375b1cc8a514d5bf85d7cf5a1d0f5194f0657d06db236f0e"
+    },
+    {
+      "bytes": 1230852,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s014-5.png",
+      "sha256": "7bd2ebaeff80cd335a0e8921c581bd0b935fe516a94a373bce15a578952f12c7"
+    },
+    {
+      "bytes": 1936900,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s015-1.png",
+      "sha256": "6262a6f727e1e86ec16d5da2ac43a25b949a8f3c052cfa62f0c1ce5f5ce3529b"
+    },
+    {
+      "bytes": 1485657,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s015-2.png",
+      "sha256": "e542cf3d377f6d766517db5ce7eb41d19b5c13cddc64d2cd12c90e7307bafe31"
+    },
+    {
+      "bytes": 1834848,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s015-3.png",
+      "sha256": "e34d8e8e79ee2e103a36a3debe27700da1e43fcbf93dc422fe0a4a59aa29454a"
+    },
+    {
+      "bytes": 2103233,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/selfish-giant-stills-film-01-house/f01s015-4.png",
+      "sha256": "e94fe199414464d88a64a1e8353c67a6eece4ce2dc0b420ed7aa7823c3e0989a"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+        "job_id": "selfish-giant-music-film-01",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/selfish-giant-music-film-01/cue-1-the-garden.wav",
+      "sha256": "174b6d514dacb3d25676b87dfdcff98ca69addc167d2515dfcb71a0385d40666"
+    },
+    {
+      "bytes": 1527,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+        "job_id": "selfish-giant-music-film-01",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/selfish-giant-music-film-01/cue-1-the-garden_input_params.json",
+      "sha256": "3924e51a56086938f487a371842519ef1bfa433d5688510ef8cf10d105bfc167"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+        "job_id": "selfish-giant-music-film-01",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/selfish-giant-music-film-01/cue-2-the-long-winter.wav",
+      "sha256": "605181bbe877f944176642da3646897aa33dcd0b1d628bf9d6c4aed9799e9853"
+    },
+    {
+      "bytes": 1513,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+        "job_id": "selfish-giant-music-film-01",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/selfish-giant-music-film-01/cue-2-the-long-winter_input_params.json",
+      "sha256": "3c0feb632ac4907b733396f55ca1d088b400ad9b521dc7a9ac7c450bb3001b93"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+        "job_id": "selfish-giant-music-film-01",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/selfish-giant-music-film-01/cue-3-spring-returns.wav",
+      "sha256": "1f9e831fbede9cd812bc22a036f2480ff105dd6d6170573795ebb00ed3b1aff6"
+    },
+    {
+      "bytes": 1523,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+        "job_id": "selfish-giant-music-film-01",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/selfish-giant-music-film-01/cue-3-spring-returns_input_params.json",
+      "sha256": "235fbdfbecdecae89dc0aac304dee467ab72373cdc59bd700cb58672c8ce043c"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+        "job_id": "selfish-giant-music-film-01",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/selfish-giant-music-film-01/cue-4-paradise.wav",
+      "sha256": "e843dd1dafde573eb9fb4d5e900178717e60c1afb7ffe801b564a036d7feb143"
+    },
+    {
+      "bytes": 1528,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+        "job_id": "selfish-giant-music-film-01",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/selfish-giant-music-film-01/cue-4-paradise_input_params.json",
+      "sha256": "b82322475b195a09a86026aa427604ac3c565c39b253aeaf43acd75eb3b2a8e0"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -3350,6 +5504,236 @@
         "reason": "CUDA OOM on L4 with 8-bit transformer under model CPU offload: encode prompts first, free the text encoders, then load the transformer alone; house style moved first so CLIP/T5 truncation never drops it"
       },
       "result": "notebook_rebuilt",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T17:56:38.684507+00:00",
+      "detail": {
+        "actual_units": 1.4,
+        "files": [
+          "stills/selfish-giant-stills-film-01-house/f01s001-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s001-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s001-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s001-4.png",
+          "stills/selfish-giant-stills-film-01-house/f01s002-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s002-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s002-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s003-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s003-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s004-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s004-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s004-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s005-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s005-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s005-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s005-4.png",
+          "stills/selfish-giant-stills-film-01-house/f01s005-5.png",
+          "stills/selfish-giant-stills-film-01-house/f01s005-6.png",
+          "stills/selfish-giant-stills-film-01-house/f01s006-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s006-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s006-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s007-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s007-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s007-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s007-4.png",
+          "stills/selfish-giant-stills-film-01-house/f01s007-5.png",
+          "stills/selfish-giant-stills-film-01-house/f01s007-6.png",
+          "stills/selfish-giant-stills-film-01-house/f01s008-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s008-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s008-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s008-4.png",
+          "stills/selfish-giant-stills-film-01-house/f01s008-5.png",
+          "stills/selfish-giant-stills-film-01-house/f01s008-6.png",
+          "stills/selfish-giant-stills-film-01-house/f01s009-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s009-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s009-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s009-4.png",
+          "stills/selfish-giant-stills-film-01-house/f01s010-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s010-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s010-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s010-4.png",
+          "stills/selfish-giant-stills-film-01-house/f01s010-5.png",
+          "stills/selfish-giant-stills-film-01-house/f01s010-6.png",
+          "stills/selfish-giant-stills-film-01-house/f01s011-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s011-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s011-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s012-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s012-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s012-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s012-4.png",
+          "stills/selfish-giant-stills-film-01-house/f01s013-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s013-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s013-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s014-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s014-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s014-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s014-4.png",
+          "stills/selfish-giant-stills-film-01-house/f01s014-5.png",
+          "stills/selfish-giant-stills-film-01-house/f01s015-1.png",
+          "stills/selfish-giant-stills-film-01-house/f01s015-2.png",
+          "stills/selfish-giant-stills-film-01-house/f01s015-3.png",
+          "stills/selfish-giant-stills-film-01-house/f01s015-4.png"
+        ],
+        "input_zip_sha256": "8ea0cfdb3c8bd6d9e7c3a244138ac99a64594f2c2ebfe72eca278054d6ebfe22",
+        "job_id": "selfish-giant-stills-film-01-house",
+        "kind": "stills",
+        "model": {
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s010-6"
+          ],
+          "transformer_precision": "bf16"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-24T17:56:38.701152+00:00",
+      "detail": {
+        "job_id": "selfish-giant-stills-film-01-house",
+        "members": [
+          "f01s001-1.png",
+          "f01s001-2.png",
+          "f01s001-3.png",
+          "f01s001-4.png",
+          "f01s002-1.png",
+          "f01s002-2.png",
+          "f01s002-3.png",
+          "f01s003-1.png",
+          "f01s003-2.png",
+          "f01s004-1.png",
+          "f01s004-2.png",
+          "f01s004-3.png",
+          "f01s005-1.png",
+          "f01s005-2.png",
+          "f01s005-3.png",
+          "f01s005-4.png",
+          "f01s005-5.png",
+          "f01s005-6.png",
+          "f01s006-1.png",
+          "f01s006-2.png",
+          "f01s006-3.png",
+          "f01s007-1.png",
+          "f01s007-2.png",
+          "f01s007-3.png",
+          "f01s007-4.png",
+          "f01s007-5.png",
+          "f01s007-6.png",
+          "f01s008-1.png",
+          "f01s008-2.png",
+          "f01s008-3.png",
+          "f01s008-4.png",
+          "f01s008-5.png",
+          "f01s008-6.png",
+          "f01s009-1.png",
+          "f01s009-2.png",
+          "f01s009-3.png",
+          "f01s009-4.png",
+          "f01s010-1.png",
+          "f01s010-2.png",
+          "f01s010-3.png",
+          "f01s010-4.png",
+          "f01s010-5.png",
+          "f01s010-6.png",
+          "f01s011-1.png",
+          "f01s011-2.png",
+          "f01s011-3.png",
+          "f01s012-1.png",
+          "f01s012-2.png",
+          "f01s012-3.png",
+          "f01s012-4.png",
+          "f01s013-1.png",
+          "f01s013-2.png",
+          "f01s013-3.png",
+          "f01s014-1.png",
+          "f01s014-2.png",
+          "f01s014-3.png",
+          "f01s014-4.png",
+          "f01s014-5.png",
+          "f01s015-1.png",
+          "f01s015-2.png",
+          "f01s015-3.png",
+          "f01s015-4.png",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-house/outputs.tar",
+        "outputs_tar_sha256": "e86a787d4bcea488653daa5bf90c4732a3eb2f1f596e299e85f150d2107bb008"
+      },
+      "result": "exchange_collected",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-24T17:56:44.316762+00:00",
+      "detail": {
+        "actual_units": 0.7,
+        "files": [
+          "music/selfish-giant-music-film-01/cue-1-the-garden.wav",
+          "music/selfish-giant-music-film-01/cue-1-the-garden_input_params.json",
+          "music/selfish-giant-music-film-01/cue-2-the-long-winter.wav",
+          "music/selfish-giant-music-film-01/cue-2-the-long-winter_input_params.json",
+          "music/selfish-giant-music-film-01/cue-3-spring-returns.wav",
+          "music/selfish-giant-music-film-01/cue-3-spring-returns_input_params.json",
+          "music/selfish-giant-music-film-01/cue-4-paradise.wav",
+          "music/selfish-giant-music-film-01/cue-4-paradise_input_params.json"
+        ],
+        "input_zip_sha256": "363a768583e4747cce62fb48479589592be2d36b55d133e33e468f1460f64636",
+        "job_id": "selfish-giant-music-film-01",
+        "kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-24T17:56:44.345893+00:00",
+      "detail": {
+        "job_id": "selfish-giant-music-film-01",
+        "members": [
+          "cue-1-the-garden.wav",
+          "cue-1-the-garden_input_params.json",
+          "cue-2-the-long-winter.wav",
+          "cue-2-the-long-winter_input_params.json",
+          "cue-3-spring-returns.wav",
+          "cue-3-spring-returns_input_params.json",
+          "cue-4-paradise.wav",
+          "cue-4-paradise_input_params.json",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-music-film-01/outputs.tar",
+        "outputs_tar_sha256": "cc0e9d1297fef4f295052a705997832401eb29eba5624c48a7f000593ccb4369"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],
