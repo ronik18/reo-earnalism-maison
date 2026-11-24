@@ -38,7 +38,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
-from . import budget, colab_jobs, film, importer, mix, qc, reel, scenes
+from . import budget, colab_jobs, film, importer, mix, qc, reel, scenes, social
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import voice_units
@@ -1157,10 +1157,73 @@ def cmd_status(args):
                   f"(forecast {j['forecast_units']:.2f} CU)")
 
 
+REPO = Path(__file__).resolve().parents[4]
+FONTS = {"bn": REPO / "billing" / "fonts" / "MaisonSansBengali.ttf",
+         "en": REPO / "billing" / "fonts" / "MaisonSansLatin.ttf"}
+
+
+def cmd_social(args):
+    """Write the posting kit: tagged links, film descriptions, reel posts and quote cards."""
+    rec = _record(args.root)
+    plan = _plan(rec)
+    src = rec.data["source"]
+    lang, campaign = plan["language"], rec.data["title_slug"]
+    url = lambda source, content: social.campaign_url(args.site, src["edition_id"], campaign, source, content)
+    out = rec.root / "social"
+    links, written = {}, []
+    tags = list(reel.REQUIRED_TAGS)
+    for n, f in enumerate(plan["plan"]["films"], 1):
+        t = _film_target(n)
+        art = next((a for a in reversed(rec.data["artifacts"]) if a["kind"] == "film" and a["meta"].get("target") == t), None)
+        if art is None:
+            continue
+        timing = _json(rec.root / "film" / t / "timing.json")["units"]
+        units = [u for u in src["units"] if u["unit_id"] in f["unit_ids"]]
+        marks = social.chapters(units, f["scenes"], timing)
+        music = _music_licence(art["meta"]["score"]["route"])
+        credits = [f"Text: {args.author}, public domain in our publishing regions.",
+                   "Narration: Earnalism Voice (AI narration).",
+                   f"Music: {music['source_and_licence'].split(',')[0]}, {music['licence']}.",
+                   "Visuals: AI-generated illustrations."]
+        links[f"youtube-{t}"] = url("youtube", t)
+        path = out / f"youtube-{t}.txt"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(social.film_description(args.title, args.author, links[f"youtube-{t}"], marks, credits, tags),
+                        encoding="utf-8")
+        written.append((path, {"target": t, "chapters": len(marks)}))
+    for folder in sorted((rec.root / "reels").glob("reel-*")) if (rec.root / "reels").is_dir() else []:
+        caption = folder / "caption.txt"
+        if not (caption.is_file() and (folder / f"{folder.name}.mp4").is_file()):
+            continue
+        for platform, clickable in (("youtube", True), ("facebook", True), ("instagram", False)):
+            key = f"{platform}-{folder.name}"
+            links[key] = url(platform, folder.name)
+            path = out / f"{key}.txt"
+            path.write_text(social.reel_post(caption.read_text(encoding="utf-8"), links[key], clickable), encoding="utf-8")
+            written.append((path, {"target": folder.name, "platform": platform}))
+    for i, quote in enumerate(args.quote or [], 1):
+        text = social.verify_quote(quote, src["units"])
+        content = f"quote-{i}"
+        links[f"instagram-{content}"] = url("instagram", content)
+        path = out / f"{content}.png"
+        info = social.quote_card(text, args.author, "theearnalism.com", FONTS.get(lang, FONTS["en"]), FONTS["en"],
+                                 path, Path(args.background) if args.background else None, marks=lang != "bn")
+        written.append((path, {"target": content, **info}))
+    if not written:
+        raise Stop("nothing to write: no assembled film, finished reel or --quote yet", next_action(rec.root))
+    _write_json(out / "links.json", links)
+    written.append((out / "links.json", {"count": len(links)}))
+    for path, meta in written:
+        rec.add_artifact("social_kit", path, meta)
+    rec.event("social", "kit_written", {"files": len(written), "site": args.site})
+    print(f"Social kit: {len(written)} file(s) in {out}. Nothing is posted; posting needs the owner's "
+          "destination instruction and turning on each platform's AI-content label.")
+
+
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "supersede": cmd_supersede, "close": cmd_close,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
-            "bundle-audio": cmd_bundle_audio}
+            "bundle-audio": cmd_bundle_audio, "social": cmd_social}
 
 
 def _parser():
@@ -1219,6 +1282,12 @@ def _parser():
     s.add_argument("--score-dir", help="<unit_id>.wav score bed per chapter (default route)")
     s.add_argument("--score-route", help="with --score-dir: vcsl or ace-step:<imported music job id>")
     s.add_argument("--dry", action="store_true", help="narration only; recorded in the evidence draft")
+    s = add("social")
+    s.add_argument("--site", required=True, help="bare https origin, e.g. https://theearnalism.com")
+    s.add_argument("--title", required=True, help="display title exactly as on the edition")
+    s.add_argument("--author", required=True)
+    s.add_argument("--quote", action="append", help="exact words from the book; one card each")
+    s.add_argument("--background", help="an imported still to darken behind quote cards")
     return p
 
 

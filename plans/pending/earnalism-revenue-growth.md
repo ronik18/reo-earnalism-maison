@@ -137,6 +137,8 @@ Files to touch: `accounts/`, `learning/`, `billing/`, `templates/`
 | Attribution transport (1.1) | Carry `utm_*` inside the existing `return_to` link; capture at registration | No new cookie for anonymous visitors; tagged URLs already bypass the public cache; almost no template changes |
 | Funnel data (1.2) | Derive stages from existing Progress/Completion/Subscription rows; no new event table | Simpler; nothing new to retain or delete; "visit" counts are left to provider analytics |
 | Header CTA on tagged pages | "Start reading free" returns to the tagged page instead of Explore | Found while testing: the header link dropped the tags, losing YouTube visitors who click it |
+| Term screen (2.1) | Code the 9 territory rules once and screen every candidate; reproduce the two approved evidence records as a test | Removes hand arithmetic; caught Thakurmar Jhuli (compiler died 1956/57: in copyright in GB/BR/SG/ID until 2027) |
+| Quote cards (2.2) | Only the book's exact words; Bengali subset font for text, Latin font for the address | Truth rule; the Bengali font subset has no Latin glyphs |
 | Attribution privacy | Allow-listed sources and slugs only; exported with the account, deleted on account deletion, treated as registration scaffolding by abandoned-signup cleanup; none for guardian-managed accounts | Minimal data that still answers "which content brings members" |
 
 ## Not yet specified (Gate 0 questions for the owner)
@@ -161,6 +163,6 @@ Files to touch: `accounts/`, `learning/`, `billing/`, `templates/`
 | --- | --- |
 | Gate 0 | Approved 24 Nov 2026 |
 | 1 Measure | Implemented 24 Nov 2026: `accounts/attribution.py`, migration `accounts/0007`, `funnel_report` command, header CTA keeps tags on tagged pages, guide in `docs/CAMPAIGN_LINKS.md`. Verified by `accounts.test_attribution` (13 tests) and the full suite. Not yet deployed. |
-| 2 Flywheel | Not started |
+| 2 Flywheel | In progress (24 Nov 2026). 2.1: `library/term_check.py` + `term_check` command; 14-title screen in `library/intake/candidates-20261124.json` (11 pass, 2 illustration review, 1 hold). 2.2: `eav social` posting kit (tagged links, YouTube descriptions/chapters, reel posts, exact-word quote cards). 2.3 blocked on owner: first film must be produced (Colab jobs for বিচারক are prepared, none run) and the YouTube channel and upload access named. 2.4 blocked on audio clearance and a Google Play Books partner account. |
 | 3 Pass | Not started |
 | 4 Classroom | Not started |
