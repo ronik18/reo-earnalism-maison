@@ -24,3 +24,4 @@ production/audiovisual/*/stills/*/
 production/audiovisual/*/music/*/
 production/audiovisual/*/film/*/*.wav
 production/audiovisual/*/film/*/*.mp4
+production/audiovisual/*/film/*/stills/
