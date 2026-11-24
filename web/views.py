@@ -223,7 +223,8 @@ def title(request, locale, identifier):
         if pair.get('back'):back_cover='/api/v1/staff/draft-covers/'+pair['back']['asset_id']
     download_bootstrap = {"edition_revision_id":edition["edition_revision_id"],"unit_ids":[u["unit_id"] for u in units],"units":[{"unit_id":u["unit_id"],"title":u["title"]} for u in units],"formats":edition["downloadable_formats"],"title":edition["title"],"locale":edition["locale"]} if django_settings.FEATURES.get("offline_text_audio") and edition["published_at"] and request.user.is_authenticated else None
     sample = public_preview_data(request, edition) if django_settings.FEATURES.get("audio") else {}
-    return page(request, locale, "web/title.html", edition=edition, units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
+    from learning.classroom import is_teacher
+    return page(request, locale, "web/title.html", teacher=is_teacher(request.user), edition=edition, units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
 
 
 @require_GET
@@ -528,7 +529,37 @@ def track(request, locale, track_id):
     from learning.services import track_detail, interview_questions_page
     data = track_detail(request.user, track_id)
     result = interview_questions_page(request,request.user,track_id) if data.get("kind") == "sde_interview" and data.get("access") != "locked" else {"items":[],"next_cursor":None}
-    return page(request, locale, "web/track.html", track=data, questions=result["items"], next_cursor=result["next_cursor"], active_nav="learn")
+    from learning.classroom import is_teacher
+    return page(request, locale, "web/track.html", track=data, questions=result["items"], next_cursor=result["next_cursor"], active_nav="learn", teacher=is_teacher(request.user))
+
+
+@require_GET
+@member_required
+@domain_view
+def classroom(request, locale, edition_id, unit_id):
+    from learning.classroom import open_classroom
+    from library.services import edition_units
+    document = open_classroom(request.user, edition_id, unit_id, trusted_territory(request))
+    units = edition_units(edition_id, territory=trusted_territory(request), user=request.user)
+    index = next((i for i, u in enumerate(units) if u["unit_id"] == str(unit_id)), 0)
+    step = lambda i: reverse("web:classroom", args=[locale, edition_id, units[i]["unit_id"]]) if 0 <= i < len(units) else None
+    return page(request, locale, "web/classroom.html", document=document, edition=document["edition"],
+                previous_unit_url=step(index - 1), next_unit_url=step(index + 1), focused=True, active_nav="explore")
+
+
+@require_GET
+@member_required
+@domain_view
+def worksheet(request, locale, track_id):
+    from django.http import HttpResponse
+    from learning.classroom import require_teacher
+    from learning.worksheet import render
+    require_teacher(request.user)
+    answers = request.GET.get("answers") == "1"
+    response = HttpResponse(render(track_id, answers=answers), content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="earnalism-{"answer-key" if answers else "worksheet"}-{track_id}.pdf"'
+    response["Cache-Control"] = "private, no-store"
+    return response
 
 
 @require_POST

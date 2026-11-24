@@ -475,3 +475,13 @@ STRINGS.update({
     "certificate_withdraw": ("Withdraw certificate", "শংসাপত্র প্রত্যাহার করুন"),
     "certificate_ready": ("You finished every lesson.", "আপনি সব পাঠ শেষ করেছেন।"),
 })
+
+STRINGS.update({
+    "classroom_mode": ("Classroom mode", "শ্রেণিকক্ষ মোড"),
+    "classroom_help": ("Use → or Space for the next paragraph, ← for the previous one, F for full screen.", "পরের অনুচ্ছেদের জন্য → বা স্পেস, আগেরটির জন্য ←, পূর্ণ পর্দার জন্য F চাপুন।"),
+    "classroom_previous": ("Previous paragraph", "আগের অনুচ্ছেদ"),
+    "classroom_next": ("Next paragraph", "পরের অনুচ্ছেদ"),
+    "classroom_full_screen": ("Full screen", "পূর্ণ পর্দা"),
+    "worksheet": ("Printable worksheet", "ছাপার অনুশীলনী"),
+    "answer_key": ("Answer key", "উত্তরমালা"),
+})

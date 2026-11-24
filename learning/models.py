@@ -137,3 +137,16 @@ class Certificate(models.Model):
         constraints=[models.UniqueConstraint(fields=['user','track'],name='maison_certificate_user_track'),
                      models.CheckConstraint(condition=~Q(display_name=''),name='maison_certificate_named'),
                      models.CheckConstraint(condition=Q(lessons_completed__gte=1),name='maison_certificate_lessons')]
+
+
+class ClassroomSession(models.Model):
+    """One projection of a chapter by a pilot teacher; the pilot's usage measure. No student data."""
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    teacher=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='classroom_sessions')
+    edition=models.ForeignKey('library.Edition',on_delete=models.PROTECT)
+    unit=models.ForeignKey('library.Unit',on_delete=models.PROTECT)
+    started_at=models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table='maison_classroom_session'
+        indexes=[models.Index(fields=['teacher','started_at'],name='maison_classroom_teacher_idx')]
+        permissions=[('teach_classroom','Can use classroom mode and printable worksheets')]
