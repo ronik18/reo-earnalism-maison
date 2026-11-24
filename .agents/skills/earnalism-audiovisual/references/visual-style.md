@@ -19,8 +19,33 @@ needs the owner.
 - `eav.colab_jobs.HOUSE_STYLE` is appended to every stills prompt by the job builder. Prompts
   carry only content: who, doing what the text says at that beat, period, place, palette, light.
 - A prompt asking for another look (photoreal, photograph, oil-on-canvas, realism, watercolour,
-  gouache, 3D render, "not a cartoon", "not anime") is refused: describe the content instead.
+  gouache, 3D render) is refused: describe the content instead.
+- A prompt using a negative word (`no`, `not`, `without`, `never`, `none`, `nor`, `n't`) is
+  refused at job build, house style included (see Prompt wording).
 - The world bible's `lens_and_look` names the house style; it never adds a second style.
+
+## Prompt wording: positive only
+
+FLUX.1-schnell runs at guidance 0 with no negative prompt, so every word it reads is something
+to draw: "no bindi" paints a bindi, "no beard" a beard, "no watermark" a watermark (the
+full-size review of 134 stills traced most failures to this). Describe what *is* there:
+
+- Hemshashi, a widow of the 1880s: "bare forehead, bare ears and wrists, plain undecorated
+  white cotton sari" (never "no bindi, no jewellery, no border").
+- Judge Mohit: "smooth clean-shaven face" (never "no beard").
+- Palette words are colours, not light sources: "honey-gold light", never "candle gold" (a
+  candle appears).
+- Clean corners and edges are already in the house style; never write "no text" or "no
+  watermark".
+
+## Candidates, review and pick
+
+A redone shot carries `"candidates": 3` in its stills spec item (1–4, default 1). The job makes
+`<key>--c1.png` … `<key>--cN.png` from seeds `seed` … `seed+N-1`; the forecast counts every
+image. After import a reviewer looks at each candidate at full size and records the best with
+`pick --job <stills job> --choices picks.json` (`{"<key>": <candidate number>}`; a re-run
+replaces the selection). `film` patches only picked candidates, as `<key>.png`, over the base
+set; an unpicked candidates job adds nothing (reported as `unpicked`) and is never the base.
 
 ## What still needs a human look after import
 
@@ -28,11 +53,12 @@ The style does not fix content. Check every imported still at full size for:
 
 - **Faithfulness to the text**: appearance, age and beauty as the author describes them
   (e.g. Tagore's Kshiroda at 38 is "গভীর প্রশান্ত প্রগাঢ় সুন্দর", not haggard).
-- **Period dress and customs**: e.g. a Bengali widow of the 1880s wears a plain white sari
-  with no border, no bindi and no jewellery; no modern suits, watches, cars or wine bars.
+- **Period dress and customs**: e.g. a Bengali widow of the 1880s wears a plain undecorated
+  white sari with a bare forehead and bare wrists; check for modern suits, watches, cars or
+  wine bars.
 - **Anatomy and physics**: hands and fingers, people sitting on something, feet on the ground.
 - **Stray lettering or watermarks**, even small ones in a corner.
 - **Identity drift** between shots of the same character.
 
-Regenerate only the failing stills as a small patch job (`film` applies a later partial
-stills job over the full set).
+Regenerate only the failing stills as a small patch job with candidates, then pick (`film`
+applies a later partial stills job, or a candidates job's picks, over the full set).

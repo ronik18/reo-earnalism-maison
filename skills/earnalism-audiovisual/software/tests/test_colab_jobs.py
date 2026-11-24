@@ -709,3 +709,76 @@ class AccessPreflightTests(unittest.TestCase):
     def test_open_model_runs_without_a_secret(self):
         seen, token = self.run_access("music", secret_error=KeyError("HF_TOKEN"))
         self.assertEqual(seen["call"], ("ACE-Step/ACE-Step-v1-3.5B", None))
+
+
+class PositivePromptTests(unittest.TestCase):
+    """FLUX.1-schnell runs at guidance 0 with no negative prompt: 'no bindi' paints a bindi.
+    Owner 2026-11-24: stills prompts are positive-only, and a redone shot gets candidates."""
+    setUp, build, nb = ColabJobTests.setUp, ColabJobTests.build, ColabJobTests.nb
+    payload = HouseStyleTests.payload
+
+    def stills(self, *items):
+        return self.build("stills", {"items": list(items)})
+
+    def test_house_style_is_the_approved_positive_text(self):
+        self.assertEqual(colab_jobs.HOUSE_STYLE, (
+            "Earnalism house style: 2D animated feature-film illustration, clean confident line art, "
+            "soft cel shading with gentle painterly gradients, expressive faces with large luminous "
+            "eyes, consistent character designs, cinematic composition, clean image edges and plain "
+            "uncluttered corners, hand-drawn cel animation look."))
+        self.assertEqual(colab_jobs.negative_words(colab_jobs.HOUSE_STYLE), [])
+        r = self.stills({"key": "a", "prompt": "a lamp on a sill", "seed": 1})
+        self.assertTrue(self.payload(r)["items"][0]["prompt"].endswith(colab_jobs.HOUSE_STYLE))
+
+    def test_each_negative_word_is_refused(self):
+        for word, prompt in (("no", "Hemshashi, No bindi"), ("not", "a judge, not bearded"),
+                             ("without", "a sari without borders"), ("never", "never smiling"),
+                             ("none", "jewellery: none"), ("nor", "neither rings nor bangles"),
+                             ("n't", "a judge who doesn't wear a beard")):
+            with self.subTest(word=word):
+                with self.assertRaises(ValueError) as caught:
+                    self.stills({"key": "f01s002-1", "prompt": prompt, "seed": 1})
+                msg = str(caught.exception)
+                self.assertIn("f01s002-1", msg)
+                self.assertIn(repr(word), msg)
+                self.assertIn("describe what is there instead (e.g. 'bare forehead', "
+                              "'clean-shaven')", msg)
+        self.assertEqual(list(self.out.iterdir()), [])
+        self.assertEqual(self.ledger._load(), [])
+
+    def test_words_that_only_contain_a_negative_are_allowed(self):
+        self.stills({"key": "a", "prompt": "snow on a knot of notes, nothing else, a nook, "
+                                           "a nordic notice, a nones bell", "seed": 1})
+
+    def test_candidates_expand_into_seeded_files_and_scale_the_forecast(self):
+        one = self.stills({"key": "a", "prompt": "a lamp", "seed": 7})
+        three = self.stills({"key": "a", "prompt": "a lamp", "seed": 7, "candidates": 3},
+                            {"key": "b", "prompt": "a door", "seed": 2})
+        items = self.payload(three)["items"]
+        self.assertEqual([(i["key"], i["seed"]) for i in items],
+                         [("a--c1", 7), ("a--c2", 8), ("a--c3", 9), ("b", 2)])
+        self.assertEqual({i["prompt"] for i in items[:3]}, {items[0]["prompt"]})
+        self.assertEqual([(i.get("base"), i.get("candidate")) for i in items],
+                         [("a", 1), ("a", 2), ("a", 3), (None, None)])
+        self.assertEqual(json.loads(Path(three["manifest"]).read_text())["kind"], "stills")
+        from eav.budget import MARGIN
+        rate = RATES["stills"]
+        per_image = colab_jobs.STILLS_STEPS * rate["s_per_step"] * MARGIN / 3600 * rate["units_per_hour"]
+        # four images against one: the forecast grows by exactly three images' worth
+        self.assertAlmostEqual(three["forecast_units"] - one["forecast_units"], 3 * per_image)
+        self.assertEqual(colab_jobs.job_items("stills", {"items": [
+            {"key": "a", "candidates": 3}, {"key": "b"}]}), 4)
+        src = "".join("".join(c["source"]) for c in self.nb(three)["cells"])
+        self.assertIn('EXPECTED = [item["key"] + ".png" for item in JOB["items"]]', src)
+        self.assertIn("by_text[text] = (pe.cpu(), pooled.cpu())", src)  # one encode per prompt
+
+    def test_candidates_must_be_an_int_from_1_to_4(self):
+        for bad in (0, 5, "2", True, 2.0):
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError) as caught:
+                    self.stills({"key": "a", "prompt": "a lamp", "seed": 1, "candidates": bad})
+                self.assertIn("candidates", str(caught.exception))
+
+    def test_a_key_that_looks_like_a_candidate_file_is_refused(self):
+        with self.assertRaises(ValueError):
+            self.stills({"key": "a--c2", "prompt": "a lamp", "seed": 1})

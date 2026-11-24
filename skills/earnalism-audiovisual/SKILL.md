@@ -45,6 +45,12 @@ inputs to get past it.
 | 8 | Review: automated checks, contact sheets, owner review | `qc`; owner watches the first package | `earnalism-book-audiovisual` |
 | 9 | Publish, only when told and only where told | `bundle-audio` → Maison `attach_audiovisual_audio stage|publish`; social private staging | `earnalism-book-audiovisual`, `earnalism-book-production` |
 
+Redone stills: prompts are positive-only (the builder refuses `no`, `not`, `without`, …;
+describe what is there). Each redone shot gets `"candidates": 3` in its spec item → Colab makes
+`<key>--c1..c3.png` → `import` → a reviewer checks every candidate at full size → `pick --job
+<stills job> --choices <{"<key>": N} json>` → `film` uses only the picked files (as `<key>.png`)
+over the base set; an unpicked candidates job adds nothing ([visual style](references/visual-style.md)).
+
 Recipes: [film](references/film-recipe.md), [house visual style](references/visual-style.md), [reels](references/reel-recipe.md),
 [voice](references/earnalism-voice.md), [free stack](references/free-stack.md),
 [budget](references/compute-budget.md), [record](references/production-record.md),

@@ -39,9 +39,14 @@ DRIVE_ROOT = "/content/drive/MyDrive/earnalism-audiovisual"
 # of the বিচারক stills he chose. Appended to every stills prompt by the job builder (prompts carry
 # content, period, palette and light only); a prompt asking for another look is refused.
 HOUSE_STYLE = ("Earnalism house style: 2D animated feature-film illustration, clean confident line art, "
-               "soft cel shading with gentle painterly gradients, expressive faces with large luminous eyes, "
-               "consistent character designs, cinematic composition. No text, no letters, no signage, "
-               "no watermark, no logos, no extra fingers; not photorealistic, not a 3D render.")
+               "soft cel shading with gentle painterly gradients, expressive faces with large luminous "
+               "eyes, consistent character designs, cinematic composition, clean image edges and plain "
+               "uncluttered corners, hand-drawn cel animation look.")
+# FLUX.1-schnell runs at guidance 0 with no negative prompt: "no bindi" paints a bindi. A stills
+# prompt (house style included) says only what is in the picture.
+NEGATIVE_WORDS = re.compile(r"\b(no|not|without|never|none|nor)\b|n't", re.IGNORECASE)
+MAX_CANDIDATES = 4
+CANDIDATE_SUFFIX = re.compile(r"--c\d+$")
 STYLE_CONFLICTS = ("photoreal", "photograph", "oil-on-canvas", "realism", "watercolour", "watercolor",
                    "gouache", "3d render", "not a cartoon", "not anime", "not a flat illustration")
 KINDS = ("narration", "stills", "music", "reel_clips")
@@ -395,10 +400,26 @@ def narration_units(spec: dict) -> list:
     return units
 
 
+def negative_words(prompt: str) -> list:
+    """The negative words a prompt uses (lowercase, in order); FLUX draws what they name."""
+    return [m.group(0).lower() for m in NEGATIVE_WORDS.finditer(prompt)]
+
+
+def _candidates(item: dict) -> int:
+    n = item.get("candidates", 1)
+    if isinstance(n, bool) or not isinstance(n, int) or not 1 <= n <= MAX_CANDIDATES:
+        raise ValueError(f"stills item {item.get('key')!r} candidates must be an integer from 1 to "
+                         f"{MAX_CANDIDATES}, not {n!r}")
+    return n
+
+
 def job_items(kind: str, spec: dict) -> int:
-    """How many items the job really generates (voice units, stills, cues or shots)."""
+    """How many items the job really generates (voice units, stills images, cues or shots);
+    a stills item with candidates counts once per candidate image."""
     if kind == "narration":
         return len(narration_units(spec))
+    if kind == "stills":
+        return sum(_candidates(s) for s in spec.get("items") or [])
     return len(spec.get("shots" if kind == "reel_clips" else "items") or [])
 
 
@@ -432,14 +453,30 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                 "revision": NARRATION_REVISION, "steps": 1, "compute": compute}
     if kind == "stills":
         _check_model(kind, spec, STILLS_REPO)
+        items = []
         for s in spec["items"]:
             clash = [w for w in STYLE_CONFLICTS if w in s["prompt"].lower()]
             if clash:
                 raise ValueError(f"stills prompt {s['key']!r} asks for {clash[0]!r}, which conflicts with "
                                  f"the house style (references/visual-style.md); describe the content only")
-        items = [{"key": s["key"], "prompt": s["prompt"].rstrip() + " " + HOUSE_STYLE, "seed": int(s["seed"]),
-                  "width": int(s.get("width", 1024)), "height": int(s.get("height", 1024))}
-                 for s in spec["items"]]
+            if CANDIDATE_SUFFIX.search(str(s["key"])):
+                raise ValueError(f"stills key {s['key']!r} ends like a candidate file (--cN); "
+                                 "use candidates instead")
+            prompt = s["prompt"].rstrip() + " " + HOUSE_STYLE
+            negative = negative_words(prompt)
+            if negative:
+                raise ValueError(f"stills prompt {s['key']!r} uses the negative word {negative[0]!r}: "
+                                 "FLUX.1-schnell has no negative prompt and draws what it names; "
+                                 "describe what is there instead (e.g. 'bare forehead', 'clean-shaven')"
+                                 " (references/visual-style.md, Prompt wording)")
+            n, seed = _candidates(s), int(s["seed"])
+            size = {"width": int(s.get("width", 1024)), "height": int(s.get("height", 1024))}
+            if n == 1:
+                items.append({"key": s["key"], "prompt": prompt, "seed": seed, **size})
+                continue
+            # one entry per candidate image, so EXPECTED, the deadline and the manifest see each file
+            items += [{"key": f"{s['key']}--c{c}", "base": s["key"], "candidate": c,
+                       "prompt": prompt, "seed": seed + c - 1, **size} for c in range(1, n + 1)]
         if not items:
             raise ValueError("no stills requested")
         return {"payload": {"items": items}, "repo": STILLS_REPO,

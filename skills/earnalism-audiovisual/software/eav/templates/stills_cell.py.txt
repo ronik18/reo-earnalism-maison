@@ -30,15 +30,19 @@ def look_first(prompt):
 # Phase 1: encode every prompt with only the text encoders on the GPU.
 enc = FluxPipeline.from_pretrained(MODEL_REPO, revision=revision, transformer=None, vae=None,
                                    torch_dtype=torch.bfloat16).to("cuda")
-EMBEDS, t5_cut = {}, []
+# JOB["items"] already has one entry per image: a shot with candidates is <key>--c1 ... --cN
+# (seeds seed .. seed+N-1, one shared prompt), so the candidates are encoded once.
+EMBEDS, t5_cut, by_text = {}, [], {}
 with torch.no_grad():
     for item in JOB["items"]:
         text = look_first(item["prompt"])
-        if len(enc.tokenizer_2(text).input_ids) > T5_MAX:
-            t5_cut.append(item["key"])
-        pe, pooled, _ = enc.encode_prompt(prompt=text, prompt_2=text, device="cuda",
-                                          max_sequence_length=T5_MAX)
-        EMBEDS[item["key"]] = (pe.cpu(), pooled.cpu())
+        if text not in by_text:
+            if len(enc.tokenizer_2(text).input_ids) > T5_MAX:
+                t5_cut.append(item["key"])
+            pe, pooled, _ = enc.encode_prompt(prompt=text, prompt_2=text, device="cuda",
+                                              max_sequence_length=T5_MAX)
+            by_text[text] = (pe.cpu(), pooled.cpu())
+        EMBEDS[item["key"]] = by_text[text]
 print("encoded", len(EMBEDS), "prompts; T5 tail cut on", len(t5_cut), t5_cut)
 del enc
 gc.collect()

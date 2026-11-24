@@ -25,7 +25,9 @@ Write it once per title and reuse it in every prompt:
 - **Character sheets**: for each recurring person a fixed one-line description (age, face,
   hair, clothing, one distinguishing detail), repeated word-for-word in every prompt.
 - **2–3 anchor stills** generated first and reviewed; later prompts quote the same bible.
-- **Negative list**: no text, letters, logos, watermarks, extra fingers, modern objects.
+- **Review list** (checked on the imported stills, never written into a prompt: FLUX.1-schnell
+  draws what a negative names): text, letters, logos, watermarks, extra fingers, modern objects.
+  Prompts are positive-only ([visual-style.md](visual-style.md), Prompt wording).
 
 ## 3. Stills spec (`job stills --film N --spec stills.json`)
 
@@ -34,6 +36,7 @@ Write it once per title and reuse it in every prompt:
             "seed": 101, "width": 1344, "height": 768}]}
 ```
 
+- A redone shot adds `"candidates": 3` (1–4): `<key>--c1..cN.png`, reviewed, then `pick`.
 - Keys are `<scene_id>-<k>` (k = 1..keyframes): `film` finds stills by scene id and
   spreads them evenly across the scene.
 - Each prompt shows what the text says at that beat; never contradict the text. Same seed

@@ -24,6 +24,8 @@
                          [--account <id> --bucket <name>]   (downloads outputs.tar, then import)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
   python3 -m eav.cli close <job_id> --root <dir> --units <CU Colab shows> --reason "<what happened>"
+  python3 -m eav.cli pick --root <dir> --job <stills job id> --choices <{"<key>": N} json file>
+                         (after review: one candidate per <key>--cN still; film uses only picks)
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
   python3 -m eav.cli reel <n> --root <dir> --script <script.json> [--hashtags ...]
@@ -1252,34 +1254,124 @@ def cmd_film(args):
           f"TP {m['true_peak']:.1f} dBTP. Maison video stays held (Stream cost not approved).")
 
 
+_CANDIDATE = re.compile(r"(?P<key>.+)--c(?P<n>[1-9][0-9]*)$")
+
+
+def _stills_files(rec, job_id) -> dict:
+    """{file stem: path} of one imported stills job's images."""
+    folder = rec.root / "stills" / job_id
+    return {p.stem: p for p in sorted(folder.iterdir()) if p.suffix.lower() in film.STILL_EXTS}
+
+
+def _candidate_files(files: dict) -> dict:
+    """{key: {candidate number: path}} for the <key>--cN images of a candidates job."""
+    out = {}
+    for stem, path in files.items():
+        m = _CANDIDATE.fullmatch(stem)
+        if m:
+            out.setdefault(m["key"], {})[int(m["n"])] = path
+    return out
+
+
+def _latest_pick(rec, job_id):
+    picks = _artifacts(rec, "stills_pick", job_id=job_id)
+    return picks[-1]["meta"]["choices"] if picks else None
+
+
+def cmd_pick(args):
+    """Record the reviewer's choice among a stills job's candidates (<key>--cN images)."""
+    rec = _record(args.root)
+    job = next((j for j in _jobs(rec) if j["job_id"] == args.job), None)
+    if job is None or job["kind"] != "stills" or not job["imported"] or _ended(job):
+        raise Stop(f"{args.job} is not an imported stills job",
+                   f"{PROG} status --root {rec.root}; pick names an imported stills job with candidates")
+    cands = _candidate_files(_stills_files(rec, args.job))
+    if not cands:
+        raise Stop(f"stills job {args.job} has no candidate files (<key>--cN.png)",
+                   "Build the redone shots with \"candidates\": N in the stills spec, import, review, pick")
+    choices = _json(args.choices)
+    if not isinstance(choices, dict):
+        raise Stop("the choices file must be a JSON object {\"<key>\": <candidate number>}",
+                   f"Fix {args.choices} and rerun pick")
+    if not choices:
+        raise Stop("the choices file has no choices", f"Name at least one key of {args.job}: "
+                   f"{', '.join(sorted(cands))}")
+    picked = {}
+    for key, n in choices.items():
+        if key not in cands:
+            raise Stop(f"{key!r} has no candidates in {args.job}",
+                       f"Use one of: {', '.join(sorted(cands))}")
+        if isinstance(n, bool) or not isinstance(n, int) or n not in cands[key]:
+            raise Stop(f"{key!r} candidate {n!r} is not one of {args.job}'s "
+                       f"{', '.join(str(c) for c in sorted(cands[key]))}",
+                       f"Fix {args.choices} and rerun pick")
+        path = cands[key][n]
+        picked[key] = {"candidate": n, "file": path.relative_to(rec.root).as_posix(),
+                       "sha256": sha256_file(path)}
+    version = len(_artifacts(rec, "stills_pick", job_id=args.job)) + 1
+    path = _write_json(rec.root / "picks" / f"{args.job}.pick-{version}.json",
+                       {"job_id": args.job, "choices": picked})
+    rec.add_artifact("stills_pick", path, {"job_id": args.job, "choices": picked,
+                                           "version": version})
+    rec.event("pick", "recorded", {"job_id": args.job, "version": version,
+                                   "choices": {k: v["candidate"] for k, v in picked.items()}})
+    print(f"Picked {len(picked)} still(s) of {args.job}: "
+          + ", ".join(f"{k} -> c{v['candidate']}" for k, v in sorted(picked.items()))
+          + ". The film uses only these candidates; a later pick replaces this one.")
+
+
 def _film_stills(rec, t, out):
     """The film's stills: the latest complete stills job, with any later imported job whose
     keys are all already in it applied as a patch (it replaces just those stills, e.g. one
-    character regenerated). Linked into film/<t>/stills so the film reads one folder."""
-    def keyed(job):
-        folder = rec.root / "stills" / job["job_id"]
-        return {p.stem: p for p in sorted(folder.iterdir()) if p.suffix.lower() in film.STILL_EXTS}
-    jobs = [(j, keyed(j)) for j in _jobs(rec) if j["kind"] == "stills" and j["target"] == t
-            and j["imported"] and not _ended(j)]
+    character regenerated). A candidates job (<key>--cN files) is never a base: it patches only
+    its picked candidates, renamed to <key>, and contributes nothing until picked. Linked into
+    film/<t>/stills so the film reads one folder."""
+    jobs = []
+    for j in _jobs(rec):
+        if j["kind"] == "stills" and j["target"] == t and j["imported"] and not _ended(j):
+            files = _stills_files(rec, j["job_id"])
+            jobs.append((j, files, _candidate_files(files)))
     base = None
-    for i, (job, keys) in enumerate(jobs):
+    for i, (job, keys, cands) in enumerate(jobs):
+        if cands:
+            continue
         if base is None or not set(keys) <= set(jobs[base][1]):
             base = i
+    if base is None:
+        raise Stop(f"{t} has no ordinary stills job to use as a base (candidates jobs only patch)",
+                   next_action(rec.root))
     files = dict(jobs[base][1])
-    patches = []
-    for job, keys in jobs[base + 1:]:
-        files.update(keys)
+    patches, unpicked = [], []
+    for job, keys, cands in jobs[base + 1:]:
+        if not cands:
+            files.update(keys)
+            patches.append(job["job_id"])
+            continue
+        choices = _latest_pick(rec, job["job_id"])
+        if not choices:
+            unpicked.append(job["job_id"])
+            continue
+        for key, c in choices.items():
+            src = rec.root / c["file"]
+            if sha256_file(src) != c["sha256"]:
+                raise Stop(f"picked still {c['file']} changed since it was picked",
+                           f"{PROG} pick --root {rec.root} --job {job['job_id']} --choices <json>")
+            files[key] = src
         patches.append(job["job_id"])
     merged = out / "stills"
     if merged.exists():
         shutil.rmtree(merged)
     merged.mkdir()
-    for src in files.values():
+    for key, src in files.items():
+        dst = merged / (key + src.suffix)  # a picked <key>--cN file lands as <key>
         try:
-            os.link(src, merged / src.name)  # same disk: no copy of the image bytes
+            os.link(src, dst)  # same disk: no copy of the image bytes
         except OSError:
-            shutil.copy2(src, merged / src.name)
-    return merged, {"base": jobs[base][0]["job_id"], "patches": patches}
+            shutil.copy2(src, dst)
+    meta = {"base": jobs[base][0]["job_id"], "patches": patches}
+    if unpicked:
+        meta["unpicked"] = unpicked
+    return merged, meta
 
 
 def _line_ends(script, units, timing) -> list:
@@ -1701,7 +1793,7 @@ def cmd_bundle_film(args):
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take,
-            "supersede": cmd_supersede, "close": cmd_close,
+            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio,
@@ -1769,6 +1861,9 @@ def _parser():
     s.add_argument("job_id")
     s.add_argument("--units", type=float, required=True, help="the CU Colab shows the run used")
     s.add_argument("--reason", required=True)
+    s = add("pick", help="choose one candidate per redone still after review")
+    s.add_argument("--job", required=True, help="the imported stills job with <key>--cN candidates")
+    s.add_argument("--choices", required=True, help='JSON file {"<key>": <candidate number>, ...}')
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)

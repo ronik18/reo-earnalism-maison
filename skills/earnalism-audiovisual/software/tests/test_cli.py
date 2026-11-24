@@ -642,6 +642,114 @@ class RoundTwo:
             self.assertEqual((merged / other).read_bytes(),
                              (self.root / "stills" / base / other).read_bytes())
 
+
+    # --- candidates per shot: review, pick, film ------------------------------------------
+    def candidates_ready(self, picked_colour=(0, 200, 0)):
+        """film_ready plus a later stills job with three candidates for the first scene's still."""
+        self.film_ready()
+        scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+        first = f"{scenes[0]['scene_id']}-1"
+
+        def cands(rec, job_id, job_dir, out):
+            for c in (1, 2, 3):
+                colour = picked_colour if c == 2 else (10 * c, 0, 0)
+                Image.new("RGB", (320, 180), colour).save(out / f"{first}--c{c}.png")
+        return scenes, first, self.fake_job("stills", "film-01", cands)
+
+    def film_run(self):
+        bed = self.d / "bed.wav"
+        if not bed.exists():
+            self.noise(bed, 30)
+        return run("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card",
+                   self.d / "end.png", "--score", bed, "--score-route", "vcsl")
+
+    def pick(self, job, choices):
+        path = self.d / "choices.json"
+        path.write_text(json.dumps(choices), encoding="utf-8")
+        return run("pick", "--root", self.root, "--job", job, "--choices", path)
+
+    def test_pick_records_the_chosen_candidates_with_their_sha256(self):
+        scenes, first, job = self.candidates_ready()
+        code, out = self.pick(job, {first: 2})
+        self.assertEqual(code, 0, out)
+        rec = Record.load(self.root)
+        art = [a for a in rec.data["artifacts"] if a["kind"] == "stills_pick"][-1]
+        chosen = self.root / "stills" / job / f"{first}--c2.png"
+        self.assertEqual(art["meta"]["job_id"], job)
+        self.assertEqual(art["meta"]["choices"], {first: {
+            "candidate": 2, "file": f"stills/{job}/{first}--c2.png",
+            "sha256": hashlib.sha256(chosen.read_bytes()).hexdigest()}})
+        self.assertEqual(json.loads((self.root / art["path"]).read_text())["choices"],
+                         art["meta"]["choices"])
+        self.assertTrue(any(e["stage"] == "pick" and e["result"] == "recorded"
+                            and e["detail"]["job_id"] == job for e in rec.data["events"]))
+
+    def test_pick_refuses_bad_jobs_keys_and_numbers(self):
+        scenes, first, job = self.candidates_ready()
+        base = [j for j in cli._jobs(Record.load(self.root)) if j["kind"] == "stills"][0]["job_id"]
+        narr = [j for j in cli._jobs(Record.load(self.root)) if j["kind"] == "narration"][0]["job_id"]
+        for bad_job, choices, words in ((base, {first: 1}, "no candidate"),
+                                        (narr, {first: 1}, "not an imported stills job"),
+                                        ("stills-nope", {first: 1}, "not an imported stills job"),
+                                        (job, {"f99s999-1": 1}, "f99s999-1"),
+                                        (job, {first: 4}, "4"), (job, {first: 0}, "0"),
+                                        (job, {first: "2"}, "'2'"), (job, {first: True}, "True"),
+                                        (job, {}, "no choices"), (job, [first], "object")):
+            with self.subTest(job=bad_job, choices=choices):
+                code, out = self.pick(bad_job, choices)
+                self.assertNotEqual(code, 0, out)
+                self.assertIn("STOP", out)
+                self.assertIn(words, out)
+        rec = Record.load(self.root)
+        self.assertFalse([a for a in rec.data["artifacts"] if a["kind"] == "stills_pick"])
+        self.assertFalse((self.root / "picks").exists() and any((self.root / "picks").iterdir()))
+
+    def test_film_uses_only_the_picked_candidate_renamed_to_its_key(self):
+        scenes, first, job = self.candidates_ready()
+        base = [j for j in cli._jobs(Record.load(self.root)) if j["kind"] == "stills"][0]["job_id"]
+        self.assertEqual(self.pick(job, {first: 1})[0], 0)
+        self.assertEqual(self.pick(job, {first: 2})[0], 0)  # re-running replaces the selection
+        code, out = self.film_run()
+        self.assertEqual(code, 0, out)
+        art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
+        self.assertEqual(art["meta"]["stills"], {"base": base, "patches": [job]})
+        merged = self.root / "film" / "film-01" / "stills"
+        names = sorted(p.name for p in merged.iterdir())
+        self.assertEqual(names, sorted(f"{sc['scene_id']}-1.png" for sc in scenes))
+        self.assertFalse([n for n in names if "--c" in n])
+        self.assertEqual((merged / f"{first}.png").read_bytes(),
+                         (self.root / "stills" / job / f"{first}--c2.png").read_bytes())
+
+    def test_film_ignores_an_unpicked_candidates_job(self):
+        scenes, first, job = self.candidates_ready()
+        base = [j for j in cli._jobs(Record.load(self.root)) if j["kind"] == "stills"][0]["job_id"]
+        code, out = self.film_run()
+        self.assertEqual(code, 0, out)
+        art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
+        self.assertEqual(art["meta"]["stills"], {"base": base, "patches": [], "unpicked": [job]})
+        merged = self.root / "film" / "film-01" / "stills"
+        self.assertFalse([p for p in merged.iterdir() if "--c" in p.name])
+        self.assertEqual((merged / f"{first}.png").read_bytes(),
+                         (self.root / "stills" / base / f"{first}.png").read_bytes())
+
+    def test_a_candidates_job_never_becomes_the_base(self):
+        """Every key of the base is covered by the candidates job, yet the base stays."""
+        self.film_ready()
+        scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+        base = [j for j in cli._jobs(Record.load(self.root)) if j["kind"] == "stills"][0]["job_id"]
+
+        def cands(rec, job_id, job_dir, out):
+            for sc in scenes:
+                for c in (1, 2):
+                    Image.new("RGB", (320, 180), (0, 0, 40 * c)).save(
+                        out / f"{sc['scene_id']}-1--c{c}.png")
+        job = self.fake_job("stills", "film-01", cands)
+        self.assertEqual(self.pick(job, {f"{scenes[0]['scene_id']}-1": 2})[0], 0)
+        code, out = self.film_run()
+        self.assertEqual(code, 0, out)
+        art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
+        self.assertEqual(art["meta"]["stills"], {"base": base, "patches": [job]})
+
 class CliTests(RoundTwo, unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
