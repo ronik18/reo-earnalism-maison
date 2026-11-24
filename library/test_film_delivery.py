@@ -268,3 +268,100 @@ class FilmDeliveryTests(TestCase):
         self.assertEqual(self.media_check()['status'], 'fail')
         Asset.objects.filter(kind='video_captions').update(state='ready')
         self.assertEqual(self.media_check()['status'], 'pass')
+
+
+VTT = b'WEBVTT\n\n00:00:01.000 --> 00:00:03.000\nSynthetic caption line.\n'
+
+
+@override_settings(LOCAL=True, MAISON_LOCAL_FIXTURES=False, FREE_ACCESS_ENABLED=False,
+                   FEATURES={'video': True}, VIDEO_PROVIDER='r2')
+class FilmCaptionsEndpointTests(TestCase):
+    """Same-origin captions: the film authorization path, never cached, raw VTT bytes."""
+
+    film = FilmDeliveryTests.film
+    captions = FilmDeliveryTests.captions
+    publish = FilmDeliveryTests.publish
+    entitle = FilmDeliveryTests.entitle
+
+    def setUp(self):
+        FilmDeliveryTests.setUp(self)
+        self.video = self.film()
+        self.vtt = self.captions(bytes=len(VTT))
+        self.live = False
+        self.login()
+
+    def login(self):
+        response = self.client.post('/api/v1/auth/login', {
+            'email': self.user.email, 'password': 'Synthetic-Film-Passphrase-47', 'password_purpose_consent': True,
+            'password_purpose_version': 'password-account-v1'}, content_type='application/json')
+        self.assertEqual(response.status_code, 200, response.content)
+
+    def url(self, asset=None):
+        return f'/api/v1/content/video-captions/{(asset or self.video).pk}'
+
+    def get(self, asset=None):
+        if not self.live:  # Revision children freeze at publication: arrange assets first.
+            self.live = True
+            self.publish()
+            self.entitle()
+        with patch('library.storage.read_verified', return_value=VTT) as read:
+            response = self.client.get(self.url(asset))
+        return response, read
+
+    def test_captions_served_no_store(self):
+        response, read = self.get()
+        self.assertEqual(response.status_code, 200, response.content[:200])
+        self.assertEqual(response['Content-Type'], 'text/vtt; charset=utf-8')
+        self.assertEqual(response.content, VTT)
+        self.assertEqual(response['Cache-Control'], 'private, no-store, max-age=0')
+        self.assertEqual(response['X-Content-Type-Options'], 'nosniff')
+        self.assertEqual(read.call_args.args[0].pk, self.vtt.pk)
+
+    def test_captions_guest_401(self):
+        self.client.logout()
+        response, read = self.get()
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()['code'], 'authentication_required')
+        read.assert_not_called()
+
+    def test_captions_outside_whitelist_403(self):
+        with patch('library.views.context', return_value=('en', 'AE')):
+            response, read = self.get()
+        self.assertEqual((response.status_code, response.json()['code']), (403, 'rights_unavailable'))
+        read.assert_not_called()
+
+    def test_captions_without_entitlement_403(self):
+        self.live = True
+        self.publish()
+        response, read = self.get()
+        self.assertEqual((response.status_code, response.json()['code']), (403, 'entitlement_required'))
+        read.assert_not_called()
+
+    def test_captions_missing_404(self):
+        self.vtt.delete()
+        response, read = self.get()
+        self.assertEqual((response.status_code, response.json()['code']), (404, 'not_found'))
+        read.assert_not_called()
+
+    def test_captions_not_ready_or_other_unit_404(self):
+        Asset.objects.filter(pk=self.vtt.pk).update(state='processing')
+        self.assertEqual(self.get()[0].status_code, 404)
+
+    def test_captions_for_other_unit_404(self):
+        other = Unit.objects.create(revision=self.revision, ordinal=2, title='Other', duration_ms=FILM_MS)
+        Asset.objects.filter(pk=self.vtt.pk).update(unit=other)
+        self.assertEqual(self.get()[0].status_code, 404)
+
+    def test_captions_for_non_film_asset_404(self):
+        self.assertEqual(self.get(self.vtt)[0].status_code, 404)
+        self.assertEqual(self.client.get(f'/api/v1/content/video-captions/{uuid.uuid4()}').status_code, 404)
+
+    def test_captions_wrong_provider_404(self):
+        with override_settings(VIDEO_PROVIDER='stream'):
+            self.assertEqual(self.get()[0].status_code, 404)
+
+    def test_captions_feature_disabled_503(self):
+        with override_settings(FEATURES={'video': False}):
+            response, read = self.get()
+        self.assertEqual((response.status_code, response.json()['code']), (503, 'feature_disabled'))
+        read.assert_not_called()

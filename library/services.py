@@ -569,6 +569,20 @@ def _film_grant(user,asset,data,territory):
             'quality_kbps':None,'duration_ms':asset.duration_ms}
 
 
+def video_captions(user,video_asset_id,territory):
+    """Synced WebVTT for a private film: authorized exactly like the film grant, verified bytes."""
+    if settings.FEATURES.get('video') is not True:raise DomainError('feature_disabled','Video is unavailable.',503)
+    try:
+        video=Asset.objects.select_related('revision','revision__edition').get(
+            pk=video_asset_id,kind='video',state='ready',provider=video_provider())
+    except (Asset.DoesNotExist,ValueError,ValidationError):
+        raise DomainError('not_found','Captions not found.',404)
+    authorize_revision(user,video.revision,'video',action='read',territory=territory)
+    captions=Asset.objects.filter(revision_id=video.revision_id,unit_id=video.unit_id,kind='video_captions',state='ready').order_by('-created_at').first()
+    if not captions:raise DomainError('not_found','Captions not found.',404)
+    return _asset_valid(captions)
+
+
 def resolve_signed_asset(user,asset_id,token):
     try:
         data=signing.loads(token,salt='maison-private-asset',max_age=GRANT_SECONDS)

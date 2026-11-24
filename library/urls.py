@@ -11,7 +11,7 @@ urlpatterns=[
     path('catalog/editions/<uuid:edition_id>/units',views.units),path('content/audio-previews/<uuid:asset_id>',views.audio_preview),path('content/previews/<uuid:revision_id>',views.preview),
     path('content/covers/<uuid:asset_id>',views.cover),path('content/manifests/<uuid:revision_id>',views.manifest),
     path('content/packages/grants',views.packages),path('media/grants',views.media),
-    path('content/local-assets/<uuid:asset_id>',views.local_asset),path('content/mappings/<uuid:revision_id>',views.mappings),
+    path('content/local-assets/<uuid:asset_id>',views.local_asset),path('content/video-captions/<uuid:asset_id>',views.video_captions),path('content/mappings/<uuid:revision_id>',views.mappings),
     path('content/switch-position',views.switch),path('staff/editions/<uuid:edition_id>/review',views.staff_review),
     path('staff/editions/<uuid:edition_id>/production-handoffs',production_handoff_api.production_handoffs),
     path('staff/editions/<uuid:edition_id>/source-imports',general_import_api.finalize),

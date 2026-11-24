@@ -193,6 +193,14 @@ def media(request):
     result=svc.media_grant(request.user,data,territory);result['url']=request.build_absolute_uri(result['url'])
     return api_response(result)
 
+@json_endpoint()
+def video_captions(request,asset_id):
+    _,territory=context(request)
+    raw=svc.video_captions(request.user,asset_id,territory)
+    response=HttpResponse(raw,content_type='text/vtt; charset=utf-8')
+    response['Cache-Control']='private, no-store, max-age=0';response['X-Content-Type-Options']='nosniff'
+    return response
+
 # Audio and full films are played by browser media elements, which always request byte ranges.
 RANGE_KINDS={'audio_chapter','video'}
 
