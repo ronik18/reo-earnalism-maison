@@ -91,6 +91,7 @@ def track_detail(user,track_id):
     completed={row.lesson_id:row for row in LessonCompletion.objects.filter(user=user,lesson__track=track)} if getattr(user,'is_authenticated',False) else {}
     lessons=list(track.lessons.select_related('quiz').all())
     result['lessons']=[{'lesson_id':str(l.id),'title':l.title,'ordinal':l.ordinal,'completed':completion_is_current(completed.get(l.id),l)} for l in lessons]
+    result['sponsor']={'name':track.sponsor_name,'url':track.sponsor_url} if track.sponsor_name else None
     result['has_quiz']=any(hasattr(l,'quiz') for l in lessons)
     existing=Certificate.objects.filter(user=user,track=track).first() if getattr(user,'is_authenticated',False) else None
     result['certificate']={'certificate_id':str(existing.id) if existing else None,

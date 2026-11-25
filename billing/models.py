@@ -156,11 +156,21 @@ class LegacyLiability(models.Model):
     class Meta:
         db_table='maison_legacy_liability'
 
+class InstitutionAccount(models.Model):
+    id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
+    name=models.CharField(max_length=200,unique=True)
+    contact_email=models.EmailField(blank=True)
+    created_by=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,related_name='+')
+    created_at=models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table='maison_institution_account'
+
 class Invoice(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     current_revision=models.ForeignKey('billing.InvoiceRevision',null=True,on_delete=models.PROTECT,related_name='+')
     order=models.OneToOneField(Order,on_delete=models.PROTECT,null=True,blank=True)
     subscription=models.ForeignKey('billing.Subscription',on_delete=models.PROTECT,null=True,blank=True,related_name='invoices')
+    institution=models.ForeignKey('billing.InstitutionAccount',on_delete=models.PROTECT,null=True,blank=True,related_name='invoices')
     period_start=models.DateTimeField(null=True,blank=True)
     period_end=models.DateTimeField(null=True,blank=True)
     revision=models.PositiveIntegerField(default=1)
@@ -173,7 +183,7 @@ class Invoice(models.Model):
     class Meta:
         db_table='maison_invoice'
         indexes=[models.Index(fields=['-issued_at','-id'],name='maison_invoice_keyset_idx')]
-        constraints=[models.CheckConstraint(condition=Q(order__isnull=False,subscription__isnull=True)|Q(order__isnull=True,subscription__isnull=False),name='maison_invoice_one_source'),models.CheckConstraint(condition=Q(revision__gte=1),name='maison_invoice_revision_positive'),models.CheckConstraint(condition=Q(period_start__isnull=True,period_end__isnull=True)|Q(period_start__isnull=False,period_end__isnull=False,period_end__gt=F('period_start')),name='maison_invoice_period')]
+        constraints=[models.CheckConstraint(condition=Q(order__isnull=False,subscription__isnull=True,institution__isnull=True)|Q(order__isnull=True,subscription__isnull=False,institution__isnull=True)|Q(order__isnull=True,subscription__isnull=True,institution__isnull=False),name='maison_invoice_one_source'),models.CheckConstraint(condition=Q(revision__gte=1),name='maison_invoice_revision_positive'),models.CheckConstraint(condition=Q(period_start__isnull=True,period_end__isnull=True)|Q(period_start__isnull=False,period_end__isnull=False,period_end__gt=F('period_start')),name='maison_invoice_period')]
     def save(self,*args,**kwargs):
         if type(self).objects.filter(pk=self.pk).exists(): raise ValidationError('Issued financial snapshots are immutable.')
         super().save(*args,**kwargs)
@@ -188,3 +198,4 @@ class PaymentAllocation(models.Model):
 
 from .subscription_models import BillingPlan,Subscription,Mandate
 from .invoice_models import InvoiceArtifact,InvoiceRevision,FinanceNumberSequence
+from .revenue_models import RevenueEntry,ReinvestmentEntry

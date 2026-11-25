@@ -1,5 +1,5 @@
 from django.urls import path, re_path
-from . import views, legal
+from . import views, legal, podcast
 from .legacy_redirects import legacy_page, legacy_title
 
 app_name = "web"
@@ -10,6 +10,7 @@ urlpatterns = [
     re_path(r"^(?:book|reader)/(?P<slug>[A-Za-z0-9-]+)/?$", legacy_title),
     path("maison-sw.js",views.service_worker,name="service-worker"),
     path("<str:locale>/offline/",views.offline_shell,name="offline-shell"),
+    path("podcast/<str:locale>.xml", podcast.feed, name="podcast-feed"),
     path("auth/verify/", views.verify_landing, name="verify-landing"),
     path("auth/reset/", views.reset_landing, name="reset-landing"),
     path("auth/sign-in/", views.email_link_landing, name="email-link-landing"),
@@ -49,6 +50,8 @@ urlpatterns = [
     path("<str:locale>/tracks/<uuid:track_id>/certificate/", views.certificate_issue, name="certificate-issue"),
     path("<str:locale>/tracks/<uuid:track_id>/worksheet.pdf", views.worksheet, name="worksheet"),
     path("<str:locale>/classroom/<uuid:edition_id>/<uuid:unit_id>/", views.classroom, name="classroom"),
+    path("<str:locale>/staff/review/", views.staff_review, name="staff-review"),
+    path("<str:locale>/staff/review/<uuid:item_id>/cover/<str:side>.jpg", views.staff_review_cover, name="staff-review-cover"),
     path("<str:locale>/certificates/<uuid:certificate_id>/", views.certificate, name="certificate"),
     path("<str:locale>/certificates/<uuid:certificate_id>/withdraw/", views.certificate_withdraw, name="certificate-withdraw"),
     path("<str:locale>/interview/sde/", views.interview, name="interview"),

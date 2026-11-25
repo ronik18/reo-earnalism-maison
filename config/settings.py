@@ -318,6 +318,31 @@ if not LOCAL and (not R2_PUBLIC_ASSET_HOST or not STATIC_RELEASE_ID):
 if R2_PUBLIC_ASSET_HOST and STATIC_RELEASE_ID:
     STATIC_URL = R2_PUBLIC_ASSET_HOST.rstrip('/') + '/static/' + STATIC_RELEASE_ID + '/'
 
+# Share of earned revenue set aside for owner-approved growth spend.
+def reinvest_share_percent(raw):
+    try:
+        value = int(raw.strip(), 10)
+    except (AttributeError, ValueError):
+        value = None
+    if value is None or not 0 <= value <= 100:
+        raise ImproperlyConfigured('MAISON_REINVEST_SHARE_PERCENT must be a whole number from 0 to 100')
+    return value
+
+
+MAISON_REINVEST_SHARE_PERCENT = reinvest_share_percent(os.getenv('MAISON_REINVEST_SHARE_PERCENT', '30'))
+# Monday review standing permission (owner decision D5): unset until the owner turns it on,
+# about two months after the first weekly batch. Must be a full ISO 8601 datetime with offset.
+_review_standing = os.getenv('MAISON_REVIEW_STANDING_FROM', '').strip()
+if _review_standing:
+    from django.utils.dateparse import parse_datetime as _parse_datetime
+    MAISON_REVIEW_STANDING_FROM = _parse_datetime(_review_standing)
+    if MAISON_REVIEW_STANDING_FROM is None or MAISON_REVIEW_STANDING_FROM.tzinfo is None:
+        raise ImproperlyConfigured('MAISON_REVIEW_STANDING_FROM must be an ISO 8601 datetime with a UTC offset')
+else:
+    MAISON_REVIEW_STANDING_FROM = None
+# Attended social posting journal (post_approved); every run must share this directory.
+MAISON_SOCIAL_JOURNAL_DIR = os.getenv('MAISON_SOCIAL_JOURNAL_DIR', str(BASE_DIR / '.local' / 'social-journal'))
+
 # Owner-approved free rollout; authorization still enforces publication and rights.
 FREE_ACCESS_ENABLED = bool_setting('MAISON_FREE_ACCESS', False)
 

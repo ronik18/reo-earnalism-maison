@@ -1,3 +1,4 @@
+import hashlib
 import re
 from functools import wraps
 import json
@@ -13,6 +14,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
+from billing.founding import founding_plans_open, founding_prices
 from .i18n import catalogue, text
 
 
@@ -197,7 +199,7 @@ def search(request, locale):
 @require_GET
 @domain_view
 def title(request, locale, identifier):
-    from library.services import edition_detail, edition_units, get_edition_by_slug, catalog_cards
+    from library.services import edition_detail, edition_translation, edition_units, get_edition_by_slug, catalog_cards
     try:
         edition_id = UUID(identifier)
     except ValueError:
@@ -224,13 +226,13 @@ def title(request, locale, identifier):
     download_bootstrap = {"edition_revision_id":edition["edition_revision_id"],"unit_ids":[u["unit_id"] for u in units],"units":[{"unit_id":u["unit_id"],"title":u["title"]} for u in units],"formats":edition["downloadable_formats"],"title":edition["title"],"locale":edition["locale"]} if django_settings.FEATURES.get("offline_text_audio") and edition["published_at"] and request.user.is_authenticated else None
     sample = public_preview_data(request, edition) if django_settings.FEATURES.get("audio") else {}
     from learning.classroom import is_teacher
-    return page(request, locale, "web/title.html", teacher=is_teacher(request.user), edition=edition, units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
+    return page(request, locale, "web/title.html", teacher=is_teacher(request.user), edition=edition, translation=edition_translation(edition["edition_id"]), units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
 
 
 @require_GET
 @domain_view
 def reader(request, locale, edition_id, unit_id=None):
-    from library.services import get_reader_document, get_preview_document, edition_units
+    from library.services import get_reader_document, get_preview_document, edition_units, edition_translation
     if unit_id is None:
         units = edition_units(edition_id, territory=trusted_territory(request), user=request.user)
         if not units:
@@ -262,7 +264,7 @@ def reader(request, locale, edition_id, unit_id=None):
     if document.get("preview"):
         bootstrap["next_unit_url"]=None
         bootstrap["player_url"]=None
-    return page(request, locale, "web/reader.html", document=document, edition=edition, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination)
+    return page(request, locale, "web/reader.html", document=document, edition=edition, translation=edition_translation(edition["edition_id"]), bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination)
 
 
 class EmailForm(forms.Form):
@@ -506,11 +508,25 @@ def settings(request, locale):
     })
 
 
+PASS_ANCHORS = [
+    {"name": "Storytel", "price": "INR 149/month", "source_url": "https://www.storytel.com/in"},
+    {"name": "Kuku FM", "price": "INR 899/year", "source_url": "https://inc42.com/buzz/after-2-5-mn-paid-subscribers-kuku-fm-25-mn-fuel-expansion/"},
+    {"name": "SpeakX", "price": "about INR 300/month", "source_url": "https://www.magzter.com/de/stories/newspaper/Mint-Ahmedabad/STARTUPS-HELP-SMALLTOWN-INDIA-BREAK-BIGCITY-ENGLISH-BARRIER"},
+]
+
+
+def _rupees(minor):
+    """INR minor units as shown in the founding wording: 9900 -> 99, 12950 -> 129.50."""
+    return f"{minor // 100}" if minor % 100 == 0 else f"{minor // 100}.{minor % 100:02d}"
+
+
 @require_GET
 @domain_view
 def pass_page(request, locale):
     destination = safe_return(request.GET.get("return_to"),locale) if request.GET.get("return_to") else reverse("web:explore",args=[locale])
-    return page(request, locale, "web/pass.html", active_nav="pass", free_return_path=destination, commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
+    prices = founding_prices() if founding_plans_open() else None
+    founding = {unit: _rupees(minor) for unit, minor in prices.items()} if prices else None
+    return page(request, locale, "web/pass.html", active_nav="pass", free_return_path=destination, founding_open=founding is not None, founding_prices=founding, anchors=PASS_ANCHORS, commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
 
 
 @require_GET
@@ -531,6 +547,114 @@ def track(request, locale, track_id):
     result = interview_questions_page(request,request.user,track_id) if data.get("kind") == "sde_interview" and data.get("access") != "locked" else {"items":[],"next_cursor":None}
     from learning.classroom import is_teacher
     return page(request, locale, "web/track.html", track=data, questions=result["items"], next_cursor=result["next_cursor"], active_nav="learn", teacher=is_teacher(request.user))
+
+
+def _require_reviewer(user):
+    if not (user.is_authenticated and user.is_active and user.is_staff and user.is_verified and user.has_perm("operations.decide_review")):
+        raise Http404
+
+
+def _read_review_json(ref):
+    """Parsed JSON of a queued review file (bounded), or None when missing, unreadable or too large."""
+    from operations import review
+    path = review._resolve(ref) if isinstance(ref, str) else None
+    try:
+        if path is None or not path.is_file() or path.stat().st_size > 2_000_000:
+            return None
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _review_detail(item, locale):
+    """What the owner needs to see to decide one item; read at view time from the bound file or bundle."""
+    from operations import review
+    summary = item.summary or {}
+    if item.kind == "post":
+        manifest = _read_review_json(summary.get("bundle_manifest"))
+        social = next((d for d in (manifest or {}).get("social") or [] if isinstance(d, dict)
+                       and f"{d.get('platform')}:{d.get('account_id')}" == summary.get("destination_key")), {})
+        video = next((a for a in (manifest or {}).get("assets") or [] if isinstance(a, dict)
+                      and a.get("id") == social.get("video_asset_id")), {})
+        return {"bundle": summary.get("bundle_manifest"), "asset_root": summary.get("asset_root"),
+                "video": video.get("path"), "caption_title": social.get("title"),
+                "caption": (social.get("description") or "")[:280], "unreadable": manifest is None}
+    detail = {"changed": review._file_sha256(item.ref) != item.sha256}
+    if item.kind == "clearance":
+        record = _read_review_json(item.ref)
+        detail.update(unreadable=record is None, status=(record or {}).get("status"),
+                      territories=(record or {}).get("territories") or [], formats=(record or {}).get("formats") or [])
+    elif item.kind == "cover":
+        detail.update({side: reverse("web:staff-review-cover", args=[locale, item.pk, side]) for side in ("front", "back")})
+    elif item.kind == "edition":
+        record = _read_review_json(item.ref) or {}
+        detail.update(method=record.get("method"), model=record.get("model"), translated_from=record.get("translated_from"),
+                      language=(record.get("edition") or {}).get("language"))
+    return detail
+
+
+@require_GET
+@domain_view
+def staff_review_cover(request, locale, item_id, side):
+    """Staff-only view of a queued cover pair, served only while it is exactly the bytes cover_provenance.json names."""
+    _require_reviewer(request.user)
+    from django.http import HttpResponse
+    from operations import review
+    from operations.models import ReviewItem
+    item = ReviewItem.objects.filter(pk=item_id, kind="cover").first()
+    if item is None or side not in ("front", "back") or review._file_sha256(item.ref) != item.sha256:
+        raise Http404
+    provenance = _read_review_json(item.ref) or {}
+    expected = (((provenance.get("sides") or {}).get(side) or {}).get("delivery") or {}).get("sha256")
+    path = review._resolve(item.ref).parent / f"{side}.jpg"
+    try:
+        raw = path.read_bytes() if path.is_file() and path.stat().st_size <= 10_000_000 else None
+    except OSError:
+        raw = None
+    if raw is None or not expected or hashlib.sha256(raw).hexdigest() != expected:
+        raise Http404
+    response = HttpResponse(raw, content_type="image/jpeg")
+    response["Cache-Control"] = "private, no-store"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+@require_http_methods(["GET", "POST"])
+@domain_view
+def staff_review(request, locale):
+    """Monday review page: staff only (everyone else gets 404). POST decides the ticked items, then redirects (PRG)."""
+    user = request.user
+    _require_reviewer(user)
+    from core.api import DomainError
+    from operations import review
+    from operations.models import ReviewItem
+    error, changed_refs, status = None, [], 200
+    if request.method == "POST":
+        ids = []
+        for raw in request.POST.getlist("item"):
+            try:
+                ids.append(UUID(raw))
+            except ValueError:
+                pass
+        try:
+            count = review.decide(user, ids, request.POST.get("decision", "")) if ids else 0
+            return HttpResponseRedirect(reverse("web:staff-review", args=[locale]) + "?" + urlencode({"decided": count}))
+        except DomainError as exc:
+            error = {"REVIEW_ITEM_CHANGED": "review_changed"}.get(exc.code, "error")
+            changed_refs = (exc.details or {}).get("refs", [])
+            status = exc.status
+    notice = None
+    if request.method == "GET" and "decided" in request.GET:
+        decided = request.GET["decided"]
+        notice = {"count": int(decided)} if decided.isdigit() and int(decided) > 0 else {"count": 0}
+    selected = request.GET.get("select", "")
+    groups = [{"kind": kind, "selected": selected == kind,
+               "items": [{"item": item, "detail": _review_detail(item, locale)}
+                         for item in ReviewItem.objects.filter(status="pending", kind=kind).order_by("created_at")]}
+              for kind, _ in ReviewItem.KINDS]
+    return page(request, locale, "web/staff_review.html", status=status, groups=[g for g in groups if g["items"]],
+                review_error=error, changed_refs=changed_refs, review_notice=notice)
 
 
 @require_GET

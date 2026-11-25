@@ -495,3 +495,40 @@ STRINGS.update({
     "new_here": ("New to Earnalism?", "Earnalism-এ নতুন?"),
     "turned_18": ("Parent-managed reader who has turned 18?", "অভিভাবক-পরিচালিত পাঠক, এখন ১৮ বছর?"),
 })
+STRINGS['sponsored_by'] = ('Sponsored by', 'সৌজন্যে')
+
+STRINGS.update({
+    "review_title": ("Monday review", "সোমবারের পর্যালোচনা"),
+    "review_empty": ("Nothing is waiting for review.", "পর্যালোচনার জন্য কিছু অপেক্ষায় নেই।"),
+    "review_approve": ("Approve selected", "বাছাইগুলো অনুমোদন করুন"),
+    "review_reject": ("Reject selected", "বাছাইগুলো প্রত্যাখ্যান করুন"),
+    "review_kind_clearance": ("Title clearance records", "শিরোনাম ছাড়পত্রের নথি"),
+    "review_kind_cover": ("Cover matches", "প্রচ্ছদ মিলানো"),
+    "review_kind_edition": ("New editions", "নতুন সংস্করণ"),
+    "review_kind_post": ("Social posts", "সামাজিক মাধ্যমের পোস্ট"),
+    "review_changed": ("A reviewed file changed after it was queued. Nothing was decided. Reject them, or queue them again:", "সারিতে তোলার পরে একটি ফাইল বদলেছে। কিছু সিদ্ধান্ত হয়নি। সেগুলো প্রত্যাখ্যান করুন বা আবার সারিতে তুলুন:"),
+    "review_decided": ("Items decided:", "সিদ্ধান্ত হয়েছে:"),
+    "review_select_all": ("Select all in this group", "এই দলের সব বাছুন"),
+    "review_clear_selection": ("Clear selection", "বাছাই মুছুন"),
+    "review_status": ("Status", "অবস্থা"),
+    "review_territories": ("Territories", "অঞ্চল"),
+    "review_formats": ("Formats", "ফরম্যাট"),
+    "review_front": ("Front cover", "সামনের প্রচ্ছদ"),
+    "review_back": ("Back cover", "পেছনের প্রচ্ছদ"),
+    "review_video": ("Video", "ভিডিও"),
+    "review_caption": ("Caption", "ক্যাপশন"),
+    "review_bundle": ("Bundle", "বান্ডল"),
+    "review_translation": ("Translation", "অনুবাদ"),
+    "review_unreadable": ("The file cannot be read; reject this item or queue it again.", "ফাইলটি পড়া যাচ্ছে না; এটি প্রত্যাখ্যান করুন বা আবার সারিতে তুলুন।"),
+    "review_item_changed": ("Changed since it was queued; it cannot be approved.", "সারিতে তোলার পরে বদলেছে; অনুমোদন করা যাবে না।"),
+    "review_none_decided": ("Nothing was decided. Tick at least one pending item first.", "কিছু সিদ্ধান্ত হয়নি। আগে অন্তত একটি অপেক্ষমাণ আইটেম বাছুন।"),
+    "ai_translation": ("AI translation", "এআই অনুবাদ"),
+    "translated_by": ("Translated with AI, edited by {name}", "এআই-সহায়ক অনুবাদ, সম্পাদনা: {name}"),
+})
+
+STRINGS.update({
+    "founding_offer": ("Founding member: INR {month}/month or INR {year}/year — your price stays the same for as long as you stay a member.", "প্রতিষ্ঠাতা সদস্য: {month} টাকা মাসে অথবা {year} টাকা বছরে — যতদিন সদস্য থাকবেন, আপনার দাম একই থাকবে।"),
+    "founding_anchors_title": ("Other services, for comparison", "তুলনার জন্য অন্য পরিষেবা"),
+    "founding_anchor_source": ("Source", "সূত্র"),
+    "founding_cancel_link": ("Manage or cancel in account settings", "অ্যাকাউন্ট সেটিংসে পরিচালনা বা বাতিল করুন"),
+})

@@ -37,6 +37,7 @@ def render_pdf(snapshot,number,kind):
     lines += ['Net: '+money(net),'Tax ('+str(tax.get('label','test-only amount'))+'): '+money(tax_amount),'Total: '+money(snapshot['amount_minor'])]
     for component in tax.get('components',[]) if kind=='invoice' else []:
         lines.append(str(component['label'])+': '+money(component['tax_minor'])+(f" at {Decimal(component['rate_bps'])/Decimal(100):.2f}%" if 'rate_bps' in component else ''))
+    if snapshot.get('institution'):lines.append(f"Institution: {snapshot['institution']}; {snapshot['classes']} classes, {snapshot['students']} students at {money(snapshot['unit_price_minor'])} each; period {snapshot['period_start']} to {snapshot['period_end']}")
     for key in ['order_id','invoice_number','refund_id','reason']:
         if snapshot.get(key):lines.append(key.replace('_',' ').title()+': '+str(snapshot[key]))
     if snapshot.get('local_test_document'):lines.insert(1,'TEST DOCUMENT - NOT A TAX INVOICE')
@@ -104,7 +105,8 @@ def issue_document(actor,invoice_id,data,base,key,refund_id=None):
         return OperationResult(201,document_data(prior),True)
     if not isinstance(data.get('reason'),str) or not 1<=len(data['reason'].strip())<=500:raise DomainError('validation_error','A bounded finance reason is required.',422)
     snapshot=dict(invoice.line_snapshot);finance=snapshot.get('finance',{})
-    live=not invoice.order.test_only if invoice.order_id else not invoice.subscription.plan.offer.test_only
+    if invoice.institution_id:live=snapshot.get('local_test_document') is False  # mode retained at issue from MERCHANT_FINANCE_POLICY['approved']
+    else:live=not invoice.order.test_only if invoice.order_id else not invoice.subscription.plan.offer.test_only
     if snapshot.get('amount_minor',invoice.amount_minor)!=invoice.amount_minor or snapshot.get('currency',invoice.currency)!=invoice.currency:raise DomainError('finance_policy_required','Retained document totals do not match the immutable invoice.',409)
     snapshot.update(amount_minor=invoice.amount_minor,currency=invoice.currency,local_test_document=not live)
     issuer_version=data.get('issuer_version')

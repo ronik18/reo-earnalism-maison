@@ -16,6 +16,10 @@ https://<site>/en/titles/<edition-slug>/?utm_source=<source>&utm_campaign=<title
 
 Values that break these rules are dropped, never stored. Do not put names, emails or other personal details in a link.
 
+The podcast feed (`/podcast/en.xml`, `/podcast/bn.xml`) lists each cleared, free-audio edition with a title-page link tagged `utm_source=podcast&utm_medium=feed&utm_campaign=<edition-slug>`. Region limits on each podcast platform are set by hand in that platform; a platform that cannot limit listings to the 9 regions is not used.
+
+**Limitation:** The feed has no audio enclosures because full narration is members-only. Apple Podcasts, Spotify and most directories require an audio enclosure per episode, so the feed will likely be rejected or show no episodes until the owner approves public audio (e.g. a cleared CDN-hosted preview or full episode).
+
 ## Reading the funnel
 
 ```bash

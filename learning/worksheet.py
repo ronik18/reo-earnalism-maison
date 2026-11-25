@@ -14,9 +14,9 @@ from .models import Track
 LETTERS = {'en': 'ABCDEFGH', 'bn': 'কখগঘঙচছজ'}
 WORDS = {
     'en': {'worksheet': 'Worksheet', 'answers': 'Answer key', 'name': 'Name', 'class': 'Class', 'answer': 'Answer',
-           'footer': 'Earnalism classroom · theearnalism.com'},
+           'sponsored': 'Sponsored by {name}', 'footer': 'Earnalism classroom · theearnalism.com'},
     'bn': {'worksheet': 'অনুশীলনী', 'answers': 'উত্তরমালা', 'name': 'নাম', 'class': 'শ্রেণি', 'answer': 'উত্তর',
-           'footer': 'Earnalism classroom · theearnalism.com'},
+           'sponsored': 'সৌজন্যে {name}', 'footer': 'Earnalism classroom · theearnalism.com'},
 }
 TOP, BOTTOM, LEFT, WIDTH = 790, 60, 56, 483
 
@@ -80,6 +80,8 @@ def render(track_id, answers=False):
 
     line(track.title, 18)
     line(words['answers' if answers else 'worksheet'], 13)
+    if track.sponsor_name:
+        line(words['sponsored'].format(name=track.sponsor_name), 10)
     if not answers:
         line(f"{words['name']}: ______________________    {words['class']}: __________", 11)
     y -= 8
