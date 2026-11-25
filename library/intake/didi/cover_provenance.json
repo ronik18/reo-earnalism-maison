@@ -1,0 +1,59 @@
+{
+ "schema": "earnalism.cover-provenance.v2",
+ "slug": "didi",
+ "status": "OWNER_PROVIDED_ARTWORK",
+ "owner_statement": {
+  "date": "2026-11-25",
+  "text": "Owner: \"You may find the book covers already designed by me and uploaded in cloudinary account for the next story books.\""
+ },
+ "basis": "Owner-created artwork with owner-held copyright, the same basis recorded for বিচারক (legacy-owner_artwork_declaration.json). Selected by Claude by reading the cover title and author lettering; front and back share the Cloudinary asset id.",
+ "scope": "Cover display only; grants no text, audio or publication authorization.",
+ "sides": {
+  "front": {
+   "original": {
+    "url": "https://res.cloudinary.com/dzlrhlfpu/image/upload/v1780681332/earnalism/covers/front/cover_a4c32e7b-2e1e-4908-9c9f-9d4eee5e0736.png",
+    "public_id": "earnalism/covers/front/cover_a4c32e7b-2e1e-4908-9c9f-9d4eee5e0736",
+    "asset_id": "423736801cc0ce375da066595a9bc7c4",
+    "version": 1780681332,
+    "created_at": "2026-06-04T14:32:51Z",
+    "format": "png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2874999,
+    "sha256": "050ef71ac7dd6a69ba9608e061979918b673acf8fca13789c6e29f2f5c2d3780"
+   },
+   "delivery": {
+    "path": "front.jpg",
+    "width": 800,
+    "height": 1200,
+    "format": "JPEG",
+    "bytes": 300440,
+    "sha256": "154447e6efa1c3c747563f8629498f21a131b2a368280255f06d269ec8507f3d",
+    "derivation": "Pillow LANCZOS resize to 800x1200, JPEG quality 90, metadata not copied"
+   }
+  },
+  "back": {
+   "original": {
+    "url": "https://res.cloudinary.com/dzlrhlfpu/image/upload/v1780681339/earnalism/covers/back/back_cover_a4c32e7b-2e1e-4908-9c9f-9d4eee5e0736.png",
+    "public_id": "earnalism/covers/back/back_cover_a4c32e7b-2e1e-4908-9c9f-9d4eee5e0736",
+    "asset_id": "8f4716ed3b6436b6cb478a7f6fe412e9",
+    "version": 1780681339,
+    "created_at": "2026-06-04T14:33:02Z",
+    "format": "png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2857618,
+    "sha256": "53bf50bf2142c0dbccc1e9cffce1332ecfc619902c2f2e43bfbfd719466a919d"
+   },
+   "delivery": {
+    "path": "back.jpg",
+    "width": 800,
+    "height": 1200,
+    "format": "JPEG",
+    "bytes": 247963,
+    "sha256": "e291361bcd9648aec2c6808a60d315ba8c788f3928bc23de3911127391084811",
+    "derivation": "Pillow LANCZOS resize to 800x1200, JPEG quality 90, metadata not copied"
+   }
+  }
+ }
+}
