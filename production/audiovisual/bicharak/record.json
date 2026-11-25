@@ -30720,6 +30720,138 @@
       },
       "path": "jobs/edit-test-film-01/edit.ipynb",
       "sha256": "4d7b44f36507d4d1e9305bbdddd3ea3294cda372ab15ad064dc0300f0740dce9"
+    },
+    {
+      "bytes": 205967288,
+      "kind": "film",
+      "meta": {
+        "body_ceiling_db": -1.5,
+        "body_gain_db": 0.0,
+        "body_gain_fallback": false,
+        "clips": 77,
+        "duration": 1303.960583,
+        "lufs": -16.0,
+        "narration_end": 1300.96,
+        "narration_job_id": "narration-elevenlabs-0bca7520",
+        "path": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/film/film-01/film-01.mp4",
+        "scenes": 19,
+        "score": {
+          "cues_sha256": {
+            "cue-1-kshiroda-night.wav": "168d3d271b6b4872b9727227c7e8cba60392f7dba6db9b5617216e9eb25f201e",
+            "cue-2-window-and-judge.wav": "832b8c47bc9e98f6dcaf816ab379c24b4b97114dcc22fe02bdfa14f95d03f99b",
+            "cue-3-dream-and-carriage.wav": "c41fcd765b569fa308dfb6023ba6d0773bb9f84b02a3787f5fbfb5d258bcf207",
+            "cue-4-prison-and-ring.wav": "8afff9cb2960a6ea71e5b38ea10ad3ecd3022114b375aaedabcae85e64475b48"
+          },
+          "route": "ace-step:music-film-01-r4",
+          "sha256": "b7f204ae72f8e9bbb746cb37746ed1fe25e82d3d921f705e12e713c2827eeef0"
+        },
+        "size": [
+          1920,
+          1080
+        ],
+        "stills": {
+          "base": "stills-film-01-r5",
+          "held": [
+            "f01s003-6",
+            "f01s005-2",
+            "f01s008-3",
+            "f01s010-5",
+            "f01s011-2",
+            "f01s012-2",
+            "f01s012-3",
+            "f01s013-4",
+            "f01s013-5",
+            "f01s015-1",
+            "f01s015-2",
+            "f01s015-3",
+            "f01s016-3",
+            "f01s018-2",
+            "f01s019-2"
+          ],
+          "patches": [
+            "stills-film-01-r8-house",
+            "stills-film-01-r9",
+            "retouch-film-01-r9",
+            "stills-film-01-r10",
+            "touchup-film-01"
+          ],
+          "substitutes": {
+            "f01s003-6": {
+              "cross_scene": false,
+              "use": "f01s003-5"
+            },
+            "f01s005-2": {
+              "cross_scene": false,
+              "use": "f01s005-1"
+            },
+            "f01s008-3": {
+              "cross_scene": false,
+              "use": "f01s008-2"
+            },
+            "f01s010-5": {
+              "cross_scene": false,
+              "use": "f01s010-4"
+            },
+            "f01s011-2": {
+              "cross_scene": false,
+              "use": "f01s011-1"
+            },
+            "f01s012-2": {
+              "cross_scene": false,
+              "use": "f01s012-1"
+            },
+            "f01s012-3": {
+              "cross_scene": false,
+              "use": "f01s012-1"
+            },
+            "f01s013-4": {
+              "cross_scene": false,
+              "use": "f01s013-3"
+            },
+            "f01s013-5": {
+              "cross_scene": false,
+              "use": "f01s013-3"
+            },
+            "f01s015-1": {
+              "cross_scene": true,
+              "use": "f01s014-3"
+            },
+            "f01s015-2": {
+              "cross_scene": true,
+              "use": "f01s014-3"
+            },
+            "f01s015-3": {
+              "cross_scene": true,
+              "use": "f01s014-3"
+            },
+            "f01s016-3": {
+              "cross_scene": false,
+              "use": "f01s016-2"
+            },
+            "f01s018-2": {
+              "cross_scene": false,
+              "use": "f01s018-1"
+            },
+            "f01s019-2": {
+              "cross_scene": false,
+              "use": "f01s019-1"
+            }
+          }
+        },
+        "target": "film-01",
+        "true_peak": -1.5
+      },
+      "path": "film/film-01/film-01.mp4",
+      "sha256": "869ffc90bbe47c114e0b608e797b2f575893e38ef4025ce5d35864214fd6b84d"
+    },
+    {
+      "bytes": 495,
+      "kind": "qc_report",
+      "meta": {
+        "failed": []
+      },
+      "path": "qc/report.json",
+      "sha256": "b968d25cae3d80f73273140d0d2ef3b2a35ed3b132561d294c7a55b8b3f7d2f8"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -33912,6 +34044,23 @@
       },
       "result": "exchange_staged",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-25T08:28:28.017326+00:00",
+      "detail": {
+        "duration": 1303.960583,
+        "target": "film-01"
+      },
+      "result": "assembled",
+      "stage": "film"
+    },
+    {
+      "at": "2026-11-25T08:30:20.860931+00:00",
+      "detail": {
+        "failed": []
+      },
+      "result": "pass",
+      "stage": "qc"
     }
   ],
   "ledger": "../allowance-ledger.json",

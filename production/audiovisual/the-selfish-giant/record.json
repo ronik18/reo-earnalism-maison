@@ -22012,6 +22012,174 @@
       },
       "path": "jobs/selfish-giant-edit-test-film-01/edit.ipynb",
       "sha256": "e201792362df038fd0a2db61279e450b8b056802884400aa7eaf651b6cb000f7"
+    },
+    {
+      "bytes": 307762901,
+      "kind": "film",
+      "meta": {
+        "body_ceiling_db": -1.5,
+        "body_gain_db": 0.0,
+        "body_gain_fallback": false,
+        "clips": 62,
+        "duration": 912.840604,
+        "lufs": -16.0,
+        "narration_end": 909.84,
+        "narration_job_id": "narration-elevenlabs-db5b38b5",
+        "path": "/home/user/reo-earnalism-maison/production/audiovisual/the-selfish-giant/film/film-01/film-01.mp4",
+        "scenes": 15,
+        "score": {
+          "cues_sha256": {
+            "cue-1-the-garden.wav": "174b6d514dacb3d25676b87dfdcff98ca69addc167d2515dfcb71a0385d40666",
+            "cue-2-the-long-winter.wav": "605181bbe877f944176642da3646897aa33dcd0b1d628bf9d6c4aed9799e9853",
+            "cue-3-spring-returns.wav": "1f9e831fbede9cd812bc22a036f2480ff105dd6d6170573795ebb00ed3b1aff6",
+            "cue-4-paradise.wav": "e843dd1dafde573eb9fb4d5e900178717e60c1afb7ffe801b564a036d7feb143"
+          },
+          "route": "ace-step:selfish-giant-music-film-01",
+          "sha256": "f32bc548954df1ab03c7d6781c989941662b6039be213f2c8a87ec01d0cdc73e"
+        },
+        "size": [
+          1920,
+          1080
+        ],
+        "stills": {
+          "base": "selfish-giant-stills-film-01-house",
+          "held": [
+            "f01s002-2",
+            "f01s003-1",
+            "f01s005-5",
+            "f01s007-3",
+            "f01s007-6",
+            "f01s008-4",
+            "f01s008-6",
+            "f01s010-3",
+            "f01s010-4",
+            "f01s010-6",
+            "f01s012-2",
+            "f01s012-3",
+            "f01s012-4",
+            "f01s013-1",
+            "f01s013-2",
+            "f01s013-3",
+            "f01s014-1",
+            "f01s014-3",
+            "f01s014-4",
+            "f01s014-5",
+            "f01s015-1",
+            "f01s015-4"
+          ],
+          "patches": [
+            "selfish-giant-stills-film-01-r9",
+            "selfish-giant-stills-film-01-r10",
+            "selfish-giant-touchup-film-01"
+          ],
+          "substitutes": {
+            "f01s002-2": {
+              "cross_scene": false,
+              "use": "f01s002-1"
+            },
+            "f01s003-1": {
+              "cross_scene": false,
+              "use": "f01s003-2"
+            },
+            "f01s005-5": {
+              "cross_scene": false,
+              "use": "f01s005-4"
+            },
+            "f01s007-3": {
+              "cross_scene": false,
+              "use": "f01s007-2"
+            },
+            "f01s007-6": {
+              "cross_scene": false,
+              "use": "f01s007-5"
+            },
+            "f01s008-4": {
+              "cross_scene": false,
+              "use": "f01s008-3"
+            },
+            "f01s008-6": {
+              "cross_scene": false,
+              "use": "f01s008-5"
+            },
+            "f01s010-3": {
+              "cross_scene": false,
+              "use": "f01s010-2"
+            },
+            "f01s010-4": {
+              "cross_scene": false,
+              "use": "f01s010-2"
+            },
+            "f01s010-6": {
+              "cross_scene": false,
+              "use": "f01s010-5"
+            },
+            "f01s012-2": {
+              "cross_scene": false,
+              "use": "f01s012-1"
+            },
+            "f01s012-3": {
+              "cross_scene": false,
+              "use": "f01s012-1"
+            },
+            "f01s012-4": {
+              "cross_scene": false,
+              "use": "f01s012-1"
+            },
+            "f01s013-1": {
+              "cross_scene": true,
+              "use": "f01s012-1"
+            },
+            "f01s013-2": {
+              "cross_scene": true,
+              "use": "f01s012-1"
+            },
+            "f01s013-3": {
+              "cross_scene": true,
+              "use": "f01s012-1"
+            },
+            "f01s014-1": {
+              "cross_scene": false,
+              "use": "f01s014-2"
+            },
+            "f01s014-3": {
+              "cross_scene": false,
+              "use": "f01s014-2"
+            },
+            "f01s014-4": {
+              "cross_scene": false,
+              "use": "f01s014-2"
+            },
+            "f01s014-5": {
+              "cross_scene": false,
+              "use": "f01s014-2"
+            },
+            "f01s015-1": {
+              "cross_scene": false,
+              "use": "f01s015-2"
+            },
+            "f01s015-4": {
+              "cross_scene": false,
+              "use": "f01s015-3"
+            }
+          },
+          "unpicked": [
+            "selfish-giant-retouch-film-01-r9"
+          ]
+        },
+        "target": "film-01",
+        "true_peak": -1.5
+      },
+      "path": "film/film-01/film-01.mp4",
+      "sha256": "dbfe765ac47bd3db37cc4a89cb6489184453a09cade77ac924af379585da684d"
+    },
+    {
+      "bytes": 495,
+      "kind": "qc_report",
+      "meta": {
+        "failed": []
+      },
+      "path": "qc/report.json",
+      "sha256": "5423636e4f17d26c7c9dc039d0855a8750a8428021c58ae8898dd494d1cdebb4"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -23952,6 +24120,23 @@
       },
       "result": "exchange_staged",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-25T08:47:52.074740+00:00",
+      "detail": {
+        "duration": 912.840604,
+        "target": "film-01"
+      },
+      "result": "assembled",
+      "stage": "film"
+    },
+    {
+      "at": "2026-11-25T08:49:39.762568+00:00",
+      "detail": {
+        "failed": []
+      },
+      "result": "pass",
+      "stage": "qc"
     }
   ],
   "ledger": "../allowance-ledger.json",
