@@ -15,7 +15,7 @@ Last updated: 25 Nov 2026.
   - [ ] প্রতিহিংসা (clearance; cover still needed)
   - [ ] মধ্যবর্ত্তিনী, শাস্তি, সমাপ্তি from *কথা-চতুষ্টয়* (1894) (clearance + cover; on the page after the next deploy)
   - [ ] মেঘ ও রৌদ্র from *কথা-চতুষ্টয়* (clearance + cover; on the page after the footnote-style deploy)
-- [ ] **Say which approved titles to publish.** Already publishable now: ক্ষুধিত পাষাণ (unpublished draft in production, clearance recorded; বিচারক is already live).
+- [ ] **Say which approved titles to publish.** Standing instruction (25 Nov): publish every title that is ready. Ready means its clearance and cover are approved, it passes browser acceptance and it is deployed. ক্ষুধিত পাষাণ publishes with the footnote-style deploy; each title you approve on the Monday page follows.
 
 ## Assets
 - [ ] **Covers** (upload front/back pairs to Cloudinary, then tell Claude): প্রায়শ্চিত্ত, আপদ, ঠাকুর্দ্দা, প্রতিহিংসা.

@@ -7,7 +7,7 @@ docs/evidence/*
 !docs/evidence/selfish-giant-global-rights.json
 !docs/evidence/publication-clearance-20261123.json
 !docs/evidence/publication-clearance-*.json
-!docs/evidence/publication-browser-20261123.json
+!docs/evidence/publication-browser-*.json
 
 node_modules
 .env
