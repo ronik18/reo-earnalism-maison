@@ -1,0 +1,10 @@
+{% extends 'web/base.html' %}{% load maison %}{% block content %}<div class="page-title"><h1>{% ui 'review_title' %}</h1></div>
+{% if review_error %}<p role="alert">{% ui review_error %}</p>{% endif %}
+{% if groups %}<form method="post" action="{% url 'web:staff-review' ui_locale %}">{% csrf_token %}
+{% for group in groups %}<fieldset><legend>{% if group.kind == 'clearance' %}{% ui 'review_kind_clearance' %}{% elif group.kind == 'cover' %}{% ui 'review_kind_cover' %}{% elif group.kind == 'edition' %}{% ui 'review_kind_edition' %}{% else %}{% ui 'review_kind_post' %}{% endif %}</legend>
+{% for item in group.items %}<p><label><input type="checkbox" name="item" value="{{ item.id }}"> <code>{{ item.ref }}</code>{% if item.summary.title %} · {{ item.summary.title }}{% elif item.summary.edition_slug %} · {{ item.summary.edition_slug }}{% endif %}</label></p>
+{% endfor %}</fieldset>
+{% endfor %}
+<div class="actions"><button class="button" type="submit" name="decision" value="approved">{% ui 'review_approve' %}</button> <button class="button secondary" type="submit" name="decision" value="rejected">{% ui 'review_reject' %}</button></div>
+</form>{% else %}<p>{% ui 'review_empty' %}</p>{% endif %}
+{% endblock %}

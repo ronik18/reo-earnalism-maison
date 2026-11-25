@@ -533,6 +533,36 @@ def track(request, locale, track_id):
     return page(request, locale, "web/track.html", track=data, questions=result["items"], next_cursor=result["next_cursor"], active_nav="learn", teacher=is_teacher(request.user))
 
 
+@require_http_methods(["GET", "POST"])
+@domain_view
+def staff_review(request, locale):
+    """Monday review page: staff only (everyone else gets 404). POST decides the ticked items, then redirects (PRG)."""
+    if not (request.user.is_authenticated and request.user.is_staff):
+        raise Http404
+    from core.api import DomainError
+    from operations import review
+    from operations.models import ReviewItem
+    error = None
+    if request.method == "POST":
+        ids = []
+        for raw in request.POST.getlist("item"):
+            try:
+                ids.append(UUID(raw))
+            except ValueError:
+                pass
+        try:
+            review.decide(request.user, ids, request.POST.get("decision", ""))
+            return HttpResponseRedirect(reverse("web:staff-review", args=[locale]))
+        except DomainError as exc:
+            error = {"REVIEW_ITEM_CHANGED": "review_changed", "ACCESS_DENIED": "review_denied"}.get(exc.code, "error")
+            status = exc.status
+    else:
+        status = 200
+    groups = [{"kind": kind, "items": list(ReviewItem.objects.filter(status="pending", kind=kind).order_by("created_at"))}
+              for kind, _ in ReviewItem.KINDS]
+    return page(request, locale, "web/staff_review.html", status=status, groups=[g for g in groups if g["items"]], review_error=error)
+
+
 @require_GET
 @member_required
 @domain_view
