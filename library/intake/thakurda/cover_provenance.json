@@ -1,0 +1,59 @@
+{
+ "schema": "earnalism.cover-provenance.v2",
+ "slug": "thakurda",
+ "status": "OWNER_PROVIDED_ARTWORK",
+ "owner_statement": {
+  "date": "2026-11-25",
+  "text": "Owner, 25 Nov 2026: \"If the covers are not present, design them consistently like the already present covers.\""
+ },
+ "basis": "Designed by Claude at the owner instruction above, matching the existing Earnalism cover series (painted scene, gold Bengali title, author line, footer; textured back with a gold line-art motif, tagline, summary and year). Front and back illustrations generated with Krea 3 on the owner ElevenLabs Creator plan (flow uP0ao4gyge6DhUsgXiKo; commercial use under that plan terms); lettering set in Noto Serif Bengali, Noto Sans Bengali and Source Serif 4 (SIL OFL). Uploaded to the owner Cloudinary; front and back share the asset UUID. Requires the owner cover approval on the Monday page.",
+ "scope": "Cover display only; grants no text, audio or publication authorization.",
+ "sides": {
+  "front": {
+   "original": {
+    "url": "https://res.cloudinary.com/dzlrhlfpu/image/upload/v1795634668/earnalism/covers/front/cover_c0326d36-8dc4-44cb-9cbd-914f89df718a.png",
+    "public_id": "earnalism/covers/front/cover_c0326d36-8dc4-44cb-9cbd-914f89df718a",
+    "asset_id": "379700780e711755d67bbf5ab352fad2",
+    "version": 1795634668,
+    "created_at": "2026-11-25T19:24:28Z",
+    "format": "png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2797382,
+    "sha256": "17829437a24a0c7e6364b0d45f532427fc936146fa9b111d6b96966682231a88"
+   },
+   "delivery": {
+    "path": "front.jpg",
+    "width": 800,
+    "height": 1200,
+    "format": "JPEG",
+    "bytes": 243563,
+    "sha256": "5cab7d23001312b999fcffcf81aaf40a0000e34c52fdeb4605a40a44cfa2f0fe",
+    "derivation": "Pillow LANCZOS resize to 800x1200, JPEG quality 90, metadata not copied"
+   }
+  },
+  "back": {
+   "original": {
+    "url": "https://res.cloudinary.com/dzlrhlfpu/image/upload/v1795634669/earnalism/covers/back/back_cover_c0326d36-8dc4-44cb-9cbd-914f89df718a.png",
+    "public_id": "earnalism/covers/back/back_cover_c0326d36-8dc4-44cb-9cbd-914f89df718a",
+    "asset_id": "5f02374b5a026841e8f00cde00ac5aea",
+    "version": 1795634669,
+    "created_at": "2026-11-25T19:24:29Z",
+    "format": "png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2909987,
+    "sha256": "d19b16dfb1c8e58773cecd1080868245a340130ab6a7e89e60ea356d211658a3"
+   },
+   "delivery": {
+    "path": "back.jpg",
+    "width": 800,
+    "height": 1200,
+    "format": "JPEG",
+    "bytes": 200591,
+    "sha256": "d88a085750e83005773b95d25379e7c8858e65721b48b7fce1e99ff7b4a9c029",
+    "derivation": "Pillow LANCZOS resize to 800x1200, JPEG quality 90, metadata not copied"
+   }
+  }
+ }
+}
