@@ -188,3 +188,4 @@ class PaymentAllocation(models.Model):
 
 from .subscription_models import BillingPlan,Subscription,Mandate
 from .invoice_models import InvoiceArtifact,InvoiceRevision,FinanceNumberSequence
+from .revenue_models import RevenueEntry,ReinvestmentEntry
