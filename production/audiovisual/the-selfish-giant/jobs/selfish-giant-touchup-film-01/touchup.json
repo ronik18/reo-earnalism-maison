@@ -1,0 +1,65 @@
+{
+  "items": [
+    {
+      "key": "f01s002-1",
+      "ops": [
+        {
+          "box": [
+            743,
+            387,
+            760,
+            411
+          ],
+          "feather": 1,
+          "op": "fill",
+          "sample": [
+            751,
+            394
+          ]
+        },
+        {
+          "box": [
+            1019,
+            487,
+            1050,
+            504
+          ],
+          "feather": 1,
+          "op": "fill",
+          "sample": [
+            1018,
+            497
+          ]
+        }
+      ],
+      "source": {
+        "file": "f01s002-1--c3.png",
+        "job": "selfish-giant-stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s008-2",
+      "ops": [
+        {
+          "box": [
+            1238,
+            704,
+            1328,
+            736
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#1E2D05",
+          "tol": 70
+        }
+      ],
+      "source": {
+        "file": "f01s008-2--c2.png",
+        "job": "selfish-giant-stills-film-01-r9"
+      }
+    }
+  ]
+}

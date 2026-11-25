@@ -21809,6 +21809,161 @@
       },
       "path": "picks/selfish-giant-stills-film-01-r10.pick-1.json",
       "sha256": "704b879c0d63205afa42ac97d11ca498fa4ea31a33c69d355421038f72cfe029"
+    },
+    {
+      "bytes": 2470,
+      "kind": "touchup_job",
+      "meta": {
+        "engine": "opencv",
+        "forecast_units": 0.0,
+        "job_id": "selfish-giant-touchup-film-01",
+        "job_kind": "touchup",
+        "manifest": "jobs/selfish-giant-touchup-film-01/touchup-manifest.json",
+        "opencv": "5.1.0"
+      },
+      "path": "jobs/selfish-giant-touchup-film-01/touchup-manifest.json",
+      "sha256": "08a5abd075ef711c6f19ff50a6dca2b616f698226aa2294f88690d8b8c5b3a42"
+    },
+    {
+      "bytes": 1136,
+      "kind": "touchup_spec",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "selfish-giant-touchup-film-01",
+        "job_kind": "touchup",
+        "opencv": "5.1.0"
+      },
+      "path": "jobs/selfish-giant-touchup-film-01/touchup.json",
+      "sha256": "b8a9dcd36061d9cdeac77eca304799168c9ee3f0a919fb7a19c08c352ef89dce"
+    },
+    {
+      "bytes": 1491920,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "selfish-giant-touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s002-1",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              743,
+              387,
+              760,
+              411
+            ],
+            "feather": 1,
+            "op": "fill",
+            "sample": [
+              751,
+              394
+            ]
+          },
+          {
+            "box": [
+              1019,
+              487,
+              1050,
+              504
+            ],
+            "feather": 1,
+            "op": "fill",
+            "sample": [
+              1018,
+              497
+            ]
+          }
+        ],
+        "source": "stills/selfish-giant-stills-film-01-r9/f01s002-1--c3.png",
+        "source_sha256": "94932ee599ab9626a43be804e3b47951151e272fd9f873c3e89a748ddf04f1a8"
+      },
+      "path": "touchup/selfish-giant-touchup-film-01/f01s002-1--c1.png",
+      "sha256": "01e18fdd8060a7c84deb5d54242fcf5954f40837b30eb590d899993eda44ab66"
+    },
+    {
+      "bytes": 1192,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "selfish-giant-touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s002-1",
+        "opencv": "5.1.0",
+        "source": "stills/selfish-giant-stills-film-01-r9/f01s002-1--c3.png",
+        "source_sha256": "94932ee599ab9626a43be804e3b47951151e272fd9f873c3e89a748ddf04f1a8"
+      },
+      "path": "touchup/selfish-giant-touchup-film-01/f01s002-1--mask.png",
+      "sha256": "c59acde34e4f74ef10f76d7bce2633af65798247d2e840ee73065316c3e3cf3e"
+    },
+    {
+      "bytes": 2234024,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "selfish-giant-touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s008-2",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              1238,
+              704,
+              1328,
+              736
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#1E2D05",
+            "tol": 70
+          }
+        ],
+        "source": "stills/selfish-giant-stills-film-01-r9/f01s008-2--c2.png",
+        "source_sha256": "20414b9d35a872652a1c75045156f9d78a6bc4a8a08bd8baf57a1d1905a3925b"
+      },
+      "path": "touchup/selfish-giant-touchup-film-01/f01s008-2--c1.png",
+      "sha256": "e4f04d503b73bd1b7f4bf45c26c14c68e2ccd14672c4c669743165778d36b09d"
+    },
+    {
+      "bytes": 1356,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "selfish-giant-touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s008-2",
+        "opencv": "5.1.0",
+        "source": "stills/selfish-giant-stills-film-01-r9/f01s008-2--c2.png",
+        "source_sha256": "20414b9d35a872652a1c75045156f9d78a6bc4a8a08bd8baf57a1d1905a3925b"
+      },
+      "path": "touchup/selfish-giant-touchup-film-01/f01s008-2--mask.png",
+      "sha256": "0aaf266a9ec00ace69b165f1d30887f7cbef3f93127958d5a3a758ad6d5ca38a"
+    },
+    {
+      "bytes": 475,
+      "kind": "stills_pick",
+      "meta": {
+        "choices": {
+          "f01s002-1": {
+            "candidate": 1,
+            "file": "touchup/selfish-giant-touchup-film-01/f01s002-1--c1.png",
+            "sha256": "01e18fdd8060a7c84deb5d54242fcf5954f40837b30eb590d899993eda44ab66"
+          },
+          "f01s008-2": {
+            "candidate": 1,
+            "file": "touchup/selfish-giant-touchup-film-01/f01s008-2--c1.png",
+            "sha256": "e4f04d503b73bd1b7f4bf45c26c14c68e2ccd14672c4c669743165778d36b09d"
+          }
+        },
+        "job_id": "selfish-giant-touchup-film-01",
+        "version": 1
+      },
+      "path": "picks/selfish-giant-touchup-film-01.pick-1.json",
+      "sha256": "ee04d9cdd223a9d5159480a084462ebbf537657b5a80440b7176fb065a839db5"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -23626,6 +23781,49 @@
           "f01s009-1": 1
         },
         "job_id": "selfish-giant-stills-film-01-r10",
+        "version": 1
+      },
+      "result": "recorded",
+      "stage": "pick"
+    },
+    {
+      "at": "2026-11-25T07:44:52.632756+00:00",
+      "detail": {
+        "engine": "opencv",
+        "job_id": "selfish-giant-touchup-film-01",
+        "kind": "touchup",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-25T07:44:52.742462+00:00",
+      "detail": {
+        "actual_units": 0,
+        "engine": "opencv",
+        "files": [
+          "touchup/selfish-giant-touchup-film-01/f01s002-1--c1.png",
+          "touchup/selfish-giant-touchup-film-01/f01s002-1--mask.png",
+          "touchup/selfish-giant-touchup-film-01/f01s008-2--c1.png",
+          "touchup/selfish-giant-touchup-film-01/f01s008-2--mask.png"
+        ],
+        "job_id": "selfish-giant-touchup-film-01",
+        "kind": "touchup",
+        "manifest_sha256": "08a5abd075ef711c6f19ff50a6dca2b616f698226aa2294f88690d8b8c5b3a42",
+        "opencv": "5.1.0"
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-25T07:45:35.798250+00:00",
+      "detail": {
+        "choices": {
+          "f01s002-1": 1,
+          "f01s008-2": 1
+        },
+        "job_id": "selfish-giant-touchup-film-01",
         "version": 1
       },
       "result": "recorded",

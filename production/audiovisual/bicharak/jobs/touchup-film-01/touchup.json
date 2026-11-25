@@ -1,0 +1,1539 @@
+{
+  "items": [
+    {
+      "key": "f01s001-5",
+      "ops": [
+        {
+          "box": [
+            300,
+            160,
+            397,
+            250
+          ],
+          "feather": 2,
+          "grow": 3,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 5,
+          "target": "#2D2A32",
+          "tol": 80
+        },
+        {
+          "box": [
+            368,
+            213,
+            387,
+            314
+          ],
+          "feather": 1,
+          "line": [
+            377,
+            222,
+            377,
+            304
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 9
+        },
+        {
+          "box": [
+            480,
+            243,
+            499,
+            346
+          ],
+          "feather": 1,
+          "line": [
+            489,
+            252,
+            489,
+            336
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 9
+        },
+        {
+          "box": [
+            478,
+            276,
+            501,
+            298
+          ],
+          "feather": 2,
+          "op": "inpaint",
+          "radius": 4
+        },
+        {
+          "box": [
+            372,
+            236,
+            408,
+            264
+          ],
+          "feather": 1,
+          "line": [
+            379,
+            243,
+            400,
+            256
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            393,
+            249,
+            428,
+            278
+          ],
+          "feather": 1,
+          "line": [
+            400,
+            256,
+            420,
+            270
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            413,
+            263,
+            448,
+            289
+          ],
+          "feather": 1,
+          "line": [
+            420,
+            270,
+            440,
+            281
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            433,
+            274,
+            468,
+            297
+          ],
+          "feather": 1,
+          "line": [
+            440,
+            281,
+            460,
+            289
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            453,
+            282,
+            494,
+            301
+          ],
+          "feather": 1,
+          "line": [
+            460,
+            289,
+            486,
+            293
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            485,
+            282,
+            528,
+            306
+          ],
+          "feather": 1,
+          "line": [
+            492,
+            289,
+            520,
+            298
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            513,
+            291,
+            548,
+            312
+          ],
+          "feather": 1,
+          "line": [
+            520,
+            298,
+            540,
+            304
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            533,
+            297,
+            568,
+            314
+          ],
+          "feather": 1,
+          "line": [
+            540,
+            304,
+            560,
+            306
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            553,
+            299,
+            608,
+            317
+          ],
+          "feather": 1,
+          "line": [
+            560,
+            306,
+            600,
+            309
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            593,
+            301,
+            648,
+            317
+          ],
+          "feather": 1,
+          "line": [
+            600,
+            309,
+            640,
+            308
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            487,
+            293,
+            548,
+            317
+          ],
+          "feather": 1,
+          "line": [
+            494,
+            300,
+            540,
+            309
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            533,
+            302,
+            588,
+            322
+          ],
+          "feather": 1,
+          "line": [
+            540,
+            309,
+            580,
+            314
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            573,
+            307,
+            628,
+            328
+          ],
+          "feather": 1,
+          "line": [
+            580,
+            314,
+            620,
+            320
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            487,
+            297,
+            524,
+            350
+          ],
+          "feather": 1,
+          "line": [
+            494,
+            304,
+            516,
+            342
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 3,
+          "width": 7
+        },
+        {
+          "box": [
+            739,
+            448,
+            766,
+            466
+          ],
+          "feather": 1,
+          "grow": 1,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 3,
+          "target": "#3C2014",
+          "tol": 60
+        }
+      ],
+      "source": {
+        "file": "f01s001-5--c3.png",
+        "job": "stills-film-01-r10"
+      }
+    },
+    {
+      "key": "f01s002-4",
+      "ops": [
+        {
+          "box": [
+            556,
+            0,
+            915,
+            64
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#10181E",
+          "tol": 24
+        },
+        {
+          "box": [
+            606,
+            150,
+            630,
+            368
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#10181E",
+          "tol": 24
+        },
+        {
+          "box": [
+            628,
+            296,
+            750,
+            352
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#132630",
+          "tol": 26
+        },
+        {
+          "box": [
+            628,
+            352,
+            750,
+            425
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#10181E",
+          "tol": 20
+        },
+        {
+          "box": [
+            638,
+            336,
+            668,
+            374
+          ],
+          "feather": 3,
+          "op": "inpaint",
+          "radius": 5
+        }
+      ],
+      "source": {
+        "file": "f01s002-4--c1.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s003-5",
+      "ops": [
+        {
+          "box": [
+            662,
+            196,
+            750,
+            216
+          ],
+          "feather": 3,
+          "op": "inpaint",
+          "radius": 5
+        },
+        {
+          "box": [
+            676,
+            214,
+            750,
+            229
+          ],
+          "feather": 3,
+          "op": "inpaint",
+          "radius": 5
+        },
+        {
+          "box": [
+            748,
+            196,
+            793,
+            216
+          ],
+          "feather": 3,
+          "op": "inpaint",
+          "radius": 5
+        },
+        {
+          "box": [
+            570,
+            330,
+            800,
+            494
+          ],
+          "feather": 20,
+          "mask": "ellipse",
+          "op": "fill",
+          "sample": [
+            580,
+            480
+          ]
+        },
+        {
+          "box": [
+            596,
+            430,
+            774,
+            496
+          ],
+          "feather": 8,
+          "op": "fill",
+          "sample": [
+            580,
+            480
+          ]
+        },
+        {
+          "box": [
+            655,
+            430,
+            715,
+            493
+          ],
+          "feather": 2,
+          "op": "fill",
+          "sample": [
+            580,
+            480
+          ]
+        },
+        {
+          "box": [
+            584,
+            490,
+            653,
+            521
+          ],
+          "feather": 1,
+          "op": "fill",
+          "sample": [
+            580,
+            480
+          ]
+        },
+        {
+          "box": [
+            713,
+            490,
+            786,
+            521
+          ],
+          "feather": 1,
+          "op": "fill",
+          "sample": [
+            580,
+            480
+          ]
+        },
+        {
+          "box": [
+            648,
+            484,
+            718,
+            514
+          ],
+          "feather": 1,
+          "grow": 1,
+          "mask": "color",
+          "op": "fill",
+          "sample": [
+            650,
+            505
+          ],
+          "target": "#2F3240",
+          "tol": 16
+        }
+      ],
+      "source": {
+        "file": "f01s003-5--c1.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s006-1",
+      "ops": [
+        {
+          "box": [
+            620,
+            294,
+            766,
+            360
+          ],
+          "feather": 3,
+          "grow": 3,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 6,
+          "target": "#2D2A21",
+          "tol": 40
+        },
+        {
+          "box": [
+            679,
+            332,
+            723,
+            337
+          ],
+          "feather": 1,
+          "mask": "ellipse",
+          "op": "fill",
+          "sample": [
+            589,
+            365
+          ]
+        }
+      ],
+      "source": {
+        "file": "f01s006-1--c2.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s007-1",
+      "ops": [
+        {
+          "box": [
+            956,
+            0,
+            987,
+            140
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#0E1020",
+          "tol": 45
+        },
+        {
+          "box": [
+            1017,
+            0,
+            1088,
+            124
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#0E1020",
+          "tol": 45
+        },
+        {
+          "box": [
+            1088,
+            60,
+            1116,
+            124
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#0E1020",
+          "tol": 45
+        },
+        {
+          "box": [
+            1018,
+            150,
+            1117,
+            182
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#0E1020",
+          "tol": 30
+        },
+        {
+          "box": [
+            30,
+            0,
+            300,
+            180
+          ],
+          "from": {
+            "hue": [
+              160,
+              235
+            ],
+            "sat_min": 0.06
+          },
+          "grow": 1,
+          "op": "recolor",
+          "to": "#3C2318"
+        }
+      ],
+      "source": {
+        "file": "f01s007-1--c2.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s007-2",
+      "ops": [
+        {
+          "box": [
+            505,
+            528,
+            645,
+            690
+          ],
+          "from": {
+            "hue": [
+              348,
+              5
+            ],
+            "sat_min": 0.2
+          },
+          "grow": 3,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#AC9276"
+        },
+        {
+          "box": [
+            505,
+            528,
+            645,
+            690
+          ],
+          "from": {
+            "hue": [
+              90,
+              200
+            ],
+            "light_min": 0.09,
+            "sat_min": 0.03
+          },
+          "grow": 3,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#AC9276"
+        },
+        {
+          "box": [
+            628,
+            440,
+            672,
+            528
+          ],
+          "from": {
+            "hue": [
+              348,
+              5
+            ],
+            "sat_min": 0.2
+          },
+          "grow": 3,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#AC9276"
+        },
+        {
+          "box": [
+            628,
+            440,
+            672,
+            528
+          ],
+          "from": {
+            "hue": [
+              90,
+              200
+            ],
+            "light_min": 0.09,
+            "sat_min": 0.03
+          },
+          "grow": 3,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#AC9276"
+        },
+        {
+          "box": [
+            596,
+            496,
+            640,
+            532
+          ],
+          "from": {
+            "hue": [
+              348,
+              5
+            ],
+            "sat_min": 0.2
+          },
+          "grow": 3,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#AC9276"
+        },
+        {
+          "box": [
+            596,
+            496,
+            640,
+            532
+          ],
+          "from": {
+            "hue": [
+              90,
+              200
+            ],
+            "light_min": 0.09,
+            "sat_min": 0.03
+          },
+          "grow": 3,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#AC9276"
+        },
+        {
+          "box": [
+            661,
+            182,
+            682,
+            213
+          ],
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 5
+        },
+        {
+          "box": [
+            150,
+            699,
+            201,
+            768
+          ],
+          "feather": 4,
+          "op": "inpaint",
+          "radius": 7
+        }
+      ],
+      "source": {
+        "file": "f01s007-2--c3.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s007-4",
+      "ops": [
+        {
+          "box": [
+            401,
+            312,
+            417,
+            329
+          ],
+          "feather": 2,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 4
+        },
+        {
+          "box": [
+            626,
+            314,
+            646,
+            332
+          ],
+          "op": "inpaint",
+          "radius": 5
+        },
+        {
+          "box": [
+            420,
+            500,
+            700,
+            768
+          ],
+          "from": {
+            "hue": [
+              330,
+              6
+            ],
+            "sat_min": 0.2
+          },
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#D9AD97"
+        },
+        {
+          "box": [
+            220,
+            735,
+            430,
+            768
+          ],
+          "from": {
+            "hue": [
+              325,
+              6
+            ],
+            "sat_min": 0.15
+          },
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#D9AD97"
+        }
+      ],
+      "source": {
+        "file": "f01s007-4--c1.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s007-5",
+      "ops": [
+        {
+          "box": [
+            740,
+            268,
+            758,
+            287
+          ],
+          "feather": 2,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 4
+        },
+        {
+          "box": [
+            937,
+            253,
+            955,
+            273
+          ],
+          "feather": 2,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 4
+        }
+      ],
+      "source": {
+        "file": "f01s007-5--c1.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s007-6",
+      "ops": [
+        {
+          "box": [
+            747,
+            180,
+            768,
+            213
+          ],
+          "feather": 3,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 5
+        },
+        {
+          "box": [
+            488,
+            292,
+            514,
+            318
+          ],
+          "feather": 3,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 3
+        }
+      ],
+      "source": {
+        "file": "f01s007-6--c1.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s008-1",
+      "ops": [
+        {
+          "box": [
+            340,
+            0,
+            640,
+            175
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#B49B78",
+          "tol": 70
+        },
+        {
+          "box": [
+            752,
+            0,
+            846,
+            177
+          ],
+          "feather": 3,
+          "grow": 3,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 5,
+          "target": "#A08C6E",
+          "tol": 110
+        },
+        {
+          "box": [
+            786,
+            54,
+            830,
+            100
+          ],
+          "feather": 3,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 5
+        },
+        {
+          "box": [
+            696,
+            402,
+            720,
+            430
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 3,
+          "target": "#4A4250",
+          "tol": 60
+        },
+        {
+          "box": [
+            752,
+            196,
+            800,
+            300
+          ],
+          "feather": 1,
+          "grow": 1,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 3,
+          "target": "#C4A878",
+          "tol": 24
+        },
+        {
+          "box": [
+            736,
+            222,
+            770,
+            252
+          ],
+          "feather": 1,
+          "grow": 1,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 3,
+          "target": "#C4A878",
+          "tol": 24
+        }
+      ],
+      "source": {
+        "file": "f01s008-1--c1.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s009-4",
+      "ops": [
+        {
+          "box": [
+            444,
+            356,
+            469,
+            386
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 3,
+          "target": "#AAAAAA",
+          "tol": 70
+        },
+        {
+          "box": [
+            687,
+            176,
+            714,
+            222
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#000000",
+          "tol": 120
+        },
+        {
+          "box": [
+            540,
+            575,
+            990,
+            768
+          ],
+          "from": {
+            "hue": [
+              100,
+              200
+            ],
+            "light_min": 0.06,
+            "sat_min": 0.04
+          },
+          "grow": 2,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#9A958C"
+        },
+        {
+          "box": [
+            930,
+            0,
+            1046,
+            400
+          ],
+          "feather": 16,
+          "method": "telea",
+          "op": "inpaint",
+          "radius": 15
+        }
+      ],
+      "source": {
+        "file": "f01s009-4--c3.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s012-1",
+      "ops": [
+        {
+          "box": [
+            884,
+            279,
+            899,
+            293
+          ],
+          "feather": 1,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 3
+        },
+        {
+          "box": [
+            883,
+            286,
+            900,
+            300
+          ],
+          "feather": 1,
+          "grow": 1,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 3,
+          "target": "#9C8CC0",
+          "tol": 110
+        },
+        {
+          "box": [
+            680,
+            480,
+            1010,
+            768
+          ],
+          "feather": 1,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 3,
+          "target": "#695C44",
+          "tol": 28
+        },
+        {
+          "box": [
+            980,
+            705,
+            1045,
+            768
+          ],
+          "feather": 2,
+          "grow": 3,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 5,
+          "target": "#A05366",
+          "tol": 95
+        },
+        {
+          "box": [
+            1274,
+            352,
+            1344,
+            390
+          ],
+          "feather": 6,
+          "op": "inpaint",
+          "radius": 6
+        },
+        {
+          "box": [
+            1216,
+            680,
+            1336,
+            760
+          ],
+          "feather": 8,
+          "op": "inpaint",
+          "radius": 6
+        }
+      ],
+      "source": {
+        "file": "f01s012-1--c1.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s013-1",
+      "ops": [
+        {
+          "box": [
+            626,
+            206,
+            655,
+            244
+          ],
+          "feather": 2,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 4
+        },
+        {
+          "box": [
+            421,
+            362,
+            436,
+            380
+          ],
+          "feather": 1,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 3
+        },
+        {
+          "box": [
+            753,
+            404,
+            772,
+            428
+          ],
+          "feather": 1,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 3
+        },
+        {
+          "box": [
+            928,
+            373,
+            972,
+            429
+          ],
+          "feather": 2,
+          "op": "inpaint",
+          "radius": 5
+        },
+        {
+          "box": [
+            926,
+            372,
+            974,
+            432
+          ],
+          "feather": 10,
+          "from": [
+            0,
+            -56
+          ],
+          "mask": "ellipse",
+          "op": "clone"
+        },
+        {
+          "box": [
+            924,
+            308,
+            977,
+            380
+          ],
+          "feather": 6,
+          "op": "inpaint",
+          "radius": 7
+        },
+        {
+          "box": [
+            560,
+            540,
+            1030,
+            768
+          ],
+          "from": {
+            "hue": [
+              40,
+              110
+            ],
+            "light_max": 0.45,
+            "sat_min": 0.025
+          },
+          "grow": 1,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#868B8E"
+        }
+      ],
+      "source": {
+        "file": "f01s013-1--c1.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s013-2",
+      "ops": [
+        {
+          "box": [
+            503,
+            158,
+            522,
+            184
+          ],
+          "feather": 2,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 3
+        },
+        {
+          "box": [
+            415,
+            311,
+            430,
+            354
+          ],
+          "feather": 1,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 3
+        },
+        {
+          "box": [
+            634,
+            311,
+            650,
+            354
+          ],
+          "feather": 1,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 3
+        },
+        {
+          "box": [
+            722,
+            460,
+            850,
+            610
+          ],
+          "feather": 2,
+          "line": [
+            729,
+            469,
+            839,
+            603
+          ],
+          "mask": "line",
+          "op": "inpaint",
+          "radius": 5,
+          "width": 16
+        }
+      ],
+      "source": {
+        "file": "f01s013-2--c1.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s013-3",
+      "ops": [
+        {
+          "box": [
+            516,
+            132,
+            542,
+            156
+          ],
+          "feather": 2,
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 4
+        },
+        {
+          "box": [
+            150,
+            360,
+            425,
+            690
+          ],
+          "from": {
+            "hue": [
+              352,
+              14
+            ],
+            "light_max": 0.42,
+            "sat_min": 0.3
+          },
+          "grow": 2,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#C7AC8A"
+        }
+      ],
+      "source": {
+        "file": "f01s013-3--c2.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s014-1",
+      "ops": [
+        {
+          "box": [
+            262,
+            214,
+            326,
+            346
+          ],
+          "from": {
+            "hue": [
+              15,
+              65
+            ],
+            "sat_min": 0.2
+          },
+          "grow": 2,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#1A2638"
+        },
+        {
+          "box": [
+            782,
+            492,
+            832,
+            562
+          ],
+          "from": {
+            "hue": [
+              15,
+              65
+            ],
+            "sat_min": 0.2
+          },
+          "grow": 2,
+          "lightness": "shade",
+          "op": "recolor",
+          "to": "#1A2638"
+        },
+        {
+          "box": [
+            790,
+            446,
+            824,
+            476
+          ],
+          "feather": 2,
+          "grow": 2,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 4,
+          "target": "#101828",
+          "tol": 30
+        }
+      ],
+      "source": {
+        "file": "f01s014-1--c3.png",
+        "job": "stills-film-01-r9"
+      }
+    },
+    {
+      "key": "f01s016-1",
+      "ops": [
+        {
+          "box": [
+            620,
+            242,
+            752,
+            298
+          ],
+          "feather": 3,
+          "grow": 3,
+          "mask": "color",
+          "op": "inpaint",
+          "radius": 6,
+          "target": "#35302B",
+          "tol": 35
+        },
+        {
+          "box": [
+            668,
+            276,
+            714,
+            281
+          ],
+          "feather": 1,
+          "mask": "ellipse",
+          "op": "fill",
+          "sample": [
+            606,
+            307
+          ]
+        }
+      ],
+      "source": {
+        "file": "f01s016-1--c1.png",
+        "job": "stills-film-01-r9"
+      }
+    }
+  ]
+}

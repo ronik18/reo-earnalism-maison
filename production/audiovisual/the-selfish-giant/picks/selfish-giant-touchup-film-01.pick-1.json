@@ -1,0 +1,15 @@
+{
+  "choices": {
+    "f01s002-1": {
+      "candidate": 1,
+      "file": "touchup/selfish-giant-touchup-film-01/f01s002-1--c1.png",
+      "sha256": "01e18fdd8060a7c84deb5d54242fcf5954f40837b30eb590d899993eda44ab66"
+    },
+    "f01s008-2": {
+      "candidate": 1,
+      "file": "touchup/selfish-giant-touchup-film-01/f01s008-2--c1.png",
+      "sha256": "e4f04d503b73bd1b7f4bf45c26c14c68e2ccd14672c4c669743165778d36b09d"
+    }
+  },
+  "job_id": "selfish-giant-touchup-film-01"
+}

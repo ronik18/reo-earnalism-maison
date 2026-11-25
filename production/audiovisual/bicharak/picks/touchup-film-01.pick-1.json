@@ -1,0 +1,90 @@
+{
+  "choices": {
+    "f01s001-5": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s001-5--c1.png",
+      "sha256": "15f929c8ddc2f1bd91be4156b90ea8bd0ac88a0ea34a011748f0158faa670ce8"
+    },
+    "f01s002-4": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s002-4--c1.png",
+      "sha256": "df07ecc7eae9e74635857d87888078a71315d39cc6beee329b980a0516f4ae69"
+    },
+    "f01s003-5": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s003-5--c1.png",
+      "sha256": "d5bd759982499bb862e8578b7377ea0e8a9337531368ee0c37e622a33f0d5fb6"
+    },
+    "f01s006-1": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s006-1--c1.png",
+      "sha256": "bfe8e89efd14d73d0627c3e61f73b514381077ccf186c9bf0357f08625eb8418"
+    },
+    "f01s007-1": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s007-1--c1.png",
+      "sha256": "6a3afdc9493d0d36f8a39d5fd99ff6334b43748ed8fd35fb597d0dffee89c688"
+    },
+    "f01s007-2": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s007-2--c1.png",
+      "sha256": "7df257feecb37992806a1dfecb421076fd331ecf9259c348197bc438264ca8f2"
+    },
+    "f01s007-4": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s007-4--c1.png",
+      "sha256": "ca0d66cdf69a3444f33af2e44d5cfa8d41e88d316914dc37ec109f756c0bb73e"
+    },
+    "f01s007-5": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s007-5--c1.png",
+      "sha256": "d6f375ab851519b151235c913284f451909b4665e5dc39df1f1bae13db5fb99d"
+    },
+    "f01s007-6": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s007-6--c1.png",
+      "sha256": "1504be0c8ea63e7a40c9cabdd40d438f6476f4f775eaba02d788b0fc9243a74a"
+    },
+    "f01s008-1": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s008-1--c1.png",
+      "sha256": "bd09941e33bf4141c22544cdb0c346e6059176e259e5f7ce82af57a0eb2d08b5"
+    },
+    "f01s009-4": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s009-4--c1.png",
+      "sha256": "fb17fe1d6984c18eb1ccfa2a48455ecbb8f67b02d26d0a4806bb57e65247ece9"
+    },
+    "f01s012-1": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s012-1--c1.png",
+      "sha256": "44088b46aa7c322434729bcea442df76fb748ffcc9f5443e616f5ee8cde50034"
+    },
+    "f01s013-1": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s013-1--c1.png",
+      "sha256": "975ec93c3d67eb8c8e30e4b4d8256e953db26f173fa32f5fbbb0c64d215879fd"
+    },
+    "f01s013-2": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s013-2--c1.png",
+      "sha256": "804533873104f7a50593a7f739fbbded7973adadac0bf19dc5e3eb404a5c5873"
+    },
+    "f01s013-3": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s013-3--c1.png",
+      "sha256": "3b68cb6573a778429225cbfe3b3291fa780ad09fefd95ef07016e27f10a0d0be"
+    },
+    "f01s014-1": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s014-1--c1.png",
+      "sha256": "de983d2781a341da41bf5642bfae8b875c31770fb4b80acb6d5138c910adf4aa"
+    },
+    "f01s016-1": {
+      "candidate": 1,
+      "file": "touchup/touchup-film-01/f01s016-1--c1.png",
+      "sha256": "f4dfbad916e754501661e4e51bbfc3040b56d9a84f493f4cce0d16784fc26d70"
+    }
+  },
+  "job_id": "touchup-film-01"
+}

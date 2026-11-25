@@ -28630,6 +28630,2055 @@
       },
       "path": "picks/stills-film-01-r10.pick-1.json",
       "sha256": "59035a52eed63b64f9107aad6c62d4a94d32f7bccceb7a10160c8c565eb353e8"
+    },
+    {
+      "bytes": 36740,
+      "kind": "touchup_job",
+      "meta": {
+        "engine": "opencv",
+        "forecast_units": 0.0,
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "manifest": "jobs/touchup-film-01/touchup-manifest.json",
+        "opencv": "5.1.0"
+      },
+      "path": "jobs/touchup-film-01/touchup-manifest.json",
+      "sha256": "4889805881a5f85f82085767a3272828e3bf462352b7193bd8f6c270ad6b7fe6"
+    },
+    {
+      "bytes": 28363,
+      "kind": "touchup_spec",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "opencv": "5.1.0"
+      },
+      "path": "jobs/touchup-film-01/touchup.json",
+      "sha256": "398d7c5370a22ffb3cfc72c966cef1726797dce0a35fc683c5986a1d0bb520cc"
+    },
+    {
+      "bytes": 1170368,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s001-5",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              300,
+              160,
+              397,
+              250
+            ],
+            "feather": 2,
+            "grow": 3,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 5,
+            "target": "#2D2A32",
+            "tol": 80
+          },
+          {
+            "box": [
+              368,
+              213,
+              387,
+              314
+            ],
+            "feather": 1,
+            "line": [
+              377,
+              222,
+              377,
+              304
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 9
+          },
+          {
+            "box": [
+              480,
+              243,
+              499,
+              346
+            ],
+            "feather": 1,
+            "line": [
+              489,
+              252,
+              489,
+              336
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 9
+          },
+          {
+            "box": [
+              478,
+              276,
+              501,
+              298
+            ],
+            "feather": 2,
+            "op": "inpaint",
+            "radius": 4
+          },
+          {
+            "box": [
+              372,
+              236,
+              408,
+              264
+            ],
+            "feather": 1,
+            "line": [
+              379,
+              243,
+              400,
+              256
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              393,
+              249,
+              428,
+              278
+            ],
+            "feather": 1,
+            "line": [
+              400,
+              256,
+              420,
+              270
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              413,
+              263,
+              448,
+              289
+            ],
+            "feather": 1,
+            "line": [
+              420,
+              270,
+              440,
+              281
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              433,
+              274,
+              468,
+              297
+            ],
+            "feather": 1,
+            "line": [
+              440,
+              281,
+              460,
+              289
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              453,
+              282,
+              494,
+              301
+            ],
+            "feather": 1,
+            "line": [
+              460,
+              289,
+              486,
+              293
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              485,
+              282,
+              528,
+              306
+            ],
+            "feather": 1,
+            "line": [
+              492,
+              289,
+              520,
+              298
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              513,
+              291,
+              548,
+              312
+            ],
+            "feather": 1,
+            "line": [
+              520,
+              298,
+              540,
+              304
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              533,
+              297,
+              568,
+              314
+            ],
+            "feather": 1,
+            "line": [
+              540,
+              304,
+              560,
+              306
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              553,
+              299,
+              608,
+              317
+            ],
+            "feather": 1,
+            "line": [
+              560,
+              306,
+              600,
+              309
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              593,
+              301,
+              648,
+              317
+            ],
+            "feather": 1,
+            "line": [
+              600,
+              309,
+              640,
+              308
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              487,
+              293,
+              548,
+              317
+            ],
+            "feather": 1,
+            "line": [
+              494,
+              300,
+              540,
+              309
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              533,
+              302,
+              588,
+              322
+            ],
+            "feather": 1,
+            "line": [
+              540,
+              309,
+              580,
+              314
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              573,
+              307,
+              628,
+              328
+            ],
+            "feather": 1,
+            "line": [
+              580,
+              314,
+              620,
+              320
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              487,
+              297,
+              524,
+              350
+            ],
+            "feather": 1,
+            "line": [
+              494,
+              304,
+              516,
+              342
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 3,
+            "width": 7
+          },
+          {
+            "box": [
+              739,
+              448,
+              766,
+              466
+            ],
+            "feather": 1,
+            "grow": 1,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 3,
+            "target": "#3C2014",
+            "tol": 60
+          }
+        ],
+        "source": "stills/stills-film-01-r10/f01s001-5--c3.png",
+        "source_sha256": "6ed2ebf0fa285575fef80ad04816bc607f916ec4fe9348fb43de3ad7b3c782f5"
+      },
+      "path": "touchup/touchup-film-01/f01s001-5--c1.png",
+      "sha256": "15f929c8ddc2f1bd91be4156b90ea8bd0ac88a0ea34a011748f0158faa670ce8"
+    },
+    {
+      "bytes": 2710,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s001-5",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r10/f01s001-5--c3.png",
+        "source_sha256": "6ed2ebf0fa285575fef80ad04816bc607f916ec4fe9348fb43de3ad7b3c782f5"
+      },
+      "path": "touchup/touchup-film-01/f01s001-5--mask.png",
+      "sha256": "fdb6b976006da60029c70f7354f33a07ee90bf683568c996f92971544b7831cf"
+    },
+    {
+      "bytes": 941695,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s002-4",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              556,
+              0,
+              915,
+              64
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#10181E",
+            "tol": 24
+          },
+          {
+            "box": [
+              606,
+              150,
+              630,
+              368
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#10181E",
+            "tol": 24
+          },
+          {
+            "box": [
+              628,
+              296,
+              750,
+              352
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#132630",
+            "tol": 26
+          },
+          {
+            "box": [
+              628,
+              352,
+              750,
+              425
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#10181E",
+            "tol": 20
+          },
+          {
+            "box": [
+              638,
+              336,
+              668,
+              374
+            ],
+            "feather": 3,
+            "op": "inpaint",
+            "radius": 5
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s002-4--c1.png",
+        "source_sha256": "85a554ad299b3ff019d23890a39c9382b99a395e448b5703f6ba1f2dd849e298"
+      },
+      "path": "touchup/touchup-film-01/f01s002-4--c1.png",
+      "sha256": "df07ecc7eae9e74635857d87888078a71315d39cc6beee329b980a0516f4ae69"
+    },
+    {
+      "bytes": 3976,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s002-4",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s002-4--c1.png",
+        "source_sha256": "85a554ad299b3ff019d23890a39c9382b99a395e448b5703f6ba1f2dd849e298"
+      },
+      "path": "touchup/touchup-film-01/f01s002-4--mask.png",
+      "sha256": "703a7b8fd41ff7085f5ec753710d3b17dbe82edf0b066ebe3cac6c7c271b99fa"
+    },
+    {
+      "bytes": 662283,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s003-5",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              662,
+              196,
+              750,
+              216
+            ],
+            "feather": 3,
+            "op": "inpaint",
+            "radius": 5
+          },
+          {
+            "box": [
+              676,
+              214,
+              750,
+              229
+            ],
+            "feather": 3,
+            "op": "inpaint",
+            "radius": 5
+          },
+          {
+            "box": [
+              748,
+              196,
+              793,
+              216
+            ],
+            "feather": 3,
+            "op": "inpaint",
+            "radius": 5
+          },
+          {
+            "box": [
+              570,
+              330,
+              800,
+              494
+            ],
+            "feather": 20,
+            "mask": "ellipse",
+            "op": "fill",
+            "sample": [
+              580,
+              480
+            ]
+          },
+          {
+            "box": [
+              596,
+              430,
+              774,
+              496
+            ],
+            "feather": 8,
+            "op": "fill",
+            "sample": [
+              580,
+              480
+            ]
+          },
+          {
+            "box": [
+              655,
+              430,
+              715,
+              493
+            ],
+            "feather": 2,
+            "op": "fill",
+            "sample": [
+              580,
+              480
+            ]
+          },
+          {
+            "box": [
+              584,
+              490,
+              653,
+              521
+            ],
+            "feather": 1,
+            "op": "fill",
+            "sample": [
+              580,
+              480
+            ]
+          },
+          {
+            "box": [
+              713,
+              490,
+              786,
+              521
+            ],
+            "feather": 1,
+            "op": "fill",
+            "sample": [
+              580,
+              480
+            ]
+          },
+          {
+            "box": [
+              648,
+              484,
+              718,
+              514
+            ],
+            "feather": 1,
+            "grow": 1,
+            "mask": "color",
+            "op": "fill",
+            "sample": [
+              650,
+              505
+            ],
+            "target": "#2F3240",
+            "tol": 16
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s003-5--c1.png",
+        "source_sha256": "763cc6417dfd88c0f46c562e58b145e9dfc0a84f79af605236af69ae421d8383"
+      },
+      "path": "touchup/touchup-film-01/f01s003-5--c1.png",
+      "sha256": "d5bd759982499bb862e8578b7377ea0e8a9337531368ee0c37e622a33f0d5fb6"
+    },
+    {
+      "bytes": 4542,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s003-5",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s003-5--c1.png",
+        "source_sha256": "763cc6417dfd88c0f46c562e58b145e9dfc0a84f79af605236af69ae421d8383"
+      },
+      "path": "touchup/touchup-film-01/f01s003-5--mask.png",
+      "sha256": "f4f5f8b0bab34d26819aa9a60eef17c9c093db7ef8ae2afcdb61b0d9626872c4"
+    },
+    {
+      "bytes": 927779,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s006-1",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              620,
+              294,
+              766,
+              360
+            ],
+            "feather": 3,
+            "grow": 3,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 6,
+            "target": "#2D2A21",
+            "tol": 40
+          },
+          {
+            "box": [
+              679,
+              332,
+              723,
+              337
+            ],
+            "feather": 1,
+            "mask": "ellipse",
+            "op": "fill",
+            "sample": [
+              589,
+              365
+            ]
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s006-1--c2.png",
+        "source_sha256": "94bc533348ff5207e7e54e31330b9a8148cf90e05720c1e6b021a4eeb16b35e9"
+      },
+      "path": "touchup/touchup-film-01/f01s006-1--c1.png",
+      "sha256": "bfe8e89efd14d73d0627c3e61f73b514381077ccf186c9bf0357f08625eb8418"
+    },
+    {
+      "bytes": 1941,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s006-1",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s006-1--c2.png",
+        "source_sha256": "94bc533348ff5207e7e54e31330b9a8148cf90e05720c1e6b021a4eeb16b35e9"
+      },
+      "path": "touchup/touchup-film-01/f01s006-1--mask.png",
+      "sha256": "6e7e46ae86b8c68896671159c3557a33eee55e713103184b9dd53d12188e57ea"
+    },
+    {
+      "bytes": 1208336,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s007-1",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              956,
+              0,
+              987,
+              140
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#0E1020",
+            "tol": 45
+          },
+          {
+            "box": [
+              1017,
+              0,
+              1088,
+              124
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#0E1020",
+            "tol": 45
+          },
+          {
+            "box": [
+              1088,
+              60,
+              1116,
+              124
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#0E1020",
+            "tol": 45
+          },
+          {
+            "box": [
+              1018,
+              150,
+              1117,
+              182
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#0E1020",
+            "tol": 30
+          },
+          {
+            "box": [
+              30,
+              0,
+              300,
+              180
+            ],
+            "from": {
+              "hue": [
+                160,
+                235
+              ],
+              "sat_min": 0.06
+            },
+            "grow": 1,
+            "op": "recolor",
+            "to": "#3C2318"
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s007-1--c2.png",
+        "source_sha256": "6f58e0e82bd41d8391498fe4807a09d631b932da8eabce6e3c11e45ba392541c"
+      },
+      "path": "touchup/touchup-film-01/f01s007-1--c1.png",
+      "sha256": "6a3afdc9493d0d36f8a39d5fd99ff6334b43748ed8fd35fb597d0dffee89c688"
+    },
+    {
+      "bytes": 3097,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s007-1",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s007-1--c2.png",
+        "source_sha256": "6f58e0e82bd41d8391498fe4807a09d631b932da8eabce6e3c11e45ba392541c"
+      },
+      "path": "touchup/touchup-film-01/f01s007-1--mask.png",
+      "sha256": "7407911709bf49cc140b1caf002851ddb25da3292230f270d9b541cd560457b7"
+    },
+    {
+      "bytes": 945113,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s007-2",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              505,
+              528,
+              645,
+              690
+            ],
+            "from": {
+              "hue": [
+                348,
+                5
+              ],
+              "sat_min": 0.2
+            },
+            "grow": 3,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#AC9276"
+          },
+          {
+            "box": [
+              505,
+              528,
+              645,
+              690
+            ],
+            "from": {
+              "hue": [
+                90,
+                200
+              ],
+              "light_min": 0.09,
+              "sat_min": 0.03
+            },
+            "grow": 3,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#AC9276"
+          },
+          {
+            "box": [
+              628,
+              440,
+              672,
+              528
+            ],
+            "from": {
+              "hue": [
+                348,
+                5
+              ],
+              "sat_min": 0.2
+            },
+            "grow": 3,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#AC9276"
+          },
+          {
+            "box": [
+              628,
+              440,
+              672,
+              528
+            ],
+            "from": {
+              "hue": [
+                90,
+                200
+              ],
+              "light_min": 0.09,
+              "sat_min": 0.03
+            },
+            "grow": 3,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#AC9276"
+          },
+          {
+            "box": [
+              596,
+              496,
+              640,
+              532
+            ],
+            "from": {
+              "hue": [
+                348,
+                5
+              ],
+              "sat_min": 0.2
+            },
+            "grow": 3,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#AC9276"
+          },
+          {
+            "box": [
+              596,
+              496,
+              640,
+              532
+            ],
+            "from": {
+              "hue": [
+                90,
+                200
+              ],
+              "light_min": 0.09,
+              "sat_min": 0.03
+            },
+            "grow": 3,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#AC9276"
+          },
+          {
+            "box": [
+              661,
+              182,
+              682,
+              213
+            ],
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 5
+          },
+          {
+            "box": [
+              150,
+              699,
+              201,
+              768
+            ],
+            "feather": 4,
+            "op": "inpaint",
+            "radius": 7
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s007-2--c3.png",
+        "source_sha256": "fe5ffafa64c33070141d3d5defc24a35e6676df9b73675da124b9bc73adf1023"
+      },
+      "path": "touchup/touchup-film-01/f01s007-2--c1.png",
+      "sha256": "7df257feecb37992806a1dfecb421076fd331ecf9259c348197bc438264ca8f2"
+    },
+    {
+      "bytes": 3310,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s007-2",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s007-2--c3.png",
+        "source_sha256": "fe5ffafa64c33070141d3d5defc24a35e6676df9b73675da124b9bc73adf1023"
+      },
+      "path": "touchup/touchup-film-01/f01s007-2--mask.png",
+      "sha256": "27e0a5811a2d9628a3a7f979c6fef864d8b2c5c6edc6f505cd4c17ec16938e4f"
+    },
+    {
+      "bytes": 924164,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s007-4",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              401,
+              312,
+              417,
+              329
+            ],
+            "feather": 2,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 4
+          },
+          {
+            "box": [
+              626,
+              314,
+              646,
+              332
+            ],
+            "op": "inpaint",
+            "radius": 5
+          },
+          {
+            "box": [
+              420,
+              500,
+              700,
+              768
+            ],
+            "from": {
+              "hue": [
+                330,
+                6
+              ],
+              "sat_min": 0.2
+            },
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#D9AD97"
+          },
+          {
+            "box": [
+              220,
+              735,
+              430,
+              768
+            ],
+            "from": {
+              "hue": [
+                325,
+                6
+              ],
+              "sat_min": 0.15
+            },
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#D9AD97"
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s007-4--c1.png",
+        "source_sha256": "c8cd5ae8cd4cef2466c0e0780e4a5b287d6c8134f94ebd28c6faf8ba729aec27"
+      },
+      "path": "touchup/touchup-film-01/f01s007-4--c1.png",
+      "sha256": "ca0d66cdf69a3444f33af2e44d5cfa8d41e88d316914dc37ec109f756c0bb73e"
+    },
+    {
+      "bytes": 5086,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s007-4",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s007-4--c1.png",
+        "source_sha256": "c8cd5ae8cd4cef2466c0e0780e4a5b287d6c8134f94ebd28c6faf8ba729aec27"
+      },
+      "path": "touchup/touchup-film-01/f01s007-4--mask.png",
+      "sha256": "b1e1bf70b6c942b0e73dd4e1438164976aa19bbc2b3039313a53b2bc4e06b5e8"
+    },
+    {
+      "bytes": 1020071,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s007-5",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              740,
+              268,
+              758,
+              287
+            ],
+            "feather": 2,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 4
+          },
+          {
+            "box": [
+              937,
+              253,
+              955,
+              273
+            ],
+            "feather": 2,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 4
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s007-5--c1.png",
+        "source_sha256": "0b73e5451d42a42839370d3cd074c55b519c2014001c3a08fd4e66abdd64acfc"
+      },
+      "path": "touchup/touchup-film-01/f01s007-5--c1.png",
+      "sha256": "d6f375ab851519b151235c913284f451909b4665e5dc39df1f1bae13db5fb99d"
+    },
+    {
+      "bytes": 1314,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s007-5",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s007-5--c1.png",
+        "source_sha256": "0b73e5451d42a42839370d3cd074c55b519c2014001c3a08fd4e66abdd64acfc"
+      },
+      "path": "touchup/touchup-film-01/f01s007-5--mask.png",
+      "sha256": "c29b49fa93c11a86c566b379a8a8b712b7285cf8a6a9372938eddbcccd2bd58a"
+    },
+    {
+      "bytes": 1066491,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s007-6",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              747,
+              180,
+              768,
+              213
+            ],
+            "feather": 3,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 5
+          },
+          {
+            "box": [
+              488,
+              292,
+              514,
+              318
+            ],
+            "feather": 3,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 3
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s007-6--c1.png",
+        "source_sha256": "0b7a1fd2591151f94b16a496c90ad48c2b15a7117f41a8fb208340ebf5f9d6fe"
+      },
+      "path": "touchup/touchup-film-01/f01s007-6--c1.png",
+      "sha256": "1504be0c8ea63e7a40c9cabdd40d438f6476f4f775eaba02d788b0fc9243a74a"
+    },
+    {
+      "bytes": 1611,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s007-6",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s007-6--c1.png",
+        "source_sha256": "0b7a1fd2591151f94b16a496c90ad48c2b15a7117f41a8fb208340ebf5f9d6fe"
+      },
+      "path": "touchup/touchup-film-01/f01s007-6--mask.png",
+      "sha256": "6efc2b40a50b3ac153c12a1578b8bac1bea8fc40d032b91a8b7f3f1ce984b912"
+    },
+    {
+      "bytes": 941740,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s008-1",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              340,
+              0,
+              640,
+              175
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#B49B78",
+            "tol": 70
+          },
+          {
+            "box": [
+              752,
+              0,
+              846,
+              177
+            ],
+            "feather": 3,
+            "grow": 3,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 5,
+            "target": "#A08C6E",
+            "tol": 110
+          },
+          {
+            "box": [
+              786,
+              54,
+              830,
+              100
+            ],
+            "feather": 3,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 5
+          },
+          {
+            "box": [
+              696,
+              402,
+              720,
+              430
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 3,
+            "target": "#4A4250",
+            "tol": 60
+          },
+          {
+            "box": [
+              752,
+              196,
+              800,
+              300
+            ],
+            "feather": 1,
+            "grow": 1,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 3,
+            "target": "#C4A878",
+            "tol": 24
+          },
+          {
+            "box": [
+              736,
+              222,
+              770,
+              252
+            ],
+            "feather": 1,
+            "grow": 1,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 3,
+            "target": "#C4A878",
+            "tol": 24
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s008-1--c1.png",
+        "source_sha256": "349ebe2fffa2d733b30a0e74b749552645c315201dd0b2c08499dd7151e78c17"
+      },
+      "path": "touchup/touchup-film-01/f01s008-1--c1.png",
+      "sha256": "bd09941e33bf4141c22544cdb0c346e6059176e259e5f7ce82af57a0eb2d08b5"
+    },
+    {
+      "bytes": 4782,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s008-1",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s008-1--c1.png",
+        "source_sha256": "349ebe2fffa2d733b30a0e74b749552645c315201dd0b2c08499dd7151e78c17"
+      },
+      "path": "touchup/touchup-film-01/f01s008-1--mask.png",
+      "sha256": "055cecc7c291f4e8b15390dc3e8304293603816a659dc32062a1df8eaceea1c5"
+    },
+    {
+      "bytes": 878341,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s009-4",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              444,
+              356,
+              469,
+              386
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 3,
+            "target": "#AAAAAA",
+            "tol": 70
+          },
+          {
+            "box": [
+              687,
+              176,
+              714,
+              222
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#000000",
+            "tol": 120
+          },
+          {
+            "box": [
+              540,
+              575,
+              990,
+              768
+            ],
+            "from": {
+              "hue": [
+                100,
+                200
+              ],
+              "light_min": 0.06,
+              "sat_min": 0.04
+            },
+            "grow": 2,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#9A958C"
+          },
+          {
+            "box": [
+              930,
+              0,
+              1046,
+              400
+            ],
+            "feather": 16,
+            "method": "telea",
+            "op": "inpaint",
+            "radius": 15
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s009-4--c3.png",
+        "source_sha256": "e9cd9f02974a6bcadeacdca19667fe3b4c6a40092b2bc5a52445e39d07608c82"
+      },
+      "path": "touchup/touchup-film-01/f01s009-4--c1.png",
+      "sha256": "fb17fe1d6984c18eb1ccfa2a48455ecbb8f67b02d26d0a4806bb57e65247ece9"
+    },
+    {
+      "bytes": 4402,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s009-4",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s009-4--c3.png",
+        "source_sha256": "e9cd9f02974a6bcadeacdca19667fe3b4c6a40092b2bc5a52445e39d07608c82"
+      },
+      "path": "touchup/touchup-film-01/f01s009-4--mask.png",
+      "sha256": "76ac22677d99cc17c32f70cf9dbc1a08f8a58f389e82368ecdc4388c4b57cea6"
+    },
+    {
+      "bytes": 788838,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s012-1",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              884,
+              279,
+              899,
+              293
+            ],
+            "feather": 1,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 3
+          },
+          {
+            "box": [
+              883,
+              286,
+              900,
+              300
+            ],
+            "feather": 1,
+            "grow": 1,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 3,
+            "target": "#9C8CC0",
+            "tol": 110
+          },
+          {
+            "box": [
+              680,
+              480,
+              1010,
+              768
+            ],
+            "feather": 1,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 3,
+            "target": "#695C44",
+            "tol": 28
+          },
+          {
+            "box": [
+              980,
+              705,
+              1045,
+              768
+            ],
+            "feather": 2,
+            "grow": 3,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 5,
+            "target": "#A05366",
+            "tol": 95
+          },
+          {
+            "box": [
+              1274,
+              352,
+              1344,
+              390
+            ],
+            "feather": 6,
+            "op": "inpaint",
+            "radius": 6
+          },
+          {
+            "box": [
+              1216,
+              680,
+              1336,
+              760
+            ],
+            "feather": 8,
+            "op": "inpaint",
+            "radius": 6
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s012-1--c1.png",
+        "source_sha256": "e793a72dae2a012b05c92d2098479bbf58040f80fbd2127b27cc258209a9afe3"
+      },
+      "path": "touchup/touchup-film-01/f01s012-1--c1.png",
+      "sha256": "44088b46aa7c322434729bcea442df76fb748ffcc9f5443e616f5ee8cde50034"
+    },
+    {
+      "bytes": 3481,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s012-1",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s012-1--c1.png",
+        "source_sha256": "e793a72dae2a012b05c92d2098479bbf58040f80fbd2127b27cc258209a9afe3"
+      },
+      "path": "touchup/touchup-film-01/f01s012-1--mask.png",
+      "sha256": "fa2687f6c6b9af7358194923e7c17ad47d0d2be2fb413ca210e8866a77097c71"
+    },
+    {
+      "bytes": 784174,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s013-1",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              626,
+              206,
+              655,
+              244
+            ],
+            "feather": 2,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 4
+          },
+          {
+            "box": [
+              421,
+              362,
+              436,
+              380
+            ],
+            "feather": 1,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 3
+          },
+          {
+            "box": [
+              753,
+              404,
+              772,
+              428
+            ],
+            "feather": 1,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 3
+          },
+          {
+            "box": [
+              928,
+              373,
+              972,
+              429
+            ],
+            "feather": 2,
+            "op": "inpaint",
+            "radius": 5
+          },
+          {
+            "box": [
+              926,
+              372,
+              974,
+              432
+            ],
+            "feather": 10,
+            "from": [
+              0,
+              -56
+            ],
+            "mask": "ellipse",
+            "op": "clone"
+          },
+          {
+            "box": [
+              924,
+              308,
+              977,
+              380
+            ],
+            "feather": 6,
+            "op": "inpaint",
+            "radius": 7
+          },
+          {
+            "box": [
+              560,
+              540,
+              1030,
+              768
+            ],
+            "from": {
+              "hue": [
+                40,
+                110
+              ],
+              "light_max": 0.45,
+              "sat_min": 0.025
+            },
+            "grow": 1,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#868B8E"
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s013-1--c1.png",
+        "source_sha256": "0d6b88446a34cf21e964756f79170a53b4dcb91e99fa6394539334052e12ca5b"
+      },
+      "path": "touchup/touchup-film-01/f01s013-1--c1.png",
+      "sha256": "975ec93c3d67eb8c8e30e4b4d8256e953db26f173fa32f5fbbb0c64d215879fd"
+    },
+    {
+      "bytes": 4520,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s013-1",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s013-1--c1.png",
+        "source_sha256": "0d6b88446a34cf21e964756f79170a53b4dcb91e99fa6394539334052e12ca5b"
+      },
+      "path": "touchup/touchup-film-01/f01s013-1--mask.png",
+      "sha256": "ab27f0ca9a1651485edce4ea5a1a416cb1a251e76473a77102a8734329920965"
+    },
+    {
+      "bytes": 1105051,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s013-2",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              503,
+              158,
+              522,
+              184
+            ],
+            "feather": 2,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 3
+          },
+          {
+            "box": [
+              415,
+              311,
+              430,
+              354
+            ],
+            "feather": 1,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 3
+          },
+          {
+            "box": [
+              634,
+              311,
+              650,
+              354
+            ],
+            "feather": 1,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 3
+          },
+          {
+            "box": [
+              722,
+              460,
+              850,
+              610
+            ],
+            "feather": 2,
+            "line": [
+              729,
+              469,
+              839,
+              603
+            ],
+            "mask": "line",
+            "op": "inpaint",
+            "radius": 5,
+            "width": 16
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s013-2--c1.png",
+        "source_sha256": "074334b49cfd3019c0bc0d21c098372d49a860d8a9327e1eb2b9bdcb7e7fd188"
+      },
+      "path": "touchup/touchup-film-01/f01s013-2--c1.png",
+      "sha256": "804533873104f7a50593a7f739fbbded7973adadac0bf19dc5e3eb404a5c5873"
+    },
+    {
+      "bytes": 2136,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s013-2",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s013-2--c1.png",
+        "source_sha256": "074334b49cfd3019c0bc0d21c098372d49a860d8a9327e1eb2b9bdcb7e7fd188"
+      },
+      "path": "touchup/touchup-film-01/f01s013-2--mask.png",
+      "sha256": "9bf3a280f2fc4cf0ebb4885e0ad9f8174ccfd20809304204d157191d20d7c446"
+    },
+    {
+      "bytes": 1035188,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s013-3",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              516,
+              132,
+              542,
+              156
+            ],
+            "feather": 2,
+            "mask": "ellipse",
+            "op": "inpaint",
+            "radius": 4
+          },
+          {
+            "box": [
+              150,
+              360,
+              425,
+              690
+            ],
+            "from": {
+              "hue": [
+                352,
+                14
+              ],
+              "light_max": 0.42,
+              "sat_min": 0.3
+            },
+            "grow": 2,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#C7AC8A"
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s013-3--c2.png",
+        "source_sha256": "be8cd6ea2518aa0b723afc41e3fe25fb353db17e8ba4230c7c3716be646392a4"
+      },
+      "path": "touchup/touchup-film-01/f01s013-3--c1.png",
+      "sha256": "3b68cb6573a778429225cbfe3b3291fa780ad09fefd95ef07016e27f10a0d0be"
+    },
+    {
+      "bytes": 5034,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s013-3",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s013-3--c2.png",
+        "source_sha256": "be8cd6ea2518aa0b723afc41e3fe25fb353db17e8ba4230c7c3716be646392a4"
+      },
+      "path": "touchup/touchup-film-01/f01s013-3--mask.png",
+      "sha256": "a82fa226570e456424d1bcd1619da8bc94d4d54208c259a4a25867b57df6bcde"
+    },
+    {
+      "bytes": 1126498,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s014-1",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              262,
+              214,
+              326,
+              346
+            ],
+            "from": {
+              "hue": [
+                15,
+                65
+              ],
+              "sat_min": 0.2
+            },
+            "grow": 2,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#1A2638"
+          },
+          {
+            "box": [
+              782,
+              492,
+              832,
+              562
+            ],
+            "from": {
+              "hue": [
+                15,
+                65
+              ],
+              "sat_min": 0.2
+            },
+            "grow": 2,
+            "lightness": "shade",
+            "op": "recolor",
+            "to": "#1A2638"
+          },
+          {
+            "box": [
+              790,
+              446,
+              824,
+              476
+            ],
+            "feather": 2,
+            "grow": 2,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 4,
+            "target": "#101828",
+            "tol": 30
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s014-1--c3.png",
+        "source_sha256": "6018c9bc24a8d1cfbcbd882aa6eea45ddfe5086e9c73d2f121b1d582e199ec4f"
+      },
+      "path": "touchup/touchup-film-01/f01s014-1--c1.png",
+      "sha256": "de983d2781a341da41bf5642bfae8b875c31770fb4b80acb6d5138c910adf4aa"
+    },
+    {
+      "bytes": 2568,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s014-1",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s014-1--c3.png",
+        "source_sha256": "6018c9bc24a8d1cfbcbd882aa6eea45ddfe5086e9c73d2f121b1d582e199ec4f"
+      },
+      "path": "touchup/touchup-film-01/f01s014-1--mask.png",
+      "sha256": "496f872278525a39dd78007d410ea4b55db0bd5085e91a69a3c653dcbcffca0f"
+    },
+    {
+      "bytes": 880490,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s016-1",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              620,
+              242,
+              752,
+              298
+            ],
+            "feather": 3,
+            "grow": 3,
+            "mask": "color",
+            "op": "inpaint",
+            "radius": 6,
+            "target": "#35302B",
+            "tol": 35
+          },
+          {
+            "box": [
+              668,
+              276,
+              714,
+              281
+            ],
+            "feather": 1,
+            "mask": "ellipse",
+            "op": "fill",
+            "sample": [
+              606,
+              307
+            ]
+          }
+        ],
+        "source": "stills/stills-film-01-r9/f01s016-1--c1.png",
+        "source_sha256": "a579db27bd56e4f92734a2a48b7861a02704ebdb4f63892bd3cfd26df51c36cc"
+      },
+      "path": "touchup/touchup-film-01/f01s016-1--c1.png",
+      "sha256": "f4dfbad916e754501661e4e51bbfc3040b56d9a84f493f4cce0d16784fc26d70"
+    },
+    {
+      "bytes": 1954,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "job_kind": "touchup",
+        "key": "f01s016-1",
+        "opencv": "5.1.0",
+        "source": "stills/stills-film-01-r9/f01s016-1--c1.png",
+        "source_sha256": "a579db27bd56e4f92734a2a48b7861a02704ebdb4f63892bd3cfd26df51c36cc"
+      },
+      "path": "touchup/touchup-film-01/f01s016-1--mask.png",
+      "sha256": "8f869157b44f339342e403610d3ac2b3d568d9f2868ce1fc37b3efb86801c2cb"
+    },
+    {
+      "bytes": 3283,
+      "kind": "stills_pick",
+      "meta": {
+        "choices": {
+          "f01s001-5": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s001-5--c1.png",
+            "sha256": "15f929c8ddc2f1bd91be4156b90ea8bd0ac88a0ea34a011748f0158faa670ce8"
+          },
+          "f01s002-4": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s002-4--c1.png",
+            "sha256": "df07ecc7eae9e74635857d87888078a71315d39cc6beee329b980a0516f4ae69"
+          },
+          "f01s003-5": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s003-5--c1.png",
+            "sha256": "d5bd759982499bb862e8578b7377ea0e8a9337531368ee0c37e622a33f0d5fb6"
+          },
+          "f01s006-1": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s006-1--c1.png",
+            "sha256": "bfe8e89efd14d73d0627c3e61f73b514381077ccf186c9bf0357f08625eb8418"
+          },
+          "f01s007-1": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s007-1--c1.png",
+            "sha256": "6a3afdc9493d0d36f8a39d5fd99ff6334b43748ed8fd35fb597d0dffee89c688"
+          },
+          "f01s007-2": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s007-2--c1.png",
+            "sha256": "7df257feecb37992806a1dfecb421076fd331ecf9259c348197bc438264ca8f2"
+          },
+          "f01s007-4": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s007-4--c1.png",
+            "sha256": "ca0d66cdf69a3444f33af2e44d5cfa8d41e88d316914dc37ec109f756c0bb73e"
+          },
+          "f01s007-5": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s007-5--c1.png",
+            "sha256": "d6f375ab851519b151235c913284f451909b4665e5dc39df1f1bae13db5fb99d"
+          },
+          "f01s007-6": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s007-6--c1.png",
+            "sha256": "1504be0c8ea63e7a40c9cabdd40d438f6476f4f775eaba02d788b0fc9243a74a"
+          },
+          "f01s008-1": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s008-1--c1.png",
+            "sha256": "bd09941e33bf4141c22544cdb0c346e6059176e259e5f7ce82af57a0eb2d08b5"
+          },
+          "f01s009-4": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s009-4--c1.png",
+            "sha256": "fb17fe1d6984c18eb1ccfa2a48455ecbb8f67b02d26d0a4806bb57e65247ece9"
+          },
+          "f01s012-1": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s012-1--c1.png",
+            "sha256": "44088b46aa7c322434729bcea442df76fb748ffcc9f5443e616f5ee8cde50034"
+          },
+          "f01s013-1": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s013-1--c1.png",
+            "sha256": "975ec93c3d67eb8c8e30e4b4d8256e953db26f173fa32f5fbbb0c64d215879fd"
+          },
+          "f01s013-2": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s013-2--c1.png",
+            "sha256": "804533873104f7a50593a7f739fbbded7973adadac0bf19dc5e3eb404a5c5873"
+          },
+          "f01s013-3": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s013-3--c1.png",
+            "sha256": "3b68cb6573a778429225cbfe3b3291fa780ad09fefd95ef07016e27f10a0d0be"
+          },
+          "f01s014-1": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s014-1--c1.png",
+            "sha256": "de983d2781a341da41bf5642bfae8b875c31770fb4b80acb6d5138c910adf4aa"
+          },
+          "f01s016-1": {
+            "candidate": 1,
+            "file": "touchup/touchup-film-01/f01s016-1--c1.png",
+            "sha256": "f4dfbad916e754501661e4e51bbfc3040b56d9a84f493f4cce0d16784fc26d70"
+          }
+        },
+        "job_id": "touchup-film-01",
+        "version": 1
+      },
+      "path": "picks/touchup-film-01.pick-1.json",
+      "sha256": "daa2479f6831915d17541f77be5f02bd523ee88c26995419116d3df23c2eafd8"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -31661,6 +33710,94 @@
           "f01s019-3": 1
         },
         "job_id": "stills-film-01-r10",
+        "version": 1
+      },
+      "result": "recorded",
+      "stage": "pick"
+    },
+    {
+      "at": "2026-11-25T07:44:50.221570+00:00",
+      "detail": {
+        "engine": "opencv",
+        "job_id": "touchup-film-01",
+        "kind": "touchup",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-25T07:44:51.536867+00:00",
+      "detail": {
+        "actual_units": 0,
+        "engine": "opencv",
+        "files": [
+          "touchup/touchup-film-01/f01s001-5--c1.png",
+          "touchup/touchup-film-01/f01s001-5--mask.png",
+          "touchup/touchup-film-01/f01s002-4--c1.png",
+          "touchup/touchup-film-01/f01s002-4--mask.png",
+          "touchup/touchup-film-01/f01s003-5--c1.png",
+          "touchup/touchup-film-01/f01s003-5--mask.png",
+          "touchup/touchup-film-01/f01s006-1--c1.png",
+          "touchup/touchup-film-01/f01s006-1--mask.png",
+          "touchup/touchup-film-01/f01s007-1--c1.png",
+          "touchup/touchup-film-01/f01s007-1--mask.png",
+          "touchup/touchup-film-01/f01s007-2--c1.png",
+          "touchup/touchup-film-01/f01s007-2--mask.png",
+          "touchup/touchup-film-01/f01s007-4--c1.png",
+          "touchup/touchup-film-01/f01s007-4--mask.png",
+          "touchup/touchup-film-01/f01s007-5--c1.png",
+          "touchup/touchup-film-01/f01s007-5--mask.png",
+          "touchup/touchup-film-01/f01s007-6--c1.png",
+          "touchup/touchup-film-01/f01s007-6--mask.png",
+          "touchup/touchup-film-01/f01s008-1--c1.png",
+          "touchup/touchup-film-01/f01s008-1--mask.png",
+          "touchup/touchup-film-01/f01s009-4--c1.png",
+          "touchup/touchup-film-01/f01s009-4--mask.png",
+          "touchup/touchup-film-01/f01s012-1--c1.png",
+          "touchup/touchup-film-01/f01s012-1--mask.png",
+          "touchup/touchup-film-01/f01s013-1--c1.png",
+          "touchup/touchup-film-01/f01s013-1--mask.png",
+          "touchup/touchup-film-01/f01s013-2--c1.png",
+          "touchup/touchup-film-01/f01s013-2--mask.png",
+          "touchup/touchup-film-01/f01s013-3--c1.png",
+          "touchup/touchup-film-01/f01s013-3--mask.png",
+          "touchup/touchup-film-01/f01s014-1--c1.png",
+          "touchup/touchup-film-01/f01s014-1--mask.png",
+          "touchup/touchup-film-01/f01s016-1--c1.png",
+          "touchup/touchup-film-01/f01s016-1--mask.png"
+        ],
+        "job_id": "touchup-film-01",
+        "kind": "touchup",
+        "manifest_sha256": "4889805881a5f85f82085767a3272828e3bf462352b7193bd8f6c270ad6b7fe6",
+        "opencv": "5.1.0"
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-25T07:45:35.554841+00:00",
+      "detail": {
+        "choices": {
+          "f01s001-5": 1,
+          "f01s002-4": 1,
+          "f01s003-5": 1,
+          "f01s006-1": 1,
+          "f01s007-1": 1,
+          "f01s007-2": 1,
+          "f01s007-4": 1,
+          "f01s007-5": 1,
+          "f01s007-6": 1,
+          "f01s008-1": 1,
+          "f01s009-4": 1,
+          "f01s012-1": 1,
+          "f01s013-1": 1,
+          "f01s013-2": 1,
+          "f01s013-3": 1,
+          "f01s014-1": 1,
+          "f01s016-1": 1
+        },
+        "job_id": "touchup-film-01",
         "version": 1
       },
       "result": "recorded",

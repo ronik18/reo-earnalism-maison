@@ -22,6 +22,7 @@ production/**/exchange.json
 production/audiovisual/*/narration/*/
 production/audiovisual/*/stills/*/
 production/audiovisual/*/retouch/*/
+production/audiovisual/*/touchup/*/
 production/audiovisual/*/music/*/
 production/audiovisual/*/film/*/*.wav
 production/audiovisual/*/film/*/*.mp4
