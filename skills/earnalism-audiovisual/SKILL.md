@@ -63,6 +63,13 @@ Touch-up (small, local defects a mask query keeps missing): `touchup --film N --
 model, no Colab) → `<key>--c1.png` + `<key>--mask.png` → open both at full size → `pick --job ID`
 → `film` patches the pick (visual style, Touch-up).
 
+Edit (a held shot drawn wrong in a way a mask cannot fix: a child widow given a bindi or looking
+too young, a bearded judge, the Giant at the wrong scale, snow indoors, out-of-season fruit):
+`job edit --film N --spec edit.json` runs Qwen-Image-Edit-2511 (Apache-2.0 only; pinned diffusers)
+on the imported still with 0–2 reference images and a plain instruction plus a real negative
+prompt (the positive-only rule does not apply) → `<key>--cN.png` at the source size → `import` →
+`pick --job <edit job>` → `film` patches the pick; a picked edit releases that key's hold (visual style, Edit).
+
 Recipes: [film](references/film-recipe.md), [house visual style](references/visual-style.md), [reels](references/reel-recipe.md),
 [voice](references/earnalism-voice.md), [free stack](references/free-stack.md),
 [budget](references/compute-budget.md), [record](references/production-record.md),
@@ -93,14 +100,14 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
   kept). Candidates never voice production. No impersonation, no spoken stage directions.
   ElevenLabs route: the owner-picked voice of the title, one tagged-script take per scene,
   `import-take` (refuses any script whose words differ from the book).
-- **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0), SDXL inpainting 0.1 + CLIPSeg (retouch), OpenCV (touch-up) and
+- **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0), SDXL inpainting 0.1 + CLIPSeg (retouch), Qwen-Image-Edit-2511 (edit, Apache-2.0), OpenCV (touch-up) and
   VCSL samples (CC0). MusicGen (CC-BY-NC weights) and FLUX.1-dev (non-commercial) are
   forbidden even if the owner names them; offer the licensed equivalent instead.
   No paid generator or credit-spending connector (Kling, Suno, Runway, Adobe/Canva
   credits): not for "just one test" either. The one exception is ElevenLabs Eleven v3
   narration within the plan's included credits (owner decision 24 Nov 2026,
   `references/earnalism-voice.md`).
-- **Colab.** The owner runs every job. Narration, stills, retouch and music notebooks are inert
+- **Colab.** The owner runs every job. Narration, stills, retouch, edit and music notebooks are inert
   until `RUN = True` and stop at their forecast seconds (hard stop). Their default route
   is the R2 exchange (`exchange-stage` → Maison `presign_colab_exchange` → owner: RUN = True,
   Run all → `exchange-collect`); signed URLs live only in the gitignored `exchange.json`. Reel clips use the

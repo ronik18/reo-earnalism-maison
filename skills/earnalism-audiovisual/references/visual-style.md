@@ -119,6 +119,51 @@ Colab, no randomness. Install with `pip install -r software/requirements-touchup
 - Not for composition, scale, time of day, wrong characters or anatomy: regenerate those.
   Child characters: only restore the story's described dress and bare skin (model-licences.md).
 
+## Edit: instruction-following repair of a held shot
+
+When a shot is wrong in a way no mask or box fixes (a child widow given a bindi or jewellery, or
+drawn too old or too young; a judge with a beard; the Giant at the wrong scale; snow inside a
+room; fruit out of season; palms missing their reverent marks), hold it and edit it (owner
+decision 25 November 2026, free test on Colab Pro within the caps): `Qwen/Qwen-Image-Edit-2511`
+(Apache-2.0) follows a written instruction on the still, optionally guided by up to two reference
+images (for example a correct still of the same character or setting).
+
+- Spec (`job edit --root R --film N --spec edit.json --rates rates.json --job-id ID`):
+
+  ```json
+  {"items": [{"key": "f01s013-4",
+              "source": {"job": "retouch-film-01-r2", "file": "f01s013-4--c1.png"},
+              "refs": [{"job": "stills-film-01-r5", "file": "f01s007-6.png"}],
+              "instruction": "Remove the red dot from her forehead and the gold studs from her ears; she is a fourteen-year-old widow in a plain white cotton sari",
+              "negative": "bindi, jewellery, coloured sari border, adult face",
+              "seed": 123, "candidates": 2, "steps": 40, "true_cfg_scale": 4.0}]}
+  ```
+
+  `source` is a recorded image of an imported stills, retouch or touchup job of that film whose
+  sha256 matches the record, and `key` is its still's key. `refs` (0–2) are recorded images of any
+  imported stills, retouch or touchup job of the title, sha256-checked the same way (review
+  masks never count). `candidates` 1–4 (seeds `seed` … `seed+N-1`), `steps` 8–50 (default 40),
+  `true_cfg_scale` 1–10 (default 4.0), `instruction` and `negative` at most 900 characters each.
+- **Wording exemption.** The positive-only rule (Prompt wording, above) does not apply to edits:
+  the model reads a real negative prompt with true classifier-free guidance, and an edit
+  instruction exists to name what to change, "remove the beard" included. Put what must not
+  appear in `negative`. Another look ("photoreal", "watercolour", …) is still refused in the
+  instruction (it is allowed in `negative`), and every instruction ends with the builder's "Keep
+  everything else unchanged: the same 2D animated feature-film illustration style, …".
+- Runs: the notebook checks the GPU, model access and the card licence (apache-2.0 only), installs
+  the pinned diffusers and refuses one without `QwenImageEditPlusPipeline`, then loads the
+  transformer 4-bit NF4 below 60 GB of VRAM (L4, A100 40 GB) or bf16 (A100 80 GB), the text encoder
+  bf16, with model CPU offload. It edits at about one megapixel at the source's aspect ratio and
+  writes `<key>--c1.png` … `<key>--cN.png` resized back to exactly the source's size; it prints the
+  GPU, precision and seconds per image.
+- Review each candidate at full size (faithfulness, identity against the refs, nothing else
+  changed, the child-depiction rule of `model-licences.md`), then `pick --job <edit job>` exactly
+  as for stills. `film` patches only the pick, as `<key>.png`.
+- **Holds.** A held key whose film still is a picked edit is released: the film shows the edit,
+  not a substitute, and records it under `released_by_edit`; other holds stay. An unpicked edit
+  releases nothing, and a picked retouch or touch-up does not release a hold (`hold --clear` or a
+  new `hold` does).
+
 ## What still needs a human look after import
 
 The style does not fix content. Check every imported still at full size for:

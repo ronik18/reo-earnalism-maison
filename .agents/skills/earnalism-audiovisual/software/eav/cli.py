@@ -7,6 +7,9 @@
   python3 -m eav.cli job retouch --root <dir> --rates <rates.json> --film N --spec <retouch.json>
                          [--job-id <id>]  (inpaint masked regions of imported stills; candidates;
                          references/visual-style.md, Retouch)
+  python3 -m eav.cli job edit --root <dir> --rates <rates.json> --film N --spec <edit.json>
+                         [--job-id <id>]  (Qwen-Image-Edit-2511 instruction edits of imported stills
+                         with up to 2 reference images; candidates; references/visual-style.md, Edit)
   python3 -m eav.cli job narration --root <dir> --rates <rates.json> [--film N | --reel N]
                          --expressive [--directions <directions.json>] [--voice <OWNER_SELECTED
                          storyteller preset>] [--list-units]   (storyteller style, references/earnalism-voice.md)
@@ -30,10 +33,11 @@
   python3 -m eav.cli touchup --root <dir> --film N --spec <touchup.json> --job-id <id>
                          (local OpenCV repaint of hand-placed boxes of imported stills: inpaint,
                          recolor, fill, clone; one <key>--c1 candidate + <key>--mask per item)
-  python3 -m eav.cli pick --root <dir> --job <stills|retouch|touchup job id> --choices <{"<key>": N} json file>
+  python3 -m eav.cli pick --root <dir> --job <stills|retouch|touchup|edit job id> --choices <{"<key>": N} json file>
                          (after review: one candidate per <key>--cN still; film uses only picks)
   python3 -m eav.cli hold --root <dir> --film N --keys k1,k2,... [--clear]
-                         (shots with no approved still: the film shows the scene's nearest approved still)
+                         (shots with no approved still: the film shows the scene's nearest approved still;
+                         a picked edit of a held key releases that key)
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
   python3 -m eav.cli reel <n> --root <dir> --script <script.json> [--hashtags ...]
@@ -733,9 +737,9 @@ def _job_spec(rec, args, kind, target):
             raise Stop(f"a {kind} job needs --spec (prompts, seeds{', shots' if kind == 'reel_clips' else ''})",
                        "Write it per references/film-recipe.md or references/reel-recipe.md")
         spec = _json(args.spec)
-        if kind == "retouch":
+        if kind in ("retouch", "edit"):
             if args.reel:
-                raise Stop("retouch jobs patch a film's stills", "Pass --film <n>, not --reel")
+                raise Stop(f"{kind} jobs patch a film's stills", "Pass --film <n>, not --reel")
             spec["target"] = target
         if kind == "reel_clips" and not Path(spec.get("art_dir", ".")).is_absolute():
             spec["art_dir"] = str((Path(args.spec).parent / spec.get("art_dir", ".")).resolve())
@@ -1272,8 +1276,8 @@ def cmd_film(args):
 _CANDIDATE = re.compile(r"(?P<key>.+)--c(?P<n>[1-9][0-9]*)$")
 
 
-PICK_KINDS = ("stills", "retouch", "touchup")  # jobs whose <key>--cN candidates are picked
-PATCH_KINDS = ("retouch", "touchup")  # always patches of picked candidates; never a base
+PICK_KINDS = ("stills", "retouch", "touchup", "edit")  # jobs whose <key>--cN candidates are picked
+PATCH_KINDS = ("retouch", "touchup", "edit")  # always patches of picked candidates; never a base
 
 
 def _stills_files(rec, job_id, kind="stills") -> dict:
@@ -1298,14 +1302,14 @@ def _latest_pick(rec, job_id):
 
 
 def cmd_pick(args):
-    """Record the reviewer's choice among a stills, retouch or touchup job's candidates (<key>--cN
+    """Record the reviewer's choice among a stills, retouch, touchup or edit job's candidates (<key>--cN
     images; a retouch or touchup job's <key>--mask is for review only and never a candidate)."""
     rec = _record(args.root)
     job = next((j for j in _jobs(rec) if j["job_id"] == args.job), None)
     if job is None or job["kind"] not in PICK_KINDS or not job["imported"] or _ended(job):
         raise Stop(f"{args.job} is not an imported stills job",
-                   f"{PROG} status --root {rec.root}; pick names an imported stills, retouch or "
-                   "touchup job with candidates")
+                   f"{PROG} status --root {rec.root}; pick names an imported stills, retouch, "
+                   "touchup or edit job with candidates")
     cands = _candidate_files(_stills_files(rec, args.job, job["kind"]))
     if not cands:
         raise Stop(f"stills job {args.job} has no candidate files (<key>--cN.png)",
@@ -1488,9 +1492,10 @@ def _film_stills(rec, t, out):
     """The film's stills: the latest complete stills job, with any later imported job whose
     keys are all already in it applied as a patch (it replaces just those stills, e.g. one
     character regenerated). A candidates job (<key>--cN files) is never a base: it patches only
-    its picked candidates, renamed to <key>, and contributes nothing until picked. A retouch or
-    touchup job is always such a patch (its <key>--mask files never enter the film). Linked into
-    film/<t>/stills so the film reads one folder."""
+    its picked candidates, renamed to <key>, and contributes nothing until picked. A retouch,
+    touchup or edit job is always such a patch (its <key>--mask files never enter the film). A held
+    key whose film still is a picked edit is released: the edit is that shot's approved still.
+    Linked into film/<t>/stills so the film reads one folder."""
     jobs = []
     for j in _jobs(rec):
         if j["kind"] in PICK_KINDS and j["target"] == t and j["imported"] and not _ended(j):
@@ -1509,10 +1514,12 @@ def _film_stills(rec, t, out):
         raise Stop(f"{t} has no ordinary stills job to use as a base (candidates jobs only patch)",
                    next_action(rec.root))
     files = dict(jobs[base][1])
+    origin = {}  # key -> kind of the job its film still now comes from (patches only)
     patches, unpicked = [], []
     for job, keys, cands in jobs[base + 1:]:
         if not cands:
             files.update(keys)
+            origin.update({k: job["kind"] for k in keys})
             patches.append(job["job_id"])
             continue
         choices = _latest_pick(rec, job["job_id"])
@@ -1525,8 +1532,11 @@ def _film_stills(rec, t, out):
                 raise Stop(f"picked still {c['file']} changed since it was picked",
                            f"{PROG} pick --root {rec.root} --job {job['job_id']} --choices <json>")
             files[key] = src
+            origin[key] = job["kind"]
         patches.append(job["job_id"])
     held, substitutes = _held_keys(rec, t), {}
+    released = [k for k in held if origin.get(k) == "edit"]
+    held = [k for k in held if k not in released]
     if held:
         files, substitutes = _apply_hold(files, held)
     merged = out / "stills"
@@ -1545,6 +1555,8 @@ def _film_stills(rec, t, out):
     if held:
         meta["held"] = sorted(held, key=_shot_order)
         meta["substitutes"] = substitutes
+    if released:
+        meta["released_by_edit"] = sorted(released, key=_shot_order)
     return merged, meta
 
 
@@ -2098,7 +2110,7 @@ def _parser():
     s.add_argument("--reason", required=True)
     s = add("pick", help="choose one candidate per redone still after review")
     s.add_argument("--job", required=True,
-                   help="the imported stills, retouch or touchup job with <key>--cN candidates")
+                   help="the imported stills, retouch, touchup or edit job with <key>--cN candidates")
     s.add_argument("--choices", required=True, help='JSON file {"<key>": <candidate number>, ...}')
     s = add("hold", help="show the nearest approved still of the scene for shots with none yet")
     s.add_argument("--film", type=int, default=1)

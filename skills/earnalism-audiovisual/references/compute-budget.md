@@ -26,6 +26,7 @@ pinned value):
 {"narration":  {"s_per_step": 9.0,  "units_per_hour": 1.94, "steps": 1,  "decode_s": 300, "export_s": 60},
  "stills":     {"s_per_step": 2.5,  "units_per_hour": 1.94, "steps": 4,  "decode_s": 240, "export_s": 60},
  "retouch":    {"s_per_step": 1.0,  "units_per_hour": 1.94, "steps": 30, "decode_s": 900, "export_s": 120},
+ "edit":       {"s_per_step": 3.75, "units_per_hour": 1.94, "steps": 40, "decode_s": 1500, "export_s": 120},
  "reel_clips": {"clip_s": 500, "units_per_hour": 1.94, "steps": 24}}
 ```
 
@@ -34,6 +35,16 @@ run yet: its first `rates.json` entry is an ESTIMATE like the first stills entry
 "ESTIMATE — replace with measured values after the first run"; ~1 s/step at about 1024² on an L4,
 decode_s covering the install, ~7 GB fp16 download and load) and is replaced by measured values
 after that run.
+
+`edit` (Qwen-Image-Edit-2511, one item per candidate image) has no measured run yet either. Its
+first entry is an ESTIMATE ("source": "ESTIMATE — replace with measured values after the first
+run"): ~150 s per image on an L4 at 40 steps including model CPU offload (`s_per_step` 3.75),
+`decode_s` 1500 for the install, the ~58 GB download (transformer ~41 GB bf16, Qwen2.5-VL-7B text
+encoder ~17 GB) and the 4-bit NF4 load. Its `steps` is the reference the rate is measured at
+(40); items set their own steps (8–50), so the forecast uses ceil(total item steps / images) as
+`steps`, never less than the job's real step total. The notebook prints and records the seconds
+of every image (`seconds_per_image`): measure the first run from those. On an A100 the CU per
+hour differs from an L4's; the rate holds only for the GPU it was measured on.
 
 `clip_s` is the measured end-to-end seconds per finished Wan `l4-balanced-v2` clip
 (load, 24 denoising steps, decode, export). Reel batches: at most 5 shots each, so a

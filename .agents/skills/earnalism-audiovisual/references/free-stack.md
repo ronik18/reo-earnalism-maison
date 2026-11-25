@@ -12,6 +12,7 @@ started by the owner; everything else runs in Claude's container (CPU, ffmpeg).
 | Reel motion | Wan 2.2 TI2V-5B (existing `wan22` builder) | Apache-2.0 | Colab L4, profile `l4-balanced-v2` (512×896, 24 steps) | model revision pinned in `wan22/batch.py` |
 | Retouch (inpainting) | SDXL Inpainting 0.1 `diffusers/stable-diffusion-xl-1.0-inpainting-0.1` | CreativeML Open RAIL++-M (2023-07-26), see `model-licences.md` | Colab GPU (`job retouch`) | revision resolved and recorded by the notebook |
 | Retouch masks | CLIPSeg `CIDAS/clipseg-rd64-refined` | Apache-2.0 | Colab GPU (`job retouch`) | revision resolved and recorded by the notebook |
+| Edit (instruction edits with reference images) | Qwen-Image-Edit-2511 `Qwen/Qwen-Image-Edit-2511` (~20.4B, `QwenImageEditPlusPipeline`) | Apache-2.0, see `model-licences.md` | Colab GPU (`job edit`): L4 or A100 40 GB with a 4-bit NF4 transformer, A100 80 GB bf16; model CPU offload | revision resolved and recorded by the notebook; `diffusers==0.37.0` (first release whose transformer accepts the model's `zero_cond_t`) |
 | Touch-up (box repaint) | OpenCV `opencv-python-headless` (inpaint Telea/NS, colour, fill, clone) | Apache-2.0 | container CPU (`eav touchup`) | `software/requirements-touchup.txt` |
 | Film motion, mix, assembly, QC | ffmpeg, NumPy, Pillow | LGPL/GPL tools, BSD, HPND | container | `eav.film`, `eav.mix`, `eav.reel`, `eav.qc` |
 
@@ -38,6 +39,9 @@ licence that permits commercial output.
   manifest) can finish before it, and a timer unassigns the runtime at it. A stopped or
   short run writes `manifest.json` with `status: INCOMPLETE`, which `import` refuses;
   end that job with `close --units <CU Colab shows>`.
+- **Edit pin**: the edit notebook installs `diffusers==0.37.0` before the clock and refuses to
+  continue (before any weights download) if `QwenImageEditPlusPipeline` or the transformer's
+  `zero_cond_t` option is missing. 0.36.0 has the pipeline but silently drops `zero_cond_t`.
 - **Package versions**: the notebooks still `pip install` parler-tts and ACE-Step from
   git and diffusers/transformers unpinned. Every output manifest records the resolved
   versions (and VCS commits) under `packages`, and `import` refuses a manifest without

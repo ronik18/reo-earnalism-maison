@@ -1,6 +1,6 @@
 """Verified import of Colab outputs into the production record.
 
-Notebook kinds (narration, stills, music, retouch) come back as a Drive folder whose
+Notebook kinds (narration, stills, music, retouch, edit) come back as a Drive folder whose
 manifest.json lists the sha256 of every output. Reel clips come back as the
 wan22 export archive and are verified by that tool's own import_export.
 Any mismatch raises ImportHeld and leaves files, record and ledger unchanged.
@@ -65,7 +65,7 @@ def import_job(record, job: dict, downloaded_dir, ledger, actual_units: float,
     if build.get("job_id", job_id) != job_id:
         raise ImportHeld("build manifest belongs to a different job")
     _preflight_ledger(ledger, job_id, actual_units)
-    if kind not in ("narration", "stills", "music", "retouch", "reel_clips"):
+    if kind not in ("narration", "stills", "music", "retouch", "edit", "reel_clips"):
         raise ImportHeld(f"unknown job kind: {kind!r}")
     dest = record.root / kind / job_id
     if dest.exists():

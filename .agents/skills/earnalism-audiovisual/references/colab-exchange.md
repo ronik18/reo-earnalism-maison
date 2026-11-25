@@ -1,4 +1,4 @@
-# Colab R2 exchange (default route for narration, stills, retouch and music)
+# Colab R2 exchange (default route for narration, stills, retouch, edit and music)
 
 Owner-approved 2026-11-23 (option B). The owner's only action per Colab job is:
 **open the notebook in Colab, set `RUN = True` in the first cell, Run all.** Inputs arrive

@@ -50,6 +50,23 @@ for this skill's use, not legal advice.
 Masks are internal working files, never published. Apache-2.0 allows commercial use. Its notice
 obligations attach to redistributing the model or its source, which we do not do.
 
+## Qwen-Image-Edit-2511 (Apache-2.0): edit
+
+`job edit` uses `Qwen/Qwen-Image-Edit-2511` (Hub card `license: apache-2.0`, tag
+`diffusers:QwenImageEditPlusPipeline`, ~20.4B parameters; its text encoder is Qwen2.5-VL-7B,
+shipped in the same repo under the same card), read 25 November 2026 through the Hugging Face
+connector. Apache-2.0 permits commercial use of the model and places no restriction on outputs;
+its notice and attribution obligations attach to redistributing the weights or code, which we do
+not do (we run the unmodified model in our own Colab job and publish images). There is no
+use-restriction attachment as in OpenRAIL; our own rules still apply: the child-depiction rule
+below and the pick review against likenesses of real people, logos or existing artwork. The
+notebook re-reads the card's `license` field before any download and refuses anything but
+`apache-2.0` (its own allowlist; the retouch allowlist is not reused). Edit follows the same
+child-depiction rule as retouch and touch-up: an edit of a child character only restores the
+story's described age, dress and bare skin (a plain white sari, a bare forehead, earlobes or
+wrists, a child's face), never alters a child's body, and never sexualises, demeans or endangers
+a child.
+
 ## OpenCV (Apache-2.0): touch-up
 
 `eav touchup` uses `opencv-python-headless` (Apache-2.0 since OpenCV 4.5.0; the wheel bundles
@@ -69,6 +86,10 @@ alter a child's body, and never in a way that sexualises, demeans or endangers a
   film that uses retouched stills, "SDXL Inpainting 0.1, CreativeML Open RAIL++-M (2023-07-26),
   outputs only; Attachment A use restrictions reviewed: none applicable", with the retouch job
   ids.
+- Each edit job records the model repo, resolved revision, the `apache-2.0` card licence the
+  preflight printed, the pinned and installed diffusers versions and the precision used. A title
+  whose film uses an edited still lists "Qwen-Image-Edit-2511, Apache-2.0, outputs only" with the
+  edit job ids.
 - Platform rules sit on top of this and are handled elsewhere: AI-content labels on social
   posts and the 2026 IT Rules disclosure (reel recipe), and Maison's 47-region publication
   policy.

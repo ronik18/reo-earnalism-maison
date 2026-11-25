@@ -1,0 +1,106 @@
+# Edit: instruction-following repair of a chosen still (Qwen-Image-Edit-2511, Apache-2.0).
+# The still to edit goes first, then up to two reference images; the exact revision is resolved
+# now and recorded. The licence and pipeline preflights already ran (pinned diffusers installed).
+if RUN is not True:
+    raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
+import os, gc, hashlib, io, logging, math, warnings, zipfile
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
+
+# --- helpers (pure PIL; unit-tested by the skill)
+import math
+from PIL import Image
+
+
+def precision_for(vram_gib, nf4_below_gib):
+    """The transformer's precision: 4-bit NF4 below the threshold (L4, A100 40 GB), else bf16."""
+    return "bf16" if vram_gib >= nf4_below_gib else "nf4"
+
+
+def edit_size(width, height, area=1024 * 1024, multiple=32):
+    """The model's working size: about one megapixel at the source's aspect ratio, in multiples of
+    32 (passed explicitly: the pipeline would otherwise follow the LAST input image, a reference)."""
+    ratio = width / height
+    w = max(multiple, int(round(math.sqrt(area * ratio) / multiple)) * multiple)
+    h = max(multiple, int(round(math.sqrt(area / ratio) / multiple)) * multiple)
+    return w, h
+
+
+def fit_back(image, size):
+    """The model output resized back to exactly the source still's size (RGB)."""
+    image = image.convert("RGB")
+    return image if image.size == tuple(size) else image.resize(tuple(size), Image.LANCZOS)
+# --- end helpers
+
+
+import torch
+from diffusers import BitsAndBytesConfig, QwenImageEditPlusPipeline, QwenImageTransformer2DModel
+from huggingface_hub import HfApi
+
+revision = HfApi().model_info(MODEL_REPO).sha
+gpu = torch.cuda.get_device_properties(0)
+VRAM_GIB = gpu.total_memory / 2**30
+PRECISION = precision_for(VRAM_GIB, NF4_BELOW_GIB)
+print("GPU", gpu.name, "%.1f GiB;" % VRAM_GIB, "transformer", PRECISION,
+      "; text encoder bf16; model CPU offload (one large part on the GPU at a time)")
+if PRECISION == "nf4":
+    # bitsandbytes logs a dtype-cast notice on every quantized matmul (thousands of lines per
+    # image). Say it once here, then silence that logger and warning.
+    logging.getLogger("bitsandbytes.autograd._functions").setLevel(logging.ERROR)
+    warnings.filterwarnings("ignore", message=".*Input type into Linear4bit.*")
+    warnings.filterwarnings("ignore", message=".*will be cast from.*", module="bitsandbytes")
+    print("4-bit NF4 transformer: bitsandbytes computes in bf16 (cast notices shown once)")
+
+# Sources and references: every PNG is checked against the sha256 the production record holds.
+IMAGES = {}
+with zipfile.ZipFile(INPUT_ZIP) as z:
+    for item in JOB["items"]:
+        wanted = [(item["source"], item["source_sha256"])] + [(r["member"], r["sha256"]) for r in item["refs"]]
+        for member, digest in wanted:
+            if member in IMAGES:
+                continue
+            data = z.read(member)
+            if hashlib.sha256(data).hexdigest() != digest:
+                raise RuntimeError("input image sha256 mismatch: " + member)
+            IMAGES[member] = Image.open(io.BytesIO(data)).convert("RGB")
+
+kw = {"revision": revision, "torch_dtype": torch.bfloat16}
+if PRECISION == "nf4":
+    kw["quantization_config"] = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
+                                                   bnb_4bit_compute_dtype=torch.bfloat16)
+transformer = QwenImageTransformer2DModel.from_pretrained(MODEL_REPO, subfolder="transformer", **kw)
+pipe = QwenImageEditPlusPipeline.from_pretrained(MODEL_REPO, revision=revision, transformer=transformer,
+                                                 torch_dtype=torch.bfloat16)
+pipe.enable_model_cpu_offload()
+pipe.set_progress_bar_config(disable=True)
+import diffusers
+SECONDS = {}
+MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "pipeline": EDIT_PIPELINE,
+              "diffusers": diffusers.__version__, "diffusers_pin": DIFFUSERS_PIN,
+              "licences": LICENCES, "gpu": gpu.name, "vram_gib": round(VRAM_GIB, 1),
+              "transformer_precision": PRECISION, "text_encoder_precision": "bf16",
+              "offload": "enable_model_cpu_offload", "output_size": "source size (LANCZOS)",
+              "seconds_per_image": SECONDS}
+EXPECTED = [i["key"] + ".png" for i in JOB["items"]]
+last = 0.0  # seconds the previous candidate took; the next starts only if it fits (R25)
+for item in JOB["items"]:
+    if not may_start(last):
+        break
+    started = time.time()
+    src = IMAGES[item["source"]]
+    width, height = edit_size(*src.size)
+    gen = torch.Generator("cpu").manual_seed(item["seed"])
+    with torch.inference_mode():
+        out = pipe(image=[src] + [IMAGES[r["member"]] for r in item["refs"]],
+                   prompt=item["instruction"], negative_prompt=item["negative"],
+                   true_cfg_scale=item["true_cfg_scale"], guidance_scale=1.0,
+                   num_inference_steps=item["steps"], width=width, height=height,
+                   num_images_per_prompt=1, generator=gen).images[0]
+    fit_back(out, src.size).save(OUT_DIR / (item["key"] + ".png"))
+    last = time.time() - started
+    SECONDS[item["key"]] = round(last, 1)
+    print("wrote", item["key"], "%dx%d" % src.size, "(model %dx%d, %d steps)" % (width, height, item["steps"]),
+          "in %.1f s per image" % last)
+del pipe, transformer
+gc.collect()
+torch.cuda.empty_cache()

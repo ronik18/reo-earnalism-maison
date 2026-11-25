@@ -1,4 +1,4 @@
-"""Inert, hash-bound Colab job bundles (narration, stills, music, retouch, reel clips).
+"""Inert, hash-bound Colab job bundles (narration, stills, music, retouch, edit, reel clips).
 
 Building a bundle spends nothing: it reserves the forecast on the ledger,
 writes a notebook (nbformat 4, plain JSON) and an input zip, and records both.
@@ -45,6 +45,32 @@ RETOUCH_GUIDANCE = 7.5
 RETOUCH_MASK = {"threshold": 0.4, "dilate_px": 6, "feather_px": 4}
 MAX_REGIONS = 6
 STRENGTH_RANGE = (0.5, 1.0)
+# Edit (owner 2026-11-25, free test on Colab Pro): an instruction-following image editor repairs
+# held shots the open text-to-image models drew wrong (a child widow given a bindi or looking too
+# young, a judge with a beard, the Giant at the wrong scale, snow inside rooms). Qwen-Image-Edit-2511
+# (Hub card `license: apache-2.0`, ~20.4B params, diffusers QwenImageEditPlusPipeline) takes the
+# still to edit first, then up to two reference images, and has a real negative prompt with
+# true_cfg_scale. Its revision is resolved and recorded at run time; the notebook re-reads the card
+# licence before any download and refuses anything but apache-2.0.
+EDIT_REPO = "Qwen/Qwen-Image-Edit-2511"
+EDIT_PIPELINE = "QwenImageEditPlusPipeline"
+# 0.36.0 is the first release with QwenImageEditPlusPipeline, but 2511's transformer config sets
+# zero_cond_t, which QwenImageTransformer2DModel accepts only from 0.37.0 (0.36.0 would drop it
+# and run the model wrongly). Checked against both wheels from PyPI on 2026-11-25.
+EDIT_DIFFUSERS = "diffusers==0.37.0"
+EDIT_LICENCES = {EDIT_REPO: "apache-2.0"}
+EDIT_LICENCE_ALLOWLIST = ("apache-2.0",)
+EDIT_RATE_STEPS = 40      # rates.json "edit" is measured at 40 steps per image
+EDIT_DEFAULT_STEPS = 40
+EDIT_STEPS_RANGE = (8, 50)
+EDIT_CFG_RANGE = (1.0, 10.0)
+EDIT_DEFAULT_CFG = 4.0
+EDIT_NF4_BELOW_GIB = 60   # L4 (22 GB) and A100 40 GB: 4-bit NF4 transformer; A100 80 GB: bf16
+MAX_EDIT_REFS = 2
+MAX_INSTRUCTION = 900
+# Appended to every edit instruction: the edit changes only what it names.
+EDIT_KEEP = ("Keep everything else unchanged: the same 2D animated feature-film illustration style, "
+             "line art, cel shading, colours, faces, composition and framing.")
 REEL_PROFILE = "l4-balanced-v2"
 # One reel_clips batch must fit one Wan job (batch.MAX_WALL_SECONDS = 2700 s) at the measured
 # ~500 s per finished clip, and the owner's metered Wan authority approves at most 5 CU.
@@ -66,7 +92,7 @@ MAX_CANDIDATES = 4
 CANDIDATE_SUFFIX = re.compile(r"--c\d+$")
 STYLE_CONFLICTS = ("photoreal", "photograph", "oil-on-canvas", "realism", "watercolour", "watercolor",
                    "gouache", "3d render", "not a cartoon", "not anime", "not a flat illustration")
-KINDS = ("narration", "stills", "music", "retouch", "reel_clips")
+KINDS = ("narration", "stills", "music", "retouch", "edit", "reel_clips")
 JOB_SCHEMA = "earnalism.audiovisual-job.v1"
 EXCHANGE_SCHEMA = "earnalism.colab-exchange.v1"
 _TEMPLATES = Path(__file__).with_name("templates")
@@ -210,12 +236,12 @@ except Exception as _e:
 print("model access OK:", MODEL_REPO, "(token from HF_TOKEN)" if _token else "(public)")
 '''
 
-# Retouch only: both repos reachable and each model card's licence on the allowlist, printed,
-# before the clock starts and before any install or download.
+# Retouch and edit: every repo of the job reachable and each model card's licence on the
+# allowlist, printed, before the clock starts and before any install or download.
 _LICENCE = _GUARD + '''import os
 from huggingface_hub import HfApi
 LICENCES = {}
-for _repo in (MODEL_REPO, MASK_REPO):
+for _repo in LICENCE_REPOS:
     try:
         HfApi().auth_check(_repo, token=os.environ.get("HF_TOKEN"))
         _info = HfApi().model_info(_repo, token=os.environ.get("HF_TOKEN"))
@@ -232,6 +258,23 @@ for _repo in (MODEL_REPO, MASK_REPO):
         raise RuntimeError("model card licence of " + _repo + " is " + repr(_lic) + ", not one of "
                            + ", ".join(LICENCE_ALLOWLIST) + ": this job never runs it; tell Claude")
     LICENCES[_repo] = _lic
+'''
+
+# Edit only: install the pinned diffusers before the clock and refuse a build without the pipeline
+# class (or without the zero_cond_t transformer option 2511 needs) before any weights download.
+_EDIT_PREFLIGHT = _GUARD + '''import importlib, inspect, subprocess, sys
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", DIFFUSERS_PIN, "transformers",
+                "accelerate", "safetensors", "bitsandbytes"], check=True)
+importlib.invalidate_caches()
+import diffusers
+print("diffusers", diffusers.__version__, "(pin: " + DIFFUSERS_PIN + ")")
+if not hasattr(diffusers, EDIT_PIPELINE):
+    raise RuntimeError("diffusers " + diffusers.__version__ + " has no " + EDIT_PIPELINE + "; install "
+                       + DIFFUSERS_PIN + " (Runtime > Restart session, Run all); nothing downloaded")
+if "zero_cond_t" not in inspect.signature(diffusers.QwenImageTransformer2DModel.__init__).parameters:
+    raise RuntimeError("diffusers " + diffusers.__version__ + " QwenImageTransformer2DModel lacks "
+                       "zero_cond_t (needed by " + MODEL_REPO + "); install " + DIFFUSERS_PIN)
+print("pipeline OK:", EDIT_PIPELINE)
 '''
 
 _CLOCK = _GUARD + '''import threading, time
@@ -318,12 +361,14 @@ PACKAGES = {"narration": ("parler_tts", "transformers", "torch", "soundfile", "p
                        "bitsandbytes", "torch"),
             "retouch": ("diffusers", "transformers", "accelerate", "safetensors", "torch",
                         "huggingface_hub"),
+            "edit": ("diffusers", "transformers", "accelerate", "safetensors", "bitsandbytes",
+                     "torch", "huggingface_hub"),
             "music": ("ace-step", "acestep", "torch", "transformers", "diffusers", "huggingface_hub")}
 MANIFEST_RESERVE_S = 60
 
 
 def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, deadline_s) -> bytes:
-    retouch = kind == "retouch"
+    retouch, edit = kind == "retouch", kind == "edit"
     config = (_GUARD +
               f"import pathlib\nJOB_ID = {job_id!r}\nTITLE = {title!r}\nKIND = {kind!r}\n"
               f"INPUT_ZIP_SHA256 = {zip_sha!r}\nMODEL_REPO = {repo!r}\n"
@@ -334,7 +379,13 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
               f"PACKAGES = {PACKAGES[kind]!r}\nEXCHANGE_SCHEMA = {EXCHANGE_SCHEMA!r}\n")
     if retouch:
         config += (f"MASK_REPO = {MASK_REPO!r}\nLICENCE_ALLOWLIST = {LICENCE_ALLOWLIST!r}\n"
+                   f"LICENCE_REPOS = (MODEL_REPO, MASK_REPO)\n"
                    f"GUIDANCE = {RETOUCH_GUIDANCE!r}\nMASK = {RETOUCH_MASK!r}\n")
+    if edit:
+        config += (f"LICENCE_ALLOWLIST = {EDIT_LICENCE_ALLOWLIST!r}\nLICENCE_REPOS = (MODEL_REPO,)\n"
+                   f"EDIT_PIPELINE = {EDIT_PIPELINE!r}\nDIFFUSERS_PIN = {EDIT_DIFFUSERS!r}\n"
+                   f"# transformer 4-bit NF4 below this much VRAM, else bf16\n"
+                   f"NF4_BELOW_GIB = {EDIT_NF4_BELOW_GIB}\n")
     intro = (f"# Earnalism {kind} job `{job_id}`\n\n**Prepared, not run.** Input zip SHA256 "
              f"`{zip_sha}`. Set `RUN = True` in the first cell, then run all. With the R2 exchange "
              f"(`exchange.json` in `{DRIVE_ROOT}/{title}/{job_id}/`) the notebook downloads "
@@ -346,7 +397,8 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
              f"cannot be imported.\n")
     # The generation cell may call setup that sets OUT_DIR; the verify cell sets JOB/OUT_DIR.
     parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _GPU), ("code", _ACCESS),
-             *([("code", _LICENCE)] if retouch else []), ("code", _CLOCK),
+             *([("code", _LICENCE)] if retouch or edit else []),
+             *([("code", _EDIT_PREFLIGHT)] if edit else []), ("code", _CLOCK),
              ("code", _VERIFY), ("code", template.read_text(encoding="utf-8")),
              ("code", _MANIFEST)]
     nb = {"nbformat": 4, "nbformat_minor": 5,
@@ -393,6 +445,8 @@ def pinned_steps(kind: str) -> int:
         return MUSIC_STEPS
     if kind == "retouch":
         return RETOUCH_STEPS
+    if kind == "edit":
+        return EDIT_RATE_STEPS  # the steps the edit rate is measured at; items carry their own
     if kind == "reel_clips":
         return _load_wan_batch().w.PROFILES[REEL_PROFILE]["steps"]
     raise ValueError(f"unknown job kind: {kind!r}")
@@ -430,6 +484,9 @@ def derive_compute(kind: str, spec: dict, rates: dict, items: int) -> dict:
                          "start per shot)")
     if isinstance(items, bool) or not isinstance(items, int) or items <= 0:
         raise ValueError(f"a {kind} job needs at least one item")
+    if kind == "edit":  # steps x images is never below the job's real step total
+        steps = math.ceil(sum(_edit_steps(s) * _candidates(s, kind) for s in spec.get("items") or [])
+                          / items)
     compute = {"kind": kind, "steps": steps, "items": items, "takes": 1}
     if kind != "reel_clips":
         compute.update(decode_s=rate["decode_s"], export_s=rate["export_s"])
@@ -486,7 +543,7 @@ def job_items(kind: str, spec: dict) -> int:
         return len(narration_units(spec))
     if kind == "stills":
         return sum(_candidates(s) for s in spec.get("items") or [])
-    if kind == "retouch":
+    if kind in ("retouch", "edit"):
         return sum(_candidates(s, kind) for s in spec.get("items") or [])
     return len(spec.get("shots" if kind == "reel_clips" else "items") or [])
 
@@ -593,6 +650,123 @@ def _retouch_items(record, spec: dict) -> tuple:
     return items, masks, sources
 
 
+def _edit_steps(item: dict) -> int:
+    n = item.get("steps", EDIT_DEFAULT_STEPS) if isinstance(item, dict) else None
+    lo, hi = EDIT_STEPS_RANGE
+    if isinstance(n, bool) or not isinstance(n, int) or not lo <= n <= hi:
+        key = item.get("key") if isinstance(item, dict) else None
+        raise ValueError(f"edit item {key!r} steps must be an integer from {lo} to {hi}, not {n!r}")
+    return n
+
+
+IMAGE_KINDS = ("stills", "retouch", "touchup")  # imported jobs whose images an edit may read
+
+
+def _imported_images(record) -> tuple:
+    """({job_id: (kind, target)}, {(job_id, file name): (path, recorded sha256)}) of the record's
+    imported, un-ended stills, retouch and touchup jobs (review masks excluded)."""
+    events = record.data["events"]
+    targets = {e["detail"]["job_id"]: (e["detail"].get("kind", "stills"), e["detail"].get("target"))
+               for e in events if e["stage"] == "cli" and e["result"] == "job_target"
+               and e["detail"].get("kind", "stills") in IMAGE_KINDS}
+    done = {e["detail"].get("job_id") for e in events if e["stage"] == "import" and e["result"] == "accepted"}
+    ended = {e["detail"].get("job_id") for e in events if e["stage"] == "job"
+             and e["result"] in ("superseded", "closed", "superseding", "closing")}
+    jobs = {j: kt for j, kt in targets.items() if j in done and j not in ended}
+    files = {}
+    for a in record.data["artifacts"]:
+        jid = a["meta"].get("job_id")
+        if jid in jobs and a["kind"] == jobs[jid][0] and not a["path"].endswith("--mask.png"):
+            files[(jid, Path(a["path"]).name)] = (record.root / a["path"], a["sha256"])
+    return {j: kt for j, kt in jobs.items() if any(k[0] == j for k in files)}, files
+
+
+def _edit_text(key, field, value, allow_empty=False) -> str:
+    if not isinstance(value, str) or (not allow_empty and not value.strip()):
+        raise ValueError(f"edit {key!r} needs a {'' if allow_empty else 'non-empty '}{field} text")
+    if len(value) > MAX_INSTRUCTION:
+        raise ValueError(f"edit {key!r} {field} is {len(value)} characters; at most {MAX_INSTRUCTION}")
+    return value.strip()
+
+
+def _edit_items(record, spec: dict) -> tuple:
+    """Validate an edit spec against the record; returns (job items, zip members).
+
+    The positive-only wording rule of stills and retouch does not apply: Qwen-Image-Edit has a real
+    negative prompt (true CFG) and an edit instruction says what to change, "remove ..." included
+    (references/visual-style.md, Edit). Another look is still refused in the instruction."""
+    target = spec.get("target")
+    jobs, files = _imported_images(record)
+    film_keys = {CANDIDATE_SUFFIX.sub("", Path(name).stem) for (jid, name) in files
+                 if jobs[jid] == ("stills", target)}
+    if not film_keys:
+        raise ValueError(f"{target!r} has no imported stills to edit")
+
+    def recorded(key, what, ref, film=None):
+        if not isinstance(ref, dict):
+            raise ValueError(f"edit {key!r}: {what} must be {{job, file}}, not {ref!r}")
+        job, name = ref.get("job"), ref.get("file")
+        if job not in jobs or (film is not None and jobs[job][1] != film):
+            raise ValueError(f"edit {key!r}: {what} job {job!r} is not an imported stills, retouch or "
+                             f"touchup job{' of ' + film if film else ''}")
+        if not isinstance(name, str) or Path(name).name != name or (job, name) not in files:
+            raise ValueError(f"edit {key!r}: {what} {name!r} is not a recorded image of {job} "
+                             "(review --mask files never count)")
+        path, digest_rec = files[(job, name)]
+        data = path.read_bytes() if path.is_file() else b""
+        digest = hashlib.sha256(data).hexdigest()
+        if digest != digest_rec:
+            raise ValueError(f"edit {key!r}: {what} {job}/{name} sha256 {digest[:12]} differs from the "
+                             f"record's {digest_rec[:12]}; the image changed since import")
+        return job, name, data, digest
+
+    items, members, seen = [], {}, set()
+    for s in spec.get("items") or []:
+        key = s.get("key") if isinstance(s, dict) else None
+        if not isinstance(key, str) or CANDIDATE_SUFFIX.search(key) or key.endswith("--mask"):
+            raise ValueError(f"edit key {key!r} must be a still key (no --cN or --mask)")
+        if key in seen:
+            raise ValueError(f"edit key {key!r} appears twice; one item per still")
+        seen.add(key)
+        if key not in film_keys:
+            raise ValueError(f"edit key {key!r} is not a still of {target}")
+        job, name, data, digest = recorded(key, "source", s.get("source"), film=target)
+        if CANDIDATE_SUFFIX.sub("", Path(name).stem) != key:
+            raise ValueError(f"edit {key!r}: source {name!r} is another still's file")
+        source = f"sources/{job}--{name}"
+        members[source] = data
+        raw_refs = s.get("refs") if s.get("refs") is not None else []
+        if not isinstance(raw_refs, list) or len(raw_refs) > MAX_EDIT_REFS:
+            raise ValueError(f"edit {key!r} refs must be a list of 0 to {MAX_EDIT_REFS} {{job, file}}")
+        refs = []
+        for r in raw_refs:
+            rjob, rname, rdata, rdigest = recorded(key, "ref", r)
+            member = f"refs/{rjob}--{rname}"
+            members[member] = rdata
+            refs.append({"member": member, "job": rjob, "file": rname, "sha256": rdigest})
+        instruction = _edit_text(key, "instruction", s.get("instruction"))
+        clash = [w for w in STYLE_CONFLICTS if w in instruction.lower()]
+        if clash:
+            raise ValueError(f"edit instruction {key!r} asks for {clash[0]!r}, which conflicts with the "
+                             "house style (references/visual-style.md); name the content to change")
+        negative = _edit_text(key, "negative", s.get("negative", " "), allow_empty=True) or " "
+        cfg = s.get("true_cfg_scale", EDIT_DEFAULT_CFG)
+        lo, hi = EDIT_CFG_RANGE
+        if isinstance(cfg, bool) or not isinstance(cfg, (int, float)) or not lo <= cfg <= hi:
+            raise ValueError(f"edit {key!r} true_cfg_scale must be a number from {lo} to {hi}, not {cfg!r}")
+        seed = s.get("seed")
+        if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:
+            raise ValueError(f"edit {key!r} seed must be a non-negative integer, not {seed!r}")
+        n, steps = _candidates(s, "edit"), _edit_steps(s)
+        items += [{"key": f"{key}--c{c}", "base": key, "candidate": c, "seed": seed + c - 1,
+                   "source": source, "source_job": job, "source_file": name, "source_sha256": digest,
+                   "refs": refs, "instruction": instruction + " " + EDIT_KEEP, "negative": negative,
+                   "steps": steps, "true_cfg_scale": float(cfg)} for c in range(1, n + 1)]
+    if not items:
+        raise ValueError("no stills to edit")
+    return items, members
+
+
 def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
     """Validate the spec; return everything needed to write, without touching disk."""
     compute = derive_compute(kind, spec, rates, job_items(kind, spec))
@@ -667,7 +841,15 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
         return {"payload": {"items": items, "masks": masks, "mask": dict(RETOUCH_MASK),
                             "mask_model": MASK_REPO, "target": spec["target"]},
                 "files": sources, "repo": RETOUCH_REPO, "mask_repo": MASK_REPO,
-                "revision": "resolved-at-run-time", "steps": RETOUCH_STEPS, "compute": compute}
+                "revision": "resolved-at-run-time", "steps": RETOUCH_STEPS, "compute": compute,
+                "licences": {"recorded": dict(MODEL_LICENCES), "allowlist": list(LICENCE_ALLOWLIST)}}
+    if kind == "edit":
+        _check_model(kind, spec, EDIT_REPO)
+        items, members = _edit_items(record, spec)
+        return {"payload": {"items": items, "target": spec["target"], "pipeline": EDIT_PIPELINE},
+                "files": members, "repo": EDIT_REPO, "revision": "resolved-at-run-time",
+                "steps": compute["steps"], "compute": compute, "diffusers": EDIT_DIFFUSERS,
+                "licences": {"recorded": dict(EDIT_LICENCES), "allowlist": list(EDIT_LICENCE_ALLOWLIST)}}
     raise ValueError(f"unknown job kind: {kind!r}")
 
 
@@ -797,7 +979,10 @@ def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s:
         manifest["generation"] = plan["payload"]["generation"]
     if "mask_repo" in plan:
         manifest["mask_model"] = {"repo": plan["mask_repo"], "revision": "resolved-at-run-time"}
-        manifest["licences"] = {"recorded": dict(MODEL_LICENCES), "allowlist": list(LICENCE_ALLOWLIST)}
+    if "licences" in plan:
+        manifest["licences"] = plan["licences"]
+    if "diffusers" in plan:
+        manifest["diffusers"] = plan["diffusers"]
     job_dir.mkdir(parents=True)
     paths = {"notebook": job_dir / f"{kind}.ipynb", "inputs_zip": job_dir / "inputs.zip",
              "manifest": job_dir / "build-manifest.json"}
