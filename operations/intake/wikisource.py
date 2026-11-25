@@ -31,7 +31,12 @@ VERSE_MARK, HEADING_MARK, LINE_SEP = '\x01', '\x02', '\x03'
 CONTROLS = re.compile('[\x00-\x03]')
 POEM = re.compile(r'\{\{Block center\|<poem>(.*?)</poem>\}\}', re.S)
 RULE_LINE = re.compile(r'^[ \t]*\{\{rule\|[^{}\n]*\}\}[ \t]*$', re.M)
-HEADING_TEXT = r'([^{}|<>\n]+?)'
+RULE_BREAK = '\n\n' + BREAK + '\n\n'  # a rule is a break and also separates blocks it touches by one newline
+CENTER_LINE = re.compile(
+    r'(?:(?<=\n\n)|\A)[ \t]*\{\{(?:center|c)\|([^{}|<>\n\[\]]+?)\}\}[ \t]*(?=\n[ \t]*\n|\n*\Z)')
+BOOK_END_MARKER = '{{কেন্দ্র|সম্পূর্ণ।}}'
+BOOK_END = re.compile(r'(?:(?<=\n)|\A)(?:[ \t]*\{\{rule\|[^{}\n]*\}\}\s*)?' + re.escape(BOOK_END_MARKER) + r'\s*\Z')
+HEADING_TEXT =r'([^{}|<>\n]+?)'
 HEADING = re.compile(
     r'(?:(?<=\n\n)|\A)[ \t]*(?:\{\{কেন্দ্র\|\{\{larger\|' + HEADING_TEXT + r'\}\}\}\}'
     r'|\{\{কেন্দ্র\|' + HEADING_TEXT + r'\}\}|\{\{larger\|' + HEADING_TEXT + r'\}\})[ \t]*(?=\n[ \t]*\n|\n*\Z)')
@@ -59,7 +64,11 @@ def _heading(match):
     return BREAK + HEADING_MARK + next(g for g in match.groups() if g is not None) + HEADING_MARK + BREAK
 
 
-def _page_text(page, title, first):
+def _center(match):
+    return BREAK + VERSE_MARK + match.group(1).strip() + VERSE_MARK + BREAK
+
+
+def _page_text(page, title, first, last=False):
     text = NOINCLUDE.sub('', page['wikitext']).replace('\ufeff', '')
     found = CONTROLS.search(text)
     if found:
@@ -68,8 +77,13 @@ def _page_text(page, title, first):
         text, found = _title_pattern(title).subn('', text, count=1)
         if not found:
             raise IntakeError('TITLE_LINE_MISSING', title)
+    if last:
+        text = BOOK_END.sub('', text)
+    if BOOK_END_MARKER in text:
+        raise IntakeError('UNKNOWN_MARKUP', BOOK_END_MARKER)
     text = POEM.sub(_verse, text)
-    text = RULE_LINE.sub(BREAK, text)
+    text = RULE_LINE.sub(RULE_BREAK, text)
+    text = CENTER_LINE.sub(_center, text)
     text = HEADING.sub(_heading, text)
     closed = bool(re.search(r'\{\{nop\}\}\s*\Z', text))
     text = text.replace('{{nop}}', '')
@@ -88,7 +102,7 @@ def pages_to_paragraphs(pages, *, title, keep_hyphen_after=frozenset()):
     for index, page in enumerate(pages):
         if page.get('quality') != 4:
             raise IntakeError('PAGE_NOT_VALIDATED', str(page.get('page')))
-        text = _page_text(page, title, index == 0)
+        text = _page_text(page, title, index == 0, index == len(pages) - 1)
         if index and not text.startswith(BREAK) and not stream.endswith(BREAK):
             if stream.endswith('-'):
                 if pages[index - 1]['page'] not in keep_hyphen_after:

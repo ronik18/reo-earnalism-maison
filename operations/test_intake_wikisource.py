@@ -183,6 +183,39 @@ class WikisourceStructureTests(SimpleTestCase):
         self.assertEqual([p['kind'] for p in source['units'][0]['paragraphs']], ['heading', 'verse'])
         self.assertEqual(source['units'][0]['paragraphs'][1]['text'], 'ক\nখ')
 
+    def test_centered_song_line_is_a_verse_paragraph(self):
+        for tpl in ('center', 'c'):
+            with self.subTest(tpl=tpl):
+                got = _one(self.TL + 'আগে।\n\n{{' + tpl + '|কেন, পূর্ণিমা আঁধার!}}\n\nপরে।')
+                self.assertEqual(got, [{'kind': 'paragraph', 'text': 'আগে।'},
+                                       {'kind': 'verse', 'text': 'কেন, পূর্ণিমা আঁধার!'},
+                                       {'kind': 'paragraph', 'text': 'পরে।'}])
+
+    def test_centered_line_with_markup_or_inline_is_refused(self):
+        for bad in ('{{center|ক {{x}} খ}}', '{{center|ক|খ}}', 'এক {{center|ক}} দুই', 'এক।\n{{c|ক}}\nদুই', '{{center|[[ক]]}}'):
+            with self.subTest(bad=bad), self.assertRaises(IntakeError) as caught:
+                _one(self.TL + bad)
+            self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
+    def test_book_end_marker_is_dropped_on_the_last_page_only(self):
+        end = '{{কেন্দ্র|সম্পূর্ণ।}}'
+        P0 = dict(PAGES[0], wikitext=self.TL + 'এক।{{nop}}')
+        last = dict(PAGES[1], wikitext='শেষ।\n\n{{rule|3em}}\n' + end)
+        self.assertEqual(pages_to_paragraphs([P0, last], title=TITLE)[-1], {'kind': 'paragraph', 'text': 'শেষ।'})
+        last = dict(PAGES[1], wikitext='শেষ।\n\n' + end)
+        self.assertEqual(pages_to_paragraphs([P0, last], title=TITLE)[-1], {'kind': 'paragraph', 'text': 'শেষ।'})
+        for pages in ([PAGES[0], dict(PAGES[1], wikitext='শেষ।\n\n' + end), PAGES[2]],
+                      [PAGES[0], dict(PAGES[1], wikitext='শেষ।\n\n' + end + '\n\nআরও।')],
+                      [dict(PAGES[0], wikitext=PAGES[0]['wikitext'] + '\n\n' + end), PAGES[1]]):
+            with self.subTest(pages=len(pages)), self.assertRaises(IntakeError) as caught:
+                pages_to_paragraphs(pages, title=TITLE)
+            self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
+    def test_blocks_adjacent_to_a_rule_line_with_a_single_newline(self):
+        got = _one(self.TL + 'এক।\n\n{{rule|3em}}\n{{কেন্দ্র|{{larger|দ্বিতীয়।}}}}\n{{rule|3em}}\n{{Block center|<poem>ক\nখ</poem>}}\n{{rule|2em}}\nদুই।')
+        self.assertEqual(got, [{'kind': 'paragraph', 'text': 'এক।'}, {'kind': 'heading', 'text': 'দ্বিতীয়।'},
+                               {'kind': 'verse', 'text': 'ক\nখ'}, {'kind': 'paragraph', 'text': 'দুই।'}])
+
     def test_control_characters_in_the_source_are_refused(self):
         with self.assertRaises(IntakeError) as caught:
             _one(self.TL + 'এক\x01দুই')
