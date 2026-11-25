@@ -496,3 +496,8 @@ STRINGS.update({
     "turned_18": ("Parent-managed reader who has turned 18?", "অভিভাবক-পরিচালিত পাঠক, এখন ১৮ বছর?"),
 })
 STRINGS['sponsored_by'] = ('Sponsored by', 'সৌজন্যে')
+
+STRINGS.update({
+    "ai_translation": ("AI translation", "এআই অনুবাদ"),
+    "translated_by": ("Translated with AI, edited by {name}", "এআই-সহায়ক অনুবাদ, সম্পাদনা: {name}"),
+})

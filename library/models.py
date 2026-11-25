@@ -26,10 +26,25 @@ class Edition(models.Model):
     live_revision = models.ForeignKey('Revision', null=True, blank=True, on_delete=models.PROTECT, related_name='+')
     version = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
+    translated_from = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='translations')
+    translation_method = models.CharField(max_length=16, blank=True, choices=[('', ''), ('ai', 'ai'), ('ai_edited', 'ai_edited')])
+    translation_credit = models.CharField(max_length=160, blank=True)
+    translation_model = models.CharField(max_length=80, blank=True)
     class Meta:
         db_table = 'maison_edition'
+        constraints = [
+            models.CheckConstraint(
+                condition=(Q(translated_from__isnull=True, translation_method='')
+                           | Q(translated_from__isnull=False, translation_method__in=['ai', 'ai_edited'])),
+                name='maison_edition_translation_method'),
+            models.CheckConstraint(
+                condition=~Q(translation_method='ai_edited') | ~Q(translation_credit=''),
+                name='maison_edition_edited_credit'),
+        ]
 
     def clean(self):
+        if self.translated_from_id and self.translated_from.locale == self.locale:
+            raise ValidationError('A translation must be in a different language from its source.')
         if self.live_revision_id and self.live_revision.edition_id != self.id:
             raise ValidationError('Live revision must belong to this edition.')
 

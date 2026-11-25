@@ -197,7 +197,7 @@ def search(request, locale):
 @require_GET
 @domain_view
 def title(request, locale, identifier):
-    from library.services import edition_detail, edition_units, get_edition_by_slug, catalog_cards
+    from library.services import edition_detail, edition_translation, edition_units, get_edition_by_slug, catalog_cards
     try:
         edition_id = UUID(identifier)
     except ValueError:
@@ -224,13 +224,13 @@ def title(request, locale, identifier):
     download_bootstrap = {"edition_revision_id":edition["edition_revision_id"],"unit_ids":[u["unit_id"] for u in units],"units":[{"unit_id":u["unit_id"],"title":u["title"]} for u in units],"formats":edition["downloadable_formats"],"title":edition["title"],"locale":edition["locale"]} if django_settings.FEATURES.get("offline_text_audio") and edition["published_at"] and request.user.is_authenticated else None
     sample = public_preview_data(request, edition) if django_settings.FEATURES.get("audio") else {}
     from learning.classroom import is_teacher
-    return page(request, locale, "web/title.html", teacher=is_teacher(request.user), edition=edition, units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
+    return page(request, locale, "web/title.html", teacher=is_teacher(request.user), edition=edition, translation=edition_translation(edition["edition_id"]), units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
 
 
 @require_GET
 @domain_view
 def reader(request, locale, edition_id, unit_id=None):
-    from library.services import get_reader_document, get_preview_document, edition_units
+    from library.services import get_reader_document, get_preview_document, edition_units, edition_translation
     if unit_id is None:
         units = edition_units(edition_id, territory=trusted_territory(request), user=request.user)
         if not units:
@@ -262,7 +262,7 @@ def reader(request, locale, edition_id, unit_id=None):
     if document.get("preview"):
         bootstrap["next_unit_url"]=None
         bootstrap["player_url"]=None
-    return page(request, locale, "web/reader.html", document=document, edition=edition, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination)
+    return page(request, locale, "web/reader.html", document=document, edition=edition, translation=edition_translation(edition["edition_id"]), bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination)
 
 
 class EmailForm(forms.Form):
