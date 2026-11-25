@@ -106,7 +106,7 @@ Proof metric: views per film at day 30, and click-through from YouTube to the Ea
 
 - **Free forever:** reading every released edition, and the first chapter of every audiobook. This keeps the current free promise honest.
 - **Pass (INR 99/month, INR 999/year, as already planned):** full audio and read-along with paragraph highlighting (`TimingMap`), ad-free films, the Bengali ⇄ English parallel switch, offline downloads, learning tracks with quizzes and a completion certificate, and new titles one week early.
-- **Anchor honestly** against real alternatives: Storytel INR 149, Kuku INR 899/year, SpeakX ~INR 300/month. No decoy tier, no fake countdown, and cancelling takes one step (marketing-skill honesty rules).
+- **Anchor honestly** against real alternatives: Storytel INR 149, Kuku INR 899/year, SpeakX ~INR 300/month. No decoy tier, no fake countdown, and cancelling takes one confirmed step (marketing-skill honesty rules).
 - **Later, with an owner decision:** a diaspora tier priced in USD for US and GB families ("Bengali for your children"), the market ShunBoi reports as >70% of its listeners. US and GB are already active publication regions, but account service is India-only today.
 
 Proof metric: free-to-paid conversion among members who completed at least one story, and month-2 retention.

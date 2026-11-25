@@ -62,7 +62,7 @@ Files to touch: `skills/earnalism-audiovisual/`, `operations/social_delivery/`, 
 - Blocked by: 2.1, G0.4
 
 ### Phase 3: Bilingual Pass (Strategy 2)
-Verified when: a sandbox Razorpay journey buys the Pass, unlocks Pass-only features, cancels in one step and issues the correct invoice and credit note, on PostgreSQL.
+Verified when: a sandbox Razorpay journey buys the Pass, unlocks Pass-only features, cancels in one confirmed step and issues the correct invoice and credit note, on PostgreSQL.
 Files to touch: `billing/`, `library/`, `learning/`, `web/`, `client/`, `templates/`
 
 #### Step 3.1: Entitlement split, free vs Pass (Size: M), Media/commerce
@@ -87,7 +87,7 @@ Files to touch: `billing/`, `library/`, `learning/`, `web/`, `client/`, `templat
 - Blocked by: 3.1
 
 #### Step 3.4: Honest Pass page and upgrade moments (Size: S), Frontend
-- Acceptance criteria: the Pass page shows the real price and real competitor anchors with sources; the upgrade prompt appears only after a completed free chapter; one-step cancel is linked from Account.
+- Acceptance criteria: the Pass page shows the real price and real competitor anchors with sources; the upgrade prompt appears only after a completed free chapter; one confirmed-step cancel is linked from Account.
 - Verification command: `.venv/bin/python manage.py test web --noinput`; ui-consistency verifying pass
 - Files likely touched: `templates/`, `web/`
 - Test seams: web view tests and browser regression
@@ -159,7 +159,7 @@ Files to touch: `accounts/`, `learning/`, `billing/`, `templates/`
 
 ## Always / Never
 
-- Always: exact-edition clearance in all active regions before publication; one-step cancel; real sources behind every claim and price anchor; PostgreSQL tests for each step.
+- Always: exact-edition clearance in all active regions before publication; one confirmed-step cancel; real sources behind every claim and price anchor; PostgreSQL tests for each step.
 - Never: paid provisioning or ad spend without budget authority; third-party ad trackers on the Reader; student or child accounts; changing the approved stack or design without approval; publishing without an exact-action authority.
 
 ## Progress

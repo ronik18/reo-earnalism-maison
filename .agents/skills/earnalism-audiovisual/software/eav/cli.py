@@ -17,6 +17,8 @@
   python3 -m eav.cli status --root <dir>
   python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir>
                          (--score-dir <dir> --score-route vcsl|ace-step:<job_id> | --dry)
+  python3 -m eav.cli preview --root <dir> --bundle <bundle dir> --out <preview dir>
+                         (public preview clip of chapter 1: <= 120 s, <= 2 MiB, 96 kbps MP3)
 
 Every command ends with "Next: ..." -- the one action the owner (or Claude) takes next.
 Reels: script -> reel narration (measured) -> --plan-shots (ceil(narration / 5.04 s) Wan clips)
@@ -38,7 +40,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
-from . import budget, colab_jobs, film, importer, mix, qc, reel, scenes, social
+from . import budget, colab_jobs, film, importer, mix, preview, qc, reel, scenes, social
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import voice_units
@@ -1136,6 +1138,30 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
           "revision, then attach_audiovisual_audio publish --browser-report <report.json>.")
 
 
+def cmd_preview(args):
+    rec = _record(args.root)
+    src = _json(rec.root / "source.json")
+    chapter = Path(args.bundle) / "unit-001.mp3"
+    if not src["units"] or not chapter.is_file():
+        raise Stop(f"{chapter} not found", f"{PROG} bundle-audio --root {rec.root} --out <bundle dir>")
+    out = Path(args.out)
+    if out.exists() and any(out.iterdir()):
+        raise Stop(f"{out} is not empty", "Pass a new --out directory")
+    out.mkdir(parents=True, exist_ok=True)
+    try:
+        record = preview.cut_preview(chapter, out / "preview.mp3", src["units"][0]["unit_id"])
+    except ValueError as e:
+        shutil.rmtree(out, ignore_errors=True)
+        raise Stop(f"preview: {e}", "Give chapter 1 narration a pause within its first two minutes",
+                   code=5)
+    record["source_mp3_sha256"] = sha256_file(chapter)
+    path = _write_json(out / "preview.json", record)
+    rec.event("preview", "cut", {"sha256": record["sha256"], "duration_ms": record["duration_ms"]})
+    print(f"Wrote preview clip {out / 'preview.mp3'} ({record['duration_ms']} ms, {record['bytes']} bytes) "
+          f"and measurement record {path}. Server: stage it as a preview_audio asset; its asset_id completes "
+          "revision.validation_evidence['audio_preview'].")
+
+
 def cmd_status(args):
     root = Path(args.root)
     if (root / "record.json").is_file():
@@ -1223,7 +1249,7 @@ def cmd_social(args):
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "supersede": cmd_supersede, "close": cmd_close,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
-            "bundle-audio": cmd_bundle_audio, "social": cmd_social}
+            "bundle-audio": cmd_bundle_audio, "preview": cmd_preview, "social": cmd_social}
 
 
 def _parser():
@@ -1282,6 +1308,9 @@ def _parser():
     s.add_argument("--score-dir", help="<unit_id>.wav score bed per chapter (default route)")
     s.add_argument("--score-route", help="with --score-dir: vcsl or ace-step:<imported music job id>")
     s.add_argument("--dry", action="store_true", help="narration only; recorded in the evidence draft")
+    s = add("preview")
+    s.add_argument("--bundle", required=True, help="the bundle-audio output holding unit-001.mp3")
+    s.add_argument("--out", required=True)
     s = add("social")
     s.add_argument("--site", required=True, help="bare https origin, e.g. https://theearnalism.com")
     s.add_argument("--title", required=True, help="display title exactly as on the edition")

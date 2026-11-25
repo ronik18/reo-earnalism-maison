@@ -1,0 +1,32 @@
+{
+ "schema": "earnalism.book_import_manifest.v1",
+ "project_id": "prayashchitta-wikisource-20261125",
+ "work": {
+  "slug": "prayashchitta",
+  "title": "প্রায়শ্চিত্ত",
+  "creators": [
+   "রবীন্দ্রনাথ ঠাকুর"
+  ],
+  "house": "golpo"
+ },
+ "edition": {
+  "slug": "prayashchitta",
+  "language": "bn",
+  "title": "প্রায়শ্চিত্ত",
+  "description": "শ্বশুরবাড়ির টাকায় বিলেত যাওয়া এক অকর্মণ্য জামাইয়ের ছলনা আর তার অপ্রত্যাশিত প্রায়শ্চিত্তের কাহিনি।"
+ },
+ "source": {
+  "sha256": "c715ae582e82d84ad389f325de0ab0d06f94cd2c1852c5027c5241cda62716bc",
+  "bytes": 71247,
+  "content_type": "application/json",
+  "format": "earnalism.book_source.v1"
+ },
+ "provenance": {
+  "source_ref": "https://bn.wikisource.org/w/index.php?title=%E0%A6%97%E0%A6%B2%E0%A7%8D%E0%A6%AA-%E0%A6%A6%E0%A6%B6%E0%A6%95/%E0%A6%AA%E0%A7%8D%E0%A6%B0%E0%A6%BE%E0%A6%AF%E0%A6%BC%E0%A6%B6%E0%A7%8D%E0%A6%9A%E0%A6%BF%E0%A6%A4%E0%A7%8D%E0%A6%A4&oldid=1624864",
+  "source_edition": "Galpa-Dashak (গল্প-দশক), Calcutta: Sahitya-Jantra, printed by Gopalchandra Ray, published by Kalidas Chakravarti, 1302 BS (1895); sole author Rabindranath Tagore. Validated (level 4) Wikisource scan pages with recorded page revisions; conversion rules as recorded for kshudhita-pashan plus verse, section-heading and rule handling; every page-end hyphen rejoins a single word (none kept).",
+  "rights_note": "রবীন্দ্রনাথ ঠাকুর died 1941; first published 1895. Term screen verdict for 2026: screen_pass. Wikisource transcription layer reused under CC BY-SA 4.0 with attribution; ShareAlike applies to the delivered transcription only. Draft: owner approval of the clearance record and a cover with owner-held provenance are still required.",
+  "rights_evidence_refs": [
+   "reo-earnalism-maison:docs/evidence/publication-clearance-prayashchitta-draft.json"
+  ]
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "schema": "earnalism.book_import_manifest.v1",
+ "project_id": "thakurda-wikisource-20261125",
+ "work": {
+  "slug": "thakurda",
+  "title": "ঠাকুর্দ্দা",
+  "creators": [
+   "রবীন্দ্রনাথ ঠাকুর"
+  ],
+  "house": "golpo"
+ },
+ "edition": {
+  "slug": "thakurda",
+  "language": "bn",
+  "title": "ঠাকুর্দ্দা",
+  "description": "পূর্বপুরুষের জমিদারি জৌলুসের গল্পে বেঁচে থাকা এক দরিদ্র বৃদ্ধ, আর তাঁর গর্ব রক্ষায় পাড়ার ছেলেদের এক মজার ফন্দি।"
+ },
+ "source": {
+  "sha256": "4ac1dc2115c3964e55e1644c8309fdc20c3ff0ddcc86b5d4a47a41f20d0b6833",
+  "bytes": 51294,
+  "content_type": "application/json",
+  "format": "earnalism.book_source.v1"
+ },
+ "provenance": {
+  "source_ref": "https://bn.wikisource.org/w/index.php?title=%E0%A6%97%E0%A6%B2%E0%A7%8D%E0%A6%AA-%E0%A6%A6%E0%A6%B6%E0%A6%95/%E0%A6%A0%E0%A6%BE%E0%A6%95%E0%A7%81%E0%A6%B0%E0%A7%8D%E0%A6%A6%E0%A7%8D%E0%A6%A6%E0%A6%BE&oldid=1624860",
+  "source_edition": "Galpa-Dashak (গল্প-দশক), Calcutta: Sahitya-Jantra, printed by Gopalchandra Ray, published by Kalidas Chakravarti, 1302 BS (1895); sole author Rabindranath Tagore. Validated (level 4) Wikisource scan pages with recorded page revisions; conversion rules as recorded for kshudhita-pashan plus verse, section-heading and rule handling; every page-end hyphen rejoins a single word (none kept).",
+  "rights_note": "রবীন্দ্রনাথ ঠাকুর died 1941; first published 1895. Term screen verdict for 2026: screen_pass. Wikisource transcription layer reused under CC BY-SA 4.0 with attribution; ShareAlike applies to the delivered transcription only. Draft: owner approval of the clearance record and a cover with owner-held provenance are still required.",
+  "rights_evidence_refs": [
+   "reo-earnalism-maison:docs/evidence/publication-clearance-thakurda-draft.json"
+  ]
+ }
+}

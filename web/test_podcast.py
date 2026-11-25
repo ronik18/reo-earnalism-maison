@@ -47,7 +47,6 @@ class PodcastFeedTests(TestCase):
         self.assertEqual(item.findtext('title'), self.revision.title)
         self.assertEqual(item.find('guid').get('isPermaLink'), 'false')
         self.assertEqual(item.findtext('guid'), str(self.revision.edition_id))
-        self.assertIsNone(item.find('enclosure'))
         self.assertNotIn(self.asset.storage_key, response.content.decode())
         self.assertEqual(self.feed('fr').status_code, 404)
 
@@ -107,3 +106,34 @@ class PodcastFeedTests(TestCase):
         from library.models import Revision
         Revision.objects.filter(pk=self.revision.pk).update(published_at=None)
         self.assertEqual(self.items(), [])
+
+    def drop_clip(self):
+        self.revision.validation_evidence['audio_preview']['sha256'] = '0' * 64
+        type(self.revision).objects.filter(pk=self.revision.pk).update(validation_evidence=self.revision.validation_evidence)
+
+    def test_item_with_prepared_preview_has_enclosure_and_duration(self):
+        item = self.items()[0]
+        enclosure = item.find('enclosure')
+        self.assertEqual(enclosure.get('url'), settings.PUBLIC_BASE_URL.rstrip('/') + f'/api/v1/content/audio-previews/{self.clip.id}')
+        self.assertEqual(enclosure.get('length'), str(self.clip.bytes))
+        self.assertEqual(enclosure.get('type'), 'audio/mpeg')
+        self.assertEqual(item.findtext('itunes:duration', namespaces=NS), '2')
+        self.assertEqual(item.findtext('itunes:episodeType', namespaces=NS), 'full')
+        self.assertIn('Preview \u2014 listen to the full story on Earnalism.', item.findtext('description'))
+        self.assertIn('utm_source=podcast', item.findtext('description'))
+
+    def test_item_without_prepared_clip_has_no_enclosure(self):
+        self.drop_clip()
+        item = self.items()[0]
+        self.assertIsNone(item.find('enclosure'))
+        self.assertIsNone(item.find('itunes:duration', NS))
+        self.assertNotIn('Preview', item.findtext('description'))
+        self.assertIn('utm_source=podcast', item.findtext('link'))
+
+    def test_enclosure_never_points_at_full_audio_or_storage(self):
+        content = self.feed().content.decode()
+        self.assertNotIn(str(self.asset.id), content)
+        self.assertNotIn(self.asset.storage_key, content)
+        self.assertNotIn(self.clip.storage_key, content)
+        self.assertEqual(content.count('<enclosure'), 1)
+        self.assertNotIn('X-Amz', content)
