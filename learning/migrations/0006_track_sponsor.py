@@ -46,4 +46,16 @@ class Migration(migrations.Migration):
                 name="maison_track_sponsor_approved",
             ),
         ),
+        migrations.AddConstraint(
+            model_name="track",
+            constraint=models.CheckConstraint(
+                condition=models.Q(
+                    ("sponsor_url", ""),
+                    ("sponsor_url__startswith", "https://"),
+                    ("sponsor_url__startswith", "http://"),
+                    _connector="OR",
+                ),
+                name="maison_track_sponsor_url_scheme",
+            ),
+        ),
     ]

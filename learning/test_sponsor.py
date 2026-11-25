@@ -32,11 +32,11 @@ class SponsorTests(TestCase):
         self.client.get('/en/sign-in/')
         self.client.post('/en/sign-in/', {'email': self.approver.email, 'password': 'Sponsor-Passphrase-2026', 'return_to': '/en/learn/',
                                           'password_purpose_consent': 'on', 'password_purpose_version': 'password-account-v1'})
-        self.assertNotContains(self.client.get(f'/en/tracks/{track.pk}/'), '<p class="fine" lang="en">Sponsored by')
+        self.assertNotContains(self.client.get(f'/en/tracks/{track.pk}/'), '<p class="fine">Sponsored by')
         Track.objects.filter(pk=track.pk).update(sponsor_name='Acme <Books>', sponsor_url='https://acme.example/read',
                                                  sponsor_approved_by=self.approver)
         page = self.client.get(f'/en/tracks/{track.pk}/')
-        self.assertContains(page, '<p class="fine" lang="en">Sponsored by <a href="https://acme.example/read" rel="sponsored noopener">Acme &lt;Books&gt;</a></p>', html=False)
+        self.assertContains(page, '<p class="fine">Sponsored by <a href="https://acme.example/read" rel="sponsored noopener" lang="en">Acme &lt;Books&gt;</a></p>', html=False)
         self.assertContains(page, 'rel="sponsored noopener"')
         self.assertContains(page, 'href="https://acme.example/read"')
         self.assertContains(page, 'Acme &lt;Books&gt;')
@@ -60,3 +60,10 @@ class SponsorTests(TestCase):
         Track.objects.filter(pk=track.pk).update(sponsor_name='Acme', sponsor_approved_by=self.approver)
         with self.assertRaises(Exception), transaction.atomic():
             self.approver.delete()
+
+    def test_sponsor_url_scheme_rejected_by_database(self):
+        track = quiz_track('en')
+        for bad in ('javascript:alert(1)', 'data:text/html,x', 'ftp://x.example'):
+            with self.assertRaises(IntegrityError), transaction.atomic():
+                Track.objects.filter(pk=track.pk).update(sponsor_name='Acme', sponsor_approved_by=self.approver, sponsor_url=bad)
+        Track.objects.filter(pk=track.pk).update(sponsor_name='Acme', sponsor_approved_by=self.approver, sponsor_url='http://acme.example/')
