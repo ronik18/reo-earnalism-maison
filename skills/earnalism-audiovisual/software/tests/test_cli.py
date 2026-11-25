@@ -732,6 +732,81 @@ class RoundTwo:
         self.assertEqual((merged / f"{first}.png").read_bytes(),
                          (self.root / "stills" / base / f"{first}.png").read_bytes())
 
+    # --- hold: unapproved shots show the scene's nearest approved still ---------------------
+    def hold_ready(self):
+        """film_ready plus a base stills job with four shots (distinct colours) per scene."""
+        self.film_ready()
+        scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+        sid = scenes[0]["scene_id"]
+
+        def shots(rec, job_id, job_dir, out):
+            for sc in scenes:
+                for n in range(1, 5):
+                    Image.new("RGB", (64, 36), (40 * n, 7 * n, 3)).save(out / f"{sc['scene_id']}-{n}.png")
+        job = self.fake_job("stills", "film-01", shots)
+        return sid, job
+
+    def hold(self, *args):
+        return run("hold", "--root", self.root, "--film", "1", *args)
+
+    def merged(self):
+        rec = Record.load(self.root)
+        out = self.d / "merged-out"
+        out.mkdir(exist_ok=True)
+        folder, meta = cli._film_stills(rec, "film-01", out)
+        return {p.stem: p.read_bytes() for p in folder.iterdir()}, meta
+
+    def shot(self, job, sid, n):
+        return (self.root / "stills" / job / f"{sid}-{n}.png").read_bytes()
+
+    def test_hold_substitutes_the_previous_approved_shot_else_the_next(self):
+        sid, job = self.hold_ready()
+        code, out = self.hold("--keys", f"{sid}-2,{sid}-3,{sid}-1")
+        self.assertEqual(code, 0, out)
+        files, meta = self.merged()
+        self.assertEqual(files[f"{sid}-1"], self.shot(job, sid, 4))  # nothing before: the next approved
+        self.assertEqual(files[f"{sid}-2"], self.shot(job, sid, 4))
+        self.assertEqual(files[f"{sid}-3"], self.shot(job, sid, 4))
+        code, out = self.hold("--keys", f"{sid}-3")
+        self.assertEqual(code, 0, out)
+        files, meta = self.merged()
+        self.assertEqual(files[f"{sid}-3"], self.shot(job, sid, 2))  # previous wins over next
+        self.assertEqual(files[f"{sid}-4"], self.shot(job, sid, 4))
+        self.assertEqual(meta["held"], [f"{sid}-3"])
+        self.assertEqual(meta["substitutes"], {f"{sid}-3": f"{sid}-2"})
+
+    def test_a_held_key_never_uses_its_own_file(self):
+        sid, job = self.hold_ready()
+        self.assertEqual(self.hold("--keys", f"{sid}-2")[0], 0)
+        files, meta = self.merged()
+        self.assertNotEqual(files[f"{sid}-2"], self.shot(job, sid, 2))
+        self.assertEqual(files[f"{sid}-2"], self.shot(job, sid, 1))
+        self.assertEqual(meta["substitutes"], {f"{sid}-2": f"{sid}-1"})
+
+    def test_a_scene_with_every_shot_held_stops_naming_the_scene(self):
+        sid, job = self.hold_ready()
+        self.assertEqual(self.hold("--keys", ",".join(f"{sid}-{n}" for n in range(1, 5)))[0], 0)
+        with self.assertRaises(cli.Stop) as cm:
+            self.merged()
+        self.assertIn(sid, str(cm.exception))
+        self.assertIn("every shot held", str(cm.exception))
+
+    def test_the_latest_hold_wins_and_clear_removes_it(self):
+        sid, job = self.hold_ready()
+        self.assertEqual(self.hold("--keys", f"{sid}-2")[0], 0)
+        self.assertEqual(self.hold("--keys", f"{sid}-3")[0], 0)
+        files, meta = self.merged()
+        self.assertEqual(meta["held"], [f"{sid}-3"])
+        self.assertEqual(files[f"{sid}-2"], self.shot(job, sid, 2))
+        code, out = self.hold("--clear")
+        self.assertEqual(code, 0, out)
+        files, meta = self.merged()
+        self.assertNotIn("held", meta)
+        self.assertEqual(files[f"{sid}-3"], self.shot(job, sid, 3))
+        arts = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "stills_hold"]
+        self.assertEqual([a["meta"]["keys"] for a in arts], [[f"{sid}-2"], [f"{sid}-3"], []])
+        self.assertNotEqual(self.hold()[0], 0)  # neither --keys nor --clear
+
     def test_a_candidates_job_never_becomes_the_base(self):
         """Every key of the base is covered by the candidates job, yet the base stays."""
         self.film_ready()

@@ -32,6 +32,8 @@
                          recolor, fill, clone; one <key>--c1 candidate + <key>--mask per item)
   python3 -m eav.cli pick --root <dir> --job <stills|retouch|touchup job id> --choices <{"<key>": N} json file>
                          (after review: one candidate per <key>--cN still; film uses only picks)
+  python3 -m eav.cli hold --root <dir> --film N --keys k1,k2,... [--clear]
+                         (shots with no approved still: the film shows the scene's nearest approved still)
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
   python3 -m eav.cli reel <n> --root <dir> --script <script.json> [--hashtags ...]
@@ -1524,6 +1526,9 @@ def _film_stills(rec, t, out):
                            f"{PROG} pick --root {rec.root} --job {job['job_id']} --choices <json>")
             files[key] = src
         patches.append(job["job_id"])
+    held, substitutes = _held_keys(rec, t), {}
+    if held:
+        files, substitutes = _apply_hold(files, held)
     merged = out / "stills"
     if merged.exists():
         shutil.rmtree(merged)
@@ -1537,7 +1542,66 @@ def _film_stills(rec, t, out):
     meta = {"base": jobs[base][0]["job_id"], "patches": patches}
     if unpicked:
         meta["unpicked"] = unpicked
+    if held:
+        meta["held"] = sorted(held, key=_shot_order)
+        meta["substitutes"] = substitutes
     return merged, meta
+
+
+def _shot_order(key):
+    """Sort key of a still key f01s007-4: scene prefix, then the shot number."""
+    scene, _, shot = key.rpartition("-")
+    return (scene, int(shot) if shot.isdigit() else 0, key)
+
+
+def _held_keys(rec, t) -> list:
+    holds = _artifacts(rec, "stills_hold", target=t)
+    return list(holds[-1]["meta"]["keys"]) if holds else []
+
+
+def _apply_hold(files, held):
+    """Held keys never use their own file: each takes the file of the nearest non-held key of its
+    scene (the previous key in order, else the next). Returns (files, {held key: substitute})."""
+    files = {k: v for k, v in files.items() if k not in held}
+    universe = sorted(set(files) | set(held), key=_shot_order)
+    subs = {}
+    for key in sorted(held, key=_shot_order):
+        scene = key.rpartition("-")[0]
+        same = [k for k in universe if k.rpartition("-")[0] == scene]
+        i = same.index(key)
+        pick = next((k for k in reversed(same[:i]) if k not in held), None) \
+            or next((k for k in same[i + 1:] if k not in held), None)
+        if pick is None:
+            raise Stop(f"scene {scene} has every shot held ({', '.join(same)}): "
+                       "no approved still to show", f"Approve a still of {scene} (pick) or "
+                       f"release a hold: {PROG} hold --root <dir> --film <n> --keys <others> "
+                       "or --clear")
+        subs[key] = pick
+    out = dict(files)
+    for key, pick in subs.items():
+        out[key] = files[pick]
+    return out, subs
+
+
+def cmd_hold(args):
+    """Record which shots of a film have no approved still: the film shows the nearest approved
+    still of the same scene for them (latest call wins; --clear removes the holds)."""
+    rec = _record(args.root)
+    t = _film_target(args.film)
+    if args.clear == bool(args.keys):
+        raise Stop("hold needs exactly one of --keys or --clear",
+                   f"{PROG} hold --root {rec.root} --film {args.film} --keys k1,k2 | --clear")
+    keys = [] if args.clear else sorted({k.strip() for k in args.keys.split(",") if k.strip()},
+                                        key=_shot_order)
+    bad = [k for k in keys if not re.fullmatch(r".+-[0-9]+", k)]
+    if bad:
+        raise Stop(f"not a still key: {', '.join(bad)}", "Keys look like f01s007-4")
+    version = len(_artifacts(rec, "stills_hold", target=t)) + 1
+    path = _write_json(rec.root / "holds" / f"{t}.hold-{version}.json", {"target": t, "keys": keys})
+    rec.add_artifact("stills_hold", path, {"target": t, "keys": keys, "version": version})
+    rec.event("hold", "recorded", {"target": t, "version": version, "keys": keys})
+    print(f"{len(keys)} shot(s) of {t} held" + (": " + ", ".join(keys) if keys else " (cleared)")
+          + ". The film shows the nearest approved still of the same scene for them.")
 
 
 def _line_ends(script, units, timing) -> list:
@@ -1959,7 +2023,7 @@ def cmd_bundle_film(args):
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take,
-            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "touchup": cmd_touchup,
+            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio,
@@ -2031,6 +2095,10 @@ def _parser():
     s.add_argument("--job", required=True,
                    help="the imported stills, retouch or touchup job with <key>--cN candidates")
     s.add_argument("--choices", required=True, help='JSON file {"<key>": <candidate number>, ...}')
+    s = add("hold", help="show the nearest approved still of the scene for shots with none yet")
+    s.add_argument("--film", type=int, default=1)
+    s.add_argument("--keys", help="comma-separated held still keys, e.g. f01s007-4,f01s007-5")
+    s.add_argument("--clear", action="store_true", help="remove all holds of the film")
     s = add("touchup", help="repaint small defects in hand-placed boxes of imported stills (local)")
     s.add_argument("--film", type=int, required=True)
     s.add_argument("--spec", required=True, help='{"items": [{"key", "source": {"job", "file"}, "ops"}]}')
