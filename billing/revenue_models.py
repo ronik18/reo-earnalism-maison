@@ -16,7 +16,8 @@ class RevenueEntry(models.Model):
     class Meta:
         db_table='maison_revenue_entry'
         constraints=[models.CheckConstraint(condition=Q(month__day=1),name='maison_revenue_month_first'),
-                     models.CheckConstraint(condition=Q(source__in=SOURCES),name='maison_revenue_source')]
+                     models.CheckConstraint(condition=Q(source__in=SOURCES),name='maison_revenue_source'),
+                     models.CheckConstraint(condition=Q(currency__regex=r'^[A-Z]{3}$'),name='maison_revenue_currency')]
 
 class ReinvestmentEntry(models.Model):
     month=models.DateField()

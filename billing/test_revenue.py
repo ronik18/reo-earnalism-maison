@@ -1,12 +1,12 @@
 import io,uuid
 from datetime import date,datetime,timedelta,timezone as dtz
 from django.contrib.auth import get_user_model
-from django.core.management import call_command
+from django.core.management import call_command,CommandError
 from django.db import IntegrityError,transaction
 from django.test import TestCase,override_settings
 from django.utils import timezone
 from .models import Offer,Invoice,BillingPlan,Subscription,RevenueEntry,ReinvestmentEntry
-from .revenue import month_report
+from .revenue import month_report,record_spend
 
 MONTH=date(2026,12,1)
 
@@ -63,3 +63,26 @@ class RevenueTests(TestCase):
         self.assertIn('podcast',out.getvalue())
         rows=ReinvestmentEntry.objects.filter(kind='set_aside',month=MONTH)
         self.assertEqual([r.amount_minor for r in rows],[3000])
+
+    def test_pass_is_labelled_invoiced_and_set_aside_line_says_so(self):
+        self.pass_invoice(amount=1000)
+        self.assertEqual(month_report(MONTH)['pass_basis'],'invoiced')
+        out=io.StringIO();call_command('revenue_report','--month','2026-12',stdout=out)
+        self.assertIn('pass (invoiced; capture not verified; refunds not deducted)',out.getvalue())
+        self.assertIn('set-aside (on invoiced figures)',out.getvalue())
+
+    def test_overdue_includes_spends_from_earlier_months(self):
+        old=self.spend(month=date(2026,1,1),payback_due=date(2026,2,1))
+        self.assertEqual([r['id'] for r in month_report(MONTH)['overdue_paybacks']],[old.pk])
+        self.assertEqual(month_report(MONTH)['spends'],[])
+
+    def test_record_spend_refuses_payback_beyond_sixty_days(self):
+        from core.api import DomainError
+        with self.assertRaises(DomainError) as c: record_spend(MONTH,100,'ads',self.user,date(2027,2,15))
+        self.assertEqual(c.exception.code,'PAYBACK_BEYOND_60_DAYS')
+        self.assertEqual(record_spend(MONTH,100,'ads',self.user,date(2027,1,30)).kind,'spend')
+        with self.assertRaises(CommandError):
+            call_command('revenue_report','--month','2026-12','--record-spend','5','--approved-by',self.user.email,'--payback-due','2027-06-01',stdout=io.StringIO())
+
+    def test_revenue_currency_must_be_three_uppercase_letters(self):
+        with self.assertRaises(IntegrityError),transaction.atomic(): self.entry('pass',1,currency='inr')
