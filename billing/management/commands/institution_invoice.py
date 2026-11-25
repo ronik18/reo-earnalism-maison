@@ -12,7 +12,7 @@ DEFAULT_PRICE_MINOR = 20000  # pilot price hypothesis (INR minor units per stude
 
 
 class Command(BaseCommand):
-    help = f'Issue a yearly institution invoice (audited). Default price per student: {DEFAULT_PRICE_MINOR} minor units.'
+    help = f'Issue a yearly institution invoice (audited). Classes are recorded, not priced; amount = students x price. Default price per student: {DEFAULT_PRICE_MINOR} minor units.'
 
     def add_arguments(self, parser):
         parser.add_argument('--institution', required=True)

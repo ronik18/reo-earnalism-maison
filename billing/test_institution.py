@@ -1,4 +1,6 @@
-"""Institution (school) yearly invoices: a request for payment, never a card checkout."""
+"""Institution (school) yearly invoices: a request for payment, never a card checkout.
+
+Live institution invoices await an approved institution tax rule; only local test documents are issued."""
 from datetime import date
 from io import StringIO
 from unittest.mock import patch
@@ -6,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import IntegrityError,transaction
-from django.test import TestCase
+from django.test import TestCase,override_settings
 from core.api import DomainError
 from .institution import issue_institution_invoice
 from .invoices import owned_queryset
@@ -24,7 +26,7 @@ class InstitutionInvoiceTests(TestCase):
     def issue(self,**kw):
         data=dict(institution='Greenfield School',classes=3,students=90,price_per_student_minor=20000,period_start=date(2027,4,1));data.update(kw)
         return issue_institution_invoice(self.staff,**data)
-    def test_invoice_uses_the_existing_series_and_totals(self):
+    def test_local_test_document_series_and_totals(self):
         invoice=self.issue()
         self.assertEqual(invoice.amount_minor,90*20000);self.assertEqual(invoice.currency,'INR')
         self.assertTrue(invoice.number.startswith('LOCAL-TEST-'))
@@ -56,3 +58,17 @@ class InstitutionInvoiceTests(TestCase):
         call_command('institution_invoice',institution='Hill School',classes=2,students=40,period_start='2027-04-01',by='inst-approver@example.test',stdout=out)
         invoice=Invoice.objects.get(institution__name='Hill School');self.assertEqual(invoice.amount_minor,40*20000);self.assertIn(invoice.number,out.getvalue())
         with self.assertRaises(CommandError):call_command('institution_invoice',institution='Hill School',classes=2,students=40,period_start='2027-04-01',by='inst-member@example.test',stdout=StringIO())
+
+    def test_refused_outside_local_environment(self):
+        with override_settings(LOCAL=False):
+            with self.assertRaises(DomainError) as caught:self.issue()
+        self.assertEqual((caught.exception.code,caught.exception.status),('finance_policy_required',409))
+        self.assertFalse(Invoice.objects.exists());self.assertFalse(InstitutionAccount.objects.exists())
+    def test_refused_when_finance_policy_is_approved(self):
+        with override_settings(MERCHANT_FINANCE_POLICY={'approved':True,'version':'x'}):
+            with self.assertRaises(DomainError) as caught:self.issue()
+        self.assertEqual((caught.exception.code,caught.exception.status),('finance_policy_required',409))
+        self.assertFalse(Invoice.objects.exists());self.assertFalse(InstitutionAccount.objects.exists())
+    def test_account_lookup_is_case_insensitive(self):
+        a=self.issue();b=self.issue(institution='  GREENFIELD school ')
+        self.assertEqual(a.institution_id,b.institution_id);self.assertEqual(InstitutionAccount.objects.count(),1)

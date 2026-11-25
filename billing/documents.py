@@ -37,6 +37,7 @@ def render_pdf(snapshot,number,kind):
     lines += ['Net: '+money(net),'Tax ('+str(tax.get('label','test-only amount'))+'): '+money(tax_amount),'Total: '+money(snapshot['amount_minor'])]
     for component in tax.get('components',[]) if kind=='invoice' else []:
         lines.append(str(component['label'])+': '+money(component['tax_minor'])+(f" at {Decimal(component['rate_bps'])/Decimal(100):.2f}%" if 'rate_bps' in component else ''))
+    if snapshot.get('institution'):lines.append(f"Institution: {snapshot['institution']}; {snapshot['classes']} classes, {snapshot['students']} students at {money(snapshot['unit_price_minor'])} each; period {snapshot['period_start']} to {snapshot['period_end']}")
     for key in ['order_id','invoice_number','refund_id','reason']:
         if snapshot.get(key):lines.append(key.replace('_',' ').title()+': '+str(snapshot[key]))
     if snapshot.get('local_test_document'):lines.insert(1,'TEST DOCUMENT - NOT A TAX INVOICE')

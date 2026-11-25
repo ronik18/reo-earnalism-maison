@@ -1,8 +1,8 @@
 """Yearly per-class institution invoices: a request for payment, never a card checkout.
 
-Mode source of truth: settings.MERCHANT_FINANCE_POLICY['approved'] (as for live offers). No institution
-tax rule is approved in that policy, so while it is approved a live institution invoice is refused
-rather than invented; otherwise the document is a numbered local test document. Payment recording
+Live institution invoices await an approved institution tax/numbering rule: outside the local/test
+environment (settings.LOCAL false) or whenever settings.MERCHANT_FINANCE_POLICY is approved, issuing is
+refused with finance_policy_required. Only in the local environment is a LOCAL-TEST-INST test document made. Payment recording
 for institutions is out of scope: nothing here creates an Order, Payment or PaymentAllocation.
 """
 import hashlib
@@ -31,11 +31,12 @@ def issue_institution_invoice(actor,*,institution,classes,students,price_per_stu
         if type(value) is not int or value<=0:raise DomainError('validation_error','Classes, students and price per student must be positive whole numbers.',422)
     if not isinstance(period_start,date) or isinstance(period_start,datetime):raise DomainError('validation_error','A period start date is required.',422)
     policy=getattr(settings,'MERCHANT_FINANCE_POLICY',None)
-    if isinstance(policy,dict) and policy.get('approved') is True:
+    if not settings.LOCAL or (isinstance(policy,dict) and policy.get('approved') is True):
         raise DomainError('finance_policy_required','No approved tax and numbering rule exists for institution invoices.',409)
     period_end=_year_later(period_start);total=students*price_per_student_minor
     with transaction.atomic():
-        account,_=InstitutionAccount.objects.get_or_create(name=name,defaults={'created_by':actor})
+        account=InstitutionAccount.objects.filter(name__iexact=name).first()
+        if not account:account=InstitutionAccount.objects.create(name=name,created_by=actor)
         invoice_id=uuid.uuid4();now=timezone.now()
         snapshot={'institution':name,'institution_id':str(account.pk),'classes':classes,'students':students,'unit_price_minor':price_per_student_minor,
             'period_start':period_start.isoformat(),'period_end':period_end.isoformat(),'amount_minor':total,'currency':'INR','issued_at':now.isoformat(),
