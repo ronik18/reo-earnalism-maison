@@ -496,3 +496,17 @@ STRINGS.update({
     "turned_18": ("Parent-managed reader who has turned 18?", "অভিভাবক-পরিচালিত পাঠক, এখন ১৮ বছর?"),
 })
 STRINGS['sponsored_by'] = ('Sponsored by', 'সৌজন্যে')
+
+STRINGS.update({
+    "review_title": ("Monday review", "সোমবারের পর্যালোচনা"),
+    "review_empty": ("Nothing is waiting for review.", "পর্যালোচনার জন্য কিছু অপেক্ষায় নেই।"),
+    "review_approve": ("Approve selected", "বাছাইগুলো অনুমোদন করুন"),
+    "review_reject": ("Reject selected", "বাছাইগুলো প্রত্যাখ্যান করুন"),
+    "review_kind_clearance": ("Title clearance records", "শিরোনাম ছাড়পত্রের নথি"),
+    "review_kind_cover": ("Cover matches", "প্রচ্ছদ মিলানো"),
+    "review_kind_edition": ("New editions", "নতুন সংস্করণ"),
+    "review_kind_post": ("Social posts", "সামাজিক মাধ্যমের পোস্ট"),
+    "review_changed": ("A reviewed file changed after it was queued. Nothing was decided. Reject them, or queue them again:", "সারিতে তোলার পরে একটি ফাইল বদলেছে। কিছু সিদ্ধান্ত হয়নি। সেগুলো প্রত্যাখ্যান করুন বা আবার সারিতে তুলুন:"),
+    "review_decided": ("Items decided:", "সিদ্ধান্ত হয়েছে:"),
+    "review_none_decided": ("Nothing was decided. Tick at least one pending item first.", "কিছু সিদ্ধান্ত হয়নি। আগে অন্তত একটি অপেক্ষমাণ আইটেম বাছুন।"),
+})

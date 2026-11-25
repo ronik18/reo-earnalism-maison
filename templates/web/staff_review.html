@@ -1,0 +1,11 @@
+{% extends 'web/base.html' %}{% load maison %}{% block content %}<section><div class="page-title"><p class="eyebrow">{% ui 'review_title' %}</p><h1>{% ui 'review_title' %}</h1></div>
+{% if review_error %}<p class="error-notice" role="alert" tabindex="-1" autofocus>{% ui review_error %}{% if changed_refs %} {{ changed_refs|join:', ' }}{% endif %}</p>{% endif %}
+{% if review_notice %}{% if review_notice.count %}<p class="notice" role="status">{% ui 'review_decided' %} {{ review_notice.count }}</p>{% else %}<p class="notice" role="status">{% ui 'review_none_decided' %}</p>{% endif %}{% endif %}
+{% if groups %}<form method="post" action="{% url 'web:staff-review' ui_locale %}">{% csrf_token %}
+{% for group in groups %}<fieldset><legend>{% if group.kind == 'clearance' %}{% ui 'review_kind_clearance' %}{% elif group.kind == 'cover' %}{% ui 'review_kind_cover' %}{% elif group.kind == 'edition' %}{% ui 'review_kind_edition' %}{% else %}{% ui 'review_kind_post' %}{% endif %}</legend>
+{% for item in group.items %}<label class="check-label"><input type="checkbox" name="item" value="{{ item.id }}"><span><code>{{ item.ref }}</code>{% if item.summary.title %} · {{ item.summary.title }}{% elif item.summary.edition_slug %} · {{ item.summary.edition_slug }}{% endif %}</span></label>
+{% endfor %}</fieldset>
+{% endfor %}
+<div class="actions"><button class="button" type="submit" name="decision" value="approved">{% ui 'review_approve' %}</button> <button class="button secondary" type="submit" name="decision" value="rejected">{% ui 'review_reject' %}</button></div>
+</form>{% else %}<p>{% ui 'review_empty' %}</p>{% endif %}
+</section>{% endblock %}

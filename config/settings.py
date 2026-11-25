@@ -320,6 +320,16 @@ if R2_PUBLIC_ASSET_HOST and STATIC_RELEASE_ID:
 
 # Share of earned revenue set aside for owner-approved growth spend.
 MAISON_REINVEST_SHARE_PERCENT = int(os.getenv('MAISON_REINVEST_SHARE_PERCENT', '30'))
+# Monday review standing permission (owner decision D5): unset until the owner turns it on,
+# about two months after the first weekly batch. Must be a full ISO 8601 datetime with offset.
+_review_standing = os.getenv('MAISON_REVIEW_STANDING_FROM', '').strip()
+if _review_standing:
+    from django.utils.dateparse import parse_datetime as _parse_datetime
+    MAISON_REVIEW_STANDING_FROM = _parse_datetime(_review_standing)
+    if MAISON_REVIEW_STANDING_FROM is None or MAISON_REVIEW_STANDING_FROM.tzinfo is None:
+        raise ImproperlyConfigured('MAISON_REVIEW_STANDING_FROM must be an ISO 8601 datetime with a UTC offset')
+else:
+    MAISON_REVIEW_STANDING_FROM = None
 
 # Owner-approved free rollout; authorization still enforces publication and rights.
 FREE_ACCESS_ENABLED = bool_setting('MAISON_FREE_ACCESS', False)
