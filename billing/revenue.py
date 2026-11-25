@@ -48,3 +48,28 @@ def record_spend(month,amount_minor,purpose,approved_by,payback_due):
         if totals.get('spend',0)+amount_minor>totals.get('set_aside',0):
             raise DomainError('SPEND_EXCEEDS_SET_ASIDE','Total spends would exceed the total set aside from earned revenue.',422)
         return ReinvestmentEntry.objects.create(month=start,kind='spend',amount_minor=amount_minor,purpose=purpose,approved_by=approved_by,payback_due=payback_due,paid_back=False)
+
+
+def record_set_aside(month,amount_minor,update=False):
+    """Record the month's set-aside. An existing row with a different amount (share changed, late invoices) is never
+    silently kept or changed: it is refused unless update=True, which changes the row, audits it and never lets the
+    set-asides fall below the spends already approved. Returns (row, 'created'|'unchanged'|'updated')."""
+    from core.api import DomainError
+    from core.services import audit
+    from django.db import transaction
+    start=month.replace(day=1)
+    with transaction.atomic():
+        list(ReinvestmentEntry.objects.select_for_update().filter(kind='set_aside').values_list('pk',flat=True))
+        row=ReinvestmentEntry.objects.filter(month=start,kind='set_aside').first()
+        if row is None:
+            return ReinvestmentEntry.objects.create(month=start,kind='set_aside',amount_minor=amount_minor,purpose='monthly set-aside'),'created'
+        if row.amount_minor==amount_minor: return row,'unchanged'
+        if not update:
+            raise DomainError('SET_ASIDE_DIFFERS',f'Recorded set-aside is {row.amount_minor} but the computed amount is {amount_minor}; pass --update-set-aside to change it.',409)
+        totals={r['kind']:r['total'] for r in ReinvestmentEntry.objects.values('kind').annotate(total=Sum('amount_minor'))}
+        if totals.get('set_aside',0)-row.amount_minor+amount_minor<totals.get('spend',0):
+            raise DomainError('SET_ASIDE_BELOW_SPENDS','Updating would put the total set aside below the spends already approved.',422)
+        before=row.amount_minor
+        row.amount_minor=amount_minor;row.save(update_fields=['amount_minor'])
+        audit(None,'revenue.set_aside_updated',row,{'month':start.isoformat(),'from_minor':before,'to_minor':amount_minor})
+        return row,'updated'

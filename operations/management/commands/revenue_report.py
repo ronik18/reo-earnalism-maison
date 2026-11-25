@@ -1,13 +1,15 @@
 from datetime import date
 from django.core.management.base import BaseCommand,CommandError
 from billing.models import ReinvestmentEntry
-from billing.revenue import month_report
+from billing.revenue import month_report,record_set_aside
+from core.api import DomainError
 
 class Command(BaseCommand):
     help='Print the monthly revenue report; optionally record the reinvestment set-aside.'
     def add_arguments(self,parser):
         parser.add_argument('--month',required=True,help='YYYY-MM')
         parser.add_argument('--record-set-aside',action='store_true')
+        parser.add_argument('--update-set-aside',action='store_true',help='With --record-set-aside: change an existing row whose amount differs (audited).')
         parser.add_argument('--record-spend',type=int,metavar='AMOUNT_MINOR')
         parser.add_argument('--purpose',default='')
         parser.add_argument('--approved-by',help='approver email')
@@ -18,7 +20,6 @@ class Command(BaseCommand):
         if o['record_spend'] is not None:
             from django.contrib.auth import get_user_model
             from billing.revenue import record_spend
-            from core.api import DomainError
             user=get_user_model().objects.filter(email=o['approved_by']).first()
             try: payback=date.fromisoformat(o['payback_due']) if o['payback_due'] else None
             except ValueError: raise CommandError('--payback-due must be YYYY-MM-DD')
@@ -33,5 +34,10 @@ class Command(BaseCommand):
         w(f"spends: {len(r['spends'])}")
         for s in r['overdue_paybacks']: w(f"OVERDUE payback: spend {s['id']} {s['amount_minor']} due {s['payback_due']}")
         if o['record_set_aside']:
-            _,created=ReinvestmentEntry.objects.get_or_create(month=month,kind='set_aside',defaults={'amount_minor':r['set_aside_due_minor'],'purpose':'monthly set-aside'})
-            w('set-aside recorded' if created else 'set-aside already recorded')
+            try: row,state=record_set_aside(month,r['set_aside_due_minor'],update=o['update_set_aside'])
+            except DomainError as e:
+                if e.code=='SET_ASIDE_DIFFERS':
+                    recorded=ReinvestmentEntry.objects.get(month=month,kind='set_aside').amount_minor
+                    w(f"set-aside recorded: {recorded}; computed now: {r['set_aside_due_minor']}")
+                raise CommandError(str(e))
+            w({'created':'set-aside recorded','unchanged':'set-aside already recorded','updated':f"set-aside updated to {row.amount_minor}"}[state])
