@@ -193,6 +193,14 @@ class ColabJobTests(unittest.TestCase):
         self.assertIn("text_encoder_2=None", src)
         self.assertIn("prompt_embeds=pe", src)
 
+    def test_stills_silence_the_8bit_cast_warning(self):
+        # the per-matmul bitsandbytes cast warning floods the output on an L4; log it once
+        s = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]})
+        src = "".join("".join(c["source"]) for c in self.nb(s)["cells"])
+        self.assertIn('logging.getLogger("bitsandbytes.autograd._functions").setLevel(logging.ERROR)', src)
+        self.assertLess(src.index('if QUANT == "int8":'), src.index("bitsandbytes.autograd._functions"))
+        self.assertLess(src.index("bitsandbytes.autograd._functions"), src.index('subfolder="transformer"'))
+
     def test_stills_put_the_house_style_first(self):
         # CLIP reads 77 tokens and T5 256: the look must survive truncation
         s = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]})

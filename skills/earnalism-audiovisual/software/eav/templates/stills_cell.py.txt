@@ -16,6 +16,12 @@ revision = HfApi().model_info(MODEL_REPO).sha
 gpu = torch.cuda.get_device_properties(0)
 QUANT = "bf16" if gpu.total_memory >= 30 * 2**30 else "int8"
 print("GPU", gpu.name, "%.1f GiB;" % (gpu.total_memory / 2**30), "transformer", QUANT)
+if QUANT == "int8":
+    # bitsandbytes logs "inputs will be cast from torch.bfloat16 to float16" on every 8-bit
+    # matmul (thousands of lines per still). Say it once here, then silence that logger.
+    import logging
+    logging.getLogger("bitsandbytes.autograd._functions").setLevel(logging.ERROR)
+    print("8-bit transformer: bitsandbytes casts its matmul inputs to float16 (notice shown once)")
 T5_MAX = 256  # FLUX.1-schnell's T5 limit
 
 
