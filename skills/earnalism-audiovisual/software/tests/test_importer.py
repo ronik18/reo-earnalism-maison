@@ -57,7 +57,7 @@ class ImporterTests(unittest.TestCase):
         self.assertEqual([e["stage"] for e in self.record.data["events"]], ["job"])
         self.assertFalse((self.record.root / "stills").exists())
         self.assertEqual(self.ledger._load()[0]["state"], "reserved")
-        self.assertEqual([p.name for p in self.record.root.iterdir() if p.name.startswith(".")], [])
+        self.assertEqual([p.name for p in self.record.root.iterdir() if p.name.startswith(".") and p.name != ".record.lock"], [])
 
     def test_clean_import_adds_artifacts_and_settles(self):
         self.download()

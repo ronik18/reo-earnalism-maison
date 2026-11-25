@@ -57,3 +57,57 @@ class RecordTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _append_events(root, tag, n):
+    rec = Record.load(root)
+    for i in range(n):
+        rec.event("race", "ok", {"tag": tag, "i": i})
+
+
+class RecordMergeTests(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name)
+
+    def test_stale_instance_does_not_drop_other_commands_entries(self):
+        make(self.root)
+        a = Record.load(self.root)
+        b = Record.load(self.root)
+        f = self.root / "b.bin"
+        f.write_bytes(b"bb")
+        b.add_artifact("still", f, {"k": 1})
+        b.event("job", "stills", {"x": 1})
+        a.event("film", "done", {"y": 2})
+        final = Record.load(self.root).data
+        self.assertEqual([x["kind"] for x in final["artifacts"]], ["still"])
+        self.assertEqual([e["stage"] for e in final["events"]], ["job", "film"])
+        self.assertEqual(a.data, final)  # refreshed from the merged result
+
+    def test_two_processes_append_concurrently(self):
+        import multiprocessing as mp
+        make(self.root)
+        ps = [mp.Process(target=_append_events, args=(self.root, t, 50)) for t in ("p", "q")]
+        for p in ps:
+            p.start()
+        for p in ps:
+            p.join(120)
+            self.assertEqual(p.exitcode, 0)
+        ev = Record.load(self.root).data["events"]
+        self.assertEqual(len(ev), 100)
+        self.assertEqual({(e["detail"]["tag"], e["detail"]["i"]) for e in ev},
+                         {(t, i) for t in ("p", "q") for i in range(50)})
+
+    def test_top_level_change_kept_and_rollback_removes_only_own(self):
+        rec = make(self.root)
+        other = Record.load(self.root)
+        other.event("job", "x", {})
+        snap = (list(rec.data["artifacts"]), list(rec.data["events"]))
+        rec.event("a", "1", {})
+        rec.data["ledger"] = "../l.json"
+        rec._save()
+        rec.rollback(snap)
+        final = Record.load(self.root).data
+        self.assertEqual([e["stage"] for e in final["events"]], ["job"])
+        self.assertEqual(final["ledger"], "../l.json")

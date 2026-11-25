@@ -975,9 +975,8 @@ def cmd_import_take(args):
                                          "files": [a["path"] for a in arts],
                                          "estimated_boundaries": estimated})
     except BaseException:
-        rec.data["artifacts"], rec.data["events"] = snapshot
         try:
-            rec._save()
+            rec.rollback(snapshot)
         finally:
             for p in (wav_dest, job_dest, stage):
                 shutil.rmtree(p, ignore_errors=True)

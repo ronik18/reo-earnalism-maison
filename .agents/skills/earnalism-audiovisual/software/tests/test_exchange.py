@@ -279,7 +279,7 @@ class ExchangeCliTests(unittest.TestCase):
         return path
 
     def leftovers(self):
-        return [p.name for p in self.root.iterdir() if p.name.startswith(".")]
+        return [p.name for p in self.root.iterdir() if p.name.startswith(".") and p.name != ".record.lock"]
 
     def test_collect_imports_through_the_importer_and_cleans_up(self):
         self.staged()

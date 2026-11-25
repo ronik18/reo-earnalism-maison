@@ -83,9 +83,8 @@ def import_job(record, job: dict, downloaded_dir, ledger, actual_units: float,
                                             "files": [a["path"] for a in artifacts], **detail})
         ledger.settle(job_id, actual_units)
     except BaseException:
-        record.data["artifacts"], record.data["events"] = snapshot
         try:
-            record._save()
+            record.rollback(snapshot)
         finally:
             shutil.rmtree(dest, ignore_errors=True)
             if not parent_existed:
