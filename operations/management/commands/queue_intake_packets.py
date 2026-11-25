@@ -52,17 +52,23 @@ class Command(BaseCommand):
         summary = {'edition_slug': edition.get('slug') or slug, 'title': edition.get('title') or slug}
         clearance = root / 'docs' / 'evidence' / f'publication-clearance-{slug}-draft.json'
         entries = []
+        approved_in_file = False
         if clearance.is_file():
             record = _json(clearance) or {}
             approval = record.get('approval') or {}
             if (record.get('status') == 'OWNER_APPROVED' and approval.get('approved') is True
                     and not approval.get('still_required')):
+                approved_in_file = True
                 self.stdout.write(f'{slug}: clearance skipped (already owner-approved in the file)')
             else:
                 entries.append(('clearance', clearance))
         else:
-            self.stdout.write(f'{slug}: clearance skipped (no draft record)')
-        if (folder / 'cover_provenance.json').is_file():
+            cited = [r for r in ((manifest.get('provenance') or {}).get('rights_evidence_refs') or [])
+                     if isinstance(r, str) and 'publication-clearance' in r]
+            self.stdout.write(f'{slug}: clearance skipped (no draft record; manifest cites {", ".join(cited) or "no clearance file"})')
+        if approved_in_file:
+            self.stdout.write(f'{slug}: skipped: clearance approved in file')
+        elif (folder / 'cover_provenance.json').is_file():
             entries.append(('cover', folder / 'cover_provenance.json'))
         else:
             self.stdout.write(f'{slug}: cover skipped (no cover_provenance.json)')
@@ -71,7 +77,7 @@ class Command(BaseCommand):
         for kind, path in entries:
             try:
                 ref = review.review_ref(path)
-                sha = review._file_sha256(ref)
+                sha = review.file_sha256(ref)
                 if ReviewItem.objects.filter(kind=kind, ref=ref, sha256=sha).exists():
                     self.stdout.write(f'{slug}: {kind} {ref} already queued')
                 elif dry_run:
