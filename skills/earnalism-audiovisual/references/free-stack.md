@@ -12,6 +12,7 @@ started by the owner; everything else runs in Claude's container (CPU, ffmpeg).
 | Reel motion | Wan 2.2 TI2V-5B (existing `wan22` builder) | Apache-2.0 | Colab L4, profile `l4-balanced-v2` (512×896, 24 steps) | model revision pinned in `wan22/batch.py` |
 | Retouch (inpainting) | SDXL Inpainting 0.1 `diffusers/stable-diffusion-xl-1.0-inpainting-0.1` | CreativeML Open RAIL++-M (2023-07-26), see `model-licences.md` | Colab GPU (`job retouch`) | revision resolved and recorded by the notebook |
 | Retouch masks | CLIPSeg `CIDAS/clipseg-rd64-refined` | Apache-2.0 | Colab GPU (`job retouch`) | revision resolved and recorded by the notebook |
+| Touch-up (box repaint) | OpenCV `opencv-python-headless` (inpaint Telea/NS, colour, fill, clone) | Apache-2.0 | container CPU (`eav touchup`) | `software/requirements-touchup.txt` |
 | Film motion, mix, assembly, QC | ffmpeg, NumPy, Pillow | LGPL/GPL tools, BSD, HPND | container | `eav.film`, `eav.mix`, `eav.reel`, `eav.qc` |
 
 ## Forbidden

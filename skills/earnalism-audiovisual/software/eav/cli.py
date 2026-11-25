@@ -27,7 +27,10 @@
                          [--account <id> --bucket <name>]   (downloads outputs.tar, then import)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
   python3 -m eav.cli close <job_id> --root <dir> --units <CU Colab shows> --reason "<what happened>"
-  python3 -m eav.cli pick --root <dir> --job <stills|retouch job id> --choices <{"<key>": N} json file>
+  python3 -m eav.cli touchup --root <dir> --film N --spec <touchup.json> --job-id <id>
+                         (local OpenCV repaint of hand-placed boxes of imported stills: inpaint,
+                         recolor, fill, clone; one <key>--c1 candidate + <key>--mask per item)
+  python3 -m eav.cli pick --root <dir> --job <stills|retouch|touchup job id> --choices <{"<key>": N} json file>
                          (after review: one candidate per <key>--cN still; film uses only picks)
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
@@ -63,6 +66,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
+from . import touchup
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, unit_anchors, voice_units
@@ -83,6 +87,8 @@ LOOP_MIN = 0.8
 HOOK_ONSET_MAX_S = 0.2
 MP3_END_SLACK_MS = 50
 TAKE_JOB = "narration_take"   # artifact kind of an imported ElevenLabs take job (its manifest)
+TOUCHUP_JOB = "touchup_job"   # artifact kind of a local touch-up job (its manifest)
+TOUCHUP_SCHEMA = "earnalism.audiovisual-touchup.v1"
 TAKE_ENGINES = {"elevenlabs": ("eleven_v3",)}  # owner decision 2026-11-24
 TAKE_AUDIO = (".mp3", ".wav")
 TAKE_SCHEMA = "earnalism.audiovisual-take-import.v1"
@@ -198,11 +204,11 @@ def _jobs(rec) -> list:
                           ("job", "superseding"), ("job", "closing"))}
     out = []
     for a in rec.data["artifacts"]:
-        if a["kind"] not in ("colab_job", TAKE_JOB):
+        if a["kind"] not in ("colab_job", TAKE_JOB, TOUCHUP_JOB):
             continue
         m = a["meta"]
         jid = m["job_id"]
-        colab = a["kind"] == "colab_job"  # an imported take has no notebook or inputs zip
+        colab = a["kind"] == "colab_job"  # an imported take or touch-up has no notebook or zip
         out.append({"job_id": jid, "kind": m["job_kind"], "target": targets.get(jid),
                     "engine": details.get(jid, {}).get("engine", "parler"),
                     "order": order.get(jid, -1),
@@ -1264,7 +1270,8 @@ def cmd_film(args):
 _CANDIDATE = re.compile(r"(?P<key>.+)--c(?P<n>[1-9][0-9]*)$")
 
 
-PICK_KINDS = ("stills", "retouch")  # jobs whose <key>--cN candidates are picked
+PICK_KINDS = ("stills", "retouch", "touchup")  # jobs whose <key>--cN candidates are picked
+PATCH_KINDS = ("retouch", "touchup")  # always patches of picked candidates; never a base
 
 
 def _stills_files(rec, job_id, kind="stills") -> dict:
@@ -1289,14 +1296,14 @@ def _latest_pick(rec, job_id):
 
 
 def cmd_pick(args):
-    """Record the reviewer's choice among a stills or retouch job's candidates (<key>--cN images;
-    a retouch job's <key>--mask is for review only and never a candidate)."""
+    """Record the reviewer's choice among a stills, retouch or touchup job's candidates (<key>--cN
+    images; a retouch or touchup job's <key>--mask is for review only and never a candidate)."""
     rec = _record(args.root)
     job = next((j for j in _jobs(rec) if j["job_id"] == args.job), None)
     if job is None or job["kind"] not in PICK_KINDS or not job["imported"] or _ended(job):
         raise Stop(f"{args.job} is not an imported stills job",
-                   f"{PROG} status --root {rec.root}; pick names an imported stills or retouch job "
-                   "with candidates")
+                   f"{PROG} status --root {rec.root}; pick names an imported stills, retouch or "
+                   "touchup job with candidates")
     cands = _candidate_files(_stills_files(rec, args.job, job["kind"]))
     if not cands:
         raise Stop(f"stills job {args.job} has no candidate files (<key>--cN.png)",
@@ -1332,19 +1339,162 @@ def cmd_pick(args):
           + ". The film uses only these candidates; a later pick replaces this one.")
 
 
+def _touchup_items(rec, t, spec) -> list:
+    """Validate a touchup spec against the record: [(key, job, kind, name, path, sha256, ops)]."""
+    sources = {j["job_id"]: j["kind"] for j in _jobs(rec) if j["kind"] in ("stills", "retouch")
+               and j["target"] == t and j["imported"] and not _ended(j)}
+    recorded = {a["path"]: a["sha256"] for a in rec.data["artifacts"]
+                if a["kind"] in ("stills", "retouch") and a["meta"].get("job_id") in sources}
+    film_keys = {colab_jobs.CANDIDATE_SUFFIX.sub("", Path(a["path"]).stem)
+                 for a in rec.data["artifacts"] if a["kind"] == "stills"
+                 and sources.get(a["meta"].get("job_id")) == "stills"}
+    if not film_keys:
+        raise Stop(f"{t} has no imported stills to touch up", next_action(rec.root))
+    items = spec.get("items") if isinstance(spec, dict) else None
+    if not isinstance(items, list) or not items:
+        raise Stop("the touchup spec needs items: [{key, source: {job, file}, ops}]",
+                   "Fix the spec per references/visual-style.md (Touch-up)")
+    out, seen = [], set()
+    for s in items:
+        key = s.get("key") if isinstance(s, dict) else None
+        if not isinstance(key, str) or colab_jobs.CANDIDATE_SUFFIX.search(key) or key.endswith("--mask"):
+            raise Stop(f"touchup key {key!r} must be a still key (no --cN or --mask)", "Fix the spec")
+        if key in seen:
+            raise Stop(f"touchup key {key!r} appears twice; one item per still", "Fix the spec")
+        seen.add(key)
+        if key not in film_keys:
+            raise Stop(f"touchup key {key!r} is not a still of {t}", "Fix the spec")
+        src = s.get("source") or {}
+        job, name = src.get("job"), src.get("file")
+        if job not in sources:
+            raise Stop(f"touchup {key!r}: source job {job!r} is not an imported stills or retouch job "
+                       f"of {t}", f"{PROG} status --root {rec.root}")
+        kind = sources[job]
+        rel = f"{kind}/{job}/{name}"
+        if not isinstance(name, str) or Path(name).name != name or rel not in recorded \
+                or name.endswith("--mask.png"):
+            raise Stop(f"touchup {key!r}: {name!r} is not a recorded still of {kind} job {job}",
+                       "Name a recorded <key>.png or <key>--cN.png of that job")
+        if colab_jobs.CANDIDATE_SUFFIX.sub("", Path(name).stem) != key:
+            raise Stop(f"touchup {key!r}: source {name!r} is another still's file", "Fix the spec")
+        path = rec.root / rel
+        digest = sha256_file(path) if path.is_file() else None
+        if digest != recorded[rel]:
+            raise Stop(f"touchup {key!r}: {rel} sha256 {str(digest)[:12]} differs from the record's "
+                       f"{recorded[rel][:12]}; the still changed since import", "Restore the imported file")
+        out.append((key, job, kind, name, path, digest, s.get("ops")))
+    return out
+
+
+def cmd_touchup(args):
+    """Repaint small defects in hand-placed boxes of imported stills (OpenCV, local, no model):
+    one <key>--c1.png candidate and one <key>--mask.png (review only) per item, filed as an
+    imported touchup job so pick and film treat it exactly like a retouch job."""
+    import numpy as np
+    from PIL import Image
+
+    rec = _record(args.root)
+    t = _film_target(args.film)
+    spec = _json(args.spec)
+    job_id = args.job_id
+    if not SLUG.fullmatch(job_id or "") or any(j["job_id"] == job_id for j in _jobs(rec)):
+        raise Stop(f"job id {job_id!r} is not new or not lowercase letters, digits and hyphens",
+                   "Pass a new --job-id")
+    items = _touchup_items(rec, t, spec)
+    dest, job_dest = rec.root / "touchup" / job_id, rec.root / "jobs" / job_id
+    if dest.exists() or job_dest.exists():
+        raise Stop(f"{dest} or {job_dest} already exists", "Pass a new --job-id")
+    try:
+        version = touchup.opencv_version()
+    except ValueError as e:
+        raise Stop(str(e), "pip install -r skills/earnalism-audiovisual/software/requirements-touchup.txt")
+    stage = Path(tempfile.mkdtemp(dir=rec.root, prefix=".touchup-"))
+    try:
+        (stage / "out").mkdir()
+        (stage / "job").mkdir()
+        rows = []
+        for key, job, kind, name, path, digest, ops in items:
+            with Image.open(path) as im:
+                img = np.asarray(im.convert("RGB"))
+            try:
+                edited, mask = touchup.apply(img, ops)
+            except ValueError as e:
+                raise Stop(f"touchup {key!r}: {e}", "Fix the item's ops") from None
+            Image.fromarray(edited, "RGB").save(stage / "out" / f"{key}--c1.png")
+            Image.fromarray(mask, "L").save(stage / "out" / f"{key}--mask.png")
+            rows.append({"key": key, "source_job": job, "source_kind": kind, "source_file": name,
+                         "source": f"{kind}/{job}/{name}", "source_sha256": digest, "ops": ops,
+                         "candidate": f"touchup/{job_id}/{key}--c1.png",
+                         "candidate_sha256": sha256_file(stage / "out" / f"{key}--c1.png"),
+                         "mask": f"touchup/{job_id}/{key}--mask.png",
+                         "mask_sha256": sha256_file(stage / "out" / f"{key}--mask.png")})
+        _write_json(stage / "job" / "touchup.json", spec)
+        manifest = {"schema": TOUCHUP_SCHEMA, "job_id": job_id, "target": t, "kind": "touchup",
+                    "engine": "opencv", "opencv": version, "method": "eav.touchup.apply",
+                    "spec_sha256": sha256_file(stage / "job" / "touchup.json"), "items": rows}
+        _write_json(stage / "job" / "touchup-manifest.json", manifest)
+    except BaseException:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise
+    snapshot = (list(rec.data["artifacts"]), list(rec.data["events"]))
+    parents = {p: p.exists() for p in (dest.parent, job_dest.parent)}
+    try:  # all or nothing: files and record rows
+        for p in parents:
+            p.mkdir(parents=True, exist_ok=True)
+        (stage / "out").rename(dest)
+        (stage / "job").rename(job_dest)
+        meta = {"job_id": job_id, "job_kind": "touchup", "engine": "opencv", "opencv": version}
+        rec.add_artifact(TOUCHUP_JOB, job_dest / "touchup-manifest.json",
+                         {**meta, "forecast_units": 0.0,
+                          "manifest": f"jobs/{job_id}/touchup-manifest.json"})
+        rec.add_artifact("touchup_spec", job_dest / "touchup.json", meta)
+        rec.event("cli", "job_target", {"job_id": job_id, "target": t, "kind": "touchup",
+                                        "engine": "opencv"})
+        arts = []
+        for r in rows:
+            src = {"key": r["key"], "source": r["source"], "source_sha256": r["source_sha256"]}
+            arts.append(rec.add_artifact("touchup", rec.root / r["candidate"],
+                                         {**meta, **src, "ops": r["ops"]}))
+            arts.append(rec.add_artifact("touchup_mask", rec.root / r["mask"], {**meta, **src}))
+        for a, want in zip(arts, [h for r in rows for h in (r["candidate_sha256"], r["mask_sha256"])]):
+            if a["sha256"] != want:
+                raise Stop(f"{a['path']} changed while filing", "Rerun touchup with a new --job-id")
+        rec.event("import", "accepted", {"job_id": job_id, "kind": "touchup", "actual_units": 0,
+                                         "engine": "opencv", "opencv": version,
+                                         "manifest_sha256": sha256_file(job_dest / "touchup-manifest.json"),
+                                         "files": [a["path"] for a in arts]})
+    except BaseException:
+        try:
+            rec.rollback(snapshot)
+        finally:
+            for p in (dest, job_dest, stage):
+                shutil.rmtree(p, ignore_errors=True)
+            for p, existed in parents.items():
+                if not existed:
+                    try:
+                        p.rmdir()
+                    except OSError:
+                        pass
+        raise
+    shutil.rmtree(stage, ignore_errors=True)
+    print(f"Touched up {len(rows)} still(s) of {t} as job {job_id} (OpenCV {version}, 0 CU): "
+          + ", ".join(r["key"] for r in rows) + ". Open every <key>--c1.png and <key>--mask.png at "
+          f"full size, then {PROG} pick --root {rec.root} --job {job_id} --choices <json>.")
+
+
 def _film_stills(rec, t, out):
     """The film's stills: the latest complete stills job, with any later imported job whose
     keys are all already in it applied as a patch (it replaces just those stills, e.g. one
     character regenerated). A candidates job (<key>--cN files) is never a base: it patches only
-    its picked candidates, renamed to <key>, and contributes nothing until picked. A retouch job
-    is always such a patch (its <key>--mask files never enter the film). Linked into
+    its picked candidates, renamed to <key>, and contributes nothing until picked. A retouch or
+    touchup job is always such a patch (its <key>--mask files never enter the film). Linked into
     film/<t>/stills so the film reads one folder."""
     jobs = []
     for j in _jobs(rec):
         if j["kind"] in PICK_KINDS and j["target"] == t and j["imported"] and not _ended(j):
             files = _stills_files(rec, j["job_id"], j["kind"])
             cands = _candidate_files(files)
-            if j["kind"] == "retouch":
+            if j["kind"] in PATCH_KINDS:
                 files, cands = {}, cands or {"": {}}  # picks only; never a base or a whole job
             jobs.append((j, files, cands))
     base = None
@@ -1809,7 +1959,7 @@ def cmd_bundle_film(args):
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take,
-            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick,
+            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "touchup": cmd_touchup,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio,
@@ -1878,8 +2028,13 @@ def _parser():
     s.add_argument("--units", type=float, required=True, help="the CU Colab shows the run used")
     s.add_argument("--reason", required=True)
     s = add("pick", help="choose one candidate per redone still after review")
-    s.add_argument("--job", required=True, help="the imported stills or retouch job with <key>--cN candidates")
+    s.add_argument("--job", required=True,
+                   help="the imported stills, retouch or touchup job with <key>--cN candidates")
     s.add_argument("--choices", required=True, help='JSON file {"<key>": <candidate number>, ...}')
+    s = add("touchup", help="repaint small defects in hand-placed boxes of imported stills (local)")
+    s.add_argument("--film", type=int, required=True)
+    s.add_argument("--spec", required=True, help='{"items": [{"key", "source": {"job", "file"}, "ops"}]}')
+    s.add_argument("--job-id", required=True)
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)

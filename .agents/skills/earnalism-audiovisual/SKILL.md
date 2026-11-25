@@ -58,6 +58,11 @@ with open-licence SDXL inpainting (CLIPSeg masks; the notebook refuses a model c
 It returns `<key>--cN.png` candidates plus `<key>--mask.png` for review → `import` → `pick --job
 <retouch job>` → `film` patches the pick; masks never enter the film (visual style, Retouch).
 
+Touch-up (small, local defects a mask query keeps missing): `touchup --film N --spec touchup.json
+--job-id ID` repaints hand-placed boxes locally with OpenCV (inpaint, recolor, fill, clone; no
+model, no Colab) → `<key>--c1.png` + `<key>--mask.png` → open both at full size → `pick --job ID`
+→ `film` patches the pick (visual style, Touch-up).
+
 Recipes: [film](references/film-recipe.md), [house visual style](references/visual-style.md), [reels](references/reel-recipe.md),
 [voice](references/earnalism-voice.md), [free stack](references/free-stack.md),
 [budget](references/compute-budget.md), [record](references/production-record.md),
@@ -88,7 +93,7 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
   kept). Candidates never voice production. No impersonation, no spoken stage directions.
   ElevenLabs route: the owner-picked voice of the title, one tagged-script take per scene,
   `import-take` (refuses any script whose words differ from the book).
-- **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0), SDXL inpainting 0.1 + CLIPSeg (retouch) and
+- **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0), SDXL inpainting 0.1 + CLIPSeg (retouch), OpenCV (touch-up) and
   VCSL samples (CC0). MusicGen (CC-BY-NC weights) and FLUX.1-dev (non-commercial) are
   forbidden even if the owner names them; offer the licensed equivalent instead.
   No paid generator or credit-spending connector (Kling, Suno, Runway, Adobe/Canva

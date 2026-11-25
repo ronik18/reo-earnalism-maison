@@ -50,6 +50,16 @@ for this skill's use, not legal advice.
 Masks are internal working files, never published. Apache-2.0 allows commercial use. Its notice
 obligations attach to redistributing the model or its source, which we do not do.
 
+## OpenCV (Apache-2.0): touch-up
+
+`eav touchup` uses `opencv-python-headless` (Apache-2.0 since OpenCV 4.5.0; the wheel bundles
+FFmpeg and other libraries under their own permissive or LGPL licences, which we do not
+redistribute). It is a library run in our container, not a generative model: no weights, no use
+restrictions, no attribution on outputs. The Telea and Navier-Stokes inpainting algorithms are
+patent-free. Touch-up follows the same child-depiction rule as retouch: only restore the story's
+described dress or bare skin (a plain white sari edge, a bare forehead, earlobes or wrists), never
+alter a child's body, and never in a way that sexualises, demeans or endangers a child.
+
 ## How the record and clearance carry this
 
 - Each retouch job records the model repos, resolved revisions and the card licence

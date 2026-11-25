@@ -1,0 +1,1 @@
+opencv-python-headless==5.1.0.95  # Apache-2.0; eav touchup (references/free-stack.md)

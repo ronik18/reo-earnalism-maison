@@ -84,6 +84,41 @@ masked regions; every pixel outside the mask stays the source's own.
   exactly as for stills. `film` patches only the picked candidate over the base, as `<key>.png`;
   masks never enter the film; an unpicked retouch job adds nothing.
 
+## Touch-up: repaint a small defect locally, in hand-placed boxes
+
+When the forbidden detail is small and local (a bindi dot, ear or nose studs, bangles, a coloured
+sari edge, a moustache on a cel-shaded face, wires or a pole against sky, corner text, out-of-season
+fruit, a stray small object) and text-prompted masks keep missing it, touch it up locally (owner
+decision 25 November 2026): OpenCV (`opencv-python-headless`, Apache-2.0) on the CPU, no model, no
+Colab, no randomness. Install with `pip install -r software/requirements-touchup.txt`.
+
+- Spec (`touchup --root R --film N --spec touchup.json --job-id ID`):
+
+  ```json
+  {"items": [{"key": "f01s007-4",
+              "source": {"job": "retouch-film-01-r9", "file": "f01s007-4--c1.png"},
+              "ops": [{"op": "inpaint", "box": [395, 305, 420, 335], "radius": 5},
+                      {"op": "inpaint", "box": [600, 300, 660, 350], "radius": 3,
+                       "mask": "color", "target": "#C8323C", "tol": 60},
+                      {"op": "recolor", "box": [500, 510, 620, 768], "lightness": "shade",
+                       "from": {"hue": [330, 30], "sat_min": 0.25}, "to": "#F4F1EA"},
+                      {"op": "fill", "box": [0, 0, 1344, 120], "sample": [40, 60]},
+                      {"op": "clone", "box": [960, 0, 1100, 300], "from": [-160, 0]}]}]}
+  ```
+
+  The source is a recorded file of an imported stills or retouch job of that film whose sha256
+  matches the record; `key` is that still's key. Boxes are `[x0, y0, x1, y1]` in source pixels.
+  `mask`: `box` (default), `ellipse` (inscribed) or `color` (`target` + `tol` RGB distance,
+  `grow` px). `feather` (default 3 px) blends each edit inside its box; every pixel outside all
+  boxes stays byte-identical. Hues are degrees (h0 > h1 wraps through red), `sat_min` is chroma
+  0-1. `recolor` keeps lightness; `"lightness": "shade"` lifts to the target and keeps folds.
+- Output: `touchup/<ID>/<key>--c1.png` plus `<key>--mask.png`; the record holds the spec, the ops
+  and the sha256 of every source and output. Open both at full size: the defect must be gone,
+  the repair invisible (no smear, seam or colour patch) and faces intact. Then `pick --job <ID>`;
+  `film` patches only the pick; masks never enter the film.
+- Not for composition, scale, time of day, wrong characters or anatomy: regenerate those.
+  Child characters: only restore the story's described dress and bare skin (model-licences.md).
+
 ## What still needs a human look after import
 
 The style does not fix content. Check every imported still at full size for:
