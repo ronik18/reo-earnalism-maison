@@ -75,6 +75,18 @@ def candidate(summary):
     return review.post_candidate_sha256(summary)
 
 
+def make_live_edition(slug='a', live=True):
+    from library.models import Edition, Revision, Work
+    work = Work.objects.create(slug=f'work-{slug}', title='T', creators=['A'])
+    edition = Edition.objects.create(work=work, slug=slug, locale='bn')
+    revision = Revision.objects.create(edition=edition, title='T', content_sha256='b' * 64,
+                                       state='live' if live else 'draft', published_at=timezone.now() if live else None)
+    if live:
+        edition.live_revision = revision
+        edition.save(update_fields=['live_revision'])
+    return edition
+
+
 def make_user(email, *, staff=True, verified=True, perm=True):
     user = User.objects.create_user(email, PASSWORD, is_staff=staff, is_verified=verified)
     if perm:
@@ -177,6 +189,7 @@ class ReviewQueueTests(TestCase):
             self.assertEqual(ctx.exception.code, 'REVIEW_HASH_INVALID')
 
     def test_standing_checks_fail_closed(self):
+        make_live_edition('a')
         with override_settings(MAISON_REVIEW_STANDING_FROM=STANDING):
             clearance, _ = self.file_item('clearance', slug='a')
             review.decide(self.owner, [clearance.pk], 'approved')
@@ -204,15 +217,19 @@ class ReviewQueueTests(TestCase):
     def test_standing_post_requires_passing_checks(self):
         with override_settings(MAISON_REVIEW_STANDING_FROM=STANDING):
             self.assertEqual(self.post('p0').status, 'pending')
-            self.assertEqual(review.auto_checks(ReviewItem.objects.get(ref='social/a/p0')), ['EDITION_NOT_CLEARED'])
+            self.assertEqual(review.auto_checks(ReviewItem.objects.get(ref='social/a/p0')), ['EDITION_NOT_CLEARED', 'EDITION_NOT_LIVE'])
             clearance, _ = self.file_item('clearance', slug='a')
             review.decide(self.owner, [clearance.pk], 'approved')
+            self.assertEqual(self.post('p00').status, 'pending')
+            self.assertEqual(review.auto_checks(ReviewItem.objects.get(ref='social/a/p00')), ['EDITION_NOT_LIVE'])
+            make_live_edition('a')
             ok = self.post('p1')
             self.assertEqual((ok.status, ok.standing), ('approved', True))
             self.assertIsNone(ok.decided_by)
             self.assertIsNotNone(ok.decided_at)
             for pid, extra, code in [('p2', {'cover_sha256': ''}, 'NO_OWNER_COVER'), ('p3', {'exact_words': False}, 'NOT_EXACT_WORDS'),
-                                     ('p4', {'ai': True}, 'AI_NOT_LABELLED'), ('p5', {'claims': ['best']}, 'HAS_CLAIMS')]:
+                                     ('p4', {'ai': True}, 'AI_NOT_LABELLED'), ('p5', {'claims': ['best']}, 'HAS_CLAIMS'),
+                                     ('p8', {'sponsored': True}, 'SPONSORED'), ('p9', {'new_author': True}, 'NEW_AUTHOR')]:
                 bad = self.post(pid, **extra)
                 self.assertEqual(bad.status, 'pending', pid)
                 self.assertEqual(review.auto_checks(bad), [code])
@@ -265,7 +282,21 @@ class ReviewQueueTests(TestCase):
         url = reverse('web:staff-review', args=['en'])
         self.assertEqual(client.post(url, {'item': [str(item.pk)], 'decision': 'approved'}).status_code, 403)
 
+    def test_standing_exclusions_fail_closed_on_missing_flags(self):
+        make_live_edition('a')
+        clearance, _ = self.file_item('clearance', slug='a')
+        review.decide(self.owner, [clearance.pk], 'approved')
+        for drop, code in (('sponsored', 'SPONSORED'), ('new_author', 'NEW_AUTHOR')):
+            summary = post_summary(self.base, 'x-' + drop)
+            summary.pop(drop)
+            self.assertEqual(review.auto_checks(ReviewItem(kind='post', summary=summary)), [code])
+        draft_only = post_summary(self.base, 'x-draft', edition='draft-only')
+        make_live_edition('draft-only', live=False)
+        ReviewItem.objects.filter(pk=clearance.pk).update(summary={'edition_slug': 'draft-only'})
+        self.assertEqual(review.auto_checks(ReviewItem(kind='post', summary=draft_only)), ['EDITION_NOT_LIVE'])
+
     def test_weekly_report_marks_standing_items(self):
+        make_live_edition('a')
         with override_settings(MAISON_REVIEW_STANDING_FROM=STANDING):
             clearance, _ = self.file_item('clearance', slug='a')
             review.decide(self.owner, [clearance.pk], 'approved')

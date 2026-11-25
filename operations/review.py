@@ -8,7 +8,8 @@ summary names. `queue` validates the post summary schema (POST_SUMMARY) and requ
 approval and refuses REVIEW_ITEM_CHANGED if the bundle moved on; post_approved checks it again before any provider call.
 
 Standing permission (settings.MAISON_REVIEW_STANDING_FROM, two months after the first batch) may auto-approve
-only `post` items for editions with an approved clearance that pass every automatic check.
+only `post` items for live editions with an approved clearance that pass every automatic check; sponsored items and
+new authors always wait (a missing flag counts as not passing).
 """
 import hashlib
 import json
@@ -55,6 +56,9 @@ def auto_checks(item):
     slug = summary.get('edition_slug')
     if not slug or not ReviewItem.objects.filter(kind='clearance', status='approved', summary__edition_slug=slug).exists():
         failures.append('EDITION_NOT_CLEARED')
+    from library.models import Edition
+    if not slug or not Edition.objects.filter(slug=slug, live_revision__state='live').exists():
+        failures.append('EDITION_NOT_LIVE')
     if not summary.get('cover_sha256'):
         failures.append('NO_OWNER_COVER')
     if summary.get('exact_words') is not True:
@@ -64,6 +68,11 @@ def auto_checks(item):
         failures.append('AI_NOT_LABELLED')
     if 'claims' not in summary or summary['claims']:
         failures.append('HAS_CLAIMS')
+    # New authors and sponsored items always wait for the owner (spec 5.5); a missing flag waits too.
+    if summary.get('sponsored') is not False:
+        failures.append('SPONSORED')
+    if summary.get('new_author') is not False:
+        failures.append('NEW_AUTHOR')
     return failures
 
 
