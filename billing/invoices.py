@@ -42,7 +42,7 @@ def invoice_data(row):
     # Historical paid totals stay intact after refunds; only explicit allocations
     # and processed refund records determine the derived current refund state.
     allocations=sorted(row.paymentallocation_set.all(),key=lambda allocation:(allocation.payment.captured_at,allocation.pk))
-    owner_id=row.order.user_id if row.order_id else row.subscription.user_id
+    owner_id=row.order.user_id if row.order_id else (row.subscription.user_id if row.subscription_id else None)  # institution invoices have no member owner; any allocation fails reconciliation
     allocated=0;paid_at=None;refunded=0
     for allocation in allocations:
         payment=allocation.payment
