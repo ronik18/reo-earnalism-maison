@@ -18,6 +18,7 @@ Last updated: 25 Nov 2026.
 - [ ] **Say which approved titles to publish.** Standing instruction (25 Nov): publish every title that is ready. Ready means its clearance and cover are approved, it passes browser acceptance and it is deployed. ক্ষুধিত পাষাণ published 25 Nov; each title you approve on the Monday page follows.
 
 ## Assets
+- [ ] **Check two clauses in ক্ষুধিত পাষাণ against the 1895 scan** (published text follows the proofread transcription): open https://bn.wikisource.org/wiki/পাতা:গল্প-দশক_-_রবীন্দ্রনাথ_ঠাকুর.pdf/১৭৬ and see whether the printed line reads “…কখনো এখানে রাত্রিযাপন করিবেন।” or “…করিবেন না।” (later printings have “না”). A second likely case is “জানি” (probably “জানি না”) later in the story. If the scan has “না”, tell Claude: the transcription gets corrected and a revised edition goes to the Monday page.
 - Covers already in your Cloudinary for later titles (no action needed): কাবুলিওয়ালা, পোস্টমাস্টার, ছুটি.
 - [ ] **কাবুলিওয়ালা early scan:** open https://icvtesting.nvli.in/rarebooks/galapagaucacha-1ma-khanada from India; if a PDF/page images appear, put the file in Google Drive and share the path.
 
