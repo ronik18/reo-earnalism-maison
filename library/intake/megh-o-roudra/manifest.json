@@ -1,0 +1,32 @@
+{
+ "schema": "earnalism.book_import_manifest.v1",
+ "project_id": "megh-o-roudra-wikisource-20261125",
+ "work": {
+  "slug": "megh-o-roudra",
+  "title": "মেঘ ও রৌদ্র",
+  "creators": [
+   "রবীন্দ্রনাথ ঠাকুর"
+  ],
+  "house": "golpo"
+ },
+ "edition": {
+  "slug": "megh-o-roudra",
+  "language": "bn",
+  "title": "মেঘ ও রৌদ্র",
+  "description": "গ্রামের মেয়ে গিরিবালা আর পড়ুয়া শশিভূষণ — বৃষ্টির দিনে শুরু হওয়া এক নীরব বন্ধুত্ব, যার ওপর মেঘ আর রৌদ্রের মতোই পালা করে নেমে আসে আলো আর ছায়া।"
+ },
+ "source": {
+  "sha256": "555131fb22a5e80900fd60e6c9a292a96c5fbefa90d24757b7b61eaccd0acd44",
+  "bytes": 140025,
+  "content_type": "application/json",
+  "format": "earnalism.book_source.v1"
+ },
+ "provenance": {
+  "source_ref": "https://bn.wikisource.org/w/index.php?title=%E0%A6%95%E0%A6%A5%E0%A6%BE-%E0%A6%9A%E0%A6%A4%E0%A7%81%E0%A6%B7%E0%A7%8D%E0%A6%9F%E0%A6%AF%E0%A6%BC/%E0%A6%AE%E0%A7%87%E0%A6%98%20%E0%A6%93%20%E0%A6%B0%E0%A7%8C%E0%A6%A6%E0%A7%8D%E0%A6%B0&oldid=1624595",
+  "source_edition": "Katha-Chatushtay (কথা-চতুষ্টয়), Calcutta: Sahitya-Jantra, printed by Jagneshwar Ghosh, published by Kalidas Chakravarti, 1301 BS (1894); sole author Rabindranath Tagore. Validated (level 4) Wikisource scan pages with recorded page revisions; conversion rules as recorded for the Galpa-Dashak packets, plus the কথা-চতুষ্টয় opening page (collection name, story title and decorative scan ornaments dropped; the first section heading kept); no page-end hyphens. Scan pages 86-134 (page 135 holds only the printer's imprint and page 136 is blank, so neither is story text); the closing marker সমাপ্ত। is dropped like সম্পূর্ণ।. The author's one footnote (scan page 101) is kept as a note block directly after its paragraph; the song continued over scan pages 130-131 is one verse block; centred sung lines are verse.",
+  "rights_note": "রবীন্দ্রনাথ ঠাকুর died 1941; first published 1894. Term screen verdict for 2026: screen_pass. Wikisource transcription layer reused under CC BY-SA 4.0 with attribution; ShareAlike applies to the delivered transcription only. Draft: owner approval of the clearance record and a cover with owner-held provenance are still required.",
+  "rights_evidence_refs": [
+   "reo-earnalism-maison:docs/evidence/publication-clearance-megh-o-roudra-draft.json"
+  ]
+ }
+}

@@ -53,6 +53,19 @@ class SourceValidationTests(unittest.TestCase):
         self.assertEqual(proof["normalized_paragraphs"], 1)
         self.assertEqual(proof["original_source_sha256"], manifest["source"]["sha256"])
 
+    def test_note_follows_a_paragraph_or_verse_only(self):
+        ok = [{"kind": "paragraph", "text": "One."}, {"kind": "note", "text": "Author's note."},
+              {"kind": "verse", "text": "a\nb"}, {"kind": "note", "text": "Second note."}]
+        source, *_ = fixture(self.root, paragraphs=ok)
+        self.assertEqual(validate_source(source)["units"][0]["paragraphs"][1]["kind"], "note")
+        for bad in ([{"kind": "note", "text": "First."}],
+                    [{"kind": "heading", "text": "H"}, {"kind": "note", "text": "N"}],
+                    [{"kind": "paragraph", "text": "P"}, {"kind": "note", "text": "N"}, {"kind": "note", "text": "M"}]):
+            source["units"][0]["paragraphs"] = bad
+            with self.subTest(bad=[p["kind"] for p in bad]), self.assertRaises(SourceError) as caught:
+                validate_source(source)
+            self.assertEqual(str(caught.exception), "SOURCE_NOTE_PLACEMENT_INVALID")
+
     def test_duplicate_keys_nonfinite_and_unpaired_surrogate_fail(self):
         for raw in (b'{"schema":"a","schema":"b"}', b'{"x":NaN}',
                 b'{"schema":"earnalism.book_source.v1","language":"en","units":[{"key":"x","title":"x","kind":"chapter","paragraphs":[{"kind":"paragraph","text":"\\ud800"}]}]}'):

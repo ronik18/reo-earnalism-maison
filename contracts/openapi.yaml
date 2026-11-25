@@ -19165,7 +19165,8 @@
             "enum": [
               "paragraph",
               "heading",
-              "verse"
+              "verse",
+              "note"
             ]
           },
           "ordinal": {
@@ -26599,7 +26600,8 @@
             "enum": [
               "paragraph",
               "heading",
-              "verse"
+              "verse",
+              "note"
             ]
           },
           "text": {
