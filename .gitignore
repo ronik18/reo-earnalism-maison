@@ -26,3 +26,4 @@ production/audiovisual/*/film/*/*.wav
 production/audiovisual/*/film/*/*.mp4
 production/audiovisual/*/film/*/stills/
 production/audiovisual/*/takes/audio/
+production/audiovisual/*/.record.lock
