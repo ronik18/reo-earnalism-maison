@@ -13,7 +13,7 @@ class SignInRateLimitMessageTests(TestCase):
         response = self.client.post('/en/sign-in/', {'email': 'limited@example.test', 'password': 'Original-Limited-Passphrase-47', **PASSWORD})
         self.assertEqual(response.status_code, 429)
         import re
-        alert = re.search(r'role="alert">([^<]*)<', response.content.decode())
+        alert = re.search(r'role="alert"[^>]*>([^<]*)<', response.content.decode())
         self.assertIsNotNone(alert, 'the page shows an alert, not raw JSON')
         self.assertEqual(alert[1], 'Too many sign-in attempts. Wait a few minutes and try again.')
         self.assertTrue(response['Content-Type'].startswith('text/html'))
@@ -23,7 +23,7 @@ class GoogleAdultDeclarationMessageTests(TestCase):
     def test_sign_in_page_explains_missing_adult_declaration(self):
         response = self.client.get('/en/sign-in/', {'google_error': 'adult_declaration_required'})
         import re
-        alert = re.search(r'role="alert">([^<]*)<', response.content.decode())
+        alert = re.search(r'role="alert"[^>]*>([^<]*)<', response.content.decode())
         self.assertIsNotNone(alert)
         self.assertEqual(alert[1], 'Please confirm that you are 18 or older to create an account here.')
 
