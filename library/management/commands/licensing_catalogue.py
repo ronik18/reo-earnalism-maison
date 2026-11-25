@@ -3,6 +3,7 @@
   python manage.py licensing_catalogue --out catalogue.csv [--replace]
 """
 import csv
+import os
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
@@ -22,8 +23,13 @@ class Command(BaseCommand):
         if path.exists() and not replace:
             raise CommandError(f'{path} exists; pass --replace to overwrite.')
         rows = licensing_rows()
-        with path.open('w', encoding='utf-8', newline='') as fh:
-            writer = csv.DictWriter(fh, fieldnames=COLUMNS)
-            writer.writeheader()
-            writer.writerows(rows)
+        tmp = path.with_name(path.name + '.tmp')
+        try:
+            with tmp.open('w', encoding='utf-8', newline='') as fh:
+                writer = csv.DictWriter(fh, fieldnames=COLUMNS)
+                writer.writeheader()
+                writer.writerows(rows)
+            os.replace(tmp, path)  # a failed write leaves any previous export intact
+        finally:
+            tmp.unlink(missing_ok=True)
         self.stdout.write(f'{len(rows)} editions written to {path}')

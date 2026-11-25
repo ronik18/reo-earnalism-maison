@@ -2,6 +2,7 @@ import csv
 import io
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 from django.conf import settings
 from django.core.management import call_command
@@ -72,11 +73,26 @@ class LicensingCatalogueTests(TestCase):
                              sha256='0' * 64, bytes=1, content_type='audio/mpeg', duration_ms=1500)])
         row = self.export('--replace')[0]
         self.assertEqual(row['audio_duration_ms'], '1500')
-        cover = Asset.objects.filter(revision=rev, kind='cover', state='ready').first()
-        if cover:
-            self.assertTrue(row['cover_url'].endswith(f'/api/v1/content/covers/{cover.pk}'))
-        else:
-            self.assertEqual(row['cover_url'], '')
+        cover = Asset.objects.get(revision=rev, kind='cover', state='ready')
+        self.assertTrue(row['cover_url'].endswith(f'/api/v1/content/covers/{cover.pk}'))
+
+    @override_settings(LOCAL=False, PUBLIC_BASE_URL='')
+    def test_unset_public_origin_gives_blank_cover_not_failure(self):
+        self.translate('ai_edited', 'Rina Das')
+        row = self.export()[0]
+        self.assertEqual(row['cover_url'], '')
+        self.assertEqual(row['edition_slug'], self.en.slug)
+
+    def test_failed_replace_keeps_old_export(self):
+        self.translate('ai_edited', 'Rina Das')
+        self.export()
+        before = self.out.read_text(encoding='utf-8')
+        with mock.patch('library.management.commands.licensing_catalogue.csv.DictWriter.writerows',
+                        side_effect=OSError('disk')):
+            with self.assertRaises(OSError):
+                self.export('--replace')
+        self.assertEqual(self.out.read_text(encoding='utf-8'), before)
+        self.assertFalse(Path(str(self.out) + '.tmp').exists())
 
     def test_refuses_overwrite_without_replace(self):
         self.translate('ai_edited', 'Rina Das')

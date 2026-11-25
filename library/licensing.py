@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.db.models import Sum
 
+from core.api import DomainError
 from . import services as svc
 from .models import Asset, Edition, Unit
 
@@ -19,9 +20,13 @@ def licensing_rows():
         rev = e.live_revision
         audio_units = Asset.objects.filter(revision=rev, kind='audio_chapter', state='ready',
                                            unit__isnull=False).values('unit')
+        # Unit.duration_ms is the authoritative duration (audio asset duration_ms is not summed).
         total = Unit.objects.filter(revision=rev, pk__in=audio_units,
                                     duration_ms__isnull=False).aggregate(t=Sum('duration_ms'))['t']
-        cover = svc._cover(rev)
+        try:
+            cover = svc._cover(rev)
+        except DomainError:  # public origin not configured: blank cover_url, never abort the export
+            cover = None
         rows.append({'edition_slug': e.slug, 'title': rev.title, 'language': e.locale,
                      'source_edition_slug': e.translated_from.slug, 'source_language': e.translated_from.locale,
                      'editor_credit': e.translation_credit, 'audio_duration_ms': total if total else '',
