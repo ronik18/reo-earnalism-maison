@@ -1,0 +1,85 @@
+{
+  "note": "Round 10: full regeneration of the 10 shots that retouch failed to repair (picker notes .superpowers/sdd/picks-bicharak-r9.md). Composition-first prompts: camera and framing lead, one clear action stated early, the exact head count in frame, time of day and light source stated at the start and the end. World-bible appearance lines repeated word for word. 019-3 is drawn as one dissolve-like image: Kshiroda's large translucent face across the night sky above the small full figure of Hemshashi in white. Seeds are r9 + 900; four candidates per shot.",
+  "items": [
+    {
+      "key": "f01s001-5",
+      "prompt": "Wide full-length shot at dusk, camera low behind her at waist height: exactly one woman, her whole figure from head to bare feet small in the lower middle of the frame, mid-stride walking away down a long brick lane, her face turned back over her shoulder. She is Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, small simple gold stud earrings, bare wrists, faded maroon cotton sari with a thin black border. An 1880s oil-lamp-era lane under a wide open evening sky, plain bare limewashed walls, glowing windows of other homes, gas lamps on wooden posts, a bullock cart resting at the far end. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; deep blue dusk sky, warm gas-lamp light along the lane.",
+      "seed": 3713,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s003-3",
+      "prompt": "Medium close-up at night, lit by one small clay oil lamp on the floor: exactly one woman seated before a plain limewashed wall, her right hand drawing a thin black kohl stick along her lower eyelid, her left hand holding up one small round brass hand mirror, the only mirror in the room, tears on her cheeks. She is Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, small simple gold stud earrings, bare wrists, faded maroon cotton sari with a thin black border. Bare plain wall behind her, simple wooden stool. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; warm oil-lamp glow on her face against deep blue night.",
+      "seed": 3717,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s003-4",
+      "prompt": "Night, cold blue moonlight through a barred window. Seen from directly above: exactly one woman lying flat on her stomach on a bare stone floor of a bolted room, the back of her head toward the camera, her face buried in her folded forearms, her bun come undone, loose glossy black hair spread over the back of her faded maroon cotton sari with a thin black border, bare wrists, exhausted. She is Kshiroda, a 38-year-old Bengali woman. A bolted wooden door at the edge of the frame. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow; cold moonlight on the stone floor.",
+      "seed": 3718,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s003-6",
+      "prompt": "Night, deep blue darkness, a brick lane lit by one gas lamp on a wooden post. Wide shot, exactly two people: on the left, Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, small simple gold stud earrings, bare wrists, faded maroon cotton sari with a thin black border, lunging out of a lamplit doorway, teeth bared, eyes blazing like a tigress, both hands gripping one coconut-rib broom raised high over her head; on the right, one young Bengali dandy in a white dhoti and shawl sprinting away from her in fright down the lane. Plain limewashed walls, dark night sky above. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; black night sky, a single pool of amber gas-lamp light.",
+      "seed": 3719,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s013-4",
+      "prompt": "Medium shot in warm golden afternoon sunlight, a simple sunlit courtyard: exactly two people, one behind the other, both facing the camera. In front, seated cross-legged on a reed mat, Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse. Kneeling close behind her, her mother, a Bengali woman of forty in a plain cotton sari, both of the mother's hands weaving Hemshashi's long black hair into one thick braid. A tender memory. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; warm golden afternoon sunlight across the courtyard.",
+      "seed": 3737,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s013-5",
+      "prompt": "Wide shot in soft warm golden evening light, a plain room with a reed mat: exactly three people. Lying back on the mat, her thin father, a Bengali clerk in a white dhoti, eyes closed, resting. Kneeling beside him, Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, her left hand waving a round stiff palm-leaf hand fan over him, her right hand feeding rice to her small brother, a thin three-year-old Bengali toddler boy with short black hair, seated at her side. A memory. Bengal, 1880s Calcutta. Palette old gold, ivory, faded vermilion; soft warm golden memory light.",
+      "seed": 3738,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s015-1",
+      "prompt": "Night, medium shot inside a cramped wooden horse carriage, black night beyond its small shuttered window; exactly two people on one dark bench. On the right, young Mohit, a 20-year-old Bengali college student, round gold-rimmed spectacles, black hair parted and combed in the Victorian English style, black moustache and short black beard, 1880s Bengali gentleman's frock coat, long and dark with a high stiff white collar over a white shirt, his body turned toward the window, his face in profile gazing out into the night. On the left, Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, facing him, pleading with folded hands. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow; faint amber carriage lamp, black night in the window.",
+      "seed": 3739,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s015-2",
+      "prompt": "Pale dawn, wide shot from far behind: one worn closed box-shaped palki-gari carriage pulled by one horse harnessed in front of it, horse and carriage both moving away from the camera down an unpaved earth country road into pale dawn haze, the back of the carriage nearest to us, a coachman in a white dhoti and turban seated up front, seen from the back. Palm trees and paddy fields on both sides, open countryside, wide pale sky. Bengal, 1880s Calcutta. Palette pale gold, ivory, soft indigo, faded vermilion; pale grey-gold dawn light over the fields.",
+      "seed": 6724,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s015-3",
+      "prompt": "Pale dawn, full-length shot, camera at knee height: exactly one girl, her whole figure from the top of her head to her bare feet in frame, standing alone in a muddy rain-wet earth lane, the hem of her white sari and her bare feet caked with brown mud, puddles at her feet. She is Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse. Plain limewashed walls, a bullock cart far behind. Bengal, 1880s Calcutta. Palette pale gold, ivory, soft indigo, faded vermilion; pale grey-gold dawn light on the wet lane.",
+      "seed": 3740,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s019-3",
+      "prompt": "Night, one dreamlike image like a film dissolve. Small in the lower half, standing in moonlight, the full figure of Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse, frightened and tearful. Large and translucent across the upper half of the night sky, the tearful face of Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, small simple gold stud earrings, bare wrists, faded maroon cotton sari with a thin black border, glowing like a memory, stars showing through it. Bengal, 1880s Calcutta. Palette indigo night, lamp amber, faded vermilion, ivory, old gold; deep indigo night sky, silver moonlight on the girl in white.",
+      "seed": 3701,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    }
+  ]
+}

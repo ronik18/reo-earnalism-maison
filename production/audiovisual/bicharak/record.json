@@ -18839,6 +18839,20 @@
       },
       "path": "jobs/retouch-film-01-r9/retouch.ipynb",
       "sha256": "e58e4507eaf7500514d59ebc3dbf8f10e181bc30aac7f9432600089ee3010e2f"
+    },
+    {
+      "bytes": 18437,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.6236722222222217,
+        "inputs_zip": "jobs/stills-film-01-r10/inputs.zip",
+        "job_id": "stills-film-01-r10",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r10/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r10/stills.ipynb",
+      "sha256": "04bea433afe485651e327c1cb95df5d008a337f65a75ff8a4257f28b7d3eb530"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -21361,6 +21375,49 @@
         "inputs_sha256": "8697ed044dd37f890cb9db0b132e3bc3c581fb244f5d1f6b9cd7fbc50ceb4c26",
         "job_id": "retouch-film-01-r9",
         "outputs_key": "exports/colab-exchange/bicharak/retouch-film-01-r9/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T04:49:19.532665+00:00",
+      "detail": {
+        "forecast_units": 1.6236722222222217,
+        "job_id": "stills-film-01-r10",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T04:49:19.549995+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r10",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-25T04:49:20.411455+00:00",
+      "detail": {
+        "bytes": 52758,
+        "job_id": "stills-film-01-r10",
+        "key": "exports/colab-exchange/bicharak/stills-film-01-r10/inputs.zip",
+        "sha256": "a5096ba375ca32a1e564ba95965afadd81089c16379f153fc30f59c9e6c7b27f"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T04:50:16.618402+00:00",
+      "detail": {
+        "expires_at": "2026-11-26T04:49:38.502062+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-film-01-r10/inputs.zip",
+        "inputs_sha256": "a5096ba375ca32a1e564ba95965afadd81089c16379f153fc30f59c9e6c7b27f",
+        "job_id": "stills-film-01-r10",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-film-01-r10/outputs.tar"
       },
       "result": "exchange_staged",
       "stage": "job"
