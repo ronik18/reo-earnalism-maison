@@ -49,6 +49,8 @@ class Command(BaseCommand):
             raise CommandError('CREDIT_REQUIRED: --credit is required for ai_edited')
         if method == 'ai' and credit:
             raise CommandError('CREDIT_NOT_ALLOWED: --credit applies only to ai_edited')
+        if slug == source_slug:
+            raise CommandError('SAME_SLUG: the translation slug must differ from its source slug')
         root = Path(o['root'])
         source_dir = root / 'library' / 'intake' / source_slug
         source_manifest = _load(source_dir / 'manifest.json')
@@ -94,10 +96,16 @@ class Command(BaseCommand):
             raise CommandError(f'MANIFEST_INVALID: {error}') from error
         translation = {'translated_from': source_slug, 'method': method, 'credit': credit, 'model': o['model'],
                        'date': today, 'source_sha256': source_sha}
-        book = {key: value for key, value in source_book.items() if key not in ('review_notes',)}
+        source_facts = {key: source_book[key] for key in ('author', 'author_died', 'first_published', 'territory_terms')
+                        if key in source_book}
+        book = {key: value for key, value in source_book.items()
+                if key not in ('review_notes', 'term_screen_verdict', 'territory_terms', 'author_died', 'first_published')}
         book.update(work=o['title'], source_sha256=sha, source_bytes=len(raw),
                     translated_from=source_slug, translation_method=method, translation_model=o['model'],
-                    review_notes=['Generated translation draft; a human must review it before approval.'])
+                    term_screen_verdict=None, term_screen_source_text=source_book.get('term_screen_verdict'),
+                    source_text=source_facts,
+                    review_notes=['Generated translation draft; a human must review it before approval.',
+                                  'Translation is a new work; its own clearance needs owner review.'])
         source_licence = source_book.get('text_source_licence')
         if source_licence:
             book['text_source_licence'] = dict(source_licence, scope=f'{source_licence.get("scope", "")} Applies to the source text only; the translation is a new work by Earnalism.'.strip())

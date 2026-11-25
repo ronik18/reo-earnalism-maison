@@ -70,6 +70,12 @@ class TranslationLabelTests(TestCase):
             self.assertIn('<p class="fine">Translated with AI, edited by Asha Rahman</p>', html)
             self.assertNotIn('<p class="fine">AI translation', html)
 
+    def test_editor_credit_is_escaped_on_the_title_page(self):
+        self.translate('ai_edited', credit='<script>alert(1)</script>')
+        html = self.pages()[0]
+        self.assertIn('edited by &lt;script&gt;alert(1)&lt;/script&gt;</p>', html)
+        self.assertNotIn('<script>alert(1)</script>', html)
+
     def test_original_editions_show_no_label(self):
         for html in self.pages():
             self.assertNotIn('<p class="fine">AI translation', html)
@@ -153,7 +159,16 @@ class IntakeTranslationCommandTests(TestCase):
         self.assertIn('date', meta)
         draft = json.loads((self.root / 'docs/evidence/publication-clearance-kp-en-draft.json').read_text(encoding='utf-8'))
         self.assertEqual(draft['status'], 'DRAFT_PENDING_OWNER_APPROVAL')
-        self.assertIn('kp-en', draft['books'])
+        book = draft['books']['kp-en']
+        self.assertIsNone(book['term_screen_verdict'])
+        self.assertEqual(book['term_screen_source_text'], 'pass')
+        self.assertEqual(book['source_text']['author_died'], 1941)
+        self.assertNotIn('author_died', book)
+        self.assertIn('Translation is a new work; its own clearance needs owner review.', book['review_notes'])
+
+    def test_same_slug_as_source_is_refused_even_with_replace(self):
+        with self.assertRaisesRegex(CommandError, 'SAME_SLUG'):
+            self.run_command('--method', 'ai', '--replace', slug='kp')
 
     def test_refuses_overwrite_without_replace_and_bad_inputs(self):
         self.run_command('--method', 'ai')
