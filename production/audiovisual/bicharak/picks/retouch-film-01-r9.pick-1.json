@@ -1,0 +1,15 @@
+{
+  "choices": {
+    "f01s011-4": {
+      "candidate": 1,
+      "file": "retouch/retouch-film-01-r9/f01s011-4--c1.png",
+      "sha256": "755bad139ac32a9cb5f88ec149d19a1dd76f0d8dc3b39af2ee2b4cdfbbcf3b37"
+    },
+    "f01s016-2": {
+      "candidate": 3,
+      "file": "retouch/retouch-film-01-r9/f01s016-2--c3.png",
+      "sha256": "dd544f7ab8901eba74d4d01c8ffe510e5580e048e6f3ed8222dc2bd686eb3748"
+    }
+  },
+  "job_id": "retouch-film-01-r9"
+}

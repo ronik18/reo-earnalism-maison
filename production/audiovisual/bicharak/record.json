@@ -28581,6 +28581,55 @@
       },
       "path": "stills/stills-film-01-r10/f01s019-3--c4.png",
       "sha256": "636d4f0e29ab02ec43617a8ddfd1f51006c1bb5531eb555ff462fb6ec10ad20a"
+    },
+    {
+      "bytes": 442,
+      "kind": "stills_pick",
+      "meta": {
+        "choices": {
+          "f01s011-4": {
+            "candidate": 1,
+            "file": "retouch/retouch-film-01-r9/f01s011-4--c1.png",
+            "sha256": "755bad139ac32a9cb5f88ec149d19a1dd76f0d8dc3b39af2ee2b4cdfbbcf3b37"
+          },
+          "f01s016-2": {
+            "candidate": 3,
+            "file": "retouch/retouch-film-01-r9/f01s016-2--c3.png",
+            "sha256": "dd544f7ab8901eba74d4d01c8ffe510e5580e048e6f3ed8222dc2bd686eb3748"
+          }
+        },
+        "job_id": "retouch-film-01-r9",
+        "version": 1
+      },
+      "path": "picks/retouch-film-01-r9.pick-1.json",
+      "sha256": "0fe2d952f683ad3a3e0a8bf0d3775c362c943a3e56eaafded9702b81817f7f0b"
+    },
+    {
+      "bytes": 632,
+      "kind": "stills_pick",
+      "meta": {
+        "choices": {
+          "f01s003-3": {
+            "candidate": 4,
+            "file": "stills/stills-film-01-r10/f01s003-3--c4.png",
+            "sha256": "2af871f53c290c1f19fa4c97a13038262c03e7ba537c7970f28947066ce7dbad"
+          },
+          "f01s003-4": {
+            "candidate": 3,
+            "file": "stills/stills-film-01-r10/f01s003-4--c3.png",
+            "sha256": "19f7f84323a25a59cf6be5c975b41f172695c4afdc43e784d7595a9725a9d73e"
+          },
+          "f01s019-3": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r10/f01s019-3--c1.png",
+            "sha256": "3b1a3ff7104d988685db853050648bdad745eddd82be96e808fa021d79d5c7dc"
+          }
+        },
+        "job_id": "stills-film-01-r10",
+        "version": 1
+      },
+      "path": "picks/stills-film-01-r10.pick-1.json",
+      "sha256": "59035a52eed63b64f9107aad6c62d4a94d32f7bccceb7a10160c8c565eb353e8"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -31589,6 +31638,33 @@
       },
       "result": "exchange_collected",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-25T06:58:13.112195+00:00",
+      "detail": {
+        "choices": {
+          "f01s011-4": 1,
+          "f01s016-2": 3
+        },
+        "job_id": "retouch-film-01-r9",
+        "version": 1
+      },
+      "result": "recorded",
+      "stage": "pick"
+    },
+    {
+      "at": "2026-11-25T06:58:13.329940+00:00",
+      "detail": {
+        "choices": {
+          "f01s003-3": 4,
+          "f01s003-4": 3,
+          "f01s019-3": 1
+        },
+        "job_id": "stills-film-01-r10",
+        "version": 1
+      },
+      "result": "recorded",
+      "stage": "pick"
     }
   ],
   "ledger": "../allowance-ledger.json",
