@@ -27,11 +27,12 @@ class IntakePacketTests(SimpleTestCase):
                 self.assertNotIn('​', text)
                 self.assertNotIn('{{', text)
 
-    def test_kshudhita_pashan_clearance_is_approved_with_the_cover_still_pending(self):
+    def test_kshudhita_pashan_clearance_is_approved_with_the_cover_attached(self):
         record = json.loads((INTAKE.parent.parent / 'docs/evidence/publication-clearance-kshudhita-pashan.json').read_text(encoding='utf-8'))
-        self.assertEqual(record['status'], 'OWNER_APPROVED_COVER_PENDING')
+        self.assertEqual(record['status'], 'OWNER_APPROVED')
         self.assertTrue(record['approval']['approved'])
-        self.assertIn('front/back cover with owner-held provenance', record['approval']['still_required'])
+        self.assertEqual(record['approval']['still_required'], [])
+        self.assertEqual(record['approval']['cover_attached']['front_sha256'], hashlib.sha256((INTAKE / 'kshudhita-pashan/front.jpg').read_bytes()).hexdigest())
         pages = record['books']['kshudhita-pashan']['scan_pages']
         self.assertEqual(len(pages), 24)
         self.assertTrue(all(p['quality'] == 4 for p in pages))
