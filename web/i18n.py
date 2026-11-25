@@ -512,3 +512,10 @@ STRINGS.update({
     "ai_translation": ("AI translation", "এআই অনুবাদ"),
     "translated_by": ("Translated with AI, edited by {name}", "এআই-সহায়ক অনুবাদ, সম্পাদনা: {name}"),
 })
+
+STRINGS.update({
+    "founding_offer": ("Founding member: INR 99/month or INR 999/year — your price stays the same for as long as you stay a member.", "প্রতিষ্ঠাতা সদস্য: ৯৯ টাকা মাসে অথবা ৯৯৯ টাকা বছরে — যতদিন সদস্য থাকবেন, আপনার দাম একই থাকবে।"),
+    "founding_anchors_title": ("Other services, for comparison", "তুলনার জন্য অন্য পরিষেবা"),
+    "founding_anchor_source": ("Source", "সূত্র"),
+    "founding_cancel_link": ("Manage or cancel in account settings", "অ্যাকাউন্ট সেটিংসে পরিচালনা বা বাতিল করুন"),
+})
