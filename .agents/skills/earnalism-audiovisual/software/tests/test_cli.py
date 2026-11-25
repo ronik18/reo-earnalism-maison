@@ -773,7 +773,7 @@ class RoundTwo:
         self.assertEqual(files[f"{sid}-3"], self.shot(job, sid, 2))  # previous wins over next
         self.assertEqual(files[f"{sid}-4"], self.shot(job, sid, 4))
         self.assertEqual(meta["held"], [f"{sid}-3"])
-        self.assertEqual(meta["substitutes"], {f"{sid}-3": f"{sid}-2"})
+        self.assertEqual(meta["substitutes"], {f"{sid}-3": {"use": f"{sid}-2", "cross_scene": False}})
 
     def test_a_held_key_never_uses_its_own_file(self):
         sid, job = self.hold_ready()
@@ -781,15 +781,39 @@ class RoundTwo:
         files, meta = self.merged()
         self.assertNotEqual(files[f"{sid}-2"], self.shot(job, sid, 2))
         self.assertEqual(files[f"{sid}-2"], self.shot(job, sid, 1))
-        self.assertEqual(meta["substitutes"], {f"{sid}-2": f"{sid}-1"})
+        self.assertEqual(meta["substitutes"], {f"{sid}-2": {"use": f"{sid}-1", "cross_scene": False}})
 
-    def test_a_scene_with_every_shot_held_stops_naming_the_scene(self):
+    def test_an_all_held_scene_falls_back_to_the_previous_scenes_last_approved_still(self):
         sid, job = self.hold_ready()
+        scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+        if len(scenes) < 2:
+            self.skipTest("needs two scenes")
+        s2 = scenes[1]["scene_id"]
+        self.assertEqual(self.hold("--keys", ",".join(f"{s2}-{n}" for n in range(1, 5)) + f",{sid}-4")[0], 0)
+        files, meta = self.merged()
+        self.assertEqual(files[f"{s2}-2"], self.shot(job, sid, 3))
+        self.assertEqual(meta["substitutes"][f"{s2}-1"], {"use": f"{sid}-3", "cross_scene": True})
+        self.assertEqual(meta["substitutes"][f"{sid}-4"], {"use": f"{sid}-3", "cross_scene": False})
+
+    def test_an_all_held_first_scene_falls_back_to_the_next_scenes_first_approved_still(self):
+        sid, job = self.hold_ready()
+        scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+        if len(scenes) < 2:
+            self.skipTest("needs two scenes")
+        s2 = scenes[1]["scene_id"]
         self.assertEqual(self.hold("--keys", ",".join(f"{sid}-{n}" for n in range(1, 5)))[0], 0)
+        files, meta = self.merged()
+        self.assertEqual(files[f"{sid}-3"], self.shot(job, s2, 1))
+        self.assertEqual(meta["substitutes"][f"{sid}-3"], {"use": f"{s2}-1", "cross_scene": True})
+
+    def test_a_film_with_every_shot_held_stops(self):
+        sid, job = self.hold_ready()
+        scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+        keys = [f"{sc['scene_id']}-{n}" for sc in scenes for n in range(1, 5)]
+        self.assertEqual(self.hold("--keys", ",".join(keys))[0], 0)
         with self.assertRaises(cli.Stop) as cm:
             self.merged()
-        self.assertIn(sid, str(cm.exception))
-        self.assertIn("every shot held", str(cm.exception))
+        self.assertIn("every shot of the film is held", str(cm.exception))
 
     def test_the_latest_hold_wins_and_clear_removes_it(self):
         sid, job = self.hold_ready()

@@ -1561,9 +1561,15 @@ def _held_keys(rec, t) -> list:
 
 def _apply_hold(files, held):
     """Held keys never use their own file: each takes the file of the nearest non-held key of its
-    scene (the previous key in order, else the next). Returns (files, {held key: substitute})."""
+    scene (the previous key in order, else the next). A scene with every shot held takes the last
+    approved key of the previous scene, else the first approved key of the next one. Returns
+    (files, {held key: {"use": substitute, "cross_scene": bool}})."""
     files = {k: v for k, v in files.items() if k not in held}
     universe = sorted(set(files) | set(held), key=_shot_order)
+    approved = [k for k in universe if k not in held]
+    if not approved:
+        raise Stop("every shot of the film is held: no approved still to show",
+                   f"Approve stills (pick) or release holds: {PROG} hold --root <dir> --film <n> --clear")
     subs = {}
     for key in sorted(held, key=_shot_order):
         scene = key.rpartition("-")[0]
@@ -1571,15 +1577,14 @@ def _apply_hold(files, held):
         i = same.index(key)
         pick = next((k for k in reversed(same[:i]) if k not in held), None) \
             or next((k for k in same[i + 1:] if k not in held), None)
-        if pick is None:
-            raise Stop(f"scene {scene} has every shot held ({', '.join(same)}): "
-                       "no approved still to show", f"Approve a still of {scene} (pick) or "
-                       f"release a hold: {PROG} hold --root <dir> --film <n> --keys <others> "
-                       "or --clear")
-        subs[key] = pick
+        cross = pick is None
+        if cross:
+            before = [k for k in approved if _shot_order(k)[0] < scene]
+            pick = before[-1] if before else next(k for k in approved if _shot_order(k)[0] > scene)
+        subs[key] = {"use": pick, "cross_scene": cross}
     out = dict(files)
-    for key, pick in subs.items():
-        out[key] = files[pick]
+    for key, sub in subs.items():
+        out[key] = files[sub["use"]]
     return out, subs
 
 
