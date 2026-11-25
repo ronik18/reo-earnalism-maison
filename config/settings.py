@@ -318,6 +318,9 @@ if not LOCAL and (not R2_PUBLIC_ASSET_HOST or not STATIC_RELEASE_ID):
 if R2_PUBLIC_ASSET_HOST and STATIC_RELEASE_ID:
     STATIC_URL = R2_PUBLIC_ASSET_HOST.rstrip('/') + '/static/' + STATIC_RELEASE_ID + '/'
 
+# Share of earned revenue set aside for owner-approved growth spend.
+MAISON_REINVEST_SHARE_PERCENT = int(os.getenv('MAISON_REINVEST_SHARE_PERCENT', '30'))
+
 # Owner-approved free rollout; authorization still enforces publication and rights.
 FREE_ACCESS_ENABLED = bool_setting('MAISON_FREE_ACCESS', False)
 
