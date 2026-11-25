@@ -353,6 +353,12 @@ def _edition_detail(edition, territory='IN', user=None):
             'published_at':iso(revision.published_at),'version':edition.version}
 
 
+def edition_translation(edition_id):
+    """Translation label data for pages; kept out of edition_detail because the Edition API shape is closed."""
+    row=Edition.objects.filter(pk=edition_id,translated_from__isnull=False).values('translation_method','translation_credit').first()
+    return {'method':row['translation_method'],'credit':row['translation_credit']} if row else None
+
+
 def unit_dto(unit,territory='IN',revision=None):
     """revision: the already-loaded revision object, so its rights/assets load once for all units."""
     revision=revision or unit.revision

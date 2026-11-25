@@ -5,8 +5,9 @@ register = template.Library()
 
 
 @register.simple_tag(takes_context=True)
-def ui(context, key):
-    return text(key, context.get("ui_locale", "en"))
+def ui(context, key, **values):
+    value = text(key, context.get("ui_locale", "en"))
+    return value.format(**values) if values else value
 
 
 @register.filter

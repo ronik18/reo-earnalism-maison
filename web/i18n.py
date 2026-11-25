@@ -509,4 +509,6 @@ STRINGS.update({
     "review_changed": ("A reviewed file changed after it was queued. Nothing was decided. Reject them, or queue them again:", "সারিতে তোলার পরে একটি ফাইল বদলেছে। কিছু সিদ্ধান্ত হয়নি। সেগুলো প্রত্যাখ্যান করুন বা আবার সারিতে তুলুন:"),
     "review_decided": ("Items decided:", "সিদ্ধান্ত হয়েছে:"),
     "review_none_decided": ("Nothing was decided. Tick at least one pending item first.", "কিছু সিদ্ধান্ত হয়নি। আগে অন্তত একটি অপেক্ষমাণ আইটেম বাছুন।"),
+    "ai_translation": ("AI translation", "এআই অনুবাদ"),
+    "translated_by": ("Translated with AI, edited by {name}", "এআই-সহায়ক অনুবাদ, সম্পাদনা: {name}"),
 })
