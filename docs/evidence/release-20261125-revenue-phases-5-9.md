@@ -33,3 +33,21 @@
 - **Render deploy** `dep-dc3itr95efls73c0hcp0` (commit `0a20d12`) live at 18:55:54Z. No static change; `STATIC_RELEASE_ID` kept.
 - **Render job** `job-dc3j3vsipgvc738q56ag` (`queue_intake_packets`) succeeded: 6 new pending review items, a clearance and a cover each for মধ্যবর্ত্তিনী, শাস্তি and সমাপ্তি. No duplicate cover item for ক্ষুধিত পাষাণ.
 - **Live checks:** `/en/`, `/en/explore/`, `/en/pass/`, `/podcast/en.xml` 200; `/en/staff/review/` 404 for anonymous visitors. Nothing published, posted or charged.
+
+## #68 deploy and ক্ষুধিত পাষাণ publication (25 Nov 2026)
+
+- **Owner instructions:** "a, add the footnote style for মেঘ ও রৌদ্র"; "yes, create the PR, merge and deploy once CI is green"; "Publish all titles which are ready."
+- **Merged:** ronik18/reo-earnalism-maison#68 after both `postgres-acceptance` runs passed on head `f46cd0c`; squash commit `303d5aa51d717f3fe92be82c59e6c6a44ae3d8b0`.
+- **Static release:**
+  - Prepared from a clean frontend build: `ec6edfb364504cd0884a4b2fc49d9bf9c793d857fb2e4c8fe4e13cafd3048ab8`, 212 files, 9,354,336 bytes.
+  - Compared with the live release `ceab4d26…`: 209 files byte-identical. Only `maison/app.css`, `maison/dist/manifest.json` and the new `maison/dist/downloads-M3PRRHIR.js` differ.
+  - Uploaded under the new prefix through the Cloudflare R2 object API (212 × 200), then verified over public HTTPS: SHA-256, length, `Content-Type` and immutable `Cache-Control` match for 212 of 212.
+  - Render `STATIC_RELEASE_ID` switched. Rollback: set it back to `ceab4d2603c2df9fd646b85fcfd258c83adfc4ebdc379580c6204b7812d87ec3` and redeploy.
+- **Restore point (before migration):** `2026-11-25T19:27:00Z`, WAL LSN `0/5ADFAA8`, 79 applied migrations.
+- **Migration:** library `0009_paragraph_note` (choices only) applied by the pre-deploy command at 19:27:44Z; the pre-deploy command was removed afterwards.
+- **Render deploy:** `dep-dc3jd2e1egvs73dq8ih0` (commit `303d5aa`), live at 19:28:22Z. The live `app.css` carries the footnote rule.
+- **ক্ষুধিত পাষাণ:**
+  - Render job `job-dc3jdoeq1p3s73bcnno0` recorded the browser acceptance report (`docs/evidence/publication-browser-20261125-kshudhita-pashan.json`) on the draft.
+  - Render job `job-dc3je2eq1p3s73bcoiog` published it: revision `3cb6a0b9-f774-4822-92e7-d4fc99de2ef4` live at 19:29:32Z.
+  - Title page 200 and listed on Explore; the reader asks anonymous visitors to sign in (302).
+- **Render job** `job-dc3jeaafngtc73a1bvpg` (`queue_intake_packets`): 2 new pending items, the clearance and cover for মেঘ ও রৌদ্র.

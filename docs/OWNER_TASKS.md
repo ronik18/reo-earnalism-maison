@@ -9,16 +9,15 @@ Last updated: 25 Nov 2026.
   - [ ] দিদি (clearance + cover)
   - [ ] মানভঞ্জন (clearance + cover)
   - [ ] অতিথি (clearance + cover)
-  - [ ] প্রায়শ্চিত্ত (clearance; cover still needed, see below)
-  - [ ] আপদ (clearance; cover still needed)
-  - [ ] ঠাকুর্দ্দা (clearance; cover still needed)
-  - [ ] প্রতিহিংসা (clearance; cover still needed)
+  - [ ] প্রায়শ্চিত্ত (clearance + cover; cover designed by Claude at your instruction, on the page after the next deploy)
+  - [ ] আপদ (clearance + cover; cover designed by Claude at your instruction, on the page after the next deploy)
+  - [ ] ঠাকুর্দ্দা (clearance + cover; cover designed by Claude at your instruction, on the page after the next deploy)
+  - [ ] প্রতিহিংসা (clearance + cover; cover designed by Claude at your instruction, on the page after the next deploy)
   - [ ] মধ্যবর্ত্তিনী, শাস্তি, সমাপ্তি from *কথা-চতুষ্টয়* (1894) (clearance + cover; on the page after the next deploy)
-  - [ ] মেঘ ও রৌদ্র from *কথা-চতুষ্টয়* (clearance + cover; on the page after the footnote-style deploy)
-- [ ] **Say which approved titles to publish.** Standing instruction (25 Nov): publish every title that is ready. Ready means its clearance and cover are approved, it passes browser acceptance and it is deployed. ক্ষুধিত পাষাণ publishes with the footnote-style deploy; each title you approve on the Monday page follows.
+  - [ ] মেঘ ও রৌদ্র from *কথা-চতুষ্টয়* (clearance + cover; on the page now)
+- [ ] **Say which approved titles to publish.** Standing instruction (25 Nov): publish every title that is ready. Ready means its clearance and cover are approved, it passes browser acceptance and it is deployed. ক্ষুধিত পাষাণ published 25 Nov; each title you approve on the Monday page follows.
 
 ## Assets
-- [ ] **Covers** (upload front/back pairs to Cloudinary, then tell Claude): প্রায়শ্চিত্ত, আপদ, ঠাকুর্দ্দা, প্রতিহিংসা.
 - Covers already in your Cloudinary for later titles (no action needed): কাবুলিওয়ালা, পোস্টমাস্টার, ছুটি.
 - [ ] **কাবুলিওয়ালা early scan:** open https://icvtesting.nvli.in/rarebooks/galapagaucacha-1ma-khanada from India; if a PDF/page images appear, put the file in Google Drive and share the path.
 
@@ -43,5 +42,7 @@ Last updated: 25 Nov 2026.
 - [x] Approved Phases 5–9 design, plan, merge and deploy (25 Nov 2026).
 - [x] Approved ক্ষুধিত পাষাণ clearance and cover.
 - [x] Import ক্ষুধিত পাষাণ as an unpublished draft (25 Nov 2026).
+- [x] ক্ষুধিত পাষাণ published (25 Nov 2026).
+- [x] Missing covers designed by Claude in the series style (প্রায়শ্চিত্ত, আপদ, ঠাকুর্দ্দা, প্রতিহিংসা), 25 Nov 2026.
 - [x] D11 footnote style in the reader for মেঘ ও রৌদ্র (25 Nov 2026).
 - [x] D8 Monday-page approval unlocks publishing; D9 two-click cancel; D10 public podcast previews.
