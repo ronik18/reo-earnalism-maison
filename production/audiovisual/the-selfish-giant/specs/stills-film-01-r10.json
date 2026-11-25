@@ -1,0 +1,125 @@
+{
+  "note": "Round 10 (25 Nov 2026): full regeneration of the 15 shots that retouch cannot fix (picker notes .superpowers/sdd/picks-selfish-giant-r9.md: the Giant's scale and anatomy, the wall towering over him, merged or duplicated heads, children or snow inside rooms). Composition- and scale-first prompts for FLUX.1-schnell (guidance 0, empty negative prompt): camera and framing lead, the exact head count in frame, a single giant figure scaled by concrete comparison every time (as tall as a two-storey house, children up to his knee, the grey stone garden wall at his waist); indoor shots name the room and place the snowy garden only outside the window; season and light stated at the start and the end; one clear action per shot; world-bible appearance lines repeated word for word; each prompt under about 150 words so the text encoder reads it whole; the job builder appends the house style. Seeds are r9 + 900; four candidates per shot; same 1344x768 size.",
+  "items": [
+    {
+      "key": "f01s002-2",
+      "prompt": "Low wide shot from grass level, spring, clear midday sunlight. A single giant figure stands full length in the centre, boots to head in frame: the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots. He looks straight down in surprise at three small children playing by his boots: Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots. Scale: the Giant is as tall as a two-storey house; the children reach only up to his knee; the grey stone garden wall reaches his waist. Grey stone castle behind; peach trees in pink spring blossom. Late-Victorian English countryside, 1880s. Palette: spring green, blossom pink and pearl, honey-gold light; clear midday sunlight.",
+      "seed": 4506,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s003-1",
+      "prompt": "Wide shot, spring afternoon, soft amber sunlight. On the right, a single giant figure stands full length, shouting, pointing left to the open gate in the grey stone garden wall: the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots. On the left, five small children run away across the grass toward the gate, well apart from him: Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots. Scale: the Giant is as tall as a two-storey house; each child is as tall as his knee; the grey stone garden wall reaches his waist. Peach trees in pink spring blossom. Late-Victorian English countryside, 1880s. Palette: spring green, blossom pink and pearl, honey-gold light; soft amber afternoon sunlight.",
+      "seed": 4508,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s005-5",
+      "prompt": "Wide shot of the stormy winter sky above the castle, cold grey daylight. Exactly one spirit: the North Wind, a huge bearded man with a human face, wrapped in grey furs, cheeks puffed, blowing. His great human head and fur-wrapped shoulders fill the upper left of the grey sky, long grey beard streaming, cheeks round and puffed, lips pursed, blowing one long visible stream of white wind and snowflakes across the frame to the right. His two hands are open and empty, palms forward, in grey fur sleeves. On the right, two brick chimney-pots tumble in mid-air off the slate roof of the grey stone castle. Below, the walled garden lies under white snow, its trees bare and frost-covered. Late-Victorian English countryside, 1880s. Palette: winter silver and slate blue, honey-gold light; cold grey stormy daylight.",
+      "seed": 4517,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s006-3",
+      "prompt": "Interior of the Giant's stone hall, medium wide shot from inside the room, winter, cold pale daylight. Exactly one figure in the room: the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, sitting on a huge wooden chair beside a tall arched window, a thick brown wool blanket around his shoulders puzzled, gazing out through the glass. The room is warm and dry: bare grey stone walls, a stone floor, a hearth fire glowing behind him. Outside the window, far below, the walled garden lies white under snow, bare frost-covered trees standing on an empty white lawn. Late-Victorian English countryside, 1880s. Palette: winter silver and slate blue, honey-gold light; cold pale daylight through the window and warm hearth glow inside.",
+      "seed": 4521,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s007-3",
+      "prompt": "Interior of the Giant's stone bedchamber, medium shot, winter morning, soft sunlight through one tall window. Exactly one figure in the room: the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, tonight dressed in a long white linen nightshirt, lying in a huge wooden bed under a brown quilt, head on a white pillow, eyes wide open, listening, one hand cupped behind his ear. His brown tunic and wide leather belt hang on a wooden peg on the stone wall. Bare grey stone walls, a stone floor, a wooden nightstand with a pewter jug. Outside the tall window, bare frost-covered branches and a white snowy garden under a pale sky. Late-Victorian English countryside, 1880s. Palette: winter silver and slate blue, honey-gold light; soft morning sunlight across the bed.",
+      "seed": 4524,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s007-6",
+      "prompt": "Interior of the Giant's stone bedchamber, wide shot, winter morning, a warm sunbeam through one tall window. Exactly one figure in the room: the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, dressed in a long white linen nightshirt, barefoot, mid-stride as he springs out of a huge wooden bed toward the tall window, one arm reaching for the window latch, face bright with hope. His brown tunic, belt and boots hang on a wooden peg beside the bed. Bare grey stone walls, a stone floor, a pewter jug on a wooden nightstand. Outside the window, frost-covered branches and a snowy garden lit by the first warm sunbeam. Late-Victorian English countryside, 1880s. Palette: winter silver and slate blue, honey-gold light; warm morning sunlight through the window.",
+      "seed": 4527,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s008-4",
+      "prompt": "High aerial view looking down over the whole walled garden, spring, bright morning sunlight. Twelve peach trees in pink spring blossom stand in rows on green grass. High in the branches of each tree sits one small child among the blossoms: Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots. The lawn between the trees is open green grass. In the far top-left corner of the frame, one single leafless tree stands in a small patch of white snow, its bare branches covered with frost. A grey stone wall encloses the garden; a grey stone castle at the right edge. Late-Victorian English countryside, 1880s. Palette: spring green, blossom pink and pearl, honey-gold light, winter silver in the far corner; bright morning sunlight.",
+      "seed": 4531,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s008-6",
+      "prompt": "Wide shot of the far corner of the garden, winter, cold pale morning light. Exactly one child and one wind spirit. At the bottom centre, small, the child: one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, standing in the snow beneath a single leafless tree covered with frost and snow, both arms reaching up to its branches, crying. High in the grey sky above the tree, separate from it, the North Wind, a huge bearded man with a human face, wrapped in grey furs, cheeks puffed, blowing, his broad human face and fur-wrapped shoulders in the clouds, blowing a stream of white wind and snowflakes down over the branches. Behind them, the grey stone garden wall. Late-Victorian English countryside, 1880s. Palette: winter silver and slate blue, honey-gold light; cold pale morning light.",
+      "seed": 4533,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s009-1",
+      "prompt": "Medium wide shot at child height, winter, soft pale morning sunlight. Exactly one child: one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, standing on tiptoe in the snow, both arms stretched straight up above his head, fingertips reaching. Above him one leafless frost-covered tree bows its whole trunk and branches down in a deep arch toward him, like a person bowing, its lowest twig hanging just above his fingertips. His white smock falls to his ankles; his small bare feet stand on the snow. Behind him, the grey stone garden wall. Late-Victorian English countryside, 1880s. Palette: winter silver and slate blue, honey-gold light; soft pale morning sunlight.",
+      "seed": 4534,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s010-3",
+      "prompt": "Low wide shot in the snowy far corner, winter, soft pale morning sunlight. Exactly two figures. In the right foreground, small, stands one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, his back to the Giant, face in his hands, crying. On the left, a single giant figure creeps toward him on tiptoe, bent forward, gentle: the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots. Scale: the Giant is as tall as a two-storey house; the boy's head reaches only up to the Giant's knee; the grey stone garden wall reaches his waist. One bare frost-covered tree in the corner. Late-Victorian English countryside, 1880s. Palette: winter silver and slate blue, honey-gold light; soft pale morning sunlight.",
+      "seed": 4540,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s010-4",
+      "prompt": "Medium wide shot, spring, bright morning sunlight. Exactly two figures. A single giant figure kneels on one knee on the grass, his open palm raised to a low peach branch: the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots. Standing on his palm, small as a doll, one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, stepping onto the branch. Scale: the boy is as tall as the Giant's forearm; the kneeling Giant's head is level with the treetop; the grey stone garden wall reaches his chest. The tree bursts into pink and white blossom, flowers only, small birds flying in. Late-Victorian English countryside, 1880s. Palette: spring green, blossom pink and pearl, honey-gold light; bright morning sunlight.",
+      "seed": 4541,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s010-6",
+      "prompt": "Wide side-on shot, spring, bright morning sunlight. On the left, a single giant figure stands full length: the Giant, a huge human man three times a grown man's height, ruddy weathered face, bushy brown beard, heavy brows, coarse brown woollen tunic, wide leather belt, great boots, gripping one great wooden-handled axe in both hands and swinging it into the grey stone garden wall; a section bursts apart, grey stones tumbling to the grass. On the right, six small children run in through the gap: Victorian village schoolchildren aged six to ten, girls in pinafores over plain dresses, boys in caps, short jackets and boots. Scale: the Giant is as tall as a two-storey house; the children reach only up to his knee; the grey stone garden wall reaches his waist. Peach trees in pink spring blossom. Late-Victorian English countryside, 1880s. Palette: spring green, blossom pink and pearl, honey-gold light; bright morning sunlight.",
+      "seed": 4543,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s014-3",
+      "prompt": "Wide shot from the snowy lawn looking up at the grey stone castle, winter, bright morning sunlight on snow. Exactly one figure: a single giant figure, the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, hurrying out through the castle's huge arched oak door and down wide stone steps, arms open, face bright with joy, shawl flying. Scale: he is as tall as a two-storey house; the arched door is just his height; each stone step reaches his ankle. Bare frost-covered trees across the snowy garden; in the far corner, a golden-trunked tree with white blossom, golden branches and silver fruit. Late-Victorian English countryside, 1880s. Palette: winter silver and slate blue, honey-gold light; bright morning sunlight on snow.",
+      "seed": 4556,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s014-4",
+      "prompt": "Low wide shot across the snowy lawn, winter, bright morning sunlight. Exactly two figures. In the right foreground, small, one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, beneath a golden-trunked tree with white blossom, golden branches and silver fruit. On the left, a single giant figure in great boots strides toward him: the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic. Scale: the old Giant is as tall as a two-storey house; the boy reaches only up to his knee; the grey stone garden wall reaches the Giant's waist. Bare frosted trees across the snowy garden. Late-Victorian English countryside, 1880s. Palette: winter silver and slate blue, honey-gold light; bright morning sunlight.",
+      "seed": 4557,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    },
+    {
+      "key": "f01s015-1",
+      "prompt": "Low wide shot, winter, soft morning sunlight. Exactly two figures. In the foreground, small, one tiny four-year-old boy with fair curly hair, bare head, pale round cheeks, an ankle-length plain white smock and small bare feet, calm on the snow beneath a golden-trunked tree with white blossom, golden branches and silver fruit. Towering over him, a single giant figure in great boots: the old Giant, the same huge human man three times a grown man's height, now very old and frail, long snow-white beard, thin white hair, gentle tired eyes, grey woollen shawl over a brown tunic, face flushed red with anger, fists clenched, crying out in protective fury. Scale: the old Giant is as tall as a two-storey house; the boy reaches only up to his knee; the grey stone garden wall reaches his waist. Bare frosted trees, snowy garden. Late-Victorian English countryside, 1880s. Palette: winter silver and slate blue, honey-gold light; soft morning sunlight.",
+      "seed": 4559,
+      "width": 1344,
+      "height": 768,
+      "candidates": 4
+    }
+  ]
+}

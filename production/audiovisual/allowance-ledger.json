@@ -265,5 +265,14 @@
     "state": "reserved",
     "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
     "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "selfish-giant-stills-film-01-r10",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 2.1194499999999996,
+    "state": "reserved",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
   }
 ]

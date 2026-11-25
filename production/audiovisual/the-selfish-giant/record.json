@@ -16905,6 +16905,20 @@
       },
       "path": "jobs/selfish-giant-retouch-film-01-r9/retouch.ipynb",
       "sha256": "5977252e9983e665760030aa9e6727d0f28708fe1093a2926f61d9999b4f6999"
+    },
+    {
+      "bytes": 18534,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 2.1194499999999996,
+        "inputs_zip": "jobs/selfish-giant-stills-film-01-r10/inputs.zip",
+        "job_id": "selfish-giant-stills-film-01-r10",
+        "job_kind": "stills",
+        "manifest": "jobs/selfish-giant-stills-film-01-r10/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/selfish-giant-stills-film-01-r10/stills.ipynb",
+      "sha256": "abd08ba2431fbb4cc2cff3ff464d8d4ad5e5cd467bd8583d31771f79475fb1d0"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -18314,6 +18328,48 @@
       },
       "result": "job_target",
       "stage": "cli"
+    },
+    {
+      "at": "2026-11-25T05:16:35.512801+00:00",
+      "detail": {
+        "forecast_units": 2.1194499999999996,
+        "job_id": "selfish-giant-stills-film-01-r10",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T05:16:35.527536+00:00",
+      "detail": {
+        "job_id": "selfish-giant-stills-film-01-r10",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-25T05:16:38.023459+00:00",
+      "detail": {
+        "bytes": 19063536,
+        "job_id": "selfish-giant-retouch-film-01-r9",
+        "key": "exports/colab-exchange/the-selfish-giant/selfish-giant-retouch-film-01-r9/inputs.zip",
+        "sha256": "28a78c985b71c5f37684a93a6d4e267687492cd3dc511ac05fd0e3cac4b6a30e"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T05:16:39.125995+00:00",
+      "detail": {
+        "bytes": 81841,
+        "job_id": "selfish-giant-stills-film-01-r10",
+        "key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r10/inputs.zip",
+        "sha256": "a5f361540e9d338404f22f6ac30b1d1286b52c4159e1850dfb311a9d5585cead"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
