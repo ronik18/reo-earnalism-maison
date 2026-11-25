@@ -5,7 +5,7 @@ import json
 import urllib.request
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 CLOUD = "dzlrhlfpu"
 SCHEMA = "earnalism.cover-provenance.v2"
@@ -52,9 +52,27 @@ def _derive_side(raw, listing):
         image.load()
     except Exception as exc:
         raise CoverError("COVER_UNREADABLE", str(exc)) from exc
+    decoded_format = (image.format or "").lower().replace("jpg", "jpeg")
+    if (
+        (image.width, image.height) != (listing["width"], listing["height"])
+        or decoded_format != str(listing["format"]).lower().replace("jpg", "jpeg")
+    ):
+        raise CoverError(
+            "COVER_LISTING_MISMATCH",
+            f"decoded {image.width}x{image.height} {decoded_format}",
+        )
+    image = ImageOps.exif_transpose(image)
     width, height = image.size
     if width * 3 != height * 2:
         raise CoverError("COVER_RATIO", f"{width}x{height}")
+    has_alpha = image.mode in ("RGBA", "LA", "PA") or (
+        image.mode == "P" and "transparency" in image.info
+    )
+    if has_alpha:
+        rgba = image.convert("RGBA")
+        base = Image.new("RGBA", rgba.size, (255, 255, 255, 255))
+        base.alpha_composite(rgba)
+        image = base
     rgb = image.convert("RGB").resize(SIZE, Image.LANCZOS)
     out = io.BytesIO()
     rgb.save(out, "JPEG", quality=QUALITY)
@@ -74,6 +92,9 @@ def _derive_side(raw, listing):
 
 
 def derive_pair(front_raw, back_raw, originals, *, slug="", owner_statement=None, basis=None):
+    f_l, b_l = originals["front"], originals["back"]
+    if f_l["public_id"] == b_l["public_id"] or f_l["asset_id"] == b_l["asset_id"]:
+        raise CoverError("COVER_PAIR_DUPLICATE", "front and back are the same asset")
     sides = {}
     outputs = {}
     for name, raw in (("front", front_raw), ("back", back_raw)):
@@ -91,6 +112,8 @@ def derive_pair(front_raw, back_raw, originals, *, slug="", owner_statement=None
                 "derivation": DERIVATION,
             },
         }
+    if sides["front"]["original"]["sha256"] == sides["back"]["original"]["sha256"]:
+        raise CoverError("COVER_PAIR_DUPLICATE", "front and back bytes are identical")
     provenance = {
         "schema": SCHEMA,
         "slug": slug,
