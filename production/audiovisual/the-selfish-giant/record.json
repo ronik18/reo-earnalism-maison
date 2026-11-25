@@ -18370,6 +18370,30 @@
       },
       "result": "exchange_uploaded",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-25T05:21:40.141831+00:00",
+      "detail": {
+        "expires_at": "2026-11-26T05:19:43.124567+00:00",
+        "inputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-retouch-film-01-r9/inputs.zip",
+        "inputs_sha256": "28a78c985b71c5f37684a93a6d4e267687492cd3dc511ac05fd0e3cac4b6a30e",
+        "job_id": "selfish-giant-retouch-film-01-r9",
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-retouch-film-01-r9/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T05:21:40.290724+00:00",
+      "detail": {
+        "expires_at": "2026-11-26T05:19:44+00:00",
+        "inputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r10/inputs.zip",
+        "inputs_sha256": "a5f361540e9d338404f22f6ac30b1d1286b52c4159e1850dfb311a9d5585cead",
+        "job_id": "selfish-giant-stills-film-01-r10",
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r10/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
