@@ -908,6 +908,17 @@ class CliTests(RoundTwo, unittest.TestCase):
         self.assertIs(ev["dry_narration"], True)
         self.assertIsNone(ev["music"])
 
+    def test_preview_needs_a_bundle_and_refuses_a_chapter_without_a_pause(self):
+        self.reviewed()
+        code, out = run("preview", "--root", self.root, "--bundle", self.d / "none", "--out", self.d / "pv")
+        self.assertEqual(code, 2, out)
+        self.assertFalse((self.d / "pv").exists())
+        bundle = self.d / "bundle"
+        self.assertEqual(run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")[0], 0)
+        code, out = run("preview", "--root", self.root, "--bundle", bundle, "--out", self.d / "pv")
+        self.assertEqual(code, 5, out)  # the fixture chapter is too short to hold a >= 10 s cut
+        self.assertFalse((self.d / "pv").exists())
+
     def test_bundle_audio_before_narration_import_stops_and_writes_nothing(self):
         self.build_narration()
         bundle = self.d / "bundle"
