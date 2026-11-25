@@ -152,6 +152,16 @@ print("inputs verified for", JOB_ID)
 # Model access, checked before the clock starts and before any install (Colab 2026-11-23: a gated
 # model failed only after the install). Gated repos need their terms accepted on Hugging Face and a
 # token in the Colab secret HF_TOKEN; the token is exported so every later download uses it.
+_GPU = _GUARD + '''import shutil, subprocess
+# A GPU first: a CPU-only runtime would install, download and then fail with a confusing CUDA error.
+_smi = shutil.which("nvidia-smi")
+if not _smi or subprocess.run([_smi, "-L"], capture_output=True).returncode != 0:
+    raise RuntimeError("No GPU attached: Runtime -> Disconnect and delete runtime, then Runtime -> "
+                       "Change runtime type -> A100 GPU (or L4), Save, Connect, and Run all again")
+print(subprocess.run([_smi, "-L"], capture_output=True, text=True).stdout.strip())
+'''
+
+
 _ACCESS = _GUARD + '''import os
 _token, _secret_problem = None, None
 try:
@@ -281,7 +291,7 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
              f"it and the runtime is unassigned at it; a stopped run's manifest says INCOMPLETE and "
              f"cannot be imported.\n")
     # The generation cell may call setup that sets OUT_DIR; the verify cell sets JOB/OUT_DIR.
-    parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _ACCESS),
+    parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _GPU), ("code", _ACCESS),
              ("code", _CLOCK),
              ("code", _VERIFY), ("code", template.read_text(encoding="utf-8")),
              ("code", _MANIFEST)]

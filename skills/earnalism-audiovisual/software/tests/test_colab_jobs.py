@@ -193,6 +193,29 @@ class ColabJobTests(unittest.TestCase):
         self.assertIn("text_encoder_2=None", src)
         self.assertIn("prompt_embeds=pe", src)
 
+    def test_every_gpu_job_stops_early_without_a_gpu(self):
+        # a CPU-only runtime failed late with "Torch not compiled with CUDA enabled"; check first
+        s = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]})
+        cells = ["".join(c["source"]) for c in self.nb(s)["cells"]]
+        gpu = next(i for i, c in enumerate(cells) if "nvidia-smi" in c)
+        access = next(i for i, c in enumerate(cells) if "auth_check" in c)
+        clock = next(i for i, c in enumerate(cells) if "DEADLINE_SECONDS" in c and "threading" in c)
+        self.assertIn("No GPU attached", cells[gpu])
+        self.assertIn("if RUN is not True", cells[gpu])
+        self.assertLess(gpu, access)
+        self.assertLess(access, clock)
+
+    def test_gpu_cell_refuses_a_cpu_runtime(self):
+        from unittest import mock
+        s = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]})
+        cell = next("".join(c["source"]) for c in self.nb(s)["cells"] if "nvidia-smi" in "".join(c["source"]))
+        with mock.patch("shutil.which", return_value=None):
+            with self.assertRaises(RuntimeError) as caught:
+                exec(cell, {"RUN": True})
+        self.assertIn("No GPU attached", str(caught.exception))
+        with self.assertRaises(RuntimeError):
+            exec(cell, {"RUN": False})  # the guard still refuses before RUN = True
+
     def test_stills_silence_the_8bit_cast_warning(self):
         # the per-matmul bitsandbytes cast warning floods the output on an L4; log it once
         s = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]})
