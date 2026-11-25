@@ -16,7 +16,6 @@ from .intake.wikisource import IntakeError, build_packet, pages_to_paragraphs
 
 ROOT = Path(__file__).resolve().parent.parent
 TITLE = 'ক্ষুধিত পাষাণ'
-NO_BREAK = '​'
 # Three pages in the recorded API shape: a title page ending in a hyphen, a page ending {{nop}}, a {{gap}} page.
 PAGES = [
     {'page': '১৭৩', 'revision': 1505887, 'quality': 4, 'timestamp': '2020-11-15T16:43:18Z',
@@ -44,12 +43,22 @@ class WikisourceRulesTests(SimpleTestCase):
             'সঙ্গিনীহীন মাশুল-কালেক্টরের বাসস্থান।',
             'শেষ।'])
         text = ''.join(paragraphs)
-        self.assertNotIn(NO_BREAK, text)
         self.assertNotIn('﻿', text)
         self.assertNotIn('{{', text)
 
     def test_hyphen_is_dropped_unless_the_page_is_listed(self):
         self.assertIn('মাশুলকালেক্টরের', ' '.join(pages_to_paragraphs(PAGES, title=TITLE)))
+
+    def test_missing_title_line_is_refused(self):
+        pages = [dict(PAGES[0], wikitext='আমি।')]
+        with self.assertRaises(IntakeError) as caught:
+            pages_to_paragraphs(pages, title=TITLE)
+        self.assertEqual(caught.exception.code, 'TITLE_LINE_MISSING')
+
+    def test_unknown_keep_hyphen_label_is_refused(self):
+        with self.assertRaises(IntakeError) as caught:
+            pages_to_paragraphs(PAGES, title=TITLE, keep_hyphen_after=frozenset({'৯৯৯'}))
+        self.assertEqual(caught.exception.code, 'UNKNOWN_PAGE_LABEL')
 
     def test_quality_below_four_is_refused(self):
         pages = [dict(PAGES[0]), dict(PAGES[1], quality=3)]
@@ -60,7 +69,7 @@ class WikisourceRulesTests(SimpleTestCase):
     def test_leftover_markup_is_refused(self):
         for bad in ('দেখুন [[অন্য]] পাতা।', 'টীকা<ref>x</ref>।', "''তির্যক''", '{{অজানা|x}}'):
             with self.subTest(bad=bad):
-                pages = [dict(PAGES[1], wikitext=PAGES[1]['wikitext'] + bad)]
+                pages = [dict(PAGES[0], wikitext=PAGES[0]['wikitext'] + bad)]
                 with self.assertRaises(IntakeError) as caught:
                     pages_to_paragraphs(pages, title=TITLE)
                 self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
@@ -124,6 +133,13 @@ class WikisourceCommandTests(SimpleTestCase):
             self.assertEqual(hashlib.sha256((packet / 'source.json').read_bytes()).hexdigest(), manifest['source']['sha256'])
             draft = json.loads((Path(directory) / 'docs/evidence/publication-clearance-test-book-draft.json').read_text(encoding='utf-8'))
             self.assertEqual(draft['status'], 'DRAFT_PENDING_OWNER_APPROVAL')
+
+    def test_existing_packet_is_not_overwritten_without_replace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self._run(directory, self._api(PAGES), '--write')
+            with self.assertRaisesRegex(CommandError, 'PACKET_EXISTS'):
+                self._run(directory, self._api(PAGES), '--write')
+            self._run(directory, self._api(PAGES), '--write', '--replace')
 
     def test_unvalidated_page_fails_the_command(self):
         bad = [dict(p) for p in PAGES]

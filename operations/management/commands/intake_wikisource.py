@@ -47,6 +47,7 @@ class Command(BaseCommand):
         parser.add_argument('--creator', action='append', required=True)
         parser.add_argument('--keep-hyphen-after', action='append', default=[], metavar='PAGE')
         parser.add_argument('--write', action='store_true')
+        parser.add_argument('--replace', action='store_true', help='Overwrite an existing packet or clearance draft.')
         parser.add_argument('--root', default=str(ROOT), help='Repository root to write under (tests).')
 
     def handle(self, *args, **o):
@@ -71,6 +72,8 @@ class Command(BaseCommand):
         root = Path(o['root'])
         packet_dir = root / 'library' / 'intake' / slug
         evidence = root / 'docs' / 'evidence' / f'publication-clearance-{slug}-draft.json'
+        if not o['replace'] and (packet_dir.exists() or evidence.exists()):
+            raise CommandError(f'PACKET_EXISTS: {packet_dir} or {evidence} already exists; pass --replace to overwrite')
         packet_dir.mkdir(parents=True, exist_ok=True)
         evidence.parent.mkdir(parents=True, exist_ok=True)
         (packet_dir / 'source.json').write_bytes(source_bytes(packet['source']))

@@ -30,7 +30,9 @@ class IntakeError(ValueError):
 def _page_text(page, title, first):
     text = NOINCLUDE.sub('', page['wikitext']).replace('﻿', '')
     if first:
-        text = re.sub(r'\{\{কেন্দ্র\|\{\{x-larger\|' + re.escape(title) + r'।?\}\}\}\}', '', text, count=1)
+        text, found = re.subn(r'\{\{কেন্দ্র\|\{\{x-larger\|' + re.escape(title) + r'।?\}\}\}\}', '', text, count=1)
+        if not found:
+            raise IntakeError('TITLE_LINE_MISSING', title)
     closed = bool(re.search(r'\{\{nop\}\}\s*\Z', text))
     text = text.replace('{{nop}}', '')
     text = re.sub(r'\{\{gap\}\}|\n[ \t]*\n', BREAK, text).strip()
@@ -41,6 +43,9 @@ def pages_to_paragraphs(pages, *, title, keep_hyphen_after=frozenset()):
     """Join validated pages into paragraphs using the recorded conversion rules."""
     if not pages:
         raise IntakeError('NO_PAGES')
+    unknown = set(keep_hyphen_after) - {page.get('page') for page in pages}
+    if unknown:
+        raise IntakeError('UNKNOWN_PAGE_LABEL', ', '.join(sorted(unknown)))
     stream = ''
     for index, page in enumerate(pages):
         if page.get('quality') != 4:
