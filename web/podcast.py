@@ -1,7 +1,12 @@
 """Public podcast feed: one item per cleared edition with free audio.
 
 Audio bytes are served only through the authenticated player, so items carry no enclosure
-and never expose storage URLs; each item links its title page with podcast campaign tags."""
+and never expose storage URLs; each item links its title page with podcast campaign tags.
+
+LIMITATION: The feed has no audio enclosures because full narration is members-only. Apple
+Podcasts, Spotify and most directories require an audio enclosure per episode, so the feed will
+likely be rejected or show no episodes until the owner approves public audio (e.g. a cleared
+CDN-hosted preview or full episode)."""
 import xml.etree.ElementTree as ET
 from urllib.parse import urlencode
 
@@ -58,6 +63,6 @@ def feed(request, locale):
         _text(item, _it('explicit'), 'false')
     body = b'<?xml version="1.0" encoding="UTF-8"?>\n' + ET.tostring(rss, encoding='utf-8')
     response = HttpResponse(body, content_type='application/rss+xml; charset=utf-8')
-    response['Cache-Control'] = 'private, no-store, max-age=0'
+    response['Cache-Control'] = 'public,max-age=0,must-revalidate'  # same as the other public page (offline_shell)
     response['Content-Language'] = locale
     return response

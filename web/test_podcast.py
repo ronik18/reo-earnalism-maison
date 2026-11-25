@@ -30,6 +30,11 @@ class PodcastFeedTests(TestCase):
         response = self.feed()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'application/rss+xml; charset=utf-8')
+        # The view sets the same header as web.views.offline_shell; the stack's public-cache finalizer
+        # (operations.cache, PUBLIC_PATH) downgrades unregistered paths to private, no-store.
+        from django.test import RequestFactory
+        from web import podcast
+        self.assertEqual(podcast.feed(RequestFactory().get('/podcast/en.xml'), 'en')['Cache-Control'], 'public,max-age=0,must-revalidate')
         self.assertIn('no-store', response['Cache-Control'])
         root = ET.fromstring(response.content)
         channel = root.find('channel')
@@ -75,3 +80,30 @@ class PodcastFeedTests(TestCase):
         self.assertFalse(audio_cleared_everywhere(self.revision))
         self.clear(asset_sha256={})
         self.assertFalse(audio_cleared_everywhere(self.revision))
+
+    def test_bn_edition_listed_only_in_bn_feed(self):
+        type(self.revision.edition).objects.filter(pk=self.revision.edition_id).update(locale='bn')
+        self.assertEqual(len(self.items('bn')), 1)
+        self.assertEqual(self.items('en'), [])
+        self.assertEqual(ET.fromstring(self.feed('bn').content).findtext('./channel/language'), 'bn')
+
+    def _go_live_with(self, policy):
+        from django.utils import timezone
+        from library import services as svc
+        from library.models import Revision
+        draft = svc.clone_revision(self.revision.id)
+        draft.access_policy = policy
+        draft.save()
+        Revision.objects.filter(pk=self.revision.pk).update(state='retired')
+        Revision.objects.filter(pk=draft.pk).update(state='live', published_at=timezone.now())
+        type(self.revision.edition).objects.filter(pk=self.revision.edition_id).update(live_revision=draft.pk)
+
+    def test_paid_and_denied_audio_are_excluded(self):
+        for audio in ('paid', 'deny'):
+            self._go_live_with({'reader': 'free', 'audio': audio})
+            self.assertEqual(self.items(), [], audio)
+
+    def test_unpublished_edition_is_excluded(self):
+        from library.models import Revision
+        Revision.objects.filter(pk=self.revision.pk).update(published_at=None)
+        self.assertEqual(self.items(), [])
