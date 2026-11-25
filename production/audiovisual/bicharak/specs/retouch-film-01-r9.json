@@ -1,0 +1,656 @@
+{
+  "note": "Retouch of round-9 shots where every candidate drew forbidden details; owner-approved open-licence inpainting 2026-11-25",
+  "items": [
+    {
+      "key": "f01s002-4",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s002-4--c1.png"
+      },
+      "regions": [
+        {
+          "find": "overhead electric wires across the night sky",
+          "prompt": "clear deep indigo night sky"
+        },
+        {
+          "find": "wooden utility poles with cables down the lane",
+          "prompt": "plain limewashed house walls and tiled rooftops"
+        }
+      ],
+      "prompt": "Kshiroda, a dignified 38-year-old Bengali woman in a faded maroon sari with a thin black border, black hair in a low bun, standing alone in a dark quiet 1880s Calcutta brick lane, plain limewashed walls, gas lamps on wooden posts, at night, looking up at one lit upstairs window, a bullock cart resting at the far end.",
+      "seed": 3315,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s003-5",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s003-5--c1.png"
+      },
+      "regions": [
+        {
+          "find": "burning flame and glow of the clay lamp on the floor",
+          "prompt": "a cold dark clay lamp with a dry black wick, dim blue shadow on the floor"
+        },
+        {
+          "find": "thin wires in the sky seen through the window",
+          "prompt": "clear pale blue dusk sky"
+        }
+      ],
+      "prompt": "A bare empty room at dusk, mud-plastered walls, a cold dark clay lamp standing on the beaten-earth floor, one small window showing the last blue dusk, deep shadow in the corners, 1880s Bengal.",
+      "seed": 6306,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s005-2",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s005-2--c3.png"
+      },
+      "regions": [
+        {
+          "find": "metal electric ceiling fan",
+          "prompt": "a long white cotton cloth punkah hanging from a wooden beam, a rope running from it"
+        },
+        {
+          "find": "grey stubble shading on the judge's jaw and upper lip",
+          "prompt": "smooth clean-shaven chin, jaw and upper lip, same skin tone"
+        },
+        {
+          "find": "tuft of hair on the top front of the judge's head",
+          "prompt": "smooth bald shining crown"
+        }
+      ],
+      "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face, bald crown with a small back tuft, dark chapkan coat over a white dhoti, seated high on the raised wooden bench of a colonial sessions courtroom, Bengali lawyers below, tall shuttered windows, bright midday light.",
+      "seed": 5301,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s006-1",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s006-1--c2.png"
+      },
+      "regions": [
+        {
+          "find": "black moustache on the man's upper lip",
+          "prompt": "smooth clean-shaven upper lip, same skin tone"
+        },
+        {
+          "find": "the man's jaw and cheek",
+          "prompt": "smooth clean-shaven jaw with a dab of white shaving lather"
+        },
+        {
+          "find": "pen held in the man's right hand",
+          "prompt": "a folding straight razor held in his right hand"
+        },
+        {
+          "find": "metal pan on the desk at the left",
+          "prompt": "plain polished wooden desk surface"
+        }
+      ],
+      "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face, bald crown with a small back tuft, dark chapkan coat over a white dhoti, seated at a wooden desk in the morning, shaving, a brass bowl and a small hand mirror on the desk, warm early window light.",
+      "seed": 5303,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s007-1",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s007-1--c2.png"
+      },
+      "regions": [
+        {
+          "find": "wooden utility pole with a bundle of wires at the right",
+          "prompt": "plain limewashed house wall and a tiled rooftop"
+        },
+        {
+          "find": "overhead electric wires across the sky",
+          "prompt": "clear open dusk sky"
+        }
+      ],
+      "prompt": "A quiet narrow 1880s Calcutta brick lane, plain limewashed walls, gas lamps on wooden posts at dusk, a lime-washed two-storey house with green wooden shutters and an iron-barred upstairs window, a bullock cart resting by the wall.",
+      "seed": 6310,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s007-2",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s007-2--c3.png"
+      },
+      "regions": [
+        {
+          "find": "dark dot on the girl's forehead",
+          "prompt": "smooth bare forehead skin, same warm skin tone"
+        },
+        {
+          "find": "red and green border along the edge of the white sari",
+          "prompt": "plain white cotton sari edge, the same white as the rest of the sari"
+        },
+        {
+          "find": "braid of hair over the girl's shoulder",
+          "prompt": "long loose black hair falling over her shoulder"
+        },
+        {
+          "find": "small scribble in the bottom-left corner",
+          "prompt": "plain window sill and wall"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, sitting at an iron-barred upstairs window, chin on her hand, gazing out at the lane, warm golden afternoon sunlight.",
+      "seed": 3302,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s007-4",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s007-4--c1.png"
+      },
+      "regions": [
+        {
+          "find": "green stud on the girl's earlobe",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        },
+        {
+          "find": "red border of the white sari",
+          "prompt": "plain white cotton sari edge, the same white as the rest of the sari"
+        },
+        {
+          "find": "tiny stud on the girl's nose",
+          "prompt": "smooth bare nose skin, same warm skin tone"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, at the barred window at dusk, the world beyond glowing like a far golden pleasure garden of lights and trees.",
+      "seed": 3322,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s007-5",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s007-5--c1.png"
+      },
+      "regions": [
+        {
+          "find": "tiny dark studs on the girl's earlobes",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, standing on a flat rooftop, a soft spring wind lifting her hair and sari, bright sky, distant palm trees.",
+      "seed": 3323,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s007-6",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s007-6--c1.png"
+      },
+      "regions": [
+        {
+          "find": "faint red mark on the girl's forehead",
+          "prompt": "smooth bare forehead skin, same warm skin tone"
+        },
+        {
+          "find": "black stud on the girl's earlobe",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, dreamlike, red lotus petals unfolding around her, soft warm golden glow.",
+      "seed": 3324,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s008-1",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s008-1--c1.png"
+      },
+      "regions": [
+        {
+          "find": "electric street lamp pole with a globe at the end of the lane",
+          "prompt": "clear blue morning sky over tiled rooftops"
+        },
+        {
+          "find": "wires along the wall and across the sky",
+          "prompt": "plain limewashed wall and clear blue sky"
+        },
+        {
+          "find": "phone-like object in the woman's hand",
+          "prompt": "her open hand raised in a wave"
+        },
+        {
+          "find": "brown leather bag held by the boy",
+          "prompt": "a small black wooden-framed writing slate held in both hands"
+        }
+      ],
+      "prompt": "Two small Bengali brothers in white kurtas carrying writing slates, running to school down a sunlit 1880s Calcutta brick lane, plain limewashed walls, gas lamps on wooden posts, their mother in a cotton sari by the door, a bullock cart, bright morning sun.",
+      "seed": 6312,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s008-3",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s008-3--c2.png"
+      },
+      "regions": [
+        {
+          "find": "green stud on the girl's earlobe",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        },
+        {
+          "find": "yellow border along the edge of the white sari",
+          "prompt": "plain white cotton sari edge, the same white as the rest of the sari"
+        },
+        {
+          "find": "coloured stripes on the girl's sleeve",
+          "prompt": "plain white cotton blouse sleeve"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, at the barred window looking down at the 1880s Calcutta brick lane, plain limewashed walls, gas lamps on wooden posts below, passers-by in dhotis, a hawker with a basket on his head, warm golden afternoon sunlight.",
+      "seed": 3325,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s009-4",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s009-4--c3.png"
+      },
+      "regions": [
+        {
+          "find": "hanging electric light bulb on a cord",
+          "prompt": "a small brass oil lamp hanging on a chain with a tiny open flame"
+        },
+        {
+          "find": "small stud on the girl's earlobe",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        },
+        {
+          "find": "dark green border of the white sari",
+          "prompt": "plain white cotton sari edge, the same white as the rest of the sari"
+        },
+        {
+          "find": "dark mark between the girl's eyebrows",
+          "prompt": "smooth bare forehead skin, same warm skin tone"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, awake late at night in her dark room, lamp-thrown shadows on the plain limewashed wall, a small myna bird in a bamboo cage by the window.",
+      "seed": 3327,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s010-5",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s010-5--c3.png"
+      },
+      "regions": [
+        {
+          "find": "red splashes and puddles on the white floor-sheet",
+          "prompt": "faint pale brownish wine stains on a white cotton floor-sheet"
+        },
+        {
+          "find": "black flat slab on the floor at the left",
+          "prompt": "a small brass cup on the floor-sheet"
+        },
+        {
+          "find": "red paper lantern hanging from the ceiling",
+          "prompt": "plain dark wooden ceiling beam in shadow"
+        }
+      ],
+      "prompt": "A Bengali baithak-khana room after a party at night, weary men in dhotis and draped shawls slumped on a white floor-sheet with bolsters, brass decanters, guttering brass oil lamps, joyless, 1880s Calcutta.",
+      "seed": 6318,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s011-2",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s011-2--c1.png"
+      },
+      "regions": [
+        {
+          "find": "small earring on the girl's earlobe",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        },
+        {
+          "find": "red and yellow border of the white sari",
+          "prompt": "plain white cotton sari edge, the same white as the rest of the sari"
+        },
+        {
+          "find": "hanging electric light bulb behind the bars",
+          "prompt": "dusky indigo evening sky beyond the bars"
+        },
+        {
+          "find": "the girl's hand holding the letter",
+          "prompt": "a slender girl's hand with five fingers and a thumb holding the folded letter"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, at an iron-barred window at dusk, startled, taking a folded letter through the bars from a man's hand in a dark sleeve.",
+      "seed": 3329,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s011-4",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s011-4--c1.png"
+      },
+      "regions": [
+        {
+          "find": "black dot on the girl's forehead",
+          "prompt": "smooth bare forehead skin, same warm skin tone"
+        },
+        {
+          "find": "small gold stud on the girl's earlobe",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, in a whirl of wind and scattered blank pages in a dark room, a brass oil lamp glowing behind, dreamlike.",
+      "seed": 3331,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s012-1",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s012-1--c1.png"
+      },
+      "regions": [
+        {
+          "find": "small stud on the girl's earlobe",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        },
+        {
+          "find": "gold trim lines on the girl's collar and shoulder",
+          "prompt": "plain white cotton sari draped over her shoulder, the same white to the edge"
+        },
+        {
+          "find": "arrow mark drawn on the wall",
+          "prompt": "plain weathered wall plaster"
+        },
+        {
+          "find": "scribbled signature in the bottom-right corner",
+          "prompt": "plain weathered wall plaster in shadow"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, slipping out of a wooden door at deep night, looking back over her shoulder, a dark 1880s Calcutta brick lane, plain limewashed walls, gas lamps on wooden posts.",
+      "seed": 3332,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s012-2",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s012-2--c3.png"
+      },
+      "regions": [
+        {
+          "find": "dark mark on the girl's forehead",
+          "prompt": "smooth bare forehead skin, same warm skin tone"
+        },
+        {
+          "find": "small gold earrings on the girl's earlobes",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        },
+        {
+          "find": "black stripes on the edge of the white sari and sleeve",
+          "prompt": "plain white cotton sari edge, the same white as the rest of the sari"
+        },
+        {
+          "find": "pointed goatee on the man's chin",
+          "prompt": "short trimmed black beard along his jaw and chin, joining his moustache"
+        }
+      ],
+      "prompt": "Inside a closed wooden horse carriage at night, dark wood panels; Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, shrinking away beside young Mohit, a 20-year-old Bengali student with round spectacles, black moustache and short black beard, dark frock coat.",
+      "seed": 3333,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s012-3",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s012-3--c1.png"
+      },
+      "regions": [
+        {
+          "find": "drooping black cable across the top-left wall",
+          "prompt": "plain brick wall in shadow"
+        },
+        {
+          "find": "lattice water-tank tower on the rooftop",
+          "prompt": "tiled rooftop against a deep blue night sky"
+        }
+      ],
+      "prompt": "A closed box-shaped palki-gari horse carriage with shuttered sides speeding through a dark 1880s Calcutta brick lane, plain limewashed walls, gas lamps on wooden posts at night, its side lamp swinging.",
+      "seed": 6320,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s013-1",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s013-1--c1.png"
+      },
+      "regions": [
+        {
+          "find": "red mark on the girl's forehead",
+          "prompt": "smooth bare forehead skin, same warm skin tone"
+        },
+        {
+          "find": "tiny studs on the girl's earlobes",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        },
+        {
+          "find": "white wax candle in the alcove",
+          "prompt": "a small brass oil lamp with a tiny open flame"
+        },
+        {
+          "find": "olive-green stripe along the edge of the white sari",
+          "prompt": "plain white cotton sari edge, the same white as the rest of the sari"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, weeping with eyes shut inside a closed wooden horse carriage with slatted shutters and dark wood panels, deep blue darkness.",
+      "seed": 3334,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s013-2",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s013-2--c1.png"
+      },
+      "regions": [
+        {
+          "find": "dark dot on the girl's forehead",
+          "prompt": "smooth bare forehead skin, same warm skin tone"
+        },
+        {
+          "find": "drop earrings on the girl's earlobes",
+          "prompt": "bare earlobe skin, same warm skin tone"
+        },
+        {
+          "find": "thin stick in the man's right hand over the rice",
+          "prompt": "the fingers of his right hand scooping rice from the brass plate"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, sitting before her thin father, a Bengali clerk in a white dhoti, who eats rice from a brass plate with his fingers, warm golden memory light.",
+      "seed": 3335,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s013-3",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s013-3--c2.png"
+      },
+      "regions": [
+        {
+          "find": "red dot on the girl's forehead",
+          "prompt": "smooth bare forehead skin, same warm skin tone"
+        },
+        {
+          "find": "red stripes on the girl's sleeves and neckline",
+          "prompt": "plain white cotton blouse and sari, the same white to the edge"
+        },
+        {
+          "find": "narrow green leaf sprigs in their hands",
+          "prompt": "broad heart-shaped glossy green betel leaves being folded"
+        }
+      ],
+      "prompt": "Hemshashi, a 14-year-old Bengali girl-widow in a plain all-white cotton sari, long loose black hair, bare forehead, sitting on a mat with her mother, a Bengali woman in a plain cotton sari, both folding green betel leaves, warm morning sun, a memory.",
+      "seed": 3336,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s014-1",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s014-1--c3.png"
+      },
+      "regions": [
+        {
+          "find": "brightly lit yellow window on the left house",
+          "prompt": "a dark window closed with wooden shutters"
+        },
+        {
+          "find": "thin wires at the far end of the lane",
+          "prompt": "clear starry night sky"
+        }
+      ],
+      "prompt": "A quiet lane of small brick houses asleep under a sky full of stars, every window dark and shuttered, pale moonlight, a bullock cart resting by a plain limewashed wall, 1880s Calcutta.",
+      "seed": 6321,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s016-1",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s016-1--c1.png"
+      },
+      "regions": [
+        {
+          "find": "black moustache on the man's upper lip",
+          "prompt": "smooth clean-shaven upper lip, same skin tone"
+        },
+        {
+          "find": "the man's open empty palms",
+          "prompt": "both hands cupped together holding clear water raised toward the sun"
+        }
+      ],
+      "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face, bald crown with a small back tuft, dark chapkan coat over a white dhoti, standing on the lowest stone step of a river ghat at sunrise, offering water from both cupped hands, golden sunrise over the river.",
+      "seed": 5304,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s016-2",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s016-2--c3.png"
+      },
+      "regions": [
+        {
+          "find": "open paper book with printed lettering in the man's hands",
+          "prompt": "a long narrow bundle of plain pale dried palm leaves strung on a cord"
+        }
+      ],
+      "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face, bald crown with a small back tuft, dark chapkan coat over a white dhoti, seated cross-legged reading a palm-leaf scripture manuscript at a low wooden desk, a brass oil lamp, night.",
+      "seed": 5305,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s016-3",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s016-3--c3.png"
+      },
+      "regions": [
+        {
+          "find": "grey moustache and goatee on the man's face",
+          "prompt": "smooth clean-shaven chin and upper lip, same skin tone"
+        },
+        {
+          "find": "belt and buckle at the man's waist",
+          "prompt": "folded white dhoti cloth at the waist"
+        },
+        {
+          "find": "glasses on the boy at the right",
+          "prompt": "the boy's bare face with plain dark eyes"
+        }
+      ],
+      "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face, bald crown with a small back tuft, dark chapkan coat over a white dhoti, seated cross-legged, hands resting on his knees, small Bengali boys in white kurtas and dhotis sitting cross-legged in prayer before him, warm morning sun.",
+      "seed": 5306,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s018-2",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s018-2--c3.png"
+      },
+      "regions": [
+        {
+          "find": "round coin with a portrait held in the man's fingers",
+          "prompt": "a small round gold finger-ring with a visible gold band, its oval bezel holding a tiny painted ivory miniature of a bearded young man with spectacles"
+        },
+        {
+          "find": "lettering in the top-left corner",
+          "prompt": "plain whitewashed wall"
+        }
+      ],
+      "prompt": "A turbaned Bengali jail warder in a white tunic holding up a small gold finger-ring; beside him Kshiroda, a dignified 38-year-old Bengali woman in a faded maroon sari with a thin black border, black hair in a low bun, looking at it, alone in a whitewashed jail cell, warm lamp light.",
+      "seed": 3343,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s019-2",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s019-2--c2.png"
+      },
+      "regions": [
+        {
+          "find": "round medal with a portrait held in the man's fingers",
+          "prompt": "a small round gold finger-ring with a visible gold band, its oval bezel holding a tiny painted ivory miniature of a bearded young man with spectacles"
+        },
+        {
+          "find": "black bars along the top and bottom edges",
+          "prompt": "bare stone jail wall in lamp-lit shadow"
+        }
+      ],
+      "prompt": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face, bald crown with a small back tuft, dark chapkan coat over a white dhoti, alone in frame, startled as if holding a burning coal, staring at a small gold finger-ring held in his fingers, bare jail wall behind, warm oil-lamp light.",
+      "seed": 5309,
+      "candidates": 3,
+      "strength": 0.85
+    }
+  ]
+}

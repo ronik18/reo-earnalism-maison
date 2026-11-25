@@ -18825,6 +18825,20 @@
       },
       "path": "picks/stills-film-01-r9.pick-1.json",
       "sha256": "87920a4e1af178922f8a298cde5b4c02535f9a7675f1c600caebb19f08f26246"
+    },
+    {
+      "bytes": 22097,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 2.1380416666666666,
+        "inputs_zip": "jobs/retouch-film-01-r9/inputs.zip",
+        "job_id": "retouch-film-01-r9",
+        "job_kind": "retouch",
+        "manifest": "jobs/retouch-film-01-r9/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/retouch-film-01-r9/retouch.ipynb",
+      "sha256": "e58e4507eaf7500514d59ebc3dbf8f10e181bc30aac7f9432600089ee3010e2f"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -21307,6 +21321,49 @@
       },
       "result": "recorded",
       "stage": "pick"
+    },
+    {
+      "at": "2026-11-25T04:39:19.004239+00:00",
+      "detail": {
+        "forecast_units": 2.1380416666666666,
+        "job_id": "retouch-film-01-r9",
+        "kind": "retouch"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T04:39:19.036582+00:00",
+      "detail": {
+        "job_id": "retouch-film-01-r9",
+        "kind": "retouch",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-25T04:39:30.766791+00:00",
+      "detail": {
+        "bytes": 26910145,
+        "job_id": "retouch-film-01-r9",
+        "key": "exports/colab-exchange/bicharak/retouch-film-01-r9/inputs.zip",
+        "sha256": "8697ed044dd37f890cb9db0b132e3bc3c581fb244f5d1f6b9cd7fbc50ceb4c26"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T04:40:20.193125+00:00",
+      "detail": {
+        "expires_at": "2026-11-26T04:39:43.652007+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/retouch-film-01-r9/inputs.zip",
+        "inputs_sha256": "8697ed044dd37f890cb9db0b132e3bc3c581fb244f5d1f6b9cd7fbc50ceb4c26",
+        "job_id": "retouch-film-01-r9",
+        "outputs_key": "exports/colab-exchange/bicharak/retouch-film-01-r9/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",

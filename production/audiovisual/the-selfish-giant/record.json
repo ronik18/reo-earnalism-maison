@@ -5901,6 +5901,18 @@
       },
       "result": "restored",
       "stage": "record"
+    },
+    {
+      "at": "2026-11-25T04:40:20.379338+00:00",
+      "detail": {
+        "expires_at": "2026-11-26T04:39:44+00:00",
+        "inputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r9/inputs.zip",
+        "inputs_sha256": "a7a685e5fcbfa09a8ae466c0d5e96b874802537b4d51a8f7fc4fea52846286c1",
+        "job_id": "selfish-giant-stills-film-01-r9",
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-stills-film-01-r9/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",

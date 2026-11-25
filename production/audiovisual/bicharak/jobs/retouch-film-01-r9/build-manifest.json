@@ -1,0 +1,30 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 3967,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/retouch-film-01-r9",
+  "inputs_sha256": "8697ed044dd37f890cb9db0b132e3bc3c581fb244f5d1f6b9cd7fbc50ceb4c26",
+  "job_id": "retouch-film-01-r9",
+  "kind": "retouch",
+  "licences": {
+    "allowlist": [
+      "apache-2.0",
+      "mit",
+      "openrail++"
+    ],
+    "recorded": {
+      "CIDAS/clipseg-rd64-refined": "apache-2.0",
+      "diffusers/stable-diffusion-xl-1.0-inpainting-0.1": "openrail++"
+    }
+  },
+  "mask_model": {
+    "repo": "CIDAS/clipseg-rd64-refined",
+    "revision": "resolved-at-run-time"
+  },
+  "model": {
+    "repo": "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "e58e4507eaf7500514d59ebc3dbf8f10e181bc30aac7f9432600089ee3010e2f",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}
