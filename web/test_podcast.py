@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 from django.conf import settings
 from django.test import TestCase
-from library.clearance import audio_cleared
+from library.store_export import audio_cleared_everywhere
 from library import test_audio_preview as fixtures
 
 NS = {'itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd'}
@@ -13,7 +13,8 @@ class PodcastFeedTests(TestCase):
         self.clear()
 
     def clear(self, **changes):
-        clearance = {'status': 'pass', 'sha256': self.revision.content_sha256, 'formats': ['audio'],
+        clearance = {'status': 'pass', 'sha256': self.revision.content_sha256, 'formats': ['reader', 'audio'],
+                     'asset_sha256': {str(a.id): a.sha256 for a in self.revision.assets.filter(state='ready')},
                      'territories': list(settings.MAISON_PUBLICATION_TERRITORIES), 'evidence_ref': 'legal-ref-1'}
         clearance.update(changes)
         self.revision.validation_evidence['publication_clearance'] = clearance
@@ -66,9 +67,11 @@ class PodcastFeedTests(TestCase):
         type(self.revision.edition).objects.filter(pk=self.revision.edition_id).update(live_revision=None)
         self.assertEqual(self.items(), [])
 
-    def test_audio_cleared_requires_pass_and_live(self):
-        self.assertTrue(audio_cleared(self.revision))
+    def test_audio_cleared_everywhere_requires_pass_and_exact_assets(self):
+        self.assertTrue(audio_cleared_everywhere(self.revision))
         self.clear(status='fail')
-        self.assertFalse(audio_cleared(self.revision))
+        self.assertFalse(audio_cleared_everywhere(self.revision))
         self.clear(evidence_ref=' ')
-        self.assertFalse(audio_cleared(self.revision))
+        self.assertFalse(audio_cleared_everywhere(self.revision))
+        self.clear(asset_sha256={})
+        self.assertFalse(audio_cleared_everywhere(self.revision))

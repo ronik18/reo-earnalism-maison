@@ -27,7 +27,7 @@ def _text(parent, tag, value):
 def feed(request, locale):
     if locale not in ('en', 'bn'):
         raise Http404
-    from library.clearance import audio_cleared
+    from library.store_export import audio_cleared_everywhere
     from library.models import Edition
     rss = ET.Element('rss', {'version': '2.0'})
     channel = ET.SubElement(rss, 'channel')
@@ -45,7 +45,7 @@ def feed(request, locale):
                 .order_by('-live_revision__published_at', 'slug'))
     for edition in editions:
         revision = edition.live_revision
-        if revision.access_policy.get('audio') != 'free' or not audio_cleared(revision):
+        if revision.access_policy.get('audio') != 'free' or not audio_cleared_everywhere(revision):
             continue
         link = request.build_absolute_uri(reverse('web:title', args=['en', edition.slug])) + '?' + urlencode(
             {'utm_source': 'podcast', 'utm_medium': 'feed', 'utm_campaign': edition.slug})
