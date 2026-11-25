@@ -225,8 +225,8 @@
     "job_id": "stills-film-01-r9",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 5.68905,
-    "state": "reserved",
+    "units": 10.0,
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   },
