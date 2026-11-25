@@ -17,6 +17,7 @@ Last updated: 25 Nov 2026.
 
 ## Assets
 - [ ] **Covers** (upload front/back pairs to Cloudinary, then tell Claude): প্রায়শ্চিত্ত, আপদ, ঠাকুর্দ্দা, প্রতিহিংসা.
+- Covers already in your Cloudinary for the next batch (no action needed): মধ্যবর্ত্তিনী, শাস্তি, সমাপ্তি, মেঘ ও রৌদ্র (from *কথা-চতুষ্টয়*), কাবুলিওয়ালা, পোস্টমাস্টার, ছুটি.
 - [ ] **কাবুলিওয়ালা early scan:** open https://icvtesting.nvli.in/rarebooks/galapagaucacha-1ma-khanada from India; if a PDF/page images appear, put the file in Google Drive and share the path.
 
 ## Production runs
