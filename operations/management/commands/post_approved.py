@@ -13,6 +13,8 @@ Post summary contract (ReviewItem kind='post', status='approved'); every field i
   destination_key  bridge destination key 'youtube:<account_id>' (must name a youtube destination in the manifest)
   account_id       YouTube channel id; must equal the account in destination_key
   post_id          stable post identifier, recorded in the authority reference and the audit event
+The item's sha256 is the bundle's prepared candidate_sha256 (operations.review.queue requires it); before any
+provider call the bundle is prepared again and an item whose content changed is refused REVIEW_ITEM_CHANGED.
 Paths resolve under settings.BASE_DIR; absolute or escaping paths are refused. An item missing a field, or
 failing a check, gets a per-item error and is left untouched; the rest of the batch continues.
 
@@ -150,6 +152,8 @@ class Command(BaseCommand):
     def _upload(self, item, fields, token):
         manifest = json.loads(fields['manifest_path'].read_text())
         plan = prepare(manifest, fields['root_path'])
+        if plan['candidate_sha256'] != item.sha256:  # the approval binds this exact prepared content, nothing else
+            raise DeliveryError('REVIEW_ITEM_CHANGED')
         key = fields['destination_key']
         if not any(d['key'] == key for d in plan['destinations']):
             raise DeliveryError('destination_not_in_bound_manifest')

@@ -1,8 +1,10 @@
 import hashlib
+import json
 import tempfile
 from datetime import datetime, timedelta, timezone as dt_timezone
 from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
@@ -36,6 +38,43 @@ def login(client, user):
     assert client.post(path, data).status_code in (200, 302)
 
 
+PROBE = lambda _: dict(width=1080, height=1920, duration_seconds=30, codec='h264')
+REAL_PREPARE = review.prepare
+
+
+def write_bundle(base, name, video=b'bound-video-payload', title='Exact title'):
+    """A minimal production bundle under `base` (inside BASE_DIR); returns (manifest_rel, asset_root_rel)."""
+    from django.conf import settings
+    assets = base / 'assets' / name
+    assets.mkdir(parents=True, exist_ok=True)
+    (assets / 'film').write_bytes(video)
+    manifest = dict(schema='earnalism.production_bundle.v1', project_id=name, private=True,
+        content=dict(text_sha256='a' * 64, language='en', voice_profile='en_tisha'),
+        assets=[dict(id='film', path='film', bytes=len(video), sha256=hashlib.sha256(video).hexdigest(),
+                     role='video', content_type='video/mp4')], evidence=dict(qa=[], rights=[]),
+        social=[dict(platform='youtube', account_id='account1', video_asset_id='film', title=title,
+                     description='Exact description', made_for_kids=False)])
+    path = base / 'bundle' / (name + '.json')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(manifest))
+    root = Path(settings.BASE_DIR)
+    return str(path.relative_to(root)), str(assets.relative_to(root))
+
+
+def post_summary(base, post_id, edition='a', **overrides):
+    manifest, assets = write_bundle(base, post_id)
+    summary = {'edition_slug': edition, 'bundle_manifest': manifest, 'asset_root': assets,
+               'destination_key': 'youtube:account1', 'account_id': 'account1', 'post_id': post_id,
+               'cover_sha256': 'c' * 64, 'exact_words': True, 'ai': False, 'ai_labelled': False, 'claims': [],
+               'sponsored': False, 'new_author': False}
+    summary.update(overrides)
+    return summary
+
+
+def candidate(summary):
+    return review.post_candidate_sha256(summary)
+
+
 def make_user(email, *, staff=True, verified=True, perm=True):
     user = User.objects.create_user(email, PASSWORD, is_staff=staff, is_verified=verified)
     if perm:
@@ -51,6 +90,9 @@ class ReviewQueueTests(TestCase):
         self.base = Path(self.tmp.name)
         self.prefix = self.base.name
         self.owner = make_user('owner@example.test')
+        patcher = patch.object(review, 'prepare', lambda m, r: REAL_PREPARE(m, r, probe=PROBE))
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def file_item(self, kind='clearance', slug='a', body=b'{"ok": 1}'):
         rel = f'{self.prefix}/docs/evidence/publication-clearance-{slug}.json'
@@ -61,10 +103,8 @@ class ReviewQueueTests(TestCase):
         return item, path
 
     def post(self, post_id='p1', **summary):
-        base = {'edition_slug': 'a', 'cover_sha256': 'c' * 64, 'exact_words': True, 'claims': [], 'ai': False}
-        base.update(summary)
-        sha = hashlib.sha256(post_id.encode()).hexdigest()
-        return review.queue('post', f'social/a/{post_id}', sha, base)
+        base = post_summary(self.base, post_id, **summary)
+        return review.queue('post', f'social/a/{post_id}', candidate(base), base)
 
     def test_queue_is_idempotent(self):
         first, _ = self.file_item('cover', slug='idem')
@@ -141,10 +181,12 @@ class ReviewQueueTests(TestCase):
             clearance, _ = self.file_item('clearance', slug='a')
             review.decide(self.owner, [clearance.pk], 'approved')
             for pid, drop, code in [('q1', 'ai', 'AI_NOT_LABELLED'), ('q2', 'claims', 'HAS_CLAIMS'), ('q3', 'exact_words', 'NOT_EXACT_WORDS')]:
-                summary = {'edition_slug': 'a', 'cover_sha256': 'c' * 64, 'exact_words': True, 'claims': [], 'ai': False}
+                summary = post_summary(self.base, pid)
                 summary.pop(drop)
-                item = review.queue('post', f'social/a/{pid}', hashlib.sha256(pid.encode()).hexdigest(), summary)
-                self.assertEqual(item.status, 'pending', pid)
+                with self.assertRaises(DomainError) as ctx:  # queue refuses an incomplete summary outright
+                    review.queue('post', f'social/a/{pid}', candidate(summary), summary)
+                self.assertEqual(ctx.exception.code, 'REVIEW_SUMMARY_INVALID')
+                item = ReviewItem(kind='post', ref=f'social/a/{pid}', summary=summary)  # e.g. a hand-made row
                 self.assertEqual(review.auto_checks(item), [code])
 
     def test_standing_permission_never_applies_to_clearance_or_edition(self):
@@ -239,3 +281,75 @@ class ReviewQueueTests(TestCase):
         out = StringIO()
         call_command('review_report', week='2026-W47', stdout=out)
         self.assertEqual(out.getvalue().strip(), '')
+
+
+class PostBindingTests(TestCase):
+    """A post approval binds the exact prepared bundle (candidate_sha256) and one summary schema."""
+    def setUp(self):
+        from django.conf import settings
+        self.tmp = tempfile.TemporaryDirectory(dir=settings.BASE_DIR, prefix='.review-test-')
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.owner = make_user('owner@example.test')
+        patcher = patch.object(review, 'prepare', lambda m, r: REAL_PREPARE(m, r, probe=PROBE))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_post_sha256_must_be_the_prepared_candidate(self):
+        summary = post_summary(self.base, 'b1')
+        for sha in (hashlib.sha256(b'b1').hexdigest(), '0' * 64):
+            with self.assertRaises(DomainError) as ctx:
+                review.queue('post', 'social/a/b1', sha, summary)
+            self.assertEqual(ctx.exception.code, 'REVIEW_HASH_INVALID')
+        item = review.queue('post', 'social/a/b1', candidate(summary), summary)
+        self.assertEqual(item.sha256, REAL_PREPARE(json.loads((Path(settings_base()) / summary['bundle_manifest']).read_text()),
+                                                   Path(settings_base()) / summary['asset_root'], probe=PROBE)['candidate_sha256'])
+
+    def test_post_summary_schema_is_required(self):
+        good = post_summary(self.base, 'b2')
+        sha = candidate(good)
+        for key, value in [('edition_slug', None), ('account_id', ''), ('post_id', 3), ('cover_sha256', None),
+                           ('exact_words', 'yes'), ('ai', None), ('ai_labelled', 1), ('claims', 'none'),
+                           ('sponsored', None), ('new_author', 'no'), ('destination_key', None)]:
+            summary = dict(good)
+            if value is None:
+                summary.pop(key)
+            else:
+                summary[key] = value
+            with self.assertRaises(DomainError) as ctx:
+                review.queue('post', 'social/a/b2', sha, summary)
+            self.assertEqual(ctx.exception.code, 'REVIEW_SUMMARY_INVALID', key)
+            self.assertIn(key, ctx.exception.details['fields'])
+        for key, value in [('bundle_manifest', '/etc/passwd'), ('asset_root', '../../outside')]:
+            with self.assertRaises(DomainError) as ctx:
+                review.queue('post', 'social/a/b2', sha, dict(good, **{key: value}))
+            self.assertEqual(ctx.exception.code, 'REVIEW_REF_INVALID', key)
+        with self.assertRaises(DomainError) as ctx:
+            review.queue('post', 'social/other/b2', sha, good)
+        self.assertEqual(ctx.exception.code, 'REVIEW_REF_INVALID')
+        self.assertFalse(ReviewItem.objects.exists())
+
+    def test_changed_bundle_cannot_be_approved(self):
+        summary = post_summary(self.base, 'b3')
+        item = review.queue('post', 'social/a/b3', candidate(summary), summary)
+        write_bundle(self.base, 'b3', title='A different title')
+        with self.assertRaises(DomainError) as ctx:
+            review.decide(self.owner, [item.pk], 'approved')
+        self.assertEqual(ctx.exception.code, 'REVIEW_ITEM_CHANGED')
+        self.assertEqual(ctx.exception.details['refs'], ['social/a/b3'])
+        item.refresh_from_db()
+        self.assertEqual(item.status, 'pending')
+        write_bundle(self.base, 'b3', video=b'another-video')
+        with self.assertRaises(DomainError):
+            review.decide(self.owner, [item.pk], 'approved')
+        self.assertEqual(review.decide(self.owner, [item.pk], 'rejected'), 1)
+
+    def test_unchanged_bundle_is_approved(self):
+        summary = post_summary(self.base, 'b4')
+        item = review.queue('post', 'social/a/b4', candidate(summary), summary)
+        self.assertEqual(review.decide(self.owner, [item.pk], 'approved'), 1)
+
+
+def settings_base():
+    from django.conf import settings
+    return settings.BASE_DIR
