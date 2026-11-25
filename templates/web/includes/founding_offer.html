@@ -1,5 +1,5 @@
-{% load maison %}<section class="founding-offer narrow" aria-labelledby="founding-offer-text">
+{% load maison %}<div role="group" aria-labelledby="founding-offer-text">
 <p id="founding-offer-text" class="lead">{% ui 'founding_offer' %}</p>
 <div class="pass-reference-grid" aria-label="{% ui 'founding_anchors_title' %}">{% for a in anchors %}<article class="pass-reference"><h2>{{ a.name }}</h2><p class="reference-amount"><span>{{ a.price }}</span></p><p class="fine">{% ui 'founding_anchor_source' %}: <a class="text-link" href="{{ a.source_url }}" rel="noopener">{{ a.name }}</a></p></article>{% endfor %}</div>
 {% if request.user.is_authenticated %}<p class="fine"><a class="text-link" href="{% url 'web:settings' ui_locale %}">{% ui 'founding_cancel_link' %}</a></p>{% endif %}
-</section>
+</div>

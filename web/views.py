@@ -13,6 +13,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
+from billing.founding import founding_plans_open
 from .i18n import catalogue, text
 
 
@@ -517,10 +518,7 @@ PASS_ANCHORS = [
 @domain_view
 def pass_page(request, locale):
     destination = safe_return(request.GET.get("return_to"),locale) if request.GET.get("return_to") else reverse("web:explore",args=[locale])
-    from billing.founding import SPECS
-    from billing.models import Offer
-    founding_open = Offer.objects.filter(code__in=[s["code"] for s in SPECS.values()], approved=True, active=True).count() == len(SPECS)
-    return page(request, locale, "web/pass.html", active_nav="pass", free_return_path=destination, founding_open=founding_open, anchors=PASS_ANCHORS, commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
+    return page(request, locale, "web/pass.html", active_nav="pass", free_return_path=destination, founding_open=founding_plans_open(), anchors=PASS_ANCHORS, commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
 
 
 @require_GET
