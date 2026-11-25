@@ -31,11 +31,12 @@ ROOT = Path(settings.BASE_DIR)
 INTAKE = ROOT / "library" / "intake"
 CLEARANCE_DOC = "docs/evidence/publication-clearance-20261123.json"
 NAMESPACE = uuid.UUID("6f1d8a52-3c1e-4c55-9a51-0b7f3a2d2311")
-REASON = "Owner-authorized go-live, 23 Nov 2026: public-domain term evidence, text licence and owner cover provenance (" + CLEARANCE_DOC + ")."
-BOOKS = {
-    "the-selfish-giant": {"edition": "the-selfish-giant-en", "intake": INTAKE / "covers", "import": False},
-    "bicharak": {"edition": "bicharak", "intake": INTAKE / "bicharak", "import": True},
+# The two books published on 23 Nov 2026 keep their multi-book clearance record; every later packet carries its own.
+LEGACY_BOOKS = {
+    "the-selfish-giant": {"edition": "the-selfish-giant-en", "intake": "covers", "import": False},
+    "bicharak": {"edition": "bicharak", "intake": "bicharak", "import": True},
 }
+EVIDENCE_PREFIX = "reo-earnalism-maison:"
 
 
 def sha256(raw):
@@ -47,9 +48,77 @@ def stable_id(*parts):
     return uuid.UUID(bytes=uuid.uuid5(NAMESPACE, ":".join(str(p) for p in parts)).bytes, version=4)
 
 
-def clearance_document():
-    path = ROOT / CLEARANCE_DOC
-    raw = path.read_bytes()
+def _json(path):
+    try:
+        return json.loads(Path(path).read_bytes())
+    except (OSError, ValueError):
+        return None
+
+
+def approved_packets(intake=INTAKE, root=ROOT):
+    """Every publishable packet: the two legacy books plus each intake packet with an owner-approved clearance record.
+
+    A discovered packet qualifies only when its own clearance record (manifest.provenance.rights_evidence_refs) has a
+    status starting OWNER_APPROVED, approval.approved true and nothing still required, and the text and cover bytes
+    on disk are exactly those the record and cover_provenance.json name. Approval over changed bytes is refused.
+    """
+    intake, root = Path(intake), Path(root)
+    packets = {}
+    legacy_doc = root / CLEARANCE_DOC
+    legacy_sha = sha256(legacy_doc.read_bytes()) if legacy_doc.exists() else None
+    for slug, spec in LEGACY_BOOKS.items():
+        covers = ((_json(legacy_doc) or {}).get("books", {}).get(slug, {}).get("covers", {}))
+        packets[slug] = {"slug": slug, "edition_slug": spec["edition"], "folder": intake / spec["intake"],
+            "clearance_path": CLEARANCE_DOC, "clearance_sha256": legacy_sha, "import": spec["import"], "legacy": True,
+            "covers": (covers.get("front_jpg_sha256"), covers.get("back_jpg_sha256"))}
+    for manifest_path in sorted(intake.glob("*/manifest.json")):
+        folder = manifest_path.parent
+        manifest = _json(manifest_path) or {}
+        edition_slug = (manifest.get("edition") or {}).get("slug")
+        slug = (manifest.get("work") or {}).get("slug") or edition_slug
+        if not slug or slug in packets:
+            continue
+        refs = [r for r in (manifest.get("provenance") or {}).get("rights_evidence_refs") or [] if str(r).startswith(EVIDENCE_PREFIX)]
+        if len(refs) != 1:
+            continue
+        clearance_path = refs[0][len(EVIDENCE_PREFIX):]
+        clearance_file = root / clearance_path
+        if not clearance_file.is_file():
+            continue
+        record = _json(clearance_file)
+        if not isinstance(record, dict):
+            continue
+        approval = record.get("approval") or {}
+        book = (record.get("books") or {}).get(slug)
+        if not (str(record.get("status", "")).startswith("OWNER_APPROVED") and approval.get("approved") is True
+                and not approval.get("still_required") and isinstance(book, dict) and edition_slug):
+            continue
+        provenance = _json(folder / "cover_provenance.json")
+        if not provenance or not all((folder / name).is_file() for name in ("front.jpg", "back.jpg", "source.json")):
+            continue
+        source_sha = sha256((folder / "source.json").read_bytes())
+        if book.get("source_sha256") != source_sha or (manifest.get("source") or {}).get("sha256") != source_sha:
+            raise CommandError(f"{slug}: SOURCE_HASH_MISMATCH: source.json differs from the owner-approved clearance record.")
+        covers = []
+        for side in ("front", "back"):
+            expected = (((provenance.get("sides") or {}).get(side) or {}).get("delivery") or {}).get("sha256")
+            if not expected or sha256((folder / f"{side}.jpg").read_bytes()) != expected:
+                raise CommandError(f"{slug}: COVER_HASH_MISMATCH: {side}.jpg differs from cover_provenance.json.")
+            covers.append(expected)
+        packets[slug] = {"slug": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
+            "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": tuple(covers)}
+    return packets
+
+
+def reason_for(packet):
+    if packet["legacy"]:
+        return "Owner-authorized go-live, 23 Nov 2026: public-domain term evidence, text licence and owner cover provenance (" + CLEARANCE_DOC + ")."
+    return ("Owner-authorized publication: public-domain term evidence, text licence and owner cover provenance ("
+            + packet["clearance_path"] + "#sha256=" + packet["clearance_sha256"] + ").")
+
+
+def clearance_document(packet):
+    raw = (ROOT / packet["clearance_path"]).read_bytes()
     return json.loads(raw), sha256(raw)
 
 
@@ -57,8 +126,8 @@ def territories():
     return list(settings.MAISON_PUBLICATION_TERRITORIES)
 
 
-def draft_for(slug):
-    edition = Edition.objects.filter(slug=BOOKS[slug]["edition"]).first()
+def draft_for(packet):
+    edition = Edition.objects.filter(slug=packet["edition_slug"]).first()
     if edition is None:
         return None
     return edition.revisions.order_by("-created_at").first()
@@ -70,7 +139,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("stage", choices=("import", "evidence", "publish", "status"))
         parser.add_argument("--publisher", required=True, help="public_id of an active verified staff publisher")
-        parser.add_argument("--book", action="append", choices=sorted(BOOKS), help="limit to these books")
+        parser.add_argument("--book", action="append", choices=sorted(approved_packets()), help="limit to these books")
         parser.add_argument("--browser-report", help="repo-relative browser acceptance report (evidence stage)")
 
     def handle(self, *args, **options):
@@ -78,25 +147,27 @@ class Command(BaseCommand):
         if actor is None or not actor.is_verified or not actor.has_perm("library.publish_revision"):
             raise CommandError("An active verified staff publisher with library.publish_revision is required.")
         out = {}
-        for slug in options["book"] or sorted(BOOKS):
+        packets = approved_packets()
+        for slug in options["book"] or sorted(packets):
+            packet = packets[slug]
             stage = options["stage"]
             if stage == "import":
-                out[slug] = self.import_book(actor, slug) if BOOKS[slug]["import"] else {"skipped": "already imported"}
+                out[slug] = self.import_book(actor, packet) if packet["import"] else {"skipped": "already imported"}
             elif stage == "evidence":
-                out[slug] = self.record_evidence(actor, slug, options.get("browser_report"))
+                out[slug] = self.record_evidence(actor, packet, options.get("browser_report"))
             elif stage == "publish":
-                out[slug] = self.publish(actor, slug)
-            out.setdefault(slug, {}).update(self.status(slug))
+                out[slug] = self.publish(actor, packet)
+            out.setdefault(slug, {}).update(self.status(packet))
         self.stdout.write("MAISON_OUT " + json.dumps(out, ensure_ascii=False, default=str))
 
     # --- import -------------------------------------------------------------------------------
-    def import_book(self, actor, slug):
-        folder = BOOKS[slug]["intake"]
+    def import_book(self, actor, packet):
+        slug, folder = packet["slug"], Path(packet["folder"])
         manifest = json.loads((folder / "manifest.json").read_text())
         raw = (folder / "source.json").read_bytes()
         if sha256(raw) != manifest["source"]["sha256"] or len(raw) != manifest["source"]["bytes"]:
             raise CommandError("Intake source differs from its manifest.")
-        revision = draft_for(slug)
+        revision = draft_for(packet)
         if revision is None:
             _, started = start_import(actor, manifest, str(stable_id(slug, "start")))[:2]
             revision = Revision.objects.get(pk=started["edition_revision_id"])
@@ -116,7 +187,7 @@ class Command(BaseCommand):
         if revision.state != "draft":
             return {"note": "revision is no longer a draft; nothing changed"}
         self.attach_covers(actor, revision, folder)
-        self.offer_reader(actor, revision)
+        self.offer_reader(actor, revision, packet)
         return {"imported": True}
 
     def attach_covers(self, actor, revision, folder):
@@ -140,7 +211,7 @@ class Command(BaseCommand):
             current.save()
         revision.refresh_from_db()
 
-    def offer_reader(self, actor, revision):
+    def offer_reader(self, actor, revision, packet):
         first = revision.units.order_by("ordinal").first()
         paragraphs = [p for p in first.paragraphs.order_by("ordinal") if p.kind == "paragraph"]
         preview, used = [], 0
@@ -159,9 +230,9 @@ class Command(BaseCommand):
             current.version += 1
             current.save()
             if not current.rights.exists():
-                doc, doc_sha = clearance_document()
+                doc, doc_sha = clearance_document(packet)
                 now = timezone.now()
-                evidence = json.dumps({"territories": territories(), "evidence_ref": f"{CLEARANCE_DOC}#sha256={doc_sha}",
+                evidence = json.dumps({"territories": territories(), "evidence_ref": f"{packet['clearance_path']}#sha256={doc_sha}",
                     "basis": "owner-authorized public-domain term evidence"}, ensure_ascii=False)
                 for action in ("read", "preview"):
                     right = Rights.objects.create(revision=current, format="reader", action=action, territories=territories(),
@@ -169,11 +240,12 @@ class Command(BaseCommand):
                     audit(actor, "rights.create", right, {"action": action, "territories": territories(), "channel": "server_job"})
 
     # --- evidence -----------------------------------------------------------------------------
-    def record_evidence(self, actor, slug, report_path):
-        revision = draft_for(slug)
+    def record_evidence(self, actor, packet, report_path):
+        slug = packet["slug"]
+        revision = draft_for(packet)
         if revision is None or revision.state != "draft":
             raise CommandError(f"{slug}: a draft revision is required.")
-        doc, doc_sha = clearance_document()
+        doc, doc_sha = clearance_document(packet)
         book = doc["books"][slug]
         if set(doc["territories"]) != set(territories()) or doc["formats"] != ["reader"]:
             raise CommandError("Clearance document scope differs from the active whitelist/offered formats.")
@@ -181,7 +253,7 @@ class Command(BaseCommand):
             raise CommandError(f"{slug}: clearance document names a different text hash.")
         covers = {a.sha256 for a in revision.assets.filter(kind="cover", state="ready")}
         pair = revision.validation_evidence.get("cover_pair", {})
-        if {pair.get("front", {}).get("sha256"), pair.get("back", {}).get("sha256")} != {book["covers"]["front_jpg_sha256"], book["covers"]["back_jpg_sha256"]} or not covers:
+        if {pair.get("front", {}).get("sha256"), pair.get("back", {}).get("sha256")} != set(packet["covers"]) or not covers:
             raise CommandError(f"{slug}: selected cover pair differs from the cleared artwork.")
         browser = None
         if report_path:
@@ -195,7 +267,7 @@ class Command(BaseCommand):
         ready = list(revision.assets.filter(state="ready"))
         clearance = {"status": "pass", "sha256": revision.content_sha256, "territories": territories(), "formats": ["reader"],
             "asset_sha256": {str(a.id): a.sha256 for a in ready},
-            "evidence_ref": f"{CLEARANCE_DOC}#sha256={doc_sha}",
+            "evidence_ref": f"{packet['clearance_path']}#sha256={doc_sha}",
             "basis": "owner_authorized_public_domain_term_evidence", "recorded_by": str(actor.public_id),
             "recorded_at": timezone.now().isoformat()}
         with transaction.atomic():
@@ -213,23 +285,24 @@ class Command(BaseCommand):
         return {"evidence_recorded": True}
 
     # --- publish ------------------------------------------------------------------------------
-    def publish(self, actor, slug):
-        revision = draft_for(slug)
+    def publish(self, actor, packet):
+        revision = draft_for(packet)
         if revision is None:
-            raise CommandError(f"{slug}: no revision.")
+            raise CommandError(f"{packet['slug']}: no revision.")
+        reason = reason_for(packet)
         steps = []
         for action in ("mark-ready", "publish"):
             revision.refresh_from_db()
             if (action == "mark-ready" and revision.state != "draft") or (action == "publish" and revision.state != "ready"):
                 continue
-            state = transition_revision(actor, revision.id, action, revision.version, revision.content_sha256, REASON)
-            audit(actor, "revision." + action, revision, {"reason": REASON, "channel": "server_job"})
+            state = transition_revision(actor, revision.id, action, revision.version, revision.content_sha256, reason)
+            audit(actor, "revision." + action, revision, {"reason": reason, "channel": "server_job"})
             steps.append({"action": action, "state": state["state"], "version": state["version"]})
         return {"steps": steps}
 
     # --- status -------------------------------------------------------------------------------
-    def status(self, slug):
-        revision = draft_for(slug)
+    def status(self, packet):
+        revision = draft_for(packet)
         if revision is None:
             return {"exists": False}
         report = validate_revision(revision, prepared=prepare_revision_validation(revision.id))

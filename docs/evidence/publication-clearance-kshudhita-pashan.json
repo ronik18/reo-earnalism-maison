@@ -1,6 +1,6 @@
 {
  "schema": "earnalism.publication-clearance-evidence.v1",
- "status": "OWNER_APPROVED_COVER_PENDING",
+ "status": "OWNER_APPROVED",
  "recorded_on": "2026-11-25",
  "owner_instruction": {
   "date": "2026-11-25",
@@ -15,9 +15,13 @@
   "approved": true,
   "approved_on": "2026-11-25",
   "approved_by": "owner (in-session instruction)",
-  "still_required": [
-   "front/back cover with owner-held provenance"
-  ]
+  "still_required": [],
+  "cover_attached": {
+   "date": "2026-11-25",
+   "provenance": "library/intake/kshudhita-pashan/cover_provenance.json",
+   "front_sha256": "bdd5e58e284131019732b60b9bf7533dfbf37cf1502d528ffa32b2fc13d025cf",
+   "back_sha256": "168cc76d3f37804c68e423bf2a38731242e54577914e15c109b0e9e3a648fb1f"
+  }
  },
  "territories": [
   "IN",
