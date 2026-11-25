@@ -1,6 +1,6 @@
 # Earnalism revenue growth, Phases 5–9: the content engine and recurring income
 
-Status: **draft for owner approval** (brainstormed with the owner 25 Nov 2026). Extends `docs/superpowers/specs/2026-11-24-earnalism-revenue-strategy-design.md` (market research, strategies S1–S3) and `plans/pending/earnalism-revenue-growth.md` (Gate 0 and Phases 1–4). Nothing here authorizes spending, publication or a provider change by itself; each still needs the approval this document names.
+Status: **draft for owner approval** (brainstormed with the owner 25 Nov 2026; all owner questions answered). Extends `docs/superpowers/specs/2026-11-24-earnalism-revenue-strategy-design.md` (market research, strategies S1–S3) and `plans/pending/earnalism-revenue-growth.md` (Gate 0 and Phases 1–4). Nothing here authorizes spending, publication or a provider change by itself; each still needs the approval this document names.
 
 ## 1. Intent
 
@@ -19,6 +19,7 @@ Read as: income that arrives every month and can be counted on, from as many ind
 | D3 | Overseas Bengali families (US/UK) | **Stores only for now** (Google Play Books, other stores); **US/UK paying accounts are a MUST later** | A required phase (9) with a measurable trigger; a baseline deviation needing owner approval at that time |
 | D4 | English translations | **AI draft + credited human editor for licensing titles; AI-only, labelled "AI translation", for the rest** | Licensing titles become human-authored works Earnalism owns; the rest give fast bilingual reading with honest labels |
 | D5 | How much needs the owner | **Weekly batch approval for two months, then standing permission with limits** | One Monday review page; after two months, anything passing every automatic check goes out on schedule, new or unusual items still wait |
+| D7 | Where we sell and post | **Keep the 9 active regions for now** | Every store listing, podcast and licence is restricted to IN, US, GB, BR, SG, MY, ID, PH, TH; a channel that cannot restrict regions is skipped. Widening the list is a later, separate owner decision (policy amendment plus term rules per new region) |
 | D6 | Shape of the work | **A content engine that never stops, with income sources switched on as soon as each can pay; phases overlap** | Phase 5 runs continuously; 6–9 each switch on a group of income sources |
 
 ## 3. Goals, non-goals, anti-goals
@@ -29,7 +30,7 @@ Read as: income that arrives every month and can be counted on, from as many ind
 - **Owner time:** about 20 minutes a week in the batch period; less after standing permission.
 - A monthly revenue report that shows every source, and the reinvestment record.
 
-**Non-goals:** a phone app before the web funnel converts; serialized drama or coins; competing with Storytel or Pocket FM on catalogue size; Bangladesh as an active region (still deferred).
+**Non-goals:** regions beyond the 9 (a later owner decision); a phone app before the web funnel converts; serialized drama or coins; competing with Storytel or Pocket FM on catalogue size; Bangladesh as an active region (still deferred).
 
 **Anti-goals (failure even if money arrives):** publishing anything not cleared for its exact edition in all active regions; presenting an AI translation as human work or an AI voice as a human narrator; dark patterns (fake urgency, hard cancellation, pre-ticked consent); spending money that was not earned first or not approved; student or child accounts; licensing a translation we do not own.
 
@@ -84,11 +85,11 @@ Each phase has: what it switches on, what it needs, and **verified when** (money
 
 ### Phase 7: Stores, licensing and podcast
 
-**Switches on:** store income worldwide (reaching overseas families per D3) and partner licensing.
+**Switches on:** store income in the 9 regions, including US and UK families (D3, D7), and partner licensing.
 
-- **7.1 Google Play Books** (52% share): Bengali and English audiobooks and ebooks, worldwide, with Earnalism as publisher and AI narration disclosed per the store's rules. Other stores (Apple Books, Kobo, Audible/ACX) only where their AI-narration rules allow; checked per store before submitting.
-- **7.2 Licensing titles:** AI draft plus a credited human editor (D4), paid from the reinvestment share. The edited translation and its audiobook form a catalogue offered to Storytel, Kuku FM or Pocket FM. A one-time legal review of the licence template is a D1 spend.
-- **7.3 Podcast feed** of narrations (YouTube Podcasts, Spotify) as discovery and ad income, served from the existing public asset storage.
+- **7.1 Google Play Books** (52% share): Bengali and English audiobooks and ebooks, sold in the 9 active regions only (D7), with Earnalism as publisher and AI narration disclosed per the store's rules. Other stores (Apple Books, Kobo, Audible/ACX) only where their AI-narration rules allow; checked per store before submitting.
+- **7.2 Licensing titles:** AI draft plus a credited human editor (D4), paid from the reinvestment share. The edited translation and its audiobook form a catalogue offered to Storytel, Kuku FM or Pocket FM, licensed for the 9 regions only. A one-time legal review of the licence template is a D1 spend.
+- **7.3 Podcast feed** of narrations (YouTube Podcasts, Spotify), with availability limited to the 9 regions where the platform allows it, otherwise not used, as discovery and ad income, served from the existing public asset storage.
 
 **Needs from the owner:** a Google Play Books partner account (G0.4); approval of each editor engagement and the legal review; signature on any licence.
 **Verified when:** the first store payout arrives, and at least one licensing proposal is sent with a priced catalogue.
