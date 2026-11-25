@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 
 from operations.management.commands import publish_cleared_editions as command
 
@@ -242,10 +242,11 @@ def make_source_packet(root, slug="golpo-test"):
         {"title": f"Book/{page['page']}", "proofread": {"quality": page["quality"]},
          "revisions": [{"revid": page["revision"], "timestamp": page["timestamp"], "slots": {"main": {"content": page["wikitext"]}}}]}
         for page in PAGES]}}, ensure_ascii=False), encoding="utf-8")
-    call_command("intake_wikisource", slug, "--api-json", str(api), "--title", TITLE,
-                 "--source-ref", "https://bn.wikisource.org/w/index.php?title=T&oldid=1", "--source-edition", "Test edition, 1895.",
-                 "--house", "golpo", "--description", "বিবরণ", "--first-published", "1895", "--author-died", "1941",
-                 "--creator", "রবীন্দ্রনাথ ঠাকুর", "--keep-hyphen-after", "১৭৫", "--write", "--root", str(root), stdout=io.StringIO())
+    with override_settings(BASE_DIR=root):  # the command queues its clearance draft relative to the repository root
+        call_command("intake_wikisource", slug, "--api-json", str(api), "--title", TITLE,
+                     "--source-ref", "https://bn.wikisource.org/w/index.php?title=T&oldid=1", "--source-edition", "Test edition, 1895.",
+                     "--house", "golpo", "--description", "বিবরণ", "--first-published", "1895", "--author-died", "1941",
+                     "--creator", "রবীন্দ্রনাথ ঠাকুর", "--keep-hyphen-after", "১৭৫", "--write", "--root", str(root), stdout=io.StringIO())
     approve_draft(root, slug)
     give_covers(root, slug)
 
@@ -254,16 +255,17 @@ def make_translation_packet(root, slug="kshudhita-pashan-en", source="kshudhita-
     """intake_translation output for an approved source packet, approved and given an owner cover pair."""
     translated = root / "translated.json"
     translated.write_text(json.dumps(EN_TRANSLATION, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    call_command("intake_translation", slug, "--from", source, "--source", str(translated),
-                 "--method", "ai", "--model", "claude-test", "--title", "The Hungry Stones",
-                 "--description", "A tale of a palace.", "--root", str(root), stdout=io.StringIO())
+    with override_settings(BASE_DIR=root):
+        call_command("intake_translation", slug, "--from", source, "--source", str(translated),
+                     "--method", "ai", "--model", "claude-test", "--title", "The Hungry Stones",
+                     "--description", "A tale of a palace.", "--root", str(root), stdout=io.StringIO())
     give_covers(root, slug)
     if approve:
         approve_draft(root, slug)
     return root / "library" / "intake" / slug
 
 
-class TranslationPacketSharesSourceWorkTests(SimpleTestCase):
+class TranslationPacketSharesSourceWorkTests(TestCase):
     def setUp(self):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
@@ -308,7 +310,6 @@ class TranslationPacketSharesSourceWorkTests(SimpleTestCase):
 
 class TranslationEndToEndTests(TestCase):
     def setUp(self):
-        from django.test import override_settings
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         self.root = Path(directory.name)

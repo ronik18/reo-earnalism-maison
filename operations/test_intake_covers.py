@@ -1,3 +1,4 @@
+import hashlib
 import io
 import json
 import tempfile
@@ -6,10 +7,11 @@ from unittest import mock
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 from PIL import Image
 
 from operations.intake import covers
+from operations.models import ReviewItem
 
 
 def png(size, color=(200, 30, 30), mode="RGB", fmt="PNG"):
@@ -30,7 +32,7 @@ def listing(pid, raw, **kw):
     return base
 
 
-class CoverTests(SimpleTestCase):
+class CoverTests(TestCase):
     def test_pair_is_800_by_1200_and_hashes_recorded(self):
         f, b = png((1024, 1536)), png((512, 768), (10, 90, 200))
         origs = {"front": listing("x/front", f), "back": listing("x/back", b)}
@@ -70,10 +72,15 @@ class CoverTests(SimpleTestCase):
                 return json.dumps(lists[url.split("/upload/")[1]]).encode()
             return f if "front" in url else b
 
-        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(covers, "_get", fake_get):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(covers, "_get", fake_get), \
+                override_settings(BASE_DIR=Path(tmp)):
             folder = str(Path(tmp) / "slug")
             args = ["slug", "--front", "x/front", "--back", "x/back", "--folder", folder]
             call_command("intake_cover", *args)
+            item = ReviewItem.objects.get()
+            self.assertEqual((item.kind, item.ref, item.summary), ("cover", "slug/cover_provenance.json",
+                                                                  {"edition_slug": "slug", "title": "slug"}))
+            self.assertEqual(item.sha256, hashlib.sha256((Path(folder) / "cover_provenance.json").read_bytes()).hexdigest())
             prov = json.loads((Path(folder) / "cover_provenance.json").read_text())
             self.assertEqual(prov["status"], "OWNER_PROVIDED_ARTWORK")
             self.assertTrue((Path(folder) / "front.jpg").exists())
@@ -86,6 +93,14 @@ class CoverTests(SimpleTestCase):
             self.assertEqual(
                 json.loads((Path(folder) / "cover_provenance.json").read_text())["slug"], "slug"
             )
+            self.assertEqual(ReviewItem.objects.filter(status="pending").count(), 1)  # the replaced file supersedes
+
+    def test_command_outside_the_repository_is_refused_before_fetching(self):
+        with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as repo, \
+                mock.patch.object(covers, "_get", side_effect=AssertionError("no fetch")), override_settings(BASE_DIR=Path(repo)):
+            with self.assertRaisesRegex(CommandError, "REVIEW_REF_INVALID"):
+                call_command("intake_cover", "slug", "--front", "x/front", "--back", "x/back", "--folder", str(Path(tmp) / "slug"))
+            self.assertFalse((Path(tmp) / "slug").exists())
 
     def test_alpha_composites_onto_white(self):
         f = png((1024, 1536), (0, 0, 0, 0), "RGBA")

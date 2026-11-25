@@ -384,3 +384,87 @@ class PostBindingTests(TestCase):
 def settings_base():
     from django.conf import settings
     return settings.BASE_DIR
+
+
+class ReviewPageContentTests(TestCase):
+    """The Monday page shows what is being approved: clearance facts, the cover pair, the post's video and caption."""
+    def setUp(self):
+        from django.conf import settings
+        self.tmp = tempfile.TemporaryDirectory(dir=settings.BASE_DIR, prefix='.review-test-')
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.owner = make_user('owner@example.test')
+        patcher = patch.object(review, 'prepare', lambda m, r: REAL_PREPARE(m, r, probe=PROBE))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.url = reverse('web:staff-review', args=['en'])
+
+    def write(self, rel, body):
+        path = self.base / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(body)
+        return path
+
+    def clearance(self):
+        body = json.dumps({'status': 'DRAFT_PENDING_OWNER_APPROVAL', 'territories': ['IN', 'US'], 'formats': ['reader']}).encode()
+        path = self.write('docs/evidence/publication-clearance-cl-draft.json', body)
+        return review.queue_files([('clearance', path, {'edition_slug': 'cl', 'title': 'Clear title'})])[0], path
+
+    def cover(self):
+        front, back = b'\xff\xd8\xff front-bytes', b'\xff\xd8\xff back-bytes'
+        self.write('library/intake/cv/front.jpg', front)
+        self.write('library/intake/cv/back.jpg', back)
+        provenance = {'sides': {side: {'delivery': {'sha256': hashlib.sha256(raw).hexdigest()}}
+                                for side, raw in (('front', front), ('back', back))}}
+        path = self.write('library/intake/cv/cover_provenance.json', json.dumps(provenance).encode())
+        return review.queue_files([('cover', path, {'edition_slug': 'cv', 'title': 'Cover title'})])[0], front
+
+    def test_clearance_facts_are_shown(self):
+        self.clearance()
+        login(self.client, self.owner)
+        html = self.client.get(self.url).content.decode()
+        for text in ('DRAFT_PENDING_OWNER_APPROVAL', 'IN, US', 'reader', 'Clear title'):
+            self.assertIn(text, html)
+
+    def test_cover_pair_is_shown_through_a_staff_only_view(self):
+        item, front = self.cover()
+        front_url = reverse('web:staff-review-cover', args=['en', item.pk, 'front'])
+        self.assertEqual(self.client.get(front_url).status_code, 404)  # anonymous
+        login(self.client, make_user('plain-c@example.test', staff=False))
+        self.assertEqual(self.client.get(front_url).status_code, 404)
+        login(self.client, self.owner)
+        self.assertIn(f'src="{front_url}"', self.client.get(self.url).content.decode())
+        response = self.client.get(front_url)
+        self.assertEqual((response.status_code, response['Content-Type'], response.content), (200, 'image/jpeg', front))
+        self.assertEqual(response['Cache-Control'], 'private, no-store')
+        self.assertEqual(self.client.get(reverse('web:staff-review-cover', args=['en', item.pk, 'spine'])).status_code, 404)
+        self.write('library/intake/cv/front.jpg', b'\xff\xd8\xff other')  # not the bytes the provenance names
+        self.assertEqual(self.client.get(front_url).status_code, 404)
+
+    def test_changed_cover_provenance_is_flagged_and_not_served(self):
+        item, _ = self.cover()
+        self.write('library/intake/cv/cover_provenance.json', b'{}')
+        login(self.client, self.owner)
+        self.assertContains(self.client.get(self.url), 'Changed since it was queued')
+        self.assertEqual(self.client.get(reverse('web:staff-review-cover', args=['en', item.pk, 'front'])).status_code, 404)
+
+    def test_post_shows_bundle_video_and_caption(self):
+        summary = post_summary(self.base, 'pv')
+        review.queue('post', 'social/a/pv', candidate(summary), summary)
+        login(self.client, self.owner)
+        html = self.client.get(self.url).content.decode()
+        self.assertIn(summary['bundle_manifest'], html)
+        self.assertIn(summary['asset_root'] + '/film', html)
+        self.assertIn('Exact title — Exact description', html)
+
+    def test_select_all_checks_one_group_only(self):
+        clearance, _ = self.clearance()
+        cover, _ = self.cover()
+        login(self.client, self.owner)
+        plain = self.client.get(self.url).content.decode()
+        self.assertNotRegex(plain, r'<input[^>]*\bchecked\b')
+        self.assertIn('?select=cover', plain)
+        html = self.client.get(self.url + '?select=cover').content.decode()
+        self.assertRegex(html, rf'value="{cover.pk}" checked')
+        self.assertNotRegex(html, rf'value="{clearance.pk}" checked')
+        self.assertIn('Clear selection', html)

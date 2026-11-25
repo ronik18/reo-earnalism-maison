@@ -7,6 +7,13 @@ File-backed kinds (clearance, cover, edition) carry `ref` = repo-relative path a
 summary names. `queue` validates the post summary schema (POST_SUMMARY) and requires that hash; `decide` re-prepares on
 approval and refuses REVIEW_ITEM_CHANGED if the bundle moved on; post_approved checks it again before any provider call.
 
+Approval here is a recorded decision only: approving a clearance item does NOT yet change the clearance JSON's
+status, and publish_cleared_editions does not read review decisions. Linking the two is an owner decision.
+
+The intake commands (intake_wikisource, intake_cover, intake_translation) queue what they write with --write:
+clearance drafts as 'clearance', cover_provenance.json as 'cover', a translation's manifest.json and
+translation.json as 'edition'; each with its file sha256 and a summary {edition_slug, title}.
+
 Standing permission (settings.MAISON_REVIEW_STANDING_FROM, two months after the first batch) may auto-approve
 only `post` items for live editions with an approved clearance that pass every automatic check; sponsored items and
 new authors always wait (a missing flag counts as not passing).
@@ -93,6 +100,24 @@ def _file_sha256(ref):
         for chunk in iter(lambda: handle.read(1 << 20), b''):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def review_ref(path):
+    """Repo-relative ref (under settings.BASE_DIR) for a file an intake command writes; REVIEW_REF_INVALID otherwise."""
+    root = Path(settings.BASE_DIR).resolve()
+    resolved = Path(path).resolve()
+    if not resolved.is_relative_to(root):
+        raise DomainError('REVIEW_REF_INVALID', f'{path} is outside the repository; it cannot be queued for review.', 400)
+    return resolved.relative_to(root).as_posix()
+
+
+def queue_files(entries):
+    """Queue written intake files for the Monday page: entries = [(kind, path, summary)], each bound to its sha256."""
+    items = []
+    for kind, path, summary in entries:
+        ref = review_ref(path)
+        items.append(queue(kind, ref, _file_sha256(ref), summary))
+    return items
 
 
 def validate_post_summary(ref, summary):

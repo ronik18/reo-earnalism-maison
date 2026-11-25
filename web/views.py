@@ -1,3 +1,4 @@
+import hashlib
 import re
 from functools import wraps
 import json
@@ -541,13 +542,83 @@ def track(request, locale, track_id):
     return page(request, locale, "web/track.html", track=data, questions=result["items"], next_cursor=result["next_cursor"], active_nav="learn", teacher=is_teacher(request.user))
 
 
+def _require_reviewer(user):
+    if not (user.is_authenticated and user.is_active and user.is_staff and user.is_verified and user.has_perm("operations.decide_review")):
+        raise Http404
+
+
+def _read_review_json(ref):
+    """Parsed JSON of a queued review file (bounded), or None when missing, unreadable or too large."""
+    from operations import review
+    path = review._resolve(ref) if isinstance(ref, str) else None
+    try:
+        if path is None or not path.is_file() or path.stat().st_size > 2_000_000:
+            return None
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _review_detail(item, locale):
+    """What the owner needs to see to decide one item; read at view time from the bound file or bundle."""
+    from operations import review
+    summary = item.summary or {}
+    if item.kind == "post":
+        manifest = _read_review_json(summary.get("bundle_manifest"))
+        social = next((d for d in (manifest or {}).get("social") or [] if isinstance(d, dict)
+                       and f"{d.get('platform')}:{d.get('account_id')}" == summary.get("destination_key")), {})
+        video = next((a for a in (manifest or {}).get("assets") or [] if isinstance(a, dict)
+                      and a.get("id") == social.get("video_asset_id")), {})
+        return {"bundle": summary.get("bundle_manifest"), "asset_root": summary.get("asset_root"),
+                "video": video.get("path"), "caption_title": social.get("title"),
+                "caption": (social.get("description") or "")[:280], "unreadable": manifest is None}
+    detail = {"changed": review._file_sha256(item.ref) != item.sha256}
+    if item.kind == "clearance":
+        record = _read_review_json(item.ref)
+        detail.update(unreadable=record is None, status=(record or {}).get("status"),
+                      territories=(record or {}).get("territories") or [], formats=(record or {}).get("formats") or [])
+    elif item.kind == "cover":
+        detail.update({side: reverse("web:staff-review-cover", args=[locale, item.pk, side]) for side in ("front", "back")})
+    elif item.kind == "edition":
+        record = _read_review_json(item.ref) or {}
+        detail.update(method=record.get("method"), model=record.get("model"), translated_from=record.get("translated_from"),
+                      language=(record.get("edition") or {}).get("language"))
+    return detail
+
+
+@require_GET
+@domain_view
+def staff_review_cover(request, locale, item_id, side):
+    """Staff-only view of a queued cover pair, served only while it is exactly the bytes cover_provenance.json names."""
+    _require_reviewer(request.user)
+    from django.http import HttpResponse
+    from operations import review
+    from operations.models import ReviewItem
+    item = ReviewItem.objects.filter(pk=item_id, kind="cover").first()
+    if item is None or side not in ("front", "back") or review._file_sha256(item.ref) != item.sha256:
+        raise Http404
+    provenance = _read_review_json(item.ref) or {}
+    expected = (((provenance.get("sides") or {}).get(side) or {}).get("delivery") or {}).get("sha256")
+    path = review._resolve(item.ref).parent / f"{side}.jpg"
+    try:
+        raw = path.read_bytes() if path.is_file() and path.stat().st_size <= 10_000_000 else None
+    except OSError:
+        raw = None
+    if raw is None or not expected or hashlib.sha256(raw).hexdigest() != expected:
+        raise Http404
+    response = HttpResponse(raw, content_type="image/jpeg")
+    response["Cache-Control"] = "private, no-store"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
 @require_http_methods(["GET", "POST"])
 @domain_view
 def staff_review(request, locale):
     """Monday review page: staff only (everyone else gets 404). POST decides the ticked items, then redirects (PRG)."""
     user = request.user
-    if not (user.is_authenticated and user.is_active and user.is_staff and user.is_verified and user.has_perm("operations.decide_review")):
-        raise Http404
+    _require_reviewer(user)
     from core.api import DomainError
     from operations import review
     from operations.models import ReviewItem
@@ -570,7 +641,10 @@ def staff_review(request, locale):
     if request.method == "GET" and "decided" in request.GET:
         decided = request.GET["decided"]
         notice = {"count": int(decided)} if decided.isdigit() and int(decided) > 0 else {"count": 0}
-    groups = [{"kind": kind, "items": list(ReviewItem.objects.filter(status="pending", kind=kind).order_by("created_at"))}
+    selected = request.GET.get("select", "")
+    groups = [{"kind": kind, "selected": selected == kind,
+               "items": [{"item": item, "detail": _review_detail(item, locale)}
+                         for item in ReviewItem.objects.filter(status="pending", kind=kind).order_by("created_at")]}
               for kind, _ in ReviewItem.KINDS]
     return page(request, locale, "web/staff_review.html", status=status, groups=[g for g in groups if g["items"]],
                 review_error=error, changed_refs=changed_refs, review_notice=notice)
