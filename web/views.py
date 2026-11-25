@@ -537,12 +537,13 @@ def track(request, locale, track_id):
 @domain_view
 def staff_review(request, locale):
     """Monday review page: staff only (everyone else gets 404). POST decides the ticked items, then redirects (PRG)."""
-    if not (request.user.is_authenticated and request.user.is_staff):
+    user = request.user
+    if not (user.is_authenticated and user.is_active and user.is_staff and user.is_verified and user.has_perm("operations.decide_review")):
         raise Http404
     from core.api import DomainError
     from operations import review
     from operations.models import ReviewItem
-    error = None
+    error, changed_refs, status = None, [], 200
     if request.method == "POST":
         ids = []
         for raw in request.POST.getlist("item"):
@@ -551,16 +552,20 @@ def staff_review(request, locale):
             except ValueError:
                 pass
         try:
-            review.decide(request.user, ids, request.POST.get("decision", ""))
-            return HttpResponseRedirect(reverse("web:staff-review", args=[locale]))
+            count = review.decide(user, ids, request.POST.get("decision", "")) if ids else 0
+            return HttpResponseRedirect(reverse("web:staff-review", args=[locale]) + "?" + urlencode({"decided": count}))
         except DomainError as exc:
-            error = {"REVIEW_ITEM_CHANGED": "review_changed", "ACCESS_DENIED": "review_denied"}.get(exc.code, "error")
+            error = {"REVIEW_ITEM_CHANGED": "review_changed"}.get(exc.code, "error")
+            changed_refs = (exc.details or {}).get("refs", [])
             status = exc.status
-    else:
-        status = 200
+    notice = None
+    if request.method == "GET" and "decided" in request.GET:
+        decided = request.GET["decided"]
+        notice = {"count": int(decided)} if decided.isdigit() and int(decided) > 0 else {"count": 0}
     groups = [{"kind": kind, "items": list(ReviewItem.objects.filter(status="pending", kind=kind).order_by("created_at"))}
               for kind, _ in ReviewItem.KINDS]
-    return page(request, locale, "web/staff_review.html", status=status, groups=[g for g in groups if g["items"]], review_error=error)
+    return page(request, locale, "web/staff_review.html", status=status, groups=[g for g in groups if g["items"]],
+                review_error=error, changed_refs=changed_refs, review_notice=notice)
 
 
 @require_GET

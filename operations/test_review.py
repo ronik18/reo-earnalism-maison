@@ -45,41 +45,42 @@ def make_user(email, *, staff=True, verified=True, perm=True):
 
 class ReviewQueueTests(TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
+        from django.conf import settings
+        self.tmp = tempfile.TemporaryDirectory(dir=settings.BASE_DIR, prefix='.review-test-')
         self.addCleanup(self.tmp.cleanup)
         self.base = Path(self.tmp.name)
+        self.prefix = self.base.name
         self.owner = make_user('owner@example.test')
 
     def file_item(self, kind='clearance', slug='a', body=b'{"ok": 1}'):
-        rel = f'docs/evidence/publication-clearance-{slug}.json'
-        path = self.base / rel
+        rel = f'{self.prefix}/docs/evidence/publication-clearance-{slug}.json'
+        path = self.base.parent / rel
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(body)
         item = review.queue(kind, rel, hashlib.sha256(body).hexdigest(), {'edition_slug': slug})
         return item, path
 
     def post(self, post_id='p1', **summary):
-        base = {'edition_slug': 'a', 'cover_sha256': 'c' * 64, 'exact_words': True, 'claims': []}
+        base = {'edition_slug': 'a', 'cover_sha256': 'c' * 64, 'exact_words': True, 'claims': [], 'ai': False}
         base.update(summary)
         sha = hashlib.sha256(post_id.encode()).hexdigest()
         return review.queue('post', f'social/a/{post_id}', sha, base)
 
     def test_queue_is_idempotent(self):
-        first = review.queue('cover', 'x.json', 'a' * 64, {'n': 1})
-        second = review.queue('cover', 'x.json', 'a' * 64, {'n': 2})
+        first, _ = self.file_item('cover', slug='idem')
+        second, _ = self.file_item('cover', slug='idem')
         self.assertEqual(first.pk, second.pk)
         self.assertEqual(ReviewItem.objects.count(), 1)
         self.assertEqual(second.status, 'pending')
 
     def test_decide_requires_permission_and_audits(self):
-        with override_settings(BASE_DIR=self.base):
-            item, _ = self.file_item()
-            for bad in (make_user('np@example.test', perm=False), make_user('ns@example.test', staff=False),
-                        make_user('nv@example.test', verified=False)):
-                with self.assertRaises(DomainError) as ctx:
-                    review.decide(bad, [item.pk], 'approved')
-                self.assertEqual(ctx.exception.code, 'ACCESS_DENIED')
-            self.assertEqual(review.decide(self.owner, [item.pk], 'approved', 'ok'), 1)
+        item, _ = self.file_item()
+        for bad in (make_user('np@example.test', perm=False), make_user('ns@example.test', staff=False),
+                    make_user('nv@example.test', verified=False)):
+            with self.assertRaises(DomainError) as ctx:
+                review.decide(bad, [item.pk], 'approved')
+            self.assertEqual(ctx.exception.code, 'ACCESS_DENIED')
+        self.assertEqual(review.decide(self.owner, [item.pk], 'approved', 'ok'), 1)
         item.refresh_from_db()
         self.assertEqual((item.status, item.decided_by, item.decision_note, item.standing), ('approved', self.owner, 'ok', False))
         self.assertIsNotNone(item.decided_at)
@@ -88,27 +89,66 @@ class ReviewQueueTests(TestCase):
         self.assertEqual(event.detail['decision'], 'approved')
 
     def test_second_decision_is_a_no_op(self):
-        with override_settings(BASE_DIR=self.base):
-            item, _ = self.file_item()
-            self.assertEqual(review.decide(self.owner, [item.pk], 'approved'), 1)
-            self.assertEqual(review.decide(self.owner, [item.pk], 'rejected'), 0)
+        item, _ = self.file_item()
+        self.assertEqual(review.decide(self.owner, [item.pk], 'approved'), 1)
+        self.assertEqual(review.decide(self.owner, [item.pk], 'rejected'), 0)
         item.refresh_from_db()
         self.assertEqual(item.status, 'approved')
         self.assertEqual(AuditEvent.objects.filter(action='review.decided').count(), 1)
 
     def test_changed_file_cannot_be_approved(self):
-        with override_settings(BASE_DIR=self.base):
-            item, path = self.file_item()
-            path.write_bytes(b'{"ok": 2}')
-            with self.assertRaises(DomainError) as ctx:
-                review.decide(self.owner, [item.pk], 'approved')
+        item, path = self.file_item()
+        path.write_bytes(b'{"ok": 2}')
+        with self.assertRaises(DomainError) as ctx:
+            review.decide(self.owner, [item.pk], 'approved')
         self.assertEqual(ctx.exception.code, 'REVIEW_ITEM_CHANGED')
+        self.assertEqual(ctx.exception.details['refs'], [item.ref])
         item.refresh_from_db()
         self.assertEqual(item.status, 'pending')
         self.assertFalse(AuditEvent.objects.filter(action='review.decided').exists())
+        path.unlink()  # a missing file also cannot be approved, but can be rejected, with a healthy item in the batch
+        good, _ = self.file_item('cover', slug='good')
+        with self.assertRaises(DomainError) as ctx:
+            review.decide(self.owner, [good.pk, item.pk], 'approved')
+        self.assertIn(item.ref, ctx.exception.message)
+        self.assertEqual(review.decide(self.owner, [good.pk, item.pk], 'rejected'), 2)
+        item.refresh_from_db()
+        self.assertEqual(item.status, 'rejected')
+
+    def test_requeue_with_new_hash_supersedes_old_pending(self):
+        old, path = self.file_item('clearance', slug='sup')
+        new, _ = self.file_item('clearance', slug='sup', body=b'{"ok": 3}')
+        old.refresh_from_db()
+        self.assertNotEqual(old.pk, new.pk)
+        self.assertEqual((old.status, old.decision_note, old.decided_by), ('rejected', 'superseded', None))
+        self.assertEqual(new.status, 'pending')
+        self.assertEqual(AuditEvent.objects.filter(action='review.decided', entity_id=str(old.pk), actor=None).count(), 1)
+
+    def test_queue_validates_file_refs_and_hashes(self):
+        good = hashlib.sha256(b'{"ok": 1}').hexdigest()
+        _, path = self.file_item('cover', slug='v')
+        for ref in ('/etc/passwd', '../outside.json'):
+            with self.assertRaises(DomainError) as ctx:
+                review.queue('cover', ref, good, {})
+            self.assertEqual(ctx.exception.code, 'REVIEW_REF_INVALID')
+        for sha in ('zz', 'A' * 64, '0' * 64):
+            with self.assertRaises(DomainError) as ctx:
+                review.queue('cover', f'{self.prefix}/docs/evidence/publication-clearance-v.json', sha, {})
+            self.assertEqual(ctx.exception.code, 'REVIEW_HASH_INVALID')
+
+    def test_standing_checks_fail_closed(self):
+        with override_settings(MAISON_REVIEW_STANDING_FROM=STANDING):
+            clearance, _ = self.file_item('clearance', slug='a')
+            review.decide(self.owner, [clearance.pk], 'approved')
+            for pid, drop, code in [('q1', 'ai', 'AI_NOT_LABELLED'), ('q2', 'claims', 'HAS_CLAIMS'), ('q3', 'exact_words', 'NOT_EXACT_WORDS')]:
+                summary = {'edition_slug': 'a', 'cover_sha256': 'c' * 64, 'exact_words': True, 'claims': [], 'ai': False}
+                summary.pop(drop)
+                item = review.queue('post', f'social/a/{pid}', hashlib.sha256(pid.encode()).hexdigest(), summary)
+                self.assertEqual(item.status, 'pending', pid)
+                self.assertEqual(review.auto_checks(item), [code])
 
     def test_standing_permission_never_applies_to_clearance_or_edition(self):
-        with override_settings(BASE_DIR=self.base, MAISON_REVIEW_STANDING_FROM=STANDING):
+        with override_settings(MAISON_REVIEW_STANDING_FROM=STANDING):
             self.assertTrue(review.standing_permission_active(STANDING + timedelta(days=1)))
             self.assertFalse(review.standing_permission_active(STANDING - timedelta(days=1)))
             for kind in ('clearance', 'cover', 'edition'):
@@ -120,7 +160,7 @@ class ReviewQueueTests(TestCase):
             self.assertFalse(review.standing_permission_active(timezone.now()))
 
     def test_standing_post_requires_passing_checks(self):
-        with override_settings(BASE_DIR=self.base, MAISON_REVIEW_STANDING_FROM=STANDING):
+        with override_settings(MAISON_REVIEW_STANDING_FROM=STANDING):
             self.assertEqual(self.post('p0').status, 'pending')
             self.assertEqual(review.auto_checks(ReviewItem.objects.get(ref='social/a/p0')), ['EDITION_NOT_CLEARED'])
             clearance, _ = self.file_item('clearance', slug='a')
@@ -153,12 +193,28 @@ class ReviewQueueTests(TestCase):
         self.assertContains(response, 'publication-clearance-lst.json')
         self.assertContains(response, 'name="item"')
         self.assertContains(response, 'csrfmiddlewaretoken')
-        with override_settings(BASE_DIR=self.base):
-            response = self.client.post(url, {'item': [str(item.pk)], 'decision': 'approved'})
-        self.assertRedirects(response, url, fetch_redirect_response=False)
+        response = self.client.post(url, {'item': [str(item.pk)], 'decision': 'approved'})
+        self.assertRedirects(response, url + '?decided=1', fetch_redirect_response=False)
         item.refresh_from_db()
         self.assertEqual(item.status, 'approved')
         self.assertNotContains(self.client.get(url), 'publication-clearance-lst.json')
+
+    def test_page_needs_verified_staff_with_permission(self):
+        url = reverse('web:staff-review', args=['en'])
+        for user in (make_user('uv@example.test', verified=False), make_user('np2@example.test', perm=False)):
+            client = Client()
+            login(client, user)
+            self.assertEqual(client.get(url).status_code, 404, user.email)
+            self.assertEqual(client.post(url, {'decision': 'approved'}).status_code, 404, user.email)
+
+    def test_page_confirms_count_and_empty_selection(self):
+        item, _ = self.file_item('cover', slug='conf')
+        login(self.client, self.owner)
+        url = reverse('web:staff-review', args=['en'])
+        response = self.client.post(url, {'item': [str(item.pk)], 'decision': 'rejected'}, follow=True)
+        self.assertContains(response, 'Items decided: 1')
+        response = self.client.post(url, {'decision': 'approved'}, follow=True)
+        self.assertContains(response, 'Nothing was decided')
 
     def test_page_post_needs_csrf(self):
         item, _ = self.file_item('cover', slug='csrf')
@@ -168,7 +224,7 @@ class ReviewQueueTests(TestCase):
         self.assertEqual(client.post(url, {'item': [str(item.pk)], 'decision': 'approved'}).status_code, 403)
 
     def test_weekly_report_marks_standing_items(self):
-        with override_settings(BASE_DIR=self.base, MAISON_REVIEW_STANDING_FROM=STANDING):
+        with override_settings(MAISON_REVIEW_STANDING_FROM=STANDING):
             clearance, _ = self.file_item('clearance', slug='a')
             review.decide(self.owner, [clearance.pk], 'approved')
             standing = self.post('p1')

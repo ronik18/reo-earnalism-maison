@@ -505,6 +505,7 @@ STRINGS.update({
     "review_kind_cover": ("Cover matches", "প্রচ্ছদ মিলানো"),
     "review_kind_edition": ("New editions", "নতুন সংস্করণ"),
     "review_kind_post": ("Social posts", "সামাজিক মাধ্যমের পোস্ট"),
-    "review_changed": ("A reviewed file changed after it was queued. Nothing was decided; queue the item again.", "সারিতে তোলার পরে একটি ফাইল বদলেছে। কিছু সিদ্ধান্ত হয়নি; আইটেমটি আবার সারিতে তুলুন।"),
-    "review_denied": ("Your account cannot decide review items.", "আপনার অ্যাকাউন্ট পর্যালোচনার সিদ্ধান্ত নিতে পারে না।"),
+    "review_changed": ("A reviewed file changed after it was queued. Nothing was decided. Reject them, or queue them again:", "সারিতে তোলার পরে একটি ফাইল বদলেছে। কিছু সিদ্ধান্ত হয়নি। সেগুলো প্রত্যাখ্যান করুন বা আবার সারিতে তুলুন:"),
+    "review_decided": ("Items decided:", "সিদ্ধান্ত হয়েছে:"),
+    "review_none_decided": ("Nothing was decided. Tick at least one pending item first.", "কিছু সিদ্ধান্ত হয়নি। আগে অন্তত একটি অপেক্ষমাণ আইটেম বাছুন।"),
 })
