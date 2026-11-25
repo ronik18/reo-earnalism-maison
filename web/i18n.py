@@ -495,3 +495,4 @@ STRINGS.update({
     "new_here": ("New to Earnalism?", "Earnalism-এ নতুন?"),
     "turned_18": ("Parent-managed reader who has turned 18?", "অভিভাবক-পরিচালিত পাঠক, এখন ১৮ বছর?"),
 })
+STRINGS['sponsored_by'] = ('Sponsored by', 'সৌজন্যে')

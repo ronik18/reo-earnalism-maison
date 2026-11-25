@@ -14,8 +14,12 @@ class Track(models.Model):
     access=models.CharField(max_length=8,choices=[('free','free'),('paid','paid'),('deny','deny')],default='deny')
     edition=models.ForeignKey('library.Edition',on_delete=models.PROTECT,null=True,blank=True)
     published=models.BooleanField(default=False)
+    sponsor_name=models.CharField(max_length=120,blank=True)
+    sponsor_url=models.URLField(blank=True)
+    sponsor_approved_by=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,null=True,blank=True,related_name='+')
     class Meta:
         db_table='maison_track'
+        constraints=[models.CheckConstraint(condition=Q(sponsor_name='')|Q(sponsor_approved_by__isnull=False),name='maison_track_sponsor_approved'),models.CheckConstraint(condition=Q(sponsor_url='')|Q(sponsor_url__startswith='https://')|Q(sponsor_url__startswith='http://'),name='maison_track_sponsor_url_scheme')]
 
 class Lesson(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
