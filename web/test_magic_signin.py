@@ -23,7 +23,7 @@ class MagicSigninScreensTests(TestCase):
         destination = '/bn/vault/?tab=lists'
         page = self.client.get('/bn/sign-in/', {'return_to': destination}, follow=True)
         self.assertContains(page, '/en/email-sign-in/')
-        self.assertContains(page, 'Sign in by email')
+        self.assertContains(page, 'Email me a sign-in link')
         path = '/en/email-sign-in/'
         missing = self.client.post(path, {'email': 'missing@example.test', 'return_to': destination})
         existing = self.client.post(path, {'email': self.user.email, 'return_to': destination})
@@ -79,7 +79,7 @@ class MagicSigninScreensTests(TestCase):
     def test_google_control_is_enabled_only_and_keeps_the_localized_destination(self):
         destination = '/bn/vault/?tab=lists'
         response = self.client.get('/bn/sign-in/', {'return_to': destination}, follow=True)
-        self.assertContains(response, 'Sign in with Google')
+        self.assertContains(response, 'Continue with Google')
         match = re.search(r'href="(/api/v1/auth/google[^"]+)"', response.content.decode())
         self.assertIsNotNone(match)
         query = parse_qs(urlsplit(html.unescape(match[1])).query)

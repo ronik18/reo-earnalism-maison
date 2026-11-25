@@ -485,3 +485,13 @@ STRINGS.update({
     "worksheet": ("Printable worksheet", "ছাপার অনুশীলনী"),
     "answer_key": ("Answer key", "উত্তরমালা"),
 })
+
+STRINGS.update({
+    "signing_in": ("Signing in…", "প্রবেশ করা হচ্ছে…"),
+    "other_ways_sign_in": ("Other ways to sign in", "প্রবেশের অন্য উপায়"),
+    "continue_with_google": ("Continue with Google", "Google দিয়ে চালিয়ে যান"),
+    "google_after_link": ("Works after you connect Google in Settings.", "সেটিংসে Google যুক্ত করার পরে কাজ করে।"),
+    "email_link_offer": ("Email me a sign-in link", "আমাকে প্রবেশের লিংক ইমেল করুন"),
+    "new_here": ("New to Earnalism?", "Earnalism-এ নতুন?"),
+    "turned_18": ("Parent-managed reader who has turned 18?", "অভিভাবক-পরিচালিত পাঠক, এখন ১৮ বছর?"),
+})

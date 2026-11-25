@@ -36,12 +36,48 @@ class AuthLinksTests(TestCase):
         row = html.split('class="auth-links"', 1)[1].split('</div>', 1)[0]
         return re.findall(r'href="(/en/[a-z-]+/)', row)
 
-    def test_sign_in_offers_recovery_and_sign_up_but_not_itself(self):
+    def test_sign_in_offers_sign_up_but_not_itself(self):
         links = self.links('/en/sign-in/')
-        self.assertIn('/en/password-reset/', links)
         self.assertIn('/en/sign-up/', links)
         self.assertNotIn('/en/sign-in/', links)
 
     def test_other_pages_offer_sign_in_and_never_link_to_themselves(self):
         self.assertEqual(self.links('/en/sign-up/'), ['/en/sign-in/'])
         self.assertEqual(self.links('/en/password-reset/'), ['/en/sign-in/', '/en/sign-up/'])
+
+
+from django.conf import settings
+from django.test import override_settings
+
+
+@override_settings(FEATURES={**settings.FEATURES, 'google_oauth': True, 'email_link': True})
+class SimplifiedSignInTests(TestCase):
+    """UI review 25 Nov 2026: one obvious path, then the alternatives."""
+    def page(self, **params):
+        return self.client.get('/en/sign-in/', params).content.decode()
+
+    def test_form_comes_first_and_alternatives_follow_it(self):
+        html = self.page()
+        form, google, email_link = html.index('data-auth-form'), html.index('Continue with Google'), html.index('Email me a sign-in link')
+        self.assertLess(form, google)
+        self.assertLess(form, email_link)
+        self.assertIn('Works after you connect Google in Settings.', html)
+        self.assertNotIn('Google signs in an existing account here', html)
+
+    def test_forgot_password_sits_under_the_password_field(self):
+        html = self.page()
+        self.assertLess(html.index('id="auth-password"'), html.index('Forgot your password?'))
+        self.assertLess(html.index('Forgot your password?'), html.index('type="submit"'))
+
+    def test_sign_in_appears_only_as_heading_and_button_in_the_panel(self):
+        panel = self.page().split('class="narrow auth-panel"', 1)[1].split('</section>', 1)[0]
+        import re
+        visible = re.sub(r'<[^>]+>', ' ', panel)
+        self.assertEqual(len(re.findall(r'\bSign in\b', visible)), 2)
+
+    def test_busy_label_error_focus_and_no_competing_header_cta(self):
+        html = self.page(google_error='identity_link_required')
+        self.assertIn('data-busy-label="Signing in…"', html)
+        self.assertIn('class="error-notice" role="alert" tabindex="-1" autofocus', html)
+        self.assertNotIn('class="room-cta"', html)
+        self.assertIn('class="room-cta"', self.client.get('/en/explore/').content.decode())
