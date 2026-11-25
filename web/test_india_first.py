@@ -60,7 +60,7 @@ class IndiaFirstScreensTests(TestCase):
         expected='/en/learn/?track=original&topic=streams#lesson'
         response=self.client.get('/en/sign-in/',{'google_error':'account_registration_required','return_to':destination})
         self.assertContains(response,'No new account was created')
-        match=re.search(r'href="([^"]+)">Create a new account</a>',response.content.decode())
+        match=re.search(r'New to Earnalism\? <a href="([^"]+)">Create an account</a>',response.content.decode())
         self.assertIsNotNone(match)
         signup=html.unescape(match[1]);parsed=urlsplit(signup)
         self.assertEqual(parsed.path,'/en/sign-up/')
@@ -71,7 +71,7 @@ class IndiaFirstScreensTests(TestCase):
         self.assertContains(choice,'name="account_capacity" value="adult"')
         self.assertContains(choice,'name="return_to" value="'+html.escape(expected)+'"')
         unsafe=self.client.get('/en/sign-in/',{'google_error':'account_registration_required','return_to':'https://outside.example.test/collect'})
-        link=re.search(r'href="([^"]+)">Create a new account</a>',unsafe.content.decode())[1]
+        link=re.search(r'New to Earnalism\? <a href="([^"]+)">Create an account</a>',unsafe.content.decode())[1]
         self.assertEqual(parse_qs(urlsplit(html.unescape(link)).query),{'return_to':['/en/']})
 
     def test_adult_form_submission_forwards_the_exact_account_permission(self):
