@@ -21,6 +21,11 @@ Receipt: `summary["receipt"]` = {video_id, upload_completed} as the bridge retur
 is read once, kept in memory, and never logged or stored. The operation journal lives under
 MAISON_SOCIAL_JOURNAL_DIR (setting or env, default .local/social-journal), so a re-run never starts a duplicate
 upload.
+All runs must share one MAISON_SOCIAL_JOURNAL_DIR: the journal lock is what prevents duplicate uploads.
+
+Under the item's row lock each item is re-read just before upload: if it is no longer approved or already has a
+receipt it is skipped. If a previous run uploaded but failed to save the receipt, the journal's completed-upload
+record is used to write the receipt without any provider request.
 """
 import json
 import os
@@ -33,8 +38,9 @@ from django.utils import timezone
 
 from core.services import audit
 from operations.models import ReviewItem
-from operations.production_journal import OperationJournal
+from operations.production_journal import OperationJournal, UncertainOperation
 from operations.social_delivery import Authority, Delivery, DeliveryError, prepare
+from operations.social_delivery.bridge import fingerprint
 
 PROVIDERS = ('youtube',)
 TOKEN_ENV = 'EARNALISM_YOUTUBE_ACCESS_TOKEN'
@@ -74,6 +80,13 @@ def _check(item):
     return {**{k: summary[k] for k in REQUIRED}, 'manifest_path': manifest, 'root_path': root}, None
 
 
+def authorize_private_upload(authority, plan, destination, action):
+    """Grant exactly one start/upload action for this candidate, destination and account; nothing else."""
+    return (action in UPLOAD_ACTIONS and authority.actions == frozenset([action])
+            and authority.destination_key == destination['key'] and authority.account_id == destination['account_id']
+            and authority.candidate_sha256 == plan['candidate_sha256'])
+
+
 def make_http():
     return None  # bridge default HTTPS client; tests replace this
 
@@ -107,18 +120,30 @@ class Command(BaseCommand):
         if not execute:
             self.stdout.write(f'Dry run: {sum(1 for c in checked if not c[2])} item(s) would upload privately; nothing changed.')
             return
-        done = 0
+        done = skipped = 0
         for item, fields, error in checked:
             if error:
                 continue
             try:
                 receipt = self._upload(item, fields, token)
+                if receipt is None:
+                    skipped += 1
+                    self.stdout.write(f'{item.ref}\tSKIPPED (no longer approved or already receipted)')
+                    continue
                 done += 1
                 self.stdout.write(f"{item.ref}\tUPLOADED (private)\t{receipt['video_id']}")
+            except (UncertainOperation, DeliveryError) as exc:
+                if isinstance(exc, DeliveryError) and 'reconcil' not in exc.code:
+                    failures += 1
+                    self.stderr.write(f'{item.ref}: FAILED - {exc.code}')
+                    continue
+                failures += 1
+                self.stderr.write(f'{item.ref}: HELD - upload outcome uncertain; reconcile with the bridge\'s '
+                                  'reconcile_upload action; not retried automatically')
             except Exception as exc:  # one bad item must not stop the batch; report the code, never details
                 failures += 1
                 self.stderr.write(f'{item.ref}: FAILED - {getattr(exc, "code", None) or type(exc).__name__}')
-        self.stdout.write(f'{done} uploaded privately; {failures} refused or failed.')
+        self.stdout.write(f'{done} uploaded privately; {skipped} skipped; {failures} refused or failed.')
         if failures:
             raise CommandError(f'{failures} item(s) were not uploaded; see messages above.')
 
@@ -131,21 +156,28 @@ class Command(BaseCommand):
         journal = OperationJournal(_journal_dir())
         reference = f"post_approved:{fields['post_id']}:{item.sha256}"
 
-        def authorize(authority, plan_, destination, action):
-            return (action in UPLOAD_ACTIONS and authority.actions == frozenset([action])
-                    and authority.destination_key == key and authority.account_id == fields['account_id']
-                    and authority.candidate_sha256 == plan_['candidate_sha256'])
-
-        delivery = Delivery(plan, journal, lambda platform, account: token, authorize, http=make_http())
-        result = None
-        for action in UPLOAD_ACTIONS:
-            authority = Authority(plan['candidate_sha256'], key, fields['account_id'], frozenset([action]), reference)
-            result = delivery.run(key, action, execute=True, authority=authority)
-        if result.get('upload_completed') is not True or not result.get('video_id'):
-            raise DeliveryError('upload_not_confirmed')
-        receipt = {'video_id': result['video_id'], 'upload_completed': True}
+        completed_key = 'social:' + plan['candidate_sha256'] + ':' + key + ':completed-upload'
+        dest = next(d for d in plan['destinations'] if d['key'] == key)
+        binding = fingerprint({'candidate': plan['candidate_sha256'], 'destination': key,
+                               'source_sha256': dest['video']['sha256'], 'source_bytes': dest['video']['bytes']})
         with transaction.atomic():
+            # Row lock held across upload and receipt write: a concurrent run or a decision cannot interleave.
             item = ReviewItem.objects.select_for_update().get(pk=item.pk)
+            if item.status != 'approved' or (item.summary or {}).get('receipt'):
+                return None
+            prior = journal.read(completed_key)
+            if prior and prior['state'] == 'acknowledged' and prior['fingerprint'] == binding \
+                    and prior['result'].get('upload_completed') is True and prior['result'].get('video_id'):
+                result = prior['result']  # earlier run uploaded but never saved the receipt: no provider request
+            else:
+                delivery = Delivery(plan, journal, lambda platform, account: token, authorize_private_upload, http=make_http())
+                result = None
+                for action in UPLOAD_ACTIONS:
+                    authority = Authority(plan['candidate_sha256'], key, fields['account_id'], frozenset([action]), reference)
+                    result = delivery.run(key, action, execute=True, authority=authority)
+            if result.get('upload_completed') is not True or not result.get('video_id'):
+                raise DeliveryError('upload_not_confirmed')
+            receipt = {'video_id': result['video_id'], 'upload_completed': True}
             item.summary = {**item.summary, 'receipt': receipt, 'posted_at': timezone.now().isoformat()}
             item.save(update_fields=['summary'])
             audit(None, 'social.upload_private', item, {'post_id': fields['post_id'], 'destination_key': key,

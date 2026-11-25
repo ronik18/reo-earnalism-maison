@@ -14,7 +14,7 @@ from django.test import TestCase, override_settings
 from core.models import AuditEvent
 from operations.management.commands import post_approved
 from operations.models import ReviewItem
-from operations.social_delivery import prepare
+from operations.social_delivery import Authority, prepare
 from operations.social_delivery.http import Response
 
 TOKEN = 'in-memory-fixture-credential'
@@ -165,3 +165,66 @@ class PostApprovedTests(TestCase):
         with patch.object(post_approved, 'make_http', lambda: http), patch.object(post_approved.Delivery, 'run', spy):
             self.run_cmd('--provider', 'youtube', '--execute')
         self.assertEqual(seen, [('start', frozenset(['start'])), ('upload', frozenset(['upload']))])
+
+    def test_item_rejected_after_listing_is_not_uploaded(self):
+        item = self.post()
+        http = FakeHTTP()
+        real = post_approved.Command._upload
+
+        def reject_then_upload(self_, it, fields, token):
+            ReviewItem.objects.filter(pk=it.pk).update(status='rejected')
+            return real(self_, it, fields, token)
+
+        with patch.object(post_approved, 'make_http', lambda: http), patch.object(post_approved.Command, '_upload', reject_then_upload):
+            self.run_cmd('--provider', 'youtube', '--execute')
+        self.assertEqual(http.calls, [])
+        self.assertIn('SKIPPED', self.out)
+        item.refresh_from_db()
+        self.assertNotIn('receipt', item.summary)
+
+    def test_receipt_write_failure_recovers_without_provider_request(self):
+        item = self.post()
+        http = FakeHTTP(*upload_replies())
+        with patch.object(post_approved, 'make_http', lambda: http), patch.object(post_approved, 'audit', side_effect=RuntimeError('db')):
+            with self.assertRaises(CommandError):
+                self.run_cmd('--provider', 'youtube', '--execute')
+        item.refresh_from_db()
+        self.assertNotIn('receipt', item.summary)
+        again = FakeHTTP()
+        with patch.object(post_approved, 'make_http', lambda: again):
+            self.run_cmd('--provider', 'youtube', '--execute')
+        self.assertEqual(again.calls, [])
+        item.refresh_from_db()
+        self.assertEqual(item.summary['receipt'], {'video_id': 'video1', 'upload_completed': True})
+        self.assertEqual(AuditEvent.objects.filter(action='social.upload_private').count(), 1)
+
+    def test_uncertain_upload_prints_reconcile_next_step(self):
+        self.post()
+        http = FakeHTTP(reply({'items': [{'id': 'account1'}]}),
+                        reply(location='https://www.googleapis.com/upload/youtube/v3/videos?session=transient'),
+                        TimeoutError('x'))
+        with patch.object(post_approved, 'make_http', lambda: http):
+            with self.assertRaises(CommandError):
+                self.run_cmd('--provider', 'youtube', '--execute')
+            self.assertIn('provider_outcome_unknown', self.err)
+            http.responses.append(reply({'items': [{'id': 'account1'}]}))  # identity check on the re-run
+            with self.assertRaises(CommandError):
+                self.run_cmd('--provider', 'youtube', '--execute')
+        self.assertIn('reconcile_upload', self.err)
+        self.assertIn('not retried automatically', self.err)
+
+    def test_authorize_grants_only_one_private_upload_action(self):
+        plan = {'candidate_sha256': 'a' * 64}
+        dest = {'key': 'youtube:account1', 'account_id': 'account1'}
+
+        def grant(actions, action, sha='a' * 64, key='youtube:account1', account='account1'):
+            return post_approved.authorize_private_upload(Authority(sha, key, account, frozenset(actions), 'r'), plan, dest, action)
+
+        self.assertTrue(grant(['start'], 'start'))
+        self.assertTrue(grant(['upload'], 'upload'))
+        for action in ('publish', 'status', 'captions', 'thumbnail', 'resume_upload'):
+            self.assertFalse(grant([action], action))
+        self.assertFalse(grant(['start', 'upload'], 'start'))
+        self.assertFalse(grant(['start'], 'start', sha='b' * 64))
+        self.assertFalse(grant(['start'], 'start', key='youtube:other'))
+        self.assertFalse(grant(['start'], 'start', account='other'))
