@@ -55,14 +55,15 @@ def _json(path):
         return None
 
 
-def approved_packets(intake=INTAKE, root=ROOT):
+def approved_packets(intake=None, root=None, check=None):
     """Every publishable packet: the two legacy books plus each intake packet with an owner-approved clearance record.
 
     A discovered packet qualifies only when its own clearance record (manifest.provenance.rights_evidence_refs) has a
-    status starting OWNER_APPROVED, approval.approved true and nothing still required, and the text and cover bytes
+    status exactly OWNER_APPROVED, approval.approved true and nothing still required, and the text and cover bytes
     on disk are exactly those the record and cover_provenance.json name. Approval over changed bytes is refused.
+    `check` limits the byte-hash verification (and its CommandError) to those slugs; None verifies every packet.
     """
-    intake, root = Path(intake), Path(root)
+    intake, root = Path(intake or INTAKE), Path(root or ROOT)
     packets = {}
     legacy_doc = root / CLEARANCE_DOC
     legacy_sha = sha256(legacy_doc.read_bytes()) if legacy_doc.exists() else None
@@ -90,11 +91,16 @@ def approved_packets(intake=INTAKE, root=ROOT):
             continue
         approval = record.get("approval") or {}
         book = (record.get("books") or {}).get(slug)
-        if not (str(record.get("status", "")).startswith("OWNER_APPROVED") and approval.get("approved") is True
+        if not (record.get("status") == "OWNER_APPROVED" and approval.get("approved") is True
                 and not approval.get("still_required") and isinstance(book, dict) and edition_slug):
             continue
         provenance = _json(folder / "cover_provenance.json")
         if not provenance or not all((folder / name).is_file() for name in ("front.jpg", "back.jpg", "source.json")):
+            continue
+        covers = ()
+        if check is not None and slug not in check:
+            packets[slug] = {"slug": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
+                "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": covers}
             continue
         source_sha = sha256((folder / "source.json").read_bytes())
         if book.get("source_sha256") != source_sha or (manifest.get("source") or {}).get("sha256") != source_sha:
@@ -105,6 +111,9 @@ def approved_packets(intake=INTAKE, root=ROOT):
             if not expected or sha256((folder / f"{side}.jpg").read_bytes()) != expected:
                 raise CommandError(f"{slug}: COVER_HASH_MISMATCH: {side}.jpg differs from cover_provenance.json.")
             covers.append(expected)
+        attached = approval.get("cover_attached")
+        if attached and (attached.get("front_sha256"), attached.get("back_sha256")) != tuple(covers):
+            raise CommandError(f"{slug}: COVER_HASH_MISMATCH: approval.cover_attached differs from front.jpg/back.jpg.")
         packets[slug] = {"slug": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
             "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": tuple(covers)}
     return packets
@@ -139,16 +148,20 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("stage", choices=("import", "evidence", "publish", "status"))
         parser.add_argument("--publisher", required=True, help="public_id of an active verified staff publisher")
-        parser.add_argument("--book", action="append", choices=sorted(approved_packets()), help="limit to these books")
+        parser.add_argument("--book", action="append", choices=sorted(approved_packets(check=())), help="limit to these books")
+        parser.add_argument("--all", action="store_true", help="act on every approved book (required for evidence/publish without --book)")
         parser.add_argument("--browser-report", help="repo-relative browser acceptance report (evidence stage)")
 
     def handle(self, *args, **options):
         actor = get_user_model().objects.filter(public_id=options["publisher"], is_active=True, is_staff=True).first()
         if actor is None or not actor.is_verified or not actor.has_perm("library.publish_revision"):
             raise CommandError("An active verified staff publisher with library.publish_revision is required.")
+        if options["stage"] in ("evidence", "publish") and not options["book"] and not options["all"]:
+            raise CommandError(f"BOOK_REQUIRED: the {options['stage']} stage needs --book <slug> or --all.")
         out = {}
-        packets = approved_packets()
-        for slug in options["book"] or sorted(packets):
+        chosen = options["book"] or sorted(approved_packets(check=()))
+        packets = approved_packets(check=set(chosen))
+        for slug in chosen:
             packet = packets[slug]
             stage = options["stage"]
             if stage == "import":
