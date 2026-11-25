@@ -130,6 +130,27 @@ class ExperienceTests(TestCase):
         self.assertContains(response, english)
         self.assertContains(response, "Mark finished")
 
+    def test_author_note_renders_as_a_footnote_after_its_paragraph(self):
+        self.login()
+        from unittest.mock import patch
+        from library import services
+        from library.models import Paragraph
+        unit="40000000-0000-4000-8000-000000000002"
+        rows=list(Paragraph.objects.filter(unit_id=unit).order_by("ordinal")[:2])
+        self.assertEqual(len(rows),2)
+        real=services.get_reader_document
+        def with_note(*args,**kwargs):  # published rows are frozen; mark the second anchor as an author's note
+            document=real(*args,**kwargs)
+            for paragraph in document["paragraphs"]:
+                if paragraph["anchor_id"]==str(rows[1].anchor_id):
+                    paragraph["kind"]="note"
+            return document
+        with patch.object(services,"get_reader_document",with_note):
+            response=self.client.get(f"/en/read/20000000-0000-4000-8000-000000000002/{unit}/")
+        html=response.content.decode()
+        self.assertIn(f'id="anchor-{rows[1].anchor_id}" data-anchor="{rows[1].anchor_id}" class="footnote" role="note">',html)
+        self.assertLess(html.index(f'anchor-{rows[0].anchor_id}"'),html.index(f'anchor-{rows[1].anchor_id}"'))
+
     def test_bengali_book_keeps_its_text_and_language_in_the_english_reader(self):
         self.login()
         from library.models import Paragraph

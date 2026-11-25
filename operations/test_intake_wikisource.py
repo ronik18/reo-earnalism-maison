@@ -69,7 +69,7 @@ class WikisourceRulesTests(SimpleTestCase):
         self.assertEqual(caught.exception.code, 'PAGE_NOT_VALIDATED')
 
     def test_leftover_markup_is_refused(self):
-        for bad in ('দেখুন [[অন্য]] পাতা।', 'টীকা<ref>x</ref>।', "''তির্যক''", '{{অজানা|x}}'):
+        for bad in ('দেখুন [[অন্য]] পাতা।', "''তির্যক''", '{{অজানা|x}}'):
             with self.subTest(bad=bad):
                 pages = [dict(PAGES[0], wikitext=PAGES[0]['wikitext'] + bad)]
                 with self.assertRaises(IntakeError) as caught:
@@ -207,9 +207,44 @@ class WikisourceStructureTests(SimpleTestCase):
                 _one(self.KC + 'এক।\n\n' + bad + '\n\nদুই।', title='মধ্যবর্ত্তিনী')
             self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
 
+    def test_author_footnote_becomes_a_note_after_its_paragraph(self):
+        got = _one(self.TL + 'আদেশ পালন করিল।<ref>এই গল্প  পূর্ব্বে রচিত।</ref>\n\n{{gap}}পরে।')
+        self.assertEqual(got, [{'kind': 'paragraph', 'text': 'আদেশ পালন করিল।'},
+                               {'kind': 'note', 'text': 'এই গল্প পূর্ব্বে রচিত।'}, {'kind': 'paragraph', 'text': 'পরে।'}])
+
+    def test_footnote_mid_paragraph_follows_the_whole_paragraph(self):
+        got = _one(self.TL + 'এক<ref>টীকা</ref> দুই।\n\nতিন।')
+        self.assertEqual(got, [{'kind': 'paragraph', 'text': 'এক দুই।'}, {'kind': 'note', 'text': 'টীকা'},
+                               {'kind': 'paragraph', 'text': 'তিন।'}])
+
+    def test_footnote_with_markup_empty_or_outside_a_paragraph_is_refused(self):
+        for bad in ('এক<ref>ক {{gap}}</ref>', 'এক<ref> </ref>', 'এক<ref name="a">ক</ref>',
+                    '{{কেন্দ্র|প্রথম<ref>ক</ref>}}', '{{Block center|<poem>ক<ref>খ</ref></poem>}}', '<references/>'):
+            with self.subTest(bad=bad), self.assertRaises(IntakeError) as caught:
+                _one(self.TL + bad)
+            self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
+    def test_poem_split_across_pages_is_one_verse(self):
+        pages = [{'page': '১', 'revision': 1, 'quality': 4,
+                  'wikitext': self.TL + 'আগে,—\n\n{{Block center/s}}<poem>ক খ\nগ</poem><noinclude>{{block center/e}}</noinclude>'},
+                 {'page': '২', 'revision': 2, 'quality': 4,
+                  'wikitext': '<noinclude>{{rh||x|১}}\n{{Block center/s}}</noinclude><poem>ঘ\nঙ</poem>{{block center/e}}\n\n{{gap}}পরে।'}]
+        self.assertEqual(pages_to_paragraphs(pages, title=TITLE), [
+            {'kind': 'paragraph', 'text': 'আগে,—'}, {'kind': 'verse', 'text': 'ক খ\nগ\nঘ\nঙ'},
+            {'kind': 'paragraph', 'text': 'পরে।'}])
+
+    def test_split_poem_halves_must_meet_at_a_page_break(self):
+        open_end = self.TL + 'এক\n\n{{Block center/s}}<poem>ক</poem>'
+        close_start = '<poem>খ</poem>{{block center/e}}\n\nদুই'
+        for bad in ([open_end, 'দুই।'], [self.TL + 'এক', close_start], [open_end + '\n\nআরও', close_start]):
+            pages = [{'page': str(n), 'revision': n, 'quality': 4, 'wikitext': text} for n, text in enumerate(bad, 1)]
+            with self.subTest(bad=bad), self.assertRaises(IntakeError) as caught:
+                pages_to_paragraphs(pages, title=TITLE)
+            self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
     def test_verse_and_heading_flow_into_the_source_units(self):
         pages = [{'page': '১', 'revision': 1, 'quality': 4, 'timestamp': None,
-                  'wikitext': self.TL + '{{কেন্দ্র|প্রথম।}}\n\n{{Block center|<poem>ক\nখ</poem>}}'}]
+                  'wikitext': self.TL + '{{কেন্দ্র|প্রথম পরিচ্ছেদ।}}\n\n{{Block center|<poem>ক\nখ</poem>}}'}]
         source = build_packet('test-book', TITLE, pages, **KW)['source']
         self.assertEqual([p['kind'] for p in source['units'][0]['paragraphs']], ['heading', 'verse'])
         self.assertEqual(source['units'][0]['paragraphs'][1]['text'], 'ক\nখ')
@@ -241,6 +276,19 @@ class WikisourceStructureTests(SimpleTestCase):
             with self.subTest(pages=len(pages)), self.assertRaises(IntakeError) as caught:
                 pages_to_paragraphs(pages, title=TITLE)
             self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
+    def test_samapta_is_also_a_last_page_end_marker(self):
+        P0 = dict(PAGES[0], wikitext=self.TL + 'এক।{{nop}}')
+        last = dict(PAGES[1], wikitext='গাহিতে লাগিল—\n\n{{কেন্দ্র|এস এস হে!}}\n\n\n\n{{কেন্দ্র|সমাপ্ত।}}')
+        self.assertEqual(pages_to_paragraphs([P0, last], title=TITLE)[-2:], [
+            {'kind': 'paragraph', 'text': 'গাহিতে লাগিল—'}, {'kind': 'verse', 'text': 'এস এস হে!'}])
+        with self.assertRaises(IntakeError) as caught:
+            pages_to_paragraphs([dict(P0, wikitext=self.TL + 'এক।\n\n{{কেন্দ্র|সমাপ্ত।}}'), PAGES[1]], title=TITLE)
+        self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
+    def test_bare_centered_line_is_a_heading_only_when_it_names_a_section(self):
+        got = _one(self.TL + '{{কেন্দ্র|নবম পরিচ্ছেদ।}}\n\nএক।\n\n{{কেন্দ্র|পরিশিষ্ট।}}\n\nদুই।\n\n{{কেন্দ্র|এস এস হে!}}')
+        self.assertEqual([p['kind'] for p in got], ['heading', 'paragraph', 'heading', 'paragraph', 'verse'])
 
     def test_blocks_adjacent_to_a_rule_line_with_a_single_newline(self):
         got = _one(self.TL + 'এক।\n\n{{rule|3em}}\n{{কেন্দ্র|{{larger|দ্বিতীয়।}}}}\n{{rule|3em}}\n{{Block center|<poem>ক\nখ</poem>}}\n{{rule|2em}}\nদুই।')
