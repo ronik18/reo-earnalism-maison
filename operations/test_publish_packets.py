@@ -214,14 +214,63 @@ class MondayApprovalTests(TestCase):
             command.reverify_approval(packet)
         self.assertIn("MONDAY_APPROVAL_VOIDED", str(raised.exception))
 
+    def make_actor(self):
+        actor = get_user_model().objects.create_user("publisher16@example.test", "Test-Only-Passphrase-47", is_verified=True)
+        actor.is_staff = True
+        actor.save()
+        return actor
+
+    def make_draft(self, packet, content_sha=None):
+        from library.models import Asset, Edition, Revision, Work
+        edition = Edition.objects.create(work=Work.objects.create(slug="w-" + packet["edition_slug"], title="Test work"),
+                                         slug=packet["edition_slug"], locale="bn")
+        revision = Revision.objects.create(edition=edition, title="Draft", content_sha256=content_sha or "")
+        pair = {}
+        for side, digest in zip(("front", "back"), packet["covers"]):
+            Asset.objects.create(revision=revision, kind="cover", state="ready", storage_key=f"revisions/{revision.id}/{side}", sha256=digest,
+                                 bytes=1, content_type="image/jpeg")
+            pair[side] = {"sha256": digest}
+        revision.validation_evidence = {"cover_pair": pair}
+        revision.save()
+        return revision
+
     def test_recorded_clearance_evidence_ref_cites_review_items(self):
-        items = self.approve_both()
+        self.approve_both()
         packet = self.packets()[self.SLUG]
-        ref = command.evidence_ref_for(packet)
-        self.assertIn(str(items[0].id), ref)
-        import inspect
-        source = inspect.getsource(command.Command.record_evidence)
-        self.assertIn('"evidence_ref": evidence_ref_for(packet) if packet.get("review_items")', source)
+        revision = self.make_draft(packet)
+        command.Command().record_evidence(self.make_actor(), packet, None)
+        revision.refresh_from_db()
+        ref = revision.validation_evidence["publication_clearance"]["evidence_ref"]
+        self.assertEqual(ref, command.evidence_ref_for(packet))
+        self.assertIn("review_items=", ref)
+        self.assertIn("decided_by=" + str(self.owner.public_id), ref)
+
+    def test_legacy_packet_evidence_ref_keeps_the_plain_form(self):
+        packet = command.approved_packets(check=())["bicharak"]
+        self.assertFalse(packet.get("review_items"))
+        doc, _ = command.clearance_document(packet)
+        revision = self.make_draft(packet, doc["books"]["bicharak"].get("maison_revision_content_sha256"))
+        command.Command().record_evidence(self.make_actor(), packet, None)
+        revision.refresh_from_db()
+        ref = revision.validation_evidence["publication_clearance"]["evidence_ref"]
+        self.assertEqual(ref, packet["clearance_path"] + "#sha256=" + packet["clearance_sha256"])
+        self.assertNotIn("review_items", ref)
+
+    def test_publish_and_offer_reader_refuse_after_the_files_change(self):
+        self.approve_both()
+        packet = self.packets()[self.SLUG]
+        revision = self.make_draft(packet)
+        actor = self.make_actor()
+        before = (revision.state, revision.version, revision.preview, revision.access_policy)
+        self.edit_clearance(lambda r: r.update(note="changed after discovery"))
+        for call in (lambda: command.Command().publish(actor, packet),
+                     lambda: command.Command().offer_reader(actor, revision, packet)):
+            with self.assertRaises(CommandError) as raised:
+                call()
+            self.assertIn("MONDAY_APPROVAL_VOIDED", str(raised.exception))
+        revision.refresh_from_db()
+        self.assertEqual((revision.state, revision.version, revision.preview, revision.access_policy), before)
+        self.assertFalse(revision.rights.exists())
 
     def test_source_change_still_refused_for_db_approved_packet(self):
         self.approve_both()

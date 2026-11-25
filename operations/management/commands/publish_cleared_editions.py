@@ -384,9 +384,9 @@ class Command(BaseCommand):
         revision.refresh_from_db()
 
     def offer_reader(self, actor, revision, packet):
+        reverify_approval(packet)
         first = revision.units.order_by("ordinal").first()
         paragraphs = [p for p in first.paragraphs.order_by("ordinal") if p.kind == "paragraph"]
-        reverify_approval(packet)
         preview = preview_entries(paragraphs)
         if not preview:
             raise CommandError("No bounded preview paragraph is available.")
