@@ -1,0 +1,116 @@
+{
+  "note": "Qwen-Image-Edit-2511 test batch on held shots, 2026-11-25",
+  "items": [
+    {
+      "key": "f01s003-1",
+      "source": {
+        "job": "selfish-giant-stills-film-01-r10",
+        "file": "f01s003-1--c2.png"
+      },
+      "refs": [
+        {
+          "job": "selfish-giant-stills-film-01-r9",
+          "file": "f01s010-1--c2.png"
+        }
+      ],
+      "instruction": "Edit the first image only. Keep the 2D animated cel-shaded illustration style, line work and colour palette, the spring light, the blossom tree, the stone archway and the Giant's pose, pointing arm, shouting face, beard, brown tunic, belt and boots. Fix the scale: the Giant is a huge man three times a grown man's height. Lower the long stone garden wall behind him so its top reaches only the middle of his chest and the open sky shows above it around his head and shoulders. Keep the fleeing children small, their heads no higher than his knee. Replace the wooden picket fence and plank gate at the left with the same grey stone wall. Keep the Giant identical to the Giant in the second image.",
+      "negative": "wall higher than his chest, wall at his shoulders, man-sized Giant, children as tall as his waist, picket fence, plank fence, wooden fence, second Giant, fur, photorealism, 3D render, CGI, text, lettering, watermark, signature, letterbox bars, extra fingers, extra limbs, duplicate person",
+      "seed": 251201,
+      "candidates": 2,
+      "steps": 40,
+      "true_cfg_scale": 4.0
+    },
+    {
+      "key": "f01s007-6",
+      "source": {
+        "job": "selfish-giant-stills-film-01-r10",
+        "file": "f01s007-6--c1.png"
+      },
+      "refs": [
+        {
+          "job": "selfish-giant-stills-film-01-r10",
+          "file": "f01s006-3--c1.png"
+        },
+        {
+          "job": "selfish-giant-stills-film-01-r9",
+          "file": "f01s010-1--c2.png"
+        }
+      ],
+      "instruction": "Edit the first image only. Keep the 2D animated cel-shaded illustration style, line work and colour palette, the stone bedchamber, the bed, the nightstand and jug, the bright window and the Giant's leaping pose and face. Remove every trace of snow and ice from inside the room: the floor, the window sill, the corners, the stool and the nightstand are dry grey stone and wood. Snow and bare branches appear only outside, beyond the window glass. Change the Giant's grey tunic into a long plain white linen nightshirt reaching his ankles, with no belt; his feet are bare, no boots. Keep his face, bushy brown beard and hair identical to the Giant in the second and third images.",
+      "negative": "snow indoors, snow on floor, snow on furniture, snow on sill, ice indoors, icicles indoors, belt, boots, tunic, waistcoat, lettering on jug, children, photorealism, 3D render, CGI, text, lettering, watermark, signature, letterbox bars, extra fingers, extra limbs, duplicate person",
+      "seed": 251202,
+      "candidates": 2,
+      "steps": 40,
+      "true_cfg_scale": 4.0
+    },
+    {
+      "key": "f01s010-4",
+      "source": {
+        "job": "selfish-giant-stills-film-01-r10",
+        "file": "f01s010-4--c1.png"
+      },
+      "refs": [
+        {
+          "job": "selfish-giant-stills-film-01-r9",
+          "file": "f01s008-5--c2.png"
+        },
+        {
+          "job": "selfish-giant-stills-film-01-r9",
+          "file": "f01s010-1--c2.png"
+        }
+      ],
+      "instruction": "Edit the first image only. Keep the 2D animated cel-shaded illustration style, line work and colour palette, the kneeling Giant, his face, beard and open hand, the grey stone wall, the lawn and the sunlight. Spring: replace the peaches and the plain green leaves of the tree at the left with branches thickly covered in pink and white peach blossom, flowers only and no fruit anywhere. Change the little boy on the Giant's palm into a tiny four-year-old with fair curly hair, bare head and pale round cheeks, in an ankle-length plain white smock, with small bare feet, as in the second image. Keep the boy's place and pose on the palm. Keep the Giant identical to the Giant in the third image.",
+      "negative": "peaches, fruit, apples, oranges, round red fruit, shirt, shorts, trousers, shoes, brown hair, chain, spectacles, second child, photorealism, 3D render, CGI, text, lettering, watermark, signature, letterbox bars, extra fingers, extra limbs, duplicate person",
+      "seed": 251203,
+      "candidates": 2,
+      "steps": 40,
+      "true_cfg_scale": 4.0
+    },
+    {
+      "key": "f01s014-5",
+      "source": {
+        "job": "selfish-giant-stills-film-01-r9",
+        "file": "f01s014-5--c1.png"
+      },
+      "refs": [
+        {
+          "job": "selfish-giant-stills-film-01-r9",
+          "file": "f01s015-2--c3.png"
+        },
+        {
+          "job": "selfish-giant-stills-film-01-r9",
+          "file": "f01s015-3--c2.png"
+        }
+      ],
+      "instruction": "Edit the first image only. Keep everything exactly as it is: the composition, the 2D animated cel-shaded style, the golden tree with white blossom, the snow, the soft golden light, the kneeling old Giant, and the little boy's face, fair curly hair, white smock, pose and open hands. Add only four small soft rose-pink marks, each like a faint round petal: one in the centre of each of the boy's open palms and one on the top of each small bare foot. The marks are small, gentle and clean, with no blood. His face stays clean and serene. The boy matches the boy in the second image; the old Giant matches the old Giant in the third image.",
+      "negative": "blood, bleeding, drip, wound, cut, gash, scar, nail, hole, bruise, gore, red stains, dark red, large marks, marks on face, crying, photorealism, 3D render, CGI, text, lettering, watermark, signature, letterbox bars, extra fingers, extra limbs, duplicate person",
+      "seed": 251204,
+      "candidates": 2,
+      "steps": 40,
+      "true_cfg_scale": 4.0
+    },
+    {
+      "key": "f01s015-4",
+      "source": {
+        "job": "selfish-giant-stills-film-01-r9",
+        "file": "f01s015-4--c3.png"
+      },
+      "refs": [
+        {
+          "job": "selfish-giant-stills-film-01-r9",
+          "file": "f01s015-3--c2.png"
+        },
+        {
+          "job": "selfish-giant-stills-film-01-r9",
+          "file": "f01s014-2--c3.png"
+        }
+      ],
+      "instruction": "Edit the first image only. Keep the 2D animated cel-shaded illustration style, line work and colour palette, the camera, the old Giant's peaceful closed eyes, faint smile, white beard and resting pose, and the hushed children and their places. Scatter many fallen white blossoms over the old Giant's whole body, covering his tunic and arms like a soft blanket. Re-tint the dark tree trunk and branches above him to warm gold, keeping its white blossom, like the golden tree in the third image. Replace the cottage with the lit window in the background with the plain grey garden wall and bare snowy trees, with no lit window anywhere. Keep the old Giant identical to the old Giant in the second image.",
+      "negative": "lit window, glowing window, lamp, lantern, cottage, house, dark trunk, open eyes, blood, sad faces, crying, photorealism, 3D render, CGI, text, lettering, watermark, signature, letterbox bars, extra fingers, extra limbs, duplicate person",
+      "seed": 251205,
+      "candidates": 2,
+      "steps": 40,
+      "true_cfg_scale": 4.0
+    }
+  ]
+}
