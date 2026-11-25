@@ -181,7 +181,8 @@ def approved_for(kind, ref, sha256):
     """The owner-approved (never standing) ReviewItem bound to exactly this kind, ref and file hash, or None.
 
     A later change to the file changes its sha256, so an older approval no longer matches (owner decision D8)."""
-    return (ReviewItem.objects.filter(kind=kind, ref=ref, sha256=sha256, status='approved', standing=False)
+    return (ReviewItem.objects.filter(kind=kind, ref=ref, sha256=sha256, status='approved', standing=False,
+                                    decided_by__isnull=False, decided_at__isnull=False)
             .select_related('decided_by').order_by('-decided_at').first())
 
 

@@ -56,12 +56,13 @@ def _json(path):
         return None
 
 
-def monday_approval(root, folder, clearance_path, clearance_file, record):
+def monday_approval(root, folder, clearance_path, clearance_file, record, edition_slug):
     """Owner decision D8: the clearance item and the cover item approved on the Monday page for these exact files.
 
     Returns the two ReviewItems (clearance, cover) or None. Both are bound to the files' current sha256, so a later
     change to either file voids the approval; standing permission never counts (approved_for ignores it)."""
-    if set(record.get("territories") or ()) != set(territories()) or record.get("formats") != ["reader"]:
+    if (record.get("status") != "DRAFT_PENDING_OWNER_APPROVAL" or set(record.get("territories") or ()) != set(territories())
+            or record.get("formats") != ["reader"]):
         return None
     try:
         cover_ref = (Path(folder) / "cover_provenance.json").relative_to(root).as_posix()
@@ -72,7 +73,20 @@ def monday_approval(root, folder, clearance_path, clearance_file, record):
         return None
     clearance = approved_for("clearance", clearance_path, sha256(Path(clearance_file).read_bytes()))
     cover = approved_for("cover", cover_ref, sha256(cover_file.read_bytes()))
-    return (clearance, cover) if clearance and cover else None
+    if not (clearance and cover) or (clearance.summary or {}).get("edition_slug") != edition_slug:
+        return None
+    return clearance, cover
+
+
+def reverify_approval(packet):
+    """Immediately before a write: a DB-approved packet must still match its approved items and files (D8)."""
+    if not packet.get("review_items"):
+        return
+    root, folder = Path(packet["root"]), Path(packet["folder"])
+    clearance_file = root / packet["clearance_path"]
+    again = monday_approval(root, folder, packet["clearance_path"], clearance_file, _json(clearance_file) or {}, packet["edition_slug"])
+    if again is None or [i.id for i in again] != [i.id for i in packet["review_items"]]:
+        raise CommandError(f"{packet['slug']}: MONDAY_APPROVAL_VOIDED: the clearance or cover file changed or the approval no longer stands.")
 
 
 def evidence_ref_for(packet):
@@ -88,7 +102,9 @@ def approved_packets(intake=None, root=None, check=None):
     """Every publishable packet: the two legacy books plus each intake packet with an owner-approved clearance record.
 
     A discovered packet qualifies only when its own clearance record (manifest.provenance.rights_evidence_refs) has a
-    status exactly OWNER_APPROVED, approval.approved true and nothing still required, and the text and cover bytes
+    status exactly OWNER_APPROVED, approval.approved true and nothing still required, or (owner decision D8) a status
+    exactly DRAFT_PENDING_OWNER_APPROVAL whose clearance file and cover_provenance.json each have an approved,
+    non-standing Monday-page review item bound to the file's current sha256 (see monday_approval); and the text and cover bytes
     on disk are exactly those the record and cover_provenance.json name. Approval over changed bytes is refused.
     `check` limits the byte-hash verification (and its CommandError) to those slugs; None verifies every packet.
     """
@@ -128,7 +144,7 @@ def approved_packets(intake=None, root=None, check=None):
                    and not approval.get("still_required"))
         review_items = None
         if not in_file:
-            review_items = monday_approval(root, folder, clearance_path, clearance_file, record)
+            review_items = monday_approval(root, folder, clearance_path, clearance_file, record, edition_slug)
             if review_items is None:
                 continue
         provenance = _json(folder / "cover_provenance.json")
@@ -138,7 +154,7 @@ def approved_packets(intake=None, root=None, check=None):
         if check is not None and slug not in check:
             packets[slug] = {"slug": slug, "book_key": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
                 "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": covers,
-                "review_items": review_items}
+                "review_items": review_items, "root": str(root)}
             continue
         source_sha = sha256((folder / "source.json").read_bytes())
         if book.get("source_sha256") != source_sha or (manifest.get("source") or {}).get("sha256") != source_sha:
@@ -154,7 +170,7 @@ def approved_packets(intake=None, root=None, check=None):
             raise CommandError(f"{slug}: COVER_HASH_MISMATCH: approval.cover_attached differs from front.jpg/back.jpg.")
         packets[slug] = {"slug": slug, "book_key": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
             "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": tuple(covers),
-            "review_items": review_items}
+            "review_items": review_items, "root": str(root)}
     return packets
 
 
@@ -370,6 +386,7 @@ class Command(BaseCommand):
     def offer_reader(self, actor, revision, packet):
         first = revision.units.order_by("ordinal").first()
         paragraphs = [p for p in first.paragraphs.order_by("ordinal") if p.kind == "paragraph"]
+        reverify_approval(packet)
         preview = preview_entries(paragraphs)
         if not preview:
             raise CommandError("No bounded preview paragraph is available.")
@@ -419,7 +436,7 @@ class Command(BaseCommand):
         ready = list(revision.assets.filter(state="ready"))
         clearance = {"status": "pass", "sha256": revision.content_sha256, "territories": territories(), "formats": ["reader"],
             "asset_sha256": {str(a.id): a.sha256 for a in ready},
-            "evidence_ref": f"{packet['clearance_path']}#sha256={doc_sha}",
+            "evidence_ref": evidence_ref_for(packet) if packet.get("review_items") else f"{packet['clearance_path']}#sha256={doc_sha}",
             "basis": "owner_authorized_public_domain_term_evidence", "recorded_by": str(actor.public_id),
             "recorded_at": timezone.now().isoformat()}
         with transaction.atomic():
@@ -438,6 +455,7 @@ class Command(BaseCommand):
 
     # --- publish ------------------------------------------------------------------------------
     def publish(self, actor, packet):
+        reverify_approval(packet)
         require_translation_labels(packet)
         revision = draft_for(packet)
         if revision is None:

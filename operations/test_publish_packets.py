@@ -135,7 +135,10 @@ class MondayApprovalTests(TestCase):
         return command.sha256((self.root / ref).read_bytes())
 
     def item(self, kind, ref, status="approved", standing=False, **extra):
+        from django.utils import timezone
         from operations.models import ReviewItem
+        extra.setdefault("summary", {"edition_slug": self.SLUG})
+        extra.setdefault("decided_at", timezone.now() if status == "approved" else None)
         return ReviewItem.objects.create(kind=kind, ref=ref, sha256=extra.pop("sha256", self.digest(ref)), status=status,
                                          decided_by=self.owner if status == "approved" else None, standing=standing, **extra)
 
@@ -174,15 +177,51 @@ class MondayApprovalTests(TestCase):
             self.item("cover", self.COVER, status=status)
             self.assertNotIn(self.SLUG, self.packets(), status)
 
-    def test_standing_items_never_count(self):
-        # standing=True is only legal on approved posts at the database level; the helper also ignores it.
+    def test_approved_item_without_decider_does_not_unlock(self):
         from operations.models import ReviewItem
-        from operations.review import approved_for
-        item = self.item("clearance", CLEARANCE)
-        ReviewItem.objects.filter(pk=item.pk).update(standing=False)
-        self.assertEqual(approved_for("clearance", CLEARANCE, item.sha256), item)
-        self.assertIsNone(approved_for("clearance", CLEARANCE, "0" * 64))
-        self.assertIsNone(approved_for("cover", CLEARANCE, item.sha256))
+        self.approve_both()
+        self.assertIn(self.SLUG, self.packets())
+        ReviewItem.objects.update(decided_by=None)
+        self.assertNotIn(self.SLUG, self.packets())
+        ReviewItem.objects.update(decided_by=self.owner, decided_at=None)
+        self.assertNotIn(self.SLUG, self.packets())
+
+    def test_standing_is_database_forbidden_for_clearance_items(self):
+        from django.db import IntegrityError, transaction
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            self.item("clearance", CLEARANCE, standing=True)
+
+    def test_only_draft_pending_status_qualifies(self):
+        self.approve_both()
+        for status in ("REJECTED", "WITHDRAWN", "DRAFT"):
+            self.edit_clearance(lambda r: r.update(status=status))
+            from operations.models import ReviewItem
+            ReviewItem.objects.all().delete()
+            self.approve_both()
+            self.assertNotIn(self.SLUG, self.packets(), status)
+
+    def test_clearance_item_must_name_the_packet_edition(self):
+        self.item("clearance", CLEARANCE, summary={"edition_slug": "another-book"})
+        self.item("cover", self.COVER)
+        self.assertNotIn(self.SLUG, self.packets())
+
+    def test_reverify_refuses_when_files_change_after_discovery(self):
+        self.approve_both()
+        packet = self.packets()[self.SLUG]
+        command.reverify_approval(packet)
+        self.edit_clearance(lambda r: r.update(note="changed after discovery"))
+        with self.assertRaises(CommandError) as raised:
+            command.reverify_approval(packet)
+        self.assertIn("MONDAY_APPROVAL_VOIDED", str(raised.exception))
+
+    def test_recorded_clearance_evidence_ref_cites_review_items(self):
+        items = self.approve_both()
+        packet = self.packets()[self.SLUG]
+        ref = command.evidence_ref_for(packet)
+        self.assertIn(str(items[0].id), ref)
+        import inspect
+        source = inspect.getsource(command.Command.record_evidence)
+        self.assertIn('"evidence_ref": evidence_ref_for(packet) if packet.get("review_items")', source)
 
     def test_source_change_still_refused_for_db_approved_packet(self):
         self.approve_both()
