@@ -47,6 +47,43 @@ image. After import a reviewer looks at each candidate at full size and records 
 replaces the selection). `film` patches only picked candidates, as `<key>.png`, over the base
 set; an unpicked candidates job adds nothing (reported as `unpicked`) and is never the base.
 
+## Retouch: redraw only a small region of a chosen still
+
+When a still is right except for a small culturally-default detail the story forbids (a bindi,
+ear studs or a coloured sari border on Hemshashi; a beard on Judge Mohit; overhead wires in an
+1880s lane), prompt wording will not remove it and a regenerated shot loses what was right.
+Retouch it instead (owner decision 25 November 2026): an open inpainting model redraws only
+masked regions; every pixel outside the mask stays the source's own.
+
+- Models: `diffusers/stable-diffusion-xl-1.0-inpainting-0.1` (card licence `openrail++`) and
+  `CIDAS/clipseg-rd64-refined` masks (`apache-2.0`), revisions resolved and recorded per run. The
+  notebook reads both model cards' `license` field before any download and refuses anything
+  outside `openrail++`, `apache-2.0`, `mit`. No other model, no paid service.
+- Spec (`job retouch --root R --film N --spec retouch.json --rates rates.json [--job-id ID]`):
+
+  ```json
+  {"items": [{"key": "f01s007-4",
+              "source": {"job": "stills-film-01-r9", "file": "f01s007-4--c2.png"},
+              "regions": [{"find": "red dot on the forehead",
+                           "prompt": "smooth bare forehead skin, same skin tone"},
+                          {"find": "small gold earrings", "prompt": "bare earlobes, same skin tone"}],
+              "prompt": "a young widow in a plain white cotton sari, 1880s courtyard",
+              "seed": 123, "candidates": 3, "strength": 0.85}]}
+  ```
+
+  The source is a file of an imported stills job of that film, with the sha256 the record holds;
+  `key` is that still's key; 1–6 regions; `strength` 0.5–1.0; `candidates` 1–4.
+- `find` is a mask query: it names what to locate, so it may name the unwanted thing ("red dot on
+  the forehead"). Every `prompt` (each region's and the scene's) is drawn, so it is positive-only
+  like a stills prompt and the house style is appended: "smooth bare forehead skin", never "no
+  bindi".
+- Output: `<key>--c1.png` … `<key>--cN.png` (seeds `seed` … `seed+N-1`) at the source resolution,
+  plus `<key>--mask.png`. Review the mask first: it must cover the detail and little else (a mask
+  that missed shows the detail unchanged; the run records regions that found nothing as
+  `empty_regions`). Then review each candidate at full size and `pick --job <retouch job>`
+  exactly as for stills. `film` patches only the picked candidate over the base, as `<key>.png`;
+  masks never enter the film; an unpicked retouch job adds nothing.
+
 ## What still needs a human look after import
 
 The style does not fix content. Check every imported still at full size for:

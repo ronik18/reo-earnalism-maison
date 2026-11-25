@@ -4,6 +4,9 @@
   python3 -m eav.cli plan --root <dir>
   python3 -m eav.cli job <narration|stills|music|reel_clips> --root <dir> --rates <rates.json>
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
+  python3 -m eav.cli job retouch --root <dir> --rates <rates.json> --film N --spec <retouch.json>
+                         [--job-id <id>]  (inpaint masked regions of imported stills; candidates;
+                         references/visual-style.md, Retouch)
   python3 -m eav.cli job narration --root <dir> --rates <rates.json> [--film N | --reel N]
                          --expressive [--directions <directions.json>] [--voice <OWNER_SELECTED
                          storyteller preset>] [--list-units]   (storyteller style, references/earnalism-voice.md)
@@ -24,7 +27,7 @@
                          [--account <id> --bucket <name>]   (downloads outputs.tar, then import)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
   python3 -m eav.cli close <job_id> --root <dir> --units <CU Colab shows> --reason "<what happened>"
-  python3 -m eav.cli pick --root <dir> --job <stills job id> --choices <{"<key>": N} json file>
+  python3 -m eav.cli pick --root <dir> --job <stills|retouch job id> --choices <{"<key>": N} json file>
                          (after review: one candidate per <key>--cN still; film uses only picks)
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
@@ -722,6 +725,10 @@ def _job_spec(rec, args, kind, target):
             raise Stop(f"a {kind} job needs --spec (prompts, seeds{', shots' if kind == 'reel_clips' else ''})",
                        "Write it per references/film-recipe.md or references/reel-recipe.md")
         spec = _json(args.spec)
+        if kind == "retouch":
+            if args.reel:
+                raise Stop("retouch jobs patch a film's stills", "Pass --film <n>, not --reel")
+            spec["target"] = target
         if kind == "reel_clips" and not Path(spec.get("art_dir", ".")).is_absolute():
             spec["art_dir"] = str((Path(args.spec).parent / spec.get("art_dir", ".")).resolve())
         if kind == "reel_clips":
@@ -1257,9 +1264,12 @@ def cmd_film(args):
 _CANDIDATE = re.compile(r"(?P<key>.+)--c(?P<n>[1-9][0-9]*)$")
 
 
-def _stills_files(rec, job_id) -> dict:
-    """{file stem: path} of one imported stills job's images."""
-    folder = rec.root / "stills" / job_id
+PICK_KINDS = ("stills", "retouch")  # jobs whose <key>--cN candidates are picked
+
+
+def _stills_files(rec, job_id, kind="stills") -> dict:
+    """{file stem: path} of one imported stills (or retouch) job's images."""
+    folder = rec.root / kind / job_id
     return {p.stem: p for p in sorted(folder.iterdir()) if p.suffix.lower() in film.STILL_EXTS}
 
 
@@ -1279,13 +1289,15 @@ def _latest_pick(rec, job_id):
 
 
 def cmd_pick(args):
-    """Record the reviewer's choice among a stills job's candidates (<key>--cN images)."""
+    """Record the reviewer's choice among a stills or retouch job's candidates (<key>--cN images;
+    a retouch job's <key>--mask is for review only and never a candidate)."""
     rec = _record(args.root)
     job = next((j for j in _jobs(rec) if j["job_id"] == args.job), None)
-    if job is None or job["kind"] != "stills" or not job["imported"] or _ended(job):
+    if job is None or job["kind"] not in PICK_KINDS or not job["imported"] or _ended(job):
         raise Stop(f"{args.job} is not an imported stills job",
-                   f"{PROG} status --root {rec.root}; pick names an imported stills job with candidates")
-    cands = _candidate_files(_stills_files(rec, args.job))
+                   f"{PROG} status --root {rec.root}; pick names an imported stills or retouch job "
+                   "with candidates")
+    cands = _candidate_files(_stills_files(rec, args.job, job["kind"]))
     if not cands:
         raise Stop(f"stills job {args.job} has no candidate files (<key>--cN.png)",
                    "Build the redone shots with \"candidates\": N in the stills spec, import, review, pick")
@@ -1324,13 +1336,17 @@ def _film_stills(rec, t, out):
     """The film's stills: the latest complete stills job, with any later imported job whose
     keys are all already in it applied as a patch (it replaces just those stills, e.g. one
     character regenerated). A candidates job (<key>--cN files) is never a base: it patches only
-    its picked candidates, renamed to <key>, and contributes nothing until picked. Linked into
+    its picked candidates, renamed to <key>, and contributes nothing until picked. A retouch job
+    is always such a patch (its <key>--mask files never enter the film). Linked into
     film/<t>/stills so the film reads one folder."""
     jobs = []
     for j in _jobs(rec):
-        if j["kind"] == "stills" and j["target"] == t and j["imported"] and not _ended(j):
-            files = _stills_files(rec, j["job_id"])
-            jobs.append((j, files, _candidate_files(files)))
+        if j["kind"] in PICK_KINDS and j["target"] == t and j["imported"] and not _ended(j):
+            files = _stills_files(rec, j["job_id"], j["kind"])
+            cands = _candidate_files(files)
+            if j["kind"] == "retouch":
+                files, cands = {}, cands or {"": {}}  # picks only; never a base or a whole job
+            jobs.append((j, files, cands))
     base = None
     for i, (job, keys, cands) in enumerate(jobs):
         if cands:
@@ -1862,7 +1878,7 @@ def _parser():
     s.add_argument("--units", type=float, required=True, help="the CU Colab shows the run used")
     s.add_argument("--reason", required=True)
     s = add("pick", help="choose one candidate per redone still after review")
-    s.add_argument("--job", required=True, help="the imported stills job with <key>--cN candidates")
+    s.add_argument("--job", required=True, help="the imported stills or retouch job with <key>--cN candidates")
     s.add_argument("--choices", required=True, help='JSON file {"<key>": <candidate number>, ...}')
     s = add("film")
     s.add_argument("--film", type=int, default=1)

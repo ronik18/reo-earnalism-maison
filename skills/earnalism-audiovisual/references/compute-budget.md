@@ -25,8 +25,15 @@ pinned value):
 ```json
 {"narration":  {"s_per_step": 9.0,  "units_per_hour": 1.94, "steps": 1,  "decode_s": 300, "export_s": 60},
  "stills":     {"s_per_step": 2.5,  "units_per_hour": 1.94, "steps": 4,  "decode_s": 240, "export_s": 60},
+ "retouch":    {"s_per_step": 1.0,  "units_per_hour": 1.94, "steps": 30, "decode_s": 900, "export_s": 120},
  "reel_clips": {"clip_s": 500, "units_per_hour": 1.94, "steps": 24}}
 ```
+
+`retouch` (SDXL inpainting 0.1, 30 pinned steps, one item per candidate image) has no measured
+run yet: its first `rates.json` entry is an ESTIMATE like the first stills entry ("source":
+"ESTIMATE — replace with measured values after the first run"; ~1 s/step at about 1024² on an L4,
+decode_s covering the install, ~7 GB fp16 download and load) and is replaced by measured values
+after that run.
 
 `clip_s` is the measured end-to-end seconds per finished Wan `l4-balanced-v2` clip
 (load, 24 denoising steps, decode, export). Reel batches: at most 5 shots each, so a

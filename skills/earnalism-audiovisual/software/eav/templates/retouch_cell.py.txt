@@ -1,0 +1,124 @@
+# Retouch: redraw only small masked regions of a chosen still (SDXL inpainting 0.1, CLIPSeg masks).
+# Both exact revisions are resolved now and recorded; the licence preflight already ran.
+if RUN is not True:
+    raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
+import os, gc, hashlib, io, math, subprocess, sys, zipfile
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "diffusers", "transformers",
+                "accelerate", "safetensors"], check=True)
+
+
+# --- helpers (pure PIL; unit-tested by the skill)
+import math
+from PIL import Image, ImageChops, ImageFilter
+
+
+def pad8(img):
+    """Pad to multiples of 8 (SDXL's latent grid); the original pixels stay at (0, 0)."""
+    w, h = img.size
+    W, H = int(math.ceil(w / 8) * 8), int(math.ceil(h / 8) * 8)
+    if (W, H) == (w, h):
+        return img.copy()
+    canvas = img.resize((W, H), Image.BICUBIC)  # the border strip continues the picture
+    canvas.paste(img, (0, 0))
+    return canvas
+
+
+def union_mask(soft, threshold, dilate_px, feather_px):
+    """Soft per-region masks (L, 0-255) -> thresholded, dilated, unioned, feathered outward."""
+    cut = int(round(threshold * 255))
+    union = None
+    for m in soft:
+        hard = m.point(lambda v: 255 if v >= cut else 0)
+        union = hard if union is None else ImageChops.lighter(union, hard)
+    if dilate_px > 0:
+        union = union.filter(ImageFilter.MaxFilter(2 * dilate_px + 1))
+    if feather_px > 0:  # the dilated region stays fully redrawn; only its edge blends outward
+        union = ImageChops.lighter(union.filter(ImageFilter.GaussianBlur(feather_px)), union)
+    return union
+
+
+def composite(source, generated, mask):
+    """Back at the source size: the generated pixels only where the mask is, the source elsewhere."""
+    gen = generated.crop((0, 0) + source.size).convert(source.mode)
+    return Image.composite(gen, source, mask)
+# --- end helpers
+
+
+import torch
+from huggingface_hub import HfApi
+from transformers import CLIPSegForImageSegmentation, CLIPSegProcessor
+
+revision = HfApi().model_info(MODEL_REPO).sha
+mask_revision = HfApi().model_info(MASK_REPO).sha
+gpu = torch.cuda.get_device_properties(0)
+print("GPU", gpu.name, "%.1f GiB" % (gpu.total_memory / 2**30))
+
+# Sources: every PNG is checked against the sha256 the production record holds.
+SOURCES = {}
+with zipfile.ZipFile(INPUT_ZIP) as z:
+    for item in JOB["items"]:
+        if item["source"] not in SOURCES:
+            data = z.read(item["source"])
+            if hashlib.sha256(data).hexdigest() != item["source_sha256"]:
+                raise RuntimeError("source still sha256 mismatch: " + item["source"])
+            SOURCES[item["source"]] = Image.open(io.BytesIO(data)).convert("RGB")
+
+# Phase 1: masks (CLIPSeg alone on the GPU), one per still, written as <key>--mask.png for review.
+processor = CLIPSegProcessor.from_pretrained(MASK_REPO, revision=mask_revision)
+segmenter = CLIPSegForImageSegmentation.from_pretrained(MASK_REPO, revision=mask_revision).to("cuda")
+MASKS, empty = {}, []
+with torch.no_grad():
+    for item in JOB["items"]:
+        if item["base"] in MASKS:
+            continue
+        img = SOURCES[item["source"]]
+        finds = [r["find"] for r in item["regions"]]
+        inputs = processor(text=finds, images=[img] * len(finds), padding="max_length",
+                           return_tensors="pt").to("cuda")
+        logits = segmenter(**inputs).logits
+        if logits.dim() == 2:
+            logits = logits.unsqueeze(0)
+        soft = []
+        for find, prob in zip(finds, torch.sigmoid(logits).float().cpu()):
+            m = Image.fromarray((prob.numpy() * 255).astype("uint8"), "L").resize(img.size, Image.BILINEAR)
+            if max(m.getdata()) < int(round(MASK["threshold"] * 255)):
+                empty.append(item["base"] + ": " + find)
+            soft.append(m)
+        mask = union_mask(soft, MASK["threshold"], MASK["dilate_px"], MASK["feather_px"])
+        mask.save(OUT_DIR / (item["base"] + "--mask.png"))
+        MASKS[item["base"]] = mask
+print("masks:", len(MASKS), "; regions found nothing:", empty or "none")
+del segmenter, processor
+gc.collect()
+torch.cuda.empty_cache()
+
+# Phase 2: SDXL inpainting at the source resolution (padded to multiples of 8, cropped back).
+from diffusers import StableDiffusionXLInpaintPipeline
+pipe = StableDiffusionXLInpaintPipeline.from_pretrained(
+    MODEL_REPO, revision=revision, torch_dtype=torch.float16, variant="fp16").to("cuda")
+pipe.set_progress_bar_config(disable=True)
+MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "mask_repo": MASK_REPO,
+              "mask_revision": mask_revision, "licences": LICENCES, "steps": STEPS,
+              "guidance": GUIDANCE, "mask": MASK, "gpu": gpu.name, "precision": "fp16",
+              "empty_regions": empty, "outside_mask": "source pixels, unchanged"}
+EXPECTED = [i["key"] + ".png" for i in JOB["items"]] + [m + ".png" for m in JOB["masks"]]
+last = 0.0  # seconds the previous candidate took; the next starts only if it fits (R25)
+for item in JOB["items"]:
+    if not may_start(last):
+        break
+    started = time.time()
+    src, mask = SOURCES[item["source"]], MASKS[item["base"]]
+    image, mask8 = pad8(src), pad8(mask)
+    regions = "; ".join(r["prompt"] for r in item["regions"])
+    k = item["prompt"].find("Earnalism house style")
+    scene, style = (item["prompt"][:k].strip(), item["prompt"][k:]) if k >= 0 else (item["prompt"], "")
+    gen = torch.Generator("cpu").manual_seed(item["seed"])
+    with torch.no_grad():
+        out = pipe(prompt=regions + ". " + scene, prompt_2=(style + " " + regions).strip(),
+                   image=image, mask_image=mask8, width=image.size[0], height=image.size[1],
+                   num_inference_steps=STEPS, strength=item["strength"], guidance_scale=GUIDANCE,
+                   generator=gen).images[0]
+    composite(src, out, mask).save(OUT_DIR / (item["key"] + ".png"))
+    last = time.time() - started
+    print("wrote", item["key"], "in %.1f s" % last)

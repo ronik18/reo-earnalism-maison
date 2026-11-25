@@ -1,6 +1,6 @@
 """Verified import of Colab outputs into the production record.
 
-Notebook kinds (narration, stills, music) come back as a Drive folder whose
+Notebook kinds (narration, stills, music, retouch) come back as a Drive folder whose
 manifest.json lists the sha256 of every output. Reel clips come back as the
 wan22 export archive and are verified by that tool's own import_export.
 Any mismatch raises ImportHeld and leaves files, record and ledger unchanged.
@@ -65,7 +65,7 @@ def import_job(record, job: dict, downloaded_dir, ledger, actual_units: float,
     if build.get("job_id", job_id) != job_id:
         raise ImportHeld("build manifest belongs to a different job")
     _preflight_ledger(ledger, job_id, actual_units)
-    if kind not in ("narration", "stills", "music", "reel_clips"):
+    if kind not in ("narration", "stills", "music", "retouch", "reel_clips"):
         raise ImportHeld(f"unknown job kind: {kind!r}")
     dest = record.root / kind / job_id
     if dest.exists():
@@ -104,7 +104,10 @@ def _job_keys(inputs_zip, kind) -> list:
     except (OSError, KeyError, ValueError, zipfile.BadZipFile) as e:
         raise ImportHeld(f"cannot read the built job.json: {e}") from None
     rows = data.get("units") if kind == "narration" else data.get("items")
-    return [r["unit_key" if kind == "narration" else "key"] for r in rows or []]
+    keys = [r["unit_key" if kind == "narration" else "key"] for r in rows or []]
+    if kind == "retouch":  # every retouched still also returns its <key>--mask for review
+        keys += list(data.get("masks") or [])
+    return keys
 
 
 def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path):
@@ -168,7 +171,8 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
         raise
     meta = {"job_id": job_id, "job_kind": kind, "model": model, "packages": packages,
             "input_zip_sha256": zip_sha}
-    artifacts = [record.add_artifact(kind, dest / name, meta) for name in sorted(outputs)]
+    artifacts = [record.add_artifact("retouch_mask" if kind == "retouch" and name.endswith("--mask.png")
+                                     else kind, dest / name, meta) for name in sorted(outputs)]
     return artifacts, {"model": model, "packages": packages, "input_zip_sha256": zip_sha}
 
 

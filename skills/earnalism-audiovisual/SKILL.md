@@ -51,6 +51,13 @@ describe what is there). Each redone shot gets `"candidates": 3` in its spec ite
 <stills job> --choices <{"<key>": N} json>` → `film` uses only the picked files (as `<key>.png`)
 over the base set; an unpicked candidates job adds nothing ([visual style](references/visual-style.md)).
 
+Retouch (a chosen still right except a small forbidden detail: bindi, ear studs, beard, wires):
+`job retouch --film N --spec retouch.json` redraws only text-masked regions of that imported still
+with open-licence SDXL inpainting (CLIPSeg masks; the notebook refuses a model card licence outside
+`openrail++`/`apache-2.0`/`mit`). Region prompts are positive-only; `find` texts are mask queries.
+It returns `<key>--cN.png` candidates plus `<key>--mask.png` for review → `import` → `pick --job
+<retouch job>` → `film` patches the pick; masks never enter the film (visual style, Retouch).
+
 Recipes: [film](references/film-recipe.md), [house visual style](references/visual-style.md), [reels](references/reel-recipe.md),
 [voice](references/earnalism-voice.md), [free stack](references/free-stack.md),
 [budget](references/compute-budget.md), [record](references/production-record.md),
@@ -81,14 +88,14 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
   kept). Candidates never voice production. No impersonation, no spoken stage directions.
   ElevenLabs route: the owner-picked voice of the title, one tagged-script take per scene,
   `import-take` (refuses any script whose words differ from the book).
-- **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0) and
+- **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0), SDXL inpainting 0.1 + CLIPSeg (retouch) and
   VCSL samples (CC0). MusicGen (CC-BY-NC weights) and FLUX.1-dev (non-commercial) are
   forbidden even if the owner names them; offer the licensed equivalent instead.
   No paid generator or credit-spending connector (Kling, Suno, Runway, Adobe/Canva
   credits): not for "just one test" either. The one exception is ElevenLabs Eleven v3
   narration within the plan's included credits (owner decision 24 Nov 2026,
   `references/earnalism-voice.md`).
-- **Colab.** The owner runs every job. Narration, stills and music notebooks are inert
+- **Colab.** The owner runs every job. Narration, stills, retouch and music notebooks are inert
   until `RUN = True` and stop at their forecast seconds (hard stop). Their default route
   is the R2 exchange (`exchange-stage` → Maison `presign_colab_exchange` → owner: RUN = True,
   Run all → `exchange-collect`); signed URLs live only in the gitignored `exchange.json`. Reel clips use the

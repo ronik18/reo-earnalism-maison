@@ -1,4 +1,4 @@
-"""Inert, hash-bound Colab job bundles (narration, stills, music, reel clips).
+"""Inert, hash-bound Colab job bundles (narration, stills, music, retouch, reel clips).
 
 Building a bundle spends nothing: it reserves the forecast on the ledger,
 writes a notebook (nbformat 4, plain JSON) and an input zip, and records both.
@@ -28,6 +28,23 @@ STILLS_STEPS = 4
 # Resolved to an exact commit (plus weight hashes) by the notebook at run time.
 MUSIC_REPO = "ACE-Step/ACE-Step-v1-3.5B"
 MUSIC_STEPS = 60
+# Retouch (owner 2026-11-25): redraw only small masked regions of an already-chosen still with an
+# open inpainting model; the masks come from text-prompted segmentation. Both exact revisions are
+# resolved and recorded by the notebook at run time, as for stills. Licences as the Hub card
+# metadata states them (read 2026-11-25 through the Hugging Face connector, not the licence text
+# itself): SDXL inpainting 0.1 "openrail++" (CreativeML OpenRAIL++-M: commercial use allowed under
+# its use restrictions), CLIPSeg rd64-refined "apache-2.0". The notebook re-reads each card's
+# `license` field before any download and refuses a value outside LICENCE_ALLOWLIST.
+RETOUCH_REPO = "diffusers/stable-diffusion-xl-1.0-inpainting-0.1"
+MASK_REPO = "CIDAS/clipseg-rd64-refined"
+MODEL_LICENCES = {RETOUCH_REPO: "openrail++", MASK_REPO: "apache-2.0"}
+LICENCE_ALLOWLIST = ("apache-2.0", "mit", "openrail++")
+RETOUCH_STEPS = 30
+RETOUCH_GUIDANCE = 7.5
+# Soft CLIPSeg mask -> threshold -> dilate a few px -> union of the regions -> feather.
+RETOUCH_MASK = {"threshold": 0.4, "dilate_px": 6, "feather_px": 4}
+MAX_REGIONS = 6
+STRENGTH_RANGE = (0.5, 1.0)
 REEL_PROFILE = "l4-balanced-v2"
 # One reel_clips batch must fit one Wan job (batch.MAX_WALL_SECONDS = 2700 s) at the measured
 # ~500 s per finished clip, and the owner's metered Wan authority approves at most 5 CU.
@@ -49,7 +66,7 @@ MAX_CANDIDATES = 4
 CANDIDATE_SUFFIX = re.compile(r"--c\d+$")
 STYLE_CONFLICTS = ("photoreal", "photograph", "oil-on-canvas", "realism", "watercolour", "watercolor",
                    "gouache", "3d render", "not a cartoon", "not anime", "not a flat illustration")
-KINDS = ("narration", "stills", "music", "reel_clips")
+KINDS = ("narration", "stills", "music", "retouch", "reel_clips")
 JOB_SCHEMA = "earnalism.audiovisual-job.v1"
 EXCHANGE_SCHEMA = "earnalism.colab-exchange.v1"
 _TEMPLATES = Path(__file__).with_name("templates")
@@ -83,6 +100,13 @@ def _check_model(kind: str, spec: dict, expected: str) -> None:
             raise ValueError(f"forbidden model: {value!r}")
         if value != expected:
             raise ValueError(f"{kind} job must use {expected!r}, not {value!r}")
+
+
+def _check_mask_model(spec: dict) -> None:
+    for key in ("mask_model", "mask_repo"):
+        value = spec.get(key)
+        if value is not None and value != MASK_REPO:
+            raise ValueError(f"retouch masks must use {MASK_REPO!r}, not {value!r}")
 
 
 def _zip_bytes(files: dict) -> bytes:
@@ -186,6 +210,30 @@ except Exception as _e:
 print("model access OK:", MODEL_REPO, "(token from HF_TOKEN)" if _token else "(public)")
 '''
 
+# Retouch only: both repos reachable and each model card's licence on the allowlist, printed,
+# before the clock starts and before any install or download.
+_LICENCE = _GUARD + '''import os
+from huggingface_hub import HfApi
+LICENCES = {}
+for _repo in (MODEL_REPO, MASK_REPO):
+    try:
+        HfApi().auth_check(_repo, token=os.environ.get("HF_TOKEN"))
+        _info = HfApi().model_info(_repo, token=os.environ.get("HF_TOKEN"))
+    except Exception as _e:
+        raise RuntimeError("No access to " + _repo + " (" + type(_e).__name__ + "); nothing ran") from None
+    _card = getattr(_info, "card_data", None) or getattr(_info, "cardData", None) or {}
+    _lic = _card.get("license") if hasattr(_card, "get") else getattr(_card, "license", None)
+    if not _lic:
+        _lic = next((t.split(":", 1)[1] for t in (getattr(_info, "tags", None) or [])
+                     if t.startswith("license:")), None)
+    _lic = str(_lic).strip().lower() if _lic else None
+    print("model card licence:", _repo, "->", _lic, "(allowlist: %s)" % ", ".join(LICENCE_ALLOWLIST))
+    if _lic not in LICENCE_ALLOWLIST:
+        raise RuntimeError("model card licence of " + _repo + " is " + repr(_lic) + ", not one of "
+                           + ", ".join(LICENCE_ALLOWLIST) + ": this job never runs it; tell Claude")
+    LICENCES[_repo] = _lic
+'''
+
 _CLOCK = _GUARD + '''import threading, time
 if "JOB_STARTED" not in globals():
     JOB_STARTED = time.time()
@@ -268,11 +316,14 @@ if globals().get("EXCHANGE") is not None:  # R2 exchange: one uncompressed tar, 
 PACKAGES = {"narration": ("parler_tts", "transformers", "torch", "soundfile", "protobuf"),
             "stills": ("diffusers", "transformers", "accelerate", "sentencepiece", "protobuf",
                        "bitsandbytes", "torch"),
+            "retouch": ("diffusers", "transformers", "accelerate", "safetensors", "torch",
+                        "huggingface_hub"),
             "music": ("ace-step", "acestep", "torch", "transformers", "diffusers", "huggingface_hub")}
 MANIFEST_RESERVE_S = 60
 
 
 def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, deadline_s) -> bytes:
+    retouch = kind == "retouch"
     config = (_GUARD +
               f"import pathlib\nJOB_ID = {job_id!r}\nTITLE = {title!r}\nKIND = {kind!r}\n"
               f"INPUT_ZIP_SHA256 = {zip_sha!r}\nMODEL_REPO = {repo!r}\n"
@@ -281,6 +332,9 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
               f"# Hard wall-clock stop = the forecast seconds reserved on the ledger (R25)\n"
               f"DEADLINE_SECONDS = {int(deadline_s)}\nMANIFEST_RESERVE_S = {MANIFEST_RESERVE_S}\n"
               f"PACKAGES = {PACKAGES[kind]!r}\nEXCHANGE_SCHEMA = {EXCHANGE_SCHEMA!r}\n")
+    if retouch:
+        config += (f"MASK_REPO = {MASK_REPO!r}\nLICENCE_ALLOWLIST = {LICENCE_ALLOWLIST!r}\n"
+                   f"GUIDANCE = {RETOUCH_GUIDANCE!r}\nMASK = {RETOUCH_MASK!r}\n")
     intro = (f"# Earnalism {kind} job `{job_id}`\n\n**Prepared, not run.** Input zip SHA256 "
              f"`{zip_sha}`. Set `RUN = True` in the first cell, then run all. With the R2 exchange "
              f"(`exchange.json` in `{DRIVE_ROOT}/{title}/{job_id}/`) the notebook downloads "
@@ -292,7 +346,7 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
              f"cannot be imported.\n")
     # The generation cell may call setup that sets OUT_DIR; the verify cell sets JOB/OUT_DIR.
     parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _GPU), ("code", _ACCESS),
-             ("code", _CLOCK),
+             *([("code", _LICENCE)] if retouch else []), ("code", _CLOCK),
              ("code", _VERIFY), ("code", template.read_text(encoding="utf-8")),
              ("code", _MANIFEST)]
     nb = {"nbformat": 4, "nbformat_minor": 5,
@@ -337,6 +391,8 @@ def pinned_steps(kind: str) -> int:
         return STILLS_STEPS
     if kind == "music":
         return MUSIC_STEPS
+    if kind == "retouch":
+        return RETOUCH_STEPS
     if kind == "reel_clips":
         return _load_wan_batch().w.PROFILES[REEL_PROFILE]["steps"]
     raise ValueError(f"unknown job kind: {kind!r}")
@@ -415,10 +471,10 @@ def negative_words(prompt: str) -> list:
     return [m.group(0).lower() for m in NEGATIVE_WORDS.finditer(prompt)]
 
 
-def _candidates(item: dict) -> int:
+def _candidates(item: dict, kind: str = "stills") -> int:
     n = item.get("candidates", 1)
     if isinstance(n, bool) or not isinstance(n, int) or not 1 <= n <= MAX_CANDIDATES:
-        raise ValueError(f"stills item {item.get('key')!r} candidates must be an integer from 1 to "
+        raise ValueError(f"{kind} item {item.get('key')!r} candidates must be an integer from 1 to "
                          f"{MAX_CANDIDATES}, not {n!r}")
     return n
 
@@ -430,7 +486,111 @@ def job_items(kind: str, spec: dict) -> int:
         return len(narration_units(spec))
     if kind == "stills":
         return sum(_candidates(s) for s in spec.get("items") or [])
+    if kind == "retouch":
+        return sum(_candidates(s, kind) for s in spec.get("items") or [])
     return len(spec.get("shots" if kind == "reel_clips" else "items") or [])
+
+
+def _check_prompt(kind: str, key, prompt) -> None:
+    """Positive-only wording and the house style, as for stills (references/visual-style.md)."""
+    if not isinstance(prompt, str) or not prompt.strip():
+        raise ValueError(f"{kind} item {key!r} needs a non-empty prompt")
+    clash = [w for w in STYLE_CONFLICTS if w in prompt.lower()]
+    if clash:
+        raise ValueError(f"{kind} prompt {key!r} asks for {clash[0]!r}, which conflicts with "
+                         f"the house style (references/visual-style.md); describe the content only")
+    negative = negative_words(prompt)
+    if negative:
+        raise ValueError(f"{kind} prompt {key!r} uses the negative word {negative[0]!r}: "
+                         "the generator has no negative prompt and draws what it names; "
+                         "describe what is there instead (e.g. 'bare forehead', 'clean-shaven')"
+                         " (references/visual-style.md, Prompt wording)")
+
+
+def _imported_stills(record) -> dict:
+    """{job_id: target} of the record's imported, un-ended stills jobs."""
+    events = record.data["events"]
+    targets = {e["detail"]["job_id"]: e["detail"].get("target") for e in events
+               if e["stage"] == "cli" and e["result"] == "job_target"
+               and e["detail"].get("kind", "stills") == "stills"}
+    done = {e["detail"].get("job_id") for e in events if e["stage"] == "import" and e["result"] == "accepted"}
+    ended = {e["detail"].get("job_id") for e in events if e["stage"] == "job"
+             and e["result"] in ("superseded", "closed", "superseding", "closing")}
+    built = {a["meta"].get("job_id") for a in record.data["artifacts"]
+             if a["kind"] == "colab_job" and a["meta"].get("job_kind") == "stills"}
+    stills = {a["meta"].get("job_id") for a in record.data["artifacts"] if a["kind"] == "stills"}
+    return {j: t for j, t in targets.items()
+            if j in done and j not in ended and (j in built or j in stills)}
+
+
+def _retouch_items(record, spec: dict) -> tuple:
+    """Validate a retouch spec against the record; returns (job items, masks, sources zip map)."""
+    target = spec.get("target")
+    jobs = _imported_stills(record)
+    files = {}  # (job, file) -> recorded sha256
+    film_keys = set()
+    for a in record.data["artifacts"]:
+        jid = a["meta"].get("job_id")
+        if a["kind"] != "stills" or jid not in jobs:
+            continue
+        name = Path(a["path"]).name
+        files[(jid, name)] = a["sha256"]
+        if jobs[jid] == target:
+            film_keys.add(CANDIDATE_SUFFIX.sub("", Path(name).stem))
+    if not film_keys:
+        raise ValueError(f"{target!r} has no imported stills to retouch")
+    items, masks, sources, seen = [], [], {}, set()
+    for s in spec.get("items") or []:
+        key = s.get("key")
+        if not isinstance(key, str) or CANDIDATE_SUFFIX.search(key) or key.endswith("--mask"):
+            raise ValueError(f"retouch key {key!r} must be a still key (no --cN or --mask)")
+        if key in seen:
+            raise ValueError(f"retouch key {key!r} appears twice; one item per still")
+        seen.add(key)
+        if key not in film_keys:
+            raise ValueError(f"retouch key {key!r} is not a still of {target}")
+        src = s.get("source") or {}
+        job, name = src.get("job"), src.get("file")
+        if job not in jobs or jobs[job] != target:
+            raise ValueError(f"retouch {key!r}: source job {job!r} is not an imported stills job of {target}")
+        if (job, name) not in files or Path(str(name)).name != name:
+            raise ValueError(f"retouch {key!r}: {name!r} is not an imported file of stills job {job}")
+        if CANDIDATE_SUFFIX.sub("", Path(name).stem) != key:
+            raise ValueError(f"retouch {key!r}: source {name!r} is another still's file")
+        path = record.root / "stills" / job / name
+        data = path.read_bytes() if path.is_file() else b""
+        digest = hashlib.sha256(data).hexdigest()
+        if digest != files[(job, name)]:
+            raise ValueError(f"retouch {key!r}: {job}/{name} sha256 {digest[:12]} differs from the "
+                             f"record's {files[(job, name)][:12]}; the still changed since import")
+        regions = s.get("regions")
+        if not isinstance(regions, list) or not 1 <= len(regions) <= MAX_REGIONS:
+            raise ValueError(f"retouch {key!r} needs 1 to {MAX_REGIONS} regions")
+        clean = []
+        for g in regions:
+            if not isinstance(g, dict) or not isinstance(g.get("find"), str) or not g["find"].strip():
+                raise ValueError(f"retouch {key!r}: every region needs a find text (the mask query)")
+            # find describes what to locate, so it may name the unwanted thing; prompt is drawn
+            _check_prompt("retouch", key, g.get("prompt"))
+            clean.append({"find": g["find"].strip(), "prompt": g["prompt"].strip()})
+        _check_prompt("retouch", key, s.get("prompt"))
+        prompt = s["prompt"].rstrip() + " " + HOUSE_STYLE
+        _check_prompt("retouch", key, prompt)
+        strength = s.get("strength")
+        lo, hi = STRENGTH_RANGE
+        if isinstance(strength, bool) or not isinstance(strength, (int, float)) or not lo <= strength <= hi:
+            raise ValueError(f"retouch {key!r} strength must be a number from {lo} to {hi}, not {strength!r}")
+        n, seed = _candidates(s, "retouch"), int(s["seed"])
+        member = f"sources/{job}--{name}"
+        sources[member] = data
+        items += [{"key": f"{key}--c{c}", "base": key, "candidate": c, "seed": seed + c - 1,
+                   "source": member, "source_job": job, "source_file": name, "source_sha256": digest,
+                   "regions": clean, "prompt": prompt, "strength": float(strength)}
+                  for c in range(1, n + 1)]
+        masks.append(f"{key}--mask")
+    if not items:
+        raise ValueError("no stills to retouch")
+    return items, masks, sources
 
 
 def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
@@ -500,6 +660,14 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
             raise ValueError("no tracks requested")
         return {"payload": {"items": items}, "repo": MUSIC_REPO,
                 "revision": "resolved-at-run-time", "steps": MUSIC_STEPS, "compute": compute}
+    if kind == "retouch":
+        _check_model(kind, spec, RETOUCH_REPO)
+        _check_mask_model(spec)
+        items, masks, sources = _retouch_items(record, spec)
+        return {"payload": {"items": items, "masks": masks, "mask": dict(RETOUCH_MASK),
+                            "mask_model": MASK_REPO, "target": spec["target"]},
+                "files": sources, "repo": RETOUCH_REPO, "mask_repo": MASK_REPO,
+                "revision": "resolved-at-run-time", "steps": RETOUCH_STEPS, "compute": compute}
     raise ValueError(f"unknown job kind: {kind!r}")
 
 
@@ -615,7 +783,7 @@ def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s:
     job_json = {"schema": JOB_SCHEMA, "kind": kind, "job_id": job_id, "title": title,
                 "model": plan["repo"], **plan["payload"]}
     archive = _zip_bytes({"job.json": (json.dumps(job_json, indent=2, sort_keys=True)
-                                       + "\n").encode("utf-8")})
+                                       + "\n").encode("utf-8"), **plan.get("files", {})})
     zip_sha = hashlib.sha256(archive).hexdigest()
     nb = _notebook(kind, job_id, title, zip_sha, plan["repo"], plan["revision"],
                    plan["steps"], _TEMPLATES / f"{kind}_cell.py.txt", deadline_s)
@@ -627,6 +795,9 @@ def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s:
                 "deadline_seconds": int(deadline_s), "authority_created": False}
     if "generation" in plan["payload"]:
         manifest["generation"] = plan["payload"]["generation"]
+    if "mask_repo" in plan:
+        manifest["mask_model"] = {"repo": plan["mask_repo"], "revision": "resolved-at-run-time"}
+        manifest["licences"] = {"recorded": dict(MODEL_LICENCES), "allowlist": list(LICENCE_ALLOWLIST)}
     job_dir.mkdir(parents=True)
     paths = {"notebook": job_dir / f"{kind}.ipynb", "inputs_zip": job_dir / "inputs.zip",
              "manifest": job_dir / "build-manifest.json"}
