@@ -152,14 +152,16 @@ class MaisonSocialAccountAdapter(DefaultSocialAccountAdapter):
             if sociallogin.is_existing and sociallogin.user.pk!=request.user.pk:
                 raise ImmediateHttpResponse(oauth_problem(DomainError('identity_already_linked','This Google identity cannot be linked.',409),request))
             return
+        # An existing account for this email is told to sign in and link Google first, in every
+        # launch mode; it is never auto-linked and never sent to account creation.
+        if not sociallogin.is_existing and (User.objects.filter(email=email).exists() or EmailAddress.objects.filter(email__iexact=email).exists()):
+            raise ImmediateHttpResponse(oauth_problem(DomainError('identity_link_required','Sign in to your existing account, then explicitly link Google in Settings.',409),request))
         from .enrollment import enabled,adult_declaration
         if enabled() and not sociallogin.is_existing:
             if data.get('create_account') is not True:
                 raise ImmediateHttpResponse(oauth_problem(DomainError('account_registration_required','Create your account first. A parent or legal guardian creates a younger reader’s account.',403),request))
             try:adult_declaration(data.get('account_declaration',{}),getattr(request,'territory',None))
             except DomainError as error:raise ImmediateHttpResponse(oauth_problem(error,request))
-        if not sociallogin.is_existing and (User.objects.filter(email=email).exists() or EmailAddress.objects.filter(email__iexact=email).exists()):
-            raise ImmediateHttpResponse(oauth_problem(DomainError('identity_link_required','Sign in to your existing account, then explicitly link Google in Settings.',409),request))
     def save_user(self,request,sociallogin,form=None):
         from .enrollment import enabled,adult_declaration,record_adult
         declaration=None
