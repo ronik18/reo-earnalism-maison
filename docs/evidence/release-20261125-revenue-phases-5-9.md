@@ -9,3 +9,9 @@
 - **New settings:** none set in production. `MAISON_REINVEST_SHARE_PERCENT` defaults to 30; `MAISON_REVIEW_STANDING_FROM` unset (standing permission off); `MAISON_SOCIAL_JOURNAL_DIR` default.
 - **Live checks (theearnalism.com):** `/en/`, `/en/pass/`, `/en/explore/`, `/en/sign-in/` return 200; `/podcast/en.xml` and `/podcast/bn.xml` return 200 `application/rss+xml`, valid and empty (no title has cleared free audio yet); `/podcast/xx.xml` 404; `/en/staff/review/` 404 for anonymous visitors; the Pass page shows no founding offer (free access on, plans not created).
 - **Nothing published, posted, uploaded or charged.** Founding plans not created; no review items; no store, podcast directory or licensing submission.
+
+## Follow-up deploys (25 Nov 2026)
+
+- **#65** (squash `fd4e61d`): eight Galpa-Dashak intake packets with draft clearance, converter extensions, `queue_intake_packets`, podcast preview enclosures (D10), `eav preview`. No migrations, no static change. Render deploy `dep-dc398e2fngtc73dbh7rg` live at 07:55:18Z. The first `queue_intake_packets` job queued only the 5 cover items: `.dockerignore` excluded the per-title clearance records from the image.
+- **#66** (squash `f2f9ec6`): ship `docs/evidence/publication-clearance-*.json` in the image. Deploy live at 08:11:56Z; `/en/` and `/podcast/en.xml` 200, `/en/staff/review/` 404 anonymous.
+- **Render job** `job-dc39gl68bjmc73f1kgf0` (`python manage.py queue_intake_packets`) succeeded at 08:12Z. Production review queue now holds 8 pending clearance items (nishithe, prayashchitta, apad, didi, thakurda, manbhanjan, pratihingsa, atithi) and 5 pending cover items (nishithe, didi, manbhanjan, atithi, kshudhita-pashan; the last is already approved in its clearance file). Nothing approved, imported or published.
