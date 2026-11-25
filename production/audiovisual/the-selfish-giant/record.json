@@ -16709,6 +16709,188 @@
       },
       "path": "stills/selfish-giant-stills-film-01-r9/f01s015-4--c3.png",
       "sha256": "f6f3cd3b68926bed8f0da81c0ee02f3bfc4cde52cf8ff62bac1428c94eb5046e"
+    },
+    {
+      "bytes": 7039,
+      "kind": "stills_pick",
+      "meta": {
+        "choices": {
+          "f01s001-1": {
+            "candidate": 3,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s001-1--c3.png",
+            "sha256": "777893f53294f88d82128cd229936aa166f2cf3bb46b83fba6b5d378ea9b48ec"
+          },
+          "f01s001-2": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s001-2--c2.png",
+            "sha256": "540f2f68a90b8ae08fb8bd75841f9f186b72490821154b1fd30cf274655207fe"
+          },
+          "f01s001-3": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s001-3--c2.png",
+            "sha256": "16a89a6affac172bf8a6f75108871c606d1ebae5a2300a608da246c85533139d"
+          },
+          "f01s001-4": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s001-4--c1.png",
+            "sha256": "b0d91b9d77ffbe59088b4c005f52ad1d9b3d8012ab90bfcb0d4be17c31470782"
+          },
+          "f01s002-3": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s002-3--c1.png",
+            "sha256": "0e40ec127881d29b78d28f0166448849970e994481f05d620a903cbe0c789972"
+          },
+          "f01s003-2": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s003-2--c2.png",
+            "sha256": "8a82d08ad60a1b8f32000a35df9ac9044da5d83a8f3f5ba1097a899deaced9a9"
+          },
+          "f01s004-1": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s004-1--c1.png",
+            "sha256": "9ffeb9485bbdeba454db1a335b9d5d08a58c9f15eb6a8f0ef45e3c3d765957f6"
+          },
+          "f01s004-2": {
+            "candidate": 3,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s004-2--c3.png",
+            "sha256": "e207a01376e5cf6dc243a3dc75f72f3fdc2cdd660045505fe4db6728c5179adb"
+          },
+          "f01s005-1": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s005-1--c1.png",
+            "sha256": "1dcc3b6142b65f63166ee63d4e3971f95604fe050d7ce6e58f0b0de0129cb210"
+          },
+          "f01s005-2": {
+            "candidate": 3,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s005-2--c3.png",
+            "sha256": "7fe8f98afd89542a6b25a368689fe63b7b2fc4b901967de1e604c18bcd02bd0c"
+          },
+          "f01s005-3": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s005-3--c1.png",
+            "sha256": "79c40847195f54dbeacc7571eb5af48ff35f747e98cd2fa30c071cd92f81d883"
+          },
+          "f01s005-4": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s005-4--c1.png",
+            "sha256": "8fb7c9704d293e0f1b97e0b2f693bbf2f91f6b3fe41912a10f7316d4fe601795"
+          },
+          "f01s005-6": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s005-6--c1.png",
+            "sha256": "4c762e1865b767d8d97ff5a493323daa4dd44cda5023e7aa5d1d242d33d8670c"
+          },
+          "f01s006-1": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s006-1--c1.png",
+            "sha256": "e60155ec07602dfb3cffc18d10ca9aa74b661e5cc987d91e495304cdf2a9ff27"
+          },
+          "f01s006-2": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s006-2--c2.png",
+            "sha256": "a6610a052effe6a00acd510a3deaf60f10b195f34d8830af5dfeae7555855310"
+          },
+          "f01s007-1": {
+            "candidate": 3,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s007-1--c3.png",
+            "sha256": "34a95b2d3c95b480b02d83587c3e0d377ae538c2c3780ea3bc50d423b9509025"
+          },
+          "f01s007-2": {
+            "candidate": 3,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s007-2--c3.png",
+            "sha256": "7a8001bd6176a3669fc7bb86f403525454e0447aba8ae8e6f67bdb5a1aef07d3"
+          },
+          "f01s007-4": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s007-4--c2.png",
+            "sha256": "689fbe839a542856235c7f2458bb1c2a8cb996f165a81dcb110adda424064bd2"
+          },
+          "f01s007-5": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s007-5--c2.png",
+            "sha256": "4cd66a592c75e0417dac77838317bbd8f7d233ea9f90e1d247d3ba6d2097c60b"
+          },
+          "f01s008-1": {
+            "candidate": 3,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s008-1--c3.png",
+            "sha256": "249a9fcf2c15110628ad857613400ab78bdb91929f154f00d93785f9f0c1669c"
+          },
+          "f01s008-5": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s008-5--c2.png",
+            "sha256": "d22a05afca475a2c53e1ce36f58fe00a3104854852f6643643353f5ab831e1d7"
+          },
+          "f01s009-2": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s009-2--c2.png",
+            "sha256": "fcd4a59d322264bedb3a7f26bc88b23e194c568f29aedaa1743e4ea9f3115084"
+          },
+          "f01s009-3": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s009-3--c2.png",
+            "sha256": "9df21cf5d467277f222568805a431f36f199a6420c1a3a3e13b00acd01ae93e7"
+          },
+          "f01s009-4": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s009-4--c1.png",
+            "sha256": "382fa411bdac966486e33fa63290a84813a49d74315b103823592915e99facdb"
+          },
+          "f01s010-1": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s010-1--c2.png",
+            "sha256": "0732ced2ccfb358e1fc20e6288f44fbda6e1fd8b418c1735ec01a85048fc10c3"
+          },
+          "f01s010-2": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s010-2--c2.png",
+            "sha256": "7b8c09986f427e0b95454e030bd26de57be4a00f9ea3796c1219e72790784cf5"
+          },
+          "f01s010-5": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s010-5--c2.png",
+            "sha256": "4ebf2a6567c8912d928ede975d44dc004c1109b4b5cba8c0613e96623436a0c4"
+          },
+          "f01s011-1": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s011-1--c1.png",
+            "sha256": "0b84daec3e640185a241c2a6074f4355428a7a997b3f3c62f19633aaf503822c"
+          },
+          "f01s011-2": {
+            "candidate": 3,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s011-2--c3.png",
+            "sha256": "574bdba2d6cf647f3e8a70a97c7339f896ef878f1a0f3b4d41f25f225cf18832"
+          },
+          "f01s011-3": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s011-3--c2.png",
+            "sha256": "344568ddfb755f6d78accf0d57468781304ac0883c73be1c5f98a6b7b0f17b3a"
+          },
+          "f01s012-1": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s012-1--c1.png",
+            "sha256": "0937954a4eecd973ccb3ebf28e7eedf443914450a2d6d1cfb35d9821313b3cbe"
+          },
+          "f01s014-2": {
+            "candidate": 3,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s014-2--c3.png",
+            "sha256": "255fc4a0a0d8ac2465e1f39397166f35f31d14c06d26e6ba51588b35add261b0"
+          },
+          "f01s015-2": {
+            "candidate": 3,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s015-2--c3.png",
+            "sha256": "e8a183c62d0511b6ef656c14de0da22aded2637b56bc3f628a665b6824fa2ee5"
+          },
+          "f01s015-3": {
+            "candidate": 2,
+            "file": "stills/selfish-giant-stills-film-01-r9/f01s015-3--c2.png",
+            "sha256": "a9dc162dea8ef4befb306884d424e5a39055ad353f4d1b1450dcfbe291c88c0f"
+          }
+        },
+        "job_id": "selfish-giant-stills-film-01-r9",
+        "version": 1
+      },
+      "path": "picks/selfish-giant-stills-film-01-r9.pick-1.json",
+      "sha256": "3b325c955fde3d13c0e22ab24fef8079ac274eac9c0e484cf6eb83d78c1d30da"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -18053,6 +18235,51 @@
       },
       "result": "exchange_collected",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-25T05:03:50.321146+00:00",
+      "detail": {
+        "choices": {
+          "f01s001-1": 3,
+          "f01s001-2": 2,
+          "f01s001-3": 2,
+          "f01s001-4": 1,
+          "f01s002-3": 1,
+          "f01s003-2": 2,
+          "f01s004-1": 1,
+          "f01s004-2": 3,
+          "f01s005-1": 1,
+          "f01s005-2": 3,
+          "f01s005-3": 1,
+          "f01s005-4": 1,
+          "f01s005-6": 1,
+          "f01s006-1": 1,
+          "f01s006-2": 2,
+          "f01s007-1": 3,
+          "f01s007-2": 3,
+          "f01s007-4": 2,
+          "f01s007-5": 2,
+          "f01s008-1": 3,
+          "f01s008-5": 2,
+          "f01s009-2": 2,
+          "f01s009-3": 2,
+          "f01s009-4": 1,
+          "f01s010-1": 2,
+          "f01s010-2": 2,
+          "f01s010-5": 2,
+          "f01s011-1": 1,
+          "f01s011-2": 3,
+          "f01s011-3": 2,
+          "f01s012-1": 1,
+          "f01s014-2": 3,
+          "f01s015-2": 3,
+          "f01s015-3": 2
+        },
+        "job_id": "selfish-giant-stills-film-01-r9",
+        "version": 1
+      },
+      "result": "recorded",
+      "stage": "pick"
     }
   ],
   "ledger": "../allowance-ledger.json",
