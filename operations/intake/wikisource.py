@@ -43,10 +43,24 @@ HEADING = re.compile(
 COLLECTION_HEADER = r'\{\{কেন্দ্র\|\{\{x-larger\|গল্প-দশক।\}\}\}\}\s*'
 
 
+# কথা-চতুষ্টয় (1894) opening page: the collection name, then the story title and its first section heading, each
+# followed by a decorative ornament cropped from the scan. The ornaments carry no text and are dropped with the title.
+KC_ORNAMENT = (r'\{\{কেন্দ্র\|\[\[File:কথা-চতুষ্টয় - রবীন্দ্রনাথ ঠাকুর \(page \d+ crop \d+\)\.jpg\|\d+px\]\]\}\}')
+KC_HEADER = r'\{\{কেন্দ্র\|\{\{xxxx-larger\|কথা-চতুষ্টয়।\}\}\}\}\s*' + KC_ORNAMENT + r'\s*'
+
+
 def _title_pattern(title):
     t = re.escape(title) + '।?'
     return re.compile(r'(?:' + COLLECTION_HEADER + r'\{\{কেন্দ্র\|\{\{larger\|' + t + r'\}\}\}\}'
-                      r'|\{\{কেন্দ্র\|\{\{x-larger\|' + t + r'\}\}\}\})')
+                      r'|\{\{কেন্দ্র\|\{\{x-larger\|' + t + r'\}\}\}\}'
+                      r'|' + KC_HEADER + r'\{\{কেন্দ্র\|\{\{xx-larger\|' + t + r'\}\}\}\}\s*' + KC_ORNAMENT
+                      + r'\s*\{\{কেন্দ্র\|\{\{x-larger\|(?P<h>' + HEADING_TEXT[1:-1] + r')\}\}\}\}\s*' + KC_ORNAMENT
+                      + r'|\{\{কেন্দ্র\|\{\{xx-larger\|' + t + r'\}\}\}\})')
+
+
+def _title_removed(match):
+    """Drop the title block; a section heading inside it stays, as its own heading block."""
+    return '{{কেন্দ্র|' + match.group('h') + '}}\n\n' if match.group('h') else ''
 
 
 def _verse(match):
@@ -74,7 +88,7 @@ def _page_text(page, title, first, last=False):
     if found:
         raise IntakeError('UNKNOWN_MARKUP', repr(found.group(0)))
     if first:
-        text, found = _title_pattern(title).subn('', text, count=1)
+        text, found = _title_pattern(title).subn(_title_removed, text, count=1)
         if not found:
             raise IntakeError('TITLE_LINE_MISSING', title)
     if last:

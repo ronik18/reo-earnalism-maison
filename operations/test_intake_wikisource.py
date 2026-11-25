@@ -176,6 +176,37 @@ class WikisourceStructureTests(SimpleTestCase):
             pages_to_paragraphs(pages, title=TITLE)
         self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
 
+    def test_xx_larger_title_line_is_dropped(self):
+        got = _one('\ufeff{{কেন্দ্র|{{xx-larger|\ufeffমেঘ ও রৌদ্র।}}}}\n\n{{rule|3em}}\n\nএক।', title='মেঘ ও রৌদ্র')
+        self.assertEqual(got, [{'kind': 'paragraph', 'text': 'এক।'}])
+
+    KC = ('{{কেন্দ্র|{{xxxx-larger|কথা-চতুষ্টয়।}}}}\n\n'
+          '{{কেন্দ্র|[[File:কথা-চতুষ্টয় - রবীন্দ্রনাথ ঠাকুর (page 5 crop 1).jpg|150px]]}}\n\n'
+          '{{কেন্দ্র|{{xx-larger|মধ্যবর্ত্তিনী।}}}}\n\n'
+          '{{কেন্দ্র|[[File:কথা-চতুষ্টয় - রবীন্দ্রনাথ ঠাকুর (page 5 crop 2).jpg|120px]]}}\n\n'
+          '{{কেন্দ্র|{{x-larger|প্রথম পরিচ্ছেদ।}}}}\n\n'
+          '{{কেন্দ্র|[[File:কথা-চতুষ্টয় - রবীন্দ্রনাথ ঠাকুর (page 5 crop 3).jpg|100px]]}}\n\n')
+
+    def test_katha_chatushtay_opening_keeps_only_the_section_heading(self):
+        got = _one(self.KC + 'নিবারণের সংসার।\n\n{{gap}}দুই।', title='মধ্যবর্ত্তিনী')
+        self.assertEqual(got, [{'kind': 'heading', 'text': 'প্রথম পরিচ্ছেদ।'},
+                               {'kind': 'paragraph', 'text': 'নিবারণের সংসার।'}, {'kind': 'paragraph', 'text': 'দুই।'}])
+
+    def test_katha_chatushtay_opening_must_be_exact(self):
+        variants = (self.KC.replace('page 5 crop 2', 'other'),            # not a scan ornament
+                    self.KC.replace('কথা-চতুষ্টয়।}}', 'গল্প-দশক।}}'),     # a different collection
+                    self.KC.replace('মধ্যবর্ত্তিনী।', 'শাস্তি।'))           # a different story
+        for bad in variants:
+            with self.subTest(bad=bad[:80]), self.assertRaises(IntakeError):
+                _one(bad + 'এক।', title='মধ্যবর্ত্তিনী')
+
+    def test_ornament_or_x_larger_heading_outside_the_opening_is_refused(self):
+        for bad in ('{{কেন্দ্র|[[File:কথা-চতুষ্টয় - রবীন্দ্রনাথ ঠাকুর (page 9 crop 1).jpg|100px]]}}',
+                    '{{কেন্দ্র|{{x-larger|দ্বিতীয় পরিচ্ছেদ।}}}}'):
+            with self.subTest(bad=bad), self.assertRaises(IntakeError) as caught:
+                _one(self.KC + 'এক।\n\n' + bad + '\n\nদুই।', title='মধ্যবর্ত্তিনী')
+            self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
     def test_verse_and_heading_flow_into_the_source_units(self):
         pages = [{'page': '১', 'revision': 1, 'quality': 4, 'timestamp': None,
                   'wikitext': self.TL + '{{কেন্দ্র|প্রথম।}}\n\n{{Block center|<poem>ক\nখ</poem>}}'}]

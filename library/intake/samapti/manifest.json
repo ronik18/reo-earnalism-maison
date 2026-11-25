@@ -1,0 +1,32 @@
+{
+ "schema": "earnalism.book_import_manifest.v1",
+ "project_id": "samapti-wikisource-20261125",
+ "work": {
+  "slug": "samapti",
+  "title": "সমাপ্তি",
+  "creators": [
+   "রবীন্দ্রনাথ ঠাকুর"
+  ],
+  "house": "golpo"
+ },
+ "edition": {
+  "slug": "samapti",
+  "language": "bn",
+  "title": "সমাপ্তি",
+  "description": "কলকাতা-পড়ুয়া অপূর্ব বিয়ে করে গ্রামের দুরন্ত মেয়ে মৃন্ময়ীকে, যে তখনও বউ হতে শেখেনি।"
+ },
+ "source": {
+  "sha256": "1f3b9290ec0279ac782c45e62e61dadd6a949e1f7c1879a0c5bf89a2a1cfcf01",
+  "bytes": 105158,
+  "content_type": "application/json",
+  "format": "earnalism.book_source.v1"
+ },
+ "provenance": {
+  "source_ref": "https://bn.wikisource.org/w/index.php?title=%E0%A6%95%E0%A6%A5%E0%A6%BE-%E0%A6%9A%E0%A6%A4%E0%A7%81%E0%A6%B7%E0%A7%8D%E0%A6%9F%E0%A6%AF%E0%A6%BC/%E0%A6%B8%E0%A6%AE%E0%A6%BE%E0%A6%AA%E0%A7%8D%E0%A6%A4%E0%A6%BF&oldid=1624597",
+  "source_edition": "Katha-Chatushtay (কথা-চতুষ্টয়), Calcutta: Sahitya-Jantra, printed by Jagneshwar Ghosh, published by Kalidas Chakravarti, 1301 BS (1894); sole author Rabindranath Tagore. Validated (level 4) Wikisource scan pages with recorded page revisions; conversion rules as recorded for the Galpa-Dashak packets, plus the কথা-চতুষ্টয় opening page (collection name, story title and decorative scan ornaments dropped; the first section heading kept); every page-end hyphen rejoins a single word (none kept). Scan pages 49-85.",
+  "rights_note": "রবীন্দ্রনাথ ঠাকুর died 1941; first published 1894. Term screen verdict for 2026: screen_pass. Wikisource transcription layer reused under CC BY-SA 4.0 with attribution; ShareAlike applies to the delivered transcription only. Draft: owner approval of the clearance record and a cover with owner-held provenance are still required.",
+  "rights_evidence_refs": [
+   "reo-earnalism-maison:docs/evidence/publication-clearance-samapti-draft.json"
+  ]
+ }
+}

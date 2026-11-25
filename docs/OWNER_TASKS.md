@@ -13,11 +13,12 @@ Last updated: 25 Nov 2026.
   - [ ] আপদ (clearance; cover still needed)
   - [ ] ঠাকুর্দ্দা (clearance; cover still needed)
   - [ ] প্রতিহিংসা (clearance; cover still needed)
+  - [ ] মধ্যবর্ত্তিনী, শাস্তি, সমাপ্তি from *কথা-চতুষ্টয়* (1894) (clearance + cover; on the page after the next deploy)
 - [ ] **Say which approved titles to publish.** Already publishable now: ক্ষুধিত পাষাণ (unpublished draft in production, clearance recorded; বিচারক is already live).
 
 ## Assets
 - [ ] **Covers** (upload front/back pairs to Cloudinary, then tell Claude): প্রায়শ্চিত্ত, আপদ, ঠাকুর্দ্দা, প্রতিহিংসা.
-- Covers already in your Cloudinary for the next batch (no action needed): মধ্যবর্ত্তিনী, শাস্তি, সমাপ্তি, মেঘ ও রৌদ্র (from *কথা-চতুষ্টয়*), কাবুলিওয়ালা, পোস্টমাস্টার, ছুটি.
+- Covers already in your Cloudinary for later titles (no action needed): মেঘ ও রৌদ্র, কাবুলিওয়ালা, পোস্টমাস্টার, ছুটি.
 - [ ] **কাবুলিওয়ালা early scan:** open https://icvtesting.nvli.in/rarebooks/galapagaucacha-1ma-khanada from India; if a PDF/page images appear, put the file in Google Drive and share the path.
 
 ## Production runs
@@ -35,6 +36,7 @@ Last updated: 25 Nov 2026.
 - [ ] **Import further approved titles as unpublished drafts** (nothing visible to readers) for their narration jobs: say so per title after you approve it on the Monday page.
 - [ ] **Founding member trigger for US/UK accounts** (Phase 9): the number of paying Indian Pass members that starts it (proposed 300).
 - [ ] **Standing permission start date** (`MAISON_REVIEW_STANDING_FROM`): about two months after the first Monday batch.
+- [ ] **মেঘ ও রৌদ্র footnote:** the 1894 text has one author's footnote (on the magistrate). The reader has no footnote style yet. Choose: (a) add a small footnote style to the reader (a design change), or (b) hold the title. Until then it stays out.
 - [ ] **Classroom pilot teachers 2 and 3:** on hold by your choice.
 
 ## Done
