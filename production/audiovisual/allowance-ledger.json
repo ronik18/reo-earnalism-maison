@@ -67,5 +67,14 @@
     "state": "reserved",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
+  },
+  {
+    "job_id": "narration-9187e43e",
+    "title": "kshudhita-pashan",
+    "month": "2026-11",
+    "units": 4.238899999999999,
+    "state": "reserved",
+    "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
+    "root": "kshudhita-pashan"
   }
 ]
