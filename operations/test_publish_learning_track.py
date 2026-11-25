@@ -83,21 +83,31 @@ class KshudhitaPashanCompanionTests(TestCase):
         self.assertEqual((quiz["pass_score"], len(quiz["questions"])), (75, 4))
         self.assertTrue(all(sum(o["correct"] for o in q["options"]) == 1 for q in quiz["questions"]))
 
-    def test_every_quoted_phrase_is_in_the_published_text(self):
+    # 1-based paragraph ranges of source.json each lesson covers; a lesson may quote only its own range,
+    # so a quotation can never reach ahead of the day the reader is on.
+    LESSON_PARAGRAPHS = [(1, 8), (10, 19), (20, 36), (37, 59)]
+
+    def test_quotations_come_from_each_lessons_own_paragraphs(self):
         import re
         source = json.loads(self.SOURCE.read_text())
-        text = "\n".join(p["text"] for unit in source["units"] for p in unit["paragraphs"])
-        titles = {unit["title"] for unit in source["units"]}
-        strings = [self.data["description"]]
-        for lesson in self.data["lessons"]:
-            strings += lesson["body"]
+        (unit,) = source["units"]
+        paragraphs = [p["text"] for p in unit["paragraphs"]]
+        self.assertEqual(len(paragraphs), self.LESSON_PARAGRAPHS[-1][1])
+        quoted = lambda strings: [q.rstrip("।!") for s in strings for q in re.findall("‘([^’]+)’", s)]
+        # The description quotes only the story's title (the unit title), which is not a paragraph quotation.
+        self.assertEqual(quoted([self.data["description"]]), [unit["title"]])
+        self.assertEqual([lesson["title"] for lesson in self.data["lessons"] if "‘" in lesson["title"]], [])
+        total = 0
+        for lesson, (first, last) in zip(self.data["lessons"], self.LESSON_PARAGRAPHS, strict=True):
+            strings = list(lesson["body"])
             for q in lesson.get("quiz", {}).get("questions", []):
                 strings += [q["prompt"], q["explanation"]] + [o["text"] for o in q["options"]]
-        quotes = [q for s in strings for q in re.findall("‘([^’]+)’", s)]
-        self.assertGreater(len(quotes), 10)
-        # 'সত্য' is the lesson's own scare-quoted word, not a citation; the title is the story's title.
-        missing = [q for q in quotes if q not in titles and q != "সত্য" and q.rstrip("।!") not in text]
-        self.assertEqual(missing, [])
+            allowed = "\n".join(paragraphs[first - 1:last])
+            phrases = quoted(strings)
+            self.assertTrue(phrases, lesson["title"])
+            self.assertEqual([q for q in phrases if q not in allowed], [], lesson["title"])
+            total += len(phrases)
+        self.assertGreaterEqual(total, 14)
 
     def test_publishes_against_a_live_edition_and_renders_a_worksheet(self):
         from learning import worksheet
