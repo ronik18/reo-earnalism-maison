@@ -524,6 +524,11 @@ STRINGS.update({
     "review_none_decided": ("Nothing was decided. Tick at least one pending item first.", "কিছু সিদ্ধান্ত হয়নি। আগে অন্তত একটি অপেক্ষমাণ আইটেম বাছুন।"),
     "ai_translation": ("AI translation", "এআই অনুবাদ"),
     "translated_by": ("Translated with AI, edited by {name}", "এআই-সহায়ক অনুবাদ, সম্পাদনা: {name}"),
+    "parallel_toggle": ("Side by side", "পাশাপাশি"),
+    "parallel_caption": ("Original and translation, side by side", "মূল ও অনুবাদ, পাশাপাশি"),
+    "parallel_original": ("Original", "মূল"),
+    "language_bn": ("Bengali", "বাংলা"),
+    "language_en": ("English", "ইংরেজি"),
 })
 
 STRINGS.update({
