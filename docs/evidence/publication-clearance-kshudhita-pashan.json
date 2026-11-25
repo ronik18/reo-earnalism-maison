@@ -21,6 +21,11 @@
    "provenance": "library/intake/kshudhita-pashan/cover_provenance.json",
    "front_sha256": "bdd5e58e284131019732b60b9bf7533dfbf37cf1502d528ffa32b2fc13d025cf",
    "back_sha256": "168cc76d3f37804c68e423bf2a38731242e54577914e15c109b0e9e3a648fb1f"
+  },
+  "cover_confirmed": {
+   "date": "2026-11-25",
+   "by": "owner (in-session instruction)",
+   "text": "Owner confirmed the front/back cover pair (library/intake/kshudhita-pashan/front.jpg, back.jpg) in reply to the final-review question: \"Both Approved.\""
   }
  },
  "territories": [

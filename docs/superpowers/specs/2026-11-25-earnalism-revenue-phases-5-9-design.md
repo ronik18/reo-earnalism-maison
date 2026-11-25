@@ -129,3 +129,8 @@ Each phase has: what it switches on, what it needs, and **verified when** (money
 - The revenue-report data entry format for providers without an API.
 - Which shortlist titles go first in each monthly batch (prefer titles with an owner cover already in Cloudinary).
 - Licence template terms (after the legal review).
+
+## 9. Owner decisions after the build (25 Nov 2026)
+
+- **D8 — Monday-page approval unlocks publishing (owner: "Approved").** Approving a `clearance` item (and its `cover` item) on the Monday review page is an owner approval for publication of that exact packet. Because the live site cannot write repository files, the approval is stored as the audited `ReviewItem` decision bound to the clearance file's and cover provenance's exact sha256. `publish_cleared_editions` accepts a packet whose clearance record is owner-approved in the file (as before) **or** whose current clearance and cover provenance hashes match approved `ReviewItem`s; any later change to those files voids the approval. Standing permission still never applies to clearance, cover or edition items.
+- **ক্ষুধিত পাষাণ cover confirmed** by the owner; recorded in `approval.cover_confirmed` of its clearance record.
