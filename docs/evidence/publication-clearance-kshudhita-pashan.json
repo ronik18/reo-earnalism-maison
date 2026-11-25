@@ -1,16 +1,21 @@
 {
  "schema": "earnalism.publication-clearance-evidence.v1",
- "status": "DRAFT_PENDING_OWNER_APPROVAL",
+ "status": "OWNER_APPROVED_COVER_PENDING",
  "recorded_on": "2026-11-25",
  "owner_instruction": {
   "date": "2026-11-25",
   "text": "Owner instructed: start ক্ষুধিত পাষাণ (Galpa-Dashak 1895) while the কাবুলিওয়ালা early-scan lead is checked.",
-  "effect": "Preparation only. This record proposes the same clearance basis the owner approved for বিচারক on 2026-11-23 (per-territory public-domain term evidence + text source licence + owner-held cover provenance). It authorizes nothing until the owner approves it and a cover is attached."
+  "effect": "Owner-authorized policy decision for this exact edition only: per-territory public-domain term evidence, the text source licence and owner-held cover provenance together constitute publication clearance for the 9 active launch territories and the Reader read/preview actions. Publication still waits for a front/back cover with owner-held provenance. No lawyer sign-off is implied; no other title, format, territory, audio or video use is covered.",
+  "approval": {
+   "date": "2026-11-25",
+   "text": "Owner: \"I approve the clearance record, create a PR.\""
+  }
  },
  "approval": {
-  "approved": false,
-  "required": [
-   "owner approval of this exact record",
+  "approved": true,
+  "approved_on": "2026-11-25",
+  "approved_by": "owner (in-session instruction)",
+  "still_required": [
    "front/back cover with owner-held provenance"
   ]
  },
