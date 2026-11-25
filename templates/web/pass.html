@@ -15,5 +15,6 @@
 {% if request.user.is_authenticated %}<p class="free-billing-link"><a href="{% url 'web:settings' ui_locale %}">{% ui 'historical_billing_link' %}</a></p><p class="fine">{% ui 'free_historical_billing' %}</p>{% endif %}
 </section>
 {% else %}<section class="narrow"><p class="eyebrow">{% ui 'pass' %}</p><h1>{% ui 'pass_title' %}</h1><p class="lead">{% ui 'pass_intro' %}</p><div id="commerce-island"><p>{% ui 'loading' %}</p></div><p>{% ui 'legacy_notice' %}</p><a class="button" href="{% url 'web:explore' ui_locale %}">{% ui 'browse' %}</a></section>{% endif %}
+{% if founding_open %}{% include 'web/includes/founding_offer.html' %}{% endif %}
 {% endblock %}
 {% block bootstrap %}{% if not free_access %}{{ commerce_bootstrap|json_script:'commerce-bootstrap' }}{% island_script 'commerce' %}{% endif %}{% endblock %}

@@ -13,7 +13,7 @@ from .views import pass_page,checkout
 from . import legal
 
 @override_settings(FREE_ACCESS_ENABLED=True)
-class FreePassPresentationTests(SimpleTestCase):
+class FreePassPresentationTests(TestCase):
     def request(self,path,territory='IN'):
         request=RequestFactory().get(path);request.user=AnonymousUser();request.territory=territory
         request.resolver_match=SimpleNamespace(url_name='pass')

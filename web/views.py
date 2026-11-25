@@ -506,11 +506,21 @@ def settings(request, locale):
     })
 
 
+PASS_ANCHORS = [
+    {"name": "Storytel", "price": "INR 149/month", "source_url": "https://www.storytel.com/in"},
+    {"name": "Kuku FM", "price": "INR 899/year", "source_url": "https://inc42.com/buzz/after-2-5-mn-paid-subscribers-kuku-fm-25-mn-fuel-expansion/"},
+    {"name": "SpeakX", "price": "about INR 300/month", "source_url": "https://www.magzter.com/de/stories/newspaper/Mint-Ahmedabad/STARTUPS-HELP-SMALLTOWN-INDIA-BREAK-BIGCITY-ENGLISH-BARRIER"},
+]
+
+
 @require_GET
 @domain_view
 def pass_page(request, locale):
     destination = safe_return(request.GET.get("return_to"),locale) if request.GET.get("return_to") else reverse("web:explore",args=[locale])
-    return page(request, locale, "web/pass.html", active_nav="pass", free_return_path=destination, commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
+    from billing.founding import SPECS
+    from billing.models import Offer
+    founding_open = Offer.objects.filter(code__in=[s["code"] for s in SPECS.values()], approved=True, active=True).count() == len(SPECS)
+    return page(request, locale, "web/pass.html", active_nav="pass", free_return_path=destination, founding_open=founding_open, anchors=PASS_ANCHORS, commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
 
 
 @require_GET
