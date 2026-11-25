@@ -442,3 +442,60 @@ class TranslationEndToEndTests(TestCase):
         self.assertEqual(translation.translated_from_id, source.pk)
         html = self.client.get(f"/en/titles/{source.pk}/").content.decode()
         self.assertIn(f'href="/en/titles/{translation.pk}/"', html)
+
+
+class PreviewPrefixTests(SimpleTestCase):
+    """Task 16b: a first paragraph longer than the 1,200 codepoint budget previews an exact sentence prefix."""
+
+    @staticmethod
+    def paragraphs(*texts):
+        import uuid
+        from types import SimpleNamespace
+        return [SimpleNamespace(text=t, anchor_id=uuid.uuid4()) for t in texts]
+
+    def real_paragraphs(self):
+        source = json.loads((command.INTAKE / "kshudhita-pashan" / "source.json").read_text(encoding="utf-8"))
+        return self.paragraphs(*[p["text"] for p in source["units"][0]["paragraphs"] if p["kind"] == "paragraph"])
+
+    def test_long_opening_paragraph_previews_exact_sentence_prefix(self):
+        paragraphs = self.real_paragraphs()
+        self.assertGreater(len(paragraphs[0].text), 1200)
+        preview = command.preview_entries(paragraphs)
+        self.assertEqual(len(preview), 1)
+        text = preview[0]["text"]
+        self.assertTrue(paragraphs[0].text.startswith(text))
+        self.assertLessEqual(len(text), 1200)
+        self.assertEqual(text[-1], "।")
+        self.assertEqual(preview[0]["anchor_id"], str(paragraphs[0].anchor_id))
+        self.assertEqual(len(text), 1084)  # the danda at index 1083; the next sentence end (1311) no longer fits
+
+    def test_preview_unchanged_for_short_paragraphs(self):
+        paragraphs = self.paragraphs("a" * 500, "b" * 400, "c" * 400, "d" * 10)
+        preview = command.preview_entries(paragraphs)
+        self.assertEqual([p["text"] for p in preview], ["a" * 500, "b" * 400])
+        self.assertEqual(preview[0]["anchor_id"], str(paragraphs[0].anchor_id))
+
+    def test_no_sentence_end_within_budget_is_refused(self):
+        self.assertEqual(command.preview_entries(self.paragraphs("x" * 1300 + "।")), [])
+        self.assertEqual(command.preview_entries(self.paragraphs("x" * 1198 + ".y" + "।")), [])  # "." not before a space
+
+    def test_period_counts_only_before_space_or_end(self):
+        text = "Hello world. " + "y" * 1300
+        self.assertEqual(command.preview_entries(self.paragraphs(text))[0]["text"], "Hello world.")
+
+    def test_get_preview_document_accepts_the_result(self):
+        import uuid
+        from types import SimpleNamespace
+        from library import services as svc
+        preview = command.preview_entries(self.real_paragraphs())
+        unit = SimpleNamespace(id=uuid.uuid4())
+        revision = mock.MagicMock(preview=preview)
+        revision.units.filter.return_value.first.return_value = unit
+        revision.units.first.return_value = unit
+        with mock.patch.object(svc, "edition_detail", return_value={"edition_revision_id": "r"}), \
+                mock.patch.object(svc, "_revision", return_value=revision), \
+                mock.patch.object(svc, "current_right", return_value=object()), \
+                mock.patch.object(svc, "unit_dto", return_value={}):
+            document = svc.get_preview_document("e", unit.id)
+        self.assertEqual(document["boundary"]["end_offset_chars"], len(preview[0]["text"]))
+        self.assertEqual(document["boundary"]["end_anchor_id"], preview[0]["anchor_id"])

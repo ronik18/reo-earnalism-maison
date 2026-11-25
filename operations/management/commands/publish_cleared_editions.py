@@ -181,6 +181,35 @@ def import_order(chosen, packets):
     return ordered
 
 
+PREVIEW_ENTRIES, PREVIEW_CODEPOINTS = 3, 1200  # the approved bounds library.services.get_preview_document enforces
+SENTENCE_MARKS = "\u0964?!"  # Bengali danda, question mark, exclamation mark; "." counts only before a space or the end
+
+
+def sentence_prefix(text, limit=PREVIEW_CODEPOINTS):
+    """The longest exact prefix of `text` within `limit` codepoints that ends at a sentence end, or None."""
+    for end in range(min(len(text), limit), 0, -1):
+        mark = text[end - 1]
+        if mark in SENTENCE_MARKS or (mark == "." and (end == len(text) or text[end].isspace())):
+            return text[:end]
+    return None
+
+
+def preview_entries(paragraphs):
+    """Bounded public preview: up to 3 whole leading paragraphs within 1,200 codepoints. When the first paragraph alone
+    exceeds the budget, one entry: its exact prefix ending at the last sentence end that fits (same anchor_id)."""
+    preview, used = [], 0
+    for paragraph in paragraphs[:PREVIEW_ENTRIES]:
+        if used + len(paragraph.text) > PREVIEW_CODEPOINTS:
+            break
+        preview.append({"text": paragraph.text, "anchor_id": str(paragraph.anchor_id)})
+        used += len(paragraph.text)
+    if not preview and paragraphs:
+        prefix = sentence_prefix(paragraphs[0].text)
+        if prefix:
+            preview.append({"text": prefix, "anchor_id": str(paragraphs[0].anchor_id)})
+    return preview
+
+
 def reason_for(packet):
     if packet["legacy"]:
         return "Owner-authorized go-live, 23 Nov 2026: public-domain term evidence, text licence and owner cover provenance (" + CLEARANCE_DOC + ")."
@@ -341,12 +370,7 @@ class Command(BaseCommand):
     def offer_reader(self, actor, revision, packet):
         first = revision.units.order_by("ordinal").first()
         paragraphs = [p for p in first.paragraphs.order_by("ordinal") if p.kind == "paragraph"]
-        preview, used = [], 0
-        for paragraph in paragraphs[:3]:
-            if used + len(paragraph.text) > 1200:
-                break
-            preview.append({"text": paragraph.text, "anchor_id": str(paragraph.anchor_id)})
-            used += len(paragraph.text)
+        preview = preview_entries(paragraphs)
         if not preview:
             raise CommandError("No bounded preview paragraph is available.")
         with transaction.atomic():
