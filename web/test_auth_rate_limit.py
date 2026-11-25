@@ -63,6 +63,7 @@ class SimplifiedSignInTests(TestCase):
         self.assertLess(form, email_link)
         self.assertIn('Works after you connect Google in Settings.', html)
         self.assertNotIn('Google signs in an existing account here', html)
+        self.assertLess(html.index('Email me a sign-in link'), html.index('id="auth-help-island"'))  # alternatives before the help island
 
     def test_forgot_password_sits_under_the_password_field(self):
         html = self.page()
