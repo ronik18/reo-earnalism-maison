@@ -18658,6 +18658,173 @@
       },
       "path": "stills/stills-film-01-r9/f01s019-4--c3.png",
       "sha256": "00a29bd24557a2465a8a837164138d1c39adfcb0d17add2ec959636c9effb5ef"
+    },
+    {
+      "bytes": 5976,
+      "kind": "stills_pick",
+      "meta": {
+        "choices": {
+          "f01s001-1": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s001-1--c1.png",
+            "sha256": "89a3934148642286a2a06452812b787ef08590f35ce35f213a5518ca61c0c3f6"
+          },
+          "f01s001-2": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s001-2--c1.png",
+            "sha256": "004bf7594a6d5bce1064e9e8b4b7a849862244c4bb012624a0b750186222ea1a"
+          },
+          "f01s001-3": {
+            "candidate": 3,
+            "file": "stills/stills-film-01-r9/f01s001-3--c3.png",
+            "sha256": "24dcebc86964d8b0282375d830f7c3ba4321492334a5e6b3f4a95121804d7b4d"
+          },
+          "f01s001-4": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s001-4--c1.png",
+            "sha256": "47d5059ad666628ec7437af264e68726c9b92f7ffe59a02f231db80c8e837c19"
+          },
+          "f01s001-6": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s001-6--c2.png",
+            "sha256": "a823f8362333b939450caf9f5e52722976b6e0627a27d810f3263775d533895d"
+          },
+          "f01s002-2": {
+            "candidate": 3,
+            "file": "stills/stills-film-01-r9/f01s002-2--c3.png",
+            "sha256": "b22e85104e0f314a0568d96eaeb09147aa553e0cea0de3e5b63c7d4ff63ef136"
+          },
+          "f01s002-3": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s002-3--c1.png",
+            "sha256": "1c48049ce8bc3db5a17a7496f27068dbcd2b9a560c8effbe979a71fb06f96304"
+          },
+          "f01s003-1": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s003-1--c1.png",
+            "sha256": "ed6dfa900be4995a3e7efd27b218e43cd1e65f7881aeabd3c79e7cd546e60f4d"
+          },
+          "f01s003-2": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s003-2--c1.png",
+            "sha256": "8c2a181b8711db7a4c563998b5ba1ccac11ebaec09dee10525dc1594fbb4658e"
+          },
+          "f01s004-1": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s004-1--c1.png",
+            "sha256": "af5b9c8cef9105725729c9ff8fda599b74aa869e9b2489f383093648c872eb8c"
+          },
+          "f01s004-2": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s004-2--c2.png",
+            "sha256": "76bf66e934a8eb92d5b460018304f0688810c5717e49a21958758d3decd4ae1d"
+          },
+          "f01s004-3": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s004-3--c2.png",
+            "sha256": "bbd8793423106f5ad9f55d5725e83c14d4b1471636958d6a059c210072950431"
+          },
+          "f01s005-1": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s005-1--c2.png",
+            "sha256": "415b5b505516628e29019154c9907b9fd60909924620c47a8e4410a90680ed65"
+          },
+          "f01s005-3": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s005-3--c2.png",
+            "sha256": "2f5d8717d3ccfcf661d9e4873471c637c98cd2bde979b0de65a05ffdf5db5e75"
+          },
+          "f01s005-4": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s005-4--c1.png",
+            "sha256": "72c858bf839d95636017755c685cf2d2cb1573bcdfb8df0e07cebe2e615bf4b1"
+          },
+          "f01s006-3": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s006-3--c2.png",
+            "sha256": "d8e54e4279aa8d7777e408ab20426603e1607a347694cc6858e50360194b6fa9"
+          },
+          "f01s007-3": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s007-3--c1.png",
+            "sha256": "c1f459cb9b9b73e64eb7f8aa8ab8158e3613f733f82f6091e1e0b55e9b389c98"
+          },
+          "f01s009-1": {
+            "candidate": 3,
+            "file": "stills/stills-film-01-r9/f01s009-1--c3.png",
+            "sha256": "9f59cca31293999e95a0339818ed994bd5d9ca113d62eb350d852e6af6ae2657"
+          },
+          "f01s009-3": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s009-3--c1.png",
+            "sha256": "72b0d409f8e24ec913cccc2a91e49e1c5a9c20943a12f2fef1c57e7a37b1f20b"
+          },
+          "f01s010-1": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s010-1--c2.png",
+            "sha256": "ef1a8066e740dd0eab6adb9209fcb9ae9baeeb077f5ed861b14e073c4abeb83b"
+          },
+          "f01s010-2": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s010-2--c2.png",
+            "sha256": "32feaca68cd76463611f85b8ca7bc02b16539d0d235baaf899fae2d2b4dc7f45"
+          },
+          "f01s010-4": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s010-4--c2.png",
+            "sha256": "47d000b627ba9f92bd05d3587a762f89cd0b9ab4de8fdc0284abc1677c37ab40"
+          },
+          "f01s011-1": {
+            "candidate": 3,
+            "file": "stills/stills-film-01-r9/f01s011-1--c3.png",
+            "sha256": "9e878519f8a4fa75ca4c4d1c298befd9ce02d8f05cbb1e7fb5aa7914d11bceb5"
+          },
+          "f01s011-5": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s011-5--c2.png",
+            "sha256": "f77ecf194ff514b3f1b5946444e6b823655a39014aada9168f0238ebeef6b51f"
+          },
+          "f01s014-2": {
+            "candidate": 1,
+            "file": "stills/stills-film-01-r9/f01s014-2--c1.png",
+            "sha256": "8c6a38b38e00c9f40cb74cb71b49f8f621ba90bf0488752caf5bd4e776d299eb"
+          },
+          "f01s014-3": {
+            "candidate": 3,
+            "file": "stills/stills-film-01-r9/f01s014-3--c3.png",
+            "sha256": "619a0db122ae97cd690f765b14db5cd00b3f2f1122be661d1cd516db06254c7f"
+          },
+          "f01s017-1": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s017-1--c2.png",
+            "sha256": "b610698f87f3d5442aa663c6d1014bf2623c13d65e9374534175c68f9b8d79f0"
+          },
+          "f01s017-2": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s017-2--c2.png",
+            "sha256": "c2e28be005d551c35d24f9cb38e889b4e14d54bb4f636fa9ba644ac6f032569a"
+          },
+          "f01s018-3": {
+            "candidate": 3,
+            "file": "stills/stills-film-01-r9/f01s018-3--c3.png",
+            "sha256": "44ba0ce77a10a282430c4b85e3a693c9090b89ce3c44b32fd2e05252583e1618"
+          },
+          "f01s019-1": {
+            "candidate": 2,
+            "file": "stills/stills-film-01-r9/f01s019-1--c2.png",
+            "sha256": "13bb69fa20d671beac26f5d2ea626136cfad31aadbe0eaa17da6b6ddcc5c4f05"
+          },
+          "f01s019-4": {
+            "candidate": 3,
+            "file": "stills/stills-film-01-r9/f01s019-4--c3.png",
+            "sha256": "00a29bd24557a2465a8a837164138d1c39adfcb0d17add2ec959636c9effb5ef"
+          }
+        },
+        "job_id": "stills-film-01-r9",
+        "version": 1
+      },
+      "path": "picks/stills-film-01-r9.pick-1.json",
+      "sha256": "87920a4e1af178922f8a298cde5b4c02535f9a7675f1c600caebb19f08f26246"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -21098,6 +21265,48 @@
       },
       "result": "exchange_collected",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-25T04:17:45.816375+00:00",
+      "detail": {
+        "choices": {
+          "f01s001-1": 1,
+          "f01s001-2": 1,
+          "f01s001-3": 3,
+          "f01s001-4": 1,
+          "f01s001-6": 2,
+          "f01s002-2": 3,
+          "f01s002-3": 1,
+          "f01s003-1": 1,
+          "f01s003-2": 1,
+          "f01s004-1": 1,
+          "f01s004-2": 2,
+          "f01s004-3": 2,
+          "f01s005-1": 2,
+          "f01s005-3": 2,
+          "f01s005-4": 1,
+          "f01s006-3": 2,
+          "f01s007-3": 1,
+          "f01s009-1": 3,
+          "f01s009-3": 1,
+          "f01s010-1": 2,
+          "f01s010-2": 2,
+          "f01s010-4": 2,
+          "f01s011-1": 3,
+          "f01s011-5": 2,
+          "f01s014-2": 1,
+          "f01s014-3": 3,
+          "f01s017-1": 2,
+          "f01s017-2": 2,
+          "f01s018-3": 3,
+          "f01s019-1": 2,
+          "f01s019-4": 3
+        },
+        "job_id": "stills-film-01-r9",
+        "version": 1
+      },
+      "result": "recorded",
+      "stage": "pick"
     }
   ],
   "ledger": "../allowance-ledger.json",
