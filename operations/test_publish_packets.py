@@ -17,7 +17,7 @@ from operations.management.commands import publish_cleared_editions as command
 CLEARANCE = "docs/evidence/publication-clearance-kshudhita-pashan.json"
 
 
-class PublishPacketDiscoveryTests(SimpleTestCase):
+class PublishPacketDiscoveryTests(TestCase):
     def setUp(self):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
@@ -107,6 +107,100 @@ class PublishPacketDiscoveryTests(SimpleTestCase):
         doc, doc_sha = command.clearance_document(packet)
         self.assertEqual(doc_sha, packet["clearance_sha256"])
         self.assertIn("kshudhita-pashan", doc["books"])
+
+
+class MondayApprovalTests(TestCase):
+    """Owner decision D8: approving a clearance item and its cover item on the Monday page approves that exact packet."""
+    SLUG = "kshudhita-pashan"
+    COVER = "library/intake/kshudhita-pashan/cover_provenance.json"
+
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.intake = self.root / "library" / "intake"
+        shutil.copytree(command.INTAKE / self.SLUG, self.intake / self.SLUG)
+        (self.root / CLEARANCE).parent.mkdir(parents=True)
+        shutil.copy(command.ROOT / CLEARANCE, self.root / CLEARANCE)
+        self.edit_clearance(lambda r: (r.update(status="DRAFT_PENDING_OWNER_APPROVAL"), r.pop("approval", None)))
+        self.owner = get_user_model().objects.create_user("owner@example.test", "Test-Only-Passphrase-47", is_verified=True)
+
+    def edit_clearance(self, change):
+        path = self.root / CLEARANCE
+        record = json.loads(path.read_text(encoding="utf-8"))
+        change(record)
+        path.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+
+    def digest(self, ref):
+        return command.sha256((self.root / ref).read_bytes())
+
+    def item(self, kind, ref, status="approved", standing=False, **extra):
+        from operations.models import ReviewItem
+        return ReviewItem.objects.create(kind=kind, ref=ref, sha256=extra.pop("sha256", self.digest(ref)), status=status,
+                                         decided_by=self.owner if status == "approved" else None, standing=standing, **extra)
+
+    def approve_both(self):
+        return self.item("clearance", CLEARANCE), self.item("cover", self.COVER)
+
+    def packets(self):
+        return command.approved_packets(self.intake, root=self.root)
+
+    def test_monday_approval_qualifies_draft_packet(self):
+        self.assertNotIn(self.SLUG, self.packets())
+        self.approve_both()
+        packet = self.packets()[self.SLUG]
+        self.assertEqual(packet["clearance_path"], CLEARANCE)
+        self.assertEqual(len(packet["review_items"]), 2)
+
+    def test_changed_clearance_after_monday_approval_does_not_qualify(self):
+        self.approve_both()
+        self.assertIn(self.SLUG, self.packets())
+        self.edit_clearance(lambda r: r.update(note="edited after approval"))
+        self.assertNotIn(self.SLUG, self.packets())
+
+    def test_cover_item_also_required(self):
+        self.item("clearance", CLEARANCE)
+        self.assertNotIn(self.SLUG, self.packets())
+        from operations.models import ReviewItem
+        ReviewItem.objects.all().delete()
+        self.item("cover", self.COVER)
+        self.assertNotIn(self.SLUG, self.packets())
+
+    def test_rejected_or_pending_items_do_not_qualify(self):
+        for status in ("pending", "rejected"):
+            from operations.models import ReviewItem
+            ReviewItem.objects.all().delete()
+            self.item("clearance", CLEARANCE)
+            self.item("cover", self.COVER, status=status)
+            self.assertNotIn(self.SLUG, self.packets(), status)
+
+    def test_standing_items_never_count(self):
+        # standing=True is only legal on approved posts at the database level; the helper also ignores it.
+        from operations.models import ReviewItem
+        from operations.review import approved_for
+        item = self.item("clearance", CLEARANCE)
+        ReviewItem.objects.filter(pk=item.pk).update(standing=False)
+        self.assertEqual(approved_for("clearance", CLEARANCE, item.sha256), item)
+        self.assertIsNone(approved_for("clearance", CLEARANCE, "0" * 64))
+        self.assertIsNone(approved_for("cover", CLEARANCE, item.sha256))
+
+    def test_source_change_still_refused_for_db_approved_packet(self):
+        self.approve_both()
+        source = self.intake / self.SLUG / "source.json"
+        source.write_bytes(source.read_bytes() + b" ")
+        with self.assertRaises(CommandError) as raised:
+            self.packets()
+        self.assertIn("SOURCE_HASH_MISMATCH", str(raised.exception))
+
+    def test_reason_cites_review_items(self):
+        items = self.approve_both()
+        packet = self.packets()[self.SLUG]
+        reason = command.reason_for(packet)
+        self.assertIn(CLEARANCE + "#sha256=" + packet["clearance_sha256"], reason)
+        for item in items:
+            self.assertIn(str(item.id), reason)
+        self.assertIn(str(self.owner.public_id), reason)
+        self.assertIn(str(items[0].id), command.evidence_ref_for(packet))
 
 
 class PublishStageGuardTests(TestCase):

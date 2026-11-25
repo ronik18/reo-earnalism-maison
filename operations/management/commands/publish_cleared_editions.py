@@ -23,6 +23,7 @@ from django.utils import timezone
 
 from core.services import audit
 from library import storage
+from operations.review import approved_for
 from library.general_import import finalize_import, start_import
 from library.models import Asset, Edition, Revision, Rights
 from library.services import prepare_revision_validation, transition_revision, validate_revision
@@ -53,6 +54,34 @@ def _json(path):
         return json.loads(Path(path).read_bytes())
     except (OSError, ValueError):
         return None
+
+
+def monday_approval(root, folder, clearance_path, clearance_file, record):
+    """Owner decision D8: the clearance item and the cover item approved on the Monday page for these exact files.
+
+    Returns the two ReviewItems (clearance, cover) or None. Both are bound to the files' current sha256, so a later
+    change to either file voids the approval; standing permission never counts (approved_for ignores it)."""
+    if set(record.get("territories") or ()) != set(territories()) or record.get("formats") != ["reader"]:
+        return None
+    try:
+        cover_ref = (Path(folder) / "cover_provenance.json").relative_to(root).as_posix()
+    except ValueError:
+        cover_ref = f"library/intake/{Path(folder).name}/cover_provenance.json"
+    cover_file = Path(folder) / "cover_provenance.json"
+    if not cover_file.is_file():
+        return None
+    clearance = approved_for("clearance", clearance_path, sha256(Path(clearance_file).read_bytes()))
+    cover = approved_for("cover", cover_ref, sha256(cover_file.read_bytes()))
+    return (clearance, cover) if clearance and cover else None
+
+
+def evidence_ref_for(packet):
+    ref = packet["clearance_path"] + "#sha256=" + packet["clearance_sha256"]
+    items = packet.get("review_items")
+    if items:
+        ref += ";review_items=" + ",".join(str(i.id) for i in items) + ";decided_by=" + ",".join(
+            sorted({str(i.decided_by.public_id) if i.decided_by else "unknown" for i in items}))
+    return ref
 
 
 def approved_packets(intake=None, root=None, check=None):
@@ -93,16 +122,23 @@ def approved_packets(intake=None, root=None, check=None):
             continue
         approval = record.get("approval") or {}
         book = (record.get("books") or {}).get(slug)
-        if not (record.get("status") == "OWNER_APPROVED" and approval.get("approved") is True
-                and not approval.get("still_required") and isinstance(book, dict) and edition_slug):
+        if not (isinstance(book, dict) and edition_slug):
             continue
+        in_file = (record.get("status") == "OWNER_APPROVED" and approval.get("approved") is True
+                   and not approval.get("still_required"))
+        review_items = None
+        if not in_file:
+            review_items = monday_approval(root, folder, clearance_path, clearance_file, record)
+            if review_items is None:
+                continue
         provenance = _json(folder / "cover_provenance.json")
         if not provenance or not all((folder / name).is_file() for name in ("front.jpg", "back.jpg", "source.json")):
             continue
         covers = ()
         if check is not None and slug not in check:
             packets[slug] = {"slug": slug, "book_key": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
-                "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": covers}
+                "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": covers,
+                "review_items": review_items}
             continue
         source_sha = sha256((folder / "source.json").read_bytes())
         if book.get("source_sha256") != source_sha or (manifest.get("source") or {}).get("sha256") != source_sha:
@@ -117,7 +153,8 @@ def approved_packets(intake=None, root=None, check=None):
         if attached and (attached.get("front_sha256"), attached.get("back_sha256")) != tuple(covers):
             raise CommandError(f"{slug}: COVER_HASH_MISMATCH: approval.cover_attached differs from front.jpg/back.jpg.")
         packets[slug] = {"slug": slug, "book_key": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
-            "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": tuple(covers)}
+            "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": tuple(covers),
+            "review_items": review_items}
     return packets
 
 
@@ -147,6 +184,9 @@ def import_order(chosen, packets):
 def reason_for(packet):
     if packet["legacy"]:
         return "Owner-authorized go-live, 23 Nov 2026: public-domain term evidence, text licence and owner cover provenance (" + CLEARANCE_DOC + ")."
+    if packet.get("review_items"):
+        return ("Owner approval on the Monday review page (D8): public-domain term evidence, text licence and owner cover provenance ("
+                + evidence_ref_for(packet) + ").")
     return ("Owner-authorized publication: public-domain term evidence, text licence and owner cover provenance ("
             + packet["clearance_path"] + "#sha256=" + packet["clearance_sha256"] + ").")
 
@@ -319,7 +359,7 @@ class Command(BaseCommand):
             if not current.rights.exists():
                 doc, doc_sha = clearance_document(packet)
                 now = timezone.now()
-                evidence = json.dumps({"territories": territories(), "evidence_ref": f"{packet['clearance_path']}#sha256={doc_sha}",
+                evidence = json.dumps({"territories": territories(), "evidence_ref": evidence_ref_for(packet) if packet.get("review_items") else f"{packet['clearance_path']}#sha256={doc_sha}",
                     "basis": "owner-authorized public-domain term evidence"}, ensure_ascii=False)
                 for action in ("read", "preview"):
                     right = Rights.objects.create(revision=current, format="reader", action=action, territories=territories(),

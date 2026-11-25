@@ -7,8 +7,9 @@ File-backed kinds (clearance, cover, edition) carry `ref` = repo-relative path a
 summary names. `queue` validates the post summary schema (POST_SUMMARY) and requires that hash; `decide` re-prepares on
 approval and refuses REVIEW_ITEM_CHANGED if the bundle moved on; post_approved checks it again before any provider call.
 
-Approval here is a recorded decision only: approving a clearance item does NOT yet change the clearance JSON's
-status, and publish_cleared_editions does not read review decisions. Linking the two is an owner decision.
+Approving a clearance item and its cover item is the owner's approval of that exact packet (decision D8):
+publish_cleared_editions reads `approved_for` and qualifies a draft packet whose clearance file and cover_provenance.json
+still hash to the approved items. The clearance JSON's own status is not changed; any later file change voids the approval.
 
 The intake commands (intake_wikisource, intake_cover, intake_translation) queue what they write with --write:
 clearance drafts as 'clearance', cover_provenance.json as 'cover', a translation's manifest.json and
@@ -174,6 +175,14 @@ def queue(kind, ref, sha256, summary):
                 item.save(update_fields=['status', 'standing', 'decided_at'])
                 audit(None, 'review.decided', item, {'decision': 'approved', 'standing': True, 'kind': kind, 'ref': ref})
     return item
+
+
+def approved_for(kind, ref, sha256):
+    """The owner-approved (never standing) ReviewItem bound to exactly this kind, ref and file hash, or None.
+
+    A later change to the file changes its sha256, so an older approval no longer matches (owner decision D8)."""
+    return (ReviewItem.objects.filter(kind=kind, ref=ref, sha256=sha256, status='approved', standing=False)
+            .select_related('decided_by').order_by('-decided_at').first())
 
 
 def decide(actor, item_ids, decision, note=''):
