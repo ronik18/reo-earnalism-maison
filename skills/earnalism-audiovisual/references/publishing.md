@@ -38,7 +38,7 @@ Root/Integration owns provider mutations; this skill prepares and stages.
 2. **Clearance (per title).** The owner pre-authorised the public-domain pattern of
    `docs/evidence/publication-clearance-20261123.json` for audio and video. The agent
    prepares the draft: territories = the active whitelist, term per territory,
-   text-source licence, cover provenance, generator and music licences, asset hashes.
+   text-source licence, cover provenance, generator and music licences (with SDXL inpainting under CreativeML Open RAIL++-M for any retouched still; see `model-licences.md`), asset hashes.
    **The owner approves it**: the owner (not the agent) sets `owner_approval`
    `{"by": <who>, "at": <ISO time>}` and a non-draft `status`; it is saved under
    `docs/evidence/`. **`stage` enforces this**: it refuses a status starting with

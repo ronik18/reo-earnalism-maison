@@ -36,7 +36,7 @@ One title root, one record, one writer. `record.json` (schema
   measured_with `ffprobe`, WAV sha256s, narration job id}.
 - **Renditions**: film and reel hashes, durations, loudness, true peak, loop score.
 - **Review**: QC report, owner review result, everything not reviewed marked `unassessed`.
-- **Licences**: Apache-2.0 (Parler, FLUX.1-schnell, Wan, ACE-Step), CC0 (VCSL).
+- **Licences**: Apache-2.0 (Parler, FLUX.1-schnell, Wan, ACE-Step, CLIPSeg), CC0 (VCSL), CreativeML Open RAIL++-M (SDXL inpainting, for retouched stills; `model-licences.md`).
 
 Job endings are events too: `import/accepted`, `job/superseded` (never ran, 0 CU),
 `job/closed` (ran, not imported, actual CU) and their pending forms `job/superseding`,

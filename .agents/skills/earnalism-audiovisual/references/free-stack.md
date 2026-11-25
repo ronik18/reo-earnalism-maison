@@ -10,6 +10,8 @@ started by the owner; everything else runs in Claude's container (CPU, ffmpeg).
 | Score cues (optional) | ACE-Step `ACE-Step/ACE-Step-v1-3.5B` | Apache-2.0 | Colab GPU (`job music`), instrumental only | revision, seed, prompt and output hashes recorded |
 | Score (default) | VCSL piano/harp samples via `editorial_score.py` | CC0 | container | `earnalism-video/software/assets/music/vcsl-piano-harp-v1` |
 | Reel motion | Wan 2.2 TI2V-5B (existing `wan22` builder) | Apache-2.0 | Colab L4, profile `l4-balanced-v2` (512×896, 24 steps) | model revision pinned in `wan22/batch.py` |
+| Retouch (inpainting) | SDXL Inpainting 0.1 `diffusers/stable-diffusion-xl-1.0-inpainting-0.1` | CreativeML Open RAIL++-M (2023-07-26), see `model-licences.md` | Colab GPU (`job retouch`) | revision resolved and recorded by the notebook |
+| Retouch masks | CLIPSeg `CIDAS/clipseg-rd64-refined` | Apache-2.0 | Colab GPU (`job retouch`) | revision resolved and recorded by the notebook |
 | Film motion, mix, assembly, QC | ffmpeg, NumPy, Pillow | LGPL/GPL tools, BSD, HPND | container | `eav.film`, `eav.mix`, `eav.reel`, `eav.qc` |
 
 ## Forbidden
