@@ -30679,6 +30679,33 @@
       },
       "path": "picks/touchup-film-01.pick-1.json",
       "sha256": "daa2479f6831915d17541f77be5f02bd523ee88c26995419116d3df23c2eafd8"
+    },
+    {
+      "bytes": 297,
+      "kind": "stills_hold",
+      "meta": {
+        "keys": [
+          "f01s003-6",
+          "f01s005-2",
+          "f01s008-3",
+          "f01s010-5",
+          "f01s011-2",
+          "f01s012-2",
+          "f01s012-3",
+          "f01s013-4",
+          "f01s013-5",
+          "f01s015-1",
+          "f01s015-2",
+          "f01s015-3",
+          "f01s016-3",
+          "f01s018-2",
+          "f01s019-2"
+        ],
+        "target": "film-01",
+        "version": 1
+      },
+      "path": "holds/film-01.hold-1.json",
+      "sha256": "98e3bc689aee06999db4f5b386c97969638902387ed812afe33dfd2b68dd715a"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -33802,6 +33829,32 @@
       },
       "result": "recorded",
       "stage": "pick"
+    },
+    {
+      "at": "2026-11-25T07:56:19.557863+00:00",
+      "detail": {
+        "keys": [
+          "f01s003-6",
+          "f01s005-2",
+          "f01s008-3",
+          "f01s010-5",
+          "f01s011-2",
+          "f01s012-2",
+          "f01s012-3",
+          "f01s013-4",
+          "f01s013-5",
+          "f01s015-1",
+          "f01s015-2",
+          "f01s015-3",
+          "f01s016-3",
+          "f01s018-2",
+          "f01s019-2"
+        ],
+        "target": "film-01",
+        "version": 1
+      },
+      "result": "recorded",
+      "stage": "hold"
     }
   ],
   "ledger": "../allowance-ledger.json",
