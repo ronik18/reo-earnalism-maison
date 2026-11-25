@@ -84,3 +84,12 @@ def founding_plans_open() -> bool:
     plans = latest_founding_plans().values()
     return all(p is not None and p.merchant_approved_at is not None and p.offer.approved and p.offer.active
                and not p.offer.test_only for p in plans)
+
+
+def founding_prices():
+    """{'month': price_minor, 'year': price_minor} of the latest founding offers, or None unless every one is INR
+    (the founding wording names rupees; anything else is not shown)."""
+    plans = latest_founding_plans()
+    if any(p is None or p.offer.currency != 'INR' for p in plans.values()):
+        return None
+    return {unit: plan.offer.price_minor for unit, plan in plans.items()}

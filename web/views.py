@@ -14,7 +14,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
-from billing.founding import founding_plans_open
+from billing.founding import founding_plans_open, founding_prices
 from .i18n import catalogue, text
 
 
@@ -515,11 +515,18 @@ PASS_ANCHORS = [
 ]
 
 
+def _rupees(minor):
+    """INR minor units as shown in the founding wording: 9900 -> 99, 12950 -> 129.50."""
+    return f"{minor // 100}" if minor % 100 == 0 else f"{minor // 100}.{minor % 100:02d}"
+
+
 @require_GET
 @domain_view
 def pass_page(request, locale):
     destination = safe_return(request.GET.get("return_to"),locale) if request.GET.get("return_to") else reverse("web:explore",args=[locale])
-    return page(request, locale, "web/pass.html", active_nav="pass", free_return_path=destination, founding_open=founding_plans_open(), anchors=PASS_ANCHORS, commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
+    prices = founding_prices() if founding_plans_open() else None
+    founding = {unit: _rupees(minor) for unit, minor in prices.items()} if prices else None
+    return page(request, locale, "web/pass.html", active_nav="pass", free_return_path=destination, founding_open=founding is not None, founding_prices=founding, anchors=PASS_ANCHORS, commerce_bootstrap={"return_path":safe_return(request.GET.get("return_to"),locale)})
 
 
 @require_GET

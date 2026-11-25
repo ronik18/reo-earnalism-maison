@@ -11,7 +11,7 @@ from billing.subscription_models import BillingPlan
 from .views import pass_page
 
 WORDING = 'INR 99/month or INR 999/year — your price stays the same for as long as you stay a member.'
-BN_WORDING = '৯৯ টাকা মাসে অথবা ৯৯৯ টাকা বছরে'
+BN_WORDING = '{month} টাকা মাসে অথবা {year} টাকা বছরে'
 
 
 class PassPageFoundingTests(TestCase):
@@ -50,6 +50,23 @@ class PassPageFoundingTests(TestCase):
     def test_bengali_wording_exists_in_catalogue(self):
         from .i18n import STRINGS
         self.assertIn(BN_WORDING, STRINGS['founding_offer'][1])
+        for wording in STRINGS['founding_offer']:  # prices come from the offers, never hard-coded copy
+            self.assertNotIn('99', wording)
+            self.assertNotIn('৯৯', wording)
+
+    def test_founding_wording_reads_the_offer_prices(self):
+        self.open_founding()
+        Offer.objects.filter(code='founding-pass-month').update(price_minor=12950)
+        Offer.objects.filter(code='founding-pass-year').update(price_minor=129900)
+        html = self.main()
+        self.assertIn('Founding member: INR 129.50/month or INR 1299/year', html)
+        self.assertNotIn('INR 99/month', html)
+        self.assertIn('INR 129.50/month or INR 1299/year', self.main('bn'))  # English-only UI (owner decision)
+
+    def test_non_inr_founding_offer_hides_the_wording(self):
+        self.open_founding()
+        Offer.objects.filter(code='founding-pass-year').update(currency='USD')
+        self.assertNotIn('Founding member', self.main())
 
     def test_every_anchor_has_a_source_link(self):
         self.open_founding()

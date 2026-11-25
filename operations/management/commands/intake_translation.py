@@ -66,7 +66,10 @@ class Command(BaseCommand):
                                if p.is_file()), None)
         if clearance_path is None:
             raise CommandError(f'SOURCE_CLEARANCE_MISSING: no clearance record for {source_slug}')
-        source_book = _load(clearance_path)['books'][source_slug]
+        source_record = _load(clearance_path)
+        source_book = (source_record.get('books') or {}).get(source_slug) if isinstance(source_record, dict) else None
+        if not isinstance(source_book, dict):
+            raise CommandError(f'SOURCE_CLEARANCE_BOOK_MISSING: {clearance_path} has no books[{source_slug!r}] entry')
         try:
             raw = Path(o['source']).read_bytes()
             translated = read_source_bytes(raw)
@@ -121,7 +124,7 @@ class Command(BaseCommand):
             'approval': {'approved': False, 'approved_on': None, 'approved_by': None,
                          'still_required': ['owner approval of this clearance record',
                                             'front/back cover with owner-held provenance']},
-            'territories': _load(clearance_path).get('territories', []),
+            'territories': source_record.get('territories', []),
             'formats': ['reader'],
             'actions': ['read', 'preview'],
             'downloads': False,
