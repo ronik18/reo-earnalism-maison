@@ -147,3 +147,68 @@ class PublishStageGuardTests(TestCase):
             with self.assertRaises(CommandError) as raised:
                 self.run_command("status", "--book", "kshudhita-pashan")
         self.assertIn("SOURCE_HASH_MISMATCH", str(raised.exception))
+
+
+class TranslationImportTests(TestCase):
+    def setUp(self):
+        from library.models import Edition, Work
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.intake = Path(directory.name)
+        shutil.copytree(command.INTAKE / "kshudhita-pashan", self.intake / "kshudhita-pashan")
+        self.packet = self.intake / "kshudhita-pashan-en"
+        self.packet.mkdir()
+        source_sha = command.sha256((self.intake / "kshudhita-pashan" / "source.json").read_bytes())
+        (self.packet / "translation.json").write_text(json.dumps({
+            "translated_from": "kshudhita-pashan", "method": "ai_edited", "credit": "Edited by Test",
+            "model": "claude-test", "date": "2026-11-25", "source_sha256": source_sha}), encoding="utf-8")
+        work = Work.objects.create(slug="kshudhita-pashan", title="x", creators=["a"], house="golpo")
+        self.source = Edition.objects.create(work=work, slug="kshudhita-pashan", locale="bn")
+        self.target = Edition.objects.create(work=work, slug="kshudhita-pashan-en", locale="en")
+
+    def test_translation_packet_import_sets_label_fields(self):
+        command.apply_translation(self.target, command.read_translation(self.packet, self.intake))
+        self.target.refresh_from_db()
+        self.assertEqual(self.target.translated_from, self.source)
+        self.assertEqual((self.target.translation_method, self.target.translation_credit, self.target.translation_model),
+                         ("ai_edited", "Edited by Test", "claude-test"))
+
+    def test_translation_import_refuses_missing_source_edition(self):
+        self.source.delete()
+        with self.assertRaises(CommandError) as raised:
+            command.read_translation(self.packet, self.intake)
+        self.assertIn("SOURCE_EDITION_MISSING", str(raised.exception))
+
+    def test_translation_import_refuses_changed_source_packet(self):
+        source = self.intake / "kshudhita-pashan" / "source.json"
+        source.write_bytes(source.read_bytes() + b" ")
+        with self.assertRaises(CommandError) as raised:
+            command.read_translation(self.packet, self.intake)
+        self.assertIn("SOURCE_PACKET_HASH_MISMATCH", str(raised.exception))
+
+    def test_same_locale_translation_is_refused(self):
+        self.target.locale = "bn"
+        self.target.save()
+        from django.core.exceptions import ValidationError
+        with self.assertRaises(ValidationError):
+            command.apply_translation(self.target, command.read_translation(self.packet, self.intake))
+
+    def test_invalid_translation_json_is_refused(self):
+        for text in ("{not json", json.dumps({"translated_from": "kshudhita-pashan"})):
+            (self.packet / "translation.json").write_text(text, encoding="utf-8")
+            with self.assertRaises(CommandError) as raised:
+                command.read_translation(self.packet, self.intake)
+            self.assertIn("TRANSLATION_JSON_INVALID", str(raised.exception))
+
+    def test_publish_and_evidence_refuse_when_labels_are_absent(self):
+        packet = {"slug": "kshudhita-pashan-en", "edition_slug": "kshudhita-pashan-en", "folder": str(self.packet)}
+        with mock.patch.object(command, "INTAKE", self.intake):
+            for stage in (command.Command().publish, lambda actor, p: command.Command().record_evidence(actor, p, None)):
+                with self.assertRaises(CommandError) as raised:
+                    stage(None, packet)
+                self.assertIn("TRANSLATION_LABELS_MISSING", str(raised.exception))
+            command.apply_translation(self.target, command.read_translation(self.packet, self.intake))
+            command.require_translation_labels(packet)  # labels present: guard passes
+
+    def test_plain_packet_has_no_translation_fields(self):
+        self.assertIsNone(command.read_translation(self.intake / "kshudhita-pashan", self.intake))

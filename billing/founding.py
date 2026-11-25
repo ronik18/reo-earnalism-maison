@@ -51,3 +51,9 @@ def activate_founding_plans(actor, *, audio_titles: int) -> None:
             raise DomainError('FOUNDING_MERCHANT_UNAPPROVED', 'Both founding plans need merchant approval first.', 409)
         Offer.objects.filter(pk__in=[p.offer_id for p in plans]).update(approved=True, active=True)
         audit(actor, 'billing.founding_plans_activated', plans[0], {'audio_titles': audio_titles})
+
+
+def founding_plans_open() -> bool:
+    """True when both founding plans exist, are merchant-approved, and their offers are approved and active."""
+    plans = list(BillingPlan.objects.select_related('offer').filter(offer__code__in=[s['code'] for s in SPECS.values()]))
+    return len(plans) == len(SPECS) and all(p.merchant_approved_at is not None and p.offer.approved and p.offer.active for p in plans)

@@ -330,6 +330,8 @@ if _review_standing:
         raise ImproperlyConfigured('MAISON_REVIEW_STANDING_FROM must be an ISO 8601 datetime with a UTC offset')
 else:
     MAISON_REVIEW_STANDING_FROM = None
+# Attended social posting journal (post_approved); every run must share this directory.
+MAISON_SOCIAL_JOURNAL_DIR = os.getenv('MAISON_SOCIAL_JOURNAL_DIR', str(BASE_DIR / '.local' / 'social-journal'))
 
 # Owner-approved free rollout; authorization still enforces publication and rights.
 FREE_ACCESS_ENABLED = bool_setting('MAISON_FREE_ACCESS', False)
