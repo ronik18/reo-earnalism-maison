@@ -21787,6 +21787,28 @@
       },
       "path": "stills/selfish-giant-stills-film-01-r10/f01s015-1--c4.png",
       "sha256": "72a04b374de2f5ccf42e6323eba992b4deb508730a79755d4ae374b116281ad9"
+    },
+    {
+      "bytes": 482,
+      "kind": "stills_pick",
+      "meta": {
+        "choices": {
+          "f01s006-3": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r10/f01s006-3--c1.png",
+            "sha256": "9b43a5f4a2fba081f99288b91ca7b1b0c9b5f4fe12f881a8c6fcc484a4b4dcdc"
+          },
+          "f01s009-1": {
+            "candidate": 1,
+            "file": "stills/selfish-giant-stills-film-01-r10/f01s009-1--c1.png",
+            "sha256": "af6d61e20c4b58818e9d0af8770335acffe0973cc0880323e5fe093ef1854160"
+          }
+        },
+        "job_id": "selfish-giant-stills-film-01-r10",
+        "version": 1
+      },
+      "path": "picks/selfish-giant-stills-film-01-r10.pick-1.json",
+      "sha256": "704b879c0d63205afa42ac97d11ca498fa4ea31a33c69d355421038f72cfe029"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -23595,6 +23617,19 @@
       },
       "result": "exchange_collected",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-25T06:59:29.923776+00:00",
+      "detail": {
+        "choices": {
+          "f01s006-3": 1,
+          "f01s009-1": 1
+        },
+        "job_id": "selfish-giant-stills-film-01-r10",
+        "version": 1
+      },
+      "result": "recorded",
+      "stage": "pick"
     }
   ],
   "ledger": "../allowance-ledger.json",
