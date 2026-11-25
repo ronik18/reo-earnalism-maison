@@ -108,8 +108,8 @@ Colab, no randomness. Install with `pip install -r software/requirements-touchup
 
   The source is a recorded file of an imported stills or retouch job of that film whose sha256
   matches the record; `key` is that still's key. Boxes are `[x0, y0, x1, y1]` in source pixels.
-  `mask`: `box` (default), `ellipse` (inscribed) or `color` (`target` + `tol` RGB distance,
-  `grow` px). `feather` (default 3 px) blends each edit inside its box; every pixel outside all
+  `mask`: `box` (default), `ellipse` (inscribed), `color` (`target` + `tol` RGB distance,
+  `grow` px) or `line` (`line` [x0, y0, x1, y1] + `width`: a stick, wire or pole). `feather` (default 3 px) blends each edit inside its box; every pixel outside all
   boxes stays byte-identical. Hues are degrees (h0 > h1 wraps through red), `sat_min` is chroma
   0-1. `recolor` keeps lightness; `"lightness": "shade"` lifts to the target and keeps folds.
 - Output: `touchup/<ID>/<key>--c1.png` plus `<key>--mask.png`; the record holds the spec, the ops

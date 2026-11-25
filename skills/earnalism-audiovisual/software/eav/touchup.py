@@ -12,7 +12,7 @@ imported still with OpenCV (Apache-2.0), on the CPU, with no model and no random
 
 Boxes are source pixel coordinates, x1/y1 exclusive. Every op may narrow its box with
 "mask": "box" (default) | "ellipse" (inscribed) | "color" ("target": "#RRGGBB", "tol": RGB
-distance, "grow": px). Edits are feathered over "feather" px (default 3) inside the box, so
+distance, "grow": px) | "line" ("line": [x0, y0, x1, y1], "width": px; a stick, wire or pole). Edits are feathered over "feather" px (default 3) inside the box, so
 pixels outside every box stay byte-identical. Hues are degrees 0-360 (h0 > h1 wraps through
 red); saturation (chroma: max - min channel) and lightness are 0-1. recolor keeps each
 pixel's Lab lightness by default; "lightness": "shade" puts the target's lightness under the pixels' own shading instead (a
@@ -26,14 +26,14 @@ except ImportError:  # pragma: no cover - reported by apply()
     cv2 = None
 
 OPS = ("inpaint", "recolor", "fill", "clone")
-MASKS = ("box", "ellipse", "color")
+MASKS = ("box", "ellipse", "color", "line")
 RADIUS = (3, 15)
 FEATHER = (0, 20)
 DEFAULT_FEATHER = 3
 MAX_OPS = 40
 _OP_KEYS = {"inpaint": {"radius", "method"}, "recolor": {"from", "to", "lightness"},
             "fill": {"sample"}, "clone": {"from"}}
-_COMMON = {"op", "box", "mask", "target", "tol", "grow", "feather", "note"}
+_COMMON = {"op", "box", "mask", "target", "tol", "grow", "feather", "line", "width", "note"}
 
 
 def opencv_version() -> str:
@@ -91,6 +91,15 @@ def validate_ops(ops, size) -> list:
                 raise ValueError(f"{where}: a color mask needs tol (RGB distance 1-442)")
         elif "target" in op or "tol" in op:
             raise ValueError(f"{where}: target/tol belong to mask \"color\"")
+        if mask == "line":
+            ln, wd = op.get("line"), op.get("width")
+            if not (isinstance(ln, list) and len(ln) == 4 and all(_int(v) for v in ln)
+                    and 0 <= ln[0] < w and 0 <= ln[2] < w and 0 <= ln[1] < h and 0 <= ln[3] < h):
+                raise ValueError(f"{where}: a line mask needs line [x0, y0, x1, y1] inside the image")
+            if not _int(wd) or not 1 <= wd <= 40:
+                raise ValueError(f"{where}: a line mask needs width 1-40 px")
+        elif "line" in op or "width" in op:
+            raise ValueError(f"{where}: line/width belong to mask \"line\"")
         if "grow" in op and (not _int(op["grow"]) or not 0 <= op["grow"] <= 10):
             raise ValueError(f"{where}: grow must be 0-10 px")
         f = op.get("feather", DEFAULT_FEATHER)
@@ -144,6 +153,9 @@ def _hard(img, op) -> np.ndarray:
         yy, xx = np.mgrid[y0:y1, x0:x1].astype(np.float32)
         cx, cy, rx, ry = (x0 + x1 - 1) / 2, (y0 + y1 - 1) / 2, (x1 - x0) / 2, (y1 - y0) / 2
         m[y0:y1, x0:x1] = ((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2 <= 1.0
+    elif mode == "line":  # a thick straight stroke (a stick, wire or pole), clipped to the box
+        x_0, y_0, x_1, y_1 = op["line"]
+        cv2.line(m, (x_0, y_0), (x_1, y_1), 1, thickness=op["width"], lineType=cv2.LINE_8)
     else:
         t = np.array(_hex(op["target"], "target"), np.float32)
         d = np.sqrt(((img[y0:y1, x0:x1].astype(np.float32) - t) ** 2).sum(axis=2))

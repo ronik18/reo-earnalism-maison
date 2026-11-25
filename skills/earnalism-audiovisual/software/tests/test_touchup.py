@@ -108,6 +108,17 @@ class TouchupOps(unittest.TestCase):
         self.assertTrue(np.array_equal(out[20, 20], img[20, 20]))
         self.assertEqual(int(mask[40, 40]), 255)
 
+    def test_line_mask_removes_a_diagonal_stick_inside_its_box_only(self):
+        img = canvas()
+        for i in range(40):
+            img[20 + i, 30 + i] = img[20 + i, 31 + i] = (20, 20, 20)  # a thin diagonal stick
+        box = [25, 15, 76, 65]
+        out, mask = touchup.apply(img, [{"op": "inpaint", "box": box, "mask": "line",
+                                         "line": [30, 20, 70, 60], "width": 6, "radius": 3}])
+        self.assertTrue(outside(img, out, box))
+        self.assertLess(np.abs(out[40, 50].astype(int) - canvas()[40, 50].astype(int)).max(), 25)
+        self.assertEqual(int(mask[40, 30]), 0)  # off the stroke, inside the box: untouched
+
     def test_deterministic(self):
         img = canvas()
         img[30:40, 30:40] = (10, 200, 10)
@@ -136,7 +147,9 @@ class TouchupOps(unittest.TestCase):
                    "to": "white"}], "#RRGGBB"),
                 ([{"op": "fill", "box": [0, 0, 5, 5], "sample": [500, 1]}], "sample"),
                 ([{"op": "clone", "box": [0, 0, 5, 5], "from": [-3, 0]}], "clone source"),
-                ([{"op": "clone", "box": [0, 0, 5, 5], "from": [9, 0], "seed": 1}], "unknown")):
+                ([{"op": "clone", "box": [0, 0, 5, 5], "from": [9, 0], "seed": 1}], "unknown"),
+                ([{"op": "inpaint", "box": [0, 0, 5, 5], "radius": 3, "mask": "line", "width": 3}], "line"),
+                ([{"op": "inpaint", "box": [0, 0, 5, 5], "radius": 3, "width": 3}], "line/width")):
             with self.assertRaises(ValueError, msg=bad) as caught:
                 touchup.apply(img, bad)
             self.assertIn(words, str(caught.exception), bad)
