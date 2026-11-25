@@ -189,8 +189,26 @@ class TranslationImportTests(TestCase):
     def test_same_locale_translation_is_refused(self):
         self.target.locale = "bn"
         self.target.save()
-        with self.assertRaises(Exception):
+        from django.core.exceptions import ValidationError
+        with self.assertRaises(ValidationError):
             command.apply_translation(self.target, command.read_translation(self.packet, self.intake))
+
+    def test_invalid_translation_json_is_refused(self):
+        for text in ("{not json", json.dumps({"translated_from": "kshudhita-pashan"})):
+            (self.packet / "translation.json").write_text(text, encoding="utf-8")
+            with self.assertRaises(CommandError) as raised:
+                command.read_translation(self.packet, self.intake)
+            self.assertIn("TRANSLATION_JSON_INVALID", str(raised.exception))
+
+    def test_publish_and_evidence_refuse_when_labels_are_absent(self):
+        packet = {"slug": "kshudhita-pashan-en", "edition_slug": "kshudhita-pashan-en", "folder": str(self.packet)}
+        with mock.patch.object(command, "INTAKE", self.intake):
+            for stage in (command.Command().publish, lambda actor, p: command.Command().record_evidence(actor, p, None)):
+                with self.assertRaises(CommandError) as raised:
+                    stage(None, packet)
+                self.assertIn("TRANSLATION_LABELS_MISSING", str(raised.exception))
+            command.apply_translation(self.target, command.read_translation(self.packet, self.intake))
+            command.require_translation_labels(packet)  # labels present: guard passes
 
     def test_plain_packet_has_no_translation_fields(self):
         self.assertIsNone(command.read_translation(self.intake / "kshudhita-pashan", self.intake))

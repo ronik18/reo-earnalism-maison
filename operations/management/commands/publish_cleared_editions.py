@@ -147,12 +147,18 @@ def read_translation(folder, intake=None):
     path = Path(folder) / "translation.json"
     if not path.exists():
         return None
-    record = json.loads(path.read_text(encoding="utf-8"))
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+        for key in ("translated_from", "method", "credit", "model", "source_sha256"):
+            if not isinstance(record[key], str):
+                raise TypeError(key)
+    except (ValueError, KeyError, TypeError):
+        raise CommandError("TRANSLATION_JSON_INVALID: translation.json is not valid or lacks required keys")
     source_dir = Path(intake or INTAKE) / record["translated_from"]
     try:
         source_raw = (source_dir / "source.json").read_bytes()
         source_slug = json.loads((source_dir / "manifest.json").read_text(encoding="utf-8"))["edition"]["slug"]
-    except FileNotFoundError:
+    except (FileNotFoundError, ValueError, KeyError):
         raise CommandError(f"SOURCE_EDITION_MISSING: no source packet {record['translated_from']}")
     if sha256(source_raw) != record["source_sha256"]:
         raise CommandError("SOURCE_PACKET_HASH_MISMATCH: the source packet changed after this translation was made")
@@ -168,6 +174,18 @@ def apply_translation(edition, translation):
         setattr(edition, field, value)
     edition.full_clean()
     edition.save(update_fields=list(translation))
+
+
+def require_translation_labels(packet):
+    """Publish/evidence guard: an edition built from a translation packet must carry its labels."""
+    translation = read_translation(packet["folder"])
+    if translation is None:
+        return
+    edition = Edition.objects.filter(slug=packet["edition_slug"]).first()
+    if edition is None or any(getattr(edition, field + "_id" if field == "translated_from" else field)
+                              != (value.pk if field == "translated_from" else value)
+                              for field, value in translation.items()):
+        raise CommandError(f"TRANSLATION_LABELS_MISSING: {packet['slug']} lacks the translation labels from translation.json")
 
 
 class Command(BaseCommand):
@@ -286,6 +304,7 @@ class Command(BaseCommand):
     # --- evidence -----------------------------------------------------------------------------
     def record_evidence(self, actor, packet, report_path):
         slug = packet["slug"]
+        require_translation_labels(packet)
         revision = draft_for(packet)
         if revision is None or revision.state != "draft":
             raise CommandError(f"{slug}: a draft revision is required.")
@@ -330,6 +349,7 @@ class Command(BaseCommand):
 
     # --- publish ------------------------------------------------------------------------------
     def publish(self, actor, packet):
+        require_translation_labels(packet)
         revision = draft_for(packet)
         if revision is None:
             raise CommandError(f"{packet['slug']}: no revision.")
