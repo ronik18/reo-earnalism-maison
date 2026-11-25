@@ -10,21 +10,26 @@ from django.conf import settings
 
 from core.api import DomainError
 from .models import Edition
+from .services import FORMATS, publication_clearance_matches
 from .storage import read_verified
 
 NARRATION = {'type': 'ai', 'disclosure': 'Narrated with an AI voice.'}
 
 
 def audio_cleared_everywhere(revision):
-    """Same private evidence validate_revision reads: pass + exact text hash + audio + every territory."""
-    clearance = revision.validation_evidence.get('publication_clearance', {})
+    """Same private evidence validate_revision reads (exact asset_sha256 included); 'audio' must be a cleared format."""
+    if revision.access_policy.get('audio', 'deny') == 'deny':
+        return False
+    ready = list(revision.assets.filter(state='ready'))
     regions = list(settings.MAISON_PUBLICATION_TERRITORIES)
-    return (isinstance(clearance, dict) and clearance.get('status') == 'pass'
-            and clearance.get('sha256') == revision.content_sha256
-            and isinstance(clearance.get('formats'), list) and 'audio' in clearance['formats']
-            and isinstance(clearance.get('territories'), list)
-            and len(clearance['territories']) == len(regions) and set(clearance['territories']) == set(regions)
-            and isinstance(clearance.get('evidence_ref'), str) and bool(clearance['evidence_ref'].strip()))
+    offered = [f for f in FORMATS if revision.access_policy.get(f, 'deny') != 'deny']
+    return 'audio' in offered and publication_clearance_matches(revision, ready, offered, regions)
+
+
+def _front_cover(revision):
+    covers = revision.assets.filter(kind='cover', state='ready').order_by('id')
+    front_id = revision.validation_evidence.get('cover_pair', {}).get('front', {}).get('asset_id')
+    return covers.filter(pk=front_id).first() if front_id else covers.first()
 
 
 def export_play_books(edition_id, out_dir):
@@ -34,7 +39,7 @@ def export_play_books(edition_id, out_dir):
         raise DomainError('NOT_PUBLISHED', 'The edition has no live revision.', 409)
     if revision.access_policy.get('audio', 'deny') == 'deny' or not audio_cleared_everywhere(revision):
         raise DomainError('STORE_FORMAT_NOT_CLEARED', 'Audio is not cleared in every publication territory.', 409)
-    cover = revision.assets.filter(kind='cover', state='ready').order_by('id').first()
+    cover = _front_cover(revision)
     if cover is None:
         raise DomainError('STORE_COVER_MISSING', 'A ready front cover is required.', 409)
     chapters = []
@@ -58,6 +63,8 @@ def export_play_books(edition_id, out_dir):
         'chapters': chapters,
     }
     cover_bytes = read_verified(cover)
+    if cover.content_type != 'image/jpeg' or cover_bytes[:3] != b'\xff\xd8\xff':
+        raise DomainError('STORE_COVER_NOT_JPEG', 'The front cover must be a JPEG.', 409)
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     (out / 'audio').mkdir(exist_ok=True)
