@@ -168,7 +168,7 @@ class ReviewQueueTests(TestCase):
         self.assertEqual(item.status, 'rejected')
 
     def test_requeue_with_new_hash_supersedes_old_pending(self):
-        old, path = self.file_item('clearance', slug='sup')
+        old, _ = self.file_item('clearance', slug='sup')
         new, _ = self.file_item('clearance', slug='sup', body=b'{"ok": 3}')
         old.refresh_from_db()
         self.assertNotEqual(old.pk, new.pk)
