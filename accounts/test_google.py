@@ -173,6 +173,18 @@ class GoogleOIDCAcceptanceTests(TestCase):
         params=self.start(return_path='/bn/vault/');response,_=self.finish(params)
         self.assertEqual(response.status_code,409,response.content);self.assertEqual(response.json()['code'],'identity_link_required')
 
+    def test_india_launch_existing_password_account_is_told_to_link_not_to_create(self):
+        """Regression (24 Nov 2026): an existing member got 'No new account was created' instead."""
+        user=User.objects.create_user('google-member@example.test',PASS,is_verified=True)
+        with override_settings(INDIA_FIRST_LAUNCH_ENABLED=True,MAISON_ACCOUNT_MODES={'IN':'adult_only'}):
+            params=self.start(return_path='/en/vault/')
+            mocked,_=self.provider(self.claims(params),params)
+            with mocked:
+                response=self.client.get('/api/v1/auth/google/callback',{'state':params['state'],'code':'synthetic-code'},HTTP_HOST='localhost',HTTP_ACCEPT='text/html')
+        self.assertEqual(response.status_code,303,response.content)
+        self.assertEqual(parse_qs(urlsplit(response['Location']).query)['google_error'],['identity_link_required'])
+        self.assertFalse(SocialAccount.objects.filter(user=user).exists())  # never auto-linked
+
     def test_native_start_domain_error_redirects_but_api_keeps_json_status(self):
         with override_settings(FEATURES={**settings.FEATURES,'google_oauth':False}),patch('requests.sessions.Session.request',side_effect=AssertionError('No provider calls')):
             native=self.client.get('/api/v1/auth/google',{'return_path':'/bn/vault/'},HTTP_HOST='localhost',HTTP_ACCEPT='text/html')
