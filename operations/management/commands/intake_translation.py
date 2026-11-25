@@ -74,12 +74,12 @@ class Command(BaseCommand):
             raise CommandError('SAME_LANGUAGE: the translation must be in a different language from its source')
         today = datetime.date.today().isoformat()
         sha = hashlib.sha256(raw).hexdigest()
-        creators = source_manifest['work']['creators']
         credit_text = f'edited by {credit}' if method == 'ai_edited' else 'unedited'
         manifest = {
             'schema': MANIFEST_SCHEMA,
             'project_id': f'{slug}-translation-{today.replace("-", "")}',
-            'work': {'slug': slug, 'title': o['title'], 'creators': list(creators), 'house': source_manifest['work']['house']},
+            # A translation is another edition of the same Work, so the title page pairs it with its source.
+            'work': {key: source_manifest['work'][key] for key in ('slug', 'title', 'creators', 'house')},
             'edition': {'slug': slug, 'language': language, 'title': o['title'], 'description': o['description']},
             'source': {'sha256': sha, 'bytes': len(raw), 'content_type': 'application/json', 'format': SOURCE_SCHEMA},
             'provenance': {

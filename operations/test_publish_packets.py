@@ -212,3 +212,138 @@ class TranslationImportTests(TestCase):
 
     def test_plain_packet_has_no_translation_fields(self):
         self.assertIsNone(command.read_translation(self.intake / "kshudhita-pashan", self.intake))
+
+
+EN_TRANSLATION = {"schema": "earnalism.book_source.v1", "language": "en", "units": [{
+    "key": "chapter-001", "title": "The Hungry Stones", "kind": "chapter",
+    "paragraphs": [{"kind": "paragraph", "text": "My kinsman and myself were returning to Calcutta from our Puja trip."},
+                   {"kind": "paragraph", "text": "We met the man in the train."}]}]}
+
+
+def approve_draft(root, slug):
+    draft = root / "docs" / "evidence" / f"publication-clearance-{slug}-draft.json"
+    record = json.loads(draft.read_text(encoding="utf-8"))
+    record.update(status="OWNER_APPROVED")
+    record["approval"].update(approved=True, approved_on="2026-11-25", approved_by="test owner", still_required=[])
+    draft.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+
+
+def give_covers(root, slug):
+    """The kshudhita-pashan owner cover pair, copied with its provenance (test only)."""
+    for name in ("front.jpg", "back.jpg", "cover_provenance.json"):
+        shutil.copy(command.INTAKE / "kshudhita-pashan" / name, root / "library" / "intake" / slug / name)
+
+
+def make_source_packet(root, slug="golpo-test"):
+    """intake_wikisource --write output from the recorded API shape, then approved and given covers."""
+    from .test_intake_wikisource import PAGES, TITLE
+    api = root / "pages.json"
+    api.write_text(json.dumps({"query": {"pages": [
+        {"title": f"Book/{page['page']}", "proofread": {"quality": page["quality"]},
+         "revisions": [{"revid": page["revision"], "timestamp": page["timestamp"], "slots": {"main": {"content": page["wikitext"]}}}]}
+        for page in PAGES]}}, ensure_ascii=False), encoding="utf-8")
+    call_command("intake_wikisource", slug, "--api-json", str(api), "--title", TITLE,
+                 "--source-ref", "https://bn.wikisource.org/w/index.php?title=T&oldid=1", "--source-edition", "Test edition, 1895.",
+                 "--house", "golpo", "--description", "বিবরণ", "--first-published", "1895", "--author-died", "1941",
+                 "--creator", "রবীন্দ্রনাথ ঠাকুর", "--keep-hyphen-after", "১৭৫", "--write", "--root", str(root), stdout=io.StringIO())
+    approve_draft(root, slug)
+    give_covers(root, slug)
+
+
+def make_translation_packet(root, slug="kshudhita-pashan-en", source="kshudhita-pashan", approve=True):
+    """intake_translation output for an approved source packet, approved and given an owner cover pair."""
+    translated = root / "translated.json"
+    translated.write_text(json.dumps(EN_TRANSLATION, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    call_command("intake_translation", slug, "--from", source, "--source", str(translated),
+                 "--method", "ai", "--model", "claude-test", "--title", "The Hungry Stones",
+                 "--description", "A tale of a palace.", "--root", str(root), stdout=io.StringIO())
+    give_covers(root, slug)
+    if approve:
+        approve_draft(root, slug)
+    return root / "library" / "intake" / slug
+
+
+class TranslationPacketSharesSourceWorkTests(SimpleTestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.intake = self.root / "library" / "intake"
+        shutil.copytree(command.INTAKE / "kshudhita-pashan", self.intake / "kshudhita-pashan")
+        (self.root / CLEARANCE).parent.mkdir(parents=True)
+        shutil.copy(command.ROOT / CLEARANCE, self.root / CLEARANCE)
+
+    def test_translation_manifest_copies_the_source_work_block(self):
+        folder = make_translation_packet(self.root)
+        manifest = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
+        source = json.loads((self.intake / "kshudhita-pashan" / "manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["work"], source["work"])
+        self.assertEqual(manifest["edition"]["slug"], "kshudhita-pashan-en")
+        self.assertEqual(manifest["edition"]["title"], "The Hungry Stones")
+
+    def test_packets_are_keyed_by_edition_slug_so_a_translation_is_not_a_duplicate(self):
+        make_translation_packet(self.root)
+        packets = command.approved_packets(self.intake, root=self.root)
+        self.assertEqual(packets["kshudhita-pashan"]["edition_slug"], "kshudhita-pashan")
+        self.assertEqual(packets["kshudhita-pashan-en"]["edition_slug"], "kshudhita-pashan-en")
+        self.assertEqual(packets["kshudhita-pashan-en"]["book_key"], "kshudhita-pashan-en")
+        self.assertEqual(packets["the-selfish-giant"]["book_key"], "the-selfish-giant")
+        self.assertEqual(packets["the-selfish-giant"]["edition_slug"], "the-selfish-giant-en")
+
+    def test_clearance_book_is_looked_up_by_edition_slug(self):
+        make_translation_packet(self.root)
+        draft = self.root / "docs" / "evidence" / "publication-clearance-kshudhita-pashan-en-draft.json"
+        record = json.loads(draft.read_text(encoding="utf-8"))
+        record["books"] = {"kshudhita-pashan": record["books"]["kshudhita-pashan-en"]}  # keyed by work slug only
+        draft.write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
+        self.assertNotIn("kshudhita-pashan-en", command.approved_packets(self.intake, root=self.root))
+
+    def test_import_order_puts_a_source_before_its_translations(self):
+        make_translation_packet(self.root)
+        packets = command.approved_packets(self.intake, root=self.root)
+        order = command.import_order(["kshudhita-pashan-en", "kshudhita-pashan"], packets)
+        self.assertEqual(order, ["kshudhita-pashan", "kshudhita-pashan-en"])
+        self.assertEqual(command.import_order(["kshudhita-pashan-en"], packets), ["kshudhita-pashan-en"])
+
+
+class TranslationEndToEndTests(TestCase):
+    def setUp(self):
+        from django.test import override_settings
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        options = override_settings(MEDIA_ROOT=str(self.root / "media"), LOCAL=True)
+        options.enable(); self.addCleanup(options.disable)
+        self.intake = self.root / "library" / "intake"
+        make_source_packet(self.root, "golpo-test")
+        make_translation_packet(self.root, "golpo-test-en", source="golpo-test")
+        self.publisher = get_user_model().objects.create_user("publisher@example.test", "Test-Only-Passphrase-47", is_verified=True)
+        self.publisher.is_staff = True
+        self.publisher.save()
+        self.publisher.user_permissions.add(Permission.objects.get(codename="publish_revision"))
+        for name, value in (("INTAKE", self.intake), ("ROOT", self.root)):
+            patcher = mock.patch.object(command, name, value)
+            patcher.start(); self.addCleanup(patcher.stop)
+
+    def run_command(self, stage, *extra):
+        out = io.StringIO()
+        call_command("publish_cleared_editions", stage, "--publisher", str(self.publisher.public_id),
+                     "--book", "golpo-test-en", "--book", "golpo-test", *extra, stdout=out)
+        return json.loads(out.getvalue().split("MAISON_OUT ", 1)[1])
+
+    def test_source_and_translation_import_publish_and_pair_on_the_title_page(self):
+        from library.models import Edition
+        imported = self.run_command("import")
+        self.assertEqual(list(imported), ["golpo-test", "golpo-test-en"])  # source first, whatever order was asked
+        report = self.root / "browser.json"
+        report.write_text(json.dumps({"scope": "test_replica", "books": {
+            slug: {"status": "pass", "sha256": imported[slug]["sha256"]} for slug in imported}}), encoding="utf-8")
+        self.run_command("evidence", "--browser-report", str(report))
+        published = self.run_command("publish")
+        self.assertEqual({slug: value["state"] for slug, value in published.items()},
+                         {"golpo-test": "live", "golpo-test-en": "live"})
+        source, translation = Edition.objects.get(slug="golpo-test"), Edition.objects.get(slug="golpo-test-en")
+        self.assertEqual(source.work_id, translation.work_id)
+        self.assertEqual(translation.translated_from_id, source.pk)
+        html = self.client.get(f"/en/titles/{source.pk}/").content.decode()
+        self.assertIn(f'href="/en/titles/{translation.pk}/"', html)

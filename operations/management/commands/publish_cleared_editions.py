@@ -67,17 +67,19 @@ def approved_packets(intake=None, root=None, check=None):
     packets = {}
     legacy_doc = root / CLEARANCE_DOC
     legacy_sha = sha256(legacy_doc.read_bytes()) if legacy_doc.exists() else None
+    legacy_editions = set()
     for slug, spec in LEGACY_BOOKS.items():
         covers = ((_json(legacy_doc) or {}).get("books", {}).get(slug, {}).get("covers", {}))
-        packets[slug] = {"slug": slug, "edition_slug": spec["edition"], "folder": intake / spec["intake"],
+        packets[slug] = {"slug": slug, "book_key": slug, "edition_slug": spec["edition"], "folder": intake / spec["intake"],
             "clearance_path": CLEARANCE_DOC, "clearance_sha256": legacy_sha, "import": spec["import"], "legacy": True,
             "covers": (covers.get("front_jpg_sha256"), covers.get("back_jpg_sha256"))}
+        legacy_editions.add(spec["edition"])
     for manifest_path in sorted(intake.glob("*/manifest.json")):
         folder = manifest_path.parent
         manifest = _json(manifest_path) or {}
-        edition_slug = (manifest.get("edition") or {}).get("slug")
-        slug = (manifest.get("work") or {}).get("slug") or edition_slug
-        if not slug or slug in packets:
+        # Keyed by EDITION slug: a translation shares its source's Work and must not be dropped as a duplicate.
+        slug = edition_slug = (manifest.get("edition") or {}).get("slug")
+        if not slug or slug in packets or slug in legacy_editions:
             continue
         refs = [r for r in (manifest.get("provenance") or {}).get("rights_evidence_refs") or [] if str(r).startswith(EVIDENCE_PREFIX)]
         if len(refs) != 1:
@@ -99,7 +101,7 @@ def approved_packets(intake=None, root=None, check=None):
             continue
         covers = ()
         if check is not None and slug not in check:
-            packets[slug] = {"slug": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
+            packets[slug] = {"slug": slug, "book_key": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
                 "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": covers}
             continue
         source_sha = sha256((folder / "source.json").read_bytes())
@@ -114,9 +116,32 @@ def approved_packets(intake=None, root=None, check=None):
         attached = approval.get("cover_attached")
         if attached and (attached.get("front_sha256"), attached.get("back_sha256")) != tuple(covers):
             raise CommandError(f"{slug}: COVER_HASH_MISMATCH: approval.cover_attached differs from front.jpg/back.jpg.")
-        packets[slug] = {"slug": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
+        packets[slug] = {"slug": slug, "book_key": slug, "edition_slug": edition_slug, "folder": folder, "clearance_path": clearance_path,
             "clearance_sha256": sha256(clearance_file.read_bytes()), "import": True, "legacy": False, "covers": tuple(covers)}
     return packets
+
+
+def import_order(chosen, packets):
+    """`chosen` reordered so a source packet comes before every translation made from it (translation.json
+    translated_from names the source packet folder); otherwise the given order is kept."""
+    by_folder = {Path(packets[slug]["folder"]).name: slug for slug in chosen}
+    ordered, seen = [], set()
+
+    def visit(slug, trail=()):
+        if slug in seen:
+            return
+        if slug in trail:
+            raise CommandError(f"TRANSLATION_CYCLE: {' -> '.join(trail + (slug,))}")
+        record = _json(Path(packets[slug]["folder"]) / "translation.json") or {}
+        source = by_folder.get(record.get("translated_from")) if isinstance(record, dict) else None
+        if source and source != slug:
+            visit(source, trail + (slug,))
+        seen.add(slug)
+        ordered.append(slug)
+
+    for slug in chosen:
+        visit(slug)
+    return ordered
 
 
 def reason_for(packet):
@@ -207,7 +232,7 @@ class Command(BaseCommand):
         out = {}
         chosen = options["book"] or sorted(approved_packets(check=()))
         packets = approved_packets(check=set(chosen))
-        for slug in chosen:
+        for slug in import_order(chosen, packets):
             packet = packets[slug]
             stage = options["stage"]
             if stage == "import":
@@ -309,7 +334,7 @@ class Command(BaseCommand):
         if revision is None or revision.state != "draft":
             raise CommandError(f"{slug}: a draft revision is required.")
         doc, doc_sha = clearance_document(packet)
-        book = doc["books"][slug]
+        book = doc["books"][packet.get("book_key", slug)]
         if set(doc["territories"]) != set(territories()) or doc["formats"] != ["reader"]:
             raise CommandError("Clearance document scope differs from the active whitelist/offered formats.")
         if book.get("maison_revision_content_sha256") not in (None, revision.content_sha256):
