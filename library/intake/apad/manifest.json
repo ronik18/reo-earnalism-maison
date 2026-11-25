@@ -1,0 +1,32 @@
+{
+ "schema": "earnalism.book_import_manifest.v1",
+ "project_id": "apad-wikisource-20261125",
+ "work": {
+  "slug": "apad",
+  "title": "আপদ",
+  "creators": [
+   "রবীন্দ্রনাথ ঠাকুর"
+  ],
+  "house": "golpo"
+ },
+ "edition": {
+  "slug": "apad",
+  "language": "bn",
+  "title": "আপদ",
+  "description": "ঝড়ের রাতে নদী থেকে তুলে আনা এক অনাথ কিশোর কীভাবে এক নিঃসন্তান সংসারে আপদ থেকে আপন হয়ে ওঠে।"
+ },
+ "source": {
+  "sha256": "608da954c282463c233ebf1cc13f56439fd38485e306e9416da0f900df5f0991",
+  "bytes": 57243,
+  "content_type": "application/json",
+  "format": "earnalism.book_source.v1"
+ },
+ "provenance": {
+  "source_ref": "https://bn.wikisource.org/w/index.php?title=%E0%A6%97%E0%A6%B2%E0%A7%8D%E0%A6%AA-%E0%A6%A6%E0%A6%B6%E0%A6%95/%E0%A6%86%E0%A6%AA%E0%A6%A6&oldid=1624858",
+  "source_edition": "Galpa-Dashak (গল্প-দশক), Calcutta: Sahitya-Jantra, printed by Gopalchandra Ray, published by Kalidas Chakravarti, 1302 BS (1895); sole author Rabindranath Tagore. Validated (level 4) Wikisource scan pages with recorded page revisions; conversion rules as recorded for kshudhita-pashan plus verse, section-heading and rule handling; every page-end hyphen rejoins a single word (none kept).",
+  "rights_note": "রবীন্দ্রনাথ ঠাকুর died 1941; first published 1895. Term screen verdict for 2026: screen_pass. Wikisource transcription layer reused under CC BY-SA 4.0 with attribution; ShareAlike applies to the delivered transcription only. Draft: owner approval of the clearance record and a cover with owner-held provenance are still required.",
+  "rights_evidence_refs": [
+   "reo-earnalism-maison:docs/evidence/publication-clearance-apad-draft.json"
+  ]
+ }
+}
