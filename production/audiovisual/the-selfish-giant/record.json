@@ -16891,6 +16891,20 @@
       },
       "path": "picks/selfish-giant-stills-film-01-r9.pick-1.json",
       "sha256": "3b325c955fde3d13c0e22ab24fef8079ac274eac9c0e484cf6eb83d78c1d30da"
+    },
+    {
+      "bytes": 22194,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.2456416666666665,
+        "inputs_zip": "jobs/selfish-giant-retouch-film-01-r9/inputs.zip",
+        "job_id": "selfish-giant-retouch-film-01-r9",
+        "job_kind": "retouch",
+        "manifest": "jobs/selfish-giant-retouch-film-01-r9/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/selfish-giant-retouch-film-01-r9/retouch.ipynb",
+      "sha256": "5977252e9983e665760030aa9e6727d0f28708fe1093a2926f61d9999b4f6999"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -18280,6 +18294,26 @@
       },
       "result": "recorded",
       "stage": "pick"
+    },
+    {
+      "at": "2026-11-25T05:15:15.840966+00:00",
+      "detail": {
+        "forecast_units": 1.2456416666666665,
+        "job_id": "selfish-giant-retouch-film-01-r9",
+        "kind": "retouch"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T05:15:15.858794+00:00",
+      "detail": {
+        "job_id": "selfish-giant-retouch-film-01-r9",
+        "kind": "retouch",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
     }
   ],
   "ledger": "../allowance-ledger.json",

@@ -1,0 +1,147 @@
+{
+  "note": "retouch of round-9 shots whose best candidate has small local defects; owner-approved open-licence inpainting 2026-11-25",
+  "items": [
+    {
+      "key": "f01s002-1",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s002-1--c3.png"},
+      "regions": [
+        {"find": "small lettered sign on the wooden pole beside the road", "prompt": "a plain weathered wooden post, green hedgerow leaves behind it"},
+        {"find": "small lettered board by the hedge near the haystack", "prompt": "dense green hedgerow leaves"}
+      ],
+      "prompt": "The Giant, a huge ruddy man with a bushy brown beard in a coarse brown woollen tunic, walking home along an empty dirt country road between green hedgerows, a canvas sack over his shoulder, a grey stone castle far away, amber dusk sunlight, 1880s English countryside.",
+      "seed": 4105,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s008-2",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s008-2--c2.png"},
+      "regions": [
+        {"find": "handwritten signature in the bottom right corner", "prompt": "plain sunlit green grass"}
+      ],
+      "prompt": "Victorian schoolchildren in pinafores and caps sitting high in the branches of peach trees in pink spring blossom, legs dangling, joyful, a grey stone garden wall behind, open green lawn below, bright morning sunlight, 1880s English walled garden.",
+      "seed": 4129,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s012-2",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s012-2--c3.png"},
+      "regions": [
+        {"find": "round orange fruit on the bare tree at the left", "prompt": "a peach tree full of summer green leaves and soft white blossom"},
+        {"find": "pink fruit clusters on the small tree at the far left", "prompt": "green leaves and soft pink blossom"},
+        {"find": "pink round clusters on the shrub at the bottom left", "prompt": "a low green leafy shrub with small soft white flowers"},
+        {"find": "small figure standing on top of the round tower", "prompt": "plain grey stone battlements against the violet sky"}
+      ],
+      "prompt": "The Giant, a huge man with a bushy brown beard in a brown woollen tunic, sitting alone and sad on a grey stone castle step, gazing toward a far corner of a walled summer garden of green-leaved peach trees, fading violet dusk sky, 1880s England.",
+      "seed": 4148,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s012-3",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s012-3--c3.png"},
+      "regions": [
+        {"find": "the giant's blank white eyes", "prompt": "warm kindly brown eyes with round dark pupils, gazing down at the children, the same ruddy face"}
+      ],
+      "prompt": "The Giant, a huge ruddy man with a bushy beard in a brown woollen tunic, playing ring-a-roses with Victorian schoolchildren on a sunny lawn, everyone holding hands in a circle, peach trees with green leaves and white blossom, grey castle wall, warm afternoon sunlight.",
+      "seed": 4149,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s012-4",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s012-4--c1.png"},
+      "regions": [
+        {"find": "orange peaches in the tree at the top left", "prompt": "summer green leaves and soft white blossom"},
+        {"find": "orange peaches on the small trees at the left behind the children", "prompt": "peach trees in summer green leaves with soft pink blossom"},
+        {"find": "orange peaches in the tree at the top right", "prompt": "summer green leaves and soft white blossom"}
+      ],
+      "prompt": "The Giant, a huge man with a bushy reddish-brown beard in a brown woollen tunic and wide leather belt, standing by the stone garden wall with a faint wistful smile, gazing toward a distant corner, Victorian schoolchildren running on the grass at his feet, peach trees in summer leaf, soft amber afternoon light.",
+      "seed": 4150,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s013-1",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s013-1--c3.png"},
+      "regions": [
+        {"find": "orange peaches on the trees at the left", "prompt": "peach trees in summer green leaves and soft white blossom"},
+        {"find": "orange peaches on the tree at the right", "prompt": "summer green leaves and soft pink blossom"},
+        {"find": "tall metal candelabra stand on the lawn", "prompt": "plain grey stone castle wall"},
+        {"find": "wooden cabinet box on the grass at the left", "prompt": "a low leafy green garden shrub on the lawn"}
+      ],
+      "prompt": "The old Giant, very old and frail, long snow-white beard, thin white hair, grey woollen shawl over a brown tunic, smiling in a huge carved wooden armchair on the lawn, open hands on the chair arms, Victorian schoolchildren playing on the grass, peach trees in summer leaf, soft amber afternoon light.",
+      "seed": 4151,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s013-2",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s013-2--c3.png"},
+      "regions": [
+        {"find": "orange peaches in the tree at the top left", "prompt": "summer green leaves and soft white blossom"},
+        {"find": "orange peaches in the tree at the top right", "prompt": "summer green leaves and soft pink blossom"},
+        {"find": "small framed panel on the wall behind the children", "prompt": "plain grey stone wall"}
+      ],
+      "prompt": "The old Giant, very old and frail, long snow-white beard, thin white hair, grey woollen shawl over a brown tunic, leaning on a stout wooden stick among full summer flower-beds, Victorian schoolchildren standing among the flowers, peach trees in summer leaf, soft amber afternoon light, 1880s walled garden.",
+      "seed": 4152,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s013-3",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s013-3--c2.png"},
+      "regions": [
+        {"find": "round black spectacles on the old man's face", "prompt": "gentle tired eyes under white brows, bare weathered skin, the same kindly face"},
+        {"find": "small child with white hair standing at the window", "prompt": "plain grey stone window sill and pale snowy garden beyond the glass"},
+        {"find": "small hut with a glowing lit window in the snowy garden", "prompt": "a snow-covered grey stone garden wall"},
+        {"find": "stone lantern in the snow outside the window", "prompt": "smooth white snow over the frozen ground"}
+      ],
+      "prompt": "The old Giant, very old and frail, long snow-white beard, thin white hair, dark shawl over a brown tunic, standing calmly indoors at his tall bedroom window on a winter morning buttoning his tunic, the garden asleep under snow beyond the glass, a warm hearth glow in the stone room.",
+      "seed": 4153,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s014-1",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s014-1--c1.png"},
+      "regions": [
+        {"find": "child with red hair in a brown fur-trimmed coat outside the window", "prompt": "smooth white snow over the frozen garden"},
+        {"find": "small figures standing by the fence in the snowy garden", "prompt": "snow-covered garden ground and white snowy fence posts"},
+        {"find": "brass lamp in the bottom right corner", "prompt": "plain dark grey stone wall of the bedchamber"},
+        {"find": "small bare tree in the far corner of the snowy garden", "prompt": "one small tree with golden branches, covered in white blossom, hung with silver fruit, glowing softly in the far corner"}
+      ],
+      "prompt": "The old Giant, very old and frail, long snow-white beard, thin white hair, grey woollen shawl over a brown tunic, standing indoors at his stone bedroom window, rubbing his eyes in wonder, looking out at the snowy garden of bare frosted trees, soft winter morning sunlight.",
+      "seed": 4154,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s014-5",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s014-5--c1.png"},
+      "regions": [
+        {"find": "the boy's open palms", "prompt": "a small soft rose-coloured mark in the centre of each small palm, gentle and reverent"},
+        {"find": "the boy's bare feet", "prompt": "a small soft rose-coloured mark on the top of each small bare foot, gentle and reverent"}
+      ],
+      "prompt": "Reverent quiet scene: a tiny four-year-old boy with fair curly hair in a plain white smock, barefoot in the snow beneath a white-blossomed golden tree, open palms held out, face clean and serene; the old white-bearded Giant kneeling beside him in awe; gentle golden light.",
+      "seed": 4158,
+      "candidates": 3,
+      "strength": 0.85
+    },
+    {
+      "key": "f01s015-4",
+      "source": {"job": "selfish-giant-stills-film-01-r9", "file": "f01s015-4--c3.png"},
+      "regions": [
+        {"find": "glowing lit window of the small hut in the background", "prompt": "a dark unlit wooden shutter on a snowy hut"},
+        {"find": "dark trunk of the blossom tree", "prompt": "a warm golden tree trunk with golden bark"},
+        {"find": "the old man's brown tunic body lying on the ground", "prompt": "a brown woollen tunic strewn with many fallen white blossoms"},
+        {"find": "green cloth around the old man's shoulders", "prompt": "a grey woollen shawl scattered with fallen white blossoms"}
+      ],
+      "prompt": "The old Giant, very old, long snow-white beard, lying at peaceful rest under a white-blossomed tree with golden branches, eyes gently closed, a serene smile, his body covered with fallen white blossoms; Victorian schoolchildren arriving quietly, hushed; snowy walled garden, soft amber afternoon light.",
+      "seed": 4162,
+      "candidates": 3,
+      "strength": 0.85
+    }
+  ]
+}

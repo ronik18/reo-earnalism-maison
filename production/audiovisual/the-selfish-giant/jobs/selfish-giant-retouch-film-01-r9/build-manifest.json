@@ -1,0 +1,30 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 2311,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/the-selfish-giant/selfish-giant-retouch-film-01-r9",
+  "inputs_sha256": "28a78c985b71c5f37684a93a6d4e267687492cd3dc511ac05fd0e3cac4b6a30e",
+  "job_id": "selfish-giant-retouch-film-01-r9",
+  "kind": "retouch",
+  "licences": {
+    "allowlist": [
+      "apache-2.0",
+      "mit",
+      "openrail++"
+    ],
+    "recorded": {
+      "CIDAS/clipseg-rd64-refined": "apache-2.0",
+      "diffusers/stable-diffusion-xl-1.0-inpainting-0.1": "openrail++"
+    }
+  },
+  "mask_model": {
+    "repo": "CIDAS/clipseg-rd64-refined",
+    "revision": "resolved-at-run-time"
+  },
+  "model": {
+    "repo": "diffusers/stable-diffusion-xl-1.0-inpainting-0.1",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "5977252e9983e665760030aa9e6727d0f28708fe1093a2926f61d9999b4f6999",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "the-selfish-giant"
+}
