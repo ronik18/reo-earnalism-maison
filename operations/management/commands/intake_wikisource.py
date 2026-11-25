@@ -5,13 +5,16 @@
       --creator "..." [--keep-hyphen-after <page label>]... [--write]
 
 Without --write it only reports. With --write it writes library/intake/<slug>/{source,manifest}.json
-and docs/evidence/publication-clearance-<slug>-draft.json (status DRAFT_PENDING_OWNER_APPROVAL).
+and docs/evidence/publication-clearance-<slug>-draft.json (status DRAFT_PENDING_OWNER_APPROVAL), then queues the
+clearance draft on the Monday review page (operations.review; the output must be inside the repository).
 """
 import json
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
+from core.api import DomainError
+from operations import review
 from operations.intake.wikisource import IntakeError, build_packet, source_bytes
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -72,6 +75,10 @@ class Command(BaseCommand):
         root = Path(o['root'])
         packet_dir = root / 'library' / 'intake' / slug
         evidence = root / 'docs' / 'evidence' / f'publication-clearance-{slug}-draft.json'
+        try:
+            review.review_ref(evidence)  # refuse before writing anything the review page could not show
+        except DomainError as error:
+            raise CommandError(f'{error.code}: {error.message}') from error
         if not o['replace'] and (packet_dir.exists() or evidence.exists()):
             raise CommandError(f'PACKET_EXISTS: {packet_dir} or {evidence} already exists; pass --replace to overwrite')
         packet_dir.mkdir(parents=True, exist_ok=True)
@@ -79,4 +86,5 @@ class Command(BaseCommand):
         (packet_dir / 'source.json').write_bytes(source_bytes(packet['source']))
         for path, value in ((packet_dir / 'manifest.json', manifest), (evidence, packet['clearance'])):
             path.write_text(json.dumps(value, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
-        self.stdout.write(f'Wrote {packet_dir} and {evidence}')
+        item, = review.queue_files([('clearance', evidence, {'edition_slug': slug, 'title': o['title']})])
+        self.stdout.write(f'Wrote {packet_dir} and {evidence}; queued for review ({item.pk})')

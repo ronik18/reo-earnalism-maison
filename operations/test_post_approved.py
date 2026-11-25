@@ -73,12 +73,28 @@ class PostApprovedTests(TestCase):
         (self.root / 'bundle' / (name + '.json')).write_text(json.dumps(data))
         return 'bundle/' + name + '.json'
 
-    def post(self, name='one', status='approved', **overrides):
+    def post(self, name='one', status='approved', sha256=None, **overrides):
         summary = dict(edition_slug='ed', bundle_manifest=self.manifest(name), asset_root='assets',
                        destination_key='youtube:account1', account_id='account1', post_id=name)
         summary.update(overrides)
-        return ReviewItem.objects.create(kind='post', ref=f'social/ed/{name}', sha256=hashlib.sha256(name.encode()).hexdigest(),
+        if sha256 is None:  # the bound content hash review.queue requires: the prepared bundle's candidate_sha256
+            manifest = json.loads((self.root / summary['bundle_manifest']).read_text()) if '..' not in summary['bundle_manifest'] else None
+            sha256 = post_approved.prepare(manifest, self.root / 'assets')['candidate_sha256'] if manifest else 'f' * 64
+        return ReviewItem.objects.create(kind='post', ref=f'social/ed/{name}', sha256=sha256,
                                          summary={k: v for k, v in summary.items() if v is not None}, status=status)
+
+    def test_changed_bundle_is_refused_before_any_provider_call(self):
+        item = self.post('changed', sha256=hashlib.sha256(b'approved-other-content').hexdigest())
+        http = FakeHTTP(*upload_replies())
+        with patch.object(post_approved, 'make_http', lambda: http):
+            with self.assertRaises(CommandError):
+                self.run_cmd('--provider', 'youtube', '--execute')
+        self.assertIn('social/ed/changed: FAILED - REVIEW_ITEM_CHANGED', self.err)
+        self.assertEqual(http.calls, [])
+        item.refresh_from_db()
+        self.assertNotIn('receipt', item.summary)
+        self.assertEqual(AuditEvent.objects.filter(action='social.upload_private').count(), 0)
+        self.assertEqual(list((self.root / 'journal').glob('*.json')), [])
 
     def run_cmd(self, *args):
         out, err = StringIO(), StringIO()

@@ -51,6 +51,7 @@ urlpatterns = [
     path("<str:locale>/tracks/<uuid:track_id>/worksheet.pdf", views.worksheet, name="worksheet"),
     path("<str:locale>/classroom/<uuid:edition_id>/<uuid:unit_id>/", views.classroom, name="classroom"),
     path("<str:locale>/staff/review/", views.staff_review, name="staff-review"),
+    path("<str:locale>/staff/review/<uuid:item_id>/cover/<str:side>.jpg", views.staff_review_cover, name="staff-review-cover"),
     path("<str:locale>/certificates/<uuid:certificate_id>/", views.certificate, name="certificate"),
     path("<str:locale>/certificates/<uuid:certificate_id>/withdraw/", views.certificate_withdraw, name="certificate-withdraw"),
     path("<str:locale>/interview/sde/", views.interview, name="interview"),

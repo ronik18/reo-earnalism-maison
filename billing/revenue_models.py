@@ -17,7 +17,9 @@ class RevenueEntry(models.Model):
         db_table='maison_revenue_entry'
         constraints=[models.CheckConstraint(condition=Q(month__day=1),name='maison_revenue_month_first'),
                      models.CheckConstraint(condition=Q(source__in=SOURCES),name='maison_revenue_source'),
-                     models.CheckConstraint(condition=Q(currency__regex=r'^[A-Z]{3}$'),name='maison_revenue_currency')]
+                     models.CheckConstraint(condition=Q(currency__regex=r'^[A-Z]{3}$'),name='maison_revenue_currency'),
+                     # Pass revenue comes only from invoices (billing.revenue.month_report); a manual row would double count.
+                     models.CheckConstraint(condition=~Q(source='pass'),name='maison_revenue_not_pass')]
 
 class ReinvestmentEntry(models.Model):
     month=models.DateField()
@@ -32,4 +34,5 @@ class ReinvestmentEntry(models.Model):
         constraints=[models.CheckConstraint(condition=Q(month__day=1),name='maison_reinvest_month_first'),
                      models.CheckConstraint(condition=Q(kind__in=['set_aside','spend']),name='maison_reinvest_kind'),
                      models.CheckConstraint(condition=~Q(kind='spend')|Q(approved_by__isnull=False,payback_due__isnull=False),name='maison_reinvest_spend_approved'),
+                     models.CheckConstraint(condition=~Q(kind='spend')|Q(amount_minor__gt=0),name='maison_reinvest_spend_positive'),
                      models.UniqueConstraint(fields=['month'],condition=Q(kind='set_aside'),name='maison_reinvest_set_aside_once')]

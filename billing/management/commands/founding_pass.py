@@ -25,7 +25,7 @@ class Command(BaseCommand):
             codes = [s['code'] for s in founding.SPECS.values()]
             for plan in BillingPlan.objects.filter(offer__code__in=codes).select_related('offer').order_by('offer__code'):
                 o = plan.offer
-                self.stdout.write(f'{o.code}\t{o.price_minor}\tapproved={o.approved}\tactive={o.active}\tmerchant_approved={bool(plan.merchant_approved_at)}')
+                self.stdout.write(f'{o.code} v{o.version}\t{o.price_minor}\ttest_only={o.test_only}\tapproved={o.approved}\tactive={o.active}\tmerchant_approved={bool(plan.merchant_approved_at)}')
             return
         actor = get_user_model().objects.filter(email=(by or '').strip().casefold(), is_staff=True, is_active=True, is_verified=True).first()
         if not actor:

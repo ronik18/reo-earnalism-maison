@@ -129,6 +129,9 @@ class IntakeTranslationCommandTests(TestCase):
                              'territory_terms': {}, 'term_screen_verdict': 'pass'}}}), encoding='utf-8')
         self.translated = self.root / 'en.json'
         self.translated.write_bytes(_bytes(EN_SOURCE))
+        base = override_settings(BASE_DIR=self.root)  # the command queues what it writes relative to the repository
+        base.enable()
+        self.addCleanup(base.disable)
 
     def run_command(self, *extra, slug='kp-en'):
         out = io.StringIO()
@@ -165,6 +168,27 @@ class IntakeTranslationCommandTests(TestCase):
         self.assertEqual(book['source_text']['author_died'], 1941)
         self.assertNotIn('author_died', book)
         self.assertIn('Translation is a new work; its own clearance needs owner review.', book['review_notes'])
+        from operations.models import ReviewItem
+        queued = {(i.kind, i.ref): i for i in ReviewItem.objects.all()}
+        self.assertEqual(set(queued), {('clearance', 'docs/evidence/publication-clearance-kp-en-draft.json'),
+                                       ('edition', 'library/intake/kp-en/manifest.json'),
+                                       ('edition', 'library/intake/kp-en/translation.json')})
+        for (_, ref), item in queued.items():
+            self.assertEqual(item.sha256, hashlib.sha256((self.root / ref).read_bytes()).hexdigest())
+            self.assertEqual(item.summary, {'edition_slug': 'kp-en', 'title': 'The Hungry Stones'})
+            self.assertEqual(item.status, 'pending')
+
+    def test_source_clearance_without_the_source_book_is_refused(self):
+        path = self.root / 'docs/evidence/publication-clearance-kp.json'
+        record = json.loads(path.read_text(encoding='utf-8'))
+        record['books'] = {'other': record['books']['kp']}
+        path.write_text(json.dumps(record), encoding='utf-8')
+        with self.assertRaisesRegex(CommandError, 'SOURCE_CLEARANCE_BOOK_MISSING'):
+            self.run_command('--method', 'ai')
+        path.write_text(json.dumps({'status': 'APPROVED'}), encoding='utf-8')
+        with self.assertRaisesRegex(CommandError, 'SOURCE_CLEARANCE_BOOK_MISSING'):
+            self.run_command('--method', 'ai')
+        self.assertFalse((self.root / 'library/intake/kp-en').exists())
 
     def test_same_slug_as_source_is_refused_even_with_replace(self):
         with self.assertRaisesRegex(CommandError, 'SAME_SLUG'):

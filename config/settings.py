@@ -319,7 +319,17 @@ if R2_PUBLIC_ASSET_HOST and STATIC_RELEASE_ID:
     STATIC_URL = R2_PUBLIC_ASSET_HOST.rstrip('/') + '/static/' + STATIC_RELEASE_ID + '/'
 
 # Share of earned revenue set aside for owner-approved growth spend.
-MAISON_REINVEST_SHARE_PERCENT = int(os.getenv('MAISON_REINVEST_SHARE_PERCENT', '30'))
+def reinvest_share_percent(raw):
+    try:
+        value = int(raw.strip(), 10)
+    except (AttributeError, ValueError):
+        value = None
+    if value is None or not 0 <= value <= 100:
+        raise ImproperlyConfigured('MAISON_REINVEST_SHARE_PERCENT must be a whole number from 0 to 100')
+    return value
+
+
+MAISON_REINVEST_SHARE_PERCENT = reinvest_share_percent(os.getenv('MAISON_REINVEST_SHARE_PERCENT', '30'))
 # Monday review standing permission (owner decision D5): unset until the owner turns it on,
 # about two months after the first weekly batch. Must be a full ISO 8601 datetime with offset.
 _review_standing = os.getenv('MAISON_REVIEW_STANDING_FROM', '').strip()

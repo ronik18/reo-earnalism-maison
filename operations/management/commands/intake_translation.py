@@ -6,7 +6,8 @@
 The translated text is produced by Claude in-session and passed in as a book_source file. This writes
 library/intake/<slug>/{source,manifest,translation}.json and
 docs/evidence/publication-clearance-<slug>-draft.json (status DRAFT_PENDING_OWNER_APPROVAL). Nothing is approved
-or published; the later publish step reads translation.json to set the Edition translation fields.
+or published; the later publish step reads translation.json to set the Edition translation fields. The clearance draft
+('clearance'), manifest.json and translation.json ('edition') are queued on the Monday review page.
 """
 import datetime
 import hashlib
@@ -15,6 +16,8 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
+from core.api import DomainError
+from operations import review
 from operations.book_source import MANIFEST_SCHEMA, SOURCE_SCHEMA, SourceError, read_source_bytes, validate_manifest
 from operations.intake.wikisource import CLEARANCE_SCHEMA
 
@@ -63,7 +66,10 @@ class Command(BaseCommand):
                                if p.is_file()), None)
         if clearance_path is None:
             raise CommandError(f'SOURCE_CLEARANCE_MISSING: no clearance record for {source_slug}')
-        source_book = _load(clearance_path)['books'][source_slug]
+        source_record = _load(clearance_path)
+        source_book = (source_record.get('books') or {}).get(source_slug) if isinstance(source_record, dict) else None
+        if not isinstance(source_book, dict):
+            raise CommandError(f'SOURCE_CLEARANCE_BOOK_MISSING: {clearance_path} has no books[{source_slug!r}] entry')
         try:
             raw = Path(o['source']).read_bytes()
             translated = read_source_bytes(raw)
@@ -74,12 +80,12 @@ class Command(BaseCommand):
             raise CommandError('SAME_LANGUAGE: the translation must be in a different language from its source')
         today = datetime.date.today().isoformat()
         sha = hashlib.sha256(raw).hexdigest()
-        creators = source_manifest['work']['creators']
         credit_text = f'edited by {credit}' if method == 'ai_edited' else 'unedited'
         manifest = {
             'schema': MANIFEST_SCHEMA,
             'project_id': f'{slug}-translation-{today.replace("-", "")}',
-            'work': {'slug': slug, 'title': o['title'], 'creators': list(creators), 'house': source_manifest['work']['house']},
+            # A translation is another edition of the same Work, so the title page pairs it with its source.
+            'work': {key: source_manifest['work'][key] for key in ('slug', 'title', 'creators', 'house')},
             'edition': {'slug': slug, 'language': language, 'title': o['title'], 'description': o['description']},
             'source': {'sha256': sha, 'bytes': len(raw), 'content_type': 'application/json', 'format': SOURCE_SCHEMA},
             'provenance': {
@@ -118,7 +124,7 @@ class Command(BaseCommand):
             'approval': {'approved': False, 'approved_on': None, 'approved_by': None,
                          'still_required': ['owner approval of this clearance record',
                                             'front/back cover with owner-held provenance']},
-            'territories': _load(clearance_path).get('territories', []),
+            'territories': source_record.get('territories', []),
             'formats': ['reader'],
             'actions': ['read', 'preview'],
             'downloads': False,
@@ -126,6 +132,11 @@ class Command(BaseCommand):
             'books': {slug: book}}
         packet_dir = root / 'library' / 'intake' / slug
         evidence = root / 'docs' / 'evidence' / f'publication-clearance-{slug}-draft.json'
+        try:
+            for path in (evidence, packet_dir):  # refuse before writing anything the review page could not show
+                review.review_ref(path)
+        except DomainError as error:
+            raise CommandError(f'{error.code}: {error.message}') from error
         if not o['replace'] and (packet_dir.exists() or evidence.exists()):
             raise CommandError(f'PACKET_EXISTS: {packet_dir} or {evidence} already exists; pass --replace to overwrite')
         packet_dir.mkdir(parents=True, exist_ok=True)
@@ -134,5 +145,8 @@ class Command(BaseCommand):
         for path, value in ((packet_dir / 'manifest.json', manifest), (packet_dir / 'translation.json', translation),
                             (evidence, clearance)):
             path.write_text(json.dumps(value, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
+        summary = {'edition_slug': slug, 'title': o['title']}
+        items = review.queue_files([('clearance', evidence, summary), ('edition', packet_dir / 'manifest.json', summary),
+                                    ('edition', packet_dir / 'translation.json', summary)])
         self.stdout.write(f'{slug}: {language} translation of {source_slug} ({method}), sha256 {sha}. '
-                          f'Wrote {packet_dir} and {evidence}')
+                          f'Wrote {packet_dir} and {evidence}; queued {len(items)} item(s) for review')

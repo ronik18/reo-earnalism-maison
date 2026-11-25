@@ -9,7 +9,9 @@ from pathlib import Path
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase, override_settings
+
+from .models import ReviewItem
 
 from .book_source import read_source_bytes, validate_manifest
 from .intake.wikisource import IntakeError, build_packet, pages_to_paragraphs
@@ -105,22 +107,41 @@ class WikisourceRulesTests(SimpleTestCase):
         self.assertEqual(caught.exception.code, 'CREATORS_REQUIRED')
 
 
-class WikisourceCommandTests(SimpleTestCase):
+class WikisourceCommandTests(TestCase):
     def _api(self, pages):
         return {'query': {'pages': [
             {'title': f'পাতা:বই.pdf/{p["page"]}', 'proofread': {'quality': p['quality']},
              'revisions': [{'revid': p['revision'], 'timestamp': p['timestamp'], 'slots': {'main': {'content': p['wikitext']}}}]}
             for p in pages]}}
 
-    def _run(self, directory, api, *extra):
+    def _run(self, directory, api, *extra, base=None):
         path = Path(directory) / 'api.json'
         path.write_text(json.dumps(api, ensure_ascii=False), encoding='utf-8')
         out = StringIO()
-        call_command('intake_wikisource', 'test-book', '--api-json', str(path), '--title', TITLE,
-                     '--source-ref', KW['source_ref'], '--source-edition', KW['source_edition'], '--house', 'golpo',
-                     '--description', 'বিবরণ', '--first-published', '1895', '--author-died', '1941',
-                     '--creator', 'রবীন্দ্রনাথ ঠাকুর', '--root', str(directory), *extra, stdout=out)
+        with override_settings(BASE_DIR=Path(base or directory)):
+            call_command('intake_wikisource', 'test-book', '--api-json', str(path), '--title', TITLE,
+                         '--source-ref', KW['source_ref'], '--source-edition', KW['source_edition'], '--house', 'golpo',
+                         '--description', 'বিবরণ', '--first-published', '1895', '--author-died', '1941',
+                         '--creator', 'রবীন্দ্রনাথ ঠাকুর', '--root', str(directory), *extra, stdout=out)
         return out.getvalue()
+
+    def test_write_queues_the_clearance_draft_for_review(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self._run(directory, self._api(PAGES), '--keep-hyphen-after', '১৭৫')
+            self.assertFalse(ReviewItem.objects.exists())  # a dry run queues nothing
+            self._run(directory, self._api(PAGES), '--keep-hyphen-after', '১৭৫', '--write')
+            ref = 'docs/evidence/publication-clearance-test-book-draft.json'
+            item = ReviewItem.objects.get()
+            self.assertEqual((item.kind, item.ref, item.status), ('clearance', ref, 'pending'))
+            self.assertEqual(item.sha256, hashlib.sha256((Path(directory) / ref).read_bytes()).hexdigest())
+            self.assertEqual(item.summary, {'edition_slug': 'test-book', 'title': TITLE})
+
+    def test_output_outside_the_repository_is_refused_before_writing(self):
+        with tempfile.TemporaryDirectory() as directory, tempfile.TemporaryDirectory() as repo:
+            with self.assertRaisesRegex(CommandError, 'REVIEW_REF_INVALID'):
+                self._run(directory, self._api(PAGES), '--write', base=repo)
+            self.assertFalse((Path(directory) / 'library').exists())
+            self.assertFalse(ReviewItem.objects.exists())
 
     def test_dry_run_writes_nothing_and_write_creates_the_packet(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -154,7 +175,7 @@ class WikisourceCommandTests(SimpleTestCase):
             self.skipTest('saved MediaWiki response not present in this checkout')
         committed = ROOT / 'library/intake/kshudhita-pashan'
         expected = json.loads((committed / 'manifest.json').read_text(encoding='utf-8'))
-        with tempfile.TemporaryDirectory() as directory:
+        with tempfile.TemporaryDirectory() as directory, override_settings(BASE_DIR=Path(directory)):
             out = StringIO()
             call_command('intake_wikisource', 'kshudhita-pashan', '--api-json', str(saved), '--title', TITLE,
                          '--source-ref', expected['provenance']['source_ref'],
