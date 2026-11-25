@@ -19,7 +19,8 @@ class RevenueEntry(models.Model):
                      models.CheckConstraint(condition=Q(source__in=SOURCES),name='maison_revenue_source'),
                      models.CheckConstraint(condition=Q(currency__regex=r'^[A-Z]{3}$'),name='maison_revenue_currency'),
                      # Pass revenue comes only from invoices (billing.revenue.month_report); a manual row would double count.
-                     models.CheckConstraint(condition=~Q(source='pass'),name='maison_revenue_not_pass')]
+                     models.CheckConstraint(condition=~Q(source='pass'),name='maison_revenue_not_pass'),
+                     models.CheckConstraint(condition=Q(amount_minor__gt=0),name='maison_revenue_amount_positive')]
 
 class ReinvestmentEntry(models.Model):
     month=models.DateField()

@@ -1,7 +1,8 @@
 """Institution (school) yearly invoices: a request for payment, never a card checkout.
 
 Live institution invoices await an approved institution tax rule; only local test documents are issued."""
-from datetime import date
+import uuid
+from datetime import date,timedelta
 from io import StringIO
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
@@ -9,10 +10,11 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import IntegrityError,transaction
 from django.test import TestCase,override_settings
+from django.utils import timezone
 from core.api import DomainError
 from .institution import issue_institution_invoice
 from .invoices import owned_queryset
-from .models import Invoice,InstitutionAccount,PaymentAllocation
+from .models import Invoice,InstitutionAccount,Offer,Order,Payment,PaymentAllocation
 
 PDF=b'%PDF-1.4\nSynthetic institution fixture\n%%EOF'
 
@@ -38,6 +40,14 @@ class InstitutionInvoiceTests(TestCase):
         self.assertTrue(snap['local_test_document'])
         invoice.refresh_from_db();self.assertIsNotNone(invoice.current_revision_id);self.assertEqual(invoice.current_revision.kind,'invoice');self.assertTrue(invoice.current_revision.storage_key)
         self.assertEqual(self.issue().institution_id,invoice.institution_id);self.assertEqual(InstitutionAccount.objects.count(),1)
+        self.assertFalse(PaymentAllocation.objects.exists())
+    def test_database_rejects_a_payment_allocation_to_an_institution_invoice(self):
+        invoice=self.issue()
+        offer=Offer.objects.create(code='inst-alloc',name='Original test-only offer',currency='INR',price_minor=invoice.amount_minor,duration_seconds=86400,formats=['reader'],terms_version='synthetic',test_only=True)
+        order=Order.objects.create(user=self.plain,offer=offer,total_minor=invoice.amount_minor,currency='INR',offer_snapshot={},operation_id=uuid.uuid4(),request_sha256='0'*64,expires_at=timezone.now()+timedelta(hours=1))
+        payment=Payment.objects.create(order=order,provider='local_test',provider_payment_id='inst-alloc-payment',amount_minor=invoice.amount_minor,currency='INR',status='captured',captured_at=timezone.now(),verification_source='local_test',evidence_sha256='2'*64)
+        with self.assertRaises(IntegrityError),transaction.atomic():
+            PaymentAllocation.objects.create(payment=payment,invoice=invoice,amount_minor=100)
         self.assertFalse(PaymentAllocation.objects.exists())
     def test_zero_students_refused(self):
         for bad in ({'students':0},{'classes':0},{'price_per_student_minor':0},{'students':-1},{'institution':'  '}):

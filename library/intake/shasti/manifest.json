@@ -1,0 +1,32 @@
+{
+ "schema": "earnalism.book_import_manifest.v1",
+ "project_id": "shasti-wikisource-20261125",
+ "work": {
+  "slug": "shasti",
+  "title": "শাস্তি",
+  "creators": [
+   "রবীন্দ্রনাথ ঠাকুর"
+  ],
+  "house": "golpo"
+ },
+ "edition": {
+  "slug": "shasti",
+  "language": "bn",
+  "title": "শাস্তি",
+  "description": "দাদার হাতে বউ খুন হওয়ার পর ছিদাম বলে বসে, তার নিজের বউ চন্দরাই খুনি — আর চন্দরা সেই মিথ্যাকেই নিজের সত্য করে নেয়।"
+ },
+ "source": {
+  "sha256": "4700bc9c48c3e21dad0403a3328beb9ac6d8bc209663d0469fadfe5c04a92e43",
+  "bytes": 55262,
+  "content_type": "application/json",
+  "format": "earnalism.book_source.v1"
+ },
+ "provenance": {
+  "source_ref": "https://bn.wikisource.org/w/index.php?title=%E0%A6%95%E0%A6%A5%E0%A6%BE-%E0%A6%9A%E0%A6%A4%E0%A7%81%E0%A6%B7%E0%A7%8D%E0%A6%9F%E0%A6%AF%E0%A6%BC/%E0%A6%B6%E0%A6%BE%E0%A6%B8%E0%A7%8D%E0%A6%A4%E0%A6%BF&oldid=1624596",
+  "source_edition": "Katha-Chatushtay (কথা-চতুষ্টয়), Calcutta: Sahitya-Jantra, printed by Jagneshwar Ghosh, published by Kalidas Chakravarti, 1301 BS (1894); sole author Rabindranath Tagore. Validated (level 4) Wikisource scan pages with recorded page revisions; conversion rules as recorded for the Galpa-Dashak packets, plus the কথা-চতুষ্টয় opening page (collection name, story title and decorative scan ornaments dropped; the first section heading kept); every page-end hyphen rejoins a single word (none kept). Scan pages 29-48.",
+  "rights_note": "রবীন্দ্রনাথ ঠাকুর died 1941; first published 1894. Term screen verdict for 2026: screen_pass. Wikisource transcription layer reused under CC BY-SA 4.0 with attribution; ShareAlike applies to the delivered transcription only. Draft: owner approval of the clearance record and a cover with owner-held provenance are still required.",
+  "rights_evidence_refs": [
+   "reo-earnalism-maison:docs/evidence/publication-clearance-shasti-draft.json"
+  ]
+ }
+}

@@ -1,0 +1,97 @@
+{
+  "artifacts": [
+    {
+      "bytes": 74494,
+      "kind": "source",
+      "meta": {
+        "revision_id": "3cb6a0b9-f774-4822-92e7-d4fc99de2ef4"
+      },
+      "path": "source.json",
+      "sha256": "3b9dcf64ea107c4e000e2a71c1a2499c1fe2a00700f44ef7a2836b081f3c69d0"
+    },
+    {
+      "bytes": 155177,
+      "kind": "plan",
+      "meta": {
+        "films": 1,
+        "series": false
+      },
+      "path": "plan.json",
+      "sha256": "ca6949e88d30153efcd1691087ba31da90aba4a8f2fc1a7503b65644cdf1c68b"
+    },
+    {
+      "bytes": 9138,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 4.238899999999999,
+        "inputs_zip": "jobs/narration-9187e43e/inputs.zip",
+        "job_id": "narration-9187e43e",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-9187e43e/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-9187e43e/narration.ipynb",
+      "sha256": "7c83383eaf90bacc7efce0f76a7b12341f03f6ec48989240c72bdf055a152fff"
+    }
+  ],
+  "created_at": "2026-11-25T11:16:00.930973+00:00",
+  "events": [
+    {
+      "at": "2026-11-25T11:16:00.933075+00:00",
+      "detail": {
+        "audio_rights_on_maison": false,
+        "slug": "kshudhita-pashan"
+      },
+      "result": "ok",
+      "stage": "init"
+    },
+    {
+      "at": "2026-11-25T11:16:01.138873+00:00",
+      "detail": {
+        "films": 1,
+        "flags": [],
+        "voice": "bn_arnav::story"
+      },
+      "result": "ok",
+      "stage": "plan"
+    },
+    {
+      "at": "2026-11-25T11:16:01.374874+00:00",
+      "detail": {
+        "forecast_units": 4.238899999999999,
+        "job_id": "narration-9187e43e",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T11:16:01.375702+00:00",
+      "detail": {
+        "job_id": "narration-9187e43e",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    }
+  ],
+  "ledger": "../allowance-ledger.json",
+  "schema": "earnalism.audiovisual_record.v1",
+  "source": {
+    "content_sha256": "5fe217851a7caa946d7e03890f03083d17377e62d94145873e6c38113db2949e",
+    "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
+    "export_sha256": "3b9dcf64ea107c4e000e2a71c1a2499c1fe2a00700f44ef7a2836b081f3c69d0",
+    "language": "bn",
+    "public_domain_evidence": true,
+    "revision_id": "3cb6a0b9-f774-4822-92e7-d4fc99de2ef4",
+    "rights": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "state": "draft"
+  },
+  "title_slug": "kshudhita-pashan"
+}

@@ -92,6 +92,10 @@ def _resolve(ref):
     return path
 
 
+def file_sha256(ref):
+    return _file_sha256(ref)
+
+
 def _file_sha256(ref):
     path = _resolve(ref)
     if path is None or not path.is_file():

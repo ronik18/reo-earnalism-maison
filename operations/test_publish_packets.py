@@ -289,6 +289,18 @@ class MondayApprovalTests(TestCase):
             self.assertIn(str(item.id), reason)
         self.assertIn(str(self.owner.public_id), reason)
         self.assertIn(str(items[0].id), command.evidence_ref_for(packet))
+        self.assertIn("draft record approved on the Monday page (review items " + str(items[0].id), reason)
+
+    def test_monday_approved_evidence_basis_says_draft_record_not_in_file(self):
+        items = self.approve_both()
+        packet = self.packets()[self.SLUG]
+        revision = self.make_draft(packet)
+        command.Command().record_evidence(self.make_actor(), packet, None)
+        revision.refresh_from_db()
+        basis = revision.validation_evidence["publication_clearance"]["basis"]
+        self.assertEqual(basis, "draft_record_approved_on_monday_page")
+        legacy = command.approved_packets(check=())["bicharak"]
+        self.assertNotIn("Monday page", command.reason_for(legacy))
 
 
 class PublishStageGuardTests(TestCase):

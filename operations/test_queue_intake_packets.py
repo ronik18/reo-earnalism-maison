@@ -51,8 +51,26 @@ class QueueIntakePacketsTests(TestCase):
 
     def test_skips_in_file_owner_approved_clearance(self):
         self.packet('book', status='OWNER_APPROVED')
-        self.assertIn('already owner-approved', run())
-        self.assertEqual(list(ReviewItem.objects.values_list('kind', flat=True)), ['cover'])
+        out = run()
+        self.assertIn('already owner-approved', out)
+        self.assertIn('skipped: clearance approved in file', out)
+        self.assertEqual(list(ReviewItem.objects.values_list('kind', flat=True)), [])
+
+    def test_missing_draft_names_the_clearance_file_the_manifest_cites(self):
+        folder = self.packet('book')
+        (self.root / 'docs' / 'evidence' / 'publication-clearance-book-draft.json').unlink()
+        (folder / 'manifest.json').write_text(json.dumps({'edition': {'slug': 'book'}, 'provenance': {'rights_evidence_refs': [
+            'other:x.json', 'reo-earnalism-maison:docs/evidence/publication-clearance-20261123.json']}}))
+        out = run()
+        self.assertIn('manifest cites reo-earnalism-maison:docs/evidence/publication-clearance-20261123.json', out)
+        self.assertNotIn('no draft record)', out.replace('no draft record;', ''))
+
+    def test_review_exposes_public_file_sha256(self):
+        from operations import review
+        self.packet('book')
+        ref = 'library/intake/book/cover_provenance.json'
+        self.assertEqual(review.file_sha256(ref), review._file_sha256(ref))
+        self.assertIsNone(review.file_sha256('library/intake/book/missing.json'))
 
     def test_translation_queues_edition_items(self):
         self.packet('book-en', translation=True)

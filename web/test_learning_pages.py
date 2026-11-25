@@ -27,3 +27,12 @@ class LearningPageNavigationTests(TestCase):
   self.assertIn(rows[0].prompt,html);self.assertNotIn(rows[1].prompt,html);self.assertIn('cursor=',html)
   response=views.question(self.request('/en/question/'),locale='en',track_id=t.id,question_id=rows[1].id)
   self.assertEqual(response.status_code,200);self.assertIn(rows[1].prompt,response.content.decode())
+
+ def test_question_page_shows_escaped_sponsor_line(self):
+  approver=get_user_model().objects.create_user('ssr-sponsor-approver@example.test','Original-Paging-Fixture-48',is_verified=True)
+  t=Track.objects.create(title='Original sponsored interview',locale='en',kind='sde_interview',access='free',published=True,sponsor_name='Acme <b>Labs</b>',sponsor_url='https://sponsor.example.test/',sponsor_approved_by=approver)
+  q=InterviewQuestion.objects.create(id=uuid.UUID(int=30),track=t,topic='queues',difficulty='foundation',prompt='Original sponsored prompt',model_answer='Original answer',rubric=[])
+  html=views.question(self.request('/en/question/'),locale='en',track_id=t.id,question_id=q.id).content.decode()
+  self.assertIn('<p class="fine">Sponsored by <a href="https://sponsor.example.test/" rel="sponsored noopener"',html);self.assertIn('Acme &lt;b&gt;Labs&lt;/b&gt;',html);self.assertNotIn('<b>Labs</b>',html)
+  t.sponsor_name='';t.sponsor_url='';t.sponsor_approved_by=None;t.save()
+  self.assertNotIn('rel="sponsored',views.question(self.request('/en/question/'),locale='en',track_id=t.id,question_id=q.id).content.decode())

@@ -9,3 +9,17 @@
 - **New settings:** none set in production. `MAISON_REINVEST_SHARE_PERCENT` defaults to 30; `MAISON_REVIEW_STANDING_FROM` unset (standing permission off); `MAISON_SOCIAL_JOURNAL_DIR` default.
 - **Live checks (theearnalism.com):** `/en/`, `/en/pass/`, `/en/explore/`, `/en/sign-in/` return 200; `/podcast/en.xml` and `/podcast/bn.xml` return 200 `application/rss+xml`, valid and empty (no title has cleared free audio yet); `/podcast/xx.xml` 404; `/en/staff/review/` 404 for anonymous visitors; the Pass page shows no founding offer (free access on, plans not created).
 - **Nothing published, posted, uploaded or charged.** Founding plans not created; no review items; no store, podcast directory or licensing submission.
+
+## Follow-up deploys (25 Nov 2026)
+
+- **#65** (squash `fd4e61d`): eight Galpa-Dashak intake packets with draft clearance, converter extensions, `queue_intake_packets`, podcast preview enclosures (D10), `eav preview`. No migrations, no static change. Render deploy `dep-dc398e2fngtc73dbh7rg` live at 07:55:18Z. The first `queue_intake_packets` job queued only the 5 cover items: `.dockerignore` excluded the per-title clearance records from the image.
+- **#66** (squash `f2f9ec6`): ship `docs/evidence/publication-clearance-*.json` in the image. Deploy live at 08:11:56Z; `/en/` and `/podcast/en.xml` 200, `/en/staff/review/` 404 anonymous.
+- **Render job** `job-dc39gl68bjmc73f1kgf0` (`python manage.py queue_intake_packets`) succeeded at 08:12Z. Production review queue now holds 8 pending clearance items (nishithe, prayashchitta, apad, didi, thakurda, manbhanjan, pratihingsa, atithi) and 5 pending cover items (nishithe, didi, manbhanjan, atithi, kshudhita-pashan; the last is already approved in its clearance file). Nothing approved, imported or published.
+
+## ক্ষুধিত পাষাণ draft import (25 Nov 2026)
+
+- **Owner instruction:** "yes, import ক্ষুধিত পাষাণ as a draft".
+- **Render job** `job-dc3c3ptg1s2s73d2hlg0` (`publish_cleared_editions import --book kshudhita-pashan`): edition `54f37caa-050b-47c3-95c2-3cbc214d6485`, revision `3cb6a0b9-f774-4822-92e7-d4fc99de2ef4` (state draft, no live revision), 1 unit, 2 cover assets, 1-entry preview (1,084 characters). Public title page 404, absent from explore.
+- **Render job** `job-dc3c63afngtc73djhml0` (`publish_cleared_editions evidence --book kshudhita-pashan`): recorded the owner-approved clearance (`docs/evidence/publication-clearance-kshudhita-pashan.json`) on the draft revision so the audiovisual export carries public-domain evidence. No browser report; revision still draft, not published.
+- **Render job** `job-dc3c6aafngtc73dji8d0` (read-only `export_audiovisual_source`): content_sha256 `5fe217851a7caa946d7e03890f03083d17377e62d94145873e6c38113db2949e`, 59 paragraphs, public_domain_evidence true.
+- **Narration job** `narration-9187e43e` built with `eav` under `production/audiovisual/kshudhita-pashan/`: forecast 4.24 CU reserved, 55.76 CU left under the title cap. Inert until the owner runs it in Colab.

@@ -66,6 +66,34 @@ class RevenueTests(TestCase):
         rows=ReinvestmentEntry.objects.filter(kind='set_aside',month=MONTH)
         self.assertEqual([r.amount_minor for r in rows],[3000])
 
+    @override_settings(MAISON_REINVEST_SHARE_PERCENT=30)
+    def test_differing_set_aside_is_refused_unless_updated_and_audited(self):
+        from core.models import AuditEvent
+        self.entry('podcast',10000)
+        call_command('revenue_report','--month','2026-12','--record-set-aside',stdout=io.StringIO())
+        self.entry('youtube',10000)  # late income: computed 6000, recorded 3000
+        out=io.StringIO()
+        with self.assertRaises(CommandError): call_command('revenue_report','--month','2026-12','--record-set-aside',stdout=out)
+        self.assertIn('3000',out.getvalue());self.assertIn('6000',out.getvalue())
+        self.assertEqual(ReinvestmentEntry.objects.get(kind='set_aside',month=MONTH).amount_minor,3000)
+        call_command('revenue_report','--month','2026-12','--record-set-aside','--update-set-aside',stdout=io.StringIO())
+        row=ReinvestmentEntry.objects.get(kind='set_aside',month=MONTH)
+        self.assertEqual(row.amount_minor,6000)
+        event=AuditEvent.objects.get(action='revenue.set_aside_updated',entity_id=str(row.pk))
+        self.assertEqual((event.detail['from_minor'],event.detail['to_minor']),(3000,6000))
+        call_command('revenue_report','--month','2026-12','--record-set-aside',stdout=io.StringIO())  # equal again: fine
+
+    @override_settings(MAISON_REINVEST_SHARE_PERCENT=30)
+    def test_update_cannot_drop_set_aside_below_approved_spends(self):
+        self.entry('podcast',10000)
+        self.set_aside(3000);record_spend(MONTH,2500,'ads',self.user,date(2026,12,31))
+        RevenueEntry.objects.all().delete();self.entry('podcast',1000)  # computed 300 < spends 2500
+        with self.assertRaises(CommandError): call_command('revenue_report','--month','2026-12','--record-set-aside','--update-set-aside',stdout=io.StringIO())
+        self.assertEqual(ReinvestmentEntry.objects.get(kind='set_aside',month=MONTH).amount_minor,3000)
+
+    def test_zero_revenue_entry_is_rejected_by_the_database(self):
+        with self.assertRaises(IntegrityError),transaction.atomic(): self.entry('podcast',0)
+
     def test_pass_is_labelled_invoiced_and_set_aside_line_says_so(self):
         self.pass_invoice(amount=1000)
         self.assertEqual(month_report(MONTH)['pass_basis'],'invoiced')

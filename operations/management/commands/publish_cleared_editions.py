@@ -230,7 +230,9 @@ def reason_for(packet):
     if packet["legacy"]:
         return "Owner-authorized go-live, 23 Nov 2026: public-domain term evidence, text licence and owner cover provenance (" + CLEARANCE_DOC + ")."
     if packet.get("review_items"):
-        return ("Owner approval on the Monday review page (D8): public-domain term evidence, text licence and owner cover provenance ("
+        ids = ", ".join(str(i.id) for i in packet["review_items"])
+        return ("Owner approval on the Monday review page (D8): the draft record approved on the Monday page (review items " + ids
+                + ", not an in-file approval) for public-domain term evidence, text licence and owner cover provenance ("
                 + evidence_ref_for(packet) + ").")
     return ("Owner-authorized publication: public-domain term evidence, text licence and owner cover provenance ("
             + packet["clearance_path"] + "#sha256=" + packet["clearance_sha256"] + ").")
@@ -401,7 +403,8 @@ class Command(BaseCommand):
                 doc, doc_sha = clearance_document(packet)
                 now = timezone.now()
                 evidence = json.dumps({"territories": territories(), "evidence_ref": evidence_ref_for(packet) if packet.get("review_items") else f"{packet['clearance_path']}#sha256={doc_sha}",
-                    "basis": "owner-authorized public-domain term evidence"}, ensure_ascii=False)
+                    "basis": "draft record approved on the Monday page (review items " + ", ".join(str(i.id) for i in packet["review_items"]) + ")"
+                    if packet.get("review_items") else "owner-authorized public-domain term evidence"}, ensure_ascii=False)
                 for action in ("read", "preview"):
                     right = Rights.objects.create(revision=current, format="reader", action=action, territories=territories(),
                         starts_at=now, ends_at=now + timedelta(days=3650), approved=True, test_only=False, evidence=evidence)
@@ -437,7 +440,7 @@ class Command(BaseCommand):
         clearance = {"status": "pass", "sha256": revision.content_sha256, "territories": territories(), "formats": ["reader"],
             "asset_sha256": {str(a.id): a.sha256 for a in ready},
             "evidence_ref": evidence_ref_for(packet) if packet.get("review_items") else f"{packet['clearance_path']}#sha256={doc_sha}",
-            "basis": "owner_authorized_public_domain_term_evidence", "recorded_by": str(actor.public_id),
+            "basis": "draft_record_approved_on_monday_page" if packet.get("review_items") else "owner_authorized_public_domain_term_evidence", "recorded_by": str(actor.public_id),
             "recorded_at": timezone.now().isoformat()}
         with transaction.atomic():
             current = Revision.objects.select_for_update().get(pk=revision.pk)
