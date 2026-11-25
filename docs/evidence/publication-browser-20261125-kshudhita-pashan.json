@@ -1,0 +1,64 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-25",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the production release code (main 0a20d12, deployed as dep-dc3itr95efls73c0hcp0) serving a local PostgreSQL replica. ক্ষুধিত পাষাণ imported there with the same publisher identity and deterministic operation IDs as production job job-dc3c3ptg1s2s73d2hlg0: edition 54f37caa-050b-47c3-95c2-3cbc214d6485, revision 3cb6a0b9-f774-4822-92e7-d4fc99de2ef4, and all 59 unit/anchor IDs and texts identical to the production read-only export (job-dc3c6aafngtc73dji8d0). Signed in as a staff publisher; desktop 1440x900 and mobile 390x844; the title page (covers) and the reader (text).",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "kshudhita-pashan": {
+   "status": "pass",
+   "sha256": "5fe217851a7caa946d7e03890f03083d17377e62d94145873e6c38113db2949e",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 59,
+     "paragraphs_expected": 59,
+     "text_and_anchor_order_exact": true,
+     "first": "আমি এবং আমার আত্মীয় পূজার ছুটিতে দেশভ্রমণ সারিয়া কলিকাতায়",
+     "last": "সফিষ্ট্‌ আত্মীয়টির সহিত আমার জন্মের মত বিচ্ছেদ ঘটিয়া গেছে।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 59,
+     "paragraphs_expected": 59,
+     "text_and_anchor_order_exact": true,
+     "first": "আমি এবং আমার আত্মীয় পূজার ছুটিতে দেশভ্রমণ সারিয়া কলিকাতায়",
+     "last": "সফিষ্ট্‌ আত্মীয়টির সহিত আমার জন্মের মত বিচ্ছেদ ঘটিয়া গেছে।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  }
+ }
+}

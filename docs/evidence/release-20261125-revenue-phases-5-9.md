@@ -23,3 +23,13 @@
 - **Render job** `job-dc3c63afngtc73djhml0` (`publish_cleared_editions evidence --book kshudhita-pashan`): recorded the owner-approved clearance (`docs/evidence/publication-clearance-kshudhita-pashan.json`) on the draft revision so the audiovisual export carries public-domain evidence. No browser report; revision still draft, not published.
 - **Render job** `job-dc3c6aafngtc73dji8d0` (read-only `export_audiovisual_source`): content_sha256 `5fe217851a7caa946d7e03890f03083d17377e62d94145873e6c38113db2949e`, 59 paragraphs, public_domain_evidence true.
 - **Narration job** `narration-9187e43e` built with `eav` under `production/audiovisual/kshudhita-pashan/`: forecast 4.24 CU reserved, 55.76 CU left under the title cap. Inert until the owner runs it in Colab.
+
+## #67 deploy (25 Nov 2026)
+
+- **Owner instruction:** "yes, create the PR, merge and deploy once CI is green".
+- **Merged:** ronik18/reo-earnalism-maison#67 after `postgres-acceptance` passed on head `f3f08a5`; squash commit `0a20d12d86927a9ed011a52431f621e5c67d405e`.
+- **Restore point (before migration):** `2026-11-25T18:44:19Z`, WAL LSN `0/5AA7070`, 78 applied migrations; `maison_revenue_entry` held 0 rows, so the new constraint had nothing to reject.
+- **Migration:** billing `0015_revenue_amount_positive` applied by the Render pre-deploy command at 18:55:28Z; the pre-deploy command was removed afterwards.
+- **Render deploy** `dep-dc3itr95efls73c0hcp0` (commit `0a20d12`) live at 18:55:54Z. No static change; `STATIC_RELEASE_ID` kept.
+- **Render job** `job-dc3j3vsipgvc738q56ag` (`queue_intake_packets`) succeeded: 6 new pending review items, a clearance and a cover each for মধ্যবর্ত্তিনী, শাস্তি and সমাপ্তি. No duplicate cover item for ক্ষুধিত পাষাণ.
+- **Live checks:** `/en/`, `/en/explore/`, `/en/pass/`, `/podcast/en.xml` 200; `/en/staff/review/` 404 for anonymous visitors. Nothing published, posted or charged.

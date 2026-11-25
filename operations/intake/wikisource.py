@@ -27,15 +27,25 @@ class IntakeError(ValueError):
         self.code = code
 
 
-VERSE_MARK, HEADING_MARK, LINE_SEP = '\x01', '\x02', '\x03'
-CONTROLS = re.compile('[\x00-\x03]')
+VERSE_MARK, HEADING_MARK, LINE_SEP, NOTE_MARK, SPLIT_MARK = '\x01', '\x02', '\x03', '\x04', '\x05'
+CONTROLS = re.compile('[\x00-\x05]')
+# An author's footnote: plain text only, no attributes or nested markup.
+REF = re.compile(r'<ref>([^<>{}\[\]|]*)</ref>')
 POEM = re.compile(r'\{\{Block center\|<poem>(.*?)</poem>\}\}', re.S)
+# A poem continued over a page break: it opens at the very end of one page and closes at the very start of the next.
+POEM_OPEN_AT_END = re.compile(r'\{\{[Bb]lock center/s\}\}<poem>([^<>{}]*?)</poem>\s*\Z')
+POEM_CLOSE_AT_START = re.compile(r'\A\s*<poem>([^<>{}]*?)</poem>\{\{[Bb]lock center/e\}\}')
 RULE_LINE = re.compile(r'^[ \t]*\{\{rule\|[^{}\n]*\}\}[ \t]*$', re.M)
 RULE_BREAK = '\n\n' + BREAK + '\n\n'  # a rule is a break and also separates blocks it touches by one newline
 CENTER_LINE = re.compile(
     r'(?:(?<=\n\n)|\A)[ \t]*\{\{(?:center|c)\|([^{}|<>\n\[\]]+?)\}\}[ \t]*(?=\n[ \t]*\n|\n*\Z)')
-BOOK_END_MARKER = '{{কেন্দ্র|সম্পূর্ণ।}}'
-BOOK_END = re.compile(r'(?:(?<=\n)|\A)(?:[ \t]*\{\{rule\|[^{}\n]*\}\}\s*)?' + re.escape(BOOK_END_MARKER) + r'\s*\Z')
+BOOK_END_MARKERS = ('{{কেন্দ্র|সম্পূর্ণ।}}', '{{কেন্দ্র|সমাপ্ত।}}')
+BOOK_END_MARKER = BOOK_END_MARKERS[0]
+BOOK_END = re.compile(r'(?:(?<=\n)|\A)(?:[ \t]*\{\{rule\|[^{}\n]*\}\}\s*)?(?:'
+                      + '|'.join(map(re.escape, BOOK_END_MARKERS)) + r')\s*\Z')
+# A bare centred line is a section heading only when it names a section; any other centred line is a sung or
+# quoted line and becomes verse.
+SECTION_NAME = re.compile(r'\S+ পরিচ্ছেদ।?|পরিশিষ্ট।?')
 HEADING_TEXT =r'([^{}|<>\n]+?)'
 HEADING = re.compile(
     r'(?:(?<=\n\n)|\A)[ \t]*(?:\{\{কেন্দ্র\|\{\{larger\|' + HEADING_TEXT + r'\}\}\}\}'
@@ -75,6 +85,9 @@ def _verse(match):
 
 
 def _heading(match):
+    bare = match.group(2)
+    if bare is not None and not SECTION_NAME.fullmatch(bare):
+        return BREAK + VERSE_MARK + bare.strip() + VERSE_MARK + BREAK
     return BREAK + HEADING_MARK + next(g for g in match.groups() if g is not None) + HEADING_MARK + BREAK
 
 
@@ -93,9 +106,13 @@ def _page_text(page, title, first, last=False):
             raise IntakeError('TITLE_LINE_MISSING', title)
     if last:
         text = BOOK_END.sub('', text)
-    if BOOK_END_MARKER in text:
-        raise IntakeError('UNKNOWN_MARKUP', BOOK_END_MARKER)
+    for marker in BOOK_END_MARKERS:
+        if marker in text:
+            raise IntakeError('UNKNOWN_MARKUP', marker)
+    text = REF.sub(lambda m: NOTE_MARK + m.group(1) + NOTE_MARK, text)
     text = POEM.sub(_verse, text)
+    text = POEM_OPEN_AT_END.sub(lambda m: _verse(m)[:-2] + SPLIT_MARK, text)
+    text = POEM_CLOSE_AT_START.sub(lambda m: SPLIT_MARK + _verse(m)[2:], text)
     text = RULE_LINE.sub(RULE_BREAK, text)
     text = CENTER_LINE.sub(_center, text)
     text = HEADING.sub(_heading, text)
@@ -117,7 +134,11 @@ def pages_to_paragraphs(pages, *, title, keep_hyphen_after=frozenset()):
         if page.get('quality') != 4:
             raise IntakeError('PAGE_NOT_VALIDATED', str(page.get('page')))
         text = _page_text(page, title, index == 0, index == len(pages) - 1)
-        if index and not text.startswith(BREAK) and not stream.endswith(BREAK):
+        if stream.endswith(SPLIT_MARK) or text.startswith(SPLIT_MARK):
+            if not (stream.endswith(SPLIT_MARK) and text.startswith(SPLIT_MARK)):
+                raise IntakeError('UNKNOWN_MARKUP', 'block center/s')
+            stream, text = stream[:-1] + LINE_SEP, text[1:]
+        elif index and not text.startswith(BREAK) and not stream.endswith(BREAK):
             if stream.endswith('-'):
                 if pages[index - 1]['page'] not in keep_hyphen_after:
                     stream = stream[:-1]
@@ -130,12 +151,22 @@ def pages_to_paragraphs(pages, *, title, keep_hyphen_after=frozenset()):
             paragraphs.append({'kind': 'verse', 'text': part[1:-1].replace(LINE_SEP, '\n')})
             continue
         kind = 'heading' if part.startswith(HEADING_MARK) else 'paragraph'
+        notes = re.findall(NOTE_MARK + '(.*?)' + NOTE_MARK, part, re.S) if kind == 'paragraph' else []
+        if kind == 'paragraph':
+            part = re.sub(NOTE_MARK + '.*?' + NOTE_MARK, '', part, flags=re.S)
         text = ' '.join(part.strip(HEADING_MARK).split())
         if text:
             paragraphs.append({'kind': kind, 'text': text})
+        for note in notes:
+            note = ' '.join(note.split())
+            if not note or not text:
+                raise IntakeError('UNKNOWN_MARKUP', '<ref>')
+            paragraphs.append({'kind': 'note', 'text': note})
     if not paragraphs:
         raise IntakeError('NO_TEXT')
     for paragraph in paragraphs:
+        if NOTE_MARK in paragraph['text'] or SPLIT_MARK in paragraph['text']:
+            raise IntakeError('UNKNOWN_MARKUP', '<ref>')
         found = MARKUP.search(paragraph['text'])
         if found:
             raise IntakeError('UNKNOWN_MARKUP', found.group(0))

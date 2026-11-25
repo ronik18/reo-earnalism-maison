@@ -138,10 +138,15 @@ def validate_source(source):
         count += len(paragraphs)
         if count > MAX_PARAGRAPHS:
             raise SourceError("BOUNDED_SOURCE_PARAGRAPHS_REQUIRED")
+        previous = None
         for paragraph in paragraphs:
             _keys(paragraph, ("kind", "text"))
-            if paragraph["kind"] not in ("paragraph", "heading", "verse"):
+            if paragraph["kind"] not in ("paragraph", "heading", "verse", "note"):
                 raise SourceError("SOURCE_PARAGRAPH_KIND_INVALID")
+            # An author's footnote sits directly after the paragraph or verse it annotates.
+            if paragraph["kind"] == "note" and previous not in ("paragraph", "verse"):
+                raise SourceError("SOURCE_NOTE_PLACEMENT_INVALID")
+            previous = paragraph["kind"]
             _text(paragraph["text"], MAX_PARAGRAPH_CHARACTERS, multiline=True)
             if len(paragraph["text"].encode("utf-8")) > MAX_PARAGRAPH_BYTES:
                 raise SourceError("SOURCE_PARAGRAPH_UTF8_BUDGET_EXCEEDED")

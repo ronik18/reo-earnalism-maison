@@ -130,7 +130,7 @@ class Paragraph(RevisionContent):
     anchor_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='paragraphs')
     ordinal = models.PositiveIntegerField()
-    kind = models.CharField(max_length=12, default='paragraph', choices=[('paragraph','paragraph'),('heading','heading'),('verse','verse')])
+    kind = models.CharField(max_length=12, default='paragraph', choices=[('paragraph','paragraph'),('heading','heading'),('verse','verse'),('note','note')])
     text = models.TextField()
     class Meta:
         db_table = 'maison_paragraph_anchor'

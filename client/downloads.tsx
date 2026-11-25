@@ -360,7 +360,8 @@ function Downloads({ boot }: { boot: Boot }) {
               ) : (
                 <p
                   key={p.anchor_id}
-                  className={p.kind === "verse" ? "verse" : undefined}
+                  className={p.kind === "verse" ? "verse" : p.kind === "note" ? "footnote" : undefined}
+                  role={p.kind === "note" ? "note" : undefined}
                 >
                   {p.text}
                 </p>
