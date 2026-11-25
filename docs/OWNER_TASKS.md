@@ -31,6 +31,7 @@ Last updated: 25 Nov 2026.
 - [ ] **Apple Podcasts / Spotify for Creators accounts**, once the first preview episode exists (Claude will give the submission steps).
 
 ## Decisions
+- [ ] **Import approved titles as unpublished drafts** (nothing visible to readers), so Claude can prepare their Colab narration jobs. Ready now: ক্ষুধিত পাষাণ; later each title you approve on the Monday page.
 - [ ] **Founding member trigger for US/UK accounts** (Phase 9): the number of paying Indian Pass members that starts it (proposed 300).
 - [ ] **Standing permission start date** (`MAISON_REVIEW_STANDING_FROM`): about two months after the first Monday batch.
 - [ ] **Classroom pilot teachers 2 and 3:** on hold by your choice.
