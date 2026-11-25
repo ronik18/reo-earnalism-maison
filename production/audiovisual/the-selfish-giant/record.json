@@ -21998,6 +21998,20 @@
       },
       "path": "holds/film-01.hold-1.json",
       "sha256": "294a912df9b1fb5ec4341e0fd455b70a5580e1fac7436667d38b3d1264492e11"
+    },
+    {
+      "bytes": 22739,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.933533333333333,
+        "inputs_zip": "jobs/selfish-giant-edit-test-film-01/inputs.zip",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "manifest": "jobs/selfish-giant-edit-test-film-01/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/selfish-giant-edit-test-film-01/edit.ipynb",
+      "sha256": "e201792362df038fd0a2db61279e450b8b056802884400aa7eaf651b6cb000f7"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -23895,6 +23909,49 @@
       },
       "result": "recorded",
       "stage": "hold"
+    },
+    {
+      "at": "2026-11-25T08:22:35.728949+00:00",
+      "detail": {
+        "forecast_units": 1.933533333333333,
+        "job_id": "selfish-giant-edit-test-film-01",
+        "kind": "edit"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T08:22:35.753346+00:00",
+      "detail": {
+        "job_id": "selfish-giant-edit-test-film-01",
+        "kind": "edit",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-25T08:22:37.610871+00:00",
+      "detail": {
+        "bytes": 16679612,
+        "job_id": "selfish-giant-edit-test-film-01",
+        "key": "exports/colab-exchange/the-selfish-giant/selfish-giant-edit-test-film-01/inputs.zip",
+        "sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T08:23:30.353908+00:00",
+      "detail": {
+        "expires_at": "2026-11-26T08:22:53+00:00",
+        "inputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-edit-test-film-01/inputs.zip",
+        "inputs_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-edit-test-film-01/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",

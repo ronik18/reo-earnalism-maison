@@ -1,0 +1,24 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 3242,
+  "diffusers": "diffusers==0.37.0",
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/edit-test-film-01",
+  "inputs_sha256": "adf021f94447d133e312871e77b4dc51fd5f20e02434c9fa7e49d5dc7abf46ad",
+  "job_id": "edit-test-film-01",
+  "kind": "edit",
+  "licences": {
+    "allowlist": [
+      "apache-2.0"
+    ],
+    "recorded": {
+      "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+    }
+  },
+  "model": {
+    "repo": "Qwen/Qwen-Image-Edit-2511",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "4d7b44f36507d4d1e9305bbdddd3ea3294cda372ab15ad064dc0300f0740dce9",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}

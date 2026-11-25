@@ -45,5 +45,14 @@
     "export_s": 120,
     "source": "ESTIMATE — replace with measured values after the first run",
     "basis": "SDXL 1.0 inpainting fp16 + CLIPSeg masks at 1344x768 on L4/A100; 30 steps; see skills/earnalism-audiovisual/references/compute-budget.md"
+  },
+  "edit": {
+    "s_per_step": 3.75,
+    "units_per_hour": 1.94,
+    "steps": 40,
+    "decode_s": 1500,
+    "export_s": 120,
+    "source": "ESTIMATE — replace with measured values after the first run",
+    "basis": "Qwen-Image-Edit-2511, NF4 transformer + CPU offload on L4; ~58 GB download"
   }
 }

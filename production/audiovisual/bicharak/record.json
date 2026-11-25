@@ -30706,6 +30706,20 @@
       },
       "path": "holds/film-01.hold-1.json",
       "sha256": "98e3bc689aee06999db4f5b386c97969638902387ed812afe33dfd2b68dd715a"
+    },
+    {
+      "bytes": 22642,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.7476166666666664,
+        "inputs_zip": "jobs/edit-test-film-01/inputs.zip",
+        "job_id": "edit-test-film-01",
+        "job_kind": "edit",
+        "manifest": "jobs/edit-test-film-01/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/edit-test-film-01/edit.ipynb",
+      "sha256": "4d7b44f36507d4d1e9305bbdddd3ea3294cda372ab15ad064dc0300f0740dce9"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -33855,6 +33869,49 @@
       },
       "result": "recorded",
       "stage": "hold"
+    },
+    {
+      "at": "2026-11-25T08:22:33.353406+00:00",
+      "detail": {
+        "forecast_units": 1.7476166666666664,
+        "job_id": "edit-test-film-01",
+        "kind": "edit"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T08:22:33.383837+00:00",
+      "detail": {
+        "job_id": "edit-test-film-01",
+        "kind": "edit",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-25T08:22:35.221165+00:00",
+      "detail": {
+        "bytes": 8204892,
+        "job_id": "edit-test-film-01",
+        "key": "exports/colab-exchange/bicharak/edit-test-film-01/inputs.zip",
+        "sha256": "adf021f94447d133e312871e77b4dc51fd5f20e02434c9fa7e49d5dc7abf46ad"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T08:23:30.032866+00:00",
+      "detail": {
+        "expires_at": "2026-11-26T08:22:52.916074+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/edit-test-film-01/inputs.zip",
+        "inputs_sha256": "adf021f94447d133e312871e77b4dc51fd5f20e02434c9fa7e49d5dc7abf46ad",
+        "job_id": "edit-test-film-01",
+        "outputs_key": "exports/colab-exchange/bicharak/edit-test-film-01/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",

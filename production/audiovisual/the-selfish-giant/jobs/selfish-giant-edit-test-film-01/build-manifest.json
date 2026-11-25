@@ -1,0 +1,24 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 3587,
+  "diffusers": "diffusers==0.37.0",
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/the-selfish-giant/selfish-giant-edit-test-film-01",
+  "inputs_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+  "job_id": "selfish-giant-edit-test-film-01",
+  "kind": "edit",
+  "licences": {
+    "allowlist": [
+      "apache-2.0"
+    ],
+    "recorded": {
+      "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+    }
+  },
+  "model": {
+    "repo": "Qwen/Qwen-Image-Edit-2511",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "e201792362df038fd0a2db61279e450b8b056802884400aa7eaf651b6cb000f7",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "the-selfish-giant"
+}
