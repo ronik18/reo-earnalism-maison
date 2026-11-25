@@ -243,8 +243,8 @@
     "job_id": "retouch-film-01-r9",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 2.1380416666666666,
-    "state": "reserved",
+    "units": 1.5,
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   },
@@ -252,8 +252,8 @@
     "job_id": "stills-film-01-r10",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 1.6236722222222217,
-    "state": "reserved",
+    "units": 1.0,
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   },
@@ -261,8 +261,8 @@
     "job_id": "selfish-giant-retouch-film-01-r9",
     "title": "the-selfish-giant",
     "month": "2026-11",
-    "units": 1.2456416666666665,
-    "state": "reserved",
+    "units": 1.0,
+    "state": "settled",
     "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
     "root": "the-selfish-giant"
   },
@@ -270,8 +270,8 @@
     "job_id": "selfish-giant-stills-film-01-r10",
     "title": "the-selfish-giant",
     "month": "2026-11",
-    "units": 2.1194499999999996,
-    "state": "reserved",
+    "units": 1.1,
+    "state": "settled",
     "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
     "root": "the-selfish-giant"
   }

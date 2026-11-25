@@ -21,6 +21,7 @@ production/**/exchange.json
 # Imported Colab media lives in R2 (exports/audiovisual-archive/); only its hash manifest is committed
 production/audiovisual/*/narration/*/
 production/audiovisual/*/stills/*/
+production/audiovisual/*/retouch/*/
 production/audiovisual/*/music/*/
 production/audiovisual/*/film/*/*.wav
 production/audiovisual/*/film/*/*.mp4
