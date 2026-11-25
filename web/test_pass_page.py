@@ -28,7 +28,7 @@ class PassPageFoundingTests(TestCase):
     def open_founding(self):
         staff = get_user_model().objects.create_user('staff-pass@example.test', 'Local-Fixture-Password-47', is_staff=True, is_verified=True)
         founding.ensure_founding_plans(staff)
-        Offer.objects.filter(code__in=['founding-pass-month', 'founding-pass-year']).update(approved=True, active=True)
+        Offer.objects.filter(code__in=['founding-pass-month', 'founding-pass-year']).update(approved=True, active=True, test_only=False)
         BillingPlan.objects.update(merchant_approved_at=timezone.now())
 
     def test_founding_price_and_lifetime_wording_shown_only_when_open(self):
@@ -43,6 +43,8 @@ class PassPageFoundingTests(TestCase):
         Offer.objects.filter(code='founding-pass-year').update(approved=True, active=True)
         self.assertNotIn(WORDING, self.main())  # merchant approval still missing
         BillingPlan.objects.update(merchant_approved_at=timezone.now())
+        self.assertNotIn(WORDING, self.main())  # still test-only offers: not purchasable in production
+        Offer.objects.update(test_only=False)
         self.assertIn('Founding member: ' + WORDING, self.main())
 
     def test_bengali_wording_exists_in_catalogue(self):
