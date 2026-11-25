@@ -20,7 +20,9 @@ class Command(BaseCommand):
             from billing.revenue import record_spend
             from core.api import DomainError
             user=get_user_model().objects.filter(email=o['approved_by']).first()
-            try: record_spend(month,o['record_spend'],o['purpose'],user,date.fromisoformat(o['payback_due']) if o['payback_due'] else None)
+            try: payback=date.fromisoformat(o['payback_due']) if o['payback_due'] else None
+            except ValueError: raise CommandError('--payback-due must be YYYY-MM-DD')
+            try: record_spend(month,o['record_spend'],o['purpose'],user,payback)
             except DomainError as e: raise CommandError(str(e))
         r=month_report(month);w=self.stdout.write
         w(f"Revenue report {month:%Y-%m} (INR minor units)")
