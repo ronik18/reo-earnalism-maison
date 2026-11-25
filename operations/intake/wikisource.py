@@ -27,12 +27,50 @@ class IntakeError(ValueError):
         self.code = code
 
 
+VERSE_MARK, HEADING_MARK, LINE_SEP = '\x01', '\x02', '\x03'
+CONTROLS = re.compile('[\x00-\x03]')
+POEM = re.compile(r'\{\{Block center\|<poem>(.*?)</poem>\}\}', re.S)
+RULE_LINE = re.compile(r'^[ \t]*\{\{rule\|[^{}\n]*\}\}[ \t]*$', re.M)
+HEADING_TEXT = r'([^{}|<>\n]+?)'
+HEADING = re.compile(
+    r'(?:(?<=\n\n)|\A)[ \t]*(?:\{\{কেন্দ্র\|\{\{larger\|' + HEADING_TEXT + r'\}\}\}\}'
+    r'|\{\{কেন্দ্র\|' + HEADING_TEXT + r'\}\}|\{\{larger\|' + HEADING_TEXT + r'\}\})[ \t]*(?=\n[ \t]*\n|\n*\Z)')
+COLLECTION_HEADER = r'\{\{কেন্দ্র\|\{\{x-larger\|গল্প-দশক।\}\}\}\}\s*'
+
+
+def _title_pattern(title):
+    t = re.escape(title) + '।?'
+    return re.compile(r'(?:' + COLLECTION_HEADER + r'\{\{কেন্দ্র\|\{\{larger\|' + t + r'\}\}\}\}'
+                      r'|\{\{কেন্দ্র\|\{\{x-larger\|' + t + r'\}\}\}\})')
+
+
+def _verse(match):
+    lines = [line.strip() for line in match.group(1).split('\n')]
+    if not lines or not all(lines):
+        raise IntakeError('UNKNOWN_MARKUP', 'poem with an empty line')
+    for line in lines:
+        found = MARKUP.search(line)
+        if found:
+            raise IntakeError('UNKNOWN_MARKUP', found.group(0))
+    return BREAK + VERSE_MARK + LINE_SEP.join(lines) + VERSE_MARK + BREAK
+
+
+def _heading(match):
+    return BREAK + HEADING_MARK + next(g for g in match.groups() if g is not None) + HEADING_MARK + BREAK
+
+
 def _page_text(page, title, first):
-    text = NOINCLUDE.sub('', page['wikitext']).replace('﻿', '')
+    text = NOINCLUDE.sub('', page['wikitext']).replace('\ufeff', '')
+    found = CONTROLS.search(text)
+    if found:
+        raise IntakeError('UNKNOWN_MARKUP', repr(found.group(0)))
     if first:
-        text, found = re.subn(r'\{\{কেন্দ্র\|\{\{x-larger\|' + re.escape(title) + r'।?\}\}\}\}', '', text, count=1)
+        text, found = _title_pattern(title).subn('', text, count=1)
         if not found:
             raise IntakeError('TITLE_LINE_MISSING', title)
+    text = POEM.sub(_verse, text)
+    text = RULE_LINE.sub(BREAK, text)
+    text = HEADING.sub(_heading, text)
     closed = bool(re.search(r'\{\{nop\}\}\s*\Z', text))
     text = text.replace('{{nop}}', '')
     text = re.sub(r'\{\{gap\}\}|\n[ \t]*\n', BREAK, text).strip()
@@ -40,7 +78,7 @@ def _page_text(page, title, first):
 
 
 def pages_to_paragraphs(pages, *, title, keep_hyphen_after=frozenset()):
-    """Join validated pages into paragraphs using the recorded conversion rules."""
+    """Join validated pages into [{"kind", "text"}] paragraphs using the recorded conversion rules."""
     if not pages:
         raise IntakeError('NO_PAGES')
     unknown = set(keep_hyphen_after) - {page.get('page') for page in pages}
@@ -58,12 +96,19 @@ def pages_to_paragraphs(pages, *, title, keep_hyphen_after=frozenset()):
             else:
                 stream += ' '
         stream += text
-    paragraphs = [' '.join(part.split()) for part in stream.split(BREAK)]
-    paragraphs = [p for p in paragraphs if p]
+    paragraphs = []
+    for part in stream.split(BREAK):
+        if part.startswith(VERSE_MARK):
+            paragraphs.append({'kind': 'verse', 'text': part[1:-1].replace(LINE_SEP, '\n')})
+            continue
+        kind = 'heading' if part.startswith(HEADING_MARK) else 'paragraph'
+        text = ' '.join(part.strip(HEADING_MARK).split())
+        if text:
+            paragraphs.append({'kind': kind, 'text': text})
     if not paragraphs:
         raise IntakeError('NO_TEXT')
     for paragraph in paragraphs:
-        found = MARKUP.search(paragraph)
+        found = MARKUP.search(paragraph['text'])
         if found:
             raise IntakeError('UNKNOWN_MARKUP', found.group(0))
     return paragraphs
@@ -85,7 +130,7 @@ def build_packet(slug, title, pages, *, source_ref, source_edition, house, descr
     paragraphs = pages_to_paragraphs(pages, title=title, keep_hyphen_after=frozenset(keep_hyphen_after))
     source = {'schema': SOURCE_SCHEMA, 'language': 'bn', 'units': [{
         'key': 'chapter-001', 'title': title, 'kind': 'chapter',
-        'paragraphs': [{'kind': 'paragraph', 'text': p} for p in paragraphs]}]}
+        'paragraphs': paragraphs}]}
     raw = source_bytes(source)
     read_source_bytes(raw)
     sha = hashlib.sha256(raw).hexdigest()

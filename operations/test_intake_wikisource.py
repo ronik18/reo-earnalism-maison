@@ -41,15 +41,15 @@ class WikisourceRulesTests(SimpleTestCase):
     def test_rules_match_the_kshudhita_pashan_packet(self):
         paragraphs = pages_to_paragraphs(PAGES, title=TITLE, keep_hyphen_after=frozenset({'১৭৫'}))
         self.assertEqual(paragraphs, [
-            'আমি এবং আমার আত্মীয় কলিকাতায় ফিরিয়া আসিতেছিলাম। তাহার প্রতিবিম্ব আলোড়িত হইল।',
-            'সঙ্গিনীহীন মাশুল-কালেক্টরের বাসস্থান।',
-            'শেষ।'])
-        text = ''.join(paragraphs)
+            {'kind': 'paragraph', 'text': 'আমি এবং আমার আত্মীয় কলিকাতায় ফিরিয়া আসিতেছিলাম। তাহার প্রতিবিম্ব আলোড়িত হইল।'},
+            {'kind': 'paragraph', 'text': 'সঙ্গিনীহীন মাশুল-কালেক্টরের বাসস্থান।'},
+            {'kind': 'paragraph', 'text': 'শেষ।'}])
+        text = ''.join(p['text'] for p in paragraphs)
         self.assertNotIn('﻿', text)
         self.assertNotIn('{{', text)
 
     def test_hyphen_is_dropped_unless_the_page_is_listed(self):
-        self.assertIn('মাশুলকালেক্টরের', ' '.join(pages_to_paragraphs(PAGES, title=TITLE)))
+        self.assertIn('মাশুলকালেক্টরের', ' '.join(p['text'] for p in pages_to_paragraphs(PAGES, title=TITLE)))
 
     def test_missing_title_line_is_refused(self):
         pages = [dict(PAGES[0], wikitext='আমি।')]
@@ -105,6 +105,88 @@ class WikisourceRulesTests(SimpleTestCase):
         with self.assertRaises(IntakeError) as caught:
             build_packet('x', TITLE, PAGES, **kw)
         self.assertEqual(caught.exception.code, 'CREATORS_REQUIRED')
+
+
+def _one(wikitext, title=TITLE):
+    return pages_to_paragraphs([{'page': '১', 'revision': 1, 'quality': 4, 'wikitext': wikitext}], title=title)
+
+
+class WikisourceStructureTests(SimpleTestCase):
+    TL = '{{কেন্দ্র|{{x-larger|ক্ষুধিত পাষাণ।}}}}\n\n'
+
+    def test_poem_block_is_one_verse_paragraph(self):
+        got = _one(self.TL + 'আগে।\n\n{{Block center|<poem>প্রথম  পংক্তি \n  দ্বিতীয় পংক্তি,–\nতৃতীয়</poem>}}\n\n{{gap}}পরে।')
+        self.assertEqual(got, [
+            {'kind': 'paragraph', 'text': 'আগে।'},
+            {'kind': 'verse', 'text': 'প্রথম  পংক্তি\nদ্বিতীয় পংক্তি,–\nতৃতীয়'},
+            {'kind': 'paragraph', 'text': 'পরে।'}])
+
+    def test_poem_starts_and_ends_a_paragraph_even_without_blank_lines(self):
+        got = _one(self.TL + 'আগে\n{{Block center|<poem>ক\nখ</poem>}}\nপরে')
+        self.assertEqual([p['kind'] for p in got], ['paragraph', 'verse', 'paragraph'])
+
+    def test_poem_with_blank_line_or_markup_is_refused(self):
+        for bad in ('ক\n\nখ', 'ক [[খ]]', 'ক {{গ}}'):
+            with self.subTest(bad=bad), self.assertRaises(IntakeError) as caught:
+                _one(self.TL + '{{Block center|<poem>' + bad + '</poem>}}')
+            self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
+    def test_section_headings_in_all_three_forms(self):
+        body = ('{{কেন্দ্র|প্রথম পরিচ্ছেদ।}}\n\nএক।\n\n{{কেন্দ্র|{{larger|দ্বিতীয় পরিচ্ছেদ}}}}\n\n'
+                'দুই।\n\n{{larger|তৃতীয় পরিচ্ছেদ।}}\n\nতিন।')
+        self.assertEqual(_one(self.TL + body), [
+            {'kind': 'heading', 'text': 'প্রথম পরিচ্ছেদ।'}, {'kind': 'paragraph', 'text': 'এক।'},
+            {'kind': 'heading', 'text': 'দ্বিতীয় পরিচ্ছেদ'}, {'kind': 'paragraph', 'text': 'দুই।'},
+            {'kind': 'heading', 'text': 'তৃতীয় পরিচ্ছেদ।'}, {'kind': 'paragraph', 'text': 'তিন।'}])
+
+    def test_heading_must_be_its_own_block_else_refused(self):
+        for bad in ('এক {{কেন্দ্র|শিরোনাম}} দুই', 'এক।\n{{কেন্দ্র|শিরোনাম}}\nদুই', '{{কেন্দ্র|{{x-larger|শিরোনাম}}}}',
+                    '{{কেন্দ্র|ক|খ}}', '{{larger|{{larger|ক}}}}'):
+            with self.subTest(bad=bad), self.assertRaises(IntakeError) as caught:
+                _one(self.TL + bad)
+            self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
+    def test_rule_line_is_a_paragraph_break_with_no_text(self):
+        got = _one(self.TL + 'এক\n{{rule|3em}}\nদুই\n\n{{rule|3em}}')
+        self.assertEqual(got, [{'kind': 'paragraph', 'text': 'এক'}, {'kind': 'paragraph', 'text': 'দুই'}])
+
+    def test_rule_inside_a_line_is_refused(self):
+        with self.assertRaises(IntakeError) as caught:
+            _one(self.TL + 'এক {{rule|3em}} দুই')
+        self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
+    def test_rule_right_after_the_title_line(self):
+        got = _one(self.TL + '{{rule|3em}}\n\nএক')
+        self.assertEqual(got, [{'kind': 'paragraph', 'text': 'এক'}])
+
+    def test_collection_header_then_title_line_are_both_dropped(self):
+        got = _one('{{কেন্দ্র|{{x-larger|গল্প-দশক।}}}}\n\n{{কেন্দ্র|{{larger|ক্ষুধিত পাষাণ।}}}}\n\n'
+                   '{{কেন্দ্র|প্রথম পরিচ্ছেদ।}}\n\nএক।')
+        self.assertEqual(got, [{'kind': 'heading', 'text': 'প্রথম পরিচ্ছেদ।'}, {'kind': 'paragraph', 'text': 'এক।'}])
+
+    def test_collection_header_without_the_title_line_is_refused(self):
+        for bad in ('{{কেন্দ্র|{{x-larger|গল্প-দশক।}}}}\n\nএক।', '{{কেন্দ্র|{{larger|ক্ষুধিত পাষাণ।}}}}\n\nএক।'):
+            with self.subTest(bad=bad), self.assertRaises(IntakeError) as caught:
+                _one(bad)
+            self.assertEqual(caught.exception.code, 'TITLE_LINE_MISSING')
+
+    def test_collection_header_on_a_later_page_is_refused(self):
+        pages = [PAGES[0], dict(PAGES[1], wikitext='{{কেন্দ্র|{{x-larger|গল্প-দশক।}}}}\n\nএক')]
+        with self.assertRaises(IntakeError) as caught:
+            pages_to_paragraphs(pages, title=TITLE)
+        self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
+
+    def test_verse_and_heading_flow_into_the_source_units(self):
+        pages = [{'page': '১', 'revision': 1, 'quality': 4, 'timestamp': None,
+                  'wikitext': self.TL + '{{কেন্দ্র|প্রথম।}}\n\n{{Block center|<poem>ক\nখ</poem>}}'}]
+        source = build_packet('test-book', TITLE, pages, **KW)['source']
+        self.assertEqual([p['kind'] for p in source['units'][0]['paragraphs']], ['heading', 'verse'])
+        self.assertEqual(source['units'][0]['paragraphs'][1]['text'], 'ক\nখ')
+
+    def test_control_characters_in_the_source_are_refused(self):
+        with self.assertRaises(IntakeError) as caught:
+            _one(self.TL + 'এক\x01দুই')
+        self.assertEqual(caught.exception.code, 'UNKNOWN_MARKUP')
 
 
 class WikisourceCommandTests(TestCase):
