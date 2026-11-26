@@ -20,7 +20,9 @@
   python3 -m eav.cli modal-request <job_id> --root <dir> --colab-units <CU, 0 if none>
                          (no Modal access here: the same checks, move and pending worst-case row as modal-run,
                           then production/audiovisual/modal-requests/<job_id>.json for the modal-jobs workflow,
-                          which runs `modal-run --request` and `r2-upload`; root commits and pushes the request)
+                          which runs `r2-probe`, `modal-run --request` (caps re-checked for the run month) and
+                          `r2-upload` (`modal-replay` re-applies a result after a push conflict); root commits
+                          and pushes the request)
   python3 -m eav.cli modal-fetch <job_id> --root <dir> [--into <dir>]
                          (a finished request: download its job folder from private R2, sha256-verified; never imports)
   python3 -m eav.cli modal-settle <job_id> --root <dir> --usd <billed>   (replace an interrupted run's pending worst-case row)
@@ -1019,14 +1021,40 @@ def _requested_run(args, rec, req_path):
         raise Stop(f"--colab-units {args.colab_units:g} differs from the request's {colab_units:g}",
                    "Drop --colab-units; the request carries it")
     ledger, run_id = _ledger(rec, args), req["pending_run_id"]
-    if not any(r["run_id"] == run_id and r["status"] == "pending"
-               for r in ledger.modal_rows(job_id=args.job_id)):
+    row = next((r for r in ledger.modal_rows(job_id=args.job_id)
+                if r["run_id"] == run_id and r["status"] == "pending"), None)
+    if row is None:
         raise Stop(f"the request's row {run_id} is not pending on the ledger; Modal was not "
                    "contacted", f"Make a new request: {PROG} modal-request {args.job_id} --root "
                    f"{rec.root} --colab-units {colab_units:g}")
+    # The request may run in a later UTC month (or after other spend): both caps are checked again
+    # now, for the current month, with this row's worst case moved there.
+    month = _month()
+    try:
+        ledger.check_modal(month, rec.data["title_slug"], row["usd"],
+                           rec.data["source"].get("edition_id"), exclude_run_id=run_id)
+    except budget.BudgetExceeded as e:
+        _refuse_request(ledger, req_path, run_id, f"Budget exceeded at run time: {e}")
+        raise Stop(f"Budget exceeded: {e}. The request is refused, its pending row released; Modal "
+                   "was not contacted.", "Hold the job and ask the owner; never run past the Modal cap.",
+                   code=3)
+    if not any(r["run_id"] == run_id for r in ledger.modal_rows(month=month)):
+        ledger.move_modal_row(run_id, month)
     _move_to_modal(rec, ledger, args.job_id, colab_units,
                    datetime.now(timezone.utc).isoformat(timespec="seconds"))
     return ledger, run_id, colab_units
+
+
+def _refuse_request(ledger, req_path, run_id, reason):
+    """Before Modal is contacted: release the request's pending row and mark it refused."""
+    try:
+        ledger.release_pending_modal(run_id)
+    except (KeyError, ValueError):
+        pass  # already released, or no longer pending: it then stays as it is
+    req = modal_requests.read_request(req_path)
+    req.update(status=modal_requests.REFUSED, error=reason,
+               finished_at=datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    modal_requests.write_request(req_path, req)
 
 
 def cmd_modal_run(args):
@@ -1139,8 +1167,70 @@ def cmd_r2_upload(args):
     modal_requests.write_request(path, req)
     print(f"Request {args.job_id}: {status}; {len(files)} verified file(s) under "
           f"r2://{modal_requests.R2_BUCKET}/{prefix}")
+    try:  # the copy modal-fetch reads if the request cannot be pushed back to the branch
+        modal_requests.put_result(prefix, req, modal_requests.default_opener(),
+                                  os.environ.get(modal_requests.TOKEN_ENV) or None)
+    except modal_requests.R2Error as e:
+        upload_error = upload_error or f"result copy: {e}"
+        print(f"The R2 copy {modal_requests.RESULT_NAME} was not written: {e}")
     if upload_error:
         raise Stop(upload_error, "Commit the request and the ledger anyway (the spend is recorded)")
+
+
+def cmd_r2_probe(args):
+    """The workflow, before the paid run: PUT, list, GET and DELETE a probe object under the job's
+    R2 prefix with the runner's token. On failure the request is refused and its pending row
+    released, so Modal is never paid for outputs that could not be uploaded."""
+    rec = _record(args.root)
+    path = modal_requests.request_path(rec.root, args.job_id)
+    req = modal_requests.read_request(path)
+    if req["status"] not in modal_requests.OPEN:
+        raise Stop(f"request {path} is {req['status']}; only an open request is probed",
+                   f"{PROG} status --root {rec.root}")
+    prefix = modal_requests.r2_prefix(rec.data["title_slug"], args.job_id)
+    try:
+        key = modal_requests.probe(prefix, modal_requests.default_opener(),
+                                   os.environ.get(modal_requests.TOKEN_ENV) or None)
+    except modal_requests.R2Error as e:
+        _refuse_request(_ledger(rec, args), path, req["pending_run_id"], f"R2 probe failed: {e}")
+        raise Stop(f"R2 probe failed: {e}. The request is refused, its pending row released; Modal "
+                   "was not contacted.", "Fix the R2 token or API access, then modal-request again")
+    print(f"R2 probe ok: put, listed, read back and deleted r2://{modal_requests.R2_BUCKET}/{key}")
+
+
+def cmd_modal_replay(args):
+    """The workflow, when a push-back rebase conflicts: on the freshly fetched branch, re-apply this
+    job's saved request file and its own ledger entry and rows (by job_id and run_id); every other
+    line of the newer ledger is kept."""
+    rec = _record(args.root)
+    saved = Path(args.saved)
+    req = modal_requests.read_request(saved / "request.json")
+    if req["job_id"] != args.job_id:
+        raise Stop(f"the saved request is for {req['job_id']}, not {args.job_id}", "Pass the right --saved")
+    ledger = _ledger(rec, args)
+    ledger.replay_job(args.job_id, _json(saved / "ledger.json"))
+    modal_requests.write_request(modal_requests.request_path(rec.root, args.job_id), req)
+    print(f"Replayed request {args.job_id} ({req['status']}) and its ledger rows onto the current tree.")
+
+
+def _fetchable_request(rec, args, path):
+    """The branch request; if it is missing or still open (the workflow could not push it back),
+    the finished copy the workflow uploaded to R2 as _request-result.json."""
+    req = modal_requests.read_request(path) if path.is_file() else None
+    if req is not None and req["status"] not in modal_requests.OPEN:
+        return req, False
+    prefix = modal_requests.r2_prefix(rec.data["title_slug"], args.job_id)
+    try:
+        copy = modal_requests.get_result(prefix, modal_requests.default_opener())
+    except modal_requests.R2Error as e:
+        raise Stop(f"the R2 copy of request {args.job_id} is unreadable: {e}",
+                   f"Pull {modal_requests.BRANCH} and rerun")
+    if copy is not None and copy.get("job_id") == args.job_id and copy["status"] not in modal_requests.OPEN:
+        return copy, True
+    if req is None:
+        raise Stop(f"no request file {path}", f"{PROG} status --root {rec.root}")
+    raise Stop(f"request {args.job_id} is {req['status']}; the workflow has not finished it",
+               f"Pull {modal_requests.BRANCH} and rerun once the request is done")
 
 
 def cmd_modal_fetch(args):
@@ -1148,12 +1238,14 @@ def cmd_modal_fetch(args):
     sha256 against the request. Never imports: the printed command does."""
     rec = _record(args.root)
     path = modal_requests.request_path(rec.root, args.job_id)
-    if not path.is_file():
-        raise Stop(f"no request file {path}", f"{PROG} status --root {rec.root}")
-    req = modal_requests.read_request(path)
-    if req["status"] not in modal_requests.FINISHED:
-        raise Stop(f"request {args.job_id} is {req['status']}; the workflow has not finished it",
-                   f"Pull {modal_requests.BRANCH} and rerun once the request is done")
+    req, from_r2 = _fetchable_request(rec, args, path)
+    if from_r2:
+        print(f"The branch request is stale; using the R2 copy ({req['status']}). Merge "
+              f"{modal_requests.FALLBACK_BRANCH.format(job_id=args.job_id)} (the request and the "
+              "ledger rows of this run) before import.")
+    if req["status"] == modal_requests.REFUSED:
+        raise Stop(f"request {args.job_id} was refused before Modal was contacted: {req.get('error')}",
+                   f"Hold for the owner; then {PROG} modal-request {args.job_id} --root {rec.root} ...")
     if not req.get("files"):
         raise Stop(f"request {args.job_id} is {req['status']} with no uploaded files "
                    f"({req.get('error')})", f"{PROG} close {args.job_id} --root {rec.root} --reason "
@@ -1852,7 +1944,7 @@ def cmd_social(args):
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "supersede": cmd_supersede, "close": cmd_close, "modal-run": cmd_modal_run, "modal-settle": cmd_modal_settle,
             "modal-request": cmd_modal_request, "r2-upload": cmd_r2_upload,
-            "modal-fetch": cmd_modal_fetch,
+            "modal-fetch": cmd_modal_fetch, "r2-probe": cmd_r2_probe, "modal-replay": cmd_modal_replay,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio, "preview": cmd_preview, "social": cmd_social}
 
@@ -1902,6 +1994,11 @@ def _parser():
     s = add("r2-upload")
     s.add_argument("job_id")
     s.add_argument("--from", dest="source", required=True, help="the downloaded job folder")
+    s = add("r2-probe")
+    s.add_argument("job_id")
+    s = add("modal-replay")
+    s.add_argument("job_id")
+    s.add_argument("--saved", required=True, help="folder with this run's request.json and ledger.json")
     s = add("modal-fetch")
     s.add_argument("job_id")
     s.add_argument("--into", help="where the job folder lands (default <root>/.downloads/<job_id>)")

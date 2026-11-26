@@ -37,30 +37,37 @@ class FakeR2:
     cursor pagination (page_size keys per page). Records every request's method, URL and headers."""
 
     def __init__(self, page_size=2):
-        self.store, self.page_size, self.calls = {}, page_size, []
+        self.store, self.page_size, self.calls, self.deny = {}, page_size, [], set()
 
     def open(self, req, timeout=None):
         url, method = req.full_url, req.get_method()
         self.calls.append((method, url, dict(req.header_items())))
         assert url.startswith(OBJECTS), url
+        if method in self.deny:
+            raise urllib.error.HTTPError(url, 403, "Forbidden", {}, None)
         rest = url[len(OBJECTS):]
-        if rest.startswith("?"):
+        if rest.startswith("?"):  # the verified shape: result is a plain list; a cursor only if more
             q = urllib.parse.parse_qs(rest[1:])
+            assert q["per_page"] == ["1000"], q
             keys = sorted(k for k in self.store if k.startswith(q["prefix"][0]))
             start = int(q.get("cursor", ["0"])[0])
             page = keys[start:start + self.page_size]
-            more = start + self.page_size < len(keys)
-            return _Resp(json.dumps({
-                "success": True, "errors": [], "messages": [],
-                "result": [{"key": k, "size": len(self.store[k]), "etag": "x"} for k in page],
-                "result_info": {"cursor": str(start + self.page_size) if more else "",
-                                "is_truncated": more, "per_page": self.page_size}}).encode())
-        key = urllib.parse.unquote(rest[1:])
+            body = {"success": True, "errors": [], "messages": [],
+                    "result": [{"key": k, "size": len(self.store[k]), "etag": "x"} for k in page]}
+            if start + self.page_size < len(keys):
+                body["result_info"] = {"cursor": str(start + self.page_size)}
+            return _Resp(json.dumps(body).encode())
+        assert "%2F" not in rest, rest  # slashes stay literal; each segment is encoded on its own
+        key = "/".join(urllib.parse.unquote(seg) for seg in rest[1:].split("/"))
         if method == "PUT":
             self.store[key] = req.data
-            return _Resp(json.dumps({"success": True, "errors": [], "result": {"key": key}}).encode())
+            return _Resp(json.dumps({"success": True, "errors": [], "result": {
+                "key": key, "size": str(len(req.data)), "etag": "x"}}).encode())
         if key not in self.store:
             raise urllib.error.HTTPError(url, 404, "Not Found", {}, None)
+        if method == "DELETE":
+            del self.store[key]
+            return _Resp(json.dumps({"success": True, "errors": [], "result": {}}).encode())
         return _Resp(self.store[key])
 
 
@@ -245,14 +252,148 @@ class ModalRequestTests(unittest.TestCase):
         self.assertEqual(req["files"], [
             {"path": p, "sha256": hashlib.sha256(b).hexdigest(), "bytes": len(b)}
             for p, b in (("manifest.json", b"{}"), ("sub/u2.wav", b"two"), ("u1.wav", b"one"))])
-        self.assertEqual(sorted(self.r2.store), sorted(prefix + f["path"] for f in req["files"]))
+        result_key = prefix + "_request-result.json"
+        self.assertEqual(sorted(self.r2.store),
+                         sorted([result_key] + [prefix + f["path"] for f in req["files"]]))
+        self.assertEqual(json.loads(self.r2.store[result_key]), req)  # the R2 copy of the request
         puts = [c for c in self.r2.calls if c[0] == "PUT"]
-        self.assertEqual(len(puts), 3)
+        self.assertEqual(len(puts), 4)
         self.assertTrue(all(c[2].get("Authorization") == "Bearer test-token-value" for c in puts))
-        self.assertIn(f"objects/gpu-jobs%2F{self.slug}%2F{self.job_id}%2Fsub%2Fu2.wav",
+        self.assertIn(f"objects/gpu-jobs/{self.slug}/{self.job_id}/sub/u2.wav",
                       " ".join(c[1] for c in puts))
         # every upload was read back
         self.assertEqual(len([c for c in self.r2.calls if c[0] == "GET"]), 3)
+
+    def test_object_urls_keep_slashes_and_encode_each_segment(self):
+        url = modal_requests._object_url("gpu-jobs/a b/c?d/e.wav")
+        self.assertEqual(url, OBJECTS + "/gpu-jobs/a%20b/c%3Fd/e.wav")
+        self.assertIn("per_page=1000", modal_requests._list_url("gpu-jobs/x/"))
+
+    def test_list_follows_a_cursor_without_is_truncated(self):
+        self.r2.page_size = 1
+        for i in range(3):
+            self.r2.store[f"p/{i}"] = b"x"
+        self.assertEqual(modal_requests.list_keys("p/", self.r2), ["p/0", "p/1", "p/2"])
+        self.assertEqual(len(self.r2.calls), 3)
+
+    # ------------------------------------------------------------ run-time cap re-check (I2)
+    def test_request_run_in_a_later_month_counts_there(self):
+        with mock.patch.object(modal_run, "L4_USD_PER_S", 1.0 / self.timeout_s):
+            self.assertEqual(self.request()[0], 0)  # 1.00 USD pending in 2026-11
+        self.set_status("running")
+        with mock.patch.object(cli, "_MONTH", "2026-12"), \
+                mock.patch.object(modal_run, "run_modal", fake_runner(0.4)):
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--request")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(self.ledger.modal_rows(month="2026-11"), [])
+        self.assertEqual([(r["status"], r["usd"]) for r in self.ledger.modal_rows(month="2026-12")],
+                         [("ok", 0.4)])
+
+    def test_request_refused_when_the_run_month_is_full(self):
+        with mock.patch.object(modal_run, "L4_USD_PER_S", 1.0 / self.timeout_s):
+            self.assertEqual(self.request()[0], 0)
+        self.set_status("running")
+        self.ledger.record_modal_spend("2026-12", "other-job", 29.5, 1.0, "ok", "t")
+        calls = []
+        with mock.patch.object(cli, "_MONTH", "2026-12"), \
+                mock.patch.object(modal_run, "run_modal", fake_runner(0.1, calls=calls)):
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--request")
+        self.assertEqual((code, calls), (3, []), out)
+        self.assertIn("Modal month cap", out)
+        self.assertEqual(self.rows(), [])  # the pending row was released
+        req = self.req()
+        self.assertEqual(req["status"], "refused")
+        self.assertIn("Budget exceeded", req["error"])
+        with mock.patch.object(cli, "_MONTH", "2026-12"), \
+                mock.patch.object(modal_run, "L4_USD_PER_S", 1.0 / self.timeout_s):
+            self.assertEqual(self.request()[0], 3)  # December is still full for a new request
+
+    def test_request_refused_when_the_title_cap_filled_meanwhile(self):
+        with mock.patch.object(modal_run, "L4_USD_PER_S", 1.0 / self.timeout_s):
+            self.assertEqual(self.request()[0], 0)
+        self.set_status("running")
+        (entry,) = [e for e in json.loads(self.ledger_bytes()) if e.get("job_id") == self.job_id]
+        # another job of the same title spent 5.50 USD since the request was written
+        self.ledger.reserve(entry.get("title"), self.MONTH, 0.0, "sibling-job", entry.get("edition_id"))
+        self.ledger.record_modal_spend(self.MONTH, "sibling-job", 5.5, 1.0, "ok", "t")
+        calls = []
+        with mock.patch.object(modal_run, "run_modal", fake_runner(0.1, calls=calls)):
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--request")
+        self.assertEqual((code, calls), (3, []), out)
+        self.assertIn("title cap", out)
+        self.assertEqual((self.req()["status"], self.rows()), ("refused", []))
+
+    # ------------------------------------------------------------ R2 probe before the paid run (I3)
+    def test_probe_puts_lists_reads_and_deletes(self):
+        self.assertEqual(self.request()[0], 0)
+        self.set_status("running")
+        with mock.patch.dict(os.environ, {"CLOUDFLARE_R2_TOKEN": "test-token-value"}):
+            code, out = run("r2-probe", self.job_id, "--root", self.root)
+        self.assertEqual(code, 0, out)
+        self.assertEqual([c[0] for c in self.r2.calls], ["PUT", "GET", "GET", "DELETE"])
+        self.assertIn(f"/gpu-jobs/{self.slug}/{self.job_id}/_probe/probe.txt", self.r2.calls[0][1])
+        self.assertEqual(self.r2.store, {})
+        self.assertEqual((self.req()["status"], len(self.rows())), ("running", 1))
+
+    def test_probe_failure_refuses_and_releases_before_modal(self):
+        self.assertEqual(self.request()[0], 0)
+        self.set_status("running")
+        self.r2.deny = {"DELETE"}
+        code, out = run("r2-probe", self.job_id, "--root", self.root)
+        self.assertEqual(code, 2, out)
+        self.assertIn("R2 probe failed", out)
+        self.assertEqual((self.req()["status"], self.rows()), ("refused", []))
+        with mock.patch.object(modal_run, "run_modal", fake_runner(0.1, calls=[])) as _:
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--request")
+        self.assertEqual(code, 2, out)  # a refused request never runs
+        self.assertEqual(self.request()[0], 0)  # a new request may follow
+
+    # ------------------------------------------------------------ replay after a rebase conflict (I1)
+    def test_replay_reapplies_only_this_jobs_rows_onto_a_newer_ledger(self):
+        code, out = self.run_and_upload()
+        self.assertEqual(code, 0, out)
+        saved = self.d / "saved"
+        saved.mkdir()
+        (saved / "request.json").write_bytes(self.req_path.read_bytes())
+        (saved / "ledger.json").write_bytes(self.ledger_bytes())
+        mine = self.ledger.modal_rows(job_id=self.job_id)
+        # the branch moved on: the ledger as it was before the run, plus root's new request row
+        newer = json.loads(self.ledger_bytes())
+        for rec in newer:
+            for row in rec.get("rows", ()):
+                if row["job_id"] == self.job_id:
+                    row.update(status="pending", usd=9.9, seconds=0.0)
+        newer.append({"modal_spend": "2026-11", "rows": []})
+        newer = [r for r in newer if r.get("rows", [1])]
+        for rec in newer:
+            if rec.get("modal_spend") == self.MONTH:
+                rec["rows"].append({"run_id": "next-job#9", "job_id": "next-job", "usd": 1.2,
+                                    "seconds": 0.0, "at": "t", "status": "pending"})
+        self.ledger._write(newer)
+        self.set_status("running")
+        code, out = run("modal-replay", self.job_id, "--root", self.root, "--saved", saved)
+        self.assertEqual(code, 0, out)
+        self.assertEqual(self.ledger.modal_rows(job_id=self.job_id), mine)
+        self.assertEqual([r["usd"] for r in self.ledger.modal_rows(job_id="next-job")], [1.2])
+        self.assertEqual(self.req()["status"], "done")
+        code, out = run("modal-replay", "other", "--root", self.root, "--saved", saved)
+        self.assertEqual(code, 2, out)
+
+    def test_fetch_reads_the_r2_copy_when_the_branch_request_is_stale(self):
+        self.assertEqual(self.run_and_upload()[0], 0)
+        self.set_status("running")  # the push-back never reached the branch
+        code, out = self.fetch()
+        self.assertEqual(code, 0, out)
+        self.assertIn("stale", out)
+        self.assertIn(f"modal-results/{self.job_id}", out)
+        self.assertEqual((self.root / ".downloads" / self.job_id / "u1.wav").read_bytes(), b"one")
+
+    def test_upload_refuses_a_reserved_name(self):
+        folder = self.d / "f"
+        folder.mkdir()
+        (folder / "_request-result.json").write_text("{}")
+        with self.assertRaises(modal_requests.R2Error):
+            modal_requests.upload_folder(folder, "p/", self.r2)
 
     def test_upload_maps_hard_stop_and_records_a_failed_upload(self):
         code, out = self.run_and_upload(fake_runner(0.3, "hard_stopped"))
@@ -320,7 +461,10 @@ class ModalRequestTests(unittest.TestCase):
             code, out = self.fetch()
             self.assertEqual(code, 2, out)
             self.assertIn("has not finished", out)
-        self.assertEqual(self.r2.calls, [])
+        # only the R2 copy of the request was looked for (absent), nothing downloaded
+        self.assertTrue(self.r2.calls)
+        self.assertTrue(all(c[0] == "GET" and c[1].endswith("/_request-result.json")
+                            for c in self.r2.calls))
 
     def test_list_parser_tolerates_other_shapes(self):
         class Opener:
@@ -371,11 +515,27 @@ class WorkflowTests(unittest.TestCase):
         self.assertTrue(readme.is_file())
         self.assertIn("paths: ['production/audiovisual/modal-requests/*.json']", self.text)
         self.assertIn("set -euo pipefail", self.text)
-        self.assertIn("modal-run \"$job_id\" --root \"$root\" --request", self.text)
+        self.assertIn('modal-run "$JOB_ID" --root "$ROOT" --request', self.text)
+        self.assertIn("r2-probe", self.text)
         self.assertIn("r2-upload", self.text)
 
+    def test_actions_pinned_to_commits_and_modal_pinned(self):
+        uses = re.findall(r"uses:\s*(\S+)", self.text)
+        self.assertTrue(uses)
+        for u in uses:
+            self.assertRegex(u, r"^[\w-]+/[\w-]+@[0-9a-f]{40}$")
+        self.assertIn("pip install modal==1.6.4", self.text)
+
+    def test_publish_script_aborts_a_conflicting_rebase_and_falls_back(self):
+        script = (REPO / ".github" / "scripts" / "modal-publish.sh").read_text(encoding="utf-8")
+        self.assertIn("git rebase --abort", script)
+        self.assertIn("modal-replay", script)
+        self.assertIn("modal-results/$job_id", script)
+        self.assertIn("set -euo pipefail", script)
+        self.assertNotIn("--force", script)
+
     @unittest.skipUnless(__import__("importlib").util.find_spec("yaml"), "PyYAML not installed")
-    def test_workflow_parses(self):
+    def test_workflow_parses_and_each_step_holds_only_its_secrets(self):
         import yaml
         wf = yaml.safe_load(self.text)
         on = wf.get("on", wf.get(True))  # YAML 1.1 reads a bare `on` as True
@@ -383,13 +543,27 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(on["push"]["paths"], ["production/audiovisual/modal-requests/*.json"])
         self.assertEqual(wf["permissions"], {"contents": "write"})
         self.assertEqual(wf["concurrency"], {"group": "modal-jobs", "cancel-in-progress": False})
-        (job,) = wf["jobs"].values()
+        job = wf["jobs"]["run"]
         self.assertEqual((job["runs-on"], job["timeout-minutes"]), ("ubuntu-latest", 300))
+        self.assertEqual(job["strategy"]["max-parallel"], 1)
+        self.assertNotIn("secrets.", json.dumps(wf["jobs"]["list"]))
+        self.assertNotIn("secrets.", json.dumps(job.get("env", {})))
         steps = job["steps"]
         self.assertTrue(any(s.get("with", {}).get("python-version") == "3.12" for s in steps))
-        self.assertTrue(any(s.get("run") == "pip install modal" for s in steps))
-        env = {k: v for s in steps for k, v in (s.get("env") or {}).items()}
-        self.assertEqual(env, {n: "${{ secrets.%s }}" % n for n in SECRETS})
+        secrets_by_step = {s.get("name", s.get("uses", "")): {
+            k for k, v in (s.get("env") or {}).items() if "secrets." in str(v)} for s in steps}
+        self.assertEqual(secrets_by_step["Install the Modal client (no secrets in this step)"], set())
+        self.assertEqual(secrets_by_step["Probe R2 before the paid run"], {"CLOUDFLARE_R2_TOKEN"})
+        self.assertEqual(secrets_by_step["Run on Modal"], {"MODAL_TOKEN_ID", "MODAL_TOKEN_SECRET"})
+        self.assertEqual(secrets_by_step["Upload the outputs to R2"], {"CLOUDFLARE_R2_TOKEN"})
+        self.assertEqual(secrets_by_step["Push the result back (no secrets in this step)"], set())
+        self.assertEqual(sum(len(v) for v in secrets_by_step.values()), 4)
+        for s in steps:
+            for k, v in (s.get("env") or {}).items():
+                if "secrets." in str(v):
+                    self.assertEqual(v, "${{ secrets.%s }}" % k)
+        names = [s.get("name") for s in steps]
+        self.assertLess(names.index("Probe R2 before the paid run"), names.index("Run on Modal"))
 
 
 if __name__ == "__main__":

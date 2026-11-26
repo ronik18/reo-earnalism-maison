@@ -5,17 +5,23 @@ A session that cannot reach Modal writes a request file (`eav modal-request`); t
 the private R2 bucket (`eav r2-upload`) and records the file list with sha256 in the request;
 `eav modal-fetch` downloads and verifies it. `eav import` is unchanged and still does the import.
 
-R2 is reached through the Cloudflare v4 REST API (api.cloudflare.com), not the S3 endpoint:
-  PUT  /client/v4/accounts/{account}/r2/buckets/{bucket}/objects/{key}   body = the object bytes
-  GET  /client/v4/accounts/{account}/r2/buckets/{bucket}/objects/{key}   returns the object bytes
-  GET  /client/v4/accounts/{account}/r2/buckets/{bucket}/objects?prefix=<p>[&cursor=<c>]
-       returns the usual envelope {"success", "errors", "result": [{"key", "size", "etag", ...}],
-       "result_info": {"cursor", "is_truncated", ...}}
-The key is one path segment (percent-encoded, slashes included). The listing parser is tolerant:
-`result` may also be {"objects": [...]} and the cursor/is_truncated pair may sit in `result_info`
-or in `result`. No code here reads a token from disk or prints one: in GitHub Actions the bearer
-token comes from the CLOUDFLARE_R2_TOKEN secret through the environment; in the Claude session the
+R2 is reached through the Cloudflare v4 REST API (api.cloudflare.com), not the S3 endpoint.
+Shapes verified live by root against reo-earnalism-maison-private (27 Nov 2026):
+  PUT    .../accounts/{account}/r2/buckets/{bucket}/objects/{key}   body = the object bytes;
+         returns {"success": true, "result": {"key", "size", "etag"}}
+  GET    .../objects/{key}                                          returns the raw object bytes
+  DELETE .../objects/{key}
+  GET    .../objects?prefix=<p>&per_page=1000[&cursor=<c>]
+         returns {"success": true, "result": [{"key", "size", "etag", ...}], "result_info"?: {...}}
+The key keeps its slashes literally; each path segment is percent-encoded on its own. Listing
+follows a non-empty `result_info.cursor` until there is none (`result` as {"objects": [...]} is also
+accepted). No code here reads a token from disk or prints one: in GitHub Actions the bearer token
+comes from the CLOUDFLARE_R2_TOKEN secret through the environment; in the Claude session the
 egress proxy injects it, so the caller passes no token.
+
+Two reserved names under a job's prefix: `_request-result.json` (a copy of the finished request,
+so `modal-fetch` works even when the workflow could not push it to the branch) and `_probe/`
+(the workflow's pre-run probe object, deleted again).
 """
 import hashlib
 import json
@@ -35,7 +41,12 @@ API = "https://api.cloudflare.com/client/v4"
 TOKEN_ENV = "CLOUDFLARE_R2_TOKEN"
 OPEN = ("requested", "running")
 FINISHED = ("done", "failed", "hard_stopped")
-STATUSES = OPEN + FINISHED
+REFUSED = "refused"  # refused before Modal was contacted: its pending row was released
+STATUSES = OPEN + FINISHED + (REFUSED,)
+RESULT_NAME = "_request-result.json"
+PROBE_DIR = "_probe/"
+FALLBACK_BRANCH = "modal-results/{job_id}"
+PER_PAGE = 1000
 RUN_TO_REQUEST = {"ok": "done", "failed": "failed", "hard_stopped": "hard_stopped"}
 TIMEOUT_S = 120
 MAX_PAGES = 1000
@@ -96,11 +107,12 @@ def write_request(path, data) -> Path:
 
 # ---------------------------------------------------------------- R2 over the Cloudflare API
 def _object_url(key, account=R2_ACCOUNT, bucket=R2_BUCKET) -> str:
-    return f"{API}/accounts/{account}/r2/buckets/{bucket}/objects/{urllib.parse.quote(key, safe='')}"
+    path = "/".join(urllib.parse.quote(seg, safe="") for seg in key.split("/"))
+    return f"{API}/accounts/{account}/r2/buckets/{bucket}/objects/{path}"
 
 
 def _list_url(prefix, cursor=None, account=R2_ACCOUNT, bucket=R2_BUCKET) -> str:
-    query = {"prefix": prefix}
+    query = {"prefix": prefix, "per_page": PER_PAGE}
     if cursor:
         query["cursor"] = cursor
     return f"{API}/accounts/{account}/r2/buckets/{bucket}/objects?{urllib.parse.urlencode(query)}"
@@ -139,8 +151,8 @@ def default_opener():
 
 
 def list_keys(prefix, opener, token=None) -> list:
-    """Every object key under prefix, following the cursor while the listing is truncated."""
-    keys, cursor = [], None
+    """Every object key under prefix, following result_info.cursor while it is non-empty."""
+    keys, cursor, seen = [], None, set()
     for _ in range(MAX_PAGES):
         data = _envelope(_call(opener, "GET", _list_url(prefix, cursor), token=token), "list")
         result = data.get("result")
@@ -153,8 +165,11 @@ def list_keys(prefix, opener, token=None) -> list:
             keys.append(obj["key"])
         info = data.get("result_info") or (result if isinstance(result, dict) else {}) or {}
         cursor = info.get("cursor") if isinstance(info, dict) else None
-        if not (isinstance(info, dict) and info.get("is_truncated") and cursor):
+        if not cursor:
             return keys
+        if cursor in seen:
+            raise R2Error(f"list: the cursor repeats under {prefix}")
+        seen.add(cursor)
     raise R2Error(f"list: more than {MAX_PAGES} pages under {prefix}")
 
 
@@ -168,6 +183,50 @@ def put_object(key, body: bytes, opener, token=None) -> None:
         _envelope(raw, f"PUT {key}")
 
 
+def delete_object(key, opener, token=None) -> None:
+    raw = _call(opener, "DELETE", _object_url(key), token=token)
+    if raw.strip():
+        _envelope(raw, f"DELETE {key}")
+
+
+def _reserved(rel: str) -> bool:
+    return rel == RESULT_NAME or rel.startswith(PROBE_DIR)
+
+
+def probe(prefix, opener, token=None, body=b"eav r2 probe\n") -> str:
+    """PUT, list, GET and DELETE a tiny object under prefix + _probe/, so a wrong token or API shape
+    is found before any paid run. Returns the probe key; R2Error on any failure."""
+    key = prefix + PROBE_DIR + "probe.txt"
+    put_object(key, body, opener, token)
+    if key not in list_keys(prefix + PROBE_DIR, opener, token):
+        raise R2Error(f"probe: {key} was put but is not listed")
+    if get_object(key, opener, token) != body:
+        raise R2Error(f"probe: {key} does not read back")
+    delete_object(key, opener, token)
+    return key
+
+
+def put_result(prefix, request: dict, opener, token=None) -> None:
+    """The finished request as prefix + _request-result.json (the copy modal-fetch can read)."""
+    put_object(prefix + RESULT_NAME, (json.dumps(request, indent=2, sort_keys=True) + "\n").encode(),
+               opener, token)
+
+
+def get_result(prefix, opener, token=None):
+    """The R2 copy of the finished request, or None if there is none."""
+    try:
+        raw = get_object(prefix + RESULT_NAME, opener, token)
+    except R2Error:
+        return None
+    try:
+        data = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
+        raise R2Error(f"{RESULT_NAME} under {prefix} is not JSON") from None
+    if not isinstance(data, dict) or data.get("schema") != SCHEMA or data.get("status") not in STATUSES:
+        raise R2Error(f"{RESULT_NAME} under {prefix} is not a {SCHEMA} request")
+    return data
+
+
 def upload_folder(folder, prefix, opener, token=None) -> list:
     """PUT every file of folder under prefix + its relative path, then GET each one back and
     compare sha256. Returns [{"path", "sha256", "bytes"}] in path order."""
@@ -177,6 +236,8 @@ def upload_folder(folder, prefix, opener, token=None) -> list:
     files = []
     for p in sorted(x for x in folder.rglob("*") if x.is_file()):
         rel = p.relative_to(folder).as_posix()
+        if _reserved(rel):
+            raise R2Error(f"{rel}: a reserved name under the job prefix")
         body = p.read_bytes()
         digest = hashlib.sha256(body).hexdigest()
         put_object(prefix + rel, body, opener, token)
@@ -202,7 +263,8 @@ def fetch_folder(prefix, files, dest, opener, token=None) -> Path:
     for key in keys:
         if not key.startswith(prefix) or key == prefix:
             raise R2Error(f"list returned {key!r} outside {prefix}")
-        have[key[len(prefix):]] = key
+        if not _reserved(key[len(prefix):]):
+            have[key[len(prefix):]] = key
     missing = sorted(set(want) - set(have))
     extra = sorted(set(have) - set(want))
     if missing:

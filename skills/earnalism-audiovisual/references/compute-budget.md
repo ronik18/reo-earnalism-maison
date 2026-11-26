@@ -196,20 +196,35 @@ back through the private Cloudflare R2 bucket `reo-earnalism-maison-private`. Th
    never commits: root commits the request with the ledger and pushes to
    `claude/wonderful-bardeen-s9k90x`.
 2. **Workflow** (`.github/workflows/modal-jobs.yml`, triggered only by a pushed
-   `modal-requests/*.json`, one run at a time, 300 min): for each `requested` file it marks it
-   `running` and pushes, runs `modal-run <job_id> --root <title_root> --request` (reuses the
-   request's pending row and `--colab-units` instead of writing a second row, and replaces that row
-   with the actual spend in a `finally`), then `eav r2-upload` puts every file of the downloaded job
-   folder under `gpu-jobs/<slug>/<job_id>/` and reads each one back to compare its sha256. The
-   request becomes `done`, `failed` or `hard_stopped` with `seconds`, `usd`, `r2_prefix` and `files`
-   (`path`, `sha256`, `bytes`); the request, the ledger and the record are committed and pushed
-   (`git pull --rebase`, with retries). Secrets come only from `MODAL_TOKEN_ID`,
-   `MODAL_TOKEN_SECRET` and `CLOUDFLARE_R2_TOKEN`; the Modal workspace spend limit is the backstop.
+   `modal-requests/*.json`; one request at a time, each a matrix job of at most 300 min). Actions
+   are pinned to commit SHAs and the client to `modal==1.6.4`, installed in a step without secrets;
+   each later step gets only the secrets it needs. Per `requested` file:
+   - mark it `running` and push (no secrets);
+   - `eav r2-probe` (R2 token only): PUT, list, GET and DELETE a probe object under
+     `gpu-jobs/<slug>/<job_id>/_probe/`. If that fails, the request becomes `refused`, its pending
+     row is released and Modal is never contacted;
+   - `modal-run <job_id> --root <title_root> --request` (Modal tokens only): reuses the request's
+     pending row and `--colab-units`, but re-checks both caps first for the **current** UTC month
+     (the row moves there) and the title. Over either cap: `refused`, row released, exit 3, nothing
+     contacted. Otherwise the row is replaced with the actual spend in a `finally`;
+   - `eav r2-upload` (R2 token only): puts every file of the downloaded job folder under
+     `gpu-jobs/<slug>/<job_id>/`, reads each one back to compare its sha256, and finishes the
+     request as `done`, `failed` or `hard_stopped` with `seconds`, `usd`, `r2_prefix` and `files`
+     (`path`, `sha256`, `bytes`). A copy of the finished request goes to
+     `gpu-jobs/<slug>/<job_id>/_request-result.json`;
+   - push the request and the ledger back (no secrets, `.github/scripts/modal-publish.sh`). A
+     conflicting rebase is aborted; on the fresh branch head `eav modal-replay` re-applies the
+     request file and only this job's ledger entry and rows (by job_id and run_id), then it retries.
+     If every attempt fails, the result is pushed to `modal-results/<job_id>`.
+
+   The Modal workspace spend limit is the backstop.
 3. **Fetch** (in the session, after pulling the branch): `eav modal-fetch <job_id> --root <title
    root> [--into <dir>]` lists and downloads every object under the prefix through
    api.cloudflare.com (the session proxy supplies the credential), refuses a missing, extra or
    mismatched file with nothing written, and lands the folder in `<root>/.downloads/<job_id>/`
-   (git-ignored). It never imports.
+   (git-ignored). If the branch request is still `running` (the push-back failed), it reads the
+   R2 copy `_request-result.json` instead and says to merge `modal-results/<job_id>` for the
+   ledger. A `refused` request has nothing to fetch. It never imports.
 4. **Import** as usual: `eav import <job_id> --root <title root> --from <that folder>`; the Modal
    portion settles from the Modal rows.
 

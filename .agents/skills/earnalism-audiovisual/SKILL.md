@@ -95,9 +95,10 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   Never raise, split around or skip a cap or the pending row. Reel clips (Wan 2.2) never run on Modal.
   When this session cannot reach Modal: `modal-request <job_id> --root <dir> --colab-units <CU>`
   (same checks, move and pending row; writes `production/audiovisual/modal-requests/<job_id>.json`;
-  root commits and pushes it) → the `modal-jobs` GitHub Actions workflow runs `modal-run --request`
-  and uploads the outputs to the private R2 bucket → `modal-fetch <job_id> --root <dir>` (sha256
-  verified, never imports) → `import`. See [compute budget](references/compute-budget.md).
+  root commits and pushes it) → the `modal-jobs` GitHub Actions workflow probes R2, re-checks both
+  caps for the run's UTC month (a `refused` request releases its pending row; nothing was run), runs
+  `modal-run --request` and uploads the outputs to the private R2 bucket → `modal-fetch <job_id>
+  --root <dir>` (sha256 verified, never imports) → `import`. See [compute budget](references/compute-budget.md).
 - **Rates.** Forecasts are per runner kind from measured rates: the first real Modal run of a kind
   sets its rate; until then use the Colab L4 rates. Never lower a forecast.
 - **Colab.** The owner runs Colab jobs. Narration, stills and music notebooks are inert
