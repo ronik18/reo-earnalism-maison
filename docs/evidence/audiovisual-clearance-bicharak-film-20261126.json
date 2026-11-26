@@ -1,8 +1,12 @@
 {
  "schema": "earnalism.audiovisual-clearance-evidence.v1",
  "edition_slug": "bicharak",
- "status": "DRAFT_NOT_APPROVED — prepared by the integration lane on 2026-11-26 for the owner's review; stage refuses it until the owner sets a non-draft status and owner_approval",
- "owner_approval": null,
+ "status": "APPROVED — owner, 2026-11-26",
+ "owner_approval": {
+  "by": "Owner (Earnalism), in the Claude Code session",
+  "at": "2026-11-26",
+  "words": "Edition notice is enough, Creator plan active, wording fine — approve."
+ },
  "prepared": {
   "by": "integration lane (Claude Code)",
   "at": "2026-11-26",
@@ -142,7 +146,7 @@
    "licence": "CC-BY-SA-4.0"
   },
   "film_use": "The narration reads the edition text word for word (tags stripped; no word added, dropped or reordered) and the captions are that same text. The literary work is public domain in every listed territory. The Wikisource transcription layer is CC BY-SA 4.0: its attribution and ShareAlike notice is carried by the edition licence notice, which covers every format of the edition, video included.",
-  "owner_decision_needed": "Confirm that the edition licence notice is sufficient attribution for the film format, or instruct that the film also carry the Wikisource attribution (e.g. in the Maison film page credits)."
+  "owner_decision": "Edition licence notice is sufficient attribution for the film format (owner, 2026-11-26)."
  },
  "cover_provenance": {
   "provenance": "library/intake/bicharak/legacy-cover_provenance.json",
@@ -161,7 +165,7 @@
   "job_id": "narration-elevenlabs-0bca7520",
   "credits": 14956,
   "licence": "Owner's ElevenLabs Creator plan (paid tier: commercial licence for generated audio), owner decision 24 Nov 2026 (skills/earnalism-audiovisual/references/earnalism-voice.md)",
-  "owner_decision_needed": "Confirm the Creator plan was active when the take was generated (24–25 Nov 2026) and that the voice was used from the ElevenLabs Voice Library under its standard terms."
+  "owner_decision": "Creator plan was active when the narration was generated (owner, 2026-11-26)."
  },
  "music": {
   "route": "ace-step:music-film-01-r4",
@@ -277,7 +281,8 @@
    }
   },
   "branding": "Earnalism logo lockup (owner's official logo) and the owner-approved END card video",
-  "ai_disclosure": "The Maison film page should state that the illustrations and narration are AI-generated (owner to confirm wording)."
+  "ai_disclosure": "The Maison film page states that the illustrations and narration are AI-generated (wording approved by the owner, 2026-11-26)."
  },
- "binding": "On stage, attach_audiovisual_film records publication_clearance for formats reader+video bound to this document's sha256, the live text hash and every ready asset sha256 (film and captions included)."
+ "binding": "On stage, attach_audiovisual_film records publication_clearance for formats reader+video bound to this document's sha256, the live text hash and every ready asset sha256 (film and captions included).",
+ "scope_note": "Binds only film sha256 in video_sha256. The owner rated this film 6/10 and asked for a cinematic re-production; any re-rendered film needs a new clearance document with its own hashes."
 }
