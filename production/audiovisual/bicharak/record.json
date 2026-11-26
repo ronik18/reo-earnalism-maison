@@ -34379,6 +34379,26 @@
       },
       "result": "exchange_collected",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-26T10:47:27.958185+00:00",
+      "detail": {
+        "decision": "approved as is, held shots on neighbouring stills (owner, 26 Nov 2026)",
+        "film_sha256": "869ffc90bbe47c114e0b608e797b2f575893e38ef4025ce5d35864214fd6b84d",
+        "target": "film-01"
+      },
+      "result": "approved",
+      "stage": "owner_review"
+    },
+    {
+      "at": "2026-11-26T10:47:28.864997+00:00",
+      "detail": {
+        "bundle": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/film/film-01/bundle",
+        "mp4_sha256": "869ffc90bbe47c114e0b608e797b2f575893e38ef4025ce5d35864214fd6b84d",
+        "target": "film-01"
+      },
+      "result": "bundled",
+      "stage": "bundle_film"
     }
   ],
   "ledger": "../allowance-ledger.json",

@@ -30,3 +30,5 @@ production/audiovisual/*/film/*/*.mp4
 production/audiovisual/*/film/*/stills/
 production/audiovisual/*/takes/audio/
 production/audiovisual/*/.record.lock
+# Film bundles: the MP4 copy stays local (film.json and film.vtt are tracked)
+production/**/bundle/film.mp4

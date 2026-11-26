@@ -1,0 +1,14 @@
+{
+  "schema": "earnalism.audiovisual-film-bundle.v1",
+  "units": [
+    {
+      "bytes": 205967288,
+      "duration_ms": 1303961,
+      "mp4": "film.mp4",
+      "mp4_sha256": "869ffc90bbe47c114e0b608e797b2f575893e38ef4025ce5d35864214fd6b84d",
+      "unit_id": "2285d936-802f-49d8-8034-18a0e3393929",
+      "vtt": "film.vtt",
+      "vtt_sha256": "50895ec65de15264f91c4749a4d1fc89f7a1702c11cfe402acd1a0e86d07f477"
+    }
+  ]
+}
