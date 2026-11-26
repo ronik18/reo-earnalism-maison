@@ -541,7 +541,7 @@ class WorkflowTests(unittest.TestCase):
     def test_trigger_paths_exclude_the_readme(self):
         readme = REPO / "production" / "audiovisual" / "modal-requests" / "README.md"
         self.assertTrue(readme.is_file())
-        self.assertIn("paths: ['production/audiovisual/modal-requests/*.json']", self.text)
+        self.assertIn("paths: ['production/audiovisual/modal-requests/*.json', '.github/workflows/modal-jobs.yml']", self.text)
         self.assertIn("set -euo pipefail", self.text)
         self.assertIn('modal-run "$JOB_ID" --root "$ROOT" --request', self.text)
         self.assertIn("r2-probe", self.text)
@@ -568,7 +568,8 @@ class WorkflowTests(unittest.TestCase):
         wf = yaml.safe_load(self.text)
         on = wf.get("on", wf.get(True))  # YAML 1.1 reads a bare `on` as True
         self.assertEqual(on["push"]["branches"], [modal_requests.BRANCH])
-        self.assertEqual(on["push"]["paths"], ["production/audiovisual/modal-requests/*.json"])
+        self.assertEqual(on["push"]["paths"], ["production/audiovisual/modal-requests/*.json",
+                                               ".github/workflows/modal-jobs.yml"])
         self.assertEqual(wf["permissions"], {"contents": "write"})
         self.assertEqual(wf["concurrency"], {"group": "modal-jobs", "cancel-in-progress": False})
         job = wf["jobs"]["run"]
