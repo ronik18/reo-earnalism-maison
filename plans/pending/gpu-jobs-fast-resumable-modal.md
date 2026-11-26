@@ -129,7 +129,7 @@ The tracks run in parallel. A step starts when its `Blocked by` steps are done.
 ## Progress
 | Step | Status |
 | --- | --- |
-| A1–A3 | not started |
-| B0–B3 | not started |
+| A1–A3 | A1 in progress (26 Nov) |
+| B0–B3 | B1 in progress (26 Nov); B0 waits on O1 |
 | C1–C5 | not started |
 | O1–O5 | O2, O3 prompts given |
