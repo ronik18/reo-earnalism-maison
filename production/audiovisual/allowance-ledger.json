@@ -367,5 +367,15 @@
   "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
   "root": "bicharak",
   "note": "SPIKE: pilot v2 animation, 3 Wan 2.2 TI2V-5B clips at 1280x704 + depth for 8 stills; forecast 70 min on L4"
+ },
+ {
+  "job_id": "motion-pilot3-f01s014",
+  "title": "bicharak",
+  "month": "2026-11",
+  "units": 2.9,
+  "state": "reserved",
+  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+  "root": "bicharak",
+  "note": "SPIKE: pilot v3 fix run, 3 new HD takes of the mother's shot (no detached hand); forecast 70 min on L4"
  }
 ]
