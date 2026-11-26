@@ -86,7 +86,7 @@
       "Referrer-Policy": "strict-origin-when-cross-origin"
     },
     "private_conditional_rule": "authorization/rights/device validation precedes conditional evaluation; do not emit304 for denied access",
-    "public_object_rights": "Only globally cleared public cover/preview objects and previews API representations; territory query is not public-object authorization. Territorial restricted samples use authorized private delivery, not shared public cache."
+    "public_object_rights": "Only globally cleared public cover/preview objects and previews API representations; territory query is not public-object authorization. Reader text preview API (owner decision 26 Nov 2026): shared-cached (public, s-maxage=60) only while the reader preview right is current in all 9 whitelist territories; otherwise private, no-store. Territorial restricted samples use authorized private delivery, not shared public cache."
   },
   "classes": [
     {
@@ -117,7 +117,7 @@
     },
     {
       "id": "public_previews",
-      "scope": "Globally cleared for public delivery only. physically bounded text/audio preview objects only; versioned path",
+      "scope": "Globally cleared for public delivery only; versioned path. Audio/video samples are physically bounded objects. Reader text preview (owner decision 26 Nov 2026): a deterministic server-side cut of the cleared edition text, about 25% of the story words (at least 400, at most 1,500), counted across units, ending after the whole paragraph that reaches the target and never including the final paragraph; a story of 400 words or fewer previews its first paragraph only, none if that is the whole story. Revision.preview is only the on/off signal. The previews API is public (s-maxage=60) only when the reader preview right is current in all 9 whitelist territories; otherwise private, no-store.",
       "browser_ttl_seconds": 0,
       "edge_ttl_seconds": 60,
       "swr_seconds": 0,

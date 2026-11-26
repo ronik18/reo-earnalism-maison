@@ -128,6 +128,37 @@ class ExperienceTests(TestCase):
         self.assertContains(response, f"anchor%3D{rows[1].anchor_id}%26offset%3D{len(rows[1].text)}")
         self.assertContains(response, "You have reached the end of the free preview.")
 
+    def test_no_js_preview_links_to_the_next_unit_only_while_the_preview_continues(self):
+        # The fixture book has one unit, so a second unit is added to the unit list and the preview document
+        # is marked as continuing into it, as get_preview_document does for a multi-unit book.
+        import uuid
+        from unittest.mock import patch
+        from library import services
+        real_document, real_units = services.get_preview_document, services.edition_units
+        second = str(uuid.uuid4())
+        next_url = f"/en/read/{self.edition}/{second}/"
+
+        def units(*args, **kwargs):
+            listed = real_units(*args, **kwargs)
+            return listed + [dict(listed[0], unit_id=second, ordinal=2)]
+
+        def continuing(*args, **kwargs):
+            return dict(real_document(*args, **kwargs), preview_continues=True)
+        with patch.object(services, "edition_units", units), patch.object(services, "get_preview_document", continuing):
+            response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn(f'<div data-preview-fallback data-preview-next><p><a href="{next_url}">Next chapter</a></p></div>', html)
+        self.assertNotIn('<p class="notice">You have reached the end of the free preview.</p>', html)  # not ended yet
+        self.assertContains(response, '"preview_continues": true')
+        # On the unit where the preview ends, there is no next-unit link even though a next unit exists.
+        with patch.object(services, "edition_units", units):
+            response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        self.assertNotContains(response, "data-preview-next")
+        self.assertNotContains(response, next_url)
+        self.assertContains(response, '<p class="notice">You have reached the end of the free preview.</p>')
+        self.assertContains(response, '"next_unit_url": null')
+
     def test_signed_in_reader_still_gets_the_whole_unit_beyond_the_preview(self):
         from unittest.mock import patch
         from library import services
