@@ -135,6 +135,7 @@
       "browser_ttl_seconds": 31536000,
       "edge_ttl_seconds": 3600,
       "swr_seconds": 0,
+      "swr_rule": "swr_seconds 0 applies to the edge and to the content-hashed rendition paths. Only the unversioned path /api/v1/content/covers/{asset_id} may send browser stale-while-revalidate=604800, and only while max-age+604800 <= remaining rights seconds (earliest rights end across active publication territories); otherwise it sends no stale-while-revalidate",
       "stale_if_error_seconds": 0,
       "rights_cap": "known_rights_expiry applies: every max-age is min(value, earliest rights end across active publication territories); immutable never extends past that end",
       "headers": {
@@ -146,7 +147,7 @@
         "Cache-Control": "public, max-age={min(86400, rights seconds)}, stale-while-revalidate=604800 only while max-age+604800 <= rights seconds (otherwise no stale-while-revalidate)",
         "Cloudflare-CDN-Cache-Control": "public, max-age={min(3600, rights seconds)}, stale-while-revalidate=0, stale-if-error=0"
       },
-      "purge": "Each emitted anonymous public cover URL is recorded as a public cache reference (asset, revision, edition and work dependencies); publication, replacement and withdrawal purge it with its sibling widths and unversioned path. A cover response that cannot be recorded is not stored at the edge (CDN-Cache-Control: no-store).",
+      "purge": "Each emitted anonymous public cover URL is recorded as a public cache reference (asset, revision, edition and work dependencies); publication, replacement and withdrawal purge it with its sibling widths and unversioned path. A cover response that cannot be recorded is not stored at the edge (CDN-Cache-Control: no-store). A row is written with up to 3600 s headroom beyond the edge TTL; a request whose URL, asset/revision and epoch are already covered until now+edge TTL performs no ledger write, and a 304 revalidation never writes (an unrecorded conditional request receives the full 200).",
       "private": "Draft and staff covers (/api/v1/staff/draft-covers/{asset_id}, staff review covers) and any authenticated cover remain private, no-store",
       "sw": "bounded public UI cache; purge locally on online withdrawal notice; already copied bytes cannot be recalled"
     },

@@ -32,6 +32,8 @@ class CoverRevalidationTests(TestCase):
         self.assertIn('public', response['Cache-Control'])
 
     def test_matching_validator_returns_not_modified_without_body(self):
+        # The edge revalidates a copy it fetched earlier; that fetch recorded the URL, so the 304 writes nothing.
+        self.assertEqual(self.get().status_code, 200)
         response = self.get(HTTP_IF_NONE_MATCH=f'"{self.asset.sha256}"')
         self.assertEqual(response.status_code, 304)
         self.assertEqual(response.content, b'')

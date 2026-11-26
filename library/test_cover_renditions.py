@@ -8,7 +8,9 @@ from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
+from django.db import connection
 from django.test import Client, SimpleTestCase, TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 from PIL import Image
 
@@ -223,6 +225,41 @@ class PublicCoverHeaderTests(TestCase):
         self.assertTrue(set(expected).issubset(urls), urls)
         self.assertEqual(_urls({'urls': expected}, 'maison.example'), expected)
         self.assertEqual(self.get(rendition_path(self.asset.id, self.asset.sha256, 160)).status_code, 404)
+
+    def ledger_writes(self, path, **headers):
+        with CaptureQueriesContext(connection) as queries:
+            response = self.get(path, **headers)
+        writes = [q['sql'] for q in queries.captured_queries
+                  if 'maison_public_cache_' in q['sql'] and re.search(r'^\s*(INSERT|UPDATE)|FOR (UPDATE|SHARE)', q['sql'])]
+        return response, writes
+
+    def test_repeat_requests_and_revalidations_do_not_rewrite_the_ledger(self):
+        """Ledger load: two consecutive anonymous requests write once; a 304 never writes."""
+        path = rendition_path(self.asset.id, self.asset.sha256, 160)
+        first, writes = self.ledger_writes(path)
+        self.assertEqual(first.status_code, 200); self.assertTrue(writes)
+        expires = PublicCacheReference.objects.get().expires_at
+        second, writes = self.ledger_writes(path)
+        self.assertEqual(second.status_code, 200); self.assertEqual(writes, [])
+        self.assertTrue(second['CDN-Cache-Control'].startswith('public, max-age='))
+        revalidated, writes = self.ledger_writes(path, HTTP_IF_NONE_MATCH=f'"{self.asset.sha256}-w160"')
+        self.assertEqual(revalidated.status_code, 304); self.assertEqual(writes, [])
+        self.assertTrue(revalidated['CDN-Cache-Control'].startswith('public, max-age='))
+        self.assertEqual(PublicCacheReference.objects.get().expires_at, expires)
+
+    def test_unrecorded_conditional_request_gets_full_response_and_one_write(self):
+        path = rendition_path(self.asset.id, self.asset.sha256, 320)
+        response, writes = self.ledger_writes(path, HTTP_IF_NONE_MATCH=f'"{self.asset.sha256}-w320"')
+        self.assertEqual(response.status_code, 200); self.assertTrue(writes)
+        self.assertEqual(PublicCacheReference.objects.count(), 1)
+
+    def test_epoch_change_after_recording_refuses_the_edge_copy(self):
+        path = rendition_path(self.asset.id, self.asset.sha256, 160)
+        self.get(path)
+        from .services import queue_catalog_purge
+        queue_catalog_purge(self.revision)  # bumps the generation epoch; the row remains for the purge
+        response = self.get(path)
+        self.assertTrue(response['CDN-Cache-Control'].startswith('public, max-age='))  # a new request starts in the new epoch
 
     def test_draft_cover_is_not_public_and_staff_copy_stays_no_store(self):
         from .services import clone_revision

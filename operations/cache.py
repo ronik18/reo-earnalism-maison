@@ -165,29 +165,59 @@ def finalize_public_response(request,response):
     return response
 
 
+COVER_RECORD_HEADROOM=3600
+
+
+def _cover_refs(request,response,ttl):
+    start=getattr(request,'_maison_public_cache_start',None)
+    dependencies=getattr(response,'_maison_public_cover',None)
+    if not start or not dependencies or ttl<=0:return None,None
+    refs=sorted(f'{kind}:{_uuid(value)}' for kind,value in dependencies.items() if _uuid(value))
+    return (start,refs) if len(refs)==4 else (None,None)
+
+
+def public_cover_covered(request,response,ttl):
+    """True when an unexpired ledger row already covers this exact URL, its asset/revision and epoch until now+ttl.
+
+    Read-only: no lock and no write. A purge committed after the request
+    started changes the epoch (refused); one committed later finds the row.
+    """
+    start,refs=_cover_refs(request,response,ttl)
+    if not start:return False
+    try:
+        if _candidate(request)!=start[0]:return False
+        digest=hashlib.sha256(start[0].encode()).hexdigest()
+        row=PublicCacheReference.objects.filter(url_sha256=digest).only('url','dependencies','expires_at').first()
+        if (not row or row.url!=start[0] or not set(refs).issubset(row.dependencies)
+                or row.expires_at<timezone.now()+timedelta(seconds=ttl)):return False
+        return _generation()==start[1]
+    except Exception:return False
+
+
 def record_public_cover(request,response,ttl):
     """Record an emitted public cover URL like finalize_public_response, or return 0 (edge must not cache).
 
     Called only for live covers already cleared in every publication territory.
     The dependencies name the asset, revision, edition and work so publication,
-    replacement and withdrawal purge the exact URL.
+    replacement and withdrawal purge the exact URL. A row already covering the
+    URL is not touched; a new or extended row gets headroom so repeat edge
+    misses within it are read-only.
     """
-    start=getattr(request,'_maison_public_cache_start',None)
-    dependencies=getattr(response,'_maison_public_cover',None)
-    if not start or not dependencies or ttl<=0:return 0
+    start,refs=_cover_refs(request,response,ttl)
+    if not start:return 0
+    if public_cover_covered(request,response,ttl):return ttl
     try:
         with transaction.atomic():
             epoch=_generation(shared=True)
             if _candidate(request)!=start[0] or epoch!=start[1]:return 0
-            refs=sorted(f'{kind}:{_uuid(value)}' for kind,value in dependencies.items() if _uuid(value))
-            if len(refs)!=4:return 0
             now=timezone.now();digest=hashlib.sha256(start[0].encode()).hexdigest()
+            until=now+timedelta(seconds=ttl+COVER_RECORD_HEADROOM)
             row=PublicCacheReference.objects.select_for_update().filter(url_sha256=digest).first()
             if row:
                 if row.url!=start[0]:raise ValueError('URL digest collision')
                 row.dependencies=sorted(set(refs)|set(row.dependencies if row.expires_at>now else []))
-                row.expires_at=max(row.expires_at,now+timedelta(seconds=ttl));row.save()
-            else:PublicCacheReference.objects.create(url=start[0],url_sha256=digest,dependencies=refs,expires_at=now+timedelta(seconds=ttl))
+                row.expires_at=max(row.expires_at,until);row.save()
+            else:PublicCacheReference.objects.create(url=start[0],url_sha256=digest,dependencies=refs,expires_at=until)
     except Exception:return 0
     return ttl
 
