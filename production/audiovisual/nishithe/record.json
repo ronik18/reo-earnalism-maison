@@ -1,0 +1,97 @@
+{
+  "artifacts": [
+    {
+      "bytes": 72104,
+      "kind": "source",
+      "meta": {
+        "revision_id": "c8fac00e-2fef-42b9-a724-d7d275544823"
+      },
+      "path": "source.json",
+      "sha256": "1c667ad08b09aa56c10f9edf802d4170fff1aa9b305ed248f820a356e100ac31"
+    },
+    {
+      "bytes": 150905,
+      "kind": "plan",
+      "meta": {
+        "films": 1,
+        "series": false
+      },
+      "path": "plan.json",
+      "sha256": "73ab181c7c2df59da8227984aae5b62d66091fb96e7e390859f3200d0b3762a4"
+    },
+    {
+      "bytes": 9116,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 5.819191666666667,
+        "inputs_zip": "jobs/narration-c7d371b4/inputs.zip",
+        "job_id": "narration-c7d371b4",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-c7d371b4/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-c7d371b4/narration.ipynb",
+      "sha256": "4424f3a0edc50fb15be990ea503a212895281767d490ff69714b5d5b65e02612"
+    }
+  ],
+  "created_at": "2026-11-26T03:54:08.199673+00:00",
+  "events": [
+    {
+      "at": "2026-11-26T03:54:08.201301+00:00",
+      "detail": {
+        "audio_rights_on_maison": false,
+        "slug": "nishithe"
+      },
+      "result": "ok",
+      "stage": "init"
+    },
+    {
+      "at": "2026-11-26T03:54:08.343513+00:00",
+      "detail": {
+        "films": 1,
+        "flags": [],
+        "voice": "bn_arnav::story"
+      },
+      "result": "ok",
+      "stage": "plan"
+    },
+    {
+      "at": "2026-11-26T03:54:08.537791+00:00",
+      "detail": {
+        "forecast_units": 5.819191666666667,
+        "job_id": "narration-c7d371b4",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:54:08.538273+00:00",
+      "detail": {
+        "job_id": "narration-c7d371b4",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    }
+  ],
+  "ledger": "../allowance-ledger.json",
+  "schema": "earnalism.audiovisual_record.v1",
+  "source": {
+    "content_sha256": "4679bc61283c39c891b108604c37ef13d1240b9dbecff17915bd19a45943677d",
+    "edition_id": "e9734480-f2c3-4680-9619-78f6b5850d10",
+    "export_sha256": "1c667ad08b09aa56c10f9edf802d4170fff1aa9b305ed248f820a356e100ac31",
+    "language": "bn",
+    "public_domain_evidence": true,
+    "revision_id": "c8fac00e-2fef-42b9-a724-d7d275544823",
+    "rights": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "state": "draft"
+  },
+  "title_slug": "nishithe"
+}

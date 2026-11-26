@@ -1,0 +1,97 @@
+{
+  "artifacts": [
+    {
+      "bytes": 62831,
+      "kind": "source",
+      "meta": {
+        "revision_id": "dcd1d8cc-35d8-4fc2-a638-07ef5f44cecf"
+      },
+      "path": "source.json",
+      "sha256": "9c38297e474b8d2dfc5c69c221699a8cba225910fd30680c87e82cda80eb1cc8"
+    },
+    {
+      "bytes": 131617,
+      "kind": "plan",
+      "meta": {
+        "films": 1,
+        "series": false
+      },
+      "path": "plan.json",
+      "sha256": "7da1a3047927593721a17ca8980cd9ccb172b3a06d52ca6cdfd9336ae29a10fc"
+    },
+    {
+      "bytes": 9102,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 4.1459416666666655,
+        "inputs_zip": "jobs/narration-c35fd867/inputs.zip",
+        "job_id": "narration-c35fd867",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-c35fd867/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-c35fd867/narration.ipynb",
+      "sha256": "6fad84fcbcb77fda917bcb5bfbc46a9db7bb6be06bee8fe672093b4abbe049e1"
+    }
+  ],
+  "created_at": "2026-11-26T03:54:08.681733+00:00",
+  "events": [
+    {
+      "at": "2026-11-26T03:54:08.683159+00:00",
+      "detail": {
+        "audio_rights_on_maison": false,
+        "slug": "didi"
+      },
+      "result": "ok",
+      "stage": "init"
+    },
+    {
+      "at": "2026-11-26T03:54:08.822579+00:00",
+      "detail": {
+        "films": 1,
+        "flags": [],
+        "voice": "bn_arnav::story"
+      },
+      "result": "ok",
+      "stage": "plan"
+    },
+    {
+      "at": "2026-11-26T03:54:08.995738+00:00",
+      "detail": {
+        "forecast_units": 4.1459416666666655,
+        "job_id": "narration-c35fd867",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:54:08.996261+00:00",
+      "detail": {
+        "job_id": "narration-c35fd867",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    }
+  ],
+  "ledger": "../allowance-ledger.json",
+  "schema": "earnalism.audiovisual_record.v1",
+  "source": {
+    "content_sha256": "50a9dfffce662f0eab5e9f946f6b5d1d001560c6801a0cbbd0ab1e062195c05d",
+    "edition_id": "93565d7b-e24b-4775-a84e-99417f0e403e",
+    "export_sha256": "9c38297e474b8d2dfc5c69c221699a8cba225910fd30680c87e82cda80eb1cc8",
+    "language": "bn",
+    "public_domain_evidence": true,
+    "revision_id": "dcd1d8cc-35d8-4fc2-a638-07ef5f44cecf",
+    "rights": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "state": "draft"
+  },
+  "title_slug": "didi"
+}

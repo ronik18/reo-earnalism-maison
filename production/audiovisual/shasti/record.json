@@ -1,0 +1,97 @@
+{
+  "artifacts": [
+    {
+      "bytes": 62422,
+      "kind": "source",
+      "meta": {
+        "revision_id": "161a991c-cb2c-4ee0-b0b2-9cc6366d4cea"
+      },
+      "path": "source.json",
+      "sha256": "dc7cdb74c939339a4f86c88caa771364f234aff79aaeb4be3751d67c64c37d89"
+    },
+    {
+      "bytes": 130718,
+      "kind": "plan",
+      "meta": {
+        "films": 1,
+        "series": false
+      },
+      "path": "plan.json",
+      "sha256": "f316cbbc95f231798ac8f66960d0ae1700bf66e7cfeb6b18adf14b52cb50622b"
+    },
+    {
+      "bytes": 9108,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 4.833833333333334,
+        "inputs_zip": "jobs/narration-bbf45e84/inputs.zip",
+        "job_id": "narration-bbf45e84",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-bbf45e84/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-bbf45e84/narration.ipynb",
+      "sha256": "54ee7992da6794b08658e9f0184475d3bca502732d4a4b215977831132effd00"
+    }
+  ],
+  "created_at": "2026-11-26T03:54:10.448791+00:00",
+  "events": [
+    {
+      "at": "2026-11-26T03:54:10.450190+00:00",
+      "detail": {
+        "audio_rights_on_maison": false,
+        "slug": "shasti"
+      },
+      "result": "ok",
+      "stage": "init"
+    },
+    {
+      "at": "2026-11-26T03:54:10.593685+00:00",
+      "detail": {
+        "films": 1,
+        "flags": [],
+        "voice": "bn_arnav::story"
+      },
+      "result": "ok",
+      "stage": "plan"
+    },
+    {
+      "at": "2026-11-26T03:54:10.735611+00:00",
+      "detail": {
+        "forecast_units": 4.833833333333334,
+        "job_id": "narration-bbf45e84",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:54:10.736011+00:00",
+      "detail": {
+        "job_id": "narration-bbf45e84",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    }
+  ],
+  "ledger": "../allowance-ledger.json",
+  "schema": "earnalism.audiovisual_record.v1",
+  "source": {
+    "content_sha256": "9ce6a04ab2485e585e2b42b53478c34e5f002ce0aa5a01f682186c4bf8ab3135",
+    "edition_id": "7c832e44-2019-4415-9213-4170b41123a3",
+    "export_sha256": "dc7cdb74c939339a4f86c88caa771364f234aff79aaeb4be3751d67c64c37d89",
+    "language": "bn",
+    "public_domain_evidence": true,
+    "revision_id": "161a991c-cb2c-4ee0-b0b2-9cc6366d4cea",
+    "rights": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "state": "draft"
+  },
+  "title_slug": "shasti"
+}

@@ -1,0 +1,97 @@
+{
+  "artifacts": [
+    {
+      "bytes": 77846,
+      "kind": "source",
+      "meta": {
+        "revision_id": "b3657c17-7c4d-4f4a-b524-c7b1291835f4"
+      },
+      "path": "source.json",
+      "sha256": "6f8e76d300616cc07c062bafbed30b8e57eb09b0c086a35642b2630c31655572"
+    },
+    {
+      "bytes": 162375,
+      "kind": "plan",
+      "meta": {
+        "films": 1,
+        "series": false
+      },
+      "path": "plan.json",
+      "sha256": "092887cc8871c40eab0dd1577c8cd84424e998068f44da9c56c846cf68c28a0d"
+    },
+    {
+      "bytes": 9129,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 5.187075,
+        "inputs_zip": "jobs/narration-bc4edba3/inputs.zip",
+        "job_id": "narration-bc4edba3",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-bc4edba3/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-bc4edba3/narration.ipynb",
+      "sha256": "1d233f2ae014c1c3861e70ae3e1157aa1335e3d0b6002fdb813e161921c92f70"
+    }
+  ],
+  "created_at": "2026-11-26T03:54:11.757546+00:00",
+  "events": [
+    {
+      "at": "2026-11-26T03:54:11.758857+00:00",
+      "detail": {
+        "audio_rights_on_maison": false,
+        "slug": "prayashchitta"
+      },
+      "result": "ok",
+      "stage": "init"
+    },
+    {
+      "at": "2026-11-26T03:54:11.945949+00:00",
+      "detail": {
+        "films": 1,
+        "flags": [],
+        "voice": "bn_arnav::story"
+      },
+      "result": "ok",
+      "stage": "plan"
+    },
+    {
+      "at": "2026-11-26T03:54:12.113885+00:00",
+      "detail": {
+        "forecast_units": 5.187075,
+        "job_id": "narration-bc4edba3",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:54:12.114269+00:00",
+      "detail": {
+        "job_id": "narration-bc4edba3",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    }
+  ],
+  "ledger": "../allowance-ledger.json",
+  "schema": "earnalism.audiovisual_record.v1",
+  "source": {
+    "content_sha256": "265a285b59289966c2875b57cf5d4d11b04eb2f8a569ccad3e1e18cd1f784a2b",
+    "edition_id": "82a2e6d1-e279-4179-85a0-d9d52361af05",
+    "export_sha256": "6f8e76d300616cc07c062bafbed30b8e57eb09b0c086a35642b2630c31655572",
+    "language": "bn",
+    "public_domain_evidence": true,
+    "revision_id": "b3657c17-7c4d-4f4a-b524-c7b1291835f4",
+    "rights": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "state": "draft"
+  },
+  "title_slug": "prayashchitta"
+}
