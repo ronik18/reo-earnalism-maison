@@ -28,13 +28,17 @@ from acestep.pipeline_ace_step import ACEStepPipeline
 
 pipe = ACEStepPipeline(checkpoint_dir=weights_dir, dtype="bfloat16")
 EXPECTED = [t["key"] + ".wav" for t in JOB["items"]]
+DONE = resume_done(EXPECTED)  # finished in an earlier session: file present and sha256 logged
+todo = [t for t in JOB["items"] if t["key"] + ".wav" not in DONE]
+print(len(DONE), "cues already done;", len(todo), "to generate")
 last = 0.0  # seconds the previous cue took; the next starts only if it fits (R25)
-for t in JOB["items"]:
+for t in todo:
     if not may_start(last):
         break
     started = time.time()
     pipe(prompt=t["prompt"], lyrics=t.get("lyrics", "[instrumental]"),
          audio_duration=t["duration_s"], infer_step=60, guidance_scale=15.0,
          manual_seeds=[t["seed"]], save_path=str(OUT_DIR / (t["key"] + ".wav")))
+    record_item(t["key"], t["key"] + ".wav")
     last = time.time() - started
     print("wrote", t["key"], "in %.1f s" % last)

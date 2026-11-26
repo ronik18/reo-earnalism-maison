@@ -13,8 +13,11 @@ MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "steps": STEPS}
 pipe = FluxPipeline.from_pretrained(MODEL_REPO, revision=revision, torch_dtype=torch.bfloat16)
 pipe.enable_model_cpu_offload()
 EXPECTED = [item["key"] + ".png" for item in JOB["items"]]
+DONE = resume_done(EXPECTED)  # finished in an earlier session: file present and sha256 logged
+todo = [i for i in JOB["items"] if i["key"] + ".png" not in DONE]
+print(len(DONE), "stills already done;", len(todo), "to generate")
 last = 0.0  # seconds the previous still took; the next starts only if it fits (R25)
-for item in JOB["items"]:
+for item in todo:
     if not may_start(last):
         break
     started = time.time()
@@ -23,5 +26,6 @@ for item in JOB["items"]:
                  max_sequence_length=256, width=item["width"], height=item["height"],
                  generator=gen).images[0]
     image.save(OUT_DIR / (item["key"] + ".png"))
+    record_item(item["key"], item["key"] + ".png")
     last = time.time() - started
     print("wrote", item["key"], "in %.1f s" % last)
