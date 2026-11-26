@@ -5,7 +5,7 @@
   "r2_prefix": "gpu-jobs/bicharak/narration-film-01-r3-c1of2/",
   "requested_at": "2026-11-26T11:16:15+00:00",
   "schema": "earnalism.modal-request.v1",
-  "status": "requested",
+  "status": "running",
   "title_root": "production/audiovisual/bicharak",
   "worst_case_usd": 0.87357
 }
