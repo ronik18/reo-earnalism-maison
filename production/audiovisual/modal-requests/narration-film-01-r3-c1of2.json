@@ -1,11 +1,23 @@
 {
   "colab_units": 0.0,
+  "error": "InvalidError: Please add a payment method to use L4 GPU functions.; download: NotFoundError: No such file or directory; upload: the job folder /home/runner/work/_temp/modal-downloads/narration-film-01-r3-c1of2 is empty",
+  "files": [],
+  "finished_at": "2026-11-26T11:20:39+00:00",
   "job_id": "narration-film-01-r3-c1of2",
   "pending_run_id": "narration-film-01-r3-c1of2#2",
   "r2_prefix": "gpu-jobs/bicharak/narration-film-01-r3-c1of2/",
   "requested_at": "2026-11-26T11:16:15+00:00",
+  "run": {
+    "error": "InvalidError: Please add a payment method to use L4 GPU functions.; download: NotFoundError: No such file or directory",
+    "run_id": "narration-film-01-r3-c1of2#2",
+    "seconds": 102.262239675,
+    "status": "failed",
+    "usd": 0.02270221720785
+  },
   "schema": "earnalism.modal-request.v1",
-  "status": "running",
+  "seconds": 102.262239675,
+  "status": "failed",
   "title_root": "production/audiovisual/bicharak",
+  "usd": 0.02270221720785,
   "worst_case_usd": 0.87357
 }
