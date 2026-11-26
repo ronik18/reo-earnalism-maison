@@ -23,7 +23,8 @@ Last updated: 26 Nov 2026.
 - [ ] **Narration Colab jobs for the 12 pipeline titles** (64.70 CU): `production/audiovisual/RUN_SHEET-pipeline-narration.md`.
 
 ## Accounts and keys
-- [ ] **Modal account (approved 26 Nov, cap $30/month):** sign up free at https://modal.com (Starter plan). In Settings → Usage & Billing set a **workspace spend limit of $30/month**. Then Settings → API Tokens → **New token**. Tell Claude "Modal token ready": Claude opens an approval prompt to allow `api.modal.com`, then the secure form for the token secret (never paste it in chat). The token id is not secret.
+- [x] **Modal account, token and GitHub secrets** (26 Nov 2026).
+- [ ] **Modal payment method:** Modal refuses L4 GPU runs without a card on file ("Please add a payment method to use L4 GPU functions"). In Modal → Settings → Usage & Billing, add a payment method and keep the **workspace spend limit at $30/month**. Starter credit is used first; Claude's own caps ($30/month, $6/title) stop runs before the limit. Then tell Claude "Modal card added".
 - [x] **YouTube Studio sign-in** for channel UCw-UnAXdRzqij8_B2TlgQjQ (owner confirmed 26 Nov 2026).
 - [ ] **YouTube upload token, at the first private upload only:** once a finished film exists (after the বিচারক Colab jobs), Claude asks through the secure credential form for a short-lived OAuth access token for `www.googleapis.com` (scope `youtube.upload`, from Google's OAuth Playground signed in to this channel). The token is never pasted in chat or stored in the repo. The bridge checks it belongs to this channel before uploading, and uploads stay private.
 - [ ] **Razorpay test keys**, then live sign-off and merchant approval (founding Pass).
