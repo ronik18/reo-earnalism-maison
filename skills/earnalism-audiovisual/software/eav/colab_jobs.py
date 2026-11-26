@@ -552,8 +552,34 @@ def chunk_job_id(group: str, index: int, of: int) -> str:
     return f"{group}-c{index}of{of}"
 
 
+def replacement_job_id(group: str, index: int, of: int, k: int) -> str:
+    """The k-th rebuild (1, 2, ...) of one chunk: <group>-c<index>of<of>-r<k>."""
+    return f"{chunk_job_id(group, index, of)}-r{k}"
+
+
+def _replacement_plan(kind: str, old: dict, build: dict, rates: dict) -> dict:
+    """A closed/superseded chunk's exact work again: the same payload (items in the same order,
+    generation, batch), model and revision, read from its own job.json and build manifest; only the
+    forecast is derived afresh from the measured rates."""
+    if kind not in CHUNKED_KINDS or old.get("kind") != kind or not isinstance(old.get("chunk"), dict):
+        raise ValueError(f"only a {'/'.join(CHUNKED_KINDS)} chunk can be replaced")
+    repo = NARRATION_REPO if kind == "narration" else STILLS_REPO
+    model = build.get("model") or {}
+    if old.get("model") != repo or model.get("repo") != repo or not model.get("revision"):
+        raise ValueError(f"the chunk was built with {old.get('model')!r}, not {repo!r}")
+    key = "units" if kind == "narration" else "items"
+    payload = {k: v for k, v in old.items()
+               if k not in ("schema", "kind", "job_id", "title", "model", "chunk")}
+    if not payload.get(key):
+        raise ValueError("the chunk's job.json holds no items")
+    return {"payload": payload, "repo": repo, "revision": model["revision"],
+            "steps": pinned_steps(kind),
+            "compute": derive_compute(kind, {}, rates, len(payload[key])),
+            "chunk": {k: old["chunk"][k] for k in ("index", "of", "group")}}
+
+
 def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
-              month: str = None, chunk: dict = None) -> dict:
+              month: str = None, chunk: dict = None, replace: dict = None) -> dict:
     """Build an inert bundle under out/<job_id>/.
 
     The forecast is reserved on the ledger before anything is written. If the
@@ -564,13 +590,18 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
     chunk = {"index", "of", "group", "start", "stop"} builds items [start, stop) of the
     validated full job as its own job chunk_job_id(group, index, of) (narration, stills only);
     its job.json and build manifest carry chunk = {"index", "of", "group"}.
+    replace = {"job_json", "build", "k"} rebuilds a closed/superseded chunk's exact slice as
+    replacement_job_id(group, index, of, k), with the same chunk block.
     """
     if kind not in KINDS:
         raise ValueError(f"unknown job kind: {kind!r}")
-    if chunk is not None and kind not in CHUNKED_KINDS:
+    if (chunk is not None or replace is not None) and kind not in CHUNKED_KINDS:
         raise ValueError(f"{kind} jobs are never chunked")
     title = record.data["title_slug"]
-    if chunk is not None:
+    if replace is not None:
+        chunk = replace["job_json"]["chunk"]
+        job_id = replacement_job_id(chunk["group"], chunk["index"], chunk["of"], replace["k"])
+    elif chunk is not None:
         job_id = chunk_job_id(chunk["group"], chunk["index"], chunk["of"])
     else:
         job_id = spec.get("job_id") or new_job_id(kind)
@@ -591,6 +622,8 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
         _check_model(kind, spec, _load_wan_batch().w.MODEL)
         plan = {"compute": derive_compute(kind, spec, rates, job_items(kind, spec))}
         job = _reel_job(spec, job_id, forecast_seconds(plan["compute"], rates), rates[kind])
+    elif replace is not None:
+        plan = _replacement_plan(kind, replace["job_json"], replace["build"], rates)
     else:
         plan = _plan(kind, record, spec, rates)
         if chunk is not None:

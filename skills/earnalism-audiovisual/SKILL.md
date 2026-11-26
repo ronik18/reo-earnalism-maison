@@ -78,7 +78,7 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 - **Colab.** The owner runs every job. Narration, stills and music notebooks are inert
   until `RUN = True` and stop at their forecast seconds (hard stop). Narration or stills
   forecast over 3600 s are built as chunks `<id>-c<i>of<n>` of ≤ 3600 s each (one session
-  each; the caps see the sum): run and import every chunk ([budget](references/compute-budget.md)). Reel clips use the
+  each; the caps see the sum): run and import every chunk; a closed chunk is rebuilt alone with `job --replace-chunk` ([budget](references/compute-budget.md)). Reel clips use the
   Wan batch notebook: its own flags plus an authority file
   (`/content/wan22-batch-authority.json`) that **the owner writes and signs. Claude never
   writes, edits, drafts or fills in Wan authority files**, never supplies an observed rate,

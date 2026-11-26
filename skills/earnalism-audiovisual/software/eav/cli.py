@@ -6,6 +6,8 @@
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
                          (narration/stills forecast over 3600 s: built as chunks <id>-c<i>of<n>, each
                           its own job of <= 3600 s; the caps are checked once for the sum)
+  python3 -m eav.cli job <narration|stills> --root <dir> --rates <rates.json> --replace-chunk <closed chunk id>
+                         (rebuilds only that chunk's items as <chunk id>-r<k>; the group keeps its other chunks)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> [--units <CU>]
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli modal-run <job_id> --root <dir> [--download <dir>] [--dry-run]
@@ -45,6 +47,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
@@ -200,8 +203,12 @@ def _ended(j) -> bool:
 
 def _logical(rec) -> list:
     """Jobs as consumers see them: a plain job, or one entry per chunk group (job_id = the group
-    id). A group is imported only when every chunk is; it is superseded/closed (dead: it can never
-    be complete) as soon as any chunk is. `chunks` holds the real jobs in chunk order."""
+    id). For each chunk index the group uses the imported chunk, else the latest live one (a
+    closed or superseded chunk can be rebuilt with job --replace-chunk as <chunk id>-r<k>).
+    `chunks` holds those, in index order; `all_chunks` every job of the group; `missing` the
+    indices with no imported or live chunk (each names its latest, ended chunk). The group is
+    imported when every index 1..of has an imported chunk; while an index is missing it is
+    closed/superseded (it cannot complete until that index is replaced)."""
     out, groups = [], {}
     for j in _jobs(rec):
         c = j["chunk"]
@@ -210,14 +217,25 @@ def _logical(rec) -> list:
             continue
         if c["group"] not in groups:
             groups[c["group"]] = {"job_id": c["group"], "kind": j["kind"], "target": j["target"],
-                                  "order": j["order"], "chunks": [], "of": c["of"]}
+                                  "order": j["order"], "all_chunks": [], "of": c["of"]}
             out.append(groups[c["group"]])
-        groups[c["group"]]["chunks"].append(j)
+        groups[c["group"]]["all_chunks"].append(j)
     for g in groups.values():
-        cs = g["chunks"] = sorted(g["chunks"], key=lambda j: j["chunk"]["index"])
-        g.update(imported=len(cs) == g["of"] and all(j["imported"] for j in cs),
-                 superseded=any(j["superseded"] for j in cs), closed=any(j["closed"] for j in cs),
-                 unfinished=any(j["unfinished"] for j in cs))
+        use, missing = [], {}
+        for i in range(1, g["of"] + 1):
+            mine = sorted((j for j in g["all_chunks"] if j["chunk"]["index"] == i),
+                          key=lambda j: j["order"])
+            done = [j for j in mine if j["imported"]]
+            live = [j for j in mine if not _ended(j)]
+            if done or live:
+                use.append((done or live)[-1])
+            elif mine:
+                missing[i] = mine[-1]
+        g.update(chunks=use, missing=missing,
+                 imported=len(use) == g["of"] and all(j["imported"] for j in use),
+                 superseded=any(j["superseded"] for j in missing.values()),
+                 closed=any(j["closed"] for j in missing.values()),
+                 unfinished=any(j["unfinished"] for j in g["all_chunks"]))
     return out
 
 
@@ -400,7 +418,7 @@ def _measured_track(rec, units, job, out: Path):
 def _incomplete(rec, kind, target) -> str:
     """' (<group>: k of n chunks imported)' for a live chunk group not fully imported, else ''."""
     found = [g for g in _logical(rec) if g["kind"] == kind and g["target"] == target and "of" in g
-             and not _ended(g) and not g["imported"]]
+             and not g["superseded"] and not g["imported"]]
     if not found:
         return ""
     g = found[-1]
@@ -466,12 +484,14 @@ def next_action(root) -> str:
         return (f"Finish the interrupted supersede/close of {j['job_id']}: rerun the same "
                 f"{PROG} supersede|close {j['job_id']} --root {root} command"
                 + (" (supersede of a chunk: with --group)" if j["chunk"] else ""))
-    for g in _logical(rec):  # a chunk group that lost a chunk can never be complete
-        open_ = [c["job_id"] for c in g["chunks"] if not c["imported"] and not _ended(c)]
-        if "of" in g and _ended(g) and open_:
-            return (f"Chunk group {g['job_id']} lost a chunk (closed or superseded), so it can never be "
-                    f"complete; release its never-run chunks ({', '.join(open_)}): {PROG} supersede "
-                    f"{open_[0]} --root {root} --group --reason \"<why they never ran>\"")
+    for g in _logical(rec):  # a closed chunk is rebuilt on its own; the rest of the group is kept
+        if "of" in g and g["closed"] and not g["superseded"]:  # superseded: the group was given up
+            i, c = next((i, c) for i, c in sorted(g["missing"].items()) if c["closed"])
+            return (f"Chunk {i} of {g['of']} of group {g['job_id']} ({c['job_id']}) ran but was closed; "
+                    f"rebuild only that chunk's items: {PROG} job {g['kind']} --root {root} --rates "
+                    f"<rates.json> --replace-chunk {c['job_id']} (the group's other chunks are kept). "
+                    f"To give the whole group up instead: {PROG} supersede {c['job_id']} --root {root} "
+                    "--group --reason \"<why>\"")
     pending = [j for j in jobs if not j["imported"] and not _ended(j)]
     if pending:
         return _colab_action(rec, pending[0])
@@ -674,9 +694,78 @@ def _job_spec(rec, args, kind, target):
     return spec, colab_jobs.job_items(kind, spec)
 
 
+def _replace_chunk(rec, args):
+    """Rebuild one closed (ran, not imported) or superseded chunk: exactly its own items, order and
+    settings (from its job.json and build manifest), as <chunk id>-r<k>, cap-checked and reserved on
+    its own. The group's other chunks are kept, and the group completes once it is imported."""
+    old = next((j for j in _jobs(rec) if j["job_id"] == args.replace_chunk), None)
+    if old is None or not old["chunk"]:
+        raise Stop(f"{args.replace_chunk} is not a chunk of a chunked job", f"{PROG} status --root {rec.root}")
+    if old["kind"] != args.kind:
+        raise Stop(f"{args.replace_chunk} is a {old['kind']} chunk, not {args.kind}",
+                   f"{PROG} job {old['kind']} --root {rec.root} --rates <rates.json> "
+                   f"--replace-chunk {args.replace_chunk}")
+    if args.spec or args.job_id or args.clause:
+        raise Stop("--replace-chunk takes the chunk's own items and settings; --spec, --job-id and "
+                   "--clause do not apply", "Drop them and rerun")
+    c = old["chunk"]
+    group = _find(rec, c["group"])
+    if old["unfinished"] or not _ended(old):
+        raise Stop(f"{args.replace_chunk} is {'imported' if old['imported'] else 'still live'}; only a "
+                   "closed (ran, not imported) or superseded chunk is replaced",
+                   next_action(rec.root))
+    if c["index"] not in group["missing"]:
+        live = next(j for j in group["chunks"] if j["chunk"]["index"] == c["index"])
+        raise Stop(f"chunk {c['index']} of group {c['group']} already has {live['job_id']} "
+                   f"({'imported' if live['imported'] else 'live'})", next_action(rec.root))
+    k = 1 + sum(1 for j in group["all_chunks"]
+                if j["chunk"]["index"] == c["index"] and j["job_id"] != colab_jobs.chunk_job_id(
+                    c["group"], c["index"], c["of"]))
+    job_dir = old["inputs_zip"].parent
+    try:
+        with zipfile.ZipFile(old["inputs_zip"]) as z:
+            job_json = json.loads(z.read("job.json"))
+        build = _json(old["manifest"])
+        if sha256_file(old["inputs_zip"]) != build.get("inputs_sha256"):
+            raise ValueError(f"inputs.zip of {old['job_id']} does not match its build manifest")
+        replace = {"job_json": job_json, "build": build, "k": k}
+        rates = _json(args.rates)
+        compute = colab_jobs._replacement_plan(args.kind, job_json, build, rates)["compute"]
+    except (KeyError, ValueError, zipfile.BadZipFile) as e:
+        raise Stop(f"chunk {old['job_id']} cannot be replaced: {e}",
+                   f"Check {job_dir} and the measured rates.json (references/compute-budget.md)")
+    if budget.forecast_seconds(compute, rates) > colab_jobs.MAX_CHUNK_SECONDS:
+        raise Stop(f"at the current rates chunk {c['index']} is forecast over "
+                   f"{colab_jobs.MAX_CHUNK_SECONDS} s", "Hold for the owner: the measured rates changed")
+    ledger, month = _ledger(rec, args), _month()
+    units = budget.forecast(compute, rates)
+    remaining = _remaining(ledger, rec, month)
+    if units > remaining:
+        raise Stop(f"Budget exceeded: forecast {units:.2f} CU > remaining {remaining:.2f} CU "
+                   f"(caps {budget.TITLE_CAP:g}/title, {budget.MONTH_CAP:g}/month, {month}). "
+                   "Nothing was reserved or written.",
+                   "Hold the job and ask the owner; never retry past a cap.", code=3)
+    try:
+        result = colab_jobs.build_job(args.kind, rec, {}, ledger, rates, rec.root / "jobs",
+                                      month=month, replace=replace)
+    except budget.BudgetExceeded as e:
+        raise Stop(f"Budget exceeded: {e}. Nothing was written.",
+                   "Hold the job and ask the owner; never retry past a cap.", code=3)
+    except (ValueError, FileExistsError, KeyError) as e:
+        raise Stop(f"job not built: {e}", "Fix the input it names and rerun")
+    rec.event("cli", "job_target", {"job_id": result["job_id"], "target": old["target"],
+                                    "kind": args.kind, "chunk": {**c, "replaces": old["job_id"]}})
+    print(f"Built {args.kind} job {result['job_id']} for {old['target']}: chunk {c['index']} of "
+          f"{c['of']} of group {c['group']} again (replaces {old['job_id']}; the same "
+          f"{compute['items']} items), forecast {units:.2f} CU reserved ({remaining - units:.2f} CU "
+          "left under the title and month caps). Inert until the owner enables it.")
+
+
 def cmd_job(args):
     rec = _record(args.root)
     kind = args.kind
+    if args.replace_chunk:
+        return _replace_chunk(rec, args)
     if kind == "reel_clips" and not args.reel:
         raise Stop("reel_clips jobs belong to one reel", "Pass --reel <n>")
     target = f"reel-{args.reel}" if args.reel else _film_target(args.film)
@@ -896,7 +985,7 @@ def _supersede_group(args):
     if group is None or "of" not in group:
         raise Stop(f"{args.job_id} is not a chunk or chunk group",
                    f"Drop --group: {PROG} supersede {args.job_id} --root {rec.root} --reason \"...\"")
-    todo = [c["job_id"] for c in group["chunks"] if not c["imported"] and not _ended(c)]
+    todo = [c["job_id"] for c in group["all_chunks"] if not c["imported"] and not _ended(c)]
     if not todo:
         raise Stop(f"chunk group {group['job_id']} has no never-run chunk left to supersede",
                    f"{PROG} status --root {rec.root}")
@@ -1442,7 +1531,10 @@ def cmd_status(args):
             if "of" in g:
                 done = sum(c["imported"] for c in g["chunks"])
                 state = ("complete" if g["imported"] else
-                         "dead: a chunk was closed or superseded" if _ended(g) else "incomplete")
+                         "dead: superseded" if g["superseded"] else
+                         "incomplete: chunk " + ", ".join(map(str, sorted(g["missing"])))
+                         + " closed; rebuild it with job --replace-chunk" if g["closed"]
+                         else "incomplete")
                 print(f"  group {g['job_id']} {g['kind']} {g['target']}: {done} of {g['of']} chunks "
                       f"imported ({state})")
 
@@ -1538,6 +1630,8 @@ def _parser():
     s.add_argument("--reel", type=int)
     s.add_argument("--clause", help="optional appended voice clause, <= 12 words")
     s.add_argument("--job-id")
+    s.add_argument("--replace-chunk", help="a closed or superseded chunk id: rebuild only its items "
+                   "as <chunk id>-r<k>; the group's other chunks are kept")
     s = add("import")
     s.add_argument("job_id")
     s.add_argument("--from", dest="source", required=True)

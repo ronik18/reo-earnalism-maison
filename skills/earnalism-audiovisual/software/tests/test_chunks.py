@@ -194,18 +194,126 @@ class ChunkCliTests(unittest.TestCase):
         code, out = run("supersede", ids[0], "--root", self.root, "--reason", "again", "--group")
         self.assertNotEqual(code, 0)
 
-    def test_a_closed_chunk_kills_the_group(self):
+    # --- fix round 1 (I1): a closed chunk is rebuilt alone ---------------------------------------
+    def closed_stills_chunk_2(self):
+        spec, keys = self.stills_spec()
+        self.assertEqual(run("job", "stills", "--root", self.root, "--rates", self.rates,
+                             "--spec", spec)[0], 0)
+        ids = [d.name for d in self.jobs()]
+        code, out = run("close", ids[1], "--root", self.root, "--units", 1.0, "--reason", "hard stop")
+        self.assertEqual(code, 0, out)
+        return ids, keys
+
+    def test_a_closed_chunk_is_replaced_with_only_its_items(self):
+        ids, keys = self.closed_stills_chunk_2()
+        group = ids[0].rsplit("-c", 1)[0]
+        nxt = cli.next_action(self.root)
+        self.assertIn(f"--replace-chunk {ids[1]}", nxt)
+        code, out = run("status", "--root", self.root)
+        self.assertIn(f"group {group} stills film-01: 0 of 3 chunks imported (incomplete: chunk 2 "
+                      "closed; rebuild it with job --replace-chunk)", out)
+        rows = len(self.ledger_rows())
+        code, out = run("job", "stills", "--root", self.root, "--rates", self.rates,
+                        "--replace-chunk", ids[1])
+        self.assertEqual(code, 0, out)
+        new = self.root / "jobs" / f"{ids[1]}-r1"
+        old_job, new_job = _job_json(self.root / "jobs" / ids[1]), _job_json(new)
+        self.assertEqual(new_job["items"], old_job["items"])  # the same slice, in order
+        self.assertEqual(new_job["chunk"], {"index": 2, "of": 3, "group": group})
+        self.assertEqual({k: v for k, v in new_job.items() if k != "job_id"},
+                         {k: v for k, v in old_job.items() if k != "job_id"})
+        self.assertEqual(json.loads((new / "build-manifest.json").read_text())["chunk"], new_job["chunk"])
+        ledger = self.ledger_rows()
+        self.assertEqual(len(ledger), rows + 1)
+        entry = next(r for r in ledger if r["job_id"] == new.name)
+        self.assertEqual(entry["state"], "reserved")
+        self.assertAlmostEqual(entry["units"], budget.forecast(
+            {"kind": "stills", "steps": 4, "items": 10, "takes": 1, "decode_s": 240, "export_s": 60},
+            {"stills": STILLS}), places=9)
+        self.assertIn(f"import {ids[0]}", cli.next_action(self.root))  # chunks 1 and 3 kept
+        code, out = run("status", "--root", self.root)
+        self.assertIn(f"{new.name} stills film-01 chunk 2/3 of {group}: waiting for Colab", out)
+        self.assertIn(f"group {group} stills film-01: 0 of 3 chunks imported (incomplete)", out)
+        # a second replacement while r1 is live is refused; so is replacing a live chunk
+        code, out = run("job", "stills", "--root", self.root, "--rates", self.rates,
+                        "--replace-chunk", ids[1])
+        self.assertNotEqual(code, 0)
+        self.assertIn(f"already has {new.name}", out)
+
+    def test_a_live_chunk_is_never_replaced(self):
         spec, _ = self.stills_spec()
         self.assertEqual(run("job", "stills", "--root", self.root, "--rates", self.rates,
                              "--spec", spec)[0], 0)
         ids = [d.name for d in self.jobs()]
-        code, out = run("close", ids[0], "--root", self.root, "--units", 1.0, "--reason", "crashed")
+        code, out = run("job", "stills", "--root", self.root, "--rates", self.rates,
+                        "--replace-chunk", ids[1])
+        self.assertNotEqual(code, 0)
+        self.assertIn("still live", out)
+        self.assertEqual(len(self.jobs()), 3)
+        self.assertEqual(len(self.ledger_rows()), 3)
+
+    def test_a_replacement_over_the_cap_exits_3(self):
+        ids, _ = self.closed_stills_chunk_2()
+        before = self.ledger_rows()
+        self.set_rates(NARR, {**STILLS, "units_per_hour": 300.0})
+        code, out = run("job", "stills", "--root", self.root, "--rates", self.rates,
+                        "--replace-chunk", ids[1])
+        self.assertEqual(code, 3, out)
+        self.assertIn("Budget exceeded", out)
+        self.assertEqual(self.ledger_rows(), before)
+        self.assertEqual(len(self.jobs()), 3)
+
+    def test_replaced_chunk_completes_the_group_for_film_and_bundle(self):
+        self.set_rates({**NARR, "s_per_step": 3000.0, "units_per_hour": 0.2}, STILLS)
+        self.assertEqual(run("job", "narration", "--root", self.root, "--rates", self.rates)[0], 0)
+        narr = self.jobs()
+        self.assertGreaterEqual(len(narr), 3)
+        spec, _ = self.stills_spec(5)  # one short stills job
+        self.assertEqual(run("job", "stills", "--root", self.root, "--rates", self.rates,
+                             "--spec", spec)[0], 0)
+        [stills] = [d for d in self.jobs() if d not in narr]
+        self.import_chunk(stills, "stills")
+        code, out = run("close", narr[1].name, "--root", self.root, "--units", 0.2, "--reason", "crash")
         self.assertEqual(code, 0, out)
-        nxt = cli.next_action(self.root)
-        self.assertIn("--group", nxt)
-        self.assertIn(ids[1], nxt)
+        for d in [narr[0]] + narr[2:]:
+            self.import_chunk(d, "narration")
+        code, out = run("job", "narration", "--root", self.root, "--rates", self.rates,
+                        "--replace-chunk", narr[1].name)
+        self.assertEqual(code, 0, out)
+        r1 = self.root / "jobs" / f"{narr[1].name}-r1"
+        self.import_chunk(r1, "narration")
+        used = [narr[0].name, r1.name] + [d.name for d in narr[2:]]
+        group = narr[0].name.rsplit("-c", 1)[0]
         code, out = run("status", "--root", self.root)
-        self.assertIn("dead: a chunk was closed or superseded", out)
+        self.assertIn(f"group {group} narration film-01: {len(narr)} of {len(narr)} chunks imported "
+                      "(complete)", out)
+        Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(self.d / "logo.png")
+        Image.new("RGB", (320, 180), (0, 0, 0)).save(self.d / "end.png")
+        bed = self.d / "bed.wav"
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
+                        "anoisesrc=d=30:c=pink:r=48000:a=0.2", "-ac", "2", str(bed)], check=True)
+        code, out = run("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card",
+                        self.d / "end.png", "--score", bed, "--score-route", "vcsl")
+        self.assertEqual(code, 0, out)
+        timing = json.loads((self.root / "film" / "film-01" / "timing.json").read_text())
+        self.assertEqual([t["unit_key"] for t in timing["units"]], [u["unit_key"] for u in self.units])
+        self.assertEqual(timing["provenance"]["narration_chunk_job_ids"], used)
+        for u in _job_json(r1)["units"]:
+            self.assertEqual(timing["provenance"]["wav_sha256"][u["unit_key"]], hashlib.sha256(
+                (self.root / "narration" / r1.name / f"{u['unit_key']}.wav").read_bytes()).hexdigest())
+        Record.load(self.root).event("qc", "pass", {"failed": []})
+        bundle = self.d / "bundle"
+        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")
+        self.assertEqual(code, 0, out)
+        prov = json.loads((bundle / "timing.json").read_text())["provenance"]
+        for unit in prov["units"].values():
+            self.assertEqual(unit["narration_chunk_job_ids"], used)
+        draft = json.loads((self.root / "maison" / cli.EVIDENCE_DRAFT).read_text())
+        self.assertEqual(draft["generators"][0]["job_ids"], sorted(used))
+        self.assertNotIn(narr[1].name, draft["generators"][0]["job_ids"])
+        code, out = run("preview", "--root", self.root, "--bundle", bundle, "--out", self.d / "preview")
+        self.assertIn(code, (0, 5), out)
+        self.assertNotIn("Traceback", out)
 
     # --- requirement 5: consumers ----------------------------------------------------------------
     def fake_outputs(self, job_dir, kind):

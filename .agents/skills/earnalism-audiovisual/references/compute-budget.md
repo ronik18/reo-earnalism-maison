@@ -64,9 +64,16 @@ stills by keyframe). A job at or under 3600 s is built exactly as before. Music 
   chunks (`narration_chunk_job_ids`). `status` lists every chunk (`chunk i/n of <group>`) and one
   line per group: `k of n chunks imported (complete|incomplete|dead ...)`.
 - One chunk is never superseded alone: `supersede <chunk or group id> --group --reason "..."`
-  supersedes every chunk of the group that is neither imported nor ended. A chunk that ran but
-  cannot be imported is `close`d on its own; the group is then dead (it can never be complete),
-  and `Next:` asks for `supersede --group` of its never-run chunks before a new job.
+  supersedes every chunk of the group that is neither imported nor ended (the group is given up).
+- A chunk that ran but cannot be imported is `close`d on its own (actual units). Only that chunk is
+  rebuilt: `job <kind> --root <root> --rates <rates.json> --replace-chunk <closed chunk id>` builds
+  `<chunk id>-r<k>` (k = 1, 2, ...) from the closed chunk's own job.json and build manifest (the
+  same items in the same order, the same settings, model and revision), forecast from the measured
+  rates, cap-checked (exit 3 over a cap) and reserved on its own. It is refused unless the chunk is
+  closed or superseded and its index has no imported or live chunk. The group's other chunks are
+  kept; for each index the group uses the imported chunk, else the latest live one, and it is
+  complete once every index has an imported chunk. `Next:` offers `--replace-chunk` for a closed
+  chunk. This is a retry of one already cap-checked slice, not a split to slip under a cap.
 - If building a later chunk fails, every chunk built by that command is removed, its reservation
   settled at 0 and the record restored.
 
