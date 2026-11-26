@@ -1897,19 +1897,23 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                            + _incomplete(rec, "narration", _film_target(fi)), next_action(rec.root))
             job_ids.add(job["job_id"])
             run_ids.update(_chunk_ids(job))
-            units, tags = [], []
+            units, tags, spoken = [], [], {}
             for _, sc in mine:
                 vus = voice_units(sc, {"description": ""}, None, lang)
-                tg = [b["anchor_id"] for b in sc["blocks"] for _ in block_parts(b["text"], lang)]
+                tg = []
+                for b in sc["blocks"]:  # a block's parts with their exact joiners rebuild the block
+                    parts = block_parts(b["text"], lang)
+                    tg += [b["anchor_id"]] * len(parts)
+                    spoken.setdefault(b["anchor_id"], []).append(
+                        (vus[len(tg) - len(parts):len(tg)], parts))
                 if len(tg) != len(vus):
                     raise Stop(f"scene {sc['scene_id']}: unit/anchor mismatch", "Report as a bug")
                 units += vus
                 tags += tg
-            spoken = {}
-            for u, a in zip(units, tags):
-                spoken.setdefault(a, []).append(u["text"])
             for p in unit["paragraphs"]:
-                if " ".join(spoken.get(p["anchor_id"], [])) != " ".join(p["text"].split()):
+                said = " ".join("".join(u["text"] + j for u, (_, _, j) in zip(us, parts))
+                                for us, parts in spoken.get(p["anchor_id"], []))
+                if said != " ".join(p["text"].split()):
                     raise Stop(f"paragraph {p['anchor_id']}: spoken units do not reproduce its text "
                                "exactly", "Refuse; never publish narration that differs from the book")
             chapter = td / f"unit-{n:03d}.wav"

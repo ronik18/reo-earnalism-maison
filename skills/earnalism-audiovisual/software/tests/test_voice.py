@@ -70,89 +70,135 @@ def _production_root():
     return None
 
 
-class SplitTests(unittest.TestCase):
-    """V1: every unit fits Parler's ~30 s output cap (<= 200 chars), losslessly."""
+def _rejoin(pairs) -> str:
+    return "".join(p + sep for p, sep in pairs)
 
-    def assert_lossless(self, text, parts):
-        self.assertEqual(" ".join(parts), _norm(text))
-        for p in parts:
+
+def _parts(pairs) -> list:
+    return [p for p, _ in pairs]
+
+
+class SplitTests(unittest.TestCase):
+    """V1: every unit fits Parler's ~30 s output cap (<= 200 chars), losslessly, at clause marks."""
+
+    def assert_lossless(self, text, pairs):
+        self.assertEqual(_rejoin(pairs), text)  # byte for byte, with the recorded separators
+        self.assertEqual(pairs[-1][1], "")
+        for p, sep in pairs:
             self.assertTrue(p)
             self.assertLessEqual(len(p), MAX_UNIT_CHARS)
             self.assertEqual(p, p.strip())
+            self.assertEqual(sep.strip(), "")
 
     def test_limit_values(self):
         self.assertEqual(MAX_UNIT_CHARS, 200)
         self.assertEqual(CLAUSE_PAUSE_MS, 150)
 
     def test_short_sentence_is_one_unit(self):
-        self.assertEqual(split_unit("  A short   one. "), ["A short one."])
-        self.assertEqual(split_unit("x" * 200), ["x" * 200])
+        self.assertEqual(split_unit("A short one."), [("A short one.", "")])
+        self.assertEqual(split_unit("x" * 200), [("x" * 200, "")])
 
     def test_english_splits_at_the_comma_closest_to_the_middle(self):
         a = "The children came back to the garden after school every single day of the long year"
         b = "and they played among the flowers and the peach trees until the evening light faded"
         c = "while the selfish giant was far away visiting his friend"
         text = f"{a}, {b}, {c}."
-        parts = split_unit(text)
-        self.assert_lossless(text, parts)
-        self.assertEqual(parts, [f"{a},", f"{b}, {c}."])
+        pairs = split_unit(text)
+        self.assert_lossless(text, pairs)
+        self.assertEqual(pairs, [(f"{a},", " "), (f"{b}, {c}.", "")])
 
     def test_clause_punctuation_beats_a_more_central_space(self):
         text = ("word " * 30) + "end; " + ("tail " * 10) + "stop."
-        parts = split_unit(text)
-        self.assert_lossless(text, parts)
-        self.assertTrue(parts[0].endswith("end;"))
+        pairs = split_unit(text)
+        self.assert_lossless(text, pairs)
+        self.assertTrue(pairs[0][0].endswith("end;"))
 
     def test_dashes_and_colons_are_clause_points(self):
         for mark in ("—", "–", ":"):
             text = ("alpha " * 25) + mark + " " + ("beta " * 20) + "end."
-            parts = split_unit(text)
-            self.assert_lossless(text, parts)
-            self.assertTrue(parts[0].endswith(mark), (mark, parts))
+            pairs = split_unit(text)
+            self.assert_lossless(text, pairs)
+            self.assertTrue(pairs[0][0].endswith(mark), (mark, pairs))
+
+    def test_clause_mark_without_a_space_splits_after_the_whole_run(self):
+        a = " ".join(["ছায়া-যবনিকা পড়িয়া গেল"] * 5)
+        b = " ".join(["এখানে আর কেহ নাই"] * 6)
+        for run in (";—", ",—", "—", ","):
+            text = f"{a}{run}{b}।"
+            pairs = split_unit(text)
+            self.assert_lossless(text, pairs)
+            self.assertEqual(pairs, [(f"{a}{run}", ""), (f"{b}।", "")], run)
+
+    def test_clause_split_with_recursion_beats_a_whitespace_split_that_fits(self):
+        # no single clause point leaves both pieces <= 200 but the middle space would; that space
+        # cuts a clause in two, so the clause marks are used with recursion: three natural pieces
+        clause = " ".join(["কেমন করিয়া অদৃশ্য হইয়া গেল"] * 4)
+        text = ",—".join([clause] * 3) + "।"
+        middle = text.index(" ", len(text) // 2)
+        self.assertLessEqual(max(middle, len(text) - middle - 1), MAX_UNIT_CHARS)
+        self.assertGreater(len(text) - len(clause) - 2, MAX_UNIT_CHARS)
+        pairs = split_unit(text)
+        self.assert_lossless(text, pairs)
+        self.assertEqual(pairs, [(clause + ",—", ""), (clause + ",—", ""), (clause + "।", "")])
+
+    def test_whitespace_only_inside_a_clause_longer_than_the_limit(self):
+        long_clause = " ".join(["পড়িয়া গেল আর"] * 20)  # 279 chars, no clause mark
+        short = "তখন সে ফিরিল"
+        text = f"{short}, {long_clause}।"
+        pairs = split_unit(text)
+        self.assert_lossless(text, pairs)
+        self.assertEqual(pairs[0], (f"{short},", " "))
+        self.assertEqual(len(pairs), 3)  # the long clause alone is cut at its middle space
 
     def test_no_punctuation_splits_at_whitespace_near_the_middle(self):
         text = " ".join(f"w{i:03d}" for i in range(60))  # 299 chars
-        parts = split_unit(text)
-        self.assert_lossless(text, parts)
-        self.assertEqual(len(parts), 2)
-        self.assertLess(abs(len(parts[0]) - len(parts[1])), 6)
+        pairs = split_unit(text)
+        self.assert_lossless(text, pairs)
+        self.assertEqual(len(pairs), 2)
+        self.assertLess(abs(len(pairs[0][0]) - len(pairs[1][0])), 6)
 
     def test_very_long_word_run_recurses(self):
         text = " ".join(["running"] * 300)  # 2399 chars, no punctuation
-        parts = split_unit(text)
-        self.assert_lossless(text, parts)
-        self.assertGreaterEqual(len(parts), 12)
+        pairs = split_unit(text)
+        self.assert_lossless(text, pairs)
+        self.assertGreaterEqual(len(pairs), 12)
 
-    def test_never_splits_inside_a_word(self):
+    def test_never_splits_inside_a_word_or_a_number(self):
         word = "অ" * 150
         text = f"{word} {word}।"
-        self.assertEqual(split_unit(text), [word, word + "।"])
+        self.assertEqual(split_unit(text), [(word, " "), (word + "।", "")])
         with self.assertRaises(ValueError):
             split_unit("x" * 201)
+        text = "sum " * 40 + "1,000,000 and 10:30 " + "more " * 20 + "end."
+        pairs = split_unit(text)
+        self.assert_lossless(text, pairs)
+        self.assertFalse(any(p[-1].isdigit() and sep == "" for p, sep in pairs[:-1]))
 
     def test_bengali_danda_inside_a_sentence(self):
         a = " ".join(["তিনি বাগানে ফিরে এলেন"] * 6)
         b = " ".join(["শিশুরা খেলা করছিল"] * 6)
         for mark in ("॥", ","):
             text = f"{a}{mark} {b}।"
-            parts = split_unit(text)
-            self.assert_lossless(text, parts)
-            self.assertEqual(parts, [f"{a}{mark}", f"{b}।"])
+            pairs = split_unit(text)
+            self.assert_lossless(text, pairs)
+            self.assertEqual(_parts(pairs), [f"{a}{mark}", f"{b}।"])
 
     def test_clause_mark_before_a_closing_quote(self):
         a = " ".join(["he said the garden was his own"] * 4)
         text = f"“{a},” " + ("and then he built a wall " * 4) + "around it."
-        parts = split_unit(text)
-        self.assert_lossless(text, parts)
-        self.assertTrue(parts[0].endswith(",”"))
+        pairs = split_unit(text)
+        self.assert_lossless(text, pairs)
+        self.assertEqual(pairs[0], (f"“{a},”", " "))
 
     def test_long_bengali_paragraph_units_and_pauses(self):
         clause = "তিনি অনেক দিন পরে বাগানে ফিরে এসে দেখলেন যে শিশুরা সেখানে খেলা করছে"
-        long_sentence = ", ".join([clause] * 8) + "।"
+        long_sentence = ",—".join([clause] * 8) + "।"
         text = f"ছোট বাক্য। {long_sentence} শেষ।"
         scene = {"scene_id": "s1", "blocks": [{"anchor_id": "a", "kind": "paragraph", "text": text}]}
         units = voice_units(scene, PRESET, None, "bn")
-        self.assertEqual(" ".join(u["text"] for u in units), _norm(text))
+        parts = block_parts(text, "bn")
+        self.assertEqual([u["text"] for u in units], [p for p, _, _ in parts])
+        self.assertEqual("".join(u["text"] + j for u, (_, _, j) in zip(units, parts)), text)
         self.assertTrue(all(len(u["text"]) <= MAX_UNIT_CHARS for u in units))
         self.assertGreater(len(units), 3)
         self.assertEqual([u["unit_key"] for u in units],
@@ -162,7 +208,6 @@ class SplitTests(unittest.TestCase):
         self.assertEqual(pauses[-2], 400)  # last part of the long sentence keeps the sentence rule
         self.assertEqual(pauses[-1], 800)  # paragraph end
         self.assertEqual(set(pauses[1:-2]), {CLAUSE_PAUSE_MS})
-        self.assertEqual(len(block_parts(text, "bn")), len(units))
 
     def test_split_last_part_of_a_heading_keeps_the_heading_pause(self):
         text = ", ".join(["a long heading phrase that goes on"] * 10)
@@ -193,11 +238,16 @@ class ProductionSourceTests(unittest.TestCase):
                 for f in plan_film(source)["films"]:
                     for sc in f["scenes"]:
                         units = voice_units(sc, preset, None, lang)
-                        texts = [_norm(b["text"]) for b in sc["blocks"]]
-                        block_texts += texts
-                        self.assertEqual(" ".join(u["text"] for u in units), " ".join(texts))
-                        self.assertEqual(len(units), sum(len(block_parts(b["text"], lang))
-                                                         for b in sc["blocks"]))
+                        parts = [p for b in sc["blocks"] for p in block_parts(b["text"], lang)]
+                        self.assertEqual([u["text"] for u in units], [p for p, _, _ in parts])
+                        k = 0
+                        for b in sc["blocks"]:  # every block rebuilt byte for byte
+                            n = len(block_parts(b["text"], lang))
+                            said = "".join(u["text"] + j for u, (_, _, j)
+                                           in zip(units[k:k + n], parts[k:k + n]))
+                            self.assertEqual(said, _norm(b["text"]))
+                            block_texts.append(said)
+                            k += n
                         for u in units:
                             self.assertLessEqual(len(u["text"]), MAX_UNIT_CHARS, u["unit_key"])
                             self.assertEqual(u["description"], preset["description"])

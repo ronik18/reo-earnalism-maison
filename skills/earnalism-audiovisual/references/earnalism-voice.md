@@ -34,10 +34,15 @@ shifts of pace and intensity, never by character impersonation.
    `generate()` at about 30 s (measured 30.2 s; the story voice speaks about 11–12
    Bengali characters a second), so no unit is longer than `MAX_UNIT_CHARS = 200`
    characters (about 18 s), in every language. A longer sentence becomes several
-   ordinary units: it is split at clause punctuation (`;` `:` `,` `—` `–`, a danda or
-   double danda inside it), else at a space, at the point closest to the middle that
-   leaves both parts within the limit (recursively), never inside a word and never
-   dropping or changing a character. Unit keys stay `<scene_id>-NNN` in order.
+   ordinary units. It is split only at clause punctuation (`;` `:` `,` `—` `–`, a danda
+   or double danda inside it), after the whole punctuation run (e.g. `;—`), whether or
+   not a space follows, at the point closest to the middle that leaves both parts within
+   the limit, else the one closest to the middle, recursing on each part. A space is used
+   only inside a stretch with no clause mark that is itself longer than the limit (again
+   closest to the middle). Never inside a word or a number; every part keeps its exact
+   characters, and the parts with their original separators (a space, or nothing after
+   unspaced punctuation) rebuild the sentence byte for byte. Unit keys stay
+   `<scene_id>-NNN` in order.
 3. **Pauses in the edit, once.** Colab writes dry per-unit WAVs with no added silence;
    `eav.film.narration_track` is the only place pauses are inserted, so measured unit ends
    are speech ends. 150 ms after each part of a split sentence (`CLAUSE_PAUSE_MS`; its
