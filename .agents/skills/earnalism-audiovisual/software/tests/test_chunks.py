@@ -2,6 +2,7 @@
 chunk group only once every chunk is imported, and then all chunks' outputs in order."""
 import hashlib
 import json
+import re
 import subprocess
 import tempfile
 import unittest
@@ -74,7 +75,13 @@ class ChunkCliTests(unittest.TestCase):
         self.rates.write_text(json.dumps({"narration": narration, "stills": stills}), encoding="utf-8")
 
     def jobs(self):
-        return sorted(p for p in (self.root / "jobs").iterdir()) if (self.root / "jobs").is_dir() else []
+        """Job folders in build order: a group's chunks by their numeric index (A3 M5: as strings,
+        -c10of12 would sort before -c2of12)."""
+        def order(p):
+            m = re.search(r"-c(\d+)of(\d+)", p.name)
+            return (p.name[:m.start()], int(m.group(1)), p.name) if m else (p.name, 0, p.name)
+        return sorted((p for p in (self.root / "jobs").iterdir()), key=order) \
+            if (self.root / "jobs").is_dir() else []
 
     def stills_spec(self, n=30):
         keys = [f"{self.scenes[i % len(self.scenes)]['scene_id']}-{i // len(self.scenes) + 1:02d}"
@@ -107,6 +114,33 @@ class ChunkCliTests(unittest.TestCase):
         art = next(a for a in rec.data["artifacts"] if a["kind"] == "colab_job")
         self.assertNotIn("chunk", art["meta"])
         self.assertEqual(len(self.ledger_rows()), 1)
+
+    def test_short_job_json_is_byte_identical_to_the_build_before_chunks(self):
+        """A3 M4: compared with output produced by the code before chunking existed (commit
+        f48d4a1, tests/fixtures/narration-job-at-f48d4a1.json), not with a dict built here."""
+        code, out = run("job", "narration", "--root", self.root, "--rates", self.rates,
+                        "--job-id", "narration-golden")
+        self.assertEqual(code, 0, out)
+        with zipfile.ZipFile(self.root / "jobs" / "narration-golden" / "inputs.zip") as z:
+            built = z.read("job.json")
+        self.assertEqual(built, (Path(__file__).parent / "fixtures" /
+                                 "narration-job-at-f48d4a1.json").read_bytes())
+
+    def test_a_job_id_already_used_as_a_job_or_group_id_is_refused(self):
+        """A3 M3: one id names one thing: a --job-id that is a job id or a chunk group id here is
+        refused before anything is reserved or written."""
+        spec, _ = self.stills_spec()
+        self.assertEqual(run("job", "stills", "--root", self.root, "--rates", self.rates,
+                             "--spec", spec, "--job-id", "stills-g")[0], 0)
+        ids = [d.name for d in self.jobs()]
+        self.assertEqual(ids[0], "stills-g-c1of3")
+        before = (self.ledger.read_bytes(), (self.root / "record.json").read_bytes())
+        for taken in ("stills-g", "stills-g-c2of3"):
+            code, out = run("job", "narration", "--root", self.root, "--rates", self.rates,
+                            "--job-id", taken)
+            self.assertEqual(code, 2, out)
+            self.assertIn(f"--job-id {taken} is already a job or chunk group id", out)
+        self.assertEqual((self.ledger.read_bytes(), (self.root / "record.json").read_bytes()), before)
 
     # --- requirements 2-4: ~2.5 h splits into 3 chunks -----------------------------------------
     def test_stills_job_of_two_and_a_half_hours_is_three_chunks(self):
@@ -324,7 +358,7 @@ class ChunkCliTests(unittest.TestCase):
         for unit in prov["units"].values():
             self.assertEqual(unit["narration_chunk_job_ids"], used)
         draft = json.loads((self.root / "maison" / cli.EVIDENCE_DRAFT).read_text())
-        self.assertEqual(draft["generators"][0]["job_ids"], sorted(used))
+        self.assertEqual(draft["generators"][0]["job_ids"], used)  # chunk order (A3 M5)
         self.assertNotIn(narr[1].name, draft["generators"][0]["job_ids"])
         code, out = run("preview", "--root", self.root, "--bundle", bundle, "--out", self.d / "preview")
         self.assertIn(code, (0, 5), out)
@@ -420,10 +454,138 @@ class ChunkCliTests(unittest.TestCase):
             self.assertEqual(unit["narration_job_id"], group)
             self.assertEqual(unit["narration_chunk_job_ids"], [d.name for d in narr])
         draft = json.loads((self.root / "maison" / cli.EVIDENCE_DRAFT).read_text())
-        self.assertEqual(draft["generators"][0]["job_ids"], sorted(d.name for d in narr))
+        self.assertEqual(draft["generators"][0]["job_ids"], [d.name for d in narr])  # chunk order
         code, out = run("preview", "--root", self.root, "--bundle", bundle, "--out", self.d / "preview")
         self.assertIn(code, (0, 5), out)  # the fixture's short pauses may not qualify; never a crash
         self.assertNotIn("Traceback", out)
+
+
+    # --- M1: retire a group a newer build replaced ------------------------------------------------
+    def film_args(self):
+        Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(self.d / "logo.png")
+        Image.new("RGB", (320, 180), (0, 0, 0)).save(self.d / "end.png")
+        bed = self.d / "bed.wav"
+        if not bed.exists():
+            subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
+                            "anoisesrc=d=30:c=pink:r=48000:a=0.2", "-ac", "2", str(bed)], check=True)
+        return ("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card",
+                self.d / "end.png", "--score", bed, "--score-route", "vcsl")
+
+    def test_a_retired_group_is_never_current_and_film_uses_the_newest_complete_job(self):
+        """The live case: a narration group (chunk 1 imported, chunk 2 closed) was rebuilt as one
+        job and imported; the group kept driving Next ("rebuild only that chunk"). Retired, it is
+        kept on record and never used; film, bundle-audio and preview say which job they used."""
+        self.set_rates({**NARR, "s_per_step": 3000.0, "units_per_hour": 0.2}, STILLS)
+        self.assertEqual(run("job", "narration", "--root", self.root, "--rates", self.rates,
+                             "--job-id", "narration-r3")[0], 0)
+        chunks = self.jobs()
+        self.assertGreaterEqual(len(chunks), 2)
+        self.import_chunk(chunks[0], "narration")
+        for d in chunks[1:]:
+            code, out = run("close", d.name, "--root", self.root, "--units", 0.1, "--reason", "cut off")
+            self.assertEqual(code, 0, out)
+        self.set_rates(NARR, STILLS)
+        self.assertEqual(run("job", "narration", "--root", self.root, "--rates", self.rates,
+                             "--job-id", "narration-r4")[0], 0)
+        self.import_chunk(self.root / "jobs" / "narration-r4", "narration")
+        spec, _ = self.stills_spec(5)
+        self.assertEqual(run("job", "stills", "--root", self.root, "--rates", self.rates,
+                             "--spec", spec, "--job-id", "stills-one")[0], 0)
+        self.import_chunk(self.root / "jobs" / "stills-one", "stills")
+        self.assertIn("--replace-chunk", cli.next_action(self.root))  # the bug: the old group leads
+        code, out = run("retire", chunks[0].name, "--root", self.root, "--reason", "rebuilt as r4")
+        self.assertEqual(code, 2, out)
+        self.assertIn("a group is retired as a whole", out)
+        self.assertIn("retire narration-r3", out)
+        events = len(Record.load(self.root).data["events"])
+        ledger = self.ledger.read_bytes()
+        code, out = run("retire", "narration-r3", "--root", self.root, "--reason", "rebuilt as narration-r4")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(self.ledger.read_bytes(), ledger)  # kept on record: nothing settled again
+        ev = Record.load(self.root).data["events"][events]
+        self.assertEqual((ev["stage"], ev["result"], ev["detail"]["job_id"], ev["detail"]["jobs"]),
+                         ("job", "retired", "narration-r3", [d.name for d in chunks]))
+        nxt = cli.next_action(self.root)
+        self.assertNotIn("--replace-chunk", nxt)
+        self.assertIn("film", nxt)
+        code, out = run("status", "--root", self.root)
+        self.assertIn("group narration-r3 narration film-01", out)
+        self.assertIn("(retired: kept on record, never used as current)", out)
+        self.assertIn(f"{chunks[0].name} narration film-01 chunk 1/{len(chunks)} of narration-r3: "
+                      "retired, never used as current (imported)", out)
+        code, out = run("retire", "narration-r3", "--root", self.root, "--reason", "again")
+        self.assertEqual(code, 2, out)
+        self.assertIn("already retired", out)
+        code, out = run("job", "narration", "--root", self.root, "--rates", self.rates,
+                        "--replace-chunk", chunks[1].name)
+        self.assertEqual(code, 2, out)
+        self.assertIn("is retired", out)
+        code, out = run(*self.film_args())
+        self.assertEqual(code, 0, out)
+        self.assertIn("from narration job narration-r4 and stills job stills-one", out)
+        timing = json.loads((self.root / "film" / "film-01" / "timing.json").read_text())
+        self.assertEqual(timing["provenance"]["narration_job_id"], "narration-r4")
+        Record.load(self.root).event("qc", "pass", {"failed": []})
+        bundle = self.d / "bundle"
+        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")
+        self.assertEqual(code, 0, out)
+        self.assertIn("from narration job(s) narration-r4.", out)
+        # a bundle built from the retired group is refused by preview
+        stale = self.d / "stale-bundle"
+        stale.mkdir()
+        (stale / "unit-001.mp3").write_bytes((bundle / "unit-001.mp3").read_bytes())
+        prov = json.loads((bundle / "timing.json").read_text())
+        for unit in prov["provenance"]["units"].values():
+            unit["narration_job_id"] = "narration-r3"
+        (stale / "timing.json").write_text(json.dumps(prov))
+        code, out = run("preview", "--root", self.root, "--bundle", stale, "--out", self.d / "pv-stale")
+        self.assertEqual(code, 2, out)
+        self.assertIn("built from narration job narration-r3, which is not the current narration "
+                      "(narration-r4", out)
+        self.assertFalse((self.d / "pv-stale").exists())
+        code, out = run("preview", "--root", self.root, "--bundle", bundle, "--out", self.d / "pv")
+        self.assertIn(code, (0, 5), out)
+        if code == 0:
+            self.assertIn("from narration job narration-r4", out)
+
+    def test_retire_refuses_live_jobs_pending_rows_and_open_requests(self):
+        self.assertEqual(run("job", "narration", "--root", self.root, "--rates", self.rates,
+                             "--job-id", "narration-live")[0], 0)
+        before = ((self.root / "record.json").read_bytes(), self.ledger.read_bytes())
+        code, out = run("retire", "narration-live", "--root", self.root, "--reason", "x")
+        self.assertEqual(code, 2, out)
+        self.assertIn("still live", out)
+        code, out = run("retire", "nope", "--root", self.root, "--reason", "x")
+        self.assertEqual(code, 2, out)
+        self.assertIn("unknown job or chunk group", out)
+        led = budget.Ledger(self.ledger)
+        led.move_to_modal("narration-live", "t", 0.0)
+        run_id = led.record_modal_spend("2026-11", "narration-live", 1.0, 0.0, "pending", "t")
+        code, out = run("retire", "narration-live", "--root", self.root, "--reason", "x")
+        self.assertEqual(code, 2, out)
+        self.assertIn(f"pending Modal row ({run_id})", out)
+        led.finish_modal_spend(run_id, 0.3, 100.0, "failed")
+        req = cli.modal_requests.request_path(self.root, "narration-live")
+        req.parent.mkdir(parents=True, exist_ok=True)
+        data = {"schema": cli.modal_requests.SCHEMA, "job_id": "narration-live", "status": "running"}
+        req.write_text(json.dumps(data))
+        code, out = run("retire", "narration-live", "--root", self.root, "--reason", "x")
+        self.assertEqual(code, 2, out)
+        self.assertIn("open Modal request", out)
+        self.assertEqual((self.root / "record.json").read_bytes(), before[0])
+        # failed on Modal (its request finished failed): closed first, settling the spend, then retired
+        req.write_text(json.dumps({**data, "status": "failed"}))
+        code, out = run("retire", "narration-live", "--root", self.root, "--reason", "rebuilt")
+        self.assertEqual(code, 0, out)
+        self.assertIn("Closed first (failed on Modal, spend settled): narration-live", out)
+        entry = next(e for e in json.loads(self.ledger.read_text()) if e.get("job_id") == "narration-live")
+        self.assertEqual((entry["state"], entry["usd"]), ("settled", 0.3))
+        results = [e["result"] for e in Record.load(self.root).data["events"]
+                   if e["detail"].get("job_id") == "narration-live" and e["stage"] == "job"]
+        self.assertEqual(results, ["built", "closing", "closed", "retired"])
+        code, out = run("import", "narration-live", "--root", self.root, "--from", self.d)
+        self.assertEqual(code, 2, out)
+        self.assertIn("retired", out)
 
 
 if __name__ == "__main__":

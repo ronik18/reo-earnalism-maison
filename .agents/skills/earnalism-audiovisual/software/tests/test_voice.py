@@ -222,8 +222,13 @@ class ProductionSourceTests(unittest.TestCase):
 
     def test_every_production_source_fits_and_is_lossless(self):
         root = _production_root()
-        if root is None:
-            self.skipTest("no production/audiovisual next to this skill copy")
+        if root is None:  # V1 M-5: inside the repository checkout the data must be there
+            here = Path(__file__).resolve().parents
+            repo = next((p for p in here if (p / ".git").exists()
+                         and (p / "skills" / "earnalism-audiovisual").is_dir()), None)
+            if repo is not None:
+                self.fail(f"{repo} has no production/audiovisual: the real-data check cannot run")
+            self.skipTest("not inside the repository checkout (a copy of the skill on its own)")
         sources = sorted(root.glob("*/source.json"))
         self.assertTrue(sources)
         for src_path in sources:

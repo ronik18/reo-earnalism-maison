@@ -1,10 +1,12 @@
 """modal-run: cell extraction, the headless executor with fake models, the CLI dry run, the cost."""
 import contextlib
+import hashlib
 import io
 import json
 import os
 import sys
 import tempfile
+import threading
 import time
 import types
 import unittest
@@ -14,6 +16,7 @@ from unittest import mock
 from eav import budget, cli, colab_jobs, importer, modal_run
 from eav.budget import Ledger
 from eav.record import Record
+from tests import _narration_fakes
 
 RATES = {k: {"s_per_step": 100.0, "units_per_hour": 10.0, "decode_s": 30, "export_s": 20}
          for k in ("narration", "stills", "music")}
@@ -22,38 +25,10 @@ SCENE = {"scene_id": "s01", "text": "The morning was quiet. Rain fell on the roo
 COMPUTE = {"steps": 1, "items": 2, "takes": 1, "decode_s": 30, "export_s": 20}
 
 
-class _Arr:
-    def cpu(self): return self
-    def numpy(self): return self
-    def squeeze(self): return self
-    def astype(self, _): return b"fake-audio"
-
-
-class _Tok:
-    def __init__(self, *a, **k): pass
-    @classmethod
-    def from_pretrained(cls, *a, **k): return cls()
-    def __call__(self, text, return_tensors=None):
-        return types.SimpleNamespace(input_ids=1, attention_mask=1, to=lambda dev: types.SimpleNamespace(
-            input_ids=1, attention_mask=1))
-
-
-class _Model:
-    config = types.SimpleNamespace(sampling_rate=24000,
-                                   text_encoder=types.SimpleNamespace(_name_or_path="fake-t5"))
-    @classmethod
-    def from_pretrained(cls, *a, **k): return cls()
-    def to(self, device): return self
-    def generate(self, **k): return _Arr()
-
-
 def fake_modules():
-    """The batched-narration fakes of test_narration_resume (the notebook batches and uses torch
-    dtypes); the colab shim under test supplies google.colab itself."""
-    from tests.test_narration_resume import _fake_modules
-    mods = _fake_modules()
-    mods.pop("google"), mods.pop("google.colab")
-    return mods
+    """The batched-narration fakes (tests/_narration_fakes); the colab shim under test supplies
+    google.colab itself."""
+    return _narration_fakes.fake_modules(colab=False)
 
 
 @contextlib.contextmanager
@@ -132,6 +107,10 @@ class FakeModal:
 
         mod.Image, mod.Volume, mod.App, mod.Secret = Image, Volume, App, Secret
         return mod
+
+
+def colab_jobs_job_id(job) -> str:
+    return Path(job["notebook"]).parent.name
 
 
 class ModalRunTests(unittest.TestCase):
@@ -238,6 +217,54 @@ class ModalRunTests(unittest.TestCase):
         self.assertNotIn("REACHED_END_OF_LONG_CELL", g)
         self.assertFalse((folder / "later.txt").exists())
 
+    def test_a_stop_between_cells_runs_no_later_cell(self):
+        """B1 re-review: the stop flag is checked before each cell, not only via the interrupt."""
+        folder = self.root / "between"
+        cells = ["JOB_ID = 'x'",
+                 "from google.colab import runtime\nruntime.stopped = True",  # stop, no interrupt
+                 "open(DRIVE_JOB_DIR + '/later.txt', 'w').write('ran')"]
+        g = modal_run.run_cells(cells, folder)
+        self.assertTrue(g["HARD_STOPPED"])
+        self.assertFalse((folder / "later.txt").exists())
+
+    def test_a_stop_that_fires_after_the_last_cell_is_absorbed(self):
+        """B1 re-review: the timer firing just after the last cell (as its cancel comes too late)
+        neither surfaces later as a KeyboardInterrupt nor labels a finished run hard_stopped."""
+        import builtins
+        folder = self.root / "late"
+        seen = {}
+
+        class LateGuard:  # cancel() is too late: the stop fires from the timer thread right now
+            def __init__(self, rt):
+                seen["rt"] = rt
+
+            def cancel(self):
+                t = threading.Thread(target=seen["rt"].unassign)
+                t.start()
+                t.join()
+        builtins.EAV_TEST_GUARD = LateGuard
+        try:
+            g = modal_run.run_cells(
+                ["JOB_ID = 'x'",
+                 "open(DRIVE_JOB_DIR + '/manifest.json', 'w').write('{}')\nLAST_CELL_DONE = True",
+                 "from google.colab import runtime\nSTOP_GUARD = EAV_TEST_GUARD(runtime)"], folder)
+            time.sleep(0.3)  # a stray interrupt would surface here, outside run_cells
+        finally:
+            del builtins.EAV_TEST_GUARD
+        self.assertTrue(g["LAST_CELL_DONE"])
+        self.assertTrue(seen["rt"].stopped)  # the stop did fire, after every cell had run
+        self.assertFalse(g["HARD_STOPPED"])
+        self.assertTrue((folder / "manifest.json").is_file())
+
+    def test_a_stop_after_the_executor_closed_does_nothing(self):
+        folder = self.root / "closed"
+        g = modal_run.run_cells(["JOB_ID = 'x'", "from google.colab import runtime\nRT = runtime"],
+                                folder)
+        g["RT"].unassign()  # e.g. a timer thread that outlived the run: no interrupt, no flag
+        time.sleep(0.2)
+        self.assertFalse(g["RT"].stopped)
+        self.assertFalse(g["HARD_STOPPED"])
+
     def test_real_keyboard_interrupt_is_not_swallowed(self):
         with self.assertRaises(KeyboardInterrupt):
             modal_run.run_cells(["JOB_ID = 'x'", "raise KeyboardInterrupt()"], self.root / "ki")
@@ -314,6 +341,67 @@ class ModalRunTests(unittest.TestCase):
         self.assertAlmostEqual(result["usd"], result["seconds"] * modal_run.L4_USD_PER_S * 1.25)
         self.assertTrue((result["folder"] / "partial.wav").is_file())
         self.assertFalse((result["folder"] / "manifest.json").exists())
+
+    def test_download_replaces_an_earlier_download_exactly(self):
+        """B1 M3: a file an earlier download left (and the volume no longer holds) is gone, so
+        import never refuses this run's folder for an "extra" file."""
+        job = self.build()
+        fm = FakeModal(self.root / "vol")
+        stale = self.root / "dl" / colab_jobs_job_id(job) / "old-temp.wav"
+        stale.parent.mkdir(parents=True)
+        stale.write_bytes(b"left by an earlier run")
+        with fakes(), mock.patch.dict(sys.modules, {"modal": fm.module()}):
+            result = modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl")
+        self.assertEqual(result["status"], "ok")
+        self.assertFalse(stale.exists())
+        self.assertTrue((result["folder"] / "manifest.json").is_file())
+        self.assertEqual(sorted(p.name for p in (self.root / "dl").iterdir()), [stale.parent.name])
+
+    def test_a_failed_download_keeps_what_it_got_and_never_carries_the_token(self):
+        """H1 Minor 2: the download error text is scrubbed like the remote error."""
+        job = self.build()
+        fm = FakeModal(self.root / "vol")
+        real = fm.module
+
+        def module():
+            mod = real()
+            vol = mod.Volume
+
+            class Broken(vol):
+                @staticmethod
+                def from_name(name, create_if_missing=False):
+                    return Broken()
+
+                def read_file(self, path):
+                    if path.endswith("manifest.json"):
+                        raise OSError(f"volume read refused for token {TOKEN}")
+                    return vol.read_file(self, path)
+            mod.Volume = Broken
+            return mod
+        with fakes(), mock.patch.dict(sys.modules, {"modal": module()}), \
+                mock.patch.dict(os.environ, {"HF_TOKEN": TOKEN}):
+            result = modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl")
+        self.assertEqual(result["status"], "failed")
+        self.assertIn("download: OSError", result["error"])
+        self.assertNotIn(TOKEN, result["error"])
+        self.assertIn("***", result["error"])
+        self.assertTrue((result["folder"] / "inputs.zip").is_file())  # what it got stays
+
+    def test_the_bytes_sent_are_the_bytes_checked(self):
+        """B1 M4: with the build manifest's sha256 the inputs are read once and verified before
+        Modal is contacted."""
+        job = self.build()
+        fm = FakeModal(self.root / "vol")
+        contacted = []
+        with fakes(), mock.patch.dict(sys.modules, {"modal": fm.module()}):
+            with self.assertRaisesRegex(ValueError, "does not match its build manifest"):
+                modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl",
+                                    on_contact=lambda: contacted.append(1), expected_sha256="0" * 64)
+            self.assertEqual((contacted, fm.events), ([], []))
+            good = hashlib.sha256(Path(job["inputs_zip"]).read_bytes()).hexdigest()
+            result = modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl",
+                                         expected_sha256=good)
+        self.assertEqual(result["status"], "ok")
 
     def test_volume_paths_with_or_without_a_leading_slash(self):
         """B1 M1: listdir's path shape is unverified on real Modal; both shapes land the same."""

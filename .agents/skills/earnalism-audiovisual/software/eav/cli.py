@@ -825,6 +825,9 @@ def _replace_chunk(rec, args):
                    "--clause do not apply", "Drop them and rerun")
     c = old["chunk"]
     group = _find(rec, c["group"])
+    if old["retired"] or group["retired"]:
+        raise Stop(f"chunk group {c['group']} is retired (a newer build replaced it); it is never "
+                   "rebuilt", next_action(rec.root))
     if old["unfinished"] or not _ended(old):
         raise Stop(f"{args.replace_chunk} is {'imported' if old['imported'] else 'still live'}; only a "
                    "closed (ran, not imported) or superseded chunk is replaced",

@@ -45,12 +45,18 @@ class FakeFlux:
 
 
 class FakeAce:
+    suffix = None  # some ACE-Step versions write <save_path stem><suffix>.wav and return its path
+
     def __init__(self, checkpoint_dir=None, dtype=None):
         pass
 
     def __call__(self, prompt, save_path, **kw):
         GENERATED.append(prompt)
-        Path(save_path).write_bytes(("wav:" + prompt + str(kw["manual_seeds"])).encode())
+        path = Path(save_path)
+        if FakeAce.suffix is not None:
+            path = path.with_name(path.stem + FakeAce.suffix + ".wav")
+        path.write_bytes(("wav:" + prompt + str(kw["manual_seeds"])).encode())
+        return [str(path), str(path.with_suffix(".json"))]
 
 
 class FakeHfApi:
@@ -180,12 +186,55 @@ class _Base:
         self.assertTrue(self.import_folder())
 
 
+    def test_a_file_written_but_never_recorded_is_redone(self):
+        """A2: a crash between the write and its progress line leaves a stale file: it is deleted
+        and generated again, never trusted."""
+        self.session(stop_after=1, manifest=False)
+        stale = self.drive / (self.items[1]["key"] + self.ext)
+        stale.write_bytes(b"half-written before the crash")  # no progress line for it
+        GENERATED.clear()
+        self.session()
+        self.assertEqual(len(GENERATED), 3)
+        self.assertNotEqual(stale.read_bytes(), b"half-written before the crash")
+        self.assertEqual(self.manifest()["status"], "COMPLETE")
+        self.assertTrue(self.import_folder())
+
+    def test_progress_lines_carry_the_inputs_zip_and_item_seconds(self):
+        """A1 M1/M4: each line is bound to this job's inputs.zip and records the item time."""
+        g = self.session(stop_after=2, manifest=False)
+        lines = [json.loads(x) for x in (self.drive / "progress.jsonl").read_text().splitlines()]
+        self.assertEqual({p["zip"] for p in lines}, {g["INPUT_ZIP_SHA256"]})
+        self.assertTrue(all(isinstance(p["item_s"], float) for p in lines))
+
+
 class StillsResumeTests(_Base, unittest.TestCase):
     kind, items, ext = "stills", STILLS, ".png"
 
 
 class MusicResumeTests(_Base, unittest.TestCase):
     kind, items, ext = "music", CUES, ".wav"
+
+    def tearDown(self):
+        FakeAce.suffix = None
+
+    def test_a_cue_written_under_another_name_is_moved_to_the_expected_one(self):
+        """A2: ACE-Step's real output name is not guaranteed; the WAV it reports is placed at
+        <key>.wav before it is recorded, so a paid cue is never lost (or left as an extra file)."""
+        FakeAce.suffix = "_output_0"
+        self.session()
+        m = self.manifest()
+        self.assertEqual(m["status"], "COMPLETE")
+        self.assertEqual(sorted(m["outputs"]), sorted(c["key"] + ".wav" for c in CUES))
+        self.assertFalse(list(self.drive.glob("*_output_0.wav")))
+        self.assertTrue(self.import_folder())
+
+    def test_no_wav_for_a_cue_stops_the_run_with_a_clear_error(self):
+        class Silent(FakeAce):
+            def __call__(self, prompt, save_path, **kw):
+                return []
+        with patch.object(sys.modules[__name__], "FakeAce", Silent):
+            with self.assertRaisesRegex(RuntimeError, "ACE-Step wrote no single WAV"):
+                self.session()
 
 
 if __name__ == "__main__":

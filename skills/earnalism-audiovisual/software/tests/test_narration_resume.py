@@ -16,101 +16,13 @@ from eav import colab_jobs, importer
 from eav.budget import Ledger
 from eav.importer import ImportHeld
 from eav.record import Record
+from tests._narration_fakes import FakeModel, fake_modules as _fake_modules
 
 RATES = {k: {"s_per_step": 1.0, "units_per_hour": 10.0, "decode_s": 30, "export_s": 20}
          for k in ("narration", "stills", "music")}
 PRESET = {"description": "A calm warm female voice, very clear.", "temperature": 0.7}
 SCENE = {"scene_id": "s01", "text": "One quiet morning. Rain fell. The lamp burned low. "
                                     "A door opened. Someone laughed. Then silence returned."}
-
-
-class FakeTensor:
-    def __init__(self, a):
-        self.a = np.asarray(a)
-
-    def __getitem__(self, i):
-        return FakeTensor(self.a[i])
-
-    def cpu(self):
-        return self
-
-    def float(self):
-        return self
-
-    def numpy(self):
-        return self.a
-
-
-class FakeTokens:
-    def __init__(self, texts):
-        width = max(len(t) for t in texts)
-        self.input_ids = np.array([[ord(c) for c in t] + [0] * (width - len(t)) for t in texts])
-        self.attention_mask = (self.input_ids != 0).astype(int)
-
-    def to(self, device):
-        return self
-
-
-class FakeTokenizer:
-    @classmethod
-    def from_pretrained(cls, *a, **k):
-        return cls()
-
-    def __call__(self, texts, return_tensors=None, padding=False):
-        assert padding is True and isinstance(texts, list)
-        return FakeTokens(texts)
-
-
-class FakeModel:
-    calls = []
-    load = {}
-    with_lengths = True
-    refuse_sdpa = False
-    config = types.SimpleNamespace(sampling_rate=100,
-                                   text_encoder=types.SimpleNamespace(_name_or_path="t5"))
-
-    @classmethod
-    def from_pretrained(cls, repo, **kw):
-        if cls.refuse_sdpa and kw.get("attn_implementation") == "sdpa":
-            raise ValueError("T5EncoderModel does not support an attention implementation through "
-                             "torch.nn.functional.scaled_dot_product_attention yet.")
-        cls.load = dict(kw, repo=repo)
-        return cls()
-
-    def to(self, device):
-        return self
-
-    def generate(self, **kw):
-        FakeModel.calls.append(kw)
-        masks = kw["prompt_attention_mask"]
-        ids = kw["prompt_input_ids"]
-        lengths = [int(m.sum()) * 3 for m in masks]
-        longest = max(lengths) + 5  # the longest sample is also padded with zeros
-        seq = np.zeros((len(lengths), 1, longest), dtype="float32")
-        for j, n in enumerate(lengths):
-            seq[j, 0, :n] = (ids[j][:1].sum() % 7 + 1) * 0.01 + np.arange(1, n + 1) * 1e-4
-        out = types.SimpleNamespace(sequences=FakeTensor(seq))
-        if FakeModel.with_lengths:
-            out.audios_length = lengths
-        return out
-
-
-def _fake_modules(bf16=True):
-    torch = types.ModuleType("torch")
-    torch.bfloat16, torch.float16, torch.float32 = "bf16", "fp16", "fp32"
-    torch.cuda = types.SimpleNamespace(is_available=lambda: True, is_bf16_supported=lambda: bf16)
-    sf = types.ModuleType("soundfile")
-    sf.write = lambda path, wav, rate: Path(path).write_bytes(
-        np.asarray(wav, dtype="float32").tobytes() + str(rate).encode())
-    pt = types.ModuleType("parler_tts")
-    pt.ParlerTTSForConditionalGeneration = FakeModel
-    tr = types.ModuleType("transformers")
-    tr.AutoTokenizer = FakeTokenizer
-    colab = types.ModuleType("google.colab")
-    colab.drive = types.SimpleNamespace(mount=lambda p: None)
-    colab.runtime = types.SimpleNamespace(unassign=lambda: None)
-    return {"torch": torch, "soundfile": sf, "parler_tts": pt, "transformers": tr,
-            "google": types.ModuleType("google"), "google.colab": colab}
 
 
 class NarrationResumeTests(unittest.TestCase):
@@ -289,8 +201,8 @@ class NarrationResumeTests(unittest.TestCase):
         self.session()
         self.assertEqual(done[0].read_bytes(), original)
         self.assertTrue(stray.exists())
-        self.assertIn(len(g["JOB"]["units"]) - len(done) + 1,
-                      [sum(len(c["input_ids"]) for c in FakeModel.calls)])
+        self.assertEqual(sum(len(c["input_ids"]) for c in FakeModel.calls),
+                         len(g["JOB"]["units"]) - len(done) + 1)
         (self.drive / "late-extra.txt").write_text("x")  # appeared after the manifest
         with self.assertRaises(ImportHeld) as ctx:
             self.import_folder()
@@ -362,6 +274,99 @@ class NarrationResumeTests(unittest.TestCase):
         g["note_session"] = boom
         g["_hard_stop"]()
         self.assertEqual(unassigned, [True])
+
+
+    # --- M1: deferred minors ----------------------------------------------------------------
+    def test_progress_lines_written_for_other_inputs_are_not_trusted(self):
+        """A1 M4: a line proves a WAV only for this job's inputs.zip (a reused folder's stale WAVs
+        with lines of other inputs are regenerated)."""
+        g = self.session(stop_after_batches=1, manifest=False)
+        lines = self.lines("progress.jsonl")
+        self.assertEqual({x["zip"] for x in lines}, {g["INPUT_ZIP_SHA256"]})
+        (self.drive / "progress.jsonl").write_text("".join(
+            json.dumps({**x, "zip": "0" * 64}) + "\n" for x in lines))
+        FakeModel.calls = []
+        self.session()
+        self.assertEqual(sum(len(c["input_ids"]) for c in FakeModel.calls), len(g["JOB"]["units"]))
+        self.assertEqual(self.manifest()["status"], "COMPLETE")
+
+    def test_a_resumed_session_starts_only_if_the_last_batch_time_still_fits(self):
+        """A1 M1: the first batch of a resumed session uses the last recorded batch time, not 0."""
+        self.job = self.build(batch=2, job_id="narration-b2m1")
+        shutil.copy(self.job["inputs_zip"], self.drive / "inputs.zip")
+        nb = json.loads(Path(self.job["notebook"]).read_text())
+        self.cells = ["".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "code"]
+        self.session(stop_after_batches=1, manifest=False)
+        lines = self.lines("progress.jsonl")
+        self.assertTrue(all(isinstance(x["item_s"], float) for x in lines))
+        (self.drive / "progress.jsonl").write_text("".join(
+            json.dumps({**x, "item_s": 950.0}) + "\n" for x in lines))
+        FakeModel.calls = []
+        g = self.session(deadline=1000)  # ~1000 s left < 950 s + the manifest reserve
+        self.assertEqual(FakeModel.calls, [])
+        self.assertEqual(g["last_item_seconds"](), 950.0)
+        self.assertEqual(self.manifest()["status"], "INCOMPLETE")
+        (self.drive / "progress.jsonl").write_text("".join(
+            json.dumps({**x, "item_s": 5.0}) + "\n" for x in lines))
+        self.session(deadline=1000)
+        self.assertEqual(self.manifest()["status"], "COMPLETE")
+
+    def test_the_prompt_tokenizer_is_made_to_pad_on_the_left(self):
+        """A1 M3: the notebook sets left padding itself and refuses a tokenizer that ignores it
+        (the fake model asserts the padding side of every batch it gets)."""
+        from tests import _narration_fakes as nf
+
+        class Stubborn(nf.FakeTokenizer):
+            @property
+            def padding_side(self):
+                return "right"
+
+            @padding_side.setter
+            def padding_side(self, value):
+                pass
+        mods = _fake_modules()
+        mods["transformers"].AutoTokenizer = Stubborn
+        with self.assertRaisesRegex(RuntimeError, "does not pad on the left"):
+            self.session(modules=mods)
+        self.session()  # the normal tokenizer: generate() saw left-padded prompts
+        self.assertTrue(FakeModel.calls)
+
+    def test_appends_from_two_threads_never_tear_a_line(self):
+        """The heartbeat thread and the main thread append to the same files under one lock."""
+        import threading
+        g = self.session(manifest=False, generate=False)
+        self.assertTrue(hasattr(g["_APPEND_LOCK"], "acquire"))
+        def many(tag):
+            for i in range(200):
+                g["_append"]("sessions.jsonl", {"started": tag, "seconds": i, "pad": "x" * 300})
+        threads = [threading.Thread(target=many, args=(t,)) for t in (1.0, 2.0)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        rows = (self.drive / "sessions.jsonl").read_text().splitlines()
+        parsed = [json.loads(r) for r in rows]  # every line is whole JSON
+        self.assertEqual(sum(1 for r in parsed if r["started"] in (1.0, 2.0)), 400)
+
+    def test_rerunning_the_cells_after_the_time_is_used_up_repeats_the_refusal(self):
+        """A1 M2: a used-up job refuses the same way on a second Run all in the same runtime
+        (never a NameError)."""
+        (self.drive / "sessions.jsonl").write_text(json.dumps({"started": 1.0, "seconds": 2000}) + "\n")
+        g = {}
+        try:
+            with patch.dict(sys.modules, _fake_modules()), patch("subprocess.run"):
+                run, config, clock, verify = self.cells[:4]
+                exec(run, g)
+                g["RUN"] = True
+                exec(config, g)
+                g.update(DRIVE_JOB_DIR=str(self.drive), DEADLINE_SECONDS=1000)
+                for _ in range(2):
+                    exec(clock, g)
+                    with self.assertRaisesRegex(RuntimeError, "reserved time used up"):
+                        exec(verify, g)
+        finally:
+            g.get("STOP_GUARD") and g["STOP_GUARD"].cancel()
+            g.get("HEARTBEAT_STOP") and g["HEARTBEAT_STOP"].set()
 
 
 if __name__ == "__main__":

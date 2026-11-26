@@ -489,6 +489,47 @@ class RoundTwo:
         self.assertAlmostEqual(reel_art["meta"]["seconds"], sum(x["seconds"] for x in shots), delta=0.05)
         self.assertGreaterEqual(reel_art["meta"]["seconds"], 60.05)
 
+    def test_reel_assembly_refuses_suspect_truncated_narration_until_accepted(self):
+        """V1 M-4: reel narration is Parler too; the reel assembly is gated like film."""
+        shots, stills = self.planned_reel()
+        ids = [x["id"] for x in shots]
+        narr_id = [j["job_id"] for j in cli._jobs(Record.load(self.root)) if j["kind"] == "narration"][-1]
+        for i in range(0, len(ids), 5):
+            self.clip_batch(ids[i:i + 5])
+        from eav import film
+        from eav.voice import voice_units
+        units = voice_units(cli._reel_scene(REEL, 1), {"description": ""}, None, "en")
+        key = next(u["unit_key"] for u in units if u["text"].startswith("The children played"))
+        self.wav(film.unit_wav(self.root / "narration" / narr_id, key), 0.5)  # ~116 chars/s: cut off
+        bed = self.d / "bed.wav"
+        self.noise(bed, 70)
+        base = ("reel", 1, "--root", self.root, "--score", bed, "--score-route", "vcsl")
+        code, out = run(*base)
+        self.assertEqual(code, 5, out)
+        self.assertIn(f"suspect_truncated narration unit(s) {key}", out)
+        self.assertFalse((self.root / "reels" / "reel-1" / "reel-1.mp4").exists())
+        code, out = run(*base, "--accept-qc", key)
+        self.assertEqual(code, 0, out)
+        self.assertIn(f"narration job {narr_id}", out)
+        art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "reel"][-1]
+        self.assertEqual(art["meta"]["qc_accepted"], [key])
+        self.assertEqual([x["unit_key"] for x in art["meta"]["suspect_truncated"]], [key])
+
+    def test_accept_qc_names_only_units_that_are_suspect_now(self):
+        """V1 M-2: an acceptance covers what the owner heard, never a later regeneration."""
+        self.film_ready()
+        plan = json.loads((self.root / "plan.json").read_text())
+        from eav.voice import voice_units
+        key = next(u["unit_key"] for sc in plan["plan"]["films"][0]["scenes"]
+                   for u in voice_units(sc, {"description": ""}, None, "en"))
+        bed = self.d / "bed.wav"
+        self.noise(bed, 30)
+        code, out = run("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card",
+                        self.d / "end.png", "--score", bed, "--score-route", "vcsl", "--accept-qc", key)
+        self.assertEqual(code, 2, out)
+        self.assertIn(f"not suspect_truncated now: {key}", out)
+        self.assertFalse((self.root / "film" / "film-01" / "film-01.mp4").exists())
+
     # --- R27: assembly and clips are bound to the narration the shots were planned from -------
     def test_new_reel_narration_after_shots_planned_is_refused(self):
         self.planned_reel()
