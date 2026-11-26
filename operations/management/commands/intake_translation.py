@@ -93,8 +93,8 @@ class Command(BaseCommand):
                 'source_edition': (f'Translation of packet {source_slug} (source sha256 {source_sha}); method {method}; '
                                    f'model {o["model"]}; {today}. Source edition: {source_manifest["provenance"]["source_edition"]}'),
                 'rights_note': (f'The translation is a new work by Earnalism (method {method}, {credit_text}; model {o["model"]}) '
-                                f'of a public-domain source. Source rights: {source_manifest["provenance"]["rights_note"]} '
-                                'Draft: owner approval of the clearance record and a cover with owner-held provenance are still required.'),
+                                f'of a public-domain source. Source edition: {source_manifest["provenance"]["rights_note"]} '
+                                'Draft: the cover and owner approval of this edition\'s clearance record are pending owner review.'),
                 'rights_evidence_refs': [f'reo-earnalism-maison:docs/evidence/publication-clearance-{slug}-draft.json']}}
         try:
             validate_manifest(manifest)
