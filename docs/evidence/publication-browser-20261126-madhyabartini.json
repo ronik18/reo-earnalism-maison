@@ -1,0 +1,64 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-26",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the release code (branch claude/wonderful-bardeen-s9k90x at b94449a, what production will run) serving a local PostgreSQL replica (database replica_g2, loopback only). The Monday-page approval of the clearance and cover items was simulated on this replica only by a local staff user, bound to the exact file hashes; nothing is approved or published in production. The book was imported there with the production publisher identity and deterministic operation IDs: edition f415e7a7-1a83-4f43-ac23-56bd605c5a2e, revision 4d5fe6a6-76bd-479e-84a5-1fe1d1ec7a0c, and all 99 unit/anchor IDs and texts identical to the export_audiovisual_source output of that revision. Signed in as a staff publisher; desktop 1440x900 and mobile 390x844; the title page (covers) and the reader (text).",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "madhyabartini": {
+   "status": "pass",
+   "sha256": "9c0cb606566ef983e26492d40d7705f2719ae485e1e7ad9526bc58817e35b7b2",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 99,
+     "paragraphs_expected": 99,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "কটি মৃত বালিকা শুইয়া রহিল, তাহাকে কেহ লঙ্ঘন করিতে পারিল না।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 99,
+     "paragraphs_expected": 99,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "কটি মৃত বালিকা শুইয়া রহিল, তাহাকে কেহ লঙ্ঘন করিতে পারিল না।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  }
+ }
+}
