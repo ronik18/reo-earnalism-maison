@@ -1,0 +1,61 @@
+{
+  "theme_brief": "ক্ষুধিত পাষাণ: one Hindustani/Persian court palette (sarangi, santoor, setar, tanpura drone), eerie and longing, no vocals. Eight 240 s beds, one per eighth of film-01's 36 scenes as `film --cues-job` spreads them (scenes 1-4, 5-9, 10-13, 14-18, 19-22, 23-27, 28-31, 32-36; about 155-312 s of narration each by the plan's estimate); looped by eav.mix.arrange_cues where narration runs longer. Ducked 19 dB under speech; silence at turns is the edit's job.",
+  "items": [
+    {
+      "key": "cue-1-journey-and-palace",
+      "prompt": "warm santoor phrases over a soft tanpura drone, curious and gently mysterious, a faraway journey, Hindustani and Persian court music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7101,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    },
+    {
+      "key": "cue-2-river-at-dusk",
+      "prompt": "shimmering santoor and a distant sarangi over tanpura drone, eerie and enchanted, invisible laughter on water, Hindustani and Persian court music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7102,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    },
+    {
+      "key": "cue-3-the-great-hall",
+      "prompt": "ghostly setar and santoor fragments with soft sarangi over tanpura drone, haunted and dreamlike, a vanished court, Hindustani and Persian court music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7103,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    },
+    {
+      "key": "cue-4-the-night-summons",
+      "prompt": "low sarangi and a hushed tanpura drone, suspenseful and stealthy, a midnight procession through dark corridors, Hindustani and Persian court music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7104,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    },
+    {
+      "key": "cue-5-persian-chamber",
+      "prompt": "slow sarangi and setar with santoor over tanpura drone, seductive and dreamlike, an old Persian court, Hindustani and Persian court music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7105,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    },
+    {
+      "key": "cue-6-mirror-and-lament",
+      "prompt": "longing solo sarangi lament with soft santoor over tanpura drone, sorrowful, tender and yearning, Hindustani and Persian court music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7106,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    },
+    {
+      "key": "cue-7-remorse",
+      "prompt": "sparse sarangi and a single setar over a dark tanpura drone, remorse and emptiness, restless, Hindustani and Persian court music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7107,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    },
+    {
+      "key": "cue-8-storm-and-warning",
+      "prompt": "low bowed sarangi and santoor tremolo over a deep tanpura drone, dark storm tension fading into an unresolved stillness, Hindustani and Persian court music, instrumental, slow tempo around 60 bpm, sparse and quiet underscore for spoken narration, no drums, no percussion, no vocals, no choir",
+      "seed": 7108,
+      "duration_s": 240.0,
+      "lyrics": "[instrumental]"
+    }
+  ]
+}

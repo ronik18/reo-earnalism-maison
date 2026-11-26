@@ -32,6 +32,34 @@
       },
       "path": "jobs/narration-9187e43e/narration.ipynb",
       "sha256": "7c83383eaf90bacc7efce0f76a7b12341f03f6ec48989240c72bdf055a152fff"
+    },
+    {
+      "bytes": 8277,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 4.052983333333333,
+        "inputs_zip": "jobs/stills-d095a5f0/inputs.zip",
+        "job_id": "stills-d095a5f0",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-d095a5f0/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-d095a5f0/stills.ipynb",
+      "sha256": "5425c1737a32b6d63481c99b4f8fe92fb3060c4b297f7a8a9efff9788d3e117b"
+    },
+    {
+      "bytes": 8728,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.4873333333333334,
+        "inputs_zip": "jobs/music-a45f086f/inputs.zip",
+        "job_id": "music-a45f086f",
+        "job_kind": "music",
+        "manifest": "jobs/music-a45f086f/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/music-a45f086f/music.ipynb",
+      "sha256": "364a41372311bd9e059089baaa99ce8609c939f89726fa185f1d4513504771fe"
     }
   ],
   "created_at": "2026-11-25T11:16:00.930973+00:00",
@@ -70,6 +98,46 @@
       "detail": {
         "job_id": "narration-9187e43e",
         "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-25T20:59:38.976969+00:00",
+      "detail": {
+        "forecast_units": 4.052983333333333,
+        "job_id": "stills-d095a5f0",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T20:59:38.977539+00:00",
+      "detail": {
+        "job_id": "stills-d095a5f0",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-25T20:59:41.887921+00:00",
+      "detail": {
+        "forecast_units": 1.4873333333333334,
+        "job_id": "music-a45f086f",
+        "kind": "music"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-25T20:59:41.889885+00:00",
+      "detail": {
+        "job_id": "music-a45f086f",
+        "kind": "music",
         "target": "film-01"
       },
       "result": "job_target",
