@@ -1,6 +1,6 @@
 {
   "note": "Qwen-Image-Edit quality test 2 (A100, int8 with sensitive layers kept, VAE fp32), same instruction as test 1 for a direct comparison",
-  "min_vram_gib": 38,
+  "min_vram_gib": 30,
   "items": [
     {
       "key": "f01s007-6",

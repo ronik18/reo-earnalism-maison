@@ -30852,6 +30852,20 @@
       },
       "path": "qc/report.json",
       "sha256": "b968d25cae3d80f73273140d0d2ef3b2a35ed3b132561d294c7a55b8b3f7d2f8"
+    },
+    {
+      "bytes": 26886,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.4997277777777778,
+        "inputs_zip": "jobs/edit-test2-film-01/inputs.zip",
+        "job_id": "edit-test2-film-01",
+        "job_kind": "edit",
+        "manifest": "jobs/edit-test2-film-01/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/edit-test2-film-01/edit.ipynb",
+      "sha256": "13aea144d1cf27a1b36aa0ac5a71867a48ccb66cc3e790bbd03a51e17b981323"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -34082,6 +34096,49 @@
         "units": 4.3
       },
       "result": "closed",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:51:15.058297+00:00",
+      "detail": {
+        "forecast_units": 1.4997277777777778,
+        "job_id": "edit-test2-film-01",
+        "kind": "edit"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:51:15.092843+00:00",
+      "detail": {
+        "job_id": "edit-test2-film-01",
+        "kind": "edit",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T03:51:16.811498+00:00",
+      "detail": {
+        "bytes": 3014844,
+        "job_id": "edit-test2-film-01",
+        "key": "exports/colab-exchange/bicharak/edit-test2-film-01/inputs.zip",
+        "sha256": "96da59f8066131b212d09bae6b802cafd4b4ab4a1bd5312332141a7c4ff38602"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:52:15.111762+00:00",
+      "detail": {
+        "expires_at": "2026-11-27T03:51:41+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/edit-test2-film-01/inputs.zip",
+        "inputs_sha256": "96da59f8066131b212d09bae6b802cafd4b4ab4a1bd5312332141a7c4ff38602",
+        "job_id": "edit-test2-film-01",
+        "outputs_key": "exports/colab-exchange/bicharak/edit-test2-film-01/outputs.tar"
+      },
+      "result": "exchange_staged",
       "stage": "job"
     }
   ],
