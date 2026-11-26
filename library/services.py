@@ -403,6 +403,62 @@ def get_preview_document(edition_id,unit_id,territory='IN'):
                         'audio_end_ms':None,'video_end_ms':None},'preview':True}
 
 
+def has_active_pass(user,at=None):
+    """A Pass is an active platform-scope entitlement (Step 3.1); free grants never count as one."""
+    if not getattr(user,'is_authenticated',False):return False
+    from billing.models import Entitlement
+    at=at or timezone.now()
+    return Entitlement.objects.filter(user=user,scope='platform',status='active',revoked_at=None,valid_from__lte=at).exclude(
+        source='free').filter(Q(valid_until__isnull=True)|Q(valid_until__gt=at)).exists()
+
+
+def parallel_companion(user,edition_id,unit_id,territory='IN'):
+    """Step 3.2: the other half of a bn/en translation pair for one unit, or None (fail closed).
+
+    Offered only when both editions are live and readable by this member in this territory, units
+    and the unit's paragraphs align one to one by ordinal and kind, and, once the free rollout ends,
+    the member holds an active Pass.
+    """
+    if not getattr(settings,'FREE_ACCESS_ENABLED',False) and not has_active_pass(user):return None
+    try:
+        edition=Edition.objects.select_related('live_revision','translated_from__live_revision').get(pk=edition_id)
+    except (Edition.DoesNotExist,ValueError,ValidationError):
+        return None
+    if edition.translated_from_id:
+        candidates=[edition.translated_from]
+    else:
+        candidates=edition.translations.select_related('live_revision').filter(live_revision__isnull=False).exclude(
+            locale=edition.locale).order_by('locale','id')
+    for partner in candidates:
+        companion=_aligned_companion(user,edition,partner,unit_id,territory)
+        if companion:return companion
+    return None
+
+
+def _aligned_companion(user,edition,partner,unit_id,territory):
+    try:
+        details={}
+        for side in (edition,partner):
+            if not side.live_revision_id or not _live(side.live_revision):return None
+            details[side.id]=_edition_detail(side,territory,user)
+            authorize_revision(user,side.live_revision,territory=territory)
+    except DomainError:
+        return None
+    units=list(edition.live_revision.units.all())
+    partner_units=list(partner.live_revision.units.all())
+    if len(units)!=len(partner_units) or any(a.kind!=b.kind for a,b in zip(units,partner_units)):return None
+    index=next((i for i,u in enumerate(units) if str(u.pk)==str(unit_id)),None)
+    if index is None:return None
+    kinds=list(units[index].paragraphs.values_list('kind',flat=True))
+    paragraphs=list(partner_units[index].paragraphs.all())
+    if len(kinds)!=len(paragraphs) or any(k!=p.kind for k,p in zip(kinds,paragraphs)):return None
+    translation=edition if edition.translated_from_id==partner.id else partner
+    return {'edition':{'edition_id':str(partner.id),'title':details[partner.id]['title'],'locale':partner.locale},
+            'unit_id':str(partner_units[index].id),'current_is_original':translation is partner,
+            'translation':{'method':translation.translation_method,'credit':translation.translation_credit},
+            'paragraphs':[paragraph_dto(p) for p in paragraphs]}
+
+
 def get_reader_manifest(user,revision_id,territory='IN',cursor=None):
     revision = authorize_revision(user,revision_id,territory=territory)
     units = list(revision.units.all())

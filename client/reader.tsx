@@ -10,6 +10,7 @@ import {
   type FormEvent,
 } from "react";
 import { mountIsland } from "./lifecycle";
+import { setupParallel } from "./parallel";
 import {
   api,
   ApiError,
@@ -1123,6 +1124,7 @@ function Reader({ boot }: { boot: Boot }) {
 }
 export function mount() {
   document.querySelector<HTMLElement>("[data-preview-fallback]")?.setAttribute("hidden", "");
+  setupParallel();
   mountIsland(document.getElementById("reader-controls"), () => (
     <Reader boot={readBootstrap<Boot>("reader-bootstrap")} />
   ));

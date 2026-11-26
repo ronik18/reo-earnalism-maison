@@ -474,3 +474,13 @@ test("Legacy UI return links preserve content language, query and anchor in the 
  assert.equal(checkoutReturnPath("/bn/read/book/unit/?anchor=p1","bn"),"/en/read/book/unit/?anchor=p1");
  assert.equal(validReturnPath("//other.test/bn/read/book/","bn"),"/en/");
 });
+
+import { parallelPreference, parallelRoles } from "./parallel";
+test("Side-by-side mode is opt-in and exposes a table only while it is on", () => {
+  assert.equal(parallelPreference(null), false);
+  assert.equal(parallelPreference("off"), false);
+  assert.equal(parallelPreference("true"), false);
+  assert.equal(parallelPreference("on"), true);
+  assert.equal(parallelRoles(false), null);
+  assert.deepEqual(parallelRoles(true), { table: "table", row: "row", head: "columnheader", cell: "cell" });
+});
