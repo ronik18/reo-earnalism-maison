@@ -353,8 +353,8 @@
     "job_id": "stills-pilot2-f01s014",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 1.1526833333333333,
-    "state": "reserved",
+    "units": 1.0,
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   }
