@@ -25,7 +25,7 @@ cd skills/earnalism-audiovisual/software
 python3 -m eav.cli status --root <title root>      # prints the next owner action
 ```
 
-Commands: `init`, `plan`, `job`, `import`, `supersede` (never ran), `close` (ran, not
+Commands: `init`, `plan`, `job`, `import`, `supersede` (never ran; a chunk only with `--group`), `close` (ran, not
 imported: settles the actual CU), `film`, `reel`, `qc`, `status`, `bundle-audio`, `preview` (public ≤120 s preview clip of chapter 1),
 `social` (posting kit; see [publishing](references/publishing.md)) (usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
@@ -76,7 +76,9 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   No paid generator or credit-spending connector (Kling, ElevenLabs, Suno, Runway,
   Adobe/Canva credits): not for "just one test" either.
 - **Colab.** The owner runs every job. Narration, stills and music notebooks are inert
-  until `RUN = True` and stop at their forecast seconds (hard stop). Reel clips use the
+  until `RUN = True` and stop at their forecast seconds (hard stop). Narration or stills
+  forecast over 3600 s are built as chunks `<id>-c<i>of<n>` of ≤ 3600 s each (one session
+  each; the caps see the sum): run and import every chunk ([budget](references/compute-budget.md)). Reel clips use the
   Wan batch notebook: its own flags plus an authority file
   (`/content/wan22-batch-authority.json`) that **the owner writes and signs. Claude never
   writes, edits, drafts or fills in Wan authority files**, never supplies an observed rate,

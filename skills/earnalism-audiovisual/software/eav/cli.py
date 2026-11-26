@@ -4,6 +4,8 @@
   python3 -m eav.cli plan --root <dir>
   python3 -m eav.cli job <narration|stills|music|reel_clips> --root <dir> --rates <rates.json>
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
+                         (narration/stills forecast over 3600 s: built as chunks <id>-c<i>of<n>, each
+                          its own job of <= 3600 s; the caps are checked once for the sum)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> [--units <CU>]
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli modal-run <job_id> --root <dir> [--download <dir>] [--dry-run]
@@ -11,7 +13,8 @@
                           leaves the job folder `import` expects; refuses (exit 3) past the 30 USD UTC-month Modal cap
                           and appends the actual spend to the ledger; then import/close need no --units)
   python3 -m eav.cli modal-settle <job_id> --root <dir> --usd <billed>   (replace an interrupted run's pending worst-case row)
-  python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
+  python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>" [--group]
+                         (a chunk only with --group: every never-run chunk of its group together)
   python3 -m eav.cli close <job_id> --root <dir> [--units <CU Colab shows>] --reason "<what happened>"
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
@@ -178,7 +181,7 @@ def _jobs(rec) -> list:
         m = a["meta"]
         jid = m["job_id"]
         out.append({"job_id": jid, "kind": m["job_kind"], "target": targets.get(jid),
-                    "order": order.get(jid, -1),
+                    "order": order.get(jid, -1), "chunk": m.get("chunk"),
                     "notebook": rec.root / a["path"], "inputs_zip": rec.root / m["inputs_zip"],
                     "manifest": rec.root / m["manifest"], "forecast_units": m["forecast_units"],
                     "imported": jid in done["accepted"],
@@ -195,8 +198,51 @@ def _ended(j) -> bool:
     return j["superseded"] or j["closed"]
 
 
+def _logical(rec) -> list:
+    """Jobs as consumers see them: a plain job, or one entry per chunk group (job_id = the group
+    id). A group is imported only when every chunk is; it is superseded/closed (dead: it can never
+    be complete) as soon as any chunk is. `chunks` holds the real jobs in chunk order."""
+    out, groups = [], {}
+    for j in _jobs(rec):
+        c = j["chunk"]
+        if not c:
+            out.append({**j, "chunks": [j]})
+            continue
+        if c["group"] not in groups:
+            groups[c["group"]] = {"job_id": c["group"], "kind": j["kind"], "target": j["target"],
+                                  "order": j["order"], "chunks": [], "of": c["of"]}
+            out.append(groups[c["group"]])
+        groups[c["group"]]["chunks"].append(j)
+    for g in groups.values():
+        cs = g["chunks"] = sorted(g["chunks"], key=lambda j: j["chunk"]["index"])
+        g.update(imported=len(cs) == g["of"] and all(j["imported"] for j in cs),
+                 superseded=any(j["superseded"] for j in cs), closed=any(j["closed"] for j in cs),
+                 unfinished=any(j["unfinished"] for j in cs))
+    return out
+
+
+def _find(rec, job_id):
+    """A plain job or chunk group by its id (as film/reel/plan records name it)."""
+    return next((j for j in _logical(rec) if j["job_id"] == job_id), None)
+
+
+def _dirs(rec, job) -> list:
+    """Output folders of a job: one, or every chunk's in chunk order."""
+    return [rec.root / job["kind"] / c["job_id"] for c in job["chunks"]]
+
+
+def _one_dir(rec, job):
+    dirs = _dirs(rec, job)
+    return dirs[0] if len(dirs) == 1 else dirs
+
+
+def _chunk_ids(job) -> list:
+    return [c["job_id"] for c in job["chunks"]]
+
+
 def _latest_job(rec, kind, target, imported=True, after=-1):
-    found = [j for j in _jobs(rec) if j["kind"] == kind and j["target"] == target
+    """The latest live job (or complete chunk group, when imported=True) for kind and target."""
+    found = [j for j in _logical(rec) if j["kind"] == kind and j["target"] == target
              and not _ended(j) and j["order"] > after and (j["imported"] or not imported)]
     return found[-1] if found else None
 
@@ -252,7 +298,7 @@ def _bound_plan(rec, n):
         raise Stop(f"reels/{t}/shots.json is not the plan --plan-shots wrote; it is never edited by hand",
                    "Report this; restore it from git, never re-plan around it")
     narr_id = detail["narration_job_id"]
-    job = next((j for j in _jobs(rec) if j["job_id"] == narr_id), None)
+    job = _find(rec, narr_id)
     latest = _reel_narration(rec, n)
     if job is None or _ended(job) or not job["imported"] or latest is None or latest["job_id"] != narr_id:
         raise Stop(f"{t} shots were planned from narration {narr_id}, but the latest imported reel "
@@ -336,15 +382,30 @@ def _remaining(ledger, rec, month) -> float:
                budget.MONTH_CAP - ledger.spent(None, month))
 
 
-def _measured_track(units, wav_dir: Path, out: Path, job_id: str):
-    """film.narration_track over the imported WAVs, plus provenance of what was measured."""
+def _measured_track(rec, units, job, out: Path):
+    """film.narration_track over the imported WAVs of a narration job (or every chunk of its
+    group, in order), plus provenance of what was measured."""
+    wav_dir = _one_dir(rec, job)
     timing = film.narration_track(units, wav_dir, out)
     provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
-                  "narration_job_id": job_id,
-                  "wav_sha256": {u["unit_key"]: sha256_file(Path(wav_dir) / f"{u['unit_key']}.wav")
+                  "narration_job_id": job["job_id"],
+                  "wav_sha256": {u["unit_key"]: sha256_file(film.unit_wav(wav_dir, u["unit_key"]))
                                  for u in units},
                   "track_sha256": sha256_file(out)}
+    if "of" in job:  # a chunk group
+        provenance["narration_chunk_job_ids"] = _chunk_ids(job)
     return timing, provenance
+
+
+def _incomplete(rec, kind, target) -> str:
+    """' (<group>: k of n chunks imported)' for a live chunk group not fully imported, else ''."""
+    found = [g for g in _logical(rec) if g["kind"] == kind and g["target"] == target and "of" in g
+             and not _ended(g) and not g["imported"]]
+    if not found:
+        return ""
+    g = found[-1]
+    return (f" ({g['job_id']}: {sum(c['imported'] for c in g['chunks'])} of {g['of']} chunks "
+            "imported; incomplete)")
 
 
 def _ff(*args):
@@ -380,7 +441,10 @@ def _colab_action(rec, job) -> str:
     if job["kind"] == "reel_clips":
         return _wan_action(rec, job)
     drive = _json(job["manifest"]).get("drive_dir", colab_jobs.DRIVE_ROOT)
-    return (f"Run the {job['kind']} notebook in Colab: copy {job['inputs_zip']} to Drive {drive}/, "
+    c = job.get("chunk")
+    part = (f" (chunk {c['index']} of {c['of']} of group {c['group']}; each chunk is its own job, "
+            "run and imported on its own)" if c else "")
+    return (f"Run the {job['kind']} notebook{part} in Colab: copy {job['inputs_zip']} to Drive {drive}/, "
             f"open {job['notebook']}, set RUN = True in the first cell, Run all; download that Drive "
             f"folder, then: {PROG} import {job['job_id']} --root {rec.root} --from <downloaded folder> "
             f"--units <CU shown in Colab>. If it ran but cannot be imported (crash, hard stop, lost "
@@ -400,7 +464,14 @@ def next_action(root) -> str:
     if unfinished:
         j = unfinished[0]
         return (f"Finish the interrupted supersede/close of {j['job_id']}: rerun the same "
-                f"{PROG} supersede|close {j['job_id']} --root {root} command")
+                f"{PROG} supersede|close {j['job_id']} --root {root} command"
+                + (" (supersede of a chunk: with --group)" if j["chunk"] else ""))
+    for g in _logical(rec):  # a chunk group that lost a chunk can never be complete
+        open_ = [c["job_id"] for c in g["chunks"] if not c["imported"] and not _ended(c)]
+        if "of" in g and _ended(g) and open_:
+            return (f"Chunk group {g['job_id']} lost a chunk (closed or superseded), so it can never be "
+                    f"complete; release its never-run chunks ({', '.join(open_)}): {PROG} supersede "
+                    f"{open_[0]} --root {root} --group --reason \"<why they never ran>\"")
     pending = [j for j in jobs if not j["imported"] and not _ended(j)]
     if pending:
         return _colab_action(rec, pending[0])
@@ -450,7 +521,9 @@ def next_action(root) -> str:
         if todo:
             batch = todo[:colab_jobs.MAX_CLIPS_PER_BATCH]
             return (f"Write clips.json per references/reel-recipe.md (Clips spec): art_dir = "
-                    f"{root / 'stills' / stills['job_id']}, prior_attempt_evidence = the retained Wan "
+                    f"{' or '.join(map(str, _dirs(rec, stills)))}"
+                    f"{' (the chunk folder holding the batch stills)' if 'of' in stills else ''}, "
+                    f"prior_attempt_evidence = the retained Wan "
                     f"l4-balanced-v2 provenance (prior run ids, observed s/step, completed clips), "
                     f"shots = one {{id, image, seed, prompt}} for each of the next shots "
                     f"{', '.join(batch)} ({len(todo)} of {len(shots)} still need clips; at most "
@@ -614,8 +687,13 @@ def cmd_job(args):
     except ValueError as e:
         raise Stop(f"job not built: {e}", "Use the values measured on the last Colab run "
                    "(references/compute-budget.md) and never a compute block that differs from the job")
+    try:
+        sizes, unchunkable = colab_jobs.chunk_sizes(compute, rates), None  # [items] if <= 3600 s
+    except ValueError as e:
+        sizes, unchunkable = [items], e
     ledger, month = _ledger(rec, args), _month()
-    units = budget.forecast(compute, rates)
+    # the caps see the whole job: the sum of every chunk's forecast, checked once
+    units = sum(budget.forecast({**compute, "items": k}, rates) for k in sizes)
     remaining = _remaining(ledger, rec, month)
     if units > remaining:
         hint = "Hold the job and ask the owner; never retry past a cap."
@@ -626,20 +704,68 @@ def cmd_job(args):
                         f"spec's shots list to {fit['items']} entries and rerun (takes are fixed at 1 by "
                         "the Wan contract). The reel needs every planned shot, so the rest wait for "
                         "allowance; or hold for the owner.")
-        raise Stop(f"Budget exceeded: forecast {units:.2f} CU > remaining {remaining:.2f} CU "
+        whole = f" for all {len(sizes)} chunks of the job" if len(sizes) > 1 else ""
+        raise Stop(f"Budget exceeded: forecast {units:.2f} CU{whole} > remaining {remaining:.2f} CU "
                    f"(caps {budget.TITLE_CAP:g}/title, {budget.MONTH_CAP:g}/month, {month}). "
                    "Nothing was reserved or written.", hint, code=3)
+    if unchunkable is not None:
+        raise Stop(f"job not built: {unchunkable}", "Check the measured rates.json (references/"
+                   "compute-budget.md); hold for the owner if they are right")
     try:
-        result = colab_jobs.build_job(kind, rec, spec, ledger, rates, rec.root / "jobs", month=month)
+        if len(sizes) == 1:
+            results = [colab_jobs.build_job(kind, rec, spec, ledger, rates, rec.root / "jobs",
+                                            month=month)]
+            rec.event("cli", "job_target", {"job_id": results[0]["job_id"], "target": target,
+                                            "kind": kind})
+        else:
+            results = _build_chunks(rec, kind, spec, ledger, rates, month, sizes, target)
     except budget.BudgetExceeded as e:
         raise Stop(f"Budget exceeded: {e}. Nothing was written.",
                    "Hold the job and ask the owner; never retry past a cap.", code=3)
     except (ValueError, FileExistsError, KeyError) as e:
         raise Stop(f"job not built: {e}", "Fix the spec and rerun")
-    rec.event("cli", "job_target", {"job_id": result["job_id"], "target": target, "kind": kind})
-    print(f"Built {kind} job {result['job_id']} for {target}: forecast {result['forecast_units']:.2f} CU "
-          f"reserved ({remaining - result['forecast_units']:.2f} CU left under the title and month caps). "
-          "Inert until the owner enables it in Colab.")
+    spent = sum(r["forecast_units"] for r in results)
+    if len(results) == 1:
+        print(f"Built {kind} job {results[0]['job_id']} for {target}: forecast {spent:.2f} CU "
+              f"reserved ({remaining - spent:.2f} CU left under the title and month caps). "
+              "Inert until the owner enables it in Colab.")
+        return
+    print(f"Built {kind} job for {target} as {len(results)} chunks of at most "
+          f"{colab_jobs.MAX_CHUNK_SECONDS} forecast seconds each (one GPU session each): "
+          + ", ".join(f"{r['job_id']} ({r['forecast_units']:.2f} CU)" for r in results)
+          + f"; {spent:.2f} CU reserved in all ({remaining - spent:.2f} CU left under the title and "
+          "month caps). Each chunk is its own job: run and import each one; film, bundle-audio and "
+          "reels use the group only once every chunk is imported. Inert until the owner enables it.")
+
+
+def _build_chunks(rec, kind, spec, ledger, rates, month, sizes, target) -> list:
+    """Build every chunk as its own job (own id, inputs.zip, notebook, manifest, reservation), in
+    item order. The caps were checked for the sum first; if a chunk still fails, every chunk built
+    so far is removed, its reservation settled at 0 and the record restored (all or nothing)."""
+    group = spec.get("job_id") or colab_jobs.new_job_id(kind)
+    snapshot = (list(rec.data["artifacts"]), list(rec.data["events"]))
+    built, start = [], 0
+    try:
+        for i, k in enumerate(sizes, 1):
+            chunk = {"index": i, "of": len(sizes), "group": group, "start": start, "stop": start + k}
+            result = colab_jobs.build_job(kind, rec, spec, ledger, rates, rec.root / "jobs",
+                                          month=month, chunk=chunk)
+            built.append(result)
+            rec.event("cli", "job_target", {"job_id": result["job_id"], "target": target,
+                                            "kind": kind, "chunk": {"index": i, "of": len(sizes),
+                                                                    "group": group}})
+            start += k
+    except BaseException:
+        for r in built:
+            shutil.rmtree(Path(r["notebook"]).parent, ignore_errors=True)
+            try:
+                ledger.settle(r["job_id"], 0)  # release; nothing ran
+            except Exception:
+                pass  # never mask the original error
+        rec.data["artifacts"], rec.data["events"] = snapshot
+        rec._save()
+        raise
+    return built
 
 
 def _modal_units(ledger, job_id, given):
@@ -761,67 +887,95 @@ def cmd_modal_settle(args):
 _ENDINGS = {"supersede": ("superseding", "superseded"), "close": ("closing", "closed")}
 
 
-def _end_job(args, how):
+def _supersede_group(args):
+    """supersede --group: every chunk of the group that is neither imported nor ended is superseded
+    together (each with its own R23 intent/settle/result), so a rerun finishes an interrupted one."""
+    rec = _record(args.root)
+    job = next((j for j in _jobs(rec) if j["job_id"] == args.job_id), None)
+    group = _find(rec, args.job_id) if job is None else _find(rec, (job["chunk"] or {}).get("group"))
+    if group is None or "of" not in group:
+        raise Stop(f"{args.job_id} is not a chunk or chunk group",
+                   f"Drop --group: {PROG} supersede {args.job_id} --root {rec.root} --reason \"...\"")
+    todo = [c["job_id"] for c in group["chunks"] if not c["imported"] and not _ended(c)]
+    if not todo:
+        raise Stop(f"chunk group {group['job_id']} has no never-run chunk left to supersede",
+                   f"{PROG} status --root {rec.root}")
+    for job_id in todo:
+        _end_job(args, "supersede", job_id)
+
+
+def _end_job(args, how, job_id=None):
     """supersede (never ran: settle 0) or close (ran, not imported: settle the ACTUAL units).
 
     R23: the intent is recorded first as a pending event, then the ledger is settled, then the
-    final event is written; rerunning the same command after any failure finishes it."""
+    final event is written; rerunning the same command after any failure finishes it.
+    A chunk is superseded only with its whole group (supersede --group); close is per chunk."""
     pending_result, final = _ENDINGS[how]
     rec = _record(args.root)
-    job = next((j for j in _jobs(rec) if j["job_id"] == args.job_id), None)
+    job_id = job_id or args.job_id
+    job = next((j for j in _jobs(rec) if j["job_id"] == job_id), None)
     if job is None:
-        raise Stop(f"unknown job {args.job_id}", f"{PROG} status --root {rec.root}")
+        raise Stop(f"unknown job {job_id}", f"{PROG} status --root {rec.root}")
+    if how == "supersede" and job["chunk"] and not getattr(args, "group", False):
+        raise Stop(f"job {job_id} is chunk {job['chunk']['index']} of {job['chunk']['of']} of group "
+                   f"{job['chunk']['group']}; one chunk is never superseded alone (the group would "
+                   "stay incomplete forever)",
+                   f"Supersede every never-run chunk of the group together: {PROG} supersede {job_id} "
+                   f"--root {rec.root} --group --reason \"<why they never ran>\"")
     if job["imported"]:
-        raise Stop(f"job {args.job_id} was imported; its outputs and spend stay on record",
+        raise Stop(f"job {job_id} was imported; its outputs and spend stay on record",
                    f"{PROG} status --root {rec.root}")
     if _ended(job):
-        raise Stop(f"job {args.job_id} is already {'superseded' if job['superseded'] else 'closed'}",
+        raise Stop(f"job {job_id} is already {'superseded' if job['superseded'] else 'closed'}",
                    f"{PROG} status --root {rec.root}")
     events = rec.data["events"]
-    pending = [e for e in events if e["stage"] == "job" and e["detail"].get("job_id") == args.job_id
+    pending = [e for e in events if e["stage"] == "job" and e["detail"].get("job_id") == job_id
                and e["result"] in ("superseding", "closing")]
     if pending and pending[-1]["result"] != pending_result:
-        raise Stop(f"job {args.job_id} has an unfinished {pending[-1]['result'][:-3]}e; finish that one",
-                   f"Rerun {PROG} {'close' if how == 'supersede' else 'supersede'} {args.job_id} "
+        raise Stop(f"job {job_id} has an unfinished {pending[-1]['result'][:-3]}e; finish that one",
+                   f"Rerun {PROG} {'close' if how == 'supersede' else 'supersede'} {job_id} "
                    f"--root {rec.root}")
     if not args.reason.strip():
         raise Stop("a reason is required", f"Pass --reason \"<{'why it never ran' if how == 'supersede' else 'what happened'}>\"")
     ledger = _ledger(rec, args)
-    units = 0 if how == "supersede" else budget._check_units(_modal_units(ledger, args.job_id, args.units))
-    entry = next((e for e in ledger._load() if e["job_id"] == args.job_id), None)
+    units = 0 if how == "supersede" else budget._check_units(_modal_units(ledger, job_id, args.units))
+    entry = next((e for e in ledger._load() if e["job_id"] == job_id), None)
     if pending:
         recorded = pending[-1]["detail"]["units"]
         if recorded != units:
-            raise Stop(f"the interrupted {how} of {args.job_id} recorded {recorded:g} CU; it is finished "
+            raise Stop(f"the interrupted {how} of {job_id} recorded {recorded:g} CU; it is finished "
                        "with the recorded units, never re-decided",
                        f"Rerun with --units {recorded:g}" if how == "close" else "Rerun supersede")
     else:
         if entry is None or entry["state"] != "reserved":
-            raise Stop(f"job {args.job_id} has no open reservation on the ledger "
+            raise Stop(f"job {job_id} has no open reservation on the ledger "
                        f"({'missing' if entry is None else entry['state']}); nothing to settle",
                        f"{PROG} status --root {rec.root}")
-        rec.event("job", pending_result, {"job_id": args.job_id, "units": units, "reason": args.reason})
+        rec.event("job", pending_result, {"job_id": job_id, "units": units, "reason": args.reason})
     if entry is None:
-        raise Stop(f"job {args.job_id} is missing from the ledger", f"{PROG} status --root {rec.root}")
+        raise Stop(f"job {job_id} is missing from the ledger", f"{PROG} status --root {rec.root}")
     if entry["state"] == "reserved":
-        ledger.settle(args.job_id, units)
+        ledger.settle(job_id, units)
     elif entry["units"] != units:
-        raise Stop(f"ledger entry {args.job_id} was settled at {entry['units']:g} CU, not {units:g}",
+        raise Stop(f"ledger entry {job_id} was settled at {entry['units']:g} CU, not {units:g}",
                    "Report this; never edit the ledger by hand")
     reason = pending[-1]["detail"]["reason"] if pending else args.reason
     if how == "supersede":
-        rec.event("job", final, {"job_id": args.job_id, "reason": reason})
-        print(f"Superseded {job['kind']} job {args.job_id}: reservation of {entry['units']:.2f} CU "
+        rec.event("job", final, {"job_id": job_id, "reason": reason})
+        print(f"Superseded {job['kind']} job {job_id}: reservation of {entry['units']:.2f} CU "
               "released (settled at 0). Do not run its notebook.")
     else:
-        rec.event("job", final, {"job_id": args.job_id, "units": units, "ran": True,
+        rec.event("job", final, {"job_id": job_id, "units": units, "ran": True,
                                  "imported": False, "reason": reason})
-        print(f"Closed {job['kind']} job {args.job_id}: it ran but is not imported; settled at the "
+        print(f"Closed {job['kind']} job {job_id}: it ran but is not imported; settled at the "
               f"actual {units:g} CU (reserved {entry['units']:.2f} CU). Its outputs are not on record.")
 
 
 def cmd_supersede(args):
-    """Release a never-run job: settle its reservation at 0 and record job/superseded (R19)."""
+    """Release a never-run job: settle its reservation at 0 and record job/superseded (R19).
+    A chunk only with --group: every never-run chunk of its group together."""
+    if args.group:
+        return _supersede_group(args)
     _end_job(args, "supersede")
 
 
@@ -840,14 +994,15 @@ def cmd_film(args):
     narr = _latest_job(rec, "narration", t)
     stills = _latest_job(rec, "stills", t)
     if not narr or not stills:
-        raise Stop(f"{t} needs imported narration and stills jobs", next_action(rec.root))
+        raise Stop(f"{t} needs imported narration and stills jobs"
+                   + _incomplete(rec, "narration", t) + _incomplete(rec, "stills", t),
+                   next_action(rec.root))
     lang = plan["language"]
     scs = films[args.film - 1]["scenes"]
     units = [u for sc in scs for u in voice_units(sc, {"description": ""}, None, lang)]
     out = rec.root / "film" / t
     out.mkdir(parents=True, exist_ok=True)
-    timing, prov = _measured_track(units, rec.root / "narration" / narr["job_id"],
-                                   out / "narration.wav", narr["job_id"])
+    timing, prov = _measured_track(rec, units, narr, out / "narration.wav")
     _write_json(out / "timing.json", {"units": timing, "provenance": prov})
     (out / f"{t}.srt").write_text(film.subtitles(timing, units), encoding="utf-8")
     if args.score:  # the bed never outlasts the narration; the END card follows it
@@ -879,7 +1034,7 @@ def cmd_film(args):
         m = mix.duck_and_master(out / "narration.wav", score, out / "mix.wav", FILM_LUFS)
     except ValueError as e:
         raise Stop(f"QC failure: {e}", "Re-balance the score bed and rerun film", code=5)
-    info = film.assemble(plan["plan"], timing, rec.root / "stills" / stills["job_id"], out / "mix.wav",
+    info = film.assemble(plan["plan"], timing, _one_dir(rec, stills), out / "mix.wav",
                          Path(args.logo), Path(args.end_card), out / f"{t}.mp4",
                          film=args.film - 1, language=lang)
     for kind, p in (("timing", out / "timing.json"), ("subtitles", out / f"{t}.srt"),
@@ -907,8 +1062,7 @@ def _line_ends(script, units, timing) -> list:
 
 def _reel_track(rec, n, script, narr, folder):
     units = voice_units(_reel_scene(script, n), {"description": ""}, None, script["language"])
-    timing, prov = _measured_track(units, rec.root / "narration" / narr["job_id"],
-                                   folder / "narration.wav", narr["job_id"])
+    timing, prov = _measured_track(rec, units, narr, folder / "narration.wav")
     return units, timing, prov
 
 
@@ -978,7 +1132,7 @@ def cmd_reel(args):
     if script is None or _plan_event(rec, n)[1] is None:
         raise Stop(f"{t} needs a script, its imported narration and a shot plan", next_action(rec.root))
     shots, planned, narr_id = _bound_plan(rec, n)  # R27: exactly the planned narration
-    narr = next(j for j in _jobs(rec) if j["job_id"] == narr_id)
+    narr = _find(rec, narr_id)
     by_scene, jobs = {}, []
     for j in _clip_jobs(rec, n, planned, imported=True):
         jobs.append(j["job_id"])
@@ -1125,7 +1279,7 @@ def cmd_bundle_audio(args):
 
 
 def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
-    rows, prov_units, job_ids = [], {}, set()
+    rows, prov_units, job_ids, run_ids = [], {}, set(), set()
     with tempfile.TemporaryDirectory() as td:
         td = Path(td)
         bundle.mkdir(parents=True, exist_ok=True)
@@ -1135,10 +1289,13 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
             films_used = {fi for fi, _ in mine}
             if not mine or len(films_used) != 1:
                 raise Stop(f"unit {unit['unit_id']} has no single planned film", "Re-plan the title")
-            job = _latest_job(rec, "narration", _film_target(films_used.pop()))
+            fi = films_used.pop()
+            job = _latest_job(rec, "narration", _film_target(fi))
             if not job:
-                raise Stop(f"unit {unit['unit_id']}: narration not imported yet", next_action(rec.root))
+                raise Stop(f"unit {unit['unit_id']}: narration not imported yet"
+                           + _incomplete(rec, "narration", _film_target(fi)), next_action(rec.root))
             job_ids.add(job["job_id"])
+            run_ids.update(_chunk_ids(job))
             units, tags = [], []
             for _, sc in mine:
                 vus = voice_units(sc, {"description": ""}, None, lang)
@@ -1155,8 +1312,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                     raise Stop(f"paragraph {p['anchor_id']}: spoken units do not reproduce its text "
                                "exactly", "Refuse; never publish narration that differs from the book")
             chapter = td / f"unit-{n:03d}.wav"
-            timing, prov = _measured_track(units, rec.root / "narration" / job["job_id"], chapter,
-                                           job["job_id"])
+            timing, prov = _measured_track(rec, units, job, chapter)
             master, score_sha = td / f"unit-{n:03d}-master.wav", None
             try:
                 if args.dry:  # narration only, same -16 LUFS / -1 dBTP gate
@@ -1193,6 +1349,8 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                 "score_sha256": score_sha,
                 "mp3_sha256": sha256_file(mp3), "mp3_duration_ms": dur_ms,
                 "encoder": "ffmpeg libmp3lame 96 kbps CBR stereo 48 kHz"}
+            if "narration_chunk_job_ids" in prov:
+                prov_units[unit["unit_id"]]["narration_chunk_job_ids"] = prov["narration_chunk_job_ids"]
     ids = sorted(job_ids)
     provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
                   "narration_job_id": ids[0] if len(ids) == 1 else ids, "units": prov_units}
@@ -1211,7 +1369,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
         "timing_json_sha256": sha256_file(timing_path), "term_per_territory": {},
         "text_source_licence": None, "cover_provenance": None,
         "generators": [{"model": colab_jobs.NARRATION_REPO, "revision": colab_jobs.NARRATION_REVISION,
-                        "licence": "Apache-2.0", "job_ids": ids,
+                        "licence": "Apache-2.0", "job_ids": sorted(run_ids),
                         "voice": plan["voice"]["preset_key"]}],
         "dry_narration": bool(args.dry),
         "music": None if args.dry else {
@@ -1276,8 +1434,17 @@ def cmd_status(args):
                      else f"closed (ran, not imported; {closed:.2f} CU settled)" if j["closed"]
                      else "supersede/close unfinished: rerun it" if j["unfinished"]
                      else "waiting for Colab")
-            print(f"  {j['job_id']} {j['kind']} {j['target']}: {state} "
+            c = j["chunk"]
+            part = f" chunk {c['index']}/{c['of']} of {c['group']}" if c else ""
+            print(f"  {j['job_id']} {j['kind']} {j['target']}{part}: {state} "
                   f"(forecast {j['forecast_units']:.2f} CU)")
+        for g in _logical(rec):
+            if "of" in g:
+                done = sum(c["imported"] for c in g["chunks"])
+                state = ("complete" if g["imported"] else
+                         "dead: a chunk was closed or superseded" if _ended(g) else "incomplete")
+                print(f"  group {g['job_id']} {g['kind']} {g['target']}: {done} of {g['of']} chunks "
+                      f"imported ({state})")
 
 
 REPO = Path(__file__).resolve().parents[4]
@@ -1387,6 +1554,8 @@ def _parser():
     s = add("supersede")
     s.add_argument("job_id")
     s.add_argument("--reason", required=True)
+    s.add_argument("--group", action="store_true",
+                   help="a chunk (or group id): supersede every never-run chunk of its group together")
     s = add("close")
     s.add_argument("job_id")
     s.add_argument("--units", type=float, help="the CU Colab shows the run used (optional after "

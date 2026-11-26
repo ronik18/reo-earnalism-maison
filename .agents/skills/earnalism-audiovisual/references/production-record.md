@@ -28,7 +28,10 @@ One title root, one record, one writer. `record.json` (schema
   ACE-Step), seeds and prompts (inside the inputs zip), output hashes, forecast and actual CU.
 - **Score**: route (VCSL editorial or ACE-Step cues), licence, cue hashes.
 - **Measured timing**: `timing.json` with `provenance` = {method `eav.film.narration_track`,
-  measured_with `ffprobe`, WAV sha256s, narration job id}.
+  measured_with `ffprobe`, WAV sha256s, narration job id}; for a chunked narration job the
+  id is the group id plus `narration_chunk_job_ids` (every chunk, in order).
+- **Chunks**: a chunk's `colab_job` artifact, `job/built` and `cli/job_target` events, `job.json`
+  and build manifest carry `chunk: {index, of, group}`.
 - **Renditions**: film and reel hashes, durations, loudness, true peak, loop score.
 - **Review**: QC report, owner review result, everything not reviewed marked `unassessed`.
 - **Licences**: Apache-2.0 (Parler, FLUX.1-schnell, Wan, ACE-Step), CC0 (VCSL).

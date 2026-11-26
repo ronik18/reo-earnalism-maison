@@ -43,6 +43,33 @@ voice unit (`items` = number of units).
 Planning size per title: narration ~2–10 CU, stills ~3–5 CU, ACE-Step cues ~2–3 CU,
 reel clips ~20–40 CU (the largest). About 30–60 CU per title, two titles a month.
 
+## Chunks (session length, not the caps)
+
+A `narration` or `stills` job whose forecast is over **3600 s** (`MAX_CHUNK_SECONDS`, margin
+included) is built as the fewest consecutive chunks, as even as possible, each forecast with the
+same formula and its own `decode_s` + `export_s` at most 3600 s, so every chunk fits one GPU
+session (Colab or `modal-run`) and resumes cleanly. Order is kept (narration by voice unit,
+stills by keyframe). A job at or under 3600 s is built exactly as before. Music cues and
+`reel_clips` batches are never chunked.
+
+- The caps are checked **once, for the sum of every chunk's forecast** (more than the unsplit
+  forecast, since each chunk pays its own overhead). Over a cap: exit 3, nothing reserved or written.
+  Chunking never lets a title slip under a cap.
+- Each chunk is its own job: id `<kind>-<hex8>-c<i>of<n>` (or `<--job-id>-c<i>of<n>`; the part
+  before `-c` is the group id), its own `inputs.zip`, notebook, build manifest (`chunk: {index, of,
+  group}`, also in `job.json`), hard stop and ledger reservation. `import`, `close` and `modal-run`
+  take one chunk at a time.
+- `film`, `bundle-audio`, reels and `Next:` use a group only once **every** chunk is imported, then
+  all chunks' outputs in chunk order; provenance names the group (`narration_job_id`) and its
+  chunks (`narration_chunk_job_ids`). `status` lists every chunk (`chunk i/n of <group>`) and one
+  line per group: `k of n chunks imported (complete|incomplete|dead ...)`.
+- One chunk is never superseded alone: `supersede <chunk or group id> --group --reason "..."`
+  supersedes every chunk of the group that is neither imported nor ended. A chunk that ran but
+  cannot be imported is `close`d on its own; the group is then dead (it can never be complete),
+  and `Next:` asks for `supersede --group` of its never-run chunks before a new job.
+- If building a later chunk fails, every chunk built by that command is removed, its reservation
+  settled at 0 and the record restored.
+
 ## The ledger
 
 - Shared by every title and **pinned at `init`**: `--ledger`, else `$EAV_LEDGER`, else

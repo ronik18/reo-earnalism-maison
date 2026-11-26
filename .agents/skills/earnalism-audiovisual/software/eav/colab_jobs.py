@@ -36,6 +36,11 @@ MAX_APPROVED_UNITS = 5.0
 DRIVE_ROOT = "/content/drive/MyDrive/earnalism-audiovisual"
 
 KINDS = ("narration", "stills", "music", "reel_clips")
+# Long narration/stills jobs are cut into consecutive chunks of at most this many forecast seconds
+# (margin included), so each chunk fits one GPU session and resumes cleanly. This is for session
+# length only: the caps are checked once against the sum of every chunk (chunk_forecasts).
+MAX_CHUNK_SECONDS = 3600
+CHUNKED_KINDS = ("narration", "stills")
 JOB_SCHEMA = "earnalism.audiovisual-job.v1"
 _TEMPLATES = Path(__file__).with_name("templates")
 _WAN_DIR = Path(__file__).resolve().parents[3] / "earnalism-video" / "software" / "wan22"
@@ -420,6 +425,33 @@ def job_items(kind: str, spec: dict) -> int:
     return len(spec.get("shots" if kind == "reel_clips" else "items") or [])
 
 
+def chunk_sizes(compute: dict, rates: dict) -> list:
+    """Item counts of the consecutive chunks a job is cut into: [items] when its forecast is at most
+    MAX_CHUNK_SECONDS (or the kind is not chunked), else the fewest chunks, as even as possible, each
+    forecast (same formula, its own decode_s/export_s overhead) at most MAX_CHUNK_SECONDS."""
+    items = compute["items"]
+    if compute["kind"] not in CHUNKED_KINDS or forecast_seconds(compute, rates) <= MAX_CHUNK_SECONDS:
+        return [items]
+
+    def fits(k):
+        return forecast_seconds({**compute, "items": k}, rates) <= MAX_CHUNK_SECONDS
+
+    per = 0
+    while per < items and fits(per + 1):
+        per += 1
+    if per == 0:
+        raise ValueError(f"one {compute['kind']} item alone is forecast over {MAX_CHUNK_SECONDS} s; "
+                         "it cannot be cut into session-length chunks")
+    n = -(-items // per)
+    base, extra = divmod(items, n)
+    return [base + 1] * extra + [base] * (n - extra)
+
+
+def chunk_forecasts(compute: dict, rates: dict) -> list:
+    """(items, forecast units) of each chunk; the caps are checked once against their sum."""
+    return [(k, forecast({**compute, "items": k}, rates)) for k in chunk_sizes(compute, rates)]
+
+
 def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
     """Validate the spec; return everything needed to write, without touching disk."""
     compute = derive_compute(kind, spec, rates, job_items(kind, spec))
@@ -499,19 +531,49 @@ def _reel_job(spec: dict, job_id: str, seconds: float, rate: dict) -> dict:
     return job
 
 
+def _chunk_plan(kind: str, plan: dict, spec: dict, rates: dict, chunk: dict) -> dict:
+    """The validated full job's plan cut to items [start, stop); compute derived for that slice."""
+    key = "units" if kind == "narration" else "items"
+    rows = plan["payload"][key][chunk["start"]:chunk["stop"]]
+    if not rows or chunk["stop"] - chunk["start"] != len(rows):
+        raise ValueError(f"chunk {chunk['index']} of {chunk['of']} is outside the job's items")
+    bare = {k: v for k, v in spec.items() if k != "compute"}  # the full job's block was checked
+    return {**plan, "payload": {**plan["payload"], key: rows},
+            "compute": derive_compute(kind, bare, rates, len(rows)),
+            "chunk": {"index": chunk["index"], "of": chunk["of"], "group": chunk["group"]}}
+
+
+def new_job_id(kind: str) -> str:
+    return f"{kind.replace('_', '-')}-{uuid.uuid4().hex[:8]}"
+
+
+def chunk_job_id(group: str, index: int, of: int) -> str:
+    """Chunk ids keep the job id scheme with a suffix: <kind>-<hex8>-c<index>of<of> (1-based)."""
+    return f"{group}-c{index}of{of}"
+
+
 def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
-              month: str = None) -> dict:
+              month: str = None, chunk: dict = None) -> dict:
     """Build an inert bundle under out/<job_id>/.
 
     The forecast is reserved on the ledger before anything is written. If the
     write fails, the partial directory is removed and the reservation settled
     at 0 units; the settled entry stays in the ledger, so a retry needs a new
     job_id. spec['compute'] (measured steps, items, decode_s, export_s) is required.
+
+    chunk = {"index", "of", "group", "start", "stop"} builds items [start, stop) of the
+    validated full job as its own job chunk_job_id(group, index, of) (narration, stills only);
+    its job.json and build manifest carry chunk = {"index", "of", "group"}.
     """
     if kind not in KINDS:
         raise ValueError(f"unknown job kind: {kind!r}")
+    if chunk is not None and kind not in CHUNKED_KINDS:
+        raise ValueError(f"{kind} jobs are never chunked")
     title = record.data["title_slug"]
-    job_id = spec.get("job_id") or f"{kind.replace('_', '-')}-{uuid.uuid4().hex[:8]}"
+    if chunk is not None:
+        job_id = chunk_job_id(chunk["group"], chunk["index"], chunk["of"])
+    else:
+        job_id = spec.get("job_id") or new_job_id(kind)
     if not _SAFE.fullmatch(job_id) or not _SAFE.fullmatch(title):
         raise ValueError("job_id and title slug must be lowercase letters, digits and hyphens")
     month = month or datetime.now(timezone.utc).strftime("%Y-%m")
@@ -531,6 +593,8 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
         job = _reel_job(spec, job_id, forecast_seconds(plan["compute"], rates), rates[kind])
     else:
         plan = _plan(kind, record, spec, rates)
+        if chunk is not None:
+            plan = _chunk_plan(kind, plan, spec, rates, chunk)
     units = forecast(plan["compute"], rates)
 
     edition_id = (record.data.get("source") or {}).get("edition_id")
@@ -552,13 +616,14 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
             pass  # never mask the original error
         raise
     result.update(job_id=job_id, forecast_units=units)
+    extra = {"chunk": plan["chunk"]} if "chunk" in plan else {}
     record.add_artifact("colab_job", Path(result["notebook"]), {
-        "job_id": job_id, "job_kind": kind, "forecast_units": units, "month": month,
+        **extra, "job_id": job_id, "job_kind": kind, "forecast_units": units, "month": month,
         "inputs_zip": Path(result["inputs_zip"]).resolve().relative_to(
             record.root.resolve()).as_posix(),
         "manifest": Path(result["manifest"]).resolve().relative_to(
             record.root.resolve()).as_posix()})
-    record.event("job", "built", {"job_id": job_id, "kind": kind, "forecast_units": units})
+    record.event("job", "built", {"job_id": job_id, "kind": kind, "forecast_units": units, **extra})
     return {"job_id": job_id, "notebook": result["notebook"],
             "inputs_zip": result["inputs_zip"], "manifest": result["manifest"],
             "forecast_units": units}
@@ -567,6 +632,8 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
 def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s: float) -> dict:
     job_json = {"schema": JOB_SCHEMA, "kind": kind, "job_id": job_id, "title": title,
                 "model": plan["repo"], **plan["payload"]}
+    if "chunk" in plan:
+        job_json["chunk"] = plan["chunk"]
     archive = _zip_bytes({"job.json": (json.dumps(job_json, indent=2, sort_keys=True)
                                        + "\n").encode("utf-8")})
     zip_sha = hashlib.sha256(archive).hexdigest()
@@ -580,6 +647,8 @@ def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s:
                 "deadline_seconds": int(deadline_s), "authority_created": False}
     if "generation" in plan["payload"]:
         manifest["generation"] = plan["payload"]["generation"]
+    if "chunk" in plan:
+        manifest["chunk"] = plan["chunk"]
     job_dir.mkdir(parents=True)
     paths = {"notebook": job_dir / f"{kind}.ipynb", "inputs_zip": job_dir / "inputs.zip",
              "manifest": job_dir / "build-manifest.json"}
