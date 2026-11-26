@@ -757,9 +757,10 @@ class ModalRequestTests(unittest.TestCase):
 
     # ------------------------------------------------------------ F1: the real ledger and requests
     def test_the_existing_production_ledger_and_requests_load(self):
-        """A copy of production/audiovisual (ledger, request files, the title's record.json), read
-        only: request #1 refused by hand (row settled at 0), request #2 failed (no payment method)."""
-        src = REPO / "production" / "audiovisual"
+        """A copy of a frozen snapshot of production/audiovisual (tests/fixtures/modal-state-20261126:
+        ledger, request files, the title's record.json), read only: c1of2 #1 refused by hand (row
+        settled at 0), #2 failed (no payment method); the live files change with every real run."""
+        src = Path(__file__).resolve().parent / "fixtures" / "modal-state-20261126"
         work = self.d / "copy"
         (work / ".git").mkdir(parents=True)
         dst = work / "production" / "audiovisual"
@@ -788,22 +789,27 @@ class ModalRequestTests(unittest.TestCase):
                 self.assertFalse(ledger.undo_move_to_modal(job))  # it reached Modal: stays moved
             self.assertEqual(ledger.record_modal_spend("2026-11", job, 0.0, 0.0, "pending", "t"),
                              f"{job}#{nxt}")
-        # the known state: c1of2 #1 settled 0 (refused by hand), #2 failed with the wall-clock estimate
+        # the known state: c1of2 #1 settled 0 (refused by hand), #2 and #3 failed with the wall-clock
+        # estimate (the next run is #4); c2of2 #1 settled 0.0117, its request failed
+        c2 = "narration-film-01-r3-c2of2"
+        row2 = ledger.modal_rows(job_id=c2)[0]  # [1] is the probe row the loop above added
+        self.assertEqual((row2["status"], row2["usd"]), ("settled", 0.0117))
+        self.assertEqual(modal_requests.read_request(dst / "modal-requests" / f"{c2}.json")["status"], "failed")
         job = "narration-film-01-r3-c1of2"
         rows = {r["run_id"]: r for r in ledger.modal_rows(job_id=job)}
         self.assertEqual(rows[f"{job}#1"]["status"], "settled")
         self.assertEqual(rows[f"{job}#2"]["status"], "failed")
-        self.assertEqual([r["run_id"] for r in ledger.unbilled_modal_runs(job)], [f"{job}#2"])
-        ledger.release_pending_modal(f"{job}#3")  # the probe row above
+        self.assertEqual([r["run_id"] for r in ledger.unbilled_modal_runs(job)], [f"{job}#2", f"{job}#3"])
+        ledger.release_pending_modal(f"{job}#4")  # the probe row above
         root = dst / "bicharak"
-        code, out = run("modal-settle", job, "--root", root, "--usd", 0)
+        code, out = run("modal-settle", job, "--root", root, "--usd", 0, "--run", f"{job}#2")
         self.assertEqual(code, 0, out)  # reconcile #2 from the bill (Modal refused before any GPU)
         row = next(r for r in ledger.modal_rows(job_id=job) if r["run_id"] == f"{job}#2")
         self.assertEqual((row["usd"], row["billed"], row["status"]), (0, True, "failed"))
         self.assertAlmostEqual(row["estimated_usd"], 0.02270221720785)
         code, out = run("modal-fetch", job, "--root", root)
-        self.assertEqual(code, 2, out)  # failed with no files: close or request again
-        self.assertIn("no uploaded files", out)
+        self.assertEqual(code, 2, out)  # failed, its files are not in the (fake, empty) R2: nothing written
+        self.assertIn("missing in R2", out)
         code, out = run("modal-request", job, "--root", root, "--abandon", "--reason", "x")
         self.assertEqual(code, 2, out)  # failed, not running
         self.assertEqual(budget.Ledger(src / "allowance-ledger.json").modal_rows(job_id=job)[1]["status"],
