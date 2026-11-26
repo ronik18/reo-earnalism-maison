@@ -1719,6 +1719,3678 @@
       },
       "path": "jobs/narration-film-01-r4/narration.ipynb",
       "sha256": "87c05f742b10e42dedb9423f3bea0c21423b78cf9ec85f3a7ce6c64e1a007700"
+    },
+    {
+      "bytes": 190508,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s001-001.wav",
+      "sha256": "55f85db84e03a6db758760b2f0de59e67dada744adb38472057b15ca6f6ead77"
+    },
+    {
+      "bytes": 1004588,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s001-002.wav",
+      "sha256": "05314b9a2f1f1e5076d9ae8bc56864ac3a6bb834a40a88c931a470d3fe224f65"
+    },
+    {
+      "bytes": 769068,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s001-003.wav",
+      "sha256": "19f5ce9f7dad5808ec5e5640035b47d9f8a3e3163146aed16612b19dde80a787"
+    },
+    {
+      "bytes": 1073196,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s001-004.wav",
+      "sha256": "d9ceb66526735aea0919f195612726d69e2655531004f405b2a82981b19182e3"
+    },
+    {
+      "bytes": 465964,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s001-005.wav",
+      "sha256": "0bb97f5c002d6eadc887cf682c84d480b6f965570dc90c01f445d2853bab7201"
+    },
+    {
+      "bytes": 1261612,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s001-006.wav",
+      "sha256": "f311dcccc1f400a3e8c43b01691086c8e9f5e56df598debd9d3f1aec8487eba4"
+    },
+    {
+      "bytes": 1054764,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s001-007.wav",
+      "sha256": "379bf58df795168581a0440d7abf462cb7177b771915077c0f504df213b958e1"
+    },
+    {
+      "bytes": 793644,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s001-008.wav",
+      "sha256": "d1a1198950cecfb9b724ad2c8ba0530f2a73aaeeb008ffb346f1299a0791da99"
+    },
+    {
+      "bytes": 1087532,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s001-009.wav",
+      "sha256": "cdd8921b64552cd726e1649620da64a2339d7e0dbfbfd91e9f55a9c794747e1b"
+    },
+    {
+      "bytes": 586796,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s001-010.wav",
+      "sha256": "f2ccf8982e81bd3b0dd1802b7053e215ca14fa30e50f18043870eeb1a9093b01"
+    },
+    {
+      "bytes": 1326124,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s002-001.wav",
+      "sha256": "44230080362df521565dde8c6b76c8d67e35633ebe8eca2443c13e93f1104668"
+    },
+    {
+      "bytes": 1109036,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s002-002.wav",
+      "sha256": "a04678cd76ddfe780a61133418f88e0b2e77a16aff9752329f11faafc78d7c89"
+    },
+    {
+      "bytes": 1017900,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s002-003.wav",
+      "sha256": "6c24c012afb674917c40a18ca43d58256d97c8b376d17fd5518acb237f8010d8"
+    },
+    {
+      "bytes": 1095724,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s002-004.wav",
+      "sha256": "b86820514904f91b241363d3dca0844e086e1cc6001a442cc5b0f8a87b465913"
+    },
+    {
+      "bytes": 1161260,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s002-005.wav",
+      "sha256": "4e320cebe57f2dd004fa9560b314e4a59b743fa5abfb90a41c0144cfbaa88d5a"
+    },
+    {
+      "bytes": 1340460,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s003-001.wav",
+      "sha256": "bc59dbe2901a0a75fe4f2fc633c1532f58568ce93f5c937bff3e4bef3c952213"
+    },
+    {
+      "bytes": 1158188,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s003-002.wav",
+      "sha256": "257423141471e7e378ad4d4614c95cc4e6f90dbbb7a7163f00f04f24bd951409"
+    },
+    {
+      "bytes": 515116,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s003-003.wav",
+      "sha256": "891b417e54b31e3d7e4875fe6ece0e6004869d9f50dfbca304b9c64c0284d06e"
+    },
+    {
+      "bytes": 865324,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s003-004.wav",
+      "sha256": "de9e141cad9930846f8195075bc07dafccbc405e25d592b3f477532e675298f2"
+    },
+    {
+      "bytes": 951340,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s003-005.wav",
+      "sha256": "3073f6ccf75965765510e4a0f0f02cd95221f9acd1d50158df7c304554e8f166"
+    },
+    {
+      "bytes": 1034284,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s003-006.wav",
+      "sha256": "7f8f3caedf4d4aee3381ca93f09374a875e9c80cd730d2736cbf51d23310f710"
+    },
+    {
+      "bytes": 534572,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s003-007.wav",
+      "sha256": "32f183627c2fca6170815934079a8cf17e28ba02ec36cf26745e9c25ba873bbc"
+    },
+    {
+      "bytes": 618540,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s003-008.wav",
+      "sha256": "e5c3b160523b9ee7084749ac4eef730b82fadbb6fe3d18ab3b103aff6de925c3"
+    },
+    {
+      "bytes": 1020972,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s003-009.wav",
+      "sha256": "29911ad6821a0699e29d9b15fad1f44e6a44b2eb7ce47969a83977694a03d3f0"
+    },
+    {
+      "bytes": 512044,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s004-001.wav",
+      "sha256": "817261e5176a94a7514ecac3f51c2e56c54a5f8dadd93a403afc6bc8db61d4a6"
+    },
+    {
+      "bytes": 703532,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s004-002.wav",
+      "sha256": "7f93b8d7df1ab07b0dd4f16818aaad2b42e168bc97a3e7dd25d84351d84ce866"
+    },
+    {
+      "bytes": 805932,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s004-003.wav",
+      "sha256": "550e8c9ee6ced28ba1c5e3b2daa4cac140d50a4aff547db6bab4c19297ff0d9d"
+    },
+    {
+      "bytes": 531500,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s004-004.wav",
+      "sha256": "8640889a234cbbbb3cf310c67b5987c403e0dce42a43aa4a9409f9f8f04a5c2d"
+    },
+    {
+      "bytes": 426028,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s004-005.wav",
+      "sha256": "1cf2af9cb277aba91e49deb894def6e56e2954d29d00700b439c915d958e5ee0"
+    },
+    {
+      "bytes": 334892,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s004-006.wav",
+      "sha256": "cb2f4bcdb188f6bf75841c306421274cbb779f8c716c5e63157ed4815f6cf5a7"
+    },
+    {
+      "bytes": 384044,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-001.wav",
+      "sha256": "9f623e8eecebe0ed38a2a8f63c4c9007743ecd0b14b8a84210782b16e132d5dd"
+    },
+    {
+      "bytes": 404524,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-002.wav",
+      "sha256": "0237a1d50ebae4f77e1548ba6efbc37c150b2ddc7b743f669a9199c49af66b59"
+    },
+    {
+      "bytes": 246828,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-003.wav",
+      "sha256": "9598c136df2e1009cda2cf7d9bfe12fc7a4789ac129446c4bf6a6c23b200d2a7"
+    },
+    {
+      "bytes": 189484,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-004.wav",
+      "sha256": "5a331c2d91bb0f9b7a88869a780e17bd110109e9b982362a48898e61738fbf23"
+    },
+    {
+      "bytes": 230444,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-005.wav",
+      "sha256": "8fb7e9d7661bfbb66399dbd03d9023888354db410089c753c347748451e91c39"
+    },
+    {
+      "bytes": 335916,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-006.wav",
+      "sha256": "3cd83e82938faeaf85f9338faa8156f1e8f438384c9f6f0691ab4076378721b3"
+    },
+    {
+      "bytes": 838700,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-007.wav",
+      "sha256": "1a1c9e40affa03902ebc970ef303d2072c1ec97248504729b92bd7bd059d2e3d"
+    },
+    {
+      "bytes": 407596,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-008.wav",
+      "sha256": "f5ffd64fe3e683a7f95539a5fb4b749637ac6b34cfc8bd7fcb9ed7d913121a0c"
+    },
+    {
+      "bytes": 194604,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-009.wav",
+      "sha256": "ddbc7c39e6f210d252a7e946370d99a5cd3739ceeef034165f5d63cbcc00a2cf"
+    },
+    {
+      "bytes": 725036,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-010.wav",
+      "sha256": "063539fd57abbfe29b9e19f68869393bc4b6be76b8a8dceb6a5b1ed3fad916ba"
+    },
+    {
+      "bytes": 1035308,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s005-011.wav",
+      "sha256": "70525d71902b94b5c79a3211a017a3860fe40818b00a88d77cdf1179ae7183a9"
+    },
+    {
+      "bytes": 271404,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s006-001.wav",
+      "sha256": "fdcf2183e4923324cc7c52a986d462d5abfaad6b28cac08b525ecdedfa51aa62"
+    },
+    {
+      "bytes": 532524,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s006-002.wav",
+      "sha256": "3c33b0564b69955abf428c9f122afd84743d369fd6877fd52c95b83894ab04de"
+    },
+    {
+      "bytes": 773164,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s006-003.wav",
+      "sha256": "fc142c6ad825e9d7130304024e3e0eb90edf7ef660398f655c4e26e18bfabf0d"
+    },
+    {
+      "bytes": 974892,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s006-004.wav",
+      "sha256": "b3b32cd09c254e3177c62ff0d976d439648005914724fb6f49f7eb383138d8a1"
+    },
+    {
+      "bytes": 817196,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s006-005.wav",
+      "sha256": "27d819298b3d897fcd07c37f1bc6259963d6a6b4c2fb972e9fea0a12d842353f"
+    },
+    {
+      "bytes": 692268,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s006-006.wav",
+      "sha256": "baa25cb5b18a2e3cfb60b9c43b7a417e042534bea92fb64a890c01f496bd069c"
+    },
+    {
+      "bytes": 310316,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-001.wav",
+      "sha256": "f6ed476808210de320c40b6db52494d2683e89a04b4e05b22b4fd9debdbd8556"
+    },
+    {
+      "bytes": 355372,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-002.wav",
+      "sha256": "b84defe9e358d89908f0acf434a439a9bff8afd1f7defa0754b5ded56ed5ee78"
+    },
+    {
+      "bytes": 238636,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-003.wav",
+      "sha256": "b17a39bff69cbc0170ea19ef6dd7cf9b8536ec4afec6a94db52b6c31d3359646"
+    },
+    {
+      "bytes": 357420,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-004.wav",
+      "sha256": "864c469d81ec9a3acef9c94f3a0a447daac7288497155b52a276d982cdf97774"
+    },
+    {
+      "bytes": 815148,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-005.wav",
+      "sha256": "363b8956f1355de47c2bea88e6651fba1632ae5490b0ff99a40c5605a4fd8f0f"
+    },
+    {
+      "bytes": 1221676,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-006.wav",
+      "sha256": "5e57ec39c5b2e3755a7370bad95af29e5f45335ef15643d77bf86eaad7447a8e"
+    },
+    {
+      "bytes": 624684,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-007.wav",
+      "sha256": "0eed3e3b54b6f38f001f4749a9181e7b6f50b33c39dc12367da02403d03deedb"
+    },
+    {
+      "bytes": 1016876,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-008.wav",
+      "sha256": "0a418ebbc3b30b25bd35941ffa570dffe8a9695b1a6f1cb0f09300ec4fa96908"
+    },
+    {
+      "bytes": 986156,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-009.wav",
+      "sha256": "d45e018e46ed579feb7c07579f4723f5d328835d7dd14784402bda7976992cb9"
+    },
+    {
+      "bytes": 1199148,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-010.wav",
+      "sha256": "4716ad01af4c8784ed92ae02fe9c409fc7ea91e47045de1498b7e3965fbbfa5d"
+    },
+    {
+      "bytes": 1247276,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s007-011.wav",
+      "sha256": "99ccb6738427619421d9270df68bd21cbae0ce1b3f9d1659608fe112905ba765"
+    },
+    {
+      "bytes": 454700,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s008-001.wav",
+      "sha256": "2dd80b21b21e6506d6167bd3c022b6c43b86289bb1a1eedef20a6f933a194232"
+    },
+    {
+      "bytes": 972844,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s008-002.wav",
+      "sha256": "09a283273a9360c58768328b95c54ee3e2e95f091e40944b49cd9e92335051a5"
+    },
+    {
+      "bytes": 503852,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s008-003.wav",
+      "sha256": "a50df31aed2be9e696025c36d126bbdd2991d3d24efcb962d2cdf8d526a83fd1"
+    },
+    {
+      "bytes": 469036,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s008-004.wav",
+      "sha256": "2b3e926fc986b6a93376f6f3a0caea8cd38084a87713d5600809080e657a9725"
+    },
+    {
+      "bytes": 1113132,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s008-005.wav",
+      "sha256": "8c47197498951d9eaaf8b5d812863769608fb6653b8452e3c743d2249ac9587a"
+    },
+    {
+      "bytes": 943148,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s008-006.wav",
+      "sha256": "01c68df7bb214b7928202924570949e7ee6d10befd50fc0fe253f17a7b09624a"
+    },
+    {
+      "bytes": 681004,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s009-001.wav",
+      "sha256": "6b60dd75f6879bf32582e18cdd5923949badc728eb28a71ab3b5ecbb4ba2dec4"
+    },
+    {
+      "bytes": 522284,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s009-002.wav",
+      "sha256": "c9985398073dc4bc2ea6de8662338ecf937fd1cb9d77d9ab02df2e76b837f205"
+    },
+    {
+      "bytes": 689196,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s009-003.wav",
+      "sha256": "7de58b08daf6e26c0b3f1b278890e276c95fac3cb7483f7a616015fea257ff29"
+    },
+    {
+      "bytes": 1019948,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s009-004.wav",
+      "sha256": "985c2e741974c1f97b5d6e924707cec138e58e503165ff4016b813e12a42f790"
+    },
+    {
+      "bytes": 909356,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s009-005.wav",
+      "sha256": "5a84ccadbef2f973d1f98e691b586e0e6e53eb1c95012b5814b3c420a45d1e72"
+    },
+    {
+      "bytes": 755756,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s009-006.wav",
+      "sha256": "791970ed629c84401dd5dd4418bb0dada97eded8e6f2e162de0ae994b35d8ece"
+    },
+    {
+      "bytes": 823340,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s009-007.wav",
+      "sha256": "e15864bc7f8d734186fd51661ec982383f2a25e781e357be71b78b7d574c608c"
+    },
+    {
+      "bytes": 779308,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s010-001.wav",
+      "sha256": "24b710f3ab02421ed7f0f5407e205a5ed10c64423658990b0befddac830b326c"
+    },
+    {
+      "bytes": 988204,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s010-002.wav",
+      "sha256": "81f960957fc210368070385bf38a11143a09a93848a645567bff5e7539a0e41e"
+    },
+    {
+      "bytes": 1349676,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s010-003.wav",
+      "sha256": "be2181aa2ee7eeaa975fd06013a5ab30a97cd8fa2f7f7bdaae5d5a969768e923"
+    },
+    {
+      "bytes": 1156140,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s010-004.wav",
+      "sha256": "26c4f175113189c16bd6e5ffa4188fbd7516be3396f5f954325dde01924e2a41"
+    },
+    {
+      "bytes": 855084,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s010-005.wav",
+      "sha256": "66c0ed292da32c2eec5ecb1a5cd899ce04f6b0a21924404688bd56594330047d"
+    },
+    {
+      "bytes": 836652,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s010-006.wav",
+      "sha256": "b26d00ba080553cdfaa844d1ef4d296b84636c528b6b3447d588959f76e958dc"
+    },
+    {
+      "bytes": 1233964,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s010-007.wav",
+      "sha256": "e66883ea4521b66d6115e73b57db826620034246d771dfe6a6f242e7e0fac66f"
+    },
+    {
+      "bytes": 1023020,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s010-008.wav",
+      "sha256": "ba197ed2021a30a6c0edce0a5f18702a63642e84d968f3983588f1b0af06ab89"
+    },
+    {
+      "bytes": 1338412,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s011-001.wav",
+      "sha256": "e19e41b653ac86922c02e1e35b22c42d4e402cfa2d921ecb5e73d1e297865468"
+    },
+    {
+      "bytes": 1132588,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s011-002.wav",
+      "sha256": "96cfb80cb23728b60c8efc63cf25e0d71ef71a1ef20fb626093430227f143ae5"
+    },
+    {
+      "bytes": 1227820,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s011-003.wav",
+      "sha256": "1f4d2fd62cd511357c13fd9144a68b40c6243c71cffdac566ead12d9418be6b1"
+    },
+    {
+      "bytes": 1282092,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s011-004.wav",
+      "sha256": "3447ffed9afb89e64754f7295d8bc87108837e2799c9bb17c4b74ad6d44db6bd"
+    },
+    {
+      "bytes": 1171500,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s011-005.wav",
+      "sha256": "1cfc36fa77ccc1a1a8732bce1c842efb2ed9313f9a2383b57bf0aac603914165"
+    },
+    {
+      "bytes": 1419308,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s011-006.wav",
+      "sha256": "601cc5dc97a9ce0da875923a2a519d126670bfdef3fa6c7b353264dde4efa094"
+    },
+    {
+      "bytes": 998444,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s012-001.wav",
+      "sha256": "5ad6d0c147166106dba02d4ee88204b6c490963b27d1ce6245f0b2bb8ccf2400"
+    },
+    {
+      "bytes": 1223724,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s012-002.wav",
+      "sha256": "c550223f338b2d925697bb8ee0e1098e38b1b93741e46ec7a4a4b53212328939"
+    },
+    {
+      "bytes": 980012,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s012-003.wav",
+      "sha256": "1c1beeb5926a1ac44ab0d30ac6c31f1ab604e24b675515c349ad79361aed26cb"
+    },
+    {
+      "bytes": 629804,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s012-004.wav",
+      "sha256": "c775565ec93cfcf8adbfe5f7fd2c93d0362d69c7a6e4c934e315fc00de871c00"
+    },
+    {
+      "bytes": 1170476,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s013-001.wav",
+      "sha256": "7c6555f6a7cc7dbfec21c4628e299ba5d0cc890a9c7135cd89d4b7f38ff954b2"
+    },
+    {
+      "bytes": 369708,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s013-002.wav",
+      "sha256": "655a0f68bd3e022afb319083d64a192840017dd42ff632635ab5a64945c1623f"
+    },
+    {
+      "bytes": 784428,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s013-003.wav",
+      "sha256": "e3148c9d79251046521ad1d9b56b8d14746d7547af930ca2c98bd6bdabc7500c"
+    },
+    {
+      "bytes": 740396,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s013-004.wav",
+      "sha256": "e8a8dcdfa4b1fc6e3e3dd2c29525c3c91f733feb6a84d782a9c409fea60b9142"
+    },
+    {
+      "bytes": 720940,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s013-005.wav",
+      "sha256": "aa92e30708eea3de8d98cd8567029221ef564da188cee29f6c042e0ce17397a2"
+    },
+    {
+      "bytes": 590892,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s013-006.wav",
+      "sha256": "f83b8eeec47772d0d8950ca7d11c4c4e74703066225f10962ec2ea3e512314b9"
+    },
+    {
+      "bytes": 1191980,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s013-007.wav",
+      "sha256": "fa491f9da6fcd83940c7a633c201909502f1da8bab3dc09dd3df96b8f46efcb0"
+    },
+    {
+      "bytes": 1031212,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s013-008.wav",
+      "sha256": "4ce94b327a11538b1d697cf44a3657f5a5b39a8ff518a82f12111c6e31a65a7e"
+    },
+    {
+      "bytes": 645164,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s014-001.wav",
+      "sha256": "ba5d5416a0b42dde7a73b7488d06c06eaa20cbb3a2bc2420cea6fe856f150cad"
+    },
+    {
+      "bytes": 915500,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s014-002.wav",
+      "sha256": "1fac98d27815deccf368b901d5697b9be7826bad8658b91afb1e381e7c2606a1"
+    },
+    {
+      "bytes": 1097772,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s014-003.wav",
+      "sha256": "fe6d952c84e0b3e2734ec40af7371be6072272928fba560ea68bc1cd06bf968c"
+    },
+    {
+      "bytes": 1324076,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s014-004.wav",
+      "sha256": "9fada1e38de9720d7eea3a6cc25e9fddc374256d3a87b5666206dc5f4fda2976"
+    },
+    {
+      "bytes": 343084,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s014-005.wav",
+      "sha256": "62310bcab74fae48392d7061ffe9e22f6c61e5b4bc4f2ea8b5a85c89edeaa2dc"
+    },
+    {
+      "bytes": 1268780,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s015-001.wav",
+      "sha256": "adb233e464cf02a4a6cb1fcbfa93151f06fe7a6b3bec73b2c337db3ee78c3b9d"
+    },
+    {
+      "bytes": 1156140,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s015-002.wav",
+      "sha256": "f3cfc05627bcd4b78fb5280a1fe56e4fc204c4aa5613d58bf0e3ddeb667ff122"
+    },
+    {
+      "bytes": 1072172,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s015-003.wav",
+      "sha256": "14f695d6a179159d8c225c2443be1992686f0a7e81657a096f107c6cfed6b08d"
+    },
+    {
+      "bytes": 182316,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s016-001.wav",
+      "sha256": "bd622954304f0c776de1eb14fddd38b2508c467088108b2dcbedaa40f17e817f"
+    },
+    {
+      "bytes": 485420,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s016-002.wav",
+      "sha256": "29bec005bdf6bd7d1e697fa9e6548c7fa67b5fc9ce1b847408f7cfaca8afa7c1"
+    },
+    {
+      "bytes": 617516,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s016-003.wav",
+      "sha256": "0b07fe5357d3f883da15abb7df266917d64c740707c2dee7d3bc57c948c626ca"
+    },
+    {
+      "bytes": 475180,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s016-004.wav",
+      "sha256": "5fe2649c9a68d4a43bdedb53afbc28ec8553fe4de013391c751571de62264df9"
+    },
+    {
+      "bytes": 601132,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s016-005.wav",
+      "sha256": "148e9e6e2a83aff71a7bb706eb5492993253444c92f743093527dfb76690308f"
+    },
+    {
+      "bytes": 748588,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s016-006.wav",
+      "sha256": "12c2151fceafaff94f6e707a8b89d9138a20f6044351706abe9ee6b3cdd03f7f"
+    },
+    {
+      "bytes": 1020972,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s016-007.wav",
+      "sha256": "fab4b3d786182f25560c308bbd7f045198e1fa5f13c2bed93cf4af2ead7937cf"
+    },
+    {
+      "bytes": 917548,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s016-008.wav",
+      "sha256": "1639d720669e2797f2e4c906dc6c5d450af04839d2e37722f3fada7e65ad5299"
+    },
+    {
+      "bytes": 840748,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s017-001.wav",
+      "sha256": "3bd1fc0ec6e2e671e3c681ceb6acfc90773cf70b51ded80d4ae30271a7403daf"
+    },
+    {
+      "bytes": 795692,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s017-002.wav",
+      "sha256": "f3c6ac9658ea6d855758bc1e6c855fd48ce3e4653e1db0b7f2b32f41b74506ac"
+    },
+    {
+      "bytes": 305196,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s017-003.wav",
+      "sha256": "4c52a14f23dd2282f7ad31a08b7fdc600bce5dea53cf1a05356daf0da9f6b708"
+    },
+    {
+      "bytes": 436268,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s017-004.wav",
+      "sha256": "5df736db23005f34a0e41b42773248c047d00de853b6e95383f59d2326d5923a"
+    },
+    {
+      "bytes": 481324,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s017-005.wav",
+      "sha256": "0cd29af50b181c46098ba56b1227458420855006249686bcd686eb1b36bdc930"
+    },
+    {
+      "bytes": 517164,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s017-006.wav",
+      "sha256": "6a1c2e3d74b1bc46bb64ffa386b6276e98ccb29bda6e26bf5fdc75bdb9142a38"
+    },
+    {
+      "bytes": 333868,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s017-007.wav",
+      "sha256": "721c779aec5f78e92cac9e71c881552cde5a6269623cfb84816837ef3c7b3fb7"
+    },
+    {
+      "bytes": 441388,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s017-008.wav",
+      "sha256": "861ced55e7337544e7f63785fe51c2ee615ba899e32880e55c339b9c61380805"
+    },
+    {
+      "bytes": 742444,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s018-001.wav",
+      "sha256": "226670f5d6421c8c1ec2953b7fb71824090a9b8f221a97171f72daa4f3f46439"
+    },
+    {
+      "bytes": 833580,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s018-002.wav",
+      "sha256": "f1ecd5e57689699345ad242e3c58f1480cc594be24df09457088c2be35e1f09f"
+    },
+    {
+      "bytes": 255020,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s018-003.wav",
+      "sha256": "6c54233d121efd2a16939dcdbf7b0a09e86143f302fa7cb67154533a8da07cc9"
+    },
+    {
+      "bytes": 903212,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s018-004.wav",
+      "sha256": "db3d3453ab8ec38a62c34a85cc5bde049829e1386428dc9e5716d6a9f11b6d9d"
+    },
+    {
+      "bytes": 269356,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s018-005.wav",
+      "sha256": "b323f2a891b42bf222b5108d04e17cd7d816f0c23001f7531cf990e37cfacef0"
+    },
+    {
+      "bytes": 526380,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s018-006.wav",
+      "sha256": "2df958fb53b9cd2c9d24754efe4dcb469b4de10899f4914311aac77051a04cc3"
+    },
+    {
+      "bytes": 212012,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s018-007.wav",
+      "sha256": "e1ae9da79df938d4988603173c0831e77a39c89e3c9d156496800e2b78f35ec3"
+    },
+    {
+      "bytes": 279596,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s019-001.wav",
+      "sha256": "9fd89de621419a79946eb3c46db8eef2b4f332eab04344326586c774474cdebf"
+    },
+    {
+      "bytes": 304172,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s019-002.wav",
+      "sha256": "287897c98e90d13cfede2a1065ce8274ac365ad86ef4154ef625a9127e6cd09a"
+    },
+    {
+      "bytes": 446508,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s019-003.wav",
+      "sha256": "67c80051523dd64fb566bca769ebed4a7057cb0644dfe7d22859ff13250d0e4c"
+    },
+    {
+      "bytes": 1114156,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s019-004.wav",
+      "sha256": "aca5588c7522b92fe153c583852c1ed410247560a86721b4936507c8aa8cd592"
+    },
+    {
+      "bytes": 539692,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s019-005.wav",
+      "sha256": "931a7cf4fb175874d7cb84625b2c0a46de98ad4f3412549a3d9d0591e6927809"
+    },
+    {
+      "bytes": 889900,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s019-006.wav",
+      "sha256": "e5514d195e4155591e733a2d5fc87363350cb0ae7a13b63fdcd97d975ed15c0c"
+    },
+    {
+      "bytes": 891948,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s019-007.wav",
+      "sha256": "8c55ef6b02dab9128cd9688ebcf8c3a8ba65b8a72b3bdf14d6bc37204655cb43"
+    },
+    {
+      "bytes": 760876,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/narration-film-01-r4/f01s019-008.wav",
+      "sha256": "42ff53e97bfdfd96543299bfed2adb68cff9c577603c85be3ce023d1d4ba7112"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -2349,6 +6021,171 @@
       },
       "result": "job_target",
       "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T14:28:35.196164+00:00",
+      "detail": {
+        "actual_units": 0.0,
+        "files": [
+          "narration/narration-film-01-r4/f01s001-001.wav",
+          "narration/narration-film-01-r4/f01s001-002.wav",
+          "narration/narration-film-01-r4/f01s001-003.wav",
+          "narration/narration-film-01-r4/f01s001-004.wav",
+          "narration/narration-film-01-r4/f01s001-005.wav",
+          "narration/narration-film-01-r4/f01s001-006.wav",
+          "narration/narration-film-01-r4/f01s001-007.wav",
+          "narration/narration-film-01-r4/f01s001-008.wav",
+          "narration/narration-film-01-r4/f01s001-009.wav",
+          "narration/narration-film-01-r4/f01s001-010.wav",
+          "narration/narration-film-01-r4/f01s002-001.wav",
+          "narration/narration-film-01-r4/f01s002-002.wav",
+          "narration/narration-film-01-r4/f01s002-003.wav",
+          "narration/narration-film-01-r4/f01s002-004.wav",
+          "narration/narration-film-01-r4/f01s002-005.wav",
+          "narration/narration-film-01-r4/f01s003-001.wav",
+          "narration/narration-film-01-r4/f01s003-002.wav",
+          "narration/narration-film-01-r4/f01s003-003.wav",
+          "narration/narration-film-01-r4/f01s003-004.wav",
+          "narration/narration-film-01-r4/f01s003-005.wav",
+          "narration/narration-film-01-r4/f01s003-006.wav",
+          "narration/narration-film-01-r4/f01s003-007.wav",
+          "narration/narration-film-01-r4/f01s003-008.wav",
+          "narration/narration-film-01-r4/f01s003-009.wav",
+          "narration/narration-film-01-r4/f01s004-001.wav",
+          "narration/narration-film-01-r4/f01s004-002.wav",
+          "narration/narration-film-01-r4/f01s004-003.wav",
+          "narration/narration-film-01-r4/f01s004-004.wav",
+          "narration/narration-film-01-r4/f01s004-005.wav",
+          "narration/narration-film-01-r4/f01s004-006.wav",
+          "narration/narration-film-01-r4/f01s005-001.wav",
+          "narration/narration-film-01-r4/f01s005-002.wav",
+          "narration/narration-film-01-r4/f01s005-003.wav",
+          "narration/narration-film-01-r4/f01s005-004.wav",
+          "narration/narration-film-01-r4/f01s005-005.wav",
+          "narration/narration-film-01-r4/f01s005-006.wav",
+          "narration/narration-film-01-r4/f01s005-007.wav",
+          "narration/narration-film-01-r4/f01s005-008.wav",
+          "narration/narration-film-01-r4/f01s005-009.wav",
+          "narration/narration-film-01-r4/f01s005-010.wav",
+          "narration/narration-film-01-r4/f01s005-011.wav",
+          "narration/narration-film-01-r4/f01s006-001.wav",
+          "narration/narration-film-01-r4/f01s006-002.wav",
+          "narration/narration-film-01-r4/f01s006-003.wav",
+          "narration/narration-film-01-r4/f01s006-004.wav",
+          "narration/narration-film-01-r4/f01s006-005.wav",
+          "narration/narration-film-01-r4/f01s006-006.wav",
+          "narration/narration-film-01-r4/f01s007-001.wav",
+          "narration/narration-film-01-r4/f01s007-002.wav",
+          "narration/narration-film-01-r4/f01s007-003.wav",
+          "narration/narration-film-01-r4/f01s007-004.wav",
+          "narration/narration-film-01-r4/f01s007-005.wav",
+          "narration/narration-film-01-r4/f01s007-006.wav",
+          "narration/narration-film-01-r4/f01s007-007.wav",
+          "narration/narration-film-01-r4/f01s007-008.wav",
+          "narration/narration-film-01-r4/f01s007-009.wav",
+          "narration/narration-film-01-r4/f01s007-010.wav",
+          "narration/narration-film-01-r4/f01s007-011.wav",
+          "narration/narration-film-01-r4/f01s008-001.wav",
+          "narration/narration-film-01-r4/f01s008-002.wav",
+          "narration/narration-film-01-r4/f01s008-003.wav",
+          "narration/narration-film-01-r4/f01s008-004.wav",
+          "narration/narration-film-01-r4/f01s008-005.wav",
+          "narration/narration-film-01-r4/f01s008-006.wav",
+          "narration/narration-film-01-r4/f01s009-001.wav",
+          "narration/narration-film-01-r4/f01s009-002.wav",
+          "narration/narration-film-01-r4/f01s009-003.wav",
+          "narration/narration-film-01-r4/f01s009-004.wav",
+          "narration/narration-film-01-r4/f01s009-005.wav",
+          "narration/narration-film-01-r4/f01s009-006.wav",
+          "narration/narration-film-01-r4/f01s009-007.wav",
+          "narration/narration-film-01-r4/f01s010-001.wav",
+          "narration/narration-film-01-r4/f01s010-002.wav",
+          "narration/narration-film-01-r4/f01s010-003.wav",
+          "narration/narration-film-01-r4/f01s010-004.wav",
+          "narration/narration-film-01-r4/f01s010-005.wav",
+          "narration/narration-film-01-r4/f01s010-006.wav",
+          "narration/narration-film-01-r4/f01s010-007.wav",
+          "narration/narration-film-01-r4/f01s010-008.wav",
+          "narration/narration-film-01-r4/f01s011-001.wav",
+          "narration/narration-film-01-r4/f01s011-002.wav",
+          "narration/narration-film-01-r4/f01s011-003.wav",
+          "narration/narration-film-01-r4/f01s011-004.wav",
+          "narration/narration-film-01-r4/f01s011-005.wav",
+          "narration/narration-film-01-r4/f01s011-006.wav",
+          "narration/narration-film-01-r4/f01s012-001.wav",
+          "narration/narration-film-01-r4/f01s012-002.wav",
+          "narration/narration-film-01-r4/f01s012-003.wav",
+          "narration/narration-film-01-r4/f01s012-004.wav",
+          "narration/narration-film-01-r4/f01s013-001.wav",
+          "narration/narration-film-01-r4/f01s013-002.wav",
+          "narration/narration-film-01-r4/f01s013-003.wav",
+          "narration/narration-film-01-r4/f01s013-004.wav",
+          "narration/narration-film-01-r4/f01s013-005.wav",
+          "narration/narration-film-01-r4/f01s013-006.wav",
+          "narration/narration-film-01-r4/f01s013-007.wav",
+          "narration/narration-film-01-r4/f01s013-008.wav",
+          "narration/narration-film-01-r4/f01s014-001.wav",
+          "narration/narration-film-01-r4/f01s014-002.wav",
+          "narration/narration-film-01-r4/f01s014-003.wav",
+          "narration/narration-film-01-r4/f01s014-004.wav",
+          "narration/narration-film-01-r4/f01s014-005.wav",
+          "narration/narration-film-01-r4/f01s015-001.wav",
+          "narration/narration-film-01-r4/f01s015-002.wav",
+          "narration/narration-film-01-r4/f01s015-003.wav",
+          "narration/narration-film-01-r4/f01s016-001.wav",
+          "narration/narration-film-01-r4/f01s016-002.wav",
+          "narration/narration-film-01-r4/f01s016-003.wav",
+          "narration/narration-film-01-r4/f01s016-004.wav",
+          "narration/narration-film-01-r4/f01s016-005.wav",
+          "narration/narration-film-01-r4/f01s016-006.wav",
+          "narration/narration-film-01-r4/f01s016-007.wav",
+          "narration/narration-film-01-r4/f01s016-008.wav",
+          "narration/narration-film-01-r4/f01s017-001.wav",
+          "narration/narration-film-01-r4/f01s017-002.wav",
+          "narration/narration-film-01-r4/f01s017-003.wav",
+          "narration/narration-film-01-r4/f01s017-004.wav",
+          "narration/narration-film-01-r4/f01s017-005.wav",
+          "narration/narration-film-01-r4/f01s017-006.wav",
+          "narration/narration-film-01-r4/f01s017-007.wav",
+          "narration/narration-film-01-r4/f01s017-008.wav",
+          "narration/narration-film-01-r4/f01s018-001.wav",
+          "narration/narration-film-01-r4/f01s018-002.wav",
+          "narration/narration-film-01-r4/f01s018-003.wav",
+          "narration/narration-film-01-r4/f01s018-004.wav",
+          "narration/narration-film-01-r4/f01s018-005.wav",
+          "narration/narration-film-01-r4/f01s018-006.wav",
+          "narration/narration-film-01-r4/f01s018-007.wav",
+          "narration/narration-film-01-r4/f01s019-001.wav",
+          "narration/narration-film-01-r4/f01s019-002.wav",
+          "narration/narration-film-01-r4/f01s019-003.wav",
+          "narration/narration-film-01-r4/f01s019-004.wav",
+          "narration/narration-film-01-r4/f01s019-005.wav",
+          "narration/narration-film-01-r4/f01s019-006.wav",
+          "narration/narration-film-01-r4/f01s019-007.wav",
+          "narration/narration-film-01-r4/f01s019-008.wav"
+        ],
+        "input_zip_sha256": "edb7142e5c607096766f78df318317918b73d6b72c208c12c13f9d811b1eec67",
+        "job_id": "narration-film-01-r4",
+        "kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
     }
   ],
   "ledger": "../allowance-ledger.json",
