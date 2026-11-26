@@ -31641,6 +31641,20 @@
       },
       "path": "stills/stills-pilot2-f01s014/f01s014-9--c3.png",
       "sha256": "8d2f8c6f2ecf621cf2a3a7692f75c8e0eabaf0e00eee00253f8d3a39cd93d285"
+    },
+    {
+      "bytes": 17221,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.598883333333333,
+        "inputs_zip": "jobs/music-pilot3-f01s014/inputs.zip",
+        "job_id": "music-pilot3-f01s014",
+        "job_kind": "music",
+        "manifest": "jobs/music-pilot3-f01s014/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/music-pilot3-f01s014/music.ipynb",
+      "sha256": "7f2ccc90b2a2424db0d2be56e795f1552f6b252a78f34d36305db82cc83b8698"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -35194,6 +35208,49 @@
         "outputs_tar_sha256": "47e3f7e77e4623db0806ad5d072de8fce0adb12abd54dda928dd8645c1c0ec0e"
       },
       "result": "exchange_collected",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:56:58.427529+00:00",
+      "detail": {
+        "forecast_units": 1.598883333333333,
+        "job_id": "music-pilot3-f01s014",
+        "kind": "music"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:56:58.461612+00:00",
+      "detail": {
+        "job_id": "music-pilot3-f01s014",
+        "kind": "music",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T18:57:07.101055+00:00",
+      "detail": {
+        "bytes": 3749,
+        "job_id": "music-pilot3-f01s014",
+        "key": "exports/colab-exchange/bicharak/music-pilot3-f01s014/inputs.zip",
+        "sha256": "3860373ffb03961c3a948eeeaacaf8b8ac6e0fde0b316f520f08549f8fe90320"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:57:42.961294+00:00",
+      "detail": {
+        "expires_at": "2026-11-27T18:57:21.544909+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/music-pilot3-f01s014/inputs.zip",
+        "inputs_sha256": "3860373ffb03961c3a948eeeaacaf8b8ac6e0fde0b316f520f08549f8fe90320",
+        "job_id": "music-pilot3-f01s014",
+        "outputs_key": "exports/colab-exchange/bicharak/music-pilot3-f01s014/outputs.tar"
+      },
+      "result": "exchange_staged",
       "stage": "job"
     }
   ],

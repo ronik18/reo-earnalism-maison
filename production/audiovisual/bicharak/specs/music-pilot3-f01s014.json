@@ -1,0 +1,68 @@
+{
+ "theme_brief": "PILOT v3 (spike) scene-14 cue 'night to dawn' from the 26 Nov sound review: tanpura drone on D under the voice, solo esraj alap in raga Lalit's pre-dawn mood (komal Re for shame), a hushed consonant sunrise phrase; no percussion, sitar, flute or sub-bass. Nine 60 s stems (2 drone, 4 esraj, 3 sunrise seeds); assembled locally to the cut times with silence at the shame cut.",
+ "items": [
+  {
+   "key": "p3-drone-1",
+   "prompt": "tanpura drone only, tonic D, sustained, soft and warm, very quiet, no melody, Indian classical drone, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+   "seed": 14201,
+   "duration_s": 60.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "p3-drone-2",
+   "prompt": "tanpura drone only, tonic D, sustained, soft and warm, very quiet, no melody, Indian classical drone, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+   "seed": 14202,
+   "duration_s": 60.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "p3-esraj-1",
+   "prompt": "solo esraj alap in raga Lalit mood, pre-dawn, mournful and regretful, rubato free time, very sparse long bowed phrases, over a soft tanpura drone on D, small reverberant room, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+   "seed": 14211,
+   "duration_s": 60.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "p3-esraj-2",
+   "prompt": "solo esraj alap in raga Lalit mood, pre-dawn, mournful and regretful, rubato free time, very sparse long bowed phrases, over a soft tanpura drone on D, small reverberant room, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+   "seed": 14212,
+   "duration_s": 60.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "p3-esraj-3",
+   "prompt": "solo esraj alap in raga Lalit mood, pre-dawn, mournful and regretful, rubato free time, very sparse long bowed phrases, over a soft tanpura drone on D, small reverberant room, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+   "seed": 14213,
+   "duration_s": 60.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "p3-esraj-4",
+   "prompt": "solo esraj alap in raga Lalit mood, pre-dawn, mournful and regretful, rubato free time, very sparse long bowed phrases, over a soft tanpura drone on D, small reverberant room, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+   "seed": 14214,
+   "duration_s": 60.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "p3-sunrise-1",
+   "prompt": "gentle hushed morning esraj phrase, consonant and tender, soft early sunlight, slow, over a quiet tanpura drone on D, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+   "seed": 14221,
+   "duration_s": 60.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "p3-sunrise-2",
+   "prompt": "gentle hushed morning esraj phrase, consonant and tender, soft early sunlight, slow, over a quiet tanpura drone on D, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+   "seed": 14222,
+   "duration_s": 60.0,
+   "lyrics": "[instrumental]"
+  },
+  {
+   "key": "p3-sunrise-3",
+   "prompt": "gentle hushed morning esraj phrase, consonant and tender, soft early sunlight, slow, over a quiet tanpura drone on D, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+   "seed": 14223,
+   "duration_s": 60.0,
+   "lyrics": "[instrumental]"
+  }
+ ]
+}

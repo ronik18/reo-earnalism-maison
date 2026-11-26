@@ -377,5 +377,24 @@
   "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
   "root": "bicharak",
   "note": "SPIKE: pilot v3 fix run, 3 new HD takes of the mother's shot (no detached hand); forecast 70 min on L4"
+ },
+ {
+  "job_id": "music-pilot3-f01s014",
+  "title": "bicharak",
+  "month": "2026-11",
+  "units": 1.598883333333333,
+  "state": "reserved",
+  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+  "root": "bicharak"
+ },
+ {
+  "job_id": "motion-pilot3-f01s014-attempt1",
+  "title": "bicharak",
+  "month": "2026-11",
+  "units": 0.26,
+  "state": "settled",
+  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+  "root": "bicharak",
+  "note": "SPIKE: fix run stopped at the input checksum (an older notebook copy met re-staged inputs); nothing generated. Measured: Colab balance 421.53 -> 421.27 (A100)"
  }
 ]

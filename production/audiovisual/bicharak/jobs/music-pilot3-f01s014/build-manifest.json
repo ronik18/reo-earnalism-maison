@@ -1,0 +1,16 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 2966,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/music-pilot3-f01s014",
+  "inputs_sha256": "3860373ffb03961c3a948eeeaacaf8b8ac6e0fde0b316f520f08549f8fe90320",
+  "job_id": "music-pilot3-f01s014",
+  "kind": "music",
+  "min_vram_gib": 0,
+  "model": {
+    "repo": "ACE-Step/ACE-Step-v1-3.5B",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "7f2ccc90b2a2424db0d2be56e795f1552f6b252a78f34d36305db82cc83b8698",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}
