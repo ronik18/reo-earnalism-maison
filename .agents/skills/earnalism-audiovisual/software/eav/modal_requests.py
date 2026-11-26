@@ -71,6 +71,7 @@ MAX_PAGES = 1000
 
 class R2Error(Exception):
     """A transfer to or from R2 failed or did not verify."""
+    transient = False  # set on HTTP 429/5xx and network errors, which _call retries
 
 
 # ---------------------------------------------------------------- request files
@@ -275,7 +276,26 @@ def _list_url(prefix, cursor=None, account=R2_ACCOUNT, bucket=R2_BUCKET) -> str:
     return f"{API}/accounts/{account}/r2/buckets/{bucket}/objects?{urllib.parse.urlencode(query)}"
 
 
-def _call(opener, method, url, body=None, token=None) -> bytes:
+RETRY_STATUSES = (429, 500, 502, 503, 504)
+RETRY_DELAYS_S = (2, 5, 15, 30)  # transient Cloudflare errors: retry the same idempotent call
+
+
+def _call(opener, method, url, body=None, token=None, _sleep=None) -> bytes:
+    """One R2 API call; transient HTTP 429/5xx and network errors are retried with backoff.
+
+    PUT, GET, DELETE and list are idempotent here (same key, same bytes), so a retry is safe."""
+    import time
+    sleep = _sleep or time.sleep
+    for delay in RETRY_DELAYS_S + (None,):
+        try:
+            return _call_once(opener, method, url, body, token)
+        except R2Error as e:
+            if delay is None or not e.transient:
+                raise
+            sleep(delay)
+
+
+def _call_once(opener, method, url, body=None, token=None) -> bytes:
     headers = {"Accept": "*/*"}
     if body is not None:
         headers["Content-Type"] = "application/octet-stream"
@@ -286,9 +306,13 @@ def _call(opener, method, url, body=None, token=None) -> bytes:
         with opener.open(req, timeout=TIMEOUT_S) as resp:
             return resp.read()
     except urllib.error.HTTPError as e:
-        raise R2Error(f"{method} {url.split('?')[0]}: HTTP {e.code}") from None
+        err = R2Error(f"{method} {url.split('?')[0]}: HTTP {e.code}")
+        err.transient = e.code in RETRY_STATUSES
+        raise err from None
     except (urllib.error.URLError, OSError) as e:
-        raise R2Error(f"{method} {url.split('?')[0]}: {type(e).__name__}: {e}") from None
+        err = R2Error(f"{method} {url.split('?')[0]}: {type(e).__name__}: {e}")
+        err.transient = True
+        raise err from None
 
 
 def _envelope(raw: bytes, what: str) -> dict:

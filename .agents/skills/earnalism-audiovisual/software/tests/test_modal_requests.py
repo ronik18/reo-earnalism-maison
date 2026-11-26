@@ -985,3 +985,45 @@ class WorkflowTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class R2RetryTests(unittest.TestCase):
+    def _opener(self, codes):
+        import urllib.error
+        calls = []
+
+        class Resp:
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+            def read(self): return b"ok"
+
+        class Opener:
+            def open(self, req, timeout=None):
+                calls.append(req.get_method())
+                code = codes.pop(0) if codes else None
+                if code:
+                    raise urllib.error.HTTPError(req.full_url, code, "x", {}, None)
+                return Resp()
+        return Opener(), calls
+
+    def test_transient_502_is_retried_then_succeeds(self):
+        from eav import modal_requests as mr
+        opener, calls = self._opener([502, 503])
+        slept = []
+        self.assertEqual(mr._call(opener, "PUT", "https://x/objects/k", b"b", _sleep=slept.append), b"ok")
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(slept, [2, 5])
+
+    def test_permanent_403_is_not_retried(self):
+        from eav import modal_requests as mr
+        opener, calls = self._opener([403])
+        with self.assertRaises(mr.R2Error):
+            mr._call(opener, "PUT", "https://x/objects/k", b"b", _sleep=lambda s: None)
+        self.assertEqual(len(calls), 1)
+
+    def test_gives_up_after_the_last_retry(self):
+        from eav import modal_requests as mr
+        opener, calls = self._opener([502] * 9)
+        with self.assertRaises(mr.R2Error):
+            mr._call(opener, "GET", "https://x/objects/k", _sleep=lambda s: None)
+        self.assertEqual(len(calls), len(mr.RETRY_DELAYS_S) + 1)
