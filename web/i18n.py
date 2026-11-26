@@ -499,6 +499,9 @@ STRINGS['sponsored_by'] = ('Sponsored by', 'সৌজন্যে')
 
 STRINGS.update({
     "review_title": ("Monday review", "সোমবারের পর্যালোচনা"),
+    "review_denied": ("This page is for Monday reviewers. You are signed in as", "এই পাতাটি সোমবারের পর্যালোচকদের জন্য। আপনি সাইন ইন করে আছেন এই অ্যাকাউন্টে:"),
+    "review_denied_help": ("This account cannot approve review items. Sign in with the reviewer account, or ask an administrator to grant it the review permission.", "এই অ্যাকাউন্ট দিয়ে পর্যালোচনার বিষয় অনুমোদন করা যায় না। পর্যালোচকের অ্যাকাউন্টে সাইন ইন করুন, অথবা প্রশাসককে পর্যালোচনার অনুমতি দিতে বলুন।"),
+    "review_switch_account": ("Sign out and use another account", "সাইন আউট করে অন্য অ্যাকাউন্ট ব্যবহার করুন"),
     "review_empty": ("Nothing is waiting for review.", "পর্যালোচনার জন্য কিছু অপেক্ষায় নেই।"),
     "review_approve": ("Approve selected", "বাছাইগুলো অনুমোদন করুন"),
     "review_reject": ("Reject selected", "বাছাইগুলো প্রত্যাখ্যান করুন"),
