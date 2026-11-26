@@ -138,7 +138,7 @@ The tracks run in parallel. A step starts when its `Blocked by` steps are done.
 ## Progress
 | Step | Status |
 | --- | --- |
-| A1–A3 | A1 in progress (26 Nov) |
-| B0–B3 | B1 in progress (26 Nov); B0 waits on O1 |
-| C1–C5 | not started |
-| O1–O5 | O2, O3 prompts given |
+| A1–A3 | done, reviewed (26 Nov) |
+| B0–B5, F1, H1 | done, reviewed; B0: direct Modal impossible (no HTTP/2), GitHub Actions + R2 route works end to end (26 Nov) |
+| C1–C5 | C1 বিচারক narration rebuilt (2 chunks); C2 first real run in progress after setup fixes (HF token, payment method) |
+| O1–O5 | O1 done (Modal, card, $30 limit, GitHub secrets, HF token); O2, O3 prompts given |

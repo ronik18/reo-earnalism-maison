@@ -24,7 +24,8 @@ Last updated: 26 Nov 2026.
 
 ## Accounts and keys
 - [x] **Modal account, token and GitHub secrets** (26 Nov 2026).
-- [ ] **Modal payment method:** Modal refuses L4 GPU runs without a card on file ("Please add a payment method to use L4 GPU functions"). In Modal → Settings → Usage & Billing, add a payment method and keep the **workspace spend limit at $30/month**. Starter credit is used first; Claude's own caps ($30/month, $6/title) stop runs before the limit. Then tell Claude "Modal card added".
+- [x] **Modal payment method** added, workspace spend limit $30/month (26 Nov 2026).
+- [x] **Hugging Face read token** added as GitHub secret `HF_TOKEN` (26 Nov 2026).
 - [x] **YouTube Studio sign-in** for channel UCw-UnAXdRzqij8_B2TlgQjQ (owner confirmed 26 Nov 2026).
 - [ ] **YouTube upload token, at the first private upload only:** once a finished film exists (after the বিচারক Colab jobs), Claude asks through the secure credential form for a short-lived OAuth access token for `www.googleapis.com` (scope `youtube.upload`, from Google's OAuth Playground signed in to this channel). The token is never pasted in chat or stored in the repo. The bridge checks it belongs to this channel before uploading, and uploads stay private.
 - [ ] **Razorpay test keys**, then live sign-off and merchant approval (founding Pass).
