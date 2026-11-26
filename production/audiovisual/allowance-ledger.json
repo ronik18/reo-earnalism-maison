@@ -221,10 +221,15 @@
     "job_id": "narration-film-01-r3-c2of2",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 1.6360666666666663,
+    "units": 0.0,
     "state": "reserved",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-    "root": "bicharak"
+    "root": "bicharak",
+    "reserved_units": 1.6360666666666663,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-26T12:12:46+00:00",
+    "modal_runs_issued": 1
   },
   {
     "modal_spend": "2026-11",
@@ -251,6 +256,14 @@
         "usd": 1.0919625,
         "seconds": 0.0,
         "at": "2026-11-26T11:45:19+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-film-01-r3-c2of2#1",
+        "job_id": "narration-film-01-r3-c2of2",
+        "usd": 1.0919625,
+        "seconds": 0.0,
+        "at": "2026-11-26T12:12:46+00:00",
         "status": "pending"
       }
     ]
