@@ -53,6 +53,31 @@ def absolute(url):
     return (settings.PUBLIC_BASE_URL or "").rstrip("/") + url
 
 
+def canonical_path(request, edition=None):
+    """One address per page: English locale, the edition's UUID (never its slug) and canonical UUID spelling.
+
+    The sitemap lists titles by the same reverse(), so a slug, upper-case or unhyphenated UUID URL
+    (the podcast feed links slugs) points at the sitemap URL.
+    """
+    from django.urls import NoReverseMatch
+    match = getattr(request, "resolver_match", None)
+    if not getattr(match, "url_name", None) or not isinstance(getattr(match, "kwargs", None), dict):
+        return request.path
+    kwargs = {key: str(value) for key, value in match.kwargs.items()}
+    if "locale" in kwargs:
+        kwargs["locale"] = "en"
+    if edition and edition.get("edition_id"):
+        if "identifier" in kwargs:
+            kwargs["identifier"] = edition["edition_id"]
+        if "edition_id" in kwargs:
+            kwargs["edition_id"] = edition["edition_id"]
+    try:
+        namespace = getattr(match, "namespace", "")
+        return reverse(f"{namespace}:{match.url_name}" if namespace else match.url_name, kwargs=kwargs)
+    except NoReverseMatch:
+        return request.path
+
+
 def _shorten(text, limit=300):
     text = " ".join(str(text or "").split())
     return text if len(text) <= limit else text[:limit - 1].rsplit(" ", 1)[0] + "…"
@@ -81,7 +106,7 @@ def page_meta(request, ctx, template=""):
         title, description = text(ctx.get("error_key") or "error", "en").split(".")[0], None
     elif route == "title" and edition:
         title, description, og_type = edition["title"], edition.get("description") or f"{edition['title']}, an edition on Earnalism.", "book"
-    elif route in ("reader", "reader-start", "classroom") and edition:
+    elif route in ("reader", "reader-start") and edition:
         unit_title = ((ctx.get("document") or {}).get("unit") or {}).get("title") or ""
         title = f"{unit_title} · {edition['title']}" if unit_title and unit_title != edition["title"] else f"Read {edition['title']}"
         description = f"Read {unit_title or edition['title']} from {edition['title']} on Earnalism."
@@ -103,7 +128,7 @@ def page_meta(request, ctx, template=""):
     full_title = "Earnalism · Read, listen and learn" if route == "home" and not status_page else (f"{title} · {SITE_NAME}" if title else SITE_NAME)
     private = (status_page or route in PRIVATE_ROUTES or bool(edition and not edition.get("published_at"))
                or not settings.PUBLIC_BASE_URL)
-    canonical = absolute(request.path)
+    canonical = absolute(canonical_path(request, edition))
     image = absolute(cover["url"]) if cover else absolute(static("maison/logo.png"))
     return {
         "title": full_title, "description": _shorten(description or SITE_DESCRIPTION), "share": not private,

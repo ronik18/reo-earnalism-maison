@@ -108,6 +108,39 @@ class SiteQualityTests(TestCase):
         for html in pages.values():
             self.assertEqual(head(html).count("<title>"), 1)
 
+    def test_slug_and_uuid_variants_share_the_sitemap_canonical(self):
+        canonical = f"{ORIGIN}/en/titles/{BN}/"
+        slug = Edition.objects.get(pk=BN).slug
+        for path in (f"/en/titles/{slug}/", f"/en/titles/{slug}/?utm_source=podcast", f"/en/titles/{BN.upper()}/",
+                     f"/en/titles/{BN.replace('-', '')}/", f"/bn/titles/{BN}/"):
+            response = self.client.get(path, follow=True)
+            self.assertEqual(response.status_code, 200, path)
+            html = response.content.decode()
+            self.assertEqual(link(html, "canonical"), [("", canonical)], path)
+            self.assertEqual(meta(html, "property", "og:url"), canonical, path)
+        self.assertIn(canonical, self.client.get("/sitemap.xml").content.decode())
+        unit = "40000000-0000-4000-8000-000000000002"
+        reader = self.get(f"/en/read/{BN.upper()}/{unit.upper()}/")
+        self.assertEqual(link(reader, "canonical"), [("", f"{ORIGIN}/en/read/{BN}/{unit}/")])
+
+    def test_sharing_values_are_escaped(self):
+        from django.contrib.auth.models import AnonymousUser
+        from django.template.loader import render_to_string
+        from django.test import RequestFactory
+        from django.urls import resolve
+        from web.seo import page_meta
+        from web.views import context
+        request = RequestFactory().get(f"/en/titles/{EN}/")
+        request.user, request.resolver_match = AnonymousUser(), resolve(request.path)
+        edition = {"edition_id": EN, "title": 'Say "hi" <now>', "description": 'A "quoted" <b>bold</b> & plain story',
+                   "locale": "en", "published_at": "2026-11-26T00:00:00Z", "cover": None}
+        values = context(request, "en", edition=edition)
+        values["meta"] = page_meta(request, values, "web/title.html")
+        html = render_to_string("web/base.html", values, request=request)
+        self.assertIn('<meta property="og:description" content="A &quot;quoted&quot; &lt;b&gt;bold&lt;/b&gt; &amp; plain story">', html)
+        self.assertIn("<title>Say &quot;hi&quot; &lt;now&gt; · Earnalism</title>", html)
+        self.assertNotIn("<b>bold</b>", head(html))
+
     def test_title_page_shares_the_book_with_its_cover(self):
         html = self.get(f"/en/titles/{BN}/")
         revision = Revision.objects.get(edition_id=BN, state="live")
@@ -211,12 +244,17 @@ class SiteQualityTests(TestCase):
         self.assertIn('<meta name="robots" content="noindex,nofollow">', self.get(self.reader_bn))
 
     def test_bengali_fragments_carry_their_edition_language(self):
-        explore = self.get("/en/explore/")
-        self.assertIn('<p lang="bn">Maison local fixture authors</p>', explore)
-        title_page = self.get(f"/en/titles/{BN}/")
-        self.assertRegex(title_page, r'<h1 lang="bn">[^<]+</h1><p lang="bn">Maison local fixture authors</p>')
-        self.assertRegex(self.get(f"/en/titles/{EN}/"), r'<h1 lang="en">[^<]+</h1><p lang="en">Maison local fixture authors</p>')
+        # The fixture's author name is in Latin script on both editions, so it is marked English even on the Bengali edition.
+        self.assertRegex(self.get(f"/en/titles/{BN}/"), r'<h1 lang="bn">[^<]+</h1><p lang="en">Maison local fixture authors</p>')
         self.assertRegex(self.get(self.reader_bn), r'<span class="room-evening-title" lang="bn">')
+        # A translated English edition shares its source Work, and so its Bengali author name.
+        from library.models import Work
+        Work.objects.filter(editions__id=EN).update(creators=["রবীন্দ্রনাথ ঠাকুর"])
+        bengali_author = '<p lang="bn">রবীন্দ্রনাথ ঠাকুর</p>'
+        self.assertRegex(self.get(f"/en/titles/{EN}/"), r'<h1 lang="en">[^<]+</h1>' + bengali_author)
+        self.assertEqual(self.get("/en/explore/").count(bengali_author), 2)
+        self.assertIn('<p class="room-muted" lang="bn">রবীন্দ্রনাথ ঠাকুর</p>', self.get("/en/"))
+        self.assertNotIn('lang="en">রবীন্দ্রনাথ', self.get("/en/explore/"))
         for path in ("/en/", "/en/explore/", "/en/learn/", f"/en/titles/{BN}/", self.reader_bn):
             parser = UnmarkedBengali()
             parser.feed(self.get(path).split("</head>", 1)[1])
@@ -245,8 +283,23 @@ class TapTargetAndLogoStyleTests(TestCase):
         self.assertIsNotNone(rule)
         for selector in (".room-logo-mini", ".focus-toolbar>a", ".actions>a:not(.button)", ".book-row h3 a", ".room-footer a", ".unit-list a"):
             self.assertIn(selector + "::after", rule.group(1) + "::after")
-        self.assertNotIn(".turn-dot{width:28px}", self.css)
+        # The carousel pill keeps its approved layout: 28px dots below 400px, hit area grown only into the pill padding.
+        self.assertIn("@media (max-width:400px){.turn-dot{width:28px}.turn-controls{gap:0}}", self.css)
+        self.assertIn(".turn-dot{height:54px;margin:-5px 0}", self.css)
+
 
     def test_reader_logo_image_box_stops_at_the_visible_logo(self):
         self.assertIn("width:calc(1197px*var(--s));max-width:none;object-fit:cover;object-position:0 0", self.css)
         self.assertIn(".room-logo-mini img{clip-path:inset(", self.css)
+
+
+class ScriptLanguageTests(TestCase):
+    def test_language_follows_the_script_of_the_text(self):
+        from web.templatetags.maison import lang_attr, script_language
+        self.assertEqual(script_language(["রবীন্দ্রনাথ ঠাকুর"]), "bn")
+        self.assertEqual(script_language(["Oscar Wilde"]), "en")
+        self.assertEqual(script_language(["রবীন্দ্রনাথ ঠাকুর", "Tr. A. Smith"]), "bn")
+        self.assertIsNone(script_language([]))
+        self.assertIsNone(script_language(["1861–1941"]))
+        self.assertEqual(lang_attr("Oscar Wilde"), ' lang="en"')
+        self.assertEqual(lang_attr(""), "")
