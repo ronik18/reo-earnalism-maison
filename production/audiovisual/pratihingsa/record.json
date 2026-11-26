@@ -32,6 +32,44 @@
       },
       "path": "jobs/narration-781b8abc/narration.ipynb",
       "sha256": "4824aac0739ccb0ea8c52a807744a77b329759e1898fca6feea1b6fa6f833bab"
+    },
+    {
+      "bytes": 16454,
+      "kind": "colab_job",
+      "meta": {
+        "chunk": {
+          "group": "narration-781b8abc-r2",
+          "index": 1,
+          "of": 2
+        },
+        "forecast_units": 1.3181491666666665,
+        "inputs_zip": "jobs/narration-781b8abc-r2-c1of2/inputs.zip",
+        "job_id": "narration-781b8abc-r2-c1of2",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-781b8abc-r2-c1of2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-781b8abc-r2-c1of2/narration.ipynb",
+      "sha256": "ef939891a5e63dee44724b2e2d300b94fd566fa9b997818a7770789222e841be"
+    },
+    {
+      "bytes": 16454,
+      "kind": "colab_job",
+      "meta": {
+        "chunk": {
+          "group": "narration-781b8abc-r2",
+          "index": 2,
+          "of": 2
+        },
+        "forecast_units": 1.3130674444444443,
+        "inputs_zip": "jobs/narration-781b8abc-r2-c2of2/inputs.zip",
+        "job_id": "narration-781b8abc-r2-c2of2",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-781b8abc-r2-c2of2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-781b8abc-r2-c2of2/narration.ipynb",
+      "sha256": "a1db1597ef46b43a8012d9cf4645e0b42023ccf5ec2cc8782f6fde8c4f7f06e9"
     }
   ],
   "created_at": "2026-11-26T03:54:13.232687+00:00",
@@ -69,6 +107,85 @@
       "at": "2026-11-26T03:54:13.525706+00:00",
       "detail": {
         "job_id": "narration-781b8abc",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T18:38:18.622181+00:00",
+      "detail": {
+        "job_id": "narration-781b8abc",
+        "reason": "Rebuilt with <=200-character voice units (no 30 s truncation) and the measured Modal narration rate; never run",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:18.623958+00:00",
+      "detail": {
+        "job_id": "narration-781b8abc",
+        "reason": "Rebuilt with <=200-character voice units (no 30 s truncation) and the measured Modal narration rate; never run"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:18.783683+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-781b8abc-r2",
+          "index": 1,
+          "of": 2
+        },
+        "forecast_units": 1.3181491666666665,
+        "job_id": "narration-781b8abc-r2-c1of2",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:18.784042+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-781b8abc-r2",
+          "index": 1,
+          "of": 2
+        },
+        "job_id": "narration-781b8abc-r2-c1of2",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T18:38:18.792114+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-781b8abc-r2",
+          "index": 2,
+          "of": 2
+        },
+        "forecast_units": 1.3130674444444443,
+        "job_id": "narration-781b8abc-r2-c2of2",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:18.792521+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-781b8abc-r2",
+          "index": 2,
+          "of": 2
+        },
+        "job_id": "narration-781b8abc-r2-c2of2",
         "kind": "narration",
         "target": "film-01"
       },

@@ -32,6 +32,20 @@
       },
       "path": "jobs/narration-c35fd867/narration.ipynb",
       "sha256": "6fad84fcbcb77fda917bcb5bfbc46a9db7bb6be06bee8fe672093b4abbe049e1"
+    },
+    {
+      "bytes": 16403,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.6941966111111109,
+        "inputs_zip": "jobs/narration-c35fd867-r2/inputs.zip",
+        "job_id": "narration-c35fd867-r2",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-c35fd867-r2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-c35fd867-r2/narration.ipynb",
+      "sha256": "c4814e175d62ba4b9a0dc47087b866906b3eccc59fcc8b8c373e532e466bad32"
     }
   ],
   "created_at": "2026-11-26T03:54:08.681733+00:00",
@@ -69,6 +83,45 @@
       "at": "2026-11-26T03:54:08.996261+00:00",
       "detail": {
         "job_id": "narration-c35fd867",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T18:38:09.912262+00:00",
+      "detail": {
+        "job_id": "narration-c35fd867",
+        "reason": "Rebuilt with <=200-character voice units (no 30 s truncation) and the measured Modal narration rate; never run",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:10.066689+00:00",
+      "detail": {
+        "job_id": "narration-c35fd867",
+        "reason": "Rebuilt with <=200-character voice units (no 30 s truncation) and the measured Modal narration rate; never run"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:11.846162+00:00",
+      "detail": {
+        "forecast_units": 1.6941966111111109,
+        "job_id": "narration-c35fd867-r2",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:11.846945+00:00",
+      "detail": {
+        "job_id": "narration-c35fd867-r2",
         "kind": "narration",
         "target": "film-01"
       },

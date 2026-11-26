@@ -1,0 +1,23 @@
+{
+  "authority_created": false,
+  "chunk": {
+    "group": "narration-52b24258-r2",
+    "index": 2,
+    "of": 2
+  },
+  "deadline_seconds": 2794,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/atithi/narration-52b24258-r2-c2of2",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "7ef6a35bd6a023334a13908a652344900f4cd46327365cf8f526dddf3e71b48a",
+  "job_id": "narration-52b24258-r2-c2of2",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "8b4560aa26fe0d7f2fdd0a3833fabcaf6ccfaad867c3e5c23eb219dfc5f54ade",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "atithi"
+}

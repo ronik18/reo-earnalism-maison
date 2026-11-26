@@ -72,8 +72,8 @@
     "job_id": "narration-9187e43e",
     "title": "kshudhita-pashan",
     "month": "2026-11",
-    "units": 4.238899999999999,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
     "root": "kshudhita-pashan"
   },
@@ -99,8 +99,8 @@
     "job_id": "narration-c7d371b4",
     "title": "nishithe",
     "month": "2026-11",
-    "units": 5.819191666666667,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "e9734480-f2c3-4680-9619-78f6b5850d10",
     "root": "nishithe"
   },
@@ -108,8 +108,8 @@
     "job_id": "narration-c35fd867",
     "title": "didi",
     "month": "2026-11",
-    "units": 4.1459416666666655,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "93565d7b-e24b-4775-a84e-99417f0e403e",
     "root": "didi"
   },
@@ -117,8 +117,8 @@
     "job_id": "narration-1bc7990f",
     "title": "manbhanjan",
     "month": "2026-11",
-    "units": 3.848474999999999,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "906f2df9-a6bf-4676-a8d5-dafe055a8b7b",
     "root": "manbhanjan"
   },
@@ -126,8 +126,8 @@
     "job_id": "narration-52b24258",
     "title": "atithi",
     "month": "2026-11",
-    "units": 5.967924999999999,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "cf7ae583-f5ff-4f18-9852-27ce39e7f0c6",
     "root": "atithi"
   },
@@ -135,8 +135,8 @@
     "job_id": "narration-91c7abe1",
     "title": "madhyabartini",
     "month": "2026-11",
-    "units": 5.205666666666666,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "f415e7a7-1a83-4f43-ac23-56bd605c5a2e",
     "root": "madhyabartini"
   },
@@ -144,8 +144,8 @@
     "job_id": "narration-bbf45e84",
     "title": "shasti",
     "month": "2026-11",
-    "units": 4.833833333333334,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "7c832e44-2019-4415-9213-4170b41123a3",
     "root": "shasti"
   },
@@ -153,8 +153,8 @@
     "job_id": "narration-b2d6c2d9",
     "title": "samapti",
     "month": "2026-11",
-    "units": 8.384841666666665,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "2be3bc99-f143-4aa4-b080-ade26f7e381a",
     "root": "samapti"
   },
@@ -162,8 +162,8 @@
     "job_id": "narration-eea606f6",
     "title": "megh-o-roudra",
     "month": "2026-11",
-    "units": 9.072733333333334,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "899f8c17-dd85-4b19-82a0-a03f4d8d40ff",
     "root": "megh-o-roudra"
   },
@@ -171,8 +171,8 @@
     "job_id": "narration-bc4edba3",
     "title": "prayashchitta",
     "month": "2026-11",
-    "units": 5.187075,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "82a2e6d1-e279-4179-85a0-d9d52361af05",
     "root": "prayashchitta"
   },
@@ -180,8 +180,8 @@
     "job_id": "narration-7a7651c0",
     "title": "apad",
     "month": "2026-11",
-    "units": 3.718333333333333,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "439e8f15-d679-4137-a2c0-9af5e1eccc5f",
     "root": "apad"
   },
@@ -189,8 +189,8 @@
     "job_id": "narration-775c2abc",
     "title": "thakurda",
     "month": "2026-11",
-    "units": 3.4022749999999995,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "96b09e3c-11ee-41d0-bcfa-44c8a4549b73",
     "root": "thakurda"
   },
@@ -198,8 +198,8 @@
     "job_id": "narration-781b8abc",
     "title": "pratihingsa",
     "month": "2026-11",
-    "units": 5.112708333333333,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "89d6ff7e-42c5-491c-8c05-0a08bc8827d6",
     "root": "pratihingsa"
   },
@@ -282,6 +282,186 @@
     "modal_runs_issued": 2,
     "usd": 0.227405,
     "cu_equivalent": 2.27
+  },
+  {
+    "job_id": "narration-9187e43e-r2",
+    "title": "kshudhita-pashan",
+    "month": "2026-11",
+    "units": 1.861893444444444,
+    "state": "reserved",
+    "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
+    "root": "kshudhita-pashan"
+  },
+  {
+    "job_id": "narration-c7d371b4-r2-c1of2",
+    "title": "nishithe",
+    "month": "2026-11",
+    "units": 1.374048111111111,
+    "state": "reserved",
+    "edition_id": "e9734480-f2c3-4680-9619-78f6b5850d10",
+    "root": "nishithe"
+  },
+  {
+    "job_id": "narration-c7d371b4-r2-c2of2",
+    "title": "nishithe",
+    "month": "2026-11",
+    "units": 1.374048111111111,
+    "state": "reserved",
+    "edition_id": "e9734480-f2c3-4680-9619-78f6b5850d10",
+    "root": "nishithe"
+  },
+  {
+    "job_id": "narration-c35fd867-r2",
+    "title": "didi",
+    "month": "2026-11",
+    "units": 1.6941966111111109,
+    "state": "reserved",
+    "edition_id": "93565d7b-e24b-4775-a84e-99417f0e403e",
+    "root": "didi"
+  },
+  {
+    "job_id": "narration-1bc7990f-r2",
+    "title": "manbhanjan",
+    "month": "2026-11",
+    "units": 1.673869722222222,
+    "state": "reserved",
+    "edition_id": "906f2df9-a6bf-4676-a8d5-dafe055a8b7b",
+    "root": "manbhanjan"
+  },
+  {
+    "job_id": "narration-52b24258-r2-c1of2",
+    "title": "atithi",
+    "month": "2026-11",
+    "units": 1.5061728888888886,
+    "state": "reserved",
+    "edition_id": "cf7ae583-f5ff-4f18-9852-27ce39e7f0c6",
+    "root": "atithi"
+  },
+  {
+    "job_id": "narration-52b24258-r2-c2of2",
+    "title": "atithi",
+    "month": "2026-11",
+    "units": 1.5061728888888886,
+    "state": "reserved",
+    "edition_id": "cf7ae583-f5ff-4f18-9852-27ce39e7f0c6",
+    "root": "atithi"
+  },
+  {
+    "job_id": "narration-91c7abe1-r2-c1of2",
+    "title": "madhyabartini",
+    "month": "2026-11",
+    "units": 1.3029039999999994,
+    "state": "reserved",
+    "edition_id": "f415e7a7-1a83-4f43-ac23-56bd605c5a2e",
+    "root": "madhyabartini"
+  },
+  {
+    "job_id": "narration-91c7abe1-r2-c2of2",
+    "title": "madhyabartini",
+    "month": "2026-11",
+    "units": 1.2978222777777773,
+    "state": "reserved",
+    "edition_id": "f415e7a7-1a83-4f43-ac23-56bd605c5a2e",
+    "root": "madhyabartini"
+  },
+  {
+    "job_id": "narration-bbf45e84-r2",
+    "title": "shasti",
+    "month": "2026-11",
+    "units": 1.8314031111111109,
+    "state": "reserved",
+    "edition_id": "7c832e44-2019-4415-9213-4170b41123a3",
+    "root": "shasti"
+  },
+  {
+    "job_id": "narration-b2d6c2d9-r2-c1of2",
+    "title": "samapti",
+    "month": "2026-11",
+    "units": 1.7602589999999996,
+    "state": "reserved",
+    "edition_id": "2be3bc99-f143-4aa4-b080-ade26f7e381a",
+    "root": "samapti"
+  },
+  {
+    "job_id": "narration-b2d6c2d9-r2-c2of2",
+    "title": "samapti",
+    "month": "2026-11",
+    "units": 1.7551772777777777,
+    "state": "reserved",
+    "edition_id": "2be3bc99-f143-4aa4-b080-ade26f7e381a",
+    "root": "samapti"
+  },
+  {
+    "job_id": "narration-eea606f6-r2-c1of2",
+    "title": "megh-o-roudra",
+    "month": "2026-11",
+    "units": 1.9228741111111107,
+    "state": "reserved",
+    "edition_id": "899f8c17-dd85-4b19-82a0-a03f4d8d40ff",
+    "root": "megh-o-roudra"
+  },
+  {
+    "job_id": "narration-eea606f6-r2-c2of2",
+    "title": "megh-o-roudra",
+    "month": "2026-11",
+    "units": 1.9177923888888886,
+    "state": "reserved",
+    "edition_id": "899f8c17-dd85-4b19-82a0-a03f4d8d40ff",
+    "root": "megh-o-roudra"
+  },
+  {
+    "job_id": "narration-bc4edba3-r2-c1of2",
+    "title": "prayashchitta",
+    "month": "2026-11",
+    "units": 1.3029039999999994,
+    "state": "reserved",
+    "edition_id": "82a2e6d1-e279-4179-85a0-d9d52361af05",
+    "root": "prayashchitta"
+  },
+  {
+    "job_id": "narration-bc4edba3-r2-c2of2",
+    "title": "prayashchitta",
+    "month": "2026-11",
+    "units": 1.3029039999999994,
+    "state": "reserved",
+    "edition_id": "82a2e6d1-e279-4179-85a0-d9d52361af05",
+    "root": "prayashchitta"
+  },
+  {
+    "job_id": "narration-7a7651c0-r2",
+    "title": "apad",
+    "month": "2026-11",
+    "units": 1.602725611111111,
+    "state": "reserved",
+    "edition_id": "439e8f15-d679-4137-a2c0-9af5e1eccc5f",
+    "root": "apad"
+  },
+  {
+    "job_id": "narration-775c2abc-r2",
+    "title": "thakurda",
+    "month": "2026-11",
+    "units": 1.5366632222222218,
+    "state": "reserved",
+    "edition_id": "96b09e3c-11ee-41d0-bcfa-44c8a4549b73",
+    "root": "thakurda"
+  },
+  {
+    "job_id": "narration-781b8abc-r2-c1of2",
+    "title": "pratihingsa",
+    "month": "2026-11",
+    "units": 1.3181491666666665,
+    "state": "reserved",
+    "edition_id": "89d6ff7e-42c5-491c-8c05-0a08bc8827d6",
+    "root": "pratihingsa"
+  },
+  {
+    "job_id": "narration-781b8abc-r2-c2of2",
+    "title": "pratihingsa",
+    "month": "2026-11",
+    "units": 1.3130674444444443,
+    "state": "reserved",
+    "edition_id": "89d6ff7e-42c5-491c-8c05-0a08bc8827d6",
+    "root": "pratihingsa"
   },
   {
     "modal_spend": "2026-11",

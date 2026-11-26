@@ -1,0 +1,23 @@
+{
+  "authority_created": false,
+  "chunk": {
+    "group": "narration-781b8abc-r2",
+    "index": 1,
+    "of": 2
+  },
+  "deadline_seconds": 2446,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/pratihingsa/narration-781b8abc-r2-c1of2",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "6540a31637528193d8d611c02c14a841d95908f99a1e612120d9d86d788851bb",
+  "job_id": "narration-781b8abc-r2-c1of2",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "ef939891a5e63dee44724b2e2d300b94fd566fa9b997818a7770789222e841be",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "pratihingsa"
+}

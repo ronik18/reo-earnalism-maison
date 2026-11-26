@@ -60,6 +60,20 @@
       },
       "path": "jobs/music-a45f086f/music.ipynb",
       "sha256": "364a41372311bd9e059089baaa99ce8609c939f89726fa185f1d4513504771fe"
+    },
+    {
+      "bytes": 16439,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.861893444444444,
+        "inputs_zip": "jobs/narration-9187e43e-r2/inputs.zip",
+        "job_id": "narration-9187e43e-r2",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-9187e43e-r2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-9187e43e-r2/narration.ipynb",
+      "sha256": "7ae4f7cf1f48f067e1f73634c3fd56a47cdf4cb1368bde8c35978a42f61960e1"
     }
   ],
   "created_at": "2026-11-25T11:16:00.930973+00:00",
@@ -138,6 +152,45 @@
       "detail": {
         "job_id": "music-a45f086f",
         "kind": "music",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T18:38:08.647904+00:00",
+      "detail": {
+        "job_id": "narration-9187e43e",
+        "reason": "Rebuilt with <=200-character voice units (no 30 s truncation) and the measured Modal narration rate; never run",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:08.649623+00:00",
+      "detail": {
+        "job_id": "narration-9187e43e",
+        "reason": "Rebuilt with <=200-character voice units (no 30 s truncation) and the measured Modal narration rate; never run"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:09.225690+00:00",
+      "detail": {
+        "forecast_units": 1.861893444444444,
+        "job_id": "narration-9187e43e-r2",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:09.226776+00:00",
+      "detail": {
+        "job_id": "narration-9187e43e-r2",
+        "kind": "narration",
         "target": "film-01"
       },
       "result": "job_target",
