@@ -60,7 +60,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install the Modal client (no secrets in this step)
-        run: pip install modal==1.6.4
+        run: pip install modal==1.6.4 numpy==2.5.3 pillow==13.0.0.post1
       - name: Mark the request running
         id: start
         run: |
