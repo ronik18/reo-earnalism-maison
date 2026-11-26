@@ -298,7 +298,9 @@ class EditBuildTests(unittest.TestCase):
         self.assertIn("EDIT_PIPELINE = 'QwenImageEditPlusPipeline'", src)
         self.assertIn("QwenImageEditPlusPipeline", cells[generate])
         self.assertIn('bnb_4bit_quant_type="nf4"', cells[generate])
-        self.assertIn("NF4_BELOW_GIB = 60", src)
+        self.assertIn("BF16_FROM_GIB = 70", src)
+        self.assertIn("INT8_FROM_GIB = 30", src)
+        self.assertNotIn("NF4_BELOW_GIB", src)
         self.assertIn("negative_prompt=", cells[generate])
         self.assertIn("true_cfg_scale=", cells[generate])
         self.assertIn('logging.getLogger("bitsandbytes', cells[generate])
@@ -387,10 +389,104 @@ class EditBuildTests(unittest.TestCase):
         exec(template[template.index("# --- helpers"):template.index("# --- end helpers")], ns)
         return ns
 
-    def test_the_precision_branch_loads_nf4_below_60_gib(self):
+    def test_precision_by_vram_bf16_from_70_int8_from_30_else_nf4(self):
+        # the first L4 run (NF4 everywhere) came out grainy and washed: 4-bit is the last resort
         ns = self.helpers()
-        for gib, want in ((22.5, "nf4"), (39.4, "nf4"), (59.9, "nf4"), (60.0, "bf16"), (79.3, "bf16")):
-            self.assertEqual(ns["precision_for"](gib, 60), want, gib)
+        for gib, want in ((22.5, "nf4"), (29.9, "nf4"), (30.0, "int8"), (39.4, "int8"),
+                          (69.9, "int8"), (70.0, "bf16"), (79.3, "bf16")):
+            self.assertEqual(ns["precision_for"](gib, 70, 30), want, gib)
+        self.assertEqual((colab_jobs.EDIT_BF16_FROM_GIB, colab_jobs.EDIT_INT8_FROM_GIB), (70, 30))
+
+    def test_quantized_loads_keep_the_sensitive_modules_bf16_and_print_them(self):
+        # input/output projections, timestep/text embedding and the final norm of
+        # QwenImageTransformer2DModel at diffusers 0.37.0 stay bf16 in the int8 and nf4 loads
+        self.assertEqual(colab_jobs.EDIT_SKIP_MODULES,
+                         ("img_in", "txt_in", "time_text_embed", "norm_out", "proj_out"))
+        cells = self.src(self.build())
+        src = "\n".join(cells)
+        generate = next(c for c in cells if "enable_model_cpu_offload()" in c)
+        self.assertIn(f"SKIP_MODULES = {list(colab_jobs.EDIT_SKIP_MODULES)!r}", src)
+        self.assertIn("load_in_8bit=True", generate)
+        self.assertIn("load_in_4bit=True", generate)
+        self.assertEqual(generate.count("llm_int8_skip_modules=SKIPPED"), 2)
+        self.assertIn('if PRECISION == "int8":', generate)
+        self.assertIn('elif PRECISION == "nf4":', generate)
+        self.assertIn('print("kept in bf16 (not quantized):"', generate)
+        self.assertIn('"transformer_kept_bf16": SKIPPED', generate)
+        self.assertIn("enable_model_cpu_offload()", generate)
+        ns = self.helpers()
+        self.assertEqual(ns["kept_bf16"]("bf16", ["img_in"]), [])
+        self.assertEqual(ns["kept_bf16"]("int8", ("img_in", "proj_out")), ["img_in", "proj_out"])
+        self.assertEqual(ns["kept_bf16"]("nf4", ("img_in",)), ["img_in"])
+
+    def test_the_vae_decodes_in_float32(self):
+        generate = next(c for c in self.src(self.build()) if "enable_model_cpu_offload()" in c)
+        self.assertIn("pipe.vae.to(torch.float32)", generate)
+        self.assertIn('output_type="latent"', generate)
+        self.assertIn("pipe.vae.to(torch.bfloat16)", generate)  # the inputs' encode stays bf16
+        self.assertLess(generate.index("pipe.vae.to(torch.float32)"),
+                        generate.index("pipe.vae.decode("))
+        self.assertIn('"vae_decode": "float32"', generate)
+
+    # --- min_vram_gib ------------------------------------------------------------------------
+    def config(self, r):
+        return next(c for c in self.src(r) if "DRIVE_JOB_DIR =" in c)
+
+    def test_min_vram_gib_defaults_to_0_and_is_written_to_the_notebook_and_manifest(self):
+        r = self.build()
+        self.assertIn("MIN_VRAM_GIB = 0\n", self.config(r))
+        self.assertEqual(json.loads(Path(r["manifest"]).read_text())["min_vram_gib"], 0)
+        r = self.build(job_id="edit-a100", min_vram_gib=30)
+        self.assertIn("MIN_VRAM_GIB = 30\n", self.config(r))
+        self.assertEqual(json.loads(Path(r["manifest"]).read_text())["min_vram_gib"], 30)
+        nb = json.loads(Path(r["notebook"]).read_text())
+        self.assertEqual(nb["metadata"]["colab"]["gpuType"], "A100")
+        self.build(job_id="edit-80", min_vram_gib=80)
+
+    def test_min_vram_gib_must_be_an_integer_from_0_to_80(self):
+        for bad in (-1, 81, 40.5, True, "40", None):
+            with self.subTest(value=bad):
+                self.refused(min_vram_gib=bad, words=("min_vram_gib", "0 to 80"))
+
+    def gpu_cell(self, min_gib, mib):
+        cells = self.src(self.build(job_id=f"edit-v{min_gib}-{mib}", min_vram_gib=min_gib))
+        cell = next(c for c in cells if "nvidia-smi" in c)
+        calls = []
+
+        def run(args, **kw):
+            calls.append(list(args))
+            out = "GPU 0: NVIDIA A100" if "-L" in args else f"{mib}\n"
+            return types.SimpleNamespace(returncode=0, stdout=out)
+        out = io.StringIO()
+        with patch("shutil.which", return_value="/usr/bin/nvidia-smi"), \
+                patch("subprocess.run", run), contextlib.redirect_stdout(out):
+            exec(cell, {"RUN": True, "MIN_VRAM_GIB": min_gib})
+        return calls, out.getvalue()
+
+    def test_the_gpu_cell_refuses_a_gpu_below_min_vram_gib_before_any_download(self):
+        with self.assertRaises(RuntimeError) as caught:
+            self.gpu_cell(30, 23034)  # an L4
+        msg = str(caught.exception)
+        self.assertIn("needs an A100 or larger: Runtime -> Change runtime type -> A100", msg)
+        self.assertIn("22.5 GiB", msg)
+        self.assertIn("30 GiB", msg)
+        calls, printed = self.gpu_cell(30, 40960)  # an A100 40 GB
+        self.assertIn("40.0 GiB", printed)
+        calls, printed = self.gpu_cell(0, 23034)  # no minimum: memory is not queried
+        self.assertFalse(any("--query-gpu=memory.total" in " ".join(c) for c in calls))
+        cells = self.src(self.build(job_id="edit-order", min_vram_gib=30))
+        gpu = next(i for i, c in enumerate(cells) if "nvidia-smi" in c)
+        access = next(i for i, c in enumerate(cells) if "auth_check(MODEL_REPO" in c)
+        self.assertLess(gpu, access)
+
+    def test_the_deadline_follows_the_edit_rate_in_rates_json_as_is(self):
+        rates = {**RATES, "edit": {**RATES["edit"], "s_per_step": 10.0}}
+        r = colab_jobs.build_job("edit", self.record, {"target": "film-01", "items": [item()]},
+                                 self.ledger, rates, self.out, month="2026-11")
+        want = (40 * 10.0 * 2 + 30 + 20) * MARGIN
+        self.assertIn(f"DEADLINE_SECONDS = {int(want)}\n", self.config(r))
+        generate = next(c for c in self.src(r) if "enable_model_cpu_offload()" in c)
+        self.assertIn("s per image", generate)
 
     def test_the_model_runs_near_one_megapixel_and_the_output_returns_at_the_source_size(self):
         ns = self.helpers()
@@ -491,7 +587,7 @@ class EditCli(CliTests):
             "key": key, "source": {"job": base, "file": f"{key}.png"},
             "refs": [{"job": base, "file": f"{sid}-1.png"}],
             "instruction": "Remove the beard; Judge Mohit is clean-shaven.", "negative": "beard",
-            "seed": 5, "candidates": 2, "steps": 40, "true_cfg_scale": 4.0}]}))
+            "seed": 5, "candidates": 2, "steps": 40, "true_cfg_scale": 4.0}], "min_vram_gib": 30}))
         rates = self.d / "rates-edit.json"
         rates.write_text(json.dumps({"edit": {"s_per_step": 3.75, "units_per_hour": 1.94,
                                               "steps": colab_jobs.EDIT_RATE_STEPS,
@@ -504,6 +600,8 @@ class EditCli(CliTests):
         entry = json.loads(self.ledger.read_text())[-1]
         self.assertEqual((entry["job_id"], entry["state"]), ("edit-film-01-r1", "reserved"))
         self.assertTrue((self.root / "jobs" / "edit-film-01-r1" / "edit.ipynb").is_file())
+        build = json.loads((self.root / "jobs" / "edit-film-01-r1" / "build-manifest.json").read_text())
+        self.assertEqual(build["min_vram_gib"], 30)
         code, out = run("job", "edit", "--root", self.root, "--rates", rates, "--spec", spec,
                         "--reel", 1, "--job-id", "edit-film-01-r2")
         self.assertNotEqual(code, 0, out)

@@ -40,11 +40,13 @@ after that run.
 first entry is an ESTIMATE ("source": "ESTIMATE — replace with measured values after the first
 run"): ~150 s per image on an L4 at 40 steps including model CPU offload (`s_per_step` 3.75),
 `decode_s` 1500 for the install, the ~58 GB download (transformer ~41 GB bf16, Qwen2.5-VL-7B text
-encoder ~17 GB) and the 4-bit NF4 load. Its `steps` is the reference the rate is measured at
+encoder ~17 GB) and the transformer load. Its `steps` is the reference the rate is measured at
 (40); items set their own steps (8–50), so the forecast uses ceil(total item steps / images) as
 `steps`, never less than the job's real step total. The notebook prints and records the seconds
 of every image (`seconds_per_image`): measure the first run from those. On an A100 the CU per
-hour differs from an L4's; the rate holds only for the GPU it was measured on.
+hour differs from an L4's; the rate holds only for the GPU it was measured on. The first L4 run
+(NF4, 40 steps) took ~400 s per image; the forecast and hard stop use the `edit` entry of
+rates.json exactly as written (no code constant), so update that entry, not the code.
 
 `clip_s` is the measured end-to-end seconds per finished Wan `l4-balanced-v2` clip
 (load, 24 denoising steps, decode, export). Reel batches: at most 5 shots each, so a

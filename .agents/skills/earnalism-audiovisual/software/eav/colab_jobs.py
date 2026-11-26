@@ -65,7 +65,18 @@ EDIT_DEFAULT_STEPS = 40
 EDIT_STEPS_RANGE = (8, 50)
 EDIT_CFG_RANGE = (1.0, 10.0)
 EDIT_DEFAULT_CFG = 4.0
-EDIT_NF4_BELOW_GIB = 60   # L4 (22 GB) and A100 40 GB: 4-bit NF4 transformer; A100 80 GB: bf16
+# Transformer precision by VRAM (owner 2026-11-26): the first L4 run, 4-bit NF4 everywhere,
+# followed the instructions but every image came out grainy with a rough, washed texture.
+# >= 70 GiB (A100 80 GB): bf16; 30-70 GiB (A100 40 GB): 8-bit LLM.int8; below (L4): NF4. Both
+# quantized loads keep the sensitive modules bf16: the image/text input projections, the
+# timestep/text embedding, the final norm and the output projection. Names checked against
+# QwenImageTransformer2DModel in the diffusers 0.37.0 wheel (img_in, txt_in, time_text_embed,
+# norm_out, proj_out); bitsandbytes skips a Linear whose own name or dotted path prefix matches.
+EDIT_BF16_FROM_GIB = 70
+EDIT_INT8_FROM_GIB = 30
+EDIT_SKIP_MODULES = ("img_in", "txt_in", "time_text_embed", "norm_out", "proj_out")
+# Optional top-level spec "min_vram_gib": the GPU cell stops before any download on a smaller GPU.
+MIN_VRAM_RANGE = (0, 80)
 MAX_EDIT_REFS = 2
 MAX_INSTRUCTION = 900
 # Appended to every edit instruction: the edit changes only what it names.
@@ -209,6 +220,20 @@ if not _smi or subprocess.run([_smi, "-L"], capture_output=True).returncode != 0
     raise RuntimeError("No GPU attached: Runtime -> Disconnect and delete runtime, then Runtime -> "
                        "Change runtime type -> A100 GPU (or L4), Save, Connect, and Run all again")
 print(subprocess.run([_smi, "-L"], capture_output=True, text=True).stdout.strip())
+_min_gib = globals().get("MIN_VRAM_GIB", 0)
+if _min_gib:  # the job's spec min_vram_gib: refuse a smaller GPU before any install or download
+    _q = subprocess.run([_smi, "--query-gpu=memory.total", "--format=csv,noheader,nounits"],
+                        capture_output=True, text=True)
+    try:
+        _gib = int(_q.stdout.split()[0]) / 1024  # MiB of the first GPU
+    except (IndexError, ValueError):
+        raise RuntimeError("could not read the GPU memory from nvidia-smi (" + repr(_q.stdout)
+                           + "); this job needs at least %d GiB" % _min_gib) from None
+    print("GPU memory %.1f GiB (this job needs at least %d GiB)" % (_gib, _min_gib))
+    if _gib < _min_gib:
+        raise RuntimeError("This job needs at least %d GiB of GPU memory and this GPU has %.1f GiB: it "
+                           "needs an A100 or larger: Runtime -> Change runtime type -> A100, Save, "
+                           "Connect, and Run all again (nothing was downloaded)" % (_min_gib, _gib))
 '''
 
 
@@ -367,7 +392,18 @@ PACKAGES = {"narration": ("parler_tts", "transformers", "torch", "soundfile", "p
 MANIFEST_RESERVE_S = 60
 
 
-def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, deadline_s) -> bytes:
+def min_vram_gib(spec: dict) -> int:
+    """The job's optional top-level min_vram_gib (default 0: any GPU)."""
+    v = spec.get("min_vram_gib", 0)
+    lo, hi = MIN_VRAM_RANGE
+    if isinstance(v, bool) or not isinstance(v, int) or not lo <= v <= hi:
+        raise ValueError(f"min_vram_gib must be an integer from {lo} to {hi} (GiB of GPU memory; "
+                         f"30 needs an A100 40 GB, 70 an A100 80 GB), not {v!r}")
+    return v
+
+
+def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, deadline_s,
+              min_vram=0) -> bytes:
     retouch, edit = kind == "retouch", kind == "edit"
     config = (_GUARD +
               f"import pathlib\nJOB_ID = {job_id!r}\nTITLE = {title!r}\nKIND = {kind!r}\n"
@@ -376,7 +412,9 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
               f"DRIVE_JOB_DIR = {DRIVE_ROOT + '/' + title + '/' + job_id!r}\n"
               f"# Hard wall-clock stop = the forecast seconds reserved on the ledger (R25)\n"
               f"DEADLINE_SECONDS = {int(deadline_s)}\nMANIFEST_RESERVE_S = {MANIFEST_RESERVE_S}\n"
-              f"PACKAGES = {PACKAGES[kind]!r}\nEXCHANGE_SCHEMA = {EXCHANGE_SCHEMA!r}\n")
+              f"PACKAGES = {PACKAGES[kind]!r}\nEXCHANGE_SCHEMA = {EXCHANGE_SCHEMA!r}\n"
+              f"# The GPU cell stops before any download below this much GPU memory (0: any GPU)\n"
+              f"MIN_VRAM_GIB = {int(min_vram)}\n")
     if retouch:
         config += (f"MASK_REPO = {MASK_REPO!r}\nLICENCE_ALLOWLIST = {LICENCE_ALLOWLIST!r}\n"
                    f"LICENCE_REPOS = (MODEL_REPO, MASK_REPO)\n"
@@ -384,8 +422,10 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
     if edit:
         config += (f"LICENCE_ALLOWLIST = {EDIT_LICENCE_ALLOWLIST!r}\nLICENCE_REPOS = (MODEL_REPO,)\n"
                    f"EDIT_PIPELINE = {EDIT_PIPELINE!r}\nDIFFUSERS_PIN = {EDIT_DIFFUSERS!r}\n"
-                   f"# transformer 4-bit NF4 below this much VRAM, else bf16\n"
-                   f"NF4_BELOW_GIB = {EDIT_NF4_BELOW_GIB}\n")
+                   f"# transformer bf16 from BF16_FROM_GIB of VRAM, 8-bit from INT8_FROM_GIB, else NF4;\n"
+                   f"# quantized loads keep SKIP_MODULES bf16\n"
+                   f"BF16_FROM_GIB = {EDIT_BF16_FROM_GIB}\nINT8_FROM_GIB = {EDIT_INT8_FROM_GIB}\n"
+                   f"SKIP_MODULES = {list(EDIT_SKIP_MODULES)!r}\n")
     intro = (f"# Earnalism {kind} job `{job_id}`\n\n**Prepared, not run.** Input zip SHA256 "
              f"`{zip_sha}`. Set `RUN = True` in the first cell, then run all. With the R2 exchange "
              f"(`exchange.json` in `{DRIVE_ROOT}/{title}/{job_id}/`) the notebook downloads "
@@ -405,7 +445,7 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
           "metadata": {"kernelspec": {"name": "python3", "display_name": "Python 3"},
                        "language_info": {"name": "python"},
                        "colab": {"name": f"earnalism_{kind}_{job_id}.ipynb",
-                                 "gpuType": "L4"}},
+                                 "gpuType": "A100" if min_vram > 24 else "L4"}},
           "cells": [_cell(k, t, i) for i, (k, t) in enumerate(parts)]}
     return (json.dumps(nb, indent=1, ensure_ascii=False) + "\n").encode("utf-8")
 
@@ -922,6 +962,10 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
         raise FileExistsError(f"bundle already exists: {job_dir}")
 
     # Validate and forecast everything before any ledger or disk change.
+    min_vram = min_vram_gib(spec)
+    if kind == "reel_clips" and min_vram:
+        raise ValueError("min_vram_gib applies to the Colab notebook jobs; reel_clips runs on the Wan "
+                         "worker's own GPU profile")
     if kind == "reel_clips":
         _check_model(kind, spec, _load_wan_batch().w.MODEL)
         plan = {"compute": derive_compute(kind, spec, rates, job_items(kind, spec))}
@@ -940,7 +984,7 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
             result = _write_reel(job, spec, job_dir)
         else:
             result = _write_notebook_bundle(kind, plan, job_id, title, job_dir,
-                                            forecast_seconds(plan["compute"], rates))
+                                            forecast_seconds(plan["compute"], rates), min_vram)
     except BaseException:
         shutil.rmtree(job_dir, ignore_errors=True)
         try:
@@ -961,20 +1005,22 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
             "forecast_units": units}
 
 
-def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s: float) -> dict:
+def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s: float,
+                           min_vram: int = 0) -> dict:
     job_json = {"schema": JOB_SCHEMA, "kind": kind, "job_id": job_id, "title": title,
                 "model": plan["repo"], **plan["payload"]}
     archive = _zip_bytes({"job.json": (json.dumps(job_json, indent=2, sort_keys=True)
                                        + "\n").encode("utf-8"), **plan.get("files", {})})
     zip_sha = hashlib.sha256(archive).hexdigest()
     nb = _notebook(kind, job_id, title, zip_sha, plan["repo"], plan["revision"],
-                   plan["steps"], _TEMPLATES / f"{kind}_cell.py.txt", deadline_s)
+                   plan["steps"], _TEMPLATES / f"{kind}_cell.py.txt", deadline_s, min_vram)
     manifest = {"schema": "earnalism.audiovisual-build.v1", "job_id": job_id, "kind": kind,
                 "title": title, "inputs_sha256": zip_sha,
                 "notebook_sha256": hashlib.sha256(nb).hexdigest(),
                 "model": {"repo": plan["repo"], "revision": plan["revision"]},
                 "drive_dir": f"{DRIVE_ROOT}/{title}/{job_id}",
-                "deadline_seconds": int(deadline_s), "authority_created": False}
+                "deadline_seconds": int(deadline_s), "min_vram_gib": min_vram,
+                "authority_created": False}
     if "generation" in plan["payload"]:
         manifest["generation"] = plan["payload"]["generation"]
     if "mask_repo" in plan:

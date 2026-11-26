@@ -12,9 +12,17 @@ import math
 from PIL import Image
 
 
-def precision_for(vram_gib, nf4_below_gib):
-    """The transformer's precision: 4-bit NF4 below the threshold (L4, A100 40 GB), else bf16."""
-    return "bf16" if vram_gib >= nf4_below_gib else "nf4"
+def precision_for(vram_gib, bf16_from_gib, int8_from_gib):
+    """The transformer's precision by total VRAM: bf16 from bf16_from_gib (A100 80 GB), 8-bit
+    LLM.int8 from int8_from_gib (A100 40 GB), else 4-bit NF4 (L4). NF4 everywhere came out grainy."""
+    if vram_gib >= bf16_from_gib:
+        return "bf16"
+    return "int8" if vram_gib >= int8_from_gib else "nf4"
+
+
+def kept_bf16(precision, skip_modules):
+    """The modules a quantized load keeps bf16 (none to keep when nothing is quantized)."""
+    return [] if precision == "bf16" else list(skip_modules)
 
 
 def edit_size(width, height, area=1024 * 1024, multiple=32):
@@ -40,16 +48,19 @@ from huggingface_hub import HfApi
 revision = HfApi().model_info(MODEL_REPO).sha
 gpu = torch.cuda.get_device_properties(0)
 VRAM_GIB = gpu.total_memory / 2**30
-PRECISION = precision_for(VRAM_GIB, NF4_BELOW_GIB)
+PRECISION = precision_for(VRAM_GIB, BF16_FROM_GIB, INT8_FROM_GIB)
+SKIPPED = kept_bf16(PRECISION, SKIP_MODULES)
 print("GPU", gpu.name, "%.1f GiB;" % VRAM_GIB, "transformer", PRECISION,
-      "; text encoder bf16; model CPU offload (one large part on the GPU at a time)")
-if PRECISION == "nf4":
+      "; text encoder bf16; VAE decode float32; model CPU offload (one large part on the GPU at a time)")
+if SKIPPED:
+    print("kept in bf16 (not quantized):", ", ".join(SKIPPED))
+if PRECISION != "bf16":
     # bitsandbytes logs a dtype-cast notice on every quantized matmul (thousands of lines per
     # image). Say it once here, then silence that logger and warning.
     logging.getLogger("bitsandbytes.autograd._functions").setLevel(logging.ERROR)
     warnings.filterwarnings("ignore", message=".*Input type into Linear4bit.*")
     warnings.filterwarnings("ignore", message=".*will be cast from.*", module="bitsandbytes")
-    print("4-bit NF4 transformer: bitsandbytes computes in bf16 (cast notices shown once)")
+    print(PRECISION, "transformer: bitsandbytes casts its inputs (cast notices shown once)")
 
 # Sources and references: every PNG is checked against the sha256 the production record holds.
 IMAGES = {}
@@ -65,20 +76,47 @@ with zipfile.ZipFile(INPUT_ZIP) as z:
             IMAGES[member] = Image.open(io.BytesIO(data)).convert("RGB")
 
 kw = {"revision": revision, "torch_dtype": torch.bfloat16}
-if PRECISION == "nf4":
+if PRECISION == "int8":
+    kw["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True, llm_int8_skip_modules=SKIPPED)
+elif PRECISION == "nf4":
     kw["quantization_config"] = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
-                                                   bnb_4bit_compute_dtype=torch.bfloat16)
+                                                   bnb_4bit_compute_dtype=torch.bfloat16,
+                                                   llm_int8_skip_modules=SKIPPED)
 transformer = QwenImageTransformer2DModel.from_pretrained(MODEL_REPO, subfolder="transformer", **kw)
 pipe = QwenImageEditPlusPipeline.from_pretrained(MODEL_REPO, revision=revision, transformer=transformer,
                                                  torch_dtype=torch.bfloat16)
 pipe.enable_model_cpu_offload()
 pipe.set_progress_bar_config(disable=True)
+
+
+def decode_f32(latents, width, height):
+    """The pipeline's own decode at diffusers 0.37.0 (unpack, de-normalise, decode the first frame),
+    with the VAE in float32 to rule out bf16 decode banding. Only the decode is upcast: the
+    pipeline feeds the VAE encoder bf16 inputs, so the VAE goes back to bf16 afterwards."""
+    # dtype changes outside inference mode, so the VAE weights stay ordinary tensors
+    pipe.vae.to(torch.float32)
+    try:
+        with torch.inference_mode():
+            lat = pipe._unpack_latents(latents, height, width, pipe.vae_scale_factor)
+            cfg = pipe.vae.config
+            lat = lat.to(pipe._execution_device, torch.float32)
+            mean = torch.tensor(cfg.latents_mean).view(1, cfg.z_dim, 1, 1, 1).to(lat.device, lat.dtype)
+            inv_std = 1.0 / torch.tensor(cfg.latents_std).view(1, cfg.z_dim, 1, 1, 1).to(lat.device,
+                                                                                         lat.dtype)
+            image = pipe.vae.decode(lat / inv_std + mean, return_dict=False)[0][:, :, 0]
+            return pipe.image_processor.postprocess(image, output_type="pil")[0]
+    finally:
+        pipe.vae.to(torch.bfloat16)
+        pipe.maybe_free_model_hooks()  # offload the VAE again
+
+
 import diffusers
 SECONDS = {}
 MODEL_INFO = {"repo": MODEL_REPO, "revision": revision, "pipeline": EDIT_PIPELINE,
               "diffusers": diffusers.__version__, "diffusers_pin": DIFFUSERS_PIN,
               "licences": LICENCES, "gpu": gpu.name, "vram_gib": round(VRAM_GIB, 1),
-              "transformer_precision": PRECISION, "text_encoder_precision": "bf16",
+              "transformer_precision": PRECISION, "transformer_kept_bf16": SKIPPED,
+              "text_encoder_precision": "bf16", "vae_decode": "float32",
               "offload": "enable_model_cpu_offload", "output_size": "source size (LANCZOS)",
               "seconds_per_image": SECONDS}
 EXPECTED = [i["key"] + ".png" for i in JOB["items"]]
@@ -91,16 +129,20 @@ for item in JOB["items"]:
     width, height = edit_size(*src.size)
     gen = torch.Generator("cpu").manual_seed(item["seed"])
     with torch.inference_mode():
-        out = pipe(image=[src] + [IMAGES[r["member"]] for r in item["refs"]],
-                   prompt=item["instruction"], negative_prompt=item["negative"],
-                   true_cfg_scale=item["true_cfg_scale"], guidance_scale=1.0,
-                   num_inference_steps=item["steps"], width=width, height=height,
-                   num_images_per_prompt=1, generator=gen).images[0]
+        latents = pipe(image=[src] + [IMAGES[r["member"]] for r in item["refs"]],
+                       prompt=item["instruction"], negative_prompt=item["negative"],
+                       true_cfg_scale=item["true_cfg_scale"], guidance_scale=1.0,
+                       num_inference_steps=item["steps"], width=width, height=height,
+                       num_images_per_prompt=1, generator=gen, output_type="latent").images
+    out = decode_f32(latents, width, height)
     fit_back(out, src.size).save(OUT_DIR / (item["key"] + ".png"))
     last = time.time() - started
     SECONDS[item["key"]] = round(last, 1)
     print("wrote", item["key"], "%dx%d" % src.size, "(model %dx%d, %d steps)" % (width, height, item["steps"]),
           "in %.1f s per image" % last)
+if SECONDS:
+    print("seconds per image: mean %.1f, max %.1f over %d images (forecast: rates.json edit s_per_step x steps)"
+          % (sum(SECONDS.values()) / len(SECONDS), max(SECONDS.values()), len(SECONDS)))
 del pipe, transformer
 gc.collect()
 torch.cuda.empty_cache()

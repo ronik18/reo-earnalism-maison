@@ -144,6 +144,9 @@ images (for example a correct still of the same character or setting).
   imported stills, retouch or touchup job of the title, sha256-checked the same way (review
   masks never count). `candidates` 1–4 (seeds `seed` … `seed+N-1`), `steps` 8–50 (default 40),
   `true_cfg_scale` 1–10 (default 4.0), `instruction` and `negative` at most 900 characters each.
+  Optional top-level `"min_vram_gib"` (integer 0–80, default 0): the notebook's GPU cell stops
+  before any download on a smaller GPU ("needs an A100 or larger: Runtime -> Change runtime type
+  -> A100"); 30 requires at least an A100 40 GB (8-bit), 70 an A100 80 GB (bf16).
 - **Wording exemption.** The positive-only rule (Prompt wording, above) does not apply to edits:
   the model reads a real negative prompt with true classifier-free guidance, and an edit
   instruction exists to name what to change, "remove the beard" included. Put what must not
@@ -152,10 +155,13 @@ images (for example a correct still of the same character or setting).
   everything else unchanged: the same 2D animated feature-film illustration style, …".
 - Runs: the notebook checks the GPU, model access and the card licence (apache-2.0 only), installs
   the pinned diffusers and refuses one without `QwenImageEditPlusPipeline`, then loads the
-  transformer 4-bit NF4 below 60 GB of VRAM (L4, A100 40 GB) or bf16 (A100 80 GB), the text encoder
-  bf16, with model CPU offload. It edits at about one megapixel at the source's aspect ratio and
+  transformer by total VRAM: bf16 from 70 GiB (A100 80 GB), 8-bit LLM.int8 from 30 GiB (A100
+  40 GB), else 4-bit NF4 (L4; the first NF4 run came out grainy and washed, so NF4 is the last
+  resort). Both quantized loads keep `img_in`, `txt_in`, `time_text_embed`, `norm_out` and
+  `proj_out` bf16 (names from diffusers 0.37.0's QwenImageTransformer2DModel). Text encoder bf16,
+  model CPU offload, VAE decode in float32 (rules out decode banding). It edits at about one megapixel at the source's aspect ratio and
   writes `<key>--c1.png` … `<key>--cN.png` resized back to exactly the source's size; it prints the
-  GPU, precision and seconds per image.
+  GPU, precision, the modules kept bf16 and seconds per image.
 - Review each candidate at full size (faithfulness, identity against the refs, nothing else
   changed, the child-depiction rule of `model-licences.md`), then `pick --job <edit job>` exactly
   as for stills. `film` patches only the pick, as `<key>.png`.
