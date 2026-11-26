@@ -254,9 +254,10 @@ class Ledger:
         return int(n) if n.isdigit() else 0
 
     def record_modal_spend(self, month: str, job_id: str, usd: float, seconds: float,
-                           status: str, at: str) -> str:
+                           status: str, at: str, local: bool = False) -> str:
         """Append one row to the month's modal_spend record. Returns the row's run_id.
         A "pending" row is a provisional worst-case charge written before Modal is contacted.
+        local=True marks a row of a local modal-run (no request file follows its result).
         The run_id is `<job_id>#<n>`, n = 1 + the highest n ever issued for the job: its rows in
         every month and the entry's `modal_runs_issued` (which remembers released rows)."""
         if status not in MODAL_STATUSES:
@@ -276,6 +277,8 @@ class Ledger:
             entry["modal_runs_issued"] = issued + 1
         row = {"run_id": run_id, "job_id": job_id, "usd": usd, "seconds": seconds, "at": at,
                "status": status}
+        if local:
+            row["local"] = True
         for rec in everything:
             if rec.get("modal_spend") == month:
                 rec["rows"].append(row)
@@ -340,12 +343,38 @@ class Ledger:
         self._write(everything)
 
     def release_pending_modal(self, run_id: str) -> None:
-        """Delete a pending row of a run that never contacted Modal (a refused request)."""
+        """Delete a pending row of a run that never contacted Modal (a refused request). The job's
+        entry remembers the month the row counted in (`released_runs`), where a later modal-settle
+        writes it again if that run was billed after all."""
         everything = self._raw()
+        month = next((rec["modal_spend"] for rec in everything if "modal_spend" in rec
+                      and any(r.get("run_id") == run_id for r in rec["rows"])), None)
         row = self._take_row(everything, run_id)
         if row["status"] != "pending":
             raise ValueError(f"row {run_id} is {row['status']}, not pending; it is never released")
+        entry = next((e for e in everything if "modal_spend" not in e
+                      and e.get("job_id") == row.get("job_id")), None)
+        if entry is not None and month is not None:
+            entry.setdefault("released_runs", {})[run_id] = month
         self._write(everything)
+
+    def released_month(self, job_id: str, run_id: str):
+        """The UTC month a released row of the job counted in (None if not recorded)."""
+        entry = next((e for e in self._load() if e["job_id"] == job_id), None)
+        return ((entry or {}).get("released_runs") or {}).get(run_id)
+
+    def _refresh_settled_usd(self, job_id: str) -> None:
+        """A settled entry records its Modal rows in USD (settle); a row billed after the settle
+        (a reconciled estimate, or a released row billed after all) updates that figure."""
+        usd, n = self.modal_job_usd(job_id)
+        entries = self._load()
+        entry = next((e for e in entries if e["job_id"] == job_id), None)
+        if entry is None or entry["state"] != "settled" or not n:
+            return
+        entry.setdefault("reserved_units", entry["units"])
+        entry.setdefault("colab_units", entry["units"])
+        entry.update(runner="modal", usd=round(usd, 6), cu_equivalent=round(usd / USD_PER_CU, 2))
+        self._save(entries)
 
     def replay_job(self, job_id: str, saved: list) -> None:
         """Re-apply one job's ledger state from saved (another copy of this ledger file) onto this
@@ -426,7 +455,9 @@ class Ledger:
         job, pending (it becomes settled) or finished (it keeps its status). The row records
         billed: true and keeps its estimate as estimated_usd. A run_id this ledger issued for the
         job whose row was released (an abandoned request that did reach Modal after all) is written
-        again into `month` as a settled, billed row. Returns the run_ids changed.
+        again as a settled, billed row into the month it counted in when released (recorded on the
+        entry), else into `month` (the caller passes the request's month). A settled entry's usd
+        follows its billed rows. Returns the run_ids changed.
         KeyError: nothing to bill; ValueError: ambiguous or not this job's row."""
         _check_units(usd)
         rows = self.modal_rows(job_id=job_id)
@@ -435,16 +466,18 @@ class Ledger:
             issued = int((entry or {}).get("modal_runs_issued", 0))
             if run_id.rpartition("#")[0] == job_id and 1 <= self.run_number(run_id) <= issued:
                 everything = self._raw()
-                self._put_row(everything, month, {
+                self._put_row(everything, self.released_month(job_id, run_id) or month, {
                     "run_id": run_id, "job_id": job_id, "usd": usd, "seconds": 0.0, "at": at,
                     "status": "settled", "billed": True, "estimated_usd": 0.0,
                     "restored": "a released row billed after all"})
                 self._write(everything)
+                self._refresh_settled_usd(job_id)
                 return [run_id]
         if run_id is None:
             pending = [r for r in rows if r["status"] == "pending"]
             if pending:
                 self.settle_pending_modal(job_id, usd)
+                self._refresh_settled_usd(job_id)
                 return [r["run_id"] for r in pending]
             todo = self.unbilled_modal_runs(job_id)
             if not todo:
@@ -457,6 +490,7 @@ class Ledger:
         if row is None:
             raise ValueError(f"run {run_id} is not a Modal row of job {job_id!r}")
         self._bill(run_id, usd, "settled" if row["status"] == "pending" else row["status"])
+        self._refresh_settled_usd(job_id)
         return [run_id]
 
     @staticmethod

@@ -1079,6 +1079,127 @@ class ModalRequestTests(unittest.TestCase):
         self.assertEqual(budget.Ledger(src / "allowance-ledger.json").modal_rows(job_id=job)[1]["status"],
                          "failed")  # the real ledger was only read
 
+    # ------------------------------------------------------------ M1 review, task quality minors
+    def take_released_cu(self):
+        """Other titles reserve the CU this job released when it moved to Modal."""
+        need = budget.MONTH_CAP - self.ledger.spent(None, self.MONTH)
+        self.ledger.reserve("another-title", self.MONTH, min(need, 60.0), "other-job")
+        if need > 60.0:
+            self.ledger.reserve("third-title", self.MONTH, need - 60.0, "third-job")
+
+    def test_a_local_run_failing_before_modal_says_hold_when_the_restore_is_over_a_cap(self):
+        """Minor 1: _not_started restores the reservation; the hold guidance is printed."""
+        def broken(*a, on_contact=None, **k):
+            self.take_released_cu()
+            raise ValueError("no Modal client")
+        with mock.patch.object(modal_run, "run_modal", broken):
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--colab-units", 0)
+        self.assertEqual(code, 2, out)
+        self.assertIn("Modal was not contacted: the pending row", out)
+        self.assertIn("month cap", out)
+        self.assertIn("hold this job for the owner; do not run it in Colab", out)
+        self.assertEqual(self.rows(), [])
+        self.assertNotIn("runner", self.entry())
+
+    def test_a_failed_request_write_says_hold_when_the_restore_is_over_a_cap(self):
+        """Minor 1: the failed request-file write restores the reservation; hold is printed."""
+        def full(*a, **k):
+            self.take_released_cu()
+            raise OSError("disk full")
+        with mock.patch.object(modal_requests, "write_request", side_effect=full):
+            code, out = self.request()
+        self.assertEqual(code, 2, out)
+        self.assertIn("The request file was not written", out)
+        self.assertIn("hold this job for the owner; do not run it in Colab", out)
+        self.assertEqual(self.rows(), [])
+        self.assertFalse(self.req_path.exists())
+
+    def test_a_released_row_billed_after_all_counts_in_the_month_of_its_request(self):
+        """Minor 2: settled in December, the abandoned November run counts in its own month."""
+        self.assertEqual(self.request()[0], 0)
+        self.set_status("running")
+        code, out = run("modal-request", self.job_id, "--root", self.root, "--abandon", "--reason",
+                        "runner cancelled before the Modal step")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(self.ledger.released_month(self.job_id, f"{self.job_id}#1"), self.MONTH)
+        with mock.patch.object(cli, "_MONTH", "2026-12"):
+            code, out = run("modal-settle", self.job_id, "--root", self.root, "--usd", 0.12,
+                            "--run", f"{self.job_id}#1")
+        self.assertEqual(code, 0, out)
+        self.assertIn(f"in {self.MONTH}", out)
+        self.assertEqual(self.ledger.modal_month_usd(self.MONTH), 0.12)
+        self.assertEqual(self.ledger.modal_rows(month="2026-12"), [])
+
+    def test_a_released_row_without_a_recorded_month_uses_the_requested_at_month(self):
+        """Minor 2: an older ledger has no released_runs; the request's requested_at decides."""
+        self.assertEqual(self.request()[0], 0)
+        self.set_status("running")
+        self.assertEqual(run("modal-request", self.job_id, "--root", self.root, "--abandon",
+                             "--reason", "x")[0], 0)
+        raw = json.loads(self.ledger_bytes())
+        for e in raw:
+            e.pop("released_runs", None)
+        self.ledger._write(raw)
+        data = self.req()
+        data["requested_at"] = "2026-10-31T23:50:00+00:00"
+        self.req_path.write_text(json.dumps(data))
+        with mock.patch.object(cli, "_MONTH", "2026-12"):
+            code, out = run("modal-settle", self.job_id, "--root", self.root, "--usd", 0.2,
+                            "--run", f"{self.job_id}#1")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(self.ledger.modal_month_usd("2026-10"), 0.2)
+        self.assertEqual(self.ledger.modal_rows(month="2026-12"), [])
+
+    def test_retire_refuses_a_finished_run_unless_the_owner_discards_it(self):
+        """Minor 3: the Modal run finished (ok row), only the upload failed: retire says to
+        re-request or import; --discard-finished retires it and states the loss."""
+        self.assertEqual(self.request()[0], 0)
+        self.set_status("running")
+        with mock.patch.object(modal_run, "run_modal", fake_runner(0.3)):
+            self.assertEqual(run("modal-run", self.job_id, "--root", self.root, "--request",
+                                 "--download", self.d / "dl")[0], 0)
+        self.set_status("failed")  # the upload failed
+        before = ((self.root / "record.json").read_bytes(), self.ledger_bytes())
+        code, out = run("retire", self.job_id, "--root", self.root, "--reason", "rebuilt")
+        self.assertEqual(code, 2, out)
+        self.assertIn("finished on Modal (its newest Modal row is ok)", out)
+        self.assertIn(f"modal-request {self.job_id}", out)
+        self.assertIn(f"import {self.job_id}", out)
+        self.assertIn("--discard-finished", out)
+        self.assertEqual(((self.root / "record.json").read_bytes(), self.ledger_bytes()), before)
+        code, out = run("retire", self.job_id, "--root", self.root, "--reason", "rebuilt",
+                        "--discard-finished")
+        self.assertEqual(code, 0, out)
+        self.assertIn(f"Discarded finished Modal run(s) (--discard-finished): {self.job_id} "
+                      "(0.3000 USD paid)", out)
+        self.assertIn("given up, never imported", out)
+        self.assertNotIn("Closed first (failed on Modal", out)
+        self.assertEqual((self.entry()["state"], self.entry()["usd"]), ("settled", 0.3))
+        (ev,) = [e for e in cli.Record.load(self.root).data["events"] if e["result"] == "retired"]
+        self.assertEqual(ev["detail"]["discarded_finished"], [self.job_id])
+
+    def test_a_finished_local_run_is_never_requested_again_after_a_failed_request(self):
+        """Minor 4: request #1 failed; a local modal-run #2 finished ok; the failed request file
+        no longer hides it, so a third run is never paid for."""
+        self.run_and_upload(fake_runner(0.3, "failed"))
+        self.assertEqual(self.req()["status"], "failed")
+        with mock.patch.object(modal_run, "run_modal", fake_runner(0.2)):
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--colab-units", 0,
+                            "--download", self.d / "local")
+        self.assertEqual(code, 0, out)
+        rows = self.ledger.modal_rows(job_id=self.job_id)
+        self.assertEqual([(r["status"], bool(r.get("local"))) for r in rows],
+                         [("failed", False), ("ok", True)])
+        before = (self.req_path.read_bytes(), self.ledger_bytes())
+        code, out = self.request()
+        self.assertEqual(code, 2, out)
+        self.assertIn("already finished on Modal", out)
+        self.assertIn(f"import {self.job_id} --root {self.root} --from <the downloaded folder>", out)
+        with mock.patch.object(modal_run, "run_modal", side_effect=AssertionError("contacted")):
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--colab-units", 0)
+        self.assertEqual(code, 2, out)
+        self.assertEqual((self.req_path.read_bytes(), self.ledger_bytes()), before)
+
 
 class WorkflowTests(unittest.TestCase):
     def setUp(self):

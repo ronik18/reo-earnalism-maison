@@ -4,7 +4,8 @@ from pathlib import Path
 
 import json
 
-from eav.budget import MODAL_MONTH_CAP_USD, MODAL_TITLE_CAP_USD, BudgetExceeded, Ledger, fit_reel_job, forecast, forecast_seconds
+from eav.budget import (MODAL_MONTH_CAP_USD, MODAL_TITLE_CAP_USD, USD_PER_CU, BudgetExceeded, Ledger,
+                        fit_reel_job, forecast, forecast_seconds)
 
 RATES = {"reel": {"s_per_step": 1.0, "units_per_hour": 10.0}}
 
@@ -400,11 +401,44 @@ class ModalFixWaveTests(unittest.TestCase):
         (row,) = self.ledger.modal_rows(job_id="a")
         self.assertEqual((row["run_id"], row["usd"], row["status"], row["billed"]),
                          (r1, 0.31, "settled", True))
-        self.assertEqual(self.ledger.modal_month_usd("2026-12"), 0.31)
+        # M1 Minor 2: it counts in the month it was released from, not the month of the settle
+        self.assertEqual((self.ledger.modal_month_usd("2026-11"),
+                          self.ledger.modal_month_usd("2026-12")), (0.31, 0.0))
         with self.assertRaises(ValueError):  # never issued for this job
             self.ledger.bill_modal_run("a", 0.1, "a#9", month="2026-12", at="x")
         with self.assertRaises(ValueError):
             self.ledger.bill_modal_run("a", 0.1, "b#1", month="2026-12", at="x")
+
+    def test_a_released_row_without_a_recorded_month_goes_into_the_month_given(self):
+        """An older ledger (no released_runs): the caller's month (the request's) is used."""
+        self.ledger.reserve("t", "2026-11", 1.0, "a")
+        r1 = self.ledger.record_modal_spend("2026-11", "a", 1.0, 0.0, "pending", "t")
+        self.ledger.release_pending_modal(r1)
+        raw = json.loads(self.path.read_text())
+        for e in raw:
+            e.pop("released_runs", None)
+        self.ledger._write(raw)
+        self.ledger.bill_modal_run("a", 0.2, r1, month="2026-10", at="x")
+        self.assertEqual(self.ledger.modal_month_usd("2026-10"), 0.2)
+
+    def test_a_settled_entrys_usd_follows_a_row_billed_after_the_settle(self):
+        """M1 Minor 2: the entry's usd stays the sum of its Modal rows."""
+        self.ledger.reserve("t", "2026-11", 1.0, "a")
+        self.ledger.move_to_modal("a", "t", 0.0)
+        r1 = self.ledger.record_modal_spend("2026-11", "a", 1.0, 0.0, "pending", "t")
+        self.ledger.finish_modal_spend(r1, 0.4, 10.0, "failed")
+        r2 = self.ledger.record_modal_spend("2026-11", "a", 1.0, 0.0, "pending", "t")
+        self.ledger.release_pending_modal(r2)
+        self.ledger.settle("a", 0.0)
+
+        def entry():
+            return next(e for e in self.ledger._load() if e["job_id"] == "a")
+        self.assertEqual(entry()["usd"], 0.4)
+        self.ledger.bill_modal_run("a", 0.25, r2, month="2026-12", at="x")
+        self.assertEqual((entry()["usd"], entry()["cu_equivalent"]),
+                         (0.65, round(0.65 / USD_PER_CU, 2)))
+        self.ledger.bill_modal_run("a", 0.3, r1)
+        self.assertEqual(entry()["usd"], 0.55)
 
 
 if __name__ == "__main__":

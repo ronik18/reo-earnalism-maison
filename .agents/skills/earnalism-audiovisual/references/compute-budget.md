@@ -138,6 +138,10 @@ it retired: its artifacts, events and ledger rows stay on record, but `film`, `b
 job for the target and say which one). Allowed when every job of it is imported, closed or
 superseded, or failed on Modal (such a job is closed first, settling its Modal spend); refused while
 any of them has a pending Modal row or an open request, and for a single chunk (retire the group).
+Also refused while the newest Modal row of a job not yet ended is `ok`: that run finished and its
+paid outputs can still be recovered, so re-request it (it resumes from the volume) or import it.
+Only the owner gives them up, with `--discard-finished`; retire then closes the job and states the
+dollars abandoned.
 
 Never: lower steps, resolution or frames of a prepared job; write a `compute` block;
 split a job to slip under a cap; shrink a measured rate; edit, delete or reset the ledger; run on another account;
@@ -315,7 +319,9 @@ reached Modal could not push that field. If there is none: `eav modal-request <j
 --abandon --reason "..."` refuses it, releases the row and restores the reservation (unless the job
 has earlier Modal runs, which stay on record), and says exactly which rows it released and kept (it
 refuses when `modal_contacted_at` is set). If a run of it shows up billed later, `modal-settle
-<job_id> --usd <billed> --run <its run_id>` writes the released row again, billed. Otherwise read
+<job_id> --usd <billed> --run <its run_id>` writes the released row again, billed, into the month
+it counted in when released (else its request's `requested_at` month), never the month of the
+settle; a settled job's `usd` follows its billed rows. Otherwise read
 the billed amount from the Modal dashboard, `modal-settle` it, and hold for the owner before a new
 request. A request refused after its reservation was restored, when another job reserved the
 released CU meanwhile, says which CU cap is now exceeded: hold that job for the owner. If the request
