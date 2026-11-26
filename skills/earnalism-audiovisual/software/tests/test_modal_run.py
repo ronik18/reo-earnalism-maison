@@ -2,6 +2,7 @@
 import contextlib
 import io
 import json
+import os
 import sys
 import tempfile
 import time
@@ -73,6 +74,7 @@ class FakeModal:
         self.image_python, self.function_kwargs = None, {}
         self.lead = ""  # listdir paths: "" (relative to the volume root) or "/" (absolute)
         self.events = []
+        self.secret_dicts = []
 
     @staticmethod
     def default(vroot, cells, job_id, archive):
@@ -122,7 +124,13 @@ class FakeModal:
                 fm.events.append("app.run")
                 yield
 
-        mod.Image, mod.Volume, mod.App = Image, Volume, App
+        class Secret:
+            @staticmethod
+            def from_dict(d):
+                fm.secret_dicts.append(dict(d))
+                return ("secret", len(fm.secret_dicts))
+
+        mod.Image, mod.Volume, mod.App, mod.Secret = Image, Volume, App, Secret
         return mod
 
 
@@ -250,6 +258,45 @@ class ModalRunTests(unittest.TestCase):
         self.assertEqual(result["status"], "ok")
         self.assertTrue((result["folder"] / "inputs.zip").is_file())
 
+    def test_run_modal_attaches_hf_token_as_an_in_memory_secret_and_never_leaks_it(self):
+        job = self.build()
+        fm = FakeModal(self.root / "vol")
+        out, err = io.StringIO(), io.StringIO()
+        with fakes(), mock.patch.dict(sys.modules, {"modal": fm.module()}), \
+                mock.patch.dict(os.environ, {"HF_TOKEN": TOKEN}), \
+                contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            result = modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl")
+        self.assertEqual(fm.secret_dicts, [{"HF_TOKEN": TOKEN, "HUGGING_FACE_HUB_TOKEN": TOKEN}])
+        self.assertEqual(len(fm.function_kwargs["secrets"]), 1)
+        self.assertNotIn(TOKEN, out.getvalue() + err.getvalue() + json.dumps(result, default=str))
+        self.assertNotIn("HF_TOKEN not set", out.getvalue() + err.getvalue())
+        for f in (self.root / "dl").rglob("*"):
+            if f.is_file():
+                self.assertNotIn(TOKEN.encode(), f.read_bytes())
+
+    def test_run_modal_without_hf_token_notes_it_and_attaches_no_secret(self):
+        job = self.build()
+        fm = FakeModal(self.root / "vol")
+        err = io.StringIO()
+        env = {k: v for k, v in os.environ.items() if k != "HF_TOKEN"}
+        with fakes(), mock.patch.dict(sys.modules, {"modal": fm.module()}), \
+                mock.patch.dict(os.environ, env, clear=True), contextlib.redirect_stderr(err):
+            modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl")
+        self.assertEqual(fm.secret_dicts, [])
+        self.assertEqual(fm.function_kwargs["secrets"], [])
+        self.assertEqual(err.getvalue().count("note: HF_TOKEN not set; gated models will fail"), 1)
+
+    def test_a_failure_message_never_carries_the_token(self):
+        job = self.build()
+        def boom(vroot, cells, job_id, archive):
+            raise RuntimeError(f"auth failed for {TOKEN}")
+        fm = FakeModal(self.root / "vol", boom)
+        with fakes(), mock.patch.dict(sys.modules, {"modal": fm.module()}), \
+                mock.patch.dict(os.environ, {"HF_TOKEN": TOKEN}):
+            result = modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl")
+        self.assertEqual(result["status"], "failed")
+        self.assertNotIn(TOKEN, result["error"])
+
     def test_run_modal_failure_still_reports_cost_and_downloads_partial(self):
         job = self.build()
 
@@ -362,8 +409,14 @@ def run(*argv):
     return code, out.getvalue()
 
 
+TOKEN = "hf_FAKE_secret_value_123"
+
+
 class ModalRunCliTests(unittest.TestCase):
     def setUp(self):
+        env = mock.patch.dict(os.environ, {"HF_TOKEN": TOKEN})  # the narration model is gated
+        env.start()
+        self.addCleanup(env.stop)
         from tests.test_cli import SOURCE, RATES as CLI_RATES
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
@@ -394,6 +447,18 @@ class ModalRunCliTests(unittest.TestCase):
         self.assertIn("not under production/audiovisual/", out)
         self.assertEqual(self.ledger_bytes(), before)
         self.assertFalse((self.titles / "modal-requests").exists())
+
+    def test_gated_model_without_hf_token_is_refused_before_modal_is_contacted(self):
+        before = self.ledger_bytes()
+        env = {k: v for k, v in os.environ.items() if k != "HF_TOKEN"}
+        fm, patch = self.modal_patch()
+        with patch, mock.patch.dict(os.environ, env, clear=True), \
+                mock.patch.object(modal_run, "run_modal", side_effect=AssertionError("contacted")):
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--colab-units", 0)
+        self.assertEqual(code, 3, out)
+        self.assertIn("HF_TOKEN", out)
+        self.assertEqual(self.ledger_bytes(), before)
+        self.assertEqual(fm.events, [])
 
     def test_dry_run_only_checks_and_prints_the_plan(self):
         before = self.ledger_bytes()

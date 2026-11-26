@@ -103,7 +103,8 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   caps for the run's UTC month (any failure before Modal is contacted ends `refused`: pending row
   released, CU reservation restored; nothing was run), runs `modal-run --request` and uploads the
   outputs to the private R2 bucket (one prefix per run) → `modal-fetch <job_id>
-  --root <dir>` (sha256 verified, never imports) → `import`. See [compute budget](references/compute-budget.md).
+  --root <dir>` (sha256 verified, never imports) → `import`. The gated narration model needs the GitHub secret `HF_TOKEN` (a read-only token of the
+  account that accepted the model's terms); without it `modal-run` refuses (exit 3) before Modal. See [compute budget](references/compute-budget.md).
 - **Rates.** Forecasts are per runner kind from measured rates: the first real Modal run of a kind
   sets its rate; until then use the Colab L4 rates. Never lower a forecast.
 - **Colab.** The owner runs Colab jobs. Narration, stills and music notebooks are inert

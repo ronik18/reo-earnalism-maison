@@ -9,6 +9,7 @@ Modal authentication comes from the environment the `modal` client reads.
 """
 import ast
 import json
+import os
 import _thread
 import sys
 import threading
@@ -27,6 +28,9 @@ VOLUME_NAME = "earnalism-eav-jobs"
 VOLUME_MOUNT = "/jobs"
 TIMEOUT_MARGIN_S = 900  # setup, pip and model download; the notebook's own clock bounds compute
 RUNNABLE_KINDS = ("narration", "stills", "music")
+# Hugging Face repos that need an accepted-terms read token; modal-run refuses them without HF_TOKEN.
+GATED_REPOS = {"ai4bharat/indic-parler-tts"}
+HF_NOTE = "note: HF_TOKEN not set; gated models will fail"
 CONFIG_NAMES = ("JOB_ID", "KIND", "INPUT_ZIP_SHA256", "DEADLINE_SECONDS", "DRIVE_JOB_DIR")
 
 
@@ -78,6 +82,14 @@ def extract_cells(notebook_path) -> list:
     if isinstance(deadline, bool) or not isinstance(deadline, (int, float)) or deadline <= 0:
         raise ValueError("config cell DEADLINE_SECONDS is not a positive number")
     return cells
+
+
+def gated_model_repo(notebook_path):
+    """The notebook's MODEL_REPO if it is one of GATED_REPOS, else None."""
+    cells = _code_cells(notebook_path)
+    config = read_config(cells[1]) if len(cells) > 1 else {}
+    repo = config.get("MODEL_REPO")
+    return repo if repo in GATED_REPOS else None
 
 
 def colab_shim(job_dir: str) -> str:
@@ -256,6 +268,8 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None) -> 
     the L4 rate x MODAL_OVERHEAD_FACTOR). on_contact() is called once, immediately before Modal
     is first contacted (the workflow records modal_contacted_at). The folder lives on the persistent volume
     `earnalism-eav-jobs` at /jobs/<job_id>, so rerunning the same job resumes from it. The
+    HF_TOKEN, if set in the launching environment, is attached as an in-memory Modal secret
+    (HF_TOKEN and HUGGING_FACE_HUB_TOKEN). The
     function timeout is DEADLINE_SECONDS + 900 s; the notebook's own clock enforces the reserved
     compute seconds. The image's Python equals the local minor version (serialized function).
     Needs modal installed and authenticated; it is imported here, never at module top level."""
@@ -263,6 +277,12 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None) -> 
     job_id, deadline = config["JOB_ID"], int(config["DEADLINE_SECONDS"])
     import modal  # optional dependency, only needed to launch
 
+    token = os.environ.get("HF_TOKEN") or ""
+    secrets = []
+    if token:  # built in memory from the launching environment; never written, printed or returned
+        secrets = [modal.Secret.from_dict({"HF_TOKEN": token, "HUGGING_FACE_HUB_TOKEN": token})]
+    else:
+        print(HF_NOTE, file=sys.stderr)
     app = modal.App(APP_NAME)
     image = (modal.Image.debian_slim(python_version=remote_python_version())
              .apt_install("git", "ffmpeg", "libsndfile1")  # git: the cells pip-install from GitHub
@@ -272,7 +292,8 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None) -> 
     volume = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 
     @app.function(image=image, gpu=gpu, volumes={VOLUME_MOUNT: volume},
-                  timeout=deadline + TIMEOUT_MARGIN_S, serialized=True)
+                  timeout=deadline + TIMEOUT_MARGIN_S, serialized=True,
+                  secrets=secrets)
     def remote(cells_, job_id_, archive_):
         from eav.modal_run import _commit_volume, execute_remote
         return execute_remote(cells_, job_id_, archive_, commit=_commit_volume)
@@ -286,6 +307,8 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None) -> 
             outcome = remote.remote(cells, job_id, archive) or {}
     except Exception as e:  # remote failure or timeout: the seconds were still billed
         status, error = "failed", f"{type(e).__name__}: {e}"
+        if token:
+            error = error.replace(token, "***")
     seconds = time.monotonic() - started
     if status == "ok" and outcome.get("hard_stopped"):
         status = "hard_stopped"

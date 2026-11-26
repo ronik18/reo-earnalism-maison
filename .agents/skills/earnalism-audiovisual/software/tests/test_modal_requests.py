@@ -21,7 +21,7 @@ from tests.test_modal_run import ModalRunCliTests, fake_runner, fakes, run
 
 REPO = next(p for p in Path(__file__).resolve().parents if (p / "AGENTS.md").is_file())
 WORKFLOW = REPO / ".github" / "workflows" / "modal-jobs.yml"
-SECRETS = {"MODAL_TOKEN_ID", "MODAL_TOKEN_SECRET", "CLOUDFLARE_R2_TOKEN"}
+SECRETS = {"MODAL_TOKEN_ID", "MODAL_TOKEN_SECRET", "CLOUDFLARE_R2_TOKEN", "HF_TOKEN"}
 OBJECTS = (f"{modal_requests.API}/accounts/{modal_requests.R2_ACCOUNT}/r2/buckets/"
            f"{modal_requests.R2_BUCKET}/objects")
 
@@ -297,6 +297,23 @@ class ModalRequestTests(unittest.TestCase):
         self.assertEqual(self.ledger.modal_rows(month="2026-11"), [])
         self.assertEqual([(r["status"], r["usd"]) for r in self.ledger.modal_rows(month="2026-12")],
                          [("ok", 0.4)])
+
+    def test_gated_model_without_hf_token_refuses_the_request_before_modal(self):
+        self.assertEqual(self.request("--colab-units", 0.5)[0], 0)
+        self.set_status("running")
+        calls = []
+        env = {k: v for k, v in os.environ.items() if k != "HF_TOKEN"}
+        with mock.patch.dict(os.environ, env, clear=True), \
+                mock.patch.object(modal_run, "run_modal", fake_runner(0.1, calls=calls)):
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--request")
+        self.assertEqual((code, calls), (3, []), out)
+        self.assertEqual(self.rows(), [])  # the pending row was released
+        req = self.req()
+        self.assertEqual(req["status"], "refused")
+        self.assertIn("HF_TOKEN", req["error"])
+        self.assertNotIn("modal_contacted_at", req)
+        (entry,) = [e for e in json.loads(self.ledger_bytes()) if e.get("job_id") == self.job_id]
+        self.assertNotEqual(entry.get("runner"), "modal")  # the CU reservation was restored
 
     def test_request_refused_when_the_run_month_is_full(self):
         with self.rate(1.0):
@@ -797,7 +814,7 @@ class WorkflowTests(unittest.TestCase):
     def setUp(self):
         self.text = WORKFLOW.read_text(encoding="utf-8")
 
-    def test_secrets_are_only_the_three_names_and_never_echoed(self):
+    def test_secrets_are_only_the_four_names_and_never_echoed(self):
         self.assertEqual(set(re.findall(r"secrets\.([A-Za-z0-9_]+)", self.text)), SECRETS)
         for name in SECRETS:
             self.assertNotRegex(self.text, r"echo[^\n]*\$\{?" + name)
@@ -896,6 +913,13 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("the result is on modal-results/job-1-run-777", proc.stdout)
         self.assertIn("failed", git("show", "modal-results/job-1-run-777:req.json", cwd=d / "origin.git"))
 
+    def test_hf_token_only_in_the_run_on_modal_step(self):
+        self.assertEqual(self.text.count("secrets.HF_TOKEN"), 1)
+        start = self.text.index("      - name: Run on Modal\n")
+        end = self.text.index("      - name: Refuse the request if Modal was never contacted")
+        self.assertIn("HF_TOKEN: ${{ secrets.HF_TOKEN }}", self.text[start:end])
+        self.assertEqual(self.text.count("HF_TOKEN: "), 1)  # no other step sets it
+
     def test_checkouts_keep_no_token_and_only_push_steps_get_it(self):
         self.assertEqual(self.text.count("persist-credentials: false"), 2)
         self.assertEqual(self.text.count("actions/checkout@"), 2)
@@ -925,10 +949,10 @@ class WorkflowTests(unittest.TestCase):
             k for k, v in (s.get("env") or {}).items() if "secrets." in str(v)} for s in steps}
         self.assertEqual(secrets_by_step["Install the Modal client (no secrets in this step)"], set())
         self.assertEqual(secrets_by_step["Probe R2 before the paid run"], {"CLOUDFLARE_R2_TOKEN"})
-        self.assertEqual(secrets_by_step["Run on Modal"], {"MODAL_TOKEN_ID", "MODAL_TOKEN_SECRET"})
+        self.assertEqual(secrets_by_step["Run on Modal"], {"MODAL_TOKEN_ID", "MODAL_TOKEN_SECRET", "HF_TOKEN"})
         self.assertEqual(secrets_by_step["Upload the outputs to R2"], {"CLOUDFLARE_R2_TOKEN"})
         self.assertEqual(secrets_by_step["Push the result back (only the push token)"], set())
-        self.assertEqual(sum(len(v) for v in secrets_by_step.values()), 4)
+        self.assertEqual(sum(len(v) for v in secrets_by_step.values()), 5)
         token_steps = {s.get("name") for s in steps if "GH_TOKEN" in (s.get("env") or {})}
         self.assertEqual(token_steps, {"Mark the request running (only the push token)",
                                        "Refuse the request if Modal was never contacted (only the push token)",

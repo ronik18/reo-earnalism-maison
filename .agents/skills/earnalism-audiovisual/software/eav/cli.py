@@ -1083,6 +1083,16 @@ def cmd_modal_run(args):
                           "next": f"{PROG} modal-run {args.job_id} --root {rec.root}"}, sort_keys=True))
         return
     req_path = modal_requests.request_path(rec.root, args.job_id)
+    gated = modal_run.gated_model_repo(job["notebook"])
+    if gated and not os.environ.get("HF_TOKEN"):
+        why = (f"{gated} is a gated Hugging Face model and HF_TOKEN is not set (a read token of the "
+               "account that accepted its terms)")
+        if args.request and _open_request(rec, args.job_id):
+            _refuse_request(_ledger(rec, args), req_path, why)
+            raise Stop(f"{why}. The request is refused, its pending row released and the job's CU "
+                       "reservation restored; Modal was not contacted.",
+                       "Add the HF_TOKEN repository secret, then make a new request", code=3)
+        raise Stop(f"{why}. Modal was not contacted.", "Export HF_TOKEN, then rerun", code=3)
     if args.request:
         ledger, run_id, colab_units = _requested_run(args, rec, req_path)
     else:

@@ -203,6 +203,12 @@ When the session cannot reach Modal (its proxy has no HTTP/2, so the gRPC client
 the run goes through the `modal-jobs` workflow on a GitHub-hosted runner, and the outputs come
 back through the private Cloudflare R2 bucket `reo-earnalism-maison-private`. The caps are the same.
 
+**GitHub secret `HF_TOKEN`**: the narration model `ai4bharat/indic-parler-tts` is gated on Hugging
+Face. Add a read-only token of the account that accepted its terms as the repository secret
+`HF_TOKEN`; only the workflow's "Run on Modal" step receives it, and `modal-run` attaches it to the
+Modal function as an in-memory secret (never written, printed or recorded). A gated model without
+`HF_TOKEN` is refused (exit 3) before Modal is contacted; the request's row is released.
+
 1. **Request** (in the session): `eav modal-request <job_id> --root <title root> --colab-units <CU>`
    runs every `modal-run` check (job state, inputs.zip sha256, `reel_clips` refused, both dollar caps
    against the worst case with pending rows counted), records the move to Modal with

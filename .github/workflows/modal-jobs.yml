@@ -9,6 +9,10 @@
 # its pending row is released and the job's CU reservation restored. `eav modal-fetch` brings the
 # outputs back for `eav import`. Each step gets only the secrets it needs; the checkout keeps no
 # token, and only the steps that push get the GitHub token.
+# Secret HF_TOKEN (only the "Run on Modal" step): a read-only Hugging Face token of the account that
+# accepted the terms of the gated narration model ai4bharat/indic-parler-tts. modal-run attaches it
+# to the Modal function as an in-memory secret and refuses (exit 3, before Modal is contacted) a gated
+# model without it.
 # The ledger's caps run on an estimate (wall seconds x the L4 rate x 1.25), reconciled from the bill
 # with `eav modal-settle`. The hard backstop is the Modal workspace spend limit: the owner sets it to
 # 30 USD a month or less when adding the payment method, before any request is (re)queued.
@@ -127,6 +131,7 @@ jobs:
         env:
           MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
           MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
           ROOT: ${{ steps.start.outputs.root }}
         run: |
           set -euo pipefail
