@@ -4,7 +4,7 @@ from pathlib import Path
 
 import json
 
-from eav.budget import MODAL_MONTH_CAP_USD, BudgetExceeded, Ledger, fit_reel_job, forecast, forecast_seconds
+from eav.budget import MODAL_MONTH_CAP_USD, MODAL_TITLE_CAP_USD, BudgetExceeded, Ledger, fit_reel_job, forecast, forecast_seconds
 
 RATES = {"reel": {"s_per_step": 1.0, "units_per_hour": 10.0}}
 
@@ -131,15 +131,71 @@ class ModalSpendTests(unittest.TestCase):
         self.ledger.record_modal_spend("2026-11", "j1", 0.25, 10.0, "failed", "a")
         self.ledger.record_modal_spend("2026-11", "j1", 0.50, 20.0, "ok", "b")
         self.ledger.record_modal_spend("2026-12", "j2", 1.0, 30.0, "hard_stopped", "c")
-        self.ledger.settle("j1", 7.5)
+        with self.assertRaises(ValueError):  # a job with Modal rows never settles in Colab units
+            self.ledger.settle("j1", 7.5)
+        self.ledger.settle("j1", 0)
         self.ledger.reserve("t", "2026-12", 1, "j2")
         self.assertEqual(self.ledger.modal_month_usd("2026-11"), 0.75)
         self.assertEqual(self.ledger.modal_job_usd("j1"), (0.75, 2))
         self.assertEqual(self.ledger.modal_units("j1"), 7.5)
         self.assertIsNone(self.ledger.modal_units("nope"))
-        self.assertEqual(self.ledger.spent("t", None), 8.5)
+        self.assertEqual(self.ledger.spent("t", None), 1)  # Modal spend is not Colab CU
+        j1 = next(e for e in json.loads(self.path.read_text()) if e.get("job_id") == "j1")
+        self.assertEqual((j1["state"], j1["units"], j1["usd"], j1["cu_equivalent"],
+                          j1["runner"], j1["reserved_units"]),
+                         ("settled", 0.0, 0.75, 7.5, "modal", 5))
+        self.assertEqual(self.ledger.modal_title_usd("t"), 1.75)
         with self.assertRaises(ValueError):
             self.ledger.record_modal_spend("2026-11", "j1", 1, 1, "weird", "d")
+
+    def test_move_to_modal_releases_the_cu_reservation_once(self):
+        self.ledger.reserve("t", "2026-11", 40, "j1")
+        self.ledger.reserve("u", "2026-11", 60, "j2")
+        with self.assertRaises(BudgetExceeded):
+            self.ledger.reserve("v", "2026-11", 1, "j3")  # 100 CU month full
+        self.assertEqual(self.ledger.move_to_modal("j1", "at"), 40)
+        self.assertEqual(self.ledger.move_to_modal("j1", "later"), 0.0)  # idempotent (resume)
+        self.assertEqual(self.ledger.spent(None, "2026-11"), 60)
+        self.assertEqual(self.ledger.spent("t", None), 0)
+        self.ledger.reserve("v", "2026-11", 40, "j3")  # the released 40 CU are Colab's again
+        j1 = next(e for e in json.loads(self.path.read_text()) if e.get("job_id") == "j1")
+        self.assertEqual((j1["runner"], j1["units"], j1["reserved_units"], j1["state"],
+                          j1["moved_to_modal_at"]), ("modal", 0.0, 40, "reserved", "at"))
+        self.assertTrue(self.ledger.is_modal_job("j1"))
+        self.assertFalse(self.ledger.is_modal_job("j2"))
+        self.ledger.settle("j2", 3)
+        with self.assertRaises(ValueError):
+            self.ledger.move_to_modal("j2", "at")  # settled: never moves
+        with self.assertRaises(KeyError):
+            self.ledger.move_to_modal("nope", "at")
+
+    def test_title_cap_6_usd_boundary_and_month_cap(self):
+        self.assertEqual(MODAL_TITLE_CAP_USD, 6.0)
+        self.ledger.reserve("t", "2026-10", 1, "j1")
+        self.ledger.reserve("t", "2026-11", 1, "j2")
+        self.ledger.reserve("big", "2026-11", 1, "k1")
+        self.ledger.record_modal_spend("2026-10", "j1", 3.00, 1.0, "ok", "a")  # lifetime: all months
+        self.ledger.record_modal_spend("2026-11", "j2", 2.50, 1.0, "pending", "b")  # pending counts
+        self.ledger.record_modal_spend("2026-11", "k1", 20.0, 1.0, "ok", "c")  # another title
+        self.assertEqual(self.ledger.modal_title_usd("t"), 5.50)
+        with self.assertRaises(BudgetExceeded) as cm:
+            self.ledger.check_modal("2026-11", "t", 0.60)
+        for word in ("title cap", "5.50", "0.60", "0.50"):
+            self.assertIn(word, str(cm.exception))
+        self.ledger.check_modal("2026-11", "t", 0.50)  # exactly the cap is fine
+        self.ledger.check_modal("2026-11", "other", 0.60)
+        with self.assertRaises(BudgetExceeded) as cm:  # month: 22.50 + 8 > 30 though title room
+            self.ledger.check_modal("2026-11", "fresh", 8.0)
+        self.assertIn("month cap", str(cm.exception))
+
+    def test_title_cap_keyed_by_edition(self):
+        self.ledger.reserve("slug-a", "2026-11", 1, "j1", edition_id="ed-1", root="a")
+        self.ledger.record_modal_spend("2026-11", "j1", 5.30, 1.0, "ok", "a")
+        self.ledger.check_modal("2026-11", "slug-b", 0.60, edition_id="ed-1")  # 5.90 allowed
+        self.ledger.record_modal_spend("2026-11", "j1", 0.20, 1.0, "ok", "b")
+        with self.assertRaises(BudgetExceeded):
+            self.ledger.check_modal("2026-11", "slug-b", 0.60, edition_id="ed-1")
+        self.ledger.check_modal("2026-11", "slug-a", 0.60, edition_id="ed-2")
 
     def test_check_modal_month_boundary(self):
         self.ledger.record_modal_spend("2026-11", "j", 29.50, 1.0, "ok", "a")

@@ -1,12 +1,15 @@
 """Compute-unit forecast and the standing Colab Pro allowance ledger.
 
-Allowance: 60 units per title over the title's whole life (all months) and 100
+Colab allowance: 60 units per title over the title's whole life (all months) and 100
 units per calendar month across titles. Reservations count as spent until
-settled with the actual units.
-Modal runs (`eav modal-run`) are also capped in dollars: 30 USD per UTC month, recorded as
+settled with the actual units. These CU caps apply to Colab work only.
+Modal runs (`eav modal-run`) are capped in dollars only (owner decision of 26 Nov 2026):
+30 USD per UTC month and 6 USD per title over the title's whole life, recorded as
 append-only `modal_spend` rows (one record per month in the ledger file, next to the
-reservation entries). A Modal run counts against the CU caps at Colab's price
-(CU-equivalent = usd / 0.10), settled at import/close.
+reservation entries). A job is reserved in CU at build time; when it is run on Modal its
+reservation entry is marked `runner: "modal"` and its units are released to 0 (the original
+forecast is kept as `reserved_units`), so it no longer counts against the CU caps. Such a job
+settles from its Modal rows in USD (`usd`, with `cu_equivalent` kept as information only).
 The ledger assumes one writer process at a time.
 """
 import json
@@ -19,7 +22,8 @@ TITLE_CAP = 60.0
 MONTH_CAP = 100.0
 MARGIN = 1.15
 MODAL_MONTH_CAP_USD = 30.0
-USD_PER_CU = 0.10
+MODAL_TITLE_CAP_USD = 6.0  # lifetime per title: the dollar value of the 60 CU title cap at 0.10/CU
+USD_PER_CU = 0.10  # information only (cu_equivalent); Modal spend never counts against CU caps
 MODAL_STATUSES = ("ok", "failed", "hard_stopped", "pending", "settled")
 MIN_ITEMS = 1
 # The wan22 batch contract allocates at least 600 s per job, so a reel batch reserves at least that.
@@ -112,17 +116,63 @@ class Ledger:
         return float(sum(r["usd"] for r in rows)), len(rows)
 
     def modal_units(self, job_id: str):
-        """CU-equivalent of the job's Modal rows (usd / USD_PER_CU, 2 decimals), None if no rows."""
+        """CU-equivalent of the job's Modal rows (usd / USD_PER_CU, 2 decimals), None if no rows.
+        Information only: Modal spend never counts against the CU caps."""
         usd, n = self.modal_job_usd(job_id)
         return round(usd / USD_PER_CU, 2) if n else None
 
+    def modal_title_usd(self, title, edition_id=None) -> float:
+        """Lifetime Modal spend of one title (every month, pending rows included): the rows of
+        every job whose reservation entry belongs to the title."""
+        jobs = {e["job_id"] for e in self._load() if self._mine(e, title, edition_id)}
+        return float(sum(r["usd"] for r in self.modal_rows() if r["job_id"] in jobs))
+
+    @staticmethod
+    def _over(spent: float, worst_case_usd: float, cap: float) -> bool:
+        return round(spent + worst_case_usd, 9) > cap
+
     def check_modal_month(self, month: str, worst_case_usd: float) -> None:
         spent = self.modal_month_usd(month)
-        if spent + worst_case_usd > MODAL_MONTH_CAP_USD:
+        if self._over(spent, worst_case_usd, MODAL_MONTH_CAP_USD):
             raise BudgetExceeded(
                 f"Modal month cap {MODAL_MONTH_CAP_USD:.2f} USD would be exceeded for {month}: "
                 f"spent {spent:.2f} USD, worst-case forecast {worst_case_usd:.2f} USD, "
                 f"remaining {max(MODAL_MONTH_CAP_USD - spent, 0):.2f} USD")
+
+    def check_modal_title(self, title, worst_case_usd: float, edition_id=None) -> None:
+        spent = self.modal_title_usd(title, edition_id)
+        if self._over(spent, worst_case_usd, MODAL_TITLE_CAP_USD):
+            raise BudgetExceeded(
+                f"Modal title cap {MODAL_TITLE_CAP_USD:.2f} USD (lifetime) would be exceeded for "
+                f"{title!r}: spent {spent:.2f} USD, worst-case forecast {worst_case_usd:.2f} USD, "
+                f"remaining {max(MODAL_TITLE_CAP_USD - spent, 0):.2f} USD")
+
+    def check_modal(self, month: str, title, worst_case_usd: float, edition_id=None) -> None:
+        """Both Modal dollar caps, checked before Modal is contacted (pending rows count)."""
+        self.check_modal_month(month, worst_case_usd)
+        self.check_modal_title(title, worst_case_usd, edition_id)
+
+    def move_to_modal(self, job_id: str, at: str) -> float:
+        """The job is run on Modal: release its CU reservation (units -> 0; the forecast is kept as
+        reserved_units) and record that it moved, so the Colab CU caps no longer count it.
+        Idempotent (a resumed run changes nothing). Returns the CU released."""
+        entries = self._load()
+        entry = next((e for e in entries if e["job_id"] == job_id), None)
+        if entry is None:
+            raise KeyError(job_id)
+        if entry.get("runner") == "modal":
+            return 0.0
+        if entry["state"] != "reserved":
+            raise ValueError(f"job {job_id!r} is already settled; it cannot move to Modal")
+        released = entry["units"]
+        entry.update(reserved_units=released, units=0.0, runner="modal", moved_to_modal_at=at)
+        self._save(entries)
+        return released
+
+    def is_modal_job(self, job_id: str) -> bool:
+        """Run on Modal: moved there, or (a ledger from before the move was recorded) has rows."""
+        entry = next((e for e in self._load() if e["job_id"] == job_id), None)
+        return bool(entry and entry.get("runner") == "modal") or bool(self.modal_rows(job_id=job_id))
 
     def record_modal_spend(self, month: str, job_id: str, usd: float, seconds: float,
                            status: str, at: str) -> str:
@@ -224,13 +274,24 @@ class Ledger:
         self._save(entries)
 
     def settle(self, job_id: str, actual_units: float) -> None:
+        """Settle a reservation. A job run on Modal settles from its Modal rows in USD: its CU
+        stay 0 (actual_units must be 0) and usd / cu_equivalent are recorded as information."""
         _check_units(actual_units)
         entries = self._load()
         for e in entries:
             if e["job_id"] == job_id:
                 if e["state"] == "settled":
                     raise ValueError(f"job already settled: {job_id!r}")
-                e["units"] = actual_units
+                usd, n = self.modal_job_usd(job_id)
+                if e.get("runner") == "modal" or n:
+                    if actual_units != 0:
+                        raise ValueError(f"job {job_id!r} ran on Modal: it settles from its Modal "
+                                         f"rows in USD, never with Colab units ({actual_units:g})")
+                    e.setdefault("reserved_units", e["units"])
+                    e.update(runner="modal", units=0.0, usd=round(usd, 6),
+                             cu_equivalent=round(usd / USD_PER_CU, 2))
+                else:
+                    e["units"] = actual_units
                 e["state"] = "settled"
                 self._save(entries)
                 return

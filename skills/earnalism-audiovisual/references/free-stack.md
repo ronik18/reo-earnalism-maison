@@ -1,7 +1,7 @@
 # Free stack: models, licences, where they run
 
-Zero additional spend beyond Modal's $30 per UTC month cap (owner decision of 26 November
-2026). Heavy jobs run in the owner's existing Colab Pro account, started by the owner, or
+Zero additional spend beyond Modal's caps of $30 per UTC month and $6 per title (owner decision
+of 26 November 2026). Heavy jobs run in the owner's existing Colab Pro account, started by the owner, or
 (narration, stills, music only) on Modal via `eav modal-run`, executing the same built notebook
 with the same pinned models, voices and licences; Wan reel clips run only in Colab. Everything
 else runs in Claude's container (CPU, ffmpeg).
@@ -22,7 +22,7 @@ else runs in Claude's container (CPU, ffmpeg).
 - **FLUX.1-dev**: non-commercial licence. Refused the same way.
 - **Paid generators and credit-spending connectors**: Kling, ElevenLabs (voice or music),
   Suno, Runway, Adobe/Canva generative credits, Veo, Luma, HeyGen and the like. Not for a
-  test, not "just the hook". The one permitted spend is Modal GPU time inside its $30 UTC-month cap.
+  test, not "just the hook". The one permitted spend is Modal GPU time inside its $30 UTC-month and $6 per-title caps.
 
 When the owner asks for a forbidden tool, say why in one sentence and offer the licensed
 equivalent (MusicGen → ACE-Step cues or the VCSL score; FLUX.1-dev → FLUX.1-schnell).
@@ -41,7 +41,7 @@ folder it leaves is what `import` expects from Colab. `modal-run` refuses `reel_
   manifest) can finish before it, and a timer unassigns the runtime at it. A stopped or
   short run writes `manifest.json` with `status: INCOMPLETE`, which `import` refuses;
   re-run the job to resume it (finished items are kept; the total across sessions stays within the
-  reserved seconds), or end it with `close --units <CU Colab shows>` (Modal rows settle themselves).
+  reserved seconds), or end it with `close --units <CU Colab shows>` (a Modal job takes no `--units`: it settles from its Modal rows in USD).
 - **Package versions**: the notebooks still `pip install` parler-tts and ACE-Step from
   git and diffusers/transformers unpinned. Every output manifest records the resolved
   versions (and VCS commits) under `packages`, and `import` refuses a manifest without

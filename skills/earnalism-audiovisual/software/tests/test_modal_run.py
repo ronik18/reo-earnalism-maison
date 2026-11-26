@@ -336,8 +336,12 @@ class ModalRunCliTests(unittest.TestCase):
         self.assertFalse((self.root / "modal-downloads").exists())
         self.assertEqual(self.ledger_bytes(), before)
 
-    def test_run_then_import_and_reservations_untouched_by_the_run(self):
-        before = self.ledger_bytes()
+    def test_run_releases_the_cu_reservation_then_import_settles_in_usd(self):
+        before = json.loads(self.ledger_bytes())
+        (reserved,) = [e for e in before if e.get("job_id") == self.job_id]
+        ledger = budget.Ledger(self.d / "titles" / "allowance-ledger.json")
+        month = cli._month()
+        colab_before = ledger.spent(None, month)
         fm, patched = self.modal_patch()
         with fakes(), patched:
             code, out = run("modal-run", self.job_id, "--root", self.root)
@@ -347,12 +351,24 @@ class ModalRunCliTests(unittest.TestCase):
         self.assertIn("eav.cli import " + self.job_id, line["next"])
         folder = Path(line["folder"])
         self.assertEqual(folder, self.root / "modal-downloads" / self.job_id)
-        entries = [e for e in json.loads(self.ledger_bytes()) if "modal_spend" not in e]
-        self.assertEqual(entries, json.loads(before))  # only the modal_spend record was added
+        (entry,) = [e for e in json.loads(self.ledger_bytes()) if e.get("job_id") == self.job_id]
+        self.assertEqual((entry["runner"], entry["units"], entry["reserved_units"], entry["state"]),
+                         ("modal", 0.0, reserved["units"], "reserved"))
+        self.assertTrue(entry["moved_to_modal_at"])
+        # the Colab month (and title) remaining grew by exactly the released reservation
+        self.assertAlmostEqual(ledger.spent(None, month), colab_before - reserved["units"])
+        code, out = run("status", "--root", self.root)
+        self.assertIn(f"{colab_before - reserved['units']:.2f} CU this month (all titles)", out)
+        self.assertIn("on Modal (CU reservation released)", out)
+        self.assertIn("(no --units)", out)
         self.assertEqual(json.loads((folder / "manifest.json").read_text())["status"], "COMPLETE")
         code, out = run("import", self.job_id, "--root", self.root, "--from", folder)
         self.assertEqual(code, 0, out)
-        self.assertNotEqual(self.ledger_bytes(), before)
+        self.assertIn("settled from its Modal rows", out)
+        (entry,) = [e for e in json.loads(self.ledger_bytes()) if e.get("job_id") == self.job_id]
+        usd = ledger.modal_job_usd(self.job_id)[0]
+        self.assertEqual((entry["state"], entry["units"], entry["usd"]), ("settled", 0.0, round(usd, 6)))
+        self.assertAlmostEqual(ledger.spent(None, month), colab_before - reserved["units"])
 
     def test_failed_remote_reports_cost_downloads_partial_and_exits_nonzero(self):
         def behavior(vroot, cells, job_id, archive):
@@ -507,42 +523,66 @@ class ModalCapTests(unittest.TestCase):
         code, out = run("modal-settle", self.job_id, "--root", self.root, "--usd", 0.25)
         self.assertEqual(code, 2, out)  # nothing pending any more
 
-    def test_import_defaults_units_to_the_sum_of_every_modal_session(self):
+    def colab_cu(self):
+        data = cli.Record.load(self.root).data
+        return (self.ledger.spent(None, self.MONTH),
+                self.ledger.spent(data["title_slug"], None, data["source"].get("edition_id")))
+
+    def test_import_settles_from_every_modal_session_in_usd_and_refuses_units(self):
         self.go(fake_runner(0.25, "failed"))
         self.go(fake_runner(0.30))
-        self.assertEqual(self.ledger.modal_units(self.job_id), 5.5)
+        cu = self.colab_cu()
         fm, patched = self.modal_patch()
         with fakes(), patched:
             run("modal-run", self.job_id, "--root", self.root)  # a real (fake-modal) run for the folder
         folder = self.root / "modal-downloads" / self.job_id
         usd = self.ledger.modal_job_usd(self.job_id)[0]
-        expected = round(usd / 0.10, 2)
         code, out = run("import", self.job_id, "--root", self.root, "--from", folder, "--units", 99)
         self.assertEqual(code, 2, out)
-        self.assertIn("double count", out)
+        self.assertIn("never with Colab --units", out)
         code, out = run("import", self.job_id, "--root", self.root, "--from", folder)
         self.assertEqual(code, 0, out)
-        self.assertIn(f"settled {expected:g} CU", out)
+        self.assertIn(f"settled from its Modal rows at {usd:.4f} USD (0 CU)", out)
         entry = next(e for e in json.loads(self.ledger.path.read_text()) if e.get("job_id") == self.job_id)
-        self.assertEqual((entry["state"], entry["units"]), ("settled", expected))
+        self.assertEqual((entry["state"], entry["units"], entry["usd"], entry["cu_equivalent"]),
+                         ("settled", 0.0, round(usd, 6), round(usd / 0.10, 2)))
+        self.assertEqual(self.colab_cu(), cu)  # the CU caps are not touched by the settlement
 
-    def test_import_accepts_a_matching_explicit_units(self):
+    def test_import_refuses_even_a_matching_explicit_units(self):
         self.seed(0.25, job_id=self.job_id)
         fm, patched = self.modal_patch()
         with fakes(), patched:
             run("modal-run", self.job_id, "--root", self.root)
         folder = self.root / "modal-downloads" / self.job_id
         units = self.ledger.modal_units(self.job_id)
-        self.assertEqual(run("import", self.job_id, "--root", self.root, "--from", folder,
-                             "--units", units)[0], 0)
+        code, out = run("import", self.job_id, "--root", self.root, "--from", folder, "--units", units)
+        self.assertEqual(code, 2, out)
+        self.assertEqual(run("import", self.job_id, "--root", self.root, "--from", folder)[0], 0)
 
-    def test_close_defaults_units_and_rejects_a_mismatch(self):
+    def test_close_settles_from_modal_rows_and_refuses_units(self):
         self.go(fake_runner(0.43, "failed"))
+        cu = self.colab_cu()
         code, out = run("close", self.job_id, "--root", self.root, "--reason", "died", "--units", 1)
         self.assertEqual(code, 2, out)
         code, out = run("close", self.job_id, "--root", self.root, "--reason", "died")
         self.assertEqual(code, 0, out)
-        self.assertIn("settled at the actual 4.3 CU", out)
+        self.assertIn("settled from its Modal rows at 0.4300 USD (0 CU)", out)
+        self.assertEqual(self.colab_cu(), cu)
+        entry = next(e for e in json.loads(self.ledger.path.read_text()) if e.get("job_id") == self.job_id)
+        self.assertEqual((entry["state"], entry["units"], entry["usd"]), ("settled", 0.0, 0.43))
+        code, out = run("status", "--root", self.root)
+        self.assertIn("closed (ran, not imported; 0.43 USD on Modal settled)", out)
+
+    def test_old_ledger_job_with_modal_rows_but_no_move_settles_in_usd(self):
+        """A ledger written before the move was recorded: Modal rows alone make it a Modal job."""
+        self.seed(0.40, job_id=self.job_id)
+        code, out = run("close", self.job_id, "--root", self.root, "--reason", "died", "--units", 4)
+        self.assertEqual(code, 2, out)
+        code, out = run("close", self.job_id, "--root", self.root, "--reason", "died")
+        self.assertEqual(code, 0, out)
+        entry = next(e for e in json.loads(self.ledger.path.read_text()) if e.get("job_id") == self.job_id)
+        self.assertEqual((entry["units"], entry["usd"], entry["runner"]), (0.0, 0.4, "modal"))
+        self.assertGreater(entry["reserved_units"], 0)
 
     def test_colab_jobs_still_require_units(self):
         code, out = run("close", self.job_id, "--root", self.root, "--reason", "died")
@@ -553,13 +593,49 @@ class ModalCapTests(unittest.TestCase):
         code, out = run("import", self.job_id, "--root", self.root, "--from", folder)
         self.assertEqual(code, 2, out)
         self.assertIn("--units is required", out)
+        code, out = run("close", self.job_id, "--root", self.root, "--reason", "died", "--units", 0.7)
+        self.assertEqual(code, 0, out)
+        self.assertIn("settled at the actual 0.7 CU", out)
+        self.assertAlmostEqual(self.colab_cu()[0], 0.7)  # Colab CU caps still count Colab work
+        entry = next(e for e in json.loads(self.ledger.path.read_text()) if e.get("job_id") == self.job_id)
+        self.assertNotIn("runner", entry)
 
-    def test_status_shows_the_month_spend(self):
+    def test_status_shows_the_month_and_title_spend(self):
         code, out = run("status", "--root", self.root)
-        self.assertIn("modal: $0.00 of $30.00 (UTC month 2026-11)", out)
+        self.assertIn("modal: $0.00 of $30.00 this month; title: $0.00 of $6.00", out)
         self.go(fake_runner(1.234))
+        self.seed(2.0)  # another title's job: the month only
         code, out = run("status", "--root", self.root)
-        self.assertIn("modal: $1.23 of $30.00 (UTC month 2026-11)", out)
+        self.assertIn("modal: $3.23 of $30.00 this month; title: $1.23 of $6.00", out)
+
+    def test_title_cap_refusal_at_the_boundary(self):
+        """The month has dollars left but the title is at its 6 USD lifetime cap: refused."""
+        self.seed(5.50, job_id=self.job_id, month="2026-10")  # lifetime: an earlier month counts
+        before = self.ledger.path.read_bytes()
+        calls = []
+        with self.with_worst_case(0.60):
+            code, out = self.go(fake_runner(0.1, calls=calls))
+        self.assertEqual(code, 3, out)
+        self.assertEqual(calls, [])  # Modal was never contacted
+        for word in ("title cap", "5.50", "0.60", "0.50"):
+            self.assertIn(word, out)
+        self.assertEqual(self.ledger.path.read_bytes(), before)  # no release, no pending row
+
+    def test_title_cap_allows_just_under(self):
+        self.seed(5.30, job_id=self.job_id)
+        with self.with_worst_case(0.60):
+            code, out = self.go(fake_runner(0.1))
+        self.assertEqual(code, 0, out)
+        data = cli.Record.load(self.root).data
+        self.assertAlmostEqual(self.ledger.modal_title_usd(
+            data["title_slug"], data["source"].get("edition_id")), 5.40)
+
+    def test_month_cap_still_binds_with_title_room(self):
+        self.seed(29.50)
+        with self.with_worst_case(0.60):
+            code, out = self.go(fake_runner(0.1))
+        self.assertEqual(code, 3, out)
+        self.assertIn("month cap", out)
 
     def test_reservation_caps_unchanged_by_modal_rows(self):
         self.seed(20.0, job_id=self.job_id)

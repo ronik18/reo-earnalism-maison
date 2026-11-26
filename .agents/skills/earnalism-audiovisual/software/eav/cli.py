@@ -12,8 +12,9 @@
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli modal-run <job_id> --root <dir> [--download <dir>] [--dry-run]
                          (runs the built notebook headlessly on a Modal L4; --dry-run only checks and prints the plan;
-                          leaves the job folder `import` expects; refuses (exit 3) past the 30 USD UTC-month Modal cap
-                          and appends the actual spend to the ledger; then import/close need no --units)
+                          leaves the job folder `import` expects; refuses (exit 3) past the 30 USD UTC-month or the
+                          6 USD lifetime title Modal cap; releases the job's CU reservation (Modal is capped in USD
+                          only) and appends the actual spend to the ledger; then import/close take no --units)
   python3 -m eav.cli modal-settle <job_id> --root <dir> --usd <billed>   (replace an interrupted run's pending worst-case row)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>" [--group]
                          (a chunk only with --group: every never-run chunk of its group together)
@@ -37,7 +38,8 @@ The CLI wraps the eav modules; it spends nothing, runs no GPU work, never marks 
 and never publishes. Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held, 5 QC failure.
 The allowance ledger is shared by every title and pinned in record.json at init (--ledger,
 else $EAV_LEDGER, else <root>/../allowance-ledger.json); later commands refuse any other path.
-The 60 CU title cap is lifetime; the 100 CU cap is per calendar month.
+The 60 CU title cap is lifetime; the 100 CU cap is per calendar month; both are Colab-only.
+Modal: 30 USD per UTC month and 6 USD per title (lifetime), in dollars only.
 """
 import argparse
 import json
@@ -455,9 +457,23 @@ def _wan_action(rec, job) -> str:
             '--reason "<what happened>"')
 
 
+def _on_modal(rec, job_id) -> bool:
+    pinned = rec.data.get("ledger")
+    if not pinned or Path(pinned).is_absolute():
+        return False
+    return budget.Ledger((rec.root / pinned).resolve()).is_modal_job(job_id)
+
+
 def _colab_action(rec, job) -> str:
     if job["kind"] == "reel_clips":
         return _wan_action(rec, job)
+    if _on_modal(rec, job["job_id"]):  # moved to Modal: Modal dollar caps, no Colab --units
+        return (f"Job {job['job_id']} runs on Modal (its CU reservation is released). Import its "
+                f"output: {PROG} import {job['job_id']} --root {rec.root} --from <the modal-run "
+                f"folder> (no --units). If it stopped short, rerun {PROG} modal-run {job['job_id']} "
+                f"--root {rec.root} to resume; if a run died with a pending row: {PROG} modal-settle "
+                f"{job['job_id']} --root {rec.root} --usd <billed>. If it can never be imported: "
+                f"{PROG} close {job['job_id']} --root {rec.root} --reason \"<what happened>\" (no --units)")
     drive = _json(job["manifest"]).get("drive_dir", colab_jobs.DRIVE_ROOT)
     c = job.get("chunk")
     part = (f" (chunk {c['index']} of {c['of']} of group {c['group']}; each chunk is its own job, "
@@ -858,21 +874,25 @@ def _build_chunks(rec, kind, spec, ledger, rates, month, sizes, target) -> list:
 
 
 def _modal_units(ledger, job_id, given):
-    """Units to settle. A job with Modal spend rows settles at the sum of every Modal session
-    (usd / USD_PER_CU, 2 decimals); --units may be omitted, and if given must equal it (no
-    double counting). A Colab-run job needs --units."""
-    modal = ledger.modal_units(job_id)
-    if modal is None:
+    """CU to settle. A Colab-run job needs --units. A job run on Modal (any Modal spend row, or
+    moved to Modal) settles from its Modal rows in USD and 0 CU: --units is refused for it."""
+    if not ledger.is_modal_job(job_id):
         if given is None:
             raise Stop(f"--units is required for job {job_id} (it has no Modal runs on the ledger)",
                        "Pass the CU Colab shows the run used")
         return given
-    if given is not None and round(given, 2) != modal:
-        raise Stop(f"--units {given:g} does not match the Modal spend of job {job_id}: "
-                   f"{modal:g} CU-equivalent ({ledger.modal_job_usd(job_id)[0]:.4f} USD / "
-                   f"{budget.USD_PER_CU:g}); counting both would double count",
-                   f"Omit --units to settle at {modal:g} CU")
-    return modal
+    if given is not None:
+        raise Stop(f"job {job_id} ran on Modal: it settles from its Modal rows in USD "
+                   f"({ledger.modal_job_usd(job_id)[0]:.4f} USD so far), never with Colab --units "
+                   f"({given:g}); Modal spend does not count against the CU caps",
+                   "Omit --units")
+    return 0
+
+
+def _settled_as(ledger, job_id, units) -> str:
+    if ledger.is_modal_job(job_id):
+        return f"settled from its Modal rows at {ledger.modal_job_usd(job_id)[0]:.4f} USD (0 CU)"
+    return f"settled {units:g} CU"
 
 
 def cmd_import(args):
@@ -900,12 +920,13 @@ def cmd_import(args):
                    f"{PROG} import {args.job_id} ...; never rebuild or rerun the job to get past it.",
                    code=4)
     print(f"Imported {len(arts)} verified file(s) from {job['kind']} job {args.job_id}; "
-          f"settled {units:g} CU.")
+          f"{_settled_as(ledger, args.job_id, units)}.")
 
 
 def cmd_modal_run(args):
     """Run a built narration/stills/music notebook headlessly on Modal; the actual spend is appended
-    to the ledger's modal_spend rows (hard cap 30 USD per UTC month) and settles at import/close."""
+    to the ledger's modal_spend rows (hard caps 30 USD per UTC month and 6 USD per title, lifetime).
+    The job's CU reservation is released when it moves to Modal; it settles in USD at import/close."""
     rec = _record(args.root)
     job = next((j for j in _jobs(rec) if j["job_id"] == args.job_id), None)
     if job is None:
@@ -928,16 +949,21 @@ def cmd_modal_run(args):
     plan = modal_run.plan(job["notebook"], job["inputs_zip"])
     worst = plan["timeout_seconds"] * modal_run.L4_USD_PER_S  # deadline + the timeout margin
     try:
-        ledger.check_modal_month(month, worst)
+        ledger.check_modal(month, rec.data["title_slug"], worst, rec.data["source"].get("edition_id"))
     except budget.BudgetExceeded as e:
         raise Stop(f"Budget exceeded: {e}. Modal was not contacted.",
                    "Hold the job and ask the owner; never run past the Modal cap.", code=3)
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    try:  # from here the job is governed by the Modal dollar caps, not the Colab CU caps
+        ledger.move_to_modal(args.job_id, now)
+    except (KeyError, ValueError) as e:
+        raise Stop(f"job {args.job_id} has no open reservation on the ledger ({e}); Modal was not "
+                   "contacted", f"{PROG} status --root {rec.root}")
     download = Path(args.download) if args.download else rec.root / "modal-downloads"
     # a provisional worst-case row counts against the cap from before Modal is contacted; it is
     # replaced by the actual spend when the run returns. If the process dies (Ctrl-C, kill, an error
     # after the paid run) it stays pending at the worst case until `modal-settle`.
-    run_id = ledger.record_modal_spend(month, args.job_id, worst, 0.0, "pending",
-                                       datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    run_id = ledger.record_modal_spend(month, args.job_id, worst, 0.0, "pending", now)
     result = None
     try:
         result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download)
@@ -970,7 +996,7 @@ def cmd_modal_settle(args):
     except KeyError:
         raise Stop(f"job {args.job_id} has no pending Modal run on the ledger", f"{PROG} status --root {rec.root}")
     print(f"Settled {n} pending Modal run(s) of job {args.job_id} at {args.usd:.4f} USD "
-          f"({round(args.usd / budget.USD_PER_CU, 2):g} CU-equivalent at import/close).")
+          f"(counts against the Modal dollar caps only).")
 
 
 _ENDINGS = {"supersede": ("superseding", "superseded"), "close": ("closing", "closed")}
@@ -1040,7 +1066,10 @@ def _end_job(args, how, job_id=None):
             raise Stop(f"job {job_id} has no open reservation on the ledger "
                        f"({'missing' if entry is None else entry['state']}); nothing to settle",
                        f"{PROG} status --root {rec.root}")
-        rec.event("job", pending_result, {"job_id": job_id, "units": units, "reason": args.reason})
+        detail = {"job_id": job_id, "units": units, "reason": args.reason}
+        if ledger.is_modal_job(job_id):
+            detail["runner"] = "modal"
+        rec.event("job", pending_result, detail)
     if entry is None:
         raise Stop(f"job {job_id} is missing from the ledger", f"{PROG} status --root {rec.root}")
     if entry["state"] == "reserved":
@@ -1054,10 +1083,16 @@ def _end_job(args, how, job_id=None):
         print(f"Superseded {job['kind']} job {job_id}: reservation of {entry['units']:.2f} CU "
               "released (settled at 0). Do not run its notebook.")
     else:
-        rec.event("job", final, {"job_id": job_id, "units": units, "ran": True,
-                                 "imported": False, "reason": reason})
-        print(f"Closed {job['kind']} job {job_id}: it ran but is not imported; settled at the "
-              f"actual {units:g} CU (reserved {entry['units']:.2f} CU). Its outputs are not on record.")
+        detail = {"job_id": job_id, "units": units, "ran": True, "imported": False, "reason": reason}
+        if ledger.is_modal_job(job_id):
+            detail.update(runner="modal", usd=round(ledger.modal_job_usd(job_id)[0], 6))
+            how_much = (f"{_settled_as(ledger, job_id, units)} (CU reservation "
+                        f"{entry.get('reserved_units', entry['units']):.2f} released)")
+        else:
+            how_much = f"settled at the actual {units:g} CU (reserved {entry['units']:.2f} CU)"
+        rec.event("job", final, detail)
+        print(f"Closed {job['kind']} job {job_id}: it ran but is not imported; {how_much}. "
+              "Its outputs are not on record.")
 
 
 def cmd_supersede(args):
@@ -1515,13 +1550,19 @@ def cmd_status(args):
               f"{budget.TITLE_CAP:g}), {ledger.spent(None, month):.2f} CU this month (all titles), "
               f"{_remaining(ledger, rec, month):.2f} CU remaining ({month}).")
         print(f"modal: ${ledger.modal_month_usd(month):.2f} of ${budget.MODAL_MONTH_CAP_USD:.2f} "
-              f"(UTC month {month})")
+              f"this month; title: ${ledger.modal_title_usd(title, s.get('edition_id')):.2f} of "
+              f"${budget.MODAL_TITLE_CAP_USD:.2f} (UTC month {month}; the CU above are Colab work "
+              "only, Modal-run jobs excluded)")
         for j in _jobs(rec):
-            closed = next((e["detail"]["units"] for e in rec.data["events"] if e["result"] == "closed"
+            closed = next((e["detail"] for e in rec.data["events"] if e["result"] == "closed"
                            and e["detail"].get("job_id") == j["job_id"]), None)
+            on_modal = ledger.is_modal_job(j["job_id"])
+            spent = (f"{closed['usd']:.2f} USD on Modal" if closed and "usd" in closed
+                     else f"{closed['units']:.2f} CU" if closed else "")
             state = ("imported" if j["imported"] else "superseded" if j["superseded"]
-                     else f"closed (ran, not imported; {closed:.2f} CU settled)" if j["closed"]
+                     else f"closed (ran, not imported; {spent} settled)" if j["closed"]
                      else "supersede/close unfinished: rerun it" if j["unfinished"]
+                     else "on Modal (CU reservation released)" if on_modal
                      else "waiting for Colab")
             c = j["chunk"]
             part = f" chunk {c['index']}/{c['of']} of {c['group']}" if c else ""
@@ -1635,8 +1676,8 @@ def _parser():
     s = add("import")
     s.add_argument("job_id")
     s.add_argument("--from", dest="source", required=True)
-    s.add_argument("--units", type=float, help="the CU Colab shows; optional for a job run with "
-                   "modal-run (then the Modal spend / 0.10 is used)")
+    s.add_argument("--units", type=float, help="the CU Colab shows (Colab jobs only; a job run "
+                   "with modal-run settles from its Modal rows in USD and refuses --units)")
     s.add_argument("--archive-sha256")
     s = add("modal-run")
     s.add_argument("job_id")
@@ -1652,8 +1693,8 @@ def _parser():
                    help="a chunk (or group id): supersede every never-run chunk of its group together")
     s = add("close")
     s.add_argument("job_id")
-    s.add_argument("--units", type=float, help="the CU Colab shows the run used (optional after "
-                   "modal-run: the Modal spend / 0.10)")
+    s.add_argument("--units", type=float, help="the CU Colab shows the run used (Colab jobs only; "
+                   "a job run with modal-run settles from its Modal rows in USD)")
     s.add_argument("--reason", required=True)
     s = add("film")
     s.add_argument("--film", type=int, default=1)

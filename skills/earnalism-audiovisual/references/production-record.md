@@ -37,7 +37,7 @@ One title root, one record, one writer. `record.json` (schema
 - **Licences**: Apache-2.0 (Parler, FLUX.1-schnell, Wan, ACE-Step), CC0 (VCSL).
 
 Job endings are events too: `import/accepted`, `job/superseded` (never ran, 0 CU),
-`job/closed` (ran, not imported, actual CU) and their pending forms `job/superseding`,
+`job/closed` (ran, not imported, actual CU; for a Modal job 0 CU and its Modal `usd`) and their pending forms `job/superseding`,
 `job/closing` while one is under way. A rebuilt chunk (`--replace-chunk`) is a new job
 `<chunk id>-r<k>` with its own `job/built` event; the closed chunk stays in the record. Reel planning adds `reel/scripted`,
 `reel/narration_misfit` and `reel/shots_planned`.
