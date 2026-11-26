@@ -110,35 +110,110 @@ print("inputs verified for", JOB_ID)
 # R25: the hard stop counts from this cell (run right after the config) and equals the forecast
 # seconds the ledger reserved. Items start only while they can still finish before it; a Timer
 # unassigns the runtime at the stop itself, as the Wan notebook does.
-_CLOCK = _GUARD + '''import threading, time
+_CLOCK = _GUARD + '''import hashlib, json, os, threading, time
+BOOKKEEPING = ("progress.jsonl", "sessions.jsonl")  # resume records: never outputs
+
+
+def _rows(name):
+    rows = []
+    path = OUT_DIR / name
+    if path.is_file():
+        for line in path.read_text().splitlines():
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue  # a line torn by a disconnect
+            if isinstance(row, dict):
+                rows.append(row)
+    return rows
+
+
+def _append(name, row):
+    path = OUT_DIR / name
+    torn = path.is_file() and path.stat().st_size > 0 and path.read_bytes()[-1:] != b"\\n"
+    with open(path, "a") as f:
+        f.write(("\\n" if torn else "") + json.dumps(row, sort_keys=True) + "\\n")
+        f.flush()
+        os.fsync(f.fileno())
+
+
+def session_seconds():
+    # started -> seconds, the latest line per session (this one once it has started)
+    latest = {}
+    for row in _rows("sessions.jsonl"):
+        if "started" in row and isinstance(row.get("seconds"), (int, float)):
+            latest[row["started"]] = row["seconds"]
+    return latest
+
+
+def note_session():
+    _append("sessions.jsonl", {"started": JOB_STARTED, "seconds": round(time.time() - JOB_STARTED, 1)})
+
+
+def resume_done(names):
+    # Finished = present AND matching its progress.jsonl line; a file without one is deleted (redone).
+    logged = {}
+    for row in _rows("progress.jsonl"):
+        if isinstance(row.get("file"), str) and isinstance(row.get("sha256"), str):
+            logged[row["file"]] = row["sha256"]
+    done = set()
+    for name in names:
+        path = OUT_DIR / name
+        if not path.is_file():
+            continue
+        if logged.get(name) == hashlib.sha256(path.read_bytes()).hexdigest():
+            done.add(name)
+        else:
+            path.unlink()
+            print("redo", name, "(no matching progress line)")
+    return done
+
+
+def record_item(key, name):
+    digest = hashlib.sha256((OUT_DIR / name).read_bytes()).hexdigest()
+    _append("progress.jsonl", {"key": key, "file": name, "sha256": digest})
+    note_session()
+
+
+def _hard_stop():
+    note_session()
+    runtime.unassign()
+
+
+# R25: the reserved seconds are a total across sessions; a re-run gets what earlier ones left.
 if "JOB_STARTED" not in globals():
     JOB_STARTED = time.time()
+    PRIOR_SECONDS = sum(session_seconds().values())
+    EFFECTIVE_DEADLINE = DEADLINE_SECONDS - PRIOR_SECONDS
+    if EFFECTIVE_DEADLINE <= 0:
+        raise RuntimeError("reserved time used up: close the job with the CU Colab shows")
+    note_session()
     from google.colab import runtime
-    STOP_GUARD = threading.Timer(DEADLINE_SECONDS, runtime.unassign)
+    STOP_GUARD = threading.Timer(EFFECTIVE_DEADLINE, _hard_stop)
     STOP_GUARD.daemon = True
     STOP_GUARD.start()
 INCOMPLETE = False
 
 
 def may_start(last_item_s):
-    """Between items: start the next one only if it (and the manifest) fits before the hard stop."""
+    # Between items: start the next one only if it (and the manifest) fits before the hard stop.
     global INCOMPLETE
-    left = DEADLINE_SECONDS - (time.time() - JOB_STARTED)
+    left = EFFECTIVE_DEADLINE - (time.time() - JOB_STARTED)
     if left < last_item_s + MANIFEST_RESERVE_S:
         INCOMPLETE = True
-        print("HARD STOP: %.0f s left of the %d s forecast; no further item starts" % (left, DEADLINE_SECONDS))
+        print("HARD STOP: %.0f s left of the %d s still reserved; no further item starts" % (left, EFFECTIVE_DEADLINE))
         return False
     return True
 
 
-print("hard stop armed:", DEADLINE_SECONDS, "s from now")
+print("hard stop armed:", EFFECTIVE_DEADLINE, "s from now (%d s used by earlier sessions)" % PRIOR_SECONDS)
 '''
 
 _MANIFEST = _GUARD + '''import hashlib, json, time
 import importlib.metadata as _md
 outputs = {}
 for p in sorted(OUT_DIR.iterdir()):
-    if p.is_file() and p.name not in ("manifest.json", "inputs.zip"):
+    if p.is_file() and p.name not in ("manifest.json", "inputs.zip") + BOOKKEEPING:
         outputs[p.name] = hashlib.sha256(p.read_bytes()).hexdigest()
 if not outputs:
     raise RuntimeError("no outputs were produced")
@@ -151,12 +226,14 @@ for _name in PACKAGES:
         packages[_name] = _dist.version + (" @ " + _commit if _commit else "")
     except _md.PackageNotFoundError:
         packages[_name] = None
+note_session()
+_sessions = session_seconds()
 complete = not INCOMPLETE and all(name in outputs for name in EXPECTED)
 manifest = {"schema": "earnalism.audiovisual-outputs.v1", "job_id": JOB_ID, "title": TITLE,
             "kind": KIND, "input_zip_sha256": INPUT_ZIP_SHA256, "model": MODEL_INFO,
             "status": "COMPLETE" if complete else "INCOMPLETE",
             "deadline_seconds": DEADLINE_SECONDS,
-            "elapsed_seconds": round(time.time() - JOB_STARTED, 1),
+            "elapsed_seconds": round(sum(_sessions.values()), 1), "sessions": len(_sessions),
             "packages": packages, "outputs": outputs}
 (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\\n")
 print("manifest.json written:", manifest["status"], len(outputs), "files")
@@ -186,10 +263,12 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
              f"(sha256 of every output) land in the same folder.\n\n**Hard stop:** "
              f"{int(deadline_s)} s (the reserved forecast) from the clock cell. No item starts after "
              f"it and the runtime is unassigned at it; a stopped run's manifest says INCOMPLETE and "
-             f"cannot be imported.\n")
+             f"cannot be imported.\n\n**Disconnected?** Run all again: finished items are kept "
+             f"(`progress.jsonl`, checked by sha256) and the run continues where it stopped, "
+             f"within the same reserved time (`sessions.jsonl` counts what earlier runs used).\n")
     # The generation cell may call setup that sets OUT_DIR; the verify cell sets JOB/OUT_DIR.
-    parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _CLOCK),
-             ("code", _VERIFY), ("code", template.read_text(encoding="utf-8")),
+    parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _VERIFY),
+             ("code", _CLOCK), ("code", template.read_text(encoding="utf-8")),
              ("code", _MANIFEST)]
     nb = {"nbformat": 4, "nbformat_minor": 5,
           "metadata": {"kernelspec": {"name": "python3", "display_name": "Python 3"},
@@ -223,6 +302,17 @@ def _generation(preset: dict) -> dict:
             raise ValueError(f"preset generation setting {k!r} invalid: {v!r}")
         out[k] = v
     return out
+
+
+DEFAULT_BATCH = 8
+
+
+def _batch(spec: dict) -> int:
+    """Units per generate() call; pinned in job.json, so it is part of the job identity."""
+    v = spec.get("batch", DEFAULT_BATCH)
+    if isinstance(v, bool) or not isinstance(v, int) or not 1 <= v <= 32:
+        raise ValueError(f"narration batch must be an integer from 1 to 32, not {v!r}")
+    return v
 
 
 def pinned_steps(kind: str) -> int:
@@ -305,7 +395,8 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                                  spec.get("language", "en"))
         if not units:
             raise ValueError("no voice units")
-        return {"payload": {"units": units, "generation": _generation(spec["preset"])},
+        return {"payload": {"units": units, "generation": _generation(spec["preset"]),
+                            "batch": _batch(spec)},
                 "repo": NARRATION_REPO,
                 "revision": NARRATION_REVISION, "steps": 1, "compute": compute}
     if kind == "stills":

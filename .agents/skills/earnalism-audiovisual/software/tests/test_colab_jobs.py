@@ -306,7 +306,7 @@ class ColabJobTests(unittest.TestCase):
         out_dir.mkdir()
         (out_dir / "a.png").write_bytes(b"png")
         with patch.dict(sys.modules, {"google": types.ModuleType("google"), "google.colab": colab}):
-            g = {"RUN": True}
+            g = {"RUN": True, "OUT_DIR": out_dir}
             exec(config, g)
             g["DEADLINE_SECONDS"] = 100
             exec(clock, g)
