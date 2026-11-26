@@ -154,7 +154,7 @@ class SiteQualityTests(TestCase):
         self.assertEqual(meta(html, "property", "og:site_name"), "Earnalism")
         self.assertEqual(meta(html, "property", "og:locale"), "bn_IN")
         image = meta(html, "property", "og:image")
-        self.assertRegex(image, r"^https://theearnalism\.com/api/v1/content/covers/[0-9a-f-]{36}$")
+        self.assertRegex(image, r"^https://theearnalism\.com/api/v1/content/covers/[0-9a-f-]{36}/[0-9a-f]{64}/w800\.jpg$")
         self.assertNotIn("/staff/", image)
         self.assertEqual(meta(html, "name", "twitter:card"), "summary_large_image")
         self.assertEqual(meta(html, "name", "twitter:image"), image)
