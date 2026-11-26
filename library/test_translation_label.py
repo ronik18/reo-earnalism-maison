@@ -155,6 +155,12 @@ class IntakeTranslationCommandTests(TestCase):
         self.assertRegex(edition, r'\d{4}-\d{2}-\d{2}')
         self.assertIn('new work by Earnalism', manifest['provenance']['rights_note'])
         self.assertIn('Asha Rahman', manifest['provenance']['rights_note'])
+        note = manifest['provenance']['rights_note']
+        self.assertIn('Source edition: Tagore died 1941.', note)
+        self.assertNotIn('Source rights:', note)
+        self.assertNotIn('owner-held', note)
+        self.assertIn('cover and owner approval', note)
+        self.assertIn('pending owner review', note)
         meta = json.loads((packet / 'translation.json').read_text(encoding='utf-8'))
         self.assertEqual({k: meta[k] for k in ('translated_from', 'method', 'credit', 'model', 'source_sha256')},
                          {'translated_from': 'kp', 'method': 'ai_edited', 'credit': 'Asha Rahman',

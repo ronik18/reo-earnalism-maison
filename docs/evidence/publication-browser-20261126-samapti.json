@@ -1,0 +1,64 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-26",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the release code (branch claude/wonderful-bardeen-s9k90x at b94449a, what production will run) serving a local PostgreSQL replica (database replica_g2, loopback only). The Monday-page approval of the clearance and cover items was simulated on this replica only by a local staff user, bound to the exact file hashes; nothing is approved or published in production. The book was imported there with the production publisher identity and deterministic operation IDs: edition 2be3bc99-f143-4aa4-b080-ade26f7e381a, revision 4fc616f0-bcb1-4fbb-b05d-904b33df49de, and all 147 unit/anchor IDs and texts identical to the export_audiovisual_source output of that revision. Signed in as a staff publisher; desktop 1440x900 and mobile 390x844; the title page (covers) and the reader (text).",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "samapti": {
+   "status": "pass",
+   "sha256": "56ae47a79cdaa005540dea9b48f4c346cb85286183b9be2e2db139a29050ccd1",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 147,
+     "paragraphs_expected": 147,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "কটি হাস্যবাধায় অসম্পন্ন চেষ্টা আজ অশ্রুজলধারায় সমাপ্ত হইল।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 147,
+     "paragraphs_expected": 147,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "কটি হাস্যবাধায় অসম্পন্ন চেষ্টা আজ অশ্রুজলধারায় সমাপ্ত হইল।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  }
+ }
+}

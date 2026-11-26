@@ -232,7 +232,7 @@ def title(request, locale, identifier):
 @require_GET
 @domain_view
 def reader(request, locale, edition_id, unit_id=None):
-    from library.services import get_reader_document, get_preview_document, edition_units, edition_translation
+    from library.services import get_reader_document, get_preview_document, edition_units, edition_translation, parallel_companion
     if unit_id is None:
         units = edition_units(edition_id, territory=trusted_territory(request), user=request.user)
         if not units:
@@ -264,7 +264,24 @@ def reader(request, locale, edition_id, unit_id=None):
     if document.get("preview"):
         bootstrap["next_unit_url"]=None
         bootstrap["player_url"]=None
-    return page(request, locale, "web/reader.html", document=document, edition=edition, translation=edition_translation(edition["edition_id"]), bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination)
+    pair = None if document.get("preview") or not request.user.is_authenticated else parallel_rows(document, parallel_companion(request.user, edition_id, unit_id, territory=trusted_territory(request)))
+    return page(request, locale, "web/reader.html", document=document, edition=edition, translation=edition_translation(edition["edition_id"]), pair=pair, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination)
+
+
+def parallel_rows(document, companion):
+    """Step 3.2 side-by-side rows, original language first; None unless the shown text aligns exactly with the companion."""
+    if not companion or [p["kind"] for p in document["paragraphs"]] != [p["kind"] for p in companion["paragraphs"]]:
+        return None
+    current = document["edition"]["locale"]
+    other = companion["edition"]["locale"]
+    rows = []
+    for mine, theirs in zip(document["paragraphs"], companion["paragraphs"]):
+        cells = [{"paragraph": mine, "locale": current, "companion": False}, {"paragraph": theirs, "locale": other, "companion": True}]
+        rows.append(cells if companion["current_is_original"] else cells[::-1])
+    columns = [{"locale": current, "original": True}, {"locale": other, "original": False}]
+    if not companion["current_is_original"]:
+        columns = [{"locale": other, "original": True}, {"locale": current, "original": False}]
+    return {"rows": rows, "columns": columns, "translation": companion["translation"]}
 
 
 class EmailForm(forms.Form):

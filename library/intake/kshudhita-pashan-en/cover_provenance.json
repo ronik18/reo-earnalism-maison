@@ -1,0 +1,59 @@
+{
+ "schema": "earnalism.cover-provenance.v2",
+ "slug": "kshudhita-pashan-en",
+ "status": "OWNER_PROVIDED_ARTWORK",
+ "owner_statement": {
+  "date": "2026-11-25",
+  "text": "Owner, 25 Nov 2026: \"If the covers are not present, design them consistently like the already present covers.\""
+ },
+ "basis": "Designed by Claude at the owner instruction above for the English AI-translation edition, matching the existing Earnalism English-title covers (painted scene, gold serif title, author line, translation label, footer; textured back with a gold line-art motif, the translation own wording of Meher Ali cry, summary and year). Illustrations generated with Krea 3 on the owner ElevenLabs Creator plan (flow uP0ao4gyge6DhUsgXiKo; commercial use under that plan terms); lettering set in Cormorant Garamond and Source Serif 4 (SIL OFL). Uploaded to the owner Cloudinary. Requires the owner cover approval on the Monday page.",
+ "scope": "Cover display only; grants no text, audio or publication authorization.",
+ "sides": {
+  "front": {
+   "original": {
+    "url": "https://res.cloudinary.com/dzlrhlfpu/image/upload/v1795664242/earnalism/covers/front/cover_da1bdfed-b8cd-4b41-82df-403ee5370237.png",
+    "public_id": "earnalism/covers/front/cover_da1bdfed-b8cd-4b41-82df-403ee5370237",
+    "asset_id": "f5cd69936594263c7700dae6349dacc6",
+    "version": 1795664242,
+    "created_at": "2026-11-26T03:37:22Z",
+    "format": "png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2682000,
+    "sha256": "55d794100be3bf8063462c5310b0e5c0724913edfc09629686c58183964fbe94"
+   },
+   "delivery": {
+    "path": "front.jpg",
+    "width": 800,
+    "height": 1200,
+    "format": "JPEG",
+    "bytes": 202391,
+    "sha256": "1bbcadeab614b1135e709e8b1923dbc1c98382b44c492921c123111fb793dceb",
+    "derivation": "Pillow LANCZOS resize to 800x1200, JPEG quality 90, metadata not copied"
+   }
+  },
+  "back": {
+   "original": {
+    "url": "https://res.cloudinary.com/dzlrhlfpu/image/upload/v1795664243/earnalism/covers/back/back_cover_da1bdfed-b8cd-4b41-82df-403ee5370237.png",
+    "public_id": "earnalism/covers/back/back_cover_da1bdfed-b8cd-4b41-82df-403ee5370237",
+    "asset_id": "f750a90a4437547a3938cdb251892198",
+    "version": 1795664243,
+    "created_at": "2026-11-26T03:37:23Z",
+    "format": "png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2947235,
+    "sha256": "5504b1fcbafc2d37dc27dd0ef7b8463b153a1b5a8694f33eaebc9d103293b3c6"
+   },
+   "delivery": {
+    "path": "back.jpg",
+    "width": 800,
+    "height": 1200,
+    "format": "JPEG",
+    "bytes": 220373,
+    "sha256": "9b75c50f14eb4cd49a98e48cdb7721cf78ddb89f16ff42b1577204477c0c75a7",
+    "derivation": "Pillow LANCZOS resize to 800x1200, JPEG quality 90, metadata not copied"
+   }
+  }
+ }
+}

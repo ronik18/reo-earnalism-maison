@@ -1,0 +1,53 @@
+{
+  "title": "ক্ষুধিত পাষাণ (Rabindranath Tagore), Maison edition 54f37caa-050b-47c3-95c2-3cbc214d6485, revision 3cb6a0b9-f774-4822-92e7-d4fc99de2ef4",
+  "period_and_place": "India, 1890s. Frame story: an 1890s second-class railway compartment and a lamplit railway junction waiting room at night. Told story: Hyderabad state under the Nizam; Barich, a remote cotton-tax post; a lone 250-year-old white marble palace built by Shah Mahmud II on a towering stone ghat of 150 steps on the Shusta river, at the foot of the forested Aravalli hills, no village near; Deccan-sultanate architecture: pointed carved arches, three rows of great pillars in the upper hall, jali screens, a rose-water bathhouse with fountains and marble seats, Persian carpets, deep-blue curtains, crystal chandeliers; the cotton market and a small tax office far off",
+  "palette_and_light": "moonlit marble white, deep indigo, saffron, rose, old gold; one light family: cool dusk and moonlight on white marble with small warm lamp glints",
+  "lens_and_look": "painterly illustrated cinema, soft film grain, 35 mm lens, shallow depth of field",
+  "characters": {
+    "narrator": "the narrator, a 22-year-old Bengali man, slim, clean-shaven, short side-parted black hair, white dhoti, cream cotton panjabi and a brown shawl over one shoulder",
+    "relative": "his theosophist relative, a 30-year-old Bengali man with a thin moustache and round steel-rimmed spectacles, white dhoti and black alpaca chapkan coat, a small notebook in hand",
+    "storyteller": "the storyteller babu, a 45-year-old Bengali man with a square jaw, a thick upturned moustache going grey and a thin scar through the right eyebrow, close-cropped greying hair, long dark-green sherwani buttoned to the throat, white churidar, a dark embroidered round cap",
+    "collector": "the young cotton-tax collector, a 26-year-old sturdy Bengali man with a square jaw, a thick black upturned moustache and a thin scar through the right eyebrow, short black hair, white sola topi, short khaki English jacket, tight white trousers, riding boots",
+    "collector_night": "the young collector, a 26-year-old sturdy Bengali man with a square jaw, a thick black upturned moustache and a thin scar through the right eyebrow, red velvet fez, loose white pyjama, flower-embroidered kaba and a long pale silk choga robe",
+    "collector_rest": "the young collector, a 26-year-old sturdy Bengali man with a square jaw, a thick black upturned moustache and a thin scar through the right eyebrow, short black hair, bareheaded, plain white kurta and pyjama",
+    "girl": "the phantom Persian girl, a young woman of about 20 with very large dark eyes and a pale face, fully and modestly clothed in saffron silk pyjama trousers, a long-sleeved gold-embroidered bodice under a sheer rose veil-jacket, a small red cap with a fringe of gold coins around her brow and cheeks, curled gold-thread slippers, half-translucent like a memory",
+    "meher": "Meher Ali, a gaunt wild-eyed old man of about 70 with a long matted white beard and long white hair, barefoot, ragged faded saffron kurta, a tattered grey blanket over his shoulders, a long bamboo staff",
+    "karim": "Karim Khan, an old Muslim clerk of about 65 with a neatly trimmed white beard, steel spectacles, a white skullcap and a long white achkan",
+    "messenger": "the unseen messenger imagined as a veiled Arab woman, a faint shadowy figure in a loose-sleeved dark robe, a fine veil falling from her cap over her face, a curved dagger at her waist, rings on her fingers",
+    "guard": "a huge, fearsome palace guard of the old Deccan court, an African man with dignified features in a kinkhab brocade robe and turban"
+  },
+  "shared_facial_signature": {
+    "men": [
+      "storyteller",
+      "collector",
+      "collector_night",
+      "collector_rest"
+    ],
+    "signature": "a square jaw, a thick upturned moustache and a thin scar through the right eyebrow",
+    "why": "the babu on the train tells the story in the first person: the young cotton-tax collector at Barich is himself twenty years earlier. One signature keeps him recognisable across the frame story and the told story without saying so.",
+    "seed_family": "all four looks draw seeds from one family (2100 series)"
+  },
+  "collector_attire": "by day the collector wears the sola topi and short khaki English jacket; at night in the palace the red fez, kaba and silk choga (¶ 'তখন আমি মাথায় এক লাল মখ্‌মলের ফেজ্‌ তুলিয়া ...'); in bed a plain white kurta and pyjama. After the whirlwind takes his hat and coat (scene f01s025) he never wears English dress again (f01s026: 'খাটো কোর্ত্তা এবং সাহেবী হ্যাট্‌পরা একেবারে ছাড়িয়া দিয়াছি'), so from f01s026 on he appears only in the night or rest looks",
+  "respectful_depiction": "no nudity and no gore anywhere. The bathing women of the palace (f01s004, f01s008-f01s010) are never shown: only architecture, water, light, footprints, bangles and scattered silk garments. The phantom girl is always fully and modestly clothed, often half-translucent or seen in a mirror or by her feet alone. The weeping woman of the storm night (f01s032) is not shown: only the dark chamber, rain, wind and a torn, soaked veil. Her imagined history (f01s027) shows a dagger and a poison cup, never a wound",
+  "seed_families": {
+    "1100": "narrator and his relative",
+    "2100": "storyteller / collector (one face)",
+    "3100": "phantom Persian girl",
+    "4100": "Meher Ali",
+    "5100": "places, objects and minor figures (messenger, guard, servants)",
+    "6100": "Karim Khan"
+  },
+  "anchor_stills": [
+    "f01s001-2 (narrator and relative, 1101)",
+    "f01s001-1 (storyteller, 2102)",
+    "f01s003-3 (collector by day, 2101)",
+    "f01s021-2 (collector at night, 2103)",
+    "f01s023-1 (phantom Persian girl, 3101)",
+    "f01s020-3 (Meher Ali, 4101)",
+    "f01s005-2 (Karim Khan, 6101)",
+    "f01s004-2 (Barich palace on its ghat, 5101)",
+    "f01s017-3 (the imagined messenger, 5102)"
+  ],
+  "negatives": "no text, no letters, no logos, no watermark, no extra fingers, no modern objects, no nudity, no gore",
+  "prompt_order": "subject first, then the style preamble, then the negatives"
+}

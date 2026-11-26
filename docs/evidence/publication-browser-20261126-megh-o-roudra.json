@@ -1,0 +1,70 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-26",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the release code (branch claude/wonderful-bardeen-s9k90x at b94449a, what production will run) serving a local PostgreSQL replica (database replica_g2, loopback only). The Monday-page approval of the clearance and cover items was simulated on this replica only by a local staff user, bound to the exact file hashes; nothing is approved or published in production. The book was imported there with the production publisher identity and deterministic operation IDs: edition 899f8c17-dd85-4b19-82a0-a03f4d8d40ff, revision 3dac775e-d883-4c85-ae88-2275fcbfd19e, and all 155 unit/anchor IDs and texts identical to the export_audiovisual_source output of that revision. Signed in as a staff publisher; desktop 1440x900 and mobile 390x844; the title page (covers) and the reader (text). Its one author footnote (a note block) renders as p.footnote with its own data-anchor, counted in the paragraph total and in order.",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "megh-o-roudra": {
+   "status": "pass",
+   "sha256": "49d3c6c63ce74f120acc77b3ae17c774ebbfa85d38b119dce0fd93618c5ae805",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 155,
+     "paragraphs_expected": 155,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "এস এস হে!",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": [],
+     "footnote_blocks_expected": 1,
+     "footnote_blocks_rendered_as_p_footnote": 1,
+     "footnote_anchors_match": true
+    },
+    "mobile": {
+     "paragraphs_rendered": 155,
+     "paragraphs_expected": 155,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "এস এস হে!",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": [],
+     "footnote_blocks_expected": 1,
+     "footnote_blocks_rendered_as_p_footnote": 1,
+     "footnote_anchors_match": true
+    }
+   }
+  }
+ }
+}
