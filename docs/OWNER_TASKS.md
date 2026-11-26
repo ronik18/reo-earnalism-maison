@@ -16,6 +16,7 @@ Last updated: 26 Nov 2026.
   - [ ] মধ্যবর্ত্তিনী, শাস্তি, সমাপ্তি from *কথা-চতুষ্টয়* (1894) (clearance + cover; on the page after the next deploy)
   - [ ] মেঘ ও রৌদ্র from *কথা-চতুষ্টয়* (clearance + cover; on the page now)
   - [ ] The Hungry Stone (English AI translation of ক্ষুধিত পাষাণ): clearance + cover + edition label review (on the page after the next deploy)
+  - When you approve a title's clearance and cover, Claude runs three server jobs (import, record the browser check, publish) and the title is live within minutes; its browser check is already done.
 - [ ] **Say which approved titles to publish.** Standing instruction (25 Nov): publish every title that is ready. Ready means its clearance and cover are approved, it passes browser acceptance and it is deployed. ক্ষুধিত পাষাণ published 25 Nov; each title you approve on the Monday page follows.
 
 ## Assets
@@ -30,6 +31,7 @@ Last updated: 26 Nov 2026.
 - [ ] **বিচারক Colab jobs** (narration, stills, music): follow `production/audiovisual/bicharak/RUN_SHEET.md`, then tell Claude the job names and compute units used. This unlocks the first film, the first audio, podcast preview episodes and the founding Pass count.
 - [ ] **ক্ষুধিত পাষাণ narration Colab job** (`narration-9187e43e`, forecast 4.24 CU): follow `production/audiovisual/kshudhita-pashan/RUN_SHEET.md`; can run alongside বিচারক's.
 - [ ] **Colab: ক্ষুধিত পাষাণ stills and music jobs** (next to its narration job): same run sheet, `production/audiovisual/kshudhita-pashan/RUN_SHEET.md`; tell Claude the job names and compute units used.
+- [ ] **Narration Colab jobs for the 12 pipeline titles** (64.70 CU): `production/audiovisual/RUN_SHEET-pipeline-narration.md`.
 
 ## Accounts and keys
 - [ ] **YouTube upload authorization** for channel UCw-UnAXdRzqij8_B2TlgQjQ (token for `EARNALISM_YOUTUBE_ACCESS_TOKEN`, held only in memory for attended runs).
