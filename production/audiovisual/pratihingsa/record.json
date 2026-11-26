@@ -1,0 +1,97 @@
+{
+  "artifacts": [
+    {
+      "bytes": 83317,
+      "kind": "source",
+      "meta": {
+        "revision_id": "af7bf8f4-80cc-4e65-92b1-0ee27bed40c2"
+      },
+      "path": "source.json",
+      "sha256": "6087f75778335ba9c33776fd91c3ee98a73ce0ac675b674d01e8e7b966b12817"
+    },
+    {
+      "bytes": 173585,
+      "kind": "plan",
+      "meta": {
+        "films": 1,
+        "series": false
+      },
+      "path": "plan.json",
+      "sha256": "d323c1ebc4ddafa8ff14e519bbad9ef02d46a941226e4f28ab4a49a4a4906935"
+    },
+    {
+      "bytes": 9123,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 5.112708333333333,
+        "inputs_zip": "jobs/narration-781b8abc/inputs.zip",
+        "job_id": "narration-781b8abc",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-781b8abc/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-781b8abc/narration.ipynb",
+      "sha256": "4824aac0739ccb0ea8c52a807744a77b329759e1898fca6feea1b6fa6f833bab"
+    }
+  ],
+  "created_at": "2026-11-26T03:54:13.232687+00:00",
+  "events": [
+    {
+      "at": "2026-11-26T03:54:13.233908+00:00",
+      "detail": {
+        "audio_rights_on_maison": false,
+        "slug": "pratihingsa"
+      },
+      "result": "ok",
+      "stage": "init"
+    },
+    {
+      "at": "2026-11-26T03:54:13.371530+00:00",
+      "detail": {
+        "films": 1,
+        "flags": [],
+        "voice": "bn_arnav::story"
+      },
+      "result": "ok",
+      "stage": "plan"
+    },
+    {
+      "at": "2026-11-26T03:54:13.525313+00:00",
+      "detail": {
+        "forecast_units": 5.112708333333333,
+        "job_id": "narration-781b8abc",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:54:13.525706+00:00",
+      "detail": {
+        "job_id": "narration-781b8abc",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    }
+  ],
+  "ledger": "../allowance-ledger.json",
+  "schema": "earnalism.audiovisual_record.v1",
+  "source": {
+    "content_sha256": "e7c0f578453084a06b6f8be50130dcf83b25a049d7cc94c537e10dbde4738079",
+    "edition_id": "89d6ff7e-42c5-491c-8c05-0a08bc8827d6",
+    "export_sha256": "6087f75778335ba9c33776fd91c3ee98a73ce0ac675b674d01e8e7b966b12817",
+    "language": "bn",
+    "public_domain_evidence": true,
+    "revision_id": "af7bf8f4-80cc-4e65-92b1-0ee27bed40c2",
+    "rights": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "state": "draft"
+  },
+  "title_slug": "pratihingsa"
+}

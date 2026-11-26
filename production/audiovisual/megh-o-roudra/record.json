@@ -1,0 +1,97 @@
+{
+  "artifacts": [
+    {
+      "bytes": 151052,
+      "kind": "source",
+      "meta": {
+        "revision_id": "3dac775e-d883-4c85-ae88-2275fcbfd19e"
+      },
+      "path": "source.json",
+      "sha256": "c51f61bea3b58eef75fdc03ab9b780a1cbaabccf54ef0d401c608270fb2f707b"
+    },
+    {
+      "bytes": 316707,
+      "kind": "plan",
+      "meta": {
+        "films": 1,
+        "series": true
+      },
+      "path": "plan.json",
+      "sha256": "08e89be203473f1a63b24330d3fa194b7b7c3a2cbec291df4fa580eb9ac8db5c"
+    },
+    {
+      "bytes": 9131,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 9.072733333333334,
+        "inputs_zip": "jobs/narration-eea606f6/inputs.zip",
+        "job_id": "narration-eea606f6",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-eea606f6/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-eea606f6/narration.ipynb",
+      "sha256": "c90160dfa9508d14ed37666be4c243cfe5ac18d25ad19cbf29e161acef233776"
+    }
+  ],
+  "created_at": "2026-11-26T03:54:11.329120+00:00",
+  "events": [
+    {
+      "at": "2026-11-26T03:54:11.331515+00:00",
+      "detail": {
+        "audio_rights_on_maison": false,
+        "slug": "megh-o-roudra"
+      },
+      "result": "ok",
+      "stage": "init"
+    },
+    {
+      "at": "2026-11-26T03:54:11.475461+00:00",
+      "detail": {
+        "films": 1,
+        "flags": [],
+        "voice": "bn_arnav::story"
+      },
+      "result": "ok",
+      "stage": "plan"
+    },
+    {
+      "at": "2026-11-26T03:54:11.624065+00:00",
+      "detail": {
+        "forecast_units": 9.072733333333334,
+        "job_id": "narration-eea606f6",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:54:11.624719+00:00",
+      "detail": {
+        "job_id": "narration-eea606f6",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    }
+  ],
+  "ledger": "../allowance-ledger.json",
+  "schema": "earnalism.audiovisual_record.v1",
+  "source": {
+    "content_sha256": "49d3c6c63ce74f120acc77b3ae17c774ebbfa85d38b119dce0fd93618c5ae805",
+    "edition_id": "899f8c17-dd85-4b19-82a0-a03f4d8d40ff",
+    "export_sha256": "c51f61bea3b58eef75fdc03ab9b780a1cbaabccf54ef0d401c608270fb2f707b",
+    "language": "bn",
+    "public_domain_evidence": true,
+    "revision_id": "3dac775e-d883-4c85-ae88-2275fcbfd19e",
+    "rights": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "state": "draft"
+  },
+  "title_slug": "megh-o-roudra"
+}
