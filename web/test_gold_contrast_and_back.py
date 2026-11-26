@@ -50,15 +50,22 @@ class GoldContrastTests(TestCase):
             background = re.search(r"background:([^;]*)", body).group(1)
             # body.room redefines --gold as the darker text gold, so a fill must not resolve through it.
             self.assertNotIn("var(--gold)", background, selector)
+            self.assertIn("var(--gold-fill)", background, selector)
             for stop in re.findall(r"#[0-9A-Fa-f]{6}", background):
                 self.assertGreaterEqual(contrast(label, stop), 4.5, (selector, stop))
 
     def test_gold_accents_and_dark_band_text_keep_their_approved_values(self):
         self.assertEqual(token(":root", "--gold"), "#D8B25E")
+        self.assertEqual(token(":root", "--gold-fill"), "#D8B25E")
         self.assertEqual(token(":root", "--gold-deep"), "#B8913F")
         self.assertEqual(token(":root", "--gold-text"), "#7A5A1E")
         self.assertEqual(token(":root", "--gold-on-dark"), "#E6C987")
-        self.assertIn("linear-gradient(180deg,#E8C676,var(--gold))", rule(".turn-pause[aria-pressed=true]"))
+        # The approved design (docs/design/final/index.html) fills the pressed pause button with the approved
+        # gold #D8B25E; --gold-fill carries that value and is not redefined by body.room.
+        pause = rule(".turn-pause[aria-pressed=true]")
+        self.assertIn("linear-gradient(180deg,#E8C676,var(--gold-fill))", pause)
+        for stop in re.findall(r"#[0-9A-Fa-f]{6}", pause) + [token(":root", "--gold-fill")]:
+            self.assertGreaterEqual(contrast(token(":root", "--burgundy-deep"), stop), 4.5, stop)
 
 
 class SingleBackLinkTests(TestCase):
@@ -76,7 +83,8 @@ class SingleBackLinkTests(TestCase):
         self.assertIn(f'<a class="room-back" href="/en/titles/{EN}/">', html)
         toolbar = re.search(r'<div class="focus-toolbar">(.*?)</div>', html, re.S).group(1)
         self.assertNotIn("<a", toolbar)
-        self.assertEqual(len(re.findall(r">Back<", html)), 1)
+        backs = re.findall(r'<a\b[^>]*href="/en/titles/' + EN + r'/"[^>]*>', html)
+        self.assertEqual([tag for tag in backs if "room-back" in tag], [f'<a class="room-back" href="/en/titles/{EN}/">'])
 
     def test_classroom_body_has_no_second_back(self):
         source = (Path(settings.BASE_DIR) / "templates/web/classroom.html").read_text()
