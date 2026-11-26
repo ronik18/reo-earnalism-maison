@@ -177,3 +177,42 @@ without it load as empty.
   before narrations are spent at scale.
 - Hold on exit 3 from `modal-run` (cap), on a run that failed or hard-stopped (settle the pending
   row, then import, resume or `close`), and on an `INCOMPLETE` import (resume, or `close`).
+
+### Through GitHub Actions (request, workflow, fetch, import)
+
+When the session cannot reach Modal (its proxy has no HTTP/2, so the gRPC client cannot connect),
+the run goes through the `modal-jobs` workflow on a GitHub-hosted runner, and the outputs come
+back through the private Cloudflare R2 bucket `reo-earnalism-maison-private`. The caps are the same.
+
+1. **Request** (in the session): `eav modal-request <job_id> --root <title root> --colab-units <CU>`
+   runs every `modal-run` check (job state, inputs.zip sha256, `reel_clips` refused, both dollar caps
+   against the worst case with pending rows counted), records the move to Modal with
+   `--colab-units` (same meaning and validation as on `modal-run`) and writes the worst-case
+   `pending` row exactly as `modal-run` would, so the caps hold while the remote run is in flight.
+   Then it writes `production/audiovisual/modal-requests/<job_id>.json` (schema
+   `earnalism.modal-request.v1`: `job_id`, `title_root`, `requested_at`, `status: requested`,
+   `colab_units`, `pending_run_id`, `worst_case_usd`, `r2_prefix`). It refuses while a request
+   for the job is `requested` or `running`, and a local `modal-run` of that job is refused too. It
+   never commits: root commits the request with the ledger and pushes to
+   `claude/wonderful-bardeen-s9k90x`.
+2. **Workflow** (`.github/workflows/modal-jobs.yml`, triggered only by a pushed
+   `modal-requests/*.json`, one run at a time, 300 min): for each `requested` file it marks it
+   `running` and pushes, runs `modal-run <job_id> --root <title_root> --request` (reuses the
+   request's pending row and `--colab-units` instead of writing a second row, and replaces that row
+   with the actual spend in a `finally`), then `eav r2-upload` puts every file of the downloaded job
+   folder under `gpu-jobs/<slug>/<job_id>/` and reads each one back to compare its sha256. The
+   request becomes `done`, `failed` or `hard_stopped` with `seconds`, `usd`, `r2_prefix` and `files`
+   (`path`, `sha256`, `bytes`); the request, the ledger and the record are committed and pushed
+   (`git pull --rebase`, with retries). Secrets come only from `MODAL_TOKEN_ID`,
+   `MODAL_TOKEN_SECRET` and `CLOUDFLARE_R2_TOKEN`; the Modal workspace spend limit is the backstop.
+3. **Fetch** (in the session, after pulling the branch): `eav modal-fetch <job_id> --root <title
+   root> [--into <dir>]` lists and downloads every object under the prefix through
+   api.cloudflare.com (the session proxy supplies the credential), refuses a missing, extra or
+   mismatched file with nothing written, and lands the folder in `<root>/.downloads/<job_id>/`
+   (git-ignored). It never imports.
+4. **Import** as usual: `eav import <job_id> --root <title root> --from <that folder>`; the Modal
+   portion settles from the Modal rows.
+
+A request left `running` (the runner died or hit its timeout) keeps its pending worst-case row:
+read the billed amount from the Modal dashboard, `modal-settle` it, and hold for the owner before a
+new request.

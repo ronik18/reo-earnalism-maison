@@ -32,7 +32,10 @@ licence that permits commercial output.
 ## Colab and Modal settings
 
 Modal runs the notebook's own code cells with `RUN = True` and the Drive paths shimmed; the job
-folder it leaves is what `import` expects from Colab. `modal-run` refuses `reel_clips`.
+folder it leaves is what `import` expects from Colab. `modal-run` refuses `reel_clips`. When the
+session cannot reach Modal, the run goes through the `modal-jobs` GitHub Actions workflow
+(`modal-request` → workflow → `modal-fetch` from the private R2 bucket → `import`; see
+[compute budget](compute-budget.md#through-github-actions-request-workflow-fetch-import)).
 
 - One notebook per job, inert: first cell `RUN = False`; every later cell refuses to run
   until the owner sets `RUN = True`.

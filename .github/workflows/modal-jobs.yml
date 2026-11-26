@@ -1,0 +1,75 @@
+# Runs queued eav Modal GPU jobs (narration, stills, music) on a GitHub-hosted runner, which can
+# reach Modal; the Claude session cannot. A request is written by `eav modal-request` (it checks the
+# Modal dollar caps and records the worst-case pending row on the ledger first) and pushed by root.
+# Outputs go to the private R2 bucket; `eav modal-fetch` brings them back for `eav import`.
+# The Modal workspace spend limit is the backstop behind the ledger's caps.
+name: Modal GPU jobs
+on:
+  push:
+    branches: [claude/wonderful-bardeen-s9k90x]
+    paths: ['production/audiovisual/modal-requests/*.json']
+permissions:
+  contents: write
+concurrency:
+  group: modal-jobs
+  cancel-in-progress: false
+jobs:
+  run-requests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      BRANCH: claude/wonderful-bardeen-s9k90x
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wonderful-bardeen-s9k90x
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install modal
+      - name: Run every requested job
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          CLOUDFLARE_R2_TOKEN: ${{ secrets.CLOUDFLARE_R2_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config user.name "eav modal-jobs"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          SW="$GITHUB_WORKSPACE/skills/earnalism-audiovisual/software"
+          eav() { (cd "$SW" && python3 -m eav.cli "$@"); }
+          field() { python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))[sys.argv[2]])' "$1" "$2"; }
+          publish() {  # commit the named paths, rebase onto the branch and push, with retries
+            local msg="$1"; shift
+            git add -- "$@"
+            if git diff --cached --quiet; then return 0; fi
+            git commit -q -m "$msg"
+            for attempt in 1 2 3 4 5; do
+              if git pull -q --rebase origin "$BRANCH" && git push -q origin "HEAD:$BRANCH"; then
+                return 0
+              fi
+              sleep $((attempt * 15))
+            done
+            return 1
+          }
+          failures=0
+          shopt -s nullglob
+          for req in production/audiovisual/modal-requests/*.json; do
+            [ "$(field "$req" status)" = requested ] || continue
+            job_id="$(field "$req" job_id)"
+            root="$GITHUB_WORKSPACE/$(field "$req" title_root)"
+            ledger="$(python3 -c 'import json, os, sys; r = sys.argv[1]; print(os.path.normpath(os.path.join(r, json.load(open(os.path.join(r, "record.json")))["ledger"])))' "$root")"
+            python3 -c 'import json, sys; p = sys.argv[1]; d = json.load(open(p)); d["status"] = "running"; open(p, "w").write(json.dumps(d, indent=2, sort_keys=True) + "\n")' "$req"
+            publish "modal-jobs: $job_id running" "$req"
+            out="$RUNNER_TEMP/modal-downloads"
+            rc=0
+            eav modal-run "$job_id" --root "$root" --request --download "$out" || rc=$?
+            eav r2-upload "$job_id" --root "$root" --from "$out/$job_id" || rc=$?
+            publish "modal-jobs: $job_id $(field "$req" status)" "$req" "$ledger" "$root/record.json"
+            if [ "$rc" -ne 0 ]; then failures=$((failures + 1)); fi
+          done
+          if [ "$failures" -ne 0 ]; then
+            echo "$failures request(s) did not finish cleanly; see the request files"
+            exit 1
+          fi
