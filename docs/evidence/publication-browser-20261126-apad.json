@@ -1,0 +1,64 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-26",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the release code (branch claude/wonderful-bardeen-s9k90x at b94449a, what production will run) serving a local PostgreSQL replica database (replica_g3, loopback 127.0.0.1:8773). আপদ was imported there with publisher public_id 649b8725-9f77-4dfd-bad9-74eacd7a973c and the deterministic operation IDs production will use: edition 439e8f15-d679-4137-a2c0-9af5e1eccc5f, revision 9c0978d5-f98e-4308-914c-bc7d7d33d667, 68 paragraphs. The owner's Monday-page approval of the packet's clearance and cover items was SIMULATED on this throwaway replica only (decided by a local staff user, bound to the exact file sha256); nothing was approved, imported or published in production. Signed in as the local staff publisher; desktop 1440x900 and mobile 390x844; the title page (covers) and the reader (text).",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "apad": {
+   "status": "pass",
+   "sha256": "97ca7a18f11d6f1f1cf5bb32abf0386a660011da91b798c87ebac002701f6c5f",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 68,
+     "paragraphs_expected": 68,
+     "text_and_anchor_order_exact": true,
+     "first": "সন্ধ্যার দিকে ঝড় ক্রমশঃ প্রবল হইতে লাগিল। বৃষ্টির ঝাপট, বজ্",
+     "last": " ঘুরিয়া খুঁজিয়া খুঁজিয়া কাঁদিয়া কাঁদিয়া বেড়াইতে লাগিল।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 68,
+     "paragraphs_expected": 68,
+     "text_and_anchor_order_exact": true,
+     "first": "সন্ধ্যার দিকে ঝড় ক্রমশঃ প্রবল হইতে লাগিল। বৃষ্টির ঝাপট, বজ্",
+     "last": " ঘুরিয়া খুঁজিয়া খুঁজিয়া কাঁদিয়া কাঁদিয়া বেড়াইতে লাগিল।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  }
+ }
+}

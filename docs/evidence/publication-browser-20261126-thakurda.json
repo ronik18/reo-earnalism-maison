@@ -1,0 +1,64 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-26",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the release code (branch claude/wonderful-bardeen-s9k90x at b94449a, what production will run) serving a local PostgreSQL replica database (replica_g3, loopback 127.0.0.1:8773). ঠাকুর্দ্দা was imported there with publisher public_id 649b8725-9f77-4dfd-bad9-74eacd7a973c and the deterministic operation IDs production will use: edition 96b09e3c-11ee-41d0-bcfa-44c8a4549b73, revision bde56df5-4291-4a5d-820b-1816ff01d7f2, 57 paragraphs. The owner's Monday-page approval of the packet's clearance and cover items was SIMULATED on this throwaway replica only (decided by a local staff user, bound to the exact file sha256); nothing was approved, imported or published in production. Signed in as the local staff publisher; desktop 1440x900 and mobile 390x844; the title page (covers) and the reader (text).",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "thakurda": {
+   "status": "pass",
+   "sha256": "0da978c62a9775c659d34b72f77155eb4fead4166592dd257c5be2c66b7c32c4",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 57,
+     "paragraphs_expected": 57,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": " বৃদ্ধ আমাকে পরম সৎপাত্র জানিয়া একান্তমনে কামনা করিতেছিলেন।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 57,
+     "paragraphs_expected": 57,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": " বৃদ্ধ আমাকে পরম সৎপাত্র জানিয়া একান্তমনে কামনা করিতেছিলেন।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  }
+ }
+}
