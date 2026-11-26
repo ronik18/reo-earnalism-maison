@@ -30866,6 +30866,20 @@
       },
       "path": "jobs/edit-test2-film-01/edit.ipynb",
       "sha256": "13aea144d1cf27a1b36aa0ac5a71867a48ccb66cc3e790bbd03a51e17b981323"
+    },
+    {
+      "bytes": 26883,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.4997277777777778,
+        "inputs_zip": "jobs/edit-test3-film-01/inputs.zip",
+        "job_id": "edit-test3-film-01",
+        "job_kind": "edit",
+        "manifest": "jobs/edit-test3-film-01/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/edit-test3-film-01/edit.ipynb",
+      "sha256": "1ac7b9350b9484eeea6bc5f41c5f5b4067cd0dc7c737c72657cbc560cd879e4f"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -34137,6 +34151,68 @@
         "inputs_sha256": "96da59f8066131b212d09bae6b802cafd4b4ab4a1bd5312332141a7c4ff38602",
         "job_id": "edit-test2-film-01",
         "outputs_key": "exports/colab-exchange/bicharak/edit-test2-film-01/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T06:46:23.336910+00:00",
+      "detail": {
+        "job_id": "edit-test2-film-01",
+        "reason": "no A100 available; replaced by an L4 build of the same test (NF4 with sensitive layers kept, fp32 decode)",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T06:46:23.369719+00:00",
+      "detail": {
+        "job_id": "edit-test2-film-01",
+        "reason": "no A100 available; replaced by an L4 build of the same test (NF4 with sensitive layers kept, fp32 decode)"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T06:46:24.944306+00:00",
+      "detail": {
+        "forecast_units": 1.4997277777777778,
+        "job_id": "edit-test3-film-01",
+        "kind": "edit"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T06:46:24.972576+00:00",
+      "detail": {
+        "job_id": "edit-test3-film-01",
+        "kind": "edit",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T06:46:27.113814+00:00",
+      "detail": {
+        "bytes": 3014844,
+        "job_id": "edit-test3-film-01",
+        "key": "exports/colab-exchange/bicharak/edit-test3-film-01/inputs.zip",
+        "sha256": "0386eb53506cc9f8d1a1990f13adc8fb7fb01c850326cecad9c668a7d7ca52d7"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T06:47:29.711920+00:00",
+      "detail": {
+        "expires_at": "2026-11-27T06:46:52+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/edit-test3-film-01/inputs.zip",
+        "inputs_sha256": "0386eb53506cc9f8d1a1990f13adc8fb7fb01c850326cecad9c668a7d7ca52d7",
+        "job_id": "edit-test3-film-01",
+        "outputs_key": "exports/colab-exchange/bicharak/edit-test3-film-01/outputs.tar"
       },
       "result": "exchange_staged",
       "stage": "job"

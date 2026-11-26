@@ -1,0 +1,29 @@
+{
+  "note": "Qwen-Image-Edit quality test 3 (L4 allowed: NF4 transformer with img_in/txt_in/time_text_embed/norm_out/proj_out kept bf16, VAE decode fp32); same instruction as tests 1-2",
+  "min_vram_gib": 0,
+  "items": [
+    {
+      "key": "f01s012-2",
+      "source": {
+        "job": "stills-film-01-r9",
+        "file": "f01s012-2--c3.png"
+      },
+      "refs": [
+        {
+          "job": "retouch-film-01-r9",
+          "file": "f01s011-4--c1.png"
+        },
+        {
+          "job": "stills-film-01-r9",
+          "file": "f01s006-3--c2.png"
+        }
+      ],
+      "instruction": "Edit the first image only. Keep the composition, camera, 2D animated cel-shaded feature-film style, line work, colours and lighting exactly as they are. Keep the carriage interior, the young man on the right (his gold round spectacles, moustache, beard, hair and dark high-collared coat) and both poses unchanged. Change only the girl on the left: remove her gold earrings so her earlobes are bare; remove the red mark between her eyebrows so her forehead is smooth bare skin; soften the red on her nose and cheeks to her natural skin tone; replace the black edge of her sari with plain white so the sari is white to the edge; undo the braid so her long loose black hair falls over both ears and shoulders. Keep her face, eyes, mole and timid expression. She should match the girl in the second image; the man matches the man in the third image.",
+      "negative": "bindi, forehead dot, red mark on forehead, earrings, ear studs, nose stud, necklace, bangles, bracelets, coloured sari border, black sari edge, patterned sari, braid, plait, red nose, heavy blush, lipstick, photorealism, 3D render, CGI, text, lettering, watermark, signature, letterbox bars, extra fingers, extra limbs, duplicate person",
+      "seed": 251102,
+      "candidates": 2,
+      "steps": 40,
+      "true_cfg_scale": 4.0
+    }
+  ]
+}
