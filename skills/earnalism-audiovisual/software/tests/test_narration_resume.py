@@ -65,11 +65,15 @@ class FakeModel:
     calls = []
     load = {}
     with_lengths = True
+    refuse_sdpa = False
     config = types.SimpleNamespace(sampling_rate=100,
                                    text_encoder=types.SimpleNamespace(_name_or_path="t5"))
 
     @classmethod
     def from_pretrained(cls, repo, **kw):
+        if cls.refuse_sdpa and kw.get("attn_implementation") == "sdpa":
+            raise ValueError("T5EncoderModel does not support an attention implementation through "
+                             "torch.nn.functional.scaled_dot_product_attention yet.")
         cls.load = dict(kw, repo=repo)
         return cls()
 
@@ -191,6 +195,17 @@ class NarrationResumeTests(unittest.TestCase):
             self.assertEqual(json.loads(z.read("job.json"))["batch"], 3)
         self.assertNotEqual(job["inputs_zip"], self.job["inputs_zip"])
 
+    def test_sdpa_refused_falls_back_to_default_attention(self):
+        FakeModel.refuse_sdpa = True
+        try:
+            self.session()
+        finally:
+            FakeModel.refuse_sdpa = False
+        self.assertNotIn("attn_implementation", FakeModel.load)
+        m = self.manifest()
+        self.assertEqual(m["model"]["attention"], "default")
+        self.assertEqual(m["status"], "COMPLETE")
+
     def test_invalid_batch_refused(self):
         for bad in (0, 33, -1, 2.5, "8", True, None):
             with self.assertRaises(ValueError, msg=repr(bad)):
@@ -211,6 +226,7 @@ class NarrationResumeTests(unittest.TestCase):
             self.assertIs(call["do_sample"], True)
         m = self.manifest()
         self.assertEqual(m["model"]["batch"], 8)
+        self.assertEqual(m["model"]["attention"], "sdpa")
         self.assertEqual(m["status"], "COMPLETE")
         for u in units:  # each WAV is its own length, not the padded batch length
             raw = (self.drive / (u["unit_key"] + ".wav")).read_bytes()

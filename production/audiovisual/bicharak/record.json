@@ -209,6 +209,44 @@
       },
       "path": "jobs/narration-film-01-r3-c2of2/narration.ipynb",
       "sha256": "248b004a29e28c808cf6878e36013a45aed95a3b43f1289194ba13044e3a9d97"
+    },
+    {
+      "bytes": 16455,
+      "kind": "colab_job",
+      "meta": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 1,
+          "of": 2
+        },
+        "forecast_units": 1.6360666666666663,
+        "inputs_zip": "jobs/narration-film-01-r3-c1of2-r1/inputs.zip",
+        "job_id": "narration-film-01-r3-c1of2-r1",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-film-01-r3-c1of2-r1/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-film-01-r3-c1of2-r1/narration.ipynb",
+      "sha256": "22738649158895b4ef26a1a1cefff5ab07a222f15aa6b8c08a70d2827defbb00"
+    },
+    {
+      "bytes": 16455,
+      "kind": "colab_job",
+      "meta": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 2,
+          "of": 2
+        },
+        "forecast_units": 1.6360666666666663,
+        "inputs_zip": "jobs/narration-film-01-r3-c2of2-r1/inputs.zip",
+        "job_id": "narration-film-01-r3-c2of2-r1",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-film-01-r3-c2of2-r1/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-film-01-r3-c2of2-r1/narration.ipynb",
+      "sha256": "05ffdf2024b502b501079834c53e338fa88511f002b05b297bcf722288d01883"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -594,6 +632,118 @@
           "of": 2
         },
         "job_id": "narration-film-01-r3-c2of2",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T13:02:42.303303+00:00",
+      "detail": {
+        "job_id": "narration-film-01-r3-c1of2",
+        "reason": "Built with the SDPA-only narration template; on Modal the T5 text encoder refused SDPA (transformers ValueError). Rebuilt with the fallback via --replace-chunk.",
+        "runner": "modal",
+        "units": 0.0
+      },
+      "result": "closing",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T13:02:42.306017+00:00",
+      "detail": {
+        "imported": false,
+        "job_id": "narration-film-01-r3-c1of2",
+        "ran": true,
+        "reason": "Built with the SDPA-only narration template; on Modal the T5 text encoder refused SDPA (transformers ValueError). Rebuilt with the fallback via --replace-chunk.",
+        "runner": "modal",
+        "units": 0.0,
+        "usd": 0.743084
+      },
+      "result": "closed",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T13:02:42.465511+00:00",
+      "detail": {
+        "job_id": "narration-film-01-r3-c2of2",
+        "reason": "Built with the SDPA-only narration template; on Modal the T5 text encoder refused SDPA (transformers ValueError). Rebuilt with the fallback via --replace-chunk.",
+        "runner": "modal",
+        "units": 0.0
+      },
+      "result": "closing",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T13:02:42.467970+00:00",
+      "detail": {
+        "imported": false,
+        "job_id": "narration-film-01-r3-c2of2",
+        "ran": true,
+        "reason": "Built with the SDPA-only narration template; on Modal the T5 text encoder refused SDPA (transformers ValueError). Rebuilt with the fallback via --replace-chunk.",
+        "runner": "modal",
+        "units": 0.0,
+        "usd": 0.0117
+      },
+      "result": "closed",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T13:02:42.633884+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 1,
+          "of": 2
+        },
+        "forecast_units": 1.6360666666666663,
+        "job_id": "narration-film-01-r3-c1of2-r1",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T13:02:42.634872+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 1,
+          "of": 2,
+          "replaces": "narration-film-01-r3-c1of2"
+        },
+        "job_id": "narration-film-01-r3-c1of2-r1",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T13:02:42.799378+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 2,
+          "of": 2
+        },
+        "forecast_units": 1.6360666666666663,
+        "job_id": "narration-film-01-r3-c2of2-r1",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T13:02:42.800526+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 2,
+          "of": 2,
+          "replaces": "narration-film-01-r3-c2of2"
+        },
+        "job_id": "narration-film-01-r3-c2of2-r1",
         "kind": "narration",
         "target": "film-01"
       },
