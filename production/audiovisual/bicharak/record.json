@@ -30880,6 +30880,102 @@
       },
       "path": "jobs/edit-test3-film-01/edit.ipynb",
       "sha256": "1ac7b9350b9484eeea6bc5f41c5f5b4067cd0dc7c737c72657cbc560cd879e4f"
+    },
+    {
+      "bytes": 1195240,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "0386eb53506cc9f8d1a1990f13adc8fb7fb01c850326cecad9c668a7d7ca52d7",
+        "job_id": "edit-test3-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA L4",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s012-2--c1": 828.8,
+            "f01s012-2--c2": 823.4
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_kept_bf16": [
+            "img_in",
+            "txt_in",
+            "time_text_embed",
+            "norm_out",
+            "proj_out"
+          ],
+          "transformer_precision": "nf4",
+          "vae_decode": "float32",
+          "vram_gib": 22.0
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/edit-test3-film-01/f01s012-2--c1.png",
+      "sha256": "efcdc84b91963a5d6849a4478397415d1ce4d5b61752cc85c1cda6a19c033673"
+    },
+    {
+      "bytes": 1166822,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "0386eb53506cc9f8d1a1990f13adc8fb7fb01c850326cecad9c668a7d7ca52d7",
+        "job_id": "edit-test3-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA L4",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s012-2--c1": 828.8,
+            "f01s012-2--c2": 823.4
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_kept_bf16": [
+            "img_in",
+            "txt_in",
+            "time_text_embed",
+            "norm_out",
+            "proj_out"
+          ],
+          "transformer_precision": "nf4",
+          "vae_decode": "float32",
+          "vram_gib": 22.0
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/edit-test3-film-01/f01s012-2--c2.png",
+      "sha256": "ebc3e683c1002a7050d11de8be91ef2cddc2954bb4c310b7eeba9e7ff65885ca"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -34215,6 +34311,73 @@
         "outputs_key": "exports/colab-exchange/bicharak/edit-test3-film-01/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T07:33:11.531376+00:00",
+      "detail": {
+        "actual_units": 2.0,
+        "files": [
+          "edit/edit-test3-film-01/f01s012-2--c1.png",
+          "edit/edit-test3-film-01/f01s012-2--c2.png"
+        ],
+        "input_zip_sha256": "0386eb53506cc9f8d1a1990f13adc8fb7fb01c850326cecad9c668a7d7ca52d7",
+        "job_id": "edit-test3-film-01",
+        "kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA L4",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s012-2--c1": 828.8,
+            "f01s012-2--c2": 823.4
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_kept_bf16": [
+            "img_in",
+            "txt_in",
+            "time_text_embed",
+            "norm_out",
+            "proj_out"
+          ],
+          "transformer_precision": "nf4",
+          "vae_decode": "float32",
+          "vram_gib": 22.0
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-26T07:33:11.561241+00:00",
+      "detail": {
+        "job_id": "edit-test3-film-01",
+        "members": [
+          "f01s012-2--c1.png",
+          "f01s012-2--c2.png",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/edit-test3-film-01/outputs.tar",
+        "outputs_tar_sha256": "58b78f9b9c493e010844c8498bd76e0d063ba3b23e498741962a9ec16e6b90b1"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],

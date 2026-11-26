@@ -24833,6 +24833,25 @@
       },
       "result": "exchange_staged",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-26T07:33:28.113189+00:00",
+      "detail": {
+        "job_id": "selfish-giant-edit-test3-film-01",
+        "reason": "the \u09ac\u09bf\u099a\u09be\u09b0\u0995 run of the same L4 test was still grainy; no further Colab edit runs",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T07:33:28.134675+00:00",
+      "detail": {
+        "job_id": "selfish-giant-edit-test3-film-01",
+        "reason": "the \u09ac\u09bf\u099a\u09be\u09b0\u0995 run of the same L4 test was still grainy; no further Colab edit runs"
+      },
+      "result": "superseded",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
