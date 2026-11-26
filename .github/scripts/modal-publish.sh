@@ -2,7 +2,9 @@
 # Commit one Modal request's request file and ledger and push them to the branch, for the
 # modal-jobs workflow. A conflicting rebase is aborted; the fresh branch head is then checked out
 # and this run's own changes are re-applied from saved copies (`eav modal-replay`: the request file,
-# and this job's ledger entry and exactly its saved rows; other jobs' rows are kept), then retried.
+# and this job's ledger entry and exactly its saved rows; other jobs' rows are kept; a row billed
+# on the branch meanwhile stays billed), then retried. The replay is stdlib only (`python3 -S -m
+# eav.modal_requests replay`), so it works even when installing the dependencies failed.
 # A failed fetch, rebase or replay never ends the script early: the attempt is retried, and if
 # every attempt fails this run's own commit goes to the fallback branch modal-results/<job_id>
 # (modal-results/<job_id>-run-<GitHub run id> if that branch already exists); `eav modal-fetch`
@@ -46,7 +48,7 @@ commit() {
 replay() {  # this run's changes on top of the fresh branch head, from the saved copies
   git checkout -q --detach "origin/$BRANCH" || return 1
   if [ -n "$ledger" ]; then
-    (cd "$SW" && GH_TOKEN= python3 -m eav.cli modal-replay "$job_id" --root "$root" --saved "$saved") || return 1
+    (cd "$SW" && GH_TOKEN= python3 -S -m eav.modal_requests replay "$job_id" --root "$root" --saved "$saved") || return 1
   else
     cp "$saved/request.json" "$req" || return 1
   fi
@@ -60,7 +62,7 @@ resync() {  # returns non-zero when HEAD is not a pushable re-application of thi
   if ! git rebase -q "origin/$BRANCH"; then
     git rebase --abort || true
     replay || return 1
-  elif ! python3 -c 'import json, sys; [json.load(open(p)) for p in sys.argv[1:]]' "${files[@]}"; then
+  elif ! python3 -S -c 'import json, sys; [json.load(open(p)) for p in sys.argv[1:]]' "${files[@]}"; then
     replay || return 1  # a clean textual rebase that left invalid JSON: re-apply from the saved copies
   fi
 }

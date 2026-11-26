@@ -134,13 +134,18 @@ def _rows(name):
     return rows
 
 
+_APPEND_LOCK = globals().get("_APPEND_LOCK") or threading.Lock()
+
+
 def _append(name, row):
-    path = OUT_DIR / name
-    torn = path.is_file() and path.stat().st_size > 0 and path.read_bytes()[-1:] != b"\\n"
-    with open(path, "a") as f:
-        f.write(("\\n" if torn else "") + json.dumps(row, sort_keys=True) + "\\n")
-        f.flush()
-        os.fsync(f.fileno())
+    # the heartbeat thread and the main thread both append: one writer at a time
+    with _APPEND_LOCK:
+        path = OUT_DIR / name
+        torn = path.is_file() and path.stat().st_size > 0 and path.read_bytes()[-1:] != b"\\n"
+        with open(path, "a") as f:
+            f.write(("\\n" if torn else "") + json.dumps(row, sort_keys=True) + "\\n")
+            f.flush()
+            os.fsync(f.fileno())
 
 
 def session_seconds():
@@ -157,10 +162,12 @@ def note_session():
 
 
 def resume_done(names):
-    # Finished = present AND matching its progress.jsonl line; a file without one is deleted (redone).
+    # Finished = present AND matching its progress.jsonl line written for THIS inputs.zip (a line
+    # of other inputs proves nothing); a file without one is deleted (redone).
     logged = {}
     for row in _rows("progress.jsonl"):
-        if isinstance(row.get("file"), str) and isinstance(row.get("sha256"), str):
+        if isinstance(row.get("file"), str) and isinstance(row.get("sha256"), str) \\
+                and row.get("zip") == INPUT_ZIP_SHA256:
             logged[row["file"]] = row["sha256"]
     done = set()
     for name in names:
@@ -175,10 +182,22 @@ def resume_done(names):
     return done
 
 
-def record_item(key, name):
+def record_item(key, name, item_s=None):
+    # item_s: the seconds this item (or its batch) took; a resumed session starts from it
     digest = hashlib.sha256((OUT_DIR / name).read_bytes()).hexdigest()
-    _append("progress.jsonl", {"key": key, "file": name, "sha256": digest})
+    row = {"key": key, "file": name, "sha256": digest, "zip": INPUT_ZIP_SHA256}
+    if isinstance(item_s, (int, float)) and not isinstance(item_s, bool) and item_s >= 0:
+        row["item_s"] = round(item_s, 1)
+    _append("progress.jsonl", row)
     note_session()
+
+
+def last_item_seconds():
+    # The latest recorded item (or batch) time, so a resumed session's first item starts only if
+    # it can finish before the stop; 0.0 before any item of this job finished.
+    times = [r["item_s"] for r in _rows("progress.jsonl") if r.get("zip") == INPUT_ZIP_SHA256
+             and isinstance(r.get("item_s"), (int, float))]
+    return float(times[-1]) if times else 0.0
 
 
 def _hard_stop():
@@ -488,6 +507,26 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
     raise ValueError(f"unknown job kind: {kind!r}")
 
 
+def art_images(spec: dict) -> dict:
+    """image basename -> its file. art_dir is one folder, or a list of folders (the chunk folders
+    of a chunked stills job: each shot's image is taken from the one folder that holds it)."""
+    dirs = spec.get("art_dir")
+    dirs = [dirs] if isinstance(dirs, (str, Path)) else dirs
+    if not isinstance(dirs, list) or not dirs or not all(isinstance(d, (str, Path)) for d in dirs):
+        raise ValueError("reel_clips spec art_dir must be a folder or a list of folders")
+    out = {}
+    for shot in spec.get("shots") or []:
+        name = shot.get("image")
+        if not isinstance(name, str) or not name or Path(name).name != name:
+            raise ValueError(f"shot {shot.get('id')!r}: image must be a file name inside art_dir")
+        hits = [Path(d) / name for d in dirs if (Path(d) / name).is_file()]
+        if len(hits) != 1:
+            raise ValueError(f"shot {shot.get('id')!r}: {name} is in {len(hits)} of the art_dir "
+                             "folders; it must be in exactly one")
+        out[name] = hits[0]
+    return out
+
+
 def _reel_job(spec: dict, job_id: str, seconds: float, rate: dict) -> dict:
     """One Wan batch: its wall is bound to the forecast and it must be one the owner can
     authorize under batch.py (wall <= 2700 s; 2 x rate x wall / 3600 <= approved CU <= 5)."""
@@ -507,13 +546,13 @@ def _reel_job(spec: dict, job_id: str, seconds: float, rate: dict) -> dict:
         raise ValueError(f"the owner's Wan authority would have to approve {need:.2f} CU "
                          f"(2 x {uph:g} CU/h x {wall} s), over the Wan worker's "
                          f"{MAX_APPROVED_UNITS:g} CU per-batch limit; use fewer shots per batch")
-    art = Path(spec["art_dir"])
+    images = art_images(spec)
     evidence = spec.get("prior_attempt_evidence")
     if not isinstance(evidence, dict) or not evidence:
         raise ValueError("reel_clips spec needs prior_attempt_evidence (a non-empty dict)")
     scenes = []
     for shot in spec["shots"]:
-        digest = hashlib.sha256((art / shot["image"]).read_bytes()).hexdigest()
+        digest = hashlib.sha256(images[shot["image"]].read_bytes()).hexdigest()
         scenes.append({
             "id": shot["id"], "image": shot["image"], "image_sha256": digest,
             "profile": REEL_PROFILE,
@@ -635,27 +674,34 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
     # BudgetExceeded: nothing written; the title cap is keyed by edition_id (R26)
     ledger.reserve(title, month, units, job_id, edition_id=edition_id,
                    root=root if edition_id else None)
-    try:
+    extra = {"chunk": plan["chunk"]} if "chunk" in plan else {}
+    artifacts = list(record.data["artifacts"])
+    try:  # the bundle and its record artifact are written together, or neither stays
         if kind == "reel_clips":
             result = _write_reel(job, spec, job_dir)
         else:
             result = _write_notebook_bundle(kind, plan, job_id, title, job_dir,
                                             forecast_seconds(plan["compute"], rates))
+        result.update(job_id=job_id, forecast_units=units)
+        record.add_artifact("colab_job", Path(result["notebook"]), {
+            **extra, "job_id": job_id, "job_kind": kind, "forecast_units": units, "month": month,
+            "inputs_zip": Path(result["inputs_zip"]).resolve().relative_to(
+                record.root.resolve()).as_posix(),
+            "manifest": Path(result["manifest"]).resolve().relative_to(
+                record.root.resolve()).as_posix()})
     except BaseException:
         shutil.rmtree(job_dir, ignore_errors=True)
+        if len(record.data["artifacts"]) != len(artifacts):
+            record.data["artifacts"] = artifacts  # the save failed: drop the in-memory artifact
+            try:
+                record._save()
+            except Exception:
+                pass
         try:
             ledger.settle(job_id, 0)  # release the reservation; nothing ran
         except Exception:
             pass  # never mask the original error
         raise
-    result.update(job_id=job_id, forecast_units=units)
-    extra = {"chunk": plan["chunk"]} if "chunk" in plan else {}
-    record.add_artifact("colab_job", Path(result["notebook"]), {
-        **extra, "job_id": job_id, "job_kind": kind, "forecast_units": units, "month": month,
-        "inputs_zip": Path(result["inputs_zip"]).resolve().relative_to(
-            record.root.resolve()).as_posix(),
-        "manifest": Path(result["manifest"]).resolve().relative_to(
-            record.root.resolve()).as_posix()})
     record.event("job", "built", {"job_id": job_id, "kind": kind, "forecast_units": units, **extra})
     return {"job_id": job_id, "notebook": result["notebook"],
             "inputs_zip": result["inputs_zip"], "manifest": result["manifest"],
@@ -697,6 +743,10 @@ def _write_reel(job: dict, spec: dict, job_dir: Path) -> dict:
     with tempfile.TemporaryDirectory() as tmp:
         job_path = Path(tmp) / "job.json"
         job_path.write_text(json.dumps(job, indent=2), encoding="utf-8")
-        notebook = builder.build(job_dir, job_path, Path(spec["art_dir"]))
+        art = Path(tmp) / "art"  # the batch's images, from one or several art_dir folders
+        art.mkdir()
+        for name, path in art_images(spec).items():
+            shutil.copyfile(path, art / name)
+        notebook = builder.build(job_dir, job_path, art)
     return {"notebook": Path(notebook), "inputs_zip": job_dir / "wan22-batch-inputs.zip",
             "manifest": job_dir / "build-manifest.json"}

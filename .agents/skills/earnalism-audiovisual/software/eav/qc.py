@@ -17,11 +17,16 @@ def _duration(video) -> float:
 TRUNCATION_CAP_S = 29.0
 # A unit whose characters/second exceed this multiple of the job's median lost words.
 CPS_RATIO = 1.6
+# Below this many characters a unit's chars/s is dominated by its leading/trailing breath, so the
+# ratio test never flags it (the job median, over every unit, is robust to a few of them); the
+# duration test still applies, and a unit with no audio at all is always suspect.
+MIN_RATIO_CHARS = 40
 
 
 def truncation_suspects(rows) -> list:
     """rows: [{"unit_key", "chars", "seconds"}] of one narration job. Returns the suspect_truncated
-    ones, each with its measurements and reasons (duration at the cap, or speech too fast)."""
+    ones, each with its measurements and reasons (duration at the cap, no audio, or speech too
+    fast for a unit of at least MIN_RATIO_CHARS characters)."""
     rates = [r["chars"] / r["seconds"] for r in rows if r["seconds"] > 0]
     median = statistics.median(rates) if rates else 0.0
     out = []
@@ -30,7 +35,9 @@ def truncation_suspects(rows) -> list:
         reasons = []
         if r["seconds"] >= TRUNCATION_CAP_S:
             reasons.append(f"duration {r['seconds']:.2f} s >= {TRUNCATION_CAP_S} s")
-        if median and cps > CPS_RATIO * median:
+        if r["seconds"] <= 0:
+            reasons.append("no audio (0 s)")
+        elif median and r["chars"] >= MIN_RATIO_CHARS and cps > CPS_RATIO * median:
             reasons.append(f"{cps:.1f} chars/s > {CPS_RATIO} x job median {median:.1f}")
         if reasons:
             out.append({"unit_key": r["unit_key"], "chars": r["chars"],

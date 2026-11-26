@@ -31,6 +31,9 @@ This module, like budget, needs only the standard library, so the workflow can r
 even when installing the dependencies failed:
   python3 -m eav.modal_requests check <request.json> --workspace <checkout>
   python3 -m eav.modal_requests refuse-unstarted <request.json> --workspace <checkout> --reason <text>
+  python3 -m eav.modal_requests replay <job_id> --root <title root> --saved <dir>
+The workflow runs these with `python3 -S` (no site-packages, so no code an install added runs in
+the steps that hold the push token).
 """
 import argparse
 import hashlib
@@ -72,6 +75,7 @@ MAX_PAGES = 1000
 class R2Error(Exception):
     """A transfer to or from R2 failed or did not verify."""
     transient = False  # set on HTTP 429/5xx and network errors, which _call retries
+    http_status = None  # the HTTP status of a refused call (404: no such object)
 
 
 # ---------------------------------------------------------------- request files
@@ -186,14 +190,18 @@ def locate(data, workspace):
 
 def refuse(path, ledger, reason) -> dict:
     """Refuse a request before Modal was contacted: release its pending row, restore the job's CU
-    reservation if it never reached Modal (budget.Ledger.undo_move_to_modal), mark it refused."""
+    reservation if it never reached Modal (budget.Ledger.undo_move_to_modal), mark it refused. If
+    the restored reservation leaves a CU cap exceeded, the request's error says so (hold the job)."""
     req = read_request(path)
     if req.get("pending_run_id"):
         try:
             ledger.release_pending_modal(req["pending_run_id"])
         except (KeyError, ValueError):
             pass  # already released, or no longer pending: it then stays as it is
-    ledger.undo_move_to_modal(req["job_id"])
+    if ledger.undo_move_to_modal(req["job_id"]):
+        over = ledger.cap_overrun(req["job_id"])
+        if over:
+            reason = f"{reason}; {over}"
     req.update(status=REFUSED, error=reason, finished_at=now())
     write_request(path, req)
     return req
@@ -227,7 +235,10 @@ def refuse_unstarted(path, workspace, reason) -> dict:
         refuse(path, budget.Ledger(ledger_path), reason)
     else:
         reason = f"{reason}; invalid request: {'; '.join(errors)}"
-        if ledger_path is not None and valid_job_id(data.get("job_id")):
+        # the ledger is touched only for the job this file is named after (a file whose job_id
+        # differs from its name never releases another job's row or reservation)
+        if ledger_path is not None and valid_job_id(data.get("job_id")) \
+                and path.name == f"{data['job_id']}.json":
             ledger = budget.Ledger(ledger_path)
             run_id = data.get("pending_run_id")
             if isinstance(run_id, str) and run_id.rpartition("#")[0] == data["job_id"]:
@@ -235,7 +246,10 @@ def refuse_unstarted(path, workspace, reason) -> dict:
                     ledger.release_pending_modal(run_id)
                 except (KeyError, ValueError):
                     pass
-            ledger.undo_move_to_modal(data["job_id"])
+            if ledger.undo_move_to_modal(data["job_id"]):
+                over = ledger.cap_overrun(data["job_id"])
+                if over:
+                    reason = f"{reason}; {over}"
         else:
             ledger_path = None
             reason += " (the ledger was not touched: settle any pending row with modal-settle)"
@@ -244,6 +258,32 @@ def refuse_unstarted(path, workspace, reason) -> dict:
     out.update(refused=True, why=reason, root=str(root) if root else None,
                ledger=str(ledger_path) if ledger_path else None)
     return out
+
+
+def pinned_ledger(root) -> Path:
+    """The ledger record.json pins (relative to the title root), as `eav` itself resolves it."""
+    root = Path(root)
+    record = json.loads((root / "record.json").read_text(encoding="utf-8"))
+    pinned = record.get("ledger") if isinstance(record, dict) else None
+    if not isinstance(pinned, str) or not pinned or PurePosixPath(pinned).is_absolute() \
+            or Path(pinned).is_absolute():
+        raise ValueError(f"{root}/record.json pins no relative ledger")
+    return (root / pinned).resolve()
+
+
+def replay(job_id, root, saved) -> dict:
+    """The publish script, when a push-back rebase conflicts: on the freshly fetched branch,
+    re-apply this run's saved request file and this job's own ledger entry and rows
+    (budget.Ledger.replay_job); every other job's entry and rows stay. Stdlib only, so it works
+    even when installing the dependencies failed."""
+    saved = Path(saved)
+    req = read_request(saved / "request.json")
+    if req["job_id"] != job_id:
+        raise ValueError(f"the saved request is for {req['job_id']}, not {job_id}")
+    ledger = budget.Ledger(pinned_ledger(root))
+    ledger.replay_job(job_id, json.loads((saved / "ledger.json").read_text(encoding="utf-8")))
+    write_request(request_path(root, job_id), req)
+    return req
 
 
 def check(path, workspace) -> dict:
@@ -308,6 +348,7 @@ def _call_once(opener, method, url, body=None, token=None) -> bytes:
     except urllib.error.HTTPError as e:
         err = R2Error(f"{method} {url.split('?')[0]}: HTTP {e.code}")
         err.transient = e.code in RETRY_STATUSES
+        err.http_status = e.code
         raise err from None
     except (urllib.error.URLError, OSError) as e:
         err = R2Error(f"{method} {url.split('?')[0]}: {type(e).__name__}: {e}")
@@ -394,11 +435,14 @@ def put_result(prefix, request: dict, opener, token=None) -> None:
 
 
 def get_result(prefix, opener, token=None):
-    """The R2 copy of the finished request, or None if there is none."""
+    """The R2 copy of the finished request, or None if there is none (HTTP 404). Any other failure
+    (auth, network, a 5xx after the retries) is raised: it says nothing about whether a copy exists."""
     try:
         raw = get_object(prefix + RESULT_NAME, opener, token)
-    except R2Error:
-        return None
+    except R2Error as e:
+        if e.http_status == 404:
+            return None
+        raise
     try:
         data = json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, ValueError):
@@ -483,7 +527,20 @@ def main(argv=None) -> int:
         s.add_argument("--workspace", required=True)
         if name == "refuse-unstarted":
             s.add_argument("--reason", required=True)
+    s = sub.add_parser("replay")
+    s.add_argument("job_id")
+    s.add_argument("--root", required=True)
+    s.add_argument("--saved", required=True, help="folder with this run's request.json and ledger.json")
     args = p.parse_args(argv)
+    if args.command == "replay":
+        try:
+            req = replay(args.job_id, args.root, args.saved)
+        except (OSError, ValueError, KeyError) as e:
+            print(f"STOP: replay failed: {type(e).__name__}: {e}")
+            return 2
+        print(f"Replayed request {args.job_id} ({req['status']}) and its ledger rows onto the "
+              "current tree.")
+        return 0
     if args.command == "check":
         result = check(args.request, args.workspace)
     else:

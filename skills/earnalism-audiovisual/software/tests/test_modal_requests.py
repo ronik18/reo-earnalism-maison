@@ -161,7 +161,7 @@ class ModalRequestTests(unittest.TestCase):
     def test_title_cap_counts_the_pending_row_of_a_request(self):
         with self.rate(5.0):
             self.assertEqual(self.request()[0], 0)
-            self.set_status("done")  # finished but its row was never replaced: still counts
+            self.set_status("failed")  # finished but its row was never replaced: still counts
             code, out = self.request()
         self.assertEqual(code, 3, out)
         self.assertIn("title cap", out)
@@ -561,7 +561,7 @@ class ModalRequestTests(unittest.TestCase):
         self.set_status("running")
         seen = []
 
-        def runner(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None):
+        def runner(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None, expected_sha256=None):
             self.assertNotIn("modal_contacted_at", self.req())
             on_contact()
             seen.append(self.req()["modal_contacted_at"])
@@ -942,7 +942,9 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(on["push"]["branches"], [modal_requests.BRANCH])
         self.assertEqual(on["push"]["paths"], ["production/audiovisual/modal-requests/*.json",
                                                ".github/workflows/modal-jobs.yml"])
-        self.assertEqual(wf["permissions"], {"contents": "write"})
+        self.assertEqual(wf["permissions"], {"contents": "read"})  # only the run job writes
+        self.assertEqual(wf["jobs"]["run"]["permissions"], {"contents": "write"})
+        self.assertNotIn("permissions", wf["jobs"]["list"])
         self.assertEqual(wf["concurrency"], {"group": "modal-jobs", "cancel-in-progress": False})
         job = wf["jobs"]["run"]
         self.assertEqual((job["runs-on"], job["timeout-minutes"]), ("ubuntu-latest", 300))
@@ -963,6 +965,11 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(token_steps, {"Mark the request running (only the push token)",
                                        "Refuse the request if Modal was never contacted (only the push token)",
                                        "Push the result back (only the push token)"})
+        for s in steps:  # where the push token is, python runs without site-packages (-S)
+            if s.get("name") in token_steps:
+                calls = re.findall(r"python3(?: -[A-Za-z])* ", s["run"])
+                self.assertTrue(calls, s["name"])
+                self.assertTrue(all(c.startswith("python3 -S") for c in calls), (s["name"], calls))
         for s in steps:
             if "uses" in s and s["uses"].startswith("actions/checkout@"):
                 self.assertIs(s["with"]["persist-credentials"], False)

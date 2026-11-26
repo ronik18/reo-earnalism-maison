@@ -35,12 +35,16 @@
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>" [--group]
                          (a chunk only with --group: every never-run chunk of its group together)
   python3 -m eav.cli close <job_id> --root <dir> [--units <CU Colab shows>] --reason "<what happened>"
+  python3 -m eav.cli retire <job_id | chunk group id> --root <dir> --reason "<what replaced it>"
+                         (kept on record, never used as current by film/bundle-audio/reels/next/status;
+                          every job of it imported, closed, superseded or failed on Modal (closed here
+                          first); refused while one has a pending Modal row or an open request)
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
                          [--accept-qc <unit_key,...>]  (suspect_truncated units the owner heard)
   python3 -m eav.cli reel <n> --root <dir> --script <script.json> [--hashtags ...]
   python3 -m eav.cli reel <n> --root <dir> --plan-shots           (after reel narration import)
-  python3 -m eav.cli reel <n> --root <dir> [--score <wav> --score-route ...]
+  python3 -m eav.cli reel <n> --root <dir> [--score <wav> --score-route ...] [--accept-qc <unit_key,...>]
   python3 -m eav.cli qc --root <dir>
   python3 -m eav.cli status --root <dir>
   python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir>
@@ -68,7 +72,7 @@ import subprocess
 import sys
 import tempfile
 import zipfile
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import (budget, colab_jobs, film, importer, mix, modal_requests, modal_run, preview,
@@ -125,8 +129,18 @@ def _ledger(rec, args) -> budget.Ledger:
     return budget.Ledger(path)
 
 
+_NOW = None  # test injection only: the current UTC datetime
+
+
 def _month() -> str:
-    return _MONTH or datetime.now(timezone.utc).strftime("%Y-%m")
+    return _MONTH or (_NOW or datetime.now(timezone.utc)).strftime("%Y-%m")
+
+
+def _month_after(seconds) -> str:
+    """The UTC month `seconds` from now (the injected month when only _MONTH is set)."""
+    if _MONTH and _NOW is None:
+        return _MONTH
+    return ((_NOW or datetime.now(timezone.utc)) + timedelta(seconds=seconds)).strftime("%Y-%m")
 
 
 def _score_route(rec, route) -> str:
@@ -197,6 +211,8 @@ def _jobs(rec) -> list:
     done = {r: {e["detail"]["job_id"] for e in events if e["stage"] == s_ and e["result"] == r}
             for s_, r in (("import", "accepted"), ("job", "superseded"), ("job", "closed"),
                           ("job", "superseding"), ("job", "closing"))}
+    retired = {jid for e in events if e["stage"] == "job" and e["result"] == "retired"
+               for jid in e["detail"].get("jobs", [])}
     out = []
     for a in rec.data["artifacts"]:
         if a["kind"] != "colab_job":
@@ -210,6 +226,8 @@ def _jobs(rec) -> list:
                     "imported": jid in done["accepted"],
                     "superseded": jid in done["superseded"],
                     "closed": jid in done["closed"],
+                    # retired (eav retire): kept on record, never used as current again
+                    "retired": jid in retired,
                     # a supersede/close that recorded its intent but has not finished (R23)
                     "unfinished": (jid in done["superseding"] and jid not in done["superseded"])
                     or (jid in done["closing"] and jid not in done["closed"])})
@@ -217,8 +235,9 @@ def _jobs(rec) -> list:
 
 
 def _ended(j) -> bool:
-    """Superseded (never ran) or closed (ran, not imported): it produces nothing more."""
-    return j["superseded"] or j["closed"]
+    """Superseded (never ran), closed (ran, not imported) or retired (kept on record, replaced):
+    it produces nothing more and is never used as current."""
+    return j["superseded"] or j["closed"] or j.get("retired", False)
 
 
 def _logical(rec) -> list:
@@ -245,7 +264,7 @@ def _logical(rec) -> list:
         for i in range(1, g["of"] + 1):
             mine = sorted((j for j in g["all_chunks"] if j["chunk"]["index"] == i),
                           key=lambda j: j["order"])
-            done = [j for j in mine if j["imported"]]
+            done = [j for j in mine if j["imported"] and not j["retired"]]
             live = [j for j in mine if not _ended(j)]
             if done or live:
                 use.append((done or live)[-1])
@@ -255,6 +274,7 @@ def _logical(rec) -> list:
                  imported=len(use) == g["of"] and all(j["imported"] for j in use),
                  superseded=any(j["superseded"] for j in missing.values()),
                  closed=any(j["closed"] for j in missing.values()),
+                 retired=all(j["retired"] for j in g["all_chunks"]),
                  unfinished=any(j["unfinished"] for j in g["all_chunks"]))
     return out
 
@@ -282,6 +302,7 @@ def _latest_job(rec, kind, target, imported=True, after=-1):
     """The latest live job (or complete chunk group, when imported=True) for kind and target."""
     found = [j for j in _logical(rec) if j["kind"] == kind and j["target"] == target
              and not _ended(j) and j["order"] > after and (j["imported"] or not imported)]
+    found.sort(key=lambda j: j["order"])  # the newest by build order (never a retired one)
     return found[-1] if found else None
 
 
@@ -460,6 +481,11 @@ def _truncation_gate(rec, groups, accepted: set, cmd: str) -> list:
         suspects += qc.narration_suspects(units, _one_dir(rec, job))
     if suspects:
         _print_suspects(suspects, cmd)
+    stale = sorted(accepted - {s["unit_key"] for s in suspects})
+    if stale:  # an acceptance covers what the owner heard now, never a future regeneration
+        raise Stop(f"--accept-qc names unit(s) that are not suspect_truncated now: {', '.join(stale)}",
+                   "Pass only the unit_key values the current suspect_truncated list prints "
+                   "(after listening to each)")
     open_ = [s["unit_key"] for s in suspects if s["unit_key"] not in accepted]
     if open_:
         raise Stop(f"QC failure: suspect_truncated narration unit(s) {', '.join(open_)} (Parler cuts "
@@ -470,10 +496,15 @@ def _truncation_gate(rec, groups, accepted: set, cmd: str) -> list:
     return suspects
 
 
+def _used(job) -> str:
+    """How a consumer names the job it used: the id, plus its chunks for a group."""
+    return job["job_id"] + (f" (chunks {', '.join(_chunk_ids(job))})" if "of" in job else "")
+
+
 def _incomplete(rec, kind, target) -> str:
     """' (<group>: k of n chunks imported)' for a live chunk group not fully imported, else ''."""
     found = [g for g in _logical(rec) if g["kind"] == kind and g["target"] == target and "of" in g
-             and not g["superseded"] and not g["imported"]]
+             and not g["superseded"] and not g["imported"] and not g["retired"]]
     if not found:
         return ""
     g = found[-1]
@@ -521,14 +552,17 @@ def _colab_action(rec, job) -> str:
     if job["kind"] == "reel_clips":
         return _wan_action(rec, job)
     if _on_modal(rec, job["job_id"]):  # moved to Modal: Modal dollar caps for the Modal portion
-        return (f"Job {job['job_id']} runs on Modal (the rest of its CU reservation is released). "
-                f"Import its output: {PROG} import {job['job_id']} --root {rec.root} --from <the "
-                f"output folder> (add --units <CU> only for Colab work after the move). If it stopped "
-                f"short, rerun {PROG} modal-run {job['job_id']} --root {rec.root} --colab-units <CU "
-                f"Colab showed for this job in total> to resume; if a run died with a pending row: "
-                f"{PROG} modal-settle {job['job_id']} --root {rec.root} --usd <billed>. If it can "
-                f"never be imported: {PROG} close {job['job_id']} --root {rec.root} --reason "
-                f"\"<what happened>\" (--units only for Colab work after the move)")
+        jid = job["job_id"]
+        return (f"Job {jid} runs on Modal (the rest of its CU reservation is released). Once its "
+                f"request is done: {PROG} modal-fetch {jid} --root {rec.root}, then {PROG} import "
+                f"{jid} --root {rec.root} --from <the fetched folder> (add --units <CU> only for "
+                f"Colab work after the move). If it failed or stopped short, request it again to "
+                f"resume from the Modal volume: {PROG} modal-request {jid} --root {rec.root} "
+                f"--colab-units <CU Colab showed for this job in total> (commit and push the "
+                f"request; `modal-run` itself only works where Modal is reachable, as in the "
+                f"workflow); if a run died with a pending row: {PROG} modal-settle {jid} --root "
+                f"{rec.root} --usd <billed>. If it can never be imported: {PROG} close {jid} --root "
+                f"{rec.root} --reason \"<what happened>\" (--units only for Colab work after the move)")
     drive = _json(job["manifest"]).get("drive_dir", colab_jobs.DRIVE_ROOT)
     c = job.get("chunk")
     part = (f" (chunk {c['index']} of {c['of']} of group {c['group']}; each chunk is its own job, "
@@ -556,7 +590,8 @@ def next_action(root) -> str:
                 f"{PROG} supersede|close {j['job_id']} --root {root} command"
                 + (" (supersede of a chunk: with --group)" if j["chunk"] else ""))
     for g in _logical(rec):  # a closed chunk is rebuilt on its own; the rest of the group is kept
-        if "of" in g and g["closed"] and not g["superseded"]:  # superseded: the group was given up
+        # superseded or retired: the group was given up (or replaced) and is never rebuilt
+        if "of" in g and g["closed"] and not g["superseded"] and not g["retired"]:
             i, c = next((i, c) for i, c in sorted(g["missing"].items()) if c["closed"])
             return (f"Chunk {i} of {g['of']} of group {g['job_id']} ({c['job_id']}) ran but was closed; "
                     f"rebuild only that chunk's items: {PROG} job {g['kind']} --root {root} --rates "
@@ -611,9 +646,11 @@ def next_action(root) -> str:
         todo = [sh["id"] for sh in shots if sh["id"] not in covered]
         if todo:
             batch = todo[:colab_jobs.MAX_CLIPS_PER_BATCH]
+            dirs = [str(d) for d in _dirs(rec, stills)]
             return (f"Write clips.json per references/reel-recipe.md (Clips spec): art_dir = "
-                    f"{' or '.join(map(str, _dirs(rec, stills)))}"
-                    f"{' (the chunk folder holding the batch stills)' if 'of' in stills else ''}, "
+                    + (json.dumps(dirs, ensure_ascii=False) + " (the stills' chunk folders; each "
+                       "shot's image is taken from the one that holds it)" if len(dirs) > 1
+                       else dirs[0]) + ", "
                     f"prior_attempt_evidence = the retained Wan "
                     f"l4-balanced-v2 provenance (prior run ids, observed s/step, completed clips), "
                     f"shots = one {{id, image, seed, prompt}} for each of the next shots "
@@ -756,11 +793,18 @@ def _job_spec(rec, args, kind, target):
             raise Stop(f"a {kind} job needs --spec (prompts, seeds{', shots' if kind == 'reel_clips' else ''})",
                        "Write it per references/film-recipe.md or references/reel-recipe.md")
         spec = _json(args.spec)
-        if kind == "reel_clips" and not Path(spec.get("art_dir", ".")).is_absolute():
-            spec["art_dir"] = str((Path(args.spec).parent / spec.get("art_dir", ".")).resolve())
-        if kind == "reel_clips":
+        if kind == "reel_clips":  # one folder, or a list (the chunk folders of chunked stills)
+            art = spec.get("art_dir", ".")
+            resolve = lambda d: d if not isinstance(d, str) or Path(d).is_absolute() else str(
+                (Path(args.spec).parent / d).resolve())
+            spec["art_dir"] = [resolve(d) for d in art] if isinstance(art, list) else resolve(art)
             _check_clip_batch(rec, args.reel, spec)
     if args.job_id:
+        taken = {j["job_id"] for j in _jobs(rec)} | {j["chunk"]["group"] for j in _jobs(rec)
+                                                    if j["chunk"]}
+        if args.job_id in taken:  # a job id or a chunk group id names one thing only
+            raise Stop(f"--job-id {args.job_id} is already a job or chunk group id in this record",
+                       "Pass a new --job-id (or none: a fresh id is made)")
         spec["job_id"] = args.job_id
     return spec, colab_jobs.job_items(kind, spec)
 
@@ -971,7 +1015,7 @@ def cmd_import(args):
     if job["imported"]:
         raise Stop(f"job {args.job_id} is already imported", f"{PROG} status --root {rec.root}")
     if _ended(job) or job["unfinished"]:
-        raise Stop(f"job {args.job_id} is superseded or closed (or that is under way); it is never "
+        raise Stop(f"job {args.job_id} is superseded, closed or retired (or that is under way); it is never "
                    "imported", f"{PROG} status --root {rec.root}")
     extra = {}
     if job["kind"] == "reel_clips":
@@ -1017,7 +1061,7 @@ def _modal_job(rec, job_id) -> dict:
     if job is None:
         raise Stop(f"unknown job {job_id}", f"{PROG} status --root {rec.root}")
     if job["imported"] or _ended(job) or job["unfinished"]:
-        raise Stop(f"job {job_id} is imported, superseded or closed (or that is under way); "
+        raise Stop(f"job {job_id} is imported, superseded, closed or retired (or that is under way); "
                    "it is never run again", f"{PROG} status --root {rec.root}")
     if job["kind"] not in modal_run.RUNNABLE_KINDS:
         raise Stop(f"{job['kind']} jobs cannot run with modal-run", "Use the Wan worker for reel_clips")
@@ -1025,7 +1069,27 @@ def _modal_job(rec, job_id) -> dict:
     if not built or sha256_file(job["inputs_zip"]) != built:
         raise Stop(f"inputs.zip of {job_id} does not match its build manifest",
                    "Never run a bundle that changed since it was built; supersede it and rebuild")
-    return job
+    # A run that already finished (ok) is imported, not paid for again: a re-run costs a cold
+    # start and the model load, and its upload would replace the finished one. With a request
+    # file its status decides (a `failed` request whose Modal run was ok but whose upload failed
+    # is re-requested: it resumes from the volume); a local modal-run is judged by its rows.
+    path = modal_requests.request_path(rec.root, job_id)
+    req = modal_requests.read_request(path) if path.is_file() else None
+    if req is not None:
+        finished = req["status"] == "done"
+    else:
+        pinned = rec.data.get("ledger")
+        rows = budget.Ledger((rec.root / pinned).resolve()).modal_rows(job_id=job_id) \
+            if pinned and not Path(pinned).is_absolute() else []
+        finished = any(r["status"] == "ok" for r in rows)
+    if finished:
+        how = (f"{PROG} modal-fetch {job_id} --root {rec.root}, then {PROG} import {job_id} --root "
+               f"{rec.root} --from <the fetched folder>" if req is not None
+               else f"{PROG} import {job_id} --root {rec.root} --from <the downloaded folder>")
+        raise Stop(f"job {job_id} already finished on Modal (done, not imported yet); it is imported, "
+                   "never run again", f"{how}. If it can never be imported: {PROG} close {job_id} "
+                   f"--root {rec.root} --reason \"<what happened>\", then rebuild it")
+    return dict(job, built_sha256=built)
 
 
 def _colab_units(args, cmd) -> float:
@@ -1069,6 +1133,7 @@ def _reserve_modal(args, rec, job, colab_units):
     worst = modal_run.modal_cost(plan["timeout_seconds"])  # deadline + margin, x overhead factor
     try:
         ledger.check_modal(month, rec.data["title_slug"], worst, rec.data["source"].get("edition_id"))
+        _check_spill(ledger, job, worst)
     except budget.BudgetExceeded as e:
         raise Stop(f"Budget exceeded: {e}. Modal was not contacted.",
                    "Hold the job and ask the owner; never run past the Modal cap.", code=3)
@@ -1078,7 +1143,7 @@ def _reserve_modal(args, rec, job, colab_units):
     return ledger, run_id, worst
 
 
-def _requested_run(args, rec, req_path):
+def _requested_run(args, rec, req_path, job):
     """modal-run --request: the request's --colab-units and pending row (the caps were checked and
     the row written by modal-request; it keeps counting until the run replaces it)."""
     if not req_path.is_file():
@@ -1105,6 +1170,7 @@ def _requested_run(args, rec, req_path):
     try:
         ledger.check_modal(month, rec.data["title_slug"], row["usd"],
                            rec.data["source"].get("edition_id"), exclude_run_id=run_id)
+        _check_spill(ledger, job, row["usd"], exclude_run_id=run_id)
     except budget.BudgetExceeded as e:
         _refuse_request(ledger, req_path, f"Budget exceeded at run time: {e}")
         raise Stop(f"Budget exceeded: {e}. The request is refused, its pending row released and the "
@@ -1123,6 +1189,32 @@ def _refuse_request(ledger, req_path, reason):
     modal_requests.refuse(req_path, ledger, reason)
 
 
+def _not_started(args, rec, ledger, run_id, req_path, why):
+    """modal-run failed after its pending row was written but before Modal was contacted (nothing
+    was spent): a request is refused; a local run releases its row and restores the reservation.
+    Best effort: the original error is what the operator sees."""
+    try:
+        if args.request:
+            _refuse_request(ledger, req_path, f"modal-run failed before Modal was contacted: {why}")
+        else:
+            ledger.release_pending_modal(run_id)
+            ledger.undo_move_to_modal(args.job_id)
+        print(f"Modal was not contacted: the pending row {run_id} was released"
+              + (" and the request refused" if args.request else ""))
+    except Exception as e:  # never mask the original error
+        print(f"could not release the pending row {run_id} ({e}); settle it at 0: {PROG} "
+              f"modal-settle {args.job_id} --root {rec.root} --usd 0 --run {run_id}")
+
+
+def _check_spill(ledger, job, worst, exclude_run_id=None):
+    """A run that may still be going in the next UTC month (start + timeout + startup allowance)
+    is checked against that month's cap too: if it ends there its row moves there."""
+    plan = modal_run.plan(job["notebook"], job["inputs_zip"])
+    later = _month_after(plan["timeout_seconds"] + modal_run.STARTUP_ALLOWANCE_S)
+    if later != _month():
+        ledger.check_modal_month(later, worst, exclude_run_id)
+
+
 def cmd_modal_run(args):
     """Run a built narration/stills/music notebook headlessly on Modal; the actual spend is appended
     to the ledger's modal_spend rows (hard caps 30 USD per UTC month and 6 USD per title, lifetime).
@@ -1137,6 +1229,10 @@ def cmd_modal_run(args):
                           "next": f"{PROG} modal-run {args.job_id} --root {rec.root}"}, sort_keys=True))
         return
     req_path = modal_requests.request_path(rec.root, args.job_id)
+    if not args.request and _open_request(rec, args.job_id):  # before any other refusal
+        raise Stop(f"job {args.job_id} has an open Modal request ({req_path}); the workflow runs "
+                   "it and nothing was run here", f"Once it is done: {PROG} modal-fetch "
+                   f"{args.job_id} --root {rec.root}")
     gated = modal_run.gated_model_repo(job["notebook"])
     if gated and not os.environ.get("HF_TOKEN"):
         why = (f"{gated} is a gated Hugging Face model and HF_TOKEN is not set (a read token of the "
@@ -1148,27 +1244,37 @@ def cmd_modal_run(args):
                        "Add the HF_TOKEN repository secret, then make a new request", code=3)
         raise Stop(f"{why}. Modal was not contacted.", "Export HF_TOKEN, then rerun", code=3)
     if args.request:
-        ledger, run_id, colab_units = _requested_run(args, rec, req_path)
+        ledger, run_id, colab_units = _requested_run(args, rec, req_path, job)
     else:
-        if _open_request(rec, args.job_id):
-            raise Stop(f"job {args.job_id} has an open Modal request ({req_path}); the workflow runs "
-                       "it and nothing was run here", f"Once it is done: {PROG} modal-fetch "
-                       f"{args.job_id} --root {rec.root}")
         colab_units = _colab_units(args, "modal-run")
         ledger, run_id, _ = _reserve_modal(args, rec, job, colab_units)
     download = Path(args.download) if args.download else rec.root / "modal-downloads"
-    contact = None
-    if args.request:
-        def contact():  # written immediately before Modal is contacted (the workflow reads it)
+    contacted = []
+
+    def contact():  # immediately before Modal is contacted (the workflow reads modal_contacted_at)
+        contacted.append(True)
+        if args.request:
             req = modal_requests.read_request(req_path)
             req["modal_contacted_at"] = modal_requests.now()
             modal_requests.write_request(req_path, req)
     result = None
     try:
-        result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download, on_contact=contact)
+        result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download, on_contact=contact,
+                                     expected_sha256=job["built_sha256"])
+    except BaseException as e:
+        if not contacted:  # failed before Modal was contacted: nothing was spent
+            _not_started(args, rec, ledger, run_id, req_path, f"{type(e).__name__}: {e}")
+        raise
     finally:
         if result is not None:
-            ledger.finish_modal_spend(run_id, result["usd"], result["seconds"], result["status"])
+            month = _month()  # a run that ended in a later UTC month counts there (checked at start)
+            row = next((r for r in ledger.modal_rows(job_id=args.job_id) if r["run_id"] == run_id),
+                       None)
+            if row is not None and row["status"] == "pending" and not any(
+                    r["run_id"] == run_id for r in ledger.modal_rows(month=month)):
+                ledger.move_modal_row(run_id, month)
+            result["usd"] = ledger.finish_modal_spend(run_id, result["usd"], result["seconds"],
+                                                      result["status"])
             if args.request:
                 req = modal_requests.read_request(req_path)
                 req["run"] = {"run_id": run_id, "seconds": result["seconds"], "usd": result["usd"],
@@ -1177,8 +1283,13 @@ def cmd_modal_run(args):
     folder, status = result["folder"], result["status"]
     nxt = f"{PROG} import {args.job_id} --root {rec.root} --from {folder}"
     if status != "ok":
-        nxt = (f"Rerun {PROG} modal-run {args.job_id} --root {rec.root} --colab-units "
-               f"{colab_units:g} to resume from the volume; if it can never finish: {PROG} close "
+        again = (f"the workflow publishes this result; make a new request to resume from the volume: "
+                 f"{PROG} modal-request {args.job_id} --root {rec.root} --colab-units {colab_units:g}"
+                 if args.request else
+                 f"rerun {PROG} modal-run {args.job_id} --root {rec.root} --colab-units "
+                 f"{colab_units:g} to resume from the volume (only where Modal is reachable; from a "
+                 f"Claude session use {PROG} modal-request instead)")
+        nxt = (f"{again[0].upper() + again[1:]}; if it can never finish: {PROG} close "
                f"{args.job_id} --root {rec.root} --reason \"<what happened>\" (settles the Modal spend "
                f"recorded on the ledger plus the {colab_units:g} CU of Colab work)")
     print(json.dumps({"job_id": args.job_id, "seconds": round(result["seconds"], 1),
@@ -1221,12 +1332,20 @@ def cmd_modal_request(args):
                    "refuses such a request and nothing was written",
                    "Run modal-request on a title root under production/audiovisual/")
     ledger, run_id, worst = _reserve_modal(args, rec, job, colab_units)
-    modal_requests.write_request(path, {
-        "schema": modal_requests.SCHEMA, "job_id": args.job_id, "title_root": title_root,
-        "requested_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "status": "requested", "colab_units": colab_units, "pending_run_id": run_id,
-        "worst_case_usd": round(worst, 6),
-        "r2_prefix": modal_requests.r2_prefix(rec.data["title_slug"], args.job_id, run_id)})
+    try:
+        modal_requests.write_request(path, {
+            "schema": modal_requests.SCHEMA, "job_id": args.job_id, "title_root": title_root,
+            "requested_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "status": "requested", "colab_units": colab_units, "pending_run_id": run_id,
+            "worst_case_usd": round(worst, 6),
+            "r2_prefix": modal_requests.r2_prefix(rec.data["title_slug"], args.job_id, run_id)})
+    except BaseException:  # no request file: the row it would carry must not stay pending
+        try:
+            ledger.release_pending_modal(run_id)
+            ledger.undo_move_to_modal(args.job_id)
+        except Exception:
+            pass  # never mask the original error
+        raise
     print(f"Modal request written: {path} (worst case {worst:.4f} USD pending on the ledger as "
           f"{run_id}; {colab_units:g} CU of Colab work kept on the Colab caps). Modal was not "
           "contacted.")
@@ -1261,9 +1380,27 @@ def _abandon_request(args):
                    f"Wait for the workflow's result, or reconcile from the Modal bill: {PROG} "
                    f"modal-settle {args.job_id} --root {rec.root} --usd <billed>")
     ledger = _ledger(rec, args)
+    run_id = req.get("pending_run_id")
+    pending = [r["run_id"] for r in ledger.pending_modal_runs(args.job_id)]
+    restored_before = ledger.is_modal_job(args.job_id)
     _refuse_request(ledger, path, f"abandoned: {args.reason.strip()}")
-    print(f"Request {args.job_id} abandoned (refused): its pending row {req.get('pending_run_id')} "
-          "was released and the job's CU reservation restored. Modal was never contacted.")
+    earlier = [r for r in ledger.modal_rows(job_id=args.job_id) if r["run_id"] != run_id]
+    released = (f"its pending row {run_id} was released" if run_id in pending
+                else f"its row {run_id} was no longer pending and was left as it is")
+    restored = ("the job's CU reservation was restored" if restored_before
+                and not ledger.is_modal_job(args.job_id) else
+                "the job stays moved to Modal (it has earlier Modal runs), so its CU reservation "
+                "stays released")
+    print(f"Request {args.job_id} abandoned (refused): this request's run recorded no Modal contact "
+          f"(no modal_contacted_at on the branch); {released}; {restored}.")
+    if earlier:
+        print("Earlier Modal rows of this job are kept as they are: " + ", ".join(
+            f"{r['run_id']} {r['status']}{' billed' if r.get('billed') else ''} {r['usd']:.4f} USD"
+            for r in earlier) + ".")
+    print("A runner lost after it reached Modal could not push modal_contacted_at: check the Modal "
+          f"dashboard (app {modal_run.APP_NAME}) for a run of this request; if one was billed, record "
+          f"it (the released row is written again, billed): {PROG} modal-settle {args.job_id} --root "
+          f"{rec.root} --usd <billed> --run {run_id}")
     print(f"Then: commit {path} with the ledger {ledger.path} and push")
 
 
@@ -1336,13 +1473,11 @@ def cmd_modal_replay(args):
     released row is never resurrected); every other job's entry and rows in the newer ledger are
     kept."""
     rec = _record(args.root)
-    saved = Path(args.saved)
-    req = modal_requests.read_request(saved / "request.json")
-    if req["job_id"] != args.job_id:
-        raise Stop(f"the saved request is for {req['job_id']}, not {args.job_id}", "Pass the right --saved")
-    ledger = _ledger(rec, args)
-    ledger.replay_job(args.job_id, _json(saved / "ledger.json"))
-    modal_requests.write_request(modal_requests.request_path(rec.root, args.job_id), req)
+    _ledger(rec, args)  # the pinned ledger, as every command checks it
+    try:  # the same stdlib function the publish script runs (python3 -S -m eav.modal_requests replay)
+        req = modal_requests.replay(args.job_id, rec.root, args.saved)
+    except ValueError as e:
+        raise Stop(str(e), "Pass the right --saved")
     print(f"Replayed request {args.job_id} ({req['status']}) and its ledger rows onto the current tree.")
 
 
@@ -1415,7 +1550,8 @@ def cmd_modal_settle(args):
     ledger = _ledger(rec, args)
     try:
         budget._check_units(args.usd)
-        changed = ledger.bill_modal_run(args.job_id, args.usd, args.run)
+        changed = ledger.bill_modal_run(args.job_id, args.usd, args.run, month=_month(),
+                                        at=datetime.now(timezone.utc).isoformat(timespec="seconds"))
     except ValueError as e:
         raise Stop(str(e), "Pass --usd as the amount billed, >= 0, and --run <run_id> to pick a row")
     except KeyError:
@@ -1535,6 +1671,76 @@ def _end_job(args, how, job_id=None):
               "Its outputs are not on record.")
 
 
+def _failed_on_modal(rec, ledger, job) -> bool:
+    """The job's Modal run ended without a result to import: its request finished failed or
+    hard_stopped, or (no request file) its latest Modal row is not ok."""
+    path = modal_requests.request_path(rec.root, job["job_id"])
+    if path.is_file():
+        return modal_requests.read_request(path)["status"] in ("failed", "hard_stopped")
+    rows = sorted(ledger.modal_rows(job_id=job["job_id"]), key=lambda r: ledger.run_number(r["run_id"]))
+    return bool(rows) and rows[-1]["status"] not in ("ok", "pending")
+
+
+def cmd_retire(args):
+    """Retire a plain job or a whole chunk group that a newer build replaced: it stays on record
+    (artifacts, events, ledger rows) but film, bundle-audio, reels, next_action and status never use
+    it as current again. Allowed when every job of it is imported, closed or superseded, or failed
+    on Modal (closed first here, settling its Modal spend); refused while any of them has a pending
+    Modal row or an open request."""
+    rec = _record(args.root)
+    reason = (args.reason or "").strip()
+    if not reason:
+        raise Stop("a reason is required", f"{PROG} retire {args.job_id} --root {rec.root} --reason "
+                   "\"<what replaced it>\"")
+    job = next((j for j in _jobs(rec) if j["job_id"] == args.job_id), None)
+    if job is not None and job["chunk"]:
+        raise Stop(f"{args.job_id} is chunk {job['chunk']['index']} of {job['chunk']['of']} of group "
+                   f"{job['chunk']['group']}; a group is retired as a whole",
+                   f"{PROG} retire {job['chunk']['group']} --root {rec.root} --reason \"{reason}\"")
+    group = None if job is not None else _find(rec, args.job_id)
+    if job is None and (group is None or "of" not in group):
+        raise Stop(f"unknown job or chunk group {args.job_id}", f"{PROG} status --root {rec.root}")
+    members = [job] if job is not None else group["all_chunks"]
+    todo = [m for m in members if not m["retired"]]
+    if not todo:
+        raise Stop(f"{args.job_id} is already retired", f"{PROG} status --root {rec.root}")
+    ledger = _ledger(rec, args)
+    to_close = []
+    for m in todo:  # every check before any write: a group is never half retired
+        jid = m["job_id"]
+        pending = ledger.pending_modal_runs(jid)
+        if pending:
+            raise Stop(f"job {jid} has a pending Modal row ({', '.join(r['run_id'] for r in pending)}); "
+                       "nothing was retired",
+                       f"Wait for its request, or reconcile it: {PROG} modal-settle {jid} --root "
+                       f"{rec.root} --usd <billed>; then rerun")
+        if _open_request(rec, jid):
+            raise Stop(f"job {jid} has an open Modal request; nothing was retired",
+                       f"Wait for the workflow, then {PROG} modal-fetch {jid} --root {rec.root}")
+        if m["unfinished"]:
+            raise Stop(f"job {jid} has an unfinished supersede/close; nothing was retired",
+                       f"Rerun that {PROG} supersede|close {jid} --root {rec.root} command first")
+        if m["imported"] or m["closed"] or m["superseded"]:
+            continue
+        if _failed_on_modal(rec, ledger, m):
+            to_close.append(jid)
+            continue
+        raise Stop(f"job {jid} is still live (built, running or waiting to be imported); only an "
+                   "imported, closed, superseded or failed job is retired, and nothing was retired",
+                   f"Import it, or supersede (never ran) / close (ran) it first: {PROG} status "
+                   f"--root {rec.root}")
+    for jid in to_close:  # failed on Modal: settle its spend as a close, then retire it
+        _end_job(argparse.Namespace(root=args.root, ledger=args.ledger, units=None, group=False,
+                                    reason=f"failed on Modal; retired: {reason}"), "close", jid)
+    rec = _record(args.root)
+    ids = [m["job_id"] for m in todo]
+    rec.event("job", "retired", {"job_id": args.job_id, "jobs": ids, "reason": reason,
+                                 "closed_here": to_close})
+    print(f"Retired {args.job_id} ({', '.join(ids)}): kept on record with its outputs, events and "
+          "ledger rows, never used as current by film, bundle-audio, reels, next_action or status."
+          + (f" Closed first (failed on Modal, spend settled): {', '.join(to_close)}." if to_close else ""))
+
+
 def cmd_supersede(args):
     """Release a never-run job: settle its reservation at 0 and record job/superseded (R19).
     A chunk only with --group: every never-run chunk of its group together."""
@@ -1613,7 +1819,8 @@ def cmd_film(args):
                                                 "qc_accepted": sorted(accepted), **info})
     rec.event("film", "assembled", {"target": t, "duration": info["duration"]})
     print(f"Assembled {out / (t + '.mp4')}: {info['duration']:.1f} s, {m['lufs']:.1f} LUFS, "
-          f"TP {m['true_peak']:.1f} dBTP. Maison video stays held (Stream cost not approved).")
+          f"TP {m['true_peak']:.1f} dBTP, from narration job {_used(narr)} and stills job "
+          f"{_used(stills)}. Maison video stays held (Stream cost not approved).")
 
 
 def _line_ends(script, units, timing) -> list:
@@ -1701,6 +1908,9 @@ def cmd_reel(args):
         raise Stop(f"{t} needs a script, its imported narration and a shot plan", next_action(rec.root))
     shots, planned, narr_id = _bound_plan(rec, n)  # R27: exactly the planned narration
     narr = _find(rec, narr_id)
+    reel_units = voice_units(_reel_scene(script, n), {"description": ""}, None, script["language"])
+    accepted = _accept_qc(args, reel_units)
+    suspects = _truncation_gate(rec, [(narr, reel_units)], accepted, f"reel {t}")
     by_scene, jobs = {}, []
     for j in _clip_jobs(rec, n, planned, imported=True):
         jobs.append(j["job_id"])
@@ -1743,10 +1953,12 @@ def cmd_reel(args):
                      {"target": t, "narration_job_id": narr["job_id"]})
     rec.add_artifact("reel", folder / f"{t}.mp4", {"target": t, "score": score_info,
                                                    "narration_job_id": narr["job_id"],
+                                                   "suspect_truncated": suspects,
+                                                   "qc_accepted": sorted(accepted),
                                                    "clip_jobs": jobs, **info})
     rec.event("reel", "assembled", {"target": t, "seconds": info["seconds"]})
     print(f"Assembled {folder / (t + '.mp4')}: {info['seconds']:.1f} s from {len(clips)} clips in "
-          f"{len(jobs)} batch(es), {info['lufs']:.1f} LUFS.")
+          f"{len(jobs)} batch(es), {info['lufs']:.1f} LUFS, narration job {_used(narr)}.")
 
 
 def _assembled_narration(rec, target, artifact):
@@ -1880,7 +2092,7 @@ def cmd_bundle_audio(args):
 
 
 def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
-    rows, prov_units, job_ids, run_ids = [], {}, set(), set()
+    rows, prov_units, job_ids, run_ids = [], {}, set(), []
     with tempfile.TemporaryDirectory() as td:
         td = Path(td)
         bundle.mkdir(parents=True, exist_ok=True)
@@ -1896,7 +2108,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                 raise Stop(f"unit {unit['unit_id']}: narration not imported yet"
                            + _incomplete(rec, "narration", _film_target(fi)), next_action(rec.root))
             job_ids.add(job["job_id"])
-            run_ids.update(_chunk_ids(job))
+            run_ids += [c for c in _chunk_ids(job) if c not in run_ids]  # chunk order
             units, tags, spoken = [], [], {}
             for _, sc in mine:
                 vus = voice_units(sc, {"description": ""}, None, lang)
@@ -1974,7 +2186,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
         "timing_json_sha256": sha256_file(timing_path), "term_per_territory": {},
         "text_source_licence": None, "cover_provenance": None,
         "generators": [{"model": colab_jobs.NARRATION_REPO, "revision": colab_jobs.NARRATION_REVISION,
-                        "licence": "Apache-2.0", "job_ids": sorted(run_ids),
+                        "licence": "Apache-2.0", "job_ids": list(run_ids),
                         "voice": plan["voice"]["preset_key"]}],
         "dry_narration": bool(args.dry),
         "music": None if args.dry else {
@@ -1991,7 +2203,8 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                                           "suspect_truncated": args.suspect_truncated,
                                           "qc_accepted": sorted(args.qc_accepted)})
     print(f"Wrote Maison audio bundle {bundle} ({len(rows)} chapter MP3s, measured timing.json with "
-          f"provenance) and evidence DRAFT {draft}.")
+          f"provenance) and evidence DRAFT {draft}, from narration job(s) {', '.join(ids)}"
+          + (f" (chunks {', '.join(run_ids)})" if sorted(run_ids) != ids else "") + ".")
     print(f"Maison audio: complete and owner-approve the draft, save it under docs/evidence/, then on the "
           f"server: python manage.py attach_audiovisual_audio stage {rec.data['title_slug']} --publisher "
           f"<public_id> --bundle {bundle} --evidence docs/evidence/<file>.json; browser-test the staged "
@@ -2004,21 +2217,36 @@ def cmd_preview(args):
     chapter = Path(args.bundle) / "unit-001.mp3"
     if not src["units"] or not chapter.is_file():
         raise Stop(f"{chapter} not found", f"{PROG} bundle-audio --root {rec.root} --out <bundle dir>")
+    unit_id = src["units"][0]["unit_id"]
+    try:  # the narration the bundle's chapter 1 was built from must still be the current one
+        used = _json(Path(args.bundle) / "timing.json")["provenance"]["units"][unit_id]["narration_job_id"]
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        raise Stop(f"{args.bundle}/timing.json does not name chapter 1's narration job ({e})",
+                   f"{PROG} bundle-audio --root {rec.root} --out <new bundle dir>")
+    job = _find(rec, used)
+    current = _latest_job(rec, "narration", job["target"]) if job is not None else None
+    if current is None or current["job_id"] != used:
+        raise Stop(f"the bundle's chapter 1 was built from narration job {used}, which is not the "
+                   f"current narration ({current['job_id'] if current else 'none'}; a retired or "
+                   "replaced job is never used)",
+                   f"{PROG} bundle-audio --root {rec.root} --out <new bundle dir>, then preview it")
     out = Path(args.out)
     if out.exists() and any(out.iterdir()):
         raise Stop(f"{out} is not empty", "Pass a new --out directory")
     out.mkdir(parents=True, exist_ok=True)
     try:
-        record = preview.cut_preview(chapter, out / "preview.mp3", src["units"][0]["unit_id"])
+        record = preview.cut_preview(chapter, out / "preview.mp3", unit_id)
     except ValueError as e:
         shutil.rmtree(out, ignore_errors=True)
         raise Stop(f"preview: {e}", "Give chapter 1 narration a pause within its first two minutes",
                    code=5)
     record["source_mp3_sha256"] = sha256_file(chapter)
+    record["narration_job_id"] = used
     path = _write_json(out / "preview.json", record)
-    rec.event("preview", "cut", {"sha256": record["sha256"], "duration_ms": record["duration_ms"]})
+    rec.event("preview", "cut", {"sha256": record["sha256"], "duration_ms": record["duration_ms"],
+                                 "narration_job_id": used})
     print(f"Wrote preview clip {out / 'preview.mp3'} ({record['duration_ms']} ms, {record['bytes']} bytes) "
-          f"and measurement record {path}. Server: stage it as a preview_audio asset; its asset_id completes "
+          f"from narration job {_used(current)} and measurement record {path}. Server: stage it as a preview_audio asset; its asset_id completes "
           "revision.validation_evidence['audio_preview'].")
 
 
@@ -2048,6 +2276,8 @@ def cmd_status(args):
                      else (f"on Modal ({ledger.colab_units_before_modal(j['job_id']):.2f} CU of "
                            "Colab work kept, rest of the reservation released)") if on_modal
                      else "waiting for Colab")
+            if j["retired"]:
+                state = f"retired, never used as current ({state})"
             c = j["chunk"]
             part = f" chunk {c['index']}/{c['of']} of {c['group']}" if c else ""
             print(f"  {j['job_id']} {j['kind']} {j['target']}{part}: {state} "
@@ -2055,7 +2285,8 @@ def cmd_status(args):
         for g in _logical(rec):
             if "of" in g:
                 done = sum(c["imported"] for c in g["chunks"])
-                state = ("complete" if g["imported"] else
+                state = ("retired: kept on record, never used as current" if g["retired"] else
+                         "complete" if g["imported"] else
                          "dead: superseded" if g["superseded"] else
                          "incomplete: chunk " + ", ".join(map(str, sorted(g["missing"])))
                          + " closed; rebuild it with job --replace-chunk" if g["closed"]
@@ -2128,7 +2359,8 @@ def cmd_social(args):
 
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
-            "supersede": cmd_supersede, "close": cmd_close, "modal-run": cmd_modal_run, "modal-settle": cmd_modal_settle,
+            "supersede": cmd_supersede, "close": cmd_close, "retire": cmd_retire,
+            "modal-run": cmd_modal_run, "modal-settle": cmd_modal_settle,
             "modal-request": cmd_modal_request, "r2-upload": cmd_r2_upload,
             "modal-fetch": cmd_modal_fetch, "r2-probe": cmd_r2_probe, "modal-replay": cmd_modal_replay,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
@@ -2205,6 +2437,9 @@ def _parser():
     s.add_argument("--units", type=float, help="the CU Colab shows the run used; for a job run with "
                    "modal-run: only the CU of any Colab run after the move (optional, default 0)")
     s.add_argument("--reason", required=True)
+    s = add("retire")
+    s.add_argument("job_id", help="a plain job id or a chunk group id")
+    s.add_argument("--reason", required=True, help="what replaced it")
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)
@@ -2222,6 +2457,8 @@ def _parser():
     s.add_argument("--score")
     s.add_argument("--score-route", help="vcsl or ace-step:<imported music job id>")
     s.add_argument("--hashtags", nargs="*")
+    s.add_argument("--accept-qc", metavar="UNIT_KEY,...",
+                   help="assembly: suspect_truncated reel narration units the owner listened to and accepts")
     add("qc")
     add("status")
     s = add("bundle-audio")

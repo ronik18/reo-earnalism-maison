@@ -8,7 +8,10 @@
 # (install, an invalid request, mark, probe, or modal-run before contact) ends the request `refused`:
 # its pending row is released and the job's CU reservation restored. `eav modal-fetch` brings the
 # outputs back for `eav import`. Each step gets only the secrets it needs; the checkout keeps no
-# token, and only the steps that push get the GitHub token.
+# token, only the steps that push get the GitHub token (and only the run job may write), and every
+# python3 in those steps runs with -S: the stdlib only, so nothing the unhashed pip install added
+# (a site .pth file) runs where the token is. Write access to this branch is still equivalent to
+# access to these secrets (the workflow runs the branch's own code with them).
 # Secret HF_TOKEN (only the "Run on Modal" step): a read-only Hugging Face token of the account that
 # accepted the terms of the gated narration model ai4bharat/indic-parler-tts. modal-run attaches it
 # to the Modal function as an in-memory secret and refuses (exit 3, before Modal is contacted) a gated
@@ -22,7 +25,7 @@ on:
     branches: [claude/wonderful-bardeen-s9k90x]
     paths: ['production/audiovisual/modal-requests/*.json', '.github/workflows/modal-jobs.yml']
 permissions:
-  contents: write
+  contents: read  # the run job alone may push
 concurrency:
   group: modal-jobs
   cancel-in-progress: false
@@ -64,6 +67,8 @@ jobs:
     needs: list
     if: needs.list.outputs.requests != '[]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # push the request result and ledger back
     timeout-minutes: 300  # per matrix job, i.e. per request
     strategy:
       max-parallel: 1
@@ -94,8 +99,8 @@ jobs:
           set -euo pipefail
           git config user.name "eav modal-jobs"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          check="$(cd "$SW" && python3 -m eav.modal_requests check "$GITHUB_WORKSPACE/$REQ" --workspace "$GITHUB_WORKSPACE")"
-          field() { python3 -c 'import json, sys; v = json.loads(sys.argv[1])[sys.argv[2]]; print("; ".join(v) if isinstance(v, list) else ("" if v is None else v))' "$check" "$1"; }
+          check="$(cd "$SW" && python3 -S -m eav.modal_requests check "$GITHUB_WORKSPACE/$REQ" --workspace "$GITHUB_WORKSPACE")"
+          field() { python3 -S -c 'import json, sys; v = json.loads(sys.argv[1])[sys.argv[2]]; print("; ".join(v) if isinstance(v, list) else ("" if v is None else v))' "$check" "$1"; }
           if [ "$(field status)" != requested ]; then
             echo "go=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -106,7 +111,7 @@ jobs:
           fi
           root="$(field root)"
           ledger="$(field ledger)"
-          python3 -c 'import json, sys; p = sys.argv[1]; d = json.load(open(p)); d["status"] = "running"; open(p, "w").write(json.dumps(d, indent=2, sort_keys=True) + "\n")' "$REQ"
+          python3 -S -c 'import json, sys; p = sys.argv[1]; d = json.load(open(p)); d["status"] = "running"; open(p, "w").write(json.dumps(d, indent=2, sort_keys=True) + "\n")' "$REQ"
           bash .github/scripts/modal-publish.sh "modal-jobs: $JOB_ID running" "$JOB_ID" "$root" "$ledger" "$REQ"
           {
             echo "go=true"
@@ -150,8 +155,8 @@ jobs:
           set -euo pipefail
           git config user.name "eav modal-jobs"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          result="$(cd "$SW" && python3 -m eav.modal_requests refuse-unstarted "$GITHUB_WORKSPACE/$REQ" --workspace "$GITHUB_WORKSPACE" --reason "the workflow stopped before Modal was contacted ($OUTCOMES)")"
-          field() { python3 -c 'import json, sys; v = json.loads(sys.argv[1])[sys.argv[2]]; print("" if v is None else v)' "$result" "$1"; }
+          result="$(cd "$SW" && python3 -S -m eav.modal_requests refuse-unstarted "$GITHUB_WORKSPACE/$REQ" --workspace "$GITHUB_WORKSPACE" --reason "the workflow stopped before Modal was contacted ($OUTCOMES)")"
+          field() { python3 -S -c 'import json, sys; v = json.loads(sys.argv[1])[sys.argv[2]]; print("" if v is None else v)' "$result" "$1"; }
           if [ "$(field refused)" != True ]; then
             echo "Not refused: $(field why)"
             exit 0
@@ -179,7 +184,7 @@ jobs:
           LEDGER: ${{ steps.start.outputs.ledger }}
         run: |
           set -euo pipefail
-          status="$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["status"])' "$REQ")"
+          status="$(python3 -S -c 'import json, sys; print(json.load(open(sys.argv[1]))["status"])' "$REQ")"
           bash .github/scripts/modal-publish.sh "modal-jobs: $JOB_ID $status" "$JOB_ID" "$ROOT" "$LEDGER" "$REQ"
           if [ "$status" != done ]; then
             echo "Request $JOB_ID ended $status; see the request file"

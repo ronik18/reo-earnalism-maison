@@ -28,6 +28,11 @@ except ValueError as e:
         MODEL_REPO, revision=MODEL_REVISION, torch_dtype=dtype).to(device)
     ATTENTION = "default"
 tokenizer = AutoTokenizer.from_pretrained(MODEL_REPO, revision=MODEL_REVISION)
+# Parler conditions on the prompt prepended to the audio: a batch must pad prompts on the LEFT
+# (the pinned revision's config says so; this holds even if a later revision drops the setting).
+tokenizer.padding_side = "left"
+if tokenizer.padding_side != "left":
+    raise RuntimeError("the prompt tokenizer does not pad on the left")
 desc_tokenizer = AutoTokenizer.from_pretrained(
     model.config.text_encoder._name_or_path)
 GENERATION = dict(JOB.get("generation", {}))  # pinned roster preset settings (R9)
@@ -43,7 +48,9 @@ EXPECTED = [unit["unit_key"] + ".wav" for unit in JOB["units"]]
 DONE = resume_done(EXPECTED)  # finished in an earlier session: file present and sha256 logged
 todo = [u for u in JOB["units"] if u["unit_key"] + ".wav" not in DONE]
 print(len(DONE), "units already done;", len(todo), "to generate in batches of", BATCH)
-last = 0.0  # seconds the previous batch took; the next starts only if it fits (R25)
+# seconds the previous batch took (from progress.jsonl in a resumed session); the next starts
+# only if it fits (R25)
+last = last_item_seconds()
 for i in range(0, len(todo), BATCH):
     if not may_start(last):
         break
@@ -57,6 +64,7 @@ for i in range(0, len(todo), BATCH):
                          prompt_attention_mask=p.attention_mask,
                          return_dict_in_generate=True, **GENERATION)
     lengths = getattr(out, "audios_length", None)
+    batch_s = time.time() - started
     for j, unit in enumerate(chunk):
         wav = out.sequences[j].cpu().float().numpy().reshape(-1)
         if lengths is not None:
@@ -64,6 +72,6 @@ for i in range(0, len(todo), BATCH):
         else:  # no lengths reported: drop only the padding zeros at the end
             wav = np.trim_zeros(wav, "b")
         sf.write(str(OUT_DIR / (unit["unit_key"] + ".wav")), wav.astype("float32"), rate)
-        record_item(unit["unit_key"], unit["unit_key"] + ".wav")
+        record_item(unit["unit_key"], unit["unit_key"] + ".wav", item_s=batch_s)
     last = time.time() - started
     print("wrote", [u["unit_key"] for u in chunk], "in %.1f s" % last)

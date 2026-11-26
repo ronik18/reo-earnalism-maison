@@ -73,8 +73,11 @@ they never move a word.
 
 A unit WAV is `suspect_truncated` when it lasts at least 29.0 s (`eav.qc.TRUNCATION_CAP_S`)
 or its characters per second exceed 1.6 x the job's median (`eav.qc.CPS_RATIO`): Parler
-stopped and text was probably lost. `import` lists them (advisory: the import stands),
-`qc` lists them in `qc/report.json`, and `film` and `bundle-audio` refuse to build from a
-narration group holding one until the owner has listened and names it with
-`--accept-qc <unit_key,...>` (recorded with the film / bundle). Otherwise regenerate that
-narration; never accept unheard.
+stopped and text was probably lost. The ratio test (and the median) leaves out units under 40
+characters (`eav.qc.MIN_RATIO_CHARS`: their rate is mostly breath); a unit with no audio is always
+suspect. `import` lists them (advisory: the import stands), `qc` lists them in
+`qc/report.json`, and `film`, `bundle-audio` and the reel assembly (`reel N`) refuse to build
+from narration holding one until the owner has listened and names it with
+`--accept-qc <unit_key,...>` (recorded with the film / bundle / reel). Only keys on the current
+suspect list are accepted, so an acceptance never covers a later regeneration. Otherwise
+regenerate that narration; never accept unheard.

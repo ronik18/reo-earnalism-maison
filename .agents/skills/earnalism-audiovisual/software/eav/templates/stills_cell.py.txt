@@ -16,7 +16,9 @@ EXPECTED = [item["key"] + ".png" for item in JOB["items"]]
 DONE = resume_done(EXPECTED)  # finished in an earlier session: file present and sha256 logged
 todo = [i for i in JOB["items"] if i["key"] + ".png" not in DONE]
 print(len(DONE), "stills already done;", len(todo), "to generate")
-last = 0.0  # seconds the previous still took; the next starts only if it fits (R25)
+# seconds the previous still took (from progress.jsonl in a resumed session); the next starts
+# only if it fits (R25)
+last = last_item_seconds()
 for item in todo:
     if not may_start(last):
         break
@@ -26,6 +28,6 @@ for item in todo:
                  max_sequence_length=256, width=item["width"], height=item["height"],
                  generator=gen).images[0]
     image.save(OUT_DIR / (item["key"] + ".png"))
-    record_item(item["key"], item["key"] + ".png")
     last = time.time() - started
+    record_item(item["key"], item["key"] + ".png", item_s=last)
     print("wrote", item["key"], "in %.1f s" % last)

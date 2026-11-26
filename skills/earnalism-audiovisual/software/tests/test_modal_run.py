@@ -560,7 +560,7 @@ class ModalRunCliTests(unittest.TestCase):
 
 def fake_runner(usd, status="ok", seconds=100.0, calls=None):
     """A stand-in for modal_run.run_modal: no Modal client, a canned bill."""
-    def runner(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None):
+    def runner(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None, expected_sha256=None):
         if calls is not None:
             calls.append(download_dir)
         if on_contact is not None:
@@ -594,7 +594,10 @@ class ModalCapTests(unittest.TestCase):
                                  usd / (self.timeout_s * modal_run.MODAL_OVERHEAD_FACTOR))
 
     def seed(self, usd, job_id="other-job", month=None):
-        self.ledger.record_modal_spend(month or self.MONTH, job_id, usd, 1.0, "ok", "t")
+        # this job's own earlier spend is a run that did not finish ok (an ok run is imported,
+        # never run again); another job's is an ok run
+        status = "failed" if job_id == self.job_id else "ok"
+        self.ledger.record_modal_spend(month or self.MONTH, job_id, usd, 1.0, status, "t")
 
     def go(self, runner, *extra):
         if "--colab-units" not in extra:
@@ -627,12 +630,12 @@ class ModalCapTests(unittest.TestCase):
             self.assertEqual(self.go(fake_runner(0.1))[0], 0)
 
     def test_spend_recorded_on_success_failure_and_hard_stop(self):
-        for usd, status in ((0.11, "ok"), (0.22, "failed"), (0.33, "hard_stopped")):
+        for usd, status in ((0.22, "failed"), (0.33, "hard_stopped"), (0.11, "ok")):
             code, out = self.go(fake_runner(usd, status, seconds=12.5))
             self.assertEqual(code, 2 if status == "failed" else 0, out)
         rows = self.ledger.modal_rows(job_id=self.job_id)
         self.assertEqual([(r["usd"], r["status"], r["seconds"]) for r in rows],
-                         [(0.11, "ok", 12.5), (0.22, "failed", 12.5), (0.33, "hard_stopped", 12.5)])
+                         [(0.22, "failed", 12.5), (0.33, "hard_stopped", 12.5), (0.11, "ok", 12.5)])
         self.assertTrue(all(r["at"] for r in rows))
 
     def test_spend_recorded_before_printing(self):
@@ -649,7 +652,9 @@ class ModalCapTests(unittest.TestCase):
         self.assertEqual([(r["usd"], r["status"], r["seconds"]) for r in rows], [(0.37, "ok", 5.0)])
 
     def test_interrupted_run_leaves_pending_worst_case_that_blocks_and_modal_settle_replaces(self):
-        def interrupted(*a, **k):
+        def interrupted(*a, on_contact=None, **k):  # Ctrl-C once Modal was contacted
+            if on_contact is not None:
+                on_contact()
             raise KeyboardInterrupt()
         with self.with_worst_case(0.60), mock.patch.object(modal_run, "run_modal", interrupted):
             with self.assertRaises(KeyboardInterrupt):
@@ -672,7 +677,9 @@ class ModalCapTests(unittest.TestCase):
 
     def test_import_and_close_refuse_while_a_row_is_pending(self):
         """B4 M2: never settle the job from a pending worst case; modal-settle first."""
-        def interrupted(*a, **k):
+        def interrupted(*a, on_contact=None, **k):  # Ctrl-C once Modal was contacted
+            if on_contact is not None:
+                on_contact()
             raise KeyboardInterrupt()
         with mock.patch.object(modal_run, "run_modal", interrupted):
             with self.assertRaises(KeyboardInterrupt):
@@ -722,7 +729,7 @@ class ModalCapTests(unittest.TestCase):
 
     def test_import_settles_from_every_modal_session_in_usd(self):
         self.go(fake_runner(0.25, "failed"))
-        self.go(fake_runner(0.30))
+        self.go(fake_runner(0.30, "hard_stopped"))
         cu = self.colab_cu()
         fm, patched = self.modal_patch()
         with fakes(), patched:
@@ -831,7 +838,8 @@ class ModalCapTests(unittest.TestCase):
     def test_status_shows_the_month_and_title_spend(self):
         code, out = run("status", "--root", self.root)
         self.assertIn("modal: $0.00 of $30.00 this month; title: $0.00 of $6.00", out)
-        self.go(fake_runner(1.234))
+        with self.with_worst_case(2.0):
+            self.go(fake_runner(1.234))
         self.seed(2.0)  # another title's job: the month only
         code, out = run("status", "--root", self.root)
         self.assertIn("modal: $3.23 of $30.00 this month; title: $1.23 of $6.00", out)

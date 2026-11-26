@@ -8,10 +8,13 @@ unchanged `eav import` accepts it. Nothing here touches the ledger, a record or 
 Modal authentication comes from the environment the `modal` client reads.
 """
 import ast
+import hashlib
 import json
 import os
+import shutil
 import _thread
 import sys
+import tempfile
 import threading
 import time
 import types
@@ -27,6 +30,9 @@ APP_NAME = "earnalism-eav"
 VOLUME_NAME = "earnalism-eav-jobs"
 VOLUME_MOUNT = "/jobs"
 TIMEOUT_MARGIN_S = 900  # setup, pip and model download; the notebook's own clock bounds compute
+# Image build and GPU queue before the function starts (not bounded by its timeout): used only to
+# decide whether a run may still be going in the next UTC month (both months' caps are checked).
+STARTUP_ALLOWANCE_S = 1800
 RUNNABLE_KINDS = ("narration", "stills", "music")
 # Hugging Face repos that need an accepted-terms read token; modal-run refuses them without HF_TOKEN.
 GATED_REPOS = {"ai4bharat/indic-parler-tts"}
@@ -113,13 +119,19 @@ class drive:
 
 class runtime:
     stopped = False
+    closed = False  # set by the executor once the cells are over: a later stop does nothing
+    lock = threading.Lock()
+    interrupted = threading.Event()  # the main thread has been sent its interrupt
     on_stop = None  # set by the executor: on Modal, commit the volume before anything else
 
     @staticmethod
     def unassign():
         """The hard stop. The notebook calls it from a Timer thread, where SystemExit would only
         end that thread, so also interrupt the main thread that is running the cells."""
-        runtime.stopped = True
+        with runtime.lock:
+            if runtime.closed:  # every cell already ran (or failed): nothing is left to stop
+                return
+            runtime.stopped = True
         sys.stdout.flush()
         sys.stderr.flush()
         if runtime.on_stop is not None:
@@ -129,7 +141,9 @@ class runtime:
                 print(f"hard stop: on_stop failed: {{type(e).__name__}}: {{e}}", file=sys.stderr)
         if threading.current_thread() is not threading.main_thread():
             _thread.interrupt_main()
+            runtime.interrupted.set()
             return
+        runtime.interrupted.set()
         raise SystemExit("runtime unassigned")
 '''
 
@@ -160,36 +174,60 @@ class _Shim:
                 sys.modules[name] = old
 
 
+INTERRUPT_WAIT_S = 5.0  # how long the executor waits for a stop's interrupt to reach it
+
+
 def run_cells(cells: list, job_dir, on_stop=None) -> dict:
     """Execute the cells in one shared namespace with RUN = True; DRIVE_JOB_DIR is overridden
     right after the config cell. runtime.unassign() (from any thread) is the hard stop: it calls
-    on_stop first (if given), then no later cell runs (so no manifest is written) and the namespace
-    has HARD_STOPPED = True. Any other exception propagates. Returns the namespace."""
+    on_stop first (if given), then no later cell runs (so no manifest is written; the stop flag is
+    also checked before each cell) and the namespace has HARD_STOPPED = True. A stop that fires
+    only after the last cell finished is absorbed here (the run is complete, HARD_STOPPED False),
+    never surfacing later as a KeyboardInterrupt. Any other exception propagates. Returns the
+    namespace."""
     job_dir = str(job_dir)
     Path(job_dir).mkdir(parents=True, exist_ok=True)
     g = {"__name__": "__main__", "RUN": True, "HARD_STOPPED": False}
+    finished = False
     with _Shim(job_dir) as shim:
-        shim.runtime.on_stop = on_stop
+        rt = shim.runtime
+        rt.on_stop = on_stop
         try:
-            for i, source in enumerate(cells):
-                exec(compile(source, f"<eav cell {i}>", "exec"), g)
-                if i == 0:
-                    g["DRIVE_JOB_DIR"] = job_dir
+            try:
+                for i, source in enumerate(cells):
+                    if rt.stopped:  # the stop fired between cells: no later cell starts
+                        raise SystemExit("runtime unassigned")
+                    exec(compile(source, f"<eav cell {i}>", "exec"), g)
+                    if i == 0:
+                        g["DRIVE_JOB_DIR"] = job_dir
+                finished = True
+            finally:
+                guard = g.get("STOP_GUARD")
+                if guard is not None:
+                    guard.cancel()
+                with rt.lock:  # from here a stop does nothing; one already under way is awaited
+                    rt.closed = True
+                    stopping = rt.stopped
+                if stopping:  # take its interrupt here, inside this try, never after it
+                    rt.interrupted.wait(INTERRUPT_WAIT_S)
+                    for _ in range(10):
+                        time.sleep(0.01)
+                sys.stdout.flush()
         except (SystemExit, KeyboardInterrupt):
-            if not shim.runtime.stopped:
+            if not rt.stopped:
                 raise  # a real Ctrl-C or sys.exit in a cell, not the hard stop
-            g["HARD_STOPPED"] = True
-        finally:
-            guard = g.get("STOP_GUARD")
-            if guard is not None:
-                guard.cancel()
-            sys.stdout.flush()
+        g["HARD_STOPPED"] = rt.stopped and not finished
     return g
 
 
-def _prepare(notebook, inputs_zip):
+def _prepare(notebook, inputs_zip, expected_sha256=None):
+    """(cells, config, inputs.zip bytes). With expected_sha256 the bytes that will be sent are the
+    ones checked (one read, so the file cannot change between the check and the run)."""
     cells = extract_cells(notebook)
-    return cells, read_config(cells[0]), Path(inputs_zip).read_bytes()
+    archive = Path(inputs_zip).read_bytes()
+    if expected_sha256 is not None and hashlib.sha256(archive).hexdigest() != expected_sha256:
+        raise ValueError(f"{inputs_zip} does not match its build manifest (sha256)")
+    return cells, read_config(cells[0]), archive
 
 
 def run_local(notebook, inputs_zip, work_dir) -> dict:
@@ -258,7 +296,34 @@ def volume_relpath(path: str, job_id: str):
     return rel
 
 
-def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None) -> dict:
+def _download(volume, job_id, dest: Path) -> None:
+    """The volume's job folder into dest, exactly: it lands in a fresh sibling folder first and then
+    replaces dest, so a file an earlier download left there (and the volume no longer holds) never
+    stays behind to make `import` refuse an "extra" file. A failed download still leaves what it
+    got (for inspection) and re-raises."""
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = Path(tempfile.mkdtemp(dir=dest.parent, prefix=f".{dest.name}-"))
+    try:
+        try:
+            for entry in list(volume.listdir(f"/{job_id}", recursive=True)):
+                if getattr(entry.type, "name", str(entry.type)).upper() != "FILE":
+                    continue
+                target = tmp / volume_relpath(entry.path, job_id)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with open(target, "wb") as fh:
+                    for chunk in volume.read_file(entry.path):
+                        fh.write(chunk)
+        finally:  # this run's files, complete or not, replace whatever an earlier download left
+            if dest.exists():
+                shutil.rmtree(dest)
+            os.replace(tmp, dest)
+    finally:
+        if tmp.exists():
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
+def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None,
+              expected_sha256=None) -> dict:
     """Run the notebook on a Modal GPU, then download the job folder to download_dir/<job_id>/.
 
     Returns {"seconds": wall seconds measured locally around the remote call (cold start
@@ -272,8 +337,10 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None) -> 
     (HF_TOKEN and HUGGING_FACE_HUB_TOKEN). The
     function timeout is DEADLINE_SECONDS + 900 s; the notebook's own clock enforces the reserved
     compute seconds. The image's Python equals the local minor version (serialized function).
-    Needs modal installed and authenticated; it is imported here, never at module top level."""
-    cells, config, archive = _prepare(notebook, inputs_zip)
+    Needs modal installed and authenticated; it is imported here, never at module top level.
+    expected_sha256 (the build manifest's inputs_sha256): the bytes sent are the bytes checked.
+    The download replaces download_dir/<job_id>/ with exactly what the volume holds."""
+    cells, config, archive = _prepare(notebook, inputs_zip, expected_sha256)
     job_id, deadline = config["JOB_ID"], int(config["DEADLINE_SECONDS"])
     import modal  # optional dependency, only needed to launch
 
@@ -307,24 +374,17 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None) -> 
             outcome = remote.remote(cells, job_id, archive) or {}
     except Exception as e:  # remote failure or timeout: the seconds were still billed
         status, error = "failed", f"{type(e).__name__}: {e}"
-        if token:
-            error = error.replace(token, "***")
     seconds = time.monotonic() - started
     if status == "ok" and outcome.get("hard_stopped"):
         status = "hard_stopped"
     dest = Path(download_dir) / job_id
-    dest.mkdir(parents=True, exist_ok=True)
     try:
-        for entry in list(volume.listdir(f"/{job_id}", recursive=True)):
-            if getattr(entry.type, "name", str(entry.type)).upper() != "FILE":
-                continue
-            target = dest / volume_relpath(entry.path, job_id)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            with open(target, "wb") as fh:
-                for chunk in volume.read_file(entry.path):
-                    fh.write(chunk)
+        _download(volume, job_id, dest)
     except Exception as e:
         status = "failed"
         error = (error + "; " if error else "") + f"download: {type(e).__name__}: {e}"
+        dest.mkdir(parents=True, exist_ok=True)
+    if token and error:  # no error text (remote call or download) ever carries the token
+        error = error.replace(token, "***")
     return {"seconds": seconds, "usd": modal_cost(seconds), "folder": dest,
             "status": status, "error": error}

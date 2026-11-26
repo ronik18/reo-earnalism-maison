@@ -67,7 +67,9 @@ or 120 s (200–245). Each reel is its own 9:16 composition, never a crop of the
 5. Clips: `job reel_clips --reel N` once per batch of **at most 5 shots** (next section);
    each batch is one Wan job, forecast and reserved in full.
 6. `reel N --score <bed> --score-route ...` assembles from every imported batch, in
-   `shots.json` order, once every planned shot has a clip.
+   `shots.json` order, once every planned shot has a clip. Like `film`, it refuses
+   `suspect_truncated` reel narration until the owner has listened and names each unit with
+   `--accept-qc <unit_key,...>` (see `earnalism-voice.md`).
 
 ### The plan is bound to its narration (R27)
 
@@ -112,7 +114,10 @@ Example shape (replace the evidence values with the actual journal entries):
 ```
 
 - `art_dir`: the folder holding the imported keyframe stills (`<root>/stills/<job_id>/`
-  after `import`). Relative paths resolve against the spec file's folder.
+  after `import`), or, when those stills were built as chunks, the list of the chunk folders
+  (`["<root>/stills/<id>-c1of2", "<root>/stills/<id>-c2of2"]`, as the CLI's `Next:` line prints
+  it): each shot's image is taken from the one folder that holds it (an image in none or in two
+  is refused). Relative paths resolve against the spec file's folder.
 - `prior_attempt_evidence` (required by the `wan22` batch contract, non-empty): the
   retained provenance that qualifies the `l4-balanced-v2` profile for this run. It names
   the earlier Wan runs this one builds on (their run ids, observed s/step, completed and

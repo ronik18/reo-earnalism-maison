@@ -50,8 +50,10 @@ reel clips ~20–40 CU (the largest). About 30–60 CU per title, two titles a m
 
 Narration generates `batch` units per call (pinned in the job, default 8, 1 to 32; part of the job
 identity) in bf16/fp16 with SDPA attention. Every narration, stills and music job is resumable: a
-finished item (file present, sha256 logged) is skipped when the job is re-run, in Colab or with
-`modal-run` again. Each session's seconds are logged (`sessions.jsonl`), and the stop for a re-run is
+finished item (file present, sha256 logged in `progress.jsonl` for this job's own inputs.zip) is
+skipped when the job is re-run, in Colab or on Modal again (from the session: `modal-request` once
+more, which resumes from the Modal volume). A resumed session starts its first item only if the
+last recorded item (or batch) time still fits before its stop. Each session's seconds are logged (`sessions.jsonl`), and the stop for a re-run is
 the reserved forecast minus what earlier sessions used, so the total across sessions never exceeds
 the reservation. A resumed job settles once, at import or `close`.
 
@@ -60,15 +62,18 @@ the reservation. A resumed job settles once, at import or `close`.
 A `narration` or `stills` job whose forecast is over **3600 s** (`MAX_CHUNK_SECONDS`, margin
 included) is built as the fewest consecutive chunks, as even as possible, each forecast with the
 same formula and its own `decode_s` + `export_s` at most 3600 s, so every chunk fits one GPU
-session (Colab or `modal-run`) and resumes cleanly. Order is kept (narration by voice unit,
+session (Colab or Modal) and resumes cleanly. Order is kept (narration by voice unit,
 stills by keyframe). A job at or under 3600 s is built exactly as before. Music cues and
-`reel_clips` batches are never chunked.
+`reel_clips` batches are never chunked. A job holding a single item that alone is forecast over
+3600 s cannot be cut into session-length chunks and is refused (check the measured rates; hold for
+the owner if they are right).
 
 - The caps are checked **once, for the sum of every chunk's forecast** (more than the unsplit
   forecast, since each chunk pays its own overhead). Over a cap: exit 3, nothing reserved or written.
   Chunking never lets a title slip under a cap.
-- Each chunk is its own job: id `<kind>-<hex8>-c<i>of<n>` (or `<--job-id>-c<i>of<n>`; the part
-  before `-c` is the group id), its own `inputs.zip`, notebook, build manifest (`chunk: {index, of,
+- Each chunk is its own job: id `<kind>-<hex8>-c<i>of<n>` (or `<--job-id>-c<i>of<n>`); the group
+  id is `chunk.group` in its `job.json` (never parsed from the id; a `--job-id` already used as a
+  job or group id in the record is refused), its own `inputs.zip`, notebook, build manifest (`chunk: {index, of,
   group}`, also in `job.json`), hard stop and ledger reservation. `import`, `close` and `modal-run`
   take one chunk at a time.
 - `film`, `bundle-audio`, reels and `Next:` use a group only once **every** chunk is imported, then
@@ -124,6 +129,16 @@ stills by keyframe). A job at or under 3600 s is built exactly as before. Music 
 3. Any other kind, or no fit: **hold** and tell the owner the forecast, the remaining
    allowance and what would fit next month.
 
+## Retiring a replaced job
+
+When a newer build replaces a job or a whole chunk group (for example a narration group rebuilt as
+one single job), `eav retire <job_id | group id> --root <dir> --reason "<what replaced it>"` marks
+it retired: its artifacts, events and ledger rows stay on record, but `film`, `bundle-audio`,
+`preview`, reels, `Next:` and `status` never use it as current again (they use the newest complete
+job for the target and say which one). Allowed when every job of it is imported, closed or
+superseded, or failed on Modal (such a job is closed first, settling its Modal spend); refused while
+any of them has a pending Modal row or an open request, and for a single chunk (retire the group).
+
 Never: lower steps, resolution or frames of a prepared job; write a `compute` block;
 split a job to slip under a cap; shrink a measured rate; edit, delete or reset the ledger; run on another account;
 buy units; retry a failed job past its forecast; point a title at a fresh ledger. For Modal also
@@ -151,7 +166,10 @@ keeps `modal_runs_issued`).
 **The figures are estimates, reconciled from the bill.** Every Modal amount the ledger writes is
 wall seconds x `L4_USD_PER_S` ($0.000222) x `MODAL_OVERHEAD_FACTOR` (1.25, which covers the CPU and
 memory surcharges and the image build that the GPU rate leaves out), for the worst case and for the
-recorded spend alike. After each run, read the billed amount from the Modal usage page and run
+recorded spend alike. The recorded estimate is at most the worst case the caps were checked with
+(the wall clock also holds image build and GPU queue time, which the function timeout does not
+bound and Modal does not bill as GPU time); a larger wall-clock figure is kept on the row as
+`wall_estimate_usd`. After each run, read the billed amount from the Modal usage page and run
 `eav modal-settle <job_id> --root <dir> --usd <billed> [--run <run_id>]`: it replaces the job's
 pending row(s), else its one finished row still holding an estimate, or the row `--run` names
 (pending or finished). The row keeps its first estimate as `estimated_usd` and records
@@ -164,13 +182,28 @@ is set, hold every Modal request.
   `(DEADLINE_SECONDS + 900) x L4_USD_PER_S x MODAL_OVERHEAD_FACTOR`, and refuses (exit 3, naming spent, forecast and
   remaining) if the month's spend plus that exceeds $30.00, or the title's lifetime Modal spend
   (every month, pending rows included) plus that exceeds $6.00. Hold and ask the owner; never run
-  past either.
+  past either. A run that may still be going in the next UTC month (start + timeout + 1800 s of
+  image build and queue) is checked against that month's cap too, and if it ends there its row
+  moves there (a run is never invisible to the month it spent in).
 - Before Modal is contacted a provisional row (`status: pending`) at the worst-case usd is appended; it
   counts toward the cap and the job's sum. When the run returns it is replaced in place by the
   estimated spend (ok, failed or hard_stopped), before the result is printed; reconcile it from the
   bill as above. If the process dies (Ctrl-C, kill, an error after the paid run) the row stays pending
   at the worst case: replace it with the billed amount via `eav modal-settle <job_id> --root <dir>
   --usd <billed>` (status `settled`). `import` and `close` refuse while the job has a pending row.
+  A failure before Modal is contacted (for example an inputs.zip that no longer matches its build
+  manifest) releases the row at once: nothing was spent.
+- A job whose Modal run finished `ok` (request `done`) is fetched and imported, never run or
+  requested again (`modal-run` and `modal-request` refuse it); if it can never be imported, `close`
+  it and rebuild. A request that `failed` after its Modal run (for example an R2 upload error) is
+  requested again: the new run resumes from the Modal volume, generates nothing that is already
+  done, and uploads under its own new `run-<n>/` prefix.
+- The Modal volume `earnalism-eav-jobs` keeps each job folder (for resuming) and the Hugging Face
+  model cache (`/hf-cache`, so a rerun does not download the weights again). Modal may bill volume
+  storage under its own pricing: tell the owner it exists, and clear old job folders and the cache
+  (`modal volume rm earnalism-eav-jobs <path> -r`, where Modal is reachable) when no run of them is
+  planned. A notebook cell never prints the environment (it holds `HF_TOKEN`); errors are written
+  with the token masked.
 - A job is reserved in CU at build time (it may run on either runner). `modal-run` requires
   `--colab-units <CU>` (>= 0): the CU Colab already showed for this job, 0 if it never ran there.
   When it moves to Modal (after the caps pass, before Modal is contacted) the ledger entry records
@@ -251,9 +284,13 @@ Modal function as an in-memory secret (never written, printed or recorded). A ga
      `done`, `failed` or `hard_stopped` with `seconds`, `usd`, `r2_prefix` and `files` (`path`,
      `sha256`, `bytes`). A copy of the finished request goes to `<prefix>_request-result.json`;
    - push the request and the ledger back (only the push token, `.github/scripts/modal-publish.sh`).
-     A conflicting rebase is aborted; on the fresh branch head `eav modal-replay` re-applies the
-     request file and this job's ledger entry, and makes the job's rows exactly the saved ones (a
-     released row stays released); other jobs' rows are kept. Then it retries; a failed fetch,
+     A conflicting rebase is aborted; on the fresh branch head the stdlib-only replay
+     (`python3 -S -m eav.modal_requests replay`, also `eav modal-replay`) re-applies the request
+     file and this job's ledger entry, and makes the job's rows exactly the saved ones (a released
+     row stays released; a row billed on the branch meanwhile stays billed); other jobs' rows are
+     kept. Every `python3` in a step holding the push token runs with `-S`, so nothing the pip
+     install added runs there; only the run job may write to the repository. Write access to the
+     branch is still equivalent to access to the secrets. Then it retries; a failed fetch,
      rebase or replay is retried too, never ends the script early. If every attempt fails, this
      run's commit is pushed to `modal-results/<job_id>` (`-run-<GitHub run id>` appended if that
      branch exists).
@@ -272,8 +309,15 @@ Modal function as an in-memory secret (never written, printed or recorded). A ga
    portion settles from the Modal rows.
 
 A request left `running` (the runner died or hit its timeout and the refusal step could not
-push) keeps its pending worst-case row. If the request has no `modal_contacted_at`, Modal was never
-reached: `eav modal-request <job_id> --root <dir> --abandon --reason "..."` refuses it, releases the
-row and restores the reservation (it refuses when `modal_contacted_at` is set). Otherwise read the
-billed amount from the Modal dashboard, `modal-settle` it, and hold for the owner before a new
-request. Never edit a request file by hand.
+push) keeps its pending worst-case row. If the request has no `modal_contacted_at` on the branch,
+first check the Modal dashboard (app `earnalism-eav`) for a run of it: a runner lost after it
+reached Modal could not push that field. If there is none: `eav modal-request <job_id> --root <dir>
+--abandon --reason "..."` refuses it, releases the row and restores the reservation (unless the job
+has earlier Modal runs, which stay on record), and says exactly which rows it released and kept (it
+refuses when `modal_contacted_at` is set). If a run of it shows up billed later, `modal-settle
+<job_id> --usd <billed> --run <its run_id>` writes the released row again, billed. Otherwise read
+the billed amount from the Modal dashboard, `modal-settle` it, and hold for the owner before a new
+request. A request refused after its reservation was restored, when another job reserved the
+released CU meanwhile, says which CU cap is now exceeded: hold that job for the owner. If the request
+file cannot be written, `modal-request` releases its pending row again. Never edit a request file by
+hand.

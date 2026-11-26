@@ -71,10 +71,22 @@ class TruncationTests(unittest.TestCase):
         self.assertEqual(len(got[0]["reasons"]), 2)  # at the cap and far too fast
         self.assertEqual(got[0]["chars_per_s"], 25.99)
 
+    def test_short_units_are_left_out_of_the_ratio_test(self):
+        """V1 M-3: a unit under MIN_RATIO_CHARS is mostly breath: the ratio test never flags it; the
+        duration cap still applies, and no audio is always suspect."""
+        self.assertEqual(qc.MIN_RATIO_CHARS, 40)
+        rows = self.rows(*[(110, 10.0)] * 6, (26, 0.5), (39, 1.0), (40, 1.0))
+        # 26 / 0.5 = 52 and 39 / 1.0 = 39 chars/s are far over 1.6 x the median, but they are short;
+        # 40 / 1.0 = 40 is long enough to be tested
+        self.assertEqual([g["unit_key"] for g in qc.truncation_suspects(rows)], ["s-009"])
+        got = qc.truncation_suspects(self.rows(*[(110, 10.0)] * 4, (12, 0.0), (30, 29.5)))
+        self.assertEqual([(g["unit_key"], g["reasons"][0][:8]) for g in got],
+                         [("s-005", "no audio"), ("s-006", "duration")])
+
     def test_narration_suspects_measures_the_wavs(self):
         with tempfile.TemporaryDirectory() as td:
             units = []
-            for i, (chars, secs) in enumerate([(22, 2.0), (22, 2.0), (66, 2.0)], 1):
+            for i, (chars, secs) in enumerate([(44, 2.0), (44, 2.0), (132, 2.0)], 1):
                 key = f"f01s001-{i:03d}"
                 ff("-f", "lavfi", "-i", f"sine=f=300:d={secs}:r=24000", "-ac", "1", str(Path(td) / f"{key}.wav"))
                 units.append({"unit_key": key, "text": "x" * chars})
