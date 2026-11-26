@@ -1,0 +1,64 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-26",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the release code (main 84eb5cb) serving a local PostgreSQL replica (replica_g5). The AI translation The Hungry Stone (kshudhita-pashan-en, translated_from kshudhita-pashan, method ai, model claude-opus-5-5) was imported there with the same publisher identity and deterministic operation IDs as production would use: edition 793553c3-b137-481d-9d27-8aa309a9373e, revision c85f053b-517a-4234-9a6a-1851b91a7e82, and all 59 unit/anchor IDs and texts identical to the export_audiovisual_source export. The owner's Monday approval of the clearance, cover and edition items was SIMULATED on the replica only (staff user on the replica); no production approval is implied. Signed in as a staff publisher; desktop 1440x900 and mobile 390x844; the title page (covers, AI translation label) and the reader (text).",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "kshudhita-pashan-en": {
+   "status": "pass",
+   "sha256": "e930c0f6562fae9bba20db4f63f3735e66745aa5e9e22c1a3bc0b835ecad0466",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 59,
+     "paragraphs_expected": 59,
+     "text_and_anchor_order_exact": true,
+     "first": "My kinsman and I were on our way back to Calcutta after a to",
+     "last": "sophist kinsman and I have parted for the rest of our lives.",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 59,
+     "paragraphs_expected": 59,
+     "text_and_anchor_order_exact": true,
+     "first": "My kinsman and I were on our way back to Calcutta after a to",
+     "last": "sophist kinsman and I have parted for the rest of our lives.",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  }
+ }
+}
