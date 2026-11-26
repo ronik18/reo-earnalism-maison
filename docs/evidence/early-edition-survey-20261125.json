@@ -1,0 +1,257 @@
+{
+ "schema": "earnalism.early-edition-survey.v1",
+ "recorded_on": "2026-11-25",
+ "rule": "Package a story only from a Wikisource scan printed in 1930 or earlier whose story pages are all proofread level 4; otherwise hold with the reason. Titles are reported, never forced.",
+ "method": "bn.wikisource.org MediaWiki API (User-Agent maison-intake/1.0, sequential, backoff on 429): intitle and exact-phrase full-text search over main and Page namespaces for each story; Index-namespace prefix listings for candidate early collections and periodicals (ছোট*, বিচিত্র*, গল্প*, কথা*, সাধনা*, সবুজ*, ভারতী*, প্রবাসী*, হিতবাদী*); imprint pages of every scan found; proofread quality of the story pages of the only <=1930 transcription found.",
+ "summary": {
+  "packaged": [],
+  "hold": [
+   "subha",
+   "khata",
+   "streer-patra",
+   "ekratri",
+   "haimanti",
+   "postmaster",
+   "kabuliwala",
+   "chhuti"
+  ]
+ },
+ "titles": [
+  {
+   "slug": "subha",
+   "title": "সুভা",
+   "status": "hold",
+   "owner_cover_front": "earnalism/covers/front/cover_c528045d-56b1-4f5d-a768-59c6219ec2b8",
+   "editions_found": [
+    {
+     "scan": "বিচিত্র গল্প দ্বিতীয় ভাগ - রবীন্দ্রনাথ ঠাকুর.pdf",
+     "printing": "বিচিত্র গল্প, দ্বিতীয় ভাগ; Calcutta: Sahitya-Jantra, printed by Jagneshwar Ghosh, published by Kalidas Chakravarti, 1301 BS (1894)",
+     "printed_1930_or_earlier": true,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1974910 (scan page 1, title page, level 3)",
+     "story_scan_pages": "61-72 (main page https://bn.wikisource.org/w/index.php?oldid=1626556)",
+     "story_page_quality": "all 12 pages level 3 (proofread, not validated): revisions 1662064, 1618384, 1662066, 1618386, 1618387, 1618388, 1618389, 1618390, 1662068, 1618392, 1662070, 1539578"
+    },
+    {
+     "scan": "গল্পগুচ্ছ (প্রথম খণ্ড).djvu",
+     "printing": "Visva-Bharati; নূতন সংস্করণ ভাদ্র 1353 BS (1946), this scan the পুনর্মুদ্রণ চৈত্র 1357 BS (1951); first Visva-Bharati edition শ্রাবণ 1333 BS (1926) is not the scanned printing",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1984057 (scan page 2, imprint, level 4)",
+     "story_scan_pages": "208-215"
+    },
+    {
+     "scan": "পূর্ব-বাংলার গল্প - রবীন্দ্রনাথ ঠাকুর.pdf",
+     "printing": "Visva-Bharati; প্রথম প্রকাশ 1 বৈশাখ 1379 BS (© 1972)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1814522 (scan page 2, imprint, level 3)",
+     "story_scan_pages": "45-53"
+    }
+   ],
+   "reason": "The only <=1930 printing on Wikisource (বিচিত্র গল্প দ্বিতীয় ভাগ, 1894) has all 12 story pages at proofread level 3, not validated level 4; the other transcriptions are 1951 and 1972 printings. Becomes packageable as soon as pages 61-72 of the 1894 scan are validated."
+  },
+  {
+   "slug": "khata",
+   "title": "খাতা",
+   "status": "hold",
+   "owner_cover_front": "earnalism/covers/front/cover_8dfc862e-b8c9-41e7-8d6c-4729f97806bd",
+   "editions_found": [
+    {
+     "scan": "গল্পগুচ্ছ (প্রথম খণ্ড).djvu",
+     "printing": "Visva-Bharati; নূতন সংস্করণ ভাদ্র 1353 BS (1946), this scan the পুনর্মুদ্রণ চৈত্র 1357 BS (1951); first Visva-Bharati edition শ্রাবণ 1333 BS (1926) is not the scanned printing",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1984057 (scan page 2, imprint, level 4)",
+     "story_scan_pages": "312-318"
+    },
+    {
+     "scan": "গল্পগুচ্ছ - রবীন্দ্রনাথ ঠাকুর.pdf",
+     "printing": "Visva-Bharati one-volume গল্পগুচ্ছ; একত্র প্রচার ফাল্গুন 1364 BS, this scan মাঘ 1366 BS (1960)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1771591 (scan page 7, imprint, level 4)"
+    },
+    {
+     "scan": "রবীন্দ্র-রচনাবলী (পঞ্চদশ / অষ্টাদশ / ত্রয়োবিংশ খণ্ড) - বিশ্বভারতী.pdf",
+     "printing": "Visva-Bharati রবীন্দ্র-রচনাবলী; volume imprints চৈত্র 1349 BS (1943), শ্রাবণ 1351 BS (1944), reprint July 1948",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1682050, https://bn.wikisource.org/w/index.php?oldid=1119148, https://bn.wikisource.org/w/index.php?oldid=1136213 (scan page 4 of each)",
+     "note": "full-text search hits only; no story transclusion; index Progress=X"
+    }
+   ],
+   "reason": "Only post-1930 printings are transcribed (1951 গল্পগুচ্ছ প্রথম খণ্ড, 1960 one-volume গল্পগুচ্ছ, 1940s রবীন্দ্র-রচনাবলী). No scan of ছোট গল্প (1300 BS) or another <=1930 printing exists on bn.wikisource."
+  },
+  {
+   "slug": "streer-patra",
+   "title": "স্ত্রীর পত্র",
+   "status": "hold",
+   "owner_cover_front": "earnalism/covers/front/cover_987ce2c8-de6d-408a-9d13-7a1063e44130",
+   "editions_found": [
+    {
+     "scan": "গল্পগুচ্ছ (তৃতীয় খণ্ড).djvu",
+     "printing": "Visva-Bharati; বিশ্বভারতী সংস্করণ January 1927, this scan the reprint আষাঢ় 1376 BS (© 1969)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1813078 (scan page 2, imprint, level 3)",
+     "story_scan_pages": "159-170"
+    },
+    {
+     "scan": "গল্পগুচ্ছ - রবীন্দ্রনাথ ঠাকুর.pdf",
+     "printing": "Visva-Bharati one-volume গল্পগুচ্ছ; একত্র প্রচার ফাল্গুন 1364 BS, this scan মাঘ 1366 BS (1960)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1771591 (scan page 7, imprint, level 4)"
+    },
+    {
+     "scan": "রবীন্দ্র-রচনাবলী (পঞ্চদশ / অষ্টাদশ / ত্রয়োবিংশ খণ্ড) - বিশ্বভারতী.pdf",
+     "printing": "Visva-Bharati রবীন্দ্র-রচনাবলী; volume imprints চৈত্র 1349 BS (1943), শ্রাবণ 1351 BS (1944), reprint July 1948",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1682050, https://bn.wikisource.org/w/index.php?oldid=1119148, https://bn.wikisource.org/w/index.php?oldid=1136213 (scan page 4 of each)",
+     "note": "full-text search hits only; no story transclusion; index Progress=X"
+    },
+    {
+     "scan": "সবুজ পত্র (প্রথম বর্ষ, চতুর্থ সংখ্যা).pdf",
+     "printing": "সবুজ পত্র magazine issue, 1321 BS (1914) - the first printing",
+     "printed_1930_or_earlier": true,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1791766 (index page)",
+     "story_page_quality": "none: index Progress=X and no Page-namespace pages exist for this scan (allpages prefix listing empty; prefix search finds no text)"
+    }
+   ],
+   "reason": "Transcribed only in post-1930 printings (1969 গল্পগুচ্ছ তৃতীয় খণ্ড, 1960 one-volume গল্পগুচ্ছ, 1948 রবীন্দ্র-রচনাবলী). The 1914 সবুজ পত্র issue scan is uploaded but has no transcribed pages at all. A periodical issue would also need owner confirmation that it counts as an eligible printing."
+  },
+  {
+   "slug": "ekratri",
+   "title": "একরাত্রি",
+   "status": "hold",
+   "owner_cover_front": "earnalism/covers/front/cover_6ef80d34-2cc1-4aa6-80a0-aa350f674d7a",
+   "editions_found": [
+    {
+     "scan": "গল্পগুচ্ছ (প্রথম খণ্ড).djvu",
+     "printing": "Visva-Bharati; নূতন সংস্করণ ভাদ্র 1353 BS (1946), this scan the পুনর্মুদ্রণ চৈত্র 1357 BS (1951); first Visva-Bharati edition শ্রাবণ 1333 BS (1926) is not the scanned printing",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1984057 (scan page 2, imprint, level 4)",
+     "story_scan_pages": "126-133"
+    },
+    {
+     "scan": "পূর্ব-বাংলার গল্প - রবীন্দ্রনাথ ঠাকুর.pdf",
+     "printing": "Visva-Bharati; প্রথম প্রকাশ 1 বৈশাখ 1379 BS (© 1972)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1814522 (scan page 2, imprint, level 3)",
+     "story_scan_pages": "26-34"
+    }
+   ],
+   "reason": "Only 1951 and 1972 printings are transcribed. The সাধনা (প্রথম বর্ষ, প্রথম ভাগ, 1892) scan does not contain the story (contents page and prefix search checked); no other <=1930 printing is on bn.wikisource."
+  },
+  {
+   "slug": "haimanti",
+   "title": "হৈমন্তী",
+   "status": "hold",
+   "owner_cover_front": "earnalism/covers/front/cover_478ccb3c-fc60-45ad-b356-6f319c4e59cb",
+   "editions_found": [
+    {
+     "scan": "গল্পগুচ্ছ (তৃতীয় খণ্ড).djvu",
+     "printing": "Visva-Bharati; বিশ্বভারতী সংস্করণ January 1927, this scan the reprint আষাঢ় 1376 BS (© 1969)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1813078 (scan page 2, imprint, level 3)",
+     "story_scan_pages": "137-147"
+    },
+    {
+     "scan": "রবীন্দ্র-রচনাবলী (পঞ্চদশ / অষ্টাদশ / ত্রয়োবিংশ খণ্ড) - বিশ্বভারতী.pdf",
+     "printing": "Visva-Bharati রবীন্দ্র-রচনাবলী; volume imprints চৈত্র 1349 BS (1943), শ্রাবণ 1351 BS (1944), reprint July 1948",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1682050, https://bn.wikisource.org/w/index.php?oldid=1119148, https://bn.wikisource.org/w/index.php?oldid=1136213 (scan page 4 of each)",
+     "note": "full-text search hits only; no story transclusion; index Progress=X"
+    },
+    {
+     "scan": "সবুজ পত্র (প্রথম বর্ষ, দ্বিতীয় সংখ্যা).pdf",
+     "printing": "সবুজ পত্র magazine issue, 1321 BS (1914) - the first printing",
+     "printed_1930_or_earlier": true,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1791770 (index page)",
+     "story_page_quality": "none: index Progress=X and no Page-namespace pages exist for this scan (allpages prefix listing empty; prefix search finds no text)"
+    }
+   ],
+   "reason": "Transcribed only in the 1969 গল্পগুচ্ছ তৃতীয় খণ্ড (and a 1948 রবীন্দ্র-রচনাবলী volume). The 1914 সবুজ পত্র issue scan has no transcribed pages; same periodical caveat as স্ত্রীর পত্র."
+  },
+  {
+   "slug": "postmaster",
+   "title": "পোস্টমাস্টার",
+   "status": "hold",
+   "owner_cover_front": "earnalism/covers/front/cover_14fff76d-4f51-4932-92e4-f0d2487e90ad",
+   "editions_found": [
+    {
+     "scan": "গল্পগুচ্ছ (প্রথম খণ্ড).djvu",
+     "printing": "Visva-Bharati; নূতন সংস্করণ ভাদ্র 1353 BS (1946), this scan the পুনর্মুদ্রণ চৈত্র 1357 BS (1951); first Visva-Bharati edition শ্রাবণ 1333 BS (1926) is not the scanned printing",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1984057 (scan page 2, imprint, level 4)",
+     "story_scan_pages": "32-37 (main page title পোস্ট্‌মাস্টার)"
+    },
+    {
+     "scan": "পূর্ব-বাংলার গল্প - রবীন্দ্রনাথ ঠাকুর.pdf",
+     "printing": "Visva-Bharati; প্রথম প্রকাশ 1 বৈশাখ 1379 BS (© 1972)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1814522 (scan page 2, imprint, level 3)",
+     "story_scan_pages": "7-13"
+    },
+    {
+     "scan": "গল্পগুচ্ছ - রবীন্দ্রনাথ ঠাকুর.pdf",
+     "printing": "Visva-Bharati one-volume গল্পগুচ্ছ; একত্র প্রচার ফাল্গুন 1364 BS, this scan মাঘ 1366 BS (1960)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1771591 (scan page 7, imprint, level 4)"
+    },
+    {
+     "scan": "রবীন্দ্র-রচনাবলী (পঞ্চদশ / অষ্টাদশ / ত্রয়োবিংশ খণ্ড) - বিশ্বভারতী.pdf",
+     "printing": "Visva-Bharati রবীন্দ্র-রচনাবলী; volume imprints চৈত্র 1349 BS (1943), শ্রাবণ 1351 BS (1944), reprint July 1948",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1682050, https://bn.wikisource.org/w/index.php?oldid=1119148, https://bn.wikisource.org/w/index.php?oldid=1136213 (scan page 4 of each)",
+     "note": "full-text search hits only; no story transclusion; index Progress=X"
+    }
+   ],
+   "reason": "Re-checked: no printing earlier than the 1946-edition গল্পগুচ্ছ প্রথম খণ্ড (scan is its 1951 reprint) is transcribed; the others are 1943-1972."
+  },
+  {
+   "slug": "kabuliwala",
+   "title": "কাবুলিওয়ালা",
+   "status": "hold",
+   "owner_cover_front": "earnalism/covers/front/cover_b33ba9ce-28b1-462a-9721-01a012424e4c",
+   "editions_found": [
+    {
+     "scan": "গল্পগুচ্ছ (প্রথম খণ্ড).djvu",
+     "printing": "Visva-Bharati; নূতন সংস্করণ ভাদ্র 1353 BS (1946), this scan the পুনর্মুদ্রণ চৈত্র 1357 BS (1951); first Visva-Bharati edition শ্রাবণ 1333 BS (1926) is not the scanned printing",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1984057 (scan page 2, imprint, level 4)",
+     "story_scan_pages": "188-198"
+    },
+    {
+     "scan": "গল্পগুচ্ছ - রবীন্দ্রনাথ ঠাকুর.pdf",
+     "printing": "Visva-Bharati one-volume গল্পগুচ্ছ; একত্র প্রচার ফাল্গুন 1364 BS, this scan মাঘ 1366 BS (1960)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1771591 (scan page 7, imprint, level 4)"
+    }
+   ],
+   "reason": "Re-checked: no printing earlier than the 1946-edition গল্পগুচ্ছ প্রথম খণ্ড is transcribed (the disambiguation page also lists a 1957 item)."
+  },
+  {
+   "slug": "chhuti",
+   "title": "ছুটি",
+   "status": "hold",
+   "owner_cover_front": "earnalism/covers/front/cover_ec396188-08a1-49b9-b210-13b3ef99a647",
+   "editions_found": [
+    {
+     "scan": "গল্পগুচ্ছ (প্রথম খণ্ড).djvu",
+     "printing": "Visva-Bharati; নূতন সংস্করণ ভাদ্র 1353 BS (1946), this scan the পুনর্মুদ্রণ চৈত্র 1357 BS (1951); first Visva-Bharati edition শ্রাবণ 1333 BS (1926) is not the scanned printing",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1984057 (scan page 2, imprint, level 4)",
+     "story_scan_pages": "199-207"
+    },
+    {
+     "scan": "পূর্ব-বাংলার গল্প - রবীন্দ্রনাথ ঠাকুর.pdf",
+     "printing": "Visva-Bharati; প্রথম প্রকাশ 1 বৈশাখ 1379 BS (© 1972)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1814522 (scan page 2, imprint, level 3)",
+     "story_scan_pages": "35-44"
+    },
+    {
+     "scan": "গল্পগুচ্ছ - রবীন্দ্রনাথ ঠাকুর.pdf",
+     "printing": "Visva-Bharati one-volume গল্পগুচ্ছ; একত্র প্রচার ফাল্গুন 1364 BS, this scan মাঘ 1366 BS (1960)",
+     "printed_1930_or_earlier": false,
+     "printing_evidence": "https://bn.wikisource.org/w/index.php?oldid=1771591 (scan page 7, imprint, level 4)"
+    }
+   ],
+   "reason": "Re-checked: no printing earlier than the 1946-edition গল্পগুচ্ছ প্রথম খণ্ড is transcribed."
+  }
+ ]
+}
