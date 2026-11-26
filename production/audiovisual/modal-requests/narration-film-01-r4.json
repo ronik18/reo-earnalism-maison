@@ -1,0 +1,11 @@
+{
+  "colab_units": 0.0,
+  "job_id": "narration-film-01-r4",
+  "pending_run_id": "narration-film-01-r4#1",
+  "r2_prefix": "gpu-jobs/bicharak/narration-film-01-r4/run-1/",
+  "requested_at": "2026-11-26T14:01:02+00:00",
+  "schema": "earnalism.modal-request.v1",
+  "status": "requested",
+  "title_root": "production/audiovisual/bicharak",
+  "worst_case_usd": 0.931013
+}

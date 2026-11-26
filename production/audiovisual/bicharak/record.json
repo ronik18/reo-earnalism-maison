@@ -1705,6 +1705,20 @@
       },
       "path": "narration/narration-film-01-r3-c1of2-r1/f01s009-006.wav",
       "sha256": "0b582e46c22e2e3733bae642d342c6de66b3933b366ba3b1804ebf79834f5456"
+    },
+    {
+      "bytes": 16410,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.3232308888888886,
+        "inputs_zip": "jobs/narration-film-01-r4/inputs.zip",
+        "job_id": "narration-film-01-r4",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-film-01-r4/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-film-01-r4/narration.ipynb",
+      "sha256": "87c05f742b10e42dedb9423f3bea0c21423b78cf9ec85f3a7ce6c64e1a007700"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -2290,6 +2304,51 @@
       },
       "result": "accepted",
       "stage": "import"
+    },
+    {
+      "at": "2026-11-26T14:00:48.507614+00:00",
+      "detail": {
+        "job_id": "narration-film-01-r3-c2of2-r1",
+        "reason": "Cancelled after the 30 s truncation finding; narration rebuilt with <=200-character units",
+        "runner": "modal",
+        "units": 0.0
+      },
+      "result": "closing",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T14:00:48.512172+00:00",
+      "detail": {
+        "imported": false,
+        "job_id": "narration-film-01-r3-c2of2-r1",
+        "ran": true,
+        "reason": "Cancelled after the 30 s truncation finding; narration rebuilt with <=200-character units",
+        "runner": "modal",
+        "units": 0.0,
+        "usd": 0.0067
+      },
+      "result": "closed",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T14:00:54.478979+00:00",
+      "detail": {
+        "forecast_units": 1.3232308888888886,
+        "job_id": "narration-film-01-r4",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T14:00:54.481701+00:00",
+      "detail": {
+        "job_id": "narration-film-01-r4",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
     }
   ],
   "ledger": "../allowance-ledger.json",

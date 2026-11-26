@@ -1,12 +1,12 @@
 {
   "narration": {
-    "s_per_step": 30.0,
+    "s_per_step": 8.2,
     "units_per_hour": 1.94,
     "steps": 1,
     "decode_s": 900,
     "export_s": 120,
-    "source": "ESTIMATE — replace with measured values after the first run",
-    "basis": "Indic Parler-TTS on L4 has no measured run in this repo. One step = one voice unit (one sentence); 30 s per unit is a conservative allowance for long Bengali sentences. decode_s covers pip install, model download and load. units_per_hour 1.94 is the L4 rate observed in skills/earnalism-video/software/WAN22_COLAB.md (v17: 'one L4 at 1.94CU/hour')."
+    "source": "MEASURED — Modal L4, GitHub run 45825344446 (বিচারক narration chunk narration-film-01-r3-c1of2-r1), 26 Nov 2026",
+    "basis": "54 voice units (batch 8, bf16, default attention) took 437.7 s of notebook time including model load: 8.1 s per unit, rounded up to 8.2. Units are now <= 200 characters (shorter than in that run), so this is conservative. decode_s 900 kept: the first Modal run spent ~915 s on image build, pip and model download before the clock; later runs reuse the cached weights. units_per_hour 1.94 is the Colab L4 rate (Colab CU accounting only; Modal is capped in dollars)."
   },
   "stills": {
     "s_per_step": 10.0,
