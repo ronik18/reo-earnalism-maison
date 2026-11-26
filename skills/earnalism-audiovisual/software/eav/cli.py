@@ -6,6 +6,9 @@
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
                          [--archive-sha256 <sha>]           (reel_clips)
+  python3 -m eav.cli modal-run <job_id> --root <dir> [--download <dir>] [--dry-run]
+                         (runs the built notebook headlessly on a Modal L4, or on CPU with --dry-run;
+                          leaves the job folder `import` expects; never touches the ledger)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
   python3 -m eav.cli close <job_id> --root <dir> --units <CU Colab shows> --reason "<what happened>"
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
@@ -40,7 +43,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
-from . import budget, colab_jobs, film, importer, mix, preview, qc, reel, scenes, social
+from . import budget, colab_jobs, film, importer, mix, modal_run, preview, qc, reel, scenes, social
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import voice_units
@@ -663,6 +666,34 @@ def cmd_import(args):
           f"settled {args.units:g} CU.")
 
 
+def cmd_modal_run(args):
+    """Run a built narration/stills/music notebook headlessly; the ledger and record stay untouched."""
+    rec = _record(args.root)
+    job = next((j for j in _jobs(rec) if j["job_id"] == args.job_id), None)
+    if job is None:
+        raise Stop(f"unknown job {args.job_id}", f"{PROG} status --root {rec.root}")
+    if job["imported"] or _ended(job) or job["unfinished"]:
+        raise Stop(f"job {args.job_id} is imported, superseded or closed (or that is under way); "
+                   "it is never run again", f"{PROG} status --root {rec.root}")
+    if job["kind"] not in modal_run.RUNNABLE_KINDS:
+        raise Stop(f"{job['kind']} jobs cannot run with modal-run", "Use the Wan worker for reel_clips")
+    built = _json(job["manifest"]).get("inputs_sha256")
+    if not built or sha256_file(job["inputs_zip"]) != built:
+        raise Stop(f"inputs.zip of {args.job_id} does not match its build manifest",
+                   "Never run a bundle that changed since it was built; supersede it and rebuild")
+    download = Path(args.download) if args.download else rec.root / "modal-downloads"
+    if args.dry_run:
+        result, usd = modal_run.run_local(job["notebook"], job["inputs_zip"], download), 0.0
+    else:
+        result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download)
+        usd = result["usd"]
+    folder = result["folder"]
+    print(json.dumps({"job_id": args.job_id, "seconds": round(result["seconds"], 1),
+                      "usd": round(usd, 4), "dry_run": bool(args.dry_run), "folder": str(folder),
+                      "next": f"{PROG} import {args.job_id} --root {rec.root} --from {folder} "
+                              "--units <CU actually used>"}, sort_keys=True))
+
+
 _ENDINGS = {"supersede": ("superseding", "superseded"), "close": ("closing", "closed")}
 
 
@@ -1247,7 +1278,7 @@ def cmd_social(args):
 
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
-            "supersede": cmd_supersede, "close": cmd_close,
+            "supersede": cmd_supersede, "close": cmd_close, "modal-run": cmd_modal_run,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio, "preview": cmd_preview, "social": cmd_social}
 
@@ -1279,6 +1310,10 @@ def _parser():
     s.add_argument("--from", dest="source", required=True)
     s.add_argument("--units", type=float, required=True)
     s.add_argument("--archive-sha256")
+    s = add("modal-run")
+    s.add_argument("job_id")
+    s.add_argument("--download", help="where the job folder lands (default <root>/modal-downloads)")
+    s.add_argument("--dry-run", action="store_true", help="run on this CPU instead of Modal")
     s = add("supersede")
     s.add_argument("job_id")
     s.add_argument("--reason", required=True)
