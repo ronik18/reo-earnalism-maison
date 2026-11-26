@@ -32,3 +32,5 @@ production/audiovisual/*/takes/audio/
 production/audiovisual/*/.record.lock
 # Film bundles: the MP4 copy stays local (film.json and film.vtt are tracked)
 production/**/bundle/film.mp4
+# Pilot spikes (throwaway media)
+production/**/pilot/
