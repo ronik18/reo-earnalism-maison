@@ -23,6 +23,7 @@ Last updated: 26 Nov 2026.
 - [ ] **Narration Colab jobs for the 12 pipeline titles** (64.70 CU): `production/audiovisual/RUN_SHEET-pipeline-narration.md`.
 
 ## Accounts and keys
+- [ ] **Rotate the Gmail SMTP app password** (`EMAIL_HOST_PASSWORD` on Render): on 26 Nov Claude's settings check printed it into the session log by mistake (nowhere else). Create a new app password for sales@ in Google Account → Security → App passwords, put it in Render, then revoke the old one.
 - [x] **Modal account, token and GitHub secrets** (26 Nov 2026).
 - [x] **Modal payment method** added, workspace spend limit $30/month (26 Nov 2026).
 - [x] **Hugging Face read token** added as GitHub secret `HF_TOKEN` (26 Nov 2026).
