@@ -270,7 +270,10 @@ def reader(request, locale, edition_id, unit_id=None):
         destination = reverse("web:reader", args=[locale, edition_id, unit_id]) + "?" + urlencode({"anchor":boundary["end_anchor_id"],"offset":boundary["end_offset_chars"]})
     bootstrap.update(free_access=getattr(django_settings,"FREE_ACCESS_ENABLED",False),preview=bool(document.get("preview")),title_url=reverse("web:title",args=[locale,edition_id]),sign_in_url=reverse("web:sign-in",args=[locale])+"?"+urlencode({"return_to":destination}),pass_url=reverse("web:pass",args=[locale])+"?"+urlencode({"return_to":destination}))
     if document.get("preview"):
-        bootstrap["next_unit_url"]=None
+        # The preview may run on into the next unit (it counts the whole story); otherwise it ends here.
+        bootstrap["preview_continues"]=bool(document.get("preview_continues"))
+        if not bootstrap["preview_continues"]:
+            bootstrap["next_unit_url"]=None
         bootstrap["player_url"]=None
     pair = None if document.get("preview") or not request.user.is_authenticated else parallel_rows(document, parallel_companion(request.user, edition_id, unit_id, territory=trusted_territory(request)))
     return page(request, locale, "web/reader.html", document=document, edition=edition, translation=edition_translation(edition["edition_id"]), pair=pair, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination)

@@ -197,7 +197,10 @@ def import_order(chosen, packets):
     return ordered
 
 
-PREVIEW_ENTRIES, PREVIEW_CODEPOINTS = 3, 1200  # the approved bounds library.services.get_preview_document enforces
+# Revision.preview must be non-empty to offer a Reader preview; it is the on/off signal only. Since the owner decision
+# of 26 Nov 2026 readers see library.services.preview_cut (about 25% of the story, 400-1,500 words), not these entries.
+# These bounds are the model's stored-entry validation (Revision.clean), not the served preview length.
+PREVIEW_ENTRIES, PREVIEW_CODEPOINTS = 3, 1200
 SENTENCE_MARKS = "\u0964?!"  # Bengali danda, question mark, exclamation mark; "." counts only before a space or the end
 
 

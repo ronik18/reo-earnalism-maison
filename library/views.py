@@ -136,21 +136,27 @@ def preview(request,revision_id):
     if not svc._live(revision):raise DomainError('preview_unavailable','No public preview is available.',404)
     from .audio_preview import descriptor
     audio=descriptor(revision,territory)
-    unit,paragraphs=svc.public_preview(revision,territory)
-    if not unit or (not paragraphs and not audio):
+    cut=svc.public_preview(revision,territory)
+    unit=revision.units.first()
+    if not unit or (not cut and not audio):
         raise DomainError('preview_unavailable','Preview does not pass its bounds.',404)
     first=unit.paragraphs.first()
-    if not paragraphs and not first:raise DomainError('preview_unavailable','A semantic preview boundary is unavailable.',409)
+    if not cut and not first:raise DomainError('preview_unavailable','A semantic preview boundary is unavailable.',409)
+    paragraphs=[p for _,blocks in cut for p in blocks]
+    boundary=svc.preview_boundary(cut) if cut else {'end_anchor_id':str(first.anchor_id),'end_offset_chars':0,'audio_end_ms':None,'video_end_ms':None}
+    boundary['audio_end_ms']=audio['duration_ms'] if audio else None
     data={'schema_version':1,'edition_revision_id':str(revision.id),'locale':revision.edition.locale,
         'preview_sha256':svc.digest(svc.canonical_bytes(paragraphs)),
-        'units':[{'unit_id':str(unit.id),'title':unit.title,'paragraphs':paragraphs}] if paragraphs else [],
-        'boundary':{'end_anchor_id':paragraphs[-1]['anchor_id'] if paragraphs else str(first.anchor_id),
-            'end_offset_chars':len(paragraphs[-1]['text']) if paragraphs else 0,
-            'audio_end_ms':audio['duration_ms'] if audio else None,'video_end_ms':None},'full_content_included':False}
+        'units':[{'unit_id':str(u.id),'title':u.title,'paragraphs':blocks} for u,blocks in cut],
+        'boundary':boundary,'full_content_included':False}
     if audio:data['audio']=audio
-    # A descriptor leads to a short-lived private redirect; never cache the audio
-    # package longer than current text/audio preview rights.
-    ttl=svc.public_ttl(revision,60,'preview',territory)
+    # A shared cache key carries no territory: the preview may be shared-cached only while it is cleared
+    # in every publication territory. Otherwise it is private to this request (cdn-cache-design §5).
+    # A descriptor leads to a short-lived private redirect; never cache the audio package longer than
+    # current text/audio preview rights.
+    ttl=min(svc.global_preview_ttl(revision,60),svc.public_ttl(revision,60,'preview',territory))
+    if ttl<=0:
+        response=api_response(data);response['Cache-Control']='private, no-store, max-age=0';return response
     return public_response(data,ttl)
 
 

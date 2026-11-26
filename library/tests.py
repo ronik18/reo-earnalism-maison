@@ -92,26 +92,48 @@ class LibraryAcceptanceTests(TestCase):
         self.assertEqual(response.status_code,200,response.content)
         preview=response.json();validate_schema(preview,'PreviewPackage')
         self.assertFalse(preview['full_content_included'])
-        # The short first chapter (about 200 words) is previewed whole, in order, with real paragraph shapes.
-        self.assertEqual(preview['units'][0]['paragraphs'],[svc.paragraph_dto(p) for p in rows])
-        self.assertEqual(preview['boundary']['end_anchor_id'],str(rows[-1].anchor_id))
-        self.assertEqual(preview['boundary']['end_offset_chars'],len(rows[-1].text))
+        # The fixture story is 222 words (400 or fewer), so only its first paragraph is previewed, with its real shape.
+        self.assertEqual(preview['units'][0]['paragraphs'],[svc.paragraph_dto(rows[0])])
+        self.assertEqual(preview['boundary']['end_anchor_id'],str(rows[0].anchor_id))
+        self.assertEqual(preview['boundary']['end_offset_chars'],len(rows[0].text))
         self.assertEqual(preview['preview_sha256'],svc.digest(svc.canonical_bytes(preview['units'][0]['paragraphs'])))
         self.assertNotIn('storage_key',response.content.decode());self.assertNotIn('evidence',response.content.decode())
-        with patch.object(svc,'PREVIEW_WORD_LIMIT',70):  # 35 + 39 words: cut after the second paragraph
+        with patch.object(svc,'PREVIEW_MIN_WORDS',60):  # target 60 words: 35, then 35 + 39 crosses it
             response=self.client.get(f'/api/v1/content/previews/{self.revision.id}')
         preview=response.json();validate_schema(preview,'PreviewPackage')
         self.assertEqual([p['anchor_id'] for p in preview['units'][0]['paragraphs']],[str(p.anchor_id) for p in rows[:2]])
         self.assertEqual(preview['boundary']['end_anchor_id'],str(rows[1].anchor_id))
         self.assertNotIn(rows[2].text,response.content.decode());self.assertNotIn(rows[-1].text,response.content.decode())
 
+    def test_preview_api_is_shared_cached_only_when_cleared_in_every_territory(self):
+        from django.contrib.auth.models import AnonymousUser
+        from django.test import RequestFactory
+        from . import views
+        def get():  # the view's own cache decision, before the capture middleware re-checks it
+            request=RequestFactory().get(f'/api/v1/content/previews/{self.revision.id}?locale=en&territory=IN')
+            request.user=AnonymousUser();request.territory='IN'
+            response=views.preview(request,self.revision.id)
+            self.assertEqual(response.status_code,200,response.content)
+            return response['Cache-Control']
+        self.assertEqual(get(),'private, no-store, max-age=0')  # the fixture clears the reader preview in IN only
+        self.assertEqual(svc.global_preview_ttl(self.revision,60),0)
+        Rights.objects.filter(revision=self.revision,format='reader',action='preview').update(
+            territories=list(settings.MAISON_PUBLICATION_TERRITORIES))
+        self.assertEqual(svc.global_preview_ttl(self.revision,60),60)
+        self.assertEqual(get(),'public, max-age=0, s-maxage=60, must-revalidate')
+        Rights.objects.filter(revision=self.revision,format='reader',action='preview').update(
+            territories=list(settings.MAISON_PUBLICATION_TERRITORIES)[:-1])
+        self.assertEqual(get(),'private, no-store, max-age=0')
+        self.assertEqual(svc.global_preview_ttl(self.revision,60),0)
+
     def test_preview_document_matches_api_and_withdraws_with_rights(self):
         rows=list(self.unit.paragraphs.all())
-        with patch.object(svc,'PREVIEW_WORD_LIMIT',70):
+        with patch.object(svc,'PREVIEW_MIN_WORDS',60):
             document=svc.get_preview_document(EN,self.unit.id)
         self.assertEqual([p['anchor_id'] for p in document['paragraphs']],[str(p.anchor_id) for p in rows[:2]])
         self.assertEqual(document['boundary']['end_offset_chars'],len(rows[1].text))
-        with self.assertRaises(DomainError):svc.get_preview_document(EN,uuid.uuid4())  # only the first unit previews
+        self.assertFalse(document['preview_continues'])
+        with self.assertRaises(DomainError):svc.get_preview_document(EN,uuid.uuid4())  # only units the preview reaches
         Rights.objects.filter(revision=self.revision,format='reader',action='preview').update(approved=False)
         with self.assertRaises(DomainError) as error:svc.get_preview_document(EN,self.unit.id)
         self.assertEqual(error.exception.code,'preview_unavailable')

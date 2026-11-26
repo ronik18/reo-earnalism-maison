@@ -12,6 +12,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.management import call_command
 from django.db import transaction,connection,connections,OperationalError
 from django.http import JsonResponse,HttpResponse
+from django.conf import settings
 from django.test import TestCase,TransactionTestCase,RequestFactory,override_settings
 from django.utils import timezone
 from library.models import Edition,Rights
@@ -68,6 +69,9 @@ class CacheReferenceTests(TestCase):
         self.assertFalse(PublicCacheReference.objects.exists())
     def test_revision_rights_and_class_ttl_caps_rechecked(self):
         request=self.request('/api/v1/content/previews/'+str(self.revision.id)+'?locale=en&territory=IN')
+        # A preview cleared only in IN must not enter the territory-less shared cache.
+        self.assertEqual(self.capture(request,self.response(600))['Cache-Control'],'private, no-store')
+        Rights.objects.filter(revision=self.revision,action='preview').update(territories=list(settings.MAISON_PUBLICATION_TERRITORIES))
         result=self.capture(request,self.response(600));self.assertIn('s-maxage=60',result['Cache-Control'])
         Rights.objects.filter(revision=self.revision,action='preview').update(ends_at=timezone.now()+timedelta(seconds=9))
         result=self.capture(request,self.response(600));self.assertIn('s-maxage=8',result['Cache-Control'])

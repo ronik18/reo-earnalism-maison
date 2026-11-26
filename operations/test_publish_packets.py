@@ -583,9 +583,9 @@ class PreviewPrefixTests(SimpleTestCase):
         text = "Hello world. " + "y" * 1300
         self.assertEqual(command.preview_entries(self.paragraphs(text))[0]["text"], "Hello world.")
 
-    def test_get_preview_document_serves_the_first_chapter_once_a_preview_is_offered(self):
+    def test_get_preview_document_serves_about_a_quarter_once_a_preview_is_offered(self):
         # Owner decision 26 Nov 2026: the stored preview entries only mark that a reader preview is offered;
-        # readers see the first chapter's whole paragraphs up to the one that reaches PREVIEW_WORD_LIMIT words.
+        # readers see whole paragraphs up to the one that reaches about 25% of the story (400 to 1,500 words).
         import uuid
         from types import SimpleNamespace
         from library import services as svc
@@ -594,17 +594,21 @@ class PreviewPrefixTests(SimpleTestCase):
         unit = SimpleNamespace(id=uuid.uuid4(), paragraphs=mock.MagicMock())
         unit.paragraphs.all.return_value = rows
         revision = mock.MagicMock(preview=command.preview_entries(paragraphs))
-        revision.units.first.return_value = unit
+        revision.units.all.return_value = [unit]
         with mock.patch.object(svc, "edition_detail", return_value={"edition_revision_id": "r"}), \
                 mock.patch.object(svc, "_revision", return_value=revision), \
                 mock.patch.object(svc, "current_right", return_value=object()), \
                 mock.patch.object(svc, "unit_dto", return_value={}):
             document = svc.get_preview_document("e", unit.id)
         shown = document["paragraphs"]
-        self.assertEqual(shown[0]["text"], rows[0].text)  # the long opening paragraph is now whole
+        self.assertEqual(shown[0]["text"], rows[0].text)  # the long opening paragraph is whole
         self.assertEqual([p["anchor_id"] for p in shown], [str(r.anchor_id) for r in rows[:len(shown)]])
         counted = [svc.preview_word_count(p["text"]) for p in shown]
-        self.assertTrue(sum(counted) >= svc.PREVIEW_WORD_LIMIT or len(shown) == len(rows))
-        self.assertLess(sum(counted[:-1]), svc.PREVIEW_WORD_LIMIT)
+        total = sum(svc.preview_word_count(r.text) for r in rows)
+        target = min(max(total * svc.PREVIEW_FRACTION, svc.PREVIEW_MIN_WORDS), svc.PREVIEW_MAX_WORDS)
+        self.assertGreaterEqual(sum(counted), target)
+        self.assertLess(sum(counted[:-1]), target)
+        self.assertLess(len(shown), len(rows))
+        self.assertFalse(document["preview_continues"])
         self.assertEqual(document["boundary"]["end_offset_chars"], len(shown[-1]["text"]))
         self.assertEqual(document["boundary"]["end_anchor_id"], shown[-1]["anchor_id"])

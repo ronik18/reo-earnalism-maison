@@ -119,7 +119,7 @@ def _dependencies(request,response):
         raise ValueError('SSR requires exact rendered cache dependencies')
     # Resolve explicit revisions and current edition pointers together. The same
     # response-local rights snapshot feeds the ordinary policy selector below.
-    from library.services import prefetch_public_rights,public_ttl
+    from library.services import prefetch_public_rights,public_ttl,global_preview_ttl
     revisions=prefetch_public_rights(Revision.objects.filter(
         Q(pk__in=revision_ids) | Q(edition_id__in=edition_ids,edition__live_revision_id=F('id'))
     ).select_related('edition'))
@@ -131,6 +131,8 @@ def _dependencies(request,response):
     for revision in revisions:
         if revision.state!='live' or revision.edition.live_revision_id!=revision.id:raise ValueError('Stale published response')
         remaining=public_ttl(revision,ttl,'preview' if preview else 'read',request.territory)
+        # A preview cache key carries no territory: shared only while cleared in every publication territory.
+        if preview and remaining>0:remaining=global_preview_ttl(revision,remaining)
         if remaining<=0:raise ValueError('Public rights unavailable')
         ttl=min(ttl,remaining);edition_ids.add(str(revision.edition_id));work_ids.add(str(revision.edition.work_id))
     for kind,values in [('work',work_ids),('edition',edition_ids),('revision',revision_ids),('asset',asset_ids)]:refs.update(kind+':'+str(x) for x in values)

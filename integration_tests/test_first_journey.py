@@ -7,11 +7,13 @@ import re
 import uuid
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 from urllib.parse import urlsplit, parse_qs, unquote
 from django.conf import settings
 from django.core.management import call_command
 from django.test import Client, TestCase, override_settings
 from django.utils import timezone
+from library import services as library_services
 from library.models import Edition
 from library.validation import validate_schema
 from core.api import DomainError
@@ -45,11 +47,9 @@ class FirstBookJourneyTests(TestCase):
     def test_preview_verify_read_save_resume_and_logout(self):
         edition=Edition.objects.select_related('live_revision').get(pk=EN)
         unit=edition.live_revision.units.first();paragraph=unit.paragraphs.order_by('ordinal').first()
-        from unittest.mock import patch
-        from library import services as library_services
-        # Owner decision 26 Nov 2026: the preview is the first chapter up to ~1,500 words. The fixture chapter is
-        # ~200 words, so a lower limit proves the anonymous page still stops before the rest of the chapter.
-        with patch.object(library_services,'PREVIEW_WORD_LIMIT',70):
+        # Owner decision 26 Nov 2026: the preview is about a quarter of the story (400 to 1,500 words, never the
+        # ending). The fixture story is ~200 words; a lower floor proves the page still stops before the rest.
+        with patch.object(library_services,'PREVIEW_MIN_WORDS',60):
             preview=self.client.get(f'/en/read/{EN}/{unit.id}/')
         self.assertEqual(preview.status_code,200)
         self.assertIn(paragraph.text,preview.content.decode())
@@ -102,5 +102,5 @@ class FirstBookJourneyTests(TestCase):
         self.assertStatus(self.send('/api/v1/session',method='delete'),204)
         self.assertEqual(self.client.get(asset_path).status_code,401)
         self.assertEqual(self.client.get(progress_path).status_code,401)
-        with patch.object(library_services,'PREVIEW_WORD_LIMIT',70):  # after logout, back to the bounded preview
+        with patch.object(library_services,'PREVIEW_MIN_WORDS',60):  # after logout, back to the bounded preview
             self.assertNotIn(unit.paragraphs.order_by('ordinal').last().text,self.client.get(f'/en/read/{EN}/{unit.id}/').content.decode())

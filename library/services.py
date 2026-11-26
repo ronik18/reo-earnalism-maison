@@ -234,6 +234,30 @@ def global_public_ttl(revision, class_seconds):
         delattr(revision, '_maison_public_rights')
 
 
+def global_preview_ttl(revision, class_seconds):
+    """Seconds the public preview representation may stay in a shared cache, or 0.
+
+    The text preview is served from the cleared edition, so a shared (territory-less) cache key is
+    allowed only while the reader preview right is current in EVERY active publication territory
+    (cdn-cache-design §5, cache-policy public_object_rights); otherwise callers serve it privately.
+    """
+    territories = list(settings.MAISON_PUBLICATION_TERRITORIES)
+    if not territories or not _live(revision):
+        return 0
+    prefetch_public_rights([revision])
+    try:
+        ttl = class_seconds
+        for territory in territories:
+            if not current_right(revision, 'reader', 'preview', territory):
+                return 0
+            ttl = min(ttl, public_ttl(revision, class_seconds, 'preview', territory))
+            if ttl <= 0:
+                return 0
+        return ttl
+    finally:
+        delattr(revision, '_maison_public_rights')
+
+
 FORMAT_ASSETS = {format: (kind, 'stream' if format == 'video' else 'r2') for kind, format in DELIVERABLE_KINDS.items()}
 
 
@@ -415,8 +439,14 @@ def get_reader_document(user,edition_id,unit_id,territory='IN'):
     return {'edition':detail,'unit':unit_dto(unit,territory,edition.live_revision),'paragraphs':[paragraph_dto(p) for p in unit.paragraphs.all()]}
 
 
-PREVIEW_WORD_LIMIT=1500  # Owner decision 26 Nov 2026: whole first chapter, or about this many words.
+# Owner decision 26 Nov 2026 (supersedes "first chapter up to 1,500 words"): the free preview is about
+# the first quarter of the story's words, at least PREVIEW_MIN_WORDS and at most PREVIEW_MAX_WORDS,
+# always ending at a paragraph boundary and never including the story's final paragraph.
+PREVIEW_FRACTION=0.25
+PREVIEW_MIN_WORDS=400
+PREVIEW_MAX_WORDS=1500
 PREVIEW_MAX_BLOCKS=100   # PreviewPackage.units[].paragraphs maxItems in contracts/openapi.yaml.
+PREVIEW_MAX_UNITS=10     # PreviewPackage.units maxItems in contracts/openapi.yaml.
 
 
 def preview_word_count(text):
@@ -424,44 +454,108 @@ def preview_word_count(text):
     return len(text.split())
 
 
-def preview_blocks(paragraphs,limit=None,max_blocks=PREVIEW_MAX_BLOCKS):
-    """The public reading preview cut from the first unit's ordered paragraphs.
+def _preview_groups(stream):
+    """(unit, [block, its notes...]) in story order. A note travels with the block before it in its unit."""
+    group=None
+    for unit,paragraph in stream:
+        if paragraph['kind']=='note' and group and group[0]==unit:
+            group[1].append(paragraph);continue
+        if group:yield group
+        group=(unit,[paragraph])
+    if group:yield group
 
-    Whole blocks only: stop after the block whose words reach `limit`, never mid-paragraph. A note
-    belongs to the block before it and travels with it, and notes do not count toward the limit.
-    The contract's block ceiling is applied the same way (whole block plus its notes). A trailing
-    heading with no text after it is dropped unless it is all there is."""
-    limit=PREVIEW_WORD_LIMIT if limit is None else limit
-    groups=[]
-    for paragraph in paragraphs:
-        if paragraph['kind']=='note' and groups:groups[-1].append(paragraph)
-        else:groups.append([paragraph])
-    blocks,words=[],0
-    for group in groups:
-        if words>=limit or len(blocks)+len(group)>max_blocks:break
-        blocks.extend(group)
-        words+=sum(preview_word_count(p['text']) for p in group if p['kind']!='note')
-    while len(blocks)>1 and blocks[-1]['kind']=='heading':blocks.pop()
-    return blocks
+
+def _group_words(group):
+    return sum(preview_word_count(p['text']) for p in group[1] if p['kind']!='note')
+
+
+def preview_cut(stream):
+    """The public reading preview from the story's (unit, paragraph DTO) pairs in reading order.
+
+    Returns [(unit, [blocks])] for the units the preview reaches, or [] when no preview may be offered.
+    Words are whitespace tokens of non-note blocks, counted across all units. Target = PREVIEW_FRACTION
+    of the story's words, clamped to [PREVIEW_MIN_WORDS, PREVIEW_MAX_WORDS]. Whole groups (a block
+    plus its notes) are taken in order while the running count is below the target; the group that
+    reaches or crosses it is the last (a heading that
+    reaches it takes the paragraph after it). A story of at most PREVIEW_MIN_WORDS words previews only its
+    first paragraph. The story's final group is never included, so the preview is never the whole
+    story; if that leaves nothing, there is no preview. The contract ceilings (100 blocks per unit,
+    10 units) stop the cut early at a whole group. A trailing heading or orphan note is dropped.
+
+    The stream is read lazily: once PREVIEW_MAX_WORDS / PREVIEW_FRACTION words have been read the
+    target is fixed at the maximum, so the rest of a long book is never loaded."""
+    enough=PREVIEW_MAX_WORDS/PREVIEW_FRACTION
+    groups,total,complete=[],0,True
+    for group in _preview_groups(stream):
+        groups.append(group);total+=_group_words(group)
+        if total>=enough:
+            complete=False;break
+    candidates=groups[:-1] if complete else groups  # never the story's final paragraph
+    chosen=[]
+    if complete and total<=PREVIEW_MIN_WORDS:
+        for group in candidates:  # first paragraph only (with any heading before it)
+            chosen.append(group)
+            if group[1][0]['kind']!='heading':break
+    else:
+        target=min(max(PREVIEW_FRACTION*total,PREVIEW_MIN_WORDS),PREVIEW_MAX_WORDS)
+        words,units,in_unit=0,0,0
+        for group in candidates:
+            if words>=target and chosen[-1][1][0]['kind']!='heading':break  # a heading never ends the preview
+            new=not chosen or group[0]!=chosen[-1][0]
+            if new and units>=PREVIEW_MAX_UNITS:break
+            size=(0 if new else in_unit)+len(group[1])
+            if size>PREVIEW_MAX_BLOCKS:break
+            units,in_unit=units+new,size
+            chosen.append(group);words+=_group_words(group)
+    while chosen and chosen[-1][1][0]['kind'] in ('heading','note'):chosen.pop()  # no dangling heading or orphan note
+    if not any(p['kind'] not in ('heading','note') for _,blocks in chosen for p in blocks):return []
+    cut=[]
+    for unit,blocks in chosen:
+        if cut and cut[-1][0]==unit:cut[-1][1].extend(blocks)
+        else:cut.append((unit,list(blocks)))
+    return cut
+
+
+def _unit_rows(unit,batch=64):
+    rows=unit.paragraphs.all();start=0
+    while True:
+        chunk=list(rows[start:start+batch])
+        yield from chunk
+        if len(chunk)<batch:return
+        start+=batch
+
+
+def _story_stream(revision):
+    for unit in revision.units.all():
+        for paragraph in _unit_rows(unit):
+            yield unit,paragraph_dto(paragraph)
 
 
 def public_preview(revision,territory='IN'):
-    """(first unit, preview paragraphs) when the live revision offers a current reader preview, else (unit, [])."""
-    unit=revision.units.first()
-    if not unit or not revision.preview or not current_right(revision,'reader','preview',territory):
-        return unit,[]
-    return unit,preview_blocks([paragraph_dto(p) for p in unit.paragraphs.all()])
+    """[(unit, preview paragraphs)] when the live revision offers a current reader preview, else [].
+
+    Revision.preview is only the on/off signal; the served text is preview_cut of the cleared edition."""
+    if not revision.preview or not current_right(revision,'reader','preview',territory):return []
+    return preview_cut(_story_stream(revision))
+
+
+def preview_boundary(cut):
+    """Where the whole preview ends: the last non-note block, so sign-in returns to the paragraph, not a footnote."""
+    blocks=[p for _,b in cut for p in b]
+    last=next((p for p in reversed(blocks) if p['kind']!='note'),blocks[-1])
+    return {'end_anchor_id':last['anchor_id'],'end_offset_chars':len(last['text']),'audio_end_ms':None,'video_end_ms':None}
 
 
 def get_preview_document(edition_id,unit_id,territory='IN'):
     detail=edition_detail(edition_id,territory)
     revision=_revision(detail['edition_revision_id'])
-    first,paragraphs=public_preview(revision,territory)
-    if not first or str(first.id)!=str(unit_id) or not paragraphs:
+    cut=public_preview(revision,territory)
+    index=next((i for i,(unit,_) in enumerate(cut) if str(unit.id)==str(unit_id)),None)
+    if index is None:
         raise DomainError('preview_unavailable','This unit has no bounded public preview.',404)
-    return {'edition':detail,'unit':unit_dto(first,territory),'paragraphs':paragraphs,
-            'boundary':{'end_anchor_id':paragraphs[-1]['anchor_id'],'end_offset_chars':len(paragraphs[-1]['text']),
-                        'audio_end_ms':None,'video_end_ms':None},'preview':True}
+    unit,paragraphs=cut[index]
+    return {'edition':detail,'unit':unit_dto(unit,territory),'paragraphs':paragraphs,'boundary':preview_boundary(cut),
+            'preview':True,'preview_continues':index+1<len(cut)}
 
 
 def has_active_pass(user,at=None):
