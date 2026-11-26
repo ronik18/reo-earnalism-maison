@@ -355,10 +355,10 @@
       {
         "run_id": "narration-film-01-r4#2",
         "job_id": "narration-film-01-r4",
-        "usd": 0.9310125,
-        "seconds": 0.0,
+        "usd": 0.033590441148675,
+        "seconds": 121.04663477,
         "at": "2026-11-26T14:18:34+00:00",
-        "status": "pending"
+        "status": "ok"
       }
     ]
   }
