@@ -1,13 +1,18 @@
 {
   "colab_units": 0.0,
-  "error": "abandoned: Cancelled by root (GitHub run 45817551050) 42 s into the Modal step, because chunk 1 failed on the gated Hugging Face model; settled at 0.0117 USD (42 s x L4 rate x 1.25) pending the Modal dashboard",
-  "finished_at": "2026-11-26T12:15:01+00:00",
+  "error": "modal-run recorded no result; upload: no job folder at /home/runner/work/_temp/modal-downloads/narration-film-01-r3-c2of2",
+  "files": [],
+  "finished_at": "2026-11-26T12:14:47+00:00",
   "job_id": "narration-film-01-r3-c2of2",
+  "modal_contacted_at": "2026-11-26T12:14:05+00:00",
+  "note": "Cancelled by root (GitHub run 45817551050) 42 s into the Modal step because chunk 1 failed on the gated HF model; ledger row settled at 0.0117 USD (42 s x L4 rate x 1.25) pending the Modal dashboard.",
   "pending_run_id": "narration-film-01-r3-c2of2#1",
   "r2_prefix": "gpu-jobs/bicharak/narration-film-01-r3-c2of2/run-1/",
   "requested_at": "2026-11-26T12:12:46+00:00",
   "schema": "earnalism.modal-request.v1",
-  "status": "refused",
+  "seconds": null,
+  "status": "failed",
   "title_root": "production/audiovisual/bicharak",
+  "usd": 0.0117,
   "worst_case_usd": 1.091962
 }
