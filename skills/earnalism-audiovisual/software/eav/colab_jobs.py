@@ -105,10 +105,11 @@ with zipfile.ZipFile(INPUT_ZIP) as z:
 if JOB["job_id"] != JOB_ID:
     raise RuntimeError("job.json belongs to a different job")
 print("inputs verified for", JOB_ID)
+attach_session()
 '''
 
 # R25: the hard stop counts from this cell (run right after the config) and equals the forecast
-# seconds the ledger reserved. Items start only while they can still finish before it; a Timer
+# seconds the ledger reserved, minus what earlier sessions of the same job already used. Items start only while they can still finish before it; a Timer
 # unassigns the runtime at the stop itself, as the Wan notebook does.
 _CLOCK = _GUARD + '''import hashlib, json, os, threading, time
 BOOKKEEPING = ("progress.jsonl", "sessions.jsonl")  # resume records: never outputs
@@ -176,20 +177,55 @@ def record_item(key, name):
 
 
 def _hard_stop():
+    try:
+        note_session()
+    except Exception as e:  # Drive may have dropped; the runtime must still be released
+        print("could not record the session seconds:", e)
+    finally:
+        runtime.unassign()
+
+
+def _heartbeat():
+    while not HEARTBEAT_STOP.wait(HEARTBEAT_S):
+        try:
+            note_session()  # a session killed mid-batch (OOM, disconnect) is still charged
+        except Exception:
+            pass
+
+
+def attach_session():
+    # Run once OUT_DIR is known (after the Drive mount): shorten the stop by what earlier sessions
+    # used, charge this session from JOB_STARTED, and start the heartbeat.
+    global PRIOR_SECONDS, EFFECTIVE_DEADLINE, STOP_GUARD, SESSION_ATTACHED
+    if SESSION_ATTACHED:
+        return
+    PRIOR_SECONDS = sum(v for k, v in session_seconds().items() if k != JOB_STARTED)
+    EFFECTIVE_DEADLINE = DEADLINE_SECONDS - PRIOR_SECONDS
+    remaining = EFFECTIVE_DEADLINE - (time.time() - JOB_STARTED)
+    if remaining <= 0:
+        note_session()
+        raise RuntimeError("reserved time used up: close the job with the CU Colab shows")
+    STOP_GUARD.cancel()
+    STOP_GUARD = threading.Timer(remaining, _hard_stop)
+    STOP_GUARD.daemon = True
+    STOP_GUARD.start()
     note_session()
-    runtime.unassign()
+    SESSION_ATTACHED = True
+    threading.Thread(target=_heartbeat, daemon=True).start()
+    print("reserved %d s, %d s used by earlier sessions" % (DEADLINE_SECONDS, PRIOR_SECONDS))
 
 
-# R25: the reserved seconds are a total across sessions; a re-run gets what earlier ones left.
+# R25: the hard stop is armed here, right after the config, for the full reserved seconds; the
+# verify cell then calls attach_session() to take off what earlier sessions used.
+HEARTBEAT_S = globals().get("HEARTBEAT_S", 20)
+HEARTBEAT_STOP = globals().get("HEARTBEAT_STOP") or threading.Event()
 if "JOB_STARTED" not in globals():
     JOB_STARTED = time.time()
-    PRIOR_SECONDS = sum(session_seconds().values())
-    EFFECTIVE_DEADLINE = DEADLINE_SECONDS - PRIOR_SECONDS
-    if EFFECTIVE_DEADLINE <= 0:
-        raise RuntimeError("reserved time used up: close the job with the CU Colab shows")
-    note_session()
+    PRIOR_SECONDS = 0
+    EFFECTIVE_DEADLINE = DEADLINE_SECONDS
+    SESSION_ATTACHED = False
     from google.colab import runtime
-    STOP_GUARD = threading.Timer(EFFECTIVE_DEADLINE, _hard_stop)
+    STOP_GUARD = threading.Timer(DEADLINE_SECONDS, _hard_stop)
     STOP_GUARD.daemon = True
     STOP_GUARD.start()
 INCOMPLETE = False
@@ -206,7 +242,7 @@ def may_start(last_item_s):
     return True
 
 
-print("hard stop armed:", EFFECTIVE_DEADLINE, "s from now (%d s used by earlier sessions)" % PRIOR_SECONDS)
+print("hard stop armed:", DEADLINE_SECONDS, "s from now")
 '''
 
 _MANIFEST = _GUARD + '''import hashlib, json, time
@@ -266,9 +302,9 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
              f"cannot be imported.\n\n**Disconnected?** Run all again: finished items are kept "
              f"(`progress.jsonl`, checked by sha256) and the run continues where it stopped, "
              f"within the same reserved time (`sessions.jsonl` counts what earlier runs used).\n")
-    # The generation cell may call setup that sets OUT_DIR; the verify cell sets JOB/OUT_DIR.
-    parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _VERIFY),
-             ("code", _CLOCK), ("code", template.read_text(encoding="utf-8")),
+    # The clock arms the stop first; the verify cell sets JOB/OUT_DIR and attaches the session.
+    parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _CLOCK),
+             ("code", _VERIFY), ("code", template.read_text(encoding="utf-8")),
              ("code", _MANIFEST)]
     nb = {"nbformat": 4, "nbformat_minor": 5,
           "metadata": {"kernelspec": {"name": "python3", "display_name": "Python 3"},

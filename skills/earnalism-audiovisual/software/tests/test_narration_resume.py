@@ -4,6 +4,7 @@ import json
 import shutil
 import sys
 import tempfile
+import time
 import types
 import unittest
 from pathlib import Path
@@ -130,32 +131,41 @@ class NarrationResumeTests(unittest.TestCase):
                                     {"scenes": [SCENE], "preset": PRESET, **spec},
                                     self.ledger, RATES, self.out, month="2026-11")
 
-    def session(self, deadline=1000, stop_after_batches=None, modules=None, manifest=True):
+    def session(self, deadline=1000, stop_after_batches=None, modules=None, manifest=True,
+                heartbeat_s=None, generate=True, keep_alive=False):
         """Run the notebook's cells in fresh globals, as a new Colab runtime would."""
-        g = {}
+        g = self.g = {}
         calls = [0]
-        with patch.dict(sys.modules, modules or _fake_modules()), \
-                patch("subprocess.run"), \
-                patch.object(importlib.metadata, "distribution", self._dist):
-            run, config, verify, clock, gen, man = self.cells
-            exec(run, g)
-            g["RUN"] = True
-            exec(config, g)
-            g.update(DRIVE_JOB_DIR=str(self.drive), DEADLINE_SECONDS=deadline)
-            exec(verify, g)
-            exec(clock, g)
-            g["STOP_GUARD"].cancel()
-            if stop_after_batches is not None:
-                def may_start(last):
-                    calls[0] += 1
-                    if calls[0] > stop_after_batches:
-                        g["INCOMPLETE"] = True
-                        return False
-                    return True
-                g["may_start"] = may_start
-            exec(gen, g)
-            if manifest:
-                exec(man, g)
+        if heartbeat_s:
+            g["HEARTBEAT_S"] = heartbeat_s
+        try:
+            with patch.dict(sys.modules, modules or _fake_modules()), \
+                    patch("subprocess.run"), \
+                    patch.object(importlib.metadata, "distribution", self._dist):
+                run, config, clock, verify, gen, man = self.cells
+                exec(run, g)
+                g["RUN"] = True
+                exec(config, g)
+                g.update(DRIVE_JOB_DIR=str(self.drive), DEADLINE_SECONDS=deadline)
+                exec(clock, g)  # arms the stop before the Drive mount (R25)
+                exec(verify, g)
+                if stop_after_batches is not None:
+                    def may_start(last):
+                        calls[0] += 1
+                        if calls[0] > stop_after_batches:
+                            g["INCOMPLETE"] = True
+                            return False
+                        return True
+                    g["may_start"] = may_start
+                if generate:
+                    exec(gen, g)
+                if manifest:
+                    exec(man, g)
+        finally:  # a test never leaves a timer or heartbeat running
+            if "STOP_GUARD" in g:
+                g["STOP_GUARD"].cancel()
+            if "HEARTBEAT_STOP" in g and not keep_alive:
+                g["HEARTBEAT_STOP"].set()
         return g
 
     @staticmethod
@@ -303,6 +313,39 @@ class NarrationResumeTests(unittest.TestCase):
             + json.dumps({"started": 1.0, "seconds": 300}) + "\n")
         g = self.session(deadline=1000, manifest=False)
         self.assertEqual(g["EFFECTIVE_DEADLINE"], 700)
+        self.assertEqual(g["PRIOR_SECONDS"], 300)
+
+    def test_session_killed_mid_batch_is_charged_by_the_heartbeat(self):
+        """A runtime dying during pip/model load/a batch writes no item line; the heartbeat has
+        already charged its elapsed time, so the next session gets less than the full deadline."""
+        self.session(deadline=1000, manifest=False, generate=False, heartbeat_s=0.02,
+                     keep_alive=True)
+        time.sleep(0.3)
+        seconds = max(r["seconds"] for r in self.lines("sessions.jsonl"))
+        self.assertGreater(seconds, 0.1)  # still ticking with no finished item
+        self.g["HEARTBEAT_STOP"].set()  # "killed": the globals are abandoned
+        time.sleep(0.1)
+        charged = sum(self.session_rows().values())
+        g2 = self.session(deadline=1000, manifest=False, generate=False)
+        self.assertEqual(g2["PRIOR_SECONDS"], charged)
+        self.assertLess(g2["EFFECTIVE_DEADLINE"], 1000)
+
+    def session_rows(self):
+        latest = {}
+        for r in self.lines("sessions.jsonl"):
+            latest[r["started"]] = r["seconds"]
+        return latest
+
+    def test_hard_stop_unassigns_even_when_drive_write_fails(self):
+        g = self.session(manifest=False, generate=False)
+        unassigned = []
+        g["runtime"] = types.SimpleNamespace(unassign=lambda: unassigned.append(True))
+
+        def boom():
+            raise OSError("Drive disconnected")
+        g["note_session"] = boom
+        g["_hard_stop"]()
+        self.assertEqual(unassigned, [True])
 
 
 if __name__ == "__main__":
