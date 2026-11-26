@@ -1,7 +1,7 @@
 """Owner decision 26 Nov 2026: the free preview is about the first quarter of the story.
 
 Target = 25% of the story's words, at least 400 and at most 1,500; whole paragraphs only, stopping after the
-paragraph that reaches the target; never the story's final paragraph; a story of 400 words or fewer previews
+paragraph that reaches the target; never the edition's last paragraph or verse block (the protected end); a story of 400 words or fewer previews
 only its first paragraph, and no preview at all if that is the whole story. Counted across all units."""
 import uuid
 from django.test import SimpleTestCase

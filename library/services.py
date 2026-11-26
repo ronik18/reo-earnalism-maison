@@ -441,7 +441,7 @@ def get_reader_document(user,edition_id,unit_id,territory='IN'):
 
 # Owner decision 26 Nov 2026 (supersedes "first chapter up to 1,500 words"): the free preview is about
 # the first quarter of the story's words, at least PREVIEW_MIN_WORDS and at most PREVIEW_MAX_WORDS,
-# always ending at a paragraph boundary and never including the story's final paragraph.
+# always ending at a paragraph boundary and never including the edition's last paragraph or verse block (the protected end).
 PREVIEW_FRACTION=0.25
 PREVIEW_MIN_WORDS=400
 PREVIEW_MAX_WORDS=1500
