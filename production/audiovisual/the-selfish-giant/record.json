@@ -22180,6 +22180,486 @@
       },
       "path": "qc/report.json",
       "sha256": "5423636e4f17d26c7c9dc039d0855a8750a8428021c58ae8898dd494d1cdebb4"
+    },
+    {
+      "bytes": 1158701,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/selfish-giant-edit-test-film-01/f01s003-1--c1.png",
+      "sha256": "03cc3d7eed2077b2188a2a9bd484821b8efa098f4c0ca9d236ce0cc5a0ca3d53"
+    },
+    {
+      "bytes": 1145465,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/selfish-giant-edit-test-film-01/f01s003-1--c2.png",
+      "sha256": "b71ad8a869594b25f9ed4609b054a26359185803863ac69aad6c01428c21a3e9"
+    },
+    {
+      "bytes": 1119599,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/selfish-giant-edit-test-film-01/f01s007-6--c1.png",
+      "sha256": "30014e4f18ee5bb016e2cd2e41c2ca8c9ea1ca0846cf4cbac63029529a5f9f79"
+    },
+    {
+      "bytes": 1232272,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/selfish-giant-edit-test-film-01/f01s007-6--c2.png",
+      "sha256": "1d09539a863cce1a6890a0f92aed52f8fae8cc98edb794280a8899b3a96750a5"
+    },
+    {
+      "bytes": 1449152,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/selfish-giant-edit-test-film-01/f01s010-4--c1.png",
+      "sha256": "0eee033ef56944dc8ec38363a447d12660c7148257f888cbddefd1b26c1bb4f3"
+    },
+    {
+      "bytes": 1472724,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/selfish-giant-edit-test-film-01/f01s010-4--c2.png",
+      "sha256": "579be12937801735b11957304c2a82a93c711bdb9e09a6d7aeaf81c64fa16dc8"
+    },
+    {
+      "bytes": 1664065,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/selfish-giant-edit-test-film-01/f01s014-5--c1.png",
+      "sha256": "c5cea62310956c484734002ab0f304eed1bf3a6ed851c204d8bd5dec2263e8b4"
+    },
+    {
+      "bytes": 1679976,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/selfish-giant-edit-test-film-01/f01s014-5--c2.png",
+      "sha256": "3a77d44807179807ca96a97d50b4a86b773e4b23685027807a938b427166a9d5"
+    },
+    {
+      "bytes": 1591016,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/selfish-giant-edit-test-film-01/f01s015-4--c1.png",
+      "sha256": "2cce1b18b09e260aeea05054b63679b894f8c8850d539ad0bb2c3efb664a1058"
+    },
+    {
+      "bytes": 1732446,
+      "kind": "edit",
+      "meta": {
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "job_kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "edit/selfish-giant-edit-test-film-01/f01s015-4--c2.png",
+      "sha256": "dcf4895cb58197e54595cbb89b6b1f6aabcb97c292b3bf45b2a1e5f3f2d965a6"
     }
   ],
   "created_at": "2026-11-24T03:00:37.424394+00:00",
@@ -24137,6 +24617,89 @@
       },
       "result": "pass",
       "stage": "qc"
+    },
+    {
+      "at": "2026-11-26T03:35:16.532010+00:00",
+      "detail": {
+        "actual_units": 4.8,
+        "files": [
+          "edit/selfish-giant-edit-test-film-01/f01s003-1--c1.png",
+          "edit/selfish-giant-edit-test-film-01/f01s003-1--c2.png",
+          "edit/selfish-giant-edit-test-film-01/f01s007-6--c1.png",
+          "edit/selfish-giant-edit-test-film-01/f01s007-6--c2.png",
+          "edit/selfish-giant-edit-test-film-01/f01s010-4--c1.png",
+          "edit/selfish-giant-edit-test-film-01/f01s010-4--c2.png",
+          "edit/selfish-giant-edit-test-film-01/f01s014-5--c1.png",
+          "edit/selfish-giant-edit-test-film-01/f01s014-5--c2.png",
+          "edit/selfish-giant-edit-test-film-01/f01s015-4--c1.png",
+          "edit/selfish-giant-edit-test-film-01/f01s015-4--c2.png"
+        ],
+        "input_zip_sha256": "6443e3a016b9f7a1be9967afa2a6e9c24d805e1b5e9468ab95689951a43746a5",
+        "job_id": "selfish-giant-edit-test-film-01",
+        "kind": "edit",
+        "model": {
+          "diffusers": "0.37.0",
+          "diffusers_pin": "diffusers==0.37.0",
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "licences": {
+            "Qwen/Qwen-Image-Edit-2511": "apache-2.0"
+          },
+          "offload": "enable_model_cpu_offload",
+          "output_size": "source size (LANCZOS)",
+          "pipeline": "QwenImageEditPlusPipeline",
+          "repo": "Qwen/Qwen-Image-Edit-2511",
+          "revision": "6f3ccc0b56e431dc6a0c2b2039706d7d26f22cb9",
+          "seconds_per_image": {
+            "f01s003-1--c1": 166.3,
+            "f01s003-1--c2": 161.5,
+            "f01s007-6--c1": 224.8,
+            "f01s007-6--c2": 224.6,
+            "f01s010-4--c1": 224.5,
+            "f01s010-4--c2": 224.6,
+            "f01s014-5--c1": 224.2,
+            "f01s014-5--c2": 224.0,
+            "f01s015-4--c1": 224.3,
+            "f01s015-4--c2": 224.5
+          },
+          "text_encoder_precision": "bf16",
+          "transformer_precision": "nf4",
+          "vram_gib": 39.5
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.37.0",
+          "huggingface_hub": "1.33.0",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-26T03:35:16.559422+00:00",
+      "detail": {
+        "job_id": "selfish-giant-edit-test-film-01",
+        "members": [
+          "f01s003-1--c1.png",
+          "f01s003-1--c2.png",
+          "f01s007-6--c1.png",
+          "f01s007-6--c2.png",
+          "f01s010-4--c1.png",
+          "f01s010-4--c2.png",
+          "f01s014-5--c1.png",
+          "f01s014-5--c2.png",
+          "f01s015-4--c1.png",
+          "f01s015-4--c2.png",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/the-selfish-giant/selfish-giant-edit-test-film-01/outputs.tar",
+        "outputs_tar_sha256": "1cce29ee86bb9727b1fad14cf79898e030b85e58c43f93df44d2a6dde76ecc03"
+      },
+      "result": "exchange_collected",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",

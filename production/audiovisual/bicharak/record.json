@@ -34061,6 +34061,28 @@
       },
       "result": "pass",
       "stage": "qc"
+    },
+    {
+      "at": "2026-11-26T03:35:17.455024+00:00",
+      "detail": {
+        "job_id": "edit-test-film-01",
+        "reason": "Qwen-Image-Edit test hit its hard stop after 4 of 8 images (\u2248400 s/image on L4 vs 150 s forecast); outputs kept out of the record, reviewed from R2 for the test only",
+        "units": 4.3
+      },
+      "result": "closing",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:35:17.516570+00:00",
+      "detail": {
+        "imported": false,
+        "job_id": "edit-test-film-01",
+        "ran": true,
+        "reason": "Qwen-Image-Edit test hit its hard stop after 4 of 8 images (\u2248400 s/image on L4 vs 150 s forecast); outputs kept out of the record, reviewed from R2 for the test only",
+        "units": 4.3
+      },
+      "result": "closed",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
