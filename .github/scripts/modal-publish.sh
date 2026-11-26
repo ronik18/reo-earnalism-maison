@@ -2,7 +2,8 @@
 # Commit one Modal request's request file and ledger and push them to the branch, for the
 # modal-jobs workflow. A conflicting rebase is aborted; the fresh branch head is then checked out
 # and this run's own changes are re-applied from saved copies (`eav modal-replay`: the request file,
-# and this job's ledger entry and rows by job_id and run_id), then retried. If every attempt fails,
+# and this job's ledger entry and exactly its saved rows; other jobs' rows are kept), then retried.
+# If every attempt fails,
 # the result goes to the fallback branch modal-results/<job_id>; `eav modal-fetch` still works from
 # the R2 copy of the request (_request-result.json).
 # Usage: modal-publish.sh <message> <job_id> <title root (absolute)> <ledger (absolute)> <request>

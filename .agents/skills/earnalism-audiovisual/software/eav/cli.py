@@ -1200,8 +1200,9 @@ def cmd_r2_probe(args):
 
 def cmd_modal_replay(args):
     """The workflow, when a push-back rebase conflicts: on the freshly fetched branch, re-apply this
-    job's saved request file and its own ledger entry and rows (by job_id and run_id); every other
-    line of the newer ledger is kept."""
+    job's saved request file and its own ledger entry, and make its rows exactly the saved ones (a
+    released row is never resurrected); every other job's entry and rows in the newer ledger are
+    kept."""
     rec = _record(args.root)
     saved = Path(args.saved)
     req = modal_requests.read_request(saved / "request.json")

@@ -274,9 +274,9 @@ class Ledger:
 
     def replay_job(self, job_id: str, saved: list) -> None:
         """Re-apply one job's ledger state from saved (another copy of this ledger file) onto this
-        one: the job's reservation entry is replaced by the saved entry, and each of the job's saved
-        Modal rows replaces the row with the same run_id (inserted into its month if absent). Every
-        other entry and row stays as it is here."""
+        one: the job's reservation entry is replaced by the saved entry, and the job's Modal rows here
+        become exactly its saved rows (each in its saved month; a row the saved copy lacks, such as a
+        released pending row, is dropped). Every other job's entry and rows stay as they are here."""
         everything = self._raw()
         entry = next((e for e in saved if "modal_spend" not in e and e.get("job_id") == job_id), None)
         if entry is not None:
@@ -286,17 +286,18 @@ class Ledger:
                     break
             else:
                 everything.insert(sum(1 for e in everything if "modal_spend" not in e), entry)
+        # this job's rows here become exactly its saved rows: a row the saved copy no longer has (a
+        # released pending row of a refused request) is dropped, never resurrected
+        for rec in everything:
+            if "modal_spend" in rec:
+                rec["rows"] = [r for r in rec["rows"] if r.get("job_id") != job_id]
+        everything = [r for r in everything if "modal_spend" not in r or r["rows"]]
         for rec in saved:
             if "modal_spend" not in rec:
                 continue
             for row in rec["rows"]:
-                if row.get("job_id") != job_id:
-                    continue
-                try:
-                    self._take_row(everything, row["run_id"])
-                except KeyError:
-                    pass
-                self._put_row(everything, rec["modal_spend"], dict(row))
+                if row.get("job_id") == job_id:
+                    self._put_row(everything, rec["modal_spend"], dict(row))
         self._write(everything)
 
     def pending_modal_runs(self, job_id: str) -> list:

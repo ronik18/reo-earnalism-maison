@@ -214,7 +214,8 @@ back through the private Cloudflare R2 bucket `reo-earnalism-maison-private`. Th
      `gpu-jobs/<slug>/<job_id>/_request-result.json`;
    - push the request and the ledger back (no secrets, `.github/scripts/modal-publish.sh`). A
      conflicting rebase is aborted; on the fresh branch head `eav modal-replay` re-applies the
-     request file and only this job's ledger entry and rows (by job_id and run_id), then it retries.
+     request file and this job's ledger entry, and makes the job's rows exactly the saved ones (a
+     released row stays released); other jobs' rows are kept. Then it retries.
      If every attempt fails, the result is pushed to `modal-results/<job_id>`.
 
    The Modal workspace spend limit is the backstop.

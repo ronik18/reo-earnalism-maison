@@ -211,6 +211,32 @@ class ModalSpendTests(unittest.TestCase):
         self.assertIn("29.50", str(cm.exception))
         self.ledger.check_modal_month("2026-11", 0.50)
 
+    def test_replay_job_makes_the_jobs_rows_exactly_the_saved_ones(self):
+        self.ledger.reserve("t", "2026-11", 1.0, "a")
+        self.ledger.reserve("t", "2026-11", 1.0, "b")
+        run_a = self.ledger.record_modal_spend("2026-11", "a", 2.0, 0.0, "pending", "t")
+        base = json.loads(self.ledger.path.read_text())
+        self.ledger.release_pending_modal(run_a)  # the runner refused job a
+        saved = json.loads(self.ledger.path.read_text())
+        self.ledger._write(base)  # the fresh head still has a's pending row ...
+        self.ledger.record_modal_spend("2026-11", "b", 1.5, 0.0, "pending", "t")  # ... and b's new row
+        self.ledger.record_modal_spend("2026-12", "a", 0.7, 0.0, "pending", "t")  # stray a row
+        self.ledger.replay_job("a", saved)
+        self.assertEqual(self.ledger.modal_rows(job_id="a"), [])
+        self.assertEqual([(r["job_id"], r["usd"]) for r in self.ledger.modal_rows()], [("b", 1.5)])
+        self.assertEqual({e["job_id"] for e in self.ledger._load()}, {"a", "b"})
+        # a saved finished row replaces the head's pending row with the same run_id
+        self.ledger.record_modal_spend("2026-11", "a", 2.0, 0.0, "pending", "t")
+        head = json.loads(self.ledger.path.read_text())
+        (row,) = self.ledger.modal_rows(job_id="a")
+        self.ledger.finish_modal_spend(row["run_id"], 0.3, 9.0, "ok")
+        saved = json.loads(self.ledger.path.read_text())
+        self.ledger._write(head)
+        self.ledger.replay_job("a", saved)
+        self.assertEqual([(r["run_id"], r["usd"], r["status"]) for r in self.ledger.modal_rows(job_id="a")],
+                         [(row["run_id"], 0.3, "ok")])
+        self.assertEqual([r["usd"] for r in self.ledger.modal_rows(job_id="b")], [1.5])
+
 
 if __name__ == "__main__":
     unittest.main()

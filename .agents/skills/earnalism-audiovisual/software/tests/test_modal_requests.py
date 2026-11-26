@@ -379,6 +379,34 @@ class ModalRequestTests(unittest.TestCase):
         code, out = run("modal-replay", "other", "--root", self.root, "--saved", saved)
         self.assertEqual(code, 2, out)
 
+    def test_replay_of_a_refused_request_never_resurrects_its_released_row(self):
+        self.assertEqual(self.request()[0], 0)
+        self.set_status("running")
+        head = json.loads(self.ledger_bytes())  # the branch: our pending row, before the refusal
+        self.r2.deny = {"PUT"}
+        code, out = run("r2-probe", self.job_id, "--root", self.root)
+        self.assertEqual((code, self.req()["status"], self.rows()), (2, "refused", []), out)
+        saved = self.d / "saved"
+        saved.mkdir()
+        (saved / "request.json").write_bytes(self.req_path.read_bytes())
+        (saved / "ledger.json").write_bytes(self.ledger_bytes())
+        # meanwhile root pushed another job's request row into the same month (the conflict)
+        for rec in head:
+            if rec.get("modal_spend") == self.MONTH:
+                rec["rows"].append({"run_id": "next-job#9", "job_id": "next-job", "usd": 1.2,
+                                    "seconds": 0.0, "at": "t", "status": "pending"})
+        self.ledger._write(head)
+        self.set_status("running")
+        self.assertEqual(len(self.rows()), 1)  # the released row is back on the fresh head
+        code, out = run("modal-replay", self.job_id, "--root", self.root, "--saved", saved)
+        self.assertEqual(code, 0, out)
+        self.assertEqual(self.rows(), [])  # no pending row for the refused request
+        self.assertEqual([(r["run_id"], r["usd"], r["status"])
+                          for r in self.ledger.modal_rows(job_id="next-job")],
+                         [("next-job#9", 1.2, "pending")])
+        self.assertEqual(self.req()["status"], "refused")
+        self.assertAlmostEqual(self.ledger.modal_month_usd(self.MONTH), 1.2)
+
     def test_fetch_reads_the_r2_copy_when_the_branch_request_is_stale(self):
         self.assertEqual(self.run_and_upload()[0], 0)
         self.set_status("running")  # the push-back never reached the branch
