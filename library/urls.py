@@ -9,7 +9,7 @@ urlpatterns=[
     path('catalog/collections',views.collections),path('catalog/collections/<uuid:collection_id>',views.collection),
     path('catalog/works/<uuid:work_id>',views.work),path('catalog/editions/<uuid:edition_id>',views.edition),
     path('catalog/editions/<uuid:edition_id>/units',views.units),path('content/audio-previews/<uuid:asset_id>',views.audio_preview),path('content/previews/<uuid:revision_id>',views.preview),
-    path('content/covers/<uuid:asset_id>',views.cover),path('content/manifests/<uuid:revision_id>',views.manifest),
+    path('content/covers/<uuid:asset_id>',views.cover),path('content/covers/<uuid:asset_id>/<str:digest>/w<int:width>.jpg',views.cover_rendition),path('content/manifests/<uuid:revision_id>',views.manifest),
     path('content/packages/grants',views.packages),path('media/grants',views.media),
     path('content/local-assets/<uuid:asset_id>',views.local_asset),path('content/mappings/<uuid:revision_id>',views.mappings),
     path('content/switch-position',views.switch),path('staff/editions/<uuid:edition_id>/review',views.staff_review),

@@ -20,10 +20,35 @@ def private_headers(response):
     return response
 
 
+def public_asset_headers(request,response,edge):
+    """Public live cover bytes (owner decision 26 Nov 2026): keep the view's browser policy.
+
+    The browser policy is long (immutable only on content-addressed paths); the
+    shared edge copy stays rights-bounded (<=3600 s) so withdrawal is not held
+    at the CDN. The bytes do not depend on the member, so Vary is not Cookie.
+    """
+    current=response.get('Cache-Control','').lower()
+    if (response.status_code!=200 or getattr(response,'streaming',False) or int(edge)<=0
+            or 'public' not in current or 'private' in current or 'no-store' in current):
+        return private_headers(response)
+    edge=int(edge)
+    response['Cloudflare-CDN-Cache-Control']=f'public, max-age={edge}, stale-while-revalidate=0, stale-if-error=0'
+    response['CDN-Cache-Control']=f'public, max-age={edge}, stale-while-revalidate=0, stale-if-error=0'
+    response['Vary']=', '.join(sorted(p.strip() for p in response.get('Vary','').split(',') if p.strip() and p.strip().lower()!='cookie')) or 'Accept-Encoding'
+    etag=response.get('ETag')
+    if etag and request.headers.get('If-None-Match')==etag:
+        conditional=HttpResponseNotModified()
+        for key,value in response.items():conditional[key]=value
+        return conditional
+    return response
+
+
 def cache_headers(request,response):
     vary={p.strip().lower() for p in response.get('Vary','').split(',') if p.strip()}
     if 'authorization' in vary or response.cookies or response.has_header('Set-Cookie'):
         return private_headers(response)
+    edge=getattr(response,'_maison_public_asset_edge_ttl',None)
+    if edge is not None:return public_asset_headers(request,response,edge)
     from .cache import finalize_public_response
     response=finalize_public_response(request,response)
     match=re.search(r'(?:^|,)\s*s-maxage=(\d+)(?:,|$)',response.get('Cache-Control',''))

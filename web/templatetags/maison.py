@@ -65,3 +65,19 @@ def lang_attr(value):
     from django.utils.html import format_html
     language = script_language(value)
     return format_html(' lang="{}"', language) if language else ""
+
+
+@register.filter
+def cover_src(url, width):
+    """A reviewed width of a public cover rendition URL; other URLs are unchanged."""
+    from library.cover_renditions import rendition_url
+    return rendition_url(url, int(width))
+
+
+@register.filter
+def cover_srcset(url, widths="160,320,480,800"):
+    """`srcset` candidates for a public cover rendition URL, or "" for any other URL."""
+    from library.cover_renditions import is_rendition_url, rendition_url
+    if not is_rendition_url(url):
+        return ""
+    return ", ".join(f"{rendition_url(url, int(w))} {int(w)}w" for w in str(widths).split(","))

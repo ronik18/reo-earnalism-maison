@@ -40,7 +40,7 @@ All values below are initial engineering bounds, not measured performance claims
 | Anonymous catalog HTML / admitted JSON | 0 s, revalidate | 30 s | 0 / 0 | Rights-sensitive discovery; no stale fallback |
 | Noncatalog editorial/help HTML | 0 s, revalidate | 300 s | 30 / 300 s | Only content without rights/access state |
 | Physically bounded public previews | 0 s, revalidate | 60 s | 0 / 0 | Current preview policy validated at origin |
-| Hashed public covers | 300 s | 3,600 s | 0 / 0 | Known immutable rendition paths; purge on withdrawal |
+| Hashed public covers (owner decision 26 Nov 2026) | 31,536,000 s, immutable | ≤3,600 s, rights-capped | 0 / 0 | Live editions only; reviewed widths 160/320/480/800 at `/api/v1/content/covers/{asset_id}/{sha256}/w{width}.jpg`; unversioned `/api/v1/content/covers/{asset_id}` is `public, max-age=86400, stale-while-revalidate=604800`; draft/staff covers stay no-store; the edge TTL bound limits withdrawal lag, browser copies cannot be recalled |
 | Hashed JS/CSS/fonts/logo | 31,536,000 s | 31,536,000 s | none | Immutable bytes; new build uses new paths |
 | SW script / web manifest / version pointer | 0 s, revalidate | bypass | none | Never immutable current pointer |
 | Auth/me/commerce/staff/search/manifests/grants | no-store | bypass | none | Includes all success/error/conditional statuses |

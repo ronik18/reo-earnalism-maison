@@ -17,6 +17,7 @@ from django.utils import timezone
 
 from core.api import DomainError
 from .models import Work, Edition, Revision, Unit, Paragraph, Asset, Rights, TimingMap
+from .cover_renditions import rendition_path
 
 FORMATS = ('reader', 'audio', 'video')
 DELIVERABLE_KINDS = {'reader_package': 'reader', 'audio_chapter': 'audio', 'video': 'video'}
@@ -218,7 +219,7 @@ def prefetch_ready_assets(revisions):
     rows=[r for r in revisions if not hasattr(r,'_maison_ready_assets')]
     # Presence/cover checks need only these columns, not storage or provider metadata.
     prefetch_related_objects(rows,Prefetch('assets',queryset=Asset.objects.filter(
-        state='ready',kind__in=[*DELIVERABLE_KINDS,'cover']).only('id','revision_id','unit_id','kind','provider')
+        state='ready',kind__in=[*DELIVERABLE_KINDS,'cover']).only('id','revision_id','unit_id','kind','provider','sha256')
         .order_by('created_at','id'),to_attr='_maison_ready_assets'))
     return revisions
 
@@ -245,7 +246,9 @@ def _cover(revision, path='/api/v1/content/covers/'):
     base='' if path.startswith('/api/v1/staff/') else getattr(settings,'PUBLIC_BASE_URL','http://127.0.0.1:8008' if getattr(settings,'LOCAL',False) else '').rstrip('/')
     if base=='' and not path.startswith('/api/v1/staff/'): raise DomainError('configuration_required','Public application origin is not configured.',503)
     meta=revision.validation_evidence.get('cover_pair',{}).get('front',{})
-    return {'url':f'{base}{path}{asset.id}', 'width':meta.get('width',600), 'height':meta.get('height',900), 'alt':revision.title+' — cover'}
+    # Public covers use the content-addressed rendition path; staff drafts keep the private bare path.
+    url=f'{base}{path}{asset.id}' if path.startswith('/api/v1/staff/') else base+rendition_path(asset.id,asset.sha256)
+    return {'url':url, 'width':meta.get('width',600), 'height':meta.get('height',900), 'alt':revision.title+' — cover'}
 
 
 def content_locale(value=None):

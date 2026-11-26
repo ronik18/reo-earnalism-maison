@@ -74,7 +74,7 @@ class LicensingCatalogueTests(TestCase):
         row = self.export('--replace')[0]
         self.assertEqual(row['audio_duration_ms'], '1500')
         cover = Asset.objects.get(revision=rev, kind='cover', state='ready')
-        self.assertTrue(row['cover_url'].endswith(f'/api/v1/content/covers/{cover.pk}'))
+        self.assertTrue(row['cover_url'].endswith(f'/api/v1/content/covers/{cover.pk}/{cover.sha256}/w800.jpg'))
 
     @override_settings(LOCAL=False, PUBLIC_BASE_URL='')
     def test_unset_public_origin_gives_blank_cover_not_failure(self):
