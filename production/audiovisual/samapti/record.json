@@ -1,0 +1,97 @@
+{
+  "artifacts": [
+    {
+      "bytes": 115412,
+      "kind": "source",
+      "meta": {
+        "revision_id": "4fc616f0-bcb1-4fbb-b05d-904b33df49de"
+      },
+      "path": "source.json",
+      "sha256": "066d11bb593651006968ad5e4a5eddd722ab1852819d1662abf49541bae4ab79"
+    },
+    {
+      "bytes": 242204,
+      "kind": "plan",
+      "meta": {
+        "films": 1,
+        "series": true
+      },
+      "path": "plan.json",
+      "sha256": "8c2e1f42c66c2a9e7cc5e32c0bd271fdd6e2e04c3e20f6c0977b5f9846e315d9"
+    },
+    {
+      "bytes": 9113,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 8.384841666666665,
+        "inputs_zip": "jobs/narration-b2d6c2d9/inputs.zip",
+        "job_id": "narration-b2d6c2d9",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-b2d6c2d9/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-b2d6c2d9/narration.ipynb",
+      "sha256": "09d08344325cd6539c044d2f4c8e13f4fd101eb7979ae91ac9ade8cc44c67535"
+    }
+  ],
+  "created_at": "2026-11-26T03:54:10.892127+00:00",
+  "events": [
+    {
+      "at": "2026-11-26T03:54:10.894489+00:00",
+      "detail": {
+        "audio_rights_on_maison": false,
+        "slug": "samapti"
+      },
+      "result": "ok",
+      "stage": "init"
+    },
+    {
+      "at": "2026-11-26T03:54:11.045016+00:00",
+      "detail": {
+        "films": 1,
+        "flags": [],
+        "voice": "bn_arnav::story"
+      },
+      "result": "ok",
+      "stage": "plan"
+    },
+    {
+      "at": "2026-11-26T03:54:11.190362+00:00",
+      "detail": {
+        "forecast_units": 8.384841666666665,
+        "job_id": "narration-b2d6c2d9",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:54:11.190848+00:00",
+      "detail": {
+        "job_id": "narration-b2d6c2d9",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    }
+  ],
+  "ledger": "../allowance-ledger.json",
+  "schema": "earnalism.audiovisual_record.v1",
+  "source": {
+    "content_sha256": "56ae47a79cdaa005540dea9b48f4c346cb85286183b9be2e2db139a29050ccd1",
+    "edition_id": "2be3bc99-f143-4aa4-b080-ade26f7e381a",
+    "export_sha256": "066d11bb593651006968ad5e4a5eddd722ab1852819d1662abf49541bae4ab79",
+    "language": "bn",
+    "public_domain_evidence": true,
+    "revision_id": "4fc616f0-bcb1-4fbb-b05d-904b33df49de",
+    "rights": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "state": "draft"
+  },
+  "title_slug": "samapti"
+}

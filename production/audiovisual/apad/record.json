@@ -1,0 +1,97 @@
+{
+  "artifacts": [
+    {
+      "bytes": 62605,
+      "kind": "source",
+      "meta": {
+        "revision_id": "9c0978d5-f98e-4308-914c-bc7d7d33d667"
+      },
+      "path": "source.json",
+      "sha256": "67c5798790265f62902d79cb3f12e36059c614f54f2eacf81a699e510fe09fc0"
+    },
+    {
+      "bytes": 131123,
+      "kind": "plan",
+      "meta": {
+        "films": 1,
+        "series": false
+      },
+      "path": "plan.json",
+      "sha256": "d2519cf2c454a07d5862fb558c9b8200244bf1a5f5ae70e81597d1d85b87d830"
+    },
+    {
+      "bytes": 9102,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 3.718333333333333,
+        "inputs_zip": "jobs/narration-7a7651c0/inputs.zip",
+        "job_id": "narration-7a7651c0",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-7a7651c0/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-7a7651c0/narration.ipynb",
+      "sha256": "28518efaa2ce2a8733318726f18fede32a17cde02f4c62e1aa04624066225edf"
+    }
+  ],
+  "created_at": "2026-11-26T03:54:12.268352+00:00",
+  "events": [
+    {
+      "at": "2026-11-26T03:54:12.269695+00:00",
+      "detail": {
+        "audio_rights_on_maison": false,
+        "slug": "apad"
+      },
+      "result": "ok",
+      "stage": "init"
+    },
+    {
+      "at": "2026-11-26T03:54:12.514395+00:00",
+      "detail": {
+        "films": 1,
+        "flags": [],
+        "voice": "bn_arnav::story"
+      },
+      "result": "ok",
+      "stage": "plan"
+    },
+    {
+      "at": "2026-11-26T03:54:12.658786+00:00",
+      "detail": {
+        "forecast_units": 3.718333333333333,
+        "job_id": "narration-7a7651c0",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:54:12.659118+00:00",
+      "detail": {
+        "job_id": "narration-7a7651c0",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    }
+  ],
+  "ledger": "../allowance-ledger.json",
+  "schema": "earnalism.audiovisual_record.v1",
+  "source": {
+    "content_sha256": "97ca7a18f11d6f1f1cf5bb32abf0386a660011da91b798c87ebac002701f6c5f",
+    "edition_id": "439e8f15-d679-4137-a2c0-9af5e1eccc5f",
+    "export_sha256": "67c5798790265f62902d79cb3f12e36059c614f54f2eacf81a699e510fe09fc0",
+    "language": "bn",
+    "public_domain_evidence": true,
+    "revision_id": "9c0978d5-f98e-4308-914c-bc7d7d33d667",
+    "rights": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "state": "draft"
+  },
+  "title_slug": "apad"
+}

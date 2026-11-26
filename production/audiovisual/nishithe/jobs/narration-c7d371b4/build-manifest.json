@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 10798,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/nishithe/narration-c7d371b4",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "9d191525283b6be32e8bba0d929f22901127230bbc45bad8dc5738ad44f4aa0c",
+  "job_id": "narration-c7d371b4",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "4424f3a0edc50fb15be990ea503a212895281767d490ff69714b5d5b65e02612",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "nishithe"
+}

@@ -1,0 +1,97 @@
+{
+  "artifacts": [
+    {
+      "bytes": 99447,
+      "kind": "source",
+      "meta": {
+        "revision_id": "de617d98-b3ed-49a3-94c5-29ade1ccbd62"
+      },
+      "path": "source.json",
+      "sha256": "bd78b6eedccd9438119939458d7564b43c66957a174307beb11d7f7e90e29a36"
+    },
+    {
+      "bytes": 207728,
+      "kind": "plan",
+      "meta": {
+        "films": 1,
+        "series": true
+      },
+      "path": "plan.json",
+      "sha256": "d3ba5c35e7a7fc1665339bb46a304f390d28445b5c6b9ef5a2f24cfdda73ccc1"
+    },
+    {
+      "bytes": 9110,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 5.967924999999999,
+        "inputs_zip": "jobs/narration-52b24258/inputs.zip",
+        "job_id": "narration-52b24258",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-52b24258/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-52b24258/narration.ipynb",
+      "sha256": "ced198b5c19ea81ef53d3560d717d87142104d27c033bd3a20685363201a1f75"
+    }
+  ],
+  "created_at": "2026-11-26T03:54:09.568457+00:00",
+  "events": [
+    {
+      "at": "2026-11-26T03:54:09.569923+00:00",
+      "detail": {
+        "audio_rights_on_maison": false,
+        "slug": "atithi"
+      },
+      "result": "ok",
+      "stage": "init"
+    },
+    {
+      "at": "2026-11-26T03:54:09.710863+00:00",
+      "detail": {
+        "films": 1,
+        "flags": [],
+        "voice": "bn_arnav::story"
+      },
+      "result": "ok",
+      "stage": "plan"
+    },
+    {
+      "at": "2026-11-26T03:54:09.888619+00:00",
+      "detail": {
+        "forecast_units": 5.967924999999999,
+        "job_id": "narration-52b24258",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T03:54:09.889176+00:00",
+      "detail": {
+        "job_id": "narration-52b24258",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    }
+  ],
+  "ledger": "../allowance-ledger.json",
+  "schema": "earnalism.audiovisual_record.v1",
+  "source": {
+    "content_sha256": "5c08b67509d8a02f2b659dac81583f8b41ab2bd101d54571ca97944d7f874746",
+    "edition_id": "cf7ae583-f5ff-4f18-9852-27ce39e7f0c6",
+    "export_sha256": "bd78b6eedccd9438119939458d7564b43c66957a174307beb11d7f7e90e29a36",
+    "language": "bn",
+    "public_domain_evidence": true,
+    "revision_id": "de617d98-b3ed-49a3-94c5-29ade1ccbd62",
+    "rights": {
+      "reader": [
+        "preview",
+        "read"
+      ]
+    },
+    "state": "draft"
+  },
+  "title_slug": "atithi"
+}
