@@ -1,0 +1,61 @@
+{
+ "note": "PILOT v2 (spike) for scene f01s014, owner-approved 26 Nov 2026: seven new shots from the deep-review shot plan (Hem in the carriage, sleeping house, dawn sweeping, the empty-bed house in sunrise, the mother's discovery, neighbours gathering). Composition-first; world-bible appearance lines word for word; the mother's appearance line is new (from still f01s013-3). Adults only where no named minor is in the text; Hemshashi (14) only in dignified close-ups. Three candidates per shot.",
+ "items": [
+  {
+   "key": "f01s014-4",
+   "prompt": "Medium-wide shot at deep night through a carved wooden lattice window into a quiet bedroom: exactly one grown young Bengali woman of about twenty asleep on her side on a wooden bed under a white mosquito net, fully covered by a cotton sheet, peaceful face, a brass oil lamp beside the bed just put out with a thin curl of smoke, moonlight laying soft lattice shadows across the sheet. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow, faint silver moonlight.",
+   "seed": 14104,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-5",
+   "prompt": "Close-up at deep night inside a closed wooden horse carriage, camera at eye level: exactly one girl, her face filling the right half of the frame, eyes wide open and wet, staring ahead, thin bars of pale moonlight from the slatted shutters falling across her cheek and eyes. She is Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse. Dark wood panels behind her. Bengal, 1880s Calcutta. Palette indigo night, deep blue darkness, cold grey shadow, thin bars of silver moonlight.",
+   "seed": 14105,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-6",
+   "prompt": "Wide shot at first light in a small beaten-earth courtyard of a Calcutta lane house: exactly one grown young Bengali woman of about twenty-five in a plain blue cotton sari, mid-stroke sweeping the courtyard with a long straw broom, calm unhurried face, a tulsi plant on a clay pedestal, a brass water pot by the steps, plain limewashed walls. Bengal, 1880s Calcutta. Palette pale gold, ivory, soft indigo; cool grey-blue dawn light turning gold at the rooftops.",
+   "seed": 14106,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-7",
+   "prompt": "Extreme close-up at the grey hour before dawn inside a dark wooden horse carriage: exactly one large dark eye of a girl, wet with tears, at a narrow gap between wooden shutter slats, a thin line of cold grey light falling across the eye and the small dark mole below it. She is Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse. Bengal, 1880s Calcutta. Palette cold grey, deep blue darkness, faint silver dawn light.",
+   "seed": 14107,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-8",
+   "prompt": "Wide shot of the front of a small two-storey lime-plastered brick house in a narrow Calcutta lane at sunrise: warm smiling morning sunlight slanting down the wall onto one open iron-barred window on the ground floor, through the window an empty straw sleeping mat on the floor and a small bamboo myna cage hanging, a wooden front door ajar, green wooden shutters, the lane empty and quiet. Bengal, 1880s Calcutta. Palette ivory, old gold, faded vermilion, soft indigo shadows; bright warm golden sunrise light.",
+   "seed": 14108,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-9",
+   "prompt": "Medium shot in morning light inside a small bare room: exactly one woman standing in the doorway, frozen in shock, staring at an empty straw sleeping mat on the floor, a brass water pot falling from her hands, water splashing. She is Hemshashi's mother, a 40-year-old Bengali woman, kind careworn round face, red bindi, small gold earrings, an ivory-white cotton sari with a thin red border draped over her head, red blouse. A small bamboo myna cage by the iron-barred window. Bengal, 1880s Calcutta. Palette ivory, pale gold, faded vermilion, soft indigo shadows; flat pale morning light from the window.",
+   "seed": 14109,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-10",
+   "prompt": "High-angle wide shot from above a narrow Calcutta lane in grey morning light: a small crowd of Bengali neighbours, grown men and women in plain cotton dhotis and saris, gathering and whispering outside the open wooden door of a small lime-plastered house, on the doorstep a woman in an ivory-white sari with a thin red border sitting crumpled with her face in her hands. Bengal, 1880s Calcutta. Palette desaturated grey, ivory, faded vermilion, soft indigo shadows; cold overcast morning light.",
+   "seed": 14110,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  }
+ ]
+}

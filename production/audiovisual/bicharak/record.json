@@ -30976,6 +30976,20 @@
       },
       "path": "edit/edit-test3-film-01/f01s012-2--c2.png",
       "sha256": "ebc3e683c1002a7050d11de8be91ef2cddc2954bb4c310b7eeba9e7ff65885ca"
+    },
+    {
+      "bytes": 19718,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.1526833333333333,
+        "inputs_zip": "jobs/stills-pilot2-f01s014/inputs.zip",
+        "job_id": "stills-pilot2-f01s014",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-pilot2-f01s014/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-pilot2-f01s014/stills.ipynb",
+      "sha256": "d27a7eb0554ac30974e0a6eb564c0ec3d5d7b9ddb3c85673a4324246ef145101"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -34399,6 +34413,49 @@
       },
       "result": "bundled",
       "stage": "bundle_film"
+    },
+    {
+      "at": "2026-11-26T17:44:34.717427+00:00",
+      "detail": {
+        "forecast_units": 1.1526833333333333,
+        "job_id": "stills-pilot2-f01s014",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T17:44:34.750788+00:00",
+      "detail": {
+        "job_id": "stills-pilot2-f01s014",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T17:44:42.827137+00:00",
+      "detail": {
+        "bytes": 22433,
+        "job_id": "stills-pilot2-f01s014",
+        "key": "exports/colab-exchange/bicharak/stills-pilot2-f01s014/inputs.zip",
+        "sha256": "af8f0941ac0e2c4dffcb502b48cbf263efd46b8f085fa245b5cc66cbe789746f"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T17:45:27.692583+00:00",
+      "detail": {
+        "expires_at": "2026-11-27T17:44:49+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-pilot2-f01s014/inputs.zip",
+        "inputs_sha256": "af8f0941ac0e2c4dffcb502b48cbf263efd46b8f085fa245b5cc66cbe789746f",
+        "job_id": "stills-pilot2-f01s014",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-pilot2-f01s014/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
