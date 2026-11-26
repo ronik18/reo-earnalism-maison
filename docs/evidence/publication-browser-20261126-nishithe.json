@@ -1,0 +1,64 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-26",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the release code (b94449a) serving a local PostgreSQL replica (database replica_g1, loopback only). nishithe imported there with the production publisher identity (649b8725-9f77-4dfd-bad9-74eacd7a973c) and deterministic operation IDs: edition e9734480-f2c3-4680-9619-78f6b5850d10, revision c8fac00e-2fef-42b9-a724-d7d275544823, 94 paragraphs; text and anchors identical to the audiovisual source export of that revision. The owner's Monday approval of the clearance and cover items was simulated on this replica only (throwaway database, local staff user, bound to the exact file hashes); nothing was approved, imported or published in production. Signed in as a staff publisher; desktop 1440x900 and mobile 390x844; the title page (covers) and the reader (text).",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "nishithe": {
+   "status": "pass",
+   "sha256": "4679bc61283c39c891b108604c37ef13d1240b9dbecff17915bd19a45943677d",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 94,
+     "paragraphs_expected": 94,
+     "text_and_anchor_order_exact": true,
+     "first": "“ডাক্তার! ডাক্তার!”",
+     "last": "্দ্ধরাত্রে আবার আমার গায়ে আসিয়া ঘা পড়িল—ডাক্তার! ডাক্তার!",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 94,
+     "paragraphs_expected": 94,
+     "text_and_anchor_order_exact": true,
+     "first": "“ডাক্তার! ডাক্তার!”",
+     "last": "্দ্ধরাত্রে আবার আমার গায়ে আসিয়া ঘা পড়িল—ডাক্তার! ডাক্তার!",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  }
+ }
+}

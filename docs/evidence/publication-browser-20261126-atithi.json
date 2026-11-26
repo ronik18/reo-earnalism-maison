@@ -1,0 +1,64 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-26",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the release code (b94449a) serving a local PostgreSQL replica (database replica_g1, loopback only). atithi imported there with the production publisher identity (649b8725-9f77-4dfd-bad9-74eacd7a973c) and deterministic operation IDs: edition cf7ae583-f5ff-4f18-9852-27ce39e7f0c6, revision de617d98-b3ed-49a3-94c5-29ade1ccbd62, 81 paragraphs; text and anchors identical to the audiovisual source export of that revision. The owner's Monday approval of the clearance and cover items was simulated on this replica only (throwaway database, local staff user, bound to the exact file hashes); nothing was approved, imported or published in production. Signed in as a staff publisher; desktop 1440x900 and mobile 390x844; the title page (covers) and the reader (text).",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "atithi": {
+   "status": "pass",
+   "sha256": "5c08b67509d8a02f2b659dac81583f8b41ab2bd101d54571ca97944d7f874746",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 81,
+     "paragraphs_expected": 81,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "ক আসক্তিবিহীন উদাসীন জননী বিশ্ব পৃথিবীর নিকট চলিয়া গিয়াছে।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 81,
+     "paragraphs_expected": 81,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "ক আসক্তিবিহীন উদাসীন জননী বিশ্ব পৃথিবীর নিকট চলিয়া গিয়াছে।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  }
+ }
+}
