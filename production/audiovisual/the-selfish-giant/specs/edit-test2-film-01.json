@@ -1,0 +1,29 @@
+{
+  "note": "Qwen-Image-Edit quality test 2 (A100, int8 with sensitive layers kept, VAE fp32), same instruction as test 1 for a direct comparison",
+  "min_vram_gib": 38,
+  "items": [
+    {
+      "key": "f01s007-6",
+      "source": {
+        "job": "selfish-giant-stills-film-01-r10",
+        "file": "f01s007-6--c1.png"
+      },
+      "refs": [
+        {
+          "job": "selfish-giant-stills-film-01-r10",
+          "file": "f01s006-3--c1.png"
+        },
+        {
+          "job": "selfish-giant-stills-film-01-r9",
+          "file": "f01s010-1--c2.png"
+        }
+      ],
+      "instruction": "Edit the first image only. Keep the 2D animated cel-shaded illustration style, line work and colour palette, the stone bedchamber, the bed, the nightstand and jug, the bright window and the Giant's leaping pose and face. Remove every trace of snow and ice from inside the room: the floor, the window sill, the corners, the stool and the nightstand are dry grey stone and wood. Snow and bare branches appear only outside, beyond the window glass. Change the Giant's grey tunic into a long plain white linen nightshirt reaching his ankles, with no belt; his feet are bare, no boots. Keep his face, bushy brown beard and hair identical to the Giant in the second and third images.",
+      "negative": "snow indoors, snow on floor, snow on furniture, snow on sill, ice indoors, icicles indoors, belt, boots, tunic, waistcoat, lettering on jug, children, photorealism, 3D render, CGI, text, lettering, watermark, signature, letterbox bars, extra fingers, extra limbs, duplicate person",
+      "seed": 251202,
+      "candidates": 2,
+      "steps": 40,
+      "true_cfg_scale": 4.0
+    }
+  ]
+}
