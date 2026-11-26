@@ -669,6 +669,16 @@ class MusicInstallTests(unittest.TestCase):
         # the dependencies are installed before the package is imported
         self.assertLess(cell.index('"spacy>=3.8.5,<3.9"'), cell.index("from acestep"))
 
+    def test_music_reloads_huggingface_hub_after_the_install(self):
+        # Colab 2026-11-27: the access check imports Colab's huggingface_hub before the install
+        # swaps it for a transformers-4.50-compatible one; the mixed modules then fail with
+        # "cannot import name 'refresh_xet_connection_info'". Pin it and import it afresh.
+        cell = (colab_jobs._TEMPLATES / "music_cell.py.txt").read_text()
+        self.assertIn('"huggingface_hub>=0.30,<1.0"', cell)
+        purge = cell.index('startswith(("huggingface_hub", "hf_xet"))')
+        self.assertLess(cell.index('"huggingface_hub>=0.30,<1.0"'), purge)
+        self.assertLess(purge, cell.index("from huggingface_hub import"))
+
 
 class AccessPreflightTests(unittest.TestCase):
     """Colab 2026-11-23: a gated model failed only after the install; check access first."""
