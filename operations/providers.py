@@ -19,7 +19,7 @@ from core.api import DomainError
 
 # Fixed API host. URL payloads select cache entries, never the request destination.
 API_HOST='api.cloudflare.com'
-PUBLIC_PATH=re.compile(r'/(?:api/v1/(?:home|catalog(?:/collections(?:/[0-9a-f-]{36})?|/works/[0-9a-f-]{36}|/editions/[0-9a-f-]{36})?|content/(?:previews|covers)/[0-9a-f-]{36})|(?:en|bn)/(?:|explore/|titles/[a-z0-9-]+/))\Z')
+PUBLIC_PATH=re.compile(r'/(?:api/v1/(?:home|catalog(?:/collections(?:/[0-9a-f-]{36})?|/works/[0-9a-f-]{36}|/editions/[0-9a-f-]{36})?|content/(?:previews|covers)/[0-9a-f-]{36}|content/covers/[0-9a-f-]{36}/[0-9a-f]{64}/w(?:160|320|480|800)\.jpg)|(?:en|bn)/(?:|explore/|titles/[a-z0-9-]+/))\Z')
 
 
 def _configuration():
@@ -59,7 +59,8 @@ def _urls(payload,host):
         if query and not canonical:
             raise DomainError('invalid_purge_urls','Only canonical content-language/territory cache variants are permitted.',422)
         # Catalog JSON variants always carry explicit storefront context.
-        if parsed.path.startswith('/api/v1/') and not query:
+        # Public cover objects are exact query-less paths; other API variants carry storefront context.
+        if parsed.path.startswith('/api/v1/') and not query and not parsed.path.startswith('/api/v1/content/covers/'):
             raise DomainError('invalid_purge_urls','API public cache URLs require explicit locale/territory.',422)
         if value not in result:result.append(value)
     return result

@@ -31,6 +31,14 @@ def _candidate(request):
     if not PUBLIC_PATH.fullmatch(request.path):return None
     # Capture the actual URI, never generate a locale/country or enumerate variants.
     query=request.META.get('QUERY_STRING','')
+    from library.cover_renditions import COVER_PATH
+    if COVER_PATH.fullmatch(request.path):
+        # Public cover objects are exact query-less paths (owner decision 26 Nov 2026).
+        if query:return None
+        url=f'{base.scheme}://{base.netloc}{request.path}'
+        try:_urls({'urls':[url]},base.netloc)
+        except Exception:return None
+        return url if getattr(request,'territory',None) in settings.MAISON_PUBLICATION_TERRITORIES else None
     if not query:return None
     url=f'{base.scheme}://{base.netloc}{request.path}'+('?' + query if query else '')
     try:_urls({'urls':[url]},base.netloc)
@@ -157,6 +165,49 @@ def finalize_public_response(request,response):
     return response
 
 
+def record_public_cover(request,response,ttl):
+    """Record an emitted public cover URL like finalize_public_response, or return 0 (edge must not cache).
+
+    Called only for live covers already cleared in every publication territory.
+    The dependencies name the asset, revision, edition and work so publication,
+    replacement and withdrawal purge the exact URL.
+    """
+    start=getattr(request,'_maison_public_cache_start',None)
+    dependencies=getattr(response,'_maison_public_cover',None)
+    if not start or not dependencies or ttl<=0:return 0
+    try:
+        with transaction.atomic():
+            epoch=_generation(shared=True)
+            if _candidate(request)!=start[0] or epoch!=start[1]:return 0
+            refs=sorted(f'{kind}:{_uuid(value)}' for kind,value in dependencies.items() if _uuid(value))
+            if len(refs)!=4:return 0
+            now=timezone.now();digest=hashlib.sha256(start[0].encode()).hexdigest()
+            row=PublicCacheReference.objects.select_for_update().filter(url_sha256=digest).first()
+            if row:
+                if row.url!=start[0]:raise ValueError('URL digest collision')
+                row.dependencies=sorted(set(refs)|set(row.dependencies if row.expires_at>now else []))
+                row.expires_at=max(row.expires_at,now+timedelta(seconds=ttl));row.save()
+            else:PublicCacheReference.objects.create(url=start[0],url_sha256=digest,dependencies=refs,expires_at=now+timedelta(seconds=ttl))
+    except Exception:return 0
+    return ttl
+
+
+def _with_cover_siblings(urls):
+    """A recorded cover URL also purges every reviewed width and the unversioned path of that asset."""
+    from library.cover_renditions import COVER_PATH,all_cover_paths
+    from library.models import Asset
+    base=urlsplit(settings.PUBLIC_BASE_URL);result=list(urls)
+    ids=set()
+    for url in urls:
+        parts=urlsplit(url);match=COVER_PATH.fullmatch(parts.path)
+        if match and not parts.query:ids.add(match['asset_id'])
+    for asset in Asset.objects.filter(pk__in=ids,kind='cover').order_by('id'):
+        for path in all_cover_paths(asset.id,asset.sha256):
+            url=f'{base.scheme}://{base.netloc}{path}'
+            if url not in result:result.append(url)
+    return result
+
+
 @transaction.atomic
 def queue_catalog_purge(revision):
     """Capture affected, actually emitted URLs in the publication transaction."""
@@ -167,7 +218,7 @@ def queue_catalog_purge(revision):
     for value in ['work:'+str(revision.edition.work_id),'edition:'+str(revision.edition_id),'revision:'+str(revision.id)]:affected|=Q(dependencies__contains=[value])
     rows=list(PublicCacheReference.objects.select_for_update().filter(expires_at__gt=now).filter(affected).order_by('url_sha256'))
     if not rows:return {'status':'not_needed','reason':'no_unexpired_emitted_urls','url_count':0,'batch_count':0}
-    urls=[row.url for row in rows];batches=0
+    urls=_with_cover_siblings([row.url for row in rows]);batches=0
     for index in range(0,len(urls),30):
         batch=urls[index:index+30];digest=hashlib.sha256(json.dumps(batch,separators=(',',':')).encode()).hexdigest()
         OutboxJob.objects.get_or_create(dedupe_key=f'catalog-purge:{revision.id}:{generation.epoch}:{digest}',defaults={

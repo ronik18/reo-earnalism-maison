@@ -162,41 +162,47 @@ def audio_preview(request,asset_id):
     return deliver(request,asset_id,territory)
 
 def _public_cover(request,asset_id):
+    # Public cover paths are exact: no query string is ever a separate cacheable variant.
+    if request.META.get('QUERY_STRING'): raise DomainError('not_found','Cover not found.',404)
     _,territory=context(request)
     try: asset=Asset.objects.select_related('revision','revision__edition').get(pk=asset_id,kind='cover',state='ready')
     except Asset.DoesNotExist: raise DomainError('not_found','Cover not found.',404)
     if not svc._live(asset.revision) or not svc.available_formats(asset.revision,territory): raise DomainError('not_found','Cover unavailable.',404)
-    return asset,territory
+    return asset
 
-def _cover_response(asset,territory,raw,content_type,browser_policy,etag):
-    """Public live cover. The origin middleware keeps this browser policy and bounds the edge TTL."""
+def _cover_response(asset,raw,content_type,versioned,etag):
+    """Public live cover. Shared caching needs clearance in every publication territory and is rights-capped."""
+    from .cover_renditions import EDGE_MAX_AGE,IMMUTABLE_MAX_AGE,browser_cache_control
     response=HttpResponse(raw,content_type=content_type)
-    edge=svc.public_ttl(asset.revision,3600,territory=territory)
-    if edge<=0:
+    response['X-Content-Type-Options']='nosniff'
+    rights=svc.global_public_ttl(asset.revision,IMMUTABLE_MAX_AGE)
+    if rights<=0:
         response['Cache-Control']='private, no-store'
         return response
-    response['Cache-Control']=browser_policy
-    response._maison_public_asset_edge_ttl=edge  # Edge copies stay rights-bounded and short for withdrawal.
-    response['X-Content-Type-Options']='nosniff'
+    response['Cache-Control']=browser_cache_control(versioned,rights)
+    response._maison_public_asset_edge_ttl=min(EDGE_MAX_AGE,rights)
+    # The origin middleware records the exact emitted URL so publication/withdrawal purges it.
+    response._maison_public_cover={'asset':str(asset.id),'revision':str(asset.revision_id),
+        'edition':str(asset.revision.edition_id),'work':str(asset.revision.edition.work_id)}
     response['ETag']=etag  # Lets the edge and browsers revalidate with 304, not bytes.
     return response
 
 @json_endpoint(auth=False)
 def cover(request,asset_id):
     """Unversioned path: the URL does not change with the bytes, so it is not immutable."""
-    from .cover_renditions import UNVERSIONED_CACHE_CONTROL
-    asset,territory=_public_cover(request,asset_id)
-    return _cover_response(asset,territory,svc._asset_valid(asset),asset.content_type,UNVERSIONED_CACHE_CONTROL,f'"{asset.sha256}"')
+    asset=_public_cover(request,asset_id)
+    return _cover_response(asset,svc._asset_valid(asset),asset.content_type,False,f'"{asset.sha256}"')
 
 @json_endpoint(auth=False)
 def cover_rendition(request,asset_id,digest,width):
-    """Content-addressed reviewed width of a live public cover; immutable for browsers."""
-    from .cover_renditions import COVER_WIDTHS,IMMUTABLE_CACHE_CONTROL,rendition
-    if width not in COVER_WIDTHS or not re.fullmatch('[0-9a-f]{64}',digest): raise DomainError('not_found','Cover size not found.',404)
-    asset,territory=_public_cover(request,asset_id)
+    """Content-addressed reviewed width of a live public cover; immutable for browsers up to the rights end."""
+    from .cover_renditions import COVER_WIDTHS,rendition
+    width=int(width)
+    if width not in COVER_WIDTHS: raise DomainError('not_found','Cover size not found.',404)
+    asset=_public_cover(request,asset_id)
     if asset.sha256!=digest: raise DomainError('not_found','Cover version not found.',404)
     raw,content_type=rendition(asset,width,svc._asset_valid)
-    return _cover_response(asset,territory,raw,content_type,IMMUTABLE_CACHE_CONTROL,f'"{asset.sha256}-w{width}"')
+    return _cover_response(asset,raw,content_type,True,f'"{asset.sha256}-w{width}"')
 
 @json_endpoint()
 def manifest(request,revision_id):

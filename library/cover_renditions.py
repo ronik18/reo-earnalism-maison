@@ -15,8 +15,13 @@ from collections import OrderedDict
 
 COVER_WIDTHS = (160, 320, 480, 800)
 DEFAULT_WIDTH = 800
-IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable'
-UNVERSIONED_CACHE_CONTROL = 'public, max-age=86400, stale-while-revalidate=604800'
+IMMUTABLE_MAX_AGE = 31536000
+UNVERSIONED_MAX_AGE = 86400
+UNVERSIONED_SWR = 604800
+EDGE_MAX_AGE = 3600
+IMMUTABLE_CACHE_CONTROL = f'public, max-age={IMMUTABLE_MAX_AGE}, immutable'
+UNVERSIONED_CACHE_CONTROL = f'public, max-age={UNVERSIONED_MAX_AGE}, stale-while-revalidate={UNVERSIONED_SWR}'
+COVER_PATH = re.compile(r'/api/v1/content/covers/(?P<asset_id>[0-9a-f-]{36})(?:/(?P<sha256>[0-9a-f]{64})/w(?P<width>160|320|480|800)\.jpg)?')
 JPEG_QUALITY = 82
 _MEMO_BYTES = 32 * 1024 * 1024
 _memo = OrderedDict()
@@ -37,6 +42,21 @@ def rendition_url(url, width):
     if not match or width not in COVER_WIDTHS:
         return url
     return f"{match['prefix']}w{width}.jpg"
+
+
+def browser_cache_control(versioned, rights_seconds):
+    """Owner TTLs, never fresher than the known rights end (cache-policy known_rights_expiry)."""
+    if versioned:
+        return f'public, max-age={min(IMMUTABLE_MAX_AGE, rights_seconds)}, immutable'
+    age = min(UNVERSIONED_MAX_AGE, rights_seconds)
+    if age + UNVERSIONED_SWR <= rights_seconds:
+        return f'public, max-age={age}, stale-while-revalidate={UNVERSIONED_SWR}'
+    return f'public, max-age={age}'
+
+
+def all_cover_paths(asset_id, sha256):
+    """Every public path one cover asset can be served on (for exact-URL purge)."""
+    return [f'/api/v1/content/covers/{asset_id}'] + [rendition_path(asset_id, sha256, w) for w in COVER_WIDTHS]
 
 
 def is_rendition_url(url):
@@ -75,7 +95,11 @@ def rendition(asset, width, read_original):
             _memo.move_to_end(key)
             return hit
     raw = read_original(asset)
-    derived = _derive(raw, width)
+    try:
+        derived = _derive(raw, width)
+    except Exception:  # Corrupt/unsupported/oversized originals are an integrity failure, not a 500.
+        from core.api import DomainError
+        raise DomainError('asset_integrity_failed', 'Cover could not be prepared.', 503)
     result = (raw, asset.content_type) if derived is None else (derived, 'image/jpeg')
     if derived is not None:
         with _lock:

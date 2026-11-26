@@ -210,6 +210,30 @@ def public_ttl(revision, class_seconds=30, action='read', territory='IN'):
     return max(0, min(class_seconds, math.floor((min(ends)-now).total_seconds()))) if ends else 0
 
 
+def global_public_ttl(revision, class_seconds):
+    """Seconds a shared public object of this revision may stay fresh, or 0.
+
+    A shared cache key carries no territory, so the object must be cleared in
+    EVERY active publication territory (cache-policy public_object_rights), and
+    freshness is capped by the earliest known rights end among them.
+    """
+    territories = list(settings.MAISON_PUBLICATION_TERRITORIES)
+    if not territories or not _live(revision):
+        return 0
+    prefetch_public_rights([revision])
+    try:
+        ttl = class_seconds
+        for territory in territories:
+            if not available_formats(revision, territory):
+                return 0
+            ttl = min(ttl, public_ttl(revision, class_seconds, territory=territory))
+            if ttl <= 0:
+                return 0
+        return ttl
+    finally:
+        delattr(revision, '_maison_public_rights')
+
+
 FORMAT_ASSETS = {format: (kind, 'stream' if format == 'video' else 'r2') for kind, format in DELIVERABLE_KINDS.items()}
 
 

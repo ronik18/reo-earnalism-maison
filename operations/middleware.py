@@ -21,19 +21,25 @@ def private_headers(response):
 
 
 def public_asset_headers(request,response,edge):
-    """Public live cover bytes (owner decision 26 Nov 2026): keep the view's browser policy.
+    """Public live cover bytes (owner decision 26 Nov 2026): keep the view's rights-capped browser policy.
 
-    The browser policy is long (immutable only on content-addressed paths); the
-    shared edge copy stays rights-bounded (<=3600 s) so withdrawal is not held
-    at the CDN. The bytes do not depend on the member, so Vary is not Cookie.
+    The view admits only covers cleared in every publication territory. The
+    shared edge copy is admitted only when its exact URL is recorded for
+    publication/withdrawal purge; otherwise the edge must not store it.
+    The bytes do not depend on the member, so Vary is not Cookie.
     """
     current=response.get('Cache-Control','').lower()
     if (response.status_code!=200 or getattr(response,'streaming',False) or int(edge)<=0
             or 'public' not in current or 'private' in current or 'no-store' in current):
         return private_headers(response)
-    edge=int(edge)
-    response['Cloudflare-CDN-Cache-Control']=f'public, max-age={edge}, stale-while-revalidate=0, stale-if-error=0'
-    response['CDN-Cache-Control']=f'public, max-age={edge}, stale-while-revalidate=0, stale-if-error=0'
+    from .cache import record_public_cover
+    edge=record_public_cover(request,response,int(edge))
+    if edge>0:
+        response['Cloudflare-CDN-Cache-Control']=f'public, max-age={edge}, stale-while-revalidate=0, stale-if-error=0'
+        response['CDN-Cache-Control']=f'public, max-age={edge}, stale-while-revalidate=0, stale-if-error=0'
+    else:
+        response['Cloudflare-CDN-Cache-Control']='no-store'
+        response['CDN-Cache-Control']='no-store'
     response['Vary']=', '.join(sorted(p.strip() for p in response.get('Vary','').split(',') if p.strip() and p.strip().lower()!='cookie')) or 'Accept-Encoding'
     etag=response.get('ETag')
     if etag and request.headers.get('If-None-Match')==etag:

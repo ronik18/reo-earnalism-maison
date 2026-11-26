@@ -75,13 +75,23 @@ class CacheReferenceTests(TestCase):
         self.assertEqual(self.capture()['Cache-Control'],'private, no-store')
     def test_cover_class_ttl_and_previous_residency_are_preserved(self):
         asset=self.revision.assets.filter(kind='cover',state='ready').first()
+        # Public cover objects are exact query-less paths (26 Nov 2026); a query variant is never admitted.
         request=self.request('/api/v1/content/covers/'+str(asset.id)+'?locale=en&territory=IN')
         response=HttpResponse(b'synthetic cover response',content_type='image/png');response['Cache-Control']='public, s-maxage=3600'
-        self.assertIn('s-maxage=3600',self.capture(request,response)['Cache-Control'])
+        self.assertEqual(self.capture(request,response)['Cache-Control'],'private, no-store')
+        self.assertFalse(PublicCacheReference.objects.exists())
+        from .cache import record_public_cover
+        def record(ttl):
+            request=self.request('/api/v1/content/covers/'+str(asset.id));begin_public_response(request)
+            response=HttpResponse(b'synthetic cover response',content_type='image/png')
+            response._maison_public_cover={'asset':str(asset.id),'revision':str(self.revision.id),
+                'edition':str(self.revision.edition_id),'work':str(self.revision.edition.work_id)}
+            return record_public_cover(request,response,ttl)
+        self.assertEqual(record(3600),3600)
         initial=PublicCacheReference.objects.get().expires_at
-        response=HttpResponse(b'synthetic cover response',content_type='image/png');response['Cache-Control']='public, s-maxage=5'
-        self.assertIn('s-maxage=5',self.capture(request,response)['Cache-Control'])
+        self.assertEqual(record(5),5)
         self.assertGreaterEqual(PublicCacheReference.objects.get().expires_at,initial)
+        self.assertIn('asset:'+str(asset.id),PublicCacheReference.objects.get().dependencies)
 
     def test_only_affected_unexpired_refs_batched_at_thirty(self):
         now=timezone.now();expected=[]
