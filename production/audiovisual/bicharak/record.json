@@ -6186,6 +6186,22 @@
       },
       "result": "accepted",
       "stage": "import"
+    },
+    {
+      "at": "2026-11-26T19:59:17.744559+00:00",
+      "detail": {
+        "closed_here": [],
+        "job_id": "narration-film-01-r3",
+        "jobs": [
+          "narration-film-01-r3-c1of2",
+          "narration-film-01-r3-c2of2",
+          "narration-film-01-r3-c1of2-r1",
+          "narration-film-01-r3-c2of2-r1"
+        ],
+        "reason": "Superseded by narration-film-01-r4 (<=200-character units, no truncation); r3 chunk 1 had 3 units truncated at 30 s"
+      },
+      "result": "retired",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
