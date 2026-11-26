@@ -1,0 +1,283 @@
+{
+ "schema": "earnalism.audiovisual-clearance-evidence.v1",
+ "edition_slug": "bicharak",
+ "status": "DRAFT_NOT_APPROVED — prepared by the integration lane on 2026-11-26 for the owner's review; stage refuses it until the owner sets a non-draft status and owner_approval",
+ "owner_approval": null,
+ "prepared": {
+  "by": "integration lane (Claude Code)",
+  "at": "2026-11-26",
+  "basis": "Owner pre-authorised the public-domain pattern of docs/evidence/publication-clearance-20261123.json for audio and video (skills/earnalism-audiovisual/references/publishing.md, Clearance per title). No lawyer sign-off is implied."
+ },
+ "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+ "live_revision_id": "5206c8ca-c195-44fa-aa37-711c764bb400",
+ "source_content_sha256": "400c8b98521511a8a50de510b346b7f4c2f9422be333518fa98d6fe6e440e74d",
+ "territories": [
+  "IN",
+  "US",
+  "GB",
+  "BR",
+  "SG",
+  "MY",
+  "ID",
+  "PH",
+  "TH"
+ ],
+ "territory_policy": {
+  "file": "contracts/publication-policy.json",
+  "sha256": "3025f0dff7159fe25ffd21a663aa76af03d46ebb91beba7e0e0629f2a76b6527",
+  "note": "Active whitelist = the nine launch territories (owner amendment 2026-11-22); deferred, pending and out-of-scope regions are not covered."
+ },
+ "formats": [
+  "reader",
+  "video"
+ ],
+ "actions": {
+  "reader": [
+   "read",
+   "preview"
+  ],
+  "video": [
+   "read"
+  ]
+ },
+ "downloads": false,
+ "access": "video offered free (attach_audiovisual_film sets access video=free); reader rights and preview unchanged",
+ "video_sha256": [
+  "869ffc90bbe47c114e0b608e797b2f575893e38ef4025ce5d35864214fd6b84d"
+ ],
+ "video": {
+  "unit_id": "2285d936-802f-49d8-8034-18a0e3393929",
+  "bytes": 205967288,
+  "duration_ms": 1303961,
+  "captions_vtt_sha256": "50895ec65de15264f91c4749a4d1fc89f7a1702c11cfe402acd1a0e86d07f477",
+  "bundle": "production/audiovisual/bicharak/film/film-01/bundle/film.json",
+  "owner_review": "Owner watched and approved film-01 as is on 2026-11-26, including 15 shots that reuse a neighbouring approved still (record.json event owner_review, film_sha256 above)."
+ },
+ "work": {
+  "title": "বিচারক",
+  "author": "রবীন্দ্রনাথ ঠাকুর (Rabindranath Tagore)",
+  "author_died": 1941,
+  "first_published": 1895
+ },
+ "term_per_territory": {
+  "IN": {
+   "region": "India",
+   "rule": "Copyright Act 1957 s.22: life + 60 years from the year following death",
+   "source": "https://copyright.gov.in/Copyright_Act_1957/chapter_v.html",
+   "expired_end_of": 2001,
+   "status": "public_domain",
+   "source_record": "docs/evidence/publication-clearance-20261123.json#books.bicharak.territory_terms.IN"
+  },
+  "US": {
+   "region": "United States",
+   "rule": "17 U.S.C. 304 / Circular 15a: works first published before 1 January 1931 are in the public domain",
+   "source": "https://www.copyright.gov/circs/circ15a.pdf",
+   "expired_end_of": "n/a: first published 1895, before 1931",
+   "status": "public_domain",
+   "source_record": "docs/evidence/publication-clearance-20261123.json#books.bicharak.territory_terms.US"
+  },
+  "GB": {
+   "region": "United Kingdom",
+   "rule": "CDPA 1988 s.12: life + 70 years from the end of the calendar year of death",
+   "source": "https://www.legislation.gov.uk/ukpga/1988/48/section/12",
+   "expired_end_of": 2011,
+   "status": "public_domain",
+   "source_record": "docs/evidence/publication-clearance-20261123.json#books.bicharak.territory_terms.GB"
+  },
+  "BR": {
+   "region": "Brazil",
+   "rule": "Law 9610/1998 art.41: life + 70 years from 1 January following death",
+   "source": "https://www.planalto.gov.br/ccivil_03/leis/l9610.htm",
+   "expired_end_of": 2011,
+   "status": "public_domain",
+   "source_record": "docs/evidence/publication-clearance-20261123.json#books.bicharak.territory_terms.BR"
+  },
+  "SG": {
+   "region": "Singapore",
+   "rule": "Copyright Act 2021 s.114: life + 70; terms already expired under the earlier life + 50 rule (before the 2004 extension) are not revived",
+   "source": "https://sso.agc.gov.sg/Act/CA2021?ProvIds=P13-&ViewType=Advance&WiAl=1",
+   "expired_end_of": 2011,
+   "status": "public_domain",
+   "source_record": "docs/evidence/publication-clearance-20261123.json#books.bicharak.territory_terms.SG"
+  },
+  "MY": {
+   "region": "Malaysia",
+   "rule": "Copyright Act 1987 s.17: life + 50 years from the year following death",
+   "source": "https://www.myipo.gov.my/faq/",
+   "expired_end_of": 1991,
+   "status": "public_domain",
+   "source_record": "docs/evidence/publication-clearance-20261123.json#books.bicharak.territory_terms.MY"
+  },
+  "ID": {
+   "region": "Indonesia",
+   "rule": "Law 28/2014 art.58: life + 70 years from 1 January following death",
+   "source": "https://www.wipo.int/wipolex/en/legislation/details/15600",
+   "expired_end_of": 2011,
+   "status": "public_domain",
+   "source_record": "docs/evidence/publication-clearance-20261123.json#books.bicharak.territory_terms.ID"
+  },
+  "PH": {
+   "region": "Philippines",
+   "rule": "IP Code s.213.1: life + 50 years from the year following death",
+   "source": "https://ilaw.ipophil.gov.ph/pluginfile.php/146/mod_resource/content/2/Philippine%20IP%20Code.pdf",
+   "expired_end_of": 1991,
+   "status": "public_domain",
+   "source_record": "docs/evidence/publication-clearance-20261123.json#books.bicharak.territory_terms.PH"
+  },
+  "TH": {
+   "region": "Thailand",
+   "rule": "Copyright Act B.E. 2537 s.19: life + 50 years from the death of the author",
+   "source": "https://web2026.ipthailand.go.th/wp-content/uploads/2025/05/COPYRIGHT-ACT-B.E.-2537-1994.pdf",
+   "expired_end_of": 1991,
+   "status": "public_domain",
+   "source_record": "docs/evidence/publication-clearance-20261123.json#books.bicharak.territory_terms.TH"
+  }
+ },
+ "text_source_licence": {
+  "source": "Bengali Wikisource, গল্প-দশক/বিচারক oldid 1624865; transcription layer under CC BY-SA 4.0 (attribution and ShareAlike carried by the edition licence notice); underlying literary text public domain",
+  "ref": "https://bn.wikisource.org/w/index.php?title=%E0%A6%97%E0%A6%B2%E0%A7%8D%E0%A6%AA-%E0%A6%A6%E0%A6%B6%E0%A6%95%2F%E0%A6%AC%E0%A6%BF%E0%A6%9A%E0%A6%BE%E0%A6%B0%E0%A6%95&oldid=1624865",
+  "licence_notice": {
+   "file": "library/intake/bicharak/legacy-license_notice.json",
+   "sha256": "1fc9cf8fae864434f95bc34656a96672c55d852f3dfdad4a1f386a1a1cc4e01c",
+   "licence": "CC-BY-SA-4.0"
+  },
+  "film_use": "The narration reads the edition text word for word (tags stripped; no word added, dropped or reordered) and the captions are that same text. The literary work is public domain in every listed territory. The Wikisource transcription layer is CC BY-SA 4.0: its attribution and ShareAlike notice is carried by the edition licence notice, which covers every format of the edition, video included.",
+  "owner_decision_needed": "Confirm that the edition licence notice is sufficient attribution for the film format, or instruct that the film also carry the Wikisource attribution (e.g. in the Maison film page credits)."
+ },
+ "cover_provenance": {
+  "provenance": "library/intake/bicharak/legacy-cover_provenance.json",
+  "provenance_sha256": "1f45a8cd0deed8a1c432d59964200174e0e6f10da4bde358fa26be79a8861d80",
+  "owner_declaration": "library/intake/bicharak/legacy-owner_artwork_declaration.json",
+  "owner_declaration_sha256": "0881001b09b5b47649f14ff289aaa7f64e98004adc3d800f67d90fab703f9264",
+  "front_jpg_sha256": "a6cac9c9cab2b1b6ec9355e29432f55f42c95ad956b6492683a527046d79e519",
+  "back_jpg_sha256": "bb0f98a310c5e83d7bd9220f0ee834dbf5739873698933eed3cae15ac4b0d845",
+  "basis": "Owner-created front/back artwork with owner-held copyright, accepted in the legacy rights decision by exact delivery hash."
+ },
+ "narration": {
+  "engine": "ElevenLabs",
+  "model": "eleven_v3",
+  "voice_id": "j5PhP1QJv2DvlhRv3mEv",
+  "voice_name": "Subhajit – Grounded Bengali Storyteller",
+  "job_id": "narration-elevenlabs-0bca7520",
+  "credits": 14956,
+  "licence": "Owner's ElevenLabs Creator plan (paid tier: commercial licence for generated audio), owner decision 24 Nov 2026 (skills/earnalism-audiovisual/references/earnalism-voice.md)",
+  "owner_decision_needed": "Confirm the Creator plan was active when the take was generated (24–25 Nov 2026) and that the voice was used from the ElevenLabs Voice Library under its standard terms."
+ },
+ "music": {
+  "route": "ace-step:music-film-01-r4",
+  "licence": "Apache-2.0 (ACE-Step model; outputs are ours, no attribution required)",
+  "source_and_licence": "ACE-Step/ACE-Step-v1-3.5B revision 82cd0d7b6322bd28cd4e830fe675ddb6180ce36c, Apache-2.0, generated on Google Colab under the owner's account; job music-film-01-r4; score sha256 b7f204ae72f8e9bbb746cb37746ed1fe25e82d3d921f705e12e713c2827eeef0",
+  "cues_sha256": {
+   "cue-1-kshiroda-night.wav": "168d3d271b6b4872b9727227c7e8cba60392f7dba6db9b5617216e9eb25f201e",
+   "cue-2-window-and-judge.wav": "832b8c47bc9e98f6dcaf816ab379c24b4b97114dcc22fe02bdfa14f95d03f99b",
+   "cue-3-dream-and-carriage.wav": "c41fcd765b569fa308dfb6023ba6d0773bb9f84b02a3787f5fbfb5d258bcf207",
+   "cue-4-prison-and-ring.wav": "8afff9cb2960a6ea71e5b38ea10ad3ecd3022114b375aaedabcae85e64475b48"
+  }
+ },
+ "dry_narration": false,
+ "visuals": {
+  "base_and_patch_jobs": [
+   "stills-film-01-r5",
+   "stills-film-01-r8-house",
+   "stills-film-01-r9",
+   "retouch-film-01-r9",
+   "stills-film-01-r10",
+   "touchup-film-01"
+  ],
+  "generators": [
+   {
+    "model": "black-forest-labs/FLUX.1-schnell",
+    "licence": "Apache-2.0, outputs only",
+    "jobs": [
+     "stills-film-01-r5",
+     "stills-film-01-r8-house",
+     "stills-film-01-r9",
+     "stills-film-01-r10"
+    ]
+   },
+   {
+    "model": "diffusers/stable-diffusion-xl-1.0-inpainting-0.1 (+ CIDAS/clipseg-rd64-refined masks, Apache-2.0)",
+    "licence": "SDXL Inpainting 0.1, CreativeML Open RAIL++-M (2023-07-26), outputs only; Attachment A use restrictions reviewed: none applicable",
+    "jobs": [
+     "retouch-film-01-r9"
+    ]
+   },
+   {
+    "model": "local OpenCV touch-up (opencv-python-headless)",
+    "licence": "Apache-2.0; deterministic local edits of our own stills",
+    "jobs": [
+     "touchup-film-01"
+    ]
+   }
+  ],
+  "not_used": "No Qwen-Image-Edit output is in this film (edit tests were not picked).",
+  "held_shots": {
+   "count": 15,
+   "substitutes": {
+    "f01s003-6": {
+     "cross_scene": false,
+     "use": "f01s003-5"
+    },
+    "f01s005-2": {
+     "cross_scene": false,
+     "use": "f01s005-1"
+    },
+    "f01s008-3": {
+     "cross_scene": false,
+     "use": "f01s008-2"
+    },
+    "f01s010-5": {
+     "cross_scene": false,
+     "use": "f01s010-4"
+    },
+    "f01s011-2": {
+     "cross_scene": false,
+     "use": "f01s011-1"
+    },
+    "f01s012-2": {
+     "cross_scene": false,
+     "use": "f01s012-1"
+    },
+    "f01s012-3": {
+     "cross_scene": false,
+     "use": "f01s012-1"
+    },
+    "f01s013-4": {
+     "cross_scene": false,
+     "use": "f01s013-3"
+    },
+    "f01s013-5": {
+     "cross_scene": false,
+     "use": "f01s013-3"
+    },
+    "f01s015-1": {
+     "cross_scene": true,
+     "use": "f01s014-3"
+    },
+    "f01s015-2": {
+     "cross_scene": true,
+     "use": "f01s014-3"
+    },
+    "f01s015-3": {
+     "cross_scene": true,
+     "use": "f01s014-3"
+    },
+    "f01s016-3": {
+     "cross_scene": false,
+     "use": "f01s016-2"
+    },
+    "f01s018-2": {
+     "cross_scene": false,
+     "use": "f01s018-1"
+    },
+    "f01s019-2": {
+     "cross_scene": false,
+     "use": "f01s019-1"
+    }
+   }
+  },
+  "branding": "Earnalism logo lockup (owner's official logo) and the owner-approved END card video",
+  "ai_disclosure": "The Maison film page should state that the illustrations and narration are AI-generated (owner to confirm wording)."
+ },
+ "binding": "On stage, attach_audiovisual_film records publication_clearance for formats reader+video bound to this document's sha256, the live text hash and every ready asset sha256 (film and captions included)."
+}
