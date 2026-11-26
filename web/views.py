@@ -267,7 +267,8 @@ def reader(request, locale, edition_id, unit_id=None):
     destination = request.get_full_path()
     if document.get("preview") and document.get("boundary"):
         boundary = document["boundary"]
-        destination = reverse("web:reader", args=[locale, edition_id, unit_id]) + "?" + urlencode({"anchor":boundary["end_anchor_id"],"offset":boundary["end_offset_chars"]})
+        # The boundary may sit in a later unit when the preview spans units; return to that unit.
+        destination = reverse("web:reader", args=[locale, edition_id, document.get("boundary_unit_id") or unit_id]) + "?" + urlencode({"anchor":boundary["end_anchor_id"],"offset":boundary["end_offset_chars"]})
     bootstrap.update(free_access=getattr(django_settings,"FREE_ACCESS_ENABLED",False),preview=bool(document.get("preview")),title_url=reverse("web:title",args=[locale,edition_id]),sign_in_url=reverse("web:sign-in",args=[locale])+"?"+urlencode({"return_to":destination}),pass_url=reverse("web:pass",args=[locale])+"?"+urlencode({"return_to":destination}))
     if document.get("preview"):
         # The preview may run on into the next unit (it counts the whole story); otherwise it ends here.

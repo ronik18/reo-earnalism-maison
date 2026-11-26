@@ -483,17 +483,25 @@ def preview_cut(stream):
     10 units) stop the cut early at a whole group. A trailing heading or orphan note is dropped.
 
     The stream is read lazily: once PREVIEW_MAX_WORDS / PREVIEW_FRACTION words have been read the
-    target is fixed at the maximum, so the rest of a long book is never loaded."""
+    target is fixed at the maximum, so the rest of a long book is never loaded. One group beyond that
+    point is always read, so the code knows whether the last group read is the story's final one."""
     enough=PREVIEW_MAX_WORDS/PREVIEW_FRACTION
-    groups,total,complete=[],0,True
-    for group in _preview_groups(stream):
+    groups,total=[],0
+    stream_groups=_preview_groups(stream)
+    for group in stream_groups:
         groups.append(group);total+=_group_words(group)
-        if total>=enough:
-            complete=False;break
-    candidates=groups[:-1] if complete else groups  # never the story's final paragraph
+        if total>=enough:break
+    # One-group lookahead: if nothing follows, the story is complete and its last group is final.
+    lookahead=next(stream_groups,None)
+    complete=lookahead is None
+    # Never the story's final paragraph. When more follows, every group read is safely before the end.
+    candidates=groups[:-1] if complete else groups
     chosen=[]
     if complete and total<=PREVIEW_MIN_WORDS:
+        size=0
         for group in candidates:  # first paragraph only (with any heading before it)
+            size+=len(group[1])
+            if size>PREVIEW_MAX_BLOCKS:break  # contract ceiling (PreviewPackage paragraphs maxItems)
             chosen.append(group)
             if group[1][0]['kind']!='heading':break
     else:
@@ -555,7 +563,7 @@ def get_preview_document(edition_id,unit_id,territory='IN'):
         raise DomainError('preview_unavailable','This unit has no bounded public preview.',404)
     unit,paragraphs=cut[index]
     return {'edition':detail,'unit':unit_dto(unit,territory),'paragraphs':paragraphs,'boundary':preview_boundary(cut),
-            'preview':True,'preview_continues':index+1<len(cut)}
+            'boundary_unit_id':str(cut[-1][0].id),'preview':True,'preview_continues':index+1<len(cut)}
 
 
 def has_active_pass(user,at=None):

@@ -67,7 +67,7 @@ class PreviewRuleTests(SimpleTestCase):
                 yield 'u1', p
         preview = svc.preview_cut(stream())[0][1]
         self.assertEqual(len(preview), 15)
-        self.assertLessEqual(len(read), 61)  # stops once 1,500 / 0.25 = 6,000 words are known (+1 to close a note group)
+        self.assertLessEqual(len(read), 62)  # 6,000 words known, plus one lookahead group (each closed by one more row)
 
     def test_story_of_400_words_or_fewer_previews_only_its_first_paragraph(self):
         story = paras(120, 100, 100, 80)  # exactly 400 words
@@ -190,3 +190,58 @@ class MultiUnitPreviewDocumentTests(SimpleTestCase):
         end = units[1].paragraphs.all.return_value[-1]
         for document in (first, second):
             self.assertEqual(document['boundary']['end_anchor_id'], str(end.anchor_id))
+            self.assertEqual(document['boundary_unit_id'], str(units[1].id))  # sign-in returns to the boundary's unit
+
+
+class LongStoryEndingTests(SimpleTestCase):
+    """Fix round 1, C1: reading stops early on long stories, but the final paragraph is still never served."""
+
+    def test_one_long_paragraph_has_no_preview(self):
+        self.assertEqual(cut(paras(7000)), [])
+        self.assertEqual(cut(paras(6000)), [])
+        self.assertEqual(cut(chapter(('paragraph', words(7000)), ('note', 'n'))), [])
+
+    def test_a_long_final_paragraph_is_never_served(self):
+        story = paras(100, 7000)
+        self.assertEqual(cut(story), story[:1])
+        story = paras(1000, 5500)
+        self.assertEqual(cut(story), story[:1])
+        story = paras(300, 300, 5400)  # 6,000 words reached exactly on the final paragraph
+        self.assertEqual(cut(story), story[:2])
+
+    def test_a_long_final_unit_is_never_served(self):
+        stream = [('u1', p) for p in paras(100)] + [('u2', p) for p in paras(7000)]
+        self.assertEqual(svc.preview_cut(stream), [('u1', [stream[0][1]])])
+        stream = [('u1', p) for p in paras(7000)] + [('u2', p) for p in paras(10)]
+        self.assertEqual(svc.preview_cut(stream), [('u1', [stream[0][1]])])  # more follows, so it may be shown
+
+    def test_lookahead_reads_at_most_one_group_past_the_stop(self):
+        read = []
+
+        def stream():
+            for p in paras(7000, 10, 10, 10):
+                read.append(p)
+                yield 'u1', p
+        preview = svc.preview_cut(stream())
+        self.assertEqual(len(preview[0][1]), 1)  # the long opening paragraph is not the final one here
+        self.assertLessEqual(len(read), 3)
+
+    def test_randomised_stories_never_show_the_ending_or_run_far_past_the_cap(self):
+        import random
+        rng = random.Random(20261126)
+        for _ in range(3000):
+            sizes = [rng.choice([1, 5, 40, 150, 600, 1400, 3000, 5000, 7000, rng.randint(1, 9000)])
+                     for _ in range(rng.randint(1, 12))]
+            story = paras(*sizes)
+            preview = cut(story)
+            self.assertNotIn(story[-1], preview, sizes)
+            self.assertLess(len(preview), len(story), sizes)
+            self.assertEqual(preview, story[:len(preview)], sizes)  # always a prefix, whole paragraphs
+            counted = [svc.preview_word_count(p['text']) for p in preview]
+            if len(counted) == 1:
+                self.assertEqual(counted[0], sizes[0])  # a single shown paragraph is the first one
+            elif counted:
+                # Everything before the paragraph that reaches the target is below the 1,500-word cap,
+                # so the preview is at most max(1,500 words, first paragraph) plus that one crossing paragraph.
+                self.assertLess(sum(counted[:-1]), svc.PREVIEW_MAX_WORDS, sizes)
+                self.assertLessEqual(sum(counted), max(svc.PREVIEW_MAX_WORDS, sizes[0]) + counted[-1], sizes)
