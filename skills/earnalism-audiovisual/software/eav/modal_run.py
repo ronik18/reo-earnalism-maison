@@ -9,7 +9,9 @@ Modal authentication comes from the environment the `modal` client reads.
 """
 import ast
 import json
+import _thread
 import sys
+import threading
 import time
 import types
 from pathlib import Path
@@ -78,8 +80,11 @@ def extract_cells(notebook_path) -> list:
 def colab_shim(job_dir: str) -> str:
     """Source of a `google.colab` stand-in. `drive.mount(path)` only records the path (the Drive
     folder is job_dir, applied by `run_cells` right after the config cell); `runtime.unassign()`
-    flushes and raises SystemExit, as unassigning a Colab runtime ends the notebook."""
+    flushes and stops the main execution from any thread (flag plus interrupt_main), as
+    unassigning a Colab runtime ends the notebook."""
     return f'''import sys
+import threading
+import _thread
 JOB_DIR = {str(job_dir)!r}
 
 
@@ -92,10 +97,18 @@ class drive:
 
 
 class runtime:
+    stopped = False
+
     @staticmethod
     def unassign():
+        """The hard stop. The notebook calls it from a Timer thread, where SystemExit would only
+        end that thread, so also interrupt the main thread that is running the cells."""
+        runtime.stopped = True
         sys.stdout.flush()
         sys.stderr.flush()
+        if threading.current_thread() is not threading.main_thread():
+            _thread.interrupt_main()
+            return
         raise SystemExit("runtime unassigned")
 '''
 
@@ -115,6 +128,7 @@ class _Shim:
         for name, value in (("google", pkg), ("google.colab", mod)):
             self.saved[name] = sys.modules.get(name)
             sys.modules[name] = value
+        self.runtime = mod.runtime
         return mod
 
     def __exit__(self, *exc):
@@ -127,19 +141,22 @@ class _Shim:
 
 def run_cells(cells: list, job_dir) -> dict:
     """Execute the cells in one shared namespace with RUN = True; DRIVE_JOB_DIR is overridden
-    right after the config cell. A SystemExit (runtime.unassign) ends the run quietly; any other
+    right after the config cell. runtime.unassign() (from any thread) is the hard stop: no later
+    cell runs (so no manifest is written) and the namespace has HARD_STOPPED = True. Any other
     exception propagates. Returns the namespace."""
     job_dir = str(job_dir)
     Path(job_dir).mkdir(parents=True, exist_ok=True)
-    g = {"__name__": "__main__", "RUN": True}
-    with _Shim(job_dir):
+    g = {"__name__": "__main__", "RUN": True, "HARD_STOPPED": False}
+    with _Shim(job_dir) as shim:
         try:
             for i, source in enumerate(cells):
                 exec(compile(source, f"<eav cell {i}>", "exec"), g)
                 if i == 0:
                     g["DRIVE_JOB_DIR"] = job_dir
-        except SystemExit:
-            pass
+        except (SystemExit, KeyboardInterrupt):
+            if not shim.runtime.stopped:
+                raise  # a real Ctrl-C or sys.exit in a cell, not the hard stop
+            g["HARD_STOPPED"] = True
         finally:
             guard = g.get("STOP_GUARD")
             if guard is not None:
@@ -161,8 +178,9 @@ def run_local(notebook, inputs_zip, work_dir) -> dict:
     folder.mkdir(parents=True, exist_ok=True)
     (folder / "inputs.zip").write_bytes(archive)
     started = time.monotonic()
-    run_cells(cells, folder)
-    return {"seconds": time.monotonic() - started, "folder": folder}
+    g = run_cells(cells, folder)
+    return {"seconds": time.monotonic() - started, "folder": folder,
+            "hard_stopped": g["HARD_STOPPED"]}
 
 
 def modal_cost(seconds: float) -> float:
@@ -170,30 +188,49 @@ def modal_cost(seconds: float) -> float:
     return seconds * L4_USD_PER_S
 
 
-def execute_remote(cells: list, job_id: str, archive: bytes, volume_mount: str = VOLUME_MOUNT) -> None:
+def remote_python_version() -> str:
+    """The image must run the local minor version: the function is cloudpickled (serialized)."""
+    return f"{sys.version_info.major}.{sys.version_info.minor}"
+
+
+def plan(notebook, inputs_zip, gpu="L4") -> dict:
+    """What run_modal would do, computed offline: nothing is executed or contacted."""
+    cells, config, _ = _prepare(notebook, inputs_zip)
+    deadline = int(config["DEADLINE_SECONDS"])
+    return {"job_id": config["JOB_ID"], "kind": config["KIND"], "cells": len(cells),
+            "gpu": gpu, "app": APP_NAME, "python_version": remote_python_version(),
+            "timeout_seconds": deadline + TIMEOUT_MARGIN_S,
+            "volume": f"{VOLUME_NAME}:{VOLUME_MOUNT}/{config['JOB_ID']}",
+            "forecast_seconds": deadline, "forecast_usd": modal_cost(deadline)}
+
+
+def execute_remote(cells: list, job_id: str, archive: bytes, volume_mount: str = VOLUME_MOUNT) -> dict:
     """Runs inside the Modal container: write inputs.zip into the volume folder, run the cells."""
     folder = Path(volume_mount) / job_id
     folder.mkdir(parents=True, exist_ok=True)
     (folder / "inputs.zip").write_bytes(archive)
-    run_cells(cells, folder)
+    g = run_cells(cells, folder)
+    return {"hard_stopped": g["HARD_STOPPED"]}
 
 
 def run_modal(notebook, inputs_zip, download_dir, gpu="L4") -> dict:
     """Run the notebook on a Modal GPU, then download the job folder to download_dir/<job_id>/.
 
-    Returns {"seconds": measured wall seconds of the remote call (cold start included),
-    "usd": seconds * L4_USD_PER_S, "folder": the download folder}. The cost is the L4 rate only;
-    Modal's CPU and memory surcharges are not modelled. The folder lives on the persistent
-    volume `earnalism-eav-jobs` at /jobs/<job_id>, so rerunning the same job resumes from it.
-    The function timeout is DEADLINE_SECONDS + 900 s; the notebook's own clock enforces the
-    reserved compute seconds. Needs modal installed and authenticated; it is imported here,
-    never at module top level."""
+    Returns {"seconds": wall seconds measured locally around the remote call (cold start
+    included), "usd": seconds * L4_USD_PER_S, "folder", "status": "ok" | "hard_stopped" |
+    "failed", "error": text or None}. A failed or timed-out remote call still returns (it was
+    paid for) and still downloads whatever the volume holds. The cost is the L4 rate only; CPU
+    and memory surcharges are not modelled. The folder lives on the persistent volume
+    `earnalism-eav-jobs` at /jobs/<job_id>, so rerunning the same job resumes from it. The
+    function timeout is DEADLINE_SECONDS + 900 s; the notebook's own clock enforces the reserved
+    compute seconds. The image's Python equals the local minor version (serialized function).
+    Needs modal installed and authenticated; it is imported here, never at module top level."""
     cells, config, archive = _prepare(notebook, inputs_zip)
     job_id, deadline = config["JOB_ID"], int(config["DEADLINE_SECONDS"])
     import modal  # optional dependency, only needed to launch
 
     app = modal.App(APP_NAME)
-    image = (modal.Image.debian_slim(python_version="3.11")
+    image = (modal.Image.debian_slim(python_version=remote_python_version())
              .apt_install("git", "ffmpeg", "libsndfile1")  # git: the cells pip-install from GitHub
              .pip_install("torch", "soundfile", "huggingface_hub")
              .env({"HF_HOME": f"{VOLUME_MOUNT}/hf-cache"})
@@ -205,22 +242,33 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4") -> dict:
     def remote(cells_, job_id_, archive_):
         from eav.modal_run import execute_remote
         try:
-            execute_remote(cells_, job_id_, archive_)
+            return execute_remote(cells_, job_id_, archive_)
         finally:
             volume.commit()
 
+    status, error, outcome = "ok", None, {}
     started = time.monotonic()
-    with app.run():
-        remote.remote(cells, job_id, archive)
+    try:
+        with app.run():
+            outcome = remote.remote(cells, job_id, archive) or {}
+    except Exception as e:  # remote failure or timeout: the seconds were still billed
+        status, error = "failed", f"{type(e).__name__}: {e}"
     seconds = time.monotonic() - started
+    if status == "ok" and outcome.get("hard_stopped"):
+        status = "hard_stopped"
     dest = Path(download_dir) / job_id
     dest.mkdir(parents=True, exist_ok=True)
-    for entry in volume.listdir(f"/{job_id}", recursive=True):
-        if getattr(entry.type, "name", str(entry.type)).upper() != "FILE":
-            continue
-        target = dest / Path(entry.path).relative_to(job_id)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        with open(target, "wb") as fh:
-            for chunk in volume.read_file(entry.path):
-                fh.write(chunk)
-    return {"seconds": seconds, "usd": modal_cost(seconds), "folder": dest}
+    try:
+        for entry in list(volume.listdir(f"/{job_id}", recursive=True)):
+            if getattr(entry.type, "name", str(entry.type)).upper() != "FILE":
+                continue
+            target = dest / Path(entry.path).relative_to(job_id)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with open(target, "wb") as fh:
+                for chunk in volume.read_file(entry.path):
+                    fh.write(chunk)
+    except Exception as e:
+        status = "failed"
+        error = (error + "; " if error else "") + f"download: {type(e).__name__}: {e}"
+    return {"seconds": seconds, "usd": modal_cost(seconds), "folder": dest,
+            "status": status, "error": error}

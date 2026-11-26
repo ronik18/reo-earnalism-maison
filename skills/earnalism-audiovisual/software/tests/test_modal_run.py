@@ -4,6 +4,7 @@ import io
 import json
 import sys
 import tempfile
+import time
 import types
 import unittest
 from pathlib import Path
@@ -64,6 +65,65 @@ def fakes():
             mock.patch("subprocess.run") as pip, \
             mock.patch("importlib.metadata.distribution", return_value=dist):
         yield pip
+
+
+class FakeModal:
+    """Just enough of the modal client for run_modal: the 'remote' runs behavior(...) in-process
+    against a directory standing in for the volume."""
+
+    def __init__(self, vroot, behavior=None):
+        self.vroot, self.behavior = Path(vroot), behavior or self.default
+        self.image_python, self.function_kwargs = None, {}
+
+    @staticmethod
+    def default(vroot, cells, job_id, archive):
+        return modal_run.execute_remote(cells, job_id, archive, volume_mount=str(vroot))
+
+    def module(self):
+        fm = self
+        mod = types.ModuleType("modal")
+
+        class Image:
+            @staticmethod
+            def debian_slim(python_version=None):
+                fm.image_python = python_version
+                return Image()
+            def apt_install(self, *a): return self
+            def pip_install(self, *a): return self
+            def env(self, *a): return self
+            def add_local_python_source(self, *a): return self
+
+        class Entry:
+            def __init__(self, path):
+                self.path, self.type = path, types.SimpleNamespace(name="FILE")
+
+        class Volume:
+            @staticmethod
+            def from_name(name, create_if_missing=False):
+                return Volume()
+            def commit(self): pass
+            def listdir(self, path, recursive=False):
+                base = fm.vroot / path.strip("/")
+                if not base.is_dir():
+                    raise FileNotFoundError(path)
+                return [Entry(p.relative_to(fm.vroot).as_posix()) for p in sorted(base.rglob("*"))
+                        if p.is_file()]
+            def read_file(self, path):
+                yield (fm.vroot / path).read_bytes()
+
+        class App:
+            def __init__(self, name): pass
+            def function(self, **kw):
+                fm.function_kwargs = kw
+                def deco(fn):
+                    return types.SimpleNamespace(remote=lambda c, j, a: fm.behavior(fm.vroot, c, j, a))
+                return deco
+            @contextlib.contextmanager
+            def run(self):
+                yield
+
+        mod.Image, mod.Volume, mod.App = Image, Volume, App
+        return mod
 
 
 class ModalRunTests(unittest.TestCase):
@@ -151,8 +211,72 @@ class ModalRunTests(unittest.TestCase):
         folder.mkdir()
         (folder / "inputs.zip").write_bytes(Path(job["inputs_zip"]).read_bytes())
         with fakes():
-            modal_run.run_cells(cells, folder)
+            g = modal_run.run_cells(cells, folder)
         self.assertFalse((folder / "manifest.json").exists())
+        self.assertTrue(g["HARD_STOPPED"])
+
+    def test_timer_thread_unassign_stops_the_main_execution(self):
+        """C1: colab_jobs fires unassign() from a Timer thread; no later cell may run."""
+        folder = self.root / "timer"
+        cells = ["JOB_ID = 'x'",
+                 "import threading, time\nfrom google.colab import runtime\n"
+                 "threading.Timer(0.2, runtime.unassign).start()\n"
+                 "for _ in range(200):\n    time.sleep(0.05)\nREACHED_END_OF_LONG_CELL = True",
+                 "open(DRIVE_JOB_DIR + '/later.txt', 'w').write('ran')"]
+        started = time.monotonic()
+        g = modal_run.run_cells(cells, folder)
+        self.assertLess(time.monotonic() - started, 5)
+        self.assertTrue(g["HARD_STOPPED"])
+        self.assertNotIn("REACHED_END_OF_LONG_CELL", g)
+        self.assertFalse((folder / "later.txt").exists())
+
+    def test_real_keyboard_interrupt_is_not_swallowed(self):
+        with self.assertRaises(KeyboardInterrupt):
+            modal_run.run_cells(["JOB_ID = 'x'", "raise KeyboardInterrupt()"], self.root / "ki")
+
+    def test_remote_python_matches_local_interpreter(self):
+        self.assertEqual(modal_run.remote_python_version(),
+                         f"{sys.version_info.major}.{sys.version_info.minor}")
+
+    def test_run_modal_with_fake_modal(self):
+        job = self.build()
+        fm = FakeModal(self.root / "vol")
+        with fakes(), mock.patch.dict(sys.modules, {"modal": fm.module()}):
+            result = modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl")
+        self.assertEqual(fm.image_python, modal_run.remote_python_version())
+        self.assertEqual(fm.function_kwargs["timeout"],
+                         modal_run.plan(job["notebook"], job["inputs_zip"])["timeout_seconds"])
+        self.assertEqual(fm.function_kwargs["gpu"], "L4")
+        self.assertEqual(result["status"], "ok")
+        self.assertTrue((result["folder"] / "inputs.zip").is_file())
+
+    def test_run_modal_failure_still_reports_cost_and_downloads_partial(self):
+        job = self.build()
+
+        def behavior(vroot, cells, job_id, archive):
+            (vroot / job_id).mkdir(parents=True)
+            (vroot / job_id / "partial.wav").write_bytes(b"x")
+            raise RuntimeError("function timed out")
+
+        fm = FakeModal(self.root / "vol", behavior)
+        with mock.patch.dict(sys.modules, {"modal": fm.module()}):
+            result = modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl")
+        self.assertEqual(result["status"], "failed")
+        self.assertIn("function timed out", result["error"])
+        self.assertGreaterEqual(result["seconds"], 0)
+        self.assertAlmostEqual(result["usd"], result["seconds"] * modal_run.L4_USD_PER_S)
+        self.assertTrue((result["folder"] / "partial.wav").is_file())
+        self.assertFalse((result["folder"] / "manifest.json").exists())
+
+    def test_plan_is_offline(self):
+        job = self.build()
+        with mock.patch.dict(sys.modules, {"modal": None}):
+            p = modal_run.plan(job["notebook"], job["inputs_zip"])
+        deadline = p["forecast_seconds"]
+        self.assertEqual(p["timeout_seconds"], deadline + 900)
+        self.assertEqual(p["gpu"], "L4")
+        self.assertEqual(p["volume"], f"earnalism-eav-jobs:/jobs/{job['job_id']}")
+        self.assertAlmostEqual(p["forecast_usd"], deadline * 0.000222)
 
     def test_cost_arithmetic(self):
         self.assertAlmostEqual(modal_run.modal_cost(3600), 0.7992)
@@ -190,35 +314,70 @@ class ModalRunCliTests(unittest.TestCase):
         self.assertEqual(run("job", "narration", "--root", self.root, "--rates", rates)[0], 0)
         self.job_id = next((self.root / "jobs").iterdir()).name
 
-    def test_dry_run_end_to_end_then_import(self):
-        with fakes():
+    def modal_patch(self, behavior=None):
+        fm = FakeModal(self.d / "vol", behavior)
+        return fm, mock.patch.dict(sys.modules, {"modal": fm.module()})
+
+    def ledger_bytes(self):
+        return (self.d / "titles" / "allowance-ledger.json").read_bytes()
+
+    def test_dry_run_only_checks_and_prints_the_plan(self):
+        before = self.ledger_bytes()
+        with mock.patch.dict(sys.modules, {"modal": None}), \
+                mock.patch("subprocess.run") as pip, \
+                mock.patch.object(modal_run, "run_cells", side_effect=AssertionError("executed")):
             code, out = run("modal-run", self.job_id, "--root", self.root, "--dry-run")
         self.assertEqual(code, 0, out)
+        self.assertFalse(pip.called)
         line = json.loads(next(l for l in out.splitlines() if l.startswith("{")))
-        self.assertEqual(line["job_id"], self.job_id)
-        self.assertEqual(line["usd"], 0.0)
         self.assertTrue(line["dry_run"])
+        self.assertEqual(line["job_id"], self.job_id)
+        self.assertEqual((line["gpu"], line["timeout_seconds"]),
+                         ("L4", line["forecast_seconds"] + 900))
+        self.assertEqual(line["volume"], f"earnalism-eav-jobs:/jobs/{self.job_id}")
+        self.assertAlmostEqual(line["forecast_usd"], line["forecast_seconds"] * 0.000222, places=4)
+        self.assertFalse((self.root / "modal-downloads").exists())
+        self.assertEqual(self.ledger_bytes(), before)
+
+    def test_run_then_import_and_ledger_untouched_by_the_run(self):
+        before = self.ledger_bytes()
+        fm, patched = self.modal_patch()
+        with fakes(), patched:
+            code, out = run("modal-run", self.job_id, "--root", self.root)
+        self.assertEqual(code, 0, out)
+        line = json.loads(next(l for l in out.splitlines() if l.startswith("{")))
+        self.assertEqual((line["status"], line["dry_run"]), ("ok", False))
         self.assertIn("eav.cli import " + self.job_id, line["next"])
         folder = Path(line["folder"])
         self.assertEqual(folder, self.root / "modal-downloads" / self.job_id)
+        self.assertEqual(self.ledger_bytes(), before)
         self.assertEqual(json.loads((folder / "manifest.json").read_text())["status"], "COMPLETE")
-        ledger_before = (self.d / "titles" / "allowance-ledger.json").read_bytes()
         code, out = run("import", self.job_id, "--root", self.root, "--from", folder, "--units", 0.5)
         self.assertEqual(code, 0, out)
-        self.assertNotEqual((self.d / "titles" / "allowance-ledger.json").read_bytes(), ledger_before)
+        self.assertNotEqual(self.ledger_bytes(), before)
 
-    def test_modal_run_does_not_touch_the_ledger(self):
-        ledger = self.d / "titles" / "allowance-ledger.json"
-        before = ledger.read_bytes()
-        with fakes():
-            run("modal-run", self.job_id, "--root", self.root, "--dry-run", "--download", self.d / "dl")
-        self.assertEqual(ledger.read_bytes(), before)
-        self.assertTrue((self.d / "dl" / self.job_id / "manifest.json").is_file())
+    def test_failed_remote_reports_cost_downloads_partial_and_exits_nonzero(self):
+        def behavior(vroot, cells, job_id, archive):
+            (vroot / job_id).mkdir(parents=True)
+            (vroot / job_id / "u1.wav").write_bytes(b"x")
+            raise RuntimeError("timed out")
+
+        fm, patched = self.modal_patch(behavior)
+        with patched:
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--download", self.d / "dl")
+        self.assertEqual(code, 2, out)
+        line = json.loads(next(l for l in out.splitlines() if l.startswith("{")))
+        self.assertEqual(line["status"], "failed")
+        self.assertIn("timed out", line["error"])
+        self.assertIn("usd", line)
+        self.assertIn("seconds", line)
+        self.assertIn(f"close {self.job_id}", line["next"])
+        self.assertIn("resume", line["next"])
+        self.assertTrue((self.d / "dl" / self.job_id / "u1.wav").is_file())
 
     def test_refuses_superseded_job(self):
         self.assertEqual(run("supersede", self.job_id, "--root", self.root, "--reason", "no")[0], 0)
-        with fakes():
-            code, out = run("modal-run", self.job_id, "--root", self.root, "--dry-run")
+        code, out = run("modal-run", self.job_id, "--root", self.root, "--dry-run")
         self.assertEqual(code, 2)
         self.assertIn("superseded", out)
         self.assertFalse((self.root / "modal-downloads").exists())
@@ -234,8 +393,9 @@ class ModalRunCliTests(unittest.TestCase):
         self.assertIn("does not match", out)
 
     def test_refuses_imported_job(self):
-        with fakes():
-            run("modal-run", self.job_id, "--root", self.root, "--dry-run")
+        fm, patched = self.modal_patch()
+        with fakes(), patched:
+            run("modal-run", self.job_id, "--root", self.root)
         folder = self.root / "modal-downloads" / self.job_id
         self.assertEqual(run("import", self.job_id, "--root", self.root, "--from", folder,
                              "--units", 0.5)[0], 0)

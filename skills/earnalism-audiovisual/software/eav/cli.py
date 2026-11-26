@@ -7,7 +7,7 @@
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli modal-run <job_id> --root <dir> [--download <dir>] [--dry-run]
-                         (runs the built notebook headlessly on a Modal L4, or on CPU with --dry-run;
+                         (runs the built notebook headlessly on a Modal L4; --dry-run only checks and prints the plan;
                           leaves the job folder `import` expects; never touches the ledger)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
   python3 -m eav.cli close <job_id> --root <dir> --units <CU Colab shows> --reason "<what happened>"
@@ -681,17 +681,25 @@ def cmd_modal_run(args):
     if not built or sha256_file(job["inputs_zip"]) != built:
         raise Stop(f"inputs.zip of {args.job_id} does not match its build manifest",
                    "Never run a bundle that changed since it was built; supersede it and rebuild")
+    if args.dry_run:  # checks and the exact remote plan only; nothing is executed or contacted
+        plan = modal_run.plan(job["notebook"], job["inputs_zip"])
+        print(json.dumps({**plan, "dry_run": True, "forecast_usd": round(plan["forecast_usd"], 4),
+                          "next": f"{PROG} modal-run {args.job_id} --root {rec.root}"}, sort_keys=True))
+        return
     download = Path(args.download) if args.download else rec.root / "modal-downloads"
-    if args.dry_run:
-        result, usd = modal_run.run_local(job["notebook"], job["inputs_zip"], download), 0.0
-    else:
-        result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download)
-        usd = result["usd"]
-    folder = result["folder"]
+    result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download)
+    folder, status = result["folder"], result["status"]
+    nxt = f"{PROG} import {args.job_id} --root {rec.root} --from {folder} --units <CU actually used>"
+    if status != "ok":
+        nxt = (f"Rerun {PROG} modal-run {args.job_id} --root {rec.root} to resume from the volume; if it "
+               f"can never finish: {PROG} close {args.job_id} --root {rec.root} --units <CU-equivalent of "
+               f"{result['usd']:.4f} USD> --reason \"<what happened>\"")
     print(json.dumps({"job_id": args.job_id, "seconds": round(result["seconds"], 1),
-                      "usd": round(usd, 4), "dry_run": bool(args.dry_run), "folder": str(folder),
-                      "next": f"{PROG} import {args.job_id} --root {rec.root} --from {folder} "
-                              "--units <CU actually used>"}, sort_keys=True))
+                      "usd": round(result["usd"], 4), "dry_run": False, "status": status,
+                      "hard_stopped": status == "hard_stopped", "error": result["error"],
+                      "folder": str(folder), "next": nxt}, sort_keys=True))
+    if status == "failed":
+        raise Stop(f"remote run failed: {result['error']}", nxt)
 
 
 _ENDINGS = {"supersede": ("superseding", "superseded"), "close": ("closing", "closed")}
@@ -1313,7 +1321,7 @@ def _parser():
     s = add("modal-run")
     s.add_argument("job_id")
     s.add_argument("--download", help="where the job folder lands (default <root>/modal-downloads)")
-    s.add_argument("--dry-run", action="store_true", help="run on this CPU instead of Modal")
+    s.add_argument("--dry-run", action="store_true", help="check and print the remote plan and forecast; run nothing")
     s = add("supersede")
     s.add_argument("job_id")
     s.add_argument("--reason", required=True)
