@@ -281,7 +281,10 @@
    },
    "review_notes": [
     "Generated translation draft; a human must review it before approval.",
-    "Translation is a new work; its own clearance needs owner review."
+    "Translation is a new work; its own clearance needs owner review.",
+    "¶6: the 1895 transcription reads 'কখনো এখানে রাত্রিযাপন করিবেন' (negation evidently dropped; later printings read 'করিবেন না'); translated 'never spend the night there' as the surrounding text requires.",
+    "¶37: 'কে … জানি' read as 'জানি না'; translated 'Someone, I do not know who, kept forbidding me'.",
+    "¶14: 'শুস্কার' read as 'শুস্তার' (the Shusta river, spelled so elsewhere in the text); translated 'Shusta'."
    ]
   }
  }
