@@ -55,7 +55,7 @@ body.room{margin:0;min-width:300px;color:var(--ink);font:400 1.0625rem/1.65 var(
 .room-top{position:sticky;top:0;z-index:20;background:rgba(251,246,236,.97);border-bottom:1px solid var(--line)}
 .room-top .room-wrap{display:flex;align-items:center;gap:28px;min-height:100px}
 .room-logo{--s:.25;display:block;flex:0 0 auto;overflow:hidden;width:calc(1114px*var(--s));height:calc(281px*var(--s))}
-.room-logo img{height:calc(500px*var(--s));width:auto;max-width:none;margin:calc(-102px*var(--s)) 0 0 calc(-83px*var(--s))}
+.room-logo img{height:calc(500px*var(--s));width:calc(1197px*var(--s));max-width:none;object-fit:cover;object-position:0 0;margin:calc(-102px*var(--s)) 0 0 calc(-83px*var(--s))}
 .room-nav{display:flex;gap:2px;padding:5px;border-radius:999px;background:linear-gradient(180deg,#2A1820,#1A0E12);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 24px -12px rgba(26,14,18,.6)}
 .room-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;color:var(--night-ink);text-decoration:none;font-weight:600;font-size:.9375rem}
 .room-nav a:hover{background:rgba(255,255,255,.08)}
@@ -188,7 +188,7 @@ body.room{margin:0;min-width:300px;color:var(--ink);font:400 1.0625rem/1.65 var(
   .dev.laptop .base{width:154px;margin-left:-11px;height:8px}
   .art-path{padding-top:40px}.art-path .soon{top:6px;right:auto;left:16px;transform:rotate(-3deg)}}
 @media (max-width:420px){.art-covers .room-cover{width:120px}}
-@media (max-width:400px){.turn-dot{width:28px}.turn-controls{gap:0}}
+@media (max-width:400px){.turn-dot{width:min(44px,calc((100vw - 174px)/4))}.turn-controls{gap:0}}
 
 /* read · listen · learn */
 .room-ways{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
@@ -369,3 +369,8 @@ body.room-focused{background:var(--paper),#1A0E12;--surface:#2A1820;--raised:#35
 .room-page form button:not([type=button]):not([type=reset]):not(.secondary):hover{background:var(--wine)!important}
 .room-focused .room-page form button:not([type=button]):not([type=reset]):not(.secondary){background:var(--gold)!important;border-color:var(--gold-deep)!important;color:var(--burgundy-deep)!important}
 @media(max-width:767px){.room-page .title-art{height:auto;max-height:none;text-align:center}.room-page .title-art img{display:inline-block;width:auto;height:auto;max-height:420px;max-width:100%}}
+/* Tap targets: at least 44x44 CSS px of hit area; the invisible ::after grows the target without moving what is seen */
+.room-logo-mini{overflow:visible;position:relative}
+.room-logo-mini img{clip-path:inset(calc(102px*var(--s)) 0 calc(117px*var(--s)) calc(83px*var(--s)))}
+.room-logo-mini,.focus-toolbar>a,.actions>a:not(.button),[data-preview-fallback] a,.book-row h3 a,.series-episodes h2 a,.unit-list a,.room-footer a{position:relative}
+.room-logo-mini::after,.focus-toolbar>a::after,.actions>a:not(.button)::after,[data-preview-fallback] a::after,.book-row h3 a::after,.series-episodes h2 a::after,.unit-list a::after,.room-footer a::after{content:"";position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%)}

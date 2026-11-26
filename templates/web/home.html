@@ -1,6 +1,5 @@
 {% extends 'web/base.html' %}{% load static maison %}
 {% block main_class %}room-home{% endblock %}
-{% block title %}Earnalism · Read, listen and learn{% endblock %}
 {% block content %}
 {% if request.user.is_authenticated %}
 <section class="room-band room-member" aria-label="Your reading">
@@ -102,7 +101,7 @@
     <div class="room-shelf">{% for card in shelf %}
       <a class="room-book" href="{% url 'web:title' ui_locale card.edition_id %}">
         {% if card.cover %}<img class="room-cover-img" src="{{ card.cover.url }}" alt="{{ card.cover.alt }}" width="150" height="225" loading="lazy">{% else %}<div class="room-cover {% if card.locale == 'bn' %}bn{% else %}en{% endif %}" aria-hidden="true" lang="{{ card.locale }}"><span class="t">{{ card.title }}</span><span class="rule"></span><span class="a">{{ card.creators|join:', ' }}</span></div>{% endif %}
-        <div><p class="room-lang">{% if card.locale == 'bn' %}Bengali{% else %}English{% endif %}</p><h3 lang="{{ card.locale }}">{{ card.title }}</h3><p class="room-muted">{{ card.creators|join:', ' }}</p>
+        <div><p class="room-lang">{% if card.locale == 'bn' %}Bengali{% else %}English{% endif %}</p><h3 lang="{{ card.locale }}">{{ card.title }}</h3><p class="room-muted" lang="{{ card.locale }}">{{ card.creators|join:', ' }}</p>
           <p class="room-chips">{% for format in card.formats %}<span class="room-chip">{% ui format %}</span>{% endfor %}</p></div>
       </a>{% endfor %}</div>
     {% else %}

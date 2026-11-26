@@ -78,7 +78,10 @@ def page(request, locale, template, status=200, **extra):
     if next_cursor:
         query=request.GET.copy();query['cursor']=next_cursor
         extra['next_page_url']=request.path+'?'+query.urlencode()
-    response = render(request, template, context(request, locale, **extra), status=status)
+    values = context(request, locale, **extra)
+    from .seo import page_meta
+    values["meta"] = page_meta(request, values, template)
+    response = render(request, template, values, status=status)
     # Local first implementation. Shared caching is qualified separately by Lane D.
     response["Cache-Control"] = "private, no-store, max-age=0"
     response["Referrer-Policy"] = "strict-origin-when-cross-origin"
@@ -193,7 +196,9 @@ def search(request, locale):
     shelf_request.GET.pop("cursor", None)
     shelf_request.GET.pop("limit", None)
     shelves = catalog_payload(shelf_request, content_locale, collection_index)["items"]
-    return page(request, locale, "web/search.html", collections=shelves, cards=data["items"], next_cursor=data["next_cursor"], selected=selected, content_locale=content_locale, content_languages=content_languages(request), active_nav="explore")
+    return page(request, locale, "web/search.html", collections=shelves, cards=data["items"], next_cursor=data["next_cursor"], selected=selected, content_locale=content_locale, content_languages=content_languages(request), active_nav="explore",
+                # The unfiltered Explore hub links to every title, so search engines may index it; filtered and search results stay out.
+                allow_index=not django_settings.LOCAL and request.path.endswith("/explore/") and not request.GET)
 
 
 @require_GET
@@ -226,7 +231,10 @@ def title(request, locale, identifier):
     download_bootstrap = {"edition_revision_id":edition["edition_revision_id"],"unit_ids":[u["unit_id"] for u in units],"units":[{"unit_id":u["unit_id"],"title":u["title"]} for u in units],"formats":edition["downloadable_formats"],"title":edition["title"],"locale":edition["locale"]} if django_settings.FEATURES.get("offline_text_audio") and edition["published_at"] and request.user.is_authenticated else None
     sample = public_preview_data(request, edition) if django_settings.FEATURES.get("audio") else {}
     from learning.classroom import is_teacher
-    return page(request, locale, "web/title.html", teacher=is_teacher(request.user), edition=edition, translation=edition_translation(edition["edition_id"]), units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
+    from library.models import Edition
+    # Same source as the catalog cards' creators (Work.creators); edition_detail keeps its closed API shape.
+    creators = Edition.objects.filter(pk=edition["edition_id"]).values_list("work__creators", flat=True).first() or []
+    return page(request, locale, "web/title.html", teacher=is_teacher(request.user), edition=edition, creators=creators, translation=edition_translation(edition["edition_id"]), units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
 
 
 @require_GET
@@ -552,7 +560,7 @@ def learn(request, locale):
     request.user.request_territory = trusted_territory(request)
     from learning.services import tracks_page
     result=tracks_page(request,request.user,request.GET.get("content_locale") or None)
-    return page(request, locale, "web/learn.html", tracks=result["items"], next_cursor=result["next_cursor"], active_nav="learn")
+    return page(request, locale, "web/learn.html", tracks=result["items"], next_cursor=result["next_cursor"], active_nav="learn", allow_index=not django_settings.LOCAL and not request.GET)
 
 
 @require_GET
