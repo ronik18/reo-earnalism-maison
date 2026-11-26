@@ -34,7 +34,8 @@ Last updated: 26 Nov 2026.
 - [ ] **Narration Colab jobs for the 12 pipeline titles** (64.70 CU): `production/audiovisual/RUN_SHEET-pipeline-narration.md`.
 
 ## Accounts and keys
-- [ ] **YouTube upload authorization** for channel UCw-UnAXdRzqij8_B2TlgQjQ (token for `EARNALISM_YOUTUBE_ACCESS_TOKEN`, held only in memory for attended runs).
+- [x] **YouTube Studio sign-in** for channel UCw-UnAXdRzqij8_B2TlgQjQ (owner confirmed 26 Nov 2026).
+- [ ] **YouTube upload token, at the first private upload only:** once a finished film exists (after the বিচারক Colab jobs), Claude asks through the secure credential form for a short-lived OAuth access token for `www.googleapis.com` (scope `youtube.upload`, from Google's OAuth Playground signed in to this channel). The token is never pasted in chat or stored in the repo. The bridge checks it belongs to this channel before uploading, and uploads stay private.
 - [ ] **Razorpay test keys**, then live sign-off and merchant approval (founding Pass).
 - [ ] **Google Play Books partner account** (store export).
 - [ ] **Finance and tax profile for schools** (real institution invoices).
