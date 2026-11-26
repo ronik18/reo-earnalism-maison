@@ -171,6 +171,44 @@
       },
       "path": "jobs/music-film-01-r2/music.ipynb",
       "sha256": "8aa3c9603c5ec77c539eb213d2103bdf261b07fb2c3ce5d525a4766474704bc7"
+    },
+    {
+      "bytes": 15811,
+      "kind": "colab_job",
+      "meta": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 1,
+          "of": 2
+        },
+        "forecast_units": 1.6360666666666663,
+        "inputs_zip": "jobs/narration-film-01-r3-c1of2/inputs.zip",
+        "job_id": "narration-film-01-r3-c1of2",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-film-01-r3-c1of2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-film-01-r3-c1of2/narration.ipynb",
+      "sha256": "0aa996d78a2614f07915d0e6ea3288930011da3e5ad1e290a0a96ad2bd074e7e"
+    },
+    {
+      "bytes": 15811,
+      "kind": "colab_job",
+      "meta": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 2,
+          "of": 2
+        },
+        "forecast_units": 1.6360666666666663,
+        "inputs_zip": "jobs/narration-film-01-r3-c2of2/inputs.zip",
+        "job_id": "narration-film-01-r3-c2of2",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-film-01-r3-c2of2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-film-01-r3-c2of2/narration.ipynb",
+      "sha256": "248b004a29e28c808cf6878e36013a45aed95a3b43f1289194ba13044e3a9d97"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -478,6 +516,85 @@
       "detail": {
         "job_id": "music-film-01-r2",
         "kind": "music",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T08:36:19.411166+00:00",
+      "detail": {
+        "job_id": "narration-film-01-r2",
+        "reason": "Rebuilt with the batched, resumable, chunked narration template (plan gpu-jobs-fast-resumable-modal C1); never run",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T08:36:19.413963+00:00",
+      "detail": {
+        "job_id": "narration-film-01-r2",
+        "reason": "Rebuilt with the batched, resumable, chunked narration template (plan gpu-jobs-fast-resumable-modal C1); never run"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T08:36:22.452110+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 1,
+          "of": 2
+        },
+        "forecast_units": 1.6360666666666663,
+        "job_id": "narration-film-01-r3-c1of2",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T08:36:22.453518+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 1,
+          "of": 2
+        },
+        "job_id": "narration-film-01-r3-c1of2",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T08:36:22.461694+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 2,
+          "of": 2
+        },
+        "forecast_units": 1.6360666666666663,
+        "job_id": "narration-film-01-r3-c2of2",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T08:36:22.463179+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-film-01-r3",
+          "index": 2,
+          "of": 2
+        },
+        "job_id": "narration-film-01-r3-c2of2",
+        "kind": "narration",
         "target": "film-01"
       },
       "result": "job_target",

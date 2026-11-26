@@ -45,8 +45,8 @@
     "job_id": "narration-film-01-r2",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 2.6400166666666665,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   },
@@ -202,5 +202,23 @@
     "state": "reserved",
     "edition_id": "89d6ff7e-42c5-491c-8c05-0a08bc8827d6",
     "root": "pratihingsa"
+  },
+  {
+    "job_id": "narration-film-01-r3-c1of2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.6360666666666663,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "narration-film-01-r3-c2of2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.6360666666666663,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
   }
 ]
