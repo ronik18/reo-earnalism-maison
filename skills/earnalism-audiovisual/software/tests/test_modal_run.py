@@ -480,6 +480,33 @@ class ModalCapTests(unittest.TestCase):
                 self.go(fake_runner(0.4))
         self.assertEqual(self.ledger.modal_month_usd(self.MONTH), 0.4)
 
+    def test_normal_run_leaves_exactly_one_row_with_the_actual_amount(self):
+        self.go(fake_runner(0.37, seconds=5.0))
+        rows = self.ledger.modal_rows(job_id=self.job_id)
+        self.assertEqual([(r["usd"], r["status"], r["seconds"]) for r in rows], [(0.37, "ok", 5.0)])
+
+    def test_interrupted_run_leaves_pending_worst_case_that_blocks_and_modal_settle_replaces(self):
+        def interrupted(*a, **k):
+            raise KeyboardInterrupt()
+        with self.with_worst_case(0.60), mock.patch.object(modal_run, "run_modal", interrupted):
+            with self.assertRaises(KeyboardInterrupt):
+                run("modal-run", self.job_id, "--root", self.root)
+        rows = self.ledger.modal_rows(job_id=self.job_id)
+        self.assertEqual([r["status"] for r in rows], ["pending"])
+        self.assertAlmostEqual(rows[0]["usd"], 0.60)
+        self.seed(29.0)  # 0.60 pending + 29.00 + 0.60 worst case of a new run > 30
+        calls = []
+        with self.with_worst_case(0.60):
+            code, out = self.go(fake_runner(0.1, calls=calls))
+        self.assertEqual((code, calls), (3, []))
+        code, out = run("modal-settle", self.job_id, "--root", self.root, "--usd", 0.25)
+        self.assertEqual(code, 0, out)
+        rows = self.ledger.modal_rows(job_id=self.job_id)
+        self.assertEqual([(r["status"], r["usd"]) for r in rows], [("settled", 0.25)])
+        self.assertEqual(self.ledger.modal_units(self.job_id), 2.5)
+        code, out = run("modal-settle", self.job_id, "--root", self.root, "--usd", 0.25)
+        self.assertEqual(code, 2, out)  # nothing pending any more
+
     def test_import_defaults_units_to_the_sum_of_every_modal_session(self):
         self.go(fake_runner(0.25, "failed"))
         self.go(fake_runner(0.30))

@@ -10,6 +10,7 @@
                          (runs the built notebook headlessly on a Modal L4; --dry-run only checks and prints the plan;
                           leaves the job folder `import` expects; refuses (exit 3) past the 30 USD UTC-month Modal cap
                           and appends the actual spend to the ledger; then import/close need no --units)
+  python3 -m eav.cli modal-settle <job_id> --root <dir> --usd <billed>   (replace an interrupted run's pending worst-case row)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
   python3 -m eav.cli close <job_id> --root <dir> [--units <CU Colab shows>] --reason "<what happened>"
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
@@ -717,11 +718,18 @@ def cmd_modal_run(args):
         raise Stop(f"Budget exceeded: {e}. Modal was not contacted.",
                    "Hold the job and ask the owner; never run past the Modal cap.", code=3)
     download = Path(args.download) if args.download else rec.root / "modal-downloads"
-    result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download)
+    # a provisional worst-case row counts against the cap from before Modal is contacted; it is
+    # replaced by the actual spend when the run returns. If the process dies (Ctrl-C, kill, an error
+    # after the paid run) it stays pending at the worst case until `modal-settle`.
+    run_id = ledger.record_modal_spend(month, args.job_id, worst, 0.0, "pending",
+                                       datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    result = None
+    try:
+        result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download)
+    finally:
+        if result is not None:
+            ledger.finish_modal_spend(run_id, result["usd"], result["seconds"], result["status"])
     folder, status = result["folder"], result["status"]
-    # the spend is on the ledger before anything is printed: a crash after the run still counts
-    ledger.record_modal_spend(month, args.job_id, result["usd"], result["seconds"], status,
-                              datetime.now(timezone.utc).isoformat(timespec="seconds"))
     nxt = f"{PROG} import {args.job_id} --root {rec.root} --from {folder}"
     if status != "ok":
         nxt = (f"Rerun {PROG} modal-run {args.job_id} --root {rec.root} to resume from the volume; if it "
@@ -733,6 +741,21 @@ def cmd_modal_run(args):
                       "folder": str(folder), "next": nxt}, sort_keys=True))
     if status == "failed":
         raise Stop(f"remote run failed: {result['error']}", nxt)
+
+
+def cmd_modal_settle(args):
+    """Replace a job's pending (interrupted) Modal row with the amount the Modal dashboard billed."""
+    rec = _record(args.root)
+    ledger = _ledger(rec, args)
+    try:
+        budget._check_units(args.usd)
+        n = ledger.settle_pending_modal(args.job_id, args.usd)
+    except ValueError as e:
+        raise Stop(str(e), "Pass --usd as the amount billed, >= 0")
+    except KeyError:
+        raise Stop(f"job {args.job_id} has no pending Modal run on the ledger", f"{PROG} status --root {rec.root}")
+    print(f"Settled {n} pending Modal run(s) of job {args.job_id} at {args.usd:.4f} USD "
+          f"({round(args.usd / budget.USD_PER_CU, 2):g} CU-equivalent at import/close).")
 
 
 _ENDINGS = {"supersede": ("superseding", "superseded"), "close": ("closing", "closed")}
@@ -1321,7 +1344,7 @@ def cmd_social(args):
 
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
-            "supersede": cmd_supersede, "close": cmd_close, "modal-run": cmd_modal_run,
+            "supersede": cmd_supersede, "close": cmd_close, "modal-run": cmd_modal_run, "modal-settle": cmd_modal_settle,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio, "preview": cmd_preview, "social": cmd_social}
 
@@ -1358,6 +1381,9 @@ def _parser():
     s.add_argument("job_id")
     s.add_argument("--download", help="where the job folder lands (default <root>/modal-downloads)")
     s.add_argument("--dry-run", action="store_true", help="check and print the remote plan and forecast; run nothing")
+    s = add("modal-settle")
+    s.add_argument("job_id")
+    s.add_argument("--usd", type=float, required=True, help="the amount the Modal dashboard billed")
     s = add("supersede")
     s.add_argument("job_id")
     s.add_argument("--reason", required=True)

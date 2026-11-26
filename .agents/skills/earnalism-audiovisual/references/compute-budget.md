@@ -95,8 +95,11 @@ without it load as empty.
 - Before contacting Modal, `modal-run` forecasts the worst case the function timeout allows,
   `(DEADLINE_SECONDS + 900) x L4_USD_PER_S`, and refuses (exit 3, naming spent, forecast and
   remaining) if the month's spend plus that exceeds $30.00. Hold and ask the owner; never run past it.
-- The actual spend of every run, failed or hard-stopped ones included, is appended to the ledger
-  before the result is printed.
+- Before Modal is contacted a provisional row (`status: pending`) at the worst-case usd is appended; it
+  counts toward the cap and the job's sum. When the run returns it is replaced in place by the actual
+  spend (ok, failed or hard_stopped), before the result is printed. If the process dies (Ctrl-C, kill, an
+  error after the paid run) the row stays pending at the worst case: replace it with the billed amount from
+  the Modal dashboard via `eav modal-settle <job_id> --root <dir> --usd <billed>` (status `settled`).
 - A Modal run also counts against the 60 CU per title / 100 CU per month caps at Colab's price:
   CU-equivalent = usd / 0.10. `import` and `close` of a job with Modal rows need no `--units`: they
   settle at the sum of all the job's Modal rows / 0.10 (2 decimals), so every session of a resumed

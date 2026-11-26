@@ -20,7 +20,7 @@ MONTH_CAP = 100.0
 MARGIN = 1.15
 MODAL_MONTH_CAP_USD = 30.0
 USD_PER_CU = 0.10
-MODAL_STATUSES = ("ok", "failed", "hard_stopped")
+MODAL_STATUSES = ("ok", "failed", "hard_stopped", "pending", "settled")
 MIN_ITEMS = 1
 # The wan22 batch contract allocates at least 600 s per job, so a reel batch reserves at least that.
 REEL_MIN_SECONDS = 600
@@ -125,14 +125,18 @@ class Ledger:
                 f"remaining {max(MODAL_MONTH_CAP_USD - spent, 0):.2f} USD")
 
     def record_modal_spend(self, month: str, job_id: str, usd: float, seconds: float,
-                           status: str, at: str) -> None:
-        """Append one row to the month's modal_spend record (append-only)."""
+                           status: str, at: str) -> str:
+        """Append one row to the month's modal_spend record. Returns the row's run_id.
+        A "pending" row is a provisional worst-case charge written before Modal is contacted."""
         if status not in MODAL_STATUSES:
             raise ValueError(f"unknown modal status {status!r}")
         _check_units(usd)
         _check_units(seconds)
         everything = self._raw()
-        row = {"job_id": job_id, "usd": usd, "seconds": seconds, "at": at, "status": status}
+        n = sum(len(r["rows"]) for r in everything if "modal_spend" in r)
+        run_id = f"{job_id}#{n + 1}"
+        row = {"run_id": run_id, "job_id": job_id, "usd": usd, "seconds": seconds, "at": at,
+               "status": status}
         for rec in everything:
             if rec.get("modal_spend") == month:
                 rec["rows"].append(row)
@@ -140,6 +144,36 @@ class Ledger:
         else:
             everything.append({"modal_spend": month, "rows": [row]})
         self._write(everything)
+        return run_id
+
+    def finish_modal_spend(self, run_id: str, usd: float, seconds: float, status: str) -> None:
+        """Replace a row in place (a pending worst-case charge becomes the actual spend)."""
+        if status not in MODAL_STATUSES or status == "pending":
+            raise ValueError(f"unknown modal status {status!r}")
+        _check_units(usd)
+        _check_units(seconds)
+        everything = self._raw()
+        for rec in everything:
+            for row in rec.get("rows", ()):
+                if row.get("run_id") == run_id:
+                    row.update(usd=usd, seconds=seconds, status=status)
+                    self._write(everything)
+                    return
+        raise KeyError(run_id)
+
+    def pending_modal_runs(self, job_id: str) -> list:
+        return [r for r in self.modal_rows(job_id=job_id) if r["status"] == "pending"]
+
+    def settle_pending_modal(self, job_id: str, usd: float) -> int:
+        """Replace the job's pending rows with the billed amount: the first takes usd, any others 0
+        (usd is the total billed for those runs). Returns how many rows were replaced."""
+        _check_units(usd)
+        pending = self.pending_modal_runs(job_id)
+        if not pending:
+            raise KeyError(job_id)
+        for i, row in enumerate(pending):
+            self.finish_modal_spend(row["run_id"], usd if i == 0 else 0.0, row["seconds"], "settled")
+        return len(pending)
 
     @staticmethod
     def _mine(e, title, edition_id) -> bool:
