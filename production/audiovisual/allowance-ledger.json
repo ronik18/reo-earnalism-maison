@@ -1,400 +1,409 @@
 [
- {
-  "job_id": "narration-film-01",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled"
- },
- {
-  "job_id": "stills-film-01",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled"
- },
- {
-  "job_id": "stills-reel-1",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled"
- },
- {
-  "job_id": "music-film-01",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled"
- },
- {
-  "job_id": "stills-film-01-r2",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled"
- },
- {
-  "job_id": "stills-reel-1-r2",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled"
- },
- {
-  "job_id": "narration-film-01-r2",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "stills-film-01-r3",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "music-film-01-r2",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "narration-film-01-r3",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0.5,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "stills-film-01-r4",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "music-film-01-r3",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "narration-film-01-r4",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 1.5,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "stills-film-01-r5",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 1.8,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "music-film-01-r4",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0.3,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "narration-55c7f7cc",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "selfish-giant-stills-film-01",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "selfish-giant-music-film-01",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 0.7,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "stills-film-01-r6-judge",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "stills-film-01-r7-review",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "stills-film-01-r8-house",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 2.4,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "selfish-giant-stills-film-01-house",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 1.4,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "bicharak-voice-audition",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0.35,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "selfish-giant-voice-audition",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 0.4,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "narration-elevenlabs-0bca7520",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "narration-elevenlabs-db5b38b5",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "stills-film-01-r9",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 10.0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "selfish-giant-stills-film-01-r9",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 3.0,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "retouch-film-01-r9",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 1.5,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "stills-film-01-r10",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 1.0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "selfish-giant-retouch-film-01-r9",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 1.0,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "selfish-giant-stills-film-01-r10",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 1.1,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "edit-test-film-01",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 4.3,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "selfish-giant-edit-test-film-01",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 4.8,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "edit-test2-film-01",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "selfish-giant-edit-test2-film-01",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "edit-test3-film-01",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 1.39,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak",
-  "note": "measured: Colab balance 427 -> 425.61"
- },
- {
-  "job_id": "selfish-giant-edit-test3-film-01",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 0,
-  "state": "settled",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "selfish-giant-edit-test4-film-01",
-  "title": "the-selfish-giant",
-  "month": "2026-11",
-  "units": 1.4997277777777778,
-  "state": "reserved",
-  "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
-  "root": "the-selfish-giant"
- },
- {
-  "job_id": "motion-pilot-f01s014",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 2.9,
-  "state": "reserved",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak",
-  "note": "SPIKE: cinematic motion pilot (Wan 2.2 TI2V-5B x4 clips + depth), owner-approved 26 Nov 2026; forecast 70 min on L4"
- },
- {
-  "job_id": "stills-pilot2-f01s014",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 1.0,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "motion-pilot2-f01s014",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 2.9,
-  "state": "reserved",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak",
-  "note": "SPIKE: pilot v2 animation, 3 Wan 2.2 TI2V-5B clips at 1280x704 + depth for 8 stills; forecast 70 min on L4"
- },
- {
-  "job_id": "motion-pilot3-f01s014",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 2.9,
-  "state": "reserved",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak",
-  "note": "SPIKE: pilot v3 fix run, 3 new HD takes of the mother's shot (no detached hand); forecast 70 min on L4"
- },
- {
-  "job_id": "music-pilot3-f01s014",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 1.598883333333333,
-  "state": "reserved",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak"
- },
- {
-  "job_id": "motion-pilot3-f01s014-attempt1",
-  "title": "bicharak",
-  "month": "2026-11",
-  "units": 0.26,
-  "state": "settled",
-  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-  "root": "bicharak",
-  "note": "SPIKE: fix run stopped at the input checksum (an older notebook copy met re-staged inputs); nothing generated. Measured: Colab balance 421.53 -> 421.27 (A100)"
- }
+  {
+    "job_id": "narration-film-01",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled"
+  },
+  {
+    "job_id": "stills-film-01",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled"
+  },
+  {
+    "job_id": "stills-reel-1",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled"
+  },
+  {
+    "job_id": "music-film-01",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled"
+  },
+  {
+    "job_id": "stills-film-01-r2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled"
+  },
+  {
+    "job_id": "stills-reel-1-r2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled"
+  },
+  {
+    "job_id": "narration-film-01-r2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "stills-film-01-r3",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "music-film-01-r2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "narration-film-01-r3",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.5,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "stills-film-01-r4",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "music-film-01-r3",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "narration-film-01-r4",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.5,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "stills-film-01-r5",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.8,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "music-film-01-r4",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.3,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "narration-55c7f7cc",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "selfish-giant-stills-film-01",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "selfish-giant-music-film-01",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 0.7,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "stills-film-01-r6-judge",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "stills-film-01-r7-review",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "stills-film-01-r8-house",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 2.4,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "selfish-giant-stills-film-01-house",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 1.4,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "bicharak-voice-audition",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.35,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "selfish-giant-voice-audition",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 0.4,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "narration-elevenlabs-0bca7520",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "narration-elevenlabs-db5b38b5",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "stills-film-01-r9",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 10.0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "selfish-giant-stills-film-01-r9",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 3.0,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "retouch-film-01-r9",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.5,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "stills-film-01-r10",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "selfish-giant-retouch-film-01-r9",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 1.0,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "selfish-giant-stills-film-01-r10",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 1.1,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "edit-test-film-01",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 4.3,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "selfish-giant-edit-test-film-01",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 4.8,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "edit-test2-film-01",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "selfish-giant-edit-test2-film-01",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "edit-test3-film-01",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.39,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak",
+    "note": "measured: Colab balance 427 -> 425.61"
+  },
+  {
+    "job_id": "selfish-giant-edit-test3-film-01",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 0,
+    "state": "settled",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "selfish-giant-edit-test4-film-01",
+    "title": "the-selfish-giant",
+    "month": "2026-11",
+    "units": 1.4997277777777778,
+    "state": "reserved",
+    "edition_id": "55a3f5e3-f713-40b2-a873-942cd97bb1b7",
+    "root": "the-selfish-giant"
+  },
+  {
+    "job_id": "motion-pilot-f01s014",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 2.9,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak",
+    "note": "SPIKE: cinematic motion pilot (Wan 2.2 TI2V-5B x4 clips + depth), owner-approved 26 Nov 2026; forecast 70 min on L4"
+  },
+  {
+    "job_id": "stills-pilot2-f01s014",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.0,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "motion-pilot2-f01s014",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 2.9,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak",
+    "note": "SPIKE: pilot v2 animation, 3 Wan 2.2 TI2V-5B clips at 1280x704 + depth for 8 stills; forecast 70 min on L4"
+  },
+  {
+    "job_id": "motion-pilot3-f01s014",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 2.65,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak",
+    "note": "SPIKE: pilot v3 fix run, 3 new HD takes of the mother's shot (no detached hand); forecast 70 min on L4; measured 421.27 -> 418.62 (L4), 4 of 6 takes before the hard stop"
+  },
+  {
+    "job_id": "music-pilot3-f01s014",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.1,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  },
+  {
+    "job_id": "motion-pilot3-f01s014-attempt1",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.26,
+    "state": "settled",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak",
+    "note": "SPIKE: fix run stopped at the input checksum (an older notebook copy met re-staged inputs); nothing generated. Measured: Colab balance 421.53 -> 421.27 (A100)"
+  },
+  {
+    "job_id": "music-pilot3b-f01s014",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.598883333333333,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
+  }
 ]
