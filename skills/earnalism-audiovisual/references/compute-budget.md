@@ -18,8 +18,9 @@ derives them; a spec `compute` block may only restate them and is refused if it 
 so it can never lower a forecast (R21). The forecast seconds are also each notebook's hard
 stop (R25) and each Wan batch's wall (≤ 2700 s).
 
-Rates are **measured** on the last real run of that job kind on that GPU, never guessed
-and never defaulted. `rates.json` (one entry per kind; `steps`, if present, must equal the
+Rates are **measured** on the last real run of that job kind on that runner and GPU, never
+guessed and never defaulted. The first real Modal run of a kind sets Modal's rate for it; until
+then forecasts use the Colab L4 rates, and a forecast is never lowered. `rates.json` (one entry per kind; `steps`, if present, must equal the
 pinned value):
 
 ```json
@@ -42,6 +43,15 @@ voice unit (`items` = number of units).
 
 Planning size per title: narration ~2–10 CU, stills ~3–5 CU, ACE-Step cues ~2–3 CU,
 reel clips ~20–40 CU (the largest). About 30–60 CU per title, two titles a month.
+
+## Batching and resuming
+
+Narration generates `batch` units per call (pinned in the job, default 8, 1 to 32; part of the job
+identity) in bf16/fp16 with SDPA attention. Every narration, stills and music job is resumable: a
+finished item (file present, sha256 logged) is skipped when the job is re-run, in Colab or with
+`modal-run` again. Each session's seconds are logged (`sessions.jsonl`), and the stop for a re-run is
+the reserved forecast minus what earlier sessions used, so the total across sessions never exceeds
+the reservation. A resumed job settles once, at import or `close`.
 
 ## Chunks (session length, not the caps)
 
@@ -111,7 +121,9 @@ stills by keyframe). A job at or under 3600 s is built exactly as before. Music 
 
 Never: lower steps, resolution or frames of a prepared job; write a `compute` block;
 split a job to slip under a cap; shrink a measured rate; edit, delete or reset the ledger; run on another account;
-buy units; retry a failed job past its forecast; point a title at a fresh ledger.
+buy units; retry a failed job past its forecast; point a title at a fresh ledger. For Modal also
+never: run past or raise the $30 cap, skip or delete the pending row, run `reel_clips` on Modal,
+or rebuild a whole group when one closed chunk needs `--replace-chunk`.
 
 ## Actuals
 
@@ -140,3 +152,8 @@ without it load as empty.
   job counts. An explicit `--units` that differs is refused (it would double count). Colab jobs
   still need `--units`.
 - `status` prints `modal: $X.XX of $30.00 (UTC month YYYY-MM)`.
+- Only narration, stills and music run on Modal; `reel_clips` stays on Colab with the owner-signed
+  Wan authority file. The owner's listening review of the first narration package is still required
+  before narrations are spent at scale.
+- Hold on exit 3 from `modal-run` (cap), on a run that failed or hard-stopped (settle the pending
+  row, then import, resume or `close`), and on an `INCOMPLETE` import (resume, or `close`).

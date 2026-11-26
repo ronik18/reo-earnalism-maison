@@ -8,8 +8,10 @@ description: Use when the owner names a book (English or Bengali) and wants its 
 One instruction ("Make the audiovisual of বিচারক") becomes one reviewable package:
 a full-length **audiobook film** (illustrated scenes, gentle motion, Earnalism Voice,
 theme-fit score, SRT subtitles) and **one or two Squint-grade story reels** (1080×1920,
-60 s or 120 s). Zero extra spend: Claude plans, assembles and checks; the owner runs
-each GPU job in the existing Colab Pro account.
+60 s or 120 s). Zero extra spend beyond the owner's Colab Pro account and a Modal
+allowance of $30 per UTC month: Claude plans, assembles and checks; narration, stills and
+music jobs run either in Colab (the owner runs them) or on Modal (Claude runs `modal-run`);
+reel clips run only in Colab.
 
 **Core principle:** this skill *conducts*; it does not replace. Every stage is owned by
 an existing Earnalism skill, every gate is enforced by the `eav` CLI, and the CLI's
@@ -25,7 +27,7 @@ cd skills/earnalism-audiovisual/software
 python3 -m eav.cli status --root <title root>      # prints the next owner action
 ```
 
-Commands: `init`, `plan`, `job`, `import`, `supersede` (never ran; a chunk only with `--group`), `close` (ran, not
+Commands: `init`, `plan`, `job` (`--replace-chunk`), `modal-run`, `modal-settle`, `import`, `supersede` (never ran; a chunk only with `--group`), `close` (ran, not
 imported: settles the actual CU), `film`, `reel`, `qc`, `status`, `bundle-audio`, `preview` (public ≤120 s preview clip of chapter 1),
 `social` (posting kit; see [publishing](references/publishing.md)) (usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
@@ -37,9 +39,9 @@ inputs to get past it.
 |---|---|---|---|
 | 1 | Resolve exact edition and cleared text | server: `python manage.py export_audiovisual_source <slug> --out src.json`; then `init src.json --root <dir> --slug <slug>` | `earnalism-book-production` |
 | 2 | Read the whole work; context map (speakers, turns, reveals, ending) | `plan` (30–90 s scenes, 1 still per 8–15 s; series past 40 min) | `earnalism-audiobook-go-live` (`references/narrative-performance.md`) |
-| 3 | Earnalism Voice narration (dry, frozen before timing) | `job narration` → owner runs Colab → `import` | `earnalism-audiobook-go-live` |
-| 4 | World bible, anchor stills, film keyframes (FLUX.1-schnell) | `job stills --spec` → Colab → `import` | `earnalism-video`, `earnalism-covers` (cover/thumbnail) |
-| 5 | Score: VCSL editorial route by default, ACE-Step cues for colour | score bed or `job music` → Colab → `import` | `earnalism-audiobook-score` |
+| 3 | Earnalism Voice narration (dry, frozen before timing) | `job narration` → Colab (owner) or `modal-run` → `import` | `earnalism-audiobook-go-live` |
+| 4 | World bible, anchor stills, film keyframes (FLUX.1-schnell) | `job stills --spec` → Colab or `modal-run` → `import` | `earnalism-video`, `earnalism-covers` (cover/thumbnail) |
+| 5 | Score: VCSL editorial route by default, ACE-Step cues for colour | score bed or `job music` → Colab or `modal-run` → `import` | `earnalism-audiobook-score` |
 | 6 | Film assembly (measured timing, ducked mix, motion, logo, END) | `film` | `earnalism-video` |
 | 7 | Reels: script, narration (measured), shot plan, keyframes, Wan clips in batches of ≤ 5, assembly | `reel N --script`, `job narration --reel N`, `reel N --plan-shots`, `job stills --reel N`, `job reel_clips --reel N` per batch, `reel N` | `earnalism-video` (Wan22 route) |
 | 8 | Review: automated checks, contact sheets, owner review | `qc`; owner watches the first package | `earnalism-book-audiovisual` |
@@ -58,8 +60,9 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 | **No cleared source** (no export, missing text/hash, title not imported) | Stop. Say which edition is missing what. Route to `earnalism-book-production`. | Fetch or type the text yourself, pick another edition, "start with the reels". |
 | **Non-public-domain title** (`public_domain_evidence` false) | `init` refuses. Hold the title; it is out of scope. | Draft clearance for it, or produce social reels of it anyway. |
 | **Audio format not cleared on Maison** (only Reader read/preview) | Keep producing: film, reels and review need no Maison grant. `bundle-audio` drafts the per-title evidence; the owner completes and approves it; only then `stage`. | Write `publication_clearance` or rights rows by hand, call the draft "cleared", or publish audio before stage + fresh browser report. |
-| **Budget exceeded** (exit 3: forecast over 60 CU per title (keyed by edition) for its whole life, or 100 CU per calendar month) | Stop. Hold for the owner with the forecast, the remaining allowance and the CLI's fit (for `reel_clips`: how many of the batch's shots still fit). | Write or edit a spec `compute` block (it is derived and refused if it differs), lower steps/resolution of a prepared job, split a job to slip under the cap, shrink measured rates, edit, reset or swap the ledger pinned at `init`, init a second root for the edition, use another Colab account, or spend money. |
-| **Import held** (exit 4: missing, extra or mismatched file, or an `INCOMPLETE` manifest) | Re-download the complete output of that exact job and re-run `import`. A job that ran but can never be imported (crash, hard stop, lost download): `close <job_id> --units <CU Colab shows> --reason "..."`, then hold for the owner. | Rebuild/rerun the GPU job, copy files in by hand, edit `manifest.json`, or `supersede` a job that ran (supersede is for never-run jobs only). |
+| **Budget exceeded** (exit 3: forecast over 60 CU per title (keyed by edition) for its whole life, or 100 CU per calendar month; for `modal-run`, worst case over the $30.00 UTC-month Modal cap) | Stop. Hold for the owner with the forecast, the remaining allowance and the CLI's fit (for `reel_clips`: how many of the batch's shots still fit). Nothing was reserved or run. | Write or edit a spec `compute` block (it is derived and refused if it differs), lower steps/resolution of a prepared job, split a job to slip under the cap, shrink measured rates, edit, reset or swap the ledger pinned at `init`, init a second root for the edition, use another Colab account, raise or work around the Modal cap, or spend other money. |
+| **Import held** (exit 4: missing, extra or mismatched file, or an `INCOMPLETE` manifest) | Re-download the complete output of that exact job and re-run `import`. A job that is `INCOMPLETE` but only stopped short (hard stop, disconnect) is resumed by re-running it (Colab, or `modal-run` again), within its reserved time. A job that ran but can never be imported (crash, lost download): `close <job_id> --reason "..."` (Colab: `--units <CU Colab shows>`; Modal rows settle themselves), then hold for the owner; for a chunk, rebuild only that chunk with `job --replace-chunk <closed chunk id>`. | Rebuild/rerun the whole GPU job or group, copy files in by hand, edit `manifest.json`, or `supersede` a job that ran (supersede is for never-run jobs only). |
+| **Modal run died, failed or hard-stopped** (Ctrl-C, kill, error after the paid run: the ledger row stays `pending` at the worst case) | Read the billed amount from the Modal dashboard and run `modal-settle <job_id> --root <dir> --usd <billed>`; then `import` the output, or re-run to resume, or `close` as above. | Delete or edit the pending row, or assume the run was free. |
 | **QC failure** (exit 5: loudness, true peak, loop close, size, hook onset, reel narration that does not fit its length ± 3 s) | Fix only the failing item (one shot, one still, the mix), re-assemble, re-run `qc`. Reel narration that does not fit: rewrite the script's words, `reel N --script`, new reel narration. | Lower a gate, trim narration, or call unheard audio "reviewed". |
 | **Stream video held** | The film goes to owner review and to social destinations the owner names. Maison gets audio only. | Upload video to Maison/Stream; `attach_audiovisual_audio` refuses it anyway. |
 
@@ -71,21 +74,36 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   byte-for-byte from the roster plus at most one clause of ≤ 12 words. No new voice
   search, no impersonation, no spoken stage directions.
 - **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0) and
-  VCSL samples (CC0). MusicGen (CC-BY-NC weights) and FLUX.1-dev (non-commercial) are
+  VCSL samples (CC0), the same pinned models, voices and licences on either runner.
+  MusicGen (CC-BY-NC weights) and FLUX.1-dev (non-commercial) are
   forbidden even if the owner names them; offer the licensed equivalent instead.
   No paid generator or credit-spending connector (Kling, ElevenLabs, Suno, Runway,
-  Adobe/Canva credits): not for "just one test" either.
-- **Colab.** The owner runs every job. Narration, stills and music notebooks are inert
-  until `RUN = True` and stop at their forecast seconds (hard stop). Narration or stills
+  Adobe/Canva credits): not for "just one test" either. The only money Claude may spend is
+  Modal GPU time through `modal-run`, inside the cap below.
+- **Modal.** Narration, stills and music may run on Modal: Claude runs
+  `modal-run <job_id> --root <dir>` on the same built notebook (`--dry-run` first checks the plan).
+  Spend is capped at **$30 per UTC month** (decision of 26 Nov 2026): the worst case is checked
+  before Modal is contacted and recorded first as a `pending` ledger row, replaced by the actual
+  amount afterwards; `modal-settle` replaces it from the billed amount if the run died. Modal usd
+  also counts against the 60 CU title / 100 CU month caps at $0.10 per CU. Never raise, split around
+  or skip the cap or the pending row. Reel clips (Wan 2.2) never run on Modal.
+- **Rates.** Forecasts are per runner kind from measured rates: the first real Modal run of a kind
+  sets its rate; until then use the Colab L4 rates. Never lower a forecast.
+- **Colab.** The owner runs Colab jobs. Narration, stills and music notebooks are inert
+  until `RUN = True` and stop at their forecast seconds (hard stop). Narration is batched (pinned
+  `batch`, default 8, bf16/fp16 with SDPA); every narration, stills and music job is resumable:
+  re-running continues, and the total across sessions stays within the reserved forecast.
+  Narration or stills
   forecast over 3600 s are built as chunks `<id>-c<i>of<n>` of ≤ 3600 s each (one session
-  each; the caps see the sum): run and import every chunk; a closed chunk is rebuilt alone with `job --replace-chunk` ([budget](references/compute-budget.md)). Reel clips use the
+  each; the caps see the sum): run and import every chunk; a closed chunk is rebuilt alone with `job --replace-chunk`, never the whole group ([budget](references/compute-budget.md)). Reel clips use the
   Wan batch notebook: its own flags plus an authority file
   (`/content/wan22-batch-authority.json`) that **the owner writes and signs. Claude never
   writes, edits, drafts or fills in Wan authority files**, never supplies an observed rate,
   allocation time or approval for one. Claude never claims a GPU run it did not import
   and verify.
 - **Listening.** Automated checks are advisory. Owner review of the first package is
-  the listening assessment; anything not reviewed stays `unassessed`.
+  the listening assessment, and narrations are not spent at scale before the owner has listened
+  to the first narration package; anything not reviewed stays `unassessed`.
 - **Publishing.** Only after an explicit owner instruction naming the destination.
   A finished package, a Maison release or "go live" for Reader does not authorise
   social posting.
@@ -106,7 +124,11 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 - "I'll write the Wan authority JSON so the owner only has to press Run." (Owner
   evidence is the owner's; Claude prints what it must contain, nothing more.)
 - "The job crashed, so it cost nothing: supersede it." (It ran: `close` it with the CU
-  Colab shows.)
+  Colab shows, or the Modal rows' sum.)
+- "The Modal run was cheap, skip the pending row." / "Just raise the cap to $35 for one job."
+  (The pending row and the $30 cap are the owner's rules, not estimates.)
+- "Wan is faster on Modal." (Reels stay on Colab with the owner-signed authority file.)
+- "The chunk failed, rebuild the whole job." (`close` it, then `--replace-chunk` that chunk.)
 
 ## Rationalizations
 
@@ -115,5 +137,6 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 | "The owner wants it live today." | Speed comes from following `Next:`; gates are the owner's own rules. |
 | "Reader is already cleared, audio is the same text." | Audio is a separate offered format with its own evidence and rights rows. |
 | "I'll reserve later, the forecast is rough." | Forecast first from measured rates; the ledger reserves before anything is written. |
+| "Modal is only a few dollars." | Dollars are capped per UTC month and also count as CU against the title cap. |
 | "Retrying the failed clip once is fine." | A retry past the forecast is spend the owner did not approve. Cut or hold. |
 | "The waveform looks fine, call it reviewed." | Measurement is not listening. Mark unassessed. |
