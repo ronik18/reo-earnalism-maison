@@ -34,6 +34,8 @@ Last updated: 26 Nov 2026.
 - [ ] **Apple Podcasts / Spotify for Creators accounts**, once the first preview episode exists (Claude will give the submission steps).
 
 ## Decisions
+- [x] **Site quality decisions (26 Nov 2026):** cache public covers and serve small sizes; darken gold text only (before/after screenshots first); longer free preview (first chapter, up to ~1,500 words); one Back link in the reader.
+- [ ] **Listen to বিচারক narration** (sent 26 Nov; 20.7 min; check 07:31) and say "Voice approved", "Approved, but redo 07:31", or what to change. The other 13 narrations are built and run on Modal only after this.
 - [ ] **Import further approved titles as unpublished drafts** (nothing visible to readers) for their narration jobs: say so per title after you approve it on the Monday page.
 - [ ] **Founding member trigger for US/UK accounts** (Phase 9): the number of paying Indian Pass members that starts it (proposed 300).
 - [ ] **Standing permission start date** (`MAISON_REVIEW_STANDING_FROM`): about two months after the first Monday batch.
