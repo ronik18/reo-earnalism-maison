@@ -1,6 +1,6 @@
 # GPU jobs: faster, resumable, and runnable on Modal (design)
 
-Status: DRAFT, waiting on owner approval of the plan
+Status: APPROVED by the owner 26 Nov 2026 (all five plan questions: yes).
 `plans/pending/gpu-jobs-fast-resumable-modal.md`.
 Owner decision (26 Nov 2026): "Go with A + B, $30/month cap."
 
