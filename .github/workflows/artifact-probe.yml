@@ -1,0 +1,17 @@
+name: Artifact download probe (temporary)
+on:
+  push:
+    branches: [claude/wonderful-bardeen-s9k90x]
+    paths: [.github/workflows/artifact-probe.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: mkdir out && echo "probe $(date -u)" > out/probe.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: probe
+          path: out/
+          retention-days: 1
