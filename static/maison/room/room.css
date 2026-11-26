@@ -378,3 +378,21 @@ body.room-focused{background:var(--paper),#1A0E12;--surface:#2A1820;--raised:#35
    Upward and downward each dot reaches through the pill's 5px padding, where no other control is nearer.
    A negative margin keeps the layout; a positioned ::after would re-layer the dot and shift its anti-aliasing. */
 .turn-dot{height:54px;margin:-5px 0}
+/* Hero art: <picture> serves AVIF/WebP renditions; display:contents keeps the img laid out as the frame's own child */
+.room-hero-picture{display:contents}
+/* Element boxes of at least 44x44, not only the ::after hit area. Each rule grows the box with padding or min-width
+   and gives the space back with an equal negative margin (or grows into empty space), so nothing visible moves. */
+.room-footer a,.book-row h3 a,.series-episodes h2 a,.unit-list a{min-width:44px}
+.focus-toolbar>a{padding:0 7px;margin:0 -7px}
+.actions>a:not(.button){padding:9px 0;margin:-9px 0}
+[data-preview-fallback] a{padding:11px 0}
+/* stacked carousel cards sit back in perspective (down to 0.94x), so their links get 4px of spare height */
+.turn-actions .room-link{min-height:48px;margin:-2px 0}
+/* The mini logo link box grows to 44px tall (5px above, 6px below keep its pixel snapping). Its ivory tile moves to
+   pseudo-elements painted as before: the fill under the logo (::before) and the 4px outline over it (::after). */
+.room-logo-mini{box-sizing:content-box;padding:5px 0 6px;margin:-5px 0 -6px;background:none;outline:0;isolation:isolate}
+.room-logo-mini::before{content:"";position:absolute;z-index:-1;inset:5px 0 6px;border-radius:6px;background:var(--ivory)}
+.room-logo-mini::after{left:0;top:5px;width:100%;height:calc(100% - 11px);transform:none;border-radius:6px;outline:4px solid var(--ivory)}
+.room .room-logo-mini:focus-visible{outline:0}
+.room .room-logo-mini:focus-visible::before{border-radius:3px}
+.room .room-logo-mini:focus-visible::after{outline:3px solid var(--wine);outline-offset:3px;border-radius:3px}

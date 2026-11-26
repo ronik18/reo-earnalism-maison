@@ -201,6 +201,12 @@ def search(request, locale):
                 allow_index=not django_settings.LOCAL and request.path.endswith("/explore/") and not request.GET)
 
 
+def edition_creators(edition_id):
+    # Same source as the catalog cards' creators (Work.creators); edition_detail keeps its closed API shape.
+    from library.models import Edition
+    return Edition.objects.filter(pk=edition_id).values_list("work__creators", flat=True).first() or []
+
+
 @require_GET
 @domain_view
 def title(request, locale, identifier):
@@ -231,10 +237,10 @@ def title(request, locale, identifier):
     download_bootstrap = {"edition_revision_id":edition["edition_revision_id"],"unit_ids":[u["unit_id"] for u in units],"units":[{"unit_id":u["unit_id"],"title":u["title"]} for u in units],"formats":edition["downloadable_formats"],"title":edition["title"],"locale":edition["locale"]} if django_settings.FEATURES.get("offline_text_audio") and edition["published_at"] and request.user.is_authenticated else None
     sample = public_preview_data(request, edition) if django_settings.FEATURES.get("audio") else {}
     from learning.classroom import is_teacher
-    from library.models import Edition
-    # Same source as the catalog cards' creators (Work.creators); edition_detail keeps its closed API shape.
-    creators = Edition.objects.filter(pk=edition["edition_id"]).values_list("work__creators", flat=True).first() or []
-    return page(request, locale, "web/title.html", teacher=is_teacher(request.user), edition=edition, creators=creators, translation=edition_translation(edition["edition_id"]), units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
+    creators = edition_creators(edition["edition_id"])
+    # A one-part story whose only unit is named after the book needs no Contents list.
+    single_unit_is_book = len(units) == 1 and " ".join(str(units[0].get("title") or "").split()).casefold() == " ".join(str(edition["title"]).split()).casefold()
+    return page(request, locale, "web/title.html", teacher=is_teacher(request.user), edition=edition, creators=creators, translation=edition_translation(edition["edition_id"]), units=units, show_contents=not single_unit_is_book, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
 
 
 @require_GET
@@ -277,7 +283,7 @@ def reader(request, locale, edition_id, unit_id=None):
             bootstrap["next_unit_url"]=None
         bootstrap["player_url"]=None
     pair = None if document.get("preview") or not request.user.is_authenticated else parallel_rows(document, parallel_companion(request.user, edition_id, unit_id, territory=trusted_territory(request)))
-    return page(request, locale, "web/reader.html", document=document, edition=edition, translation=edition_translation(edition["edition_id"]), pair=pair, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination)
+    return page(request, locale, "web/reader.html", document=document, edition=edition, creators=edition_creators(edition["edition_id"]), translation=edition_translation(edition["edition_id"]), pair=pair, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination)
 
 
 def parallel_rows(document, companion):

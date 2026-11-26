@@ -83,6 +83,16 @@ def _shorten(text, limit=300):
     return text if len(text) <= limit else text[:limit - 1].rsplit(" ", 1)[0] + "…"
 
 
+def reader_description(edition, creators=None):
+    """'<title> by <author> — <edition description>': the edition's own blurb, never the reading text,
+    so the description gives away nothing past the public preview."""
+    title = edition["title"]
+    names = ", ".join(str(name) for name in (creators or []) if str(name).strip())
+    head = f"{title} by {names}" if names else title
+    blurb = " ".join(str(edition.get("description") or "").split())
+    return f"{head} — {blurb}" if blurb else f"{head}, an edition on Earnalism."
+
+
 def _public_cover(edition):
     """The published front cover only; staff draft covers never go into sharing tags."""
     cover = edition.get("cover") if isinstance(edition, dict) else None
@@ -109,7 +119,7 @@ def page_meta(request, ctx, template=""):
     elif route in ("reader", "reader-start") and edition:
         unit_title = ((ctx.get("document") or {}).get("unit") or {}).get("title") or ""
         title = f"{unit_title} · {edition['title']}" if unit_title and unit_title != edition["title"] else f"Read {edition['title']}"
-        description = f"Read {unit_title or edition['title']} from {edition['title']} on Earnalism."
+        description = reader_description(edition, ctx.get("creators"))
     elif route in ("player", "player-unit", "audio-preview", "video") and edition:
         verb = "Watch" if route == "video" else "Listen to"
         title, description = f"{verb} {edition['title']}", f"{verb} {edition['title']} on Earnalism."
