@@ -1,11 +1,35 @@
 {
   "colab_units": 0.0,
+  "error": "ValueError: T5EncoderModel does not support an attention implementation through torch.nn.functional.scaled_dot_product_attention yet. Please request the support for this architecture: https://github.com/huggingface/transformers/issues/28005. If you believe this error is a bug, please open an issue in Transformers GitHub repository and load your model with the argument `attn_implementation=\"eager\"` meanwhile. Example: `model = AutoModel.from_pretrained(\"openai/whisper-tiny\", attn_implementation=\"eager\")`",
+  "files": [
+    {
+      "bytes": 61610,
+      "path": "inputs.zip",
+      "sha256": "bb1a2f5b9800b631db8bc1fee656b95a05eb59a0caa79d6a8cdca4e155c7ca74"
+    },
+    {
+      "bytes": 489,
+      "path": "sessions.jsonl",
+      "sha256": "4d062bb6304a9f7415ef37c8f5e5f1f59894dba6425da3cabe33a94de05ddd9d"
+    }
+  ],
+  "finished_at": "2026-11-26T13:01:10+00:00",
   "job_id": "narration-film-01-r3-c1of2",
+  "modal_contacted_at": "2026-11-26T12:44:48+00:00",
   "pending_run_id": "narration-film-01-r3-c1of2#4",
   "r2_prefix": "gpu-jobs/bicharak/narration-film-01-r3-c1of2/run-4/",
   "requested_at": "2026-11-26T12:44:11+00:00",
+  "run": {
+    "error": "ValueError: T5EncoderModel does not support an attention implementation through torch.nn.functional.scaled_dot_product_attention yet. Please request the support for this architecture: https://github.com/huggingface/transformers/issues/28005. If you believe this error is a bug, please open an issue in Transformers GitHub repository and load your model with the argument `attn_implementation=\"eager\"` meanwhile. Example: `model = AutoModel.from_pretrained(\"openai/whisper-tiny\", attn_implementation=\"eager\")`",
+    "run_id": "narration-film-01-r3-c1of2#4",
+    "seconds": 976.891117359,
+    "status": "failed",
+    "usd": 0.2710872850671225
+  },
   "schema": "earnalism.modal-request.v1",
-  "status": "running",
+  "seconds": 976.891117359,
+  "status": "failed",
   "title_root": "production/audiovisual/bicharak",
+  "usd": 0.2710872850671225,
   "worst_case_usd": 1.091962
 }
