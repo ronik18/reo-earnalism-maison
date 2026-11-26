@@ -4,20 +4,9 @@ Things only the owner can do. Claude keeps this list current; tick an item by te
 Last updated: 26 Nov 2026.
 
 ## Approvals
-- [ ] **Monday review page:** open https://theearnalism.com/en/staff/review/ (signed in as staff) and approve each title's clearance **and** its cover:
-  - [ ] নিশীথে (clearance + cover)
-  - [ ] দিদি (clearance + cover)
-  - [ ] মানভঞ্জন (clearance + cover)
-  - [ ] অতিথি (clearance + cover)
-  - [ ] প্রায়শ্চিত্ত (clearance + cover; cover designed by Claude at your instruction, on the page after the next deploy)
-  - [ ] আপদ (clearance + cover; cover designed by Claude at your instruction, on the page after the next deploy)
-  - [ ] ঠাকুর্দ্দা (clearance + cover; cover designed by Claude at your instruction, on the page after the next deploy)
-  - [ ] প্রতিহিংসা (clearance + cover; cover designed by Claude at your instruction, on the page after the next deploy)
-  - [ ] মধ্যবর্ত্তিনী, শাস্তি, সমাপ্তি from *কথা-চতুষ্টয়* (1894) (clearance + cover; on the page after the next deploy)
-  - [ ] মেঘ ও রৌদ্র from *কথা-চতুষ্টয়* (clearance + cover; on the page now)
-  - [ ] The Hungry Stone (English AI translation of ক্ষুধিত পাষাণ): clearance + cover + edition label review (on the page after the next deploy)
-  - When you approve a title's clearance and cover, Claude runs three server jobs (import, record the browser check, publish) and the title is live within minutes; its browser check is already done.
-- [ ] **Say which approved titles to publish.** Standing instruction (25 Nov): publish every title that is ready. Ready means its clearance and cover are approved, it passes browser acceptance and it is deployed. ক্ষুধিত পাষাণ published 25 Nov; each title you approve on the Monday page follows.
+- [ ] **Monday review page:** https://theearnalism.com/en/staff/review/ (signed in as account #4). Nothing is pending there now; new titles appear as they are packaged. One item was left untouched on purpose: the ক্ষুধিত পাষাণ cover provenance row (that title is already live).
+- [ ] **Check the new titles while signed in** (optional): open a few of the 13 titles from Explore and try the "Side by side" toggle on ক্ষুধিত পাষাণ. Every title passed the browser check before publishing; anonymous visitors see the free preview and are asked to sign in for the rest.
+- Standing instruction (25 Nov): publish every title that is ready (clearance and cover approved, browser acceptance passed, deployed). Each title you approve on the Monday page follows.
 
 ## Assets
 - [ ] **Check two clauses in ক্ষুধিত পাষাণ against the 1895 scan** (published text follows the proofread transcription): open https://bn.wikisource.org/wiki/পাতা:গল্প-দশক_-_রবীন্দ্রনাথ_ঠাকুর.pdf/১৭৬ and see whether the printed line reads “…কখনো এখানে রাত্রিযাপন করিবেন।” or “…করিবেন না।” (later printings have “না”). A second likely case is “জানি” (probably “জানি না”) later in the story. If the scan has “না”, tell Claude: the transcription gets corrected and a revised edition goes to the Monday page.
@@ -55,4 +44,5 @@ Last updated: 26 Nov 2026.
 - [x] ক্ষুধিত পাষাণ published (25 Nov 2026).
 - [x] Missing covers designed by Claude in the series style (প্রায়শ্চিত্ত, আপদ, ঠাকুর্দ্দা, প্রতিহিংসা), 25 Nov 2026.
 - [x] D11 footnote style in the reader for মেঘ ও রৌদ্র (25 Nov 2026).
+- [x] Monday-page approval of the 12 pipeline titles (clearance and cover) and The Hungry Stone (clearance, cover, AI-translation label), 26 Nov 2026; all 13 published the same day.
 - [x] D8 Monday-page approval unlocks publishing; D9 two-click cancel; D10 public podcast previews.
