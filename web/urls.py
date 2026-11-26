@@ -1,5 +1,5 @@
 from django.urls import path, re_path
-from . import views, legal, podcast
+from . import views, legal, podcast, seo
 from .legacy_redirects import legacy_page, legacy_title
 
 app_name = "web"
@@ -8,6 +8,9 @@ urlpatterns = [
     re_path(r"^(?P<name>privacy|terms|contact|copyright|library|pricing|about|micro-story)/?$", legacy_page),
     re_path(r"^(?P<name>journal)(?P<rest>/.*)?$", legacy_page),
     re_path(r"^(?:book|reader)/(?P<slug>[A-Za-z0-9-]+)/?$", legacy_title),
+    path("favicon.ico", seo.favicon, name="favicon"),
+    path("robots.txt", seo.robots, name="robots"),
+    path("sitemap.xml", seo.sitemap, name="sitemap"),
     path("maison-sw.js",views.service_worker,name="service-worker"),
     path("<str:locale>/offline/",views.offline_shell,name="offline-shell"),
     path("podcast/<str:locale>.xml", podcast.feed, name="podcast-feed"),

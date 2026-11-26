@@ -36,6 +36,11 @@ MAX_APPROVED_UNITS = 5.0
 DRIVE_ROOT = "/content/drive/MyDrive/earnalism-audiovisual"
 
 KINDS = ("narration", "stills", "music", "reel_clips")
+# Long narration/stills jobs are cut into consecutive chunks of at most this many forecast seconds
+# (margin included), so each chunk fits one GPU session and resumes cleanly. This is for session
+# length only: the caps are checked once against the sum of every chunk (chunk_forecasts).
+MAX_CHUNK_SECONDS = 3600
+CHUNKED_KINDS = ("narration", "stills")
 JOB_SCHEMA = "earnalism.audiovisual-job.v1"
 _TEMPLATES = Path(__file__).with_name("templates")
 _WAN_DIR = Path(__file__).resolve().parents[3] / "earnalism-video" / "software" / "wan22"
@@ -105,28 +110,158 @@ with zipfile.ZipFile(INPUT_ZIP) as z:
 if JOB["job_id"] != JOB_ID:
     raise RuntimeError("job.json belongs to a different job")
 print("inputs verified for", JOB_ID)
+attach_session()
 '''
 
 # R25: the hard stop counts from this cell (run right after the config) and equals the forecast
-# seconds the ledger reserved. Items start only while they can still finish before it; a Timer
+# seconds the ledger reserved, minus what earlier sessions of the same job already used. Items start only while they can still finish before it; a Timer
 # unassigns the runtime at the stop itself, as the Wan notebook does.
-_CLOCK = _GUARD + '''import threading, time
+_CLOCK = _GUARD + '''import hashlib, json, os, threading, time
+BOOKKEEPING = ("progress.jsonl", "sessions.jsonl")  # resume records: never outputs
+
+
+def _rows(name):
+    rows = []
+    path = OUT_DIR / name
+    if path.is_file():
+        for line in path.read_text().splitlines():
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue  # a line torn by a disconnect
+            if isinstance(row, dict):
+                rows.append(row)
+    return rows
+
+
+_APPEND_LOCK = globals().get("_APPEND_LOCK") or threading.Lock()
+
+
+def _append(name, row):
+    # the heartbeat thread and the main thread both append: one writer at a time
+    with _APPEND_LOCK:
+        path = OUT_DIR / name
+        torn = path.is_file() and path.stat().st_size > 0 and path.read_bytes()[-1:] != b"\\n"
+        with open(path, "a") as f:
+            f.write(("\\n" if torn else "") + json.dumps(row, sort_keys=True) + "\\n")
+            f.flush()
+            os.fsync(f.fileno())
+
+
+def session_seconds():
+    # started -> seconds, the latest line per session (this one once it has started)
+    latest = {}
+    for row in _rows("sessions.jsonl"):
+        if "started" in row and isinstance(row.get("seconds"), (int, float)):
+            latest[row["started"]] = row["seconds"]
+    return latest
+
+
+def note_session():
+    _append("sessions.jsonl", {"started": JOB_STARTED, "seconds": round(time.time() - JOB_STARTED, 1)})
+
+
+def resume_done(names):
+    # Finished = present AND matching its progress.jsonl line written for THIS inputs.zip (a line
+    # of other inputs proves nothing); a file without one is deleted (redone).
+    logged = {}
+    for row in _rows("progress.jsonl"):
+        if isinstance(row.get("file"), str) and isinstance(row.get("sha256"), str) \\
+                and row.get("zip") == INPUT_ZIP_SHA256:
+            logged[row["file"]] = row["sha256"]
+    done = set()
+    for name in names:
+        path = OUT_DIR / name
+        if not path.is_file():
+            continue
+        if logged.get(name) == hashlib.sha256(path.read_bytes()).hexdigest():
+            done.add(name)
+        else:
+            path.unlink()
+            print("redo", name, "(no matching progress line)")
+    return done
+
+
+def record_item(key, name, item_s=None):
+    # item_s: the seconds this item (or its batch) took; a resumed session starts from it
+    digest = hashlib.sha256((OUT_DIR / name).read_bytes()).hexdigest()
+    row = {"key": key, "file": name, "sha256": digest, "zip": INPUT_ZIP_SHA256}
+    if isinstance(item_s, (int, float)) and not isinstance(item_s, bool) and item_s >= 0:
+        row["item_s"] = round(item_s, 1)
+    _append("progress.jsonl", row)
+    note_session()
+
+
+def last_item_seconds():
+    # The latest recorded item (or batch) time, so a resumed session's first item starts only if
+    # it can finish before the stop; 0.0 before any item of this job finished.
+    times = [r["item_s"] for r in _rows("progress.jsonl") if r.get("zip") == INPUT_ZIP_SHA256
+             and isinstance(r.get("item_s"), (int, float))]
+    return float(times[-1]) if times else 0.0
+
+
+def _hard_stop():
+    try:
+        note_session()
+    except Exception as e:  # Drive may have dropped; the runtime must still be released
+        print("could not record the session seconds:", e)
+    finally:
+        runtime.unassign()
+
+
+def _heartbeat():
+    while not HEARTBEAT_STOP.wait(HEARTBEAT_S):
+        try:
+            note_session()  # a session killed mid-batch (OOM, disconnect) is still charged
+        except Exception:
+            pass
+
+
+def attach_session():
+    # Run once OUT_DIR is known (after the Drive mount): shorten the stop by what earlier sessions
+    # used, charge this session from JOB_STARTED, and start the heartbeat.
+    global PRIOR_SECONDS, EFFECTIVE_DEADLINE, STOP_GUARD, SESSION_ATTACHED
+    if SESSION_ATTACHED:
+        return
+    PRIOR_SECONDS = sum(v for k, v in session_seconds().items() if k != JOB_STARTED)
+    EFFECTIVE_DEADLINE = DEADLINE_SECONDS - PRIOR_SECONDS
+    remaining = EFFECTIVE_DEADLINE - (time.time() - JOB_STARTED)
+    if remaining <= 0:
+        note_session()
+        raise RuntimeError("reserved time used up: close the job with the CU Colab shows")
+    STOP_GUARD.cancel()
+    STOP_GUARD = threading.Timer(remaining, _hard_stop)
+    STOP_GUARD.daemon = True
+    STOP_GUARD.start()
+    note_session()
+    SESSION_ATTACHED = True
+    threading.Thread(target=_heartbeat, daemon=True).start()
+    print("reserved %d s, %d s used by earlier sessions" % (DEADLINE_SECONDS, PRIOR_SECONDS))
+
+
+# R25: the hard stop is armed here, right after the config, for the full reserved seconds; the
+# verify cell then calls attach_session() to take off what earlier sessions used.
+HEARTBEAT_S = globals().get("HEARTBEAT_S", 20)
+HEARTBEAT_STOP = globals().get("HEARTBEAT_STOP") or threading.Event()
 if "JOB_STARTED" not in globals():
     JOB_STARTED = time.time()
+    PRIOR_SECONDS = 0
+    EFFECTIVE_DEADLINE = DEADLINE_SECONDS
+    SESSION_ATTACHED = False
     from google.colab import runtime
-    STOP_GUARD = threading.Timer(DEADLINE_SECONDS, runtime.unassign)
+    STOP_GUARD = threading.Timer(DEADLINE_SECONDS, _hard_stop)
     STOP_GUARD.daemon = True
     STOP_GUARD.start()
 INCOMPLETE = False
 
 
 def may_start(last_item_s):
-    """Between items: start the next one only if it (and the manifest) fits before the hard stop."""
+    # Between items: start the next one only if it (and the manifest) fits before the hard stop.
     global INCOMPLETE
-    left = DEADLINE_SECONDS - (time.time() - JOB_STARTED)
+    left = EFFECTIVE_DEADLINE - (time.time() - JOB_STARTED)
     if left < last_item_s + MANIFEST_RESERVE_S:
         INCOMPLETE = True
-        print("HARD STOP: %.0f s left of the %d s forecast; no further item starts" % (left, DEADLINE_SECONDS))
+        print("HARD STOP: %.0f s left of the %d s still reserved; no further item starts" % (left, EFFECTIVE_DEADLINE))
         return False
     return True
 
@@ -138,7 +273,7 @@ _MANIFEST = _GUARD + '''import hashlib, json, time
 import importlib.metadata as _md
 outputs = {}
 for p in sorted(OUT_DIR.iterdir()):
-    if p.is_file() and p.name not in ("manifest.json", "inputs.zip"):
+    if p.is_file() and p.name not in ("manifest.json", "inputs.zip") + BOOKKEEPING:
         outputs[p.name] = hashlib.sha256(p.read_bytes()).hexdigest()
 if not outputs:
     raise RuntimeError("no outputs were produced")
@@ -151,12 +286,14 @@ for _name in PACKAGES:
         packages[_name] = _dist.version + (" @ " + _commit if _commit else "")
     except _md.PackageNotFoundError:
         packages[_name] = None
+note_session()
+_sessions = session_seconds()
 complete = not INCOMPLETE and all(name in outputs for name in EXPECTED)
 manifest = {"schema": "earnalism.audiovisual-outputs.v1", "job_id": JOB_ID, "title": TITLE,
             "kind": KIND, "input_zip_sha256": INPUT_ZIP_SHA256, "model": MODEL_INFO,
             "status": "COMPLETE" if complete else "INCOMPLETE",
             "deadline_seconds": DEADLINE_SECONDS,
-            "elapsed_seconds": round(time.time() - JOB_STARTED, 1),
+            "elapsed_seconds": round(sum(_sessions.values()), 1), "sessions": len(_sessions),
             "packages": packages, "outputs": outputs}
 (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\\n")
 print("manifest.json written:", manifest["status"], len(outputs), "files")
@@ -186,8 +323,10 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
              f"(sha256 of every output) land in the same folder.\n\n**Hard stop:** "
              f"{int(deadline_s)} s (the reserved forecast) from the clock cell. No item starts after "
              f"it and the runtime is unassigned at it; a stopped run's manifest says INCOMPLETE and "
-             f"cannot be imported.\n")
-    # The generation cell may call setup that sets OUT_DIR; the verify cell sets JOB/OUT_DIR.
+             f"cannot be imported.\n\n**Disconnected?** Run all again: finished items are kept "
+             f"(`progress.jsonl`, checked by sha256) and the run continues where it stopped, "
+             f"within the same reserved time (`sessions.jsonl` counts what earlier runs used).\n")
+    # The clock arms the stop first; the verify cell sets JOB/OUT_DIR and attaches the session.
     parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _CLOCK),
              ("code", _VERIFY), ("code", template.read_text(encoding="utf-8")),
              ("code", _MANIFEST)]
@@ -223,6 +362,17 @@ def _generation(preset: dict) -> dict:
             raise ValueError(f"preset generation setting {k!r} invalid: {v!r}")
         out[k] = v
     return out
+
+
+DEFAULT_BATCH = 8
+
+
+def _batch(spec: dict) -> int:
+    """Units per generate() call; pinned in job.json, so it is part of the job identity."""
+    v = spec.get("batch", DEFAULT_BATCH)
+    if isinstance(v, bool) or not isinstance(v, int) or not 1 <= v <= 32:
+        raise ValueError(f"narration batch must be an integer from 1 to 32, not {v!r}")
+    return v
 
 
 def pinned_steps(kind: str) -> int:
@@ -294,6 +444,33 @@ def job_items(kind: str, spec: dict) -> int:
     return len(spec.get("shots" if kind == "reel_clips" else "items") or [])
 
 
+def chunk_sizes(compute: dict, rates: dict) -> list:
+    """Item counts of the consecutive chunks a job is cut into: [items] when its forecast is at most
+    MAX_CHUNK_SECONDS (or the kind is not chunked), else the fewest chunks, as even as possible, each
+    forecast (same formula, its own decode_s/export_s overhead) at most MAX_CHUNK_SECONDS."""
+    items = compute["items"]
+    if compute["kind"] not in CHUNKED_KINDS or forecast_seconds(compute, rates) <= MAX_CHUNK_SECONDS:
+        return [items]
+
+    def fits(k):
+        return forecast_seconds({**compute, "items": k}, rates) <= MAX_CHUNK_SECONDS
+
+    per = 0
+    while per < items and fits(per + 1):
+        per += 1
+    if per == 0:
+        raise ValueError(f"one {compute['kind']} item alone is forecast over {MAX_CHUNK_SECONDS} s; "
+                         "it cannot be cut into session-length chunks")
+    n = -(-items // per)
+    base, extra = divmod(items, n)
+    return [base + 1] * extra + [base] * (n - extra)
+
+
+def chunk_forecasts(compute: dict, rates: dict) -> list:
+    """(items, forecast units) of each chunk; the caps are checked once against their sum."""
+    return [(k, forecast({**compute, "items": k}, rates)) for k in chunk_sizes(compute, rates)]
+
+
 def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
     """Validate the spec; return everything needed to write, without touching disk."""
     compute = derive_compute(kind, spec, rates, job_items(kind, spec))
@@ -305,7 +482,8 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                                  spec.get("language", "en"))
         if not units:
             raise ValueError("no voice units")
-        return {"payload": {"units": units, "generation": _generation(spec["preset"])},
+        return {"payload": {"units": units, "generation": _generation(spec["preset"]),
+                            "batch": _batch(spec)},
                 "repo": NARRATION_REPO,
                 "revision": NARRATION_REVISION, "steps": 1, "compute": compute}
     if kind == "stills":
@@ -329,6 +507,26 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
     raise ValueError(f"unknown job kind: {kind!r}")
 
 
+def art_images(spec: dict) -> dict:
+    """image basename -> its file. art_dir is one folder, or a list of folders (the chunk folders
+    of a chunked stills job: each shot's image is taken from the one folder that holds it)."""
+    dirs = spec.get("art_dir")
+    dirs = [dirs] if isinstance(dirs, (str, Path)) else dirs
+    if not isinstance(dirs, list) or not dirs or not all(isinstance(d, (str, Path)) for d in dirs):
+        raise ValueError("reel_clips spec art_dir must be a folder or a list of folders")
+    out = {}
+    for shot in spec.get("shots") or []:
+        name = shot.get("image")
+        if not isinstance(name, str) or not name or Path(name).name != name:
+            raise ValueError(f"shot {shot.get('id')!r}: image must be a file name inside art_dir")
+        hits = [Path(d) / name for d in dirs if (Path(d) / name).is_file()]
+        if len(hits) != 1:
+            raise ValueError(f"shot {shot.get('id')!r}: {name} is in {len(hits)} of the art_dir "
+                             "folders; it must be in exactly one")
+        out[name] = hits[0]
+    return out
+
+
 def _reel_job(spec: dict, job_id: str, seconds: float, rate: dict) -> dict:
     """One Wan batch: its wall is bound to the forecast and it must be one the owner can
     authorize under batch.py (wall <= 2700 s; 2 x rate x wall / 3600 <= approved CU <= 5)."""
@@ -348,13 +546,13 @@ def _reel_job(spec: dict, job_id: str, seconds: float, rate: dict) -> dict:
         raise ValueError(f"the owner's Wan authority would have to approve {need:.2f} CU "
                          f"(2 x {uph:g} CU/h x {wall} s), over the Wan worker's "
                          f"{MAX_APPROVED_UNITS:g} CU per-batch limit; use fewer shots per batch")
-    art = Path(spec["art_dir"])
+    images = art_images(spec)
     evidence = spec.get("prior_attempt_evidence")
     if not isinstance(evidence, dict) or not evidence:
         raise ValueError("reel_clips spec needs prior_attempt_evidence (a non-empty dict)")
     scenes = []
     for shot in spec["shots"]:
-        digest = hashlib.sha256((art / shot["image"]).read_bytes()).hexdigest()
+        digest = hashlib.sha256(images[shot["image"]].read_bytes()).hexdigest()
         scenes.append({
             "id": shot["id"], "image": shot["image"], "image_sha256": digest,
             "profile": REEL_PROFILE,
@@ -372,19 +570,80 @@ def _reel_job(spec: dict, job_id: str, seconds: float, rate: dict) -> dict:
     return job
 
 
+def _chunk_plan(kind: str, plan: dict, spec: dict, rates: dict, chunk: dict) -> dict:
+    """The validated full job's plan cut to items [start, stop); compute derived for that slice."""
+    key = "units" if kind == "narration" else "items"
+    rows = plan["payload"][key][chunk["start"]:chunk["stop"]]
+    if not rows or chunk["stop"] - chunk["start"] != len(rows):
+        raise ValueError(f"chunk {chunk['index']} of {chunk['of']} is outside the job's items")
+    bare = {k: v for k, v in spec.items() if k != "compute"}  # the full job's block was checked
+    return {**plan, "payload": {**plan["payload"], key: rows},
+            "compute": derive_compute(kind, bare, rates, len(rows)),
+            "chunk": {"index": chunk["index"], "of": chunk["of"], "group": chunk["group"]}}
+
+
+def new_job_id(kind: str) -> str:
+    return f"{kind.replace('_', '-')}-{uuid.uuid4().hex[:8]}"
+
+
+def chunk_job_id(group: str, index: int, of: int) -> str:
+    """Chunk ids keep the job id scheme with a suffix: <kind>-<hex8>-c<index>of<of> (1-based)."""
+    return f"{group}-c{index}of{of}"
+
+
+def replacement_job_id(group: str, index: int, of: int, k: int) -> str:
+    """The k-th rebuild (1, 2, ...) of one chunk: <group>-c<index>of<of>-r<k>."""
+    return f"{chunk_job_id(group, index, of)}-r{k}"
+
+
+def _replacement_plan(kind: str, old: dict, build: dict, rates: dict) -> dict:
+    """A closed/superseded chunk's exact work again: the same payload (items in the same order,
+    generation, batch), model and revision, read from its own job.json and build manifest; only the
+    forecast is derived afresh from the measured rates."""
+    if kind not in CHUNKED_KINDS or old.get("kind") != kind or not isinstance(old.get("chunk"), dict):
+        raise ValueError(f"only a {'/'.join(CHUNKED_KINDS)} chunk can be replaced")
+    repo = NARRATION_REPO if kind == "narration" else STILLS_REPO
+    model = build.get("model") or {}
+    if old.get("model") != repo or model.get("repo") != repo or not model.get("revision"):
+        raise ValueError(f"the chunk was built with {old.get('model')!r}, not {repo!r}")
+    key = "units" if kind == "narration" else "items"
+    payload = {k: v for k, v in old.items()
+               if k not in ("schema", "kind", "job_id", "title", "model", "chunk")}
+    if not payload.get(key):
+        raise ValueError("the chunk's job.json holds no items")
+    return {"payload": payload, "repo": repo, "revision": model["revision"],
+            "steps": pinned_steps(kind),
+            "compute": derive_compute(kind, {}, rates, len(payload[key])),
+            "chunk": {k: old["chunk"][k] for k in ("index", "of", "group")}}
+
+
 def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
-              month: str = None) -> dict:
+              month: str = None, chunk: dict = None, replace: dict = None) -> dict:
     """Build an inert bundle under out/<job_id>/.
 
     The forecast is reserved on the ledger before anything is written. If the
     write fails, the partial directory is removed and the reservation settled
     at 0 units; the settled entry stays in the ledger, so a retry needs a new
     job_id. spec['compute'] (measured steps, items, decode_s, export_s) is required.
+
+    chunk = {"index", "of", "group", "start", "stop"} builds items [start, stop) of the
+    validated full job as its own job chunk_job_id(group, index, of) (narration, stills only);
+    its job.json and build manifest carry chunk = {"index", "of", "group"}.
+    replace = {"job_json", "build", "k"} rebuilds a closed/superseded chunk's exact slice as
+    replacement_job_id(group, index, of, k), with the same chunk block.
     """
     if kind not in KINDS:
         raise ValueError(f"unknown job kind: {kind!r}")
+    if (chunk is not None or replace is not None) and kind not in CHUNKED_KINDS:
+        raise ValueError(f"{kind} jobs are never chunked")
     title = record.data["title_slug"]
-    job_id = spec.get("job_id") or f"{kind.replace('_', '-')}-{uuid.uuid4().hex[:8]}"
+    if replace is not None:
+        chunk = replace["job_json"]["chunk"]
+        job_id = replacement_job_id(chunk["group"], chunk["index"], chunk["of"], replace["k"])
+    elif chunk is not None:
+        job_id = chunk_job_id(chunk["group"], chunk["index"], chunk["of"])
+    else:
+        job_id = spec.get("job_id") or new_job_id(kind)
     if not _SAFE.fullmatch(job_id) or not _SAFE.fullmatch(title):
         raise ValueError("job_id and title slug must be lowercase letters, digits and hyphens")
     month = month or datetime.now(timezone.utc).strftime("%Y-%m")
@@ -402,8 +661,12 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
         _check_model(kind, spec, _load_wan_batch().w.MODEL)
         plan = {"compute": derive_compute(kind, spec, rates, job_items(kind, spec))}
         job = _reel_job(spec, job_id, forecast_seconds(plan["compute"], rates), rates[kind])
+    elif replace is not None:
+        plan = _replacement_plan(kind, replace["job_json"], replace["build"], rates)
     else:
         plan = _plan(kind, record, spec, rates)
+        if chunk is not None:
+            plan = _chunk_plan(kind, plan, spec, rates, chunk)
     units = forecast(plan["compute"], rates)
 
     edition_id = (record.data.get("source") or {}).get("edition_id")
@@ -411,27 +674,35 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
     # BudgetExceeded: nothing written; the title cap is keyed by edition_id (R26)
     ledger.reserve(title, month, units, job_id, edition_id=edition_id,
                    root=root if edition_id else None)
-    try:
+    extra = {"chunk": plan["chunk"]} if "chunk" in plan else {}
+    artifacts = list(record.data["artifacts"])
+    try:  # the bundle and its record artifact are written together, or neither stays
         if kind == "reel_clips":
             result = _write_reel(job, spec, job_dir)
         else:
             result = _write_notebook_bundle(kind, plan, job_id, title, job_dir,
                                             forecast_seconds(plan["compute"], rates))
+        result.update(job_id=job_id, forecast_units=units)
+        record.add_artifact("colab_job", Path(result["notebook"]), {
+            **extra, "job_id": job_id, "job_kind": kind, "forecast_units": units, "month": month,
+            "inputs_zip": Path(result["inputs_zip"]).resolve().relative_to(
+                record.root.resolve()).as_posix(),
+            "manifest": Path(result["manifest"]).resolve().relative_to(
+                record.root.resolve()).as_posix()})
     except BaseException:
         shutil.rmtree(job_dir, ignore_errors=True)
+        if len(record.data["artifacts"]) != len(artifacts):
+            record.data["artifacts"] = artifacts  # the save failed: drop the in-memory artifact
+            try:
+                record._save()
+            except Exception:
+                pass
         try:
             ledger.settle(job_id, 0)  # release the reservation; nothing ran
         except Exception:
             pass  # never mask the original error
         raise
-    result.update(job_id=job_id, forecast_units=units)
-    record.add_artifact("colab_job", Path(result["notebook"]), {
-        "job_id": job_id, "job_kind": kind, "forecast_units": units, "month": month,
-        "inputs_zip": Path(result["inputs_zip"]).resolve().relative_to(
-            record.root.resolve()).as_posix(),
-        "manifest": Path(result["manifest"]).resolve().relative_to(
-            record.root.resolve()).as_posix()})
-    record.event("job", "built", {"job_id": job_id, "kind": kind, "forecast_units": units})
+    record.event("job", "built", {"job_id": job_id, "kind": kind, "forecast_units": units, **extra})
     return {"job_id": job_id, "notebook": result["notebook"],
             "inputs_zip": result["inputs_zip"], "manifest": result["manifest"],
             "forecast_units": units}
@@ -440,6 +711,8 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
 def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s: float) -> dict:
     job_json = {"schema": JOB_SCHEMA, "kind": kind, "job_id": job_id, "title": title,
                 "model": plan["repo"], **plan["payload"]}
+    if "chunk" in plan:
+        job_json["chunk"] = plan["chunk"]
     archive = _zip_bytes({"job.json": (json.dumps(job_json, indent=2, sort_keys=True)
                                        + "\n").encode("utf-8")})
     zip_sha = hashlib.sha256(archive).hexdigest()
@@ -453,6 +726,8 @@ def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s:
                 "deadline_seconds": int(deadline_s), "authority_created": False}
     if "generation" in plan["payload"]:
         manifest["generation"] = plan["payload"]["generation"]
+    if "chunk" in plan:
+        manifest["chunk"] = plan["chunk"]
     job_dir.mkdir(parents=True)
     paths = {"notebook": job_dir / f"{kind}.ipynb", "inputs_zip": job_dir / "inputs.zip",
              "manifest": job_dir / "build-manifest.json"}
@@ -468,6 +743,10 @@ def _write_reel(job: dict, spec: dict, job_dir: Path) -> dict:
     with tempfile.TemporaryDirectory() as tmp:
         job_path = Path(tmp) / "job.json"
         job_path.write_text(json.dumps(job, indent=2), encoding="utf-8")
-        notebook = builder.build(job_dir, job_path, Path(spec["art_dir"]))
+        art = Path(tmp) / "art"  # the batch's images, from one or several art_dir folders
+        art.mkdir()
+        for name, path in art_images(spec).items():
+            shutil.copyfile(path, art / name)
+        notebook = builder.build(job_dir, job_path, art)
     return {"notebook": Path(notebook), "inputs_zip": job_dir / "wan22-batch-inputs.zip",
             "manifest": job_dir / "build-manifest.json"}

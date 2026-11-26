@@ -42,6 +42,7 @@ interface Boot {
   previous_unit_url?: string;
   player_url?: string;
   preview?: boolean;
+  preview_continues?: boolean;
   title_url?: string;
   sign_in_url?: string;
   pass_url?: string;
@@ -668,7 +669,7 @@ function Reader({ boot }: { boot: Boot }) {
   return (
     <>
       <nav className="unit-navigation" aria-label={t("contents")}>
-        {!boot.preview && boot.previous_unit_url ? (
+        {boot.previous_unit_url ? (
           <a
             href={boot.previous_unit_url}
             onClick={() => {
@@ -678,7 +679,7 @@ function Reader({ boot }: { boot: Boot }) {
             {t("previous_chapter")}
           </a>
         ) : null}
-        {!boot.preview && boot.next_unit_url ? (
+        {(!boot.preview || boot.preview_continues) && boot.next_unit_url ? (
           <a
             href={boot.next_unit_url}
             onClick={() => {
@@ -887,7 +888,7 @@ function Reader({ boot }: { boot: Boot }) {
           </section>
         </>
       ) : null}
-      {boot.preview ? <section className="preview-boundary" aria-label={t("preview_end")}><p>{t("preview_end")}</p><button onClick={() => setBoundaryOpen(true)}>{t("continue_beyond_preview")}</button><PreviewBoundary editionId={boot.edition_id} format="reader" freeAccess={boot.free_access === true} authenticated={boot.authenticated} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.reload()} /></section> : null}
+      {boot.preview && !boot.preview_continues ? <section className="preview-boundary" aria-label={t("preview_end")}><p>{t("preview_end")}</p><button onClick={() => setBoundaryOpen(true)}>{t("continue_beyond_preview")}</button><PreviewBoundary editionId={boot.edition_id} format="reader" freeAccess={boot.free_access === true} authenticated={boot.authenticated} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.reload()} /></section> : null}
       {fullReader && boot.player_url ? <FormatSwitch open={switchOpen} onClose={() => setSwitchOpen(false)} busy={busy} status={status} onExact={() => void switchToListen()} chapterUrl={boot.player_url + `?unit_id=${boot.unit_id}`} target="audio" /> : null}
       <dialog
         ref={settings}

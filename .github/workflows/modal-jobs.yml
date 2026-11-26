@@ -1,0 +1,192 @@
+# Runs queued eav Modal GPU jobs (narration, stills, music) on a GitHub-hosted runner, which can
+# reach Modal; the Claude session cannot. A request is written by `eav modal-request` (it checks the
+# Modal dollar caps and records the worst-case pending row on the ledger first) and pushed by root.
+# Per request (one matrix job each, one at a time, each with its own 300-minute timeout): check the
+# request file, mark it running, probe R2, run on Modal (caps re-checked for the current UTC month;
+# `modal_contacted_at` is written into the request immediately before Modal is contacted), upload
+# the outputs to the private R2 bucket, push the result back. Any failure before Modal was contacted
+# (install, an invalid request, mark, probe, or modal-run before contact) ends the request `refused`:
+# its pending row is released and the job's CU reservation restored. `eav modal-fetch` brings the
+# outputs back for `eav import`. Each step gets only the secrets it needs; the checkout keeps no
+# token, only the steps that push get the GitHub token (and only the run job may write), and every
+# python3 in those steps runs with -S: the stdlib only, so nothing the unhashed pip install added
+# (a site .pth file) runs where the token is. Write access to this branch is still equivalent to
+# access to these secrets (the workflow runs the branch's own code with them).
+# Secret HF_TOKEN (only the "Run on Modal" step): a read-only Hugging Face token of the account that
+# accepted the terms of the gated narration model ai4bharat/indic-parler-tts. modal-run attaches it
+# to the Modal function as an in-memory secret and refuses (exit 3, before Modal is contacted) a gated
+# model without it.
+# The ledger's caps run on an estimate (wall seconds x the L4 rate x 1.25), reconciled from the bill
+# with `eav modal-settle`. The hard backstop is the Modal workspace spend limit: the owner sets it to
+# 30 USD a month or less when adding the payment method, before any request is (re)queued.
+name: Modal GPU jobs
+on:
+  push:
+    branches: [claude/wonderful-bardeen-s9k90x]
+    paths: ['production/audiovisual/modal-requests/*.json', '.github/workflows/modal-jobs.yml']
+permissions:
+  contents: read  # the run job alone may push
+concurrency:
+  group: modal-jobs
+  cancel-in-progress: false
+env:
+  BRANCH: claude/wonderful-bardeen-s9k90x
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      requests: ${{ steps.ls.outputs.requests }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+        with:
+          ref: claude/wonderful-bardeen-s9k90x
+          persist-credentials: false
+      - id: ls
+        run: |
+          set -euo pipefail
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import glob, json, os, re, sys
+          ids = []
+          for p in sorted(glob.glob("production/audiovisual/modal-requests/*.json")):
+              stem = os.path.basename(p)[:-len(".json")]
+              try:
+                  d = json.load(open(p, encoding="utf-8"))
+              except (OSError, ValueError) as e:
+                  print(f"::warning::{p}: unreadable request ({e}); skipped", file=sys.stderr)
+                  continue
+              if not isinstance(d, dict) or d.get("status") != "requested":
+                  continue
+              if not re.fullmatch(r"[a-z0-9][a-z0-9.-]*", stem) or ".." in stem:
+                  print(f"::warning::{p}: the file name is not a job id; skipped", file=sys.stderr)
+                  continue
+              ids.append(stem)  # the run job validates the rest and refuses an invalid request
+          print("requests=" + json.dumps(ids))
+          PY
+  run:
+    needs: list
+    if: needs.list.outputs.requests != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # push the request result and ledger back
+    timeout-minutes: 300  # per matrix job, i.e. per request
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        job_id: ${{ fromJSON(needs.list.outputs.requests) }}
+    env:
+      JOB_ID: ${{ matrix.job_id }}
+      REQ: production/audiovisual/modal-requests/${{ matrix.job_id }}.json
+      SW: skills/earnalism-audiovisual/software
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
+        with:
+          ref: claude/wonderful-bardeen-s9k90x
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Install the Modal client (no secrets in this step)
+        id: install
+        run: pip install modal==1.6.4 numpy==2.5.3 pillow==13.0.0
+      - name: Mark the request running (only the push token)
+        id: start
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "eav modal-jobs"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          check="$(cd "$SW" && python3 -S -m eav.modal_requests check "$GITHUB_WORKSPACE/$REQ" --workspace "$GITHUB_WORKSPACE")"
+          field() { python3 -S -c 'import json, sys; v = json.loads(sys.argv[1])[sys.argv[2]]; print("; ".join(v) if isinstance(v, list) else ("" if v is None else v))' "$check" "$1"; }
+          if [ "$(field status)" != requested ]; then
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -n "$(field errors)" ]; then
+            echo "Invalid request $JOB_ID: $(field errors)"
+            exit 1  # refused by the next always() step
+          fi
+          root="$(field root)"
+          ledger="$(field ledger)"
+          python3 -S -c 'import json, sys; p = sys.argv[1]; d = json.load(open(p)); d["status"] = "running"; open(p, "w").write(json.dumps(d, indent=2, sort_keys=True) + "\n")' "$REQ"
+          bash .github/scripts/modal-publish.sh "modal-jobs: $JOB_ID running" "$JOB_ID" "$root" "$ledger" "$REQ"
+          {
+            echo "go=true"
+            echo "root=$root"
+            echo "ledger=$ledger"
+          } >> "$GITHUB_OUTPUT"
+      - name: Probe R2 before the paid run
+        id: probe
+        if: steps.start.outputs.go == 'true'
+        continue-on-error: true
+        env:
+          CLOUDFLARE_R2_TOKEN: ${{ secrets.CLOUDFLARE_R2_TOKEN }}
+          ROOT: ${{ steps.start.outputs.root }}
+        run: |
+          set -euo pipefail
+          cd "$SW"
+          python3 -m eav.cli r2-probe "$JOB_ID" --root "$ROOT"
+      - name: Run on Modal
+        id: modal
+        if: steps.probe.outcome == 'success'
+        continue-on-error: true
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          ROOT: ${{ steps.start.outputs.root }}
+        run: |
+          set -euo pipefail
+          cd "$SW"
+          python3 -m eav.cli modal-run "$JOB_ID" --root "$ROOT" --request --download "$RUNNER_TEMP/modal-downloads"
+      - name: Refuse the request if Modal was never contacted (only the push token)
+        # Runs after any failure, cancellation or skip before this point. Stdlib only (works even
+        # when the install failed). A request that is not open, or whose run wrote
+        # modal_contacted_at, is left to the upload and push-back steps.
+        id: unstarted
+        if: always() && steps.start.outputs.go != 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OUTCOMES: install=${{ steps.install.outcome }} start=${{ steps.start.outcome }} probe=${{ steps.probe.outcome }} modal=${{ steps.modal.outcome }}
+        run: |
+          set -euo pipefail
+          git config user.name "eav modal-jobs"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          result="$(cd "$SW" && python3 -S -m eav.modal_requests refuse-unstarted "$GITHUB_WORKSPACE/$REQ" --workspace "$GITHUB_WORKSPACE" --reason "the workflow stopped before Modal was contacted ($OUTCOMES)")"
+          field() { python3 -S -c 'import json, sys; v = json.loads(sys.argv[1])[sys.argv[2]]; print("" if v is None else v)' "$result" "$1"; }
+          if [ "$(field refused)" != True ]; then
+            echo "Not refused: $(field why)"
+            exit 0
+          fi
+          echo "refused=true" >> "$GITHUB_OUTPUT"
+          bash .github/scripts/modal-publish.sh "modal-jobs: $JOB_ID refused" "$JOB_ID" "$(field root)" "$(field ledger)" "$REQ"
+          echo "Request $JOB_ID refused before Modal was contacted: $(field why)"
+          exit 1
+      - name: Upload the outputs to R2
+        id: upload
+        if: always() && steps.probe.outcome == 'success' && steps.unstarted.outputs.refused != 'true'
+        continue-on-error: true
+        env:
+          CLOUDFLARE_R2_TOKEN: ${{ secrets.CLOUDFLARE_R2_TOKEN }}
+          ROOT: ${{ steps.start.outputs.root }}
+        run: |
+          set -euo pipefail
+          cd "$SW"
+          python3 -m eav.cli r2-upload "$JOB_ID" --root "$ROOT" --from "$RUNNER_TEMP/modal-downloads/$JOB_ID"
+      - name: Push the result back (only the push token)
+        if: always() && steps.start.outputs.go == 'true' && steps.unstarted.outputs.refused != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ROOT: ${{ steps.start.outputs.root }}
+          LEDGER: ${{ steps.start.outputs.ledger }}
+        run: |
+          set -euo pipefail
+          status="$(python3 -S -c 'import json, sys; print(json.load(open(sys.argv[1]))["status"])' "$REQ")"
+          bash .github/scripts/modal-publish.sh "modal-jobs: $JOB_ID $status" "$JOB_ID" "$ROOT" "$LEDGER" "$REQ"
+          if [ "$status" != done ]; then
+            echo "Request $JOB_ID ended $status; see the request file"
+            exit 1
+          fi

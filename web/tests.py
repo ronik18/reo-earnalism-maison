@@ -99,14 +99,99 @@ class ExperienceTests(TestCase):
         self.assertContains(response, "The River Notebook")
 
     def test_anonymous_reader_is_bounded_preview_not_full_book(self):
+        from unittest.mock import patch
+        from library import services
         from library.models import Paragraph
-        last = Paragraph.objects.filter(unit_id=self.unit).order_by("ordinal").last()
+        rows = list(Paragraph.objects.filter(unit_id=self.unit).order_by("ordinal"))
+        last = rows[-1]
+        # The fixture story is 222 words (400 or fewer), so the preview is its first paragraph only.
+        first = rows[0]
         response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
         self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn(f'<p id="anchor-{first.anchor_id}" data-anchor="{first.anchor_id}">{first.text}</p>', html)
+        for row in rows[1:]:
+            self.assertNotIn(row.text, html)
+        self.assertContains(response, f"anchor%3D{first.anchor_id}%26offset%3D{len(first.text)}")
+        self.assertLess(html.index(f'anchor-{first.anchor_id}"'), html.index("data-preview-fallback"))
+        self.assertContains(response, "You have reached the end of the free preview.")
+        self.assertContains(response, '"preview": true')
+        self.assertContains(response, '"preview_continues": false')
+        self.assertNotContains(response, 'id="complete-reading"')
+        # A longer story stops after the paragraph that reaches the target, never mid-paragraph.
+        with patch.object(services, "PREVIEW_MIN_WORDS", 60):
+            response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        self.assertContains(response, rows[1].text)
+        self.assertNotContains(response, rows[2].text)
         self.assertNotContains(response, last.text)
         self.assertContains(response, "Sign in")
-        self.assertContains(response, "offset%3D130")
-        self.assertNotContains(response, 'id="complete-reading"')
+        self.assertContains(response, f"anchor%3D{rows[1].anchor_id}%26offset%3D{len(rows[1].text)}")
+        self.assertContains(response, "You have reached the end of the free preview.")
+
+    def test_no_js_preview_links_to_the_next_unit_only_while_the_preview_continues(self):
+        # The fixture book has one unit, so a second unit is added to the unit list and the preview document
+        # is marked as continuing into it, as get_preview_document does for a multi-unit book.
+        import uuid
+        from unittest.mock import patch
+        from library import services
+        real_document, real_units = services.get_preview_document, services.edition_units
+        second = str(uuid.uuid4())
+        next_url = f"/en/read/{self.edition}/{second}/"
+
+        def units(*args, **kwargs):
+            listed = real_units(*args, **kwargs)
+            return listed + [dict(listed[0], unit_id=second, ordinal=2)]
+
+        def continuing(*args, **kwargs):
+            return dict(real_document(*args, **kwargs), preview_continues=True)
+        with patch.object(services, "edition_units", units), patch.object(services, "get_preview_document", continuing):
+            response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn(f'<div data-preview-fallback data-preview-next><p><a href="{next_url}">Next chapter</a></p></div>', html)
+        self.assertNotIn('<p class="notice">You have reached the end of the free preview.</p>', html)  # not ended yet
+        self.assertContains(response, '"preview_continues": true')
+        # On the unit where the preview ends, there is no next-unit link even though a next unit exists.
+        with patch.object(services, "edition_units", units):
+            response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        self.assertNotContains(response, "data-preview-next")
+        self.assertNotContains(response, next_url)
+        self.assertContains(response, '<p class="notice">You have reached the end of the free preview.</p>')
+        self.assertContains(response, '"next_unit_url": null')
+
+    def test_signed_in_reader_still_gets_the_whole_unit_beyond_the_preview(self):
+        from unittest.mock import patch
+        from library import services
+        from library.models import Paragraph
+        self.login()
+        rows = list(Paragraph.objects.filter(unit_id=self.unit).order_by("ordinal"))
+        with patch.object(services, "PREVIEW_MIN_WORDS", 60):
+            response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        for row in rows:
+            self.assertContains(response, row.text)
+        self.assertContains(response, '"preview": false')
+        self.assertNotContains(response, "data-preview-fallback")
+        self.assertContains(response, 'id="complete-reading"')
+
+    def test_anonymous_preview_keeps_note_after_its_paragraph(self):
+        from unittest.mock import patch
+        from library import services
+        from library.models import Paragraph
+        rows = list(Paragraph.objects.filter(unit_id=self.unit).order_by("ordinal"))
+        real = services.paragraph_dto
+        def with_note(paragraph):  # published rows are frozen; mark the third anchor as the second paragraph's note
+            value = real(paragraph)
+            if paragraph.anchor_id == rows[2].anchor_id:
+                value["kind"] = "note"
+            return value
+        with patch.object(services, "PREVIEW_MIN_WORDS", 60), patch.object(services, "paragraph_dto", with_note):
+            response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        html = response.content.decode()
+        self.assertIn(f'id="anchor-{rows[2].anchor_id}" data-anchor="{rows[2].anchor_id}" class="footnote" role="note">', html)
+        self.assertLess(html.index(f'anchor-{rows[1].anchor_id}"'), html.index(f'anchor-{rows[2].anchor_id}"'))
+        self.assertNotContains(response, rows[3].text)
+        # Sign-in returns to the end of the paragraph, not to its footnote.
+        self.assertContains(response, f"anchor%3D{rows[1].anchor_id}%26offset%3D{len(rows[1].text)}")
 
     def test_password_sign_in_preserves_relative_reader_destination(self):
         destination = f"/bn/read/{self.edition}/{self.unit}/?anchor=existing-anchor"

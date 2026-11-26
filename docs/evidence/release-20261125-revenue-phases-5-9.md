@@ -77,3 +77,12 @@
 - **Symptom:** the owner reported that `/en/staff/review/` showed "We could not find that page". The page returns 404 unless the user is signed in, active, staff, verified and holds `operations.decide_review`. Neither production staff account (#1, #4) held that permission, and neither is a superuser.
 - **Owner choice:** grant it to account #4 (the company-domain staff account).
 - **Change:** one row inserted into `auth_user_user_permissions` (user 4, permission `operations.decide_review`, id 300). It is idempotent and was verified afterwards: active, staff, verified, can_review = true. No other account or permission changed.
+- **#73** (squash `c9d171d`): the Monday review page now sends signed-out visitors to sign-in and shows a 403 naming the account when it lacks review access. Deploy `dep-dc3tg8bl550s73fi7smg` live at 06:57:20Z. Anonymous `/en/staff/review/` now returns 302 to `/en/sign-in/?return_to=%2Fen%2Fstaff%2Freview%2F`; `/en/` and `/en/explore/` return 200.
+
+## 13 titles published (26 Nov 2026)
+
+- **Owner approval:** on the Monday page the owner approved 28 items: clearance and cover for each of the 12 pipeline titles, plus clearance, cover and the AI-translation label for The Hungry Stone. Claude recorded no approval.
+- **Render jobs:** 39 jobs, all succeeded (import, then `evidence --browser-report docs/evidence/publication-browser-20261126-<slug>.json`, then `publish`) for nishithe, didi, manbhanjan, atithi, madhyabartini, shasti, samapti, megh-o-roudra, prayashchitta, apad, thakurda, pratihingsa and kshudhita-pashan-en. Run log: `job-dc3thmd6e07s73di2fdg` through `job-dc3tq0nf3r2c739mioa0`.
+- **Neon:** all 13 editions have a live revision; the IDs match the deterministic replica IDs in the browser reports. `kshudhita-pashan-en` (`793553c3-b137-481d-9d27-8aa309a9373e`) has `translated_from` = ক্ষুধিত পাষাণ (`54f37caa-050b-47c3-95c2-3cbc214d6485`), which makes the side-by-side pair.
+- **Live checks:** each title page returns 200, and each reader returns 200 after the redirect to its first chapter, showing the free preview to anonymous visitors. Full-text rendering, the মেঘ ও রৌদ্র footnote and the side-by-side toggle were verified signed in on the release-code replica before publishing (the browser reports above). No production test account was created for a signed-in recheck.
+- Nothing posted or charged.

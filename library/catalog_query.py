@@ -13,6 +13,8 @@ from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
+from .cover_renditions import rendition_path
+
 from core.api import DomainError
 from core.pagination import paginate_queryset
 from .models import Asset, Edition, Rights, Unit
@@ -122,7 +124,7 @@ def catalog_queryset(locale=None, territory='IN', query='', house='', format='',
     # Prefetch runs only AFTER the outer LIMIT. It makes card and deadline
     # serialization independent of page size without extra per-edition SELECTs.
     return editions.prefetch_related(
-        Prefetch('live_revision__assets', queryset=Asset.objects.filter(kind='cover', state='ready').only('id', 'revision_id'), to_attr='_catalog_covers'),
+        Prefetch('live_revision__assets', queryset=Asset.objects.filter(kind='cover', state='ready').only('id', 'revision_id', 'sha256'), to_attr='_catalog_covers'),
         Prefetch('live_revision__rights', queryset=rights.only('id', 'revision_id', 'format', 'ends_at').order_by('-ends_at'), to_attr='_catalog_rights'),
     )
 
@@ -142,7 +144,7 @@ def card_from_edition(edition):
         base = getattr(settings, 'PUBLIC_BASE_URL', 'http://127.0.0.1:8008' if getattr(settings, 'LOCAL', False) else '').rstrip('/')
         if not base:
             raise DomainError('configuration_required', 'Public application origin is not configured.', 503)
-        cover = {'url': f'{base}/api/v1/content/covers/{asset.pk}', 'width': metadata.get('width',600),
+        cover = {'url': base + rendition_path(asset.pk, asset.sha256), 'width': metadata.get('width',600),
                  'height': metadata.get('height',900), 'alt': revision.title+' — cover'}
     return {'work_id': str(edition.work_id), 'edition_id': str(edition.pk), 'title': revision.title,
             'subtitle': None, 'creators': edition.work.creators, 'locale': edition.locale, 'house': edition.work.house,

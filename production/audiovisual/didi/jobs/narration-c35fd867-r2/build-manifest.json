@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 3143,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/didi/narration-c35fd867-r2",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "4186372d0394db9dfa1814c21153e2b4f7c7a7fb276f2c4641e145ed1132e5ca",
+  "job_id": "narration-c35fd867-r2",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "c4814e175d62ba4b9a0dc47087b866906b3eccc59fcc8b8c373e532e466bad32",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "didi"
+}

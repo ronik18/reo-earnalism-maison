@@ -17,6 +17,7 @@ from django.utils import timezone
 
 from core.api import DomainError
 from .models import Work, Edition, Revision, Unit, Paragraph, Asset, Rights, TimingMap
+from .cover_renditions import rendition_path
 
 FORMATS = ('reader', 'audio', 'video')
 DELIVERABLE_KINDS = {'reader_package': 'reader', 'audio_chapter': 'audio', 'video': 'video'}
@@ -209,6 +210,54 @@ def public_ttl(revision, class_seconds=30, action='read', territory='IN'):
     return max(0, min(class_seconds, math.floor((min(ends)-now).total_seconds()))) if ends else 0
 
 
+def global_public_ttl(revision, class_seconds):
+    """Seconds a shared public object of this revision may stay fresh, or 0.
+
+    A shared cache key carries no territory, so the object must be cleared in
+    EVERY active publication territory (cache-policy public_object_rights), and
+    freshness is capped by the earliest known rights end among them.
+    """
+    territories = list(settings.MAISON_PUBLICATION_TERRITORIES)
+    if not territories or not _live(revision):
+        return 0
+    prefetch_public_rights([revision])
+    try:
+        ttl = class_seconds
+        for territory in territories:
+            if not available_formats(revision, territory):
+                return 0
+            ttl = min(ttl, public_ttl(revision, class_seconds, territory=territory))
+            if ttl <= 0:
+                return 0
+        return ttl
+    finally:
+        delattr(revision, '_maison_public_rights')
+
+
+def global_preview_ttl(revision, class_seconds):
+    """Seconds the public preview representation may stay in a shared cache, or 0.
+
+    The text preview is served from the cleared edition, so a shared (territory-less) cache key is
+    allowed only while the reader preview right is current in EVERY active publication territory
+    (cdn-cache-design §5, cache-policy public_object_rights); otherwise callers serve it privately.
+    """
+    territories = list(settings.MAISON_PUBLICATION_TERRITORIES)
+    if not territories or not _live(revision):
+        return 0
+    prefetch_public_rights([revision])
+    try:
+        ttl = class_seconds
+        for territory in territories:
+            if not current_right(revision, 'reader', 'preview', territory):
+                return 0
+            ttl = min(ttl, public_ttl(revision, class_seconds, 'preview', territory))
+            if ttl <= 0:
+                return 0
+        return ttl
+    finally:
+        delattr(revision, '_maison_public_rights')
+
+
 FORMAT_ASSETS = {format: (kind, 'stream' if format == 'video' else 'r2') for kind, format in DELIVERABLE_KINDS.items()}
 
 
@@ -218,7 +267,7 @@ def prefetch_ready_assets(revisions):
     rows=[r for r in revisions if not hasattr(r,'_maison_ready_assets')]
     # Presence/cover checks need only these columns, not storage or provider metadata.
     prefetch_related_objects(rows,Prefetch('assets',queryset=Asset.objects.filter(
-        state='ready',kind__in=[*DELIVERABLE_KINDS,'cover']).only('id','revision_id','unit_id','kind','provider')
+        state='ready',kind__in=[*DELIVERABLE_KINDS,'cover']).only('id','revision_id','unit_id','kind','provider','sha256')
         .order_by('created_at','id'),to_attr='_maison_ready_assets'))
     return revisions
 
@@ -245,7 +294,9 @@ def _cover(revision, path='/api/v1/content/covers/'):
     base='' if path.startswith('/api/v1/staff/') else getattr(settings,'PUBLIC_BASE_URL','http://127.0.0.1:8008' if getattr(settings,'LOCAL',False) else '').rstrip('/')
     if base=='' and not path.startswith('/api/v1/staff/'): raise DomainError('configuration_required','Public application origin is not configured.',503)
     meta=revision.validation_evidence.get('cover_pair',{}).get('front',{})
-    return {'url':f'{base}{path}{asset.id}', 'width':meta.get('width',600), 'height':meta.get('height',900), 'alt':revision.title+' — cover'}
+    # Public covers use the content-addressed rendition path; staff drafts keep the private bare path.
+    url=f'{base}{path}{asset.id}' if path.startswith('/api/v1/staff/') else base+rendition_path(asset.id,asset.sha256)
+    return {'url':url, 'width':meta.get('width',600), 'height':meta.get('height',900), 'alt':revision.title+' — cover'}
 
 
 def content_locale(value=None):
@@ -388,19 +439,146 @@ def get_reader_document(user,edition_id,unit_id,territory='IN'):
     return {'edition':detail,'unit':unit_dto(unit,territory,edition.live_revision),'paragraphs':[paragraph_dto(p) for p in unit.paragraphs.all()]}
 
 
+# Owner decision 26 Nov 2026 (supersedes "first chapter up to 1,500 words"): the free preview is about
+# the first quarter of the story's words, at least PREVIEW_MIN_WORDS and at most PREVIEW_MAX_WORDS,
+# always ending at a paragraph boundary and never including the edition's last paragraph or verse block (the protected end).
+PREVIEW_FRACTION=0.25
+PREVIEW_MIN_WORDS=400
+PREVIEW_MAX_WORDS=1500
+PREVIEW_MAX_BLOCKS=100   # PreviewPackage.units[].paragraphs maxItems in contracts/openapi.yaml.
+PREVIEW_MAX_UNITS=10     # PreviewPackage.units maxItems in contracts/openapi.yaml.
+
+
+def preview_word_count(text):
+    """Whitespace-separated tokens; the same count for Bengali and English."""
+    return len(text.split())
+
+
+def _preview_groups(stream):
+    """(unit, [block, its notes...]) in story order. A note travels with the block before it in its unit."""
+    group=None
+    for unit,paragraph in stream:
+        if paragraph['kind']=='note' and group and group[0]==unit:
+            group[1].append(paragraph);continue
+        if group:yield group
+        group=(unit,[paragraph])
+    if group:yield group
+
+
+PREVIEW_BODY_KINDS=('paragraph','verse')  # the blocks that carry the story; headings and notes never do
+
+
+def _is_body(group):
+    return group[1][0]['kind'] in PREVIEW_BODY_KINDS
+
+
+def _group_words(group):
+    return sum(preview_word_count(p['text']) for p in group[1] if p['kind'] in PREVIEW_BODY_KINDS)
+
+
+def preview_cut(stream):
+    """The public reading preview from the story's (unit, paragraph DTO) pairs in reading order.
+
+    Returns [(unit, [blocks])] for the units the preview reaches, or [] when no preview may be offered.
+
+    Words are whitespace tokens of paragraph and verse blocks, counted across all units; headings and
+    notes count nothing. Target = PREVIEW_FRACTION of the story's words, clamped to
+    [PREVIEW_MIN_WORDS, PREVIEW_MAX_WORDS]. Whole groups (a block plus its notes) are taken in order
+    while the running count is below the target; the paragraph that reaches or crosses it is the last.
+    A story of at most PREVIEW_MIN_WORDS words previews only its first paragraph (with any heading
+    before it).
+
+    The protected end is the edition's LAST paragraph or verse block, across all units, with its notes.
+    The preview never includes it or anything after it; if that leaves no paragraph, there is no
+    preview. The contract ceilings (100 blocks per unit, 10 units) stop the cut early at a whole group.
+    A trailing heading or orphan note is dropped.
+
+    The stream is read lazily: once PREVIEW_MAX_WORDS / PREVIEW_FRACTION words have been read the
+    target is fixed at the maximum. Reading then continues only until one more paragraph or verse
+    block is found; headings and notes never count as "more follows". If none is found, the story
+    has ended and its protected end is among the groups already read."""
+    enough=PREVIEW_MAX_WORDS/PREVIEW_FRACTION
+    groups,total,exhausted=[],0,True
+    stream_groups=_preview_groups(stream)
+    for group in stream_groups:
+        groups.append(group);total+=_group_words(group)
+        if total>=enough:
+            exhausted=False;break
+    more_body=not exhausted and any(_is_body(group) for group in stream_groups)  # stops at the first one
+    if more_body:
+        candidates=groups  # a later paragraph exists, so every group read lies before the protected end
+    else:
+        last=max((i for i,group in enumerate(groups) if _is_body(group)),default=None)
+        if last is None:return []
+        candidates=groups[:last]  # strictly before the protected end
+    chosen=[]
+    if not more_body and total<=PREVIEW_MIN_WORDS:
+        size=0
+        for group in candidates:  # first paragraph only (with any heading before it)
+            size+=len(group[1])
+            if size>PREVIEW_MAX_BLOCKS:break  # contract ceiling (PreviewPackage paragraphs maxItems)
+            chosen.append(group)
+            if _is_body(group):break
+    else:
+        target=min(max(PREVIEW_FRACTION*total,PREVIEW_MIN_WORDS),PREVIEW_MAX_WORDS)
+        words,units,in_unit=0,0,0
+        for group in candidates:
+            if words>=target:break  # headings add no words, so a heading never ends the preview
+            new=not chosen or group[0]!=chosen[-1][0]
+            if new and units>=PREVIEW_MAX_UNITS:break
+            size=(0 if new else in_unit)+len(group[1])
+            if size>PREVIEW_MAX_BLOCKS:break
+            units,in_unit=units+new,size
+            chosen.append(group);words+=_group_words(group)
+    while chosen and not _is_body(chosen[-1]):chosen.pop()  # no dangling heading or orphan note
+    if not chosen:return []
+    cut=[]
+    for unit,blocks in chosen:
+        if cut and cut[-1][0]==unit:cut[-1][1].extend(blocks)
+        else:cut.append((unit,list(blocks)))
+    return cut
+
+
+def _unit_rows(unit,batch=64):
+    rows=unit.paragraphs.all();start=0
+    while True:
+        chunk=list(rows[start:start+batch])
+        yield from chunk
+        if len(chunk)<batch:return
+        start+=batch
+
+
+def _story_stream(revision):
+    for unit in revision.units.all():
+        for paragraph in _unit_rows(unit):
+            yield unit,paragraph_dto(paragraph)
+
+
+def public_preview(revision,territory='IN'):
+    """[(unit, preview paragraphs)] when the live revision offers a current reader preview, else [].
+
+    Revision.preview is only the on/off signal; the served text is preview_cut of the cleared edition."""
+    if not revision.preview or not current_right(revision,'reader','preview',territory):return []
+    return preview_cut(_story_stream(revision))
+
+
+def preview_boundary(cut):
+    """Where the whole preview ends: the last non-note block, so sign-in returns to the paragraph, not a footnote."""
+    blocks=[p for _,b in cut for p in b]
+    last=next((p for p in reversed(blocks) if p['kind']!='note'),blocks[-1])
+    return {'end_anchor_id':last['anchor_id'],'end_offset_chars':len(last['text']),'audio_end_ms':None,'video_end_ms':None}
+
+
 def get_preview_document(edition_id,unit_id,territory='IN'):
     detail=edition_detail(edition_id,territory)
     revision=_revision(detail['edition_revision_id'])
-    unit=revision.units.filter(pk=unit_id).first()
-    first=revision.units.first()
-    if not unit or not first or unit.id!=first.id or not revision.preview or not current_right(revision,'reader','preview',territory):
+    cut=public_preview(revision,territory)
+    index=next((i for i,(unit,_) in enumerate(cut) if str(unit.id)==str(unit_id)),None)
+    if index is None:
         raise DomainError('preview_unavailable','This unit has no bounded public preview.',404)
-    paragraphs=revision.preview
-    if len(paragraphs)>3 or sum(len(p['text']) for p in paragraphs)>1200:
-        raise DomainError('preview_unavailable','Preview exceeds its approved bounds.',409)
-    return {'edition':detail,'unit':unit_dto(unit,territory),'paragraphs':paragraphs,
-            'boundary':{'end_anchor_id':paragraphs[-1]['anchor_id'],'end_offset_chars':len(paragraphs[-1]['text']),
-                        'audio_end_ms':None,'video_end_ms':None},'preview':True}
+    unit,paragraphs=cut[index]
+    return {'edition':detail,'unit':unit_dto(unit,territory),'paragraphs':paragraphs,'boundary':preview_boundary(cut),
+            'boundary_unit_id':str(cut[-1][0].id),'preview':True,'preview_continues':index+1<len(cut)}
 
 
 def has_active_pass(user,at=None):

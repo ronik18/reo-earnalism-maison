@@ -1,3 +1,4 @@
+import re
 from django import template
 from web.i18n import text
 
@@ -37,3 +38,46 @@ def island_script(name):
     if not isinstance(path,str) or not path.startswith("maison/dist/") or ".." in path:
         raise ValueError("Unknown Maison interactive island")
     return format_html('<script type="module" src="{}"></script>', static(path))
+
+
+BENGALI = re.compile("[\u0980-\u09ff]")
+LATIN = re.compile("[A-Za-z]")
+
+
+def script_language(value):
+    """bn when the text is mainly Bengali script, en when mainly Latin, otherwise None.
+
+    Author names come from Work.creators, which a translated edition shares with its source,
+    so the edition's locale does not tell the language of the name.
+    """
+    text = ", ".join(map(str, value)) if isinstance(value, (list, tuple)) else str(value or "")
+    bengali, latin = len(BENGALI.findall(text)), len(LATIN.findall(text))
+    if bengali > latin:
+        return "bn"
+    if latin > bengali:
+        return "en"
+    return None
+
+
+@register.simple_tag
+def lang_attr(value):
+    """A ` lang="…"` attribute from the script of the text itself, or nothing when unclear."""
+    from django.utils.html import format_html
+    language = script_language(value)
+    return format_html(' lang="{}"', language) if language else ""
+
+
+@register.filter
+def cover_src(url, width):
+    """A reviewed width of a public cover rendition URL; other URLs are unchanged."""
+    from library.cover_renditions import rendition_url
+    return rendition_url(url, int(width))
+
+
+@register.filter
+def cover_srcset(url, widths="160,320,480,800"):
+    """`srcset` candidates for a public cover rendition URL, or "" for any other URL."""
+    from library.cover_renditions import is_rendition_url, rendition_url
+    if not is_rendition_url(url):
+        return ""
+    return ", ".join(f"{rendition_url(url, int(w))} {int(w)}w" for w in str(widths).split(","))

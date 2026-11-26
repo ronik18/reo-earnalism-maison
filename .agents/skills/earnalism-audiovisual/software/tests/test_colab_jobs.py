@@ -333,6 +333,44 @@ class ColabJobTests(unittest.TestCase):
         self.assertTrue(Path(r["inputs_zip"]).is_file())
         self.assertTrue(Path(r["notebook"]).is_file())
 
+    # --- M1: deferred minors ----------------------------------------------------------------
+    def test_a_failed_record_write_after_the_bundle_leaves_no_orphan(self):
+        """A3 M2: the bundle is written but recording its artifact fails: the folder is removed,
+        the reservation settled at 0 and the record keeps no artifact."""
+        before = list(self.record.data["artifacts"])
+        with patch.object(Record, "_save", side_effect=OSError("record disk full")):
+            with self.assertRaises(OSError):
+                self.narration(job_id="job-rec")
+        self.assertEqual(self.record.data["artifacts"], before)
+        self.assertEqual(json.loads(self.record.path.read_text())["artifacts"], before)
+        self.assertFalse((self.out / "job-rec").exists())
+        entry = [e for e in json.loads(self.ledger.path.read_text()) if e["job_id"] == "job-rec"][0]
+        self.assertEqual((entry["state"], entry["units"]), ("settled", 0))
+
+    def test_reel_art_dir_may_list_the_chunk_folders_of_chunked_stills(self):
+        """A3 M1: a batch whose keyframes sit in two stills chunk folders is built from both, each
+        image from the one folder that holds it; an image in none or in two is refused."""
+        c1, c2 = self.root / "stills-c1of2", self.root / "stills-c2of2"
+        c1.mkdir()
+        c2.mkdir()
+        (c1 / "shot-01.png").write_bytes(b"first-chunk")
+        (c2 / "shot-02.png").write_bytes(b"second-chunk")
+        spec = {"art_dir": [str(c1), str(c2)], "prior_attempt_evidence": {"scope": "test only"},
+                "shots": [{"id": f"shot-{i:02d}", "image": f"shot-{i:02d}.png", "seed": i,
+                           "prompt": "Notice the bird, lean gently and smile softly."}
+                          for i in (1, 2)]}
+        r = self.build("reel_clips", spec)
+        with zipfile.ZipFile(r["inputs_zip"]) as z:
+            self.assertEqual(z.read("inputs/shot-01.png"), b"first-chunk")
+            self.assertEqual(z.read("inputs/shot-02.png"), b"second-chunk")
+        (c1 / "shot-02.png").write_bytes(b"duplicate")
+        with self.assertRaisesRegex(ValueError, "in 2 of the art_dir folders"):
+            self.build("reel_clips", {**spec, "shots": spec["shots"][1:]})
+        with self.assertRaisesRegex(ValueError, "in 0 of the art_dir folders"):
+            self.build("reel_clips", {**spec, "shots": [{**spec["shots"][0], "image": "none.png"}]})
+        with self.assertRaisesRegex(ValueError, "folder or a list of folders"):
+            self.build("reel_clips", {**spec, "art_dir": []})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,9 +1,16 @@
 {% load static maison %}<!doctype html>
 <html lang="en" data-ui-locale="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="{% if allow_index %}index,follow{% else %}noindex,nofollow{% endif %}"><title>{% block title %}{% ui 'site_name' %}{% endblock %}</title>
-<meta name="description" content="{% block description %}Read Bengali and English classics, listen as they are told aloud, and learn through short video series on Earnalism.{% endblock %}">
-<link rel="stylesheet" href="{% static 'maison/fonts/typography.css' %}">
+<meta name="robots" content="{% if allow_index %}index,follow{% else %}noindex,nofollow{% endif %}"><title>{% block title %}{{ meta.title|default:ui.site_name }}{% endblock %}</title>
+<meta name="description" content="{% block description %}{{ meta.description }}{% endblock %}">
+<link rel="icon" type="image/png" href="{% static 'maison/logo.png' %}">
+{% if meta.share %}<link rel="canonical" href="{{ meta.canonical }}">
+{% for alternate in meta.alternates %}<link rel="alternate" hreflang="{{ alternate.hreflang }}" href="{{ alternate.href }}">
+{% endfor %}<meta property="og:site_name" content="Earnalism"><meta property="og:type" content="{{ meta.type }}"><meta property="og:locale" content="{{ meta.locale }}">
+<meta property="og:title" content="{{ meta.title }}"><meta property="og:description" content="{{ meta.description }}"><meta property="og:url" content="{{ meta.canonical }}">
+<meta property="og:image" content="{{ meta.image }}"><meta property="og:image:alt" content="{{ meta.image_alt }}"><meta property="og:image:width" content="{{ meta.image_width }}"><meta property="og:image:height" content="{{ meta.image_height }}">
+<meta name="twitter:card" content="{{ meta.card }}"><meta name="twitter:title" content="{{ meta.title }}"><meta name="twitter:description" content="{{ meta.description }}"><meta name="twitter:image" content="{{ meta.image }}"><meta name="twitter:image:alt" content="{{ meta.image_alt }}">
+{% endif %}<link rel="stylesheet" href="{% static 'maison/fonts/typography.css' %}">
 <link rel="stylesheet" href="{% static 'maison/app.css' %}?v={% asset_version 'maison/app.css' %}">
 <link rel="stylesheet" href="{% static 'maison/room/room.css' %}?v={% asset_version 'maison/room/room.css' %}">
 <script src="{% static 'maison/app.js' %}?v={% asset_version 'maison/app.js' %}" defer></script>
@@ -28,7 +35,7 @@
 <a class="skip-link" href="#main">{% ui 'skip_content' %}</a>
 {% if focused %}<header class="room-top room-evening"><div class="room-wrap">
   <a class="room-back" href="{% if edition.edition_id %}{% url 'web:title' ui_locale edition.edition_id %}{% else %}{% url 'web:home' ui_locale %}{% endif %}"><svg aria-hidden="true"><use href="#i-back"/></svg><span>{% ui 'back' %}</span></a>
-  <span class="room-evening-title">{{ edition.title|default:ui.site_name }}</span>
+  <span class="room-evening-title"{% if edition.title %} lang="{{ edition.locale }}"{% endif %}>{{ edition.title|default:ui.site_name }}</span>
   <a class="room-logo room-logo-mini" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="" width="1400" height="500"></a>
 </div></header>{% else %}<header class="room-top"><div class="room-wrap">
   <a class="room-logo" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="Earnalism — Where Learning Becomes Earning — A Reo Enterprise venture" width="1400" height="500"></a>

@@ -1,0 +1,23 @@
+{
+  "authority_created": false,
+  "chunk": {
+    "group": "narration-91c7abe1-r2",
+    "index": 1,
+    "of": 2
+  },
+  "deadline_seconds": 2417,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/madhyabartini/narration-91c7abe1-r2-c1of2",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "56493c5cc400da73292dd6b4e4cea694c953260f04ff91a60c3ede2c73f26f69",
+  "job_id": "narration-91c7abe1-r2-c1of2",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "d049a44063d7979a1aac3225738d57a14d945eda5869b9a374b4422b68db41dd",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "madhyabartini"
+}

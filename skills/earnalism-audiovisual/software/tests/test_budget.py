@@ -2,7 +2,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from eav.budget import BudgetExceeded, Ledger, fit_reel_job, forecast, forecast_seconds
+import json
+
+from eav.budget import (MODAL_MONTH_CAP_USD, MODAL_TITLE_CAP_USD, USD_PER_CU, BudgetExceeded, Ledger,
+                        fit_reel_job, forecast, forecast_seconds)
 
 RATES = {"reel": {"s_per_step": 1.0, "units_per_hour": 10.0}}
 
@@ -108,6 +111,334 @@ class BudgetTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.ledger.settle("j1", 9)
         self.assertEqual(self.ledger.spent("a", "2026-11"), 4)
+
+
+class ModalSpendTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = Path(self.tmp.name) / "ledger.json"
+        self.ledger = Ledger(self.path)
+
+    def test_old_ledger_without_modal_spend_loads(self):
+        self.path.write_text(json.dumps([{"job_id": "j", "title": "t", "month": "2026-11",
+                                          "units": 3.0, "state": "reserved"}]))
+        self.assertEqual(self.ledger.modal_month_usd("2026-11"), 0.0)
+        self.assertEqual(self.ledger.spent(None, "2026-11"), 3.0)
+        self.ledger.check_modal_month("2026-11", MODAL_MONTH_CAP_USD)  # exactly the cap is fine
+
+    def test_rows_append_per_month_and_do_not_disturb_reservations(self):
+        self.ledger.reserve("t", "2026-11", 5, "j1")
+        self.ledger.record_modal_spend("2026-11", "j1", 0.25, 10.0, "failed", "a")
+        self.ledger.record_modal_spend("2026-11", "j1", 0.50, 20.0, "ok", "b")
+        self.ledger.record_modal_spend("2026-12", "j2", 1.0, 30.0, "hard_stopped", "c")
+        self.ledger.settle("j1", 0.5)  # a Modal job: its Colab portion (0.5 CU) plus its USD
+        self.ledger.reserve("t", "2026-12", 1, "j2")
+        self.assertEqual(self.ledger.modal_month_usd("2026-11"), 0.75)
+        self.assertEqual(self.ledger.modal_job_usd("j1"), (0.75, 2))
+        self.assertEqual(self.ledger.modal_units("j1"), 7.5)
+        self.assertIsNone(self.ledger.modal_units("nope"))
+        self.assertEqual(self.ledger.spent("t", None), 1.5)  # Modal spend is not Colab CU
+        j1 = next(e for e in json.loads(self.path.read_text()) if e.get("job_id") == "j1")
+        self.assertEqual((j1["state"], j1["units"], j1["usd"], j1["cu_equivalent"],
+                          j1["runner"], j1["reserved_units"]),
+                         ("settled", 0.5, 0.75, 7.5, "modal", 5))
+        self.assertEqual(self.ledger.modal_title_usd("t"), 1.75)
+        with self.assertRaises(ValueError):
+            self.ledger.record_modal_spend("2026-11", "j1", 1, 1, "weird", "d")
+
+    def test_move_to_modal_releases_the_cu_reservation_once(self):
+        self.ledger.reserve("t", "2026-11", 40, "j1")
+        self.ledger.reserve("u", "2026-11", 60, "j2")
+        with self.assertRaises(BudgetExceeded):
+            self.ledger.reserve("v", "2026-11", 1, "j3")  # 100 CU month full
+        self.assertEqual(self.ledger.move_to_modal("j1", "at", 4), 36)  # 4 CU already used in Colab
+        self.assertEqual(self.ledger.move_to_modal("j1", "later", 4), 0.0)  # idempotent (resume)
+        with self.assertRaises(ValueError):
+            self.ledger.move_to_modal("j1", "later", 3)  # never lowered
+        self.assertEqual(self.ledger.spent(None, "2026-11"), 64)
+        self.assertEqual(self.ledger.spent("t", None), 4)
+        with self.assertRaises(BudgetExceeded):
+            self.ledger.reserve("v", "2026-11", 37, "j3")
+        self.ledger.reserve("v", "2026-11", 36, "j3")  # only the released 36 CU are Colab's again
+        j1 = next(e for e in json.loads(self.path.read_text()) if e.get("job_id") == "j1")
+        self.assertEqual((j1["runner"], j1["units"], j1["colab_units"], j1["reserved_units"],
+                          j1["state"], j1["moved_to_modal_at"]), ("modal", 4, 4, 40, "reserved", "at"))
+        self.assertEqual(self.ledger.move_to_modal("j1", "again", 4.5), 0.0)  # Colab ran again
+        self.assertEqual(self.ledger.spent("t", None), 4.5)
+        self.assertEqual(self.ledger.colab_units_before_modal("j1"), 4.5)
+        self.assertTrue(self.ledger.is_modal_job("j1"))
+        self.assertFalse(self.ledger.is_modal_job("j2"))
+        self.ledger.settle("j2", 3)
+        with self.assertRaises(ValueError):
+            self.ledger.move_to_modal("j2", "at", 0)  # settled: never moves
+        with self.assertRaises(KeyError):
+            self.ledger.move_to_modal("nope", "at", 0)
+        with self.assertRaises(ValueError):
+            self.ledger.move_to_modal("j3", "at", -1)
+
+    def test_title_cap_6_usd_boundary_and_month_cap(self):
+        self.assertEqual(MODAL_TITLE_CAP_USD, 6.0)
+        self.ledger.reserve("t", "2026-10", 1, "j1")
+        self.ledger.reserve("t", "2026-11", 1, "j2")
+        self.ledger.reserve("big", "2026-11", 1, "k1")
+        self.ledger.record_modal_spend("2026-10", "j1", 3.00, 1.0, "ok", "a")  # lifetime: all months
+        self.ledger.record_modal_spend("2026-11", "j2", 2.50, 1.0, "pending", "b")  # pending counts
+        self.ledger.record_modal_spend("2026-11", "k1", 20.0, 1.0, "ok", "c")  # another title
+        self.assertEqual(self.ledger.modal_title_usd("t"), 5.50)
+        with self.assertRaises(BudgetExceeded) as cm:
+            self.ledger.check_modal("2026-11", "t", 0.60)
+        for word in ("title cap", "5.50", "0.60", "0.50"):
+            self.assertIn(word, str(cm.exception))
+        self.ledger.check_modal("2026-11", "t", 0.50)  # exactly the cap is fine
+        self.ledger.check_modal("2026-11", "other", 0.60)
+        with self.assertRaises(BudgetExceeded) as cm:  # month: 22.50 + 8 > 30 though title room
+            self.ledger.check_modal("2026-11", "fresh", 8.0)
+        self.assertIn("month cap", str(cm.exception))
+
+    def test_title_cap_keyed_by_edition(self):
+        self.ledger.reserve("slug-a", "2026-11", 1, "j1", edition_id="ed-1", root="a")
+        self.ledger.record_modal_spend("2026-11", "j1", 5.30, 1.0, "ok", "a")
+        self.ledger.check_modal("2026-11", "slug-b", 0.60, edition_id="ed-1")  # 5.90 allowed
+        self.ledger.record_modal_spend("2026-11", "j1", 0.20, 1.0, "ok", "b")
+        with self.assertRaises(BudgetExceeded):
+            self.ledger.check_modal("2026-11", "slug-b", 0.60, edition_id="ed-1")
+        self.ledger.check_modal("2026-11", "slug-a", 0.60, edition_id="ed-2")
+
+    def test_check_modal_month_boundary(self):
+        self.ledger.record_modal_spend("2026-11", "j", 29.50, 1.0, "ok", "a")
+        with self.assertRaises(BudgetExceeded) as cm:
+            self.ledger.check_modal_month("2026-11", 0.60)
+        self.assertIn("29.50", str(cm.exception))
+        self.ledger.check_modal_month("2026-11", 0.50)
+
+    def test_replay_job_makes_the_jobs_rows_exactly_the_saved_ones(self):
+        self.ledger.reserve("t", "2026-11", 1.0, "a")
+        self.ledger.reserve("t", "2026-11", 1.0, "b")
+        run_a = self.ledger.record_modal_spend("2026-11", "a", 2.0, 0.0, "pending", "t")
+        base = json.loads(self.ledger.path.read_text())
+        self.ledger.release_pending_modal(run_a)  # the runner refused job a
+        saved = json.loads(self.ledger.path.read_text())
+        self.ledger._write(base)  # the fresh head still has a's pending row ...
+        self.ledger.record_modal_spend("2026-11", "b", 1.5, 0.0, "pending", "t")  # ... and b's new row
+        self.ledger.record_modal_spend("2026-12", "a", 0.7, 0.0, "pending", "t")  # stray a row
+        self.ledger.replay_job("a", saved)
+        self.assertEqual(self.ledger.modal_rows(job_id="a"), [])
+        self.assertEqual([(r["job_id"], r["usd"]) for r in self.ledger.modal_rows()], [("b", 1.5)])
+        self.assertEqual({e["job_id"] for e in self.ledger._load()}, {"a", "b"})
+        # a saved finished row replaces the head's pending row with the same run_id
+        self.ledger.record_modal_spend("2026-11", "a", 2.0, 0.0, "pending", "t")
+        head = json.loads(self.ledger.path.read_text())
+        (row,) = self.ledger.modal_rows(job_id="a")
+        self.ledger.finish_modal_spend(row["run_id"], 0.3, 9.0, "ok")
+        saved = json.loads(self.ledger.path.read_text())
+        self.ledger._write(head)
+        self.ledger.replay_job("a", saved)
+        self.assertEqual([(r["run_id"], r["usd"], r["status"]) for r in self.ledger.modal_rows(job_id="a")],
+                         [(row["run_id"], 0.3, "ok")])
+        self.assertEqual([r["usd"] for r in self.ledger.modal_rows(job_id="b")], [1.5])
+
+
+class ModalFixWaveTests(unittest.TestCase):
+    """F1: run_ids never reused (I3), billed reconciliation (I1), undoing a move (I4)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = Path(self.tmp.name) / "ledger.json"
+        self.ledger = Ledger(self.path)
+
+    def entry(self, job_id):
+        return next(e for e in json.loads(self.path.read_text()) if e.get("job_id") == job_id)
+
+    def test_run_id_is_never_reused_after_a_release(self):
+        """The review's scratch case: K#1 pending, J#2 failed; release K#1; J's next is never J#2."""
+        for j in ("K", "J"):
+            self.ledger.reserve("t", "2026-11", 1.0, j)
+        k1 = self.ledger.record_modal_spend("2026-11", "K", 0.5, 0.0, "pending", "a")
+        j1 = self.ledger.record_modal_spend("2026-11", "J", 0.4, 1.0, "failed", "b")
+        self.assertEqual((k1, j1), ("K#1", "J#1"))  # numbered per job
+        self.ledger.release_pending_modal(k1)
+        self.assertEqual(self.ledger.record_modal_spend("2026-11", "K", 0.5, 0.0, "pending", "c"), "K#2")
+        j2 = self.ledger.record_modal_spend("2026-11", "J", 0.9, 0.0, "pending", "d")
+        self.assertEqual(j2, "J#2")
+        self.ledger.release_pending_modal(j2)  # released: the entry remembers it was issued
+        self.assertEqual(self.entry("J")["modal_runs_issued"], 2)
+        j3 = self.ledger.record_modal_spend("2026-11", "J", 0.9, 0.0, "pending", "e")
+        self.assertEqual(j3, "J#3")
+        self.ledger.finish_modal_spend(j3, 0.10, 5.0, "ok")
+        self.assertEqual([(r["run_id"], r["usd"], r["status"]) for r in self.ledger.modal_rows(job_id="J")],
+                         [("J#1", 0.4, "failed"), ("J#3", 0.10, "ok")])
+
+    def test_run_id_without_an_entry_counts_rows_and_refuses_a_duplicate(self):
+        self.ledger.record_modal_spend("2026-10", "x", 0.1, 1.0, "ok", "a")
+        self.assertEqual(self.ledger.record_modal_spend("2026-11", "x", 0.1, 1.0, "ok", "b"), "x#2")
+        everything = json.loads(self.path.read_text())
+        everything[-1]["rows"].append({"run_id": "x#3", "job_id": "other", "usd": 0, "seconds": 0,
+                                       "at": "c", "status": "ok"})  # a hand-made clash
+        self.path.write_text(json.dumps(everything))
+        with self.assertRaises(ValueError):
+            self.ledger.record_modal_spend("2026-11", "x", 0.1, 1.0, "ok", "d")
+        self.assertEqual(Ledger.run_number("narration-film-01-r3-c1of2#12"), 12)
+        self.assertEqual(Ledger.run_number("no-suffix"), 0)
+
+    def test_bill_a_finished_row_keeps_the_estimate(self):
+        self.ledger.reserve("t", "2026-11", 1.0, "j")
+        r1 = self.ledger.record_modal_spend("2026-11", "j", 0.0227, 102.0, "failed", "a")
+        self.assertEqual([r["run_id"] for r in self.ledger.unbilled_modal_runs("j")], [r1])
+        self.assertEqual(self.ledger.bill_modal_run("j", 0.0), [r1])  # the only unbilled row
+        (row,) = self.ledger.modal_rows(job_id="j")
+        self.assertEqual((row["usd"], row["estimated_usd"], row["billed"], row["status"]),
+                         (0.0, 0.0227, True, "failed"))
+        self.assertEqual(self.ledger.modal_month_usd("2026-11"), 0.0)  # the caps read the billed figure
+        with self.assertRaises(KeyError):
+            self.ledger.bill_modal_run("j", 0.1)  # nothing unbilled left: name the row
+        self.ledger.bill_modal_run("j", 0.01, run_id=r1)  # a second correction keeps the first estimate
+        (row,) = self.ledger.modal_rows(job_id="j")
+        self.assertEqual((row["usd"], row["estimated_usd"]), (0.01, 0.0227))
+        r2 = self.ledger.record_modal_spend("2026-11", "j", 0.5, 9.0, "ok", "b")
+        r3 = self.ledger.record_modal_spend("2026-11", "j", 0.6, 9.0, "hard_stopped", "c")
+        with self.assertRaises(ValueError):
+            self.ledger.bill_modal_run("j", 0.4)  # two unbilled rows: ambiguous
+        self.assertEqual(self.ledger.bill_modal_run("j", 0.4, run_id=r3), [r3])
+        with self.assertRaises(ValueError):
+            self.ledger.bill_modal_run("other", 0.4, run_id=r2)  # not that job's row
+        with self.assertRaises(ValueError):
+            self.ledger.bill_modal_run("j", -1, run_id=r2)
+        r4 = self.ledger.record_modal_spend("2026-11", "j", 0.9, 0.0, "pending", "d")
+        self.assertEqual(self.ledger.bill_modal_run("j", 0.2), [r4])  # pending rows first
+        row = next(r for r in self.ledger.modal_rows(job_id="j") if r["run_id"] == r4)
+        self.assertEqual((row["status"], row["usd"], row["estimated_usd"], row["billed"]),
+                         ("settled", 0.2, 0.9, True))
+
+    def test_colab_units_never_exceed_the_reservation(self):
+        self.ledger.reserve("t", "2026-11", 2.0, "j")
+        with self.assertRaises(ValueError) as cm:
+            self.ledger.move_to_modal("j", "at", 2.5)
+        self.assertIn("cannot exceed the reservation", str(cm.exception))
+        self.assertNotIn("runner", self.entry("j"))
+        self.ledger.move_to_modal("j", "at", 1.0)
+        with self.assertRaises(ValueError):
+            self.ledger.move_to_modal("j", "later", 2.1)  # still bounded by reserved_units
+        self.ledger.move_to_modal("j", "later", 2.0)
+
+    def test_undo_move_restores_the_reservation_only_if_modal_never_ran(self):
+        self.ledger.reserve("t", "2026-11", 3.0, "j")
+        self.ledger.move_to_modal("j", "at", 0.5)
+        run = self.ledger.record_modal_spend("2026-11", "j", 0.8, 0.0, "pending", "a")
+        self.ledger.release_pending_modal(run)
+        self.assertTrue(self.ledger.undo_move_to_modal("j"))
+        e = self.entry("j")
+        self.assertEqual((e["units"], e["state"], e["modal_runs_issued"]), (3.0, "reserved", 1))
+        for key in ("runner", "colab_units", "reserved_units", "moved_to_modal_at"):
+            self.assertNotIn(key, e)
+        self.assertFalse(self.ledger.is_modal_job("j"))
+        self.assertEqual(self.ledger.spent("t", None), 3.0)
+        self.assertFalse(self.ledger.undo_move_to_modal("j"))  # not moved: nothing to undo
+        self.ledger.move_to_modal("j", "again", 0.0)
+        self.ledger.record_modal_spend("2026-11", "j", 0.1, 3.0, "failed", "b")  # Modal ran once
+        self.assertFalse(self.ledger.undo_move_to_modal("j"))
+        self.assertEqual(self.entry("j")["runner"], "modal")
+        self.assertFalse(self.ledger.undo_move_to_modal("nope"))
+
+    # --- M1: deferred minors ----------------------------------------------------------------
+    def test_the_recorded_estimate_never_exceeds_the_worst_case_checked(self):
+        """B2 M1: wall seconds include image build and GPU queue (unbounded by the timeout): the
+        pending row's worst case caps the recorded figure; the wall estimate is kept on the row."""
+        self.ledger.reserve("t", "2026-11", 1.0, "a")
+        r1 = self.ledger.record_modal_spend("2026-11", "a", 1.0, 0.0, "pending", "t")
+        self.assertEqual(self.ledger.finish_modal_spend(r1, 1.3, 5000.0, "ok"), 1.0)
+        (row,) = self.ledger.modal_rows(job_id="a")
+        self.assertEqual((row["usd"], row["wall_estimate_usd"], row["status"]), (1.0, 1.3, "ok"))
+        r2 = self.ledger.record_modal_spend("2026-11", "a", 1.0, 0.0, "pending", "t")
+        self.assertEqual(self.ledger.finish_modal_spend(r2, 0.4, 900.0, "failed"), 0.4)
+        self.assertNotIn("wall_estimate_usd", self.ledger.modal_rows(job_id="a")[1])
+        self.assertLessEqual(self.ledger.modal_month_usd("2026-11"), 2.0)
+
+    def test_replay_keeps_a_row_billed_on_the_branch_meanwhile(self):
+        """Final review M4: root reconciled an older row of the job while a run was in flight;
+        the run's push-back replay never reverts it to the estimate."""
+        self.ledger.reserve("t", "2026-11", 1.0, "a")
+        old = self.ledger.record_modal_spend("2026-11", "a", 0.0227, 102.0, "failed", "t")
+        new = self.ledger.record_modal_spend("2026-11", "a", 1.0, 0.0, "pending", "t")
+        self.ledger.finish_modal_spend(new, 0.2, 700.0, "ok")
+        saved = json.loads(self.path.read_text())  # the runner's copy: old row still an estimate
+        self.ledger.bill_modal_run("a", 0.0, old)  # root: billed 0 on the branch
+        self.ledger.replay_job("a", saved)
+        rows = {r["run_id"]: r for r in self.ledger.modal_rows(job_id="a")}
+        self.assertEqual((rows[old]["usd"], rows[old].get("billed")), (0.0, True))
+        self.assertEqual((rows[new]["usd"], rows[new]["status"]), (0.2, "ok"))
+        self.assertEqual(len(rows), 2)
+
+    def test_replay_drops_only_the_month_records_it_emptied(self):
+        """B5 re-review 2: a month record that was already empty on the head is left as it is."""
+        self.ledger.reserve("t", "2026-11", 1.0, "a")
+        saved = json.loads(self.path.read_text())
+        self.ledger.record_modal_spend("2026-10", "a", 0.5, 0.0, "pending", "t")
+        head = json.loads(self.path.read_text()) + [{"modal_spend": "2026-09", "rows": []}]
+        self.ledger._write(head)
+        self.ledger.replay_job("a", saved)
+        months = [e["modal_spend"] for e in json.loads(self.path.read_text()) if "modal_spend" in e]
+        self.assertEqual(months, ["2026-09"])
+
+    def test_cap_overrun_names_the_cap_a_restored_reservation_exceeds(self):
+        """F1 concern 3: another job took the released CU; the restore says which cap is over."""
+        self.ledger.reserve("t", "2026-11", 40.0, "a")
+        self.ledger.move_to_modal("a", "now", 0.0)
+        self.ledger.reserve("t", "2026-11", 50.0, "b")  # fits only because a's CU were released
+        self.assertIsNone(self.ledger.cap_overrun("b"))
+        self.assertTrue(self.ledger.undo_move_to_modal("a"))
+        msg = self.ledger.cap_overrun("a")
+        self.assertIn("title cap (90.00 of 60 CU)", msg)
+        self.assertIn("hold this job for the owner", msg)
+        self.assertIsNone(self.ledger.cap_overrun("nope"))
+
+    def test_a_released_row_billed_after_all_is_written_again(self):
+        self.ledger.reserve("t", "2026-11", 1.0, "a")
+        r1 = self.ledger.record_modal_spend("2026-11", "a", 1.0, 0.0, "pending", "t")
+        self.ledger.release_pending_modal(r1)
+        self.assertEqual(self.ledger.bill_modal_run("a", 0.31, r1, month="2026-12", at="x"), [r1])
+        (row,) = self.ledger.modal_rows(job_id="a")
+        self.assertEqual((row["run_id"], row["usd"], row["status"], row["billed"]),
+                         (r1, 0.31, "settled", True))
+        # M1 Minor 2: it counts in the month it was released from, not the month of the settle
+        self.assertEqual((self.ledger.modal_month_usd("2026-11"),
+                          self.ledger.modal_month_usd("2026-12")), (0.31, 0.0))
+        with self.assertRaises(ValueError):  # never issued for this job
+            self.ledger.bill_modal_run("a", 0.1, "a#9", month="2026-12", at="x")
+        with self.assertRaises(ValueError):
+            self.ledger.bill_modal_run("a", 0.1, "b#1", month="2026-12", at="x")
+
+    def test_a_released_row_without_a_recorded_month_goes_into_the_month_given(self):
+        """An older ledger (no released_runs): the caller's month (the request's) is used."""
+        self.ledger.reserve("t", "2026-11", 1.0, "a")
+        r1 = self.ledger.record_modal_spend("2026-11", "a", 1.0, 0.0, "pending", "t")
+        self.ledger.release_pending_modal(r1)
+        raw = json.loads(self.path.read_text())
+        for e in raw:
+            e.pop("released_runs", None)
+        self.ledger._write(raw)
+        self.ledger.bill_modal_run("a", 0.2, r1, month="2026-10", at="x")
+        self.assertEqual(self.ledger.modal_month_usd("2026-10"), 0.2)
+
+    def test_a_settled_entrys_usd_follows_a_row_billed_after_the_settle(self):
+        """M1 Minor 2: the entry's usd stays the sum of its Modal rows."""
+        self.ledger.reserve("t", "2026-11", 1.0, "a")
+        self.ledger.move_to_modal("a", "t", 0.0)
+        r1 = self.ledger.record_modal_spend("2026-11", "a", 1.0, 0.0, "pending", "t")
+        self.ledger.finish_modal_spend(r1, 0.4, 10.0, "failed")
+        r2 = self.ledger.record_modal_spend("2026-11", "a", 1.0, 0.0, "pending", "t")
+        self.ledger.release_pending_modal(r2)
+        self.ledger.settle("a", 0.0)
+
+        def entry():
+            return next(e for e in self.ledger._load() if e["job_id"] == "a")
+        self.assertEqual(entry()["usd"], 0.4)
+        self.ledger.bill_modal_run("a", 0.25, r2, month="2026-12", at="x")
+        self.assertEqual((entry()["usd"], entry()["cu_equivalent"]),
+                         (0.65, round(0.65 / USD_PER_CU, 2)))
+        self.ledger.bill_modal_run("a", 0.3, r1)
+        self.assertEqual(entry()["usd"], 0.55)
 
 
 if __name__ == "__main__":

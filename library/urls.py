@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from . import views, intake_api, production_handoff_api, general_import_api
 urlpatterns=[
     path("staff/draft-editions/<uuid:edition_id>",intake_api.draft_edition),
@@ -9,7 +9,7 @@ urlpatterns=[
     path('catalog/collections',views.collections),path('catalog/collections/<uuid:collection_id>',views.collection),
     path('catalog/works/<uuid:work_id>',views.work),path('catalog/editions/<uuid:edition_id>',views.edition),
     path('catalog/editions/<uuid:edition_id>/units',views.units),path('content/audio-previews/<uuid:asset_id>',views.audio_preview),path('content/previews/<uuid:revision_id>',views.preview),
-    path('content/covers/<uuid:asset_id>',views.cover),path('content/manifests/<uuid:revision_id>',views.manifest),
+    path('content/covers/<uuid:asset_id>',views.cover),re_path(r'^content/covers/(?P<asset_id>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/(?P<digest>[0-9a-f]{64})/w(?P<width>160|320|480|800)\.jpg$',views.cover_rendition),path('content/manifests/<uuid:revision_id>',views.manifest),
     path('content/packages/grants',views.packages),path('media/grants',views.media),
     path('content/local-assets/<uuid:asset_id>',views.local_asset),path('content/mappings/<uuid:revision_id>',views.mappings),
     path('content/switch-position',views.switch),path('staff/editions/<uuid:edition_id>/review',views.staff_review),

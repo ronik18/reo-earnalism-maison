@@ -1,0 +1,3 @@
+# Modal requests
+
+Each `<job_id>.json` here (schema `earnalism.modal-request.v1`) asks the `modal-jobs` GitHub Actions workflow to run one built eav job on Modal; `eav modal-request` writes it after checking the Modal dollar caps and recording the worst-case pending row on the allowance ledger, and root commits and pushes it. The workflow moves it from `requested` to `running` and then to `done`, `failed` or `hard_stopped` (or `refused`, with its pending row released, when the R2 probe or the run-time cap check fails before Modal is contacted), recording the seconds, the USD, the private R2 prefix and every output file's sha256. `eav modal-fetch` then downloads and verifies those files for `eav import`; never edit these files by hand.

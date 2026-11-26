@@ -18,6 +18,7 @@ from .colab_jobs import _load_wan_batch
 from .record import sha256_file
 
 OUTPUTS_SCHEMA = "earnalism.audiovisual-outputs.v1"
+BOOKKEEPING = ("progress.jsonl", "sessions.jsonl")
 _NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 _SHA = re.compile(r"[0-9a-f]{64}")
 
@@ -125,14 +126,15 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     if not isinstance(outputs, dict) or not outputs:
         raise ImportHeld("manifest lists no outputs")
     for name, digest in outputs.items():
-        if not _NAME.fullmatch(name) or name in ("manifest.json", "inputs.zip") \
+        if not _NAME.fullmatch(name) or name in ("manifest.json", "inputs.zip") + BOOKKEEPING \
                 or not isinstance(digest, str) or not _SHA.fullmatch(digest):
             raise ImportHeld(f"invalid manifest entry: {name!r}")
     present = {}
     for p in folder.iterdir():
         if p.is_symlink() or not p.is_file():
             raise ImportHeld(f"unexpected non-file entry: {p.name}")
-        present[p.name] = p
+        if p.name not in BOOKKEEPING:  # resume records, never outputs
+            present[p.name] = p
     copy_zip = present.pop("inputs.zip", None)
     present.pop("manifest.json")
     if copy_zip is not None and sha256_file(copy_zip) != zip_sha:

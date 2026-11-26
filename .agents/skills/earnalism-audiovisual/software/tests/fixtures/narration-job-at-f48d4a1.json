@@ -1,0 +1,43 @@
+{
+  "batch": 8,
+  "generation": {
+    "temperature": 0.91
+  },
+  "job_id": "narration-golden",
+  "kind": "narration",
+  "model": "ai4bharat/indic-parler-tts",
+  "schema": "earnalism.audiovisual-job.v1",
+  "title": "selfish-giant",
+  "units": [
+    {
+      "description": "Tisha speaks with a natural Indian English accent in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "pause_after_ms": 1200,
+      "text": "The Garden",
+      "unit_key": "f01s001-001"
+    },
+    {
+      "description": "Tisha speaks with a natural Indian English accent in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "pause_after_ms": 400,
+      "text": "Every afternoon the children played in the garden.",
+      "unit_key": "f01s001-002"
+    },
+    {
+      "description": "Tisha speaks with a natural Indian English accent in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "pause_after_ms": 800,
+      "text": "It was large and lovely.",
+      "unit_key": "f01s001-003"
+    },
+    {
+      "description": "Tisha speaks with a natural Indian English accent in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "pause_after_ms": 400,
+      "text": "The giant came back.",
+      "unit_key": "f01s002-001"
+    },
+    {
+      "description": "Tisha speaks with a natural Indian English accent in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "pause_after_ms": 800,
+      "text": "He had been away for seven years.",
+      "unit_key": "f01s002-002"
+    }
+  ]
+}

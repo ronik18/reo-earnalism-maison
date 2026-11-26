@@ -28,13 +28,38 @@ from acestep.pipeline_ace_step import ACEStepPipeline
 
 pipe = ACEStepPipeline(checkpoint_dir=weights_dir, dtype="bfloat16")
 EXPECTED = [t["key"] + ".wav" for t in JOB["items"]]
-last = 0.0  # seconds the previous cue took; the next starts only if it fits (R25)
-for t in JOB["items"]:
+DONE = resume_done(EXPECTED)  # finished in an earlier session: file present and sha256 logged
+todo = [t for t in JOB["items"] if t["key"] + ".wav" not in DONE]
+print(len(DONE), "cues already done;", len(todo), "to generate")
+
+
+def _place_cue(target, returned):
+    # ACE-Step writes to save_path, but some versions add a suffix or write into a folder: move
+    # the WAV it reports (or the only new WAV for this key) to the expected name before it is
+    # recorded, so a cue that was paid for is never lost to a file-name mismatch.
+    if target.is_file():
+        return
+    found = [pathlib.Path(p) for p in (returned if isinstance(returned, (list, tuple)) else [returned])
+             if isinstance(p, (str, pathlib.Path)) and str(p).lower().endswith(".wav")]
+    found = [p for p in found if p.is_file()] or sorted(
+        p for p in OUT_DIR.glob(target.stem + "*.wav") if p.is_file() and p.name not in EXPECTED)
+    if len(found) != 1:
+        raise RuntimeError("ACE-Step wrote no single WAV for " + target.name + ": " + repr(found))
+    found[0].replace(target)
+
+
+# seconds the previous cue took (from progress.jsonl in a resumed session); the next starts only
+# if it fits (R25)
+last = last_item_seconds()
+for t in todo:
     if not may_start(last):
         break
     started = time.time()
-    pipe(prompt=t["prompt"], lyrics=t.get("lyrics", "[instrumental]"),
-         audio_duration=t["duration_s"], infer_step=60, guidance_scale=15.0,
-         manual_seeds=[t["seed"]], save_path=str(OUT_DIR / (t["key"] + ".wav")))
+    target = OUT_DIR / (t["key"] + ".wav")
+    returned = pipe(prompt=t["prompt"], lyrics=t.get("lyrics", "[instrumental]"),
+                    audio_duration=t["duration_s"], infer_step=60, guidance_scale=15.0,
+                    manual_seeds=[t["seed"]], save_path=str(target))
+    _place_cue(target, returned)
     last = time.time() - started
+    record_item(t["key"], t["key"] + ".wav", item_s=last)
     print("wrote", t["key"], "in %.1f s" % last)

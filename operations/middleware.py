@@ -20,10 +20,52 @@ def private_headers(response):
     return response
 
 
+def public_asset_headers(request,response,edge):
+    """Public live cover bytes (owner decision 26 Nov 2026): keep the view's rights-capped browser policy.
+
+    The view admits only covers cleared in every publication territory. The
+    shared edge copy is admitted only when its exact URL is recorded for
+    publication/withdrawal purge; otherwise the edge must not store it.
+    The bytes do not depend on the member, so Vary is not Cookie.
+    """
+    current=response.get('Cache-Control','').lower()
+    if (response.status_code!=200 or getattr(response,'streaming',False) or int(edge)<=0
+            or 'public' not in current or 'private' in current or 'no-store' in current):
+        return private_headers(response)
+    from .cache import public_cover_covered,record_public_cover
+    etag=response.get('ETag')
+    conditional=bool(etag) and request.headers.get('If-None-Match')==etag
+    if conditional and public_cover_covered(request,response,int(edge)):
+        # A 304 revalidation never writes the ledger; the existing row already covers the edge copy.
+        response['Cloudflare-CDN-Cache-Control']=f'public, max-age={int(edge)}, stale-while-revalidate=0, stale-if-error=0'
+        response['CDN-Cache-Control']=f'public, max-age={int(edge)}, stale-while-revalidate=0, stale-if-error=0'
+        response['Vary']=', '.join(sorted(p.strip() for p in response.get('Vary','').split(',') if p.strip() and p.strip().lower()!='cookie')) or 'Accept-Encoding'
+        not_modified=HttpResponseNotModified()
+        for key,value in response.items():not_modified[key]=value
+        return not_modified
+    edge=record_public_cover(request,response,int(edge))
+    if edge>0:
+        response['Cloudflare-CDN-Cache-Control']=f'public, max-age={edge}, stale-while-revalidate=0, stale-if-error=0'
+        response['CDN-Cache-Control']=f'public, max-age={edge}, stale-while-revalidate=0, stale-if-error=0'
+    else:
+        response['Cloudflare-CDN-Cache-Control']='no-store'
+        response['CDN-Cache-Control']='no-store'
+    response['Vary']=', '.join(sorted(p.strip() for p in response.get('Vary','').split(',') if p.strip() and p.strip().lower()!='cookie')) or 'Accept-Encoding'
+    if conditional and edge<=0:
+        # Not recordable for the edge (member/off-origin): a browser-only 304 is safe without a ledger row.
+        not_modified=HttpResponseNotModified()
+        for key,value in response.items():not_modified[key]=value
+        return not_modified
+    # A conditional request that had to write the ledger gets the full 200, so no 304 ever writes.
+    return response
+
+
 def cache_headers(request,response):
     vary={p.strip().lower() for p in response.get('Vary','').split(',') if p.strip()}
     if 'authorization' in vary or response.cookies or response.has_header('Set-Cookie'):
         return private_headers(response)
+    edge=getattr(response,'_maison_public_asset_edge_ttl',None)
+    if edge is not None:return public_asset_headers(request,response,edge)
     from .cache import finalize_public_response
     response=finalize_public_response(request,response)
     match=re.search(r'(?:^|,)\s*s-maxage=(\d+)(?:,|$)',response.get('Cache-Control',''))

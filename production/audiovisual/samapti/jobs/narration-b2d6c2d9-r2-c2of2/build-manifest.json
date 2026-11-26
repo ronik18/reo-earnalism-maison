@@ -1,0 +1,23 @@
+{
+  "authority_created": false,
+  "chunk": {
+    "group": "narration-b2d6c2d9-r2",
+    "index": 2,
+    "of": 2
+  },
+  "deadline_seconds": 3257,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/samapti/narration-b2d6c2d9-r2-c2of2",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "2073035f50cf13feb47e3e8d320b2d39d867f4f119bf40a34cafd8bfda572312",
+  "job_id": "narration-b2d6c2d9-r2-c2of2",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "5c76950074288558b8cd04cd4ee567e1907eb9a4e6fe69d3ca0085e8616b65d6",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "samapti"
+}

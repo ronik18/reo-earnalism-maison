@@ -32,6 +32,20 @@
       },
       "path": "jobs/narration-bbf45e84/narration.ipynb",
       "sha256": "54ee7992da6794b08658e9f0184475d3bca502732d4a4b215977831132effd00"
+    },
+    {
+      "bytes": 16409,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.8314031111111109,
+        "inputs_zip": "jobs/narration-bbf45e84-r2/inputs.zip",
+        "job_id": "narration-bbf45e84-r2",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-bbf45e84-r2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-bbf45e84-r2/narration.ipynb",
+      "sha256": "89f82601502bd5573e3e5e2a0ebdc21e67cf438ce84fb2e4981d96c5949a229c"
     }
   ],
   "created_at": "2026-11-26T03:54:10.448791+00:00",
@@ -69,6 +83,45 @@
       "at": "2026-11-26T03:54:10.736011+00:00",
       "detail": {
         "job_id": "narration-bbf45e84",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-26T18:38:16.437425+00:00",
+      "detail": {
+        "job_id": "narration-bbf45e84",
+        "reason": "Rebuilt with <=200-character voice units (no 30 s truncation) and the measured Modal narration rate; never run",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:16.439076+00:00",
+      "detail": {
+        "job_id": "narration-bbf45e84",
+        "reason": "Rebuilt with <=200-character voice units (no 30 s truncation) and the measured Modal narration rate; never run"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:16.638940+00:00",
+      "detail": {
+        "forecast_units": 1.8314031111111109,
+        "job_id": "narration-bbf45e84-r2",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-26T18:38:16.639619+00:00",
+      "detail": {
+        "job_id": "narration-bbf45e84-r2",
         "kind": "narration",
         "target": "film-01"
       },

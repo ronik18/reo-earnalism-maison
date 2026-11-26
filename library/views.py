@@ -136,22 +136,27 @@ def preview(request,revision_id):
     if not svc._live(revision):raise DomainError('preview_unavailable','No public preview is available.',404)
     from .audio_preview import descriptor
     audio=descriptor(revision,territory)
+    cut=svc.public_preview(revision,territory)
     unit=revision.units.first()
-    paragraphs=revision.preview if svc.current_right(revision,'reader','preview',territory) else []
-    if not unit or len(paragraphs)>3 or sum(len(p['text']) for p in paragraphs)>1200 or (not paragraphs and not audio):
+    if not unit or (not cut and not audio):
         raise DomainError('preview_unavailable','Preview does not pass its bounds.',404)
     first=unit.paragraphs.first()
-    if not paragraphs and not first:raise DomainError('preview_unavailable','A semantic preview boundary is unavailable.',409)
+    if not cut and not first:raise DomainError('preview_unavailable','A semantic preview boundary is unavailable.',409)
+    paragraphs=[p for _,blocks in cut for p in blocks]
+    boundary=svc.preview_boundary(cut) if cut else {'end_anchor_id':str(first.anchor_id),'end_offset_chars':0,'audio_end_ms':None,'video_end_ms':None}
+    boundary['audio_end_ms']=audio['duration_ms'] if audio else None
     data={'schema_version':1,'edition_revision_id':str(revision.id),'locale':revision.edition.locale,
         'preview_sha256':svc.digest(svc.canonical_bytes(paragraphs)),
-        'units':[{'unit_id':str(unit.id),'title':unit.title,'paragraphs':paragraphs}] if paragraphs else [],
-        'boundary':{'end_anchor_id':paragraphs[-1]['anchor_id'] if paragraphs else str(first.anchor_id),
-            'end_offset_chars':len(paragraphs[-1]['text']) if paragraphs else 0,
-            'audio_end_ms':audio['duration_ms'] if audio else None,'video_end_ms':None},'full_content_included':False}
+        'units':[{'unit_id':str(u.id),'title':u.title,'paragraphs':blocks} for u,blocks in cut],
+        'boundary':boundary,'full_content_included':False}
     if audio:data['audio']=audio
-    # A descriptor leads to a short-lived private redirect; never cache the audio
-    # package longer than current text/audio preview rights.
-    ttl=svc.public_ttl(revision,60,'preview',territory)
+    # A shared cache key carries no territory: the preview may be shared-cached only while it is cleared
+    # in every publication territory. Otherwise it is private to this request (cdn-cache-design §5).
+    # A descriptor leads to a short-lived private redirect; never cache the audio package longer than
+    # current text/audio preview rights.
+    ttl=min(svc.global_preview_ttl(revision,60),svc.public_ttl(revision,60,'preview',territory))
+    if ttl<=0:
+        response=api_response(data);response['Cache-Control']='private, no-store, max-age=0';return response
     return public_response(data,ttl)
 
 
@@ -161,17 +166,48 @@ def audio_preview(request,asset_id):
     from .audio_preview import deliver
     return deliver(request,asset_id,territory)
 
-@json_endpoint(auth=False)
-def cover(request,asset_id):
+def _public_cover(request,asset_id):
+    # Public cover paths are exact: no query string is ever a separate cacheable variant.
+    if request.META.get('QUERY_STRING'): raise DomainError('not_found','Cover not found.',404)
     _,territory=context(request)
     try: asset=Asset.objects.select_related('revision','revision__edition').get(pk=asset_id,kind='cover',state='ready')
     except Asset.DoesNotExist: raise DomainError('not_found','Cover not found.',404)
     if not svc._live(asset.revision) or not svc.available_formats(asset.revision,territory): raise DomainError('not_found','Cover unavailable.',404)
-    response=HttpResponse(svc._asset_valid(asset),content_type=asset.content_type)
-    response['Cache-Control']=f'public, max-age=0, s-maxage={svc.public_ttl(asset.revision,3600,territory=territory)}, must-revalidate'
+    return asset
+
+def _cover_response(asset,raw,content_type,versioned,etag):
+    """Public live cover. Shared caching needs clearance in every publication territory and is rights-capped."""
+    from .cover_renditions import EDGE_MAX_AGE,IMMUTABLE_MAX_AGE,browser_cache_control
+    response=HttpResponse(raw,content_type=content_type)
     response['X-Content-Type-Options']='nosniff'
-    response['ETag']=f'"{asset.sha256}"'  # Lets the edge and browsers revalidate with 304, not bytes.
+    rights=svc.global_public_ttl(asset.revision,IMMUTABLE_MAX_AGE)
+    if rights<=0:
+        response['Cache-Control']='private, no-store'
+        return response
+    response['Cache-Control']=browser_cache_control(versioned,rights)
+    response._maison_public_asset_edge_ttl=min(EDGE_MAX_AGE,rights)
+    # The origin middleware records the exact emitted URL so publication/withdrawal purges it.
+    response._maison_public_cover={'asset':str(asset.id),'revision':str(asset.revision_id),
+        'edition':str(asset.revision.edition_id),'work':str(asset.revision.edition.work_id)}
+    response['ETag']=etag  # Lets the edge and browsers revalidate with 304, not bytes.
     return response
+
+@json_endpoint(auth=False)
+def cover(request,asset_id):
+    """Unversioned path: the URL does not change with the bytes, so it is not immutable."""
+    asset=_public_cover(request,asset_id)
+    return _cover_response(asset,svc._asset_valid(asset),asset.content_type,False,f'"{asset.sha256}"')
+
+@json_endpoint(auth=False)
+def cover_rendition(request,asset_id,digest,width):
+    """Content-addressed reviewed width of a live public cover; immutable for browsers up to the rights end."""
+    from .cover_renditions import COVER_WIDTHS,rendition
+    width=int(width)
+    if width not in COVER_WIDTHS: raise DomainError('not_found','Cover size not found.',404)
+    asset=_public_cover(request,asset_id)
+    if asset.sha256!=digest: raise DomainError('not_found','Cover version not found.',404)
+    raw,content_type=rendition(asset,width,svc._asset_valid)
+    return _cover_response(asset,raw,content_type,True,f'"{asset.sha256}-w{width}"')
 
 @json_endpoint()
 def manifest(request,revision_id):

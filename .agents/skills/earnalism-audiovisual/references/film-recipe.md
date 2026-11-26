@@ -52,6 +52,9 @@ No drums or vocals under narration; silence at turns.
 
 What the CLI does, in order:
 
+0. Refuses a narration group with a `suspect_truncated` unit (≥ 29.0 s, or > 1.6 x the
+   job's median characters per second: Parler's ~30 s cut-off) unless the owner listened
+   and names it with `--accept-qc <unit_key,...>` (see `earnalism-voice.md`).
 1. Concatenates the imported narration WAVs with the voice pauses and **measures** every
    unit boundary (`eav.film.narration_track`, ffprobe) → `film/film-NN/timing.json` with
    a provenance block (method, measured_with, WAV hashes, narration job id).
@@ -65,6 +68,7 @@ What the CLI does, in order:
 
 ## 6. Review
 
-`qc` checks loudness and peak and writes a contact sheet; look at it. Then the
+`qc` checks loudness and peak and writes a contact sheet; look at it. It also lists any
+`suspect_truncated` narration units (advisory, with the owner's `--accept-qc` list). Then the
 candidate-bound review: opening, every join, the climax and the full ending. The end card
 and description credit AI-generated illustration.

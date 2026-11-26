@@ -14,11 +14,12 @@ class CoverRevalidationTests(TestCase):
     def setUp(self):
         directory = tempfile.TemporaryDirectory(); self.addCleanup(directory.cleanup)
         override = override_settings(MEDIA_ROOT=directory.name, MAISON_LOCAL_FIXTURES=True, LOCAL=True,
-                                     PUBLIC_BASE_URL='https://maison.example', ALLOWED_HOSTS=['maison.example'])
+                                     PUBLIC_BASE_URL='https://maison.example', ALLOWED_HOSTS=['maison.example'],
+                                     MAISON_PUBLICATION_TERRITORIES=('IN',))
         override.enable(); self.addCleanup(override.disable)
         call_command('seed_local_pilot', stdout=io.StringIO())
         self.asset = Edition.objects.get(pk=EN).live_revision.assets.get(kind='cover', state='ready')
-        self.path = f'/api/v1/content/covers/{self.asset.id}?locale=en&territory=IN'
+        self.path = f'/api/v1/content/covers/{self.asset.id}'  # public cover paths take no query
 
     def get(self, **headers):
         # An anonymous public edge request, as the CDN forwards it.
@@ -31,6 +32,8 @@ class CoverRevalidationTests(TestCase):
         self.assertIn('public', response['Cache-Control'])
 
     def test_matching_validator_returns_not_modified_without_body(self):
+        # The edge revalidates a copy it fetched earlier; that fetch recorded the URL, so the 304 writes nothing.
+        self.assertEqual(self.get().status_code, 200)
         response = self.get(HTTP_IF_NONE_MATCH=f'"{self.asset.sha256}"')
         self.assertEqual(response.status_code, 304)
         self.assertEqual(response.content, b'')

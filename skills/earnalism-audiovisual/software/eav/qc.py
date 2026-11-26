@@ -1,6 +1,7 @@
-"""Reel quality checks: contact sheet and loop-closure SSIM (ffmpeg subprocess)."""
+"""Quality checks: contact sheet, loop-closure SSIM, speech onset and truncated narration (ffmpeg)."""
 import math
 import re
+import statistics
 import subprocess
 import tempfile
 from pathlib import Path
@@ -10,6 +11,47 @@ def _duration(video) -> float:
     r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
                         "-of", "csv=p=0", str(video)], check=True, capture_output=True, text=True)
     return float(r.stdout.strip())
+
+
+# Parler-TTS stops at a hard ~30.2 s per generate(): a unit this long was probably cut off.
+TRUNCATION_CAP_S = 29.0
+# A unit whose characters/second exceed this multiple of the job's median lost words.
+CPS_RATIO = 1.6
+# Below this many characters a unit's chars/s is dominated by its leading/trailing breath, so the
+# ratio test never flags it (the job median, over every unit, is robust to a few of them); the
+# duration test still applies, and a unit with no audio at all is always suspect.
+MIN_RATIO_CHARS = 40
+
+
+def truncation_suspects(rows) -> list:
+    """rows: [{"unit_key", "chars", "seconds"}] of one narration job. Returns the suspect_truncated
+    ones, each with its measurements and reasons (duration at the cap, no audio, or speech too
+    fast for a unit of at least MIN_RATIO_CHARS characters)."""
+    rates = [r["chars"] / r["seconds"] for r in rows if r["seconds"] > 0]
+    median = statistics.median(rates) if rates else 0.0
+    out = []
+    for r in rows:
+        cps = r["chars"] / r["seconds"] if r["seconds"] > 0 else float("inf")
+        reasons = []
+        if r["seconds"] >= TRUNCATION_CAP_S:
+            reasons.append(f"duration {r['seconds']:.2f} s >= {TRUNCATION_CAP_S} s")
+        if r["seconds"] <= 0:
+            reasons.append("no audio (0 s)")
+        elif median and r["chars"] >= MIN_RATIO_CHARS and cps > CPS_RATIO * median:
+            reasons.append(f"{cps:.1f} chars/s > {CPS_RATIO} x job median {median:.1f}")
+        if reasons:
+            out.append({"unit_key": r["unit_key"], "chars": r["chars"],
+                        "seconds": round(r["seconds"], 3), "chars_per_s": round(cps, 2),
+                        "reasons": reasons})
+    return out
+
+
+def narration_suspects(units, wav_dir) -> list:
+    """truncation_suspects over a job's units and WAVs (one folder or a chunk group's folders)."""
+    from .film import unit_wav
+    return truncation_suspects([{"unit_key": u["unit_key"], "chars": len(u["text"]),
+                                 "seconds": _duration(unit_wav(wav_dir, u["unit_key"]))}
+                                for u in units])
 
 
 def speech_onset(audio, threshold_db=-40.0, rate=16000):

@@ -26,26 +26,40 @@ def _ffmpeg(args):
     subprocess.run(["ffmpeg", "-y", "-hide_banner", "-v", "error", *args], check=True)
 
 
-def narration_track(units: list, wav_dir: Path, out: Path) -> list:
+def _dirs(dirs) -> list:
+    """One folder, or the folders of a chunk group in chunk order."""
+    return [Path(d) for d in dirs] if isinstance(dirs, (list, tuple)) else [Path(dirs)]
+
+
+def unit_wav(wav_dir, key: str) -> Path:
+    """<key>.wav in the one folder (of a chunk group) that holds it; never in two."""
+    found = [d / f"{key}.wav" for d in _dirs(wav_dir) if (d / f"{key}.wav").is_file()]
+    if not found:
+        raise ValueError(f"missing narration WAV for unit {key!r}")
+    if len(found) > 1:
+        raise ValueError(f"narration WAV for unit {key!r} is in more than one chunk")
+    return found[0]
+
+
+def narration_track(units: list, wav_dir, out: Path) -> list:
     """Concatenate <unit_key>.wav files with each unit's pause; no pause after the last.
+    wav_dir is a folder or the list of a chunk group's folders.
 
     Returns [{"unit_key", "start", "end"}] measured from the real WAV durations.
     """
-    wav_dir = Path(wav_dir)
-    seen = set()
+    seen, paths = set(), {}
     for u in units:
         k = u["unit_key"]
         if k in seen:
             raise ValueError(f"duplicate unit_key {k!r}")
         seen.add(k)
-        if not (wav_dir / f"{k}.wav").is_file():
-            raise ValueError(f"missing narration WAV for unit {k!r}")
+        paths[k] = unit_wav(wav_dir, k)
     if not units:
         raise ValueError("no units")
     timing, t = [], 0.0
     parts, args = [], []
     for i, u in enumerate(units):
-        path = wav_dir / f"{u['unit_key']}.wav"
+        path = paths[u["unit_key"]]
         dur = _duration(path)
         timing.append({"unit_key": u["unit_key"], "start": round(t, 3), "end": round(t + dur, 3)})
         pause = 0.0 if i == len(units) - 1 else u.get("pause_after_ms", 0) / 1000
@@ -111,11 +125,14 @@ def _check_timing(scenes: list, timing: list, language: str):
                          f"unexpected {sorted(extra)}")
 
 
-def _stills(stills_dir: Path, scene_id: str) -> list:
-    found = sorted(p for p in Path(stills_dir).iterdir()
-                   if p.suffix.lower() in STILL_EXTS
-                   and (p.stem == scene_id or p.stem.startswith(scene_id + "-")
-                        or p.stem.startswith(scene_id + "_")))
+def _stills(stills_dir, scene_id: str) -> list:
+    """The scene's stills in name order, from one folder or across a chunk group's folders."""
+    found = sorted((p for d in _dirs(stills_dir) for p in d.iterdir()
+                    if p.suffix.lower() in STILL_EXTS
+                    and (p.stem == scene_id or p.stem.startswith(scene_id + "-")
+                         or p.stem.startswith(scene_id + "_"))), key=lambda p: p.name)
+    if len({p.name for p in found}) != len(found):
+        raise ValueError(f"a still of scene {scene_id!r} is in more than one chunk")
     if not found:
         raise ValueError(f"no still for scene {scene_id!r} in {stills_dir}")
     return found

@@ -60,7 +60,8 @@ class Revision(models.Model):
     anchor_revision = models.PositiveIntegerField(default=1)
     access_policy = models.JSONField(default=dict, blank=True, help_text='Explicit reader/audio/video: deny, free or paid. Missing means deny.')
     download_policy = models.JSONField(default=dict, blank=True, help_text='Explicit per-format booleans; missing means false.')
-    preview = models.JSONField(default=list, blank=True, help_text='Separate bounded public paragraphs, never a full-package URL.')
+    preview = models.JSONField(default=list, blank=True, help_text='Non-empty means a Reader preview is offered (owner decision 26 Nov 2026). The served preview is cut by '
+                                'library.services.preview_cut, about 25% of the story (400-1,500 words); these entries are not served.')
     validation_evidence = models.JSONField(default=dict, blank=True)
     published_at = models.DateTimeField(null=True, blank=True)
     scheduled_for = models.DateTimeField(null=True, blank=True)

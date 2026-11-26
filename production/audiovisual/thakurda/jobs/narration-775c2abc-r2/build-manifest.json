@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 2851,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/thakurda/narration-775c2abc-r2",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "f6cf879dfbc9e8af6b4bc51eacffb7105705b849398942b1429944c94dfa1cac",
+  "job_id": "narration-775c2abc-r2",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "3669ee92969bad5877588a9af50debdf0b2f40b685e02b00d28e496d2329bb79",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "thakurda"
+}

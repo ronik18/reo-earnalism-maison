@@ -1,0 +1,23 @@
+{
+  "authority_created": false,
+  "chunk": {
+    "group": "narration-bc4edba3-r2",
+    "index": 2,
+    "of": 2
+  },
+  "deadline_seconds": 2417,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/prayashchitta/narration-bc4edba3-r2-c2of2",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "23c7cd89fd511d0ac555716b5f16e99b323c25f155d2ab478314c073189fd3a1",
+  "job_id": "narration-bc4edba3-r2-c2of2",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "7306f71000b4b9601669c5efa60f2a9587a7ab69c3f56c16b0f7897485fc003d",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "prayashchitta"
+}

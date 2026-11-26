@@ -86,7 +86,7 @@
       "Referrer-Policy": "strict-origin-when-cross-origin"
     },
     "private_conditional_rule": "authorization/rights/device validation precedes conditional evaluation; do not emit304 for denied access",
-    "public_object_rights": "Only globally cleared public cover/preview objects and previews API representations; territory query is not public-object authorization. Territorial restricted samples use authorized private delivery, not shared public cache."
+    "public_object_rights": "Only globally cleared public cover/preview objects and previews API representations; territory query is not public-object authorization. Reader text preview API (owner decision 26 Nov 2026): shared-cached (public, s-maxage=60) only while the reader preview right is current in all 9 whitelist territories; otherwise private, no-store. Territorial restricted samples use authorized private delivery, not shared public cache."
   },
   "classes": [
     {
@@ -117,7 +117,7 @@
     },
     {
       "id": "public_previews",
-      "scope": "Globally cleared for public delivery only. physically bounded text/audio preview objects only; versioned path",
+      "scope": "Globally cleared for public delivery only; versioned path. Audio/video samples are physically bounded objects. Reader text preview (owner decision 26 Nov 2026): a deterministic server-side cut of the cleared edition text, about 25% of the words of paragraph and verse blocks (headings and notes count nothing; at least 400, at most 1,500), counted across units, ending after the whole paragraph that reaches the target and never including the protected end (the edition's last paragraph or verse block with its notes); a story of 400 words or fewer previews its first paragraph only, none if that is the whole story. Revision.preview is only the on/off signal. The previews API is public (s-maxage=60) only when the reader preview right is current in all 9 whitelist territories; otherwise private, no-store.",
       "browser_ttl_seconds": 0,
       "edge_ttl_seconds": 60,
       "swr_seconds": 0,
@@ -130,15 +130,25 @@
     },
     {
       "id": "public_covers",
-      "scope": "Globally cleared for public delivery only. reviewed cover sizes on content-hashed paths; no arbitrary resize service",
-      "browser_ttl_seconds": 300,
+      "scope": "Globally cleared for public delivery only: LIVE editions with current rights in EVERY active publication territory (otherwise private, no-store). Reviewed cover widths 160/320/480/800 (2:3, JPEG) on content-hashed, query-less paths /api/v1/content/covers/{asset_id}/{sha256}/w{width}.jpg; any query string or non-canonical width is 404 no-store; no arbitrary resize service; the 800x1200 original is served unchanged at w800",
+      "owner_decision": "2026-11-26: public covers cached long with resized thumbnail sizes; draft/staff covers stay private no-store",
+      "browser_ttl_seconds": 31536000,
       "edge_ttl_seconds": 3600,
       "swr_seconds": 0,
+      "swr_rule": "swr_seconds 0 applies to the edge and to the content-hashed rendition paths. Only the unversioned path /api/v1/content/covers/{asset_id} may send browser stale-while-revalidate=604800, and only while max-age+604800 <= remaining rights seconds (earliest rights end across active publication territories); otherwise it sends no stale-while-revalidate",
       "stale_if_error_seconds": 0,
+      "rights_cap": "known_rights_expiry applies: every max-age is min(value, earliest rights end across active publication territories); immutable never extends past that end",
       "headers": {
-        "Cache-Control": "public, max-age=300",
-        "Cloudflare-CDN-Cache-Control": "public, max-age=3600, stale-if-error=0"
+        "Cache-Control": "public, max-age={min(31536000, rights seconds)}, immutable",
+        "Cloudflare-CDN-Cache-Control": "public, max-age={min(3600, rights seconds)}, stale-while-revalidate=0, stale-if-error=0"
       },
+      "unversioned_path": {
+        "path": "/api/v1/content/covers/{asset_id}",
+        "Cache-Control": "public, max-age={min(86400, rights seconds)}, stale-while-revalidate=604800 only while max-age+604800 <= rights seconds (otherwise no stale-while-revalidate)",
+        "Cloudflare-CDN-Cache-Control": "public, max-age={min(3600, rights seconds)}, stale-while-revalidate=0, stale-if-error=0"
+      },
+      "purge": "Each emitted anonymous public cover URL is recorded as a public cache reference (asset, revision, edition and work dependencies); publication, replacement and withdrawal purge it with its sibling widths and unversioned path. A cover response that cannot be recorded is not stored at the edge (CDN-Cache-Control: no-store). A row is written with up to 3600 s headroom beyond the edge TTL; a request whose URL, asset/revision and epoch are already covered until now+edge TTL performs no ledger write, and a 304 revalidation never writes (an unrecorded conditional request receives the full 200).",
+      "private": "Draft and staff covers (/api/v1/staff/draft-covers/{asset_id}, staff review covers) and any authenticated cover remain private, no-store",
       "sw": "bounded public UI cache; purge locally on online withdrawal notice; already copied bytes cannot be recalled"
     },
     {
