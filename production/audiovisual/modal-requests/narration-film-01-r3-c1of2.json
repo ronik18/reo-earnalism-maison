@@ -1,11 +1,35 @@
 {
   "colab_units": 0.0,
+  "error": "OSError: You are trying to access a gated repo.\nMake sure to have access to it at https://huggingface.co/ai4bharat/indic-parler-tts.\n401 Client Error. (Request ID: Root=1-6b082257-1826138e26abe8f23d297549;8549764d-8dde-4de3-bb1a-ae5bdf7a2507)\n\nCannot access gated repo for url https://huggingface.co/ai4bharat/indic-parler-tts/resolve/7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca/config.json.\nAccess to model ai4bharat/indic-parler-tts is restricted. You must have access to it and be authenticated to access it. Please log in.",
+  "files": [
+    {
+      "bytes": 61610,
+      "path": "inputs.zip",
+      "sha256": "bb1a2f5b9800b631db8bc1fee656b95a05eb59a0caa79d6a8cdca4e155c7ca74"
+    },
+    {
+      "bytes": 195,
+      "path": "sessions.jsonl",
+      "sha256": "2f49bf6c48bb7f02e681c0231fefc7b0d94a80dc369f755a1317f3dec97053f1"
+    }
+  ],
+  "finished_at": "2026-11-26T12:13:16+00:00",
   "job_id": "narration-film-01-r3-c1of2",
+  "modal_contacted_at": "2026-11-26T11:46:13+00:00",
   "pending_run_id": "narration-film-01-r3-c1of2#3",
   "r2_prefix": "gpu-jobs/bicharak/narration-film-01-r3-c1of2/run-3/",
   "requested_at": "2026-11-26T11:45:19+00:00",
+  "run": {
+    "error": "OSError: You are trying to access a gated repo.\nMake sure to have access to it at https://huggingface.co/ai4bharat/indic-parler-tts.\n401 Client Error. (Request ID: Root=1-6b082257-1826138e26abe8f23d297549;8549764d-8dde-4de3-bb1a-ae5bdf7a2507)\n\nCannot access gated repo for url https://huggingface.co/ai4bharat/indic-parler-tts/resolve/7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca/config.json.\nAccess to model ai4bharat/indic-parler-tts is restricted. You must have access to it and be authenticated to access it. Please log in.",
+    "run_id": "narration-film-01-r3-c1of2#3",
+    "seconds": 1619.080578599,
+    "status": "failed",
+    "usd": 0.4492948605612225
+  },
   "schema": "earnalism.modal-request.v1",
-  "status": "running",
+  "seconds": 1619.080578599,
+  "status": "failed",
   "title_root": "production/audiovisual/bicharak",
+  "usd": 0.4492948605612225,
   "worst_case_usd": 1.091962
 }
