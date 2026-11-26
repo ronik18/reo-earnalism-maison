@@ -3,6 +3,10 @@
 Allowance: 60 units per title over the title's whole life (all months) and 100
 units per calendar month across titles. Reservations count as spent until
 settled with the actual units.
+Modal runs (`eav modal-run`) are also capped in dollars: 30 USD per UTC month, recorded as
+append-only `modal_spend` rows (one record per month in the ledger file, next to the
+reservation entries). A Modal run counts against the CU caps at Colab's price
+(CU-equivalent = usd / 0.10), settled at import/close.
 The ledger assumes one writer process at a time.
 """
 import json
@@ -14,6 +18,9 @@ from pathlib import Path
 TITLE_CAP = 60.0
 MONTH_CAP = 100.0
 MARGIN = 1.15
+MODAL_MONTH_CAP_USD = 30.0
+USD_PER_CU = 0.10
+MODAL_STATUSES = ("ok", "failed", "hard_stopped")
 MIN_ITEMS = 1
 # The wan22 batch contract allocates at least 600 s per job, so a reel batch reserves at least that.
 REEL_MIN_SECONDS = 600
@@ -64,21 +71,75 @@ class Ledger:
     def __init__(self, path: Path):
         self.path = Path(path)
 
-    def _load(self) -> list:
+    def _raw(self) -> list:
         if not self.path.exists():
             return []
         return json.loads(self.path.read_text(encoding="utf-8"))
 
+    def _load(self) -> list:
+        """The reservation entries (modal_spend records are kept apart; old ledgers have none)."""
+        return [e for e in self._raw() if "modal_spend" not in e]
+
+    def _modal_records(self) -> list:
+        return [e for e in self._raw() if "modal_spend" in e]
+
     def _save(self, entries: list) -> None:
+        self._write(list(entries) + self._modal_records())
+
+    def _write(self, everything: list) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         fd, tmp = tempfile.mkstemp(dir=self.path.parent, prefix=".ledger-", suffix=".tmp")
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as f:
-                json.dump(entries, f, indent=2)
+                json.dump(everything, f, indent=2)
             os.replace(tmp, self.path)
         finally:
             if os.path.exists(tmp):
                 os.unlink(tmp)
+
+    def modal_rows(self, month=None, job_id=None) -> list:
+        """Modal spend rows, oldest first, optionally for one UTC month and/or one job."""
+        return [r for rec in self._modal_records()
+                if month is None or rec["modal_spend"] == month
+                for r in rec["rows"] if job_id is None or r["job_id"] == job_id]
+
+    def modal_month_usd(self, month: str) -> float:
+        return float(sum(r["usd"] for r in self.modal_rows(month=month)))
+
+    def modal_job_usd(self, job_id: str):
+        """(total usd of every Modal session of the job, number of rows)."""
+        rows = self.modal_rows(job_id=job_id)
+        return float(sum(r["usd"] for r in rows)), len(rows)
+
+    def modal_units(self, job_id: str):
+        """CU-equivalent of the job's Modal rows (usd / USD_PER_CU, 2 decimals), None if no rows."""
+        usd, n = self.modal_job_usd(job_id)
+        return round(usd / USD_PER_CU, 2) if n else None
+
+    def check_modal_month(self, month: str, worst_case_usd: float) -> None:
+        spent = self.modal_month_usd(month)
+        if spent + worst_case_usd > MODAL_MONTH_CAP_USD:
+            raise BudgetExceeded(
+                f"Modal month cap {MODAL_MONTH_CAP_USD:.2f} USD would be exceeded for {month}: "
+                f"spent {spent:.2f} USD, worst-case forecast {worst_case_usd:.2f} USD, "
+                f"remaining {max(MODAL_MONTH_CAP_USD - spent, 0):.2f} USD")
+
+    def record_modal_spend(self, month: str, job_id: str, usd: float, seconds: float,
+                           status: str, at: str) -> None:
+        """Append one row to the month's modal_spend record (append-only)."""
+        if status not in MODAL_STATUSES:
+            raise ValueError(f"unknown modal status {status!r}")
+        _check_units(usd)
+        _check_units(seconds)
+        everything = self._raw()
+        row = {"job_id": job_id, "usd": usd, "seconds": seconds, "at": at, "status": status}
+        for rec in everything:
+            if rec.get("modal_spend") == month:
+                rec["rows"].append(row)
+                break
+        else:
+            everything.append({"modal_spend": month, "rows": [row]})
+        self._write(everything)
 
     @staticmethod
     def _mine(e, title, edition_id) -> bool:

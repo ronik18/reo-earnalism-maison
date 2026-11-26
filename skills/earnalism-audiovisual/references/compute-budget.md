@@ -84,3 +84,22 @@ buy units; retry a failed job past its forecast; point a title at a fresh ledger
 `import <job_id> --units <CU>` settles the real units shown in Colab's usage panel for
 that session. If another session ran at the same time, record the session's own
 observation, not the account aggregate.
+
+## Modal runs (`eav modal-run`)
+
+Modal is capped separately in dollars: **$30.00 per UTC calendar month**, owner decision of
+26 November 2026. The ledger keeps one append-only `modal_spend` record per month with rows
+`{job_id, usd, seconds, at, status}` (status `ok`, `failed` or `hard_stopped`); older ledgers
+without it load as empty.
+
+- Before contacting Modal, `modal-run` forecasts the worst case the function timeout allows,
+  `(DEADLINE_SECONDS + 900) x L4_USD_PER_S`, and refuses (exit 3, naming spent, forecast and
+  remaining) if the month's spend plus that exceeds $30.00. Hold and ask the owner; never run past it.
+- The actual spend of every run, failed or hard-stopped ones included, is appended to the ledger
+  before the result is printed.
+- A Modal run also counts against the 60 CU per title / 100 CU per month caps at Colab's price:
+  CU-equivalent = usd / 0.10. `import` and `close` of a job with Modal rows need no `--units`: they
+  settle at the sum of all the job's Modal rows / 0.10 (2 decimals), so every session of a resumed
+  job counts. An explicit `--units` that differs is refused (it would double count). Colab jobs
+  still need `--units`.
+- `status` prints `modal: $X.XX of $30.00 (UTC month YYYY-MM)`.

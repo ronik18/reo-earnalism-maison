@@ -2,7 +2,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from eav.budget import BudgetExceeded, Ledger, fit_reel_job, forecast, forecast_seconds
+import json
+
+from eav.budget import MODAL_MONTH_CAP_USD, BudgetExceeded, Ledger, fit_reel_job, forecast, forecast_seconds
 
 RATES = {"reel": {"s_per_step": 1.0, "units_per_hour": 10.0}}
 
@@ -108,6 +110,43 @@ class BudgetTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.ledger.settle("j1", 9)
         self.assertEqual(self.ledger.spent("a", "2026-11"), 4)
+
+
+class ModalSpendTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = Path(self.tmp.name) / "ledger.json"
+        self.ledger = Ledger(self.path)
+
+    def test_old_ledger_without_modal_spend_loads(self):
+        self.path.write_text(json.dumps([{"job_id": "j", "title": "t", "month": "2026-11",
+                                          "units": 3.0, "state": "reserved"}]))
+        self.assertEqual(self.ledger.modal_month_usd("2026-11"), 0.0)
+        self.assertEqual(self.ledger.spent(None, "2026-11"), 3.0)
+        self.ledger.check_modal_month("2026-11", MODAL_MONTH_CAP_USD)  # exactly the cap is fine
+
+    def test_rows_append_per_month_and_do_not_disturb_reservations(self):
+        self.ledger.reserve("t", "2026-11", 5, "j1")
+        self.ledger.record_modal_spend("2026-11", "j1", 0.25, 10.0, "failed", "a")
+        self.ledger.record_modal_spend("2026-11", "j1", 0.50, 20.0, "ok", "b")
+        self.ledger.record_modal_spend("2026-12", "j2", 1.0, 30.0, "hard_stopped", "c")
+        self.ledger.settle("j1", 7.5)
+        self.ledger.reserve("t", "2026-12", 1, "j2")
+        self.assertEqual(self.ledger.modal_month_usd("2026-11"), 0.75)
+        self.assertEqual(self.ledger.modal_job_usd("j1"), (0.75, 2))
+        self.assertEqual(self.ledger.modal_units("j1"), 7.5)
+        self.assertIsNone(self.ledger.modal_units("nope"))
+        self.assertEqual(self.ledger.spent("t", None), 8.5)
+        with self.assertRaises(ValueError):
+            self.ledger.record_modal_spend("2026-11", "j1", 1, 1, "weird", "d")
+
+    def test_check_modal_month_boundary(self):
+        self.ledger.record_modal_spend("2026-11", "j", 29.50, 1.0, "ok", "a")
+        with self.assertRaises(BudgetExceeded) as cm:
+            self.ledger.check_modal_month("2026-11", 0.60)
+        self.assertIn("29.50", str(cm.exception))
+        self.ledger.check_modal_month("2026-11", 0.50)
 
 
 if __name__ == "__main__":

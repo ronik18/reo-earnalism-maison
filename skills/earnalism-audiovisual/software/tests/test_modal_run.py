@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from eav import cli, colab_jobs, importer, modal_run
+from eav import budget, cli, colab_jobs, importer, modal_run
 from eav.budget import Ledger
 from eav.record import Record
 
@@ -47,15 +47,12 @@ class _Model:
 
 
 def fake_modules():
-    sf = types.ModuleType("soundfile")
-    sf.write = lambda path, wav, rate: Path(path).write_bytes(b"RIFF" + bytes(wav) + str(rate).encode())
-    torch = types.ModuleType("torch")
-    torch.cuda = types.SimpleNamespace(is_available=lambda: False)
-    parler = types.ModuleType("parler_tts")
-    parler.ParlerTTSForConditionalGeneration = _Model
-    tf = types.ModuleType("transformers")
-    tf.AutoTokenizer = _Tok
-    return {"soundfile": sf, "torch": torch, "parler_tts": parler, "transformers": tf}
+    """The batched-narration fakes of test_narration_resume (the notebook batches and uses torch
+    dtypes); the colab shim under test supplies google.colab itself."""
+    from tests.test_narration_resume import _fake_modules
+    mods = _fake_modules()
+    mods.pop("google"), mods.pop("google.colab")
+    return mods
 
 
 @contextlib.contextmanager
@@ -339,7 +336,7 @@ class ModalRunCliTests(unittest.TestCase):
         self.assertFalse((self.root / "modal-downloads").exists())
         self.assertEqual(self.ledger_bytes(), before)
 
-    def test_run_then_import_and_ledger_untouched_by_the_run(self):
+    def test_run_then_import_and_reservations_untouched_by_the_run(self):
         before = self.ledger_bytes()
         fm, patched = self.modal_patch()
         with fakes(), patched:
@@ -350,9 +347,10 @@ class ModalRunCliTests(unittest.TestCase):
         self.assertIn("eav.cli import " + self.job_id, line["next"])
         folder = Path(line["folder"])
         self.assertEqual(folder, self.root / "modal-downloads" / self.job_id)
-        self.assertEqual(self.ledger_bytes(), before)
+        entries = [e for e in json.loads(self.ledger_bytes()) if "modal_spend" not in e]
+        self.assertEqual(entries, json.loads(before))  # only the modal_spend record was added
         self.assertEqual(json.loads((folder / "manifest.json").read_text())["status"], "COMPLETE")
-        code, out = run("import", self.job_id, "--root", self.root, "--from", folder, "--units", 0.5)
+        code, out = run("import", self.job_id, "--root", self.root, "--from", folder)
         self.assertEqual(code, 0, out)
         self.assertNotEqual(self.ledger_bytes(), before)
 
@@ -397,10 +395,157 @@ class ModalRunCliTests(unittest.TestCase):
         with fakes(), patched:
             run("modal-run", self.job_id, "--root", self.root)
         folder = self.root / "modal-downloads" / self.job_id
-        self.assertEqual(run("import", self.job_id, "--root", self.root, "--from", folder,
-                             "--units", 0.5)[0], 0)
+        self.assertEqual(run("import", self.job_id, "--root", self.root, "--from", folder)[0], 0)
         code, out = run("modal-run", self.job_id, "--root", self.root, "--dry-run")
         self.assertEqual(code, 2)
+
+
+def fake_runner(usd, status="ok", seconds=100.0, calls=None):
+    """A stand-in for modal_run.run_modal: no Modal client, a canned bill."""
+    def runner(notebook, inputs_zip, download_dir, gpu="L4"):
+        if calls is not None:
+            calls.append(download_dir)
+        folder = Path(download_dir) / "job"
+        folder.mkdir(parents=True, exist_ok=True)
+        return {"seconds": seconds, "usd": usd, "folder": folder, "status": status,
+                "error": None if status != "failed" else "RuntimeError: boom"}
+    return runner
+
+
+class ModalCapTests(unittest.TestCase):
+    """B2: the 30 USD UTC-month Modal cap, spend rows on the ledger, units from Modal rows."""
+    MONTH = "2026-11"
+
+    modal_patch = ModalRunCliTests.modal_patch
+
+    def setUp(self):
+        ModalRunCliTests.setUp(self)
+        self.ledger = budget.Ledger(self.d / "titles" / "allowance-ledger.json")
+        p = mock.patch.object(cli, "_MONTH", self.MONTH)
+        p.start()
+        self.addCleanup(p.stop)
+        plan = modal_run.plan(self.root / "jobs" / self.job_id / "narration.ipynb",
+                              self.root / "jobs" / self.job_id / "inputs.zip")
+        self.timeout_s = plan["timeout_seconds"]
+
+    def with_worst_case(self, usd):
+        """Make the worst case (deadline + 900 s at the L4 rate) equal usd."""
+        return mock.patch.object(modal_run, "L4_USD_PER_S", usd / self.timeout_s)
+
+    def seed(self, usd, job_id="other-job", month=None):
+        self.ledger.record_modal_spend(month or self.MONTH, job_id, usd, 1.0, "ok", "t")
+
+    def go(self, runner, *extra):
+        with mock.patch.object(modal_run, "run_modal", runner):
+            return run("modal-run", self.job_id, "--root", self.root, *extra)
+
+    def test_cap_refusal_at_the_boundary(self):
+        self.seed(29.50)
+        calls = []
+        with self.with_worst_case(0.60):
+            code, out = self.go(fake_runner(0.1, calls=calls))
+        self.assertEqual(code, 3, out)
+        self.assertEqual(calls, [])  # Modal was never contacted
+        for word in ("29.50", "0.60", "0.50"):  # spent, forecast, remaining
+            self.assertIn(word, out)
+        self.assertEqual(self.ledger.modal_month_usd(self.MONTH), 29.50)
+
+    def test_cap_allows_just_under(self):
+        self.seed(29.00)
+        with self.with_worst_case(0.60):
+            code, out = self.go(fake_runner(0.1))
+        self.assertEqual(code, 0, out)
+        self.assertAlmostEqual(self.ledger.modal_month_usd(self.MONTH), 29.10)
+
+    def test_cap_exactly_reached_is_allowed_and_other_months_do_not_count(self):
+        self.seed(29.40)
+        self.seed(30.0, month="2026-10")
+        with self.with_worst_case(0.60):
+            self.assertEqual(self.go(fake_runner(0.1))[0], 0)
+
+    def test_spend_recorded_on_success_failure_and_hard_stop(self):
+        for usd, status in ((0.11, "ok"), (0.22, "failed"), (0.33, "hard_stopped")):
+            code, out = self.go(fake_runner(usd, status, seconds=12.5))
+            self.assertEqual(code, 2 if status == "failed" else 0, out)
+        rows = self.ledger.modal_rows(job_id=self.job_id)
+        self.assertEqual([(r["usd"], r["status"], r["seconds"]) for r in rows],
+                         [(0.11, "ok", 12.5), (0.22, "failed", 12.5), (0.33, "hard_stopped", 12.5)])
+        self.assertTrue(all(r["at"] for r in rows))
+
+    def test_spend_recorded_before_printing(self):
+        def boom(*a, **k):
+            raise RuntimeError("print crashed")
+        with mock.patch.object(cli.json, "dumps", boom):
+            with self.assertRaises(RuntimeError):
+                self.go(fake_runner(0.4))
+        self.assertEqual(self.ledger.modal_month_usd(self.MONTH), 0.4)
+
+    def test_import_defaults_units_to_the_sum_of_every_modal_session(self):
+        self.go(fake_runner(0.25, "failed"))
+        self.go(fake_runner(0.30))
+        self.assertEqual(self.ledger.modal_units(self.job_id), 5.5)
+        fm, patched = self.modal_patch()
+        with fakes(), patched:
+            run("modal-run", self.job_id, "--root", self.root)  # a real (fake-modal) run for the folder
+        folder = self.root / "modal-downloads" / self.job_id
+        usd = self.ledger.modal_job_usd(self.job_id)[0]
+        expected = round(usd / 0.10, 2)
+        code, out = run("import", self.job_id, "--root", self.root, "--from", folder, "--units", 99)
+        self.assertEqual(code, 2, out)
+        self.assertIn("double count", out)
+        code, out = run("import", self.job_id, "--root", self.root, "--from", folder)
+        self.assertEqual(code, 0, out)
+        self.assertIn(f"settled {expected:g} CU", out)
+        entry = next(e for e in json.loads(self.ledger.path.read_text()) if e.get("job_id") == self.job_id)
+        self.assertEqual((entry["state"], entry["units"]), ("settled", expected))
+
+    def test_import_accepts_a_matching_explicit_units(self):
+        self.seed(0.25, job_id=self.job_id)
+        fm, patched = self.modal_patch()
+        with fakes(), patched:
+            run("modal-run", self.job_id, "--root", self.root)
+        folder = self.root / "modal-downloads" / self.job_id
+        units = self.ledger.modal_units(self.job_id)
+        self.assertEqual(run("import", self.job_id, "--root", self.root, "--from", folder,
+                             "--units", units)[0], 0)
+
+    def test_close_defaults_units_and_rejects_a_mismatch(self):
+        self.go(fake_runner(0.43, "failed"))
+        code, out = run("close", self.job_id, "--root", self.root, "--reason", "died", "--units", 1)
+        self.assertEqual(code, 2, out)
+        code, out = run("close", self.job_id, "--root", self.root, "--reason", "died")
+        self.assertEqual(code, 0, out)
+        self.assertIn("settled at the actual 4.3 CU", out)
+
+    def test_colab_jobs_still_require_units(self):
+        code, out = run("close", self.job_id, "--root", self.root, "--reason", "died")
+        self.assertEqual(code, 2, out)
+        self.assertIn("--units is required", out)
+        folder = self.d / "nothing"
+        folder.mkdir()
+        code, out = run("import", self.job_id, "--root", self.root, "--from", folder)
+        self.assertEqual(code, 2, out)
+        self.assertIn("--units is required", out)
+
+    def test_status_shows_the_month_spend(self):
+        code, out = run("status", "--root", self.root)
+        self.assertIn("modal: $0.00 of $30.00 (UTC month 2026-11)", out)
+        self.go(fake_runner(1.234))
+        code, out = run("status", "--root", self.root)
+        self.assertIn("modal: $1.23 of $30.00 (UTC month 2026-11)", out)
+
+    def test_reservation_caps_unchanged_by_modal_rows(self):
+        self.seed(20.0, job_id=self.job_id)
+        self.ledger.reserve("other-title", self.MONTH, 60, "x1")
+        with self.assertRaises(budget.BudgetExceeded):
+            self.ledger.reserve("other-title", self.MONTH, 1, "x2")  # 60 per title still binds
+        old = self.d / "old-ledger.json"
+        old.write_text(json.dumps([{"job_id": "j", "title": "t", "month": "2026-11",
+                                    "units": 1.0, "state": "reserved"}]))
+        self.assertEqual(budget.Ledger(old).modal_month_usd("2026-11"), 0.0)
+        self.assertIsNone(budget.Ledger(old).modal_units("j"))
+        budget.Ledger(old).settle("j", 2.0)
+        self.assertEqual(budget.Ledger(old).spent(None, "2026-11"), 2.0)
 
 
 if __name__ == "__main__":

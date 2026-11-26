@@ -4,13 +4,14 @@
   python3 -m eav.cli plan --root <dir>
   python3 -m eav.cli job <narration|stills|music|reel_clips> --root <dir> --rates <rates.json>
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
-  python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
+  python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> [--units <CU>]
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli modal-run <job_id> --root <dir> [--download <dir>] [--dry-run]
                          (runs the built notebook headlessly on a Modal L4; --dry-run only checks and prints the plan;
-                          leaves the job folder `import` expects; never touches the ledger)
+                          leaves the job folder `import` expects; refuses (exit 3) past the 30 USD UTC-month Modal cap
+                          and appends the actual spend to the ledger; then import/close need no --units)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>"
-  python3 -m eav.cli close <job_id> --root <dir> --units <CU Colab shows> --reason "<what happened>"
+  python3 -m eav.cli close <job_id> --root <dir> [--units <CU Colab shows>] --reason "<what happened>"
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
   python3 -m eav.cli reel <n> --root <dir> --script <script.json> [--hashtags ...]
@@ -640,6 +641,24 @@ def cmd_job(args):
           "Inert until the owner enables it in Colab.")
 
 
+def _modal_units(ledger, job_id, given):
+    """Units to settle. A job with Modal spend rows settles at the sum of every Modal session
+    (usd / USD_PER_CU, 2 decimals); --units may be omitted, and if given must equal it (no
+    double counting). A Colab-run job needs --units."""
+    modal = ledger.modal_units(job_id)
+    if modal is None:
+        if given is None:
+            raise Stop(f"--units is required for job {job_id} (it has no Modal runs on the ledger)",
+                       "Pass the CU Colab shows the run used")
+        return given
+    if given is not None and round(given, 2) != modal:
+        raise Stop(f"--units {given:g} does not match the Modal spend of job {job_id}: "
+                   f"{modal:g} CU-equivalent ({ledger.modal_job_usd(job_id)[0]:.4f} USD / "
+                   f"{budget.USD_PER_CU:g}); counting both would double count",
+                   f"Omit --units to settle at {modal:g} CU")
+    return modal
+
+
 def cmd_import(args):
     rec = _record(args.root)
     job = next((j for j in _jobs(rec) if j["job_id"] == args.job_id), None)
@@ -653,21 +672,24 @@ def cmd_import(args):
     extra = {}
     if job["kind"] == "reel_clips":
         extra = {"archive": Path(args.source), "archive_sha256": args.archive_sha256}
+    ledger = _ledger(rec, args)
+    units = _modal_units(ledger, args.job_id, args.units)
     try:
         arts = importer.import_job(rec, {k: job[k] for k in ("job_id", "kind", "notebook",
                                                              "inputs_zip", "manifest")},
-                                   args.source, _ledger(rec, args), args.units, **extra)
+                                   args.source, ledger, units, **extra)
     except importer.ImportHeld as e:
         raise Stop(f"Import held: {e}. Nothing was imported; the reservation stays open.",
                    "Re-download the complete output folder (or archive) of this exact job and rerun "
                    f"{PROG} import {args.job_id} ...; never rebuild or rerun the job to get past it.",
                    code=4)
     print(f"Imported {len(arts)} verified file(s) from {job['kind']} job {args.job_id}; "
-          f"settled {args.units:g} CU.")
+          f"settled {units:g} CU.")
 
 
 def cmd_modal_run(args):
-    """Run a built narration/stills/music notebook headlessly; the ledger and record stay untouched."""
+    """Run a built narration/stills/music notebook headlessly on Modal; the actual spend is appended
+    to the ledger's modal_spend rows (hard cap 30 USD per UTC month) and settles at import/close."""
     rec = _record(args.root)
     job = next((j for j in _jobs(rec) if j["job_id"] == args.job_id), None)
     if job is None:
@@ -686,14 +708,25 @@ def cmd_modal_run(args):
         print(json.dumps({**plan, "dry_run": True, "forecast_usd": round(plan["forecast_usd"], 4),
                           "next": f"{PROG} modal-run {args.job_id} --root {rec.root}"}, sort_keys=True))
         return
+    ledger, month = _ledger(rec, args), _month()
+    plan = modal_run.plan(job["notebook"], job["inputs_zip"])
+    worst = plan["timeout_seconds"] * modal_run.L4_USD_PER_S  # deadline + the timeout margin
+    try:
+        ledger.check_modal_month(month, worst)
+    except budget.BudgetExceeded as e:
+        raise Stop(f"Budget exceeded: {e}. Modal was not contacted.",
+                   "Hold the job and ask the owner; never run past the Modal cap.", code=3)
     download = Path(args.download) if args.download else rec.root / "modal-downloads"
     result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download)
     folder, status = result["folder"], result["status"]
-    nxt = f"{PROG} import {args.job_id} --root {rec.root} --from {folder} --units <CU actually used>"
+    # the spend is on the ledger before anything is printed: a crash after the run still counts
+    ledger.record_modal_spend(month, args.job_id, result["usd"], result["seconds"], status,
+                              datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    nxt = f"{PROG} import {args.job_id} --root {rec.root} --from {folder}"
     if status != "ok":
         nxt = (f"Rerun {PROG} modal-run {args.job_id} --root {rec.root} to resume from the volume; if it "
-               f"can never finish: {PROG} close {args.job_id} --root {rec.root} --units <CU-equivalent of "
-               f"{result['usd']:.4f} USD> --reason \"<what happened>\"")
+               f"can never finish: {PROG} close {args.job_id} --root {rec.root} "
+               f"--reason \"<what happened>\" (settles at the Modal spend recorded on the ledger)")
     print(json.dumps({"job_id": args.job_id, "seconds": round(result["seconds"], 1),
                       "usd": round(result["usd"], 4), "dry_run": False, "status": status,
                       "hard_stopped": status == "hard_stopped", "error": result["error"],
@@ -730,8 +763,8 @@ def _end_job(args, how):
                    f"--root {rec.root}")
     if not args.reason.strip():
         raise Stop("a reason is required", f"Pass --reason \"<{'why it never ran' if how == 'supersede' else 'what happened'}>\"")
-    units = 0 if how == "supersede" else budget._check_units(args.units)
     ledger = _ledger(rec, args)
+    units = 0 if how == "supersede" else budget._check_units(_modal_units(ledger, args.job_id, args.units))
     entry = next((e for e in ledger._load() if e["job_id"] == args.job_id), None)
     if pending:
         recorded = pending[-1]["detail"]["units"]
@@ -1211,6 +1244,8 @@ def cmd_status(args):
               f"{_title_spent(ledger, rec):.2f} CU spent/reserved for this title (lifetime cap "
               f"{budget.TITLE_CAP:g}), {ledger.spent(None, month):.2f} CU this month (all titles), "
               f"{_remaining(ledger, rec, month):.2f} CU remaining ({month}).")
+        print(f"modal: ${ledger.modal_month_usd(month):.2f} of ${budget.MODAL_MONTH_CAP_USD:.2f} "
+              f"(UTC month {month})")
         for j in _jobs(rec):
             closed = next((e["detail"]["units"] for e in rec.data["events"] if e["result"] == "closed"
                            and e["detail"].get("job_id") == j["job_id"]), None)
@@ -1316,7 +1351,8 @@ def _parser():
     s = add("import")
     s.add_argument("job_id")
     s.add_argument("--from", dest="source", required=True)
-    s.add_argument("--units", type=float, required=True)
+    s.add_argument("--units", type=float, help="the CU Colab shows; optional for a job run with "
+                   "modal-run (then the Modal spend / 0.10 is used)")
     s.add_argument("--archive-sha256")
     s = add("modal-run")
     s.add_argument("job_id")
@@ -1327,7 +1363,8 @@ def _parser():
     s.add_argument("--reason", required=True)
     s = add("close")
     s.add_argument("job_id")
-    s.add_argument("--units", type=float, required=True, help="the CU Colab shows the run used")
+    s.add_argument("--units", type=float, help="the CU Colab shows the run used (optional after "
+                   "modal-run: the Modal spend / 0.10)")
     s.add_argument("--reason", required=True)
     s = add("film")
     s.add_argument("--film", type=int, default=1)

@@ -207,8 +207,9 @@ class RoundTwo:
         for bad in (-1, "nan"):
             code, out = run("close", job_id2, "--root", self.root, "--units", bad, "--reason", "x")
             self.assertNotEqual(code, 0, bad)
-        with self.assertRaises(SystemExit):
-            run("close", job_id2, "--root", self.root, "--reason", "no units")
+        code, out = run("close", job_id2, "--root", self.root, "--reason", "no units")  # Colab job
+        self.assertNotEqual(code, 0)
+        self.assertIn("--units is required", out)
 
     def build_second_narration(self):
         code, out = run("job", "narration", "--root", self.root, "--rates", self.rates, "--job-id", "narr-two")
