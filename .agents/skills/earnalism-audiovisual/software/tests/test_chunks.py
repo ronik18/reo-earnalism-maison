@@ -194,6 +194,21 @@ class ChunkCliTests(unittest.TestCase):
         code, out = run("supersede", ids[0], "--root", self.root, "--reason", "again", "--group")
         self.assertNotEqual(code, 0)
 
+    def test_a_group_with_a_chunk_that_ran_on_modal_is_never_superseded(self):
+        spec, _ = self.stills_spec()
+        self.assertEqual(run("job", "stills", "--root", self.root, "--rates", self.rates,
+                             "--spec", spec)[0], 0)
+        ids = [d.name for d in self.jobs()]
+        budget.Ledger(self.ledger).record_modal_spend("2026-11", ids[2], 0.2, 5.0, "failed", "t")
+        before_ledger = self.ledger.read_bytes()
+        before_record = (self.root / "record.json").read_bytes()
+        code, out = run("supersede", ids[0], "--root", self.root, "--reason", "replaced", "--group")
+        self.assertEqual(code, 2, out)
+        self.assertIn(f"{ids[2]} of group", out)
+        self.assertIn("ran on Modal", out)
+        self.assertEqual(self.ledger.read_bytes(), before_ledger)  # no chunk was superseded
+        self.assertEqual((self.root / "record.json").read_bytes(), before_record)
+
     # --- fix round 1 (I1): a closed chunk is rebuilt alone ---------------------------------------
     def closed_stills_chunk_2(self):
         spec, keys = self.stills_spec()

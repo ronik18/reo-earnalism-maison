@@ -131,19 +131,17 @@ class ModalSpendTests(unittest.TestCase):
         self.ledger.record_modal_spend("2026-11", "j1", 0.25, 10.0, "failed", "a")
         self.ledger.record_modal_spend("2026-11", "j1", 0.50, 20.0, "ok", "b")
         self.ledger.record_modal_spend("2026-12", "j2", 1.0, 30.0, "hard_stopped", "c")
-        with self.assertRaises(ValueError):  # a job with Modal rows never settles in Colab units
-            self.ledger.settle("j1", 7.5)
-        self.ledger.settle("j1", 0)
+        self.ledger.settle("j1", 0.5)  # a Modal job: its Colab portion (0.5 CU) plus its USD
         self.ledger.reserve("t", "2026-12", 1, "j2")
         self.assertEqual(self.ledger.modal_month_usd("2026-11"), 0.75)
         self.assertEqual(self.ledger.modal_job_usd("j1"), (0.75, 2))
         self.assertEqual(self.ledger.modal_units("j1"), 7.5)
         self.assertIsNone(self.ledger.modal_units("nope"))
-        self.assertEqual(self.ledger.spent("t", None), 1)  # Modal spend is not Colab CU
+        self.assertEqual(self.ledger.spent("t", None), 1.5)  # Modal spend is not Colab CU
         j1 = next(e for e in json.loads(self.path.read_text()) if e.get("job_id") == "j1")
         self.assertEqual((j1["state"], j1["units"], j1["usd"], j1["cu_equivalent"],
                           j1["runner"], j1["reserved_units"]),
-                         ("settled", 0.0, 0.75, 7.5, "modal", 5))
+                         ("settled", 0.5, 0.75, 7.5, "modal", 5))
         self.assertEqual(self.ledger.modal_title_usd("t"), 1.75)
         with self.assertRaises(ValueError):
             self.ledger.record_modal_spend("2026-11", "j1", 1, 1, "weird", "d")
@@ -153,21 +151,30 @@ class ModalSpendTests(unittest.TestCase):
         self.ledger.reserve("u", "2026-11", 60, "j2")
         with self.assertRaises(BudgetExceeded):
             self.ledger.reserve("v", "2026-11", 1, "j3")  # 100 CU month full
-        self.assertEqual(self.ledger.move_to_modal("j1", "at"), 40)
-        self.assertEqual(self.ledger.move_to_modal("j1", "later"), 0.0)  # idempotent (resume)
-        self.assertEqual(self.ledger.spent(None, "2026-11"), 60)
-        self.assertEqual(self.ledger.spent("t", None), 0)
-        self.ledger.reserve("v", "2026-11", 40, "j3")  # the released 40 CU are Colab's again
+        self.assertEqual(self.ledger.move_to_modal("j1", "at", 4), 36)  # 4 CU already used in Colab
+        self.assertEqual(self.ledger.move_to_modal("j1", "later", 4), 0.0)  # idempotent (resume)
+        with self.assertRaises(ValueError):
+            self.ledger.move_to_modal("j1", "later", 3)  # never lowered
+        self.assertEqual(self.ledger.spent(None, "2026-11"), 64)
+        self.assertEqual(self.ledger.spent("t", None), 4)
+        with self.assertRaises(BudgetExceeded):
+            self.ledger.reserve("v", "2026-11", 37, "j3")
+        self.ledger.reserve("v", "2026-11", 36, "j3")  # only the released 36 CU are Colab's again
         j1 = next(e for e in json.loads(self.path.read_text()) if e.get("job_id") == "j1")
-        self.assertEqual((j1["runner"], j1["units"], j1["reserved_units"], j1["state"],
-                          j1["moved_to_modal_at"]), ("modal", 0.0, 40, "reserved", "at"))
+        self.assertEqual((j1["runner"], j1["units"], j1["colab_units"], j1["reserved_units"],
+                          j1["state"], j1["moved_to_modal_at"]), ("modal", 4, 4, 40, "reserved", "at"))
+        self.assertEqual(self.ledger.move_to_modal("j1", "again", 4.5), 0.0)  # Colab ran again
+        self.assertEqual(self.ledger.spent("t", None), 4.5)
+        self.assertEqual(self.ledger.colab_units_before_modal("j1"), 4.5)
         self.assertTrue(self.ledger.is_modal_job("j1"))
         self.assertFalse(self.ledger.is_modal_job("j2"))
         self.ledger.settle("j2", 3)
         with self.assertRaises(ValueError):
-            self.ledger.move_to_modal("j2", "at")  # settled: never moves
+            self.ledger.move_to_modal("j2", "at", 0)  # settled: never moves
         with self.assertRaises(KeyError):
-            self.ledger.move_to_modal("nope", "at")
+            self.ledger.move_to_modal("nope", "at", 0)
+        with self.assertRaises(ValueError):
+            self.ledger.move_to_modal("j3", "at", -1)
 
     def test_title_cap_6_usd_boundary_and_month_cap(self):
         self.assertEqual(MODAL_TITLE_CAP_USD, 6.0)

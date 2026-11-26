@@ -7,9 +7,11 @@ Modal runs (`eav modal-run`) are capped in dollars only (owner decision of 26 No
 30 USD per UTC month and 6 USD per title over the title's whole life, recorded as
 append-only `modal_spend` rows (one record per month in the ledger file, next to the
 reservation entries). A job is reserved in CU at build time; when it is run on Modal its
-reservation entry is marked `runner: "modal"` and its units are released to 0 (the original
-forecast is kept as `reserved_units`), so it no longer counts against the CU caps. Such a job
-settles from its Modal rows in USD (`usd`, with `cu_equivalent` kept as information only).
+reservation entry is marked `runner: "modal"`; the CU Colab already used on it (`colab_units`,
+0 if it never ran there) stay counted against the CU caps and the rest of the reservation is
+released (the original forecast is kept as `reserved_units`). Such a job settles with both
+portions: the Modal rows in USD (`usd`, with `cu_equivalent` kept as information only) and its
+Colab CU (those recorded at the move plus any Colab run after it) against the CU caps.
 The ledger assumes one writer process at a time.
 """
 import json
@@ -152,22 +154,38 @@ class Ledger:
         self.check_modal_month(month, worst_case_usd)
         self.check_modal_title(title, worst_case_usd, edition_id)
 
-    def move_to_modal(self, job_id: str, at: str) -> float:
-        """The job is run on Modal: release its CU reservation (units -> 0; the forecast is kept as
-        reserved_units) and record that it moved, so the Colab CU caps no longer count it.
-        Idempotent (a resumed run changes nothing). Returns the CU released."""
+    def move_to_modal(self, job_id: str, at: str, colab_units: float) -> float:
+        """The job is run on Modal: colab_units (the CU Colab already showed for this job, 0 if it
+        never ran there) stay counted against the CU caps; the rest of the reservation is released
+        (the forecast is kept as reserved_units). A later modal-run of the same job passes the
+        cumulative Colab CU again: it may grow (a Colab session in between), never shrink.
+        Returns the CU released by this call."""
+        _check_units(colab_units)
         entries = self._load()
         entry = next((e for e in entries if e["job_id"] == job_id), None)
         if entry is None:
             raise KeyError(job_id)
-        if entry.get("runner") == "modal":
-            return 0.0
         if entry["state"] != "reserved":
             raise ValueError(f"job {job_id!r} is already settled; it cannot move to Modal")
-        released = entry["units"]
-        entry.update(reserved_units=released, units=0.0, runner="modal", moved_to_modal_at=at)
+        if entry.get("runner") == "modal":
+            recorded = entry.get("colab_units", 0.0)
+            if colab_units < recorded:
+                raise ValueError(f"job {job_id!r} already recorded {recorded:g} CU of Colab work; "
+                                 f"--colab-units {colab_units:g} would lower it")
+            if colab_units != recorded:
+                entry.update(colab_units=colab_units, units=colab_units)
+                self._save(entries)
+            return 0.0
+        released = max(entry["units"] - colab_units, 0.0)
+        entry.update(reserved_units=entry["units"], units=colab_units, colab_units=colab_units,
+                     runner="modal", moved_to_modal_at=at)
         self._save(entries)
         return released
+
+    def colab_units_before_modal(self, job_id: str) -> float:
+        """The Colab CU recorded when the job moved to Modal (0 if none or not moved)."""
+        entry = next((e for e in self._load() if e["job_id"] == job_id), None)
+        return float(entry.get("colab_units", 0.0)) if entry else 0.0
 
     def is_modal_job(self, job_id: str) -> bool:
         """Run on Modal: moved there, or (a ledger from before the move was recorded) has rows."""
@@ -274,8 +292,9 @@ class Ledger:
         self._save(entries)
 
     def settle(self, job_id: str, actual_units: float) -> None:
-        """Settle a reservation. A job run on Modal settles from its Modal rows in USD: its CU
-        stay 0 (actual_units must be 0) and usd / cu_equivalent are recorded as information."""
+        """Settle a reservation at the actual Colab CU. A job run on Modal also records its Modal
+        rows in USD (usd / cu_equivalent as information); actual_units is then its Colab portion
+        only (0 if it ran only on Modal), counted against the CU caps."""
         _check_units(actual_units)
         entries = self._load()
         for e in entries:
@@ -284,12 +303,9 @@ class Ledger:
                     raise ValueError(f"job already settled: {job_id!r}")
                 usd, n = self.modal_job_usd(job_id)
                 if e.get("runner") == "modal" or n:
-                    if actual_units != 0:
-                        raise ValueError(f"job {job_id!r} ran on Modal: it settles from its Modal "
-                                         f"rows in USD, never with Colab units ({actual_units:g})")
                     e.setdefault("reserved_units", e["units"])
-                    e.update(runner="modal", units=0.0, usd=round(usd, 6),
-                             cu_equivalent=round(usd / USD_PER_CU, 2))
+                    e.update(runner="modal", units=actual_units, colab_units=actual_units,
+                             usd=round(usd, 6), cu_equivalent=round(usd / USD_PER_CU, 2))
                 else:
                     e["units"] = actual_units
                 e["state"] = "settled"

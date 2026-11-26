@@ -61,7 +61,7 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 | **Non-public-domain title** (`public_domain_evidence` false) | `init` refuses. Hold the title; it is out of scope. | Draft clearance for it, or produce social reels of it anyway. |
 | **Audio format not cleared on Maison** (only Reader read/preview) | Keep producing: film, reels and review need no Maison grant. `bundle-audio` drafts the per-title evidence; the owner completes and approves it; only then `stage`. | Write `publication_clearance` or rights rows by hand, call the draft "cleared", or publish audio before stage + fresh browser report. |
 | **Budget exceeded** (exit 3: Colab forecast over 60 CU per title (keyed by edition) for its whole life, or 100 CU per calendar month; for `modal-run`, worst case over the $30.00 UTC-month or the $6.00 per-title (lifetime) Modal cap) | Stop. Hold for the owner with the forecast, the remaining allowance and the CLI's fit (for `reel_clips`: how many of the batch's shots still fit). Nothing was reserved or run. | Write or edit a spec `compute` block (it is derived and refused if it differs), lower steps/resolution of a prepared job, split a job to slip under the cap, shrink measured rates, edit, reset or swap the ledger pinned at `init`, init a second root for the edition, use another Colab account, raise or work around a Modal cap (month or title), or spend other money. |
-| **Import held** (exit 4: missing, extra or mismatched file, or an `INCOMPLETE` manifest) | Re-download the complete output of that exact job and re-run `import`. A job that is `INCOMPLETE` but only stopped short (hard stop, disconnect) is resumed by re-running it (Colab, or `modal-run` again), within its reserved time. A job that ran but can never be imported (crash, lost download): `close <job_id> --reason "..."` (Colab: `--units <CU Colab shows>`; a Modal job takes no `--units`: it settles from its Modal rows in USD), then hold for the owner; for a chunk, rebuild only that chunk with `job --replace-chunk <closed chunk id>`. | Rebuild/rerun the whole GPU job or group, copy files in by hand, edit `manifest.json`, or `supersede` a job that ran (supersede is for never-run jobs only). |
+| **Import held** (exit 4: missing, extra or mismatched file, or an `INCOMPLETE` manifest) | Re-download the complete output of that exact job and re-run `import`. A job that is `INCOMPLETE` but only stopped short (hard stop, disconnect) is resumed by re-running it (Colab, or `modal-run --colab-units <CU Colab already showed, 0 if none>`), within its reserved time; a switch of runner is never free: Colab CU already used stay on the CU caps (`modal-run --colab-units`) and Colab work after the move is settled with `--units`. A job that ran but can never be imported (crash, lost download): `close <job_id> --reason "..."` (Colab: `--units <CU Colab shows>`; a job that ran on Modal settles its Modal rows in USD plus its Colab CU: `--units` only for Colab work after the move), then hold for the owner; for a chunk, rebuild only that chunk with `job --replace-chunk <closed chunk id>`. | Rebuild/rerun the whole GPU job or group, copy files in by hand, edit `manifest.json`, or `supersede` a job that ran (supersede is for never-run jobs only; the CLI refuses a job, or a group, with a Modal run). |
 | **Modal run died, failed or hard-stopped** (Ctrl-C, kill, error after the paid run: the ledger row stays `pending` at the worst case) | Read the billed amount from the Modal dashboard and run `modal-settle <job_id> --root <dir> --usd <billed>`; then `import` the output, or re-run to resume, or `close` as above. | Delete or edit the pending row, or assume the run was free. |
 | **QC failure** (exit 5: loudness, true peak, loop close, size, hook onset, reel narration that does not fit its length ± 3 s) | Fix only the failing item (one shot, one still, the mix), re-assemble, re-run `qc`. Reel narration that does not fit: rewrite the script's words, `reel N --script`, new reel narration. | Lower a gate, trim narration, or call unheard audio "reviewed". |
 | **Stream video held** | The film goes to owner review and to social destinations the owner names. Maison gets audio only. | Upload video to Maison/Stream; `attach_audiovisual_audio` refuses it anyway. |
@@ -81,13 +81,17 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   Adobe/Canva credits): not for "just one test" either. The only money Claude may spend is
   Modal GPU time through `modal-run`, inside the cap below.
 - **Modal.** Narration, stills and music may run on Modal: Claude runs
-  `modal-run <job_id> --root <dir>` on the same built notebook (`--dry-run` first checks the plan).
+  `modal-run <job_id> --root <dir> --colab-units <CU>` on the same built notebook (`--dry-run` first
+  checks the plan).
   Spend is capped in dollars only (owner decision of 26 Nov 2026): **$30 per UTC month** and
   **$6 per title over its whole life**. The worst case is checked against both before Modal is
   contacted and recorded first as a `pending` ledger row, replaced by the actual amount afterwards;
   `modal-settle` replaces it from the billed amount if the run died. The 60 CU title and 100 CU month
-  caps apply to Colab work only: `modal-run` releases the job's CU reservation (the ledger records
-  the move to Modal), and the job then settles from its Modal rows in USD, never with `--units`.
+  caps apply to Colab work only, and count every CU of Colab work, also on a job that changes
+  runner. `--colab-units` (required) is the CU Colab already showed for the job, 0 if it never ran
+  there: they stay settled against the CU caps and only the rest of the reservation is released (the
+  ledger records the move to Modal). `import` and `close` then settle both portions: the Modal rows
+  in USD and the Colab CU, i.e. those recorded at the move plus `--units` for any Colab run after it.
   Never raise, split around or skip a cap or the pending row. Reel clips (Wan 2.2) never run on Modal.
 - **Rates.** Forecasts are per runner kind from measured rates: the first real Modal run of a kind
   sets its rate; until then use the Colab L4 rates. Never lower a forecast.
@@ -126,11 +130,14 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 - "I'll write the Wan authority JSON so the owner only has to press Run." (Owner
   evidence is the owner's; Claude prints what it must contain, nothing more.)
 - "The job crashed, so it cost nothing: supersede it." (It ran: `close` it with the CU
-  Colab shows; a Modal job settles from its Modal rows in USD.)
+  Colab shows; a Modal job settles its Modal rows in USD plus any Colab CU; supersede refuses it.)
+- "It ran in Colab first, but Modal is dollars, so the Colab part no longer counts." (Pass the CU
+  Colab showed as `--colab-units`; they stay on the CU caps.)
 - "The Modal run was cheap, skip the pending row." / "Just raise the cap to $35 for one job."
   (The pending row and the $30 cap are the owner's rules, not estimates.)
 - "Modal still has dollars this month; the title's $6 is only a guideline." (It is a hard cap:
-  `modal-run` exits 3; hold for the owner or use Colab inside the CU caps.)
+  `modal-run` exits 3; hold for the owner, or run it in Colab inside the CU caps and settle that
+  Colab work with `--units` at import/close.)
 - "Wan is faster on Modal." (Reels stay on Colab with the owner-signed authority file.)
 - "The chunk failed, rebuild the whole job." (`close` it, then `--replace-chunk` that chunk.)
 

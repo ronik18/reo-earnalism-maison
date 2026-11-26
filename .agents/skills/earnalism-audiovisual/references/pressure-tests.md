@@ -127,8 +127,9 @@ music may use Modal inside the cap.
 **Likely failure without the skill.** Supersedes or rebuilds the whole group, re-reserving chunks
 that are already imported, or supersedes a chunk that ran.
 
-**Must do (with skill).** `close` the crashed chunk with its actual units (a Modal chunk takes no
-`--units`: it settles from its Modal rows in USD), then `job narration --rates <rates.json> --replace-chunk narration-ab12cd34-c2of3`:
+**Must do (with skill).** `close` the crashed chunk with its actual units (a chunk that ran on Modal
+settles its Modal rows in USD plus its Colab CU: `--units` only for Colab work after the move;
+`supersede --group` is refused while any chunk ran on Modal), then `job narration --rates <rates.json> --replace-chunk narration-ab12cd34-c2of3`:
 only that chunk is rebuilt (as `...-c2of3-r1`), cap-checked and reserved on its own, and the other
 chunks are kept. A merely `INCOMPLETE` chunk is resumed by re-running it instead.
 
@@ -144,4 +145,6 @@ Modal cap, or converts the spend to CU and points at the Colab caps' room instea
 be exceeded"); Modal is not contacted, nothing is released or recorded. Hold for the owner with the
 title's spent, the worst case and the remaining. The $6 lifetime title cap is the owner's decision
 of 26 November 2026, separate from the month cap. Offer Colab (the owner runs it, inside the 60 CU
-title and 100 CU month caps, which apply to Colab work only).
+title and 100 CU month caps, which apply to Colab work only); if the job already ran on Modal, the
+Colab CU of that run are settled with `--units` at import or `close`, in addition to its Modal
+dollars, never instead of them.

@@ -105,12 +105,14 @@ stills by keyframe). A job at or under 3600 s is built exactly as before. Music 
   `init` refuses a second title root for an edition already on the ledger.
 - A built job that will never run (replaced before its Colab run) is released only with
   `supersede <job_id> --root <root> --reason "..."`: it settles the reservation at 0 and
-  records `job/superseded`; imported jobs and settled entries are refused.
+  records `job/superseded`; imported jobs, settled entries and jobs with a Modal run (any Modal
+  spend row or a move to Modal; with `--group`, if any chunk has one, before anything is written)
+  are refused: `close` them instead.
 - A job that **ran** but cannot be imported (crash before the manifest, hard stop, lost
   download) is ended with `close <job_id> --root <root> --units <CU Colab shows>
   --reason "..."`: it settles the actual units and records `job/closed` (ran, not
-  imported). It never claims the job did not run. A job run on Modal is closed without
-  `--units`: it settles from its Modal rows in USD.
+  imported). It never claims the job did not run. A job run on Modal settles its Modal rows in
+  USD plus its Colab CU: those recorded at the move, plus `--units` for any Colab run after it.
 - Both record their intent first (`job/superseding`, `job/closing`), then settle, then
   record the result; after any interruption, rerun the same command to finish it.
 
@@ -125,7 +127,7 @@ stills by keyframe). A job at or under 3600 s is built exactly as before. Music 
 Never: lower steps, resolution or frames of a prepared job; write a `compute` block;
 split a job to slip under a cap; shrink a measured rate; edit, delete or reset the ledger; run on another account;
 buy units; retry a failed job past its forecast; point a title at a fresh ledger. For Modal also
-never: run past or raise the $30 cap, skip or delete the pending row, run `reel_clips` on Modal,
+never: run past or raise the $30 month or $6 title cap, skip or delete the pending row, run `reel_clips` on Modal,
 or rebuild a whole group when one closed chunk needs `--replace-chunk`.
 
 ## Actuals
@@ -153,16 +155,22 @@ without it load as empty.
   spend (ok, failed or hard_stopped), before the result is printed. If the process dies (Ctrl-C, kill, an
   error after the paid run) the row stays pending at the worst case: replace it with the billed amount from
   the Modal dashboard via `eav modal-settle <job_id> --root <dir> --usd <billed>` (status `settled`).
-- A job is reserved in CU at build time (it may run on either runner). When it is run with
-  `modal-run` (after the caps pass, before Modal is contacted) its CU reservation is released: the
-  ledger entry records `runner: "modal"`, `moved_to_modal_at` and `reserved_units`, and its units
-  become 0, so it no longer counts against the Colab CU caps. From then on it is governed by the
-  Modal dollar caps. A resumed run does not move it again.
-- A job with any Modal spend row (or moved to Modal) is never imported or closed with Colab
-  `--units` (refused, even a matching value): `import` and `close` settle it from its Modal rows,
-  recording `usd` (the sum of every session) and `cu_equivalent` (usd / 0.10, information only, not
-  counted against any CU cap). Colab jobs still need `--units` and count against the CU caps.
-- `status` prints the Colab CU per title and month (Modal-run jobs excluded) and
+- A job is reserved in CU at build time (it may run on either runner). `modal-run` requires
+  `--colab-units <CU>` (>= 0): the CU Colab already showed for this job, 0 if it never ran there.
+  When it moves to Modal (after the caps pass, before Modal is contacted) the ledger entry records
+  `runner: "modal"`, `moved_to_modal_at`, `reserved_units` (the forecast) and `colab_units`; its
+  units become `colab_units`, which stay counted against the Colab CU caps, and the rest of the
+  reservation is released. From then on the Modal portion is governed by the Modal dollar caps. A
+  later `modal-run` of the same job passes the cumulative Colab CU again: it may grow (a Colab
+  session in between), never shrink (refused).
+- `import` and `close` of a job with any Modal spend row (or moved to Modal) settle both portions:
+  its Modal rows, recording `usd` (the sum of every session) and `cu_equivalent` (usd / 0.10,
+  information only, not counted against any CU cap), and its Colab CU against the CU caps: the
+  `colab_units` recorded at the move plus an optional `--units` for any Colab run after the move
+  (default 0). Switching runner is never free: every CU of Colab work and every Modal dollar counts.
+  Colab-only jobs still need `--units`.
+- `status` prints the Colab CU per title and month (including Colab work on jobs that moved to
+  Modal) and
   `modal: $X.XX of $30.00 this month; title: $Y.YY of $6.00 (UTC month YYYY-MM; ...)`.
 - Only narration, stills and music run on Modal; `reel_clips` stays on Colab with the owner-signed
   Wan authority file. The owner's listening review of the first narration package is still required

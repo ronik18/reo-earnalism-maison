@@ -10,11 +10,13 @@
                          (rebuilds only that chunk's items as <chunk id>-r<k>; the group keeps its other chunks)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> [--units <CU>]
                          [--archive-sha256 <sha>]           (reel_clips)
-  python3 -m eav.cli modal-run <job_id> --root <dir> [--download <dir>] [--dry-run]
+  python3 -m eav.cli modal-run <job_id> --root <dir> --colab-units <CU, 0 if none> [--download <dir>] [--dry-run]
                          (runs the built notebook headlessly on a Modal L4; --dry-run only checks and prints the plan;
                           leaves the job folder `import` expects; refuses (exit 3) past the 30 USD UTC-month or the
-                          6 USD lifetime title Modal cap; releases the job's CU reservation (Modal is capped in USD
-                          only) and appends the actual spend to the ledger; then import/close take no --units)
+                          6 USD lifetime title Modal cap; keeps --colab-units (the CU Colab already showed for the job)
+                          on the Colab caps and releases the rest of its CU reservation (Modal is capped in USD only);
+                          appends the actual spend to the ledger; then import/close take --units only for Colab work
+                          after the move)
   python3 -m eav.cli modal-settle <job_id> --root <dir> --usd <billed>   (replace an interrupted run's pending worst-case row)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>" [--group]
                          (a chunk only with --group: every never-run chunk of its group together)
@@ -467,13 +469,15 @@ def _on_modal(rec, job_id) -> bool:
 def _colab_action(rec, job) -> str:
     if job["kind"] == "reel_clips":
         return _wan_action(rec, job)
-    if _on_modal(rec, job["job_id"]):  # moved to Modal: Modal dollar caps, no Colab --units
-        return (f"Job {job['job_id']} runs on Modal (its CU reservation is released). Import its "
-                f"output: {PROG} import {job['job_id']} --root {rec.root} --from <the modal-run "
-                f"folder> (no --units). If it stopped short, rerun {PROG} modal-run {job['job_id']} "
-                f"--root {rec.root} to resume; if a run died with a pending row: {PROG} modal-settle "
-                f"{job['job_id']} --root {rec.root} --usd <billed>. If it can never be imported: "
-                f"{PROG} close {job['job_id']} --root {rec.root} --reason \"<what happened>\" (no --units)")
+    if _on_modal(rec, job["job_id"]):  # moved to Modal: Modal dollar caps for the Modal portion
+        return (f"Job {job['job_id']} runs on Modal (the rest of its CU reservation is released). "
+                f"Import its output: {PROG} import {job['job_id']} --root {rec.root} --from <the "
+                f"output folder> (add --units <CU> only for Colab work after the move). If it stopped "
+                f"short, rerun {PROG} modal-run {job['job_id']} --root {rec.root} --colab-units <CU "
+                f"Colab showed for this job in total> to resume; if a run died with a pending row: "
+                f"{PROG} modal-settle {job['job_id']} --root {rec.root} --usd <billed>. If it can "
+                f"never be imported: {PROG} close {job['job_id']} --root {rec.root} --reason "
+                f"\"<what happened>\" (--units only for Colab work after the move)")
     drive = _json(job["manifest"]).get("drive_dir", colab_jobs.DRIVE_ROOT)
     c = job.get("chunk")
     part = (f" (chunk {c['index']} of {c['of']} of group {c['group']}; each chunk is its own job, "
@@ -874,24 +878,26 @@ def _build_chunks(rec, kind, spec, ledger, rates, month, sizes, target) -> list:
 
 
 def _modal_units(ledger, job_id, given):
-    """CU to settle. A Colab-run job needs --units. A job run on Modal (any Modal spend row, or
-    moved to Modal) settles from its Modal rows in USD and 0 CU: --units is refused for it."""
+    """Colab CU to settle. A Colab-run job needs --units. A job run on Modal (any Modal spend row,
+    or moved to Modal) settles its Modal rows in USD and, against the CU caps, the Colab CU
+    recorded at the move (modal-run --colab-units) plus --units for any Colab run after the move
+    (optional, default 0)."""
     if not ledger.is_modal_job(job_id):
         if given is None:
             raise Stop(f"--units is required for job {job_id} (it has no Modal runs on the ledger)",
                        "Pass the CU Colab shows the run used")
         return given
-    if given is not None:
-        raise Stop(f"job {job_id} ran on Modal: it settles from its Modal rows in USD "
-                   f"({ledger.modal_job_usd(job_id)[0]:.4f} USD so far), never with Colab --units "
-                   f"({given:g}); Modal spend does not count against the CU caps",
-                   "Omit --units")
-    return 0
+    try:
+        after = budget._check_units(0 if given is None else given)
+    except ValueError as e:
+        raise Stop(str(e), "Pass --units as the CU Colab showed after the move to Modal, >= 0")
+    return round(ledger.colab_units_before_modal(job_id) + after, 6)
 
 
 def _settled_as(ledger, job_id, units) -> str:
     if ledger.is_modal_job(job_id):
-        return f"settled from its Modal rows at {ledger.modal_job_usd(job_id)[0]:.4f} USD (0 CU)"
+        return (f"settled from its Modal rows at {ledger.modal_job_usd(job_id)[0]:.4f} USD plus "
+                f"{units:g} CU of Colab work")
     return f"settled {units:g} CU"
 
 
@@ -945,6 +951,14 @@ def cmd_modal_run(args):
         print(json.dumps({**plan, "dry_run": True, "forecast_usd": round(plan["forecast_usd"], 4),
                           "next": f"{PROG} modal-run {args.job_id} --root {rec.root}"}, sort_keys=True))
         return
+    if args.colab_units is None:
+        raise Stop("--colab-units is required: the CU Colab already showed for this job (0 if it "
+                   "never ran in Colab); they stay counted against the Colab caps",
+                   f"{PROG} modal-run {args.job_id} --root {rec.root} --colab-units <CU, 0 if none>")
+    try:
+        budget._check_units(args.colab_units)
+    except ValueError as e:
+        raise Stop(str(e), "Pass --colab-units as the CU Colab showed for this job, >= 0")
     ledger, month = _ledger(rec, args), _month()
     plan = modal_run.plan(job["notebook"], job["inputs_zip"])
     worst = plan["timeout_seconds"] * modal_run.L4_USD_PER_S  # deadline + the timeout margin
@@ -954,11 +968,13 @@ def cmd_modal_run(args):
         raise Stop(f"Budget exceeded: {e}. Modal was not contacted.",
                    "Hold the job and ask the owner; never run past the Modal cap.", code=3)
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    try:  # from here the job is governed by the Modal dollar caps, not the Colab CU caps
-        ledger.move_to_modal(args.job_id, now)
-    except (KeyError, ValueError) as e:
-        raise Stop(f"job {args.job_id} has no open reservation on the ledger ({e}); Modal was not "
+    try:  # the Colab CU already used stay on the CU caps; the rest of the reservation is released
+        ledger.move_to_modal(args.job_id, now, args.colab_units)
+    except KeyError as e:
+        raise Stop(f"job {args.job_id} has no reservation on the ledger ({e}); Modal was not "
                    "contacted", f"{PROG} status --root {rec.root}")
+    except ValueError as e:
+        raise Stop(f"{e}; Modal was not contacted", f"{PROG} status --root {rec.root}")
     download = Path(args.download) if args.download else rec.root / "modal-downloads"
     # a provisional worst-case row counts against the cap from before Modal is contacted; it is
     # replaced by the actual spend when the run returns. If the process dies (Ctrl-C, kill, an error
@@ -973,9 +989,10 @@ def cmd_modal_run(args):
     folder, status = result["folder"], result["status"]
     nxt = f"{PROG} import {args.job_id} --root {rec.root} --from {folder}"
     if status != "ok":
-        nxt = (f"Rerun {PROG} modal-run {args.job_id} --root {rec.root} to resume from the volume; if it "
-               f"can never finish: {PROG} close {args.job_id} --root {rec.root} "
-               f"--reason \"<what happened>\" (settles at the Modal spend recorded on the ledger)")
+        nxt = (f"Rerun {PROG} modal-run {args.job_id} --root {rec.root} --colab-units "
+               f"{args.colab_units:g} to resume from the volume; if it can never finish: {PROG} close "
+               f"{args.job_id} --root {rec.root} --reason \"<what happened>\" (settles the Modal spend "
+               f"recorded on the ledger plus the {args.colab_units:g} CU of Colab work)")
     print(json.dumps({"job_id": args.job_id, "seconds": round(result["seconds"], 1),
                       "usd": round(result["usd"], 4), "dry_run": False, "status": status,
                       "hard_stopped": status == "hard_stopped", "error": result["error"],
@@ -1015,6 +1032,13 @@ def _supersede_group(args):
     if not todo:
         raise Stop(f"chunk group {group['job_id']} has no never-run chunk left to supersede",
                    f"{PROG} status --root {rec.root}")
+    ledger = _ledger(rec, args)
+    ran = [j for j in todo if ledger.is_modal_job(j)]
+    if ran:  # checked for every chunk before any write: a group is never half superseded
+        raise Stop(f"chunk(s) {', '.join(ran)} of group {group['job_id']} ran on Modal; supersede is "
+                   "for never-run jobs and nothing was superseded",
+                   f"Close each chunk that ran: {PROG} close <chunk id> --root {rec.root} --reason "
+                   "\"...\", then rebuild only it with --replace-chunk")
     for job_id in todo:
         _end_job(args, "supersede", job_id)
 
@@ -1053,6 +1077,10 @@ def _end_job(args, how, job_id=None):
     if not args.reason.strip():
         raise Stop("a reason is required", f"Pass --reason \"<{'why it never ran' if how == 'supersede' else 'what happened'}>\"")
     ledger = _ledger(rec, args)
+    if how == "supersede" and ledger.is_modal_job(job_id):
+        raise Stop(f"job {job_id} ran on Modal; supersede is for never-run jobs",
+                   f"{PROG} close {job_id} --root {rec.root} --reason \"...\" (--units only for "
+                   "Colab work after the move to Modal)")
     units = 0 if how == "supersede" else budget._check_units(_modal_units(ledger, job_id, args.units))
     entry = next((e for e in ledger._load() if e["job_id"] == job_id), None)
     if pending:
@@ -1087,7 +1115,7 @@ def _end_job(args, how, job_id=None):
         if ledger.is_modal_job(job_id):
             detail.update(runner="modal", usd=round(ledger.modal_job_usd(job_id)[0], 6))
             how_much = (f"{_settled_as(ledger, job_id, units)} (CU reservation "
-                        f"{entry.get('reserved_units', entry['units']):.2f} released)")
+                        f"{entry.get('reserved_units', entry['units']):.2f})")
         else:
             how_much = f"settled at the actual {units:g} CU (reserved {entry['units']:.2f} CU)"
         rec.event("job", final, detail)
@@ -1552,17 +1580,18 @@ def cmd_status(args):
         print(f"modal: ${ledger.modal_month_usd(month):.2f} of ${budget.MODAL_MONTH_CAP_USD:.2f} "
               f"this month; title: ${ledger.modal_title_usd(title, s.get('edition_id')):.2f} of "
               f"${budget.MODAL_TITLE_CAP_USD:.2f} (UTC month {month}; the CU above are Colab work "
-              "only, Modal-run jobs excluded)")
+              "only, including Colab work on jobs that later moved to Modal)")
         for j in _jobs(rec):
             closed = next((e["detail"] for e in rec.data["events"] if e["result"] == "closed"
                            and e["detail"].get("job_id") == j["job_id"]), None)
             on_modal = ledger.is_modal_job(j["job_id"])
-            spent = (f"{closed['usd']:.2f} USD on Modal" if closed and "usd" in closed
-                     else f"{closed['units']:.2f} CU" if closed else "")
+            spent = (f"{closed['usd']:.2f} USD on Modal + {closed['units']:.2f} CU Colab"
+                     if closed and "usd" in closed else f"{closed['units']:.2f} CU" if closed else "")
             state = ("imported" if j["imported"] else "superseded" if j["superseded"]
                      else f"closed (ran, not imported; {spent} settled)" if j["closed"]
                      else "supersede/close unfinished: rerun it" if j["unfinished"]
-                     else "on Modal (CU reservation released)" if on_modal
+                     else (f"on Modal ({ledger.colab_units_before_modal(j['job_id']):.2f} CU of "
+                           "Colab work kept, rest of the reservation released)") if on_modal
                      else "waiting for Colab")
             c = j["chunk"]
             part = f" chunk {c['index']}/{c['of']} of {c['group']}" if c else ""
@@ -1676,13 +1705,15 @@ def _parser():
     s = add("import")
     s.add_argument("job_id")
     s.add_argument("--from", dest="source", required=True)
-    s.add_argument("--units", type=float, help="the CU Colab shows (Colab jobs only; a job run "
-                   "with modal-run settles from its Modal rows in USD and refuses --units)")
+    s.add_argument("--units", type=float, help="the CU Colab shows; for a job run with modal-run: "
+                   "only the CU of any Colab run after the move (optional, default 0)")
     s.add_argument("--archive-sha256")
     s = add("modal-run")
     s.add_argument("job_id")
     s.add_argument("--download", help="where the job folder lands (default <root>/modal-downloads)")
     s.add_argument("--dry-run", action="store_true", help="check and print the remote plan and forecast; run nothing")
+    s.add_argument("--colab-units", type=float, help="required for a run: the CU Colab already showed "
+                   "for this job (0 if it never ran there); they stay on the Colab caps")
     s = add("modal-settle")
     s.add_argument("job_id")
     s.add_argument("--usd", type=float, required=True, help="the amount the Modal dashboard billed")
@@ -1693,8 +1724,8 @@ def _parser():
                    help="a chunk (or group id): supersede every never-run chunk of its group together")
     s = add("close")
     s.add_argument("job_id")
-    s.add_argument("--units", type=float, help="the CU Colab shows the run used (Colab jobs only; "
-                   "a job run with modal-run settles from its Modal rows in USD)")
+    s.add_argument("--units", type=float, help="the CU Colab shows the run used; for a job run with "
+                   "modal-run: only the CU of any Colab run after the move (optional, default 0)")
     s.add_argument("--reason", required=True)
     s = add("film")
     s.add_argument("--film", type=int, default=1)

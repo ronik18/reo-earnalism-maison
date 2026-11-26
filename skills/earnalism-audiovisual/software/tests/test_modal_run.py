@@ -344,7 +344,7 @@ class ModalRunCliTests(unittest.TestCase):
         colab_before = ledger.spent(None, month)
         fm, patched = self.modal_patch()
         with fakes(), patched:
-            code, out = run("modal-run", self.job_id, "--root", self.root)
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--colab-units", 0)
         self.assertEqual(code, 0, out)
         line = json.loads(next(l for l in out.splitlines() if l.startswith("{")))
         self.assertEqual((line["status"], line["dry_run"]), ("ok", False))
@@ -359,8 +359,8 @@ class ModalRunCliTests(unittest.TestCase):
         self.assertAlmostEqual(ledger.spent(None, month), colab_before - reserved["units"])
         code, out = run("status", "--root", self.root)
         self.assertIn(f"{colab_before - reserved['units']:.2f} CU this month (all titles)", out)
-        self.assertIn("on Modal (CU reservation released)", out)
-        self.assertIn("(no --units)", out)
+        self.assertIn("on Modal (0.00 CU of Colab work kept, rest of the reservation released)", out)
+        self.assertIn("--units <CU> only for Colab work after the move", out)
         self.assertEqual(json.loads((folder / "manifest.json").read_text())["status"], "COMPLETE")
         code, out = run("import", self.job_id, "--root", self.root, "--from", folder)
         self.assertEqual(code, 0, out)
@@ -378,7 +378,7 @@ class ModalRunCliTests(unittest.TestCase):
 
         fm, patched = self.modal_patch(behavior)
         with patched:
-            code, out = run("modal-run", self.job_id, "--root", self.root, "--download", self.d / "dl")
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--colab-units", 0, "--download", self.d / "dl")
         self.assertEqual(code, 2, out)
         line = json.loads(next(l for l in out.splitlines() if l.startswith("{")))
         self.assertEqual(line["status"], "failed")
@@ -409,7 +409,7 @@ class ModalRunCliTests(unittest.TestCase):
     def test_refuses_imported_job(self):
         fm, patched = self.modal_patch()
         with fakes(), patched:
-            run("modal-run", self.job_id, "--root", self.root)
+            run("modal-run", self.job_id, "--root", self.root, "--colab-units", 0)
         folder = self.root / "modal-downloads" / self.job_id
         self.assertEqual(run("import", self.job_id, "--root", self.root, "--from", folder)[0], 0)
         code, out = run("modal-run", self.job_id, "--root", self.root, "--dry-run")
@@ -452,6 +452,8 @@ class ModalCapTests(unittest.TestCase):
         self.ledger.record_modal_spend(month or self.MONTH, job_id, usd, 1.0, "ok", "t")
 
     def go(self, runner, *extra):
+        if "--colab-units" not in extra:
+            extra = (*extra, "--colab-units", 0)
         with mock.patch.object(modal_run, "run_modal", runner):
             return run("modal-run", self.job_id, "--root", self.root, *extra)
 
@@ -506,7 +508,7 @@ class ModalCapTests(unittest.TestCase):
             raise KeyboardInterrupt()
         with self.with_worst_case(0.60), mock.patch.object(modal_run, "run_modal", interrupted):
             with self.assertRaises(KeyboardInterrupt):
-                run("modal-run", self.job_id, "--root", self.root)
+                run("modal-run", self.job_id, "--root", self.root, "--colab-units", 0)
         rows = self.ledger.modal_rows(job_id=self.job_id)
         self.assertEqual([r["status"] for r in rows], ["pending"])
         self.assertAlmostEqual(rows[0]["usd"], 0.60)
@@ -528,61 +530,100 @@ class ModalCapTests(unittest.TestCase):
         return (self.ledger.spent(None, self.MONTH),
                 self.ledger.spent(data["title_slug"], None, data["source"].get("edition_id")))
 
-    def test_import_settles_from_every_modal_session_in_usd_and_refuses_units(self):
+    def entry(self):
+        return next(e for e in json.loads(self.ledger.path.read_text()) if e.get("job_id") == self.job_id)
+
+    def test_import_settles_from_every_modal_session_in_usd(self):
         self.go(fake_runner(0.25, "failed"))
         self.go(fake_runner(0.30))
         cu = self.colab_cu()
         fm, patched = self.modal_patch()
         with fakes(), patched:
-            run("modal-run", self.job_id, "--root", self.root)  # a real (fake-modal) run for the folder
+            run("modal-run", self.job_id, "--root", self.root, "--colab-units", 0)  # a real (fake-modal) run for the folder
         folder = self.root / "modal-downloads" / self.job_id
         usd = self.ledger.modal_job_usd(self.job_id)[0]
-        code, out = run("import", self.job_id, "--root", self.root, "--from", folder, "--units", 99)
+        code, out = run("import", self.job_id, "--root", self.root, "--from", folder, "--units", -1)
         self.assertEqual(code, 2, out)
-        self.assertIn("never with Colab --units", out)
         code, out = run("import", self.job_id, "--root", self.root, "--from", folder)
         self.assertEqual(code, 0, out)
-        self.assertIn(f"settled from its Modal rows at {usd:.4f} USD (0 CU)", out)
-        entry = next(e for e in json.loads(self.ledger.path.read_text()) if e.get("job_id") == self.job_id)
-        self.assertEqual((entry["state"], entry["units"], entry["usd"], entry["cu_equivalent"]),
-                         ("settled", 0.0, round(usd, 6), round(usd / 0.10, 2)))
-        self.assertEqual(self.colab_cu(), cu)  # the CU caps are not touched by the settlement
+        self.assertIn(f"settled from its Modal rows at {usd:.4f} USD plus 0 CU of Colab work", out)
+        self.assertEqual((self.entry()["state"], self.entry()["units"], self.entry()["usd"],
+                          self.entry()["cu_equivalent"]),
+                         ("settled", 0, round(usd, 6), round(usd / 0.10, 2)))
+        self.assertEqual(self.colab_cu(), cu)  # Modal dollars never reach the CU caps
 
-    def test_import_refuses_even_a_matching_explicit_units(self):
-        self.seed(0.25, job_id=self.job_id)
-        fm, patched = self.modal_patch()
-        with fakes(), patched:
-            run("modal-run", self.job_id, "--root", self.root)
-        folder = self.root / "modal-downloads" / self.job_id
-        units = self.ledger.modal_units(self.job_id)
-        code, out = run("import", self.job_id, "--root", self.root, "--from", folder, "--units", units)
-        self.assertEqual(code, 2, out)
-        self.assertEqual(run("import", self.job_id, "--root", self.root, "--from", folder)[0], 0)
+    def test_modal_run_requires_colab_units_and_never_lowers_them(self):
+        before = self.ledger.path.read_bytes()
+        calls = []
+        with mock.patch.object(modal_run, "run_modal", fake_runner(0.1, calls=calls)):
+            code, out = run("modal-run", self.job_id, "--root", self.root)
+        self.assertEqual((code, calls), (2, []))
+        self.assertIn("--colab-units is required", out)
+        self.assertEqual(self.ledger.path.read_bytes(), before)
+        self.assertEqual(self.go(fake_runner(0.1, "failed"), "--colab-units", 0.4)[0], 2)
+        code, out = self.go(fake_runner(0.1, calls=calls), "--colab-units", 0.3)
+        self.assertEqual((code, calls), (2, []))
+        self.assertIn("would lower it", out)
 
-    def test_close_settles_from_modal_rows_and_refuses_units(self):
-        self.go(fake_runner(0.43, "failed"))
-        cu = self.colab_cu()
-        code, out = run("close", self.job_id, "--root", self.root, "--reason", "died", "--units", 1)
-        self.assertEqual(code, 2, out)
+    def test_colab_then_modal_keeps_the_colab_cu_on_the_caps(self):
+        """Colab ran 0.5 CU and hard-stopped; the job resumes on Modal: 0.5 CU stay counted."""
+        reserved = self.entry()["units"]
+        cu_before = self.colab_cu()
+        self.go(fake_runner(0.20, "hard_stopped"), "--colab-units", 0.5)
+        e = self.entry()
+        self.assertEqual((e["runner"], e["units"], e["colab_units"], e["reserved_units"]),
+                         ("modal", 0.5, 0.5, reserved))
+        self.assertAlmostEqual(self.colab_cu()[0], cu_before[0] - reserved + 0.5)
+        self.assertAlmostEqual(self.colab_cu()[1], cu_before[1] - reserved + 0.5)
         code, out = run("close", self.job_id, "--root", self.root, "--reason", "died")
         self.assertEqual(code, 0, out)
-        self.assertIn("settled from its Modal rows at 0.4300 USD (0 CU)", out)
-        self.assertEqual(self.colab_cu(), cu)
-        entry = next(e for e in json.loads(self.ledger.path.read_text()) if e.get("job_id") == self.job_id)
-        self.assertEqual((entry["state"], entry["units"], entry["usd"]), ("settled", 0.0, 0.43))
+        self.assertIn("at 0.2000 USD plus 0.5 CU of Colab work", out)
+        self.assertEqual((self.entry()["state"], self.entry()["units"], self.entry()["usd"]),
+                         ("settled", 0.5, 0.2))
+        self.assertAlmostEqual(self.colab_cu()[0], cu_before[0] - reserved + 0.5)
         code, out = run("status", "--root", self.root)
-        self.assertIn("closed (ran, not imported; 0.43 USD on Modal settled)", out)
+        self.assertIn("closed (ran, not imported; 0.20 USD on Modal + 0.50 CU Colab settled)", out)
+
+    def test_modal_then_colab_settles_the_colab_portion_too(self):
+        """Modal ran first and stopped; the rest ran in Colab (0.7 CU): both portions settle."""
+        reserved = self.entry()["units"]
+        cu_before = self.colab_cu()
+        self.go(fake_runner(0.30, "failed"))  # Modal first: --colab-units 0
+        self.assertAlmostEqual(self.colab_cu()[0], cu_before[0] - reserved)
+        code, out = run("close", self.job_id, "--root", self.root, "--reason", "rest in Colab, lost",
+                        "--units", 0.7)
+        self.assertEqual(code, 0, out)
+        self.assertIn("at 0.3000 USD plus 0.7 CU of Colab work", out)
+        self.assertEqual((self.entry()["units"], self.entry()["usd"]), (0.7, 0.3))
+        self.assertAlmostEqual(self.colab_cu()[0], cu_before[0] - reserved + 0.7)
+        self.assertAlmostEqual(self.colab_cu()[1], cu_before[1] - reserved + 0.7)
+
+    def test_both_portions_add_up_across_switches(self):
+        """Colab 0.5 CU, then Modal, then Colab again 0.3 CU: 0.8 CU on the caps plus the USD."""
+        self.go(fake_runner(0.10, "failed"), "--colab-units", 0.5)
+        code, out = run("close", self.job_id, "--root", self.root, "--reason", "x", "--units", 0.3)
+        self.assertEqual(code, 0, out)
+        self.assertEqual((self.entry()["units"], self.entry()["usd"]), (0.8, 0.1))
+
+    def test_supersede_refuses_a_job_that_ran_on_modal(self):
+        self.go(fake_runner(0.43, "failed"))
+        before_ledger = self.ledger.path.read_bytes()
+        before_record = (self.root / "record.json").read_bytes()
+        code, out = run("supersede", self.job_id, "--root", self.root, "--reason", "never ran")
+        self.assertEqual(code, 2, out)
+        self.assertIn("ran on Modal; supersede is for never-run jobs", out)
+        self.assertIn(f"close {self.job_id}", out)
+        self.assertEqual(self.ledger.path.read_bytes(), before_ledger)
+        self.assertEqual((self.root / "record.json").read_bytes(), before_record)
 
     def test_old_ledger_job_with_modal_rows_but_no_move_settles_in_usd(self):
         """A ledger written before the move was recorded: Modal rows alone make it a Modal job."""
         self.seed(0.40, job_id=self.job_id)
-        code, out = run("close", self.job_id, "--root", self.root, "--reason", "died", "--units", 4)
-        self.assertEqual(code, 2, out)
         code, out = run("close", self.job_id, "--root", self.root, "--reason", "died")
         self.assertEqual(code, 0, out)
-        entry = next(e for e in json.loads(self.ledger.path.read_text()) if e.get("job_id") == self.job_id)
-        self.assertEqual((entry["units"], entry["usd"], entry["runner"]), (0.0, 0.4, "modal"))
-        self.assertGreater(entry["reserved_units"], 0)
+        e = self.entry()
+        self.assertEqual((e["units"], e["usd"], e["runner"]), (0, 0.4, "modal"))
+        self.assertGreater(e["reserved_units"], 0)
 
     def test_colab_jobs_still_require_units(self):
         code, out = run("close", self.job_id, "--root", self.root, "--reason", "died")

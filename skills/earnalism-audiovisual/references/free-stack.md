@@ -41,7 +41,7 @@ folder it leaves is what `import` expects from Colab. `modal-run` refuses `reel_
   manifest) can finish before it, and a timer unassigns the runtime at it. A stopped or
   short run writes `manifest.json` with `status: INCOMPLETE`, which `import` refuses;
   re-run the job to resume it (finished items are kept; the total across sessions stays within the
-  reserved seconds), or end it with `close --units <CU Colab shows>` (a Modal job takes no `--units`: it settles from its Modal rows in USD).
+  reserved seconds), or end it with `close --units <CU Colab shows>` (a job that ran on Modal settles its Modal rows in USD plus its Colab CU: `modal-run --colab-units` records the Colab CU before the move, `--units` any Colab work after it).
 - **Package versions**: the notebooks still `pip install` parler-tts and ACE-Step from
   git and diffusers/transformers unpinned. Every output manifest records the resolved
   versions (and VCS commits) under `packages`, and `import` refuses a manifest without
