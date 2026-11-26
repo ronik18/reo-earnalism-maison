@@ -1,4 +1,5 @@
 {% extends 'web/base.html' %}{% load maison %}{% block content %}<section><div class="page-title"><p class="eyebrow">{% ui 'review_title' %}</p><h1>{% ui 'review_title' %}</h1></div>
+{% if review_denied %}<p class="error-notice" role="alert">{% ui 'review_denied' %} <strong>{{ request.user.email }}</strong>.</p><p>{% ui 'review_denied_help' %}</p><form method="post" action="{% url 'web:sign-out' ui_locale %}">{% csrf_token %}<button class="button secondary" type="submit">{% ui 'review_switch_account' %}</button></form>{% endif %}
 {% if review_error %}<p class="error-notice" role="alert" tabindex="-1" autofocus>{% ui review_error %}{% if changed_refs %} {{ changed_refs|join:', ' }}{% endif %}</p>{% endif %}
 {% if review_notice %}{% if review_notice.count %}<p class="notice" role="status">{% ui 'review_decided' %} {{ review_notice.count }}</p>{% else %}<p class="notice" role="status">{% ui 'review_none_decided' %}</p>{% endif %}{% endif %}
 {% if groups %}<form method="post" action="{% url 'web:staff-review' ui_locale %}">{% csrf_token %}

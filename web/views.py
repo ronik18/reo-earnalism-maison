@@ -640,9 +640,14 @@ def staff_review_cover(request, locale, item_id, side):
 @require_http_methods(["GET", "POST"])
 @domain_view
 def staff_review(request, locale):
-    """Monday review page: staff only (everyone else gets 404). POST decides the ticked items, then redirects (PRG)."""
+    """Monday review page. Signed-out visitors go to sign-in and come back; a signed-in account without the review
+    permission gets a 403 that says so. POST decides the ticked items, then redirects (PRG)."""
     user = request.user
-    _require_reviewer(user)
+    if not user.is_authenticated:
+        return HttpResponseRedirect(reverse("web:sign-in", args=[locale]) + "?" + urlencode(
+            {"return_to": safe_return(reverse("web:staff-review", args=[locale]), locale)}))
+    if not (user.is_active and user.is_staff and user.is_verified and user.has_perm("operations.decide_review")):
+        return page(request, locale, "web/staff_review.html", status=403, review_denied=True, groups=[])
     from core.api import DomainError
     from operations import review
     from operations.models import ReviewItem

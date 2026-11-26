@@ -244,9 +244,16 @@ class ReviewQueueTests(TestCase):
     def test_page_is_staff_only_and_lists_pending(self):
         item, _ = self.file_item('cover', slug='lst')
         url = reverse('web:staff-review', args=['en'])
-        self.assertEqual(self.client.get(url).status_code, 404)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse('web:sign-in', args=['en']), response['Location'])
+        self.assertIn('return_to=%2Fen%2Fstaff%2Freview%2F', response['Location'])
         login(self.client, make_user('plain@example.test', staff=False))
-        self.assertEqual(self.client.get(url).status_code, 404)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, 'plain@example.test', status_code=403)
+        self.assertContains(response, 'This page is for Monday reviewers', status_code=403)
+        self.assertNotContains(response, 'publication-clearance-lst.json', status_code=403)
         login(self.client, self.owner)
         response = self.client.get(url)
         self.assertContains(response, 'publication-clearance-lst.json')
@@ -263,8 +270,8 @@ class ReviewQueueTests(TestCase):
         for user in (make_user('uv@example.test', verified=False), make_user('np2@example.test', perm=False)):
             client = Client()
             login(client, user)
-            self.assertEqual(client.get(url).status_code, 404, user.email)
-            self.assertEqual(client.post(url, {'decision': 'approved'}).status_code, 404, user.email)
+            self.assertEqual(client.get(url).status_code, 403, user.email)
+            self.assertEqual(client.post(url, {'decision': 'approved'}).status_code, 403, user.email)
 
     def test_page_confirms_count_and_empty_selection(self):
         item, _ = self.file_item('cover', slug='conf')

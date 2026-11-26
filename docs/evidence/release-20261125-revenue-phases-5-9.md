@@ -71,3 +71,9 @@
   - **Deploy:** `dep-dc3r7lff3r2c739f758g` live at 04:22:28Z.
   - **Live checks:** pages return 200, and the run sheet is reachable on `main`.
 - **Not published:** The Hungry Stone and the 12 titles wait for the owner's Monday-page approval.
+
+## Monday review access (26 Nov 2026)
+
+- **Symptom:** the owner reported that `/en/staff/review/` showed "We could not find that page". The page returns 404 unless the user is signed in, active, staff, verified and holds `operations.decide_review`. Neither production staff account (#1, #4) held that permission, and neither is a superuser.
+- **Owner choice:** grant it to account #4 (the company-domain staff account).
+- **Change:** one row inserted into `auth_user_user_permissions` (user 4, permission `operations.decide_review`, id 300). It is idempotent and was verified afterwards: active, staff, verified, can_review = true. No other account or permission changed.
