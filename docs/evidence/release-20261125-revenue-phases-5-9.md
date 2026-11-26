@@ -58,3 +58,16 @@
 - **Render deploy:** `dep-dc3jnjp7lnhs73du2o0g` live at 19:50:22Z. No migrations and no static change.
 - **Render job** `job-dc3jnvmi0phs73fkvb20` (`queue_intake_packets`): 4 cover items pending for আপদ, প্রতিহিংসা, প্রায়শ্চিত্ত and ঠাকুর্দ্দা.
 - **Live checks:** `/en/`, `/en/explore/`, `/podcast/en.xml` 200; `/en/staff/review/` 404 for anonymous visitors. Nothing published, posted or charged.
+
+## #70 and #71 deploys (26 Nov 2026)
+
+- **#70** (squash `f2b50ff`): side-by-side reader, The Hungry Stone packet and cover, ক্ষুধিত পাষাণ companion track and film jobs, early-edition survey, and the 12 pipeline titles' replica browser reports.
+  - **Static release:** `603e33a086435db6e0dc29f67016c9f2a8c77333af4818d37e32311221e05694`, 212 files, prepared from a clean build. Against the live release `ec6edfb3…`, 209 files are byte-identical; `app.css`, `dist/manifest.json` and the new `reader-7RBB3LF4.js` differ. Uploaded to R2 (212 × 200) and verified over public HTTPS (212/212).
+  - **Switch and deploy:** `STATIC_RELEASE_ID` switched; deploy `dep-dc3r0oec6qcc73blibl0` live at 04:07:44Z. No migrations. Rollback: set `STATIC_RELEASE_ID` back to `ec6edfb364504cd0884a4b2fc49d9bf9c793d857fb2e4c8fe4e13cafd3048ab8` and redeploy.
+  - **Render job `job-dc3r17p7lnhs73eis7cg`:** `publish_learning_track kshudhita-pashan-companion` succeeded; `/en/learn/` lists it.
+  - **Render job `job-dc3r1d17lnhs73eisle0`:** `queue_intake_packets` succeeded, adding The Hungry Stone's review items.
+  - **Live checks:** `/en/`, `/en/explore/`, `/en/learn/`, the ক্ষুধিত পাষাণ title page and `/podcast/en.xml` return 200; `/en/staff/review/` returns 404 for anonymous visitors. Pages load the new static release.
+- **#71** (squash `84eb5cb`): narration Colab jobs for the 12 pipeline titles (64.70 CU; month 80.70/100) and the run sheet `production/audiovisual/RUN_SHEET-pipeline-narration.md`.
+  - **Deploy:** `dep-dc3r7lff3r2c739f758g` live at 04:22:28Z.
+  - **Live checks:** pages return 200, and the run sheet is reachable on `main`.
+- **Not published:** The Hungry Stone and the 12 titles wait for the owner's Monday-page approval.
