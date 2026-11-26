@@ -38,6 +38,11 @@ RATES = {"narration": {"s_per_step": 2.0, "units_per_hour": 5.0, "steps": 1,
                        "decode_s": 10, "export_s": 10}}
 
 
+def speech_seconds(text: str) -> float:
+    """A fake unit WAV's length at an even 20 characters/second, so none is suspect_truncated."""
+    return round(len(text) / 20, 2)
+
+
 def run(*argv):
     out = io.StringIO()
     with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
@@ -89,7 +94,7 @@ class RoundTwo:
         def narr(rec, job_id, job_dir, out):
             for sc in scenes:
                 for u in voice_units(sc, {"description": ""}, None, "en"):
-                    self.wav(out / f"{u['unit_key']}.wav", 0.8)
+                    self.wav(out / f"{u['unit_key']}.wav", speech_seconds(u["text"]))
 
         def stills(rec, job_id, job_dir, out):
             for i, sc in enumerate(scenes):
@@ -614,6 +619,35 @@ class RoundTwo:
             "route": "vcsl", "sha256": hashlib.sha256(bed.read_bytes()).hexdigest()})
 
 
+    def test_film_refuses_suspect_truncated_until_owner_accepts_and_qc_lists_it(self):
+        self.film_ready()
+        plan = json.loads((self.root / "plan.json").read_text())
+        from eav.voice import voice_units
+        units = [u for sc in plan["plan"]["films"][0]["scenes"]
+                 for u in voice_units(sc, {"description": ""}, None, "en")]
+        key = next(u["unit_key"] for u in units if u["text"].startswith("Every afternoon"))
+        self.wav(next(self.root.glob(f"narration/*/{key}.wav")), 0.5)  # 100 chars/s: cut off
+        bed = self.d / "bed.wav"
+        self.noise(bed, 30)
+        base = ("film", "--root", self.root, "--logo", self.d / "logo.png",
+                "--end-card", self.d / "end.png", "--score", bed, "--score-route", "vcsl")
+        code, out = run(*base)
+        self.assertEqual(code, 5, out)
+        self.assertIn(f"suspect_truncated narration unit(s) {key}", out)
+        self.assertFalse((self.root / "film" / "film-01" / "film-01.mp4").exists())
+        code, out = run(*base, "--accept-qc", key)
+        self.assertEqual(code, 0, out)
+        film_art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
+        self.assertEqual(film_art["meta"]["qc_accepted"], [key])
+        self.assertEqual([s["unit_key"] for s in film_art["meta"]["suspect_truncated"]], [key])
+        code, out = run("qc", "--root", self.root)
+        self.assertIn(key, out)
+        item = json.loads((self.root / "qc" / "report.json").read_text())["items"]["film-01"]
+        self.assertEqual([s["unit_key"] for s in item["suspect_truncated"]], [key])
+        self.assertEqual(item["qc_accepted"], [key])
+        self.assertNotIn("suspect_truncated", item["checks"])  # advisory, never a qc failure
+
+
 class CliTests(RoundTwo, unittest.TestCase):
     def setUp(self):
         tmp = tempfile.TemporaryDirectory()
@@ -713,8 +747,9 @@ class CliTests(RoundTwo, unittest.TestCase):
         self.assertIn(f"python3 -m eav.cli import {job_id} --root", out)
         self.assertIn("--units", out)
 
-    def fake_colab_outputs(self, job_id, job_dir):
-        """What the owner downloads from Drive: one WAV per unit plus manifest.json."""
+    def fake_colab_outputs(self, job_id, job_dir, seconds=None):
+        """What the owner downloads from Drive: one WAV per unit plus manifest.json.
+        seconds: unit -> WAV length or None, to override a unit (e.g. one cut off)."""
         folder = self.d / "download" / job_id
         folder.mkdir(parents=True)
         with zipfile.ZipFile(job_dir / "inputs.zip") as z:
@@ -722,8 +757,9 @@ class CliTests(RoundTwo, unittest.TestCase):
         outputs = {}
         for i, u in enumerate(units):
             wav = folder / f"{u['unit_key']}.wav"
+            d = (seconds and seconds(u)) or speech_seconds(u["text"])
             subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
-                            f"sine=f={200 + 20 * i}:d={0.6 + 0.1 * i}:r=24000", "-ac", "1",
+                            f"sine=f={200 + 20 * i}:d={d}:r=24000", "-ac", "1",
                             str(wav)], check=True)
             outputs[wav.name] = hashlib.sha256(wav.read_bytes()).hexdigest()
         zip_sha = hashlib.sha256((job_dir / "inputs.zip").read_bytes()).hexdigest()
@@ -745,16 +781,17 @@ class CliTests(RoundTwo, unittest.TestCase):
         code, out = run("status", "--root", self.root)
         self.assertIn(f"import {job_id}", out)
 
-    def imported(self):
+    def imported(self, seconds=None):
         job_id, job_dir = self.build_narration()
-        folder, units = self.fake_colab_outputs(job_id, job_dir)
+        folder, units = self.fake_colab_outputs(job_id, job_dir, seconds)
         code, out = run("import", job_id, "--root", self.root, "--from", folder, "--units", 1.5)
         self.assertEqual(code, 0, out)
+        self.import_out = out
         return job_id, folder, units
 
-    def reviewed(self):
+    def reviewed(self, seconds=None):
         """Narration imported, film 1 assembled (faked) and a passing qc after it (R26)."""
-        got = self.imported()
+        got = self.imported(seconds)
         rec = Record.load(self.root)
         (self.root / "film" / "film-01").mkdir(parents=True, exist_ok=True)
         (self.root / "film" / "film-01" / "film-01.mp4").write_bytes(b"x")
@@ -762,6 +799,45 @@ class CliTests(RoundTwo, unittest.TestCase):
         rec.event("film", "assembled", {"target": "film-01"})
         rec.event("qc", "pass", {"failed": []})
         return got
+
+    @staticmethod
+    def cut_off(u):
+        """The 50-character sentence came back in 0.5 s: 100 chars/s, 5 x the 20 chars/s median."""
+        return 0.5 if u["text"].startswith("Every afternoon") else None
+
+    def test_import_lists_suspect_truncated_units_but_still_imports(self):
+        job_id, _, units = self.imported(self.cut_off)
+        key = next(u["unit_key"] for u in units if self.cut_off(u))
+        self.assertIn("suspect_truncated", self.import_out)
+        self.assertIn(key, self.import_out)
+        self.assertEqual(self.import_out.count("chars/s ("), 1)  # only that unit
+        rec = Record.load(self.root)
+        self.assertTrue(any(e["stage"] == "import" and e["result"] == "accepted"
+                            and e["detail"]["job_id"] == job_id for e in rec.data["events"]))
+
+    def test_import_of_clean_narration_reports_no_suspect(self):
+        job_id, _, _ = self.imported()
+        self.assertIn(f"No suspect_truncated narration unit in {job_id}", self.import_out)
+
+    def test_bundle_audio_refuses_suspect_truncated_until_owner_accepts(self):
+        _, _, units = self.reviewed(self.cut_off)
+        key = next(u["unit_key"] for u in units if self.cut_off(u))
+        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry")
+        self.assertEqual(code, 5, out)
+        self.assertIn("suspect_truncated", out)
+        self.assertIn(f"--accept-qc {key}", out)
+        self.assertFalse((self.d / "b").exists())
+        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry",
+                        "--accept-qc", "f99s999-001")
+        self.assertNotEqual(code, 0)
+        self.assertIn("not narration units", out)
+        self.assertFalse((self.d / "b").exists())
+        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry",
+                        "--accept-qc", key)
+        self.assertEqual(code, 0, out)
+        ev = [e for e in Record.load(self.root).data["events"] if e["stage"] == "bundle_audio"][-1]
+        self.assertEqual(ev["detail"]["qc_accepted"], [key])
+        self.assertEqual([s["unit_key"] for s in ev["detail"]["suspect_truncated"]], [key])
 
     def test_bundle_audio_needs_a_passing_qc_of_the_film(self):
         self.imported()
@@ -967,10 +1043,11 @@ class CliTests(RoundTwo, unittest.TestCase):
         self.assertEqual([s["anchor_id"] for s in segs], ["a1", "a2", "a3"])
         for s in segs:
             self.assertEqual(s["end_offset_chars"], len(texts[s["anchor_id"]]))
-        # a2 = two sentences of 0.7 s and 0.8 s with a 400 ms pause: measured, not estimated
+        # a2 = two sentences (2.5 s and 1.2 s WAVs) with a 400 ms pause: measured, not estimated
         a2 = segs[1]
+        first, second = sentences(PARAS[1][2])
         self.assertAlmostEqual((a2["end_ms"] - a2["start_ms"]) / 1000,
-                               0.7 + 0.4 + 0.8, delta=0.05)
+                               speech_seconds(first) + 0.4 + speech_seconds(second), delta=0.05)
         prov = timing["provenance"]
         self.assertEqual(prov["method"], "eav.film.narration_track")
         self.assertEqual(prov["measured_with"], "ffprobe")

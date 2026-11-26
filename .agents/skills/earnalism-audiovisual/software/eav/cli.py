@@ -37,6 +37,7 @@
   python3 -m eav.cli close <job_id> --root <dir> [--units <CU Colab shows>] --reason "<what happened>"
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
+                         [--accept-qc <unit_key,...>]  (suspect_truncated units the owner heard)
   python3 -m eav.cli reel <n> --root <dir> --script <script.json> [--hashtags ...]
   python3 -m eav.cli reel <n> --root <dir> --plan-shots           (after reel narration import)
   python3 -m eav.cli reel <n> --root <dir> [--score <wav> --score-route ...]
@@ -44,6 +45,7 @@
   python3 -m eav.cli status --root <dir>
   python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir>
                          (--score-dir <dir> --score-route vcsl|ace-step:<job_id> | --dry)
+                         [--accept-qc <unit_key,...>]
   python3 -m eav.cli preview --root <dir> --bundle <bundle dir> --out <preview dir>
                          (public preview clip of chapter 1: <= 120 s, <= 2 MiB, 96 kbps MP3)
 
@@ -72,8 +74,7 @@ from pathlib import Path, PureWindowsPath
 from . import (budget, colab_jobs, film, importer, mix, modal_requests, modal_run, preview,
                qc, reel, scenes, social)
 from .record import Record, sha256_file
-from .text import sentences
-from .voice import voice_units
+from .voice import block_parts, voice_units
 
 PROG = "python3 -m eav.cli"
 ROSTER = (Path(__file__).resolve().parents[3] / "earnalism-audiobook-go-live" / "references"
@@ -432,6 +433,41 @@ def _measured_track(rec, units, job, out: Path):
     if "of" in job:  # a chunk group
         provenance["narration_chunk_job_ids"] = _chunk_ids(job)
     return timing, provenance
+
+
+def _print_suspects(suspects, where: str):
+    print(f"{where}: {len(suspects)} narration unit(s) suspect_truncated (listen to each):")
+    for s in suspects:
+        print(f"  {s['unit_key']}: {s['chars']} chars, {s['seconds']:.2f} s, "
+              f"{s['chars_per_s']:.1f} chars/s ({'; '.join(s['reasons'])})")
+
+
+def _accept_qc(args, units) -> set:
+    """The unit keys the owner accepted after listening (--accept-qc k1,k2); each must be a unit."""
+    keys = {k.strip() for k in (getattr(args, "accept_qc", None) or "").split(",") if k.strip()}
+    unknown = sorted(keys - {u["unit_key"] for u in units})
+    if unknown:
+        raise Stop(f"--accept-qc names unit(s) that are not narration units here: {', '.join(unknown)}",
+                   "Pass the unit_key values exactly as the suspect_truncated list prints them")
+    return keys
+
+
+def _truncation_gate(rec, groups, accepted: set, cmd: str) -> list:
+    """Refuse to build from narration with a suspect_truncated unit the owner has not accepted.
+    groups: [(narration job, every unit of that job)]; the median is per job."""
+    suspects = []
+    for job, units in groups:
+        suspects += qc.narration_suspects(units, _one_dir(rec, job))
+    if suspects:
+        _print_suspects(suspects, cmd)
+    open_ = [s["unit_key"] for s in suspects if s["unit_key"] not in accepted]
+    if open_:
+        raise Stop(f"QC failure: suspect_truncated narration unit(s) {', '.join(open_)} (Parler cuts "
+                   "output at ~30 s; text may be lost)",
+                   "Listen to each. If it is complete, rerun with --accept-qc "
+                   f"{','.join(open_)} (the owner's listening decision); otherwise regenerate that "
+                   "narration (supersede/close the job and build a new one)", code=5)
+    return suspects
 
 
 def _incomplete(rec, kind, target) -> str:
@@ -954,6 +990,24 @@ def cmd_import(args):
                    code=4)
     print(f"Imported {len(arts)} verified file(s) from {job['kind']} job {args.job_id}; "
           f"{_settled_as(ledger, args.job_id, units)}.")
+    if job["kind"] == "narration":
+        _import_advisory(rec, job)
+
+
+def _import_advisory(rec, job):
+    """Advisory only (the import stands): list the job's suspect_truncated narration units."""
+    try:
+        with zipfile.ZipFile(job["inputs_zip"]) as z:
+            units = json.loads(z.read("job.json"))["units"]
+        suspects = qc.narration_suspects(units, rec.root / "narration" / job["job_id"])
+    except (OSError, KeyError, ValueError, zipfile.BadZipFile, subprocess.CalledProcessError) as e:
+        print(f"Truncation check not run for {job['job_id']} ({e}); eav qc, film and bundle-audio run it.")
+        return
+    if suspects:
+        _print_suspects(suspects, f"Import {job['job_id']} (advisory; film and bundle-audio refuse "
+                        "them until --accept-qc names them)")
+    else:
+        print(f"No suspect_truncated narration unit in {job['job_id']}.")
 
 
 def _modal_job(rec, job_id) -> dict:
@@ -1510,6 +1564,8 @@ def cmd_film(args):
     lang = plan["language"]
     scs = films[args.film - 1]["scenes"]
     units = [u for sc in scs for u in voice_units(sc, {"description": ""}, None, lang)]
+    accepted = _accept_qc(args, units)
+    suspects = _truncation_gate(rec, [(narr, units)], accepted, f"film {t}")
     out = rec.root / "film" / t
     out.mkdir(parents=True, exist_ok=True)
     timing, prov = _measured_track(rec, units, narr, out / "narration.wav")
@@ -1552,7 +1608,9 @@ def cmd_film(args):
         rec.add_artifact(kind, p, {"target": t})
     rec.add_artifact("film", out / f"{t}.mp4", {"target": t, "lufs": m["lufs"],
                                                 "true_peak": m["true_peak"], "score": score_info,
-                                                "narration_job_id": narr["job_id"], **info})
+                                                "narration_job_id": narr["job_id"],
+                                                "suspect_truncated": suspects,
+                                                "qc_accepted": sorted(accepted), **info})
     rec.event("film", "assembled", {"target": t, "duration": info["duration"]})
     print(f"Assembled {out / (t + '.mp4')}: {info['duration']:.1f} s, {m['lufs']:.1f} LUFS, "
           f"TP {m['true_peak']:.1f} dBTP. Maison video stays held (Stream cost not approved).")
@@ -1563,7 +1621,7 @@ def _line_ends(script, units, timing) -> list:
     lang = script["language"]
     ends, k = [], 0
     for line in reel.spoken(script):
-        k += len(sentences(line, lang))
+        k += len(block_parts(line, lang))
         ends.append(timing[k - 1]["end"])
     if k != len(units):
         raise Stop("reel narration units do not match the script lines", "Report this as a bug")
@@ -1691,6 +1749,22 @@ def cmd_reel(args):
           f"{len(jobs)} batch(es), {info['lufs']:.1f} LUFS.")
 
 
+def _assembled_narration(rec, target, artifact):
+    """(narration job, its units) an assembled film/reel was built from, or None if unknown."""
+    job = _find(rec, artifact["meta"].get("narration_job_id"))
+    if job is None:
+        return None
+    if artifact["kind"] == "reel":
+        n = int(target.split("-", 1)[1])
+        script = _reel_script(rec, n)
+        if script is None:
+            return None
+        return job, voice_units(_reel_scene(script, n), {"description": ""}, None, script["language"])
+    plan = _plan(rec)
+    scs = plan["plan"]["films"][int(target.split("-", 1)[1]) - 1]["scenes"]
+    return job, [u for sc in scs for u in voice_units(sc, {"description": ""}, None, plan["language"])]
+
+
 def cmd_qc(args):
     rec = _record(args.root)
     latest = {}
@@ -1721,6 +1795,11 @@ def cmd_qc(args):
             item["hook_onset_s"] = onset
             checks["hook_onset"] = onset is not None and 0.0 <= onset <= HOOK_ONSET_MAX_S
             checks["size_1080x1920"] = (a["meta"].get("width"), a["meta"].get("height")) == (1080, 1920)
+        narration = _assembled_narration(rec, target, a)
+        if narration is not None:  # advisory: film/bundle-audio refuse unaccepted ones themselves
+            item["suspect_truncated"] = qc.narration_suspects(narration[1],
+                                                              _one_dir(rec, narration[0]))
+            item["qc_accepted"] = a["meta"].get("qc_accepted", [])
         item["checks"] = {k: "pass" if v else "fail" for k, v in checks.items()}
         failed += [f"{target}:{k}" for k, v in checks.items() if not v]
         report["items"][target] = item
@@ -1730,6 +1809,9 @@ def cmd_qc(args):
     for target, item in report["items"].items():
         print(f"{target}: " + ", ".join(f"{k} {v}" for k, v in item["checks"].items())
               + f"; contact sheet qc/{item['contact_sheet']} (look at it)")
+        if item.get("suspect_truncated"):
+            _print_suspects(item["suspect_truncated"], f"{target} (advisory; accepted by the owner: "
+                            f"{', '.join(item['qc_accepted']) or 'none'})")
     if failed:
         raise Stop("QC failure: " + ", ".join(failed), next_action(rec.root), code=5)
 
@@ -1776,6 +1858,15 @@ def cmd_bundle_audio(args):
         if missing:
             raise Stop(f"no chapter score for unit(s) {', '.join(missing)} in {args.score_dir}",
                        "Add <unit_id>.wav for every chapter, or rerun with --dry")
+    groups, all_units = [], []
+    for i, f in enumerate(plan["plan"]["films"], 1):
+        units = [u for sc in f["scenes"] for u in voice_units(sc, {"description": ""}, None, lang)]
+        all_units += units
+        job = _latest_job(rec, "narration", _film_target(i))
+        if job:  # a missing job is refused per chapter below
+            groups.append((job, units))
+    args.qc_accepted = _accept_qc(args, all_units)
+    args.suspect_truncated = _truncation_gate(rec, groups, args.qc_accepted, "bundle-audio")
     created = not bundle.exists()
     try:
         return _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args)
@@ -1809,7 +1900,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
             units, tags = [], []
             for _, sc in mine:
                 vus = voice_units(sc, {"description": ""}, None, lang)
-                tg = [b["anchor_id"] for b in sc["blocks"] for _ in sentences(b["text"], lang)]
+                tg = [b["anchor_id"] for b in sc["blocks"] for _ in block_parts(b["text"], lang)]
                 if len(tg) != len(vus):
                     raise Stop(f"scene {sc['scene_id']}: unit/anchor mismatch", "Report as a bug")
                 units += vus
@@ -1892,7 +1983,9 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
         "owner_approval_required": {"by": "<who approved>", "at": "<ISO 8601 time>"}})
     rec.add_artifact("evidence_draft", draft, {"bundle": str(bundle), "audio_sha256": audio})
     rec.event("bundle_audio", "drafted", {"bundle": str(bundle), "audio_sha256": audio,
-                                          "timing_json_sha256": sha256_file(timing_path)})
+                                          "timing_json_sha256": sha256_file(timing_path),
+                                          "suspect_truncated": args.suspect_truncated,
+                                          "qc_accepted": sorted(args.qc_accepted)})
     print(f"Wrote Maison audio bundle {bundle} ({len(rows)} chapter MP3s, measured timing.json with "
           f"provenance) and evidence DRAFT {draft}.")
     print(f"Maison audio: complete and owner-approve the draft, save it under docs/evidence/, then on the "
@@ -2115,6 +2208,8 @@ def _parser():
     s.add_argument("--score")
     s.add_argument("--score-route", help="vcsl or ace-step:<imported music job id>")
     s.add_argument("--cues-job")
+    s.add_argument("--accept-qc", metavar="UNIT_KEY,...",
+                   help="suspect_truncated narration units the owner listened to and accepts")
     s = add("reel")
     s.add_argument("n", type=int)
     s.add_argument("--script")
@@ -2130,6 +2225,8 @@ def _parser():
     s.add_argument("--score-dir", help="<unit_id>.wav score bed per chapter (default route)")
     s.add_argument("--score-route", help="with --score-dir: vcsl or ace-step:<imported music job id>")
     s.add_argument("--dry", action="store_true", help="narration only; recorded in the evidence draft")
+    s.add_argument("--accept-qc", metavar="UNIT_KEY,...",
+                   help="suspect_truncated narration units the owner listened to and accepts")
     s = add("preview")
     s.add_argument("--bundle", required=True, help="the bundle-audio output holding unit-001.mp3")
     s.add_argument("--out", required=True)

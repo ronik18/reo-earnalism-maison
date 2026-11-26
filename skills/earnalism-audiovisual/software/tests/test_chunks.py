@@ -13,7 +13,7 @@ from PIL import Image
 from eav import budget, cli, colab_jobs
 from eav.record import Record
 from eav.voice import voice_units
-from tests.test_cli import SOURCE, run
+from tests.test_cli import SOURCE, run, speech_seconds
 
 NARR = {"s_per_step": 2.0, "units_per_hour": 5.0, "steps": 1, "decode_s": 10, "export_s": 10}
 # 30 stills at 4 steps: (4 x 62.7 x 30 + 300) x 1.15 = 9000 s (2.5 h); 11 stills fit 3600 s.
@@ -341,7 +341,7 @@ class ChunkCliTests(unittest.TestCase):
             if kind == "narration":
                 f = folder / f"{r['unit_key']}.wav"
                 subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
-                                f"sine=f={200 + 20 * i}:d=0.7:r=24000", "-ac", "1", str(f)], check=True)
+                                f"sine=f={200 + 20 * i}:d={speech_seconds(r['text'])}:r=24000", "-ac", "1", str(f)], check=True)
             else:
                 f = folder / f"{r['key']}.png"
                 Image.new("RGB", (320, 180), (8 * i, 90, 120)).save(f)
