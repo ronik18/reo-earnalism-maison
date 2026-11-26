@@ -51,3 +51,10 @@
   - Render job `job-dc3je2eq1p3s73bcoiog` published it: revision `3cb6a0b9-f774-4822-92e7-d4fc99de2ef4` live at 19:29:32Z.
   - Title page 200 and listed on Explore; the reader asks anonymous visitors to sign in (302).
 - **Render job** `job-dc3jeaafngtc73a1bvpg` (`queue_intake_packets`): 2 new pending items, the clearance and cover for মেঘ ও রৌদ্র.
+
+## #69 deploy (25 Nov 2026)
+
+- **Merged:** ronik18/reo-earnalism-maison#69 after CI passed on head `9b3c84e`; merge commit `c5326ab`.
+- **Render deploy:** `dep-dc3jnjp7lnhs73du2o0g` live at 19:50:22Z. No migrations and no static change.
+- **Render job** `job-dc3jnvmi0phs73fkvb20` (`queue_intake_packets`): 4 cover items pending for আপদ, প্রতিহিংসা, প্রায়শ্চিত্ত and ঠাকুর্দ্দা.
+- **Live checks:** `/en/`, `/en/explore/`, `/podcast/en.xml` 200; `/en/staff/review/` 404 for anonymous visitors. Nothing published, posted or charged.
