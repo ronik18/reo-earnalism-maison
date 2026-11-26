@@ -1,0 +1,64 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-26",
+ "scope": "release_code_replica_staff_draft_review",
+ "method": "Chromium (Playwright) against the release code (b94449a) serving a local PostgreSQL replica (database replica_g1, loopback only). manbhanjan imported there with the production publisher identity (649b8725-9f77-4dfd-bad9-74eacd7a973c) and deterministic operation IDs: edition 906f2df9-a6bf-4676-a8d5-dafe055a8b7b, revision d9b3b9fb-331e-48ea-a5d4-31d30acaea16, 63 paragraphs; text and anchors identical to the audiovisual source export of that revision. The owner's Monday approval of the clearance and cover items was simulated on this replica only (throwaway database, local staff user, bound to the exact file hashes); nothing was approved, imported or published in production. Signed in as a staff publisher; desktop 1440x900 and mobile 390x844; the title page (covers) and the reader (text).",
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "front and back cover images load (800x1200)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "books": {
+  "manbhanjan": {
+   "status": "pass",
+   "sha256": "1b5ac907fea4a27b03ddca59bbed74510ffa001e5b89b6cd20e6c8181c605a85",
+   "checks": {
+    "desktop": {
+     "paragraphs_rendered": 63,
+     "paragraphs_expected": 63,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "বালার অভিনয় দেখিতে লাগিল—কেবল গোপীনাথ সেখানে স্থান পাইল না।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    },
+    "mobile": {
+     "paragraphs_rendered": 63,
+     "paragraphs_expected": 63,
+     "text_and_anchor_order_exact": true,
+     "first": "প্রথম পরিচ্ছেদ।",
+     "last": "বালার অভিনয় দেখিতে লাগিল—কেবল গোপীনাথ সেখানে স্থান পাইল না।",
+     "cover_images": [
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      },
+      {
+       "ok": true,
+       "w": 800,
+       "h": 1200
+      }
+     ],
+     "covers_loaded": true,
+     "horizontal_overflow": false,
+     "page_errors": []
+    }
+   }
+  }
+ }
+}
