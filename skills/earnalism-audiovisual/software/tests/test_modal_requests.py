@@ -7,6 +7,8 @@ import io
 import json
 import os
 import re
+import shutil
+import subprocess
 import tempfile
 import unittest
 import urllib.error
@@ -73,24 +75,30 @@ class FakeR2:
 
 class ModalRequestTests(unittest.TestCase):
     MONTH = "2026-11"
+    TITLES = ("production", "audiovisual")  # the workflow runs title roots under production/audiovisual
     modal_patch = ModalRunCliTests.modal_patch
     ledger_bytes = ModalRunCliTests.ledger_bytes
 
     def setUp(self):
         ModalRunCliTests.setUp(self)
-        (self.d / ".git").mkdir()  # the title root sits in a checkout: titles/selfish-giant
-        self.ledger = budget.Ledger(self.d / "titles" / "allowance-ledger.json")
+        (self.d / ".git").mkdir()  # the title root sits in a checkout: production/audiovisual/selfish-giant
+        self.ledger = budget.Ledger(self.titles / "allowance-ledger.json")
         p = mock.patch.object(cli, "_MONTH", self.MONTH)
         p.start()
         self.addCleanup(p.stop)
         self.slug = cli.Record.load(self.root).data["title_slug"]
-        self.req_path = self.d / "titles" / "modal-requests" / f"{self.job_id}.json"
+        self.req_path = self.titles / "modal-requests" / f"{self.job_id}.json"
         self.r2 = FakeR2()
         p = mock.patch.object(modal_requests, "default_opener", lambda: self.r2)
         p.start()
         self.addCleanup(p.stop)
         self.timeout_s = modal_run.plan(self.root / "jobs" / self.job_id / "narration.ipynb",
                                         self.root / "jobs" / self.job_id / "inputs.zip")["timeout_seconds"]
+
+    def rate(self, usd):
+        """Make the request's worst case (deadline + margin x the overhead factor) equal usd."""
+        return mock.patch.object(modal_run, "L4_USD_PER_S",
+                                 usd / (self.timeout_s * modal_run.MODAL_OVERHEAD_FACTOR))
 
     def request(self, *extra):
         if "--colab-units" not in extra:
@@ -110,20 +118,21 @@ class ModalRequestTests(unittest.TestCase):
 
     # ------------------------------------------------------------ modal-request
     def test_request_file_schema_and_one_pending_row(self):
-        code, out = self.request("--colab-units", 1.5)
+        code, out = self.request("--colab-units", 0.75)
         self.assertEqual(code, 0, out)
         req = self.req()
         self.assertLessEqual({"schema", "job_id", "title_root", "requested_at", "status"}, set(req))
         self.assertEqual((req["schema"], req["job_id"], req["title_root"], req["status"]),
-                         ("earnalism.modal-request.v1", self.job_id, "titles/selfish-giant", "requested"))
+                         ("earnalism.modal-request.v1", self.job_id, "production/audiovisual/selfish-giant",
+                          "requested"))
         self.assertRegex(req["requested_at"], r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\+00:00$")
-        self.assertEqual(req["colab_units"], 1.5)
-        self.assertEqual(req["r2_prefix"], f"gpu-jobs/{self.slug}/{self.job_id}/")
-        worst = self.timeout_s * modal_run.L4_USD_PER_S
+        self.assertEqual(req["colab_units"], 0.75)
+        self.assertEqual(req["r2_prefix"], f"gpu-jobs/{self.slug}/{self.job_id}/run-1/")
+        worst = modal_run.modal_cost(self.timeout_s)
         self.assertEqual(self.rows(), [("pending", round(worst, 6))])
         self.assertEqual(req["pending_run_id"], self.ledger.modal_rows(job_id=self.job_id)[0]["run_id"])
         (entry,) = [e for e in json.loads(self.ledger_bytes()) if e.get("job_id") == self.job_id]
-        self.assertEqual((entry["runner"], entry["colab_units"]), ("modal", 1.5))
+        self.assertEqual((entry["runner"], entry["colab_units"]), ("modal", 0.75))
         self.assertIn("modal-fetch", out)
         self.assertIn(modal_requests.BRANCH, out)
 
@@ -142,7 +151,7 @@ class ModalRequestTests(unittest.TestCase):
     def test_cap_refusal_writes_nothing(self):
         self.ledger.record_modal_spend(self.MONTH, "other-job", 29.5, 1.0, "ok", "t")
         before = self.ledger_bytes()
-        with mock.patch.object(modal_run, "L4_USD_PER_S", 0.60 / self.timeout_s):
+        with self.rate(0.60):
             code, out = self.request()
         self.assertEqual(code, 3, out)
         self.assertIn("Modal month cap", out)
@@ -150,7 +159,7 @@ class ModalRequestTests(unittest.TestCase):
         self.assertEqual(self.ledger_bytes(), before)
 
     def test_title_cap_counts_the_pending_row_of_a_request(self):
-        with mock.patch.object(modal_run, "L4_USD_PER_S", 5.0 / self.timeout_s):
+        with self.rate(5.0):
             self.assertEqual(self.request()[0], 0)
             self.set_status("done")  # finished but its row was never replaced: still counts
             code, out = self.request()
@@ -210,7 +219,7 @@ class ModalRequestTests(unittest.TestCase):
         code, out = run("modal-run", self.job_id, "--root", self.root, "--request")
         self.assertEqual(code, 2, out)
         self.assertIn("no request file", out)
-        self.assertEqual(self.request("--colab-units", 1)[0], 0)
+        self.assertEqual(self.request("--colab-units", 0.25)[0], 0)
         calls = []
         with mock.patch.object(modal_run, "run_modal", fake_runner(0.1, calls=calls)):
             code, out = run("modal-run", self.job_id, "--root", self.root, "--request",
@@ -246,7 +255,7 @@ class ModalRequestTests(unittest.TestCase):
         self.assertEqual(code, 0, out)
         self.assertNotIn("test-token-value", out)
         req = self.req()
-        prefix = f"gpu-jobs/{self.slug}/{self.job_id}/"
+        prefix = f"gpu-jobs/{self.slug}/{self.job_id}/run-1/"
         self.assertEqual((req["status"], req["seconds"], req["usd"], req["r2_prefix"]),
                          ("done", 9.0, 0.3, prefix))
         self.assertEqual(req["files"], [
@@ -259,7 +268,7 @@ class ModalRequestTests(unittest.TestCase):
         puts = [c for c in self.r2.calls if c[0] == "PUT"]
         self.assertEqual(len(puts), 4)
         self.assertTrue(all(c[2].get("Authorization") == "Bearer test-token-value" for c in puts))
-        self.assertIn(f"objects/gpu-jobs/{self.slug}/{self.job_id}/sub/u2.wav",
+        self.assertIn(f"objects/gpu-jobs/{self.slug}/{self.job_id}/run-1/sub/u2.wav",
                       " ".join(c[1] for c in puts))
         # every upload was read back
         self.assertEqual(len([c for c in self.r2.calls if c[0] == "GET"]), 3)
@@ -278,7 +287,7 @@ class ModalRequestTests(unittest.TestCase):
 
     # ------------------------------------------------------------ run-time cap re-check (I2)
     def test_request_run_in_a_later_month_counts_there(self):
-        with mock.patch.object(modal_run, "L4_USD_PER_S", 1.0 / self.timeout_s):
+        with self.rate(1.0):
             self.assertEqual(self.request()[0], 0)  # 1.00 USD pending in 2026-11
         self.set_status("running")
         with mock.patch.object(cli, "_MONTH", "2026-12"), \
@@ -290,7 +299,7 @@ class ModalRequestTests(unittest.TestCase):
                          [("ok", 0.4)])
 
     def test_request_refused_when_the_run_month_is_full(self):
-        with mock.patch.object(modal_run, "L4_USD_PER_S", 1.0 / self.timeout_s):
+        with self.rate(1.0):
             self.assertEqual(self.request()[0], 0)
         self.set_status("running")
         self.ledger.record_modal_spend("2026-12", "other-job", 29.5, 1.0, "ok", "t")
@@ -305,11 +314,11 @@ class ModalRequestTests(unittest.TestCase):
         self.assertEqual(req["status"], "refused")
         self.assertIn("Budget exceeded", req["error"])
         with mock.patch.object(cli, "_MONTH", "2026-12"), \
-                mock.patch.object(modal_run, "L4_USD_PER_S", 1.0 / self.timeout_s):
+                self.rate(1.0):
             self.assertEqual(self.request()[0], 3)  # December is still full for a new request
 
     def test_request_refused_when_the_title_cap_filled_meanwhile(self):
-        with mock.patch.object(modal_run, "L4_USD_PER_S", 1.0 / self.timeout_s):
+        with self.rate(1.0):
             self.assertEqual(self.request()[0], 0)
         self.set_status("running")
         (entry,) = [e for e in json.loads(self.ledger_bytes()) if e.get("job_id") == self.job_id]
@@ -331,7 +340,7 @@ class ModalRequestTests(unittest.TestCase):
             code, out = run("r2-probe", self.job_id, "--root", self.root)
         self.assertEqual(code, 0, out)
         self.assertEqual([c[0] for c in self.r2.calls], ["PUT", "GET", "GET", "DELETE"])
-        self.assertIn(f"/gpu-jobs/{self.slug}/{self.job_id}/_probe/probe.txt", self.r2.calls[0][1])
+        self.assertIn(f"/gpu-jobs/{self.slug}/{self.job_id}/run-1/_probe/probe.txt", self.r2.calls[0][1])
         self.assertEqual(self.r2.store, {})
         self.assertEqual((self.req()["status"], len(self.rows())), ("running", 1))
 
@@ -456,7 +465,7 @@ class ModalRequestTests(unittest.TestCase):
 
     def test_fetch_into_and_refusals_leave_nothing(self):
         self.assertEqual(self.run_and_upload()[0], 0)
-        key = f"gpu-jobs/{self.slug}/{self.job_id}/u1.wav"
+        key = f"gpu-jobs/{self.slug}/{self.job_id}/run-1/u1.wav"
         good = self.r2.store[key]
         self.r2.store[key] = b"tampered"
         code, out = self.fetch("--into", self.d / "into")
@@ -526,6 +535,263 @@ class ModalRequestTests(unittest.TestCase):
         self.assertIn("settled from its Modal rows", out)
         self.assertEqual([r["status"] for r in self.ledger.modal_rows(job_id=self.job_id)], ["ok"])
 
+    # ------------------------------------------------------------ F1: refused before Modal (I2, I4)
+    def entry(self):
+        return next(e for e in json.loads(self.ledger_bytes()) if e.get("job_id") == self.job_id)
+
+    def test_run_request_records_modal_contacted_at(self):
+        self.assertEqual(self.request()[0], 0)
+        self.set_status("running")
+        seen = []
+
+        def runner(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None):
+            self.assertNotIn("modal_contacted_at", self.req())
+            on_contact()
+            seen.append(self.req()["modal_contacted_at"])
+            return fake_runner(0.2)(notebook, inputs_zip, download_dir)
+
+        with mock.patch.object(modal_run, "run_modal", runner):
+            code, out = run("modal-run", self.job_id, "--root", self.root, "--request")
+        self.assertEqual(code, 0, out)
+        self.assertRegex(seen[0], r"^\d{4}-\d\d-\d\dT")
+        self.assertEqual(self.req()["modal_contacted_at"], seen[0])
+
+    def test_refused_request_restores_the_cu_reservation(self):
+        """I4: a run-time refusal undoes the move: Colab caps and supersede behave as before."""
+        reserved = self.entry()["units"]
+        self.assertEqual(self.request("--colab-units", 0.25)[0], 0)
+        self.assertEqual((self.entry()["runner"], self.entry()["units"]), ("modal", 0.25))
+        self.set_status("running")
+        self.r2.deny = {"PUT"}
+        code, out = run("r2-probe", self.job_id, "--root", self.root)
+        self.assertEqual(code, 2, out)
+        self.assertIn("CU reservation restored", out)
+        e = self.entry()
+        self.assertEqual((e["units"], e["state"]), (reserved, "reserved"))
+        for key in ("runner", "colab_units", "reserved_units", "moved_to_modal_at"):
+            self.assertNotIn(key, e)
+        self.assertFalse(self.ledger.is_modal_job(self.job_id))
+        code, out = run("supersede", self.job_id, "--root", self.root, "--reason", "never ran")
+        self.assertEqual(code, 0, out)  # never ran: supersede works again
+
+    def test_colab_units_above_the_reservation_are_refused(self):
+        reserved = self.entry()["units"]
+        before = self.ledger_bytes()
+        code, out = self.request("--colab-units", reserved + 0.01)
+        self.assertEqual(code, 2, out)
+        self.assertIn("cannot exceed the reservation", out)
+        self.assertEqual(self.ledger_bytes(), before)
+        self.assertFalse(self.req_path.exists())
+
+    def refuse_unstarted(self, reason="stopped"):
+        return modal_requests.refuse_unstarted(self.req_path, self.d, reason)
+
+    def test_workflow_refuses_a_request_whose_run_never_contacted_modal(self):
+        """I2: install/mark/probe crash or modal-run dying before contact: refused, row released."""
+        reserved = self.entry()["units"]
+        self.assertEqual(self.request()[0], 0)
+        for status in ("requested", "running"):  # install failed / a later step crashed
+            self.set_status(status)
+            before = self.ledger_bytes()
+            out = self.refuse_unstarted("install=failure")
+            self.assertTrue(out["refused"], out)
+            self.assertEqual((out["root"], out["ledger"]), (str(self.root), str(self.ledger.path)))
+            req = self.req()
+            self.assertEqual(req["status"], "refused")
+            self.assertIn("install=failure", req["error"])
+            self.assertEqual(self.rows(), [])
+            self.assertEqual(self.entry()["units"], reserved)
+            self.ledger._write(json.loads(before))  # again from the same state, for the next status
+        self.set_status("running")
+        data = self.req()
+        data["modal_contacted_at"] = "2026-11-26T12:00:00+00:00"
+        self.req_path.write_text(json.dumps(data))
+        before = (self.req_path.read_bytes(), self.ledger_bytes())
+        out = self.refuse_unstarted()
+        self.assertFalse(out["refused"])
+        self.assertIn("contacted", out["why"])
+        self.assertEqual((self.req_path.read_bytes(), self.ledger_bytes()), before)
+        self.set_status("done")
+        self.assertFalse(self.refuse_unstarted()["refused"])
+
+    def test_workflow_entry_point_is_stdlib_only(self):
+        """The refusal must work when the dependency install failed (numpy, PIL, modal missing)."""
+        self.assertEqual(self.request()[0], 0)
+        self.set_status("running")
+        sw = Path(modal_requests.__file__).resolve().parents[1]
+        code = ("import builtins, runpy, sys\n"
+                "real = builtins.__import__\n"
+                "def guard(name, *a, **k):\n"
+                "    if name.split('.')[0] in ('numpy', 'PIL', 'modal'):\n"
+                "        raise ImportError('blocked ' + name)\n"
+                "    return real(name, *a, **k)\n"
+                "builtins.__import__ = guard\n"
+                "sys.argv = ['x'] + sys.argv[1:]\n"
+                "runpy.run_module('eav.modal_requests', run_name='__main__')\n")
+        proc = subprocess.run([os.sys.executable, "-c", code, "refuse-unstarted", str(self.req_path),
+                               "--workspace", str(self.d), "--reason", "install=failure"],
+                              cwd=sw, capture_output=True, text=True, timeout=60)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertTrue(json.loads(proc.stdout)["refused"])
+        self.assertEqual((self.req()["status"], self.rows()), ("refused", []))
+        proc = subprocess.run([os.sys.executable, "-m", "eav.modal_requests", "check", str(self.req_path),
+                               "--workspace", str(self.d)], cwd=sw, capture_output=True, text=True,
+                              timeout=60)
+        self.assertEqual(json.loads(proc.stdout)["status"], "refused")
+
+    def test_an_invalid_request_is_refused_instead_of_blocking_the_queue(self):
+        self.assertEqual(self.request()[0], 0)
+        good = self.req()
+        self.assertEqual(modal_requests.validate(good, self.req_path), [])
+        checked = modal_requests.check(self.req_path, self.d)
+        self.assertEqual((checked["status"], checked["errors"], checked["root"]),
+                         ("requested", [], str(self.root)))
+        bad_cases = {
+            "job_id": ("../x", "does not match"),
+            "title_root": ("titles/selfish-giant", "production/audiovisual"),
+            "schema": ("other.v1", "schema"),
+            "pending_run_id": ("other#1", "pending_run_id"),
+            "colab_units": (-1, "colab_units"),
+        }
+        for field, (value, words) in bad_cases.items():
+            data = dict(good, **{field: value})
+            self.assertTrue(any(words in e for e in modal_requests.validate(data, self.req_path)), field)
+        other = self.req_path.with_name("Not-A-Job.json")
+        self.assertTrue(any("file name" in e for e in modal_requests.validate(good, other)))
+        # title_root outside production/audiovisual: refused, the ledger cannot be located (untouched)
+        self.req_path.write_text(json.dumps(dict(good, title_root="titles/x")))
+        before = self.ledger_bytes()
+        out = self.refuse_unstarted()
+        self.assertTrue(out["refused"])
+        self.assertIsNone(out["ledger"])
+        self.assertEqual(self.ledger_bytes(), before)
+        self.assertEqual(self.req()["status"], "refused")
+        self.assertIn("invalid request", self.req()["error"])
+        self.assertIn("modal-settle", self.req()["error"])
+        # schema wrong but the ledger located: refused, its row released
+        self.req_path.write_text(json.dumps(dict(good, schema="other.v1")))
+        out = self.refuse_unstarted()
+        self.assertTrue(out["refused"])
+        self.assertEqual(self.rows(), [])
+
+    def test_abandon_a_running_request_that_never_reached_modal(self):
+        reserved = self.entry()["units"]
+        self.assertEqual(self.request()[0], 0)
+        code, out = run("modal-request", self.job_id, "--root", self.root, "--abandon", "--reason", "x")
+        self.assertEqual(code, 2, out)  # requested, not running
+        self.assertIn("only a running request", out)
+        self.set_status("running")
+        code, out = run("modal-request", self.job_id, "--root", self.root, "--abandon")
+        self.assertEqual(code, 2, out)
+        self.assertIn("--abandon needs --reason", out)
+        code, out = run("modal-request", self.job_id, "--root", self.root, "--reason", "x",
+                        "--colab-units", 0)
+        self.assertEqual(code, 2, out)
+        data = self.req()
+        data["modal_contacted_at"] = "2026-11-26T12:00:00+00:00"
+        self.req_path.write_text(json.dumps(data))
+        before = (self.req_path.read_bytes(), self.ledger_bytes())
+        code, out = run("modal-request", self.job_id, "--root", self.root, "--abandon", "--reason", "x")
+        self.assertEqual(code, 2, out)
+        self.assertIn("contacted Modal", out)
+        self.assertEqual((self.req_path.read_bytes(), self.ledger_bytes()), before)
+        del data["modal_contacted_at"]
+        self.req_path.write_text(json.dumps(data))
+        code, out = run("modal-request", self.job_id, "--root", self.root, "--abandon", "--reason",
+                        "runner cancelled before the Modal step")
+        self.assertEqual(code, 0, out)
+        req = self.req()
+        self.assertEqual(req["status"], "refused")
+        self.assertIn("abandoned: runner cancelled", req["error"])
+        self.assertEqual(self.rows(), [])
+        self.assertEqual(self.entry()["units"], reserved)
+        code, out = self.request()
+        self.assertEqual(code, 0, out)  # a new request may follow, with a fresh run_id
+        self.assertEqual(self.req()["pending_run_id"], f"{self.job_id}#2")
+
+    # ------------------------------------------------------------ F1: per-run R2 prefix (B5 M4, M1)
+    def test_each_request_has_its_own_r2_prefix_and_fetch_ignores_a_stale_copy(self):
+        code, out = self.run_and_upload(fake_runner(0.3, "failed"))
+        self.assertEqual(self.req()["r2_prefix"], f"gpu-jobs/{self.slug}/{self.job_id}/run-1/")
+        old_copy = f"gpu-jobs/{self.slug}/{self.job_id}/run-1/_request-result.json"
+        self.assertIn(old_copy, self.r2.store)
+        self.assertEqual(self.request()[0], 0)  # request again after the failure
+        req = self.req()
+        self.assertEqual((req["pending_run_id"], req["r2_prefix"]),
+                         (f"{self.job_id}#2", f"gpu-jobs/{self.slug}/{self.job_id}/run-2/"))
+        # a stale copy of run 1 placed under run 2's prefix (or found there) is not this request
+        self.r2.store[req["r2_prefix"] + "_request-result.json"] = self.r2.store[old_copy]
+        code, out = self.fetch()
+        self.assertEqual(code, 2, out)
+        self.assertIn("has not finished", out)
+        del self.r2.store[req["r2_prefix"] + "_request-result.json"]
+        self.set_status("running")
+        dl = self.d / "runner-temp-2"
+        with mock.patch.object(modal_run, "run_modal", fake_runner(0.2)):
+            self.assertEqual(run("modal-run", self.job_id, "--root", self.root, "--request",
+                                 "--download", dl)[0], 0)
+        folder = dl / "job"
+        (folder / "only.wav").write_bytes(b"new")
+        self.assertEqual(run("r2-upload", self.job_id, "--root", self.root, "--from", folder)[0], 0)
+        code, out = self.fetch()  # run 1's other files under run-1/ never get in the way
+        self.assertEqual(code, 0, out)
+        self.assertEqual(sorted(p.name for p in (self.root / ".downloads" / self.job_id).iterdir()),
+                         ["only.wav"])
+
+    # ------------------------------------------------------------ F1: the real ledger and requests
+    def test_the_existing_production_ledger_and_requests_load(self):
+        """A copy of production/audiovisual (ledger, request files, the title's record.json), read
+        only: request #1 refused by hand (row settled at 0), request #2 failed (no payment method)."""
+        src = REPO / "production" / "audiovisual"
+        work = self.d / "copy"
+        (work / ".git").mkdir(parents=True)
+        dst = work / "production" / "audiovisual"
+        shutil.copytree(src / "modal-requests", dst / "modal-requests")
+        shutil.copy2(src / "allowance-ledger.json", dst / "allowance-ledger.json")
+        ledger = budget.Ledger(dst / "allowance-ledger.json")
+        for path in sorted((dst / "modal-requests").glob("*.json")):
+            req = modal_requests.read_request(path)
+            self.assertEqual(modal_requests.validate(req, path), [], path.name)
+            slug = req["title_root"].rsplit("/", 1)[1]
+            (dst / slug).mkdir(exist_ok=True)
+            shutil.copy2(src / slug / "record.json", dst / slug / "record.json")
+            root, ledger_path = modal_requests.locate(req, work)
+            self.assertEqual(ledger_path, ledger.path.resolve())
+            job = req["job_id"]
+            rows = ledger.modal_rows(job_id=job)
+            ids = {r["run_id"] for r in rows}
+            self.assertIn(req["pending_run_id"], ids)
+            if req["status"] not in modal_requests.OPEN:  # finished or refused: the workflow leaves it
+                self.assertFalse(modal_requests.refuse_unstarted(path, work, "x")["refused"])
+            # I3: the next run_id is past every one issued, released or not
+            nxt = max(budget.Ledger.run_number(i) for i in ids) + 1
+            self.assertEqual(modal_requests.r2_prefix(slug, job, f"{job}#{nxt}"),
+                             f"gpu-jobs/{slug}/{job}/run-{nxt}/")
+            if any(r["status"] != "pending" for r in rows):
+                self.assertFalse(ledger.undo_move_to_modal(job))  # it reached Modal: stays moved
+            self.assertEqual(ledger.record_modal_spend("2026-11", job, 0.0, 0.0, "pending", "t"),
+                             f"{job}#{nxt}")
+        # the known state: c1of2 #1 settled 0 (refused by hand), #2 failed with the wall-clock estimate
+        job = "narration-film-01-r3-c1of2"
+        rows = {r["run_id"]: r for r in ledger.modal_rows(job_id=job)}
+        self.assertEqual(rows[f"{job}#1"]["status"], "settled")
+        self.assertEqual(rows[f"{job}#2"]["status"], "failed")
+        self.assertEqual([r["run_id"] for r in ledger.unbilled_modal_runs(job)], [f"{job}#2"])
+        ledger.release_pending_modal(f"{job}#3")  # the probe row above
+        root = dst / "bicharak"
+        code, out = run("modal-settle", job, "--root", root, "--usd", 0)
+        self.assertEqual(code, 0, out)  # reconcile #2 from the bill (Modal refused before any GPU)
+        row = next(r for r in ledger.modal_rows(job_id=job) if r["run_id"] == f"{job}#2")
+        self.assertEqual((row["usd"], row["billed"], row["status"]), (0, True, "failed"))
+        self.assertAlmostEqual(row["estimated_usd"], 0.02270221720785)
+        code, out = run("modal-fetch", job, "--root", root)
+        self.assertEqual(code, 2, out)  # failed with no files: close or request again
+        self.assertIn("no uploaded files", out)
+        code, out = run("modal-request", job, "--root", root, "--abandon", "--reason", "x")
+        self.assertEqual(code, 2, out)  # failed, not running
+        self.assertEqual(budget.Ledger(src / "allowance-ledger.json").modal_rows(job_id=job)[1]["status"],
+                         "failed")  # the real ledger was only read
+
 
 class WorkflowTests(unittest.TestCase):
     def setUp(self):
@@ -561,6 +827,82 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("modal-results/$job_id", script)
         self.assertIn("set -euo pipefail", script)
         self.assertNotIn("--force", script)
+        self.assertIn("GIT_CONFIG_VALUE_0", script)  # the token reaches git through its env only
+        self.assertNotIn("echo \"$GH_TOKEN", script)
+
+    @unittest.skipUnless(shutil.which("git"), "git not installed")
+    def test_publish_script_pushes_or_falls_back_under_set_e(self):
+        """B5: a failing replay under `set -e` still reaches the fallback push, and the fallback
+        branch gets a run suffix when it already exists. A local bare repository stands in for
+        GitHub; nothing leaves the machine."""
+        script = REPO / ".github" / "scripts" / "modal-publish.sh"
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        d = Path(tmp.name)
+        env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+        env.update(GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@example.invalid", GIT_COMMITTER_NAME="t",
+                   GIT_COMMITTER_EMAIL="t@example.invalid", GIT_CONFIG_GLOBAL=os.devnull,
+                   GIT_CONFIG_NOSYSTEM="1", BRANCH="b", RUNNER_TEMP=str(d / "tmp"),
+                   MODAL_PUBLISH_BACKOFF_S="0", GITHUB_RUN_ID="777")
+        env.pop("GH_TOKEN", None)
+        (d / "tmp").mkdir()
+
+        def git(*args, cwd=None):
+            return subprocess.run(["git", *args], cwd=cwd, env=env, check=True, capture_output=True,
+                                  text=True).stdout.strip()
+
+        git("init", "-q", "--bare", "-b", "b", str(d / "origin.git"))
+        git("clone", "-q", str(d / "origin.git"), str(d / "seed"))
+        git("checkout", "-q", "-b", "b", cwd=d / "seed")
+        (d / "seed" / "req.json").write_text('{"status": "requested"}\n')
+        (d / "seed" / "ledger.json").write_text("[]\n")
+        git("add", ".", cwd=d / "seed")
+        git("commit", "-q", "-m", "seed", cwd=d / "seed")
+        git("push", "-q", "origin", "b", cwd=d / "seed")
+
+        def publish(ws, status, ledger="ledger.json"):
+            (ws / "req.json").write_text('{"status": "%s"}\n' % status)
+            return subprocess.run(["bash", str(script), f"m {status}", "job-1", str(ws),
+                                   str(ws / ledger) if ledger else "", "req.json"],
+                                  cwd=ws, env=dict(env, GITHUB_WORKSPACE=str(ws)),
+                                  capture_output=True, text=True, timeout=120)
+
+        ws = d / "ws"
+        git("clone", "-q", "-b", "b", str(d / "origin.git"), str(ws))
+        proc = publish(ws, "running")
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn("running", git("show", "b:req.json", cwd=d / "origin.git"))
+        proc = publish(ws, "refused", ledger="")  # an invalid request: the request file alone
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn("refused", git("show", "b:req.json", cwd=d / "origin.git"))
+        # the branch moves on with a conflicting change; the replay cannot run here (no eav in
+        # this workspace), so every attempt fails and the fallback branch gets this run's commit
+        git("pull", "-q", "origin", "b", cwd=d / "seed")
+        (d / "seed" / "req.json").write_text('{"status": "other"}\n')
+        git("commit", "-q", "-am", "conflict", cwd=d / "seed")
+        git("push", "-q", "origin", "b", cwd=d / "seed")
+        proc = publish(ws, "done")
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        self.assertIn("the result is on modal-results/job-1", proc.stdout)
+        self.assertIn("done", git("show", "modal-results/job-1:req.json", cwd=d / "origin.git"))
+        self.assertIn("other", git("show", "b:req.json", cwd=d / "origin.git"))  # never forced
+        ws2 = d / "ws2"  # a second run, cloned before the branch moves on again
+        git("clone", "-q", "-b", "b", str(d / "origin.git"), str(ws2))
+        (d / "seed" / "req.json").write_text('{"status": "other again"}\n')
+        git("commit", "-q", "-am", "conflict again", cwd=d / "seed")
+        git("push", "-q", "origin", "b", cwd=d / "seed")
+        proc = publish(ws2, "failed")
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        self.assertIn("the result is on modal-results/job-1-run-777", proc.stdout)
+        self.assertIn("failed", git("show", "modal-results/job-1-run-777:req.json", cwd=d / "origin.git"))
+
+    def test_checkouts_keep_no_token_and_only_push_steps_get_it(self):
+        self.assertEqual(self.text.count("persist-credentials: false"), 2)
+        self.assertEqual(self.text.count("actions/checkout@"), 2)
+        self.assertEqual(self.text.count("GH_TOKEN: ${{ github.token }}"), 3)
+        self.assertRegex(self.text, r"spend limit[^\n]*\n#[^\n]*30 USD a month or less")
+        self.assertIn("refuse-unstarted", self.text)
+        self.assertIn("timeout-minutes: 300  # per matrix job, i.e. per request", self.text)
 
     @unittest.skipUnless(__import__("importlib").util.find_spec("yaml"), "PyYAML not installed")
     def test_workflow_parses_and_each_step_holds_only_its_secrets(self):
@@ -585,14 +927,30 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(secrets_by_step["Probe R2 before the paid run"], {"CLOUDFLARE_R2_TOKEN"})
         self.assertEqual(secrets_by_step["Run on Modal"], {"MODAL_TOKEN_ID", "MODAL_TOKEN_SECRET"})
         self.assertEqual(secrets_by_step["Upload the outputs to R2"], {"CLOUDFLARE_R2_TOKEN"})
-        self.assertEqual(secrets_by_step["Push the result back (no secrets in this step)"], set())
+        self.assertEqual(secrets_by_step["Push the result back (only the push token)"], set())
         self.assertEqual(sum(len(v) for v in secrets_by_step.values()), 4)
+        token_steps = {s.get("name") for s in steps if "GH_TOKEN" in (s.get("env") or {})}
+        self.assertEqual(token_steps, {"Mark the request running (only the push token)",
+                                       "Refuse the request if Modal was never contacted (only the push token)",
+                                       "Push the result back (only the push token)"})
+        for s in steps:
+            if "uses" in s and s["uses"].startswith("actions/checkout@"):
+                self.assertIs(s["with"]["persist-credentials"], False)
+        self.assertIs(wf["jobs"]["list"]["steps"][0]["with"]["persist-credentials"], False)
+        by_name = {s.get("name"): s for s in steps}
+        refuse = by_name["Refuse the request if Modal was never contacted (only the push token)"]
+        self.assertIn("always()", refuse["if"])
+        self.assertIn("refuse-unstarted", refuse["run"])
+        upload = by_name["Upload the outputs to R2"]
+        self.assertIn("steps.unstarted.outputs.refused != 'true'", upload["if"])
         for s in steps:
             for k, v in (s.get("env") or {}).items():
                 if "secrets." in str(v):
                     self.assertEqual(v, "${{ secrets.%s }}" % k)
         names = [s.get("name") for s in steps]
         self.assertLess(names.index("Probe R2 before the paid run"), names.index("Run on Modal"))
+        self.assertLess(names.index("Run on Modal"), names.index(refuse["name"]))
+        self.assertLess(names.index(refuse["name"]), names.index("Upload the outputs to R2"))
 
 
 if __name__ == "__main__":

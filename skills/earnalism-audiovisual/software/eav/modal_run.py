@@ -14,11 +14,14 @@ import sys
 import threading
 import time
 import types
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
-# Modal's published L4 rate (about $0.80 per hour). The CPU and memory surcharges are not
-# modelled, so the figure is a floor on the real bill, not the bill itself.
+# Modal's published L4 rate (about $0.80 per hour).
 L4_USD_PER_S = 0.000222
+# Every Modal figure (the pending worst case and the recorded spend) is wall seconds x the L4 rate x
+# this factor: it covers the CPU and memory surcharges and the image build that the GPU rate leaves
+# out. It stays an estimate: `eav modal-settle` replaces a row with the billed amount.
+MODAL_OVERHEAD_FACTOR = 1.25
 APP_NAME = "earnalism-eav"
 VOLUME_NAME = "earnalism-eav-jobs"
 VOLUME_MOUNT = "/jobs"
@@ -98,6 +101,7 @@ class drive:
 
 class runtime:
     stopped = False
+    on_stop = None  # set by the executor: on Modal, commit the volume before anything else
 
     @staticmethod
     def unassign():
@@ -106,6 +110,11 @@ class runtime:
         runtime.stopped = True
         sys.stdout.flush()
         sys.stderr.flush()
+        if runtime.on_stop is not None:
+            try:
+                runtime.on_stop()
+            except Exception as e:  # the stop itself must still happen
+                print(f"hard stop: on_stop failed: {{type(e).__name__}}: {{e}}", file=sys.stderr)
         if threading.current_thread() is not threading.main_thread():
             _thread.interrupt_main()
             return
@@ -139,15 +148,16 @@ class _Shim:
                 sys.modules[name] = old
 
 
-def run_cells(cells: list, job_dir) -> dict:
+def run_cells(cells: list, job_dir, on_stop=None) -> dict:
     """Execute the cells in one shared namespace with RUN = True; DRIVE_JOB_DIR is overridden
-    right after the config cell. runtime.unassign() (from any thread) is the hard stop: no later
-    cell runs (so no manifest is written) and the namespace has HARD_STOPPED = True. Any other
-    exception propagates. Returns the namespace."""
+    right after the config cell. runtime.unassign() (from any thread) is the hard stop: it calls
+    on_stop first (if given), then no later cell runs (so no manifest is written) and the namespace
+    has HARD_STOPPED = True. Any other exception propagates. Returns the namespace."""
     job_dir = str(job_dir)
     Path(job_dir).mkdir(parents=True, exist_ok=True)
     g = {"__name__": "__main__", "RUN": True, "HARD_STOPPED": False}
     with _Shim(job_dir) as shim:
+        shim.runtime.on_stop = on_stop
         try:
             for i, source in enumerate(cells):
                 exec(compile(source, f"<eav cell {i}>", "exec"), g)
@@ -184,8 +194,8 @@ def run_local(notebook, inputs_zip, work_dir) -> dict:
 
 
 def modal_cost(seconds: float) -> float:
-    """USD for the measured seconds at the published L4 rate (no CPU/memory surcharge)."""
-    return seconds * L4_USD_PER_S
+    """Estimated USD for wall seconds: the L4 rate x MODAL_OVERHEAD_FACTOR (CPU, memory, build)."""
+    return seconds * L4_USD_PER_S * MODAL_OVERHEAD_FACTOR
 
 
 def remote_python_version() -> str:
@@ -204,23 +214,47 @@ def plan(notebook, inputs_zip, gpu="L4") -> dict:
             "forecast_seconds": deadline, "forecast_usd": modal_cost(deadline)}
 
 
-def execute_remote(cells: list, job_id: str, archive: bytes, volume_mount: str = VOLUME_MOUNT) -> dict:
-    """Runs inside the Modal container: write inputs.zip into the volume folder, run the cells."""
+def execute_remote(cells: list, job_id: str, archive: bytes, volume_mount: str = VOLUME_MOUNT,
+                   commit=None) -> dict:
+    """Runs inside the Modal container: write inputs.zip into the volume folder, run the cells.
+    commit (the volume's commit, looked up inside the container) runs at the hard stop, before the
+    main thread is interrupted, and again at the end, whatever happened."""
     folder = Path(volume_mount) / job_id
     folder.mkdir(parents=True, exist_ok=True)
     (folder / "inputs.zip").write_bytes(archive)
-    g = run_cells(cells, folder)
+    try:
+        g = run_cells(cells, folder, on_stop=commit)
+    finally:
+        if commit is not None:
+            commit()
     return {"hard_stopped": g["HARD_STOPPED"]}
 
 
-def run_modal(notebook, inputs_zip, download_dir, gpu="L4") -> dict:
+def _commit_volume():
+    """Inside the container: commit the job volume, looked up by name (no captured handle)."""
+    import modal
+    modal.Volume.from_name(VOLUME_NAME).commit()
+
+
+def volume_relpath(path: str, job_id: str):
+    """A volume listdir path, with or without a leading "/", relative to the job folder (posix);
+    ValueError if it is outside it or climbs out."""
+    rel = PurePosixPath(str(path).lstrip("/"))
+    rel = rel.relative_to(job_id)
+    if rel.is_absolute() or ".." in rel.parts or not rel.parts:
+        raise ValueError(f"volume path {path!r} is not a file inside {job_id}/")
+    return rel
+
+
+def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None) -> dict:
     """Run the notebook on a Modal GPU, then download the job folder to download_dir/<job_id>/.
 
     Returns {"seconds": wall seconds measured locally around the remote call (cold start
     included), "usd": seconds * L4_USD_PER_S, "folder", "status": "ok" | "hard_stopped" |
     "failed", "error": text or None}. A failed or timed-out remote call still returns (it was
-    paid for) and still downloads whatever the volume holds. The cost is the L4 rate only; CPU
-    and memory surcharges are not modelled. The folder lives on the persistent volume
+    paid for) and still downloads whatever the volume holds. The cost is an estimate (modal_cost:
+    the L4 rate x MODAL_OVERHEAD_FACTOR). on_contact() is called once, immediately before Modal
+    is first contacted (the workflow records modal_contacted_at). The folder lives on the persistent volume
     `earnalism-eav-jobs` at /jobs/<job_id>, so rerunning the same job resumes from it. The
     function timeout is DEADLINE_SECONDS + 900 s; the notebook's own clock enforces the reserved
     compute seconds. The image's Python equals the local minor version (serialized function).
@@ -240,12 +274,11 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4") -> dict:
     @app.function(image=image, gpu=gpu, volumes={VOLUME_MOUNT: volume},
                   timeout=deadline + TIMEOUT_MARGIN_S, serialized=True)
     def remote(cells_, job_id_, archive_):
-        from eav.modal_run import execute_remote
-        try:
-            return execute_remote(cells_, job_id_, archive_)
-        finally:
-            volume.commit()
+        from eav.modal_run import _commit_volume, execute_remote
+        return execute_remote(cells_, job_id_, archive_, commit=_commit_volume)
 
+    if on_contact is not None:
+        on_contact()
     status, error, outcome = "ok", None, {}
     started = time.monotonic()
     try:
@@ -262,7 +295,7 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4") -> dict:
         for entry in list(volume.listdir(f"/{job_id}", recursive=True)):
             if getattr(entry.type, "name", str(entry.type)).upper() != "FILE":
                 continue
-            target = dest / Path(entry.path).relative_to(job_id)
+            target = dest / volume_relpath(entry.path, job_id)
             target.parent.mkdir(parents=True, exist_ok=True)
             with open(target, "wb") as fh:
                 for chunk in volume.read_file(entry.path):

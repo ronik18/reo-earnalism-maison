@@ -94,8 +94,8 @@ hand, so a killed run leaves spend nobody counted against the Modal dollar caps.
 
 **Must do (with skill).** Use `modal-run` only (try `--dry-run` first): it checks the worst case
 against the cap and records the pending row before Modal is contacted, then replaces it with the
-actual spend. If the run died, read the billed amount from the Modal dashboard and run
-`modal-settle <job_id> --usd <billed>`; never leave a run uncounted.
+estimated spend. After the run (or if it died), read the billed amount from the Modal dashboard and
+run `modal-settle <job_id> --usd <billed>`; never leave a run uncounted.
 
 ## 5. Just raise the cap to $35 for one job
 

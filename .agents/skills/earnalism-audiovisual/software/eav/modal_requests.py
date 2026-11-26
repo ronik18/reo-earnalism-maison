@@ -19,19 +19,34 @@ accepted). No code here reads a token from disk or prints one: in GitHub Actions
 comes from the CLOUDFLARE_R2_TOKEN secret through the environment; in the Claude session the
 egress proxy injects it, so the caller passes no token.
 
-Two reserved names under a job's prefix: `_request-result.json` (a copy of the finished request,
-so `modal-fetch` works even when the workflow could not push it to the branch) and `_probe/`
-(the workflow's pre-run probe object, deleted again).
+Each request has its own prefix, `gpu-jobs/<slug>/<job_id>/run-<n>/` (n from its pending run_id),
+recorded in the request as `r2_prefix`; probe, upload and fetch use the request's prefix, so a
+re-request never meets the objects of an earlier run. (Requests written before per-run prefixes
+carry `gpu-jobs/<slug>/<job_id>/` and keep it.) Two reserved names under a prefix:
+`_request-result.json` (a copy of the finished request, so `modal-fetch` works even when the
+workflow could not push it to the branch) and `_probe/` (the workflow's pre-run probe object,
+deleted again).
+
+This module, like budget, needs only the standard library, so the workflow can refuse a request
+even when installing the dependencies failed:
+  python3 -m eav.modal_requests check <request.json> --workspace <checkout>
+  python3 -m eav.modal_requests refuse-unstarted <request.json> --workspace <checkout> --reason <text>
 """
+import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
+import sys
 import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
-from pathlib import Path
+from datetime import datetime, timezone
+from pathlib import Path, PurePosixPath
+
+from . import budget
 
 SCHEMA = "earnalism.modal-request.v1"
 BRANCH = "claude/wonderful-bardeen-s9k90x"
@@ -45,7 +60,9 @@ REFUSED = "refused"  # refused before Modal was contacted: its pending row was r
 STATUSES = OPEN + FINISHED + (REFUSED,)
 RESULT_NAME = "_request-result.json"
 PROBE_DIR = "_probe/"
-FALLBACK_BRANCH = "modal-results/{job_id}"
+FALLBACK_BRANCH = "modal-results/{job_id}"  # or modal-results/<job_id>-run-<GitHub run id> if taken
+JOB_ID_RE = re.compile(r"^[a-z0-9][a-z0-9.-]*$")
+TITLE_ROOT_RE = re.compile(r"^production/audiovisual/[a-z0-9][a-z0-9-]*$")
 PER_PAGE = 1000
 RUN_TO_REQUEST = {"ok": "done", "failed": "failed", "hard_stopped": "hard_stopped"}
 TIMEOUT_S = 120
@@ -76,8 +93,18 @@ def repo_root(start) -> Path:
                      "relative to the repository the workflow checks out")
 
 
-def r2_prefix(slug, job_id) -> str:
-    return f"gpu-jobs/{slug}/{job_id}/"
+def r2_prefix(slug, job_id, run_id=None) -> str:
+    """gpu-jobs/<slug>/<job_id>/run-<n>/ for the request whose pending row is run_id."""
+    base = f"gpu-jobs/{slug}/{job_id}/"
+    return base if run_id is None else f"{base}run-{budget.Ledger.run_number(run_id)}/"
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def valid_job_id(job_id) -> bool:
+    return isinstance(job_id, str) and bool(JOB_ID_RE.fullmatch(job_id)) and ".." not in job_id
 
 
 def read_request(path) -> dict:
@@ -103,6 +130,136 @@ def write_request(path, data) -> Path:
         if os.path.exists(tmp):
             os.unlink(tmp)
     return path
+
+
+def validate(data, path) -> list:
+    """What makes a request file unusable by the workflow (empty list: none): the schema, a known
+    status, job_id matching ^[a-z0-9][a-z0-9.-]*$ and the file name, title_root under
+    production/audiovisual/, a pending_run_id of this job, colab_units >= 0 and an r2_prefix."""
+    if not isinstance(data, dict):
+        return ["the request is not a JSON object"]
+    errors = []
+    if data.get("schema") != SCHEMA:
+        errors.append(f"schema {data.get('schema')!r} is not {SCHEMA}")
+    if data.get("status") not in STATUSES:
+        errors.append(f"unknown status {data.get('status')!r}")
+    job_id = data.get("job_id")
+    if not valid_job_id(job_id):
+        errors.append(f"job_id {job_id!r} does not match {JOB_ID_RE.pattern}")
+    elif Path(path).name != f"{job_id}.json":
+        errors.append(f"job_id {job_id!r} differs from the file name {Path(path).name!r}")
+    root = data.get("title_root")
+    if not isinstance(root, str) or not TITLE_ROOT_RE.fullmatch(root):
+        errors.append(f"title_root {root!r} is not a title under production/audiovisual/")
+    run_id = data.get("pending_run_id")
+    if not isinstance(run_id, str) or not isinstance(job_id, str) \
+            or run_id.rpartition("#")[0] != job_id or budget.Ledger.run_number(run_id) < 1:
+        errors.append(f"pending_run_id {run_id!r} is not a run of {job_id!r}")
+    try:
+        budget._check_units(data.get("colab_units"))
+    except ValueError as e:
+        errors.append(f"colab_units: {e}")
+    prefix = data.get("r2_prefix")
+    if not isinstance(prefix, str) or not prefix.startswith("gpu-jobs/") or not prefix.endswith("/") \
+            or ".." in prefix.split("/"):
+        errors.append(f"r2_prefix {prefix!r} is not under gpu-jobs/")
+    return errors
+
+
+def locate(data, workspace):
+    """(title root, ledger) of a request in the workflow checkout, or ValueError."""
+    workspace = Path(workspace).resolve()
+    root_rel = data.get("title_root") if isinstance(data, dict) else None
+    if not isinstance(root_rel, str) or not TITLE_ROOT_RE.fullmatch(root_rel):
+        raise ValueError(f"title_root {root_rel!r} is not a title under production/audiovisual/")
+    root = workspace / root_rel
+    record = json.loads((root / "record.json").read_text(encoding="utf-8"))
+    pinned = record.get("ledger") if isinstance(record, dict) else None
+    if not isinstance(pinned, str) or PurePosixPath(pinned).is_absolute() or Path(pinned).is_absolute():
+        raise ValueError(f"{root}/record.json pins no relative ledger")
+    ledger = (root / pinned).resolve()
+    if workspace not in ledger.parents:
+        raise ValueError(f"the ledger {ledger} is outside the checkout")
+    return root, ledger
+
+
+def refuse(path, ledger, reason) -> dict:
+    """Refuse a request before Modal was contacted: release its pending row, restore the job's CU
+    reservation if it never reached Modal (budget.Ledger.undo_move_to_modal), mark it refused."""
+    req = read_request(path)
+    if req.get("pending_run_id"):
+        try:
+            ledger.release_pending_modal(req["pending_run_id"])
+        except (KeyError, ValueError):
+            pass  # already released, or no longer pending: it then stays as it is
+    ledger.undo_move_to_modal(req["job_id"])
+    req.update(status=REFUSED, error=reason, finished_at=now())
+    write_request(path, req)
+    return req
+
+
+def refuse_unstarted(path, workspace, reason) -> dict:
+    """The workflow, after every step before the upload: a request still open whose run never
+    recorded modal_contacted_at is refused (row released, reservation restored). An invalid request
+    is refused too; its ledger is touched only when it can be located. Returns
+    {"refused": bool, "why", "root", "ledger"} (root/ledger None when not located)."""
+    path = Path(path)
+    out = {"refused": False, "why": "", "root": None, "ledger": None}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        out["why"] = f"unreadable request: {e}"
+        return out
+    if not isinstance(data, dict) or data.get("status") not in OPEN:
+        out["why"] = f"not open ({data.get('status') if isinstance(data, dict) else 'not an object'})"
+        return out
+    if data.get("modal_contacted_at"):
+        out["why"] = f"Modal was contacted at {data['modal_contacted_at']}"
+        return out
+    errors = validate(data, path)
+    try:
+        root, ledger_path = locate(data, workspace)
+    except (OSError, ValueError) as e:
+        root = ledger_path = None
+        errors.append(f"cannot locate the ledger: {e}")
+    if not errors:
+        refuse(path, budget.Ledger(ledger_path), reason)
+    else:
+        reason = f"{reason}; invalid request: {'; '.join(errors)}"
+        if ledger_path is not None and valid_job_id(data.get("job_id")):
+            ledger = budget.Ledger(ledger_path)
+            run_id = data.get("pending_run_id")
+            if isinstance(run_id, str) and run_id.rpartition("#")[0] == data["job_id"]:
+                try:
+                    ledger.release_pending_modal(run_id)
+                except (KeyError, ValueError):
+                    pass
+            ledger.undo_move_to_modal(data["job_id"])
+        else:
+            ledger_path = None
+            reason += " (the ledger was not touched: settle any pending row with modal-settle)"
+        data.update(status=REFUSED, error=reason, finished_at=now())
+        write_request(path, data)
+    out.update(refused=True, why=reason, root=str(root) if root else None,
+               ledger=str(ledger_path) if ledger_path else None)
+    return out
+
+
+def check(path, workspace) -> dict:
+    """The workflow's mark-running step: {"status", "errors", "root", "ledger"} of a request."""
+    path = Path(path)
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        return {"status": None, "errors": [f"unreadable request: {e}"], "root": None, "ledger": None}
+    errors = validate(data, path)
+    root = ledger = None
+    try:
+        root, ledger = locate(data, workspace)
+    except (OSError, ValueError) as e:
+        errors.append(f"cannot locate the ledger: {e}")
+    return {"status": data.get("status") if isinstance(data, dict) else None, "errors": errors,
+            "root": str(root) if root else None, "ledger": str(ledger) if ledger else None}
 
 
 # ---------------------------------------------------------------- R2 over the Cloudflare API
@@ -290,3 +447,26 @@ def fetch_folder(prefix, files, dest, opener, token=None) -> Path:
         if tmp.exists():
             shutil.rmtree(tmp, ignore_errors=True)
     return dest
+
+
+# ---------------------------------------------------------------- workflow entry point (stdlib only)
+def main(argv=None) -> int:
+    p = argparse.ArgumentParser(prog="python3 -m eav.modal_requests")
+    sub = p.add_subparsers(dest="command", required=True)
+    for name in ("check", "refuse-unstarted"):
+        s = sub.add_parser(name)
+        s.add_argument("request")
+        s.add_argument("--workspace", required=True)
+        if name == "refuse-unstarted":
+            s.add_argument("--reason", required=True)
+    args = p.parse_args(argv)
+    if args.command == "check":
+        result = check(args.request, args.workspace)
+    else:
+        result = refuse_unstarted(args.request, args.workspace, args.reason)
+    print(json.dumps(result, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

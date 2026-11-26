@@ -142,19 +142,35 @@ Modal is capped in dollars only, owner decision of 26 November 2026: **$30.00 pe
 month** across titles and **$6.00 per title over the title's whole life** (`MODAL_TITLE_CAP_USD`,
 the dollar value of the 60 CU title cap at $0.10/CU; keyed like the CU title cap, by `edition_id`).
 The 100 CU month and 60 CU title caps apply to Colab work only. The ledger keeps one append-only `modal_spend` record per month with rows
-`{job_id, usd, seconds, at, status}` (status `ok`, `failed` or `hard_stopped`); older ledgers
-without it load as empty.
+`{run_id, job_id, usd, seconds, at, status}` (status `pending`, `ok`, `failed`, `hard_stopped` or
+`settled`; a row reconciled from the bill also has `billed: true` and `estimated_usd`); older
+ledgers without it load as empty. A `run_id` is `<job_id>#<n>` and is never reused: n is one more
+than the highest n ever issued for the job, including rows released since (the job's ledger entry
+keeps `modal_runs_issued`).
+
+**The figures are estimates, reconciled from the bill.** Every Modal amount the ledger writes is
+wall seconds x `L4_USD_PER_S` ($0.000222) x `MODAL_OVERHEAD_FACTOR` (1.25, which covers the CPU and
+memory surcharges and the image build that the GPU rate leaves out), for the worst case and for the
+recorded spend alike. After each run, read the billed amount from the Modal usage page and run
+`eav modal-settle <job_id> --root <dir> --usd <billed> [--run <run_id>]`: it replaces the job's
+pending row(s), else its one finished row still holding an estimate, or the row `--run` names
+(pending or finished). The row keeps its first estimate as `estimated_usd` and records
+`billed: true`; the caps always read the rows. Because the ledger is an estimate, it is not a hard
+dollar stop: **the owner sets the Modal workspace spend limit to $30 a month or less when adding the
+payment method, before any request is made or re-made.** That limit is the hard backstop; until it
+is set, hold every Modal request.
 
 - Before contacting Modal, `modal-run` forecasts the worst case the function timeout allows,
-  `(DEADLINE_SECONDS + 900) x L4_USD_PER_S`, and refuses (exit 3, naming spent, forecast and
+  `(DEADLINE_SECONDS + 900) x L4_USD_PER_S x MODAL_OVERHEAD_FACTOR`, and refuses (exit 3, naming spent, forecast and
   remaining) if the month's spend plus that exceeds $30.00, or the title's lifetime Modal spend
   (every month, pending rows included) plus that exceeds $6.00. Hold and ask the owner; never run
   past either.
 - Before Modal is contacted a provisional row (`status: pending`) at the worst-case usd is appended; it
-  counts toward the cap and the job's sum. When the run returns it is replaced in place by the actual
-  spend (ok, failed or hard_stopped), before the result is printed. If the process dies (Ctrl-C, kill, an
-  error after the paid run) the row stays pending at the worst case: replace it with the billed amount from
-  the Modal dashboard via `eav modal-settle <job_id> --root <dir> --usd <billed>` (status `settled`).
+  counts toward the cap and the job's sum. When the run returns it is replaced in place by the
+  estimated spend (ok, failed or hard_stopped), before the result is printed; reconcile it from the
+  bill as above. If the process dies (Ctrl-C, kill, an error after the paid run) the row stays pending
+  at the worst case: replace it with the billed amount via `eav modal-settle <job_id> --root <dir>
+  --usd <billed>` (status `settled`). `import` and `close` refuse while the job has a pending row.
 - A job is reserved in CU at build time (it may run on either runner). `modal-run` requires
   `--colab-units <CU>` (>= 0): the CU Colab already showed for this job, 0 if it never ran there.
   When it moves to Modal (after the caps pass, before Modal is contacted) the ledger entry records
@@ -162,7 +178,10 @@ without it load as empty.
   units become `colab_units`, which stay counted against the Colab CU caps, and the rest of the
   reservation is released. From then on the Modal portion is governed by the Modal dollar caps. A
   later `modal-run` of the same job passes the cumulative Colab CU again: it may grow (a Colab
-  session in between), never shrink (refused).
+  session in between), never shrink (refused). `--colab-units` above the job's CU reservation is
+  refused: ask the owner if Colab showed more. A request refused before Modal was contacted undoes
+  the move when the job has no non-pending Modal row: the reservation is restored and the job is a
+  Colab job again (Colab cap checks and `supersede` work as before the request).
 - `import` and `close` of a job with any Modal spend row (or moved to Modal) settle both portions:
   its Modal rows, recording `usd` (the sum of every session) and `cu_equivalent` (usd / 0.10,
   information only, not counted against any CU cap), and its Colab CU against the CU caps: the
@@ -191,44 +210,64 @@ back through the private Cloudflare R2 bucket `reo-earnalism-maison-private`. Th
    `pending` row exactly as `modal-run` would, so the caps hold while the remote run is in flight.
    Then it writes `production/audiovisual/modal-requests/<job_id>.json` (schema
    `earnalism.modal-request.v1`: `job_id`, `title_root`, `requested_at`, `status: requested`,
-   `colab_units`, `pending_run_id`, `worst_case_usd`, `r2_prefix`). It refuses while a request
+   `colab_units`, `pending_run_id`, `worst_case_usd`, `r2_prefix` =
+   `gpu-jobs/<slug>/<job_id>/run-<n>/`, one prefix per run). The job id must match
+   `^[a-z0-9][a-z0-9.-]*$` and the title root must be under `production/audiovisual/`. It refuses while a request
    for the job is `requested` or `running`, and a local `modal-run` of that job is refused too. It
    never commits: root commits the request with the ledger and pushes to
    `claude/wonderful-bardeen-s9k90x`.
 2. **Workflow** (`.github/workflows/modal-jobs.yml`, triggered only by a pushed
-   `modal-requests/*.json`; one request at a time, each a matrix job of at most 300 min). Actions
-   are pinned to commit SHAs and the client to `modal==1.6.4`, installed in a step without secrets;
-   each later step gets only the secrets it needs. Per `requested` file:
-   - mark it `running` and push (no secrets);
-   - `eav r2-probe` (R2 token only): PUT, list, GET and DELETE a probe object under
-     `gpu-jobs/<slug>/<job_id>/_probe/`. If that fails, the request becomes `refused`, its pending
-     row is released and Modal is never contacted;
+   `modal-requests/*.json`; one request at a time, each its own matrix job with its own 300-minute
+   timeout). Actions are pinned to commit SHAs and the client to `modal==1.6.4`, installed in a step
+   without secrets; the checkouts keep no token (`persist-credentials: false`), only the steps that
+   push get the GitHub token, and each other step gets only the secrets it needs. Per `requested`
+   file:
+   - check it (`python3 -m eav.modal_requests check`: schema, status, job id pattern and file
+     name, title root under `production/audiovisual/`, pending run id, `colab_units`, `r2_prefix`),
+     then mark it `running` and push. An invalid request is refused (below), never left to block
+     the queue;
+   - `eav r2-probe` (R2 token only): PUT, list, GET and DELETE a probe object under the request's
+     prefix + `_probe/`. If that fails, the request becomes `refused`, its pending row is released,
+     the CU reservation restored, and Modal is never contacted;
    - `modal-run <job_id> --root <title_root> --request` (Modal tokens only): reuses the request's
      pending row and `--colab-units`, but re-checks both caps first for the **current** UTC month
-     (the row moves there) and the title. Over either cap: `refused`, row released, exit 3, nothing
-     contacted. Otherwise the row is replaced with the actual spend in a `finally`;
-   - `eav r2-upload` (R2 token only): puts every file of the downloaded job folder under
-     `gpu-jobs/<slug>/<job_id>/`, reads each one back to compare its sha256, and finishes the
-     request as `done`, `failed` or `hard_stopped` with `seconds`, `usd`, `r2_prefix` and `files`
-     (`path`, `sha256`, `bytes`). A copy of the finished request goes to
-     `gpu-jobs/<slug>/<job_id>/_request-result.json`;
-   - push the request and the ledger back (no secrets, `.github/scripts/modal-publish.sh`). A
-     conflicting rebase is aborted; on the fresh branch head `eav modal-replay` re-applies the
+     (the row moves there) and the title. Over either cap: `refused`, row released, reservation
+     restored, exit 3, nothing contacted. Immediately before contacting Modal it writes
+     `modal_contacted_at` into the request. The row is replaced with the estimated spend in a
+     `finally`. In the container the volume is committed at the hard stop and at the end;
+   - refuse if Modal was never contacted (an `always()` step, stdlib only, so it also works when the
+     install failed: `python3 -m eav.modal_requests refuse-unstarted`): a request still open
+     without `modal_contacted_at` (install, check, mark, probe or `modal-run` failed or was
+     cancelled before contact) becomes `refused`, its pending row released and the reservation
+     restored, and is pushed;
+   - `eav r2-upload` (R2 token only): puts every file of the downloaded job folder under the
+     request's prefix, reads each one back to compare its sha256, and finishes the request as
+     `done`, `failed` or `hard_stopped` with `seconds`, `usd`, `r2_prefix` and `files` (`path`,
+     `sha256`, `bytes`). A copy of the finished request goes to `<prefix>_request-result.json`;
+   - push the request and the ledger back (only the push token, `.github/scripts/modal-publish.sh`).
+     A conflicting rebase is aborted; on the fresh branch head `eav modal-replay` re-applies the
      request file and this job's ledger entry, and makes the job's rows exactly the saved ones (a
-     released row stays released); other jobs' rows are kept. Then it retries.
-     If every attempt fails, the result is pushed to `modal-results/<job_id>`.
+     released row stays released); other jobs' rows are kept. Then it retries; a failed fetch,
+     rebase or replay is retried too, never ends the script early. If every attempt fails, this
+     run's commit is pushed to `modal-results/<job_id>` (`-run-<GitHub run id>` appended if that
+     branch exists).
 
-   The Modal workspace spend limit is the backstop.
+   The hard backstop is the Modal workspace spend limit, set by the owner to $30 a month or less
+   when the payment method is added, before any request is made or re-made.
 3. **Fetch** (in the session, after pulling the branch): `eav modal-fetch <job_id> --root <title
-   root> [--into <dir>]` lists and downloads every object under the prefix through
+   root> [--into <dir>]` lists and downloads every object under the request's prefix through
    api.cloudflare.com (the session proxy supplies the credential), refuses a missing, extra or
    mismatched file with nothing written, and lands the folder in `<root>/.downloads/<job_id>/`
    (git-ignored). If the branch request is still `running` (the push-back failed), it reads the
-   R2 copy `_request-result.json` instead and says to merge `modal-results/<job_id>` for the
-   ledger. A `refused` request has nothing to fetch. It never imports.
+   R2 copy `_request-result.json` under that request's prefix (only if it carries the same
+   `pending_run_id`) and says to merge the fallback branch for the ledger. A `refused` request has
+   nothing to fetch. It never imports.
 4. **Import** as usual: `eav import <job_id> --root <title root> --from <that folder>`; the Modal
    portion settles from the Modal rows.
 
-A request left `running` (the runner died or hit its timeout) keeps its pending worst-case row:
-read the billed amount from the Modal dashboard, `modal-settle` it, and hold for the owner before a
-new request.
+A request left `running` (the runner died or hit its timeout and the refusal step could not
+push) keeps its pending worst-case row. If the request has no `modal_contacted_at`, Modal was never
+reached: `eav modal-request <job_id> --root <dir> --abandon --reason "..."` refuses it, releases the
+row and restores the reservation (it refuses when `modal_contacted_at` is set). Otherwise read the
+billed amount from the Modal dashboard, `modal-settle` it, and hold for the owner before a new
+request. Never edit a request file by hand.

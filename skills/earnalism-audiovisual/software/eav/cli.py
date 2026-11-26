@@ -22,10 +22,16 @@
                           then production/audiovisual/modal-requests/<job_id>.json for the modal-jobs workflow,
                           which runs `r2-probe`, `modal-run --request` (caps re-checked for the run month) and
                           `r2-upload` (`modal-replay` re-applies a result after a push conflict); root commits
-                          and pushes the request)
+                          and pushes the request. A request refused before Modal was contacted releases its
+                          row and restores the job's CU reservation)
+  python3 -m eav.cli modal-request <job_id> --root <dir> --abandon --reason "<why>"
+                         (a `running` request whose run never reached Modal (no modal_contacted_at): refused,
+                          its pending row released and the CU reservation restored)
   python3 -m eav.cli modal-fetch <job_id> --root <dir> [--into <dir>]
                          (a finished request: download its job folder from private R2, sha256-verified; never imports)
-  python3 -m eav.cli modal-settle <job_id> --root <dir> --usd <billed>   (replace an interrupted run's pending worst-case row)
+  python3 -m eav.cli modal-settle <job_id> --root <dir> --usd <billed> [--run <run_id>]
+                         (reconcile from the Modal bill: the job's pending row(s), else its one unbilled finished
+                          row, or the named run; the row records billed: true and keeps estimated_usd)
   python3 -m eav.cli supersede <job_id> --root <dir> --reason "<why it never ran>" [--group]
                          (a chunk only with --group: every never-run chunk of its group together)
   python3 -m eav.cli close <job_id> --root <dir> [--units <CU Colab shows>] --reason "<what happened>"
@@ -903,6 +909,17 @@ def _modal_units(ledger, job_id, given):
     return round(ledger.colab_units_before_modal(job_id) + after, 6)
 
 
+def _no_pending_modal(rec, ledger, job_id, what):
+    """import and close settle the job from its Modal rows: never while one still holds a
+    pending worst case (a run in flight, or one that died before recording its spend)."""
+    pending = ledger.pending_modal_runs(job_id)
+    if pending:
+        raise Stop(f"job {job_id} has a pending Modal row ({', '.join(r['run_id'] for r in pending)}); "
+                   f"it is not {what} while a run may be in flight or unsettled",
+                   f"Wait for the request's result, or reconcile it from the Modal bill: {PROG} "
+                   f"modal-settle {job_id} --root {rec.root} --usd <billed>; then rerun")
+
+
 def _settled_as(ledger, job_id, units) -> str:
     if ledger.is_modal_job(job_id):
         return (f"settled from its Modal rows at {ledger.modal_job_usd(job_id)[0]:.4f} USD plus "
@@ -924,6 +941,7 @@ def cmd_import(args):
     if job["kind"] == "reel_clips":
         extra = {"archive": Path(args.source), "archive_sha256": args.archive_sha256}
     ledger = _ledger(rec, args)
+    _no_pending_modal(rec, ledger, args.job_id, "imported")
     units = _modal_units(ledger, args.job_id, args.units)
     try:
         arts = importer.import_job(rec, {k: job[k] for k in ("job_id", "kind", "notebook",
@@ -987,14 +1005,14 @@ def _move_to_modal(rec, ledger, job_id, colab_units, now):
 
 
 def _reserve_modal(args, rec, job, colab_units):
-    """Both Modal dollar caps against the worst case (deadline + timeout margin at the L4 rate,
-    pending rows counted), the move to Modal, then the provisional worst-case pending row. The row
+    """Both Modal dollar caps against the worst case (deadline + timeout margin at the L4 rate x
+    MODAL_OVERHEAD_FACTOR, pending rows counted), the move to Modal, then the provisional worst-case pending row. The row
     counts against the caps until the actual spend replaces it; if the process dies (Ctrl-C, kill,
     an error after the paid run) it stays pending until `modal-settle`. Returns
     (ledger, run_id, worst_usd)."""
     ledger, month = _ledger(rec, args), _month()
     plan = modal_run.plan(job["notebook"], job["inputs_zip"])
-    worst = plan["timeout_seconds"] * modal_run.L4_USD_PER_S  # deadline + the timeout margin
+    worst = modal_run.modal_cost(plan["timeout_seconds"])  # deadline + margin, x overhead factor
     try:
         ledger.check_modal(month, rec.data["title_slug"], worst, rec.data["source"].get("edition_id"))
     except budget.BudgetExceeded as e:
@@ -1034,9 +1052,9 @@ def _requested_run(args, rec, req_path):
         ledger.check_modal(month, rec.data["title_slug"], row["usd"],
                            rec.data["source"].get("edition_id"), exclude_run_id=run_id)
     except budget.BudgetExceeded as e:
-        _refuse_request(ledger, req_path, run_id, f"Budget exceeded at run time: {e}")
-        raise Stop(f"Budget exceeded: {e}. The request is refused, its pending row released; Modal "
-                   "was not contacted.", "Hold the job and ask the owner; never run past the Modal cap.",
+        _refuse_request(ledger, req_path, f"Budget exceeded at run time: {e}")
+        raise Stop(f"Budget exceeded: {e}. The request is refused, its pending row released and the "
+                   "job's CU reservation restored; Modal was not contacted.", "Hold the job and ask the owner; never run past the Modal cap.",
                    code=3)
     if not any(r["run_id"] == run_id for r in ledger.modal_rows(month=month)):
         ledger.move_modal_row(run_id, month)
@@ -1045,16 +1063,10 @@ def _requested_run(args, rec, req_path):
     return ledger, run_id, colab_units
 
 
-def _refuse_request(ledger, req_path, run_id, reason):
-    """Before Modal is contacted: release the request's pending row and mark it refused."""
-    try:
-        ledger.release_pending_modal(run_id)
-    except (KeyError, ValueError):
-        pass  # already released, or no longer pending: it then stays as it is
-    req = modal_requests.read_request(req_path)
-    req.update(status=modal_requests.REFUSED, error=reason,
-               finished_at=datetime.now(timezone.utc).isoformat(timespec="seconds"))
-    modal_requests.write_request(req_path, req)
+def _refuse_request(ledger, req_path, reason):
+    """Before Modal is contacted: release the request's pending row, restore the job's CU
+    reservation if it never reached Modal, and mark the request refused."""
+    modal_requests.refuse(req_path, ledger, reason)
 
 
 def cmd_modal_run(args):
@@ -1081,9 +1093,15 @@ def cmd_modal_run(args):
         colab_units = _colab_units(args, "modal-run")
         ledger, run_id, _ = _reserve_modal(args, rec, job, colab_units)
     download = Path(args.download) if args.download else rec.root / "modal-downloads"
+    contact = None
+    if args.request:
+        def contact():  # written immediately before Modal is contacted (the workflow reads it)
+            req = modal_requests.read_request(req_path)
+            req["modal_contacted_at"] = modal_requests.now()
+            modal_requests.write_request(req_path, req)
     result = None
     try:
-        result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download)
+        result = modal_run.run_modal(job["notebook"], job["inputs_zip"], download, on_contact=contact)
     finally:
         if result is not None:
             ledger.finish_modal_spend(run_id, result["usd"], result["seconds"], result["status"])
@@ -1111,8 +1129,16 @@ def cmd_modal_request(args):
     """Queue a Modal run for the modal-jobs GitHub Actions workflow: every modal-run check, the
     move to Modal and the worst-case pending row exactly as modal-run writes them (so the caps hold
     while the remote run is in flight), then production/audiovisual/modal-requests/<job_id>.json.
-    Nothing here contacts Modal or commits: root commits the request with the ledger and pushes."""
+    Nothing here contacts Modal or commits: root commits the request with the ledger and pushes.
+    --abandon: see _abandon_request."""
+    if args.abandon:
+        return _abandon_request(args)
+    if args.reason is not None:
+        raise Stop("--reason goes with --abandon only", f"Drop --reason, or add --abandon")
     rec = _record(args.root)
+    if not modal_requests.valid_job_id(args.job_id):
+        raise Stop(f"job id {args.job_id!r} does not match {modal_requests.JOB_ID_RE.pattern}; the "
+                   "workflow refuses such a request", f"{PROG} status --root {rec.root}")
     job = _modal_job(rec, args.job_id)
     path = modal_requests.request_path(rec.root, args.job_id)
     if path.is_file():
@@ -1126,18 +1152,60 @@ def cmd_modal_request(args):
         title_root = rec.root.resolve().relative_to(modal_requests.repo_root(rec.root)).as_posix()
     except ValueError as e:
         raise Stop(str(e), "Run modal-request on a title root inside the repository checkout")
+    if not modal_requests.TITLE_ROOT_RE.fullmatch(title_root):
+        raise Stop(f"title root {title_root} is not under production/audiovisual/; the workflow "
+                   "refuses such a request and nothing was written",
+                   "Run modal-request on a title root under production/audiovisual/")
     ledger, run_id, worst = _reserve_modal(args, rec, job, colab_units)
     modal_requests.write_request(path, {
         "schema": modal_requests.SCHEMA, "job_id": args.job_id, "title_root": title_root,
         "requested_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "status": "requested", "colab_units": colab_units, "pending_run_id": run_id,
         "worst_case_usd": round(worst, 6),
-        "r2_prefix": modal_requests.r2_prefix(rec.data["title_slug"], args.job_id)})
+        "r2_prefix": modal_requests.r2_prefix(rec.data["title_slug"], args.job_id, run_id)})
     print(f"Modal request written: {path} (worst case {worst:.4f} USD pending on the ledger as "
           f"{run_id}; {colab_units:g} CU of Colab work kept on the Colab caps). Modal was not "
           "contacted.")
     print(f"Then: commit {path} with the ledger {ledger.path} and push to {modal_requests.BRANCH}; "
           f"the modal-jobs workflow runs it; then {PROG} modal-fetch {args.job_id} --root {rec.root}")
+
+
+def _abandon_request(args):
+    """modal-request --abandon: a `running` request whose run is known not to have reached Modal
+    (the runner died before the Modal step, or was cancelled) is refused: its pending row released,
+    the job's CU reservation restored. Refused when modal_contacted_at is set (Modal may have
+    billed: wait for the result, or reconcile with modal-settle)."""
+    rec = _record(args.root)
+    if args.colab_units is not None:
+        raise Stop("--colab-units does not go with --abandon", "Drop --colab-units")
+    if not modal_requests.valid_job_id(args.job_id):
+        raise Stop(f"job id {args.job_id!r} does not match {modal_requests.JOB_ID_RE.pattern}",
+                   f"{PROG} status --root {rec.root}")
+    if not (args.reason or "").strip():
+        raise Stop("--abandon needs --reason", f"{PROG} modal-request {args.job_id} --root {rec.root} "
+                   "--abandon --reason \"<why it never reached Modal>\"")
+    path = modal_requests.request_path(rec.root, args.job_id)
+    if not path.is_file():
+        raise Stop(f"no request file {path}", f"{PROG} status --root {rec.root}")
+    req = modal_requests.read_request(path)
+    if req["job_id"] != args.job_id or req["status"] != "running":
+        raise Stop(f"request {path} is {req['status']}; only a running request is abandoned",
+                   f"{PROG} status --root {rec.root}")
+    if req.get("modal_contacted_at"):
+        raise Stop(f"request {args.job_id} contacted Modal at {req['modal_contacted_at']}; it may have "
+                   "been billed and is never abandoned",
+                   f"Wait for the workflow's result, or reconcile from the Modal bill: {PROG} "
+                   f"modal-settle {args.job_id} --root {rec.root} --usd <billed>")
+    ledger = _ledger(rec, args)
+    _refuse_request(ledger, path, f"abandoned: {args.reason.strip()}")
+    print(f"Request {args.job_id} abandoned (refused): its pending row {req.get('pending_run_id')} "
+          "was released and the job's CU reservation restored. Modal was never contacted.")
+    print(f"Then: commit {path} with the ledger {ledger.path} and push")
+
+
+def _req_prefix(rec, req) -> str:
+    """The request's own R2 prefix (older requests: the job prefix they recorded)."""
+    return req.get("r2_prefix") or modal_requests.r2_prefix(rec.data["title_slug"], req["job_id"])
 
 
 def cmd_r2_upload(args):
@@ -1151,7 +1219,7 @@ def cmd_r2_upload(args):
         raise Stop(f"request {path} is already {req['status']}",
                    f"{PROG} modal-fetch {args.job_id} --root {rec.root}")
     run = req.get("run") or {}
-    prefix = modal_requests.r2_prefix(rec.data["title_slug"], args.job_id)
+    prefix = _req_prefix(rec, req)
     status = modal_requests.RUN_TO_REQUEST.get(run.get("status"), "failed")
     error = run.get("error") if run else "modal-run recorded no result"
     files, upload_error = [], None
@@ -1187,14 +1255,14 @@ def cmd_r2_probe(args):
     if req["status"] not in modal_requests.OPEN:
         raise Stop(f"request {path} is {req['status']}; only an open request is probed",
                    f"{PROG} status --root {rec.root}")
-    prefix = modal_requests.r2_prefix(rec.data["title_slug"], args.job_id)
+    prefix = _req_prefix(rec, req)
     try:
         key = modal_requests.probe(prefix, modal_requests.default_opener(),
                                    os.environ.get(modal_requests.TOKEN_ENV) or None)
     except modal_requests.R2Error as e:
-        _refuse_request(_ledger(rec, args), path, req["pending_run_id"], f"R2 probe failed: {e}")
-        raise Stop(f"R2 probe failed: {e}. The request is refused, its pending row released; Modal "
-                   "was not contacted.", "Fix the R2 token or API access, then modal-request again")
+        _refuse_request(_ledger(rec, args), path, f"R2 probe failed: {e}")
+        raise Stop(f"R2 probe failed: {e}. The request is refused, its pending row released and the "
+                   "job's CU reservation restored; Modal was not contacted.", "Fix the R2 token or API access, then modal-request again")
     print(f"R2 probe ok: put, listed, read back and deleted r2://{modal_requests.R2_BUCKET}/{key}")
 
 
@@ -1215,21 +1283,23 @@ def cmd_modal_replay(args):
 
 
 def _fetchable_request(rec, args, path):
-    """The branch request; if it is missing or still open (the workflow could not push it back),
-    the finished copy the workflow uploaded to R2 as _request-result.json."""
-    req = modal_requests.read_request(path) if path.is_file() else None
-    if req is not None and req["status"] not in modal_requests.OPEN:
+    """The branch request; if it is still open (the workflow could not push it back), the finished
+    copy of this same request (same pending_run_id) that the workflow uploaded to the request's R2
+    prefix as _request-result.json."""
+    if not path.is_file():
+        raise Stop(f"no request file {path}", f"Pull {modal_requests.BRANCH}; {PROG} status --root {rec.root}")
+    req = modal_requests.read_request(path)
+    if req["status"] not in modal_requests.OPEN:
         return req, False
-    prefix = modal_requests.r2_prefix(rec.data["title_slug"], args.job_id)
     try:
-        copy = modal_requests.get_result(prefix, modal_requests.default_opener())
+        copy = modal_requests.get_result(_req_prefix(rec, req), modal_requests.default_opener())
     except modal_requests.R2Error as e:
         raise Stop(f"the R2 copy of request {args.job_id} is unreadable: {e}",
                    f"Pull {modal_requests.BRANCH} and rerun")
-    if copy is not None and copy.get("job_id") == args.job_id and copy["status"] not in modal_requests.OPEN:
+    if copy is not None and copy.get("job_id") == args.job_id \
+            and copy.get("pending_run_id") == req.get("pending_run_id") \
+            and copy["status"] not in modal_requests.OPEN:
         return copy, True
-    if req is None:
-        raise Stop(f"no request file {path}", f"{PROG} status --root {rec.root}")
     raise Stop(f"request {args.job_id} is {req['status']}; the workflow has not finished it",
                f"Pull {modal_requests.BRANCH} and rerun once the request is done")
 
@@ -1242,8 +1312,9 @@ def cmd_modal_fetch(args):
     req, from_r2 = _fetchable_request(rec, args, path)
     if from_r2:
         print(f"The branch request is stale; using the R2 copy ({req['status']}). Merge "
-              f"{modal_requests.FALLBACK_BRANCH.format(job_id=args.job_id)} (the request and the "
-              "ledger rows of this run) before import.")
+              f"{modal_requests.FALLBACK_BRANCH.format(job_id=args.job_id)} (or its -run-<id> "
+              "variant named in the workflow log: the request and the ledger rows of this run) "
+              "before import.")
     if req["status"] == modal_requests.REFUSED:
         raise Stop(f"request {args.job_id} was refused before Modal was contacted: {req.get('error')}",
                    f"Hold for the owner; then {PROG} modal-request {args.job_id} --root {rec.root} ...")
@@ -1259,7 +1330,7 @@ def cmd_modal_fetch(args):
         if not (downloads / ".gitignore").is_file():  # the outputs are never committed
             (downloads / ".gitignore").write_text("*\n", encoding="utf-8")
         dest = downloads / args.job_id
-    prefix = modal_requests.r2_prefix(rec.data["title_slug"], args.job_id)
+    prefix = _req_prefix(rec, req)
     try:
         modal_requests.fetch_folder(prefix, req["files"], dest, modal_requests.default_opener())
     except modal_requests.R2Error as e:
@@ -1272,18 +1343,23 @@ def cmd_modal_fetch(args):
 
 
 def cmd_modal_settle(args):
-    """Replace a job's pending (interrupted) Modal row with the amount the Modal dashboard billed."""
+    """Reconcile a job's Modal row(s) with the amount the Modal dashboard billed: its pending
+    (interrupted) rows, else its one finished row still holding the estimate, or the row --run
+    names (pending or finished). The row records billed: true and keeps estimated_usd; the caps
+    read the rows."""
     rec = _record(args.root)
     ledger = _ledger(rec, args)
     try:
         budget._check_units(args.usd)
-        n = ledger.settle_pending_modal(args.job_id, args.usd)
+        changed = ledger.bill_modal_run(args.job_id, args.usd, args.run)
     except ValueError as e:
-        raise Stop(str(e), "Pass --usd as the amount billed, >= 0")
+        raise Stop(str(e), "Pass --usd as the amount billed, >= 0, and --run <run_id> to pick a row")
     except KeyError:
-        raise Stop(f"job {args.job_id} has no pending Modal run on the ledger", f"{PROG} status --root {rec.root}")
-    print(f"Settled {n} pending Modal run(s) of job {args.job_id} at {args.usd:.4f} USD "
-          f"(counts against the Modal dollar caps only).")
+        raise Stop(f"job {args.job_id} has no pending or unbilled Modal run on the ledger",
+                   f"Name the row to correct: {PROG} modal-settle {args.job_id} --root {rec.root} "
+                   "--usd <billed> --run <run_id>")
+    print(f"Reconciled Modal run(s) {', '.join(changed)} of job {args.job_id} at {args.usd:.4f} USD "
+          f"billed (counts against the Modal dollar caps only).")
 
 
 _ENDINGS = {"supersede": ("superseding", "superseded"), "close": ("closing", "closed")}
@@ -1347,6 +1423,8 @@ def _end_job(args, how, job_id=None):
     if not args.reason.strip():
         raise Stop("a reason is required", f"Pass --reason \"<{'why it never ran' if how == 'supersede' else 'what happened'}>\"")
     ledger = _ledger(rec, args)
+    if how == "close":
+        _no_pending_modal(rec, ledger, job_id, "closed")
     if how == "supersede" and ledger.is_modal_job(job_id):
         raise Stop(f"job {job_id} ran on Modal; supersede is for never-run jobs",
                    f"{PROG} close {job_id} --root {rec.root} --reason \"...\" (--units only for "
@@ -1991,7 +2069,10 @@ def _parser():
     s = add("modal-request")
     s.add_argument("job_id")
     s.add_argument("--colab-units", type=float, help="required: as on modal-run, the CU Colab already "
-                   "showed for this job (0 if it never ran there)")
+                   "showed for this job (0 if it never ran there); at most its CU reservation")
+    s.add_argument("--abandon", action="store_true", help="refuse a running request that never "
+                   "reached Modal (no modal_contacted_at): release its row, restore the reservation")
+    s.add_argument("--reason", help="with --abandon: why the run never reached Modal")
     s = add("r2-upload")
     s.add_argument("job_id")
     s.add_argument("--from", dest="source", required=True, help="the downloaded job folder")
@@ -2006,6 +2087,7 @@ def _parser():
     s = add("modal-settle")
     s.add_argument("job_id")
     s.add_argument("--usd", type=float, required=True, help="the amount the Modal dashboard billed")
+    s.add_argument("--run", help="the run_id of the row to reconcile (a pending or finished row)")
     s = add("supersede")
     s.add_argument("job_id")
     s.add_argument("--reason", required=True)

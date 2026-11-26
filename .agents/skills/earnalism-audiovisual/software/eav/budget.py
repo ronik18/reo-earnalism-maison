@@ -12,6 +12,11 @@ reservation entry is marked `runner: "modal"`; the CU Colab already used on it (
 released (the original forecast is kept as `reserved_units`). Such a job settles with both
 portions: the Modal rows in USD (`usd`, with `cu_equivalent` kept as information only) and its
 Colab CU (those recorded at the move plus any Colab run after it) against the CU caps.
+A Modal row's `usd` is an estimate (wall seconds x the L4 rate x MODAL_OVERHEAD_FACTOR, see
+modal_run) until `eav modal-settle` replaces it with the amount the Modal dashboard billed
+(`billed: true`, the estimate kept as `estimated_usd`); the caps always read the rows.
+run_ids are `<job_id>#<n>` and are never reused: n is one more than the highest n ever issued for
+the job, counting rows that were released since (the job's entry keeps `modal_runs_issued`).
 The ledger assumes one writer process at a time.
 """
 import json
@@ -173,6 +178,11 @@ class Ledger:
             raise KeyError(job_id)
         if entry["state"] != "reserved":
             raise ValueError(f"job {job_id!r} is already settled; it cannot move to Modal")
+        reserved = entry.get("reserved_units", entry["units"]) if entry.get("runner") == "modal" \
+            else entry["units"]
+        if colab_units > reserved:
+            raise ValueError(f"job {job_id!r} reserved {reserved:g} CU; --colab-units {colab_units:g} "
+                             "cannot exceed the reservation (ask the owner if Colab showed more)")
         if entry.get("runner") == "modal":
             recorded = entry.get("colab_units", 0.0)
             if colab_units < recorded:
@@ -188,6 +198,23 @@ class Ledger:
         self._save(entries)
         return released
 
+    def undo_move_to_modal(self, job_id: str) -> bool:
+        """A request refused before Modal was contacted: if the job has no Modal row other than
+        pending ones (it never reached Modal), restore its CU reservation (units = reserved_units)
+        and drop the move, so the Colab caps and `supersede` treat it as before the request.
+        Returns True if the move was undone; a job that already ran on Modal stays moved."""
+        entries = self._load()
+        entry = next((e for e in entries if e["job_id"] == job_id), None)
+        if entry is None or entry["state"] != "reserved" or entry.get("runner") != "modal":
+            return False
+        if any(r["status"] != "pending" for r in self.modal_rows(job_id=job_id)):
+            return False
+        entry["units"] = entry.pop("reserved_units", entry["units"])
+        for key in ("runner", "colab_units", "moved_to_modal_at"):
+            entry.pop(key, None)
+        self._save(entries)
+        return True
+
     def colab_units_before_modal(self, job_id: str) -> float:
         """The Colab CU recorded when the job moved to Modal (0 if none or not moved)."""
         entry = next((e for e in self._load() if e["job_id"] == job_id), None)
@@ -198,17 +225,33 @@ class Ledger:
         entry = next((e for e in self._load() if e["job_id"] == job_id), None)
         return bool(entry and entry.get("runner") == "modal") or bool(self.modal_rows(job_id=job_id))
 
+    @staticmethod
+    def run_number(run_id) -> int:
+        """n of a run_id `<job_id>#<n>` (0 if it has no numeric suffix)."""
+        n = str(run_id).rpartition("#")[2]
+        return int(n) if n.isdigit() else 0
+
     def record_modal_spend(self, month: str, job_id: str, usd: float, seconds: float,
                            status: str, at: str) -> str:
         """Append one row to the month's modal_spend record. Returns the row's run_id.
-        A "pending" row is a provisional worst-case charge written before Modal is contacted."""
+        A "pending" row is a provisional worst-case charge written before Modal is contacted.
+        The run_id is `<job_id>#<n>`, n = 1 + the highest n ever issued for the job: its rows in
+        every month and the entry's `modal_runs_issued` (which remembers released rows)."""
         if status not in MODAL_STATUSES:
             raise ValueError(f"unknown modal status {status!r}")
         _check_units(usd)
         _check_units(seconds)
         everything = self._raw()
-        n = sum(len(r["rows"]) for r in everything if "modal_spend" in r)
-        run_id = f"{job_id}#{n + 1}"
+        rows = [r for rec in everything if "modal_spend" in rec for r in rec["rows"]]
+        entry = next((e for e in everything if "modal_spend" not in e and e.get("job_id") == job_id),
+                     None)
+        issued = max([self.run_number(r.get("run_id")) for r in rows if r.get("job_id") == job_id]
+                     + [int((entry or {}).get("modal_runs_issued", 0))])
+        run_id = f"{job_id}#{issued + 1}"
+        if any(r.get("run_id") == run_id for r in rows):
+            raise ValueError(f"run_id {run_id} is already on the ledger")
+        if entry is not None:
+            entry["modal_runs_issued"] = issued + 1
         row = {"run_id": run_id, "job_id": job_id, "usd": usd, "seconds": seconds, "at": at,
                "status": status}
         for rec in everything:
@@ -303,6 +346,18 @@ class Ledger:
     def pending_modal_runs(self, job_id: str) -> list:
         return [r for r in self.modal_rows(job_id=job_id) if r["status"] == "pending"]
 
+    def _bill(self, run_id: str, usd: float, status: str) -> None:
+        """Row run_id takes the billed usd (billed: true); its first estimate stays as estimated_usd."""
+        everything = self._raw()
+        for rec in everything:
+            for row in rec.get("rows", ()):
+                if row.get("run_id") == run_id:
+                    row.setdefault("estimated_usd", row["usd"])
+                    row.update(usd=usd, status=status, billed=True)
+                    self._write(everything)
+                    return
+        raise KeyError(run_id)
+
     def settle_pending_modal(self, job_id: str, usd: float) -> int:
         """Replace the job's pending rows with the billed amount: the first takes usd, any others 0
         (usd is the total billed for those runs). Returns how many rows were replaced."""
@@ -311,8 +366,39 @@ class Ledger:
         if not pending:
             raise KeyError(job_id)
         for i, row in enumerate(pending):
-            self.finish_modal_spend(row["run_id"], usd if i == 0 else 0.0, row["seconds"], "settled")
+            self._bill(row["run_id"], usd if i == 0 else 0.0, "settled")
         return len(pending)
+
+    def unbilled_modal_runs(self, job_id: str) -> list:
+        """The job's finished rows still holding an estimate (not pending, not settled, not billed)."""
+        return [r for r in self.modal_rows(job_id=job_id)
+                if r["status"] not in ("pending", "settled") and not r.get("billed")]
+
+    def bill_modal_run(self, job_id: str, usd: float, run_id=None) -> list:
+        """Reconcile from the Modal bill. Without run_id: the job's pending rows (see
+        settle_pending_modal), else its one unbilled finished row. With run_id: that row of the
+        job, pending (it becomes settled) or finished (it keeps its status). The row records
+        billed: true and keeps its estimate as estimated_usd. Returns the run_ids changed.
+        KeyError: nothing to bill; ValueError: ambiguous or not this job's row."""
+        _check_units(usd)
+        rows = self.modal_rows(job_id=job_id)
+        if run_id is None:
+            pending = [r for r in rows if r["status"] == "pending"]
+            if pending:
+                self.settle_pending_modal(job_id, usd)
+                return [r["run_id"] for r in pending]
+            todo = self.unbilled_modal_runs(job_id)
+            if not todo:
+                raise KeyError(job_id)
+            if len(todo) > 1:
+                raise ValueError(f"job {job_id!r} has {len(todo)} unbilled runs "
+                                 f"({', '.join(r['run_id'] for r in todo)}); name one with --run")
+            run_id = todo[0]["run_id"]
+        row = next((r for r in rows if r["run_id"] == run_id), None)
+        if row is None:
+            raise ValueError(f"run {run_id} is not a Modal row of job {job_id!r}")
+        self._bill(run_id, usd, "settled" if row["status"] == "pending" else row["status"])
+        return [run_id]
 
     @staticmethod
     def _mine(e, title, edition_id) -> bool:

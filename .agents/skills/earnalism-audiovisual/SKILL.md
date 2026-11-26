@@ -62,7 +62,7 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 | **Audio format not cleared on Maison** (only Reader read/preview) | Keep producing: film, reels and review need no Maison grant. `bundle-audio` drafts the per-title evidence; the owner completes and approves it; only then `stage`. | Write `publication_clearance` or rights rows by hand, call the draft "cleared", or publish audio before stage + fresh browser report. |
 | **Budget exceeded** (exit 3: Colab forecast over 60 CU per title (keyed by edition) for its whole life, or 100 CU per calendar month; for `modal-run`, worst case over the $30.00 UTC-month or the $6.00 per-title (lifetime) Modal cap) | Stop. Hold for the owner with the forecast, the remaining allowance and the CLI's fit (for `reel_clips`: how many of the batch's shots still fit). Nothing was reserved or run. | Write or edit a spec `compute` block (it is derived and refused if it differs), lower steps/resolution of a prepared job, split a job to slip under the cap, shrink measured rates, edit, reset or swap the ledger pinned at `init`, init a second root for the edition, use another Colab account, raise or work around a Modal cap (month or title), or spend other money. |
 | **Import held** (exit 4: missing, extra or mismatched file, or an `INCOMPLETE` manifest) | Re-download the complete output of that exact job and re-run `import`. A job that is `INCOMPLETE` but only stopped short (hard stop, disconnect) is resumed by re-running it (Colab, or `modal-run --colab-units <CU Colab already showed, 0 if none>`), within its reserved time; a switch of runner is never free: Colab CU already used stay on the CU caps (`modal-run --colab-units`) and Colab work after the move is settled with `--units`. A job that ran but can never be imported (crash, lost download): `close <job_id> --reason "..."` (Colab: `--units <CU Colab shows>`; a job that ran on Modal settles its Modal rows in USD plus its Colab CU: `--units` only for Colab work after the move), then hold for the owner; for a chunk, rebuild only that chunk with `job --replace-chunk <closed chunk id>`. | Rebuild/rerun the whole GPU job or group, copy files in by hand, edit `manifest.json`, or `supersede` a job that ran (supersede is for never-run jobs only; the CLI refuses a job, or a group, with a Modal run). |
-| **Modal run died, failed or hard-stopped** (Ctrl-C, kill, error after the paid run: the ledger row stays `pending` at the worst case) | Read the billed amount from the Modal dashboard and run `modal-settle <job_id> --root <dir> --usd <billed>`; then `import` the output, or re-run to resume, or `close` as above. | Delete or edit the pending row, or assume the run was free. |
+| **Modal run died, failed or hard-stopped** (Ctrl-C, kill, error after the paid run: the ledger row stays `pending` at the worst case; `import` and `close` refuse while it is pending) | Read the billed amount from the Modal dashboard and run `modal-settle <job_id> --root <dir> --usd <billed>`; then `import` the output, or re-run to resume, or `close` as above. A `running` request whose run never reached Modal (no `modal_contacted_at`): `modal-request <job_id> --root <dir> --abandon --reason "..."`. | Delete or edit the pending row, edit a request file, or assume the run was free. |
 | **QC failure** (exit 5: loudness, true peak, loop close, size, hook onset, reel narration that does not fit its length ± 3 s) | Fix only the failing item (one shot, one still, the mix), re-assemble, re-run `qc`. Reel narration that does not fit: rewrite the script's words, `reel N --script`, new reel narration. | Lower a gate, trim narration, or call unheard audio "reviewed". |
 | **Stream video held** | The film goes to owner review and to social destinations the owner names. Maison gets audio only. | Upload video to Maison/Stream; `attach_audiovisual_audio` refuses it anyway. |
 
@@ -85,8 +85,12 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   checks the plan).
   Spend is capped in dollars only (owner decision of 26 Nov 2026): **$30 per UTC month** and
   **$6 per title over its whole life**. The worst case is checked against both before Modal is
-  contacted and recorded first as a `pending` ledger row, replaced by the actual amount afterwards;
-  `modal-settle` replaces it from the billed amount if the run died. The 60 CU title and 100 CU month
+  contacted and recorded first as a `pending` ledger row, replaced afterwards by an estimate (wall
+  seconds x the L4 rate x 1.25 for CPU, memory and image build); after each run, reconcile the row
+  from the Modal usage page with `modal-settle <job_id> --usd <billed> [--run <run_id>]` (also for a
+  run that died). The ledger is an estimate, not a hard dollar stop: **when the owner adds the Modal
+  payment method, the owner also sets the workspace spend limit to $30/month or less, before any
+  request is made or re-made**; until then, hold every request. The 60 CU title and 100 CU month
   caps apply to Colab work only, and count every CU of Colab work, also on a job that changes
   runner. `--colab-units` (required) is the CU Colab already showed for the job, 0 if it never ran
   there: they stay settled against the CU caps and only the rest of the reservation is released (the
@@ -96,8 +100,9 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   When this session cannot reach Modal: `modal-request <job_id> --root <dir> --colab-units <CU>`
   (same checks, move and pending row; writes `production/audiovisual/modal-requests/<job_id>.json`;
   root commits and pushes it) → the `modal-jobs` GitHub Actions workflow probes R2, re-checks both
-  caps for the run's UTC month (a `refused` request releases its pending row; nothing was run), runs
-  `modal-run --request` and uploads the outputs to the private R2 bucket → `modal-fetch <job_id>
+  caps for the run's UTC month (any failure before Modal is contacted ends `refused`: pending row
+  released, CU reservation restored; nothing was run), runs `modal-run --request` and uploads the
+  outputs to the private R2 bucket (one prefix per run) → `modal-fetch <job_id>
   --root <dir>` (sha256 verified, never imports) → `import`. See [compute budget](references/compute-budget.md).
 - **Rates.** Forecasts are per runner kind from measured rates: the first real Modal run of a kind
   sets its rate; until then use the Colab L4 rates. Never lower a forecast.

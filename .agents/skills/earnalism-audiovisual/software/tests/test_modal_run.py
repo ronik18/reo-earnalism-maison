@@ -71,6 +71,8 @@ class FakeModal:
     def __init__(self, vroot, behavior=None):
         self.vroot, self.behavior = Path(vroot), behavior or self.default
         self.image_python, self.function_kwargs = None, {}
+        self.lead = ""  # listdir paths: "" (relative to the volume root) or "/" (absolute)
+        self.events = []
 
     @staticmethod
     def default(vroot, cells, job_id, archive):
@@ -103,10 +105,10 @@ class FakeModal:
                 base = fm.vroot / path.strip("/")
                 if not base.is_dir():
                     raise FileNotFoundError(path)
-                return [Entry(p.relative_to(fm.vroot).as_posix()) for p in sorted(base.rglob("*"))
-                        if p.is_file()]
+                return [Entry(fm.lead + p.relative_to(fm.vroot).as_posix())
+                        for p in sorted(base.rglob("*")) if p.is_file()]
             def read_file(self, path):
-                yield (fm.vroot / path).read_bytes()
+                yield (fm.vroot / path.lstrip("/")).read_bytes()
 
         class App:
             def __init__(self, name): pass
@@ -117,6 +119,7 @@ class FakeModal:
                 return deco
             @contextlib.contextmanager
             def run(self):
+                fm.events.append("app.run")
                 yield
 
         mod.Image, mod.Volume, mod.App = Image, Volume, App
@@ -261,9 +264,71 @@ class ModalRunTests(unittest.TestCase):
         self.assertEqual(result["status"], "failed")
         self.assertIn("function timed out", result["error"])
         self.assertGreaterEqual(result["seconds"], 0)
-        self.assertAlmostEqual(result["usd"], result["seconds"] * modal_run.L4_USD_PER_S)
+        self.assertAlmostEqual(result["usd"], result["seconds"] * modal_run.L4_USD_PER_S * 1.25)
         self.assertTrue((result["folder"] / "partial.wav").is_file())
         self.assertFalse((result["folder"] / "manifest.json").exists())
+
+    def test_volume_paths_with_or_without_a_leading_slash(self):
+        """B1 M1: listdir's path shape is unverified on real Modal; both shapes land the same."""
+        for path in ("job/a.wav", "/job/a.wav", "job/sub/b.wav", "/job/sub/b.wav"):
+            self.assertEqual(modal_run.volume_relpath(path, "job").as_posix(),
+                             path.lstrip("/")[len("job/"):])
+        for bad in ("other/a.wav", "/other/a.wav", "job/../x", "job"):
+            with self.assertRaises(ValueError):
+                modal_run.volume_relpath(bad, "job")
+        job = self.build()
+        for lead in ("", "/"):
+            fm = FakeModal(self.root / f"vol{len(lead)}")
+            fm.lead = lead
+            with fakes(), mock.patch.dict(sys.modules, {"modal": fm.module()}):
+                result = modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / f"dl{len(lead)}")
+            self.assertEqual(result["status"], "ok", result["error"])
+            self.assertTrue((result["folder"] / "manifest.json").is_file())
+
+    def test_on_contact_runs_once_just_before_modal_is_contacted(self):
+        job = self.build()
+        fm = FakeModal(self.root / "vol")
+        with fakes(), mock.patch.dict(sys.modules, {"modal": fm.module()}):
+            modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl",
+                                on_contact=lambda: fm.events.append("contact"))
+        self.assertEqual(fm.events, ["contact", "app.run"])
+
+    def test_execute_remote_commits_at_the_end_and_at_the_hard_stop(self):
+        """B1 M2: the container commits the volume itself, at the end whatever happened, and at the
+        hard stop before the main thread is interrupted (a kill at the timeout skips `finally`)."""
+        job = self.build()
+        cells = modal_run.extract_cells(job["notebook"])
+        archive = Path(job["inputs_zip"]).read_bytes()
+        commits = []
+        with fakes():
+            out = modal_run.execute_remote(cells, job["job_id"], archive, str(self.root / "v1"),
+                                           commit=lambda: commits.append("commit"))
+        self.assertEqual((out, commits), ({"hard_stopped": False}, ["commit"]))
+        commits.clear()
+        stop = cells[:2] + ["from google.colab import runtime\n"
+                            "open(DRIVE_JOB_DIR + '/partial.wav', 'w').write('x')\nruntime.unassign()"]
+        with fakes():
+            out = modal_run.execute_remote(stop, job["job_id"], archive, str(self.root / "v2"),
+                                           commit=lambda: commits.append("commit"))
+        self.assertEqual((out, commits), ({"hard_stopped": True}, ["commit", "commit"]))
+        commits.clear()
+        with self.assertRaises(RuntimeError):
+            modal_run.execute_remote(cells[:1] + ["raise RuntimeError('cell failed')"], job["job_id"],
+                                     archive, str(self.root / "v3"), commit=lambda: commits.append("c"))
+        self.assertEqual(commits, ["c"])
+
+    def test_timer_hard_stop_calls_on_stop_from_the_timer_thread(self):
+        import threading
+        seen = []
+        cells = ["JOB_ID = 'x'",
+                 "import threading, time\nfrom google.colab import runtime\n"
+                 "threading.Timer(0.2, runtime.unassign).start()\n"
+                 "for _ in range(200):\n    time.sleep(0.05)"]
+        g = modal_run.run_cells(cells, self.root / "t",
+                                on_stop=lambda: seen.append(threading.current_thread().name))
+        self.assertTrue(g["HARD_STOPPED"])
+        self.assertEqual(len(seen), 1)
+        self.assertNotEqual(seen[0], threading.main_thread().name)
 
     def test_plan_is_offline(self):
         job = self.build()
@@ -273,12 +338,14 @@ class ModalRunTests(unittest.TestCase):
         self.assertEqual(p["timeout_seconds"], deadline + 900)
         self.assertEqual(p["gpu"], "L4")
         self.assertEqual(p["volume"], f"earnalism-eav-jobs:/jobs/{job['job_id']}")
-        self.assertAlmostEqual(p["forecast_usd"], deadline * 0.000222)
+        self.assertAlmostEqual(p["forecast_usd"], deadline * 0.000222 * 1.25)
 
     def test_cost_arithmetic(self):
-        self.assertAlmostEqual(modal_run.modal_cost(3600), 0.7992)
+        """I1: wall seconds x the L4 rate x 1.25 (CPU, memory and image build overhead)."""
+        self.assertEqual(modal_run.MODAL_OVERHEAD_FACTOR, 1.25)
+        self.assertAlmostEqual(modal_run.modal_cost(3600), 0.7992 * 1.25)
         self.assertEqual(modal_run.modal_cost(0), 0)
-        self.assertAlmostEqual(modal_run.modal_cost(100), 100 * modal_run.L4_USD_PER_S)
+        self.assertAlmostEqual(modal_run.modal_cost(100), 100 * modal_run.L4_USD_PER_S * 1.25)
         self.assertEqual(modal_run.L4_USD_PER_S, 0.000222)
 
     def test_module_imports_without_modal(self):
@@ -301,7 +368,8 @@ class ModalRunCliTests(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.d = Path(tmp.name)
-        self.root = self.d / "titles" / "selfish-giant"
+        self.titles = self.d.joinpath(*getattr(self, "TITLES", ("titles",)))
+        self.root = self.titles / "selfish-giant"
         src = self.d / "src.json"
         src.write_text(json.dumps(SOURCE))
         rates = self.d / "rates.json"
@@ -316,7 +384,16 @@ class ModalRunCliTests(unittest.TestCase):
         return fm, mock.patch.dict(sys.modules, {"modal": fm.module()})
 
     def ledger_bytes(self):
-        return (self.d / "titles" / "allowance-ledger.json").read_bytes()
+        return (self.titles / "allowance-ledger.json").read_bytes()
+
+    def test_modal_request_refuses_a_title_root_outside_production_audiovisual(self):
+        (self.d / ".git").mkdir()  # titles/selfish-giant: the workflow would refuse it
+        before = self.ledger_bytes()
+        code, out = run("modal-request", self.job_id, "--root", self.root, "--colab-units", 0)
+        self.assertEqual(code, 2, out)
+        self.assertIn("not under production/audiovisual/", out)
+        self.assertEqual(self.ledger_bytes(), before)
+        self.assertFalse((self.titles / "modal-requests").exists())
 
     def test_dry_run_only_checks_and_prints_the_plan(self):
         before = self.ledger_bytes()
@@ -332,7 +409,7 @@ class ModalRunCliTests(unittest.TestCase):
         self.assertEqual((line["gpu"], line["timeout_seconds"]),
                          ("L4", line["forecast_seconds"] + 900))
         self.assertEqual(line["volume"], f"earnalism-eav-jobs:/jobs/{self.job_id}")
-        self.assertAlmostEqual(line["forecast_usd"], line["forecast_seconds"] * 0.000222, places=4)
+        self.assertAlmostEqual(line["forecast_usd"], line["forecast_seconds"] * 0.000222 * 1.25, places=4)
         self.assertFalse((self.root / "modal-downloads").exists())
         self.assertEqual(self.ledger_bytes(), before)
 
@@ -418,9 +495,11 @@ class ModalRunCliTests(unittest.TestCase):
 
 def fake_runner(usd, status="ok", seconds=100.0, calls=None):
     """A stand-in for modal_run.run_modal: no Modal client, a canned bill."""
-    def runner(notebook, inputs_zip, download_dir, gpu="L4"):
+    def runner(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None):
         if calls is not None:
             calls.append(download_dir)
+        if on_contact is not None:
+            on_contact()
         folder = Path(download_dir) / "job"
         folder.mkdir(parents=True, exist_ok=True)
         return {"seconds": seconds, "usd": usd, "folder": folder, "status": status,
@@ -436,7 +515,7 @@ class ModalCapTests(unittest.TestCase):
 
     def setUp(self):
         ModalRunCliTests.setUp(self)
-        self.ledger = budget.Ledger(self.d / "titles" / "allowance-ledger.json")
+        self.ledger = budget.Ledger(self.titles / "allowance-ledger.json")
         p = mock.patch.object(cli, "_MONTH", self.MONTH)
         p.start()
         self.addCleanup(p.stop)
@@ -445,8 +524,9 @@ class ModalCapTests(unittest.TestCase):
         self.timeout_s = plan["timeout_seconds"]
 
     def with_worst_case(self, usd):
-        """Make the worst case (deadline + 900 s at the L4 rate) equal usd."""
-        return mock.patch.object(modal_run, "L4_USD_PER_S", usd / self.timeout_s)
+        """Make the worst case (deadline + 900 s at the L4 rate x the overhead factor) equal usd."""
+        return mock.patch.object(modal_run, "L4_USD_PER_S",
+                                 usd / (self.timeout_s * modal_run.MODAL_OVERHEAD_FACTOR))
 
     def seed(self, usd, job_id="other-job", month=None):
         self.ledger.record_modal_spend(month or self.MONTH, job_id, usd, 1.0, "ok", "t")
@@ -524,6 +604,48 @@ class ModalCapTests(unittest.TestCase):
         self.assertEqual(self.ledger.modal_units(self.job_id), 2.5)
         code, out = run("modal-settle", self.job_id, "--root", self.root, "--usd", 0.25)
         self.assertEqual(code, 2, out)  # nothing pending any more
+
+    def test_import_and_close_refuse_while_a_row_is_pending(self):
+        """B4 M2: never settle the job from a pending worst case; modal-settle first."""
+        def interrupted(*a, **k):
+            raise KeyboardInterrupt()
+        with mock.patch.object(modal_run, "run_modal", interrupted):
+            with self.assertRaises(KeyboardInterrupt):
+                run("modal-run", self.job_id, "--root", self.root, "--colab-units", 0)
+        before = (self.ledger.path.read_bytes(), (self.root / "record.json").read_bytes())
+        folder = self.d / "out"
+        folder.mkdir()
+        for argv in (("import", self.job_id, "--root", self.root, "--from", folder),
+                     ("close", self.job_id, "--root", self.root, "--reason", "died")):
+            code, out = run(*argv)
+            self.assertEqual(code, 2, out)
+            self.assertIn("pending Modal row", out)
+            self.assertIn("modal-settle", out)
+        self.assertEqual((self.ledger.path.read_bytes(), (self.root / "record.json").read_bytes()), before)
+        self.assertEqual(run("modal-settle", self.job_id, "--root", self.root, "--usd", 0.05)[0], 0)
+        code, out = run("close", self.job_id, "--root", self.root, "--reason", "died")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(self.entry()["usd"], 0.05)
+
+    def test_modal_settle_reconciles_a_finished_row_from_the_bill(self):
+        """I1: the recorded figure is an estimate; the billed amount replaces it, estimate kept."""
+        self.go(fake_runner(0.0227, "failed", seconds=102.0))
+        self.go(fake_runner(0.40, "hard_stopped"))
+        first, second = [r["run_id"] for r in self.ledger.modal_rows(job_id=self.job_id)]
+        code, out = run("modal-settle", self.job_id, "--root", self.root, "--usd", 0)
+        self.assertEqual(code, 2, out)  # two unbilled rows: --run names one
+        self.assertIn("--run", out)
+        code, out = run("modal-settle", self.job_id, "--root", self.root, "--usd", 0, "--run", first)
+        self.assertEqual(code, 0, out)
+        self.assertIn(first, out)
+        code, out = run("modal-settle", self.job_id, "--root", self.root, "--usd", 0.35)
+        self.assertEqual(code, 0, out)  # the one unbilled row left
+        rows = self.ledger.modal_rows(job_id=self.job_id)
+        self.assertEqual([(r["run_id"], r["usd"], r["estimated_usd"], r["status"], r["billed"]) for r in rows],
+                         [(first, 0.0, 0.0227, "failed", True), (second, 0.35, 0.40, "hard_stopped", True)])
+        self.assertAlmostEqual(self.ledger.modal_month_usd(self.MONTH), 0.35)
+        code, out = run("modal-settle", self.job_id, "--root", self.root, "--usd", 0.1, "--run", "x#1")
+        self.assertEqual(code, 2, out)
 
     def colab_cu(self):
         data = cli.Record.load(self.root).data
