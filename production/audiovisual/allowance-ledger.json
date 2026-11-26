@@ -240,14 +240,16 @@
     "title": "bicharak",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak",
     "reserved_units": 1.6360666666666663,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-26T13:02:50+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.375318,
+    "cu_equivalent": 3.75
   },
   {
     "job_id": "narration-film-01-r3-c2of2-r1",
