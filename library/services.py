@@ -465,58 +465,73 @@ def _preview_groups(stream):
     if group:yield group
 
 
+PREVIEW_BODY_KINDS=('paragraph','verse')  # the blocks that carry the story; headings and notes never do
+
+
+def _is_body(group):
+    return group[1][0]['kind'] in PREVIEW_BODY_KINDS
+
+
 def _group_words(group):
-    return sum(preview_word_count(p['text']) for p in group[1] if p['kind']!='note')
+    return sum(preview_word_count(p['text']) for p in group[1] if p['kind'] in PREVIEW_BODY_KINDS)
 
 
 def preview_cut(stream):
     """The public reading preview from the story's (unit, paragraph DTO) pairs in reading order.
 
     Returns [(unit, [blocks])] for the units the preview reaches, or [] when no preview may be offered.
-    Words are whitespace tokens of non-note blocks, counted across all units. Target = PREVIEW_FRACTION
-    of the story's words, clamped to [PREVIEW_MIN_WORDS, PREVIEW_MAX_WORDS]. Whole groups (a block
-    plus its notes) are taken in order while the running count is below the target; the group that
-    reaches or crosses it is the last (a heading that
-    reaches it takes the paragraph after it). A story of at most PREVIEW_MIN_WORDS words previews only its
-    first paragraph. The story's final group is never included, so the preview is never the whole
-    story; if that leaves nothing, there is no preview. The contract ceilings (100 blocks per unit,
-    10 units) stop the cut early at a whole group. A trailing heading or orphan note is dropped.
+
+    Words are whitespace tokens of paragraph and verse blocks, counted across all units; headings and
+    notes count nothing. Target = PREVIEW_FRACTION of the story's words, clamped to
+    [PREVIEW_MIN_WORDS, PREVIEW_MAX_WORDS]. Whole groups (a block plus its notes) are taken in order
+    while the running count is below the target; the paragraph that reaches or crosses it is the last.
+    A story of at most PREVIEW_MIN_WORDS words previews only its first paragraph (with any heading
+    before it).
+
+    The protected end is the edition's LAST paragraph or verse block, across all units, with its notes.
+    The preview never includes it or anything after it; if that leaves no paragraph, there is no
+    preview. The contract ceilings (100 blocks per unit, 10 units) stop the cut early at a whole group.
+    A trailing heading or orphan note is dropped.
 
     The stream is read lazily: once PREVIEW_MAX_WORDS / PREVIEW_FRACTION words have been read the
-    target is fixed at the maximum, so the rest of a long book is never loaded. One group beyond that
-    point is always read, so the code knows whether the last group read is the story's final one."""
+    target is fixed at the maximum. Reading then continues only until one more paragraph or verse
+    block is found; headings and notes never count as "more follows". If none is found, the story
+    has ended and its protected end is among the groups already read."""
     enough=PREVIEW_MAX_WORDS/PREVIEW_FRACTION
-    groups,total=[],0
+    groups,total,exhausted=[],0,True
     stream_groups=_preview_groups(stream)
     for group in stream_groups:
         groups.append(group);total+=_group_words(group)
-        if total>=enough:break
-    # One-group lookahead: if nothing follows, the story is complete and its last group is final.
-    lookahead=next(stream_groups,None)
-    complete=lookahead is None
-    # Never the story's final paragraph. When more follows, every group read is safely before the end.
-    candidates=groups[:-1] if complete else groups
+        if total>=enough:
+            exhausted=False;break
+    more_body=not exhausted and any(_is_body(group) for group in stream_groups)  # stops at the first one
+    if more_body:
+        candidates=groups  # a later paragraph exists, so every group read lies before the protected end
+    else:
+        last=max((i for i,group in enumerate(groups) if _is_body(group)),default=None)
+        if last is None:return []
+        candidates=groups[:last]  # strictly before the protected end
     chosen=[]
-    if complete and total<=PREVIEW_MIN_WORDS:
+    if not more_body and total<=PREVIEW_MIN_WORDS:
         size=0
         for group in candidates:  # first paragraph only (with any heading before it)
             size+=len(group[1])
             if size>PREVIEW_MAX_BLOCKS:break  # contract ceiling (PreviewPackage paragraphs maxItems)
             chosen.append(group)
-            if group[1][0]['kind']!='heading':break
+            if _is_body(group):break
     else:
         target=min(max(PREVIEW_FRACTION*total,PREVIEW_MIN_WORDS),PREVIEW_MAX_WORDS)
         words,units,in_unit=0,0,0
         for group in candidates:
-            if words>=target and chosen[-1][1][0]['kind']!='heading':break  # a heading never ends the preview
+            if words>=target:break  # headings add no words, so a heading never ends the preview
             new=not chosen or group[0]!=chosen[-1][0]
             if new and units>=PREVIEW_MAX_UNITS:break
             size=(0 if new else in_unit)+len(group[1])
             if size>PREVIEW_MAX_BLOCKS:break
             units,in_unit=units+new,size
             chosen.append(group);words+=_group_words(group)
-    while chosen and chosen[-1][1][0]['kind'] in ('heading','note'):chosen.pop()  # no dangling heading or orphan note
-    if not any(p['kind'] not in ('heading','note') for _,blocks in chosen for p in blocks):return []
+    while chosen and not _is_body(chosen[-1]):chosen.pop()  # no dangling heading or orphan note
+    if not chosen:return []
     cut=[]
     for unit,blocks in chosen:
         if cut and cut[-1][0]==unit:cut[-1][1].extend(blocks)

@@ -117,7 +117,7 @@
     },
     {
       "id": "public_previews",
-      "scope": "Globally cleared for public delivery only; versioned path. Audio/video samples are physically bounded objects. Reader text preview (owner decision 26 Nov 2026): a deterministic server-side cut of the cleared edition text, about 25% of the story words (at least 400, at most 1,500), counted across units, ending after the whole paragraph that reaches the target and never including the final paragraph; a story of 400 words or fewer previews its first paragraph only, none if that is the whole story. Revision.preview is only the on/off signal. The previews API is public (s-maxage=60) only when the reader preview right is current in all 9 whitelist territories; otherwise private, no-store.",
+      "scope": "Globally cleared for public delivery only; versioned path. Audio/video samples are physically bounded objects. Reader text preview (owner decision 26 Nov 2026): a deterministic server-side cut of the cleared edition text, about 25% of the words of paragraph and verse blocks (headings and notes count nothing; at least 400, at most 1,500), counted across units, ending after the whole paragraph that reaches the target and never including the protected end (the edition's last paragraph or verse block with its notes); a story of 400 words or fewer previews its first paragraph only, none if that is the whole story. Revision.preview is only the on/off signal. The previews API is public (s-maxage=60) only when the reader preview right is current in all 9 whitelist territories; otherwise private, no-store.",
       "browser_ttl_seconds": 0,
       "edge_ttl_seconds": 60,
       "swr_seconds": 0,

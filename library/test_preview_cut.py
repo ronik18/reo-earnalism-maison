@@ -32,7 +32,7 @@ def cut(paragraphs, unit='u1'):
 
 
 def total(blocks):
-    return sum(svc.preview_word_count(p['text']) for p in blocks if p['kind'] != 'note')
+    return sum(svc.preview_word_count(p['text']) for p in blocks if p['kind'] in ('paragraph', 'verse'))
 
 
 class PreviewRuleTests(SimpleTestCase):
@@ -245,3 +245,59 @@ class LongStoryEndingTests(SimpleTestCase):
                 # so the preview is at most max(1,500 words, first paragraph) plus that one crossing paragraph.
                 self.assertLess(sum(counted[:-1]), svc.PREVIEW_MAX_WORDS, sizes)
                 self.assertLessEqual(sum(counted), max(svc.PREVIEW_MAX_WORDS, sizes[0]) + counted[-1], sizes)
+
+
+class ProtectedEndTests(SimpleTestCase):
+    """Fix round 3, C1: the protected end is the edition's last paragraph or verse block with its notes.
+    Headings and notes that follow it never count as "more follows"."""
+
+    def test_trailing_heading_does_not_expose_the_last_paragraph(self):
+        story = chapter(('paragraph', words(100)), ('paragraph', words(7000)), ('heading', 'The end'))
+        self.assertEqual(cut(story), story[:1])
+        story = chapter(('paragraph', words(200)), ('paragraph', words(300)), ('heading', 'The end'))
+        self.assertEqual(cut(story), story[:1])
+        story = chapter(('paragraph', words(7000)), ('heading', 'One'), ('heading', 'Two'))
+        self.assertEqual(cut(story), [])
+
+    def test_note_opening_a_new_unit_does_not_expose_the_last_paragraph(self):
+        stream = [('u1', p) for p in paras(100, 7000)] + [('u2', p) for p in chapter(('note', 'a note'))]
+        self.assertEqual(svc.preview_cut(stream), [('u1', [stream[0][1]])])
+        stream = [('u1', p) for p in paras(7000)] + [('u2', p) for p in chapter(('heading', 'Two'), ('note', 'n'))]
+        self.assertEqual(svc.preview_cut(stream), [])
+
+    def test_verse_is_story_text(self):
+        story = chapter(('paragraph', words(300)), ('verse', words(300)), ('verse', words(500)))
+        self.assertEqual(cut(story), story[:2])  # 1,100 words: target 400; the final verse is protected
+        story = chapter(('paragraph', words(7000)), ('verse', 'one line'))
+        self.assertEqual(cut(story), story[:1])  # a later verse block means the long paragraph is not the end
+
+    def test_headings_count_no_words(self):
+        story = chapter(('heading', words(1000)), ('paragraph', words(100)), ('paragraph', words(100)))
+        self.assertEqual(cut(story), story[:2])  # 200 story words: first paragraph only, with its heading
+
+    def test_randomised_editions_never_include_the_protected_end(self):
+        import random
+        rng = random.Random(20261127)
+        kinds = ['paragraph'] * 5 + ['verse', 'heading', 'heading', 'note', 'note']
+        sizes = [1, 5, 40, 150, 600, 1400, 3000, 5000, 7000]
+        for _ in range(4000):
+            stream = []
+            for u in range(rng.randint(1, 4)):
+                for i in range(rng.randint(1, 8)):
+                    kind = rng.choice(kinds)
+                    n = rng.choice(sizes + [rng.randint(1, 9000)])
+                    stream.append((f'u{u}', block(words(n), kind, i + 1)))
+            preview = svc.preview_cut(list(stream))
+            shown = [(unit, p) for unit, blocks in preview for p in blocks]
+            self.assertEqual(shown, stream[:len(shown)])  # a whole-block prefix, in order, unit by unit
+            body = [i for i, (_, p) in enumerate(stream) if p['kind'] in ('paragraph', 'verse')]
+            if not body:
+                self.assertEqual(preview, [])
+                continue
+            # The protected end starts at the last paragraph/verse block; nothing from there on is shown.
+            self.assertLess(len(shown), body[-1] + 1, [(u, p['kind'], svc.preview_word_count(p['text'])) for u, p in stream])
+            if shown:
+                self.assertIn(shown[-1][1]['kind'] if shown[-1][1]['kind'] != 'note' else
+                              next(p['kind'] for _, p in reversed(shown) if p['kind'] != 'note'), ('paragraph', 'verse'))
+                self.assertLessEqual(len(preview), svc.PREVIEW_MAX_UNITS)
+                self.assertTrue(all(len(blocks) <= svc.PREVIEW_MAX_BLOCKS for _, blocks in preview))
