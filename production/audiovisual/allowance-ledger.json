@@ -315,10 +315,11 @@
     "job_id": "edit-test3-film-01",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 2.0,
+    "units": 1.39,
     "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
-    "root": "bicharak"
+    "root": "bicharak",
+    "note": "measured: Colab balance 427 -> 425.61"
   },
   {
     "job_id": "selfish-giant-edit-test3-film-01",
