@@ -136,9 +136,8 @@ def preview(request,revision_id):
     if not svc._live(revision):raise DomainError('preview_unavailable','No public preview is available.',404)
     from .audio_preview import descriptor
     audio=descriptor(revision,territory)
-    unit=revision.units.first()
-    paragraphs=revision.preview if svc.current_right(revision,'reader','preview',territory) else []
-    if not unit or len(paragraphs)>3 or sum(len(p['text']) for p in paragraphs)>1200 or (not paragraphs and not audio):
+    unit,paragraphs=svc.public_preview(revision,territory)
+    if not unit or (not paragraphs and not audio):
         raise DomainError('preview_unavailable','Preview does not pass its bounds.',404)
     first=unit.paragraphs.first()
     if not paragraphs and not first:raise DomainError('preview_unavailable','A semantic preview boundary is unavailable.',409)

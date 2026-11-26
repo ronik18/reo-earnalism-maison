@@ -99,14 +99,64 @@ class ExperienceTests(TestCase):
         self.assertContains(response, "The River Notebook")
 
     def test_anonymous_reader_is_bounded_preview_not_full_book(self):
+        from unittest.mock import patch
+        from library import services
         from library.models import Paragraph
-        last = Paragraph.objects.filter(unit_id=self.unit).order_by("ordinal").last()
+        rows = list(Paragraph.objects.filter(unit_id=self.unit).order_by("ordinal"))
+        last = rows[-1]
+        # The fixture's first chapter is about 200 words, so the whole chapter is the preview.
         response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
         self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        for row in rows:
+            self.assertIn(f'<p id="anchor-{row.anchor_id}" data-anchor="{row.anchor_id}">{row.text}</p>', html)
+        self.assertContains(response, f"anchor%3D{last.anchor_id}%26offset%3D{len(last.text)}")
+        self.assertLess(html.index(f'anchor-{last.anchor_id}"'), html.index("data-preview-fallback"))
+        self.assertContains(response, "You have reached the end of the free preview.")
+        self.assertContains(response, '"preview": true')
+        self.assertNotContains(response, 'id="complete-reading"')
+        # A longer chapter stops after the paragraph that reaches the word limit, never mid-paragraph.
+        with patch.object(services, "PREVIEW_WORD_LIMIT", 70):
+            response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        self.assertContains(response, rows[1].text)
+        self.assertNotContains(response, rows[2].text)
         self.assertNotContains(response, last.text)
         self.assertContains(response, "Sign in")
-        self.assertContains(response, "offset%3D130")
-        self.assertNotContains(response, 'id="complete-reading"')
+        self.assertContains(response, f"anchor%3D{rows[1].anchor_id}%26offset%3D{len(rows[1].text)}")
+        self.assertContains(response, "You have reached the end of the free preview.")
+
+    def test_signed_in_reader_still_gets_the_whole_unit_beyond_the_preview(self):
+        from unittest.mock import patch
+        from library import services
+        from library.models import Paragraph
+        self.login()
+        rows = list(Paragraph.objects.filter(unit_id=self.unit).order_by("ordinal"))
+        with patch.object(services, "PREVIEW_WORD_LIMIT", 70):
+            response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        for row in rows:
+            self.assertContains(response, row.text)
+        self.assertContains(response, '"preview": false')
+        self.assertNotContains(response, "data-preview-fallback")
+        self.assertContains(response, 'id="complete-reading"')
+
+    def test_anonymous_preview_keeps_note_after_its_paragraph(self):
+        from unittest.mock import patch
+        from library import services
+        from library.models import Paragraph
+        rows = list(Paragraph.objects.filter(unit_id=self.unit).order_by("ordinal"))
+        real = services.paragraph_dto
+        def with_note(paragraph):  # published rows are frozen; mark the third anchor as the second paragraph's note
+            value = real(paragraph)
+            if paragraph.anchor_id == rows[2].anchor_id:
+                value["kind"] = "note"
+            return value
+        with patch.object(services, "PREVIEW_WORD_LIMIT", 70), patch.object(services, "paragraph_dto", with_note):
+            response = self.client.get(f"/en/read/{self.edition}/{self.unit}/")
+        html = response.content.decode()
+        self.assertIn(f'id="anchor-{rows[2].anchor_id}" data-anchor="{rows[2].anchor_id}" class="footnote" role="note">', html)
+        self.assertLess(html.index(f'anchor-{rows[1].anchor_id}"'), html.index(f'anchor-{rows[2].anchor_id}"'))
+        self.assertNotContains(response, rows[3].text)
+        self.assertContains(response, f"anchor%3D{rows[2].anchor_id}%26offset%3D{len(rows[2].text)}")
 
     def test_password_sign_in_preserves_relative_reader_destination(self):
         destination = f"/bn/read/{self.edition}/{self.unit}/?anchor=existing-anchor"

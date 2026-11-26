@@ -415,17 +415,51 @@ def get_reader_document(user,edition_id,unit_id,territory='IN'):
     return {'edition':detail,'unit':unit_dto(unit,territory,edition.live_revision),'paragraphs':[paragraph_dto(p) for p in unit.paragraphs.all()]}
 
 
+PREVIEW_WORD_LIMIT=1500  # Owner decision 26 Nov 2026: whole first chapter, or about this many words.
+PREVIEW_MAX_BLOCKS=100   # PreviewPackage.units[].paragraphs maxItems in contracts/openapi.yaml.
+
+
+def preview_word_count(text):
+    """Whitespace-separated tokens; the same count for Bengali and English."""
+    return len(text.split())
+
+
+def preview_blocks(paragraphs,limit=None,max_blocks=PREVIEW_MAX_BLOCKS):
+    """The public reading preview cut from the first unit's ordered paragraphs.
+
+    Whole blocks only: stop after the block whose words reach `limit`, never mid-paragraph. A note
+    belongs to the block before it and travels with it, and notes do not count toward the limit.
+    The contract's block ceiling is applied the same way (whole block plus its notes). A trailing
+    heading with no text after it is dropped unless it is all there is."""
+    limit=PREVIEW_WORD_LIMIT if limit is None else limit
+    groups=[]
+    for paragraph in paragraphs:
+        if paragraph['kind']=='note' and groups:groups[-1].append(paragraph)
+        else:groups.append([paragraph])
+    blocks,words=[],0
+    for group in groups:
+        if words>=limit or len(blocks)+len(group)>max_blocks:break
+        blocks.extend(group)
+        words+=sum(preview_word_count(p['text']) for p in group if p['kind']!='note')
+    while len(blocks)>1 and blocks[-1]['kind']=='heading':blocks.pop()
+    return blocks
+
+
+def public_preview(revision,territory='IN'):
+    """(first unit, preview paragraphs) when the live revision offers a current reader preview, else (unit, [])."""
+    unit=revision.units.first()
+    if not unit or not revision.preview or not current_right(revision,'reader','preview',territory):
+        return unit,[]
+    return unit,preview_blocks([paragraph_dto(p) for p in unit.paragraphs.all()])
+
+
 def get_preview_document(edition_id,unit_id,territory='IN'):
     detail=edition_detail(edition_id,territory)
     revision=_revision(detail['edition_revision_id'])
-    unit=revision.units.filter(pk=unit_id).first()
-    first=revision.units.first()
-    if not unit or not first or unit.id!=first.id or not revision.preview or not current_right(revision,'reader','preview',territory):
+    first,paragraphs=public_preview(revision,territory)
+    if not first or str(first.id)!=str(unit_id) or not paragraphs:
         raise DomainError('preview_unavailable','This unit has no bounded public preview.',404)
-    paragraphs=revision.preview
-    if len(paragraphs)>3 or sum(len(p['text']) for p in paragraphs)>1200:
-        raise DomainError('preview_unavailable','Preview exceeds its approved bounds.',409)
-    return {'edition':detail,'unit':unit_dto(unit,territory),'paragraphs':paragraphs,
+    return {'edition':detail,'unit':unit_dto(first,territory),'paragraphs':paragraphs,
             'boundary':{'end_anchor_id':paragraphs[-1]['anchor_id'],'end_offset_chars':len(paragraphs[-1]['text']),
                         'audio_end_ms':None,'video_end_ms':None},'preview':True}
 

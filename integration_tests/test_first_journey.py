@@ -45,8 +45,14 @@ class FirstBookJourneyTests(TestCase):
     def test_preview_verify_read_save_resume_and_logout(self):
         edition=Edition.objects.select_related('live_revision').get(pk=EN)
         unit=edition.live_revision.units.first();paragraph=unit.paragraphs.order_by('ordinal').first()
-        preview=self.client.get(f'/en/read/{EN}/{unit.id}/')
+        from unittest.mock import patch
+        from library import services as library_services
+        # Owner decision 26 Nov 2026: the preview is the first chapter up to ~1,500 words. The fixture chapter is
+        # ~200 words, so a lower limit proves the anonymous page still stops before the rest of the chapter.
+        with patch.object(library_services,'PREVIEW_WORD_LIMIT',70):
+            preview=self.client.get(f'/en/read/{EN}/{unit.id}/')
         self.assertEqual(preview.status_code,200)
+        self.assertIn(paragraph.text,preview.content.decode())
         self.assertNotIn(unit.paragraphs.order_by('ordinal').last().text,preview.content.decode())
         self.assertStatus(self.send('/api/v1/auth/register',{'email':'journey@example.test','password':'Journey-Original-Passphrase-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1','display_name':'Local journey','locale':'bn','return_path':f'/bn/read/{EN}/{unit.id}/'}),202)
         call_command('run_maintenance',stdout=io.StringIO())
@@ -96,4 +102,5 @@ class FirstBookJourneyTests(TestCase):
         self.assertStatus(self.send('/api/v1/session',method='delete'),204)
         self.assertEqual(self.client.get(asset_path).status_code,401)
         self.assertEqual(self.client.get(progress_path).status_code,401)
-        self.assertNotIn(unit.paragraphs.order_by('ordinal').last().text,self.client.get(f'/en/read/{EN}/{unit.id}/').content.decode())
+        with patch.object(library_services,'PREVIEW_WORD_LIMIT',70):  # after logout, back to the bounded preview
+            self.assertNotIn(unit.paragraphs.order_by('ordinal').last().text,self.client.get(f'/en/read/{EN}/{unit.id}/').content.decode())
