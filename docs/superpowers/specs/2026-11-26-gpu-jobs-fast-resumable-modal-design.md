@@ -98,3 +98,18 @@ Resume applies on Modal too, because the Volume keeps finished items.
 
 ## Left to the builder
 Batch padding details, the Modal image definition, file layout of `progress.jsonl`/`sessions.jsonl`, and test fixtures.
+
+## Amendments (26 Nov 2026)
+- **Owner decision on caps** (supersedes B2's CU-equivalent rule for the caps):
+  - Modal is capped in dollars only: $30 per UTC month and $6 per title over its whole life (the dollar value of the 60 CU title cap).
+  - The 100 CU month cap and the 60 CU title cap apply to Colab work only.
+  - When a job is run on Modal, its CU reservation is released.
+  - Reason: an L4 costs about $0.80/h on Modal against about $0.19/h on Colab. Converting at $0.10/CU would have let the remaining November CU cover only about $1.87 of Modal.
+- **Transport (B0 finding):**
+  - This container's egress proxy re-encrypts TLS without offering HTTP/2 (ALPN none), and Modal's client needs gRPC over HTTP/2. So Claude cannot reach Modal directly. GitHub artifact downloads are blocked too, because their storage hosts vary.
+  - The plan's approved fallback is used instead:
+    1. Claude checks the caps, writes the pending row and pushes a run request.
+    2. A GitHub Actions workflow runs `eav modal-run` with repository secrets.
+    3. The workflow uploads the outputs to the existing private R2 bucket `reo-earnalism-maison-private` under `gpu-jobs/<slug>/<job_id>/`, and commits the actual spend back.
+    4. Claude downloads the outputs through the Cloudflare API and imports them.
+  - The owner adds `MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET` and `CLOUDFLARE_R2_TOKEN` as GitHub Actions secrets.

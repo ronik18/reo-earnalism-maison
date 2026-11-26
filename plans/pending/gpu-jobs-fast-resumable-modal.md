@@ -97,13 +97,22 @@ The tracks run in parallel. A step starts when its `Blocked by` steps are done.
 - R1: `docs/OWNER_TASKS.md`, release record and progress table after each checkpoint.
 - Checkpoints: after A1+B1+B2, after C2, after C3.
 
+### Amendment (26 Nov 2026)
+- **B4:** Modal is capped in dollars only ($30 per month, $6 per title). The CU caps cover Colab only (owner decision).
+- **B5:** a GitHub Actions runner plus R2 transfer, because direct Modal access from the container is impossible (no HTTP/2 through the proxy).
+  - The workflow is triggered by a pushed request file under `production/audiovisual/modal-requests/`.
+  - It runs `eav modal-run`, uploads the outputs to `reo-earnalism-maison-private/gpu-jobs/<slug>/<job_id>/`, and commits the ledger and record back.
+  - `eav modal-fetch` downloads the outputs locally.
+  - It is blocked by the owner adding the three GitHub secrets.
+
 ## Decision log
 | Decision | Chosen option | Why |
 | --- | --- | --- |
 | Runner | Colab (improved) + Modal | owner, 26 Nov |
 | Modal spend | ≤ $30 per UTC month, enforced in the ledger and by a Modal spend limit | owner cap; two independent stops |
 | Reels | stay on Colab/Wan with owner authority | 20–40 CU per title does not fit $30/month |
-| Modal ↔ ledger | CU-equivalent at $0.10/CU (Q3) | keeps the 60/100 CU caps meaningful |
+| Modal ↔ ledger | dollars only: $30/month, $6/title; CU caps Colab-only (owner, 26 Nov, amended Q3) | Modal L4 is ~4× Colab per hour; CU conversion starved the month |
+| Modal transport | GitHub Actions + private R2 prefix | proxy has no HTTP/2, so gRPC cannot leave the container |
 | B1 seam | run the built notebook's own cells | one artifact for both runners; nothing to drift |
 | Chunk size | ≤ 60 min forecast | fits Colab sessions and the GPU allocation window |
 
