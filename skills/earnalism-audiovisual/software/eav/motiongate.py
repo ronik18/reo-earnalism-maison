@@ -31,13 +31,14 @@ THRESHOLDS = {
     "sheet_every": 4,           # contact sheet: every 4th frame
     "sheet_cols": 8,
     "min_frames": 8,            # fewer decoded frames than this cannot be judged: needs_review
-    "min_median": 1.0,          # median difference (0-255 scale) below this: nearly static, stutter not judged
+    "min_median": 0.1,          # median difference (0-255 scale) below this: nearly static (needs_review; still measured)
     "dup_rel": 0.2,             # a pair is a near-duplicate when its difference < dup_rel * median
     "min_periodic_runs": 3,     # stutter: at least this many duplicate runs ...
     "period_tolerance": 1,      # ... whose spacing varies by at most this many frames
     "spike_rel": 6.0,           # a pair is a clear spike above spike_rel * median ...
-    "spike_abs": 12.0,          # ... and above this absolute difference
-    "review_spike_rel": 4.0,    # borderline spike (needs_review) above this * median (and spike_abs / 2)
+    "spike_abs": 3.0,           # ... and above this absolute difference (real Wan takes: median 0.08-1.2, peak <= 8.8)
+    "review_spike_rel": 4.0,    # borderline spike (needs_review) above this * median (and review_spike_abs)
+    "review_spike_abs": 1.5,    # ... and above this absolute difference
     "sustained_pairs": 3,       # three or more adjacent high pairs are sustained motion, not a glitch
 }
 
@@ -119,11 +120,13 @@ def check_clip(mp4, sheet=True, thresholds: dict = None) -> dict:
     med = float(np.median(d))
     res["measured"] = {"median_diff": round(med, 4), "max_diff": round(float(d.max()), 4),
                        "min_diff": round(float(d.min()), 4), "pairs": int(len(d))}
-    if med < t["min_median"]:
+    static = med < t["min_median"]
+    if static:
         res["needs_review"] = True
-        res["notes"].append(f"nearly static (median difference {med:.3f}): stutter and spikes not judged")
-        return res
-    dup = [int(i) for i in np.nonzero(d < t["dup_rel"] * med)[0]]
+        res["notes"].append(f"nearly static (median difference {med:.3f}); detectors still run")
+    base = max(med, t["min_median"])  # ratios never divide by a tiny median
+    res["measured"]["ratio_base"] = round(base, 4)
+    dup = [int(i) for i in np.nonzero(d < t["dup_rel"] * base)[0]]
     runs = _runs(dup)
     res["near_duplicate_runs"] = [{"start": s, "length": n} for s, n in runs]
     periodic = _periodic([s for s, _ in runs], t["period_tolerance"], t["min_periodic_runs"])
@@ -136,20 +139,21 @@ def check_clip(mp4, sheet=True, thresholds: dict = None) -> dict:
     elif len(runs) >= t["min_periodic_runs"]:
         res["needs_review"] = True
         res["notes"].append(f"{len(runs)} near-duplicate runs without a regular spacing")
-    high = [int(i) for i in np.nonzero((d > t["review_spike_rel"] * med) & (d > t["spike_abs"] / 2))[0]]
+    high = [int(i) for i in np.nonzero((d > t["review_spike_rel"] * base) & (d > t["review_spike_abs"]))[0]]
     for s, n in _runs(high):
         if n >= t["sustained_pairs"]:
             continue  # sustained: fast motion, not a glitch
         peak = float(d[s:s + n].max())
-        clear = peak > t["spike_rel"] * med and peak > t["spike_abs"]
+        clear = peak > t["spike_rel"] * base and peak > t["spike_abs"]
         res["diff_spikes"].append({"index": s, "length": n, "diff": round(peak, 3),
-                                   "ratio": round(peak / med, 2), "clear": clear})
+                                   "ratio": round(peak / base, 2), "clear": clear})
         if clear:
             res["pass"] = False
-            res["notes"].append(f"difference spike at frame {s + 1}: {peak:.1f} = {peak / med:.1f}x the median")
+            res["notes"].append(f"difference spike at frame {s + 1}: {peak:.1f} = {peak / base:.1f}x the median")
         else:
             res["needs_review"] = True
-            res["notes"].append(f"borderline difference spike at frame {s + 1}: {peak / med:.1f}x the median")
+            res["notes"].append(f"borderline difference spike at frame {s + 1}: {peak / base:.1f}x the median")
+    res["measured"]["peak_diff"] = round(float(d.max()), 4)
     if not res["pass"]:
         res["needs_review"] = False  # a clear fail is not advisory
     return res

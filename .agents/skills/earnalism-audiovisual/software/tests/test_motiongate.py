@@ -13,15 +13,15 @@ from eav import cli, motiongate
 W, H, N = 160, 90, 49
 
 
-def write_clip(path: Path, order, shifts=None):
+def write_clip(path: Path, order, shifts=None, kernel=61, contrast=150):
     """A textured scene panning 1 px per source frame; `order` maps output frame -> source frame; `shifts`
     overrides the pan of a source frame (a one-frame jump)."""
     rng = np.random.default_rng(7)
     raw = rng.random((H, W * 4))
-    k = np.ones(61) / 61                                          # smooth, so a small pan is a small difference
+    k = np.ones(kernel) / kernel                                          # smooth, so a small pan is a small difference
     for ax in (0, 1):
-        raw = np.apply_along_axis(lambda v: np.convolve(np.r_[v[-60:], v, v[:60]], k, "valid")[:len(v)], ax, raw)
-    tex = (40 + (raw - raw.min()) / (raw.max() - raw.min()) * 150).astype(np.uint8)
+        raw = np.apply_along_axis(lambda v: np.convolve(np.r_[v[-kernel:], v, v[:kernel]], k, "valid")[:len(v)], ax, raw)
+    tex = (40 + (raw - raw.min()) / (raw.max() - raw.min()) * contrast).astype(np.uint8)
     frames = []
     for src in order:
         x = (shifts or {}).get(src, src)
@@ -55,6 +55,30 @@ class MotionGateTests(unittest.TestCase):
         self.assertFalse(r["pass"], r)
         self.assertGreaterEqual(len(r["near_duplicate_runs"]), 3)
         self.assertIn("stutter", " ".join(r["notes"]))
+
+    def test_real_scale_slow_pan_passes_and_the_same_clip_with_a_jump_fails(self):
+        # Wan takes move slowly: median difference well under 1 on the 160x90 grey frames
+        slow = dict(kernel=121, contrast=20)
+        ok = motiongate.check_clip(write_clip(self.d / "slow.mp4", range(N), **slow), sheet=False)
+        self.assertTrue(0.1 < ok["measured"]["median_diff"] < 0.6, ok["measured"])
+        self.assertTrue(ok["pass"], ok)
+        self.assertFalse(ok["needs_review"], ok)
+        bad = motiongate.check_clip(write_clip(self.d / "slowj.mp4", range(N), shifts={20: 100}, **slow), sheet=False)
+        self.assertFalse(bad["pass"], bad)
+        self.assertTrue(bad["diff_spikes"][0]["clear"])
+
+    def test_near_static_clip_is_needs_review_but_still_measured(self):
+        r = motiongate.check_clip(write_clip(self.d / "still.mp4", [0] * N), sheet=False)
+        self.assertTrue(r["pass"] and r["needs_review"], r)
+        self.assertIn("nearly static", " ".join(r["notes"]))
+        self.assertIn("ratio_base", r["measured"])
+        self.assertIn("periodic_starts", r["measured"])
+
+    def test_near_static_clip_with_a_jump_still_fails(self):
+        order = [0] * N
+        order[20] = 1
+        r = motiongate.check_clip(write_clip(self.d / "sj2.mp4", order, shifts={1: 150}), sheet=False)
+        self.assertFalse(r["pass"], r)
 
     def test_single_duplicate_is_not_stutter(self):
         order = list(range(N))
