@@ -977,3 +977,12 @@ class ModalCapTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ColabShimSpecTests(unittest.TestCase):
+    def test_find_spec_works_while_the_shim_is_installed(self):
+        import importlib.util, tempfile
+        from eav.modal_run import _Shim
+        with tempfile.TemporaryDirectory() as d, _Shim(d):
+            self.assertIsNotNone(importlib.util.find_spec("google.colab"))
+            self.assertIsNotNone(importlib.util.find_spec("google"))

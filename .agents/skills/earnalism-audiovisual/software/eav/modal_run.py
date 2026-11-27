@@ -155,11 +155,17 @@ class _Shim:
         self.job_dir, self.saved = job_dir, {}
 
     def __enter__(self):
+        import importlib.machinery
         mod = types.ModuleType("google.colab")
+        # Libraries such as transformers probe importlib.util.find_spec("google.colab"); a module in
+        # sys.modules with __spec__ None makes that raise ValueError, so give the shim a real spec.
+        mod.__spec__ = importlib.machinery.ModuleSpec("google.colab", None)
         exec(compile(colab_shim(self.job_dir), "<colab_shim>", "exec"), mod.__dict__)
         pkg = sys.modules.get("google") or types.ModuleType("google")
         if not hasattr(pkg, "__path__"):
             pkg.__path__ = []
+        if getattr(pkg, "__spec__", None) is None:
+            pkg.__spec__ = importlib.machinery.ModuleSpec("google", None, is_package=True)
         for name, value in (("google", pkg), ("google.colab", mod)):
             self.saved[name] = sys.modules.get(name)
             sys.modules[name] = value
