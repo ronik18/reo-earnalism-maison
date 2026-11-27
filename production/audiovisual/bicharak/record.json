@@ -32205,6 +32205,378 @@
       },
       "path": "jobs/stills-pilot4-f01s014/stills.ipynb",
       "sha256": "3cdcfa1b8680cd54a7f0faf82212ee5ab050907d7971d30f77e5b4e5838cb783"
+    },
+    {
+      "bytes": 758094,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-11--c1.png",
+      "sha256": "461705ae0e5f061fe44db5b50115e3f64330d0ac10290eb9f54630f07e330b10"
+    },
+    {
+      "bytes": 919687,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-11--c2.png",
+      "sha256": "1decab74f130852863ec2ac5b480cb80f3b410e76dda7eb568a60d72fb863689"
+    },
+    {
+      "bytes": 753087,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-11--c3.png",
+      "sha256": "430d802eb87d61c8e110e4c39275adfc12d913d2af7f3bea7f757cdaa08d501c"
+    },
+    {
+      "bytes": 904311,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-12--c1.png",
+      "sha256": "fff741a524713d5aae7aba4650ade0b5d8d9f5806be84776398736b8e6c57313"
+    },
+    {
+      "bytes": 856701,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-12--c2.png",
+      "sha256": "dd1edb7d96cc8e21e288f051e3899fbcb2382424350a28b502b4624ed3ab3a06"
+    },
+    {
+      "bytes": 721680,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-12--c3.png",
+      "sha256": "834cc167dc1b32d0b8e395869110597d7ea0a483051088a9c9cf846ee206ee0a"
+    },
+    {
+      "bytes": 1256541,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-13--c1.png",
+      "sha256": "b0bf409b8c2e1f3b6d44656e41fb207de75c95d1918289ec5c5841af3263d83d"
+    },
+    {
+      "bytes": 1119731,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-13--c2.png",
+      "sha256": "4c07814d68d41822d6cd96cb1dd70883599d76bdb26797d52d03753d222a39a8"
+    },
+    {
+      "bytes": 1016020,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-13--c3.png",
+      "sha256": "19dcd75c7ef483afa9e65cfdd2a7f59eeaaf59ab6bfcff5b32c2f895a4ea2149"
+    },
+    {
+      "bytes": 1218928,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-14--c1.png",
+      "sha256": "1d36b7417779ac18a7d59916f0efeb1de2fe9faa1fb44ca44ceb20e9918a3abb"
+    },
+    {
+      "bytes": 1003014,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-14--c2.png",
+      "sha256": "e57913333803ac81d1298ae11e67fdf075c291f899981dc5abe8be91475cadcf"
+    },
+    {
+      "bytes": 1237750,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-pilot4-f01s014/f01s014-14--c3.png",
+      "sha256": "71f5a51a6fb2a47837f45a452ed203434d41be49f380def34a1f8d496ca430af"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -35989,6 +36361,76 @@
         "outputs_key": "exports/colab-exchange/bicharak/stills-pilot4-f01s014/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T06:00:40.195415+00:00",
+      "detail": {
+        "actual_units": 0.16,
+        "files": [
+          "stills/stills-pilot4-f01s014/f01s014-11--c1.png",
+          "stills/stills-pilot4-f01s014/f01s014-11--c2.png",
+          "stills/stills-pilot4-f01s014/f01s014-11--c3.png",
+          "stills/stills-pilot4-f01s014/f01s014-12--c1.png",
+          "stills/stills-pilot4-f01s014/f01s014-12--c2.png",
+          "stills/stills-pilot4-f01s014/f01s014-12--c3.png",
+          "stills/stills-pilot4-f01s014/f01s014-13--c1.png",
+          "stills/stills-pilot4-f01s014/f01s014-13--c2.png",
+          "stills/stills-pilot4-f01s014/f01s014-13--c3.png",
+          "stills/stills-pilot4-f01s014/f01s014-14--c1.png",
+          "stills/stills-pilot4-f01s014/f01s014-14--c2.png",
+          "stills/stills-pilot4-f01s014/f01s014-14--c3.png"
+        ],
+        "input_zip_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "kind": "stills",
+        "model": {
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [
+            "f01s014-12--c1"
+          ],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-27T06:00:40.228975+00:00",
+      "detail": {
+        "job_id": "stills-pilot4-f01s014",
+        "members": [
+          "f01s014-11--c1.png",
+          "f01s014-11--c2.png",
+          "f01s014-11--c3.png",
+          "f01s014-12--c1.png",
+          "f01s014-12--c2.png",
+          "f01s014-12--c3.png",
+          "f01s014-13--c1.png",
+          "f01s014-13--c2.png",
+          "f01s014-13--c3.png",
+          "f01s014-14--c1.png",
+          "f01s014-14--c2.png",
+          "f01s014-14--c3.png",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/stills-pilot4-f01s014/outputs.tar",
+        "outputs_tar_sha256": "2eb30207e9ed67d5a29a79dcf338da04a0612e7948b57c0175d3b5640d822bf1"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],
