@@ -719,10 +719,10 @@
       {
         "run_id": "stills-film-01-r7-candidates#1",
         "job_id": "stills-film-01-r7-candidates",
-        "usd": 2.2174575,
-        "seconds": 0.0,
+        "usd": 0.840138148557535,
+        "seconds": 1240.056307834,
         "at": "2026-11-27T07:38:33+00:00",
-        "status": "pending"
+        "status": "ok"
       }
     ]
   }
