@@ -549,7 +549,7 @@ class RoundTwo:
     def test_bundle_audio_dry_is_mastered_to_film_target(self):
         self.reviewed()
         bundle = self.d / "bundle"
-        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", bundle, "--dry")
         self.assertEqual(code, 0, out)
         for mp3 in bundle.glob("*.mp3"):
             m = mix.measure(mp3)
@@ -563,7 +563,7 @@ class RoundTwo:
         bundle = self.d / "bundle"
         with mock.patch.object(cli.mix, "master",
                                side_effect=ValueError("master misses gate: {'true_peak': -0.2}")):
-            code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")
+            code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", bundle, "--dry")
         self.assertEqual(code, 5)
         self.assertIn("misses gate", out)
         self.assertFalse(bundle.exists())
@@ -575,7 +575,7 @@ class RoundTwo:
         scores.mkdir()
         for u in SOURCE["units"]:
             self.noise(scores / f"{u['unit_id']}.wav", 0.5)
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "bundle",
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "bundle",
                         "--score-dir", scores, "--score-route", "vcsl")
         self.assertNotEqual(code, 0)
         self.assertIn("shorter", out)
@@ -1081,7 +1081,7 @@ class CliTests(RoundTwo, unittest.TestCase):
 
     def test_bundle_audio_needs_a_passing_qc_of_the_film(self):
         self.imported()
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "b", "--dry")
         self.assertNotEqual(code, 0)
         self.assertIn("qc", out)
         self.assertFalse((self.d / "b").exists())
@@ -1091,15 +1091,114 @@ class CliTests(RoundTwo, unittest.TestCase):
         rec.add_artifact("film", self.root / "film" / "film-01" / "film-01.mp4", {"target": "film-01"})
         rec.event("film", "assembled", {"target": "film-01"})
         rec.event("qc", "fail", {"failed": ["film-01:loudness"]})
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "b", "--dry")
         self.assertNotEqual(code, 0)
         rec.event("qc", "pass", {"failed": []})
         rec.event("film", "assembled", {"target": "film-01"})  # re-assembled after that qc
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "b", "--dry")
         self.assertNotEqual(code, 0)
         rec.event("qc", "pass", {"failed": []})
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "b", "--dry")
         self.assertEqual(code, 0, out)
+
+
+    # --- Task 10: the audiobook profile (default): own master, chapters, sentence timing ---------------
+    def frame_dir(self):
+        d = self.d / "frame"
+        d.mkdir()
+        for name, freq in (("title", 300), ("author", 330), ("closing", 260)):
+            self.wav(d / f"{name}.wav", 0.8, freq)
+        return d
+
+    def audiobook(self, *flags, source=None):
+        if source:
+            self.src.write_text(json.dumps(source), encoding="utf-8")
+        self.reviewed()
+        bundle = self.d / "bundle"
+        # a few seconds of fixture speech have no loudness range: the 4-8 LU gate is tested in test_mix
+        with mock.patch.object(mix, "LRA_LU", (0.0, 20.0)):
+            code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--frame-dir",
+                            self.frame_dir(), *flags)
+        return code, out, bundle
+
+    def chaptered_source(self):
+        src = json.loads(json.dumps(SOURCE))
+        src["units"][0]["paragraphs"][0] = {"anchor_id": "a1", "kind": "heading", "text": "প্রথম পরিচ্ছেদ"}
+        return src
+
+    def test_bundle_has_chapters_and_sentence_timing(self):
+        code, out, bundle = self.audiobook("--dry", source=self.chaptered_source())
+        self.assertEqual(code, 0, out)
+        timing = json.loads((bundle / "timing.json").read_text())
+        rows = {r["unit_id"]: r for r in timing["units"]}
+        self.assertEqual(set(rows["u-1"]), {"unit_id", "mp3", "segments", "chapters", "sentences"})
+        segs = {s["anchor_id"]: s for r in timing["units"] for s in r["segments"]}
+        # chapter markers: the পরিচ্ছেদ heading at its measured start; a unit with none gets its title at 0
+        self.assertEqual(rows["u-1"]["chapters"], [{"title": "প্রথম পরিচ্ছেদ", "start_ms": segs["a1"]["start_ms"]}])
+        self.assertEqual(rows["u-2"]["chapters"], [{"title": "Two", "start_ms": 0}])
+        self.assertGreater(segs["a1"]["start_ms"], 0)  # the title and author are spoken first
+        by_anchor = {}
+        for r in timing["units"]:
+            for s in r["sentences"]:
+                self.assertEqual(set(s), {"anchor_id", "sentence_index", "start_ms", "end_ms"})
+                by_anchor.setdefault(s["anchor_id"], []).append(s)
+        self.assertEqual(sorted(by_anchor), ["a1", "a2", "a3"])
+        for a, got in by_anchor.items():  # every paragraph is covered by its sentences, in order
+            self.assertEqual([s["sentence_index"] for s in got], list(range({"a1": 1, "a2": 2, "a3": 2}[a])))
+            self.assertEqual(got[0]["start_ms"], segs[a]["start_ms"])
+            self.assertEqual(got[-1]["end_ms"], segs[a]["end_ms"])
+            for s, nxt in zip(got, got[1:]):
+                self.assertLess(s["start_ms"], s["end_ms"])
+                self.assertLessEqual(s["end_ms"], nxt["start_ms"])
+        # a2 = two sentences (0.7 s and 0.8 s) with a measured 400 ms pause between them
+        a2 = by_anchor["a2"]
+        self.assertAlmostEqual((a2[1]["start_ms"] - a2[0]["end_ms"]) / 1000, 0.4, delta=0.06)
+        self.assertAlmostEqual((a2[0]["end_ms"] - a2[0]["start_ms"]) / 1000, 0.7, delta=0.06)
+        prov = timing["provenance"]
+        self.assertEqual(prov["profile"], "audiobook")
+        self.assertEqual(prov["units"]["u-1"]["mastered_with"], "eav.mix.master_audiobook")
+        self.assertEqual(prov["units"]["u-1"]["encoder"], "ffmpeg libmp3lame 64 kbps CBR mono 48 kHz")
+        probe = json.loads(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=channels,bit_rate",
+                                           "-of", "json", str(bundle / "unit-001.mp3")], check=True,
+                                          capture_output=True, text=True).stdout)["streams"][0]
+        self.assertEqual((probe["channels"], probe["bit_rate"]), (1, "64000"))
+        self.assertAlmostEqual(mix.measure(bundle / "unit-001.mp3")["lufs"], -18.0, delta=1.0)
+        self.assertLessEqual(mix.measure(bundle / "unit-001.mp3")["true_peak"], -2.0)
+        for k in ("title", "author", "closing"):
+            self.assertIn(k, prov["frame_units_sha256"])
+        self.assertEqual(sorted(p.name for p in bundle.iterdir()), ["timing.json", "unit-001.mp3", "unit-002.mp3"])
+
+    def test_audiobook_is_the_default_profile_and_needs_the_frame_units(self):
+        self.reviewed()
+        bundle = self.d / "bundle"
+        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")
+        self.assertNotEqual(code, 0)
+        self.assertIn("--frame-dir", out)
+        self.assertIn("title.wav", out)
+        self.assertFalse(bundle.exists())
+        (self.d / "empty").mkdir()
+        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry", "--frame-dir", self.d / "empty")
+        self.assertNotEqual(code, 0)
+        self.assertIn("author.wav", out)
+
+    def test_audiobook_with_score_dir_beds_only_at_part_changes_and_ends(self):
+        code, out, bundle = self.audiobook("--score-dir", self.scores(), "--score-route", "vcsl")
+        self.assertEqual(code, 0, out)
+        prov = json.loads((bundle / "timing.json").read_text())["provenance"]
+        for unit_id, row in prov["units"].items():
+            self.assertEqual(row["mastered_with"], "eav.mix.master_audiobook")
+            self.assertGreaterEqual(row["bed_under_voice_lu"], 24.0)
+            self.assertEqual(row["score_sha256"], hashlib.sha256(
+                (self.d / "scores" / f"{unit_id}.wav").read_bytes()).hexdigest())
+
+    def test_film_profile_is_still_selectable_and_unchanged(self):
+        self.reviewed()
+        bundle = self.d / "bundle"
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", bundle, "--dry")
+        self.assertEqual(code, 0, out)
+        row = json.loads((bundle / "timing.json").read_text())["units"][0]
+        self.assertEqual(set(row), {"unit_id", "mp3", "segments"})
+        self.assertNotIn("profile", json.loads((bundle / "timing.json").read_text())["provenance"])
 
     # --- R26: caps keyed by edition_id; one title root per edition -----------------------------
     def test_title_cap_is_keyed_by_edition_not_slug(self):
@@ -1186,7 +1285,7 @@ class CliTests(RoundTwo, unittest.TestCase):
     def test_bundle_audio_refuses_without_score_unless_dry(self):
         self.reviewed()
         bundle = self.d / "bundle"
-        code, out = run("bundle-audio", "--root", self.root, "--out", bundle)
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", bundle)
         self.assertNotEqual(code, 0)
         self.assertIn("score", out)
         self.assertIn("--dry", out)
@@ -1197,7 +1296,7 @@ class CliTests(RoundTwo, unittest.TestCase):
         self.reviewed()
         scores = self.scores()
         (scores / "u-2.wav").unlink()
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "bundle",
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "bundle",
                         "--score-dir", scores, "--score-route", "vcsl")
         self.assertNotEqual(code, 0)
         self.assertIn("u-2", out)
@@ -1207,14 +1306,14 @@ class CliTests(RoundTwo, unittest.TestCase):
         """R24: the evidence draft names the score route and its licence for the clearance record."""
         self.reviewed()
         scores = self.scores()
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b0", "--score-dir", scores)
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "b0", "--score-dir", scores)
         self.assertNotEqual(code, 0)
         self.assertIn("--score-route", out)
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b1", "--score-dir", scores,
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "b1", "--score-dir", scores,
                         "--score-route", "ace-step:music-none")
         self.assertNotEqual(code, 0)
         self.assertFalse((self.d / "b1").exists())
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b2", "--score-dir", scores,
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "b2", "--score-dir", scores,
                         "--score-route", "vcsl")
         self.assertEqual(code, 0, out)
         ev = json.loads((self.root / "maison" / "audiovisual-clearance-evidence.draft.json").read_text())
@@ -1231,7 +1330,7 @@ class CliTests(RoundTwo, unittest.TestCase):
         def cues(rec, job_id, job_dir, out):
             self.noise(out / "cue-1.wav", 1)
         music = self.fake_job("music", "film-01", cues)
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--score-dir",
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "b", "--score-dir",
                         self.scores(), "--score-route", f"ace-step:{music}")
         self.assertEqual(code, 0, out)
         ev = json.loads((self.root / "maison" / "audiovisual-clearance-evidence.draft.json").read_text())
@@ -1241,7 +1340,7 @@ class CliTests(RoundTwo, unittest.TestCase):
 
     def test_bundle_audio_dry_is_recorded(self):
         self.reviewed()
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "bundle", "--dry")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "bundle", "--dry")
         self.assertEqual(code, 0, out)
         timing = json.loads((self.d / "bundle" / "timing.json").read_text())
         self.assertTrue(all(u["mastered_with"] == "eav.mix.master"
@@ -1253,7 +1352,7 @@ class CliTests(RoundTwo, unittest.TestCase):
     def test_bundle_audio_before_narration_import_stops_and_writes_nothing(self):
         self.build_narration()
         bundle = self.d / "bundle"
-        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", bundle, "--dry")
         self.assertNotEqual(code, 0)
         self.assertIn("qc", out)  # R26: no passing qc of an assembled film yet
         rec = Record.load(self.root)  # even with one faked, the narration must be imported
@@ -1261,7 +1360,7 @@ class CliTests(RoundTwo, unittest.TestCase):
         (self.root / "film" / "film-01" / "film-01.mp4").write_bytes(b"x")
         rec.add_artifact("film", self.root / "film" / "film-01" / "film-01.mp4", {"target": "film-01"})
         rec.event("qc", "pass", {"failed": []})
-        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--dry")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", bundle, "--dry")
         self.assertNotEqual(code, 0)
         self.assertIn("narration not imported", out)
         self.assertFalse(bundle.exists())
@@ -1271,7 +1370,7 @@ class CliTests(RoundTwo, unittest.TestCase):
         job_id, folder, units = self.reviewed()
         scores = self.scores()
         bundle = self.d / "bundle"
-        code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--score-dir", scores, "--score-route", "vcsl")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", bundle, "--score-dir", scores, "--score-route", "vcsl")
         self.assertEqual(code, 0, out)
         self.assertEqual(sorted(p.name for p in bundle.iterdir()),
                          ["timing.json", "unit-001.mp3", "unit-002.mp3"])
@@ -1505,7 +1604,7 @@ class StorytellerCliTests(unittest.TestCase):
         self.assertEqual([t["unit_key"] for t in timing["units"]], [u["unit_key"] for u in units])
         rec = Record.load(self.root)
         rec.event("qc", "pass", {"failed": []})
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "b", "--dry")
         self.assertEqual(code, 0, out)
 
 
@@ -1605,7 +1704,7 @@ class ImportTakeCliTests(unittest.TestCase):
         srt = (self.root / "film" / "film-01" / "film-01.srt").read_text()
         self.assertEqual(srt.count(" --> "), len(units))
         Record.load(self.root).event("qc", "pass", {"failed": []})
-        code, out = run("bundle-audio", "--root", self.root, "--out", self.d / "b", "--dry")
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "b", "--dry")
         self.assertEqual(code, 0, out)
         draft = json.loads((self.root / "maison" / cli.EVIDENCE_DRAFT).read_text())
         self.assertEqual(draft["generators"], [{

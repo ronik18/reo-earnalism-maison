@@ -15,6 +15,8 @@ from pathlib import Path
 
 import numpy as np
 
+from .text import sentences
+
 SR = 48000
 KEEP_S = 0.04   # original kept at each side of a pause; equals the join crossfade
 XF_S = 0.04     # equal-power join crossfade (30-50 ms)
@@ -85,6 +87,29 @@ def plan_pauses(text: str, pauses: list[tuple[float, float]], rng_seed: int) -> 
             target = e - s
         plan.append((s, e, round(target, 4)))
     return plan
+
+
+def sentence_spans(text: str, start: float, end: float, pauses: list[tuple[float, float]],
+                   tol: float = 0.02) -> list[tuple[float, float]] | None:
+    """(start, end) seconds of each sentence of `text` (eav.text.sentences) inside a passage that runs
+    start..end, cut at the measured pauses: a sentence ends where its pause begins and the next starts where
+    it ends. Pauses map in order to the text's punctuation (as plan_pauses does), keeping the ones at a
+    sentence end; when a comma pause was not detected, the n-1 longest pauses inside the passage are the
+    sentence ends. None when the passage holds fewer pauses than sentence ends: it is never estimated."""
+    n = len(sentences(text))
+    if n <= 1:
+        return [(start, end)]
+    inner = [(s, e) for s, e in pauses if s >= start - tol and e <= end + tol]
+    kinds = _kinds(text)
+    ends = [i for i, k in enumerate(kinds[:-1]) if k in ("sentence", "turn")]
+    if len(inner) == len(kinds) - 1 and len(ends) == n - 1:
+        cuts = [inner[i] for i in ends]
+    elif len(inner) >= n - 1:
+        cuts = sorted(sorted(inner, key=lambda p: p[0] - p[1])[:n - 1])
+    else:
+        return None
+    marks = [start] + [t for c in cuts for t in c] + [end]
+    return [(marks[i], marks[i + 1]) for i in range(0, len(marks), 2)]
 
 
 def detect_pauses(path: Path, threshold_db: float = -38, min_s: float = 0.18) -> list[tuple[float, float]]:

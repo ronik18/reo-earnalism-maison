@@ -6,7 +6,7 @@ from unittest import mock
 import numpy as np
 from pathlib import Path
 
-from eav import mix
+from eav import mix, retime
 from tests import _media as m
 
 
@@ -90,6 +90,119 @@ class MixTests(unittest.TestCase):
         m.sine_wav(a, 1)
         with self.assertRaises(ValueError):
             mix.arrange_cues([a], [0, 1], 3, self.d / "x.wav")
+
+
+def _tone(seconds, amp=0.3, freq=220.0):
+    t = np.arange(int(seconds * 48000)) / 48000
+    return (amp * np.sin(2 * np.pi * freq * t)).astype(np.float32)
+
+
+def _gap(seconds):
+    return np.zeros(int(seconds * 48000), np.float32)
+
+
+def narration_fixture(path: Path) -> None:
+    """~34 s: 1.5 s speech / 1.0 s pause for the first 10 s, then loud and quiet stretches (LRA ~5-6)."""
+    parts = []
+    for _ in range(4):
+        parts += [_tone(1.5), _gap(1.0)]
+    for _ in range(4):
+        parts += [_tone(2.7), _gap(0.3)]
+    for _ in range(4):
+        parts += [_tone(2.7, amp=0.12), _gap(0.3)]
+    retime.write(path, np.concatenate(parts))
+
+
+class AudiobookMasterTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = Path(self.tmp.name)
+        self.narr = self.d / "narration.wav"
+        narration_fixture(self.narr)
+        self.bed = self.d / "bed.wav"
+        m.noise_wav(self.bed, 12)
+        self.title, self.author, self.closing = (self.d / f"{n}.wav" for n in ("t", "a", "c"))
+        retime.write(self.title, _tone(1.2, freq=300))
+        retime.write(self.author, _tone(0.9, freq=330))
+        retime.write(self.closing, _tone(0.8, freq=260))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def probe(self, path):
+        import json
+        import subprocess
+        out = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                              "stream=codec_name,channels,bit_rate", "-of", "json", str(path)],
+                             check=True, capture_output=True, text=True).stdout
+        return json.loads(out)["streams"][0]
+
+    def master_part(self, name="out.mp3", **cues):
+        out = self.d / name
+        return mix.master_audiobook(self.narr, {"part": self.bed, **cues}, out), out
+
+    def test_audiobook_master_meets_targets_after_encode(self):
+        info, out = self.master_part(opening=[self.title, self.author], closing=self.closing)
+        s = self.probe(out)
+        self.assertEqual((s["codec_name"], s["channels"], s["bit_rate"]), ("mp3", 1, "64000"))
+        got = mix.measure(out)  # measured on the encoded file, not on the PCM
+        self.assertLessEqual(abs(got["lufs"] - (-18)), 1)
+        self.assertLessEqual(got["true_peak"], -2.0)
+        self.assertGreaterEqual(got["lra"], 4.0)
+        self.assertLessEqual(got["lra"], 8.0)
+        for k in ("lufs", "true_peak", "lra"):
+            self.assertAlmostEqual(info[k], got[k], delta=0.2)
+
+    def test_flat_narration_misses_the_lra_gate(self):
+        flat = self.d / "flat.wav"
+        retime.write(flat, np.concatenate([_tone(2.7), _gap(0.3)] * 8))
+        with self.assertRaisesRegex(ValueError, "LRA"):
+            mix.master_audiobook(flat, {}, self.d / "flat.mp3")
+
+    def test_opens_with_title_and_author_and_ends_with_closing_then_3s_room_tone(self):
+        info, out = self.master_part(opening=[self.title, self.author], closing=self.closing)
+        narr_s = len(m.samples(self.narr)) / 48000
+        lead = 1.0 + 1.2 + 0.8 + 0.9 + 1.5  # lead-in, title, gap, author, gap before the body
+        self.assertAlmostEqual(info["voice_offset_s"], lead, delta=0.3)  # minus the 40 ms joins
+        self.assertAlmostEqual(info["closing_start_s"], info["voice_offset_s"] + narr_s + 2.0, delta=0.1)
+        self.assertAlmostEqual(info["duration_s"], info["closing_start_s"] + 0.8 + 3.0, delta=0.15)
+        x = m.samples(out)
+        self.assertGreater(m.rms_db(x[int(1.2 * 48000):int(2.0 * 48000)]), -35)  # the title is spoken
+        tail = x[-int(2.5 * 48000):]
+        self.assertLess(m.rms_db(tail), -45)       # room tone, not speech or a bed
+        self.assertGreater(m.rms_db(tail), -90)    # and never digital zero
+
+    def stem(self, info):
+        return m.samples(Path(info["bed_stem"]))
+
+    def test_bed_at_least_24lu_under_voice(self):
+        info, out = self.master_part()
+        self.assertGreaterEqual(info["bed_under_voice_lu"], 24.0)
+        stem = self.d / "stem.wav"
+        retime.write(stem, self.stem(info))
+        self.assertGreaterEqual(mix.measure(out)["lufs"] - mix.measure(stem)["lufs"], 24.0)
+
+    def test_bed_only_at_intro_outro_and_part_changes(self):
+        info, _ = self.master_part()
+        x = self.stem(info)
+        self.assertGreater(m.rms_db(x[int(2.0 * 48000):int(3.0 * 48000)]), -90)   # part change at the start
+        self.assertEqual(float(np.abs(x[int(20 * 48000):int(28 * 48000)]).max()), 0.0)  # none mid-chapter
+
+    def test_bed_ducks_6_db_under_speech(self):
+        info, _ = self.master_part()
+        x = self.stem(info)
+        open_bed = m.rms_db(x[int(0.7 * 48000):int(1.3 * 48000)])    # before the voice enters (1.5 s)
+        under = m.rms_db(x[int(2.0 * 48000):int(2.8 * 48000)])
+        self.assertAlmostEqual(open_bed - under, 6.0, delta=1.0)
+
+    def test_no_score_pumping_in_pauses(self):
+        info, _ = self.master_part()
+        x = self.stem(info)
+        lvl = lambda a, b: m.rms_db(x[int(a * 48000):int(b * 48000)])
+        # voice 1.5-3.0 s, pause 3.0-4.0 s, voice 4.0-5.5 s
+        speech = (lvl(2.0, 2.8) + lvl(4.3, 5.2)) / 2
+        for a, b in ((3.2, 3.5), (3.5, 3.9)):
+            self.assertLess(abs(lvl(a, b) - speech), 3.0)
 
 
 if __name__ == "__main__":

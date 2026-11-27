@@ -21,8 +21,15 @@ Root/Integration owns provider mutations; this skill prepares and stages.
 ### Steps
 
 1. After a passing `qc` of the assembled film (and the owner's review),
-   `python3 -m eav.cli bundle-audio --root <root> --out <bundle dir> --score-dir <dir>
-   --score-route vcsl|ace-step:<music job_id>` writes one 96 kbps MP3 per Maison unit: the narration with its best-fit background
+   `python3 -m eav.cli bundle-audio --root <root> --out <bundle dir> --frame-dir <dir>
+   [--score-dir <dir> --score-route vcsl|ace-step:<music job_id>]` (profile `audiobook`, the default)
+   writes one mono 64 kbps MP3 per Maison unit with its own master (`eav.mix.master_audiobook`: −18 LUFS ±1,
+   ≤ −2 dBTP and LRA 4–8 LU measured on the encoded file; the score bed only at the opening, part changes and
+   closing, 24 LU under the voice). `--frame-dir` holds `title.wav`, `author.wav` and `closing.wav` (the spoken
+   title and author that open part 1, the closing word after which 3 s of room tone end the last part).
+   `timing.json` rows then also carry `chapters` and `sentences` (docs/interface-notes/2026-11-27-audio-bundle-sentences-chapters.md).
+   `--profile film` keeps the film-level master below (96 kbps stereo, −16 LUFS, no chapters or sentences).
+   The film-level master writes one 96 kbps MP3 per Maison unit: the narration with its best-fit background
    score (`<unit_id>.wav` per chapter from `earnalism-audiobook-score`), ducked under
    speech and mastered to −16 LUFS by `eav.mix.duck_and_master`. It refuses without a
    score, or when a bed is shorter than its chapter. `--dry` (narration only) is allowed

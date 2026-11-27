@@ -82,7 +82,8 @@
   python3 -m eav.cli reel <n> --root <dir> [--score <wav> --score-route ...]
   python3 -m eav.cli qc --root <dir>
   python3 -m eav.cli status --root <dir>
-  python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir>
+  python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir> [--profile audiobook|film]
+                         [--frame-dir <dir of title.wav, author.wav, closing.wav>]
                          (--score-dir <dir> --score-route vcsl|ace-step:<job_id> | --dry)
   python3 -m eav.cli bundle-film --root <dir> --film film-NN --unit-id <uuid> --out <bundle dir>
                          (faststart MP4 + WebVTT + film.json for Maison private R2)
@@ -127,6 +128,7 @@ EVIDENCE_DRAFT = "audiovisual-clearance-evidence.draft.json"
 SLUG = re.compile(r"[a-z0-9][a-z0-9-]*")
 SHA = re.compile(r"[0-9a-f]{64}")
 FILM_LUFS, REEL_LUFS, LUFS_TOL, TP_MAX = -16.0, -14.0, 1.0, -1.0
+FRAME_UNITS = ("title", "author", "closing")  # the audiobook's spoken opening and closing word
 LOOP_MIN = 0.8
 HOOK_ONSET_MAX_S = 0.2
 MP3_END_SLACK_MS = 50
@@ -642,7 +644,8 @@ def next_action(root) -> str:
     if not _artifacts(rec, "evidence_draft"):
         return ("Owner reviews the first package (opening, every join, climax, full ending); that review "
                 f"is the listening assessment. Then for Maison audio: {PROG} bundle-audio {r} --out "
-                f"{root / 'maison' / 'bundle'} --score-dir <one score bed per chapter> --score-route "
+                f"{root / 'maison' / 'bundle'} --frame-dir <title.wav, author.wav, closing.wav> "
+                "--score-dir <one score bed per chapter> --score-route "
                 f"vcsl|ace-step:<music job_id>. For Maison video (full films, private R2): {PROG} bundle-film. "
                 "Social posting only to destinations the owner names (references/publishing.md).")
     return (f"Owner completes (territories, term_per_territory for every territory, text_source_licence, "
@@ -2018,6 +2021,15 @@ def cmd_bundle_audio(args):
                    f"{PROG} qc --root {rec.root}, fix any failure, then the owner's review")
     if args.dry and (args.score_dir or args.score_route):
         raise Stop("--dry excludes --score-dir and --score-route", "Choose one")
+    if args.profile == "audiobook":
+        missing = [f"{k}.wav" for k in FRAME_UNITS
+                   if not (args.frame_dir and (Path(args.frame_dir) / f"{k}.wav").is_file())]
+        if missing:
+            raise Stop("the audiobook opens with the title and author and ends with the closing word: pass "
+                       f"--frame-dir <dir> holding {', '.join(f'{k}.wav' for k in FRAME_UNITS)} "
+                       f"(missing: {', '.join(missing)}), narrated in the book's voice",
+                       "Narrate the three units, then rerun bundle-audio --frame-dir <dir> "
+                       "(or --profile film for the film-level master)")
     if not args.dry:
         if not args.score_dir:
             raise Stop("Maison audio carries narration with its background score: pass --score-dir "
@@ -2044,6 +2056,36 @@ def cmd_bundle_audio(args):
             for child in bundle.iterdir():
                 shutil.rmtree(child) if child.is_dir() else child.unlink()
         raise
+
+
+def _audiobook_cues(args, bed, n: int, count: int) -> dict:
+    """Title and author open the first part, the closing word ends the last; a score bed (when given)
+    plays only there and at part changes (the start of every later part)."""
+    frame = {k: Path(args.frame_dir) / f"{k}.wav" for k in FRAME_UNITS}
+    cues = {}
+    if n == 1:
+        cues["opening"] = [frame["title"], frame["author"]]
+    if n == count:
+        cues["closing"] = frame["closing"]
+    if bed:
+        if n == 1:
+            cues["intro"] = bed
+        else:
+            cues["part"] = bed
+        if n == count:
+            cues["outro"] = bed
+    return cues
+
+
+def _chapters(unit: dict, segs: list) -> list:
+    """পরিচ্ছেদ markers: each heading paragraph (retime's heading rule) at its measured start; a unit
+    with none, or with text before its first heading, also gets one at 0 titled with the unit."""
+    start = {s["anchor_id"]: s["start_ms"] for s in segs}
+    marks = [{"title": " ".join(p["text"].split()).lstrip("# ").rstrip("।. "), "start_ms": start[p["anchor_id"]]}
+             for p in unit["paragraphs"] if retime._HEADING_LINE.match(p["text"])]
+    if not marks or marks[0]["start_ms"] > segs[0]["start_ms"]:
+        marks.insert(0, {"title": unit["title"], "start_ms": 0})
+    return marks
 
 
 def _narration_generators(rec, plan, job_ids) -> list:
@@ -2100,8 +2142,18 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
             timing, prov = _measured_track(units, rec.root / "narration" / job["job_id"], chapter,
                                            job["job_id"])
             master, score_sha = td / f"unit-{n:03d}-master.wav", None
+            audiobook = args.profile == "audiobook"
+            offset, pauses, master_info = 0.0, [], {}
             try:
-                if args.dry:  # narration only, same -16 LUFS / -1 dBTP gate
+                if audiobook:  # own master: -18 LUFS, TP <= -2 dBTP, LRA 4-8 LU, mono 64 kbps, beds at part ends only
+                    bed = None if args.dry else Path(args.score_dir) / f"{unit['unit_id']}.wav"
+                    score_sha = sha256_file(bed) if bed else None
+                    master_info = mix.master_audiobook(chapter, _audiobook_cues(
+                        args, bed, n, len(src["units"])), td / f"unit-{n:03d}.mp3")
+                    offset = master_info["voice_offset_s"]
+                    pauses = retime.detect_pauses(chapter)
+                    mastered = "eav.mix.master_audiobook"
+                elif args.dry:  # narration only, same -16 LUFS / -1 dBTP gate
                     mix.master(chapter, master, FILM_LUFS)
                     mastered = "eav.mix.master"
                 else:  # R10: narration + best-fit score, ducked, -16 LUFS
@@ -2116,28 +2168,54 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                 raise Stop(f"QC failure: {unit['unit_id']}: {e}",
                            "Re-balance that chapter (score bed or narration level) and rerun", code=5)
             mp3 = bundle / f"unit-{n:03d}.mp3"  # stereo keeps the master's measured loudness
-            _ff("-i", master, "-ar", 48000, "-ac", 2, "-c:a", "libmp3lame", "-b:a", "96k", mp3)
+            if audiobook:
+                shutil.copy2(td / mp3.name, mp3)
+            else:
+                _ff("-i", master, "-ar", 48000, "-ac", 2, "-c:a", "libmp3lame", "-b:a", "96k", mp3)
             dur_ms = round(film._duration(mp3) * 1000)
-            segs = []
+            segs, sents, unmeasured = [], [], []
             for p in unit["paragraphs"]:
                 times = [t for t, a in zip(timing, tags) if a == p["anchor_id"]]
-                start, end = round(times[0]["start"] * 1000), round(times[-1]["end"] * 1000)
+                start, end = round((times[0]["start"] + offset) * 1000), round((times[-1]["end"] + offset) * 1000)
                 if end > dur_ms:
                     if end - dur_ms > MP3_END_SLACK_MS:
                         raise Stop(f"{mp3.name}: measured narration ends after the MP3", "Report as a bug")
                     end = dur_ms
                 segs.append({"anchor_id": p["anchor_id"], "start_offset_chars": 0,
                              "end_offset_chars": len(p["text"]), "start_ms": start, "end_ms": end})
-            rows.append({"unit_id": unit["unit_id"], "mp3": mp3.name, "segments": segs})
+                if audiobook:
+                    spans = retime.sentence_spans(p["text"], times[0]["start"], times[-1]["end"], pauses)
+                    if spans is None:  # never estimated: the paragraph keeps paragraph-level timing
+                        unmeasured.append(p["anchor_id"])
+                        continue
+                    ms = [(round((a + offset) * 1000), round((b + offset) * 1000)) for a, b in spans]
+                    ms[0], ms[-1] = (start, ms[0][1]), (ms[-1][0], end)
+                    sents += [{"anchor_id": p["anchor_id"], "sentence_index": i, "start_ms": a, "end_ms": b}
+                              for i, (a, b) in enumerate(ms)]
+            row = {"unit_id": unit["unit_id"], "mp3": mp3.name, "segments": segs}
+            if audiobook:
+                row.update(chapters=_chapters(unit, segs), sentences=sents)
+            rows.append(row)
             prov_units[unit["unit_id"]] = {
                 "narration_job_id": job["job_id"], "wav_sha256": prov["wav_sha256"],
                 "chapter_wav_sha256": prov["track_sha256"], "mastered_with": mastered,
                 "score_sha256": score_sha,
                 "mp3_sha256": sha256_file(mp3), "mp3_duration_ms": dur_ms,
-                "encoder": "ffmpeg libmp3lame 96 kbps CBR stereo 48 kHz"}
+                "encoder": ("ffmpeg libmp3lame 64 kbps CBR mono 48 kHz" if audiobook
+                            else "ffmpeg libmp3lame 96 kbps CBR stereo 48 kHz")}
+            if audiobook:
+                prov_units[unit["unit_id"]].update(
+                    lufs=master_info["lufs"], true_peak_dbtp=master_info["true_peak"],
+                    lra_lu=master_info["lra"], bed_under_voice_lu=master_info["bed_under_voice_lu"],
+                    duck_db=master_info["duck_db"], release_s=master_info["release_s"],
+                    voice_offset_ms=round(offset * 1000), sentences_unmeasured=unmeasured)
     ids = sorted(job_ids)
     provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
                   "narration_job_id": ids[0] if len(ids) == 1 else ids, "units": prov_units}
+    if args.profile == "audiobook":
+        provenance.update(profile="audiobook", sentence_splitter="eav.text.sentences",
+                          frame_units_sha256={k: sha256_file(Path(args.frame_dir) / f"{k}.wav")
+                                              for k in FRAME_UNITS})
     timing_path = _write_json(bundle / "timing.json", {"units": rows, "provenance": provenance})
     audio = [v["mp3_sha256"] for v in prov_units.values()]
     draft = _write_json(rec.root / "maison" / EVIDENCE_DRAFT, {
@@ -2156,7 +2234,10 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
         "dry_narration": bool(args.dry),
         "music": None if args.dry else {
             **_music_licence(args.score_route),
-            "mix": "per-chapter score bed, ducked under speech (eav.mix.duck_and_master, -16 LUFS)",
+            "mix": ("score bed at the opening, part changes and closing only, 24 LU under the voice, ducked "
+                    "6 dB with a 1.5 s release (eav.mix.master_audiobook, -18 LUFS)"
+                    if args.profile == "audiobook" else
+                    "per-chapter score bed, ducked under speech (eav.mix.duck_and_master, -16 LUFS)"),
             "score_sha256": {u: v["score_sha256"] for u, v in prov_units.items()}},
         "owner_must_complete": ["territories", "term_per_territory", "text_source_licence",
                                 "cover_provenance", "status", "owner_approval"],
@@ -2535,6 +2616,11 @@ def _parser():
     s.add_argument("--score-dir", help="<unit_id>.wav score bed per chapter (default route)")
     s.add_argument("--score-route", help="with --score-dir: vcsl or ace-step:<imported music job id>")
     s.add_argument("--dry", action="store_true", help="narration only; recorded in the evidence draft")
+    s.add_argument("--profile", choices=("audiobook", "film"), default="audiobook",
+                   help="audiobook (default): own master, chapters, sentence timing; "
+                        "film: the film-level -16 LUFS stereo 96 kbps master")
+    s.add_argument("--frame-dir", help="audiobook: <dir> with title.wav, author.wav and closing.wav "
+                                       "(the spoken opening and closing word)")
     s = add("bundle-film")
     s.add_argument("--film", required=True, help="film id, e.g. film-01")
     s.add_argument("--unit-id", required=True, help="the Maison unit UUID the film belongs to")
