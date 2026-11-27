@@ -1,4 +1,5 @@
 """Representative catalog query budget and rights-before-limit acceptance."""
+import re
 import uuid
 from datetime import timedelta
 
@@ -11,6 +12,9 @@ from django.utils import timezone
 from core.api import DomainError
 from .catalog_query import catalog_page, catalog_queryset, card_from_edition
 from .models import Asset, Edition, Revision, Rights, Unit, Work
+
+# Any statement reading the edition table, as FROM or as a JOIN ("maison_edition_revision" does not match).
+EDITION_READ = re.compile(r'(?:FROM|JOIN) "maison_edition"')
 from .search import refresh_revision_search
 from .validation import validate_schema
 
@@ -67,7 +71,7 @@ class CatalogQueryTests(TestCase):
         self.assertTrue(all(card['title'].startswith('Garden') for card in result['items']))
         self.assertGreater(ttl,0); self.assertLessEqual(ttl,30)
         self.assertLessEqual(len(measured),8, [q['sql'] for q in measured])
-        outer=[q['sql'] for q in measured if 'FROM "maison_edition"' in q['sql']]
+        outer=[q['sql'] for q in measured if EDITION_READ.search(q['sql'])]
         self.assertEqual(len(outer),1)
         self.assertIn('LIMIT 21',outer[0])
         self.assertNotIn('OFFSET',outer[0])
@@ -95,7 +99,9 @@ class CatalogQueryTests(TestCase):
         self.assertEqual(len(first['items']),20);self.assertEqual(len(second['items']),20)
         self.assertFalse({r['edition_id'] for r in first['items']}&{r['edition_id'] for r in second['items']})
         self.assertLessEqual(len(measured),8)
-        self.assertTrue(all('LIMIT 21' in q['sql'] for q in measured if 'FROM "maison_edition"' in q['sql']))
+        edition_reads=[q['sql'] for q in measured if EDITION_READ.search(q['sql'])]  # FROM or JOIN: every one page-bounded
+        self.assertTrue(edition_reads)
+        self.assertTrue(all('LIMIT 21' in sql for sql in edition_reads), edition_reads)
 
     def test_access_duration_filters_and_territory_are_applied_in_sql(self):
         self.assertEqual(catalog_queryset('en','IN',duration_min='11').count(),0)

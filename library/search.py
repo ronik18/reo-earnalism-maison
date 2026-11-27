@@ -20,22 +20,22 @@ from .search_models import SearchAlias, SearchDocument
 INDEX = 'live_revision__search_index__'
 
 
-def romanized_title_ids(query):
-    """Edition ids whose LIVE Bengali title reads as the Latin query: a candidate set, not a page.
+def romanized_revision_ids(query):
+    """Live revision ids whose Bengali title reads as the Latin query: a candidate set, not a page.
 
-    Scans the search index (maison_search_document, only (edition id, title) of documents that are their edition's
-    live pointer), never maison_edition, so the catalogue page query stays the only edition query and keeps its
-    explicit LIMIT (contracts/LLD.md section 8). The caller intersects these ids with its own published, locale-
-    and territory-scoped queryset, so a draft, foreign-locale or unlicensed title can never match through here.
-    Deliberately uncapped (Task 12 ruling): a published title never drops out of the scan. Cost is linear in live
-    Bengali titles; at catalogue scale precompute the variants on SearchDocument at refresh time and index them.
+    Reads only (revision id, title) from maison_search_document joined to maison_edition_revision for its state,
+    never maison_edition, so the catalogue page query stays the only edition read and keeps its explicit LIMIT
+    (contracts/LLD.md section 8). The page query matches these ids against each edition's live_revision pointer
+    and its own published, locale- and territory-scoped filters, so a retired, draft, foreign-locale or unlicensed
+    title can never match through here, and no one-live-revision-per-edition invariant is assumed.
+    Deliberately uncapped (Task 12 ruling): every live revision is scanned, so a published title never drops out.
+    Cost is linear in live Bengali titles; at catalogue scale precompute the variants on SearchDocument at refresh.
     """
     key = normalize_latin_query(query)
     if len(key) < 3:
         return []
-    rows = SearchDocument.objects.filter(
-        revision__state='live', revision__edition__live_revision_id=F('revision_id'),
-        title_normalized__regex='[\u0980-\u09ff]').values_list('revision__edition_id', 'title_normalized').iterator()
+    rows = SearchDocument.objects.filter(revision__state='live', title_normalized__regex='[\u0980-\u09ff]').values_list(
+        'revision_id', 'title_normalized').iterator()
     return [pk for pk, title in rows if any(form.startswith(key) for form in romanize_bn(title))]
 
 
@@ -106,7 +106,7 @@ def search_editions(queryset, query, locale=None):
     aliases=SearchAlias.objects.filter(active=True,reviewed_at__lte=timezone.now(),alias_normalized__in=alias_keys)
     if locale is not None:aliases=aliases.filter(locale=locale)
     targets=list(aliases.order_by('locale','alias_normalized').values_list('locale','target_normalized')[:16])
-    romanized_match=Q(pk__in=romanized_title_ids(query))
+    romanized_match=Q(live_revision_id__in=romanized_revision_ids(query))
     simple_query=SearchQuery(query,config='simple',search_type='plain')
     languages={locale} if locale is not None else {'en'}
     languages.update(language for language,_ in targets)

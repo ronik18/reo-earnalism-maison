@@ -116,6 +116,15 @@ class SearchContractTests(TestCase):
         made = {self.edition('বিচারক', locale='bn')[0].pk for _ in range(12)}
         self.assertEqual({e.pk for e in self.results('bicharak', 'bn')}, made)
 
+    def test_romanized_match_follows_the_live_pointer_not_a_stale_live_state(self):
+        edition, old = self.edition('বিচারক', locale='bn')
+        new = Revision.objects.create(edition=edition, title='নদী', description='')
+        new.state = 'live'; new.save()  # the old row keeps state live: no one-live-per-edition invariant is assumed
+        edition.live_revision = new; edition.save()
+        refresh_revision_search(new)
+        self.assertEqual(Revision.objects.get(pk=old.pk).state, 'live')
+        self.assertEqual(self.results('bicharak', 'bn'), [])
+
     def test_reviewed_alias_still_ranks_first(self):
         romanized, _ = self.edition('বিচারক', locale='bn')
         aliased, _ = self.edition('ন্যায়বিচার', locale='bn')

@@ -55,8 +55,34 @@ Rules (the importer refuses the whole film otherwise, before any write):
 - Both maps follow `library.timing.validated_segments`: segments ordered in time and text, never overlapping,
   `end_ms > start_ms`, every `end_ms` within the ffprobe-measured film duration, and together covering every
   paragraph of the unit exactly. Gaps between segments (scene lead-ins and tails, credits) are fine.
+- Only two shapes per anchor are accepted; any other split is refused:
+  - whole paragraph: exactly one segment, offsets `0..len(text)`, no `sentence_index`. Every anchor of the paragraph
+    map has this shape, and so does a sentence-map anchor whose sentences were not measured;
+  - sentences (sentence map only): exactly the `split_sentences` spans with `sentence_index` 0..n-1. An anchor never
+    mixes indexed and unindexed rows, and each sentence's `start_ms`/`end_ms` lies inside that anchor's
+    paragraph-map time span.
+- Character offsets count Unicode code points (Python `len`, not UTF-8 bytes or UTF-16 units) of the paragraph text
+  exactly as Maison stores it (NFC, as exported by `export_audiovisual_source`).
+- Hex values (`mp4_sha256`, `text_sha256`, `timing_sha256`) are 64 lowercase hex characters (`[a-f0-9]{64}`).
 - Integers only; anchors and unit id are the live ids `export_audiovisual_source` wrote.
 - Only measured clause times; never estimated or proportional positions.
+- `measurement_evidence_ref` is validated (non-blank, at most 500 characters) and returned by `read_film_timing`, but
+  it is NOT stored on the `TimingMap` row (the row has no field for it, and no migration is proposed). Root's
+  importer should record it in the `timing_map.create` audit metadata and in the revision's `media_assets` evidence
+  for the film (next to `measurement_evidence`), so each map stays tied to its measurement receipt.
+- Gap rule (what the server does with the map): a film position inside a segment maps to that segment; a position
+  between segments (scene lead-in or tail, credits) maps to the segment narrated last before it; a position before
+  the first segment (title card) is `unmapped`. Reader -> film opens at the segment's `start_ms` (narration start).
+
+## Rollout order
+
+The new keys go into `earnalism.audiovisual-film-bundle.v1` without a version bump, and today's `read_film_bundle`
+refuses any unit key outside `UNIT_KEYS`. So:
+
+1. Root ships the importer change first (§2), accepting `timing`/`timing_sha256` as optional.
+2. Only then does the skill emit them. A bundle from an older skill still imports (film without a map; Watch falls
+   back to the part start).
+3. Once every film to be published is re-bundled with a map, root may make the keys required.
 
 ## 2. What the importer must do (root, attach_audiovisual_film)
 
@@ -69,7 +95,7 @@ Rules (the importer refuses the whole film otherwise, before any write):
    text_sha256=live.content_sha256)`; map `FilmTimingError` to `CommandError`.
 3. In `attach`, inside the atomic block after the video asset is saved:
    `for m in film_timing_maps(current, video, parsed, anchor_map_by_ordinal(live_unit, unit)): m.save()`, plus an
-   `audit(actor, "timing_map.create", m, {...})` row and the map ids in the stage output, as the audio importer does.
+   `audit(actor, "timing_map.create", m, {"asset_id": str(video.id), "asset_sha256": video.sha256, "precision": m.precision, "measurement_evidence_ref": parsed["measurement_evidence_ref"]})` row and the map ids in the stage output, as the audio importer does.
 
 The maps are ordinary `TimingMap` rows on the film asset (`asset.kind = video`); no migration. They are never listed
 by `/content/mappings` (audio only) and are served only through `/content/switch-position` to a member who may open

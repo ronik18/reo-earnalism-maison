@@ -270,6 +270,21 @@ class FilmSwitchTests(TestCase):
         self.stage(film_map=False, publish=False)
         anchors = anchor_map_by_ordinal(self.live_unit, self.unit)
 
+        def split_paragraph_map(d):  # two contiguous pieces of paragraph 1 labelled "paragraph"
+            whole = d['maps'][0]['segments'][0]
+            d['maps'][0]['segments'][0:1] = [{**whole, 'end_offset_chars': 90, 'end_ms': 1500},
+                                             {**whole, 'start_offset_chars': 90, 'start_ms': 1500}]
+
+        def split_unindexed_sentence_row(d):  # paragraph 2 split at a non-sentence offset, no sentence_index
+            whole = d['maps'][1]['segments'][3]
+            d['maps'][1]['segments'][3:4] = [{**whole, 'end_offset_chars': 100, 'end_ms': 2600},
+                                             {**whole, 'start_offset_chars': 100, 'start_ms': 2600}]
+
+        def mix_indexed_and_whole(d):  # paragraph 1: two measured sentences plus an unindexed tail
+            rows = d['maps'][1]['segments']
+            tail = {k: v for k, v in rows[2].items() if k != 'sentence_index'}
+            rows[2] = tail
+
         def refused(mutate):
             doc = json.loads(self.bundle_timing())
             mutate(doc)
@@ -282,6 +297,10 @@ class FilmSwitchTests(TestCase):
         refused(lambda d: d['maps'][0]['segments'][0].update(anchor_id=str(uuid.uuid4())))     # not this unit
         refused(lambda d: d['maps'][0]['segments'].reverse())                                  # out of order
         refused(lambda d: d['maps'][1]['segments'][1].update(start_offset_chars=40))           # not the text's sentences
+        refused(split_paragraph_map)
+        refused(split_unindexed_sentence_row)
+        refused(mix_indexed_and_whole)
+        refused(lambda d: d['maps'][1]['segments'][0].update(start_ms=900))                    # before its paragraph
         self.assertEqual(TimingMap.objects.filter(asset=self.film).count(), 0)
 
     # ------------------------------------------------------------------ bounded queries

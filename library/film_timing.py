@@ -86,28 +86,47 @@ def read_film_timing(raw, *, unit_id, mp4_sha256, text_sha256):
 
 
 def anchor_map_by_ordinal(live_unit, draft_unit):
-    """{live anchor: draft anchor} for one unit and its clone (clone_revision keeps paragraph ordinals and text)."""
+    """{live anchor: draft anchor} for one unit and its clone (clone_revision keeps paragraph ordinals and text).
+    The text must match too: the clone's content_sha256 differs from the live one, so nothing else ties them."""
     from .models import Paragraph
-    live = dict(Paragraph.objects.filter(unit=live_unit).values_list("ordinal", "anchor_id"))
-    draft = dict(Paragraph.objects.filter(unit=draft_unit).values_list("ordinal", "anchor_id"))
-    if set(live) != set(draft):
+    live = {n: (anchor, text) for n, anchor, text in Paragraph.objects.filter(unit=live_unit).values_list("ordinal", "anchor_id", "text")}
+    draft = {n: (anchor, text) for n, anchor, text in Paragraph.objects.filter(unit=draft_unit).values_list("ordinal", "anchor_id", "text")}
+    if set(live) != set(draft) or any(live[n][1] != draft[n][1] for n in live):
         raise FilmTimingError("the clone's paragraphs differ from the live unit's.")
-    return {str(live[n]): str(draft[n]) for n in live}
+    return {str(live[n][0]): str(draft[n][0]) for n in live}
 
 
-def _check_sentences(segments, texts):
-    """A sentence map gives each anchor either its whole-paragraph segment, or exactly library.sentences'
-    split with sentence_index 0..n-1 (the reader's sentence highlight uses the same split)."""
-    by_anchor = {}
+def _by_anchor(segments):
+    rows = {}
     for seg in segments:
-        by_anchor.setdefault(seg["anchor_id"], []).append(seg)
-    for anchor, rows in by_anchor.items():
-        if all("sentence_index" not in r for r in rows):
+        rows.setdefault(seg["anchor_id"], []).append(seg)
+    return rows
+
+
+def _check_shape(precision, segments, texts, paragraph_spans=None):
+    """Only two shapes per anchor exist, and any other split is refused (no estimated or proportional positions):
+    - whole paragraph: exactly ONE segment, offsets 0..len(text), no sentence_index (every anchor of a paragraph
+      map; an anchor of a sentence map whose sentences were not measured);
+    - sentences (sentence map only): exactly library.sentences.split_sentences(text), sentence_index 0..n-1, each
+      sentence's time inside that anchor's paragraph-map time span.
+    Offsets are Unicode code points of the stored paragraph text."""
+    for anchor, rows in _by_anchor(segments).items():
+        text = texts[anchor]
+        indexed = ["sentence_index" in r for r in rows]
+        if not any(indexed):
+            if len(rows) != 1 or (rows[0]["start_offset_chars"], rows[0]["end_offset_chars"]) != (0, len(text)):
+                raise FilmTimingError(f"{precision} map anchor {anchor}: a segment without sentence_index must be the "
+                                      f"one whole-paragraph segment (offsets 0..{len(text)}).")
             continue
-        spans = split_sentences(texts.get(anchor, ""))
-        got = [(r.get("sentence_index"), r["start_offset_chars"], r["end_offset_chars"]) for r in rows]
+        if precision != "sentence" or not all(indexed):
+            raise FilmTimingError(f"{precision} map anchor {anchor} mixes sentence and whole-paragraph segments.")
+        spans = split_sentences(text)
+        got = [(r["sentence_index"], r["start_offset_chars"], r["end_offset_chars"]) for r in rows]
         if got != [(i, a, b) for i, (a, b) in enumerate(spans)]:
             raise FilmTimingError(f"sentence segments of anchor {anchor} differ from the text's sentences {spans}.")
+        low, high = paragraph_spans[anchor]
+        if any(r["start_ms"] < low or r["end_ms"] > high for r in rows):
+            raise FilmTimingError(f"sentence segments of anchor {anchor} lie outside its paragraph time {low}-{high} ms.")
 
 
 def film_timing_maps(revision, video, parsed, anchor_map):
@@ -121,15 +140,16 @@ def film_timing_maps(revision, video, parsed, anchor_map):
         raise FilmTimingError("film timing belongs to a film asset of this revision with a unit.")
     paragraphs = {str(p.anchor_id): p for p in Paragraph.objects.filter(unit_id=video.unit_id)}
     texts = {anchor: p.text for anchor, p in paragraphs.items()}
-    rows = []
-    for precision, segments in parsed["maps"]:
+    rows, spans = [], None
+    for precision, segments in parsed["maps"]:  # the paragraph map comes first (read_film_timing)
         mapped = []
         for seg in segments:
             if seg["anchor_id"] not in anchor_map or anchor_map[seg["anchor_id"]] not in paragraphs:
                 raise FilmTimingError(f"{precision} map anchor {seg['anchor_id']} is not a paragraph of the film's unit.")
             mapped.append({**seg, "anchor_id": anchor_map[seg["anchor_id"]]})
-        if precision == "sentence":
-            _check_sentences(mapped, texts)
+        _check_shape(precision, mapped, texts, spans)
+        if precision == "paragraph":
+            spans = {seg["anchor_id"]: (seg["start_ms"], seg["end_ms"]) for seg in mapped}
         mapping = TimingMap(revision=revision, asset=video, text_sha256=revision.content_sha256,
                             asset_sha256=video.sha256, precision=precision, measured=True, segments=mapped)
         try:
