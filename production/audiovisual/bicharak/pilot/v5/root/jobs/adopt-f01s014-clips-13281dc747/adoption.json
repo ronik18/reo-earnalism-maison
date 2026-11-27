@@ -1,0 +1,207 @@
+{
+  "binding": {
+    "clips": {
+      "11": {
+        "art": {
+          "file": "../../v6/art/f01s014-9.png",
+          "reason": "owner-picked pot still, hand-copied to pilot/v6/art",
+          "relation": "identical to the start image f01s014-9.png of motion-pilot6-f01s014 item f01s014-9p",
+          "sha256": "89d3ee4f8c871a20f01ad9b0bf7787dfd8c26544da3de7f544590bf93a48d7fe"
+        },
+        "frames": 121,
+        "licence": {
+          "licence": "Apache-2.0",
+          "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers"
+        },
+        "needs_frames": 102,
+        "source": {
+          "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+          "job_id": "motion-pilot6-f01s014",
+          "kind": "film_clips",
+          "origin": "record",
+          "record": "../../..",
+          "verified_against": "the output sha256 recorded when eav imported the job"
+        },
+        "takes": [
+          {
+            "file": "f01s014-9p.mp4",
+            "frames": 121,
+            "key": "f01s014-9p",
+            "motion_gate": "recorded at import",
+            "sha256": "2a13b6d59363b4fe19a6212d8132d07b5af1efec2fba8386afb78c6ee106ea63"
+          }
+        ]
+      },
+      "4": {
+        "frames": 121,
+        "licence": {
+          "licence": "Apache-2.0",
+          "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers"
+        },
+        "needs_frames": 108,
+        "source": {
+          "folder": "../../motion-pilot4-f01s014",
+          "input_zip_sha256": "9afaeb304b02225e7194bf1de60c2e62664550eeb6ad8803f462daf77f392724",
+          "job_id": "motion-pilot4-f01s014",
+          "kind": "film_clips",
+          "origin": "folder",
+          "verified_against": "the job's own outputs manifest.json (COMPLETE) and its inputs.zip sha256; a pilot job eav never imported"
+        },
+        "takes": [
+          {
+            "file": "f01s014-12a.mp4",
+            "frames": 121,
+            "key": "f01s014-12a",
+            "motion_gate": "gated on adoption",
+            "sha256": "aee267a868043fc03fc1cafcaa72eb44559358b012a025fcec788d7744fb724b"
+          }
+        ]
+      },
+      "7": {
+        "art": {
+          "file": "../../v6/art/f01s014-14.png",
+          "reason": "owner-picked paan still, hand-copied to pilot/v6/art",
+          "relation": "identical to the start image f01s014-14.png of motion-pilot6-f01s014 item f01s014-14w",
+          "sha256": "301980b6d8a4cd162c33bcf2b31378f777e67585f53061ab79db0220530218ae"
+        },
+        "frames": 121,
+        "licence": {
+          "licence": "Apache-2.0",
+          "model": "Wan-AI/Wan2.2-TI2V-5B-Diffusers"
+        },
+        "needs_frames": 93,
+        "source": {
+          "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+          "job_id": "motion-pilot6-f01s014",
+          "kind": "film_clips",
+          "origin": "record",
+          "record": "../../..",
+          "verified_against": "the output sha256 recorded when eav imported the job"
+        },
+        "takes": [
+          {
+            "file": "f01s014-14w.mp4",
+            "frames": 121,
+            "key": "f01s014-14w",
+            "motion_gate": "recorded at import",
+            "sha256": "7b6c43f832f25c458617cb483e644e7dc5144740a8c4a3bdee6d39cfade2633b"
+          }
+        ]
+      }
+    },
+    "depth": {
+      "f01s014-9": {
+        "depth_model_evidence": {
+          "depth-anything/Depth-Anything-V2-Small-hf": [
+            {
+              "notebook": "motion.ipynb",
+              "sha256": "bf55e789b02c80021f0a771aa7d498967d81f44386da2b95870a8534f9ced340"
+            }
+          ]
+        },
+        "file": "f01s014-8.depth.png",
+        "licence": {
+          "licence": "Apache-2.0",
+          "model": "depth-anything/Depth-Anything-V2-Small-hf"
+        },
+        "sha256": "70659620d8cffdb209f63564e897481988ba8330317fdcfd4d26fe30490b4ed6",
+        "source": {
+          "folder": "../../motion-pilot2-f01s014",
+          "job_id": "motion-pilot2-f01s014",
+          "origin": "folder",
+          "verified_against": "the job's own outputs manifest.json (COMPLETE) and its inputs.zip sha256; a pilot job eav never imported"
+        },
+        "still_sha256": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4"
+      }
+    }
+  },
+  "files": {
+    "clips/f01s014-12a.mp4": "aee267a868043fc03fc1cafcaa72eb44559358b012a025fcec788d7744fb724b",
+    "clips/f01s014-14w.mp4": "7b6c43f832f25c458617cb483e644e7dc5144740a8c4a3bdee6d39cfade2633b",
+    "clips/f01s014-9p.mp4": "2a13b6d59363b4fe19a6212d8132d07b5af1efec2fba8386afb78c6ee106ea63",
+    "depth/f01s014-9.depth.png": "70659620d8cffdb209f63564e897481988ba8330317fdcfd4d26fe30490b4ed6"
+  },
+  "job": {
+    "depth_stills": {
+      "f01s014-9.png": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4"
+    },
+    "items": [
+      {
+        "continue_from": null,
+        "height": 704,
+        "image": "f01s014-12.png",
+        "key": "f01s014-12a",
+        "seed": 41012,
+        "shot": 4,
+        "source_job": "motion-pilot4-f01s014",
+        "width": 1280
+      },
+      {
+        "continue_from": null,
+        "height": 704,
+        "image": "f01s014-14.png",
+        "key": "f01s014-14w",
+        "seed": 61014,
+        "shot": 7,
+        "source_job": "motion-pilot6-f01s014",
+        "width": 1280
+      },
+      {
+        "continue_from": null,
+        "height": 704,
+        "image": "f01s014-9.png",
+        "key": "f01s014-9p",
+        "seed": 61009,
+        "shot": 11,
+        "source_job": "motion-pilot6-f01s014",
+        "width": 1280
+      }
+    ],
+    "scene": "f01s014"
+  },
+  "job_id": "adopt-f01s014-clips-13281dc747",
+  "kind": "film_clips",
+  "motion_gates": {
+    "f01s014-12a": {
+      "needs_review": true,
+      "notes": [
+        "difference spike at frame 21 looks like motion, not an outlier: 5.3x the median",
+        "difference spike at frame 23 looks like motion, not an outlier: 4.1x the median",
+        "difference spike at frame 28 looks like motion, not an outlier: 8.5x the median",
+        "difference spike at frame 31 looks like motion, not an outlier: 4.3x the median",
+        "difference spike at frame 63 looks like motion, not an outlier: 7.3x the median",
+        "difference spike at frame 65 looks like motion, not an outlier: 14.2x the median",
+        "difference spike at frame 68 looks like motion, not an outlier: 13.7x the median",
+        "difference spike at frame 71 looks like motion, not an outlier: 9.0x the median",
+        "difference spike at frame 80 looks like motion, not an outlier: 4.6x the median"
+      ],
+      "pass": true
+    },
+    "f01s014-14w": {
+      "needs_review": false,
+      "notes": [],
+      "pass": true
+    },
+    "f01s014-9p": {
+      "needs_review": true,
+      "notes": [
+        "difference spike at frame 10 looks like motion, not an outlier: 9.0x the median",
+        "difference spike at frame 15 looks like motion, not an outlier: 4.1x the median",
+        "difference spike at frame 17 looks like motion, not an outlier: 7.4x the median",
+        "difference spike at frame 50 looks like motion, not an outlier: 4.1x the median",
+        "difference spike at frame 111 looks like motion, not an outlier: 6.8x the median",
+        "difference spike at frame 113 looks like motion, not an outlier: 10.3x the median"
+      ],
+      "pass": true
+    }
+  },
+  "plan_sha256": "7b618dfb018645a45b5b4da9e9b96a06a016837df3c009a1b0911bf4dffc0683",
+  "scene": "f01s014",
+  "schema": "earnalism.audiovisual-adoption.v1",
+  "spec": {
+    "path": "../adopt-f01s014.json",
+    "sha256": "e2e9f8e5a010264f34a6c3416ad51728117565ad13aa04f3c1ae8f00aa24bf14"
+  },
+  "spent_cu": 0,
+  "target": "film-01"
+}

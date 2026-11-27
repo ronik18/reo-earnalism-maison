@@ -1,0 +1,132 @@
+{
+  "boundaries": [
+    {
+      "clause": 1,
+      "error_s": 0.181,
+      "expected_s": 2.156,
+      "kind": "comma",
+      "local_s_per_char": 0.1005,
+      "passage": "f01s014-p01",
+      "tol_s": 0.9
+    },
+    {
+      "clause": 2,
+      "error_s": 0.001,
+      "expected_s": 7.93,
+      "kind": "sentence",
+      "local_s_per_char": 0.097,
+      "passage": "f01s014-p01",
+      "tol_s": 0.9
+    },
+    {
+      "clause": 3,
+      "error_s": 0.855,
+      "expected_s": 17.972,
+      "kind": "turn",
+      "local_s_per_char": 0.0886,
+      "passage": "f01s014-p01",
+      "tol_s": 0.9
+    },
+    {
+      "clause": 4,
+      "error_s": 0.026,
+      "expected_s": 23.623,
+      "kind": "comma",
+      "local_s_per_char": 0.0695,
+      "passage": "f01s014-p01",
+      "tol_s": 0.9
+    },
+    {
+      "clause": 5,
+      "error_s": -0.382,
+      "expected_s": 27.403,
+      "kind": "comma",
+      "local_s_per_char": 0.0781,
+      "passage": "f01s014-p01",
+      "tol_s": 0.9
+    },
+    {
+      "clause": 6,
+      "error_s": -0.124,
+      "expected_s": 32.811,
+      "kind": "comma",
+      "local_s_per_char": 0.0866,
+      "passage": "f01s014-p01",
+      "tol_s": 0.9
+    },
+    {
+      "clause": 7,
+      "error_s": -0.268,
+      "expected_s": 48.776,
+      "kind": "comma",
+      "local_s_per_char": 0.089,
+      "passage": "f01s014-p01",
+      "tol_s": 0.9
+    }
+  ],
+  "breaths": [
+    {
+      "end": 35.352,
+      "start": 35.032
+    },
+    {
+      "end": 45.065,
+      "start": 44.364
+    }
+  ],
+  "lead_in_s": 0.85,
+  "length_s": 54.592,
+  "method": "eav.cli scene-timing: retime.clauses matched by position (retime.match_pauses) to retime.detect_pauses per retimed passage; unmatched pauses are breaths inside a clause",
+  "min_pause_s": 0.3,
+  "position_tolerance": "each clause boundary's pause within 10 characters at the local speaking rate of its local estimate, 0.3-0.6 s (x1.5 for a pause already as long as its punctuation pause); see each boundary's tol_s",
+  "r9_lead_in_ok": true,
+  "scene": "f01s014",
+  "schema": "earnalism.audiovisual-scene-timing.v1",
+  "speech_end": 52.592,
+  "speech_start": 0.85,
+  "tail_s": 2.0,
+  "threshold_db": -38.0,
+  "timing": [
+    {
+      "end": 2.337,
+      "start": 0.85,
+      "text": "মনে হইতে লাগিল,"
+    },
+    {
+      "end": 7.93,
+      "start": 2.787,
+      "text": "পৃথিবীতে ঘরে ঘরে সমস্ত কুলকন্যারা এখন গভীর সুষুপ্তিতে নিমগ্ন।"
+    },
+    {
+      "end": 18.827,
+      "start": 8.93,
+      "text": "সেই আপনার ঘরে আপনার শয্যাটির মধ্যে নিস্তব্ধ রাত্রের নিশ্চিন্ত নিদ্রা যে কত সুখের তাহা ইতিপূর্ব্বে কেন সে বুঝিতে পারে নাই!"
+    },
+    {
+      "end": 23.649,
+      "start": 20.427,
+      "text": "ঘরের মেয়েরা কাল সকালবেলায় ঘরের মধ্যে জাগিয়া উঠিবে,"
+    },
+    {
+      "end": 27.021,
+      "start": 24.199,
+      "text": "নিঃসঙ্কোচে নিত্যকর্ম্মের মধ্যে প্রবৃত্ত হইবে,"
+    },
+    {
+      "end": 32.686,
+      "start": 27.615,
+      "text": "আর গৃহচ্যুতা হেমশশির এই নিদ্রাহীন রাত্রি কোন্‌খানে গিয়া প্রভাত হইবে,"
+    },
+    {
+      "end": 48.508,
+      "start": 33.336,
+      "text": "এবং সেই নিরানন্দ প্রভাতে তাহাদের সেই গলির ধারের ছোটখাট ঘরকন্নাটির উপর যখন সকালবেলাকার চিরপরিচিত শান্তিময় হাস্যপূর্ণ রৌদ্রটি আসিয়া পতিত হইবে তখন সেখানে সহসা কি লজ্জা প্রকাশিত হইয়া পড়িবে,"
+    },
+    {
+      "end": 52.592,
+      "start": 49.209,
+      "text": "কি লাঞ্ছনা কি হাহাকার জাগ্রত হইয়া উঠিবে!"
+    }
+  ],
+  "voice_sha256": "4947a01daa0d1321d7f63dffb2af008a0aff11214facdccd9b8b93299690ff6c"
+}

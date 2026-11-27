@@ -1,0 +1,26 @@
+{
+ "scene": "f01s014",
+ "note": "Owner decision 27 Nov 2026: re-take the door beat (shot 10, 9.52 s) with the mother actually sweeping, from the same owner-picked door still pilot/v6/art/f01s014-13.png (stills-pilot6 c2, wall lettering painted out by hand). The old 13r continued from the old 13q's last frame, so a new take needs its own continuation: shot 10 renders 229 frames plus the 1-frame margin and one clip plays 121, so the chain is 2 clips (241 frames). One performed action per clip (R1): the sweep, then the head turn. A100 (min_vram_gib 30) as the recipe prefers; the L4 forecast is in the scene-14 prep report. The owner approved 0.5-0.9 CU: this forecast is above it and goes back to the owner before staging.",
+ "art_dir": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v6/art",
+ "min_vram_gib": 30,
+ "items": [
+  {
+   "key": "f01s014-13s",
+   "shot": 10,
+   "image": "f01s014-13.png",
+   "seed": 62013,
+   "prompt": "A careworn Bengali mother with her white red-bordered sari drawn over her head sweeps the dusty sunlit courtyard with her long broom, a few slow strokes across the ground, then stops and stands still holding the broom pole, her hands whole on the pole, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  },
+  {
+   "key": "f01s014-13t",
+   "shot": 10,
+   "continue_from": "f01s014-13s",
+   "seed": 62113,
+   "prompt": "A careworn Bengali mother with her white red-bordered sari drawn over her head stands still holding her long broom pole, then slowly turns her head toward the closed wooden door on the left and looks at it, the edge of her veil stirs in a light breeze, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  }
+ ]
+}

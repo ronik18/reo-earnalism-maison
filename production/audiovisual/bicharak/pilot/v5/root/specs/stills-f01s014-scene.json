@@ -1,0 +1,57 @@
+{
+ "scene": "f01s014",
+ "note": "Scene-bound stills for f01s014 (owner decision 27 Nov 2026: shots 1, 2, 3, 6, 8 and 12, about 1.5 CU with depth maps; the depth maps follow the pick in a film_clips job), written from the independent paper-edit review's changes 2-6, 9 and 10. Character lines first. Hem's line is the world bible's appearance line without its mole clause (owner decision 27 Nov 2026: no mole on Hem). Shots 2 and 6 are one daughter in one room.",
+ "art_dir": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v6/art",
+ "items": [
+  {
+   "key": "f01s014-1",
+   "prompt": "Establishing wide at deep night: a closed black horse-drawn carriage with shuttered slatted windows, seen from behind, rolls away fast down a straight narrow brick lane between two rows of shut two-storey lime-plastered Calcutta houses with green wooden shutters, one horse pulling it, a gas lamp on a wooden post, the lane running to a low flat horizon of rooftops under a full moon in a wide indigo sky. Bengal, 1880s. Indigo night, silver moonlight, lamp amber.",
+   "seed": 18001,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-2",
+   "prompt": "A grown young Bengali woman of twenty from a respectable family, gentle oval face, long black hair in a loose braid, deep green cotton sari with a broad red border, red blouse, thin glass bangles. Medium shot at night: she lies deeply asleep on a low wooden bed under a white mosquito net in a small whitewashed bedroom, a small brass oil lamp glowing low on a wooden stool, moonlight from a green-shuttered window. Bengal, 1880s. Indigo night, lamp amber, ivory.",
+   "seed": 18002,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-3",
+   "prompt": "Wide insert at deep night inside a small bare room with cream lime-plastered walls: an empty low narrow wooden cot with a low spindled headboard, a smoothed plain white sheet and a white pillow, on the right; above its head a tall narrow window high in the wall with four thin vertical bars and one crossbar, pale cream curtains at its sides; a dark wooden door frame at the left edge; cool moonlight falls through the bars in stripes across the empty sheet. Bengal, 1880s. Indigo night, silver moonlight, ivory.",
+   "seed": 18003,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-6",
+   "prompt": "A grown young Bengali woman of twenty from a respectable family, gentle oval face, long black hair in a loose braid, deep green cotton sari with a broad red border, red blouse, thin glass bangles. Medium shot at dawn: she wakes and sits up on a low wooden bed in a small whitewashed bedroom, pushing back a white mosquito net, a small brass oil lamp gone out on a wooden stool, pale grey-gold dawn light from a green-shuttered window. Bengal, 1880s. Ivory, pale gold, soft indigo shadow.",
+   "seed": 18006,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-8",
+   "anchor": "anchor-hem.png",
+   "prompt": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse. Medium close-up in profile at deep night inside a shut carriage: she sits upright and sleepless, facing a closed shutter of vertical wooden slats at the centre-left of the frame, vertical bars of pale moonlight striping her cheek and sari. Bengal, 1880s. Indigo night, silver moonlight.",
+   "seed": 18008,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-12",
+   "anchor": "anchor-mother.png",
+   "prompt": "Hemshashi's mother, a 40-year-old Bengali woman, kind careworn round face, red bindi, small gold earrings, an ivory-white cotton sari with a thin red border draped over her head, red blouse. High wide shot, morning: she sits grieving, head bowed, on the ground of a small dusty courtyard with whitewashed mud walls; women neighbours in plain cotton saris, sari ends over their heads, kneel around her holding her shoulders; behind them barefoot men in white dhotis stand at the gate to the lane. Bengal, 1880s. Ivory, faded vermilion, pale gold.",
+   "seed": 18012,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  }
+ ]
+}

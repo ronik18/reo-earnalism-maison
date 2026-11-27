@@ -1,0 +1,26 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 1616,
+  "diffusers": "diffusers==0.37.0",
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/clips-f01s014-door-r1",
+  "inputs_sha256": "aa1ebb95b940ca88907f4e10a2fd627455d942175cadb39a32db064e8ef8236d",
+  "job_id": "clips-f01s014-door-r1",
+  "kind": "film_clips",
+  "licences": {
+    "allowlist": [
+      "apache-2.0"
+    ],
+    "recorded": {
+      "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+      "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+    }
+  },
+  "min_vram_gib": 30,
+  "model": {
+    "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "09b105fc4d3160c287041f3e42c2c771fc9831efba1941632e36fbec795a430f",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}

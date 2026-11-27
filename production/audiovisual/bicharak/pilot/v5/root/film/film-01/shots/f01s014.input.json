@@ -1,0 +1,419 @@
+{
+ "spine": "Hem, sleepless in a shut carriage, realises that morning will bring shame to her home.",
+ "fidelity": "Reviewed against scenes 13-15: the carriage stays shut (slats, no open window) and is moving away fast ('দ্রুতবেগে') by this paragraph; Calcutta is flat (no hills or towers); night ambience only on night pictures, morning crows/birds on the morning pictures 9-10; Hem is a 14-year-old widow in plain white, shown only in close-up, with no mole (owner decision 27 Nov 2026); the daughters of good families wear coloured, bordered saris, never widow's white; the morning material is Hem's imagined future, bracketed by her face; scene 15's first shot must be Hem's present close-up, closing the bracket of shots 9-12 across the scene boundary; the mother is the same veiled woman throughout (white sari, red border, head covered); neighbours: women in front, men at the gate; period-correct, nothing modern. Owner waiver 27 Nov 2026: the 4 s shot minimum (spec section 8) is waived for shots 5, 6 and 7; at these measured cuts shots 2 (2.84 s), 3 (3.95 s) and 8 (3.77 s) are also under 4 s and are NOT covered by that waiver.",
+ "motifs": [
+  "the empty bed (Hem's, now empty; planted in shot 3, paid off at the peak in the same room)",
+  "the birdcage (in the barred window at sunrise, shot 9)",
+  "the slats of light (carriage slats -> window bars, shots 8 -> 9)",
+  "the paan-making place from scene 13, Hem's place empty"
+ ],
+ "approval_record": {
+  "paper_edit_review": ".superpowers/sdd/2026-11-27-earnalism-cinematic-film/paper-edit-f01s014-review.md: independent reviewer, APPROVE WITH CHANGES (structure), 27 Nov 2026; the new cut times re-checked by Claude on the --no-retime voice, as the review allows",
+  "owner_decisions_27_nov_2026": [
+   "adopt the picked media without regeneration: Hem close-up 12a, eye still 7-c1 (mole removed by touch-up), paan 14w, pot 9p; the door beat 13q->13r is re-taken instead",
+   "Eleven v4 model id eleven_v4 (voice.json)",
+   "a scene-bound stills run with depth maps for shots 1, 2, 3, 6, 8 and 12 (about 1.5 CU)",
+   "the door beat (shot 10) is re-taken with the mother actually sweeping (0.5-0.9 CU approved; more goes back to the owner)",
+   "the 4 s minimum is waived for shots 5, 6 and 7",
+   "no mole on Hem: 7-c1 retouched locally (eav touchup), the original kept"
+  ],
+  "owner_waivers": {
+   "4s_minimum": [
+    5,
+    6,
+    7
+   ]
+  },
+  "not_waived_under_4s": {
+   "2": 2.84,
+   "3": 3.945,
+   "8": 3.772
+  }
+ },
+ "timing_source": "clause bounds: eav scene-timing on the --no-retime import (-38 dBFS, 0.3 s; 8 clauses, the 1.6 s pause after 'নাই!' intact); in-clause breaths measured on the same scene wav with eav.retime.detect_pauses: -38 dBFS/0.15 s for 16.26-16.56, 30.98-31.20, 35.03-35.35, 44.36-45.07, 46.46-46.64; -34 dBFS for 12.29-12.46 (0.18 s; 0.12 s at -38); the inhale after 'কুলকন্যারা' 5.37-5.80 s is speech-free at -30 dBFS (fragments at -34). The word gap before 'সমস্ত' (4.40-4.46 s, 0.04-0.06 s at every threshold) is under the 0.15 s breath minimum, so the 1->2 cut is at the inhale after 'কুলকন্যারা'.",
+ "timing": [
+  {
+   "start": 0.85,
+   "end": 2.337,
+   "text": "মনে হইতে লাগিল,"
+  },
+  {
+   "start": 2.787,
+   "end": 5.372,
+   "text": "পৃথিবীতে ঘরে ঘরে সমস্ত কুলকন্যারা"
+  },
+  {
+   "start": 5.804,
+   "end": 7.93,
+   "text": "এখন গভীর সুষুপ্তিতে নিমগ্ন।"
+  },
+  {
+   "start": 8.93,
+   "end": 12.286,
+   "text": "সেই আপনার ঘরে আপনার শয্যাটির মধ্যে"
+  },
+  {
+   "start": 12.464,
+   "end": 16.26,
+   "text": "নিস্তব্ধ রাত্রের নিশ্চিন্ত নিদ্রা যে কত সুখের তাহা"
+  },
+  {
+   "start": 16.56,
+   "end": 18.827,
+   "text": "ইতিপূর্ব্বে কেন সে বুঝিতে পারে নাই!"
+  },
+  {
+   "start": 20.427,
+   "end": 23.649,
+   "text": "ঘরের মেয়েরা কাল সকালবেলায় ঘরের মধ্যে জাগিয়া উঠিবে,"
+  },
+  {
+   "start": 24.199,
+   "end": 27.021,
+   "text": "নিঃসঙ্কোচে নিত্যকর্ম্মের মধ্যে প্রবৃত্ত হইবে,"
+  },
+  {
+   "start": 27.615,
+   "end": 30.98,
+   "text": "আর গৃহচ্যুতা হেমশশির এই নিদ্রাহীন রাত্রি"
+  },
+  {
+   "start": 31.2,
+   "end": 32.686,
+   "text": "কোন্‌খানে গিয়া প্রভাত হইবে,"
+  },
+  {
+   "start": 33.336,
+   "end": 35.032,
+   "text": "এবং সেই নিরানন্দ প্রভাতে"
+  },
+  {
+   "start": 35.352,
+   "end": 44.364,
+   "text": "তাহাদের সেই গলির ধারের ছোটখাট ঘরকন্নাটির উপর যখন সকালবেলাকার চিরপরিচিত শান্তিময় হাস্যপূর্ণ রৌদ্রটি আসিয়া পতিত হইবে"
+  },
+  {
+   "start": 45.065,
+   "end": 46.46,
+   "text": "তখন সেখানে সহসা"
+  },
+  {
+   "start": 46.64,
+   "end": 48.508,
+   "text": "কি লজ্জা প্রকাশিত হইয়া পড়িবে,"
+  },
+  {
+   "start": 49.209,
+   "end": 52.592,
+   "text": "কি লাঞ্ছনা কি হাহাকার জাগ্রত হইয়া উঠিবে!"
+  }
+ ],
+ "length_s": 54.592,
+ "shots": [
+  {
+   "beats": [
+    0,
+    1
+   ],
+   "subject": "Hem's own shut carriage seen from behind, moving away down the night lane between two rows of shut houses (the shut houses carry 'পৃথিবীতে ঘরে ঘরে'); the lane runs to a flat Calcutta horizon under the moon (new still, stills job)",
+   "framing": "establishing wide",
+   "motion": "glide",
+   "camera": {
+    "move": "push",
+    "zoom": 0.16,
+    "pan_x": 0.0,
+    "ease": "in"
+   },
+   "layer": "present",
+   "transition_in": "cut",
+   "bible_refs": [],
+   "sound": {
+    "sfx": [
+     "night",
+     "wheels",
+     "hooves"
+    ],
+    "music": "drone fades up"
+   }
+  },
+  {
+   "beats": [
+    2,
+    2
+   ],
+   "subject": "a grown daughter of a good family in a coloured, bordered sari, asleep under a mosquito net beside a brass oil lamp in her moonlit room (new still; the same daughter and room as shot 6)",
+   "framing": "medium",
+   "motion": "glide",
+   "camera": {
+    "move": "push",
+    "zoom": 0.12,
+    "pan_x": 0.0,
+    "ease": "none"
+   },
+   "layer": "imagined",
+   "transition_in": "dissolve",
+   "bible_refs": [],
+   "sound": {
+    "sfx": [
+     "night"
+    ],
+    "music": "esraj opening phrase"
+   }
+  },
+  {
+   "beats": [
+    3,
+    3
+   ],
+   "subject": "Hem's own bed, empty, at night (PLANT): the same room, low wooden cot, white sheet and tall barred window as the pot-drop take 9p (shot 11), moonlight through the bars across the empty sheet (new still)",
+   "framing": "wide insert",
+   "motion": "glide",
+   "camera": {
+    "move": "push",
+    "zoom": 0.1,
+    "pan_x": 0.0,
+    "ease": "none"
+   },
+   "layer": "imagined",
+   "transition_in": "cut",
+   "bible_refs": [],
+   "sound": {
+    "sfx": [
+     "night"
+    ],
+    "music": "esraj"
+   }
+  },
+  {
+   "beats": [
+    4,
+    4
+   ],
+   "subject": "Hem in the shut carriage turns her face into the bar of moonlight between the slats; one slow blink (take f01s014-12a)",
+   "framing": "close-up",
+   "motion": "wan",
+   "wan_res": "1280x704",
+   "layer": "present",
+   "transition_in": "dissolve",
+   "bible_refs": [
+    "hemshashi"
+   ],
+   "sound": {
+    "sfx": [
+     "wheels"
+    ],
+    "music": "esraj settles"
+   }
+  },
+  {
+   "beats": [
+    5,
+    5
+   ],
+   "subject": "Hem's eye at the slat, glistening, dark-brown iris (cut-in on her realisation; still 7-c1 with the mole removed by eav touchup, owner decision 27 Nov: no mole on Hem, as in 12a)",
+   "framing": "extreme close-up",
+   "motion": "glide",
+   "camera": {
+    "move": "push",
+    "zoom": 0.15,
+    "pan_x": 0.0,
+    "ease": "out",
+    "flat": true
+   },
+   "layer": "present",
+   "transition_in": "cut",
+   "bible_refs": [
+    "hemshashi"
+   ],
+   "sound": {
+    "sfx": [
+     "wheels"
+    ],
+    "music": "drone"
+   }
+  },
+  {
+   "beats": [
+    6,
+    6
+   ],
+   "subject": "tomorrow's dawn: the same daughter as shot 2, in the same room and the same coloured, bordered sari, wakes and sits up on her bed, pushing back the mosquito net in pale dawn light (new still)",
+   "framing": "medium",
+   "motion": "glide",
+   "camera": {
+    "move": "push",
+    "zoom": 0.1,
+    "pan_x": 0.0,
+    "ease": "none"
+   },
+   "layer": "imagined",
+   "transition_in": "dissolve",
+   "bible_refs": [],
+   "sound": {
+    "sfx": [
+     "breeze"
+    ],
+    "music": "drone"
+   }
+  },
+  {
+   "beats": [
+    7,
+    7
+   ],
+   "subject": "the paan-making place from scene 13: the veiled mother (white sari, red border, head covered) at the daily task; Hem's place on the mat is only empty space beside her (take f01s014-14w)",
+   "framing": "medium wide",
+   "motion": "wan",
+   "wan_res": "1280x704",
+   "layer": "imagined",
+   "transition_in": "cut",
+   "bible_refs": [
+    "hem_mother"
+   ],
+   "sound": {
+    "sfx": [
+     "breeze"
+    ],
+    "music": "drone"
+   }
+  },
+  {
+   "beats": [
+    8,
+    8
+   ],
+   "subject": "back to Hem in the shut carriage, sleepless: a new profile composition, distinct from 12a, her face striped by vertical bars of moonlight from the shutter slats; the slat bars sit centre-left, where shot 9's window bars sit, for the match (new still)",
+   "framing": "medium close-up, profile",
+   "motion": "glide",
+   "camera": {
+    "move": "push",
+    "zoom": 0.08,
+    "pan_x": 0.0,
+    "ease": "out",
+    "flat": true
+   },
+   "layer": "present",
+   "transition_in": "dissolve",
+   "bible_refs": [
+    "hemshashi"
+   ],
+   "sound": {
+    "sfx": [
+     "wheels"
+    ],
+    "music": "drone"
+   }
+  },
+  {
+   "beats": [
+    9,
+    10
+   ],
+   "subject": "match cut from the carriage slats to the barred window: the house wall at sunrise, light crawling along the rays, the birdcage in the window (uncropped still stills-pilot2 f01s014-8 c2 with its motion-pilot2 depth map)",
+   "framing": "wide",
+   "motion": "glide",
+   "camera": {
+    "move": "push",
+    "zoom": 0.1,
+    "pan_x": 0.0,
+    "ease": "in",
+    "sweep": "down-left"
+   },
+   "layer": "imagined",
+   "transition_in": "match",
+   "bible_refs": [],
+   "sound": {
+    "sfx": [
+     "breeze",
+     "crows"
+    ],
+    "music": "hushed sunrise phrase"
+   }
+  },
+  {
+   "beats": [
+    11,
+    11
+   ],
+   "subject": "the door beat: their little household by the lane in the morning sun; the veiled mother (white sari, red border, head covered) sweeps the courtyard with a few slow strokes of her long broom, pauses, then turns her head toward Hem's shut door (owner decision 27 Nov: re-take from the door still f01s014-13 with real sweeping, a new take and its continuation)",
+   "framing": "medium wide",
+   "motion": "wan",
+   "wan_res": "1280x704",
+   "actions": [
+    "the veiled mother sweeps the sunlit courtyard with a few slow strokes of her long broom, then pauses",
+    "she turns her head toward Hem's shut door"
+   ],
+   "layer": "imagined",
+   "transition_in": "cut",
+   "bible_refs": [
+    "hem_mother"
+   ],
+   "sound": {
+    "sfx": [
+     "breeze",
+     "crows",
+     "broom"
+    ],
+    "music": "sunrise phrase, cut dead at the peak"
+   }
+  },
+  {
+   "beats": [
+    12,
+    13
+   ],
+   "subject": "PEAK: the veiled mother at Hem's empty bed; the brass pot drops and she raises one hand to her lips (hard cut into silence; take f01s014-9p)",
+   "framing": "medium",
+   "motion": "wan",
+   "wan_res": "1280x704",
+   "layer": "imagined",
+   "transition_in": "cut",
+   "bible_refs": [
+    "hem_mother"
+   ],
+   "plants": [
+    3,
+    10
+   ],
+   "sound": {
+    "sfx": [
+     "pot"
+    ],
+    "music": "silence 0.4 s on the cut, then low drone"
+   }
+  },
+  {
+   "beats": [
+    14,
+    14
+   ],
+   "subject": "neighbours gather in the courtyard of the household: women neighbours and elders in front, round the grieving veiled mother (white sari, red border, head covered); a few men stand back at the gate to the lane; colour drains; carriage wheels carry into scene 15 (new still)",
+   "framing": "high wide, pull-back",
+   "motion": "glide",
+   "camera": {
+    "move": "pull",
+    "zoom": -0.12,
+    "pan_x": 0.0,
+    "ease": "out",
+    "zoom0": 1.17,
+    "drain": true
+   },
+   "layer": "imagined",
+   "transition_in": "cut",
+   "bible_refs": [
+    "hem_mother"
+   ],
+   "sound": {
+    "sfx": [
+     "murmur",
+     "wheels"
+    ],
+    "music": "drone and esraj resolve"
+   }
+  }
+ ],
+ "peak": {
+  "shot": 11,
+  "at": 45.065
+ }
+}

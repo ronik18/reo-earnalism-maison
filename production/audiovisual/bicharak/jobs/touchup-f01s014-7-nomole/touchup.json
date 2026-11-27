@@ -1,0 +1,36 @@
+{
+  "items": [
+    {
+      "key": "f01s014-7",
+      "ops": [
+        {
+          "box": [
+            612,
+            645,
+            662,
+            695
+          ],
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 6
+        },
+        {
+          "box": [
+            620,
+            634,
+            632,
+            646
+          ],
+          "mask": "ellipse",
+          "op": "inpaint",
+          "radius": 3
+        }
+      ],
+      "source": {
+        "file": "f01s014-7--c1.png",
+        "job": "stills-pilot7-f01s014"
+      }
+    }
+  ],
+  "note": "Owner decision 27 Nov 2026: no mole on Hem (matches take 12a and the Hem anchor). Removes the small dark mole under her eye (frame-left of the nose) from the picked eye still stills-pilot7-f01s014 f01s014-7--c1 (scene 14 shot 5), and one 2 px speck above it. Reviewer change 6 (paper-edit-f01s014-review.md)."
+}

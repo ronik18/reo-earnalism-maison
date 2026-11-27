@@ -1,0 +1,164 @@
+{
+  "binding": {
+    "music": {
+      "licence": {
+        "licence": "Apache-2.0",
+        "model": "ACE-Step/ACE-Step-v1-3.5B"
+      },
+      "source": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "origin": "record",
+        "record": "../../..",
+        "verified_against": "the output sha256 recorded when eav imported the job"
+      },
+      "stems": {
+        "p3-drone-1": {
+          "file": "p3-drone-1.wav",
+          "role": "drone",
+          "sha256": "5e55f443ee07c735735ea0ca4d7a4fd873ea8b6cd4d741ce221c82de84e9330f"
+        },
+        "p3-drone-2": {
+          "file": "p3-drone-2.wav",
+          "role": "drone",
+          "sha256": "9c7faca57283b658f56acfa3f534288f7fdeab54e47bb351eb5b64ac1bd6f8a5"
+        },
+        "p3-esraj-1": {
+          "file": "p3-esraj-1.wav",
+          "role": "solo",
+          "sha256": "fe4b486afe1dc25232979473720cd25eb46cb7b243876c029fe122029a2d0626"
+        },
+        "p3-esraj-2": {
+          "file": "p3-esraj-2.wav",
+          "role": "solo",
+          "sha256": "0a0c69b2fadace4ebb25684b946e279374c54e473c58f8350889d741404e4fe3"
+        },
+        "p3-esraj-3": {
+          "file": "p3-esraj-3.wav",
+          "role": "solo",
+          "sha256": "204d24ebb140e2c63f63eb9dffcd54553715c5195b982c953e2ecdb94318f1ac"
+        },
+        "p3-esraj-4": {
+          "file": "p3-esraj-4.wav",
+          "role": "solo",
+          "sha256": "1851f3440534535549dd6d3672fd4f8ac03083175d1b09241d342b87c956716a"
+        },
+        "p3-sunrise-1": {
+          "file": "p3-sunrise-1.wav",
+          "role": "phrase",
+          "sha256": "3701a91f86bb097582ae8e309c1db53ccd9ff77beadf47c89bc12131bfe3bc94"
+        },
+        "p3-sunrise-2": {
+          "file": "p3-sunrise-2.wav",
+          "role": "phrase",
+          "sha256": "f81835e8b09dd64111f88b31e8e8a7cdd487cf3a07e2672a785fb8a3c336253f"
+        },
+        "p3-sunrise-3": {
+          "file": "p3-sunrise-3.wav",
+          "role": "phrase",
+          "sha256": "79ac103671dcfd3fcf2103af08429f7ea00aaac4808354a3077677eb1f91883d"
+        }
+      }
+    }
+  },
+  "files": {
+    "p3-drone-1.wav": "5e55f443ee07c735735ea0ca4d7a4fd873ea8b6cd4d741ce221c82de84e9330f",
+    "p3-drone-2.wav": "9c7faca57283b658f56acfa3f534288f7fdeab54e47bb351eb5b64ac1bd6f8a5",
+    "p3-esraj-1.wav": "fe4b486afe1dc25232979473720cd25eb46cb7b243876c029fe122029a2d0626",
+    "p3-esraj-2.wav": "0a0c69b2fadace4ebb25684b946e279374c54e473c58f8350889d741404e4fe3",
+    "p3-esraj-3.wav": "204d24ebb140e2c63f63eb9dffcd54553715c5195b982c953e2ecdb94318f1ac",
+    "p3-esraj-4.wav": "1851f3440534535549dd6d3672fd4f8ac03083175d1b09241d342b87c956716a",
+    "p3-sunrise-1.wav": "3701a91f86bb097582ae8e309c1db53ccd9ff77beadf47c89bc12131bfe3bc94",
+    "p3-sunrise-2.wav": "f81835e8b09dd64111f88b31e8e8a7cdd487cf3a07e2672a785fb8a3c336253f",
+    "p3-sunrise-3.wav": "79ac103671dcfd3fcf2103af08429f7ea00aaac4808354a3077677eb1f91883d"
+  },
+  "job": {
+    "items": [
+      {
+        "duration_s": 60.0,
+        "key": "p3-drone-1",
+        "lyrics": "[instrumental]",
+        "prompt": "tanpura drone only, tonic D, sustained, soft and warm, very quiet, no melody, Indian classical drone, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+        "role": "drone",
+        "seed": 14201
+      },
+      {
+        "duration_s": 60.0,
+        "key": "p3-drone-2",
+        "lyrics": "[instrumental]",
+        "prompt": "tanpura drone only, tonic D, sustained, soft and warm, very quiet, no melody, Indian classical drone, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+        "role": "drone",
+        "seed": 14202
+      },
+      {
+        "duration_s": 60.0,
+        "key": "p3-esraj-1",
+        "lyrics": "[instrumental]",
+        "prompt": "solo esraj alap in raga Lalit mood, pre-dawn, mournful and regretful, rubato free time, very sparse long bowed phrases, over a soft tanpura drone on D, small reverberant room, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+        "role": "solo",
+        "seed": 14211
+      },
+      {
+        "duration_s": 60.0,
+        "key": "p3-esraj-2",
+        "lyrics": "[instrumental]",
+        "prompt": "solo esraj alap in raga Lalit mood, pre-dawn, mournful and regretful, rubato free time, very sparse long bowed phrases, over a soft tanpura drone on D, small reverberant room, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+        "role": "solo",
+        "seed": 14212
+      },
+      {
+        "duration_s": 60.0,
+        "key": "p3-esraj-3",
+        "lyrics": "[instrumental]",
+        "prompt": "solo esraj alap in raga Lalit mood, pre-dawn, mournful and regretful, rubato free time, very sparse long bowed phrases, over a soft tanpura drone on D, small reverberant room, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+        "role": "solo",
+        "seed": 14213
+      },
+      {
+        "duration_s": 60.0,
+        "key": "p3-esraj-4",
+        "lyrics": "[instrumental]",
+        "prompt": "solo esraj alap in raga Lalit mood, pre-dawn, mournful and regretful, rubato free time, very sparse long bowed phrases, over a soft tanpura drone on D, small reverberant room, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+        "role": "solo",
+        "seed": 14214
+      },
+      {
+        "duration_s": 60.0,
+        "key": "p3-sunrise-1",
+        "lyrics": "[instrumental]",
+        "prompt": "gentle hushed morning esraj phrase, consonant and tender, soft early sunlight, slow, over a quiet tanpura drone on D, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+        "role": "phrase",
+        "seed": 14221
+      },
+      {
+        "duration_s": 60.0,
+        "key": "p3-sunrise-2",
+        "lyrics": "[instrumental]",
+        "prompt": "gentle hushed morning esraj phrase, consonant and tender, soft early sunlight, slow, over a quiet tanpura drone on D, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+        "role": "phrase",
+        "seed": 14222
+      },
+      {
+        "duration_s": 60.0,
+        "key": "p3-sunrise-3",
+        "lyrics": "[instrumental]",
+        "prompt": "gentle hushed morning esraj phrase, consonant and tender, soft early sunlight, slow, over a quiet tanpura drone on D, Bengali classical, instrumental, no drums, no tabla, no percussion, no sitar, no flute, no vocals, no choir",
+        "role": "phrase",
+        "seed": 14223
+      }
+    ],
+    "scene": "f01s014"
+  },
+  "job_id": "adopt-f01s014-music-f5b90329a1",
+  "kind": "music",
+  "motion_gates": {},
+  "plan_sha256": "7b618dfb018645a45b5b4da9e9b96a06a016837df3c009a1b0911bf4dffc0683",
+  "scene": "f01s014",
+  "schema": "earnalism.audiovisual-adoption.v1",
+  "spec": {
+    "path": "../adopt-f01s014.json",
+    "sha256": "e2e9f8e5a010264f34a6c3416ad51728117565ad13aa04f3c1ae8f00aa24bf14"
+  },
+  "spent_cu": 0,
+  "target": "film-01"
+}

@@ -1,0 +1,32 @@
+{
+  "scene": "f01s014",
+  "note": "Owner decisions 27 Nov 2026: adopt the picked media, no regeneration. Shot numbers are the approved v5 paper edit's (approved 27 Nov): 4 = Hem close-up 12a, 5 = Hem eye 7-c1 with the mole removed (eav touchup job touchup-f01s014-7-nomole in the title root), 7 = paan 14w, 9 = sunrise wall (uncropped stills-pilot2 f01s014-8 c2 with its motion-pilot2 depth map, per the paper-edit review), 11 = pot 9p. The door beat (shot 10) is re-taken (owner decision), so 13q/13r are not adopted. Shots 1, 2, 3, 6, 8 and 12 come from the scene-bound stills job.",
+  "sources": {
+    "motion-pilot4-f01s014": {"folder": "../motion-pilot4-f01s014"},
+    "motion-pilot2-f01s014": {"folder": "../motion-pilot2-f01s014"},
+    "motion-pilot6-f01s014": {"root": "../.."},
+    "stills-pilot7-f01s014": {"root": "../.."},
+    "stills-pilot2-f01s014": {"root": "../.."},
+    "music-pilot3b-f01s014": {"root": "../.."}
+  },
+  "stills": {
+    "f01s014-5": {"file": "../../touchup/touchup-f01s014-7-nomole/f01s014-7--c1.png",
+                  "reason": "owner-picked Hem eye still 7-c1 with the mole under her eye removed (owner decision 27 Nov 2026: no mole on Hem, matching take 12a); made by eav touchup job touchup-f01s014-7-nomole (OpenCV inpaint, two ellipse boxes) in the title root, original stills-pilot7 file unchanged",
+                  "from": {"job": "stills-pilot7-f01s014", "file": "f01s014-7--c1.png"}},
+    "f01s014-9": {"job": "stills-pilot2-f01s014", "file": "f01s014-8--c2.png"}
+  },
+  "depth": {
+    "f01s014-9": {"job": "motion-pilot2-f01s014", "file": "f01s014-8.depth.png"}
+  },
+  "clips": {
+    "4":  {"job": "motion-pilot4-f01s014", "takes": ["f01s014-12a"]},
+    "7":  {"job": "motion-pilot6-f01s014", "takes": ["f01s014-14w"],
+           "art": {"file": "../v6/art/f01s014-14.png", "reason": "owner-picked paan still, hand-copied to pilot/v6/art"}},
+    "11": {"job": "motion-pilot6-f01s014", "takes": ["f01s014-9p"],
+           "art": {"file": "../v6/art/f01s014-9.png", "reason": "owner-picked pot still, hand-copied to pilot/v6/art"}}
+  },
+  "music": {"job": "music-pilot3b-f01s014",
+            "roles": {"p3-drone-1": "drone", "p3-drone-2": "drone",
+                      "p3-esraj-1": "solo", "p3-esraj-2": "solo", "p3-esraj-3": "solo", "p3-esraj-4": "solo",
+                      "p3-sunrise-1": "phrase", "p3-sunrise-2": "phrase", "p3-sunrise-3": "phrase"}}
+}
