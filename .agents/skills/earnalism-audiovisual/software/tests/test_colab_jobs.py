@@ -16,6 +16,9 @@ from eav.record import Record
 RATES = {k: {"s_per_step": 1.0, "units_per_hour": 10.0, "decode_s": 30, "export_s": 20}
          for k in ("narration", "stills", "music")}
 RATES["reel_clips"] = {"clip_s": 500.0, "units_per_hour": 1.94}
+RATES["film_clips"] = {"clip_s_hd": 900, "clip_s_hd_a100": 215, "clip_s_sd": 435,
+                       "units_per_hour_l4": 2.4, "units_per_hour_a100": 4.5,
+                       "decode_s": 900, "export_s": 120}
 COMPUTE = {"steps": 1, "items": 2, "takes": 1, "decode_s": 30, "export_s": 20}  # narration of SCENE
 PRESET = {"description": "A calm warm female voice, very clear, close to the microphone."}
 SCENE = {"scene_id": "s01", "text": "The morning was quiet. Rain fell on the roof."}
@@ -823,3 +826,139 @@ class PositivePromptTests(unittest.TestCase):
     def test_a_key_that_looks_like_a_candidate_file_is_refused(self):
         with self.assertRaises(ValueError):
             self.stills({"key": "a--c2", "prompt": "a lamp", "seed": 1})
+
+
+class FilmClipsTests(unittest.TestCase):
+    """film_clips: Wan 2.2 TI2V-5B beats plus Depth Anything V2 Small depth maps (cinematic film, Task 6)."""
+    setUp, build, nb, cells = (ColabJobTests.setUp, ColabJobTests.build, ColabJobTests.nb, ColabJobTests.cells)
+
+    def spec(self, n=2, **kw):
+        art = self.root / "art"
+        art.mkdir(exist_ok=True)
+        (art / "f01s014-12.png").write_bytes(b"png-one")
+        items = [{"key": f"f01s014-{i:02}", "image": "f01s014-12.png", "width": 1280, "height": 704,
+                  "seed": 41000 + i, "prompt": "A girl slowly turns her face, static locked-off camera.",
+                  "continue_from": None} for i in range(n)]
+        return {"art_dir": str(art), "items": items, **kw}
+
+    def template(self):
+        return (colab_jobs._TEMPLATES / "film_clips_cell.py.txt").read_text()
+
+    def test_film_clips_kind_builds_valid_notebook(self):
+        import ast
+        r = self.build("film_clips", self.spec())
+        codes = self.cells(r)
+        for c in codes:
+            ast.parse(c)
+        src = "\n".join(codes)
+        self.assertIn("Wan-AI/Wan2.2-TI2V-5B-Diffusers", src)
+        self.assertIn("depth-anything/Depth-Anything-V2-Small-hf", src)
+        self.assertIn("MIN_VRAM_GIB = 21", src)
+        self.assertIn("quality=10", src)
+        self.assertEqual(codes[0], "RUN = False")
+        for c in codes[1:]:
+            self.assertIn("RUN is not True", c)
+        with zipfile.ZipFile(r["inputs_zip"]) as z:
+            job = json.loads(z.read("job.json"))
+            self.assertIn("f01s014-12.png", z.namelist())
+        self.assertEqual(job["kind"], "film_clips")
+        self.assertEqual([i["key"] for i in job["items"]], ["f01s014-00", "f01s014-01"])
+        self.assertEqual(job["frames"], 121)
+        self.assertEqual(job["fps"], 24)
+
+    def test_film_clips_forecast_uses_measured_rates(self):
+        r = self.build("film_clips", self.spec(4))
+        rate = RATES["film_clips"]
+        setup = rate["decode_s"] + rate["export_s"]
+        self.assertAlmostEqual(r["forecast_units"], (4 * 900 * 1.15 + setup) / 3600 * 2.4)
+
+    def test_film_clips_forecast_sd_and_a100(self):
+        spec = self.spec(2)
+        for i in spec["items"]:
+            i["width"], i["height"] = 896, 512
+        sd = self.build("film_clips", spec)
+        setup = 900 + 120
+        self.assertAlmostEqual(sd["forecast_units"], (2 * 435 * 1.15 + setup) / 3600 * 2.4)
+        big = self.spec(2, min_vram_gib=30, job_id="film-a100")
+        a100 = self.build("film_clips", big)
+        self.assertAlmostEqual(a100["forecast_units"], (2 * 215 * 1.15 + setup) / 3600 * 4.5)
+        nb = self.nb(a100)
+        self.assertEqual(nb["metadata"]["colab"]["gpuType"], "A100")
+        self.assertIn("MIN_VRAM_GIB = 30", "\n".join(self.cells(a100)))
+
+    def test_film_clips_forecast_rides_the_ledger(self):
+        r = self.build("film_clips", self.spec(2))
+        self.assertAlmostEqual(self.ledger.spent("garden-book", "2026-11"), r["forecast_units"])
+        with self.assertRaises(BudgetExceeded):
+            self.build("film_clips", self.spec(120, job_id="film-big"))
+
+    def test_film_clips_resume_skips_finished_keys(self):
+        t = self.template()
+        start = t.index("# --- journal helper begin")
+        end = t.index("# --- journal helper end")
+        g = {"RUN": True}
+        import hashlib as _h, pathlib as _p
+        exec("import hashlib, json, pathlib\n" + t[start:end], g)
+        out = _p.Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: __import__("shutil").rmtree(out, ignore_errors=True))
+        (out / "a.mp4").write_bytes(b"clip-a")
+        (out / "b.mp4").write_bytes(b"clip-b")
+        (out / "done.json").write_text(json.dumps({
+            "a": _h.sha256(b"clip-a").hexdigest(),    # finished
+            "b": _h.sha256(b"other").hexdigest(),     # recorded but the file differs: redo
+            "c": _h.sha256(b"gone").hexdigest()}))    # recorded but the file is missing: redo
+        self.assertEqual(g["remaining_keys"](out, ["a", "b", "c", "d"]), ["b", "c", "d"])
+        (out / "done.json").unlink()
+        self.assertEqual(g["remaining_keys"](out, ["a", "b"]), ["a", "b"])
+        g["record_done"](out, "a")
+        self.assertEqual(g["remaining_keys"](out, ["a", "b"]), ["b"])
+
+    def test_film_clips_negative_prompt_lists_hand_and_eye_terms(self):
+        r = self.build("film_clips", self.spec())
+        with zipfile.ZipFile(r["inputs_zip"]) as z:
+            neg = json.loads(z.read("job.json"))["negative_prompt"].lower()
+        for term in ("detached hand", "disembodied hand", "floating hand", "extra hand", "extra arm",
+                     "floating object", "objects flying", "blink", "closed eyes", "morphing eyelids",
+                     "transparent cloth", "camera movement"):
+            self.assertIn(term, neg)
+
+    def test_film_clips_refuses_depth_base_or_large(self):
+        for repo in ("depth-anything/Depth-Anything-V2-Base-hf", "depth-anything/Depth-Anything-V2-Large-hf"):
+            with self.assertRaises(ValueError) as caught:
+                self.build("film_clips", self.spec(depth_repo=repo))
+            self.assertIn("Depth-Anything-V2-Small-hf", str(caught.exception))
+        self.build("film_clips", self.spec(depth_repo="depth-anything/Depth-Anything-V2-Small-hf"))
+        t = self.template()
+        self.assertIn('DEPTH_REPO != "depth-anything/Depth-Anything-V2-Small-hf"', t)
+
+    def test_film_clips_licence_allowlist_is_apache_only_for_both_repos(self):
+        src = "\n".join(self.cells(self.build("film_clips", self.spec())))
+        self.assertIn("LICENCE_ALLOWLIST = ('apache-2.0',)", src)
+        self.assertIn("LICENCE_REPOS = (MODEL_REPO, DEPTH_REPO)", src)
+
+    def test_film_clips_template_checks_vram_deadline_and_outputs(self):
+        t = self.template()
+        for needle in ("if not may_start(", "EXPECTED", ".last.png", ".last-depth.png", ".depth.png",
+                       "quality=10", "done.json", "np.uint16"):
+            self.assertIn(needle, t)
+
+    def test_film_clips_item_validation(self):
+        bad = [({"items": []}, "at least one"),
+               ({"items": [{"key": "a", "image": "f01s014-12.png", "width": 1000, "height": 704, "seed": 1,
+                            "prompt": "p", "continue_from": None}]}, "1280x704 or 896x512"),
+               ({"items": [{"key": "a", "image": "f01s014-12.png", "width": 1280, "height": 704, "seed": 1,
+                            "prompt": "p", "continue_from": "zz"}]}, "continue_from")]
+        for patch_, word in bad:
+            spec = self.spec()
+            spec.update(patch_)
+            with self.assertRaises(ValueError) as caught:
+                self.build("film_clips", spec)
+            self.assertIn(word, str(caught.exception))
+        spec = self.spec(2)
+        spec["items"][1]["key"] = spec["items"][0]["key"]
+        with self.assertRaises(ValueError):
+            self.build("film_clips", spec)
+        # a continuation starts from the earlier clip's last frame and may omit its own image
+        spec = self.spec(2)
+        spec["items"][1].update(continue_from=spec["items"][0]["key"], image=None)
+        self.build("film_clips", spec)

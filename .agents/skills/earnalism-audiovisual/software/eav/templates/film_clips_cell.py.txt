@@ -1,0 +1,161 @@
+# Film clips: Wan 2.2 TI2V-5B image-to-video (Apache-2.0), one ~5 s clip (121 frames, 24 fps) per item,
+# plus Depth Anything V2 Small (Apache-2.0) depth maps for the camera glide: of every input still and of
+# every clip's last frame. Per item: <key>.mp4 (near-lossless), <key>.last.png, <key>.last-depth.png.
+# Per still: <image-stem>.depth.png (16-bit, 65535 = nearest). done.json in the Drive folder is the resume
+# journal: a rerun skips every key whose mp4 sha256 is recorded there and still matches the file.
+if RUN is not True:
+    raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
+# Only the small Apache-2.0 depth model: Base and Large are non-commercial.
+if DEPTH_REPO != "depth-anything/Depth-Anything-V2-Small-hf":
+    raise RuntimeError("film_clips depth must use depth-anything/Depth-Anything-V2-Small-hf (Apache-2.0); "
+                       "Base and Large are non-commercial, not " + repr(DEPTH_REPO))
+import os, gc, time, zipfile, hashlib, json, pathlib
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
+
+# --- journal helper begin (plain functions; the resume test execs this block alone) ---
+def _file_sha256(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _read_done(out_dir):
+    try:
+        done = json.loads((pathlib.Path(out_dir) / "done.json").read_text())
+    except (OSError, ValueError):
+        return {}
+    return done if isinstance(done, dict) else {}
+
+
+def remaining_keys(out_dir, keys):
+    """The keys still to make: a key is finished only if done.json records the sha256 of its mp4 and
+    the mp4 on Drive still has exactly that hash."""
+    out_dir, done = pathlib.Path(out_dir), _read_done(out_dir)
+    left = []
+    for key in keys:
+        mp4 = out_dir / (key + ".mp4")
+        if not (mp4.is_file() and done.get(key) == _file_sha256(mp4)):
+            left.append(key)
+    return left
+
+
+def record_done(out_dir, key):
+    """Journal a finished clip (call it after every file of the key is written)."""
+    out_dir = pathlib.Path(out_dir)
+    done = _read_done(out_dir)
+    done[key] = _file_sha256(out_dir / (key + ".mp4"))
+    tmp = out_dir / "done.json.tmp"
+    tmp.write_text(json.dumps(done, indent=1, sort_keys=True) + "\n")
+    tmp.replace(out_dir / "done.json")
+# --- journal helper end ---
+
+
+import numpy as np
+import torch
+from PIL import Image
+
+ITEMS = JOB["items"]
+IMAGES = sorted({i["image"] for i in ITEMS if i.get("image")})
+EXPECTED = ([k + suffix for k in (i["key"] for i in ITEMS) for suffix in (".mp4", ".last.png", ".last-depth.png")]
+            + [n.rsplit(".", 1)[0] + ".depth.png" for n in IMAGES])
+SECONDS = {}
+gpu = torch.cuda.get_device_properties(0)
+MODEL_INFO = {"repo": MODEL_REPO, "revision": None, "steps": STEPS, "guidance": GUIDANCE, "frames": FRAMES,
+              "fps": FPS, "gpu": gpu.name, "depth_repo": DEPTH_REPO,
+              "licences": {r: LICENCES.get(r) for r in LICENCE_REPOS}}
+
+# Depth first (small): the stills' maps, then each clip's last frame as it is made.
+from transformers import pipeline as _hf_pipeline
+DEPTH = _hf_pipeline("depth-estimation", model=DEPTH_REPO, device=0)
+
+
+def save_depth(img, name):
+    """Normalised depth as a 16-bit PNG at the image's size (65535 = nearest)."""
+    d = np.asarray(DEPTH(img)["predicted_depth"].squeeze().float().cpu(), dtype=np.float32)
+    d = (d - d.min()) / max(1e-6, float(d.max() - d.min()))
+    d = np.asarray(Image.fromarray(d).resize(img.size, Image.BICUBIC))
+    Image.fromarray((np.clip(d, 0.0, 1.0) * 65535).astype(np.uint16)).save(OUT_DIR / name)
+
+
+with zipfile.ZipFile(INPUT_ZIP) as z:
+    for name in IMAGES:
+        target = name.rsplit(".", 1)[0] + ".depth.png"
+        if not (OUT_DIR / target).is_file():
+            save_depth(Image.open(z.open(name)).convert("RGB"), target)
+print("depth maps written for the stills:", len(IMAGES))
+
+todo = remaining_keys(OUT_DIR, [i["key"] for i in ITEMS])
+print("clips to make:", len(todo), "of", len(ITEMS), "(done.json skips the finished ones)")
+if todo:
+    from huggingface_hub import HfApi
+    from diffusers import AutoencoderKLWan, WanImageToVideoPipeline
+    from diffusers.utils import export_to_video
+    revision = HfApi().model_info(MODEL_REPO).sha
+    MODEL_INFO["revision"] = revision
+    print("GPU", gpu.name, "%.1f GiB" % (gpu.total_memory / 2**30), "model", MODEL_REPO, revision[:12])
+    vae = AutoencoderKLWan.from_pretrained(MODEL_REPO, revision=revision, subfolder="vae", torch_dtype=torch.float32)
+    pipe = WanImageToVideoPipeline.from_pretrained(MODEL_REPO, revision=revision, vae=vae,
+                                                   torch_dtype=torch.bfloat16, expand_timesteps=True)
+    pipe.vae.enable_tiling()
+    if gpu.total_memory >= 60 * 2**30:
+        pipe.to("cuda")
+    else:
+        pipe.enable_model_cpu_offload()
+
+
+def fit(img, w, h):
+    """Centre-crop to the target aspect, then resize (Lanczos)."""
+    sw, sh = img.size
+    if sw / sh > w / h:
+        nw = round(sh * w / h)
+        img = img.crop(((sw - nw) // 2, 0, (sw - nw) // 2 + nw, sh))
+    else:
+        nh = round(sw * h / w)
+        img = img.crop((0, (sh - nh) // 2, sw, (sh - nh) // 2 + nh))
+    return img.resize((w, h), Image.LANCZOS)
+
+
+def start_image(zf, item):
+    """A continuation starts from the earlier clip's last frame; any other item from its still."""
+    if item.get("continue_from"):
+        last_png = OUT_DIR / (item["continue_from"] + ".last.png")
+        if not last_png.is_file():
+            raise RuntimeError(item["key"] + " continues " + item["continue_from"] + ", whose last frame "
+                               "is not in the Drive folder; make that clip first")
+        return Image.open(last_png).convert("RGB")
+    return Image.open(zf.open(item["image"])).convert("RGB")
+
+
+last = 0.0  # seconds the previous clip took; an HD clip takes about twice a standard one
+with zipfile.ZipFile(INPUT_ZIP) as z:
+    for item in ITEMS:
+        if item["key"] not in todo:
+            continue
+        if not may_start(last):
+            break
+        started = time.time()
+        img = fit(start_image(z, item), item["width"], item["height"])
+        frames = pipe(image=img, prompt=item["prompt"], negative_prompt=JOB["negative_prompt"],
+                      height=item["height"], width=item["width"], num_frames=FRAMES,
+                      num_inference_steps=STEPS, guidance_scale=GUIDANCE,
+                      generator=torch.Generator("cpu").manual_seed(item["seed"])).frames[0]
+        try:  # near-lossless: the default export is ~300 kbps and softens the picture
+            export_to_video(frames, str(OUT_DIR / (item["key"] + ".mp4")), fps=FPS, quality=10)
+        except TypeError:
+            export_to_video(frames, str(OUT_DIR / (item["key"] + ".mp4")), fps=FPS)
+        _last = frames[-1]
+        if not isinstance(_last, Image.Image):
+            _arr = np.asarray(_last)
+            _last = Image.fromarray((_arr * 255).astype(np.uint8) if _arr.dtype != np.uint8 else _arr)
+        _last.save(OUT_DIR / (item["key"] + ".last.png"))
+        save_depth(_last, item["key"] + ".last-depth.png")
+        record_done(OUT_DIR, item["key"])  # last: every file of the key is on Drive
+        last = time.time() - started
+        SECONDS[item["key"]] = round(last, 1)
+        print("wrote", item["key"], "%dx%d" % (item["width"], item["height"]), "in %.1f s" % last)
+        gc.collect()
+        torch.cuda.empty_cache()
+MODEL_INFO["seconds_per_clip"] = SECONDS

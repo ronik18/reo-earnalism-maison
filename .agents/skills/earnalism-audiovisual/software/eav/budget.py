@@ -32,12 +32,18 @@ def forecast_seconds(job: dict, rates: dict) -> float:
     rate = rates[job["kind"]]
     if job["kind"] == "reel_clips":
         return max(job["items"] * job["takes"] * rate["clip_s"] * MARGIN, REEL_MIN_SECONDS)
+    if job["kind"] == "film_clips":  # measured seconds per finished clip by resolution and GPU, margin on the clips
+        hd = rate["clip_s_hd_a100"] if job["gpu"] == "a100" else rate["clip_s_hd"]
+        return ((job["hd"] * hd + job["sd"] * rate["clip_s_sd"]) * job["takes"] * MARGIN
+                + job["decode_s"] + job["export_s"])
     return (job["steps"] * rate["s_per_step"] * job["items"] * job["takes"]
             + job["decode_s"] + job["export_s"]) * MARGIN
 
 
 def forecast(job: dict, rates: dict) -> float:
-    return forecast_seconds(job, rates) / 3600 * rates[job["kind"]]["units_per_hour"]
+    rate = rates[job["kind"]]
+    uph = rate["units_per_hour_" + job["gpu"]] if job["kind"] == "film_clips" else rate["units_per_hour"]
+    return forecast_seconds(job, rates) / 3600 * uph
 
 
 def fit_reel_job(job: dict, rates: dict, remaining_units: float):

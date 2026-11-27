@@ -89,6 +89,27 @@ MAX_CLIPS_PER_BATCH = 5
 MAX_APPROVED_UNITS = 5.0
 DRIVE_ROOT = "/content/drive/MyDrive/earnalism-audiovisual"
 
+# film_clips (cinematic film, Task 6): the shot plan's Wan beats (Wan 2.2 TI2V-5B, Apache-2.0) and the
+# depth maps the camera glide needs (Depth Anything V2 Small, Apache-2.0; Base and Large are
+# non-commercial and refused). The notebook re-reads both cards' `license` before any download.
+FILM_REPO = "Wan-AI/Wan2.2-TI2V-5B-Diffusers"
+FILM_DEPTH_REPO = "depth-anything/Depth-Anything-V2-Small-hf"
+FILM_LICENCES = {FILM_REPO: "apache-2.0", FILM_DEPTH_REPO: "apache-2.0"}
+FILM_LICENCE_ALLOWLIST = ("apache-2.0",)
+FILM_STEPS = 24
+FILM_GUIDANCE = 5.0
+FILM_FRAMES = 121     # 121 frames at 24 fps = 5.041667 s per clip
+FILM_FPS = 24
+FILM_DIFFUSERS = "diffusers==0.37.0"
+FILM_MIN_VRAM_GIB = 21  # an L4 (22 GB) or larger; the GPU cell stops before any download on less
+FILM_A100_FROM_GIB = 24  # a job needing more than this runs on an A100 (rates units_per_hour_a100)
+FILM_RES = {(1280, 704): "hd", (896, 512): "sd"}  # the shot plan's wan_res values
+FILM_NEGATIVE = ("photorealistic, 3D render, CGI, text, logo, watermark, extra fingers, fused hands, "
+                 "duplicate people, face morphing, detached hand, disembodied hand, floating hand, extra "
+                 "hand, extra arm, missing arm, floating object, objects flying, blink, closed eyes, "
+                 "morphing eyelids, transparent cloth, abrupt cuts, camera shake, camera movement, zoom, "
+                 "pan, flicker")
+
 # Owner 2026-11-24: one look for every book's stills, the 2D animated feature-film illustration
 # of the বিচারক stills he chose. Appended to every stills prompt by the job builder (prompts carry
 # content, period, palette and light only); a prompt asking for another look is refused.
@@ -103,7 +124,7 @@ MAX_CANDIDATES = 4
 CANDIDATE_SUFFIX = re.compile(r"--c\d+$")
 STYLE_CONFLICTS = ("photoreal", "photograph", "oil-on-canvas", "realism", "watercolour", "watercolor",
                    "gouache", "3d render", "not a cartoon", "not anime", "not a flat illustration")
-KINDS = ("narration", "stills", "music", "retouch", "edit", "reel_clips")
+KINDS = ("narration", "stills", "music", "retouch", "edit", "reel_clips", "film_clips")
 JOB_SCHEMA = "earnalism.audiovisual-job.v1"
 EXCHANGE_SCHEMA = "earnalism.colab-exchange.v1"
 _TEMPLATES = Path(__file__).with_name("templates")
@@ -302,6 +323,19 @@ if "zero_cond_t" not in inspect.signature(diffusers.QwenImageTransformer2DModel.
 print("pipeline OK:", EDIT_PIPELINE)
 '''
 
+# film_clips only: install the pinned diffusers before the clock and refuse a build without the Wan
+# image-to-video pipeline before any weights download.
+_FILM_PREFLIGHT = _GUARD + '''import importlib, subprocess, sys
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", DIFFUSERS_PIN, "transformers", "accelerate",
+                "safetensors", "ftfy", "sentencepiece", "imageio", "imageio-ffmpeg"], check=True)
+importlib.invalidate_caches()
+import diffusers
+print("diffusers", diffusers.__version__, "(pin: " + DIFFUSERS_PIN + ")")
+if not hasattr(diffusers, "WanImageToVideoPipeline"):
+    raise RuntimeError("diffusers " + diffusers.__version__ + " has no WanImageToVideoPipeline; "
+                       "Runtime > Restart session, Run all")
+'''
+
 _CLOCK = _GUARD + '''import threading, time
 if "JOB_STARTED" not in globals():
     JOB_STARTED = time.time()
@@ -330,7 +364,7 @@ _MANIFEST = _GUARD + '''import hashlib, json, time
 import importlib.metadata as _md
 outputs = {}
 for p in sorted(OUT_DIR.iterdir()):
-    if (p.is_file() and p.name not in ("manifest.json", "inputs.zip", "exchange.json")
+    if (p.is_file() and p.name not in ("manifest.json", "inputs.zip", "exchange.json", "done.json", "done.json.tmp")
             and p.suffix != ".ipynb"):  # Colab keeps the job notebook in this folder
         outputs[p.name] = hashlib.sha256(p.read_bytes()).hexdigest()
 if not outputs:
@@ -381,7 +415,9 @@ if globals().get("EXCHANGE") is not None:  # R2 exchange: one uncompressed tar, 
 '''
 
 # Distributions whose resolved versions each manifest records (R26).
-PACKAGES = {"narration": ("parler_tts", "transformers", "torch", "soundfile", "protobuf"),
+PACKAGES = {"film_clips": ("diffusers", "transformers", "accelerate", "safetensors", "torch",
+                           "huggingface_hub", "imageio", "ftfy"),
+            "narration": ("parler_tts", "transformers", "torch", "soundfile", "protobuf"),
             "stills": ("diffusers", "transformers", "accelerate", "sentencepiece", "protobuf",
                        "bitsandbytes", "torch"),
             "retouch": ("diffusers", "transformers", "accelerate", "safetensors", "torch",
@@ -404,7 +440,7 @@ def min_vram_gib(spec: dict) -> int:
 
 def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, deadline_s,
               min_vram=0) -> bytes:
-    retouch, edit = kind == "retouch", kind == "edit"
+    retouch, edit, film = kind == "retouch", kind == "edit", kind == "film_clips"
     config = (_GUARD +
               f"import pathlib\nJOB_ID = {job_id!r}\nTITLE = {title!r}\nKIND = {kind!r}\n"
               f"INPUT_ZIP_SHA256 = {zip_sha!r}\nMODEL_REPO = {repo!r}\n"
@@ -426,6 +462,10 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
                    f"# quantized loads keep SKIP_MODULES bf16\n"
                    f"BF16_FROM_GIB = {EDIT_BF16_FROM_GIB}\nINT8_FROM_GIB = {EDIT_INT8_FROM_GIB}\n"
                    f"SKIP_MODULES = {list(EDIT_SKIP_MODULES)!r}\n")
+    if film:
+        config += (f"GUIDANCE = {FILM_GUIDANCE!r}\nFRAMES = {FILM_FRAMES}\nFPS = {FILM_FPS}\n"
+                   f"LICENCE_ALLOWLIST = {FILM_LICENCE_ALLOWLIST!r}\nDEPTH_REPO = {FILM_DEPTH_REPO!r}\n"
+                   f"LICENCE_REPOS = (MODEL_REPO, DEPTH_REPO)\nDIFFUSERS_PIN = {FILM_DIFFUSERS!r}\n")
     intro = (f"# Earnalism {kind} job `{job_id}`\n\n**Prepared, not run.** Input zip SHA256 "
              f"`{zip_sha}`. Set `RUN = True` in the first cell, then run all. With the R2 exchange "
              f"(`exchange.json` in `{DRIVE_ROOT}/{title}/{job_id}/`) the notebook downloads "
@@ -437,8 +477,9 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
              f"cannot be imported.\n")
     # The generation cell may call setup that sets OUT_DIR; the verify cell sets JOB/OUT_DIR.
     parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _GPU), ("code", _ACCESS),
-             *([("code", _LICENCE)] if retouch or edit else []),
-             *([("code", _EDIT_PREFLIGHT)] if edit else []), ("code", _CLOCK),
+             *([("code", _LICENCE)] if retouch or edit or film else []),
+             *([("code", _EDIT_PREFLIGHT)] if edit else []),
+             *([("code", _FILM_PREFLIGHT)] if film else []), ("code", _CLOCK),
              ("code", _VERIFY), ("code", template.read_text(encoding="utf-8")),
              ("code", _MANIFEST)]
     nb = {"nbformat": 4, "nbformat_minor": 5,
@@ -489,6 +530,8 @@ def pinned_steps(kind: str) -> int:
         return EDIT_RATE_STEPS  # the steps the edit rate is measured at; items carry their own
     if kind == "reel_clips":
         return _load_wan_batch().w.PROFILES[REEL_PROFILE]["steps"]
+    if kind == "film_clips":
+        return FILM_STEPS
     raise ValueError(f"unknown job kind: {kind!r}")
 
 
@@ -510,8 +553,12 @@ def derive_compute(kind: str, spec: dict, rates: dict, items: int) -> dict:
     rate = rates.get(kind) if isinstance(rates, dict) else None
     needed = ("clip_s", "units_per_hour") if kind == "reel_clips" else (
         "s_per_step", "units_per_hour", "decode_s", "export_s")
+    positive = ("clip_s", "units_per_hour", "s_per_step")
+    if kind == "film_clips":
+        positive = ("clip_s_hd", "clip_s_hd_a100", "clip_s_sd", "units_per_hour_l4", "units_per_hour_a100")
+        needed = positive + ("decode_s", "export_s")
     missing = [k for k in needed if not isinstance(rate, dict) or not _measured(
-        rate.get(k), positive=k in ("clip_s", "units_per_hour", "s_per_step"))]
+        rate.get(k), positive=k in positive)]
     if missing:
         raise ValueError(f"rates.json has no measured {', '.join(missing)} for {kind}; forecasts "
                          "are never defaulted (references/compute-budget.md)")
@@ -530,6 +577,10 @@ def derive_compute(kind: str, spec: dict, rates: dict, items: int) -> dict:
     compute = {"kind": kind, "steps": steps, "items": items, "takes": 1}
     if kind != "reel_clips":
         compute.update(decode_s=rate["decode_s"], export_s=rate["export_s"])
+    if kind == "film_clips":  # clips by resolution and the GPU the job needs: both set the forecast
+        shapes = [FILM_RES[(c["width"], c["height"])] for c in _film_items(spec)]
+        compute.update(hd=shapes.count("hd"), sd=shapes.count("sd"),
+                       gpu="a100" if film_min_vram(spec) > FILM_A100_FROM_GIB else "l4")
     declared = spec.get("compute")
     if declared is not None:
         if not isinstance(declared, dict):
@@ -807,6 +858,74 @@ def _edit_items(record, spec: dict) -> tuple:
     return items, members
 
 
+def film_min_vram(spec: dict) -> int:
+    """The GPU memory a film_clips job needs: the spec's min_vram_gib, never below the Wan floor."""
+    return max(min_vram_gib(spec), FILM_MIN_VRAM_GIB)
+
+
+def _film_items(spec: dict) -> list:
+    """Validate and normalise a film_clips spec's items (the shot plan's Wan beats)."""
+    items = spec.get("items")
+    if not isinstance(items, list) or not items:
+        raise ValueError("a film_clips job needs at least one item")
+    out, seen = [], set()
+    for n, s in enumerate(items):
+        if not isinstance(s, dict):
+            raise ValueError(f"film_clips item {n} must be an object")
+        key = s.get("key")
+        if not isinstance(key, str) or not _SAFE.fullmatch(key):
+            raise ValueError(f"film_clips item {n} key must be lowercase letters, digits and hyphens, "
+                             f"not {key!r}")
+        if key in seen:
+            raise ValueError(f"film_clips key {key!r} is used twice")
+        res = (s.get("width"), s.get("height"))
+        if res not in FILM_RES:
+            raise ValueError(f"film_clips item {key!r} must be 1280x704 or 896x512 (the shot plan's "
+                             f"wan_res), not {res[0]!r}x{res[1]!r}")
+        seed = s.get("seed")
+        if isinstance(seed, bool) or not isinstance(seed, int):
+            raise ValueError(f"film_clips item {key!r} needs an integer seed")
+        cont, image = s.get("continue_from"), s.get("image")
+        if cont is not None and cont not in seen:
+            raise ValueError(f"film_clips item {key!r} continue_from {cont!r} must name an earlier item "
+                             "of this job")
+        if image is None and cont is None:
+            raise ValueError(f"film_clips item {key!r} needs an image (or continue_from)")
+        if image is not None and (not isinstance(image, str) or image != Path(image).name
+                                  or not image.lower().endswith(".png")):
+            raise ValueError(f"film_clips item {key!r} image must be a .png file name inside art_dir, "
+                             f"not {image!r}")
+        prompt = s.get("prompt")
+        if not isinstance(prompt, str) or not prompt.strip():
+            raise ValueError(f"film_clips item {key!r} needs a non-empty prompt")
+        seen.add(key)
+        out.append({"key": key, "image": image, "width": res[0], "height": res[1], "seed": seed,
+                    "prompt": prompt.strip(), "continue_from": cont})
+    return out
+
+
+def _check_depth_model(spec: dict) -> None:
+    for field in ("depth_repo", "depth_model"):
+        value = spec.get(field)
+        if value is not None and value != FILM_DEPTH_REPO:
+            raise ValueError(f"film_clips depth must use {FILM_DEPTH_REPO!r} (Apache-2.0); the Base and "
+                             f"Large depth models are non-commercial, not {value!r}")
+
+
+def _film_files(spec: dict, items: list) -> dict:
+    art = spec.get("art_dir")
+    names = sorted({i["image"] for i in items if i["image"]})
+    if names and not art:
+        raise ValueError("a film_clips spec needs art_dir (the folder holding the item images)")
+    files = {}
+    for name in names:
+        path = Path(art) / name
+        if not path.is_file():
+            raise ValueError(f"film_clips image {name!r} is not in art_dir {art}")
+        files[name] = path.read_bytes()
+    return files
+
+
 def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
     """Validate the spec; return everything needed to write, without touching disk."""
     compute = derive_compute(kind, spec, rates, job_items(kind, spec))
@@ -883,6 +1002,16 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                 "files": sources, "repo": RETOUCH_REPO, "mask_repo": MASK_REPO,
                 "revision": "resolved-at-run-time", "steps": RETOUCH_STEPS, "compute": compute,
                 "licences": {"recorded": dict(MODEL_LICENCES), "allowlist": list(LICENCE_ALLOWLIST)}}
+    if kind == "film_clips":
+        _check_model(kind, spec, FILM_REPO)
+        _check_depth_model(spec)
+        items = _film_items(spec)
+        return {"payload": {"items": items, "negative_prompt": FILM_NEGATIVE, "steps": FILM_STEPS,
+                            "guidance": FILM_GUIDANCE, "frames": FILM_FRAMES, "fps": FILM_FPS,
+                            "depth_model": FILM_DEPTH_REPO},
+                "files": _film_files(spec, items), "repo": FILM_REPO, "revision": "resolved-at-run-time",
+                "steps": FILM_STEPS, "compute": compute, "diffusers": FILM_DIFFUSERS,
+                "licences": {"recorded": dict(FILM_LICENCES), "allowlist": list(FILM_LICENCE_ALLOWLIST)}}
     if kind == "edit":
         _check_model(kind, spec, EDIT_REPO)
         items, members = _edit_items(record, spec)
@@ -963,6 +1092,8 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
 
     # Validate and forecast everything before any ledger or disk change.
     min_vram = min_vram_gib(spec)
+    if kind == "film_clips":
+        min_vram = film_min_vram(spec)
     if kind == "reel_clips" and min_vram:
         raise ValueError("min_vram_gib applies to the Colab notebook jobs; reel_clips runs on the Wan "
                          "worker's own GPU profile")

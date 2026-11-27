@@ -2,7 +2,7 @@
 
   python3 -m eav.cli init <source.json> --root <dir> [--slug <maison-edition-slug>]
   python3 -m eav.cli plan --root <dir>
-  python3 -m eav.cli job <narration|stills|music|reel_clips> --root <dir> --rates <rates.json>
+  python3 -m eav.cli job <narration|stills|music|reel_clips|film_clips> --root <dir> --rates <rates.json>
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
   python3 -m eav.cli job retouch --root <dir> --rates <rates.json> --film N --spec <retouch.json>
                          [--job-id <id>]  (inpaint masked regions of imported stills; candidates;
@@ -768,7 +768,7 @@ def _job_spec(rec, args, kind, target):
             if args.reel:
                 raise Stop(f"{kind} jobs patch a film's stills", "Pass --film <n>, not --reel")
             spec["target"] = target
-        if kind == "reel_clips" and not Path(spec.get("art_dir", ".")).is_absolute():
+        if kind in ("reel_clips", "film_clips") and not Path(spec.get("art_dir", ".")).is_absolute():
             spec["art_dir"] = str((Path(args.spec).parent / spec.get("art_dir", ".")).resolve())
         if kind == "reel_clips":
             _check_clip_batch(rec, args.reel, spec)
@@ -788,7 +788,7 @@ def cmd_job(args):
     target = (AUDITION_TARGET if kind == "narration" and args.audition
               else f"reel-{args.reel}" if args.reel else _film_target(args.film))
     spec, items = _job_spec(rec, args, kind, target)
-    if kind == "stills" and spec.get("scene"):  # R11: a shot-plan-driven job needs the approved paper edit
+    if kind in ("stills", "film_clips") and spec.get("scene"):  # R11: a shot-plan-driven job needs the approved paper edit
         try:
             shotplan.require_approved(rec.root / "film" / target, spec["scene"])
         except shotplan.NotApproved as e:

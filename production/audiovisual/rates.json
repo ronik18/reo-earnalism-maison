@@ -54,5 +54,16 @@
     "export_s": 120,
     "source": "MEASURED 2026-11-26: ~400 s/image at 40 steps on L4 NF4 with offload (first run); A100 int8 assumed no faster until measured",
     "basis": "Qwen-Image-Edit-2511, NF4 transformer + CPU offload on L4; ~58 GB download"
+  },
+  "film_clips": {
+    "clip_s_hd": 900,
+    "clip_s_hd_a100": 215,
+    "clip_s_sd": 435,
+    "units_per_hour_l4": 2.4,
+    "units_per_hour_a100": 4.5,
+    "decode_s": 900,
+    "export_s": 120,
+    "source": "MEASURED 26–27 Nov pilots",
+    "basis": "Wan 2.2 TI2V-5B, 121 frames at 24 fps, 24 steps, guidance 5: clip_s_hd is the end-to-end seconds per finished 1280x704 clip on L4 (215 on A100), clip_s_sd per 896x512 clip on L4 (the A100 standard-size clip is unmeasured and forecast at the L4 figure, which is conservative). The forecast is (HD clips x clip_s_hd + SD clips x clip_s_sd) x 1.15 margin + decode_s + export_s; the units rate follows the GPU (min_vram_gib above 24 means A100). decode_s and export_s are ESTIMATES borrowed from stills (pip install, ~33 GB weight download and load; final tar upload), not measured."
   }
 }

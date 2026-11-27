@@ -297,3 +297,32 @@ def test_stills_job_with_scene_key_needs_approval_but_legacy_spec_does_not(tmp_p
     (root / "film" / "film-01" / "shots" / "f01s014.json").unlink()
     code, out = run(*args)
     assert code == 0 and "Built stills job" in out, out
+
+
+def test_film_clips_job_with_scene_key_needs_approval_but_a_pilot_spec_does_not(tmp_path):
+    root, run = _title(tmp_path)
+    art = tmp_path / "art"
+    art.mkdir()
+    (art / "s.png").write_bytes(b"png")
+    rates = tmp_path / "r.json"
+    rates.write_text(json.dumps({"film_clips": {"clip_s_hd": 900, "clip_s_hd_a100": 215, "clip_s_sd": 435,
+                                                "units_per_hour_l4": 2.4, "units_per_hour_a100": 4.5,
+                                                "decode_s": 900, "export_s": 120}}), encoding="utf-8")
+    items = [{"key": "f01s014-1", "image": "s.png", "width": 1280, "height": 704, "seed": 1,
+              "prompt": "A girl turns her face, static locked-off camera.", "continue_from": None}]
+    spec = tmp_path / "clips.json"
+    spec.write_text(json.dumps({"scene": "f01s014", "art_dir": str(art), "items": items}), encoding="utf-8")
+    args = ("job", "film_clips", "--root", root, "--film", 1, "--rates", rates, "--spec", spec)
+    code, out = run(*args)
+    assert code == 2 and "no shot plan" in out and "plan-shots" in out
+    assert not (root / "jobs").exists() or not list((root / "jobs").iterdir())
+    assert run("plan-shots", "--root", root, "--film", 1, "--scene", "f01s014")[0] == 0
+    code, out = run(*args)
+    assert code == 2 and "not approved" in out
+    assert run("plan-shots", "--root", root, "--film", 1, "--scene", "f01s014", "--approve", "--by", "claude", "--reviewer", "rev")[0] == 0
+    code, out = run(*args)
+    assert code == 0 and "Built film_clips job" in out, out
+    spec.write_text(json.dumps({"art_dir": str(art), "items": items}), encoding="utf-8")  # pilot: no scene key
+    (root / "film" / "film-01" / "shots" / "f01s014.json").unlink()
+    code, out = run(*args, "--job-id", "film-clips-pilot")
+    assert code == 0 and "Built film_clips job" in out, out
