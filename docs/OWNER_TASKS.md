@@ -11,7 +11,7 @@ Last updated: 27 Nov 2026.
 ## Assets
 - [x] **ক্ষুধিত পাষাণ scan check** (27 Nov 2026): the 1895 print has "করিবেন না" (p. ১৭৬) and "জানি না" (p. ১৮২). Claude is preparing the corrected text; it will appear on the Monday page for your approval. The English edition already reads both correctly.
 - Covers already in your Cloudinary for later titles (no action needed): কাবুলিওয়ালা, পোস্টমাস্টার, ছুটি.
-- [ ] **কাবুলিওয়ালা early scan:** open https://icvtesting.nvli.in/rarebooks/galapagaucacha-1ma-khanada from an Indian network (not a VPN guess); if a PDF or page images appear, put them in Drive at Earnalism/scans/kabuliwala-nvli. (Timed out again 27 Nov 18:09 IST from Codex; the network used was not confirmed as Indian.)
+- [ ] **কাবুলিওয়ালা early scan:** 27 Nov 23:50 IST: Codex's automated browser on an Indian network (ipinfo IN) timed out after 10 s, which is its own limit; the site was not shown to be down. Open https://icvtesting.nvli.in/rarebooks/galapagaucacha-1ma-khanada yourself in an ordinary browser tab and give it a minute. If that address is dead, search https://nvli.in for "কাবুলিওয়ালা" or "গল্পগুচ্ছ ১ম খণ্ড". If page images or a PDF open, save them to Drive at Earnalism/scans/kabuliwala-nvli.
 
 ## Held stories
 - [ ] **Five held stories (সুভা, স্ত্রীর পত্র, হৈমন্তী, একরাত্রি, খাতা; also পোস্টমাস্টার, কাবুলিওয়ালা, ছুটি re-checked):** 27 Nov: keep them held and keep the eligibility rule. Next: validate the সুভা 1894 scan (pp. 61–72), and transcribe the 1914 সবুজ পত্র pages separately; whether a magazine issue counts as an eligible printing is still your decision.
@@ -28,9 +28,9 @@ Last updated: 27 Nov 2026.
 - [ ] **YouTube upload token, at the first private upload only:** once a finished film exists (after the বিচারক Colab jobs), Claude asks through the secure credential form for a short-lived OAuth access token for `www.googleapis.com` (scope `youtube.upload`, from Google's OAuth Playground signed in to this channel). The token is never pasted in chat or stored in the repo. The bridge checks it belongs to this channel before uploading, and uploads stay private.
 - [x] **Razorpay test keys and webhook** (27 Nov 2026): test key, key secret and webhook secret in Render; webhook `payment.captured` + `order.paid` → /api/v1/webhooks/razorpay; Render job `job-dc4hje6q1p3s73e2mnng` authenticated against the Razorpay test API.
 - [ ] **Turn purchases on** (later decision; 27 Nov: not now): checkout is disabled by design while free access is on, so Razorpay stays switched off until you end free access (G0.5 threshold). Then Claude sets `RAZORPAY_MODE=test`, the merchant configuration version and `RAZORPAY_ENABLED=true` and runs a sandbox payment; live mode needs merchant approval and your live sign-off.
-- [ ] **Google Play Books partner account:** Codex reached new-publisher setup on 27 Nov; it needs publisher name, country, website and phone, and you accept the terms yourself.
+- [ ] **Google Play Books partner account** (checked 28 Nov): Reo Enterprise account active (ID 279083731878610190), catalog 0 books. Before the first store export, fill in the payment profile, bank account and tax information yourself; Google runs a preliminary policy review when a book is ready to publish.
 - [ ] **Finance and tax profile for schools** (real institution invoices).
-- [ ] **Apple Podcasts / Spotify for Creators accounts**, once the first preview episode exists (Claude will give the submission steps).
+- [x] **Apple Podcasts / Spotify for Creators accounts** (checked 28 Nov): Apple Podcasts Connect works for "Earnalism by Reo Enterprise", with no shows and no pending agreement ("Add a Legal Entity" left untouched). Spotify for Creators is signed in, with no shows yet. Nothing is created until the first preview episode exists; Claude will then give the submission steps.
 
 ## Decisions
 - [x] **Site quality decisions (26 Nov 2026):** cache public covers and serve small sizes; darken gold text only (before/after screenshots first); longer free preview (first chapter, up to ~1,500 words); one Back link in the reader.

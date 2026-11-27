@@ -101,6 +101,37 @@ class FilmTests(unittest.TestCase):
         self.assertAlmostEqual(v, a, delta=0.1)
         self.assertAlmostEqual(v, info["duration"], delta=0.15)
 
+    def test_assemble_with_a_video_end_card_plays_its_picture_and_sound(self):
+        import subprocess
+        t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
+        mixed = self.d / "mixed.wav"
+        m.sine_wav(mixed, t[-1]["end"] + 0.5, freq=330)
+        stills = self.d / "stills"
+        stills.mkdir()
+        for name in ("s1", "s2"):
+            Image.new("RGB", (320, 180), "red").save(stills / f"{name}.png")
+        logo = self.d / "logo.png"
+        Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(logo)
+        card = self.d / "outro.mp4"  # a 3 s green video with a 880 Hz tone, like the approved outro
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", "color=c=green:s=640x360:d=3:r=25",
+                        "-f", "lavfi", "-i", "sine=frequency=880:duration=3", "-shortest",
+                        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", str(card)], check=True)
+        out = self.d / "film.mp4"
+        info = film.assemble(PLAN, t, stills, mixed, logo, card, out)
+        v = float(probe(out, "v:0", "duration"))
+        a = float(probe(out, "a:0", "duration"))
+        self.assertAlmostEqual(v, a, delta=0.1)
+        self.assertAlmostEqual(v, info["duration"], delta=0.15)
+        # the last second shows the outro's picture and carries its sound, not silence
+        frame = subprocess.run(["ffmpeg", "-v", "error", "-sseof", "-1", "-i", str(out), "-frames:v", "1",
+                                "-vf", "scale=1:1", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+                               capture_output=True, check=True).stdout
+        self.assertGreater(frame[1], 100)  # green
+        vol = subprocess.run(["ffmpeg", "-sseof", "-1.5", "-i", str(out), "-af", "volumedetect", "-f", "null", "-"],
+                             capture_output=True, text=True).stderr
+        mean = float(vol.split("mean_volume:")[1].split("dB")[0])
+        self.assertGreater(mean, -40)
+
     def _assemble_inputs(self):
         t = film.narration_track(UNITS, self.wavs, self.d / "n.wav")
         stills = self.d / "stills"

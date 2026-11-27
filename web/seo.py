@@ -17,6 +17,12 @@ OG_LOCALES = {"en": "en_US", "bn": "bn_IN"}
 # The interface is English; /bn/ paths redirect to /en/ (web.middleware), so English is the one served locale.
 SERVED_LOCALES = ("en",)
 
+# Owner-approved brand assets (task W6): title pages share their cover; every other public page shares this card.
+SHARE_CARD = "maison/share/earnalism-share-1200x630.jpg"
+SHARE_CARD_ALT = ("The Earnalism logo and the line “Carry a world of stories.” beside an illustration of "
+                  "a woman writing by lamplight on a veranda as monsoon rain falls over a river")
+FAVICON = "maison/icons/favicon.ico"
+
 # Pages with no sharing tags: signed-in, staff and token pages.
 PRIVATE_ROUTES = {
     "vault", "personal-list", "downloads", "settings", "checkout", "staff-review", "staff-review-cover",
@@ -139,13 +145,13 @@ def page_meta(request, ctx, template=""):
     private = (status_page or route in PRIVATE_ROUTES or bool(edition and not edition.get("published_at"))
                or not settings.PUBLIC_BASE_URL)
     canonical = absolute(canonical_path(request, edition))
-    image = absolute(cover["url"]) if cover else absolute(static("maison/logo.png"))
+    image = absolute(cover["url"]) if cover else absolute(static(SHARE_CARD))
     return {
         "title": full_title, "description": _shorten(description or SITE_DESCRIPTION), "share": not private,
         "canonical": canonical, "type": og_type, "locale": OG_LOCALES.get(locale, "en_US"),
-        "image": image, "image_alt": cover.get("alt") if cover else "Earnalism — Where Learning Becomes Earning",
-        "image_width": cover.get("width") if cover else 1400, "image_height": cover.get("height") if cover else 500,
-        "card": "summary_large_image" if cover else "summary",
+        "image": image, "image_alt": cover.get("alt") if cover else SHARE_CARD_ALT,
+        "image_width": cover.get("width") if cover else 1200, "image_height": cover.get("height") if cover else 630,
+        "card": "summary_large_image",
         "alternates": [{"hreflang": code, "href": canonical} for code in SERVED_LOCALES] + [{"hreflang": "x-default", "href": canonical}],
     }
 
@@ -153,7 +159,7 @@ def page_meta(request, ctx, template=""):
 @require_safe
 def favicon(request):
     # The release-specific static URL changes with each static release, so this is a temporary redirect.
-    return HttpResponseRedirect(static("maison/logo.png"))
+    return HttpResponseRedirect(static(FAVICON))
 
 
 def _sitemap_territory(request):

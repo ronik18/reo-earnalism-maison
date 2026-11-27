@@ -4,7 +4,7 @@
   --ivory:#FBF6EC;--parchment:#F3E8D4;--parchment-deep:#E9DAC0;--line:#DCCAA8;
   --burgundy:#4A1C27;--burgundy-deep:#2C0F17;--wine:#6B2335;
   --ink:#24161A;--ink-soft:#5C4A4E;
-  --gold:#D8B25E;--gold-deep:#B8913F;--gold-text:#7A5A1E;--gold-on-dark:#E6C987;
+  --gold:#D8B25E;--gold-fill:#D8B25E;--gold-deep:#B8913F;--gold-text:#7A5A1E;--gold-on-dark:#E6C987;
   --night:#1A0E12;--night-ink:#F6EEDF;--night-soft:#CDBDB4;
   --display:"Cormorant Garamond","Noto Serif Bengali",Georgia,serif;--ui:"DM Sans","Noto Sans Bengali",system-ui,sans-serif;
   --read:"Source Serif 4","Noto Serif Bengali",Georgia,serif;--bn:"Noto Serif Bengali",serif;
@@ -46,7 +46,8 @@ body.room{margin:0;min-width:300px;color:var(--ink);font:400 1.0625rem/1.65 var(
 /* buttons */
 .room-btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 24px;border-radius:4px;border:1.5px solid transparent;font:600 1rem/1 var(--ui);text-decoration:none;cursor:pointer}
 .room-btn-wine{background:var(--burgundy);color:var(--ivory)}.room-btn-wine:hover{background:var(--wine)}
-.room-btn-gold{background:var(--gold);color:var(--burgundy-deep);border-color:var(--gold-deep)}.room-btn-gold:hover{background:#E3C072}
+/* Gold fills behind dark labels use the approved fill token --gold-fill: body.room redefines --gold as the darker gold text colour #7A5A1E, so fills never resolve through --gold. */
+.room-btn-gold{background:var(--gold-fill);color:var(--burgundy-deep);border-color:var(--gold-deep)}.room-btn-gold:hover{background:#E3C072}
 .room-btn-line{border-color:var(--burgundy);color:var(--burgundy)}.room-btn-line:hover{background:var(--parchment)}
 .room-dark .room-btn-line{border-color:var(--gold-on-dark);color:var(--gold-on-dark)}.room-dark .room-btn-line:hover{background:rgba(230,201,135,.1)}
 .room-cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
@@ -59,13 +60,13 @@ body.room{margin:0;min-width:300px;color:var(--ink);font:400 1.0625rem/1.65 var(
 .room-nav{display:flex;gap:2px;padding:5px;border-radius:999px;background:linear-gradient(180deg,#2A1820,#1A0E12);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 24px -12px rgba(26,14,18,.6)}
 .room-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;color:var(--night-ink);text-decoration:none;font-weight:600;font-size:.9375rem}
 .room-nav a:hover{background:rgba(255,255,255,.08)}
-.room-nav a[aria-current=page]{background:linear-gradient(180deg,#E8C676,var(--gold));color:var(--burgundy-deep);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 6px rgba(0,0,0,.35)}
+.room-nav a[aria-current=page]{background:linear-gradient(180deg,#E8C676,var(--gold-fill));color:var(--burgundy-deep);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 6px rgba(0,0,0,.35)}
 .room-tools{margin-left:auto;display:flex;align-items:center;gap:12px}
 .room-search{text-decoration:none;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:var(--ivory);color:var(--ink-soft);min-width:230px;font-size:.9375rem}
 .room-search svg{width:16px;height:16px}
 .room-who{white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:600;color:var(--burgundy)}
 .room-cta{white-space:nowrap;display:inline-flex;align-items:center;min-height:44px;margin:5px;padding:0 20px;border-radius:999px;font-weight:600;font-size:.9375rem;text-decoration:none;
-  background:linear-gradient(180deg,#E8C676,var(--gold));color:var(--burgundy-deep);box-shadow:0 0 0 5px #1F1116,inset 0 1px 0 rgba(255,255,255,.5),0 12px 24px -10px rgba(26,14,18,.65)}
+  background:linear-gradient(180deg,#E8C676,var(--gold-fill));color:var(--burgundy-deep);box-shadow:0 0 0 5px #1F1116,inset 0 1px 0 rgba(255,255,255,.5),0 12px 24px -10px rgba(26,14,18,.65)}
 .room-cta:hover{background:linear-gradient(180deg,#F0D48C,#E3C072)}
 .room-cta:focus-visible{outline-offset:7px}
 @media (max-width:1460px){.room-search{min-width:0;width:44px;padding:0;justify-content:center}.room-search span{display:none}}
@@ -171,7 +172,7 @@ body.room{margin:0;min-width:300px;color:var(--ink);font:400 1.0625rem/1.65 var(
 .turn-controls{display:flex;align-items:center;gap:4px;width:max-content;max-width:100%;margin:28px auto 0;padding:5px;border-radius:999px;background:linear-gradient(180deg,#2A1820,#1A0E12);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 10px 24px -12px rgba(26,14,18,.6)}
 .turn-btn{display:grid;place-items:center;width:44px;height:44px;border-radius:999px;border:0;background:none;color:var(--night-ink);cursor:pointer;padding:0}
 .turn-btn:hover{background:rgba(255,255,255,.1)}
-.turn-pause[aria-pressed=true]{background:linear-gradient(180deg,#E8C676,var(--gold));color:var(--burgundy-deep)}
+.turn-pause[aria-pressed=true]{background:linear-gradient(180deg,#E8C676,var(--gold-fill));color:var(--burgundy-deep)}
 .turn-dots{display:flex}
 .turn-dot{width:44px;height:44px;border:0;background:none;cursor:pointer;display:grid;place-items:center;padding:0}
 .turn-dot::before{content:"";width:9px;height:9px;border-radius:999px;background:rgba(246,238,223,.4);transition:width 300ms,background 300ms}

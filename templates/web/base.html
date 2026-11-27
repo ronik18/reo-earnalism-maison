@@ -3,7 +3,9 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="{% if allow_index %}index,follow{% else %}noindex,nofollow{% endif %}"><title>{% block title %}{{ meta.title|default:ui.site_name }}{% endblock %}</title>
 <meta name="description" content="{% block description %}{{ meta.description }}{% endblock %}">
-<link rel="icon" type="image/png" href="{% static 'maison/logo.png' %}">
+<link rel="icon" href="{% static 'maison/icons/favicon.ico' %}" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" href="{% static 'maison/icons/icon-192.png' %}" sizes="192x192"><link rel="icon" type="image/png" href="{% static 'maison/icons/icon-512.png' %}" sizes="512x512">
+<link rel="apple-touch-icon" href="{% static 'maison/icons/apple-touch-icon.png' %}" sizes="180x180"><link rel="manifest" href="{% static 'maison/icons/site.webmanifest' %}">
 {% if meta.share %}<link rel="canonical" href="{{ meta.canonical }}">
 {% for alternate in meta.alternates %}<link rel="alternate" hreflang="{{ alternate.hreflang }}" href="{{ alternate.href }}">
 {% endfor %}<meta property="og:site_name" content="Earnalism"><meta property="og:type" content="{{ meta.type }}"><meta property="og:locale" content="{{ meta.locale }}">

@@ -159,15 +159,21 @@ class SiteQualityTests(TestCase):
         self.assertEqual(meta(html, "name", "twitter:card"), "summary_large_image")
         self.assertEqual(meta(html, "name", "twitter:image"), image)
 
-    def test_hub_pages_share_the_logo_as_a_website(self):
-        for path in ("/en/", "/en/explore/", "/en/learn/"):
+    def test_hub_and_other_non_title_pages_share_the_brand_card(self):
+        card = static("maison/share/earnalism-share-1200x630.jpg")
+        for path in ("/en/", "/en/explore/", "/en/learn/", "/en/privacy/", "/en/sign-in/"):
             html = self.get(path)
             self.assertEqual(link(html, "canonical"), [("", ORIGIN + path)])
             self.assertEqual(meta(html, "property", "og:type"), "website")
             self.assertEqual(meta(html, "property", "og:locale"), "en_US")
-            self.assertTrue(meta(html, "property", "og:image").endswith(static("maison/logo.png")))
-            self.assertTrue(meta(html, "property", "og:image").startswith("https://"))
-            self.assertEqual(meta(html, "name", "twitter:card"), "summary")
+            image = meta(html, "property", "og:image")
+            self.assertTrue(image.startswith("https://") and image.endswith(card), image)
+            self.assertEqual(meta(html, "name", "twitter:image"), image)
+            self.assertEqual(meta(html, "property", "og:image:width"), "1200")
+            self.assertEqual(meta(html, "property", "og:image:height"), "630")
+            self.assertIn("Earnalism logo", meta(html, "property", "og:image:alt"))
+            self.assertEqual(meta(html, "name", "twitter:image:alt"), meta(html, "property", "og:image:alt"))
+            self.assertEqual(meta(html, "name", "twitter:card"), "summary_large_image")
         # Query strings never become the canonical address.
         self.assertEqual(link(self.get("/en/explore/?format=reader"), "canonical"), [("", ORIGIN + "/en/explore/")])
 
@@ -192,13 +198,37 @@ class SiteQualityTests(TestCase):
         self.assertFalse(values["share"])
         self.assertNotIn("staff", values["image"])
 
-    def test_favicon_link_and_route_use_the_unaltered_logo(self):
-        html = self.get("/en/")
-        self.assertIn(f'<link rel="icon" type="image/png" href="{static("maison/logo.png")}">', html)
+    def test_icon_links_manifest_and_favicon_route_use_the_icon_set(self):
+        html = head(self.get("/en/"))
+        self.assertIn(f'<link rel="icon" href="{static("maison/icons/favicon.ico")}" sizes="16x16 32x32 48x48">', html)
+        self.assertIn(f'<link rel="icon" type="image/png" href="{static("maison/icons/icon-192.png")}" sizes="192x192">', html)
+        self.assertIn(f'<link rel="icon" type="image/png" href="{static("maison/icons/icon-512.png")}" sizes="512x512">', html)
+        self.assertIn(f'<link rel="apple-touch-icon" href="{static("maison/icons/apple-touch-icon.png")}" sizes="180x180">', html)
+        self.assertIn(f'<link rel="manifest" href="{static("maison/icons/site.webmanifest")}">', html)
+        self.assertNotIn(f'rel="icon" type="image/png" href="{static("maison/logo.png")}"', html)
         for method in (self.client.get, self.client.head):
             response = method("/favicon.ico")
             self.assertEqual(response.status_code, 302)
-            self.assertEqual(response["Location"], static("maison/logo.png"))
+            self.assertEqual(response["Location"], static("maison/icons/favicon.ico"))
+
+    def test_icon_files_and_share_card_have_the_promised_sizes(self):
+        import json
+        from PIL import Image
+        root = Path(settings.BASE_DIR) / "static/maison"
+        with Image.open(root / "icons/favicon.ico") as ico:
+            self.assertEqual(sorted(ico.info["sizes"]), [(16, 16), (32, 32), (48, 48)])
+        for name, size in (("icon-192.png", 192), ("icon-512.png", 512), ("apple-touch-icon.png", 180)):
+            with Image.open(root / "icons" / name) as image:
+                self.assertEqual((image.format, image.size), ("PNG", (size, size)))
+        manifest = json.loads((root / "icons/site.webmanifest").read_text())
+        self.assertEqual(manifest["name"], "Earnalism")
+        self.assertEqual((manifest["background_color"], manifest["theme_color"]), ("#FBF6EC", "#FBF6EC"))
+        self.assertEqual({(icon["src"], icon["sizes"]) for icon in manifest["icons"]},
+                         {("icon-192.png", "192x192"), ("icon-512.png", "512x512")})
+        card = root / "share/earnalism-share-1200x630.jpg"
+        self.assertLess(card.stat().st_size, 250 * 1024)
+        with Image.open(card) as image:
+            self.assertEqual((image.format, image.size), ("JPEG", (1200, 630)))
 
     def test_sitemap_lists_hubs_and_live_titles_and_robots_points_to_it(self):
         response = self.client.get("/sitemap.xml")
