@@ -1263,10 +1263,18 @@ class SfxCellTests(unittest.TestCase):
         self.assertTrue(rel("File:Broom sweeping floor.wav", "broom sweeping"))
         self.assertFalse(rel("File:Anything.ogg", "of the"))
 
-    def meta(self, title, lic, url="https://upload.wikimedia.org/x/Crow.ogg?utm_a=b", size=1000):
-        return {"title": title, "imageinfo": [{"url": url, "size": size, "descriptionurl": "https://c/wiki/" + title,
+    def meta(self, title, lic, url="https://upload.wikimedia.org/x/Crow.ogg?utm_a=b", size=1000, code=None,
+             cats=None):
+        """A page as the Commons API returns it: imageinfo.extmetadata (LicenseShortName, License) plus
+        prop=categories (hidden ones included: licence categories live there)."""
+        code = code if code is not None else {"CC0": "cc0", "Public domain": "pd"}.get(lic, "")
+        page = {"title": title, "imageinfo": [{"url": url, "size": size, "descriptionurl": "https://c/wiki/" + title,
                                                "extmetadata": {"LicenseShortName": {"value": lic},
+                                                               "License": {"value": code},
                                                                "Artist": {"value": "<a>Ann</a>"}}}]}
+        if cats is not None:
+            page["categories"] = [{"ns": 14, "title": "Category:" + c} for c in cats]
+        return page
 
     def test_pick_files_applies_licence_relevance_extension_and_size(self):
         ns = self.ns()
@@ -1274,15 +1282,66 @@ class SfxCellTests(unittest.TestCase):
                  self.meta("File:Crow flock.ogg", "CC0"),
                  self.meta("File:Mall.ogg", "CC0"),
                  self.meta("File:Crow US.ogg", "PD-US"),
+                 self.meta("File:Crow nasa.ogg", "Public domain", cats=["PD NASA", "PD-USGov-NASA"]),
                  self.meta("File:Crow big.ogg", "CC0", size=99_000_000),
                  self.meta("File:Crow page.ogg", "CC0", url="https://u.org/Crow"),
-                 self.meta("File:Crow morning.ogg", "Public domain")]
+                 self.meta("File:Crow morning.ogg", "Public domain", cats=["PD-self", "Self-published work"])]
         got = ns["sfx_pick"](pages, "crows cawing", "crows", limit=2)
         self.assertEqual([g["file"] for g in got], ["sfx-crows-1.ogg", "sfx-crows-2.ogg"])
         self.assertEqual([g["title"] for g in got], ["File:Crow flock.ogg", "File:Crow morning.ogg"])
         self.assertEqual(got[0]["licence"], "CC0")
+        self.assertEqual(got[0]["basis"]["rule"], "cc0")
+        self.assertEqual(got[1]["basis"], {"rule": "author-release", "categories": ["PD-self", "Self-published work"]})
         self.assertEqual(got[0]["author"], "Ann")
         self.assertTrue(got[0]["page"].startswith("https://commons.wikimedia.org/wiki/File:Crow_flock"))
+
+    def test_public_domain_needs_an_author_release_basis_and_no_country_or_age_basis(self):
+        """Commons reports PD-USGov-NASA and PD-old/PD-Art files as LicenseShortName "Public domain" /
+        License "pd", so the licence field alone cannot tell worldwide from country-limited public domain."""
+        pick = self.ns()["sfx_pick"]
+
+        def kept(page):
+            return [g["title"] for g in pick([page], "crow", "crows")]
+        nasa = self.meta("File:Crow nasa.ogg", "Public domain", cats=["PD NASA", "PD-USGov-NASA", "Audio files"])
+        old = self.meta("File:Crow old.ogg", "Public domain", cats=["PD-old-70", "PD-Art (PD-old-100)"])
+        usgov = self.meta("File:Crow gov.ogg", "Public domain", cats=["Works of the United States government"])
+        exempt = self.meta("File:Crow ex.ogg", "Public domain", cats=["PD-self", "PD-Italy-exempt"])
+        mixed = self.meta("File:Crow mix.ogg", "Public domain", cats=["PD-self", "PD-US"])
+        us_only = self.meta("File:Crow usonly.ogg", "Public domain", cats=["PD US", "Self-published work"])
+        none_known = self.meta("File:Crow unk.ogg", "Public domain", cats=["Audio files", "Birds"])
+        uncategorised = self.meta("File:Crow nocat.ogg", "Public domain")          # categories not returned
+        wrong_code = self.meta("File:Crow code.ogg", "Public domain", code="cc-by", cats=["PD-self"])
+        cc0 = self.meta("File:Crow cc0.ogg", "CC0", cats=[])                       # CC0 needs no category
+        self_pd = self.meta("File:Crow self.ogg", "Public domain", cats=["PD-self", "Self-published work"])
+        released = self.meta("File:Crow rel.ogg", "Public domain", cats=["Public domain due to author's release"])
+        selfpub = self.meta("File:Crow pub.ogg", "Public domain", cats=["Self-published work"])
+        for page in (nasa, old, usgov, exempt, mixed, us_only, none_known, uncategorised, wrong_code):
+            self.assertEqual(kept(page), [], page["title"])
+        for page in (cc0, self_pd, released, selfpub):
+            self.assertEqual(kept(page), [page["title"]], page["title"])
+        got = pick([self_pd], "crow", "crows")[0]
+        self.assertEqual(got["basis"], {"rule": "author-release", "categories": ["PD-self", "Self-published work"]})
+        self.assertEqual(pick([cc0], "crow", "crows")[0]["basis"], {"rule": "cc0", "categories": []})
+
+    def test_the_stage_asks_for_categories_in_the_same_imageinfo_query(self):
+        urls = []
+        out = self.root / "out"
+        out.mkdir()
+
+        def opener(url):
+            urls.append(url)
+            if "list=search" in url:
+                return {"query": {"search": [{"title": "File:Crow self.ogg"}]}}
+            return {"query": {"pages": {"1": self.meta("File:Crow self.ogg", "Public domain",
+                                                       cats=["PD-self", "Self-published work"])}}}
+        ns = self.ns(OUT_DIR=out, JOB={"sfx": {"crows": "crows"}}, _sfx_open=opener,
+                     _sfx_fetch=lambda url: b"x", _sfx_sleep=lambda s: None)
+        ns["run_sfx_stage"]()
+        self.assertEqual(len(urls), 2)                         # one search, one imageinfo+categories query
+        self.assertIn("prop=imageinfo%7Ccategories", urls[1])
+        self.assertIn("cllimit=max", urls[1])
+        lic = json.loads((out / "sfx-licences.json").read_text())
+        self.assertEqual(lic["sfx-crows-1.ogg"]["basis"]["rule"], "author-release")
 
     def test_api_error_response_does_not_raise_and_retries_three_times(self):
         calls = []
@@ -1323,7 +1382,8 @@ class SfxCellTests(unittest.TestCase):
         self.assertEqual(sorted(p.name for p in out.iterdir()), ["sfx-crows-1.ogg", "sfx-licences.json"])
         lic = json.loads((out / "sfx-licences.json").read_text())
         self.assertEqual(lic["sfx-crows-1.ogg"]["licence"], "CC0")
-        self.assertEqual(set(lic["sfx-crows-1.ogg"]), {"title", "page", "licence", "author"})
+        self.assertEqual(set(lic["sfx-crows-1.ogg"]), {"title", "page", "licence", "author", "basis"})
+        self.assertEqual(lic["sfx-crows-1.ogg"]["basis"]["rule"], "cc0")
 
     def test_sfx_spec_adds_the_cell_before_wan_and_reserves_its_budget(self):
         import ast

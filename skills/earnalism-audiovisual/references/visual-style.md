@@ -228,8 +228,12 @@ The builder refuses a stills prompt whose house-style-first text is over 180 on 
 ## Sound fetch (film_clips)
 
 A film_clips spec with `"sfx": {"crows": "crows cawing morning", ...}` adds a cell before the Wan clips that
-searches Wikimedia Commons (no key), keeps up to two files per name that are CC0 or worldwide public domain
-("CC0", "Public domain", "PD"; country-limited tags such as PD-US are refused) in the file's own licence, whose
-title holds a search word as a whole word, and writes `sfx-<name>-<n>.<ext>` and `sfx-licences.json`
-(title, page, licence, author). Eight minutes at most, reserved in the forecast; it never fails the job.
+searches Wikimedia Commons (no key), keeps up to two files per name whose title holds a search word as a whole
+word and whose rights are clear: CC0, or public domain by the author's own release (a PD-self / "Public domain
+due to author's release" / "Self-published work" category, read with `prop=categories` in the same query, hidden
+categories included). Commons reports PD-USGov and PD-old files as "Public domain" too, so a file with any
+country-limited or age-based category (PD-US*, PD-USGov*, PD-old*, PD-Art*, *-exempt, "Works of the United
+States government") or no clear basis is refused. The basis is recorded per file in `sfx-licences.json`
+(title, page, licence, author, basis). Writes `sfx-<name>-<n>.<ext>` and `sfx-licences.json`.
+Eight minutes at most, reserved in the forecast; it never fails the job.
 Import places them under `film_clips/<job_id>/sfx/`.

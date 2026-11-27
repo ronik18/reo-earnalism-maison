@@ -1,7 +1,9 @@
 # CC0 sound fetch (optional, film_clips jobs whose spec has "sfx": {"<name>": "<search words>"}).
 # Wikimedia Commons, keyless API. Keeps only files whose own licence (extmetadata LicenseShortName) is
-# CC0 or public domain and whose file title contains a search word. Writes flat Drive files
-# sfx-<name>-<n>.<ext> and sfx-licences.json (title, page, licence, author); the importer places them
+# CC0, or public domain by the author's own release (PD-self category, no country-limited or age-based
+# category: Commons reports PD-USGov and PD-old files as "Public domain" too), and whose file title contains
+# a search word. Writes flat Drive files
+# sfx-<name>-<n>.<ext> and sfx-licences.json (title, page, licence, author, basis); the importer places them
 # under film_clips/<job_id>/sfx/. This stage never fails the job: it has its own 8-minute budget and
 # every error is caught, so the Wan clips and the manifest below always run.
 if RUN is not True:
@@ -44,6 +46,49 @@ def _sfx_fetch(url):
 def sfx_licence_ok(licence):
     """Only CC0 and public domain (the file's own LicenseShortName); anything else is dropped."""
     return bool(licence) and bool(_SFX_OK.fullmatch(str(licence).strip()))
+
+
+_SFX_CC0 = re.compile(r"cc[ -]?0(?: 1\.0(?: universal)?)?", re.I)
+_SFX_PD = re.compile(r"public domain|pd", re.I)
+# Author's own release into the public domain (Commons categories, hidden ones included). "Self-published
+# work" counts only together with a public-domain licence (checked by the caller).
+_SFX_RELEASE = ("pd-self", "pd self", "public domain due to author's release", "public domain due to author\u2019s release",
+                "self-published work")
+# Any category that names a country-limited or age/term-based basis refuses the file, whatever else it has:
+# every PD-* / "PD " category other than the PD-self ones (PD-US, PD-USGov-NASA, PD NASA, PD-old-70, PD-Art,
+# PD-Italy-exempt ...), and these phrases.
+_SFX_REFUSE_PHRASES = ("united states government", "public domain in ", "-exempt", " exempt", "copyright expired",
+                       "due to age", "anonymous works", "published before", "pd-old", "pd-art")
+
+
+def _sfx_cat(title):
+    t = str(title)
+    return (t.split(":", 1)[1] if t.lower().startswith("category:") else t).strip()
+
+
+def sfx_basis(licence, code, categories):
+    """(basis, why): why a file's rights are acceptable, or None. (a) CC0 by LicenseShortName/License; or (b)
+    public domain by the author's own release: a public-domain licence plus a PD-self / author-release category
+    and no category naming a country-limited or age/term-based basis. Commons reports PD-USGov-NASA, PD-old and
+    PD-Art files as "Public domain" too, so the categories decide. categories is None when Commons did not return
+    them. Anything unclear is refused."""
+    lic, code = str(licence or "").strip(), str(code or "").strip().lower()
+    if _SFX_CC0.fullmatch(lic) or code in ("cc0", "cc-0", "cc0-1.0"):
+        return {"rule": "cc0", "categories": [_sfx_cat(c) for c in categories or []]}, None
+    if not (_SFX_PD.fullmatch(lic) and code in ("", "pd")):
+        return None, "licence %r is not CC0 or public domain" % lic
+    if categories is None:
+        return None, "its categories were not returned, so the public-domain basis is unknown"
+    names = [_sfx_cat(c) for c in categories]
+    low = [n.lower() for n in names]
+    for n in low:
+        if ((n.startswith("pd-") or n.startswith("pd ")) and n not in _SFX_RELEASE) \
+                or any(ph in n for ph in _SFX_REFUSE_PHRASES) or n == "pd":
+            return None, "category %r names a country-limited or age-based public-domain basis" % n
+    release = [names[i] for i, n in enumerate(low) if n in _SFX_RELEASE]
+    if not release:
+        return None, "no author-release category (PD-self); the public-domain basis is unknown"
+    return {"rule": "author-release", "categories": release}, None
 
 
 def sfx_ext(url):
@@ -111,8 +156,13 @@ def sfx_pick(pages, query, name, limit=SFX_PER_NAME):
         info = (p.get("imageinfo") or [{}])[0]
         meta = info.get("extmetadata") or {}
         licence = (meta.get("LicenseShortName") or {}).get("value", "")
+        code = (meta.get("License") or {}).get("value", "")
         title, url = p.get("title", ""), info.get("url")
         if not url or not sfx_licence_ok(licence) or not sfx_relevant(title, query):
+            continue
+        cats = p.get("categories")
+        basis, _why = sfx_basis(licence, code, [c.get("title", "") for c in cats] if isinstance(cats, list) else None)
+        if basis is None:
             continue
         if (info.get("size") or 0) > SFX_MAX_BYTES:
             continue
@@ -121,7 +171,7 @@ def sfx_pick(pages, query, name, limit=SFX_PER_NAME):
             continue
         kept.append({"file": fn, "url": url, "title": title,
                      "page": "https://commons.wikimedia.org/wiki/" + urllib.parse.quote(title.replace(" ", "_"), safe=":/"),
-                     "licence": str(licence).strip(),
+                     "licence": str(licence).strip(), "basis": basis,
                      "author": re.sub(r"<[^>]+>", "", (meta.get("Artist") or {}).get("value", "")).strip()[:200]})
         if len(kept) >= limit:
             break
@@ -144,8 +194,9 @@ def run_sfx_stage():
                 if not titles:
                     print("sfx", name, "no results")
                     continue
-                info = sfx_api({"action": "query", "prop": "imageinfo", "titles": "|".join(titles),
-                                "iiprop": "url|size|extmetadata|mime"})
+                info = sfx_api({"action": "query", "prop": "imageinfo|categories", "titles": "|".join(titles),
+                                "iiprop": "url|size|extmetadata|mime",
+                                "cllimit": "max"})
                 kept = 0
                 for item in sfx_pick(sfx_search_pages(info), query, name):
                     if time.time() - started > SFX_BUDGET_S:
@@ -155,7 +206,7 @@ def run_sfx_stage():
                     except Exception as e:
                         print("sfx download failed", item["title"], type(e).__name__)
                         continue
-                    licences[item["file"]] = {k: item[k] for k in ("title", "page", "licence", "author")}
+                    licences[item["file"]] = {k: item[k] for k in ("title", "page", "licence", "author", "basis")}
                     kept += 1
                     _sfx_sleep(1)
                 print("sfx", name, "kept", kept)
