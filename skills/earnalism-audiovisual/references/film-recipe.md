@@ -69,6 +69,22 @@ What the CLI does, in order:
    boundaries, the approved Earnalism logo lockup top-right (from `earnalism-video`, no
    backing box), the approved END card once.
 
+### Cinematic assembly (`film --shots --title T --author A --narrator V [--burn]`)
+
+For films planned shot by shot. Every scene needs its **approved** shot plan
+(`film/film-NN/shots/<scene>.json`, refused otherwise) and its scene mix
+(`film/film-NN/audio/<scene>.mix.wav`, from `cue`). Each shot is rendered by
+`eav.film.render_shot` (glide from its still `<scene>-<n>` and imported depth map, the imported Wan
+clip, or a held still) into `film/film-NN/shots-cache`, keyed by sha256 of the shot, its input files and
+the code version, so a rerun renders only what changed. A glide pull-back (negative zoom) must carry
+`zoom0` with `zoom0 * (1 + zoom * near_gain) >= 1` or the shot is refused (no edge band). A Wan shot
+with several takes needs `film/film-NN/clip-picks.json` (`{"<scene>/<n>": "<take's last key>"}`).
+`assemble_shots` joins the shots at 24 fps with one xfade per transition (a dissolve is 0.8 s, a cut or
+match is a 1-frame xfade), puts the title card first, the credits card (author, narration voice, "Illustrations and
+narration are AI-generated / ছবি ও কণ্ঠ এআই-নির্মিত", Maison fonts) and the approved END last, with the
+logo top-right, a mov_text WebVTT captions track (`--burn` also writes `<film>.burned.mp4`), and the
+1.6 s end-of-picture fade.
+
 ## 6. Review
 
 `qc` checks loudness and peak and writes a contact sheet; look at it. Then the

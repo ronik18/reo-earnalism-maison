@@ -1,8 +1,10 @@
-"""Narration track, SRT subtitles and illustrated film assembly (ffmpeg subprocess)."""
+"""Narration track, SRT subtitles and illustrated film assembly (ffmpeg subprocess); shot-based 24 fps
+film assembly (render_shot, assemble_shots), WebVTT captions and title/credit cards for the cinematic film."""
 import json
 import shutil
 import subprocess
 import tempfile
+import unicodedata
 from pathlib import Path
 
 from .voice import voice_units
@@ -254,10 +256,13 @@ def _logo_glow(lw: int, lh: int):
     return Image.fromarray(rgba, "RGBA")
 
 
-def _audio_graph(mixed_idx, end_idx, total, end_s, ceiling_db=None, gain_db=0.0):
+def _audio_graph(mixed_idx, end_idx, total, end_s, ceiling_db=None, gain_db=0.0, shape=None):
     """The film's audio: the mixed body, then the END's own sound or silence. The body goes through
     an oversampled true-peak limiter at `ceiling_db` (transient peaks only; integrated loudness is
-    kept), and a broadband `gain_db` only as the last-resort fallback. The END is never touched."""
+    kept), and a broadband `gain_db` only as the last-resort fallback. The END is never touched.
+    `shape` (shot films): {"lead": seconds of silence before the mix, "fade_out": seconds, "fade_end": where the
+    fade ends on the film's timeline}; the fade is the film's own last scene fade, never a drop to zero."""
+    shape = shape or {}
     chain = f"aresample={RATE},aformat=channel_layouts=stereo"
     if ceiling_db is not None:
         lin = 10 ** (ceiling_db / 20)
@@ -265,6 +270,10 @@ def _audio_graph(mixed_idx, end_idx, total, end_s, ceiling_db=None, gain_db=0.0)
                   f":release={LIMITER_RELEASE_MS}:level=disabled,aresample={RATE}")
     if gain_db:
         chain += f",volume={gain_db:.2f}dB"
+    if shape.get("lead"):
+        chain += f",adelay={int(round(shape['lead'] * 1000))}:all=1"
+    if shape.get("fade_out"):
+        chain += f",afade=t=out:st={shape['fade_end'] - shape['fade_out']:.3f}:d={shape['fade_out']:.3f}"
     if end_idx is None:
         return [f"[{mixed_idx}:a]{chain},atrim=0:{total:.3f},apad=whole_dur={total + end_s:.3f}[a]"]
     return [f"[{mixed_idx}:a]{chain},atrim=0:{total:.3f},apad=whole_dur={total:.3f}[am]",
@@ -273,7 +282,7 @@ def _audio_graph(mixed_idx, end_idx, total, end_s, ceiling_db=None, gain_db=0.0)
             "[am][ae]concat=n=2:v=0:a=1[a]"]
 
 
-def _body_ceiling_for_true_peak(mixed_audio, end_video, total, end_s, tries=4) -> dict:
+def _body_ceiling_for_true_peak(mixed_audio, end_video, total, end_s, tries=4, shape=None) -> dict:
     """AAC encoding raises inter-sample peaks (বিচারক film-01: -1.5 dBTP mix, -0.9 encoded), and
     peaky narration used to force a broadband gain cut that dropped the film below the loudness
     target. Encode the audio alone, measure it, and lower the body's limiter ceiling (not its
@@ -286,7 +295,7 @@ def _body_ceiling_for_true_peak(mixed_audio, end_video, total, end_s, tries=4) -
         inputs = ["-i", str(mixed_audio)] + (["-i", str(end_video)] if end_video else [])
 
         def encoded_tp():
-            graph = _audio_graph(0, 1 if end_video else None, total, end_s, ceiling, gain)
+            graph = _audio_graph(0, 1 if end_video else None, total, end_s, ceiling, gain, shape)
             _ffmpeg([*inputs, "-filter_complex", ";".join(graph), "-map", "[a]",
                      "-c:a", "aac", "-b:a", "192k", str(trial)])
             return measure(trial)["true_peak"]
@@ -302,3 +311,669 @@ def _body_ceiling_for_true_peak(mixed_audio, end_video, total, end_s, tries=4) -
                 return {"ceiling_db": round(ceiling, 2), "gain_db": gain, "fallback": True}
             gain -= tp - TP_MAX + TP_MARGIN
     raise RuntimeError(f"encoded audio stays above {TP_MAX} dBTP after {2 * tries} attempts")
+
+
+# ====================================================================== shot-based film (24 fps)
+SHOT_FPS = 24
+CODE_VERSION = "film-shots-1"   # part of every render_shot cache key: bump it when rendering changes
+FADE_OUT_S = 1.6                # the film's last picture and sound fade (pilot spike); scene mixes have none
+DISSOLVE_S = 0.8                # a "dissolve" transition_in; "cut" and "match" are hard cuts
+TITLE_S, CREDITS_S = 4.0, 5.0
+FRAME = (1920, 1080)
+GLIDE_KEYS = ("zoom", "pan_x", "pan_y", "ease", "near_gain", "zoom0", "flat", "sweep", "drain")
+NEAR_GAIN = 1.2                 # glide.render's default near-layer parallax gain
+ENCODE_PRESET = "medium"        # libx264 preset of the finished film (tests lower it for speed)
+
+
+def _sha256(path) -> str:
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def _frames(seconds: float, fps: int) -> int:
+    return int(round(seconds * fps))
+
+
+def _glide_options(shot: dict) -> dict:
+    cam = {k: v for k, v in (shot.get("camera") or {}).items() if k in GLIDE_KEYS}
+    return {**cam, **{k: v for k, v in (shot.get("glide") or {}).items() if k in GLIDE_KEYS}}
+
+
+def _check_pull_back(opts: dict) -> None:
+    """glide.overscan() ignores a negative zoom, so a pull-back needs zoom0 to cover it: refuse any glide
+    whose frame would not stay filled (an edge band) instead of rendering it."""
+    zoom, zoom0 = opts.get("zoom", 0.12), opts.get("zoom0", 1.0)
+    gain = opts.get("near_gain", NEAR_GAIN)
+    if zoom0 * (1 + min(0.0, zoom) * gain) < 1.0:
+        raise ValueError(f"a pull-back of zoom {zoom} with near_gain {gain} and zoom0 {zoom0} would expose an "
+                         f"edge band (zoom0 * (1 + zoom * near_gain) = {zoom0 * (1 + min(0.0, zoom) * gain):.3f} "
+                         f"< 1); raise zoom0 to at least {1 / (1 + min(0.0, zoom) * gain):.3f}")
+
+
+def _shot_key(shot: dict, assets: dict, fps: int) -> str:
+    import hashlib
+    files = {}
+    for name in sorted(assets):
+        value = assets[name]
+        listed = list(value) if isinstance(value, (list, tuple)) else [value]
+        for p in listed:
+            if p is None or not Path(p).is_file():
+                raise ValueError(f"shot input {name!r} is not a file: {p}")
+        files[name] = [_sha256(p) for p in listed]
+    blob = json.dumps({"shot": shot, "inputs": files, "code": CODE_VERSION, "fps": fps},
+                      sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def _encode_still(image: Path, n: int, out: Path, fps: int):
+    W, H = FRAME
+    _ffmpeg(["-loop", "1", "-framerate", str(fps), "-i", str(image), "-vf",
+             f"scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},setsar=1,format=yuv420p",
+             "-frames:v", str(n), "-c:v", "libx264", "-preset", ENCODE_PRESET, "-crf", "15",
+             "-pix_fmt", "yuv420p", "-r", str(fps), str(out)])
+
+
+def _encode_wan(clips, n: int, out: Path, fps: int):
+    """Native 24 fps Wan footage (no interpolation), black edge rows cropped away by a slight overscale, clips
+    joined end to end (a continuation starts on the previous clip's last frame, so its first frame is dropped);
+    a rare action shorter than the shot holds its last frame."""
+    W, H = FRAME
+    args, chain = [], []
+    for k, c in enumerate(clips):
+        args += ["-i", str(c)]
+        trim = "trim=start_frame=1," if k else ""
+        chain.append(f"[{k}:v]{trim}setpts=PTS-STARTPTS,scale=2016:-2:flags=lanczos,crop={W}:{H},"
+                     f"fps={fps},setsar=1,format=yuv420p[c{k}]")
+    chain.append("".join(f"[c{k}]" for k in range(len(clips))) + f"concat=n={len(clips)}:v=1:a=0[cat]")
+    chain.append(f"[cat]tpad=stop_mode=clone:stop_duration=4,trim=end_frame={n},setpts=PTS-STARTPTS[v]")
+    with tempfile.TemporaryDirectory() as td:
+        script = Path(td) / "graph.txt"
+        script.write_text(";".join(chain))
+        _ffmpeg([*args, "-filter_complex_script", str(script), "-map", "[v]", "-c:v", "libx264",
+                 "-preset", ENCODE_PRESET, "-crf", "15", "-pix_fmt", "yuv420p", "-r", str(fps), str(out)])
+
+
+def render_shot(shot: dict, assets: dict, cache_dir: Path, fps: int = SHOT_FPS) -> Path:
+    """One shot as a 1920x1080 clip of `shot["seconds"]` (whole frames), cached by sha256 of the shot's JSON,
+    the hashes of its input files and CODE_VERSION: a hit never renders.
+
+    shot    an approved shot-plan shot (motion wan|glide|static, camera {zoom, pan_x, ease, ...}) plus
+            "seconds", the render length (the shot's span plus its dissolve halves, see edit_lengths); a glide
+            may also carry camera zoom0/near_gain/pan_y/flat/sweep/drain (or a "glide" dict of the same).
+    assets  glide: {"image", "depth"} (depth omitted with flat); static: {"image"}; wan: {"clips": [paths]},
+            a take and its continuations in order."""
+    motion = shot.get("motion")
+    seconds = shot.get("seconds")
+    if not isinstance(seconds, (int, float)) or seconds <= 0:
+        raise ValueError("render_shot needs the shot's render length in shot['seconds']")
+    n = _frames(seconds, fps)
+    if n < 1:
+        raise ValueError(f"shot {shot.get('n')} is shorter than one frame")
+    if motion == "glide":
+        opts = _glide_options(shot)
+        _check_pull_back(opts)
+        if not assets.get("image"):
+            raise ValueError(f"glide shot {shot.get('n')} needs its still (assets['image'])")
+        if not assets.get("depth") and not opts.get("flat"):
+            raise ValueError(f"glide shot {shot.get('n')} needs a depth map (assets['depth']) unless flat")
+    elif motion == "static":
+        if not assets.get("image"):
+            raise ValueError(f"static shot {shot.get('n')} needs its still (assets['image'])")
+    elif motion == "wan":
+        if not assets.get("clips"):
+            raise ValueError(f"wan shot {shot.get('n')} has no imported clip; never replaced by a still")
+    else:
+        raise ValueError(f"shot {shot.get('n')} motion must be wan, glide or static, not {motion!r}")
+    cache_dir = Path(cache_dir)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    out = cache_dir / f"{_shot_key(shot, assets, fps)}.mp4"
+    if out.is_file():
+        return out
+    tmp = out.with_name(out.stem + ".part.mp4")
+    try:
+        if motion == "glide":
+            from . import glide
+            res = glide.render(Path(assets["image"]), Path(assets["depth"]) if assets.get("depth") else None,
+                               tmp, n / fps, fps=fps, **opts)
+            if res["frames"] != n:
+                raise ValueError(f"glide rendered {res['frames']} frames, expected {n}")
+        elif motion == "static":
+            _encode_still(Path(assets["image"]), n, tmp, fps)
+        else:
+            _encode_wan([Path(c) for c in assets["clips"]], n, tmp, fps)
+        tmp.rename(out)
+    finally:
+        tmp.unlink(missing_ok=True)
+    return out
+
+
+def pick_wan_clips(items: list, scene_id: str, n: int, picks: dict = None) -> list:
+    """The item keys of a Wan shot, in order: the take and its `continue_from` chain.
+
+    Candidates are the film_clips items that name shot `n` and whose key starts with `<scene_id>-` (a job's
+    items carry no scene, so the key prefix binds them). One chain: it is the shot's clip. Several takes: the
+    reviewer must name one in `picks` ({"<scene>/<n>": "<key of the take's last item>"}); never a guess."""
+    picks = picks or {}
+    mine = [i for i in items if i.get("shot") == n and str(i.get("key", "")).startswith(scene_id + "-")]
+    if not mine:
+        raise ValueError(f"no film_clips item for shot {n} of scene {scene_id}")
+    by_key = {i["key"]: i for i in mine}
+    continued = {i["continue_from"] for i in mine if i.get("continue_from")}
+    ends = [i["key"] for i in mine if i["key"] not in continued]
+    want = picks.get(f"{scene_id}/{n}")
+    if want is not None:
+        if want not in ends:
+            raise ValueError(f"clip pick {want!r} for shot {n} of scene {scene_id} is not one of its takes "
+                             f"({', '.join(sorted(ends))})")
+        ends = [want]
+    if len(ends) != 1:
+        raise ValueError(f"shot {n} of scene {scene_id} has {len(ends)} takes ({', '.join(sorted(ends))}); name "
+                         f"one in clip-picks.json as {{\"{scene_id}/{n}\": \"<key>\"}}")
+    chain, key = [], ends[0]
+    while key is not None:
+        if key not in by_key or key in chain:
+            raise ValueError(f"continue_from chain of {ends[0]!r} (shot {n}, scene {scene_id}) is broken at {key!r}")
+        chain.insert(0, key)
+        key = by_key[key].get("continue_from")
+    return chain
+
+
+def edit_lengths(durations: list, transitions: list, fps: int = SHOT_FPS):
+    """Render lengths and overlaps that put every cut on its planned frame.
+
+    durations   each shot's span in seconds (contiguous, from the shot plans)
+    transitions seconds of dissolve between shot i and i+1 (0 = hard cut), len(durations) - 1
+    Returns (lens, overlaps) in seconds for assemble_shots: a dissolve is centred on the boundary and limited to
+    half of the shorter neighbour, a hard cut is a 1-frame xfade placed so the new shot's first shown frame is
+    the boundary frame; the film's frame count is round(sum(durations) * fps)."""
+    n = len(durations)
+    if n < 1 or len(transitions) != n - 1:
+        raise ValueError("edit_lengths needs one transition between each pair of shots")
+    cum, b = 0.0, []
+    for d in durations:
+        cum += d
+        b.append(_frames(cum, fps))
+    over = []
+    for i, t in enumerate(transitions):
+        cap = 0.5 * min(durations[i], durations[i + 1])
+        over.append(max(1, _frames(min(t, cap), fps)) if t > 0 else 1)
+    starts = [b[i] - (over[i] - over[i] // 2) for i in range(n - 1)]   # first frame of overlap i
+    frames = []
+    for i in range(n):
+        a = starts[i - 1] if i else 0
+        z = starts[i] + over[i] if i < n - 1 else b[-1]
+        frames.append(z - a)
+    if any(f < 1 for f in frames):
+        raise ValueError("a shot is shorter than its transitions")
+    return [f / fps for f in frames], [o / fps for o in over]
+
+
+def _probe_video(path) -> dict:
+    r = subprocess.run(["ffprobe", "-v", "error", "-count_packets", "-select_streams", "v:0", "-show_entries",
+                        "stream=width,height,nb_read_packets", "-of", "json", str(path)],
+                       check=True, capture_output=True, text=True)
+    st = json.loads(r.stdout)["streams"][0]
+    return {"width": int(st["width"]), "height": int(st["height"]), "frames": int(st["nb_read_packets"])}
+
+
+def _burn_track(vtt: Path, size: tuple, fonts_dir: Path, work: Path) -> Path:
+    """The captions as a transparent picture sequence (concat list) drawn with the cards' raqm Bengali shaping:
+    libass in the stock ffmpeg does not reorder Bengali clusters, so burned-in text is never left to it."""
+    import re
+    from PIL import Image, ImageDraw, ImageFont
+    if not _shaping_available():
+        raise ValueError("burned-in Bengali captions need Pillow with libraqm")
+    W, H = size
+    fonts_dir = Path(fonts_dir)
+    px = max(14, round(H * 0.045))
+    fonts = {"latin": ImageFont.truetype(str(fonts_dir / FONT_FILES["latin_text"]), px, layout_engine=ImageFont.Layout.RAQM),
+             "bn": ImageFont.truetype(str(fonts_dir / FONT_FILES["bengali_text"]), px, layout_engine=ImageFont.Layout.RAQM)}
+    cues = []
+    for block in Path(vtt).read_text(encoding="utf-8").split("\n\n")[1:]:
+        lines = block.strip("\n").split("\n")
+        mt = re.fullmatch(r"(\d+):(\d\d):(\d\d)\.(\d{3}) --> (\d+):(\d\d):(\d\d)\.(\d{3})", lines[0]) if lines[0] else None
+        if mt:
+            g = list(map(int, mt.groups()))
+            cues.append((g[0] * 3600 + g[1] * 60 + g[2] + g[3] / 1000, g[4] * 3600 + g[5] * 60 + g[6] + g[7] / 1000,
+                         lines[1:]))
+    work.mkdir(parents=True, exist_ok=True)
+    blank = work / "blank.png"
+    Image.new("RGBA", (W, H), (0, 0, 0, 0)).save(blank)
+    rows, t = [], 0.0
+    for k, (a, b, lines) in enumerate(cues):
+        if a > t + 1e-6:
+            rows.append((blank, a - t))
+        img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        d = ImageDraw.Draw(img)
+        y0 = H - round(H * 0.07) - (len(lines) - 1) * round(px * 1.5)
+        for n, ln in enumerate(lines):
+            _draw_line(d, ln, y0 + n * round(px * 1.5), fonts, CARD_INK + (255,), W, stroke=max(2, px // 14))
+        png = work / f"cue{k:04d}.png"
+        img.save(png)
+        rows.append((png, b - a))
+        t = b
+    if not rows:
+        rows = [(blank, 1.0)]
+    lst = work / "captions.txt"
+    body = "".join(f"file '{p}'\nduration {d:.6f}\n" for p, d in rows) + f"file '{rows[-1][0]}'\n"
+    lst.write_text(body, encoding="utf-8")
+    return lst
+
+
+def assemble_shots(shot_clips: list, lens: list, transitions: list, audio: Path, out: Path,
+                   fps: int = SHOT_FPS, *, logo: Path = None, end_card: Path = None, title_card: Path = None,
+                   credits_card: Path = None, title_s: float = TITLE_S, credits_s: float = CREDITS_S,
+                   captions_vtt: Path = None, burn: bool = False, fade_out_s: float = FADE_OUT_S,
+                   fonts_dir: Path = None, caption_lang: str = "ben") -> dict:
+    """Join rendered shots into the film at `fps`: one xfade per transition (a 1-frame xfade is a hard cut), so
+    the picture has sum(frames of lens) - sum(overlap frames) frames exactly (edit_lengths builds both lists).
+
+    audio       the film's mix; it starts after the title card and fades out with the last picture (the last
+                scene's fade only: scene joins never drop to zero)
+    transitions overlap seconds between clip i and i+1 (len(shot_clips) - 1); 0 means a hard cut
+    logo / end_card   the approved lockup (overlay only, top-right, the same placement and glow as `assemble`)
+                and the approved END; title_card / credits_card (see cards()) are held title_s / credits_s
+    captions_vtt  on the film's timeline (captions(..., offset=title_s)); muxed as a mov_text track, or burned in
+                with burn=True (no soft track)."""
+    n = len(shot_clips)
+    if n < 1 or len(lens) != n or len(transitions) != n - 1:
+        raise ValueError("assemble_shots needs one length per clip and one transition between each pair")
+    F = [_frames(x, fps) for x in lens]
+    O = [max(1, _frames(t, fps)) for t in transitions]
+    if any(f < 1 for f in F):
+        raise ValueError("a clip is shorter than one frame")
+    for i in range(n):
+        need = (O[i - 1] if i else 0) + (O[i] if i < n - 1 else 0)
+        if F[i] < need:
+            raise ValueError(f"clip {i + 1} has {F[i]} frames but its transitions overlap {need}: shorten the "
+                             f"dissolve or lengthen the shot")
+    sizes = [_probe_video(c) for c in shot_clips]
+    if len({(s["width"], s["height"]) for s in sizes}) != 1:
+        raise ValueError("shot clips differ in size")
+    for i, (s, f) in enumerate(zip(sizes, F)):
+        if s["frames"] < f:
+            raise ValueError(f"clip {i + 1} has {s['frames']} frames, fewer than the {f} its length needs")
+    W, H = sizes[0]["width"], sizes[0]["height"]
+    pic_frames = sum(F) - sum(O)
+    pic_s = pic_frames / fps
+    fade_f = min(_frames(fade_out_s, fps), pic_frames) if fade_out_s else 0
+    if burn and not captions_vtt:
+        raise ValueError("burn needs captions_vtt")
+    work = Path(tempfile.mkdtemp())
+    if burn:
+        cap_list = _burn_track(Path(captions_vtt), (W, H), Path(fonts_dir) if fonts_dir else _default_fonts_dir(),
+                               work / "captions")
+
+    args, graph = [], []
+    for k, c in enumerate(shot_clips):
+        args += ["-i", str(c)]
+        graph.append(f"[{k}:v]settb=AVTB,fps={fps},format=yuv420p,setsar=1,trim=end_frame={F[k]},"
+                     f"setpts=PTS-STARTPTS[v{k}]")
+    cur, length = "v0", F[0]
+    for k in range(n - 1):
+        graph.append(f"[{cur}][v{k + 1}]xfade=transition=fade:duration={O[k] / fps:.6f}"
+                     f":offset={(length - O[k]) / fps:.6f}[x{k}]")
+        cur, length = f"x{k}", length + F[k + 1] - O[k]
+    nxt = n
+    if logo is not None:
+        lw, mg = int(W * LOGO_WIDTH_FRAC), int(W * LOGO_MARGIN_FRAC)
+        lh = int(lw * LOGO_ASPECT)
+        glow = _logo_glow(lw, lh)
+        glow_png = Path(tempfile.mkdtemp()) / "logo-glow.png"
+        glow.save(glow_png)
+        args += ["-i", str(logo), "-loop", "1", "-framerate", str(fps), "-i", str(glow_png)]
+        graph.append(f"[{nxt}:v]scale={lw}:-1[lg]")
+        graph.append(f"[{cur}][{nxt + 1}:v]overlay=x={W - mg - lw // 2 - glow.width // 2}"
+                     f":y={mg + lh // 2 - glow.height // 2}:format=auto:shortest=1[lit]")
+        graph.append(f"[lit][lg]overlay=x=W-w-{mg}:y={mg}:format=auto,format=yuv420p[lgo]")
+        cur, nxt = "lgo", nxt + 2
+    if fade_f:
+        graph.append(f"[{cur}]fade=t=out:s={pic_frames - fade_f}:n={fade_f}[pf]")
+        cur = "pf"
+    parts, lead, tail = [], 0.0, 0.0
+
+    def card(path, seconds, idx, name, fade_in, fade_out):
+        frames = _frames(seconds, fps)
+        fx = ""
+        edge = min(_frames(0.5, fps), frames // 2)
+        if fade_in:
+            fx += f",fade=t=in:s=0:n={edge}"
+        if fade_out:
+            fx += f",fade=t=out:s={frames - edge}:n={edge}"
+        graph.append(f"[{idx}:v]scale={W}:{H}:force_original_aspect_ratio=decrease,"
+                     f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2,fps={fps},format=yuv420p,setsar=1,trim=end_frame={frames}"
+                     f",setpts=PTS-STARTPTS{fx}[{name}]")
+        return frames / fps
+
+    if title_card is not None:
+        args += ["-loop", "1", "-framerate", str(fps), "-t", f"{title_s:.3f}", "-i", str(title_card)]
+        lead = card(title_card, title_s, nxt, "tc", True, True)
+        parts.append("tc")
+        nxt += 1
+    parts.append(cur)
+    if credits_card is not None:
+        args += ["-loop", "1", "-framerate", str(fps), "-t", f"{credits_s:.3f}", "-i", str(credits_card)]
+        tail = card(credits_card, credits_s, nxt, "cc", True, False)
+        parts.append("cc")
+        nxt += 1
+    total = lead + pic_s + tail   # everything before the END
+    graph.append("".join(f"[{p}]" for p in parts) + f"concat=n={len(parts)}:v=1:a=0[body]" if len(parts) > 1
+                 else f"[{parts[0]}]null[body]")
+    end_s, end_audio, end_idx = 0.0, False, None
+    if end_card is not None:
+        end_video = Path(end_card).suffix.lower() in VIDEO_SUFFIXES
+        end_s = _duration(end_card) if end_video else END_CARD_S
+        end_audio = end_video and _has_audio(end_card)
+        args += ["-i", str(end_card)] if end_video else [
+            "-loop", "1", "-framerate", str(fps), "-t", f"{END_CARD_S:.3f}", "-i", str(end_card)]
+        end_idx = nxt
+        nxt += 1
+        graph.append(f"[{end_idx}:v]scale={W}:{H}:force_original_aspect_ratio=decrease,"
+                     f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2,fps={fps},format=yuv420p,setsar=1[end]")
+        graph.append("[body][end]concat=n=2:v=1:a=0[vv]")
+    else:
+        graph.append("[body]null[vv]")
+    if burn:
+        args += ["-f", "concat", "-safe", "0", "-i", str(cap_list)]
+        graph.append(f"[{nxt}:v]fps={fps},format=rgba[cap]")
+        nxt += 1
+        graph.append("[vv][cap]overlay=format=auto:eof_action=pass[v]")
+    else:
+        graph.append("[vv]null[v]")
+    full = total + end_s
+    audio_idx = nxt
+    args += ["-i", str(audio)]
+    nxt += 1
+    shape = {"lead": lead, "fade_out": fade_f / fps if fade_f else 0.0, "fade_end": lead + pic_s}
+    lim = _body_ceiling_for_true_peak(audio, end_card if end_audio else None, total, end_s, shape=shape)
+    graph += _audio_graph(audio_idx, end_idx if end_audio else None, total, end_s,
+                          lim["ceiling_db"], lim["gain_db"], shape)
+    maps = ["-map", "[v]", "-map", "[a]"]
+    if captions_vtt is not None and not burn:
+        args += ["-i", str(captions_vtt)]
+        maps += ["-map", f"{nxt}:s", "-c:s", "mov_text", "-metadata:s:s:0", f"language={caption_lang}"]
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as td:
+        script = Path(td) / "graph.txt"
+        script.write_text(";".join(graph))
+        _ffmpeg([*args, "-filter_complex_script", str(script), *maps, "-c:v", "libx264", "-preset", ENCODE_PRESET,
+                 "-crf", "16", "-pix_fmt", "yuv420p", "-r", str(fps), "-c:a", "aac", "-b:a", "192k",
+                 "-t", f"{full:.4f}", "-movflags", "+faststart", str(out)])
+    shutil.rmtree(work, ignore_errors=True)
+    if logo is not None:
+        shutil.rmtree(glow_png.parent, ignore_errors=True)
+    return {"frames": pic_frames, "fps": fps, "duration": full, "picture_s": pic_s, "lead_s": lead,
+            "overlap_frames": O, "size": [W, H], "path": str(out), "captions": captions_vtt is not None,
+            "burned": bool(burn), "body_ceiling_db": lim["ceiling_db"], "body_gain_db": lim["gain_db"],
+            "body_gain_fallback": lim["fallback"]}
+
+
+# ====================================================================== captions (WebVTT)
+CAP_LINES, CAP_LINE_CHARS = 2, 42
+CAP_MIN_S, CAP_MAX_S = 1.0, 7.0
+CAP_CPS = {"bn": 15.0}          # characters per second; other languages 20
+CAP_CPS_DEFAULT = 20.0
+_JOINERS = "‌‍"
+_SPLIT_AFTER = ",;:!?।॥—–…-"   # punctuation after which a line may break
+_VIRAMA = "্"
+
+
+def _is_combining(ch: str) -> bool:
+    return unicodedata.category(ch).startswith("M") or ch in _JOINERS
+
+
+def _visible_len(text: str) -> int:
+    """Characters as a reader counts them: marks (vowel signs, hasanta, nukta) and joiners add none."""
+    return sum(1 for ch in text if not _is_combining(ch) and ch != "\n")
+
+
+def _pieces(text: str) -> list:
+    """[[word, sep]]: the text cut after whitespace and after punctuation, never inside a grapheme cluster;
+    `sep` is the single space that followed it ('' after punctuation inside a word)."""
+    out = []
+    for tok in text.split():
+        cut, start = [], 0
+        for i, ch in enumerate(tok[:-1]):
+            if ch in _SPLIT_AFTER and not _is_combining(tok[i + 1]) and tok[i + 1] not in _SPLIT_AFTER:
+                cut.append(tok[start:i + 1])
+                start = i + 1
+        cut.append(tok[start:])
+        out += [[c, ""] for c in cut]
+        out[-1][1] = " "
+    if out:
+        out[-1][1] = ""
+    for i in range(len(out) - 1, 0, -1):   # a piece may not start with a combining mark or end with a hasanta
+        if _is_combining(out[i][0][0]) or out[i - 1][0][-1] in _VIRAMA + _JOINERS:
+            out[i - 1] = [out[i - 1][0] + out[i - 1][1] + out[i][0], out[i][1]]
+            del out[i]
+    return out
+
+
+def _wrap(text: str) -> list:
+    """Lines of at most CAP_LINE_CHARS characters, as few and as even as possible."""
+    pcs = _pieces(text)
+    if not pcs:
+        raise ValueError("a caption unit has no text")
+    n = len(pcs)
+
+    def width(i, j):   # pieces i..j-1 on one line
+        return sum(len(p[0]) for p in pcs[i:j]) + sum(len(p[1]) for p in pcs[i:j - 1])
+
+    for p in pcs:
+        if len(p[0]) > CAP_LINE_CHARS:
+            raise ValueError(f"{p[0]!r} is longer than {CAP_LINE_CHARS} characters and cannot be split at a "
+                             f"space or punctuation")
+    greedy, i = 0, 0
+    while i < n:
+        j = i + 1
+        while j < n and width(i, j + 1) <= CAP_LINE_CHARS:
+            j += 1
+        greedy, i = greedy + 1, j
+    # exactly `greedy` lines with the least raggedness (sum of squared distances from the even width)
+    target = width(0, n) / greedy
+    INF = float("inf")
+    best = [[(INF, 0)] * (n + 1) for _ in range(greedy + 1)]
+    best[0][0] = (0.0, 0)
+    for k in range(1, greedy + 1):
+        for j in range(1, n + 1):
+            for i in range(j):
+                w = width(i, j)
+                if w <= CAP_LINE_CHARS and best[k - 1][i][0] < INF:
+                    cost = best[k - 1][i][0] + (w - target) ** 2
+                    if cost < best[k][j][0]:
+                        best[k][j] = (cost, i)
+    cuts, j = [], n
+    for k in range(greedy, 0, -1):
+        i = best[k][j][1]
+        cuts.append((i, j))
+        j = i
+    return ["".join(p[0] + (p[1] if x < b - 1 else "") for x, p in enumerate(pcs[a:b], a))
+            for a, b in reversed(cuts)]
+
+
+def _vtt_ts(ms: int) -> str:
+    h, ms = divmod(ms, 3600000)
+    m_, ms = divmod(ms, 60000)
+    s_, ms = divmod(ms, 1000)
+    return f"{h:02d}:{m_:02d}:{s_:02d}.{ms:03d}"
+
+
+def _unit_cues(key, lines, start, end, limit, cps):
+    """[(start_ms, end_ms, [lines])] for one unit: lines grouped 2 per cue (1 when a 2-line cue would run past
+    CAP_MAX_S), the unit's time shared by characters. The unit is shown at most `cps` characters per second:
+    when the narration is faster, the last cue is held into the pause that follows (never past `limit`, the
+    next unit's start); when even that is not enough the unit is refused, never squeezed or cut."""
+    chars = sum(_visible_len(ln) for ln in lines)
+    need = max(chars / cps, CAP_MIN_S)
+    span_end = max(end, start + need)
+    if limit is not None and span_end > limit + 1e-9:
+        raise ValueError(f"unit {key}: {chars} characters need {need:.2f} s at {cps:g} characters/s but only "
+                         f"{limit - start:.2f} s are free before the next unit; re-time the narration or "
+                         f"split the unit")
+    for per in (CAP_LINES, 1):
+        groups = [lines[i:i + per] for i in range(0, len(lines), per)]
+        weights = [sum(_visible_len(ln) for ln in g) for g in groups]
+        t0, t1 = round(start * 1000), round(span_end * 1000)
+        edges, acc = [t0], 0
+        for w in weights:
+            acc += w
+            edges.append(t0 + round((t1 - t0) * acc / chars))
+        durs = [(b - a) / 1000 for a, b in zip(edges, edges[1:])]
+        if all(CAP_MIN_S - 1e-9 <= d <= CAP_MAX_S + 1e-9 for d in durs):
+            return [(a, b, g) for a, b, g in zip(edges, edges[1:], groups)]
+    raise ValueError(f"unit {key}: its {len(lines)} caption line(s) cannot be shown for {CAP_MIN_S:g}-"
+                     f"{CAP_MAX_S:g} s each within {span_end - start:.2f} s")
+
+
+def captions(timing: list, units: list, lang: str, offset: float = 0.0) -> str:
+    """WebVTT for the narrated units: cues of at most 2 lines of 42 characters, 1-7 s each, at most 15
+    characters/s for bn, split only at spaces or punctuation and never inside a grapheme cluster. The text is
+    the source text, only split (whitespace at the splits is dropped). `offset` shifts the film timeline."""
+    text = {u["unit_key"]: u["text"] for u in units}
+    cps = CAP_CPS.get(lang, CAP_CPS_DEFAULT)
+    order = sorted(timing, key=lambda t: t["start"])
+    cues = []
+    for i, t in enumerate(order):
+        if t["unit_key"] not in text:
+            raise ValueError(f"no unit text for {t['unit_key']!r}")
+        limit = order[i + 1]["start"] if i + 1 < len(order) else None
+        if limit is not None and t["end"] > limit + 1e-9:
+            raise ValueError(f"unit {t['unit_key']} ends after the next unit starts")
+        cues += _unit_cues(t["unit_key"], _wrap(text[t["unit_key"]]), t["start"], t["end"], limit, cps)
+    shift = round(offset * 1000)
+    body = "\n\n".join(f"{_vtt_ts(a + shift)} --> {_vtt_ts(b + shift)}\n" + "\n".join(g) for a, b, g in cues)
+    return "WEBVTT\n\n" + body + "\n"
+
+
+# ====================================================================== title and credit cards
+DISCLOSURE_EN = "Illustrations and narration are AI-generated"
+DISCLOSURE_BN = "ছবি ও কণ্ঠ এআই-নির্মিত"
+CARD_BG, CARD_INK, CARD_GOLD = (25, 18, 22), (250, 242, 228), (215, 186, 130)   # Maison canvas, ink, gold
+FONT_FILES = {   # role -> self-hosted OFL font of the Maison design (static/maison/fonts)
+    "latin_display": "cormorant-garamond-latin-wght-normal.woff2",
+    "latin_text": "dm-sans-latin-standard-normal.woff2",
+    "bengali_display": "noto-serif-bengali-bengali-500-normal.woff2",
+    "bengali_text": "noto-sans-bengali-bengali-400-normal.woff2",
+}
+
+
+def _default_fonts_dir() -> Path:
+    for parent in Path(__file__).resolve().parents:
+        d = parent / "static" / "maison" / "fonts"
+        if d.is_dir():
+            return d
+    raise ValueError("the Maison fonts (static/maison/fonts) were not found; pass fonts_dir")
+
+
+def _shaping_available() -> bool:
+    from PIL import features
+    return bool(features.check("raqm"))
+
+
+def _is_bengali(ch: str) -> bool:
+    return "ঀ" <= ch <= "৿" or ch in "।॥" + _JOINERS
+
+
+def _runs(text: str) -> list:
+    """[(bengali?, text)]: Bengali (and its danda and joiners) apart from everything else, which the Latin
+    fonts draw (spaces and the em dash included)."""
+    out = []
+    for ch in text:
+        b = _is_bengali(ch)
+        if out and out[-1][0] == b:
+            out[-1][1] += ch
+        else:
+            out.append([b, ch])
+    return [(b, t) for b, t in out]
+
+
+def _draw_line(draw, text, y, fonts, fill, width, stroke=0):
+    """Centre one line of mixed Bengali and Latin text; each run in its own font, shaped with raqm."""
+    parts = [(fonts["bn" if b else "latin"], t) for b, t in _runs(text)]
+    total = sum(f.getlength(t) for f, t in parts)
+    x = (width - total) / 2
+    for f, t in parts:
+        draw.text((x, y), t, font=f, fill=fill, anchor="ls", stroke_width=stroke,
+                  stroke_fill=(CARD_BG + (255,)) if stroke else None)
+        x += f.getlength(t)
+    return total
+
+
+def _fit(text, make_fonts, size, max_w):
+    while size > 24:
+        fonts = make_fonts(size)
+        if sum(fonts["bn" if b else "latin"].getlength(t) for b, t in _runs(text)) <= max_w:
+            return fonts, size
+        size -= 4
+    return make_fonts(size), size
+
+
+def cards(title: str, author: str, voice: str, out_dir: Path, fonts_dir: Path = None) -> dict:
+    """The title card ("<title> — <author>") and the credits card (author, narration voice and the AI-generation
+    disclosure in English and Bengali) as 1920x1080 PNGs in the Maison fonts, shaped with Pillow's raqm engine
+    (Bengali conjuncts need it: without it the cards are refused). Writes cards.json beside them with the strings,
+    the font files and their sha256 and returns it."""
+    import hashlib
+    from PIL import Image, ImageDraw, ImageFont
+    if not _shaping_available():
+        raise ValueError("Pillow was built without libraqm, which Bengali needs to shape conjuncts; install "
+                         "libraqm (Pillow wheels bundle it) before making cards")
+    fonts_dir = Path(fonts_dir) if fonts_dir else _default_fonts_dir()
+    files = {}
+    for role, name in FONT_FILES.items():
+        p = fonts_dir / name
+        if not p.is_file():
+            raise ValueError(f"font {p} is missing")
+        files[role] = p
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    W, H = FRAME
+
+    def make(latin, bengali):
+        def build(size):
+            f = {"latin": ImageFont.truetype(str(files[latin]), size, layout_engine=ImageFont.Layout.RAQM),
+                 "bn": ImageFont.truetype(str(files[bengali]), size, layout_engine=ImageFont.Layout.RAQM)}
+            return f
+        return build
+
+    display, text = make("latin_display", "bengali_display"), make("latin_text", "bengali_text")
+    title_line = f"{title} — {author}"
+    combined = f"{DISCLOSURE_EN} / {DISCLOSURE_BN}"
+
+    def canvas():
+        img = Image.new("RGB", (W, H), CARD_BG)
+        return img, ImageDraw.Draw(img)
+
+    img, d = canvas()
+    fonts, _ = _fit(title_line, display, 96, W * 0.8)
+    _draw_line(d, title_line, H * 0.52, fonts, CARD_INK, W)
+    d.line([(W * 0.44, H * 0.58), (W * 0.56, H * 0.58)], fill=CARD_GOLD, width=2)
+    title_png = out_dir / "title.png"
+    img.save(title_png)
+
+    img, d = canvas()
+    fonts, _ = _fit(author, display, 80, W * 0.8)
+    _draw_line(d, author, H * 0.36, fonts, CARD_INK, W)
+    d.line([(W * 0.44, H * 0.42), (W * 0.56, H * 0.42)], fill=CARD_GOLD, width=2)
+    narr = f"Narration — {voice}"
+    fonts, _ = _fit(narr, text, 40, W * 0.8)
+    _draw_line(d, narr, H * 0.55, fonts, CARD_INK, W)
+    fonts, _ = _fit(DISCLOSURE_EN, text, 34, W * 0.8)
+    _draw_line(d, DISCLOSURE_EN, H * 0.74, fonts, CARD_GOLD, W)
+    fonts, _ = _fit(DISCLOSURE_BN, text, 38, W * 0.8)
+    _draw_line(d, DISCLOSURE_BN, H * 0.80, fonts, CARD_GOLD, W)
+    credits_png = out_dir / "credits.png"
+    img.save(credits_png)
+
+    meta = {"title": title, "author": author, "voice": voice, "title_line": title_line,
+            "disclosure": {"en": DISCLOSURE_EN, "bn": DISCLOSURE_BN, "text": combined},
+            "fonts": {role: {"file": str(p), "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
+                      for role, p in files.items()},
+            "cards": {"title": str(title_png), "credits": str(credits_png)}, "size": [W, H],
+            "engine": "pillow-raqm"}
+    (out_dir / "cards.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return meta

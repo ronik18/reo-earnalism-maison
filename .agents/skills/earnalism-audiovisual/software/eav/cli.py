@@ -75,6 +75,8 @@
                          a picked edit of a held key releases that key)
   python3 -m eav.cli film --root <dir> [--film N] --logo <png> --end-card <png>
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
+         cinematic: film --root <dir> --film N --logo <png> --end-card <png> --shots --title T --author A
+                         --narrator V [--burn] [--fonts <dir>]  (approved shots/<scene>.json + audio/<scene>.mix.wav)
   python3 -m eav.cli reel <n> --root <dir> --script <script.json> [--hashtags ...]
   python3 -m eav.cli reel <n> --root <dir> --plan-shots           (after reel narration import)
   python3 -m eav.cli reel <n> --root <dir> [--score <wav> --score-route ...]
@@ -103,6 +105,7 @@ import subprocess
 import sys
 import tempfile
 import uuid
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
@@ -1254,6 +1257,127 @@ def cmd_close(args):
     _end_job(args, "close")
 
 
+def _film_clip_items(rec, t) -> dict:
+    """key -> {"job_id", "item"}: the items of the film's imported film_clips jobs (a later job replaces a key)."""
+    found = {}
+    for j in _jobs(rec):
+        if j["kind"] != "film_clips" or j["target"] != t or not j["imported"] or _ended(j):
+            continue
+        with zipfile.ZipFile(j["inputs_zip"]) as z:
+            for item in json.loads(z.read("job.json")).get("items") or []:
+                found[item["key"]] = {"job_id": j["job_id"], "item": item}
+    return found
+
+
+def _shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir) -> dict:
+    """Inputs of one shot: its imported Wan clip(s), or its still (stem <scene>-<n>) and imported depth map."""
+    n = shot["n"]
+    if shot["motion"] == "wan":
+        try:
+            keys = film.pick_wan_clips([c["item"] for c in clip_items.values()], sid, n, picks)
+        except ValueError as e:
+            raise Stop(f"scene {sid} shot {n}: {e}", f"Import the film_clips job for it ({PROG} job film_clips) "
+                       "or name the take in clip-picks.json")
+        files = [rec.root / "film_clips" / clip_items[k]["job_id"] / "clips" / f"{k}.mp4" for k in keys]
+        absent = [f for f in files if not f.is_file()]
+        if absent:
+            raise Stop(f"scene {sid} shot {n}: clip {absent[0]} is missing", f"{PROG} status --root {rec.root}")
+        return {"clips": files}
+    stem = f"{sid}-{n}"
+    still = next((p for p in sorted(Path(stills_dir).iterdir()) if p.stem == stem and p.suffix.lower() in film.STILL_EXTS),
+                 None)
+    if still is None:
+        raise Stop(f"scene {sid} shot {n} has no still {stem}.png in {stills_dir}", next_action(rec.root))
+    assets = {"image": still}
+    if shot["motion"] == "glide":
+        depths = sorted((rec.root / "film_clips").glob(f"*/depth/{stem}.depth.png"))
+        if len({sha256_file(d) for d in depths}) != 1:
+            raise Stop(f"scene {sid} shot {n} (glide) needs exactly one depth map {stem}.depth.png from an imported "
+                       f"film_clips job; found {len(depths)} differing", "Import the depth job or remove the stale map")
+        assets["depth"] = depths[-1]
+    return assets
+
+
+def _film_shots(args, rec, plan, t, scs):
+    """cinematic film: every scene's approved shot plan, rendered shot by shot (glide, Wan, static; cached),
+    joined at 24 fps with the scene mixes, a captions track, the title and credit cards, the logo and the END."""
+    film_dir = rec.root / "film" / t
+    lang = plan["language"]
+    for need in ("title", "author", "narrator"):
+        if not getattr(args, need):
+            raise Stop(f"--shots needs --{need} (title card, credits and the AI disclosure)", f"Rerun with --{need}")
+    scenes = []
+    for sc in scs:
+        sid = sc["scene_id"]
+        try:
+            sp = shotplan.require_approved(film_dir, sid)
+        except shotplan.NotApproved as e:
+            raise Stop(str(e), f"{PROG} plan-shots --root {rec.root} --film {args.film} --scene {sid}")
+        scene_mix = film_dir / "audio" / f"{sid}.mix.wav"
+        if not scene_mix.is_file():
+            raise Stop(f"scene {sid} has no mix {scene_mix}", f"{PROG} cue --root {rec.root} --film {args.film} --scene {sid} ...")
+        if abs(film._duration(scene_mix) - sp["seconds"]) > 0.15:
+            raise Stop(f"the mix of scene {sid} is {film._duration(scene_mix):.2f} s but its shot plan is {sp['seconds']:.2f} s",
+                       f"Remix the scene with {PROG} cue")
+        scenes.append((sid, sp, scene_mix))
+    picks_path = film_dir / "clip-picks.json"
+    picks = _json(picks_path) if picks_path.is_file() else {}
+    clip_items = _film_clip_items(rec, t)
+    stills_dir, stills_info = _film_stills(rec, t, film_dir)
+    shots, assets, units, timing, mixes, at = [], [], [], [], [], 0.0
+    for sid, sp, scene_mix in scenes:
+        inp = _json(shotplan.paths(film_dir, sid)["input"])
+        for i, c in enumerate(inp.get("timing") or [], 1):
+            key = f"{sid}-{i:03d}"
+            units.append({"unit_key": key, "text": c["text"]})
+            timing.append({"unit_key": key, "start": round(at + c["start"], 3), "end": round(at + c["end"], 3)})
+        for shot in sp["shots"]:
+            shots.append({**shot, "scene_id": sid})
+            assets.append(_shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir))
+        mixes.append(scene_mix)
+        at += sp["seconds"]
+    durations = [s["end"] - s["start"] for s in shots]
+    trans = [film.DISSOLVE_S if s["transition_in"] == "dissolve" else 0.0 for s in shots[1:]]
+    lens, overlaps = film.edit_lengths(durations, trans)
+    cache = film_dir / "shots-cache"
+    clips = []
+    for shot, a, ln in zip(shots, assets, lens):
+        try:
+            clips.append(film.render_shot({**shot, "seconds": ln}, a, cache))
+        except ValueError as e:
+            raise Stop(f"scene {shot['scene_id']} shot {shot['n']}: {e}", "Fix the shot plan's camera or the inputs")
+    mixed = film_dir / "audio" / "film.mix.wav"
+    graph = "".join(f"[{i}:a]aresample={film.RATE},aformat=channel_layouts=stereo[a{i}];" for i in range(len(mixes)))
+    graph += "".join(f"[a{i}]" for i in range(len(mixes))) + f"concat=n={len(mixes)}:v=0:a=1[o]"
+    _ff(*sum((["-i", m_] for m_ in mixes), []), "-filter_complex", graph, "-map", "[o]", "-c:a", "pcm_f32le", mixed)
+    try:
+        vtt = film_dir / f"{t}.vtt"
+        vtt.write_text(film.captions(timing, units, lang, offset=film.TITLE_S), encoding="utf-8")
+    except ValueError as e:
+        raise Stop(f"captions: {e}", "Re-time the narration or split the clause in the planner input")
+    fonts = Path(args.fonts) if args.fonts else None
+    card = film.cards(args.title, args.author, args.narrator, film_dir / "cards", fonts)
+    common = dict(logo=Path(args.logo), end_card=Path(args.end_card), title_card=Path(card["cards"]["title"]),
+                  credits_card=Path(card["cards"]["credits"]), captions_vtt=vtt, fonts_dir=fonts)
+    out = film_dir / f"{t}.mp4"
+    info = film.assemble_shots(clips, lens, overlaps, mixed, out, **common)
+    burned = None
+    if args.burn:
+        burned = film_dir / f"{t}.burned.mp4"
+        film.assemble_shots(clips, lens, overlaps, mixed, burned, burn=True, **common)
+    m = mix.measure(out)
+    meta = {"target": t, "mode": "shots", "lufs": m["lufs"], "true_peak": m["true_peak"], "stills": stills_info,
+            "scenes": [s for s, _, _ in scenes], "shots": len(shots), "cards_sha256": sha256_file(film_dir / "cards" / "cards.json"),
+            "captions_sha256": sha256_file(vtt), **info}
+    rec.add_artifact("mix", mixed, {"target": t})
+    rec.add_artifact("captions", vtt, {"target": t})
+    rec.add_artifact("film", out, meta)
+    rec.event("film", "assembled", {"target": t, "duration": info["duration"], "mode": "shots",
+                                    **({"burned": str(burned)} if burned else {})})
+    print(f"Assembled {out}: {info['duration']:.1f} s, {len(shots)} shots at 24 fps, {m['lufs']:.1f} LUFS, "
+          f"TP {m['true_peak']:.1f} dBTP, captions {vtt.name}" + (f", burned-in rendition {burned.name}" if burned else "") + ".")
+
+
 def cmd_film(args):
     rec = _record(args.root)
     plan = _plan(rec)
@@ -1261,6 +1385,8 @@ def cmd_film(args):
     films = plan["plan"]["films"]
     if not 1 <= args.film <= len(films):
         raise Stop(f"film {args.film} is not in the plan", f"{PROG} status --root {rec.root}")
+    if args.shots:
+        return _film_shots(args, rec, plan, t, films[args.film - 1]["scenes"])
     narr = _latest_job(rec, "narration", t)
     stills = _latest_job(rec, "stills", t)
     if not narr or not stills:
@@ -2364,6 +2490,14 @@ def _parser():
     s.add_argument("--score")
     s.add_argument("--score-route", help="vcsl or ace-step:<imported music job id>")
     s.add_argument("--cues-job")
+    s.add_argument("--shots", action="store_true",
+                   help="cinematic film: render every scene's approved shot plan (glide/Wan/static) from "
+                        "film/film-NN/shots, join with the scene mixes (film/film-NN/audio), captions and cards")
+    s.add_argument("--burn", action="store_true", help="--shots: also write a burned-in captions rendition")
+    s.add_argument("--title", help="--shots: the title card's title")
+    s.add_argument("--author", help="--shots: the author, for the title and credits cards")
+    s.add_argument("--narrator", help="--shots: the narration voice credited on the credits card")
+    s.add_argument("--fonts", help="--shots: Maison fonts folder (default static/maison/fonts)")
     s = add("reel")
     s.add_argument("n", type=int)
     s.add_argument("--script")

@@ -613,6 +613,75 @@ class RoundTwo:
             "route": "vcsl", "sha256": hashlib.sha256(bed.read_bytes()).hexdigest()})
 
 
+    def test_film_shots_refuses_a_scene_without_an_approved_shot_plan(self):
+        self.film_ready()
+        shots = ("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card", self.d / "end.png",
+                 "--shots", "--title", "T", "--author", "A", "--narrator", "V")
+        code, out = run(*shots)
+        self.assertNotEqual(code, 0)
+        self.assertIn("no shot plan", out)                       # R11: the paper edit comes first
+        self.assertFalse([a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"])
+        code, out = run("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card",
+                        self.d / "end.png", "--shots")
+        self.assertNotEqual(code, 0)
+        self.assertIn("--title", out)                           # the cards are not optional
+
+    def test_film_shots_assembles_approved_scenes_end_to_end(self):
+        """Two approved scenes of static shots, their scene mixes, cards, captions: one 24 fps film."""
+        import re
+        from eav import shotplan
+        self.film_ready()
+        plan = json.loads((self.root / "plan.json").read_text())
+        scenes = plan["plan"]["films"][0]["scenes"]
+        fdir = self.root / "film" / "film-01"
+
+        def shot_stills(rec, job_id, job_dir, out):   # one still per shot: <scene>-<n>
+            for i, sc in enumerate(scenes):
+                for n in (1, 2):
+                    Image.new("RGB", (320, 180), (60 * i, 90, 40 * n)).save(out / f"{sc['scene_id']}-{n}.png")
+        self.fake_job("stills", "film-01", shot_stills)
+        for sc in scenes:
+            clauses = [c.strip() for c in re.split(r"(?<=[.])\s+|\n\n", sc["text"]) if c.strip()]
+            k = len(clauses)
+            first = [(i * 5.5 / (k - 1) + (0.3 if i else 0.0), (i + 1) * 5.5 / (k - 1)) for i in range(k - 1)]
+            spans = first + [(6.2, 11.5)]
+            timing = [{"start": round(a, 3), "end": round(b, 3), "text": t} for (a, b), t in zip(spans, clauses)]
+            shot = lambda b, tr, **kw: {"beats": b, "subject": "a room", "framing": "wide", "motion": "static",
+                                        "layer": "present", "transition_in": tr, "bible_refs": [],
+                                        "sound": {"sfx": [], "music": None}, **kw}
+            inp = {"spine": "s", "fidelity": "f", "motifs": ["m"], "timing": timing, "peak": {"shot": 2, "at": 9.0},
+                   "shots": [shot([0, k - 2], "cut"), shot([k - 1, k - 1], "dissolve", plants=[1])]}
+            paths = shotplan.paths(fdir, sc["scene_id"])
+            paths["dir"].mkdir(parents=True, exist_ok=True)
+            paths["input"].write_text(json.dumps(inp, ensure_ascii=False), encoding="utf-8")
+            sp = shotplan.plan({**inp, "scene_id": sc["scene_id"], "text": sc["text"]}, timing, {"characters": {}})
+            shotplan.write(fdir, shotplan.approve(sp, "claude", "reviewer", input_sha256=shotplan.input_sha256(paths["input"])))
+            (fdir / "audio").mkdir(exist_ok=True)
+            self.wav(fdir / "audio" / f"{sc['scene_id']}.mix.wav", 11.5)
+        args = ("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card", self.d / "end.png",
+                "--shots", "--title", "The Garden", "--author", "An Author", "--narrator", "A Voice", "--burn")
+        with mock.patch.object(cli.film, "ENCODE_PRESET", "ultrafast"), \
+                mock.patch.object(cli.film, "FRAME", (640, 360)):     # a small frame keeps the test fast
+            code, out = run(*args)
+        self.assertEqual(code, 0, out)
+        art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
+        mp4 = self.root / art["path"]
+        self.assertEqual(art["meta"]["mode"], "shots")
+        # 2 scenes x 11.5 s at 24 fps: each cut is a 1-frame xfade, each dissolve 19 frames, all on their frames
+        self.assertEqual(art["meta"]["frames"], len(scenes) * 276)
+        self.assertAlmostEqual(art["meta"]["duration"], art["meta"]["picture_s"] + 4.0 + 5.0 + 3.0, delta=0.05)
+        self.assertTrue((fdir / "film-01.burned.mp4").is_file())
+
+        def streams(path):
+            return subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=codec_type", "-of", "csv=p=0",
+                                   str(path)], check=True, capture_output=True, text=True).stdout.split()
+        self.assertEqual(sorted(streams(mp4)), ["audio", "subtitle", "video"])           # soft mov_text track
+        self.assertEqual(sorted(streams(fdir / "film-01.burned.mp4")), ["audio", "video"])   # burned: none
+        self.assertTrue((fdir / "film-01.vtt").read_text(encoding="utf-8").startswith("WEBVTT"))
+        self.assertTrue((fdir / "cards" / "cards.json").is_file())
+        self.assertGreater(len(list((fdir / "shots-cache").glob("*.mp4"))), 1)
+        self.assertTrue(mp4.is_file())
+
     def test_film_applies_a_later_partial_stills_job_as_a_patch(self):
         """বিচারক film-01: nine Judge Mohit stills came out bearded. A later stills job that
         regenerates only some keys replaces those keys; every other still stays from the base."""

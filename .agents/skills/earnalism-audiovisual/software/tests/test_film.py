@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 import tempfile
@@ -250,6 +251,335 @@ class FilmTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             film.assemble(PLAN, t, self.d / "stills", self.d / "n.wav",
                           self.d / "l.png", self.d / "c.png", self.d / "f.mp4")
+
+
+BN_LONG = ("যৌবনের শেষে শুভ্র শরৎকালের ন্যায় একটি গভীর প্রশান্ত প্রগাঢ় সুন্দর বয়স আসে যখন জীবনের ফল ফলিবার এবং শস্য "
+           "পাকিবার সময়। তখন আর উদ্দাম যৌবনের বসন্তচঞ্চলতা শোভা পায় না। আমাদের আয়ত্তের অতীত কুহকিনী দুরাশার "
+           "কল্পনালোক হইতে সমস্ত উদ্‌ভ্রান্ত বাসনাকে প্রত্যাহরণ করিয়া আপন ক্ষুদ্র ক্ষমতার গৃহপ্রাচীরমধ্যে "
+           "প্রতিষ্ঠিত করিয়াছি; তখন যৌবন-লাবণ্য অল্পে অল্পে বিশীর্ণ হইয়া আসিতে থাকে।")
+BN_SHORT = "প্রথম পরিচ্ছেদ।"
+BN_CAP_UNITS = [{"unit_key": "c-001", "text": BN_SHORT}, {"unit_key": "c-002", "text": BN_LONG},
+                {"unit_key": "c-003", "text": "অনেক অবস্থান্তরের পর অবশেষে ক্ষীরোদা আশ্রয় পাইল।"}]
+BN_CAP_TIMING = [{"unit_key": "c-001", "start": 0.0, "end": 2.2},
+                 {"unit_key": "c-002", "start": 2.6, "end": 2.6 + len(BN_LONG) / 11.0},
+                 {"unit_key": "c-003", "start": 2.6 + len(BN_LONG) / 11.0 + 0.6,
+                  "end": 2.6 + len(BN_LONG) / 11.0 + 0.6 + 5.0}]
+MARKS = ("M",)
+
+
+def vtt_cues(text):
+    """[(start_s, end_s, [lines])] from a WebVTT string."""
+    import re
+    assert text.startswith("WEBVTT\n\n")
+    out = []
+    for block in text.split("\n\n")[1:]:
+        if not block.strip():
+            continue
+        lines = block.strip("\n").split("\n")
+        mt = re.fullmatch(r"(\d\d):(\d\d):(\d\d)\.(\d{3}) --> (\d\d):(\d\d):(\d\d)\.(\d{3})", lines[0])
+        assert mt, lines[0]
+        g = list(map(int, mt.groups()))
+        out.append((g[0] * 3600 + g[1] * 60 + g[2] + g[3] / 1000, g[4] * 3600 + g[5] * 60 + g[6] + g[7] / 1000,
+                    lines[1:]))
+    return out
+
+
+def lavfi_clip(path, seconds, size="320x180", color="0", fps=24):
+    m.ff("-f", "lavfi", "-i", f"testsrc2=s={size}:r={fps}:d={seconds}", "-vf", f"hue=h={int(color) * 90}",
+         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-r", str(fps), str(path))
+
+
+def frame_count(path):
+    return int(subprocess.run(
+        ["ffprobe", "-v", "error", "-count_frames", "-select_streams", "v:0", "-show_entries",
+         "stream=nb_read_frames", "-of", "csv=p=0", str(path)], check=True, capture_output=True,
+        text=True).stdout.strip())
+
+
+class ShotFilmTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    # ---------------------------------------------------------------- assemble_shots
+    def _clips(self, n=3, seconds=1):
+        out = []
+        for i in range(n):
+            p = self.d / f"c{i}.mp4"
+            lavfi_clip(p, seconds, color=str(i))
+            out.append(p)
+        return out
+
+    def test_assemble_shots_frame_exact_lengths(self):
+        clips = self._clips()
+        audio = self.d / "a.wav"
+        m.sine_wav(audio, 3.0)
+        out = self.d / "f.mp4"
+        info = film.assemble_shots(clips, [1.0, 1.0, 1.0], [0.5, 0.0], audio, out)
+        # 72 frames, minus a 12-frame dissolve and a 1-frame (hard cut) xfade
+        self.assertEqual(info["frames"], 72 - 12 - 1)
+        self.assertEqual(frame_count(out), 59)
+        self.assertEqual(probe(out, "v:0", "r_frame_rate"), "24/1")
+        self.assertAlmostEqual(float(probe(out, "a:0", "duration")), 59 / 24, delta=0.06)
+
+    def test_assemble_shots_refuses_inconsistent_inputs(self):
+        clips, audio = self._clips(), self.d / "a.wav"
+        m.sine_wav(audio, 3.0)
+        with self.assertRaises(ValueError):   # one transition too few
+            film.assemble_shots(clips, [1.0, 1.0, 1.0], [0.5], audio, self.d / "f.mp4")
+        with self.assertRaises(ValueError):   # a dissolve longer than the shot it eats
+            film.assemble_shots(clips, [1.0, 1.0, 1.0], [0.9, 0.9], audio, self.d / "f.mp4")
+        with self.assertRaises(ValueError):   # a clip with fewer frames than its length
+            film.assemble_shots(clips, [2.0, 1.0, 1.0], [0.5, 0.0], audio, self.d / "f.mp4")
+
+    def test_edit_lengths_put_every_cut_on_its_frame(self):
+        lens, trans = film.edit_lengths([2.0, 1.5, 3.0], [0.8, 0.0], 24)
+        frames = [round(x * 24) for x in lens]
+        ov = [max(1, round(x * 24)) for x in trans]
+        self.assertEqual(sum(frames) - sum(ov), round(6.5 * 24))   # the film is as long as the narration
+        self.assertEqual(ov[1], 1)                                  # a hard cut is a 1-frame xfade
+        # the centre of the dissolve is the planned boundary (frame 48)
+        first_out = frames[0] - ov[0]
+
+        self.assertAlmostEqual((first_out + ov[0] / 2) / 24, 2.0, delta=1 / 24)
+
+    def test_assemble_shots_cards_logo_end_and_caption_track(self):
+        clips, audio = self._clips(2), self.d / "a.wav"
+        m.sine_wav(audio, 2.0)
+        logo, endc = self.d / "logo.png", self.d / "end.png"
+        Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(logo)
+        Image.new("RGB", (320, 180), "black").save(endc)
+        title, credits = self.d / "t.png", self.d / "cr.png"
+        Image.new("RGB", (640, 360), "navy").save(title)
+        Image.new("RGB", (640, 360), "green").save(credits)
+        vtt = self.d / "c.vtt"
+        vtt.write_text("WEBVTT\n\n00:00:02.000 --> 00:00:03.500\nhello\n\n", encoding="utf-8")
+        out = self.d / "f.mp4"
+        info = film.assemble_shots(clips, [1.0, 1.0], [0.0], audio, out, logo=logo, end_card=endc,
+                                   title_card=title, credits_card=credits, title_s=1.0, credits_s=1.0,
+                                   captions_vtt=vtt)
+        self.assertEqual(info["frames"], 47)
+        self.assertAlmostEqual(info["duration"], 1.0 + 47 / 24 + 1.0 + 3.0, delta=0.05)
+        self.assertEqual((probe(out, "v:0", "width"), probe(out, "v:0", "height")), (320, 180))
+        self.assertAlmostEqual(float(probe(out, "v:0", "duration")), info["duration"], delta=0.1)
+        self.assertEqual(probe(out, "s:0", "codec_name"), "mov_text")
+
+    def test_assemble_shots_fades_out_at_the_end_of_the_picture(self):
+        clips, audio = self._clips(2, 2), self.d / "a.wav"
+        m.sine_wav(audio, 4.0, amp=0.5)
+        out = self.d / "f.mp4"
+        film.assemble_shots(clips, [2.0, 2.0], [0.0], audio, out, fade_out_s=1.0)
+        last, mid = self.d / "last.wav", self.d / "mid.wav"
+        m.ff("-ss", "3.8", "-t", "0.2", "-i", str(out), "-ac", "1", str(last))
+        m.ff("-ss", "1.0", "-t", "0.2", "-i", str(out), "-ac", "1", str(mid))
+        self.assertLess(m.rms_db(m.samples(last)), m.rms_db(m.samples(mid)) - 15)
+        self.assertGreater(m.rms_db(m.samples(last)), -90)   # a fade, never digital silence at the join
+
+    def test_burned_captions_change_the_picture_not_the_length(self):
+        clips, audio = self._clips(1, 2), self.d / "a.wav"
+        m.sine_wav(audio, 2.0)
+        vtt = self.d / "c.vtt"
+        vtt.write_text("WEBVTT\n\n00:00:00.000 --> 00:00:02.000\n" + BN_SHORT + "\n\n", encoding="utf-8")
+        plain, burned = self.d / "p.mp4", self.d / "b.mp4"
+        film.assemble_shots(clips, [2.0], [], audio, plain, fade_out_s=0)
+        film.assemble_shots(clips, [2.0], [], audio, burned, captions_vtt=vtt, burn=True, fade_out_s=0)
+        self.assertEqual(frame_count(plain), frame_count(burned))
+        with self.assertRaises(Exception):
+            probe(burned, "s:0", "codec_name")   # burned-in: no soft track
+        a, b = self.d / "a.png", self.d / "b.png"
+        m.ff("-i", str(plain), "-vf", "select=eq(n\\,10)", "-frames:v", "1", str(a))
+        m.ff("-i", str(burned), "-vf", "select=eq(n\\,10)", "-frames:v", "1", str(b))
+        import numpy as np
+        self.assertGreater(float(np.abs(np.asarray(Image.open(a)).astype(int)
+                                        - np.asarray(Image.open(b)).astype(int)).mean()), 0.05)
+
+    # ---------------------------------------------------------------- captions
+    def _cues(self, **kw):
+        timing = kw.pop("timing", BN_CAP_TIMING)
+        units = kw.pop("units", BN_CAP_UNITS)
+        return vtt_cues(film.captions(timing, units, "bn", **kw))
+
+    def test_caption_cue_limits(self):
+        cues = self._cues()
+        self.assertGreaterEqual(len(cues), 4)
+        prev_end = 0.0
+        for s, e, lines in cues:
+            self.assertLessEqual(len(lines), 2)
+            for ln in lines:
+                self.assertLessEqual(len(ln), 42, ln)
+            self.assertGreaterEqual(e - s, 1.0 - 1e-9)
+            self.assertLessEqual(e - s, 7.0 + 1e-9)
+            self.assertLessEqual(film._visible_len(" ".join(lines)) / (e - s), 15.0 + 1e-9, lines)
+            self.assertGreaterEqual(s, prev_end - 1e-9)   # never overlapping
+            prev_end = e
+
+    def test_caption_cues_reproduce_the_source_text_exactly(self):
+        cues = self._cues()
+        got = "".join("".join(lines) for _, _, lines in cues)
+        want = "".join(u["text"] for u in BN_CAP_UNITS)
+        strip = lambda s: "".join(s.split())
+        self.assertEqual(strip(got), strip(want))   # only whitespace at the splits differs; ZWNJ kept
+        self.assertIn("‌", got)
+
+    def test_caption_wrap_keeps_bengali_graphemes(self):
+        import unicodedata
+        for _, _, lines in self._cues():
+            for ln in lines:
+                self.assertNotEqual(ln[-1], "্", ln)                       # never ends with a hasanta
+                self.assertNotIn(ln[-1], "‌‍")
+                self.assertFalse(unicodedata.category(ln[0]).startswith("M"), ln)   # no dependent vowel sign first
+                self.assertNotIn(ln[0], "‌‍")
+
+    def test_caption_split_only_at_spaces_or_punctuation(self):
+        text = BN_LONG
+        # a hard-to-wrap run: one unbreakable 50-character word is refused, never cut inside a cluster
+        word = "ক্ষ" * 25
+        with self.assertRaises(ValueError):
+            film.captions([{"unit_key": "u", "start": 0, "end": 9}], [{"unit_key": "u", "text": word}], "bn")
+        self.assertIn(text.split()[0], film.captions(BN_CAP_TIMING, BN_CAP_UNITS, "bn"))
+        # a hyphenated compound may split after its hyphen, and nowhere else inside the word
+        comp = "যৌবন-লাবণ্য" * 4
+        lines = vtt_cues(film.captions([{"unit_key": "u", "start": 0, "end": 6.5}],
+                                       [{"unit_key": "u", "text": comp}], "bn"))
+        self.assertEqual("".join("".join(c[2]) for c in lines), comp)
+
+    def test_caption_too_fast_narration_is_refused_not_squeezed(self):
+        fast = [{"unit_key": "c-001", "start": 0.0, "end": 1.0}, {"unit_key": "c-002", "start": 1.5, "end": 4.0}]
+        units = [{"unit_key": "c-001", "text": BN_LONG[:120]}, {"unit_key": "c-002", "text": "পরে।"}]
+        with self.assertRaises(ValueError):
+            film.captions(fast, units, "bn")
+
+    def test_caption_short_unit_is_held_to_one_second_in_the_pause(self):
+        tm = [{"unit_key": "a", "start": 0.0, "end": 0.4}, {"unit_key": "b", "start": 2.0, "end": 4.0}]
+        un = [{"unit_key": "a", "text": "Yes."}, {"unit_key": "b", "text": "Then she left."}]
+        cues = vtt_cues(film.captions(tm, un, "en"))
+        self.assertAlmostEqual(cues[0][1] - cues[0][0], 1.0, places=2)
+        self.assertLessEqual(cues[0][1], 2.0)
+
+    def test_caption_offset_shifts_the_film_timeline(self):
+        a = vtt_cues(film.captions(BN_CAP_TIMING, BN_CAP_UNITS, "bn"))
+        b = vtt_cues(film.captions(BN_CAP_TIMING, BN_CAP_UNITS, "bn", offset=4.0))
+        self.assertAlmostEqual(b[0][0] - a[0][0], 4.0, places=3)
+
+    def test_caption_unknown_unit_refuses(self):
+        with self.assertRaises(ValueError):
+            film.captions([{"unit_key": "zzz", "start": 0, "end": 2}], BN_CAP_UNITS, "bn")
+
+    # ---------------------------------------------------------------- render_shot
+    def _image(self, name="still.png"):
+        p = self.d / name
+        Image.new("RGB", (64, 36), "teal").save(p)
+        return p
+
+    def _fake_render(self, calls):
+        def render(image, depth, out, seconds, **kw):
+            calls.append({"image": image, "depth": depth, "seconds": seconds, **kw})
+            m.ff("-f", "lavfi", "-i", "color=c=black:s=64x36:r=24:d=0.5", "-c:v", "libx264", str(out))
+            return {"frames": int(round(seconds * kw.get("fps", 24))), "base_overscan": 1.03}
+        return render
+
+    def test_render_shot_cache_hit_skips_render(self):
+        from unittest import mock
+        calls = []
+        shot = {"n": 1, "scene_id": "s1", "motion": "glide", "seconds": 2.0,
+                "camera": {"move": "push", "zoom": 0.1, "pan_x": 0.0, "ease": "both"}}
+        assets = {"image": self._image(), "depth": self._image("depth.png")}
+        cache = self.d / "cache"
+        with mock.patch("eav.glide.render", side_effect=self._fake_render(calls)):
+            first = film.render_shot(shot, assets, cache)
+            second = film.render_shot(dict(shot), assets, cache)
+            self.assertEqual(first, second)
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(calls[0]["zoom"], 0.1)
+            self.assertEqual(calls[0]["seconds"], 2.0)
+            Image.new("RGB", (64, 36), "red").save(assets["image"])      # an input changed: re-render
+            third = film.render_shot(shot, assets, cache)
+            self.assertNotEqual(third, first)
+            self.assertEqual(len(calls), 2)
+            film.render_shot({**shot, "seconds": 2.5}, assets, cache)    # the shot changed: re-render
+            self.assertEqual(len(calls), 3)
+
+    def test_render_shot_pull_back_must_keep_the_frame_filled(self):
+        from unittest import mock
+        calls = []
+        shot = {"n": 8, "scene_id": "s1", "motion": "glide", "seconds": 2.0,
+                "camera": {"move": "pull", "zoom": -0.12, "pan_x": 0.0, "ease": "out", "zoom0": 1.16}}
+        assets = {"image": self._image(), "depth": self._image("depth.png")}
+        with mock.patch("eav.glide.render", side_effect=self._fake_render(calls)):
+            with self.assertRaises(ValueError):    # 1.16 * (1 - 0.12 * 1.2) = 0.993 < 1: an edge band
+                film.render_shot(shot, assets, self.d / "cache")
+            self.assertEqual(calls, [])
+            shot["camera"]["zoom0"] = 1.2
+            film.render_shot(shot, assets, self.d / "cache")
+            self.assertEqual(calls[0]["zoom0"], 1.2)
+            shot["camera"].pop("zoom0")            # no zoom0 at all: 1.0 * 0.856 < 1
+            with self.assertRaises(ValueError):
+                film.render_shot(shot, assets, self.d / "cache")
+
+    def test_render_shot_static_and_wan_make_exact_frames(self):
+        still = self._image()
+        static = film.render_shot({"n": 1, "scene_id": "s", "motion": "static", "seconds": 1.5,
+                                   "camera": {"move": "none", "zoom": 0.0, "pan_x": 0.0, "ease": "none"}},
+                                  {"image": still}, self.d / "cache")
+        self.assertEqual(frame_count(static), 36)
+        a, b = self.d / "w1.mp4", self.d / "w2.mp4"
+        lavfi_clip(a, 1, size="1280x704")
+        lavfi_clip(b, 1, size="1280x704")
+        wan = film.render_shot({"n": 2, "scene_id": "s", "motion": "wan", "wan_res": "1280x704", "seconds": 1.75,
+                                "camera": {"move": "none", "zoom": 0.0, "pan_x": 0.0, "ease": "none"}},
+                               {"clips": [a, b]}, self.d / "cache")
+        self.assertEqual(frame_count(wan), 42)
+        self.assertEqual((probe(wan, "v:0", "width"), probe(wan, "v:0", "height")), (1920, 1080))
+        with self.assertRaises(ValueError):   # a wan shot with no clip never falls back to a still
+            film.render_shot({"n": 2, "scene_id": "s", "motion": "wan", "seconds": 1.0, "camera": {}},
+                             {"clips": []}, self.d / "cache")
+
+    # ---------------------------------------------------------------- picking the Wan clip of a shot
+    def test_pick_wan_clips_follows_continuations_and_refuses_ambiguity(self):
+        items = [{"key": "s1-6", "shot": 6}, {"key": "s1-6x", "shot": 6, "continue_from": "s1-6"},
+                 {"key": "s1-9a", "shot": 9}, {"key": "s1-9b", "shot": 9}, {"key": "s2-6", "shot": 6}]
+        self.assertEqual(film.pick_wan_clips(items, "s1", 6), ["s1-6", "s1-6x"])
+        with self.assertRaises(ValueError):
+            film.pick_wan_clips(items, "s1", 9)                       # two takes: someone must choose
+        self.assertEqual(film.pick_wan_clips(items, "s1", 9, {"s1/9": "s1-9b"}), ["s1-9b"])
+        with self.assertRaises(ValueError):
+            film.pick_wan_clips(items, "s1", 9, {"s1/9": "s1-9z"})    # a pick that is not a take
+        with self.assertRaises(ValueError):
+            film.pick_wan_clips(items, "s3", 1)
+
+    # ---------------------------------------------------------------- cards
+    def test_cards_contain_ai_disclosure_text(self):
+        meta = film.cards("বিচারক", "রবীন্দ্রনাথ ঠাকুর", "Mitali (ElevenLabs)", self.d / "cards")
+        saved = json.loads((self.d / "cards" / "cards.json").read_text(encoding="utf-8"))
+        self.assertEqual(saved, meta)
+        self.assertEqual(saved["title_line"], "বিচারক — রবীন্দ্রনাথ ঠাকুর")
+        self.assertEqual(saved["author"], "রবীন্দ্রনাথ ঠাকুর")
+        self.assertEqual(saved["voice"], "Mitali (ElevenLabs)")
+        self.assertEqual(saved["disclosure"]["en"], "Illustrations and narration are AI-generated")
+        self.assertEqual(saved["disclosure"]["bn"], "ছবি ও কণ্ঠ এআই-নির্মিত")
+        self.assertEqual(saved["disclosure"]["text"],
+                         "Illustrations and narration are AI-generated / ছবি ও কণ্ঠ এআই-নির্মিত")
+        for role in ("latin_display", "latin_text", "bengali_display", "bengali_text"):
+            f = saved["fonts"][role]
+            self.assertTrue(Path(f["file"]).is_file())
+            self.assertEqual(f["sha256"], hashlib.sha256(Path(f["file"]).read_bytes()).hexdigest())
+        for name in ("title", "credits"):
+            img = Image.open(saved["cards"][name])
+            self.assertEqual(img.size, (1920, 1080))
+            import numpy as np
+            self.assertGreater(len(np.unique(np.asarray(img.convert("L").resize((96, 54))))), 5)  # not blank
+        self.assertEqual(saved["engine"], "pillow-raqm")
+
+    def test_cards_shape_bengali_conjuncts(self):
+        """With a shaping engine the conjunct ক্ষ is one glyph: the text is narrower than its parts."""
+        from PIL import ImageFont
+        self.assertTrue(film._shaping_available())
+        meta = film.cards("ক্ষ", "রবীন্দ্রনাথ ঠাকুর", "v", self.d / "c2")
+        font = ImageFont.truetype(meta["fonts"]["bengali_display"]["file"], 100, layout_engine=ImageFont.Layout.RAQM)
+        self.assertLess(font.getlength("ক্ষ"), font.getlength("ক") + font.getlength("্") + font.getlength("ষ") - 1)
 
 
 if __name__ == "__main__":
