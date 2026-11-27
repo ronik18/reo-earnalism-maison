@@ -35,7 +35,7 @@ Last updated: 27 Nov 2026.
 ## Decisions
 - [x] **Colours and icons approved** (28 Nov IST): the gold fill #D8B25E and the new site icon and share card are live (#78).
 - [x] **Site quality decisions (26 Nov 2026):** cache public covers and serve small sizes; darken gold text only (before/after screenshots first); longer free preview (first chapter, up to ~1,500 words); one Back link in the reader.
-- [x] **বিচারক voice, music and film** (28 Nov IST): "Voice approved" (covers the 07:31 line), "Music approved" for বিচারক and ক্ষুধিত পাষাণ, "Film approved" for the বিচারক review film. The 12 other narrations are running on Modal; any line flagged as possibly clipped will be sent to you as one short listening set.
+- [x] **বিচারক voice, music and film** (28 Nov IST): "Voice approved" (covers the 07:31 line), "Music approved" for বিচারক and ক্ষুধিত পাষাণ, "Film approved" for the বিচারক review film; "Preview approved" for its 1:53 public preview clip. The 12 other narrations are running on Modal; any line flagged as possibly clipped will be sent to you as one short listening set.
 - [ ] **Import further approved titles as unpublished drafts** (nothing visible to readers) for their narration jobs: say so per title after you approve it on the Monday page.
 - [x] **Founding member trigger for US/UK accounts** (27 Nov 2026): **10** paying Indian Pass members starts the US/UK accounts design (Phase 9, T15). Purchases are still off while free access is on.
 - [x] **Standing permission start date** (27 Nov 2026): `MAISON_REVIEW_STANDING_FROM=2027-11-30T00:00:00+05:30`, set on Render; it takes effect at the next deploy. Until then every title needs your Monday approval.
