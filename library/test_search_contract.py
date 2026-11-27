@@ -48,6 +48,9 @@ class SearchContractTests(TestCase):
         alias.active=True; alias.reviewed_at=timezone.now()+timedelta(days=1); alias.save()
         self.assertEqual(self.results('bicharok', 'bn'), [])
         self.assertEqual(self.results('bicharok', 'en'), [])
+        alias.active=False; alias.save()
+        romanized, _ = self.edition('বিচারক', locale='bn')
+        self.assertEqual([e.pk for e in self.results('bicharok', 'bn')], [romanized.pk])  # inactive alias does not suppress romanized match
 
     def test_bengali_nfc_and_punctuation_short_input_are_controlled(self):
         target, _ = self.edition('নদীর কথা', locale='bn', description='মীরা নদীতে নৌকা দেখল।')
@@ -108,6 +111,10 @@ class SearchContractTests(TestCase):
         self.edition('বিচারক', locale='bn', live=False)
         self.assertEqual(self.results('bicharak', 'bn'), [])
         self.assertEqual(list(search_editions(Edition.objects.all(), 'bicharok')), [])
+
+    def test_romanized_scan_is_uncapped_so_no_published_title_drops_out(self):
+        made = {self.edition('বিচারক', locale='bn')[0].pk for _ in range(12)}
+        self.assertEqual({e.pk for e in self.results('bicharak', 'bn')}, made)
 
     def test_reviewed_alias_still_ranks_first(self):
         romanized, _ = self.edition('বিচারক', locale='bn')

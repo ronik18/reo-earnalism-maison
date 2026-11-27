@@ -18,8 +18,6 @@ from .romanize import normalize_latin_query, romanize_bn
 from .search_models import SearchAlias, SearchDocument
 
 INDEX = 'live_revision__search_index__'
-# Romanized-title stage reads at most this many published Bengali titles per request.
-ROMANIZE_SCAN_LIMIT = 5000
 
 
 def romanized_title_ids(queryset, query):
@@ -27,14 +25,15 @@ def romanized_title_ids(queryset, query):
 
     Computed per request from the caller's (published/locale-scoped) queryset, so a
     draft title can never match; no table or cache. Cost is linear in the number of
-    Bengali titles (capped by ROMANIZE_SCAN_LIMIT); at catalogue scale precompute the
+    published Bengali titles and deliberately uncapped, so a published title can never
+    silently drop out of the scan; at catalogue scale precompute the
     variants on SearchDocument at refresh time and index them instead.
     """
     key = normalize_latin_query(query)
     if len(key) < 3:
         return []
     rows = queryset.filter(**{INDEX + 'title_normalized__regex': '[\u0980-\u09ff]'}).values_list(
-        'pk', INDEX + 'title_normalized')[:ROMANIZE_SCAN_LIMIT]
+        'pk', INDEX + 'title_normalized').iterator()
     return [pk for pk, title in rows if any(form.startswith(key) for form in romanize_bn(title))]
 
 
