@@ -12,7 +12,7 @@ import numpy as np
 from PIL import Image
 
 METHOD = "harmonic-sor+ring-texture+feather"
-METHOD_VERSION = 1
+METHOD_VERSION = 2
 FEATHER_PX = 3          # alpha 0.75, 0.5, 0.25 on the three pixel rings outside the mask
 RING_PX = 6             # width of the texture ring
 BLUR_R = 2              # high-pass = image - (2*BLUR_R+1)^2 box blur
@@ -168,6 +168,13 @@ def retouch(img: Image.Image, regions: list, seed: int):
     iters, converged = _harmonic(u, fm)
     smooth = u[1:-1, 1:-1]
     residual = (orig - _box_blur(orig, BLUR_R))[ring]
+    # Grain only: drop outliers (highlights, edges, specks of the defect's neighbours), which
+    # would otherwise be copied into the fill as visible speckles.
+    mag = np.sqrt((residual ** 2).sum(axis=1))
+    limit = min(np.percentile(mag, 80), 3.0 * float(np.median(mag)) + 1e-6)
+    kept = residual[mag <= limit]
+    if kept.shape[0]:
+        residual = kept
     rng = np.random.default_rng(seed)
     picks = rng.integers(0, residual.shape[0], size=int(fill_m.sum()))
     filled = smooth.copy()

@@ -653,14 +653,16 @@
     "title": "kshudhita-pashan",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
     "root": "kshudhita-pashan",
     "reserved_units": 1.6583766666666664,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-27T11:52:21+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 1.071583,
+    "cu_equivalent": 10.72
   },
   {
     "modal_spend": "2026-11",
