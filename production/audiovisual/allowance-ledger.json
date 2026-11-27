@@ -587,10 +587,10 @@
       {
         "run_id": "stills-film-01-r4-c1of2#1",
         "job_id": "stills-film-01-r4-c1of2",
-        "usd": 1.072815,
-        "seconds": 0.0,
+        "usd": 0.0133974420962175,
+        "seconds": 48.279070617,
         "at": "2026-11-27T05:50:24+00:00",
-        "status": "pending"
+        "status": "failed"
       },
       {
         "run_id": "stills-film-01-r4-c2of2#1",
