@@ -39,6 +39,15 @@
   python3 -m eav.cli retime <take.mp3|wav> <out.wav> --text <script text file> [--seed 0 --cuts 1.2,3.4]
                          (no --root: pauses detected, re-timed by punctuation, filled with the take's room tone;
                          prints JSON with the cut times mapped into the new timeline and the new duration)
+  python3 -m eav.cli cue --root <dir> --film N --scene ID --stems <imported music job id> --tonic D --pick
+                         (measures the job's stems and prints/saves the drone/solo/phrase choice to
+                         music/<job>/cue-pick.json)
+  python3 -m eav.cli cue --root <dir> --film N --scene ID --stems <music job id> [--drone K --solo K --phrase K]
+                         [--voice <retimed wav>] [--fx <fx.json>]
+                         (the scene's soundtrack: needs the approved shot plan; cuts = shot starts, peak = plan peak;
+                         voice default film/film-NN/voice/<scene>.wav, writes film/film-NN/audio/<scene>.mix.wav
+                         (stereo, -16 LUFS, <= -1.5 dBTP) and <scene>.mix.json. fx.json: {"ambience": [...], "foley": [...]}
+                         entries {"path","at","gain_db","fin","fout","start"?,"dur"?}; gain_db = the clip's RMS dBFS)
   python3 -m eav.cli plan-shots --root <dir> --film N --scene ID [--bible <world-bible.json>] [--approve --by <name> --reviewer <name>]
                          (the paper edit, R11: lays film/film-NN/shots/<scene>.input.json out on its measured timing,
                          writes <scene>.json and the two-column <scene>.av.md and prints rules R1-R3 (hard) and
@@ -98,7 +107,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
-from . import glide, retime, shotplan, touchup, voicecheck
+from . import cue, glide, retime, shotplan, touchup, voicecheck
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, unit_anchors, voice_units
@@ -2136,6 +2145,53 @@ def cmd_voicecheck(args):
     return 0
 
 
+def cmd_cue(args):
+    rec = _record(args.root)
+    t = _film_target(args.film)
+    stems_dir = rec.root / "music" / args.stems
+    if not stems_dir.is_dir():
+        raise Stop(f"no imported music job folder {stems_dir}", next_action(rec.root))
+    if args.pick:
+        if not args.tonic:
+            raise Stop("--pick needs --tonic (e.g. D)", "Rerun with --tonic")
+        pick = cue.pick_stems(stems_dir, args.tonic)
+        saved = cue.write_pick(stems_dir, args.tonic, pick)
+        print(f"Picked {json.dumps(pick)} for tonic {args.tonic}; saved {saved}. "
+              f"Next: {PROG} cue --root {rec.root} --film {args.film} --scene <ID> --stems {args.stems}")
+        return 0
+    if not args.scene:
+        raise Stop("cue needs --scene", "Rerun with --scene <ID>")
+    film_dir = rec.root / "film" / t
+    try:
+        sp = shotplan.require_approved(film_dir, args.scene)
+    except shotplan.NotApproved as e:
+        raise Stop(str(e), f"{PROG} plan-shots --root {rec.root} --film {args.film} --scene {args.scene}")
+    if (sp.get("peak") or {}).get("at") is None:
+        raise Stop(f"the shot plan of scene {args.scene} has no peak.at", "Set peak in the planner input and re-approve")
+    roles = {r: getattr(args, r) for r in ("drone", "solo", "phrase")}
+    if not all(roles.values()):
+        saved = stems_dir / "cue-pick.json"
+        if not saved.is_file():
+            raise Stop("cue needs --drone, --solo and --phrase (or a saved pick)", f"{PROG} cue --pick --tonic <note> first")
+        roles = {r: roles[r] or _json(saved)[r] for r in roles}
+    voice = Path(args.voice) if args.voice else film_dir / "voice" / f"{args.scene}.wav"
+    if not voice.is_file():
+        raise Stop(f"the scene voice {voice} does not exist", "Pass --voice <retimed wav> or put it there")
+    fx = _json(args.fx) if args.fx else {}
+    base = Path(args.fx).parent if args.fx else Path(".")
+    items = {k: [{**e, "path": str(base / e["path"])} for e in fx.get(k, [])] for k in ("ambience", "foley")}
+    try:
+        stems = {r: cue.stem_path(stems_dir, k) for r, k in roles.items()}
+    except ValueError as e:
+        raise Stop(str(e), "Fix the stem keys and rerun")
+    out = film_dir / "audio" / f"{args.scene}.mix.wav"
+    res = cue.scene_mix(voice, [s["start"] for s in sp["shots"]], sp["peak"]["at"], stems,
+                        items["ambience"], items["foley"], out, sp["seconds"])
+    _write_json(out.with_suffix(".json"), {"scene": args.scene, "stems": roles, "peak_at": sp["peak"]["at"], **res})
+    print(f"Mixed {out}: {res['lufs']:.1f} LUFS, {res['true_peak']:.1f} dBTP, voice over music {res['voice_over_music_db']:.1f} dB.")
+    return 0
+
+
 def cmd_plan_shots(args):
     rec = _record(args.root)
     if args.approve and not (args.by and args.reviewer):
@@ -2179,7 +2235,7 @@ def cmd_plan_shots(args):
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take,
             "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide, "retime": cmd_retime, "voicecheck": cmd_voicecheck,
-            "plan-shots": cmd_plan_shots,
+            "cue": cmd_cue, "plan-shots": cmd_plan_shots,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio,
@@ -2290,6 +2346,17 @@ def _parser():
     s.add_argument("--approve", action="store_true", help="record the approval; needs --by and --reviewer")
     s.add_argument("--by")
     s.add_argument("--reviewer")
+    s = add("cue", help="per-scene music cue and film mix from ACE-Step stems (peak silence, smooth ducking)")
+    s.add_argument("--film", type=int, default=1)
+    s.add_argument("--scene")
+    s.add_argument("--stems", required=True, help="imported music job id (music/<job>/<key>.wav)")
+    s.add_argument("--pick", action="store_true", help="measure the stems and save the choice (needs --tonic)")
+    s.add_argument("--tonic", help="e.g. D, F#, Bb (with --pick)")
+    s.add_argument("--drone")
+    s.add_argument("--solo")
+    s.add_argument("--phrase")
+    s.add_argument("--voice", help="the scene's re-timed narration wav (default film/film-NN/voice/<scene>.wav)")
+    s.add_argument("--fx", help="json {ambience: [...], foley: [...]}")
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)
