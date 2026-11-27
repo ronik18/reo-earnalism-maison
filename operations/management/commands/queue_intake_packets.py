@@ -4,7 +4,9 @@ The intake commands queue what they write into the developer's own database; pro
 by deployment. Run `python manage.py queue_intake_packets` there (a Render one-off job). For every library/intake/<slug>/
 packet it queues, idempotently and bound to each file's current sha256 (operations.review.queue):
 the clearance draft (kind 'clearance') unless the record is already owner-approved in the file, cover_provenance.json
-(kind 'cover'), and for a translation manifest.json and translation.json (kind 'edition'). Never writes files.
+(kind 'cover'), and for a translation manifest.json and translation.json (kind 'edition') unless that edition is
+already live (its labels were applied at import; an edition item gates nothing, so it would be informational only).
+Never writes files.
 """
 import json
 from pathlib import Path
@@ -45,6 +47,11 @@ class Command(BaseCommand):
                 continue
             self._packet(root, folder, o['dry_run'])
 
+    @staticmethod
+    def _edition_live(edition_slug):
+        from library.models import Edition
+        return Edition.objects.filter(slug=edition_slug, live_revision__isnull=False).exists()
+
     def _packet(self, root, folder, dry_run):
         slug = folder.name
         manifest = _json(folder / 'manifest.json') or {}
@@ -73,7 +80,12 @@ class Command(BaseCommand):
         else:
             self.stdout.write(f'{slug}: cover skipped (no cover_provenance.json)')
         if (folder / 'translation.json').is_file():  # a plain source packet's manifest is not an edition review item
-            entries += [('edition', folder / 'manifest.json'), ('edition', folder / 'translation.json')]
+            if self._edition_live(summary['edition_slug']):
+                # Informational only: a live translation's labels were applied at its import and no edition item
+                # gates anything afterwards, so a rejection could be misread as holding the edition. Not queued.
+                self.stdout.write(f'{slug}: edition files skipped (informational: the edition is already live)')
+            else:
+                entries += [('edition', folder / 'manifest.json'), ('edition', folder / 'translation.json')]
         for kind, path in entries:
             try:
                 ref = review.review_ref(path)
