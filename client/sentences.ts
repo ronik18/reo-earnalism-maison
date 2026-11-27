@@ -74,6 +74,22 @@ export function domOffset(codePoints: number, crlf: readonly number[] = []): num
 }
 
 /**
+ * The inverse of `domOffset`: a code-point offset into the page text (what a selection in the page measures) as an
+ * offset into the stored text, which is what the API stores and slices (annotation ranges, reader positions). Each
+ * CRLF the parser folded before the offset counts one more. A page offset just before a folded LF maps to its CR, so
+ * a range that starts or ends at a line break keeps the whole CRLF on one side. For every page offset `d`,
+ * `domOffset(storedOffset(d, crlf), crlf) === d`; a stored offset that is not between a CR and its LF round-trips too.
+ */
+export function storedOffset(pageCodePoints: number, crlf: readonly number[] = []): number {
+  let stored = pageCodePoints;
+  for (const cr of [...crlf].sort((a, b) => a - b)) {
+    if (cr < stored) stored++;
+    else break;
+  }
+  return stored;
+}
+
+/**
  * The UTF-16 range to highlight inside `text` (the page text); the whole text when the highlight is a paragraph or
  * its offsets do not fit. `range` is in stored-text code points; `crlf` maps them past the parser's CRLF folding.
  */
@@ -82,6 +98,15 @@ export function highlightSpan(text: string, range: [number, number] | null, crlf
   const start = utf16Index(text, domOffset(range[0], crlf));
   const end = utf16Index(text, domOffset(range[1], crlf));
   return start < end ? [start, end] : [0, text.length];
+}
+
+/**
+ * Where to draw a saved annotation inside its paragraph: the stored `[start, end)` code-point range as page code points
+ * (indexes into `Array.from(pageText)`, which has `pageLength` entries); null when it is empty or does not fit.
+ */
+export function annotationSpan(range: [number, number], crlf: readonly number[] = [], pageLength: number): [number, number] | null {
+  const start = domOffset(range[0], crlf), end = domOffset(range[1], crlf);
+  return start < end && end <= pageLength ? [start, end] : null;
 }
 
 /** Stored code-point index of each CR that starts a CRLF in `text` (the server-side rule, for tests and fixtures). */

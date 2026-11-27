@@ -25,6 +25,8 @@ import {
   PLAYBACK_REQUEST_EVENT,
   type FollowMap,
   type PlaybackDetail,
+  annotationSpan,
+  storedOffset,
 } from "./sentences";
 import {
   api,
@@ -43,6 +45,8 @@ import {
   pageCount,
   type Position,
   runListenSwitch,
+  listenFallback,
+  flushPreferenceSave,
   type ListenSwitchResult,
   initialReaderTheme,
   progressFraction,
@@ -511,13 +515,21 @@ function Reader({ boot }: { boot: Boot }) {
           acceptProgress(saved);
           setCompletion(finished);
           preferenceVersion.current = prefs.version;
-          setPreferences({
+          queue.current!.rebase(readerKeys(prefs));
+          // A setting changed before the load finished stays as the reader set it (it is still to be saved).
+          const unsaved = Object.fromEntries(
+            queue.current!.dirty().map((key) => [key, (latestPreferences.current as Record<string, unknown>)[key]]),
+          );
+          const loaded = {
             ...prefs,
             reader_line_height: Math.max(
               prefs.reader_line_height,
               boot.content_locale === "bn" ? 1.8 : 1.5,
             ),
-          });
+            ...unsaved,
+          } as Partial<Preferences>;
+          latestPreferences.current = loaded;
+          setPreferences(loaded);
           if (!boot.anchor && saved.location?.unit_id === boot.unit_id)
             jump(saved.location);
           hydrated.current = true;
@@ -613,10 +625,16 @@ function Reader({ boot }: { boot: Boot }) {
         .sort(
           (a, b) => a.range.start_offset_chars - b.range.start_offset_chars,
         );
+      // Annotation ranges are stored-text offsets; the page text lost one character per CRLF (sentences.ts domOffset).
+      const crlf = boot.crlf?.[p.anchor];
       for (const n of records) {
-        const start = n.range.start_offset_chars,
-          end = n.range.end_offset_chars;
-        if (start < cursor || end > chars.length || end <= start) continue;
+        const span = annotationSpan(
+          [n.range.start_offset_chars, n.range.end_offset_chars],
+          crlf,
+          chars.length,
+        );
+        if (!span || span[0] < cursor) continue;
+        const [start, end] = span;
         fragment.append(
           document.createTextNode(chars.slice(cursor, start).join("")),
         );
@@ -885,7 +903,7 @@ function Reader({ boot }: { boot: Boot }) {
         start_anchor_id: p.anchor,
         start_offset_chars: 0,
         end_anchor_id: p.anchor,
-        end_offset_chars: Array.from(p.text).length,
+        end_offset_chars: storedOffset(Array.from(p.text).length, boot.crlf?.[p.anchor]),
         offset_unit: "unicode_code_point",
       },
       quote: p.text,
@@ -908,9 +926,11 @@ function Reader({ boot }: { boot: Boot }) {
       const range = document.createRange();
       range.selectNodeContents(p);
       range.setEnd(node, offset);
+      const anchor = p.dataset.anchor!;
+      // The selection measures the page text; the server slices the stored text, where each CRLF is one longer.
       return {
-        anchor: p.dataset.anchor!,
-        offset: Array.from(range.toString()).length,
+        anchor,
+        offset: storedOffset(Array.from(range.toString()).length, boot.crlf?.[anchor]),
       };
     }
     const start = point(r.startContainer, r.startOffset),
@@ -954,12 +974,16 @@ function Reader({ boot }: { boot: Boot }) {
   }
   const latestPreferences = useRef(preferences);
   latestPreferences.current = preferences;
-  const queue = useRef<ReturnType<typeof createSaveQueue<Partial<Preferences>>>>(undefined);
+  type ReaderPrefs = Record<string, unknown>;
+  const readerKeys = (value: Partial<Preferences>): ReaderPrefs =>
+    Object.fromEntries(Object.entries(value).filter(([key]) => key.startsWith("reader_")));
+  const queue = useRef<ReturnType<typeof createSaveQueue<ReaderPrefs>>>(undefined);
   if (!queue.current)
-    queue.current = createSaveQueue<Partial<Preferences>>({
-      send: async (next) => {
+    queue.current = createSaveQueue<ReaderPrefs>({
+      initial: readerKeys(preferences),
+      send: async (changes, { value, keepalive }) => {
         if (!fullReader) {
-          localStorage.setItem("maison.reader.preferences", JSON.stringify(next));
+          localStorage.setItem("maison.reader.preferences", JSON.stringify(value));
           return;
         }
         const version =
@@ -968,18 +992,23 @@ function Reader({ boot }: { boot: Boot }) {
         const p = await api<Preferences>("/me/preferences", {
           method: "PATCH",
           version,
-          body: Object.fromEntries(
-            Object.entries(latestPreferences.current).filter(([key]) =>
-              key.startsWith("reader_"),
-            ),
-          ),
+          body: changes, // only the settings this tab changed: a stale tab must not revert another device
           key: crypto.randomUUID(),
+          keepalive,
         });
         preferenceVersion.current = p.version; // only the version; the screen keeps the reader's own values
       },
       isConflict: (e) => e instanceof ApiError && (e.status === 409 || e.status === 412),
       refresh: async () => {
-        preferenceVersion.current = (await api<Preferences>("/me/preferences")).version;
+        const latest = await api<Preferences>("/me/preferences");
+        preferenceVersion.current = latest.version;
+        return readerKeys(latest);
+      },
+      onMerge: (theirs) => {
+        // Settings another device saved that this tab did not change: show them instead of the stale ones.
+        const next = { ...latestPreferences.current, ...theirs } as Partial<Preferences>;
+        latestPreferences.current = next;
+        setPreferences(next);
       },
       onSaved: () => setSettingsStatus(""),
       onError: (e) => {
@@ -988,18 +1017,32 @@ function Reader({ boot }: { boot: Boot }) {
       },
     });
   function persistPreferences(next: Partial<Preferences>) {
-    return queue.current!.push(next);
+    return queue.current!.push(readerKeys(next));
   }
   const saver = useRef<ReturnType<typeof createDebouncedSaver<Partial<Preferences>>>>(undefined);
   if (!saver.current)
     saver.current = createDebouncedSaver<Partial<Preferences>>(
-      (value) => void persistPreferences(value),
+      // The latest screen values, not the scheduled snapshot: a conflict merge may have changed other keys since.
+      () => void persistPreferences(latestPreferences.current),
       PREFERENCE_SAVE_MS,
     );
-  useEffect(() => () => {
-    // leaving the page must not lose the last change
-    if (saver.current?.pending()) void persistPreferences(latestPreferences.current);
-    saver.current?.cancel();
+  useEffect(() => {
+    // Leaving the page (pagehide, or hidden on mobile) must not lose a change still waiting out the debounce: send it
+    // now with keepalive (signed out, it goes to localStorage). React unmount does not run on pagehide.
+    const flush = () => {
+      flushPreferenceSave(saver.current!, queue.current!, readerKeys(latestPreferences.current));
+    };
+    const hidden = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", hidden);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", hidden);
+      flush();
+      saver.current?.cancel();
+    };
   }, []);
   function pref<K extends keyof Preferences>(key: K, value: Preferences[K]) {
     if (latestPreferences.current[key] === value) return; // a step against an end stop changes nothing
@@ -1008,8 +1051,12 @@ function Reader({ boot }: { boot: Boot }) {
     setPreferences(next);
     saver.current?.schedule(next);
   }
-  async function switchToListen() {
-    await act(async () => {
+  const hasSwitchSheet = fullReader && !!boot.player_url;
+  /** Returns "link" when the caller should follow the toolbar link itself (no sheet to fall back to). */
+  async function switchToListen(): Promise<"none" | "sheet" | "link"> {
+    setBusy(true);
+    try {
+      let failure: unknown;
       const outcome = await runListenSwitch({
         call: (path, body) =>
           api<ListenSwitchResult>(path, { method: "POST", key: crypto.randomUUID(), body }),
@@ -1018,23 +1065,36 @@ function Reader({ boot }: { boot: Boot }) {
         playerUrl: boot.player_url ?? "",
         save: () => savePosition(),
         go: (url) => window.location.assign(url),
+        onError: (e) => {
+          failure ??= e;
+        },
       });
-      if (outcome === "unmapped") {
-        setStatus(t("switch_unmapped_audio"));
-        setSwitchOpen(true); // no exact spot: the sheet offers the chapter start instead
+      const next = listenFallback(outcome, hasSwitchSheet);
+      if (next === "sheet") {
+        // No exact spot, or the switch call failed: the sheet offers the chapter start instead.
+        setStatus(outcome === "failed" ? errorText(failure) : t("switch_unmapped_audio"));
+        setSwitchOpen(true);
       }
-    });
+      return next;
+    } finally {
+      setBusy(false);
+    }
   }
-  // The toolbar's Listen link is a real link; with scripts on it carries the reader's position first.
+  // The toolbar's Listen link is a real link; with scripts on it carries the reader's position first. It never dead
+  // ends: a failed or unmapped switch opens the format sheet (chapter start) or, with no sheet, follows the link.
   const toolbarListen = useRef(switchToListen);
   toolbarListen.current = switchToListen;
   useEffect(() => {
     const link = document.querySelector<HTMLAnchorElement>('[data-format-switch="audio"], [data-format-switch="listen"]');
-    if (!link) return;
+    if (!link || !hasSwitchSheet) return; // signed out or no player: the plain link is the whole action
     const onClick = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      void toolbarListen.current().catch(() => {});
+      void toolbarListen.current()
+        .then((next) => {
+          if (next === "link") window.location.assign(link.href);
+        })
+        .catch(() => window.location.assign(link.href));
     };
     link.addEventListener("click", onClick);
     return () => link.removeEventListener("click", onClick);

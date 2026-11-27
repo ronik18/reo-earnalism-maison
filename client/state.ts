@@ -443,30 +443,67 @@ export function radioKeyTarget(key: string, index: number, count: number): numbe
 }
 
 /**
- * One save in flight at a time. Values pushed meanwhile coalesce into a single follow-up send of the latest value.
- * A conflict refreshes the version and retries once with the latest value; any other failure goes to onError.
+ * Saves reader settings: one save in flight at a time, and each save carries only the keys this tab changed since its
+ * last successful save (`dirty()`), so a stale tab never writes back settings it did not touch.
+ * - `push(value)` records which keys differ from the last value pushed and sends them; values pushed while a save is in
+ *   flight coalesce into one follow-up send of the latest values.
+ * - A conflict calls `refresh` (which may return the server's values): keys this tab has not changed take the server's
+ *   value (reported through `onMerge`), then the changed keys are sent once more. Any other failure goes to onError and
+ *   the keys stay dirty, so the next push carries them again.
+ * - A push during the retry is kept and sent after it, not dropped.
+ * - `push(value, { keepalive: true })` from an idle queue calls `send` synchronously, for a page-hide flush.
  */
-export function createSaveQueue<T>(options: {
-  send: (value: T) => Promise<void>;
+export function createSaveQueue<T extends Record<string, unknown>>(options: {
+  /** The values the server is known to hold (or the screen's starting values before the first load). */
+  initial: T;
+  send: (changes: Partial<T>, context: { value: T; keepalive: boolean }) => Promise<void>;
   isConflict: (error: unknown) => boolean;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<Partial<T> | void>;
+  onMerge?: (theirs: Partial<T>) => void;
   onSaved?: () => void;
   onError?: (error: unknown) => void;
 }) {
-  let pending: { value: T } | undefined;
+  let latest: T = { ...options.initial };
+  const dirty = new Set<keyof T>();
+  let pending = false;
+  let keepalive = false;
   let running: Promise<void> | undefined;
+  const changes = (): Partial<T> => {
+    const out: Partial<T> = {};
+    for (const key of dirty) out[key] = latest[key];
+    return out;
+  };
+  /** A key is saved when the value sent is still the latest; a newer change keeps it dirty. */
+  const acknowledge = (sent: Partial<T>) => {
+    for (const key of Object.keys(sent) as Array<keyof T>) if (Object.is(latest[key], sent[key])) dirty.delete(key);
+  };
   async function drain() {
     while (pending) {
-      const { value } = pending;
-      pending = undefined;
+      pending = false;
+      const sent = changes();
+      const alive = keepalive;
+      keepalive = false;
+      if (Object.keys(sent).length === 0) continue; // the server refuses an empty change
       try {
         try {
-          await options.send(value);
+          await options.send(sent, { value: latest, keepalive: alive });
+          acknowledge(sent);
         } catch (error) {
           if (!options.isConflict(error)) throw error;
-          await options.refresh();
-          await options.send(pending ? (pending as { value: T }).value : value);
-          pending = undefined;
+          const server = await options.refresh();
+          if (server) {
+            const theirs: Partial<T> = {};
+            for (const key of Object.keys(server) as Array<keyof T>)
+              if (key in latest && !dirty.has(key) && !Object.is(latest[key], server[key])) theirs[key] = server[key];
+            if (Object.keys(theirs).length) {
+              latest = { ...latest, ...theirs };
+              options.onMerge?.(theirs);
+            }
+          }
+          pending = false; // the retry carries every change so far; a push during it sets pending again
+          const retry = changes();
+          await options.send(retry, { value: latest, keepalive: alive });
+          acknowledge(retry);
         }
         options.onSaved?.();
       } catch (error) {
@@ -475,13 +512,37 @@ export function createSaveQueue<T>(options: {
     }
   }
   return {
-    push(value: T): Promise<void> {
-      pending = { value };
+    push(value: T, opts: { keepalive?: boolean } = {}): Promise<void> {
+      for (const key of Object.keys(value) as Array<keyof T>)
+        if (!(key in latest) || !Object.is(latest[key], value[key])) dirty.add(key);
+      latest = { ...latest, ...value };
+      pending = true;
+      if (opts.keepalive) keepalive = true;
       running ??= drain().finally(() => { running = undefined; });
       return running;
     },
+    /** The server's values after a load: keys this tab has not changed take them. */
+    rebase(server: Partial<T>) {
+      for (const key of Object.keys(server) as Array<keyof T>) if (!dirty.has(key)) latest[key] = server[key] as T[keyof T];
+    },
+    dirty: (): Array<keyof T> => [...dirty],
     inFlight: () => running !== undefined,
   };
+}
+
+/**
+ * Page hide (pagehide, or visibilitychange to hidden): a change still waiting out the debounce is sent now, with
+ * keepalive so the request outlives the page. Returns whether anything was sent.
+ */
+export function flushPreferenceSave<T extends Record<string, unknown>>(
+  saver: { pending: () => boolean; cancel: () => void },
+  queue: { push: (value: T, opts?: { keepalive?: boolean }) => Promise<void> },
+  latest: T,
+): boolean {
+  if (!saver.pending()) return false;
+  saver.cancel();
+  void queue.push(latest, { keepalive: true });
+  return true;
 }
 
 export interface ListenSwitchResult {
@@ -489,7 +550,11 @@ export interface ListenSwitchResult {
   to_location?: { format: "audio"; unit_id: string; position_ms: number };
 }
 
-/** The toolbar's Listen action: sends the reader's current spot to /content/switch-position and opens the player there. */
+/**
+ * The toolbar's Listen action: sends the reader's current spot to /content/switch-position and opens the player there.
+ * Never throws: a failed call returns "failed" (the caller offers the chapter start), and a failed position save
+ * (network, 412) is reported through onError but does not stop a mapped switch: the page-hide save retries it.
+ */
 export async function runListenSwitch(deps: {
   call: (path: string, body: Record<string, unknown>) => Promise<ListenSwitchResult>;
   editionRevisionId: string;
@@ -497,17 +562,34 @@ export async function runListenSwitch(deps: {
   playerUrl: string;
   save: () => Promise<unknown>;
   go: (url: string) => void;
-}): Promise<"mapped" | "unmapped"> {
-  const result = await deps.call("/content/switch-position", {
-    edition_revision_id: deps.editionRevisionId,
-    from_location: deps.position,
-    to_format: "audio",
-  });
-  await deps.save();
+  onError?: (error: unknown) => void;
+}): Promise<"mapped" | "unmapped" | "failed"> {
+  let result: ListenSwitchResult;
+  try {
+    result = await deps.call("/content/switch-position", {
+      edition_revision_id: deps.editionRevisionId,
+      from_location: deps.position,
+      to_format: "audio",
+    });
+  } catch (error) {
+    deps.onError?.(error);
+    return "failed";
+  }
+  try {
+    await deps.save();
+  } catch (error) {
+    deps.onError?.(error);
+  }
   const to = result.to_location;
   if (result.outcome === "mapped" && to?.format === "audio") {
     deps.go(`${deps.playerUrl}?unit_id=${to.unit_id}&position_ms=${to.position_ms}`);
     return "mapped";
   }
   return "unmapped";
+}
+
+/** After a toolbar Listen click: nothing more, the format sheet (chapter start), or the link's own destination. */
+export function listenFallback(outcome: "mapped" | "unmapped" | "failed", hasSheet: boolean): "none" | "sheet" | "link" {
+  if (outcome === "mapped") return "none";
+  return hasSheet ? "sheet" : "link";
 }

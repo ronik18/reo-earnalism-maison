@@ -49,6 +49,7 @@ import {
   highlightSpan,
   utf16Index,
   domOffset,
+  storedOffset,
   crlfIndexes,
   followScrollDelta,
   type FollowMap,
@@ -1332,26 +1333,30 @@ test("radio keys move and wrap, Home and End jump, other keys are ignored", () =
   assert.equal(radioKeyTarget("ArrowRight", 0, 0), undefined);
 });
 
+type Prefs = { a: number; b: number; c: number };
+const tick = () => new Promise((r) => setImmediate(r));
+
 test("save queue: one in flight, later values coalesce, conflict refetches and retries once", async () => {
-  const sent: number[] = [];
+  const sent: Array<Partial<Prefs>> = [];
   const release: Array<() => void> = [];
   let active = 0;
   let maxActive = 0;
-  const queue = createSaveQueue<number>({
-    send: (v) => new Promise<void>((resolve) => {
-      active++; maxActive = Math.max(maxActive, active); sent.push(v);
+  const queue = createSaveQueue<Prefs>({
+    initial: { a: 0, b: 0, c: 0 },
+    send: (changes) => new Promise<void>((resolve) => {
+      active++; maxActive = Math.max(maxActive, active); sent.push(changes);
       release.push(() => { active--; resolve(); });
     }),
     isConflict: () => false,
     refresh: async () => {},
   });
-  const done = queue.push(1);
-  queue.push(2); queue.push(3);
-  assert.deepEqual(sent, [1]);
+  const done = queue.push({ a: 1, b: 0, c: 0 });
+  queue.push({ a: 2, b: 0, c: 0 }); queue.push({ a: 3, b: 0, c: 0 });
+  assert.deepEqual(sent, [{ a: 1 }]);
   assert.equal(queue.inFlight(), true);
   release.shift()!();
-  await new Promise((r) => setImmediate(r));
-  assert.deepEqual(sent, [1, 3]); // 2 was coalesced away
+  await tick();
+  assert.deepEqual(sent, [{ a: 1 }, { a: 3 }]); // 2 was coalesced away
   release.shift()!();
   await done;
   assert.equal(maxActive, 1);
@@ -1360,24 +1365,137 @@ test("save queue: one in flight, later values coalesce, conflict refetches and r
   const log: string[] = [];
   let calls = 0;
   const errors: unknown[] = [];
-  const retrying = createSaveQueue<number>({
-    send: async (v) => { log.push("send" + v); if (calls++ === 0) throw "conflict"; },
+  const retrying = createSaveQueue<Prefs>({
+    initial: { a: 0, b: 0, c: 0 },
+    send: async (changes) => { log.push("send" + JSON.stringify(changes)); if (calls++ === 0) throw "conflict"; },
     isConflict: (e) => e === "conflict",
     refresh: async () => { log.push("refresh"); },
     onError: (e) => errors.push(e),
   });
-  await retrying.push(7);
-  assert.deepEqual(log, ["send7", "refresh", "send7"]);
+  await retrying.push({ a: 7, b: 0, c: 0 });
+  assert.deepEqual(log, ['send{"a":7}', "refresh", 'send{"a":7}']);
   assert.deepEqual(errors, []);
 
-  const failing = createSaveQueue<number>({
+  const failing = createSaveQueue<Prefs>({
+    initial: { a: 0, b: 0, c: 0 },
     send: async () => { throw "conflict"; },
     isConflict: () => true,
     refresh: async () => {},
     onError: (e) => errors.push(e),
   });
-  await failing.push(1); // the retry fails too: reported once, not looped
+  await failing.push({ a: 1, b: 0, c: 0 }); // the retry fails too: reported once, not looped
   assert.deepEqual(errors, ["conflict"]);
+  assert.deepEqual(failing.dirty(), ["a"]); // still unsaved: the next change carries it again
+});
+
+test("save queue sends only the keys this tab changed since its last successful save", async () => {
+  const sent: Array<Partial<Prefs>> = [];
+  const queue = createSaveQueue<Prefs>({
+    initial: { a: 1, b: 1, c: 1 },
+    send: async (changes) => { sent.push(changes); },
+    isConflict: () => false,
+    refresh: async () => {},
+  });
+  await queue.push({ a: 2, b: 1, c: 1 });
+  await queue.push({ a: 2, b: 5, c: 1 });
+  assert.deepEqual(sent, [{ a: 2 }, { b: 5 }]); // a was acknowledged, so the second save carries b alone
+  assert.deepEqual(queue.dirty(), []);
+  await queue.push({ a: 2, b: 5, c: 1 }); // nothing changed: nothing is sent (the server refuses an empty PATCH)
+  assert.equal(sent.length, 2);
+});
+
+test("after a conflict a stale tab re-sends only its own changes and takes the other device's values", async () => {
+  const sent: Array<Partial<Prefs>> = [];
+  const merged: Array<Partial<Prefs>> = [];
+  let conflictOnce = true;
+  const queue = createSaveQueue<Prefs>({
+    initial: { a: 1, b: 1, c: 1 },
+    send: async (changes) => {
+      sent.push(changes);
+      if (conflictOnce) { conflictOnce = false; throw "conflict"; }
+    },
+    isConflict: (e) => e === "conflict",
+    // Another device changed b and c while this tab was open.
+    refresh: async () => ({ a: 1, b: 9, c: 8 }),
+    onMerge: (theirs) => merged.push(theirs),
+  });
+  await queue.push({ a: 4, b: 1, c: 1 });
+  assert.deepEqual(sent, [{ a: 4 }, { a: 4 }]); // never b or c: the stale 1s would revert the other device
+  assert.deepEqual(merged, [{ b: 9, c: 8 }]); // the screen takes the other device's settings
+  // The merged values are now the base: a later change to a sends a alone, not the stale b/c.
+  await queue.push({ a: 5, b: 9, c: 8 });
+  assert.deepEqual(sent.at(-1), { a: 5 });
+});
+
+test("a change pushed during the conflict retry is saved, not dropped", async () => {
+  const sent: Array<Partial<Prefs>> = [];
+  let call = 0;
+  let releaseRetry: () => void = () => {};
+  const queue = createSaveQueue<Prefs>({
+    initial: { a: 0, b: 0, c: 0 },
+    send: (changes) => {
+      sent.push(changes);
+      call++;
+      if (call === 1) return Promise.reject("conflict");
+      if (call === 2) return new Promise<void>((resolve) => { releaseRetry = resolve; });
+      return Promise.resolve();
+    },
+    isConflict: (e) => e === "conflict",
+    refresh: async () => {},
+  });
+  const done = queue.push({ a: 1, b: 0, c: 0 });
+  await tick(); await tick();
+  assert.deepEqual(sent, [{ a: 1 }, { a: 1 }]); // the retry is in flight
+  queue.push({ a: 1, b: 2, c: 0 }); // pushed while the retry is in flight
+  releaseRetry();
+  await done;
+  assert.deepEqual(sent, [{ a: 1 }, { a: 1 }, { b: 2 }]);
+  assert.deepEqual(queue.dirty(), []);
+});
+
+test("a page-hide flush sends the pending change at once with keepalive", async () => {
+  const timers = new Map<number, () => void>();
+  let id = 1;
+  const sent: Array<{ changes: Partial<Prefs>; keepalive: boolean; value: Prefs }> = [];
+  const queue = createSaveQueue<Prefs>({
+    initial: { a: 0, b: 0, c: 0 },
+    send: async (changes, context) => { sent.push({ changes, ...context }); },
+    isConflict: () => false,
+    refresh: async () => {},
+  });
+  const saver = createDebouncedSaver<Prefs>(
+    (value) => void queue.push(value),
+    PREFERENCE_SAVE_MS,
+    (fn) => { timers.set(id, fn); return id++; },
+    (t) => { timers.delete(t as number); },
+  );
+  saver.schedule({ a: 0, b: 3, c: 0 }); // the 500 ms pause has not passed when the page is hidden
+  assert.equal(flushPreferenceSave(saver, queue, { a: 0, b: 3, c: 0 }), true);
+  // send ran synchronously inside pagehide (no await before it), with keepalive, and the timer is gone.
+  assert.deepEqual(sent, [{ changes: { b: 3 }, keepalive: true, value: { a: 0, b: 3, c: 0 } }]);
+  assert.equal(timers.size, 0);
+  assert.equal(saver.pending(), false);
+  assert.equal(flushPreferenceSave(saver, queue, { a: 0, b: 3, c: 0 }), false); // nothing pending: nothing sent
+  assert.equal(sent.length, 1);
+  await tick();
+  // A later ordinary save is not keepalive.
+  await queue.push({ a: 1, b: 3, c: 0 });
+  assert.deepEqual(sent.at(-1), { changes: { a: 1 }, keepalive: false, value: { a: 1, b: 3, c: 0 } });
+});
+
+test("the signed-out page-hide flush keeps the change on this device", () => {
+  const store = new Map<string, string>();
+  const queue = createSaveQueue<Prefs>({
+    initial: { a: 0, b: 0, c: 0 },
+    // The reader's signed-out send: the whole value goes to localStorage, synchronously.
+    send: async (_changes, { value }) => { store.set("maison.reader.preferences", JSON.stringify(value)); },
+    isConflict: () => false,
+    refresh: async () => {},
+  });
+  const saver = createDebouncedSaver<Prefs>((value) => void queue.push(value), PREFERENCE_SAVE_MS, () => 1, () => {});
+  saver.schedule({ a: 0, b: 0, c: 6 });
+  flushPreferenceSave(saver, queue, { a: 0, b: 0, c: 6 });
+  assert.deepEqual(JSON.parse(store.get("maison.reader.preferences")!), { a: 0, b: 0, c: 6 }); // written before any await
 });
 
 test("splitTitleSlot leaves the title slot between the two halves", () => {
@@ -1388,7 +1506,8 @@ test("splitTitleSlot leaves the title slot between the two halves", () => {
   assert.deepEqual(splitTitleSlot("No slot"), ["No slot", ""]);
 });
 
-import { runListenSwitch } from "./state.ts";
+import { runListenSwitch, listenFallback, flushPreferenceSave } from "./state.ts";
+import { annotationSpan } from "./sentences.ts";
 
 test("the toolbar Listen action sends the current anchor and opens the player at the returned position", async () => {
   const calls: Array<{ path: string; body: Record<string, unknown> }> = [];
@@ -1430,6 +1549,110 @@ test("an unmapped Listen switch stays on the page", async () => {
 
 // What the HTML parser leaves in a text node: CRLF and a lone CR each become one LF.
 const parsed = (stored: string) => stored.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+test("a Listen switch whose call fails reports failed instead of dead-ending", async () => {
+  const went: string[] = [];
+  const errors: unknown[] = [];
+  let saved = 0;
+  const outcome = await runListenSwitch({
+    call: async () => { throw new Error("network"); },
+    editionRevisionId: "rev-1",
+    position: { format: "reader", unit_id: "u1", anchor_id: "a", offset_chars: 0 } as never,
+    playerUrl: "/en/listen/e1/",
+    save: async () => { saved++; },
+    go: (url) => went.push(url),
+    onError: (e) => errors.push(e),
+  });
+  assert.equal(outcome, "failed"); // the reader then opens the sheet with the chapter start
+  assert.deepEqual(went, []);
+  assert.equal(errors.length, 1);
+  assert.equal(saved, 0);
+});
+
+test("a failed or conflicting position save does not block a mapped Listen switch", async () => {
+  for (const failure of [new Error("network"), Object.assign(new Error("conflict"), { status: 412 })]) {
+    const went: string[] = [];
+    const errors: unknown[] = [];
+    const outcome = await runListenSwitch({
+      call: async () => ({ outcome: "mapped", to_location: { format: "audio", unit_id: "u1", position_ms: 1200 } }),
+      editionRevisionId: "rev-1",
+      position: { format: "reader", unit_id: "u1", anchor_id: "a", offset_chars: 3 } as never,
+      playerUrl: "/en/listen/e1/",
+      save: async () => { throw failure; },
+      go: (url) => went.push(url),
+      onError: (e) => errors.push(e),
+    });
+    assert.equal(outcome, "mapped");
+    assert.deepEqual(went, ["/en/listen/e1/?unit_id=u1&position_ms=1200"]); // the page-hide save retries the position
+    assert.deepEqual(errors, [failure]);
+  }
+  // Unmapped with a failing save still reaches the sheet (outcome unmapped), never a thrown dead end.
+  const outcome = await runListenSwitch({
+    call: async () => ({ outcome: "unmapped" }),
+    editionRevisionId: "rev-1",
+    position: { format: "reader", unit_id: "u1", anchor_id: "a", offset_chars: 0 } as never,
+    playerUrl: "/en/listen/e1/",
+    save: async () => { throw new Error("network"); },
+    go: () => assert.fail("must not navigate"),
+  });
+  assert.equal(outcome, "unmapped");
+});
+
+test("listenFallback: a failed or unmapped switch opens the sheet when the reader has one, else follows the link", () => {
+  assert.equal(listenFallback("mapped", true), "none");
+  assert.equal(listenFallback("unmapped", true), "sheet");
+  assert.equal(listenFallback("failed", true), "sheet");
+  assert.equal(listenFallback("unmapped", false), "link");
+  assert.equal(listenFallback("failed", false), "link");
+});
+
+test("storedOffset inverts domOffset: page offsets from a selection go back to stored-text offsets", () => {
+  const cases: Array<[string, string]> = [
+    ["CRLF", "Morning fog lifts slowly.\r\nThe miller opens the gate.\r\nWater rushes under the wheel."],
+    ["CR CR LF", "One line.\r\r\nTwo lines. Three.\r\r\nFour."],
+    ["no CR", "Plain text with no carriage return. Second sentence."],
+    ["Bengali + astral", "\u0986\u09ae\u09bf \ud83c\udf38.\r\n\u09a4\u09c1\u09ae\u09bf\u0964 Yes."],
+  ];
+  for (const [label, stored] of cases) {
+    const crlf = crlfIndexes(stored);
+    const page = parsed(stored);
+    const storedPoints = Array.from(stored);
+    const pagePoints = Array.from(page);
+    // Every page offset round-trips page -> stored -> page.
+    for (let d = 0; d <= pagePoints.length; d++)
+      assert.equal(domOffset(storedOffset(d, crlf), crlf), d, `${label}: page ${d}`);
+    // Every stored offset that is not between a CR and its LF round-trips stored -> page -> stored.
+    for (let s = 0; s <= storedPoints.length; s++) {
+      if (crlf.includes(s - 1)) continue;
+      assert.equal(storedOffset(domOffset(s, crlf), crlf), s, `${label}: stored ${s}`);
+    }
+    // A selection of each sentence on the page quotes exactly that sentence from the stored text.
+    for (const [start, end] of splitSentences(page)) {
+      const a = Array.from(page.slice(0, start)).length, b = Array.from(page.slice(0, end)).length;
+      const quote = storedPoints.slice(storedOffset(a, crlf), storedOffset(b, crlf)).join("");
+      assert.equal(parsed(quote), pagePoints.slice(a, b).join(""), `${label}: quote ${a}-${b}`);
+    }
+  }
+  // The paragraph's full page length maps to its full stored length.
+  const stored = "A.\r\nB.\r\r\nC.";
+  assert.equal(storedOffset(Array.from(parsed(stored)).length, crlfIndexes(stored)), Array.from(stored).length);
+  // Unsorted indexes from a caller still map correctly.
+  assert.equal(storedOffset(5, [5, 1]), 7); // the CR at 1 moves 5 to 6, which passes the CR at 5
+  assert.equal(storedOffset(5), 5);
+});
+
+test("annotationSpan draws a stored annotation range at the right page characters", () => {
+  const stored = "Morning fog lifts slowly.\r\nThe miller opens the gate.";
+  const crlf = crlfIndexes(stored);
+  const page = Array.from(parsed(stored));
+  const start = stored.indexOf("The"), end = stored.indexOf(" the gate");
+  const span = annotationSpan([start, end], crlf, page.length)!;
+  assert.equal(page.slice(span[0], span[1]).join(""), "The miller opens");
+  assert.equal(annotationSpan([start, end], [], page.length)!.length, 2);
+  assert.equal(annotationSpan([5, 5], crlf, page.length), null); // empty
+  assert.equal(annotationSpan([0, stored.length + 4], crlf, page.length), null); // past the paragraph
+});
+
 
 test("CRLF: stored-text sentence offsets map onto the parsed page text without shifting", () => {
   const stored = "Morning fog lifts slowly.\r\nThe miller opens the gate. Water rushes under the wheel.";
