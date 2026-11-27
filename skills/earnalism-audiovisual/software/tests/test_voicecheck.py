@@ -170,3 +170,102 @@ def test_cli_profile_saved_per_take_files_and_exit_code(tmp_path):
     assert "pitch_median" in res["failures"] and code == 1
     assert json.loads((tmp_path / "a.voicecheck.json").read_text())["pass"] is True  # untouched
     assert json.loads(prof_file.read_text()) == json.loads(prof_file.read_text())
+
+
+# ---- Whisper word check (Task 14) ------------------------------------------------------------------
+
+SRC = "রাজা বললেন, “আমি আজ যাব।” মন্ত্রী চুপ করে রইলেন। তারপর সকলে হাসল। শেষে সভা ভাঙল॥"
+
+
+def test_cer_normalises_bengali_and_ignores_punctuation():
+    noisy = "রাজা  বললেন — আমি আজ যাব ।\n‌মন্ত্রী চুপ করে রইলেন॥"
+    plain = "রাজা বললেন আমি আজ যাব মন্ত্রী চুপ করে রইলেন"
+    assert voicecheck.normalise(noisy) == voicecheck.normalise(plain) == plain
+    assert voicecheck.cer(plain, noisy) == 0.0
+    assert voicecheck.cer("ড়", "ড়") == 0.0      # composed and decomposed forms agree (NFC)
+    assert voicecheck.cer("১২ জন", "12 জন") == 0.0              # Bengali and ASCII digits agree
+    assert abs(voicecheck.cer("abcdefghij", "abcdefghix") - 0.1) < 1e-9
+    assert voicecheck.cer("", "") == 0.0 and voicecheck.cer("", "x") == 1.0
+
+
+def _clean(tmp_path, name="w.wav"):
+    y = _phrases()
+    return _write(tmp_path / name, y), len(y) / SR
+
+
+def test_words_passes_on_match(tmp_path):
+    p, n = _clean(tmp_path)
+    r = voicecheck.check(p, n, _prof(p), transcript=SRC.replace("।", ""), source=SRC)
+    assert r["pass"] is True and "words" not in r["failures"]
+    w = r["metrics"]["words"]
+    assert w["run"] is True and w["cer"] == 0.0 and w["provisional"] is True
+    assert w["threshold"] == voicecheck.WORDS_CEILING
+    assert "not_run" not in r
+
+
+def test_words_fails_on_dropped_sentence(tmp_path):
+    p, n = _clean(tmp_path)
+    dropped = "রাজা বললেন, আমি আজ যাব। শেষে সভা ভাঙল।"   # the middle two sentences are gone
+    r = voicecheck.check(p, n, _prof(p), transcript=dropped, source=SRC)
+    assert "words" in r["failures"] and r["pass"] is False
+    assert r["metrics"]["words"]["cer"] > voicecheck.WORDS_CEILING
+
+
+def test_words_threshold_is_accepted_take_median_plus_margin(tmp_path):
+    p, n = _clean(tmp_path)
+    prof = dict(_prof(p), words_cer_median=0.10, words_cer_n=5)
+    short = "রাজা বললেন আমি আজ যাব মন্ত্রী চুপ করে রইলেন তারপর সকলে হাসল শেষে সভা"
+    r = voicecheck.check(p, n, prof, transcript=short, source=SRC)
+    w = r["metrics"]["words"]
+    assert abs(w["threshold"] - (0.10 + voicecheck.WORDS_MARGIN)) < 1e-9 and w["provisional"] is False
+    assert ("words" in r["failures"]) == (w["cer"] > w["threshold"])
+    few = dict(prof, words_cer_n=voicecheck.WORDS_MIN_TAKES - 1)   # too few accepted takes: the ceiling, provisional
+    assert voicecheck.words_threshold(few) == (voicecheck.WORDS_CEILING, True)
+    assert voicecheck.words_threshold({}) == (voicecheck.WORDS_CEILING, True)
+
+
+def test_no_transcript_means_check_not_run_not_pass(tmp_path):
+    p, n = _clean(tmp_path)
+    for kw in ({}, {"source": SRC}, {"transcript": SRC}, {"transcript": "  ", "source": SRC}):
+        r = voicecheck.check(p, n, _prof(p), **kw)
+        assert r["metrics"]["words"]["run"] is False
+        assert r["not_run"] == ["words"] and "words" not in r["failures"]
+        assert "cer" not in r["metrics"]["words"]
+
+
+def test_cli_words_standalone_stale_transcript_and_profile(tmp_path):
+    from eav import cli
+    p, n = _clean(tmp_path, "s1.wav")
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "s1.txt").write_text(SRC, encoding="utf-8")
+    tr = tmp_path / "transcripts.json"
+    model = {"repo": "openai/whisper-small", "revision": "r", "licence": "mit"}
+
+    def write(text, sha=None):
+        tr.write_text(json.dumps({"schema": voicecheck.TRANSCRIPT_SCHEMA, "model": model,
+                                  "takes": {"s1": {"sha256": sha or voicecheck.sha256_file(p), "text": text}}}),
+                      encoding="utf-8")
+    args = ["voicecheck", str(p), "--expected", str(n), "--transcripts", str(tr), "--sources", str(tmp_path / "src")]
+    write("রাজা বললেন")
+    assert cli.main(args) == 1
+    res = json.loads((tmp_path / "s1.voicecheck.json").read_text())
+    assert "words" in res["failures"] and res["metrics"]["words"]["model"] == model
+    assert json.loads((tmp_path / "voicecheck-profile.json").read_text())["words_cer_n"] == 1
+    write(SRC)   # the accepted take's own CER enters the saved profile
+    assert cli.main(args) == 0
+    prof = json.loads((tmp_path / "voicecheck-profile.json").read_text())
+    assert prof["words_cer_median"] == 0.0 and prof["words_cer_n"] == 1
+    write(SRC, sha="0" * 64)   # a transcript of another file (a redo under the same name) is not applied
+    cli.main(args)
+    res = json.loads((tmp_path / "s1.voicecheck.json").read_text())
+    assert res["not_run"] == ["words"] and "words" not in res["failures"]
+    assert "words_cer_median" not in json.loads((tmp_path / "voicecheck-profile.json").read_text())
+
+
+def test_words_cell_is_valid_python_checks_licence_and_matches_the_transcript_schema():
+    import ast
+    from pathlib import Path
+    text = (Path(voicecheck.__file__).parent / "templates" / "words_cell.py.txt").read_text(encoding="utf-8")
+    ast.parse(text)
+    assert voicecheck.TRANSCRIPT_SCHEMA in text and 'LICENCE_ALLOWLIST = ("mit", "apache-2.0")' in text
+    assert "openai/whisper-" in text and "sha256" in text and "RUN is not True" in text

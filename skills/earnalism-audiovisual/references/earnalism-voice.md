@@ -122,11 +122,31 @@ One narration feeds both the film and the audiobook, so the stricter audiobook l
 and ±1.5 semitones, 30–50 ms crossfades) apply to both. Measurement is not listening: a PASS means
 "not flagged", and the owner's review is the listening assessment (see Never).
 
-**Word check (not yet built; planned: Task 14).** The spec adds a Whisper (MIT) character-error check, run in Colab
-against the source and read relative to the accepted takes, to catch dropped or changed words that
-tags and punctuation hide. No `eav` command runs it yet: until one exists, `import-take` (which
-refuses a script whose words differ from the book once tags are removed) is the only word gate, and
-the reviewer listens for dropped words. Do not claim a Whisper check was run; the Whisper check is not yet built (Task 14).
+**Word check (built, Task 14; failure code `words`).** A Whisper (MIT) transcript of each take is compared with
+the book's untagged source text, to catch dropped, added or misread words that tags and punctuation hide.
+`import-take` still refuses a script whose words differ from the book; this checks the *audio* against it.
+
+- *Transcript.* Run `software/eav/templates/words_cell.py.txt` in a free Colab runtime over the downloaded takes
+  (not the retimed ones). It is a stand-alone cell, not a job kind (no ledger units, no forecast), and reads
+  the model card's licence at run time (`mit` or `apache-2.0` only). It writes `transcripts.json`: per take stem,
+  the sha256 of the take file and the text, plus the model repo, revision and licence.
+- *Compare.* One take per scene: `eav voicecheck <take...> --expected S --transcripts transcripts.json
+  --sources <folder of <take-stem>.txt, the untagged book text>`. Passages (`import-take --transcripts
+  transcripts.json`, keyed by passage id; the source is the untagged passage text). Both write the result
+  into `<stem>.voicecheck.json` (`metrics.words`: cer, threshold, provisional, model).
+- *Measure.* Character error rate (Levenshtein distance / source length) after normalising both texts: Unicode
+  NFC, lower case, Bengali digits to ASCII, ZWNJ/ZWJ and all punctuation (`।`, `॥`, quotes, dashes) removed,
+  whitespace collapsed.
+- *Threshold.* `words` fails when the CER exceeds the median CER of the book's accepted takes plus 0.05
+  (`voicecheck-profile.json`: `words_cer_median`, `words_cer_n`, built only from takes given to the profile, so
+  give it accepted takes). Until three accepted takes carry a transcript, the absolute ceiling 0.15 applies and
+  the result says `provisional`. Both numbers are estimates, not calibrated; re-tune after the first real takes.
+- *Not run is not a pass.* A take with no transcript, no source text, or a transcript made for different file
+  bytes (a redo under the same name) is recorded as `metrics.words.run: false` and `"not_run": ["words"]`, and
+  the CLI prints that the word check was not run. `pass` then means only that the measured checks found
+  nothing. Do not claim a word check for a take that has no `words` result with `run: true`.
+- *Limit.* Whisper's Bengali is imperfect: a `words` failure is a prompt to listen to that take, a clean
+  result does not replace the owner's listening review.
 
 ## Parler route (legacy; kept for audition and Parler-only titles)
 

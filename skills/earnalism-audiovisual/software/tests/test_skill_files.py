@@ -159,12 +159,21 @@ class SkillFileTests(unittest.TestCase):
             self.assertIn(phrase, voice, phrase)
         self.assertIn("eleven_v3", voice)
         self.assertIn("film/film-NN/voice/<scene>.wav", voice)
-        self.assertRegex(voice, r"Whisper[^.]*not yet built[^.]*Task 14")
+        # Task 14 is built: the voice reference describes the word check and keeps no "not yet built" for it
+        self.assertNotRegex(voice, r"(?i)(whisper|word check)[^.]*not yet built")
+        self.assertIn("Word check (built, Task 14; failure code `words`)", voice)
+        for phrase in ("words_cell.py.txt", "--transcripts", "--sources", "words_cer_median", "0.15", "provisional",
+                       '"not_run": ["words"]', "ZWNJ/ZWJ", "not a job kind"):
+            self.assertIn(phrase, voice, phrase)
+        self.assertTrue((SKILL / "software" / "eav" / "templates" / "words_cell.py.txt").is_file())
         self.assertIn("failing takes", voice)
         self.assertIn("same-named", voice)
         recipe = self._ref("film-recipe.md")
         self.assertRegex(recipe, r"motion gate[^.]*not yet built[^.]*Task 15")
-        self.assertRegex(self._ref("free-stack.md"), r"Whisper.*not yet built \(planned: Task 14\)")
+        self.assertNotIn("Task 14", self._ref("free-stack.md"))
+        self.assertRegex(self._ref("free-stack.md"), r"Whisper.*words_cell\.py\.txt.*--transcripts")
+        self.assertNotIn("Task 14", self._ref("model-licences.md"))
+        self.assertIn("apache-2.0", self._ref("model-licences.md").split("**Whisper**")[1][:700])
         self.assertNotIn("held still", recipe)
         sec5 = recipe[recipe.index("## 5. Voice first"):recipe.index("## 6.")]
         self.assertRegex(sec5, r"`split-passages film-NN`")

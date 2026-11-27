@@ -95,7 +95,11 @@ fails closed: a card that cannot be read means the model is not loaded).
 - **CLIP is excluded.** Its model card carries no licence and puts any deployed use, commercial or
   not, out of scope; the character-lock check uses DINOv2-small instead. Adding a model needs a card
   that grants commercial use and the owner's approval.
-- **Whisper** (MIT): permits commercial use; listed for the planned word check (not yet built, planned: Task 14).
+- **Whisper** (`openai/whisper-large-v3-turbo`, MIT card): permits commercial use; runs the narration word check
+  in Colab (`software/eav/templates/words_cell.py.txt`). The cell reads the card's licence at run time and
+  allows only `mit` or `apache-2.0` (the other `openai/whisper-*` cards read apache-2.0, read 2026-11-27);
+  anything else stops the cell before any download. The revision is resolved at run time and recorded in
+  `transcripts.json`.
 - **Eleven v4 narration**: ElevenLabs Creator plan, whose paid tier carries the commercial licence for
   generated audio (owner decision 24 Nov 2026, v4 chosen 26 Nov); credits only, never top-ups.
 - **Sound effects**: only CC0 files, or public-domain files whose author released them to the public

@@ -1,0 +1,66 @@
+# Whisper word check: a transcript of each narration take, for `eav voicecheck --transcripts` and
+# `eav import-take --transcripts`. A stand-alone Colab cell, NOT a job kind: it spends no ledger units, has
+# no forecast and writes no job manifest. Free Colab runtime (a T4 GPU is plenty; CPU also works, slowly).
+# It only transcribes. Comparing with the book is local (eav/voicecheck.py), so a missing transcript is
+# recorded as "word check NOT RUN", never as a pass.
+#
+# Use: put the takes (mp3/wav, the files as downloaded from ElevenLabs, not retimed) in TAKES_DIR on Drive,
+# paste this cell into a Colab notebook, set RUN = True, run it, download transcripts.json from OUT_DIR.
+RUN = False
+TAKES_DIR = "/content/drive/MyDrive/earnalism-audiovisual/words/takes"
+OUT_DIR = "/content/drive/MyDrive/earnalism-audiovisual/words"
+LANGUAGE = "bengali"
+MODEL_REPO = "openai/whisper-large-v3-turbo"
+# The revision is resolved from the Hub when the cell runs and recorded in transcripts.json; fill REVISION
+# with that recorded value to pin a later run to the same weights.
+REVISION = None
+# Whisper's licence is read from the model card at run time (not trusted from this file). The turbo card
+# says MIT; the other openai/whisper-* cards say apache-2.0: both are permissive and allowed, nothing else.
+LICENCE_ALLOWLIST = ("mit", "apache-2.0")
+MIN_VRAM_GIB = 0   # 0: any runtime; the turbo model needs about 4 GiB on a GPU
+
+if RUN is not True:
+    raise RuntimeError("RUN is False; set RUN = True at the top of this cell to run it")
+import hashlib, json, os, pathlib, subprocess, sys, time
+subprocess.run([sys.executable, "-m", "pip", "install", "-q", "transformers", "accelerate", "soundfile", "librosa"],
+               check=True)
+from google.colab import drive
+drive.mount("/content/drive")
+import torch
+from huggingface_hub import HfApi
+from transformers import pipeline
+
+_info = HfApi().model_info(MODEL_REPO, revision=REVISION)
+_card = getattr(_info, "card_data", None) or getattr(_info, "cardData", None) or {}
+_lic = _card.get("license") if hasattr(_card, "get") else getattr(_card, "license", None)
+if not _lic:
+    _lic = next((t.split(":", 1)[1] for t in (getattr(_info, "tags", None) or []) if t.startswith("license:")), None)
+_lic = str(_lic).strip().lower() if _lic else None
+print("model card licence:", MODEL_REPO, "->", _lic, "(allowlist: %s)" % ", ".join(LICENCE_ALLOWLIST))
+if _lic not in LICENCE_ALLOWLIST:
+    raise RuntimeError("model card licence of %s is %r, not one of %s: nothing ran; tell Claude"
+                       % (MODEL_REPO, _lic, ", ".join(LICENCE_ALLOWLIST)))
+revision = REVISION or _info.sha
+cuda = torch.cuda.is_available()
+if MIN_VRAM_GIB and cuda and torch.cuda.get_device_properties(0).total_memory < MIN_VRAM_GIB * 2**30:
+    raise RuntimeError("this GPU has less than %d GiB; nothing downloaded" % MIN_VRAM_GIB)
+asr = pipeline("automatic-speech-recognition", model=MODEL_REPO, revision=revision, device=0 if cuda else -1,
+               torch_dtype=torch.float16 if cuda else torch.float32, chunk_length_s=30)
+
+takes = sorted(p for p in pathlib.Path(TAKES_DIR).iterdir() if p.suffix.lower() in (".mp3", ".wav", ".flac", ".m4a"))
+if not takes:
+    raise RuntimeError("no takes in " + TAKES_DIR)
+out = {}
+started = time.time()
+for p in takes:
+    sha = hashlib.sha256(p.read_bytes()).hexdigest()   # binds the text to these exact bytes (a redo changes it)
+    text = asr(str(p), generate_kwargs={"language": LANGUAGE, "task": "transcribe"})["text"]
+    out[p.stem] = {"sha256": sha, "text": text.strip()}
+    print("transcribed", p.name, len(text), "chars")
+doc = {"schema": "earnalism.audiovisual-transcripts.v1",
+       "model": {"repo": MODEL_REPO, "revision": revision, "licence": _lic, "language": LANGUAGE},
+       "elapsed_seconds": round(time.time() - started, 1), "takes": out}
+dest = pathlib.Path(OUT_DIR) / "transcripts.json"
+dest.parent.mkdir(parents=True, exist_ok=True)
+dest.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
+print("wrote", dest, "-", len(out), "take(s). Download it and pass it to eav --transcripts.")

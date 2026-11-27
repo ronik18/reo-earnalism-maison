@@ -2081,6 +2081,32 @@ class ImportPassagesCliTests(unittest.TestCase):
                    if e["result"] == "passages_checked"]
         self.assertEqual(checked, [420, 35])
 
+    def test_whisper_words_route_on_passages(self):
+        """--transcripts keyed by passage id: a dropped sentence fails only that passage; a passage with no
+        transcript (or one made for another file) is recorded as not run, never as checked."""
+        from eav import voicecheck
+        plain = {"f01s001-p01": "The Garden Every afternoon the children played in the garden.",
+                 "f01s001-p02": "It was large and lovely.", "f01s002-p01": "The giant came back. He had been away for seven years."}
+        sha = lambda pid: hashlib.sha256((self.audio / f"{pid}.mp3").read_bytes()).hexdigest()
+        tr = self.d / "transcripts.json"
+        tr.write_text(json.dumps({"schema": voicecheck.TRANSCRIPT_SCHEMA, "model": {"repo": "openai/whisper-small"}, "takes": {
+            "f01s001-p01": {"sha256": sha("f01s001-p01"), "text": "The Garden Every afternoon"},   # dropped words
+            "f01s001-p02": {"sha256": sha("f01s001-p02"), "text": plain["f01s001-p02"]},
+            "f01s002-p01": {"sha256": "0" * 64, "text": plain["f01s002-p01"]}}}), encoding="utf-8")
+        code, out = self.import_passages("--transcripts", tr)
+        self.assertNotEqual(code, 0)
+        work = self.root / "film" / "film-01" / "voice" / "passages"
+        res = {n: json.loads((work / f"{n}.voicecheck.json").read_text()) for n in plain}
+        self.assertIn("words", res["f01s001-p01"]["failures"])
+        self.assertNotIn("words", res["f01s001-p02"]["failures"])
+        self.assertEqual(res["f01s001-p02"]["metrics"]["words"]["cer"], 0.0)
+        self.assertEqual(res["f01s002-p01"]["not_run"], ["words"])
+        self.assertIn("Word check NOT RUN", out)
+        self.assertEqual(json.loads((work / "voicecheck-profile.json").read_text())["words_cer_n"], 2)
+        code, out = self.import_passages("--transcripts", self.d / "nope.json")
+        self.assertNotEqual(code, 0)
+        self.assertIn("not a transcripts.json", out)
+
     def test_duration_is_checked_by_the_real_gate_against_the_runs_own_pace(self):
         """Unmocked voicecheck: passages at one pace meet their expected duration; an out-of-pace take misses."""
         self.write_passage("f01s001-p02", self.PASSAGES["f01s001"][1], pace=0.07)  # 2.8x slower than the run

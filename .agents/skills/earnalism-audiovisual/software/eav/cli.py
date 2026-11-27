@@ -70,11 +70,14 @@
                          --approve records approved {by, at, reviewer}; the two names must differ and rules R1-R3
                          must pass. A job spec that declares "scene" is refused until its plan is approved.)
   python3 -m eav.cli voicecheck <take...> --expected S[,S...] [--profile profile.json] [--prev-tail <wav>] [--out <dir>]
+                         [--transcripts transcripts.json --sources <dir of <take-stem>.txt>]
                          (no --root: the narration redo gate; writes <take-stem>.voicecheck.json beside each take (or into --out)
                          with pass, failures and metrics; exits 1 if any take fails. Without --profile the book
                          profile is measured from the given takes and saved as voicecheck-profile.json; REDO RUNS MUST
                          PASS --profile <that file>. --expected is one value for all or one per take; --prev-tail is
-                         the take before the first listed one, for the join check)
+                         the take before the first listed one, for the join check. With --transcripts (Whisper, from
+                         templates/words_cell.py.txt) and --sources the `words` CER check runs; without a matching transcript it
+                         is recorded as NOT RUN, never as a pass; import-take --transcripts does the same per passage)
   python3 -m eav.cli pick --root <dir> --job <stills|retouch|touchup|edit job id> --choices <{"<key>": N} json file>
                          (after review: one candidate per <key>--cN still; film uses only picks)
   python3 -m eav.cli hold --root <dir> --film N --keys k1,k2,... [--clear]
@@ -1205,6 +1208,14 @@ def _import_passages(args, rec, plan, lang, credits):
             pauses = retime.detect_pauses(take_path)
             retime.retime(take_path, dst, retime.plan_pauses(plain, pauses, zlib.crc32(pid.encode())), [])
             retimed.append((sc, pid, dst, len(plain.strip()), len(retime.read(dst)) / retime.SR))
+    tdata = _load_transcripts(args.transcripts) if args.transcripts else None
+    words = {}   # passage id -> (transcript of the downloaded take, untagged passage text)
+    if tdata is not None:
+        for sc in scenes:
+            for (pid, _, take_path), plain in zip(sc["rows"], sc["plain"]):
+                text = _transcript_for(tdata, pid, take_path)
+                if text is not None:
+                    words[pid] = (text, plain)
     expected, measured = passages.expected_durations([r[3] for r in retimed], [r[4] for r in retimed], cps)
     if args.profile:
         pf = Path(args.profile)
@@ -1215,12 +1226,15 @@ def _import_passages(args, rec, plan, lang, credits):
     elif (work / "voicecheck-profile.json").is_file():  # a redo run keeps the film's profile (voicecheck rule)
         prof = json.loads((work / "voicecheck-profile.json").read_text())
     else:
-        prof = voicecheck.profile([r[2] for r in retimed])
+        prof = voicecheck.profile([r[2] for r in retimed],
+                                  [voicecheck.cer(w[1], w[0]) for w in words.values()])
         (work / "voicecheck-profile.json").write_text(json.dumps(prof, indent=1))
-    failed, prev, last_key = {}, None, None
+    failed, prev, last_key, unchecked = {}, None, None, False
     for (sc, pid, dst, _, _), exp in zip(retimed, expected):
         prev = prev if last_key == sc["key"] else None
-        res = voicecheck.check(dst, exp, prof, prev)
+        res = _words_note(voicecheck.check(dst, exp, prof, prev, *words[pid]) if pid in words
+                          else voicecheck.check(dst, exp, prof, prev), tdata)
+        unchecked = unchecked or bool(res.get("not_run"))
         if not measured and "duration" in res["failures"]:  # only a guessed rate: a warning, not a failure
             res["failures"] = [f for f in res["failures"] if f != "duration"]
             res["warnings"] = ["duration"]
@@ -1230,6 +1244,9 @@ def _import_passages(args, rec, plan, lang, credits):
         if not res["pass"]:
             failed.setdefault(sc["key"], []).append(f"{pid} ({', '.join(res['failures'])})")
         prev, last_key = dst, sc["key"]
+    if unchecked:
+        print("Word check NOT RUN for passage(s) without a matching Whisper transcript (--transcripts, "
+              "templates/words_cell.py.txt); a passing take is not word-checked.")
     if not measured:
         print(f"Warning: fewer than {passages.MIN_RUN} passages, so the expected duration is only the --cps "
               f"{cps:g} estimate: a duration miss is a warning, not a failure.")
@@ -2716,6 +2733,34 @@ def cmd_retime(args):
     print(json.dumps({"pauses": len(pauses), **res}))
 
 
+def _load_transcripts(path) -> dict:
+    """The Colab words cell's transcripts.json: {stem: {"sha256", "text"}} plus the model record."""
+    pf = Path(path)
+    try:
+        data = json.loads(pf.read_text(encoding="utf-8"))
+        if data.get("schema") != voicecheck.TRANSCRIPT_SCHEMA or not isinstance(data["takes"], dict):
+            raise ValueError
+    except (OSError, ValueError, KeyError, AttributeError):
+        raise Stop(f"{pf} is not a transcripts.json written by the words cell",
+                   "Run templates/words_cell.py.txt in Colab, download its transcripts.json and pass that")
+    return data
+
+
+def _transcript_for(data, stem, take_file):
+    """The transcript text of one take, or None (not run) when absent or made for another file's bytes."""
+    row = (data or {}).get("takes", {}).get(stem)
+    if not isinstance(row, dict) or row.get("sha256") != voicecheck.sha256_file(take_file):
+        return None
+    return row.get("text")
+
+
+def _words_note(res, data):
+    w = res["metrics"].get("words")
+    if data is not None and w and w["run"]:
+        w["model"] = data.get("model")
+    return res
+
+
 def cmd_voicecheck(args):
     takes = [Path(t) for t in args.takes]
     for t in takes:
@@ -2727,25 +2772,36 @@ def cmd_voicecheck(args):
     exp = exp * len(takes) if len(exp) == 1 else exp
     out = Path(args.out) if args.out else takes[0].parent
     out.mkdir(parents=True, exist_ok=True)
+    data = _load_transcripts(args.transcripts) if args.transcripts else None
+    if data is not None and not args.sources:
+        raise Stop("--transcripts needs --sources <folder of <take-stem>.txt untagged book text>",
+                   "Pass --sources; without source text the word check cannot run")
+    words = {}   # take -> (transcript, source) where both exist
+    for t in takes:
+        src = Path(args.sources or ".") / f"{t.stem}.txt" if data is not None else None
+        text = _transcript_for(data, t.stem, t) if src is not None and src.is_file() else None
+        if text is not None:
+            words[t] = (text, src.read_text(encoding="utf-8"))
     if args.profile:
         pf = Path(args.profile)
         if not pf.is_file():
             raise Stop(f"{pf} does not exist", "Fix --profile and rerun")
         prof = json.loads(pf.read_text())
     else:
-        prof = voicecheck.profile(takes)
+        prof = voicecheck.profile(takes, [voicecheck.cer(s_, t_) for t_, s_ in words.values()])
         (out / "voicecheck-profile.json").write_text(json.dumps(prof, indent=1))
     prev = Path(args.prev_tail) if args.prev_tail else None
     if prev is not None and not prev.is_file():
         raise Stop(f"{prev} does not exist", "Fix --prev-tail and rerun")
     failed = 0
     for t, e in zip(takes, exp):
-        r = voicecheck.check(t, e, prof, prev)
+        r = _words_note(voicecheck.check(t, e, prof, prev, *words.get(t, (None, None))), data)
         prev = t
         (t.parent if not args.out else out).joinpath(f"{t.stem}.voicecheck.json").write_text(
             json.dumps(r, indent=1, ensure_ascii=False))
         failed += not r["pass"]
-        print(f"{t.name}: {'PASS' if r['pass'] else 'REDO ' + ','.join(r['failures'])}")
+        print(f"{t.name}: {'PASS' if r['pass'] else 'REDO ' + ','.join(r['failures'])}"
+              + (" (word check NOT RUN: no matching transcript)" if r.get("not_run") else ""))
     print(f"Wrote <take>.voicecheck.json per take{'' if args.profile else ' and ' + str(out / 'voicecheck-profile.json')}.")
     if failed:
         print(f"Next: regenerate the {failed} REDO take(s), then rerun with --profile {out / 'voicecheck-profile.json'}")
@@ -2898,6 +2954,8 @@ def _parser():
                                    "<scene>-p01.txt is present)")
     s.add_argument("--profile", help="Eleven v4 passages: saved voicecheck-profile.json (default: the title's "
                                      "saved one under film/film-NN/voice/passages, else measured and saved)")
+    s.add_argument("--transcripts", help="Eleven v4 passages: transcripts.json from the Colab words cell, keyed by "
+                                         "<passage id>: turns on the Whisper word check (else recorded as not run)")
     s = add("split-passages", help="write the untagged passage scripts of a film (Eleven v4)")
     s.add_argument("target", help="film-NN")
     s.add_argument("--out", required=True, help="folder for <scene_id>-p<NN>.txt")
@@ -2965,6 +3023,8 @@ def _parser():
     s.add_argument("--profile", help="saved voicecheck-profile.json; always pass it on redo runs (default: measured from the given takes and saved)")
     s.add_argument("--prev-tail", help="the take before the first listed one, for the join check")
     s.add_argument("--out", help="folder for the profile and results (default: beside each take)")
+    s.add_argument("--transcripts", help="transcripts.json from the Colab words cell (Whisper): turns on the word check")
+    s.add_argument("--sources", help="with --transcripts: folder of <take-stem>.txt, the untagged book text of each take")
     s = add("plan-shots", help="the paper edit: shot plan and two-column AV script for one scene (R11)")
     s.add_argument("--film", type=int, required=True)
     s.add_argument("--scene", required=True)

@@ -11,8 +11,18 @@ about the take's median; monotone windows are non-overlapping 2 s windows with >
 median pitch of the last ~2 s of `prev_tail` against the first ~2 s of the take; true peak is the
 maximum of a 4x FFT-oversampled signal; the jump-rate profile has a floor of JUMP_FLOOR per speech
 second so a jump-free profile does not fail every later take.
+
+Word check (`words`): the character error rate of a Whisper transcript of the take against the book's
+untagged source text, both normalised (see `normalise`). The transcript comes from the Colab cell
+templates/words_cell.py.txt; this module only compares text. Threshold: the median CER of the book's
+accepted takes (profile key words_cer_median, from at least WORDS_MIN_TAKES takes) plus WORDS_MARGIN;
+before that, the absolute WORDS_CEILING, reported as provisional. With no transcript or no source the
+check is NOT RUN: it is recorded as such (metrics.words.run false, "not_run": ["words"]) and is never
+a pass.
 """
+import hashlib
 import json
+import unicodedata
 from pathlib import Path
 
 import numpy as np
@@ -30,7 +40,55 @@ LIMITS = {"duration_pct": 0.12, "pitch_median_st": 1.5, "pitch_spread_st": 3.0, 
 # a jump-free profile (rate 0) would make "1.5x the profile" fail every later take; controller ruling R-a keeps this floor
 JUMP_FLOOR = 0.1
 CODES = ("duration", "pitch_median", "pitch_spread", "monotone", "no_breath", "tail", "brightness", "jumps",
-         "clicks", "digital_zero", "join", "true_peak")
+         "clicks", "digital_zero", "join", "true_peak", "words")
+# Word check. CER is the Whisper-vs-source edit distance over normalised characters / source length.
+# WORDS_MARGIN is an absolute CER added to the accepted takes' median (ESTIMATE: 0.05, five characters
+# per hundred; re-tune from the first accepted takes). WORDS_CEILING is the provisional absolute limit
+# used until WORDS_MIN_TAKES accepted takes give a median: a dropped sentence of a 20-30 s passage is
+# ~15-25% of its characters, Whisper's own Bengali misreads are well below that (ESTIMATE, uncalibrated).
+WORDS_MARGIN = 0.05
+WORDS_CEILING = 0.15
+WORDS_MIN_TAKES = 3
+TRANSCRIPT_SCHEMA = "earnalism.audiovisual-transcripts.v1"
+_BN_DIGITS = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
+
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def normalise(text: str) -> str:
+    """NFC, lower case, Bengali digits to ASCII, ZWNJ/ZWJ and every punctuation mark (। ॥ quotes, dashes)
+    removed, whitespace collapsed to single spaces. Whisper and the book disagree on these, not on words."""
+    t = unicodedata.normalize("NFC", str(text)).lower().translate(_BN_DIGITS)
+    t = "".join(" " if c.isspace() else c for c in t if c not in "\u200c\u200d" and not unicodedata.category(c).startswith("P"))
+    return " ".join(t.split())
+
+
+def cer(reference: str, hypothesis: str) -> float:
+    """Character error rate of the normalised texts: Levenshtein distance / reference length (an empty
+    reference is 0.0 against an empty hypothesis, else 1.0)."""
+    a, b = normalise(reference), normalise(hypothesis)
+    if not a:
+        return 0.0 if not b else 1.0
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
+        prev = cur
+    return prev[-1] / len(a)
+
+
+def words_threshold(prof: dict) -> tuple[float, bool]:
+    """(CER limit, provisional): accepted-take median + WORDS_MARGIN, or the ceiling before enough takes."""
+    if "words_cer_median" in prof and prof.get("words_cer_n", 0) >= WORDS_MIN_TAKES:
+        return float(prof["words_cer_median"]) + WORDS_MARGIN, False
+    return WORDS_CEILING, True
 
 
 def _frames(x: np.ndarray, win: int, hop: int) -> np.ndarray:
@@ -222,14 +280,18 @@ def measure(path: Path) -> dict:
     }
 
 
-def profile(takes: list[Path]) -> dict:
-    """The book's running medians over the takes (keys with no measurable value are left out)."""
+def profile(takes: list[Path], cers: list[float] | None = None) -> dict:
+    """The book's running medians over the takes (keys with no measurable value are left out). `cers` are the
+    word-check CERs of the takes that had a transcript: they give words_cer_median and words_cer_n."""
     ms = [measure(Path(t)) for t in takes]
     prof = {}
     for key in ("pitch_median_hz", "rate", "brightness_db", "jump_rate", "click_rate"):
         v = [m[key] for m in ms if m.get(key) is not None]
         if v:
             prof[key] = float(np.median(v))
+    if cers:
+        prof["words_cer_median"] = float(np.median(cers))
+        prof["words_cer_n"] = len(cers)
     return prof
 
 
@@ -250,8 +312,12 @@ def _edge(path: Path, tail: bool):
     return loud, med
 
 
-def check(take: Path, expected_s: float, prof: dict, prev_tail: Path | None = None) -> dict:
-    """Measure one take and list failure codes; pass is True when none fail."""
+def check(take: Path, expected_s: float, prof: dict, prev_tail: Path | None = None,
+          transcript: str | None = None, source: str | None = None) -> dict:
+    """Measure one take and list failure codes; pass is True when none fail. With a Whisper `transcript` of
+    the take and the book's untagged `source` text, the CER is checked (`words`); without both the word check
+    is not run: metrics.words.run is false and "not_run" lists it. `pass` then says only that the
+    measured checks found nothing; it never means the words were checked."""
     take = Path(take)
     m = measure(take)
     fails: list[str] = []
@@ -293,5 +359,19 @@ def check(take: Path, expected_s: float, prof: dict, prev_tail: Path | None = No
             fails.append("join")
     if m["true_peak_dbfs"] >= L["true_peak_db"]:
         fails.append("true_peak")
+    not_run = []
+    if transcript is not None and transcript.strip() and source is not None and source.strip():
+        limit, provisional = words_threshold(prof)
+        c = cer(source, transcript)
+        m["words"] = {"run": True, "cer": c, "threshold": limit, "provisional": provisional,
+                      "source_chars": len(normalise(source))}
+        if c > limit:
+            fails.append("words")
+    else:
+        m["words"] = {"run": False, "reason": "no Whisper transcript or no source text given"}
+        not_run.append("words")
     fails.sort(key=CODES.index)
-    return {"pass": not fails, "failures": fails, "metrics": json.loads(json.dumps(m, default=float))}
+    res = {"pass": not fails, "failures": fails, "metrics": json.loads(json.dumps(m, default=float))}
+    if not_run:
+        res["not_run"] = not_run
+    return res
