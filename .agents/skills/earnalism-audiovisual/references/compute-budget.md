@@ -3,7 +3,9 @@
 Standing owner allowance: a **per-title lifetime cap** (every month counts) and **100 CU per calendar
 month** across all titles. The default title cap is 60 CU; a title can have its own cap in
 `title-caps.json` beside the ledger (`production/audiovisual/title-caps.json`, a JSON object of
-title slug → units; every value a finite number above 0). Owner decision 27 Nov 2026: **বিচারক
+title slug → units; every value a finite number above 0). `init` pins that file in `record.json` (`title_caps`,
+or `--title-caps <file>`); a root whose ledger has none beside it (a scratch or test root inside a title's tree)
+reads the nearest one above its ledger, never a silent 60, and `status` prints which file the cap comes from. Owner decision 27 Nov 2026: **বিচারক
 (`bicharak`) is 100 CU**; every other title stays at 60 until the owner sets another number there.
 Never change a cap yourself: it is the owner's number. Every GPU batch is forecast before it is built;
 the forecast is reserved on the ledger; the actual units are settled on import.

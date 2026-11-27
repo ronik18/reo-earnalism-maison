@@ -25,13 +25,17 @@
   python3 -m eav.cli import-take film-NN --root <dir> --scripts <dir of <scene>-p<NN>.txt> --audio
                          <dir of <scene>-p<NN>.mp3> --engine elevenlabs --model <model_id of <root>/voice.json>
                          --voice-id <id> --voice-name "<name>" --credits <credits used> [--cps 13]
-                         [--profile voicecheck-profile.json] [--scene ID] [--accept PID=reason]   (Eleven v4: each
-                         passage retimed and voicechecked, the scene joined to film/film-NN/voice/<scene>.wav with a
-                         0.85 s lead-in and a 2 s tail; a failed passage blocks the join; after 3 different failed takes
-                         of a passage the owner decides; --accept joins it on a recorded reason)
+                         [--profile voicecheck-profile.json] [--scene ID] [--accept PID=reason] [--no-retime]
+                         (Eleven v4: each passage retimed (pauses matched to punctuation by position; --no-retime
+                         keeps an already-retimed, owner-endorsed take as it is, recorded) and voicechecked, the
+                         scene joined to film/film-NN/voice/<scene>.wav with a 0.85 s lead-in and a 2 s tail; a
+                         failed passage blocks the join; after 3 different failed takes of a passage the owner
+                         decides; --accept joins it on a recorded reason)
   python3 -m eav.cli scene-timing --root <dir> --film N --scene ID [--min-pause 0.3 --threshold-db -38]
                          (the measured clause timing of the scene voice for plan-shots, its lead-in and tail:
-                         film/film-NN/shots/<scene>.timing.json; a pause/punctuation mismatch stops)
+                         film/film-NN/shots/<scene>.timing.json; each clause boundary's pause is matched to its
+                         punctuation by position, unpunctuated breaths stay inside their clauses, and a boundary
+                         with no pause near its words stops)
   python3 -m eav.cli job film_clips --root <dir> --rates <rates.json> --resume <job_id> [--from <partial download>]
                          (reserves the rest of a job a hard stop cut short, then writes its resume notebook)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
@@ -90,6 +94,17 @@
                          is recorded as NOT RUN, never as a pass; import-take --transcripts does the same per passage)
   python3 -m eav.cli pick --root <dir> --job <stills|retouch|touchup|edit job id> --choices <{"<key>": N} json file>
                          (after review: one candidate per <key>--cN still; film uses only picks)
+  python3 -m eav.cli adopt --root <dir> --spec <adopt.json> [--scene ID]
+                         (G1: bind media that already exists to one scene's APPROVED shots, 0 CU, idempotent:
+                         {"scene", "sources": {"<job>": {"root": <title root>} | {"folder": <pilot job folder>}},
+                          "stills": {"<scene>-<n>": {"job", "file"} | {"file", "reason", "from"?: {"job", "file"}}},
+                          "clips": {"<n>": {"job", "takes": [take, continuation...], "art"?: {"file", "reason"}}},
+                          "depth": {"<scene>-<n>": {"job", "file": "<stem>.depth.png"}},
+                          "music": {"job", "keys"?, "roles"?: {"<key>": drone|solo|phrase}}}
+                         every file verified by sha256 against the job's recorded import (or a pilot job folder's
+                         own COMPLETE outputs manifest and inputs.zip); hand-copied files need a reason and are
+                         traced; takes keep their motion verdict (gated now if none); a depth map binds only to the
+                         still it was made from; picks, licences and provenance are recorded)
   python3 -m eav.cli hold --root <dir> --film N --keys k1,k2,... [--clear]
                          (shots with no approved still: the film shows the scene's nearest approved still;
                          a picked edit of a held key releases that key)
@@ -97,11 +112,12 @@
                          (--score <wav> --score-route vcsl|ace-step:<job_id> | --cues-job <id>)
          cinematic: film --root <dir> --film N --logo <png> --end-card <png> --shots --title T --author A
                          --narrator V [--burn] [--fonts <dir>]  (approved shots/<scene>.json + audio/<scene>.mix.wav)
+                         [--scene ID]  (one scene's own cut, film/film-NN/film-NN-<ID>.mp4, for its review)
   python3 -m eav.cli reel <n> --root <dir> --script <script.json> [--hashtags ...]
   python3 -m eav.cli reel <n> --root <dir> --plan-shots           (after reel narration import)
   python3 -m eav.cli reel <n> --root <dir> [--score <wav> --score-route ...]
   python3 -m eav.cli qc --root <dir>
-  python3 -m eav.cli status --root <dir>
+  python3 -m eav.cli status --root <dir> [--scene ID]   (--scene: that one scene's route, not the film's first scene)
   python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir> [--profile audiobook|film]
                          [--frame-dir <dir of title.wav, author.wav, closing.wav>]
                          (--score-dir <dir> --score-route vcsl|ace-step:<job_id> | --dry)
@@ -115,7 +131,8 @@ The CLI wraps the eav modules; it spends nothing, runs no GPU work, never marks 
 and never publishes. Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held, 5 QC failure.
 The allowance ledger is shared by every title and pinned in record.json at init (--ledger,
 else $EAV_LEDGER, else <root>/../allowance-ledger.json); later commands refuse any other path.
-The 60 CU title cap is lifetime; the 100 CU cap is per calendar month.
+The 60 CU title cap is lifetime (title-caps.json pinned at init, or beside/above the ledger, sets a title's own cap);
+the 100 CU cap is per calendar month.
 """
 import argparse
 import json
@@ -132,7 +149,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
-from . import cue, glide, motiongate, passages, retime, shotplan, touchup, voicecheck
+from . import adopt, cue, glide, motiongate, passages, retime, shotplan, touchup, voicecheck
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, _segments, _style, unit_anchors, voice_units
@@ -157,6 +174,7 @@ HOOK_ONSET_MAX_S = 0.2
 MP3_END_SLACK_MS = 50
 TAKE_JOB = "narration_take"   # artifact kind of an imported ElevenLabs take job (its manifest)
 TOUCHUP_JOB = "touchup_job"   # artifact kind of a local touch-up job (its manifest)
+ADOPT_JOB = "adopted_job"     # artifact kind of an adoption (G1): already-imported media bound to one scene's shots
 TOUCHUP_SCHEMA = "earnalism.audiovisual-touchup.v1"
 TAKE_ENGINES = {"elevenlabs": ("eleven_v3",)}  # owner decision 2026-11-24
 TAKE_AUDIO = (".mp3", ".wav")
@@ -197,7 +215,19 @@ def _ledger(rec, args) -> budget.Ledger:
         raise Stop(f"ledger {asked} differs from the ledger pinned at init ({path}); the "
                    "allowance cannot be split across ledgers",
                    "Drop --ledger / unset EAV_LEDGER and rerun")
-    return budget.Ledger(path)
+    caps = rec.data.get("title_caps")   # G11: a title-caps.json pinned at init, relative to the root
+    caps = (rec.root / caps).resolve() if caps else None
+    if caps is not None and not caps.is_file():
+        raise Stop(f"record.json pins the title caps {caps}, which does not exist; the caps are never assumed",
+                   "Restore that title-caps.json (the owner's caps), then rerun")
+    return budget.Ledger(path, caps=caps)
+
+
+def _cap_note(ledger, title) -> str:
+    """The title's lifetime cap and the file it comes from (G11: never a silent default)."""
+    src = budget.caps_path(ledger.path, ledger.caps)
+    cap = budget.title_cap(ledger.path, title, ledger.caps)
+    return f"{cap:g} ({src if src else f'default: no {budget.CAPS_FILE} pinned, beside or above the ledger'})"
 
 
 def _month() -> str:
@@ -275,11 +305,11 @@ def _jobs(rec) -> list:
                           ("job", "superseding"), ("job", "closing"))}
     out = []
     for a in rec.data["artifacts"]:
-        if a["kind"] not in ("colab_job", TAKE_JOB, TOUCHUP_JOB):
+        if a["kind"] not in ("colab_job", TAKE_JOB, TOUCHUP_JOB, ADOPT_JOB):
             continue
         m = a["meta"]
         jid = m["job_id"]
-        colab = a["kind"] == "colab_job"  # an imported take or touch-up has no notebook or zip
+        colab = a["kind"] == "colab_job"  # an imported take, touch-up or adoption has no notebook or zip
         out.append({"job_id": jid, "kind": m["job_kind"], "target": targets.get(jid),
                     "engine": details.get(jid, {}).get("engine", "parler"),
                     "order": order.get(jid, -1),
@@ -290,6 +320,9 @@ def _jobs(rec) -> list:
                     "notebook": rec.root / a["path"] if colab else None,
                     "inputs_zip": rec.root / m["inputs_zip"] if colab else None,
                     "manifest": rec.root / m["manifest"], "forecast_units": m["forecast_units"],
+                    # an adoption's bindings (adoption.json): its job.json is the "job" in it
+                    "adopted": a["kind"] == ADOPT_JOB,
+                    "adoption": rec.root / m["manifest"] if a["kind"] == ADOPT_JOB else None,
                     "imported": jid in done["accepted"],
                     "superseded": jid in done["superseded"],
                     "closed": jid in done["closed"],
@@ -502,7 +535,7 @@ def _title_spent(ledger, rec) -> float:
 
 
 def _remaining(ledger, rec, month) -> float:
-    cap = budget.title_cap(ledger.path, rec.data["title_slug"])
+    cap = budget.title_cap(ledger.path, rec.data["title_slug"], ledger.caps)
     return min(cap - _title_spent(ledger, rec),  # title cap: lifetime
                budget.MONTH_CAP - ledger.spent(None, month))
 
@@ -626,7 +659,7 @@ def _scene_next(rec, root, i, sid) -> str:
     stills = [s for s in _still_shots(sp) if f"{sid}-{s['n']}" not in picks]
     if stills:
         jobs = [j for j in _jobs(rec) if j["kind"] == "stills" and j["target"] == t and j["scene"] == sid
-                and j["imported"] and not _ended(j)]
+                and j["imported"] and not _ended(j) and not j["adopted"]]
         if jobs:
             return (f"Review the candidates of {jobs[-1]['job_id']} (contact sheets; the gate's verdicts), then "
                     f"{PROG} pick {r} --job {jobs[-1]['job_id']} --choices <{{\"{sid}-<n>\": N}} json> for "
@@ -634,7 +667,8 @@ def _scene_next(rec, root, i, sid) -> str:
         return (f"Write stills.json for scene {sid} (\"scene\": \"{sid}\"; one item per glide/static shot, key "
                 f"{sid}-<n>, \"candidates\": 3; references/film-recipe.md) for "
                 + ", ".join(f"{sid}-{s['n']}" for s in stills) + f", then {PROG} job stills {r} --film {i} "
-                "--rates <rates.json> --spec stills.json")
+                f"--rates <rates.json> --spec stills.json (media the owner already picked: {PROG} adopt {r} --spec "
+                "adopt.json instead, 0 CU)")
     maps = _depth_maps(rec, t)
     no_depth = [s for s in _depth_shots(sp) if (f"{sid}-{s['n']}.png", picks[f"{sid}-{s['n']}"]["sha256"]) not in maps]
     items = _film_clip_items(rec, t)
@@ -648,14 +682,16 @@ def _scene_next(rec, root, i, sid) -> str:
         return (f"Write clips.json for scene {sid} (\"scene\": \"{sid}\", art_dir, items {{key {sid}-<n>..., shot, "
                 "image, width, height, seed, prompt, continue_from}}; references/film-recipe.md) for "
                 + " and ".join(what) + f", then {PROG} job film_clips {r} --film {i} --rates <rates.json> --spec "
-                "clips.json (depth stills are filled in from the picks; split per 70-minute session)")
+                "clips.json (depth stills are filled in from the picks; split per 70-minute session; takes and depth "
+                f"maps that already exist: {PROG} adopt {r} --spec adopt.json, 0 CU)")
     if not (film_dir / "audio" / f"{sid}.mix.wav").is_file():
         music = [j for j in _jobs(rec) if j["kind"] == "music" and j["target"] == t and j["scene"] == sid
                  and j["imported"] and not _ended(j)]
         if not music:
             return (f"Write music.json for scene {sid} (\"scene\": \"{sid}\", stems with \"role\" drone, solo or phrase, "
                     f"three seeds each; references/film-recipe.md), then {PROG} job music {r} --film {i} --rates "
-                    "<rates.json> --spec music.json")
+                    f"<rates.json> --spec music.json (stems already made for this scene: {PROG} adopt {r} --spec "
+                    "adopt.json, 0 CU)")
         m = music[-1]["job_id"]
         return (f"{PROG} cue {r} --film {i} --scene {sid} --stems {m} --pick --tonic <note>, then {PROG} cue {r} "
                 f"--film {i} --scene {sid} --stems {m} --fx <fx.json, every sound with its licence record>")
@@ -677,7 +713,45 @@ def _film_next(rec, root, i, scenes) -> str:
             f"{PROG} qc --root {root}")
 
 
-def next_action(root) -> str:
+def _scene_film(rec, t, sid):
+    """The latest film of one scene (`film --shots --scene`), or None."""
+    found = [a for a in _artifacts(rec, "scene_film", target=t) if a["meta"].get("scene") == sid]
+    return found[-1] if found else None
+
+
+def _scene_route(rec, root, sid) -> str:
+    """G6: the next step of one scene, for an operator working on that scene alone (a reference scene): its
+    cinematic flow, then `film --shots --scene`, qc and the owner's review. The whole film is untouched by it."""
+    plan = _plan(rec)
+    for i, f in enumerate(plan["plan"]["films"], 1):
+        if any(sc["scene_id"] == sid for sc in f["scenes"]):
+            break
+    else:
+        return f"Scene {sid} is not in the plan; {PROG} status --root {root} (the whole film)"
+    step = _scene_next(rec, root, i, sid)
+    if step:
+        return step
+    t, r = _film_target(i), f"--root {root}"
+    art = _scene_film(rec, t, sid)
+    if art is None:
+        return (f"{PROG} film {r} --film {i} --scene {sid} --shots --logo <approved logo lockup> --end-card "
+                "<approved END> --title <title> --author <author> --narrator <narration voice> [--burn], then "
+                f"{PROG} qc {r}")
+    events = rec.data["events"]
+    made = max((k for k, e in enumerate(events) if e["stage"] == "film" and e["result"] == "scene_assembled"
+                and e["detail"].get("scene") == sid and e["detail"].get("target") == t), default=-1)
+    qcs = [(k, e) for k, e in enumerate(events) if e["stage"] == "qc" and k > made]
+    if not qcs:
+        return f"{PROG} qc {r}"
+    mine = [f for f in qcs[-1][1]["detail"].get("failed") or [] if f.startswith(f"{t}/{sid}:")]
+    if mine:
+        return (f"Fix only the failing items of scene {sid} ({', '.join(mine)}; qc/report.json), re-assemble it "
+                f"({PROG} film {r} --film {i} --scene {sid} --shots ...), then {PROG} qc {r}")
+    return (f"Owner reviews scene {sid} ({art['path']}: picture, motion, sound; listening stays unassessed until "
+            f"then). The whole film: {PROG} status {r} (without --scene)")
+
+
+def next_action(root, scene=None) -> str:
     root = Path(root)
     if not (root / "record.json").is_file():
         return f"{PROG} init <source.json> --root {root} --slug <maison-edition-slug>"
@@ -690,9 +764,11 @@ def next_action(root) -> str:
         j = unfinished[0]
         return (f"Finish the interrupted supersede/close of {j['job_id']}: rerun the same "
                 f"{PROG} supersede|close {j['job_id']} --root {root} command")
-    pending = [j for j in jobs if not j["imported"] and not _ended(j)]
+    pending = [j for j in jobs if not j["imported"] and not _ended(j) and (scene is None or j["scene"] == scene)]
     if pending:
         return _colab_action(rec, pending[0])
+    if scene:
+        return _scene_route(rec, root, scene)
     r = f"--root {root}"
     plan = _plan(rec)
     for i, f in enumerate(plan["plan"]["films"], 1):
@@ -798,12 +874,17 @@ def cmd_init(args):
         raise Stop(f"edition {src['edition_id']} already has a title root on this ledger "
                    f"({', '.join(others)}); one production record per edition",
                    f"Continue that root: {PROG} status --root {ledger.parent / others[0]}")
+    if args.title_caps and not Path(args.title_caps).is_file():
+        raise Stop(f"--title-caps {args.title_caps} does not exist", "Pass the owner's title-caps.json")
     rec = Record.create(root, slug, {
         "edition_id": src.get("edition_id"), "revision_id": src["revision_id"],
         "content_sha256": src["content_sha256"], "language": src["language"],
         "rights": src.get("rights", {}), "public_domain_evidence": True,
         "state": src.get("state"), "export_sha256": sha256_file(src_path)})
     rec.data["ledger"] = Path(os.path.relpath(ledger, root.resolve())).as_posix()  # R17: relative pin
+    caps = Path(args.title_caps).resolve() if args.title_caps else budget.caps_path(ledger)
+    if caps is not None:   # G11: the caps the ledger is held to, pinned like the ledger
+        rec.data["title_caps"] = Path(os.path.relpath(caps, root.resolve())).as_posix()
     rec._save()
     shutil.copyfile(src_path, root / "source.json")
     rec.add_artifact("source", root / "source.json", {"revision_id": src["revision_id"]})
@@ -906,7 +987,12 @@ def _job_spec(rec, args, kind, target):
 
 
 def _job_json(job) -> dict:
-    """The built job.json of a notebook job (inside its inputs.zip), or {}."""
+    """The built job.json of a notebook job (inside its inputs.zip), or an adoption's bound job, or {}."""
+    if job.get("adoption"):
+        try:
+            return _json(job["adoption"]).get("job") or {}
+        except (OSError, ValueError):
+            return {}
     try:
         with zipfile.ZipFile(job["inputs_zip"]) as z:
             return json.loads(z.read("job.json"))
@@ -1112,7 +1198,7 @@ def cmd_job(args):
                         "the Wan contract). The reel needs every planned shot, so the rest wait for "
                         "allowance; or hold for the owner.")
         raise Stop(f"Budget exceeded: forecast {units:.2f} CU > remaining {remaining:.2f} CU "
-                   f"(caps {budget.title_cap(ledger.path, rec.data['title_slug']):g}/title, {budget.MONTH_CAP:g}/month, {month}). "
+                   f"(caps {_cap_note(ledger, rec.data['title_slug'])}/title, {budget.MONTH_CAP:g}/month, {month}). "
                    "Nothing was reserved or written.", hint, code=3)
     built = []
     for sp in specs:
@@ -1259,6 +1345,9 @@ def cmd_import_take(args):
                    "Read them from the ElevenLabs usage and rerun")
     if per_passage:
         return _import_passages(args, rec, plan, lang, credits)
+    if args.no_retime:
+        raise Stop("--no-retime is for Eleven v4 passage takes (the one-take route slices the take, it never retimes it)",
+                   "Drop --no-retime")
     target, todo = _take_target(rec, plan, args.target)
     waiting = [j["job_id"] for j in _jobs(rec) if j["kind"] == "narration" and j["target"] == target
                and (j["unfinished"] or (not j["imported"] and not _ended(j)))]
@@ -1483,8 +1572,14 @@ def _import_passages(args, rec, plan, lang, credits):
             shutil.copy2(script, work / "scripts" / script.name)
             shutil.copy2(take_path, work / "takes" / take_path.name)
             dst = work / f"{pid}.wav"
-            pauses = retime.detect_pauses(take_path)
-            retime.retime(take_path, dst, retime.plan_pauses(plain, pauses, zlib.crc32(pid.encode())), [])
+            if args.no_retime:   # G3: an already-retimed (owner-endorsed) take keeps every pause as it is
+                retime.retime(take_path, dst, [], [])
+            else:   # pauses matched to the punctuation by position; unpunctuated breaths keep place and length
+                x = retime.read(take_path)
+                a, b = passages._bounds(x)
+                pauses = retime.detect_pauses(take_path)
+                retime.retime(take_path, dst, retime.plan_pauses(plain, pauses, zlib.crc32(pid.encode()),
+                                                                 bounds=(a / retime.SR, b / retime.SR)), [])
             retimed.append((sc, pid, dst, len(plain.strip()), len(retime.read(dst)) / retime.SR))
     tdata = _load_transcripts(args.transcripts) if args.transcripts else None
     words = {}   # passage id -> (transcript of the downloaded take, untagged passage text)
@@ -1574,6 +1669,7 @@ def _import_passages(args, rec, plan, lang, credits):
                                              "failed_passages": sorted(p for p, r in results.items() if r["failures"]),
                                              "accepted": {p: r["accepted"]["reason"] for p, r in results.items()
                                                           if r.get("accepted")},
+                                             "retime": not args.no_retime,
                                              "skipped_hand_placed": blocked})
     if joined:
         stage = Path(tempfile.mkdtemp(dir=rec.root, prefix=".passages-"))
@@ -1588,10 +1684,13 @@ def _import_passages(args, rec, plan, lang, credits):
                     "schema": PASSAGES_SCHEMA, "scene": sc["key"], "target": target, "engine": args.engine,
                     "model": args.model, "voice_json_sha256": sha256_file(voice_json), "voice_id": args.voice_id,
                     "voice_name": args.voice_name, "credits": credits, "cps": cps,
+                    "retime": "off: the takes were imported as already retimed (--no-retime)" if args.no_retime
+                    else "pauses matched to punctuation by position (retime.match_pauses)",
                     "passages": [{"id": pid, "script": f"film/{target}/voice/passages/scripts/{script.name}",
                                   "script_sha256": sha256_file(script),
                                   "take": f"film/{target}/voice/passages/takes/{tk.name}",
                                   "take_sha256": sha256_file(tk), "retimed": f"film/{target}/voice/passages/{pid}.wav",
+                                  "retimed_by_import": not args.no_retime,
                                   "retimed_sha256": sha256_file(work / f"{pid}.wav"),
                                   "voicecheck": f"film/{target}/voice/passages/{pid}.voicecheck.json",
                                   "plain": plain,
@@ -1609,7 +1708,7 @@ def _import_passages(args, rec, plan, lang, credits):
                     rec.add_artifact("scene_voice", voice_dir / f"{k}.wav", meta)
                     rec.add_artifact("passage_manifest", voice_dir / f"{k}.passages.json", meta)
                 rec.event("import", "passages_joined", {"target": target, "engine": args.engine, "model": args.model,
-                                                        "voice_id": args.voice_id,
+                                                        "voice_id": args.voice_id, "retime": not args.no_retime,
                                                         "scenes": [sc["key"] for sc in joined],
                                                         "passages": sum(len(sc["rows"]) for sc in joined)})
             except BaseException:
@@ -1620,7 +1719,8 @@ def _import_passages(args, rec, plan, lang, credits):
     n = sum(len(sc["rows"]) for sc in joined)
     if joined:
         print(f"Imported {n} passage take(s) of {len(joined)} scene(s) for {target} ({args.model}, voice "
-              f"{args.voice_name}): each retimed and voicechecked, joined by {round(passages.XF_S * 1000)} ms "
+              f"{args.voice_name}): each " + ("kept as retimed (--no-retime, recorded)" if args.no_retime else "retimed")
+              + f" and voicechecked, joined by {round(passages.XF_S * 1000)} ms "
               f"crossfades over room tone with a {passages.LEAD_IN_S:g} s lead-in and a {passages.TAIL_S:g} s tail "
               f"into {voice_dir}/<scene>.wav. Next: {PROG} scene-timing --root {rec.root} --film {int(target[5:])} "
               "--scene <ID> (the measured clause timing for plan-shots)")
@@ -1882,9 +1982,13 @@ def _film_clip_items(rec, t) -> dict:
     for j in _jobs(rec):
         if j["kind"] != "film_clips" or j["target"] != t or not j["imported"] or _ended(j):
             continue
-        with zipfile.ZipFile(j["inputs_zip"]) as z:
-            for item in json.loads(z.read("job.json")).get("items") or []:
-                found[item["key"]] = {"job_id": j["job_id"], "item": item}
+        if j["adopted"]:   # G1: an adoption's items carry the shot they are bound to
+            items = _job_json(j).get("items") or []
+        else:
+            with zipfile.ZipFile(j["inputs_zip"]) as z:
+                items = json.loads(z.read("job.json")).get("items") or []
+        for item in items:
+            found[item["key"]] = {"job_id": j["job_id"], "item": item}
     return found
 
 
@@ -2003,6 +2107,12 @@ def _film_shots(args, rec, plan, t, scs):
     for need in ("title", "author", "narrator"):
         if not getattr(args, need):
             raise Stop(f"--shots needs --{need} (title card, credits and the AI disclosure)", f"Rerun with --{need}")
+    only = getattr(args, "scene", None)   # G6: one scene's own cut, for its review; the whole film is untouched
+    if only:
+        scs = [sc for sc in scs if sc["scene_id"] == only]
+        if not scs:
+            raise Stop(f"scene {only} is not in film {args.film}", f"{PROG} status --root {rec.root}")
+    stem = f"{t}-{only}" if only else t
     scenes = []
     for sc in scs:
         sid = sc["scene_id"]
@@ -2048,12 +2158,12 @@ def _film_shots(args, rec, plan, t, scs):
             clips.append(film.render_shot({**shot, "seconds": ln}, a, cache))
         except ValueError as e:
             raise Stop(f"scene {shot['scene_id']} shot {shot['n']}: {e}", "Fix the shot plan's camera or the inputs")
-    mixed = film_dir / "audio" / "film.mix.wav"
+    mixed = film_dir / "audio" / (f"{stem}.film-mix.wav" if only else "film.mix.wav")
     film.join_scene_mixes(mixes, scene_fr, mixed)   # each mix held to its frame-aligned scene length
     try:
-        vtt = film_dir / f"{t}.vtt"
+        vtt = film_dir / f"{stem}.vtt"
         vtt.write_text(film.captions(timing, units, lang, offset=film.TITLE_S), encoding="utf-8")
-        srt = film_dir / f"{t}.srt"       # bundle-film reads the "subtitles" artifact as SRT
+        srt = film_dir / f"{stem}.srt"       # bundle-film reads the "subtitles" artifact as SRT
         srt.write_text(film.captions(timing, units, lang, offset=film.TITLE_S, fmt="srt"), encoding="utf-8")
     except ValueError as e:
         raise Stop(f"captions: {e}", "Re-time the narration or split the clause in the planner input")
@@ -2061,11 +2171,11 @@ def _film_shots(args, rec, plan, t, scs):
     card = film.cards(args.title, args.author, args.narrator, film_dir / "cards", fonts)
     common = dict(logo=Path(args.logo), end_card=Path(args.end_card), title_card=Path(card["cards"]["title"]),
                   credits_card=Path(card["cards"]["credits"]), captions_vtt=vtt, fonts_dir=fonts)
-    out = film_dir / f"{t}.mp4"
+    out = film_dir / f"{stem}.mp4"
     info = film.assemble_shots(clips, lens, overlaps, mixed, out, **common)
     burned = None
     if args.burn:
-        burned = film_dir / f"{t}.burned.mp4"
+        burned = film_dir / f"{stem}.burned.mp4"
         film.assemble_shots(clips, lens, overlaps, mixed, burned, burn=True, **common)
     m = mix.measure(out)
     if m["true_peak"] > film.SHOT_TP_MAX or abs(m["lufs"] - FILM_LUFS) > LUFS_TOL:   # R10
@@ -2076,12 +2186,21 @@ def _film_shots(args, rec, plan, t, scs):
             "motion_review": review,
             "scenes": [s for s, _, _ in scenes], "shots": len(shots), "cards_sha256": sha256_file(film_dir / "cards" / "cards.json"),
             "captions_sha256": sha256_file(vtt), **info}
-    rec.add_artifact("mix", mixed, {"target": t})
-    rec.add_artifact("captions", vtt, {"target": t})
-    rec.add_artifact("subtitles", srt, {"target": t})
-    rec.add_artifact("film", out, meta)
-    rec.event("film", "assembled", {"target": t, "duration": info["duration"], "mode": "shots",
-                                    **({"burned": str(burned)} if burned else {})})
+    if only:   # a scene's own cut: its own artifact kinds, so the whole film's record (and bundle-film) never sees it
+        scene_meta = {"target": t, "scene": only}
+        rec.add_artifact("scene_mix", mixed, scene_meta)
+        rec.add_artifact("scene_captions", vtt, scene_meta)
+        rec.add_artifact("scene_subtitles", srt, scene_meta)
+        rec.add_artifact("scene_film", out, {**meta, "scene": only})
+        rec.event("film", "scene_assembled", {"target": t, "scene": only, "duration": info["duration"], "mode": "shots",
+                                              **({"burned": str(burned)} if burned else {})})
+    else:
+        rec.add_artifact("mix", mixed, {"target": t})
+        rec.add_artifact("captions", vtt, {"target": t})
+        rec.add_artifact("subtitles", srt, {"target": t})
+        rec.add_artifact("film", out, meta)
+        rec.event("film", "assembled", {"target": t, "duration": info["duration"], "mode": "shots",
+                                        **({"burned": str(burned)} if burned else {})})
     print(f"Assembled {out}: {info['duration']:.1f} s, {len(shots)} shots at 24 fps, {m['lufs']:.1f} LUFS, "
           f"TP {m['true_peak']:.1f} dBTP, captions {vtt.name}" + (f", burned-in rendition {burned.name}" if burned else "") + ".")
     for key, r in sorted(review.items()):
@@ -2099,6 +2218,8 @@ def cmd_film(args):
         raise Stop(f"film {args.film} is not in the plan", f"{PROG} status --root {rec.root}")
     if args.shots:
         return _film_shots(args, rec, plan, t, films[args.film - 1]["scenes"])
+    if args.scene:
+        raise Stop("--scene assembles one scene of a cinematic film", "Add --shots (and --title, --author, --narrator)")
     planned = sorted(p.name for p in (rec.root / "film" / t / "shots").glob("*.input.json"))
     if planned:   # C3: the cinematic film is assembled shot by shot and gated by qc's film gates
         raise Stop(f"{t} has shot plans ({', '.join(planned[:3])}{' ...' if len(planned) > 3 else ''}): it is a "
@@ -2770,6 +2891,8 @@ def cmd_qc(args):
     for a in rec.data["artifacts"]:
         if a["kind"] in ("film", "reel"):
             latest[a["meta"]["target"]] = a
+        elif a["kind"] == "scene_film":   # G6: a scene's own cut is checked with the same film gates
+            latest[f"{a['meta']['target']}/{a['meta']['scene']}"] = a
     if not latest:
         raise Stop("nothing assembled yet", next_action(rec.root))
     out = rec.root / "qc"
@@ -2782,21 +2905,23 @@ def cmd_qc(args):
         m = mix.measure(video)
         sheet = qc.contact_sheet(video, out / f"{target}-contact.jpg")
         lufs = REEL_LUFS if a["kind"] == "reel" else FILM_LUFS
-        shots_film = a["kind"] == "film" and a["meta"].get("mode") == "shots"   # R10: -1.5 dBTP, not -1.0
+        shots_film = a["kind"] in ("film", "scene_film") and a["meta"].get("mode") == "shots"   # R10: -1.5 dBTP
         checks = {"loudness": abs(m["lufs"] - lufs) <= LUFS_TOL,
                   "true_peak": m["true_peak"] <= (film.SHOT_TP_MAX if shots_film else TP_MAX)}
         item = {"sha256": sha256_file(video), **m, "contact_sheet": sheet.name}
         if shots_film:
-            gate_checks, detail, not_run = qc.film_gates(video, rec.root / "film" / target,
-                                                         a["meta"]["scenes"], _plan(rec)["language"])
+            film_dir = rec.root / "film" / a["meta"]["target"]
+            gate_checks, detail, not_run = qc.film_gates(video, film_dir, a["meta"]["scenes"], _plan(rec)["language"],
+                                                         vtt=video.with_suffix(".vtt"))
             review = a["meta"].get("motion_review") or {}   # I12: advisory takes reach the owner's report
             if review:
                 item["motion_review"] = review
                 report["advisory_only"] += [f"{target} {r['scene']} shot {r['shot']}: Wan take {k} needs a look "
                                             f"({r['notes']}; {r['contact_sheet']})" for k, r in sorted(review.items())]
             words = sorted(p_.name[:-len(".voicecheck.json")] for p_ in
-                           (rec.root / "film" / target / "voice" / "passages").glob("*.voicecheck.json")
-                           if "words" in (json.loads(p_.read_text(encoding="utf-8")).get("not_run") or []))
+                           (film_dir / "voice" / "passages").glob("*.voicecheck.json")
+                           if p_.name.split("-p")[0] in a["meta"]["scenes"]
+                           and "words" in (json.loads(p_.read_text(encoding="utf-8")).get("not_run") or []))
             if words:   # M6: the passages whose word check did not run
                 item["words_not_run"] = words
                 report["advisory_only"].append(f"{target}: word check NOT RUN for {len(words)} passage(s): "
@@ -3193,12 +3318,13 @@ def cmd_status(args):
         ledger = _ledger(rec, args)
         print(f"{title}: revision {s['revision_id']} ({s['language']}), "
               f"{_title_spent(ledger, rec):.2f} CU spent/reserved for this title (lifetime cap "
-              f"{budget.title_cap(ledger.path, title):g}), {ledger.spent(None, month):.2f} CU this month (all titles), "
+              f"{_cap_note(ledger, title)}), {ledger.spent(None, month):.2f} CU this month (all titles), "
               f"{_remaining(ledger, rec, month):.2f} CU remaining ({month}).")
         for j in _jobs(rec):
             closed = next((e["detail"]["units"] for e in rec.data["events"] if e["result"] == "closed"
                            and e["detail"].get("job_id") == j["job_id"]), None)
-            state = ("imported" if j["imported"] else "superseded" if j["superseded"]
+            state = ("adopted (0 CU; imported media bound to its scene)" if j["adopted"]
+                     else "imported" if j["imported"] else "superseded" if j["superseded"]
                      else f"closed (ran, not imported; {closed:.2f} CU settled)" if j["closed"]
                      else "supersede/close unfinished: rerun it" if j["unfinished"]
                      else "waiting for Colab")
@@ -3260,7 +3386,8 @@ def cmd_retime(args):
         if not path.is_file():
             raise Stop(f"{path} does not exist", "Fix the path and rerun")
     pauses = retime.detect_pauses(src)
-    plan = retime.plan_pauses(text.read_text(encoding="utf-8"), pauses, args.seed)
+    a, b = passages._bounds(retime.read(src))
+    plan = retime.plan_pauses(text.read_text(encoding="utf-8"), pauses, args.seed, bounds=(a / retime.SR, b / retime.SR))
     cuts = [float(c) for c in args.cuts.split(",") if c.strip()] if args.cuts else []
     res = retime.retime(src, Path(args.dst), plan, cuts)
     print(json.dumps({"pauses": len(pauses), **res}))
@@ -3537,22 +3664,49 @@ def _scene_clauses(film_dir, sid) -> list:
     return _json(tf)["timing"] if tf.is_file() else []
 
 
-def _passage_clauses(wav: Path, plain: str, offset: float, pid: str, threshold_db: float, min_pause: float) -> list:
-    """Clause timing of one retimed passage: its clauses (retime.clauses) mapped in order to its measured pauses."""
+TIMING_POS_TOL_S, TIMING_POS_TOL_FRAC = 2.0, 0.08   # G5: a clause boundary's pause lies within max(2 s, 8 %) of its words
+
+
+def _passage_clauses(wav: Path, plain: str, offset: float, pid: str, threshold_db: float, min_pause: float) -> tuple:
+    """(clauses, breaths) of one retimed passage: its clauses (retime.clauses) with each boundary at the measured
+    pause its punctuation matches by position (retime.match_pauses), and the pauses no mark explains (breaths inside
+    a clause, kept as they are). A boundary with no pause near its words, or whose pause lies far from them, is a
+    mislabelled clause: it stops, nothing is guessed."""
     cl = retime.clauses(plain)
     x = retime.read(wav)
     a, b = passages._bounds(x)
     t0, t1 = a / retime.SR, b / retime.SR
-    pauses = [(ps, pe) for ps, pe in retime.detect_pauses(wav, threshold_db, min_pause) if t0 < ps and pe < t1]
-    if len(pauses) != len(cl) - 1:
-        raise Stop(f"passage {pid}: {len(pauses)} pause(s) of at least {min_pause:g} s for {len(cl) - 1} clause "
-                   f"boundar{'y' if len(cl) == 2 else 'ies'} of its punctuation ({' | '.join(c for c, _ in cl)}); the "
-                   "clause times would be guessed, so none are written",
-                   "Listen to the passage: tune --min-pause / --threshold-db until the pauses match the punctuation, "
+    pauses = sorted((ps, pe) for ps, pe in retime.detect_pauses(wav, threshold_db, min_pause) if t0 < ps and pe < t1)
+    rows = retime.match_pauses(plain, pauses, (t0, t1))
+    lim = max(TIMING_POS_TOL_S, TIMING_POS_TOL_FRAC * (t1 - t0))
+
+    def short(text):
+        w = text.split()
+        return text if len(w) <= 6 else " ".join(w[:3]) + " … " + " ".join(w[-2:])
+    bad = []
+    for r in rows:
+        where = f"clause {r['clause'] + 1} «{short(cl[r['clause']][0])}» ({r['kind']})"
+        if r["pause"] is None:
+            bad.append(f"{where} ends at no measured pause of at least {min_pause:g} s (its words put the end near "
+                       f"{offset + r['expected_s']:.2f} s)")
+        elif abs(r["error_s"]) > lim:
+            ps = pauses[r["pause"]][0]
+            bad.append(f"{where} would end at the pause at {offset + ps:.2f} s, {abs(r['error_s']):.1f} s from where "
+                       f"its words put it ({offset + r['expected_s']:.2f} s)")
+    if bad:
+        raise Stop(f"passage {pid}: the measured pauses do not match its punctuation by position: " + "; ".join(bad)
+                   + f" ({len(pauses)} pause(s) of at least {min_pause:g} s for {len(rows)} clause boundar"
+                   f"{'y' if len(rows) == 1 else 'ies'}); the clause times would be guessed, so none are written",
+                   "Listen to the passage: tune --min-pause / --threshold-db until every clause boundary has its pause, "
                    "or time this scene's clauses by ear into the planner input's \"timing\"")
-    marks = [t0] + [v for ps in pauses for v in ps] + [t1]
-    return [{"start": round(offset + marks[2 * i], 3), "end": round(offset + marks[2 * i + 1], 3), "text": c}
-            for i, (c, _) in enumerate(cl)]
+    cuts = [pauses[r["pause"]] for r in rows]
+    used = {r["pause"] for r in rows}
+    marks = [t0] + [v for ps in cuts for v in ps] + [t1]
+    out = [{"start": round(offset + marks[2 * i], 3), "end": round(offset + marks[2 * i + 1], 3), "text": c}
+           for i, (c, _) in enumerate(cl)]
+    breaths = [{"start": round(offset + ps, 3), "end": round(offset + pe, 3)}
+               for j, (ps, pe) in enumerate(pauses) if j not in used]
+    return out, breaths
 
 
 def cmd_scene_timing(args):
@@ -3575,7 +3729,7 @@ def cmd_scene_timing(args):
     if not voice.is_file():
         raise Stop(f"scene {args.scene} has no voice {voice}", next_action(rec.root))
     manifest_path = film_dir / "voice" / f"{args.scene}.passages.json"
-    rows = []
+    rows, breaths = [], []
     if manifest_path.is_file():
         man = _json(manifest_path)
         if man.get("wav_sha256") != sha256_file(voice):
@@ -3590,27 +3744,480 @@ def cmd_scene_timing(args):
             plains = passages.check_passage_scripts(text, [(rec.root / p_["script"]).read_text(encoding="utf-8")
                                                            for p_ in man["passages"]])
         for p_, plain, off in zip(man["passages"], plains, offsets):
-            rows += _passage_clauses(rec.root / p_["retimed"], plain, off, p_["id"], args.threshold_db, args.min_pause)
+            got, br = _passage_clauses(rec.root / p_["retimed"], plain, off, p_["id"], args.threshold_db, args.min_pause)
+            rows, breaths = rows + got, breaths + br
     else:
         text, _ = _scene_text(sc, plan["language"])
-        rows = _passage_clauses(voice, text, 0.0, args.scene, args.threshold_db, args.min_pause)
+        rows, breaths = _passage_clauses(voice, text, 0.0, args.scene, args.threshold_db, args.min_pause)
     length = len(retime.read(voice)) / retime.SR
     lead, tail = rows[0]["start"], length - rows[-1]["end"]
     lo, hi = passages.LEAD_IN_RANGE
     out = _write_json(_timing_path(film_dir, args.scene), {
-        "schema": TIMING_SCHEMA, "scene": args.scene, "timing": rows, "length_s": round(length, 3),
+        "schema": TIMING_SCHEMA, "scene": args.scene, "timing": rows, "breaths": breaths, "length_s": round(length, 3),
         "speech_start": rows[0]["start"], "speech_end": rows[-1]["end"], "lead_in_s": round(lead, 3),
         "tail_s": round(tail, 3), "r9_lead_in_ok": lo <= lead <= hi, "voice_sha256": sha256_file(voice),
-        "method": "eav.cli scene-timing: retime.clauses mapped to retime.detect_pauses per retimed passage",
+        "method": "eav.cli scene-timing: retime.clauses matched by position (retime.match_pauses) to "
+                  "retime.detect_pauses per retimed passage; unmatched pauses are breaths inside a clause",
         "threshold_db": args.threshold_db, "min_pause_s": args.min_pause})
     rec.add_artifact("scene_timing", out, {"target": t, "scene": args.scene})
     print(f"Timed {len(rows)} clause(s) of {args.scene}: speech {rows[0]['start']:.2f}-{rows[-1]['end']:.2f} s of "
-          f"{length:.2f} s (lead-in {lead:.2f} s, tail {tail:.2f} s); wrote {out}.")
+          f"{length:.2f} s (lead-in {lead:.2f} s, tail {tail:.2f} s); wrote {out}."
+          + (f" {len(breaths)} unpunctuated breath(s) kept inside their clauses: "
+             + ", ".join(f"{b_['start']:.2f}-{b_['end']:.2f} s" for b_ in breaths) if breaths else ""))
     if not lo <= lead <= hi:
         print(f"WARNING R9: the first word lands {lead:.2f} s in, not {lo:g}-{hi:g} s: rejoin the scene (import-take "
               "pads the lead-in) before the paper edit")
     print(f"Next: write the planner input {shotplan.paths(film_dir, args.scene)['input']} without \"timing\" (this file "
           f"is read, length_s included), then {PROG} plan-shots --root {rec.root} --film {args.film} --scene {args.scene}")
+    return 0
+
+
+# ---------------------------------------------------------------- adoption (G1)
+ADOPT_DIRS = {"stills": "stills", "film_clips": "film_clips", "music": "music"}
+
+
+def _rel(path, root) -> str:
+    return Path(os.path.relpath(Path(path).resolve(), Path(root).resolve())).as_posix()
+
+
+def _adopt_sources(rec, spec, base):
+    """A loader of the jobs an adoption may draw on, and every source it can trace hand-copied files to."""
+    where_all = spec.get("sources") or {}
+    if not isinstance(where_all, dict):
+        raise adopt.Refused('"sources" must be {"<job id>": {"root": <title root>} | {"folder": <pilot job folder>}}')
+    cache, others = {}, {}
+
+    def load(job_id):
+        if job_id in cache:
+            return cache[job_id]
+        where = where_all.get(job_id)
+        if where is None:
+            row = next((j for j in _jobs(rec) if j["job_id"] == job_id), None)
+            if row is None:
+                raise adopt.Refused(f"{job_id} is not a job of this record; say where it is in the spec's \"sources\" "
+                                    f'({{"{job_id}": {{"root": "<title root>"}}}} or {{"folder": "<pilot job folder>"}})')
+            if row["adopted"]:
+                raise adopt.Refused(f"{job_id} is itself an adoption: adopt from the job that made the files")
+            src = adopt.record_source(rec.root, row, rec.data["artifacts"], _job_json(row), "this record")
+        elif isinstance(where, dict) and where.get("root"):
+            root = (base / where["root"]).resolve()
+            if not (root / "record.json").is_file():
+                raise adopt.Refused(f"{job_id}: {root} holds no production record")
+            if root not in others:
+                others[root] = Record.load(root)
+            other = others[root]
+            row = next((j for j in _jobs(other) if j["job_id"] == job_id), None)
+            if row is None:
+                raise adopt.Refused(f"{job_id} is not a job of the record at {root}")
+            src = adopt.record_source(other.root, row, other.data["artifacts"], _job_json(row), _rel(root, rec.root))
+        elif isinstance(where, dict) and where.get("folder"):
+            folder = (base / where["folder"]).resolve()
+            src = adopt.folder_source(folder, job_id, _rel(folder, rec.root))
+        else:
+            raise adopt.Refused(f'"sources" entry of {job_id} needs "root" or "folder"')
+        cache[job_id] = src
+        return src
+
+    def everything():
+        """Every loadable source, for tracing a hand-copied file: the spec's sources and this record's jobs."""
+        out = []
+        for jid in list(where_all) + [j["job_id"] for j in _jobs(rec) if j["imported"] and not _ended(j)
+                                      and not j["adopted"] and j["kind"] in PICK_KINDS + ("film_clips", "music")]:
+            try:
+                out.append(load(jid))
+            except adopt.Refused:
+                pass
+        return out
+    return load, everything
+
+
+def _adopt_gate(rec, key, src, name, path, entry, advisories):
+    """The pick gate of an adopted candidate, as `pick` applies it; returns the recorded verdict."""
+    gated = isinstance(((src.prov.get("model") if src else None) or {}).get("gate"), dict)
+    if src is not None and f"{Path(name).stem}.gate.json" in src.files:
+        src.file(f"{Path(name).stem}.gate.json")
+    gate, level, why = _gate_of(path, gated) if src is not None else (None, None, None)
+    if src is None:
+        return {"level": None, "why": "hand-copied file with no gate result of its own"}
+    record = {"level": level, "why": why,
+              "gate": None if gate is None else {k: gate.get(k) for k in ("pass", "needs_review", "anachronisms",
+                                                                         "hands_detached", "eyes", "notes")}}
+    if level == "fail":
+        if not (entry.get("override_fail") or "").strip():
+            raise adopt.Refused(f"{key}: {why} (a certain fail: give \"override_fail\": \"<reason>\" in its entry)")
+        record["override_fail"] = entry["override_fail"]
+    elif level == "review":
+        if (rec.root / "gate-calibration.json").is_file():
+            if not (entry.get("override") or "").strip():
+                raise adopt.Refused(f"{key}: {why} (give \"override\": \"<reason>\" in its entry)")
+            record["override"] = entry["override"]
+        else:
+            advisories[key] = why
+    return record
+
+
+def _adopt_stills(rec, spec, base, sid, shots, load, everything, advisories):
+    binding, files = {}, []
+    for key, entry in sorted((spec.get("stills") or {}).items()):
+        n = int(key.rpartition("-")[2]) if key.startswith(sid + "-") and key.rpartition("-")[2].isdigit() else None
+        if n not in shots:
+            raise adopt.Refused(f"still key {key!r} is not <scene>-<n> of a shot of scene {sid}")
+        if shots[n]["motion"] not in ("glide", "static"):
+            raise adopt.Refused(f"shot {n} of scene {sid} is {shots[n]['motion']}: adopt its takes under \"clips\"")
+        if not isinstance(entry, dict) or not entry.get("file"):
+            raise adopt.Refused(f"{key}: an entry needs \"file\" (and \"job\", or a hand-copied file's \"reason\")")
+        if entry.get("job"):
+            src = load(entry["job"])
+            if src.kind not in PICK_KINDS:
+                raise adopt.Refused(f"{key}: {entry['job']} is a {src.kind} job, not a stills job")
+            path, sha = src.file(Path(entry["file"]).name)
+            lic = src.licence("image")
+            gate = _adopt_gate(rec, key, src, path.name, path, entry, advisories)
+            how = {"source": {**{k: src.prov.get(k) for k in ("origin", "record", "folder", "job_id", "kind",
+                                                               "input_zip_sha256", "verified_against") if src.prov.get(k)},
+                              "file": path.name, "sha256": sha}}
+        else:
+            path = (base / entry["file"]).resolve()
+            if not path.is_file():
+                raise adopt.Refused(f"{key}: hand-copied file {path} does not exist")
+            if not (entry.get("reason") or "").strip():
+                raise adopt.Refused(f"{key}: {path.name} is a hand-copied file (no job): it needs the operator's "
+                                    "\"reason\", recorded with its sha256 and traced provenance")
+            sha = sha256_file(path)
+            traced = adopt.trace(sha, everything())
+            lic, gate, src = None, None, None
+            for t_ in traced:
+                s_ = load(t_["job_id"])
+                if t_["relation"].startswith("identical to the job's output") and s_.kind in PICK_KINDS:
+                    lic, src = s_.licence("image"), s_
+                    gate = _adopt_gate(rec, key, s_, t_["file"], s_.file(t_["file"])[0], entry, advisories)
+                    break
+            declared = entry.get("from")
+            if declared:
+                if not isinstance(declared, dict) or not declared.get("job") or not declared.get("file"):
+                    raise adopt.Refused(f"{key}: \"from\" needs {{\"job\", \"file\"}} (the job file it was derived from)")
+                d_src = load(declared["job"])
+                _, d_sha = d_src.file(Path(declared["file"]).name)
+                declared = {"job_id": d_src.job_id, "file": Path(declared["file"]).name, "sha256": d_sha,
+                            "relation": "identical" if d_sha == sha else
+                            "derived by hand, as the operator declares (not byte-identical; not verified)"}
+                if lic is None and d_src.kind in PICK_KINDS:
+                    lic = d_src.licence("image")
+            if lic is None:
+                lic = {"model": None, "licence": None, "note": "unverified: no job output matches it and none is declared"}
+                advisories[key] = "licence unverified (provenance untraced): the owner checks it before release"
+            how = {"hand_copied": {"file": _rel(path, rec.root), "sha256": sha, "reason": entry["reason"].strip(),
+                                   "traced": traced, **({"declared_from": declared} if declared else {})}}
+            if gate is None:
+                gate = {"level": None, "why": "hand-copied file with no gate result of its own"}
+        binding[key] = {**how, "licence": lic, "gate": gate}
+        files.append((path, f"{key}--c1{path.suffix.lower()}", sha, key))
+    return binding, files
+
+
+def _adopt_clips(rec, spec, base, sid, sp, shots, load):
+    binding, files, items = {}, [], []
+    need = shotplan.render_frames(sp["shots"])
+    for n_s, entry in sorted((spec.get("clips") or {}).items(), key=lambda kv: int(kv[0])):
+        n = int(n_s)
+        if n not in shots or shots[n]["motion"] != "wan":
+            raise adopt.Refused(f"clips entry {n_s}: shot {n} of scene {sid} is not a wan shot of the approved plan")
+        takes = entry.get("takes") if isinstance(entry, dict) else None
+        if not entry.get("job") or not isinstance(takes, list) or not takes:
+            raise adopt.Refused(f"clips entry {n}: needs \"job\" and \"takes\" (the take and its continuations, in order)")
+        src = load(entry["job"])
+        if src.kind != "film_clips":
+            raise adopt.Refused(f"shot {n}: {entry['job']} is a {src.kind} job, not a film_clips (Wan) job")
+        lic = src.licence("clip")
+        chain, prev, frames = [], None, 0
+        for k, key in enumerate(takes):
+            if not str(key).startswith(sid + "-"):
+                raise adopt.Refused(f"shot {n}: take {key!r} is not a key of scene {sid} (<scene>-...)")
+            path, sha = src.file(f"{key}.mp4")
+            item = src.item(key)
+            if src.job.get("items") and item is None:
+                raise adopt.Refused(f"shot {n}: {entry['job']} built no item {key!r}")
+            item = dict(item or {"key": key})
+            if (item.get("continue_from") or None) != prev:
+                raise adopt.Refused(f"shot {n}: take {key} continues {item.get('continue_from') or 'nothing'} in "
+                                    f"{entry['job']}, not {prev or 'nothing'}: list a take and its continuations in order")
+            v = film._probe_video(path)
+            if f"{v['width']}x{v['height']}" != shots[n].get("wan_res"):
+                raise adopt.Refused(f"shot {n}: take {key} is {v['width']}x{v['height']}, but the approved plan's "
+                                    f"wan_res is {shots[n].get('wan_res')}")
+            frames += v["frames"] - (1 if k else 0)
+            mj = src.motion.get(key)
+            if mj is not None:
+                if not Path(mj[0]).is_file() or sha256_file(mj[0]) != mj[1]:
+                    mj = None   # an edited or missing verdict never passes: gated again on adoption
+            chain.append({"key": key, "file": f"{key}.mp4", "sha256": sha, "frames": v["frames"],
+                          "motion_gate": "recorded at import" if mj else "gated on adoption"})
+            items.append({**{k_: v_ for k_, v_ in item.items() if k_ not in ("prompt", "negative_prompt")},
+                          "key": key, "shot": n, "continue_from": prev, "width": v["width"], "height": v["height"],
+                          "source_job": src.job_id})
+            files.append((path, f"clips/{key}.mp4", sha, key, mj))
+            prev = key
+        if not shotplan.chain_covers(len(takes), need[n]) or frames < need[n] + shotplan.CHAIN_MARGIN:
+            raise adopt.Refused(f"shot {n} renders {need[n]} frames plus a {shotplan.CHAIN_MARGIN}-frame margin, but "
+                                f"the take {' -> '.join(takes)} plays {frames}: adopt its continuation too, or re-plan")
+        art = entry.get("art")
+        if art:
+            a_path = (base / art.get("file", "")).resolve()
+            if not a_path.is_file() or not (art.get("reason") or "").strip():
+                raise adopt.Refused(f"shot {n}: \"art\" needs an existing \"file\" and the operator's \"reason\" "
+                                    "(a hand-copied file)")
+            a_sha = sha256_file(a_path)
+            start = (src.item(takes[0]) or {}).get("image")
+            want = src.images.get(start) if start else None
+            if a_sha != want:
+                raise adopt.Refused(f"shot {n}: art {a_path.name} (sha256 {a_sha[:12]}...) is not the start image "
+                                    f"{start or '(none recorded)'} the take {takes[0]} was made from")
+            art = {"file": _rel(a_path, rec.root), "sha256": a_sha, "reason": art["reason"].strip(),
+                   "relation": f"identical to the start image {start} of {src.job_id} item {takes[0]}"}
+        binding[str(n)] = {"source": {k: src.prov.get(k) for k in ("origin", "record", "folder", "job_id", "kind",
+                                                                   "input_zip_sha256", "verified_against") if src.prov.get(k)},
+                           "takes": chain, "frames": frames, "needs_frames": need[n] + shotplan.CHAIN_MARGIN,
+                           "licence": lic, **({"art": art} if art else {})}
+    return binding, files, items
+
+
+def _adopt_depth(rec, spec, sid, t, shots, still_binding, load):
+    binding, files, depth_stills = {}, [], {}
+    picks = None
+    for key, entry in sorted((spec.get("depth") or {}).items()):
+        n = int(key.rpartition("-")[2]) if key.startswith(sid + "-") and key.rpartition("-")[2].isdigit() else None
+        if n not in shots or shots[n]["motion"] != "glide" or (shots[n].get("camera") or {}).get("flat"):
+            raise adopt.Refused(f"depth {key!r}: not a layered (non-flat) glide shot of scene {sid}")
+        if not isinstance(entry, dict) or not entry.get("job") or not entry.get("file"):
+            raise adopt.Refused(f"depth {key}: needs \"job\" and \"file\" (<stem>.depth.png of a film_clips job)")
+        src = load(entry["job"])
+        name = Path(entry["file"]).name
+        if src.kind != "film_clips" or not name.endswith(".depth.png"):
+            raise adopt.Refused(f"depth {key}: {entry['job']}/{name} is not a film_clips job's depth map")
+        path, sha = src.file(name)
+        lic = src.licence("depth")
+        if key in still_binding:
+            still_sha = (still_binding[key].get("source") or still_binding[key].get("hand_copied"))["sha256"]
+        else:
+            picks = _scene_picks(rec, t, sid) if picks is None else picks
+            if key not in picks:
+                raise adopt.Refused(f"depth {key}: shot {n} has no picked still: a depth map is adopted only for the "
+                                    "exact still it was made from")
+            still_sha = picks[key]["sha256"]
+        made_from = src.depth_image_sha(name)
+        if made_from != still_sha:
+            raise adopt.Refused(f"depth {key}: {src.job_id}/{name} was made from an image with sha256 "
+                                f"{(made_from or 'unknown')[:12]}..., but the picked still of {key} is {still_sha[:12]}...: "
+                                "no depth map matches it (a depth-only film_clips job makes one)")
+        depth_stills[f"{key}.png"] = still_sha
+        binding[key] = {"source": {k: src.prov.get(k) for k in ("origin", "record", "folder", "job_id",
+                                                                 "verified_against") if src.prov.get(k)},
+                        "file": name, "sha256": sha, "still_sha256": still_sha, "licence": lic,
+                        **({"depth_model_evidence": src.prov["depth_model_evidence"]}
+                           if src.prov.get("depth_model_evidence") else {})}
+        files.append((path, f"depth/{key}.depth.png", sha, key, None))
+    return binding, files, depth_stills
+
+
+def _adopt_music(spec, load):
+    entry = spec.get("music")
+    if not entry:
+        return {}, [], []
+    if not isinstance(entry, dict) or not entry.get("job"):
+        raise adopt.Refused('"music" needs "job" (and optional "keys", "roles": {"<key>": drone|solo|phrase})')
+    src = load(entry["job"])
+    if src.kind != "music":
+        raise adopt.Refused(f"music: {entry['job']} is a {src.kind} job, not a music job")
+    lic = src.licence("music")
+    names = {Path(n).stem: n for n in src.files if Path(n).suffix.lower() in cue.STEM_EXTS}
+    keys = entry.get("keys") or sorted(names)
+    roles = entry.get("roles") or {}
+    bad = [k for k in keys if k not in names] + [k for k in roles if k not in keys]
+    if bad:
+        raise adopt.Refused(f"music: {', '.join(bad)} is not a stem of {src.job_id} being adopted")
+    wrong = [f"{k}={r}" for k, r in roles.items() if r not in cue.ROLES]
+    if wrong:
+        raise adopt.Refused(f"music: roles must be one of {', '.join(cue.ROLES)} ({', '.join(wrong)})")
+    files, items, stems = [], [], {}
+    for k in keys:
+        path, sha = src.file(names[k])
+        files.append((path, names[k], sha, k, None))
+        item = dict(src.item(k) or {"key": k})
+        if roles.get(k):
+            item["role"] = roles[k]
+        items.append(item)
+        stems[k] = {"file": names[k], "sha256": sha, **({"role": roles[k]} if roles.get(k) else {})}
+    binding = {"source": {k: src.prov.get(k) for k in ("origin", "record", "folder", "job_id", "input_zip_sha256",
+                                                       "verified_against") if src.prov.get(k)},
+               "stems": stems, "licence": lic}
+    return binding, files, items
+
+
+def _adopt_write(rec, t, sid, jid, kind, doc, files, gate_overrides, picks=None):
+    """Place one adopted job's files (hard links, else copies, each re-verified), its adoption.json and its record
+    rows, all or nothing. Clips without a recorded motion verdict are gated now; a clear fail stops."""
+    dest = rec.root / ADOPT_DIRS[kind] / jid
+    jobs_dir = rec.root / "jobs" / jid
+    if dest.exists() or jobs_dir.exists():
+        raise adopt.Refused(f"{dest} or {jobs_dir} already exists")
+    stage = Path(tempfile.mkdtemp(dir=rec.root, prefix=".adopt-"))
+    try:
+        gates = []
+        for src, rel, sha, key, mj in files:
+            out = stage / rel
+            out.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                os.link(src, out)
+            except OSError:
+                shutil.copy2(src, out)
+            if sha256_file(out) != sha:
+                raise adopt.Refused(f"the copy of {src} differs from it")
+            if kind == "stills" and Path(src).with_name(Path(src).stem + ".gate.json").is_file():
+                shutil.copy2(Path(src).with_name(Path(src).stem + ".gate.json"), out.with_name(out.stem + ".gate.json"))
+            if rel.startswith("clips/"):
+                if mj:
+                    shutil.copy2(mj[0], out.with_name(f"{key}.motion.json"))
+                    contact = Path(mj[0]).with_name(f"{key}.contact.png")
+                    if contact.is_file():
+                        shutil.copy2(contact, out.with_name(contact.name))
+                    gate = json.loads(Path(mj[0]).read_text(encoding="utf-8"))
+                else:
+                    gate = motiongate.gate_clip(out)
+                if gate.get("pass") is False and key not in gate_overrides:
+                    raise adopt.Refused(f"take {key} failed the motion gate ({'; '.join(map(str, gate.get('notes') or []))}); "
+                                        f"record why it stands in picks/gate-overrides.json ({{\"{key}\": \"<reason>\"}}) "
+                                        "or adopt another take")
+                gates.append((key, gate))
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        stage.rename(dest)
+    except BaseException:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise
+    snapshot = (list(rec.data["artifacts"]), list(rec.data["events"]))
+    try:
+        doc = {**doc, "files": {rel: sha for _, rel, sha, _, _ in files},
+               "motion_gates": {k: {x: g.get(x) for x in ("pass", "needs_review", "notes")} for k, g in gates}}
+        path = _write_json(jobs_dir / "adoption.json", doc)
+        meta = {"job_id": jid, "job_kind": kind, "adopted": True}
+        rec.add_artifact(ADOPT_JOB, path, {**meta, "forecast_units": 0.0, "manifest": f"jobs/{jid}/adoption.json",
+                                           "scene": sid})
+        rec.event("cli", "job_target", {"job_id": jid, "target": t, "kind": kind, "scene": sid, "adopted": True})
+        arts = []
+        for src, rel, sha, key, _ in files:
+            arts.append(rec.add_artifact(kind, dest / rel, {**meta, "adopted_from": str(src), "key": key}))
+            gj = (dest / rel).with_name(Path(rel).stem + ".gate.json")
+            if kind == "stills" and gj.is_file():
+                rec.add_artifact(kind, gj, {**meta, "key": key})
+        for key, _ in gates:
+            rec.add_artifact("motion_gate", dest / "clips" / f"{key}.motion.json",
+                             {**meta, "clip": f"{key}.mp4"})
+        rec.event("import", "accepted", {"job_id": jid, "kind": kind, "actual_units": 0, "adopted": True,
+                                         "files": [a["path"] for a in arts], "adoption_sha256": sha256_file(path)})
+        if picks:
+            ppath = _write_json(rec.root / "picks" / f"{jid}.pick-1.json", {"job_id": jid, "choices": picks,
+                                                                            "adopted": True})
+            rec.add_artifact("stills_pick", ppath, {"job_id": jid, "choices": picks, "version": 1, "adopted": True})
+            rec.event("pick", "recorded", {"job_id": jid, "version": 1, "adopted": True,
+                                           "choices": {k: v["candidate"] for k, v in picks.items()}})
+    except BaseException:
+        try:
+            rec.rollback(snapshot)
+        finally:
+            shutil.rmtree(dest, ignore_errors=True)
+            shutil.rmtree(jobs_dir, ignore_errors=True)
+        raise
+    return gates
+
+
+def cmd_adopt(args):
+    """G1: bind already-imported media (stills, Wan takes, depth maps, a music job) to one scene's approved shots,
+    verified file by file and recorded as adopted jobs with their picks; 0 CU, idempotent."""
+    rec = _record(args.root)
+    spec_path = Path(args.spec)
+    spec = _json(spec_path)
+    base = spec_path.resolve().parent
+    sid = spec.get("scene") if isinstance(spec, dict) else None
+    if not isinstance(sid, str) or (args.scene and args.scene != sid):
+        raise Stop("adopt.json needs \"scene\" (and --scene, if given, must name the same scene)",
+                   "Fix adopt.json and rerun")
+    args.scene = sid   # G6: the Next: line follows this scene
+    plan = _plan(rec)
+    i = next((k for k, f in enumerate(plan["plan"]["films"], 1) if any(sc["scene_id"] == sid for sc in f["scenes"])),
+             None)
+    if i is None:
+        raise Stop(f"scene {sid} is not in the plan", f"{PROG} status --root {rec.root}")
+    t = _film_target(i)
+    film_dir = rec.root / "film" / t
+    try:   # R11: media is bound to the shots of the approved paper edit only
+        sp = shotplan.require_approved(film_dir, sid)
+    except shotplan.NotApproved as e:
+        raise Stop(f"not adopted: {e}", f"{PROG} plan-shots --root {rec.root} --film {i} --scene {sid} (approve it)")
+    shots = {s["n"]: s for s in sp["shots"]}
+    plan_sha = sha256_file(shotplan.paths(film_dir, sid)["plan"])
+    overrides = {}
+    gpath = rec.root / "picks" / "gate-overrides.json"
+    if gpath.is_file():
+        overrides = {k: v for k, v in _json(gpath).items() if isinstance(v, str) and v.strip()}
+    advisories = {}
+    try:
+        load, everything = _adopt_sources(rec, spec, base)
+        stills, still_files = _adopt_stills(rec, spec, base, sid, shots, load, everything, advisories)
+        clips, clip_files, clip_items = _adopt_clips(rec, spec, base, sid, sp, shots, load)
+        depth, depth_files, depth_stills = _adopt_depth(rec, spec, sid, t, shots, stills, load)
+        music, music_files, music_items = _adopt_music(spec, load)
+        if not (stills or clips or depth or music):
+            raise adopt.Refused("adopt.json binds nothing (\"stills\", \"clips\", \"depth\", \"music\")")
+        groups = []
+        if stills:
+            groups.append(("stills", "stills", {"stills": stills}, still_files,
+                           {"scene": sid, "items": [{"key": f"{k}--c1", "base": k, "candidate": 1} for k in stills]}))
+        if clips or depth:
+            groups.append(("clips", "film_clips", {"clips": clips, "depth": depth}, clip_files + depth_files,
+                           {"scene": sid, "items": clip_items, **({"depth_stills": depth_stills} if depth_stills else {})}))
+        if music:
+            groups.append(("music", "music", {"music": music}, music_files, {"scene": sid, "items": music_items}))
+        known = {j["job_id"] for j in _jobs(rec)}
+        done, kept = [], []
+        for tag, kind, binding, files, job in groups:
+            jid = adopt.binding_id(sid, tag, {"binding": binding, "plan_sha256": plan_sha, "target": t})
+            if jid in known:
+                kept.append(jid)
+                continue
+            doc = {"schema": adopt.SCHEMA, "job_id": jid, "kind": kind, "target": t, "scene": sid,
+                   "plan_sha256": plan_sha, "binding": binding, "job": job, "spent_cu": 0,
+                   "spec": {"path": _rel(spec_path, rec.root), "sha256": sha256_file(spec_path)}}
+            picks = None
+            if kind == "stills":
+                picks = {k: {"candidate": 1, "file": f"stills/{jid}/{rel}", "sha256": sha}
+                         for _, rel, sha, k in files}
+            files = [f if len(f) == 5 else (*f, None) for f in files]
+            gates = _adopt_write(rec, t, sid, jid, kind, doc, files, overrides, picks)
+            done.append((jid, kind, len(files), gates))
+    except adopt.Refused as e:
+        raise Stop(f"not adopted: {e}. Nothing more was written", "Fix adopt.json (or the source it names) and rerun; "
+                   "never edit a job's manifest or recorded sha256")
+    if not done:
+        print(f"Already adopted for scene {sid}: {', '.join(kept)}; nothing changed (0 CU).")
+        return 0
+    for jid, kind, count, gates in done:
+        print(f"Adopted {count} file(s) as {kind} job {jid} for scene {sid} of {t}: verified by sha256, licences and "
+              "provenance recorded, 0 CU" + (" (picks recorded)" if kind == "stills" else "") + ".")
+        for key, g in gates:
+            if g.get("needs_review") or g.get("pass") is False:
+                print(f"MOTION REVIEW {key}: {'; '.join(map(str, g.get('notes') or [])) or 'needs review'} "
+                      f"(passed on the recorded override: {overrides[key]})" if key in overrides else
+                      f"MOTION REVIEW {key}: {'; '.join(map(str, g.get('notes') or [])) or 'needs review'}; look at its "
+                      "contact sheet before the owner sees the cut.")
+    for key, why in sorted(advisories.items()):
+        print(f"WARNING {key}: {why}")
+    if kept:
+        print(f"Unchanged (already adopted): {', '.join(kept)}.")
+    unbound = [f"{sid}-{s['n']}" for s in _depth_shots(sp)
+               if f"{sid}-{s['n']}" not in depth and (f"{sid}-{s['n']}.png", (_scene_picks(rec, t, sid).get(
+                   f"{sid}-{s['n']}") or {}).get("sha256")) not in _depth_maps(rec, t)]
+    if unbound:
+        print(f"Note: glide still(s) {', '.join(unbound)} have no depth map yet; film --shots refuses them until a "
+              "matching depth map is adopted or a depth-only film_clips job makes one.")
     return 0
 
 
@@ -3621,7 +4228,7 @@ COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_im
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio,
-            "bundle-film": cmd_bundle_film}
+            "bundle-film": cmd_bundle_film, "adopt": cmd_adopt}
 
 
 def _parser():
@@ -3637,6 +4244,8 @@ def _parser():
     s = add("init")
     s.add_argument("source")
     s.add_argument("--slug")
+    s.add_argument("--title-caps", help="the owner's title-caps.json to pin (default: the one beside the ledger, "
+                                        "else the nearest one above it)")
     add("plan").add_argument("--wpm", type=float, default=120)
     s = add("job")
     s.add_argument("kind", choices=colab_jobs.KINDS)
@@ -3676,6 +4285,9 @@ def _parser():
                                      "saved one under film/film-NN/voice/passages, else measured and saved)")
     s.add_argument("--transcripts", help="Eleven v4 passages: transcripts.json from the Colab words cell, keyed by "
                                          "<passage id>: turns on the Whisper word check (else recorded as not run)")
+    s.add_argument("--no-retime", action="store_true",
+                   help="Eleven v4 passages: the takes are already retimed (an owner-endorsed take): import them with "
+                        "their pauses as they are; recorded in the passage manifest and the passages_checked event")
     s.add_argument("--accept", action="append", metavar="PID=reason",
                    help="Eleven v4 passages: join this passage despite its voicecheck failures (repeatable; the "
                         "reason is recorded in the passage manifest and the passages_checked event)")
@@ -3714,6 +4326,10 @@ def _parser():
                    "the reason is recorded in the pick and its event)")
     s.add_argument("--override-fail", action="append", metavar="KEY=reason",
                    help="pick a candidate whose gate is a certain fail (repeatable; the reason is recorded)")
+    s = add("adopt", help="bind already-imported media (stills, Wan takes, depth maps, music) to one scene's approved "
+                          "shots, verified by sha256, with recorded picks, licences and provenance; 0 CU")
+    s.add_argument("--spec", required=True, help='adopt.json {"scene", "sources", "stills", "clips", "depth", "music"}')
+    s.add_argument("--scene", help="the scene adopt.json binds (checked against its \"scene\")")
     s = add("hold", help="show the nearest approved still of the scene for shots with none yet")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--keys", help="comma-separated held still keys, e.g. f01s007-4,f01s007-5")
@@ -3790,6 +4406,8 @@ def _parser():
     s.add_argument("--author", help="--shots: the author, for the title and credits cards")
     s.add_argument("--narrator", help="--shots: the narration voice credited on the credits card")
     s.add_argument("--fonts", help="--shots: Maison fonts folder (default static/maison/fonts)")
+    s.add_argument("--scene", help="--shots: assemble this one scene (e.g. f01s014) into film-NN-<scene>.mp4 for its "
+                                   "review; the whole film still needs every scene")
     s = add("reel")
     s.add_argument("n", type=int)
     s.add_argument("--script")
@@ -3799,7 +4417,9 @@ def _parser():
     s.add_argument("--score-route", help="vcsl or ace-step:<imported music job id>")
     s.add_argument("--hashtags", nargs="*")
     add("qc")
-    add("status")
+    s = add("status")
+    s.add_argument("--scene", help="the next step of this one scene (e.g. f01s014): its cinematic flow, then film "
+                                   "--shots --scene, qc and review; without it the whole film from its first scene")
     s = add("bundle-audio")
     s.add_argument("--out", required=True)
     s.add_argument("--score-dir", help="<unit_id>.wav score bed per chapter (default route)")
@@ -3837,8 +4457,15 @@ def main(argv=None) -> int:
               if hasattr(args, "root") else "Next: fix the input it names, then rerun")
         return 2
     if hasattr(args, "root"):
-        print(f"Next: {next_action(args.root)}")
+        print(f"Next: {next_action(args.root, _route_scene(args))}")
     return 0
+
+
+SCENE_ROUTE = ("status", "film", "adopt", "import-take", "scene-timing", "plan-shots", "cue")   # G6: --scene scopes Next:
+
+
+def _route_scene(args):
+    return getattr(args, "scene", None) if args.command in SCENE_ROUTE else None
 
 
 if __name__ == "__main__":

@@ -41,8 +41,9 @@ a scene wav placed by hand blocks only that scene (it is skipped, or refused wit
 overwritten). Per passage it checks the tagged script (words exactly the book's in order; at most one audio
 tag per sentence; no passage but the last ending mid-sentence; a passage opening on `[softly]` only when
 that is the mood carried from the passage before; a passage after one that ended in a mood tag must open
-on a mood tag, the carried one or a deliberate new one; `[pause]` tags set no mood), runs `retime` (pauses by
-the script's punctuation), then `voicecheck` against the film's profile
+on a mood tag, the carried one or a deliberate new one; `[pause]` tags set no mood), runs `retime` (pauses
+matched to the script's punctuation by position; an unpunctuated breath keeps its place and length), then
+`voicecheck` against the film's profile
 (`film/film-NN/voice/passages/voicecheck-profile.json`, measured on the first run and reused on every redo,
 or `--profile`; the join check compares each passage with the one before it). The expected duration of a
 passage is its characters divided by **the run's own median measured rate** (characters per second of the
@@ -70,8 +71,12 @@ passage's offset on the scene, which `scene-timing` uses to place the measured c
 script, take and retimed passage; the record gets `passages_checked` and `passages_joined` events and
 `scene_voice` and `passage_manifest` artifacts. `voice.json` may not name `eleven_v3` (that model is the
 one-take route and never needs the file), and a malformed `voice.json` does not block that route. Passages
-serve film scenes, not reels (a reel stays one `eleven_v3` take). **One-take-per-scene `eleven_v3` import is
-unchanged** (the 24 Nov route below). Not certified: the judgement that a passage sounds natural stays
+serve film scenes, not reels (a reel stays one `eleven_v3` take). **An already-retimed take** (an
+owner-endorsed take such as বিচারক scene 14's v4 take) is imported with `--no-retime`: its pauses are kept as
+they are, and the flag is recorded (`"retime"` in the passage manifest and the `passages_checked` event,
+`retimed_by_import: false` per passage); retiming a retimed take again would move its pauses. The bound
+Eleven v4 model id is `eleven_v4` (owner, 27 Nov): `voice.json` is `{"model_id": "eleven_v4"}`.
+**One-take-per-scene `eleven_v3` import is unchanged** (the 24 Nov route below). Not certified: the judgement that a passage sounds natural stays
 with `voicecheck` and the owner's ear.
 
 3. **One take, redo only the failures** (owner choice, 26 Nov; best-of-three costs 45k credits per film
@@ -88,9 +93,13 @@ with `voicecheck` and the owner's ear.
 python3 -m eav.cli retime <take.wav> <out.wav> --text <script.txt> [--seed N] [--cuts t1,t2,...]
 ```
 
-Finds the take's own pauses (silencedetect), maps them in order to the punctuation of the script text
-(audio tags are ignored; a run of marks counts once, as its strongest) and sets each to a seeded
-target: comma `,` `;` `—` 0.40–0.55 s; `।` or `?` 0.8–1.0 s; an emotional `!` before a turn
+Finds the take's own pauses (silencedetect) and matches them **by position, never by order alone**, to
+the punctuation of the script text (`eav.retime.match_pauses`: each mark's place is estimated from its
+character offset over the take's speech time; a monotonic alignment pairs marks with the nearest pauses, a
+long pause being likelier punctuation than a breath; audio tags are ignored; a run of marks counts once, as
+its strongest). A pause no mark explains is an **unpunctuated breath: it keeps its place and length** (in-order
+mapping once gave the breath after "তাহা" the 1.6 s pause of "নাই!" in scene 14). Each matched pause is set to
+a seeded target: comma `,` `;` `—` 0.40–0.55 s; `।` or `?` 0.8–1.0 s; an emotional `!` before a turn
 1.4–1.6 s; scene break 2.0 s; a পরিচ্ছেদ heading 2.5–3.0 s before and 1.5 s after. Each length is
 varied ±15%. Each pause keeps 40 ms of the original at both sides, the middle is the take's **own room
 tone** (level-matched −62 to −68 dBFS; a synthetic −65 dBFS floor if the take has none), joins are

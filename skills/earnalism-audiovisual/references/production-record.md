@@ -26,7 +26,11 @@ One title root, one record, one writer. `record.json` (schema
 <root>/stills/<job_id>/<key>--cN.png + gate.json    candidates with their gate results; picks/ and
                             picks/gate-overrides.json (single stills; reasons recorded)
 <root>/film_clips/<job_id>/ Wan clips <key>.mp4, <key>.last.png, depth maps (*.depth.png), sfx files + licences
-<root>/../title-caps.json   per-title lifetime caps (beside the ledger; default 60 CU)
+<root>/jobs/adopt-<scene>-<kind>-<hash>/adoption.json   an adoption (`adopt`): bindings, sha256, licences,
+                            provenance; its files in stills|film_clips|music/<that id>/ (0 CU, never on the ledger)
+<root>/film/film-NN/film-NN-<scene>.mp4   one scene's own cut (`film --shots --scene`; artifact scene_film)
+<root>/../title-caps.json   per-title lifetime caps, pinned in record.json at init (`title_caps`; else the one
+                            beside the ledger or the nearest above it; default 60 CU, printed by status)
 <root>/gate-calibration.json  from approved stills; makes needs_review blocking at pick
 <root>/qc/                  report.json, contact sheets
 <root>/maison/              audiovisual-clearance-evidence.draft.json

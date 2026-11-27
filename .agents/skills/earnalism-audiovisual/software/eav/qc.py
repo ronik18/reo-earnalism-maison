@@ -417,10 +417,10 @@ def check_captions(text: str, lang: str) -> list:
     return problems
 
 
-def film_gates(video: Path, film_dir: Path, scene_ids: list, lang: str) -> tuple:
+def film_gates(video: Path, film_dir: Path, scene_ids: list, lang: str, vtt: Path = None) -> tuple:
     """Run every cinematic-film gate on the finished `video` of the shot-based film in `film_dir`
     (film/film-NN: shots/<scene>.json plans, stills/, voice/<scene>.wav, audio/<scene>.mix.wav with
-    audio/<scene>.mix.json as cue writes it, and <film-NN>.vtt). Returns (checks {name: bool}, detail {name: ...},
+    audio/<scene>.mix.json as cue writes it, and <film-NN>.vtt, or `vtt` for one scene's cut). Returns (checks {name: bool}, detail {name: ...},
     not_run {gate: reason}): a gate whose inputs are missing is in not_run (the caller fails the QC), never passed.
     margin (per scene): the cue's recorded music-only voice_over_music_db within 16-18 dB and the residual margin of
     the scene mix (voice over music+ambience+foley) at least 15 dB. peak_silence: the cue's recorded
@@ -464,7 +464,7 @@ def film_gates(video: Path, film_dir: Path, scene_ids: list, lang: str) -> tuple
             checks["sound_on_picture"] = not missing
         if no_fx:
             not_run["sound_on_picture"] = f"no cue fx recorded for scene(s) {', '.join(no_fx)} (rerun cue)"
-    vtt = film_dir / f"{film_dir.name}.vtt"
+    vtt = Path(vtt) if vtt else film_dir / f"{film_dir.name}.vtt"   # a scene's own cut has its own captions
     if vtt.is_file():
         problems = check_captions(vtt.read_text(encoding="utf-8"), lang)
         checks["captions"], detail["captions"] = not problems, problems

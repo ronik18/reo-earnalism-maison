@@ -110,8 +110,9 @@ never use it on a cinematic film.)
 ## 5. Voice first (details: [earnalism-voice.md](earnalism-voice.md))
 
 The standard is Eleven v4, one take per **passage** of 15–30 s: `split-passages film-NN` writes the
-passages, then `import-take` (model id from the title's `voice.json`) retimes each passage (punctuation
-pauses with real room tone), runs `voicecheck` on it (a scene with a failed passage is listed for redo and not
+passages, then `import-take` (model id from the title's `voice.json`, `eleven_v4`) retimes each passage
+(punctuation pauses matched by position, with real room tone; `--no-retime` keeps an already-retimed,
+owner-endorsed take as it is, on record), runs `voicecheck` on it (a scene with a failed passage is listed for redo and not
 joined; only the failures are redone, at most 3 different takes of a passage, then the tool holds it for the
 owner; `--accept PID=reason` joins it on a recorded reason), and joins the scene over room tone with 40 ms
 crossfades, a 0.85 s lead-in before the first word (R9) and a 2 s room-tone tail (R4). The uncalibrated
@@ -120,6 +121,10 @@ calibrated on accepted v4 takes; they never ask for a credit-spending redo. The 
 `film/film-NN/voice/<scene>.wav`, which `scene-timing` and `cue` read. Still available: one `eleven_v3` take per scene via `import-take`
 (then `retime`, `voicecheck`), or a pre-retimed scene wav placed there by hand (`scene-timing` times it as one
 passage).
+
+`scene-timing` matches each clause boundary to its pause **by position** (not by count): an unpunctuated
+breath stays inside its clause (listed as `breaths` in `<scene>.timing.json`), and a boundary with no pause near
+its words, or one whose pause lies far from them, stops with the clause named; nothing is guessed.
 
 ## 6. Stills and their gates (`job stills --film N --spec stills.json`)
 
@@ -175,7 +180,8 @@ passage).
   near-lossless, played at native 24 fps with no interpolation; `wan_res` 1280×704 for faces, hands
   and climax beats, 896×512 for environments. A continuation clip (`continue_from`) starts from the
   previous clip's last frame when an action must last longer than 5 s: every take's chain must cover its
-  shot's render length (its span plus its transition halves; a chain of k clips plays 120 k + 1 frames), or
+  shot's render length (its span plus its transition halves; a chain of k clips plays 120 k + 1 frames) with a
+  1-frame margin (so plan and assembly rounding never leave a chain short), or
   `job film_clips` refuses it, and `film --shots` refuses a chain shorter than its shot instead of freezing
   on the last frame. A Wan shot over 6 s also declares one `actions` entry per 6 s in the paper edit (R1).
   `job film_clips --film N --spec clips.json` items carry `key`, `shot` (the plan's Wan shot number;
@@ -227,6 +233,25 @@ passage).
   lists and Commons "Public domain" labels without the author's release are refused (the 47-region
   policy needs worldwide status). Freesound is not used.
 
+### Adoption: media the owner already picked (`adopt --spec adopt.json`, 0 CU)
+
+Stills, Wan takes, depth maps and a music job that already exist are bound to one scene's **approved** shots
+instead of being generated again. `adopt.json`:
+`{"scene", "sources": {"<job id>": {"root": <title root>} | {"folder": <pilot job folder>}}, "stills": {"<scene>-<n>":
+{"job", "file"} | {"file", "reason", "from"?}}, "clips": {"<n>": {"job", "takes": [take, continuation…], "art"?:
+{"file", "reason"}}}, "depth": {"<scene>-<n>": {"job", "file": "<stem>.depth.png"}}, "music": {"job", "keys"?,
+"roles"?}}`. A job not named in `sources` is one of this record. Every file is verified by sha256: against the
+output sha256 eav recorded when it imported the job, or, for a pilot job folder eav never imported, against that
+job's own outputs `manifest.json` (COMPLETE, `input_zip_sha256` equal to its `inputs.zip`). No manifest is ever
+written or edited. A hand-copied file needs the operator's `reason`; its sha256 is recorded and its provenance
+traced (byte-identical to a job's output or input image), or a declared `from` derivation is recorded as declared;
+an untraced file's licence is recorded as unverified and warned. A take chain must continue as its job built it,
+match the shot's `wan_res` and cover the shot with the 1-frame margin; a take without a recorded motion verdict
+is gated on adoption, and a clear fail needs a reason in `picks/gate-overrides.json`. A depth map is adopted only
+for the exact still it was made from (same image sha256; its job must record Depth Anything V2 Small, or its
+own notebook name it); a glide still with no matching map still refuses at assembly. Licences and provenance go
+into `jobs/<adopted job>/adoption.json`; the stills get a recorded pick. The same adoption again changes nothing.
+
 ## 9. Assembly (`film --film N --shots --logo … --end-card … --title T --author A --narrator V [--burn]`)
 
 Every scene needs its **approved** plan (`film/film-NN/shots/<scene>.json`) and its scene mix. Each
@@ -245,6 +270,10 @@ last; the logo top-right; captions as WebVTT (`mov_text`) **and** SRT (`--burn` 
 to 1.0 s late, then merge with a neighbour if still too fast; **no merge crosses a chapter heading**
 (a fast unit before a heading may extend up to 1.5 s into the chapter-break pause). Master −16 LUFS,
 true peak ≤ **−1.5 dBTP**, 1.6 s end-of-picture fade.
+
+One scene alone (a reference scene): `status --scene <ID>` walks only that scene's route, and `film --shots
+--scene <ID>` assembles it into `film/film-NN/film-NN-<ID>.mp4` (its own `scene_film` artifact; `qc` checks it
+with the film gates); the whole film's route and record are unchanged by it.
 
 The pre-cinematic assembly (`film` without `--shots`: slow push-in per still, ducked score, SRT) still
 exists for old films only: it is refused for a film that has any shot plan. Card and end fades run at

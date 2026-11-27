@@ -28,9 +28,10 @@ python3 -m eav.cli status --root <title root>      # prints the next owner actio
 ```
 
 Commands: `init`, `plan`, `scene-timing`, `plan-shots`, `job` (kinds incl. `stills`, `film_clips` with `--resume`,
-`music`), `exchange-stage`, `exchange-collect`, `import`, `import-take` (`--accept PID=reason`), `split-passages`,
-`pick`, `supersede` (never ran), `close` (ran, not imported: settles the actual CU), `glide`, `retime`, `voicecheck`,
-`motiongate`, `cue`, `film`, `reel`, `qc`, `status`,
+`music`), `exchange-stage`, `exchange-collect`, `import`, `import-take` (`--accept PID=reason`, `--no-retime` for an
+already-retimed take), `split-passages`, `pick`, `adopt` (already-imported media bound to a scene's approved shots,
+verified by sha256, 0 CU), `supersede` (never ran), `close` (ran, not imported: settles the actual CU), `glide`, `retime`, `voicecheck`,
+`motiongate`, `cue`, `film`, `reel`, `qc`, `status` (`--scene <ID>`: one scene's route; `film --shots --scene`),
 `bundle-audio` (`--profile audiobook|film`), `bundle-film`, plus the older `hold`, `touchup`
 (usage in `eav/cli.py`; `--help`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
@@ -39,7 +40,8 @@ inputs to get past it.
 ## Stage order and who owns each stage
 
 **Cinematic film flow (the standard, [film recipe](references/film-recipe.md)), per scene as `Next:` walks it:** voice (v4 passages, retime, voicecheck, inside `import-take`) → scene-timing → plan-shots (approved) → stills+gates → pick → film_clips (Wan shots, glide depth maps) → music → cue → then film --shots → qc → owner review.
-Each scene's paper edit is approved (Claude plus an independent reviewer) before any generation. A film with a
+Each scene's paper edit is approved (Claude plus an independent reviewer) before any generation. Media the owner
+already picked is adopted, not regenerated (`adopt`, [film recipe](references/film-recipe.md), Adoption). A film with a
 shot plan is never assembled without `--shots`; the `eleven_v3` one-take route is for reels and older films.
 The table below lists the stages by who owns them.
 

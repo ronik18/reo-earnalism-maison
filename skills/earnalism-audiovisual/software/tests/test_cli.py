@@ -784,6 +784,71 @@ class RoundTwo:
             cli._motion_verdicts(Record.load(self.root), [gate.with_name(f"{s1}-2a.mp4")], s1, 2)
         again.assert_called_once()
 
+    def test_scene_route_scopes_status_and_film_to_one_scene(self):
+        """G6: status --scene and film --shots --scene follow one scene (a reference scene); the whole film's route
+        and record are unchanged by it."""
+        self.shots_end_to_end()
+        scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+        s2 = scenes[1]["scene_id"]
+        whole = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"]
+        voice = self.root / "film" / "film-01" / "voice"
+        voice.mkdir(parents=True, exist_ok=True)
+        for sc in scenes:                       # each scene's voice is in place (its mix was made from it)
+            shutil.copy2(self.root / "film" / "film-01" / "audio" / f"{sc['scene_id']}.mix.wav", voice / f"{sc['scene_id']}.wav")
+        code, out = run("status", "--root", self.root, "--scene", s2)
+        self.assertEqual(code, 0, out)
+        self.assertIn(f"film --root {self.root} --film 1 --scene {s2} --shots", out.split("Next:")[-1])
+        args = ("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card", self.d / "end.png",
+                "--shots", "--scene", s2, "--title", "The Garden", "--author", "An Author", "--narrator", "A Voice")
+        from eav import glide
+        with mock.patch.object(cli.film, "ENCODE_PRESET", "ultrafast"), \
+                mock.patch.object(cli.film, "FRAME", (640, 360)), \
+                mock.patch.object(glide, "W", 640), mock.patch.object(glide, "H", 360):
+            code, out = run(*args)
+        self.assertEqual(code, 0, out)
+        fdir = self.root / "film" / "film-01"
+        rec = Record.load(self.root)
+        art = [a for a in rec.data["artifacts"] if a["kind"] == "scene_film"][-1]
+        self.assertEqual((art["path"], art["meta"]["scene"], art["meta"]["scenes"]),
+                         (f"film/film-01/film-01-{s2}.mp4", s2, [s2]))
+        self.assertEqual(art["meta"]["frames"], 276)                         # this scene's 11.5 s only
+        self.assertTrue((fdir / f"film-01-{s2}.vtt").is_file())
+        self.assertEqual([a for a in rec.data["artifacts"] if a["kind"] == "film"], whole)   # whole film untouched
+        self.assertIn(f"{cli.PROG} qc --root {self.root}", out.split("Next:")[-1])
+        self.assertNotIn("--scene", cli.next_action(self.root))            # the whole film keeps its own route
+        code, out = run("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card", self.d / "end.png",
+                        "--scene", s2)
+        self.assertEqual(code, 2, out)
+        self.assertIn("--shots", out)
+
+    def test_status_scene_points_at_that_scene_not_the_first(self):
+        """G6: before any voice, status --scene asks for that scene's voice, while status asks for the first scene's."""
+        self.init_and_plan()
+        (self.root / "voice.json").write_text(json.dumps({"model_id": "eleven_v4"}), encoding="utf-8")
+        scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+        first, second = scenes[0]["scene_id"], scenes[1]["scene_id"]
+        code, out = run("status", "--root", self.root, "--scene", second)
+        self.assertEqual(code, 0, out)
+        nxt = out.split("Next:")[-1]
+        self.assertIn(f"Scene {second} voice", nxt)
+        self.assertNotIn(first, nxt)
+        self.assertIn(f"Scene {first} voice", run("status", "--root", self.root)[1].split("Next:")[-1])
+
+    def test_scratch_root_pins_the_real_title_caps(self):
+        """G11: a scratch root inside a title's tree pins the owner's title-caps.json and shows where its cap comes
+        from; a pinned caps file that goes missing stops, never a silent 60."""
+        (self.d / "title-caps.json").write_text(json.dumps({"selfish-giant": 100}), encoding="utf-8")
+        scratch = self.d / "titles" / "pilot" / "v5" / "root"
+        code, out = run("init", self.src, "--root", scratch, "--slug", "selfish-giant")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(Record.load(scratch).data["title_caps"], "../../../../title-caps.json")
+        code, out = run("status", "--root", scratch)
+        self.assertIn(f"lifetime cap 100 ({(self.d / 'title-caps.json').resolve()})", out)
+        (self.d / "title-caps.json").unlink()
+        code, out = run("status", "--root", scratch)
+        self.assertEqual(code, 2, out)
+        self.assertIn("never assumed", out)
+
     def test_film_clips_resume_reserves_first_and_settles_with_its_job(self):
         """I5: a job its hard stop cut short is resumed in a new session of the same job: the rest's forecast is
         reserved first (linked to the job, within the caps) and the resume notebook's hard stop is that reservation;
@@ -2226,6 +2291,35 @@ class ImportPassagesCliTests(unittest.TestCase):
         self.assertEqual(sorted(a["path"] for a in rec.data["artifacts"] if a["kind"] == "scene_voice"),
                          ["film/film-01/voice/f01s001.wav", "film/film-01/voice/f01s002.wav"])
 
+    def test_eleven_v4_model_id_is_accepted(self):
+        """The owner's Eleven v4 model id is eleven_v4 (27 Nov): voice.json {"model_id": "eleven_v4"} imports."""
+        (self.root / "voice.json").write_text(json.dumps({"model_id": "eleven_v4"}), encoding="utf-8")
+        voice = ("--engine", "elevenlabs", "--model", "eleven_v4") + self.VOICE4[4:]
+        with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing):
+            code, out = self.import_passages(voice=voice)
+        self.assertEqual(code, 0, out)
+        man = json.loads((self.root / "film" / "film-01" / "voice" / "f01s001.passages.json").read_text())
+        self.assertEqual(man["model"], "eleven_v4")
+
+    def test_no_retime_keeps_an_endorsed_take_as_it_is_and_records_it(self):
+        """G3: an already-retimed, owner-endorsed take is imported with retiming off; the flag is on record."""
+        from eav import retime
+        with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing), \
+                mock.patch.object(cli.retime, "plan_pauses", wraps=retime.plan_pauses) as planned:
+            code, out = self.import_passages("--no-retime")
+        self.assertEqual(code, 0, out)
+        planned.assert_not_called()
+        self.assertIn("--no-retime", out)
+        work = self.root / "film" / "film-01" / "voice" / "passages"
+        for pid in ("f01s001-p01", "f01s002-p01"):
+            take = retime.read(self.audio / f"{pid}.mp3")
+            self.assertAlmostEqual(len(retime.read(work / f"{pid}.wav")) / retime.SR, len(take) / retime.SR, delta=0.002)
+        man = json.loads((self.root / "film" / "film-01" / "voice" / "f01s001.passages.json").read_text())
+        self.assertTrue(man["retime"].startswith("off"))
+        self.assertEqual({p["retimed_by_import"] for p in man["passages"]}, {False})
+        ev = [e for e in Record.load(self.root).data["events"] if e["result"] == "passages_checked"][-1]["detail"]
+        self.assertIs(ev["retime"], False)
+
     def test_accept_joins_a_failing_passage_and_a_third_failed_take_is_held_for_the_owner(self):
         """I4: a recorded per-passage override joins it (in the manifest, never a pass); after 3 different failed
         takes of one passage the tool stops asking for regeneration and holds it for the owner."""
@@ -2281,12 +2375,14 @@ class ImportPassagesCliTests(unittest.TestCase):
         self.assertEqual(" ".join(t["text"] for t in doc["timing"]), self.PASSAGES["f01s002"][0])
         manifest = json.loads((fdir / "voice" / "f01s002.passages.json").read_text())
         self.assertEqual(len(manifest["join"]["offsets"]), 1)
-        # a pause the punctuation does not explain stops the timing; nothing is guessed or written
-        before = (fdir / "shots" / "f01s002.timing.json").read_bytes()
+        # G5: a pause the punctuation does not explain is a breath inside its clause, matched by position: kept and
+        # listed, never a clause boundary (a boundary with no pause near its words stops: SceneTimingPositionTests)
         code, out = run("scene-timing", "--root", self.root, "--film", 1, "--scene", "f01s002", "--min-pause", 0.2)
-        self.assertEqual(code, 2, out)
-        self.assertIn("clause", out)
-        self.assertEqual((fdir / "shots" / "f01s002.timing.json").read_bytes(), before)
+        self.assertEqual(code, 0, out)
+        self.assertIn("breath", out)
+        doc2 = json.loads((fdir / "shots" / "f01s002.timing.json").read_text())
+        self.assertEqual(len(doc2["breaths"]), 1)
+        self.assertEqual([t["text"] for t in doc2["timing"]], [t["text"] for t in doc["timing"]])
         inp = {"spine": "s", "fidelity": "f", "motifs": ["m"], "peak": {"shot": 1, "at": 1.0},
                "shots": [{"beats": [0, 0], "subject": "the giant", "framing": "wide", "motion": "static",
                           "layer": "present", "transition_in": "cut", "bible_refs": [], "sound": {}}]}
@@ -2512,3 +2608,48 @@ class ImportPassagesCliTests(unittest.TestCase):
         self.assertFalse([a for a in rec.data["artifacts"] if a["kind"] == "narration"])
         self.assertFalse([e for e in rec.data["events"] if e["result"] == "job_target"])
         self.shots_end_to_end(narration=False, init=False)
+
+
+class SceneTimingPositionTests(unittest.TestCase):
+    """G5: scene-timing matches each clause boundary to its pause by position, not by count."""
+    TEXT = "এক দুই তিন চার, পাঁচ ছয় সাত আট নয়। দশ এগারো বারো তেরো চোদ্দ পনেরো ষোলো সতেরো!"
+
+    def take(self, path, gaps, breaths=()):
+        import numpy as np
+        from eav import retime
+        from tests.test_retime import _placed
+        pauses, (t0, t1) = _placed(self.TEXT, gaps, rate=0.12, breaths=breaths)
+        lead = 0.3
+        n = int((t1 + 2 * lead) * retime.SR)
+        t = np.arange(n) / retime.SR
+        y = (0.3 * np.sin(2 * np.pi * 220 * t)).astype(np.float32)
+        y[: int(lead * retime.SR)] = 0
+        y[int((t1 + lead) * retime.SR):] = 0
+        for a, b in pauses:
+            y[int((a + lead) * retime.SR):int((b + lead) * retime.SR)] = 0
+        retime.write(path, y)
+        return [(a + lead, b + lead) for a, b in pauses]
+
+    def test_breath_is_kept_and_boundaries_match_by_position(self):
+        with tempfile.TemporaryDirectory() as d:
+            wav = Path(d) / "p.wav"
+            pauses = self.take(wav, [0.5, 0.9], breaths=[(2, 0.5, 0.45)])
+            rows, breaths = cli._passage_clauses(wav, self.TEXT, 0.0, "p", -38, 0.3)
+        self.assertEqual([r["text"][-1] for r in rows], [",", "।", "!"])
+        self.assertAlmostEqual(rows[0]["end"], pauses[0][0], delta=0.03)
+        self.assertAlmostEqual(rows[1]["end"], pauses[1][0], delta=0.03)
+        self.assertEqual(len(breaths), 1)
+        self.assertAlmostEqual(breaths[0]["start"], pauses[2][0], delta=0.03)
+
+    def test_a_mislabelled_clause_stops_with_its_name(self):
+        """The count matches (two pauses for two boundaries), but the sentence end has no pause and a breath sits
+        inside the last clause: the old count-only mapping wrote it; now it stops and names the clause."""
+        with tempfile.TemporaryDirectory() as d:
+            wav = Path(d) / "p.wav"
+            self.take(wav, [0.5, 0.05], breaths=[(2, 0.7, 0.5)])
+            with self.assertRaises(cli.Stop) as stop:
+                cli._passage_clauses(wav, self.TEXT, 0.0, "f01s014-p01", -38, 0.3)
+        msg = str(stop.exception)
+        self.assertIn("clause 2", msg)
+        self.assertIn("পাঁচ ছয় সাত আট নয়।", msg)
+        self.assertIn("ends at no measured pause", msg)
