@@ -1289,7 +1289,7 @@ def _shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir) -> dict:
     if still is None:
         raise Stop(f"scene {sid} shot {n} has no still {stem}.png in {stills_dir}", next_action(rec.root))
     assets = {"image": still}
-    if shot["motion"] == "glide":
+    if shot["motion"] == "glide" and not (shot.get("camera") or {}).get("flat"):
         depths = sorted((rec.root / "film_clips").glob(f"*/depth/{stem}.depth.png"))
         if len({sha256_file(d) for d in depths}) != 1:
             raise Stop(f"scene {sid} shot {n} (glide) needs exactly one depth map {stem}.depth.png from an imported "
@@ -1319,13 +1319,19 @@ def _film_shots(args, rec, plan, t, scs):
         if abs(film._duration(scene_mix) - sp["seconds"]) > 0.15:
             raise Stop(f"the mix of scene {sid} is {film._duration(scene_mix):.2f} s but its shot plan is {sp['seconds']:.2f} s",
                        f"Remix the scene with {PROG} cue")
+        try:
+            film.check_shot_coverage(sid, sp["shots"], sp["seconds"])
+        except ValueError as e:
+            raise Stop(str(e), f"Re-plan the scene: {PROG} plan-shots --root {rec.root} --film {args.film} --scene {sid}")
         scenes.append((sid, sp, scene_mix))
+    scene_fr = film.scene_frames([sp["seconds"] for _, sp, _ in scenes])
     picks_path = film_dir / "clip-picks.json"
     picks = _json(picks_path) if picks_path.is_file() else {}
     clip_items = _film_clip_items(rec, t)
     stills_dir, stills_info = _film_stills(rec, t, film_dir)
     shots, assets, units, timing, mixes, at = [], [], [], [], [], 0.0
-    for sid, sp, scene_mix in scenes:
+    starts = [sum(scene_fr[:k]) / film.SHOT_FPS for k in range(len(scenes))]   # frame-aligned scene starts
+    for (sid, sp, scene_mix), at in zip(scenes, starts):
         inp = _json(shotplan.paths(film_dir, sid)["input"])
         for i, c in enumerate(inp.get("timing") or [], 1):
             key = f"{sid}-{i:03d}"
@@ -1335,7 +1341,6 @@ def _film_shots(args, rec, plan, t, scs):
             shots.append({**shot, "scene_id": sid})
             assets.append(_shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir))
         mixes.append(scene_mix)
-        at += sp["seconds"]
     durations = [s["end"] - s["start"] for s in shots]
     trans = [film.DISSOLVE_S if s["transition_in"] == "dissolve" else 0.0 for s in shots[1:]]
     lens, overlaps = film.edit_lengths(durations, trans)
@@ -1347,12 +1352,12 @@ def _film_shots(args, rec, plan, t, scs):
         except ValueError as e:
             raise Stop(f"scene {shot['scene_id']} shot {shot['n']}: {e}", "Fix the shot plan's camera or the inputs")
     mixed = film_dir / "audio" / "film.mix.wav"
-    graph = "".join(f"[{i}:a]aresample={film.RATE},aformat=channel_layouts=stereo[a{i}];" for i in range(len(mixes)))
-    graph += "".join(f"[a{i}]" for i in range(len(mixes))) + f"concat=n={len(mixes)}:v=0:a=1[o]"
-    _ff(*sum((["-i", m_] for m_ in mixes), []), "-filter_complex", graph, "-map", "[o]", "-c:a", "pcm_f32le", mixed)
+    film.join_scene_mixes(mixes, scene_fr, mixed)   # each mix held to its frame-aligned scene length
     try:
         vtt = film_dir / f"{t}.vtt"
         vtt.write_text(film.captions(timing, units, lang, offset=film.TITLE_S), encoding="utf-8")
+        srt = film_dir / f"{t}.srt"       # bundle-film reads the "subtitles" artifact as SRT
+        srt.write_text(film.captions(timing, units, lang, offset=film.TITLE_S, fmt="srt"), encoding="utf-8")
     except ValueError as e:
         raise Stop(f"captions: {e}", "Re-time the narration or split the clause in the planner input")
     fonts = Path(args.fonts) if args.fonts else None
@@ -1366,11 +1371,16 @@ def _film_shots(args, rec, plan, t, scs):
         burned = film_dir / f"{t}.burned.mp4"
         film.assemble_shots(clips, lens, overlaps, mixed, burned, burn=True, **common)
     m = mix.measure(out)
+    if m["true_peak"] > film.SHOT_TP_MAX or abs(m["lufs"] - FILM_LUFS) > LUFS_TOL:   # R10
+        raise Stop(f"QC failure: the film measures {m['lufs']:.1f} LUFS and {m['true_peak']:.1f} dBTP; the gate "
+                   f"is {FILM_LUFS:g} +-{LUFS_TOL:g} LUFS and at most {film.SHOT_TP_MAX} dBTP",
+                   "Re-balance the scene mixes (cue) and rerun film", code=5)
     meta = {"target": t, "mode": "shots", "lufs": m["lufs"], "true_peak": m["true_peak"], "stills": stills_info,
             "scenes": [s for s, _, _ in scenes], "shots": len(shots), "cards_sha256": sha256_file(film_dir / "cards" / "cards.json"),
             "captions_sha256": sha256_file(vtt), **info}
     rec.add_artifact("mix", mixed, {"target": t})
     rec.add_artifact("captions", vtt, {"target": t})
+    rec.add_artifact("subtitles", srt, {"target": t})
     rec.add_artifact("film", out, meta)
     rec.event("film", "assembled", {"target": t, "duration": info["duration"], "mode": "shots",
                                     **({"burned": str(burned)} if burned else {})})

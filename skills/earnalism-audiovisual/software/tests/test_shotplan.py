@@ -360,3 +360,49 @@ def test_film_clips_job_is_bound_to_the_approved_wan_shots(tmp_path):
     assert not (root / "jobs").exists() or not list((root / "jobs").iterdir())
     code, out = attempt([_wan_item("a", 3), _wan_item("a2", 3), _wan_item("b", 9)])  # two takes of shot 3
     assert code == 0 and "Built film_clips job" in out, out
+
+
+def test_camera_carries_glide_extras_type_checked():
+    scene = _scene()
+    g = next(i for i in scene["shots"] if i["motion"] == "glide")
+    g["camera"] = {**g["camera"], "zoom": -0.12, "zoom0": 1.17, "flat": True, "sweep": "down-left",
+                   "drain": True, "pan_y": 4, "near_gain": 1.1}
+    sp = shotplan.plan(scene, FIX["timing"], FIX["bible"])
+    cam = next(s for s in sp["shots"] if s["camera"].get("zoom0"))["camera"]
+    assert cam["zoom0"] == 1.17 and cam["flat"] is True and cam["sweep"] == "down-left"
+    assert cam["drain"] is True and cam["pan_y"] == 4 and cam["near_gain"] == 1.1
+    # a plain glide keeps exactly its four fields
+    assert any(set(s["camera"]) == {"move", "zoom", "pan_x", "ease"} for s in sp["shots"] if s["motion"] == "glide")
+
+
+@pytest.mark.parametrize("bad", [{"zoom0": "1.2"}, {"zoom0": 0}, {"flat": "yes"}, {"sweep": "up"},
+                                 {"drain": 1}, {"pan_y": "x"}, {"near_gain": True}])
+def test_camera_extras_are_type_checked(bad):
+    scene = _scene()
+    g = next(i for i in scene["shots"] if i["motion"] == "glide")
+    g["camera"] = {**g["camera"], **bad}
+    with pytest.raises(ValueError, match="camera"):
+        shotplan.plan(scene, FIX["timing"], FIX["bible"])
+
+
+def test_approved_plan_pull_back_renders_only_with_enough_zoom0(tmp_path):
+    from unittest import mock
+    from eav import film
+    from PIL import Image
+    scene = _scene()
+    g = next(i for i in scene["shots"] if i["motion"] == "glide")
+    g["camera"] = {**g["camera"], "zoom": -0.12, "zoom0": 1.17}
+    sp = shotplan.plan(scene, FIX["timing"], FIX["bible"])
+    shot = next(s for s in sp["shots"] if s["motion"] == "glide" and s["camera"]["zoom"] == -0.12)
+    img = tmp_path / "i.png"
+    Image.new("RGB", (64, 36)).save(img)
+
+    def fake(image, depth, out, seconds, **kw):
+        out.write_bytes(b"x")
+        assert kw["zoom0"] == 1.17
+        return {"frames": round(seconds * 24), "base_overscan": 1.03}
+    with mock.patch("eav.glide.render", side_effect=fake):
+        film.render_shot({**shot, "seconds": 2.0}, {"image": img, "depth": img}, tmp_path / "c")
+        with pytest.raises(ValueError, match="edge band"):
+            film.render_shot({**shot, "camera": {**shot["camera"], "zoom0": 1.16}, "seconds": 2.0},
+                             {"image": img, "depth": img}, tmp_path / "c")

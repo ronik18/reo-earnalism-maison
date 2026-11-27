@@ -658,6 +658,13 @@ class RoundTwo:
             shotplan.write(fdir, shotplan.approve(sp, "claude", "reviewer", input_sha256=shotplan.input_sha256(paths["input"])))
             (fdir / "audio").mkdir(exist_ok=True)
             self.wav(fdir / "audio" / f"{sc['scene_id']}.mix.wav", 11.5)
+            loud = fdir / "audio" / f"{sc['scene_id']}.mix.wav"      # the gate wants about -16 LUFS
+            tmpw = loud.with_name("tmp.wav")
+            for _ in range(3):
+                g = -16.0 - mix.measure(loud)["lufs"]
+                subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(loud), "-af", f"volume={g}dB", str(tmpw)],
+                               check=True)
+                tmpw.replace(loud)
         args = ("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card", self.d / "end.png",
                 "--shots", "--title", "The Garden", "--author", "An Author", "--narrator", "A Voice", "--burn")
         with mock.patch.object(cli.film, "ENCODE_PRESET", "ultrafast"), \
@@ -678,6 +685,11 @@ class RoundTwo:
         self.assertEqual(sorted(streams(mp4)), ["audio", "subtitle", "video"])           # soft mov_text track
         self.assertEqual(sorted(streams(fdir / "film-01.burned.mp4")), ["audio", "video"])   # burned: none
         self.assertTrue((fdir / "film-01.vtt").read_text(encoding="utf-8").startswith("WEBVTT"))
+        arts = Record.load(self.root).data["artifacts"]
+        self.assertTrue([a for a in arts if a["kind"] == "subtitles" and a["meta"]["target"] == "film-01"])  # bundle-film
+        self.assertTrue((fdir / "film-01.srt").read_text(encoding="utf-8").startswith("1\n"))
+        self.assertLessEqual(art["meta"]["true_peak"], -1.5)
+        self.assertLessEqual(abs(art["meta"]["lufs"] + 16), 1.0)
         self.assertTrue((fdir / "cards" / "cards.json").is_file())
         self.assertGreater(len(list((fdir / "shots-cache").glob("*.mp4"))), 1)
         self.assertTrue(mp4.is_file())

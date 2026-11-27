@@ -1,6 +1,7 @@
 """Narration track, SRT subtitles and illustrated film assembly (ffmpeg subprocess); shot-based 24 fps
 film assembly (render_shot, assemble_shots), WebVTT captions and title/credit cards for the cinematic film."""
 import json
+import math
 import shutil
 import subprocess
 import tempfile
@@ -14,6 +15,7 @@ FPS = 25
 FADE_S = 0.8
 END_CARD_S = 3.0
 TP_MAX = -1.0      # dBTP gate the encoded film must meet (eav.cli TP_MAX)
+SHOT_TP_MAX = -1.5 # R10: the cinematic (shot-based) film's encoded true peak
 TP_MARGIN = 0.2
 LIMITER_START_MARGIN = 0.5   # first limiter ceiling: TP_MAX - this (dB)
 LIMITER_RATE = 192000        # oversampled limiting so inter-sample peaks are caught
@@ -282,14 +284,14 @@ def _audio_graph(mixed_idx, end_idx, total, end_s, ceiling_db=None, gain_db=0.0,
             "[am][ae]concat=n=2:v=0:a=1[a]"]
 
 
-def _body_ceiling_for_true_peak(mixed_audio, end_video, total, end_s, tries=4, shape=None) -> dict:
+def _body_ceiling_for_true_peak(mixed_audio, end_video, total, end_s, tries=4, shape=None, tp_max=TP_MAX) -> dict:
     """AAC encoding raises inter-sample peaks (বিচারক film-01: -1.5 dBTP mix, -0.9 encoded), and
     peaky narration used to force a broadband gain cut that dropped the film below the loudness
     target. Encode the audio alone, measure it, and lower the body's limiter ceiling (not its
-    gain) until the encoded track meets TP_MAX; the END's own sound is never changed. Only if the
+    gain) until the encoded track meets tp_max; the END's own sound is never changed. Only if the
     limiter cannot get there is a gain cut applied. Returns {"ceiling_db", "gain_db", "fallback"}."""
     from .mix import measure
-    ceiling, gain = TP_MAX - LIMITER_START_MARGIN, 0.0
+    ceiling, gain = tp_max - LIMITER_START_MARGIN, 0.0
     with tempfile.TemporaryDirectory() as td:
         trial = Path(td) / "audio.m4a"
         inputs = ["-i", str(mixed_audio)] + (["-i", str(end_video)] if end_video else [])
@@ -302,15 +304,15 @@ def _body_ceiling_for_true_peak(mixed_audio, end_video, total, end_s, tries=4, s
 
         for _ in range(tries):
             tp = encoded_tp()
-            if tp <= TP_MAX:
+            if tp <= tp_max:
                 return {"ceiling_db": round(ceiling, 2), "gain_db": gain, "fallback": False}
-            ceiling -= tp - TP_MAX + TP_MARGIN
-        for _ in range(tries):  # the limiter alone cannot reach TP_MAX: cut the gain, and say so
+            ceiling -= tp - tp_max + TP_MARGIN
+        for _ in range(tries):  # the limiter alone cannot reach tp_max: cut the gain, and say so
             tp = encoded_tp()
-            if tp <= TP_MAX:
+            if tp <= tp_max:
                 return {"ceiling_db": round(ceiling, 2), "gain_db": gain, "fallback": True}
-            gain -= tp - TP_MAX + TP_MARGIN
-    raise RuntimeError(f"encoded audio stays above {TP_MAX} dBTP after {2 * tries} attempts")
+            gain -= tp - tp_max + TP_MARGIN
+    raise RuntimeError(f"encoded audio stays above {tp_max} dBTP after {2 * tries} attempts")
 
 
 # ====================================================================== shot-based film (24 fps)
@@ -689,7 +691,8 @@ def assemble_shots(shot_clips: list, lens: list, transitions: list, audio: Path,
     args += ["-i", str(audio)]
     nxt += 1
     shape = {"lead": lead, "fade_out": fade_f / fps if fade_f else 0.0, "fade_end": lead + pic_s}
-    lim = _body_ceiling_for_true_peak(audio, end_card if end_audio else None, total, end_s, shape=shape)
+    lim = _body_ceiling_for_true_peak(audio, end_card if end_audio else None, total, end_s, shape=shape,
+                                    tp_max=SHOT_TP_MAX)
     graph += _audio_graph(audio_idx, end_idx if end_audio else None, total, end_s,
                           lim["ceiling_db"], lim["gain_db"], shape)
     maps = ["-map", "[v]", "-map", "[a]"]
@@ -802,51 +805,161 @@ def _vtt_ts(ms: int) -> str:
     return f"{h:02d}:{m_:02d}:{s_:02d}.{ms:03d}"
 
 
-def _unit_cues(key, lines, start, end, limit, cps):
-    """[(start_ms, end_ms, [lines])] for one unit: lines grouped 2 per cue (1 when a 2-line cue would run past
-    CAP_MAX_S), the unit's time shared by characters. The unit is shown at most `cps` characters per second:
-    when the narration is faster, the last cue is held into the pause that follows (never past `limit`, the
-    next unit's start); when even that is not enough the unit is refused, never squeezed or cut."""
+CAP_LEAD_S, CAP_HOLD_S = 0.3, 1.0   # a cue may start this much before its speech and end this much after
+
+
+def _split_span(key, lines, t0, t1):
+    """[(start_ms, end_ms, [lines])] for the span t0..t1 (ms): lines grouped 2 per cue (1 when a 2-line cue would
+    run past CAP_MAX_S), the span shared by characters; ValueError when no grouping keeps 1-7 s per cue."""
     chars = sum(_visible_len(ln) for ln in lines)
-    need = max(chars / cps, CAP_MIN_S)
-    span_end = max(end, start + need)
-    if limit is not None and span_end > limit + 1e-9:
-        raise ValueError(f"unit {key}: {chars} characters need {need:.2f} s at {cps:g} characters/s but only "
-                         f"{limit - start:.2f} s are free before the next unit; re-time the narration or "
-                         f"split the unit")
     for per in (CAP_LINES, 1):
         groups = [lines[i:i + per] for i in range(0, len(lines), per)]
-        weights = [sum(_visible_len(ln) for ln in g) for g in groups]
-        t0, t1 = round(start * 1000), round(span_end * 1000)
         edges, acc = [t0], 0
-        for w in weights:
-            acc += w
+        for g in groups:
+            acc += sum(_visible_len(ln) for ln in g)
             edges.append(t0 + round((t1 - t0) * acc / chars))
-        durs = [(b - a) / 1000 for a, b in zip(edges, edges[1:])]
-        if all(CAP_MIN_S - 1e-9 <= d <= CAP_MAX_S + 1e-9 for d in durs):
+        if all(CAP_MIN_S * 1000 <= b - a <= CAP_MAX_S * 1000 for a, b in zip(edges, edges[1:])):
             return [(a, b, g) for a, b, g in zip(edges, edges[1:], groups)]
     raise ValueError(f"unit {key}: its {len(lines)} caption line(s) cannot be shown for {CAP_MIN_S:g}-"
-                     f"{CAP_MAX_S:g} s each within {span_end - start:.2f} s")
+                     f"{CAP_MAX_S:g} s each within {(t1 - t0) / 1000:.2f} s")
 
 
-def captions(timing: list, units: list, lang: str, offset: float = 0.0) -> str:
-    """WebVTT for the narrated units: cues of at most 2 lines of 42 characters, 1-7 s each, at most 15
-    characters/s for bn, split only at spaces or punctuation and never inside a grapheme cluster. The text is
-    the source text, only split (whitespace at the splits is dropped). `offset` shifts the film timeline."""
+def _place(key, text, start, end, prev_end, next_start, cps, single):
+    """The cues of one unit (or of merged units when `single`: one cue only). The span starts at the speech
+    and runs to max(speech end, enough time for `cps`); when that does not fit before the next unit it may
+    start up to CAP_LEAD_S earlier and end up to CAP_HOLD_S later, never into the previous cue nor the next
+    unit's speech. Raises ValueError when it cannot meet every limit."""
+    lines = _wrap(text)
+    if single and len(lines) > CAP_LINES:
+        raise ValueError(f"{key}: {len(lines)} lines do not fit one cue")
+    chars = sum(_visible_len(ln) for ln in lines)
+    need = max(math.ceil(chars / cps * 1000), round(CAP_MIN_S * 1000))
+    s0, e0 = round(start * 1000), round(end * 1000)
+    s_min = max(s0 - round(CAP_LEAD_S * 1000), prev_end)
+    e_max = e0 + round(CAP_HOLD_S * 1000)
+    if next_start is not None:
+        e_max = min(e_max, round(next_start * 1000))
+    if s0 < prev_end:
+        s0 = prev_end
+    t0, t1 = s0, max(e0, s0 + need)
+    if t1 > e_max:                       # use the lead as well
+        t1 = e_max
+        t0 = min(s0, t1 - need)
+        if t0 < s_min:
+            raise ValueError(f"{key}: {chars} characters need {need / 1000:.2f} s at {cps:g} characters/s but "
+                             f"only {(e_max - s_min) / 1000:.2f} s are free around them")
+    return _split_span(key, lines, t0, t1)
+
+
+def _caption_cues(timing: list, units: list, lang: str, offset: float) -> list:
     text = {u["unit_key"]: u["text"] for u in units}
     cps = CAP_CPS.get(lang, CAP_CPS_DEFAULT)
     order = sorted(timing, key=lambda t: t["start"])
-    cues = []
     for i, t in enumerate(order):
         if t["unit_key"] not in text:
             raise ValueError(f"no unit text for {t['unit_key']!r}")
-        limit = order[i + 1]["start"] if i + 1 < len(order) else None
-        if limit is not None and t["end"] > limit + 1e-9:
+        if i + 1 < len(order) and t["end"] > order[i + 1]["start"] + 1e-9:
             raise ValueError(f"unit {t['unit_key']} ends after the next unit starts")
-        cues += _unit_cues(t["unit_key"], _wrap(text[t["unit_key"]]), t["start"], t["end"], limit, cps)
+    groups = []                          # [(first, last, cues)]
+    i = 0
+    while i < len(order):
+        prev_end = groups[-1][2][-1][1] if groups else 0
+        nxt = lambda j: order[j + 1]["start"] if j + 1 < len(order) else None
+        t = order[i]
+        try:
+            cues = _place(t["unit_key"], text[t["unit_key"]], t["start"], t["end"], prev_end, nxt(i), cps, False)
+            groups.append((i, i, cues))
+            i += 1
+            continue
+        except ValueError as first:
+            err = first
+        merged = None
+        if i + 1 < len(order):           # merge with the next unit
+            n = order[i + 1]
+            try:
+                merged = (i, i + 1, _place(f"{t['unit_key']}+{n['unit_key']}",
+                                           text[t["unit_key"]] + " " + text[n["unit_key"]], t["start"], n["end"],
+                                           prev_end, nxt(i + 1), cps, True))
+            except ValueError:
+                merged = None
+        if merged is None and groups and len(groups[-1][2]) == 1:   # or with the previous one
+            f, l, _ = groups[-1]
+            p_end = groups[-2][2][-1][1] if len(groups) > 1 else 0
+            joined = " ".join(text[order[k]["unit_key"]] for k in range(f, i + 1))
+            try:
+                merged = (f, i, _place("+".join(order[k]["unit_key"] for k in range(f, i + 1)), joined,
+                                       order[f]["start"], t["end"], p_end, nxt(i), cps, True))
+                groups.pop()
+            except ValueError:
+                merged = None
+        if merged is None:
+            raise ValueError(f"{err}; merging with a neighbouring unit does not fit either (re-time the "
+                             f"narration or split the unit)")
+        groups.append(merged)
+        i = merged[1] + 1
     shift = round(offset * 1000)
-    body = "\n\n".join(f"{_vtt_ts(a + shift)} --> {_vtt_ts(b + shift)}\n" + "\n".join(g) for a, b, g in cues)
+    return [(a + shift, b + shift, g) for _, _, cues in groups for a, b, g in cues]
+
+
+def captions(timing: list, units: list, lang: str, offset: float = 0.0, fmt: str = "vtt") -> str:
+    """Captions (fmt "vtt" WebVTT or "srt"): cues of at most 2 lines of 42 characters, 1-7 s each, at most 15
+    characters/s for bn, split only at spaces or punctuation and never inside a grapheme cluster. The text is
+    the source text, only split (whitespace at the splits is dropped). A unit narrated faster than that gets its
+    cue started up to 0.3 s early and held up to 1.0 s late (never over a neighbouring cue); failing that it is
+    merged with an adjacent unit into one cue that meets every limit; failing that it is refused, never squeezed
+    or cut. `offset` shifts the film timeline."""
+    if fmt not in ("vtt", "srt"):
+        raise ValueError("captions fmt must be vtt or srt")
+    cues = _caption_cues(timing, units, lang, offset)
+    if fmt == "srt":
+        return "\n".join(f"{i}\n{_vtt_ts(a).replace('.', ',')} --> {_vtt_ts(b).replace('.', ',')}\n" + "\n".join(g) + "\n"
+                         for i, (a, b, g) in enumerate(cues, 1))
+    body = "\n\n".join(f"{_vtt_ts(a)} --> {_vtt_ts(b)}\n" + "\n".join(g) for a, b, g in cues)
     return "WEBVTT\n\n" + body + "\n"
+
+
+def scene_frames(seconds: list, fps: int = SHOT_FPS) -> list:
+    """Frames of each scene with the same cumulative rounding as the picture (edit_lengths): boundary k is
+    round(sum of the first k scenes * fps), so scene lengths add up to the film's frame count with no drift."""
+    out, cum, prev = [], 0.0, 0
+    for sec in seconds:
+        cum += sec
+        b = _frames(cum, fps)
+        out.append(b - prev)
+        prev = b
+    return out
+
+
+def check_shot_coverage(scene_id: str, shots: list, seconds: float, tol: float = 1e-6) -> None:
+    """A scene's shots must start at 0, follow each other with no gap or overlap and end at the scene's seconds
+    (the picture is built from the shot spans, the audio and captions from the scene's seconds)."""
+    if not shots:
+        raise ValueError(f"scene {scene_id} has no shots")
+    at = 0.0
+    for s in sorted(shots, key=lambda x: x["start"]):
+        if abs(s["start"] - at) > tol:
+            raise ValueError(f"scene {scene_id} shot {s['n']} starts at {s['start']:g} s but the previous "
+                             f"shot ends at {at:g} s (gap or overlap)")
+        at = s["end"]
+    if abs(at - seconds) > tol:
+        raise ValueError(f"scene {scene_id}'s shots end at {at:g} s but the scene is {seconds:g} s")
+
+
+def join_scene_mixes(mixes: list, frames: list, out: Path, fps: int = SHOT_FPS) -> Path:
+    """Scene mixes joined into the film's mix, each held exactly to its frame-aligned scene length (cut or
+    padded with silence), so audio and picture cannot drift apart however many scenes there are."""
+    if len(mixes) != len(frames) or not mixes:
+        raise ValueError("join_scene_mixes needs one frame count per mix")
+    parts, args = [], []
+    for i, (m_, f) in enumerate(zip(mixes, frames)):
+        length = f / fps
+        args += ["-i", str(m_)]
+        parts.append(f"[{i}:a]aresample={RATE},aformat=channel_layouts=stereo,"
+                     f"apad=whole_dur={length:.6f},atrim=0:{length:.6f},asetpts=PTS-STARTPTS[a{i}]")
+    graph = ";".join(parts) + ";" + "".join(f"[a{i}]" for i in range(len(mixes))) + \
+        f"concat=n={len(mixes)}:v=0:a=1[o]"
+    _ffmpeg([*args, "-filter_complex", graph, "-map", "[o]", "-c:a", "pcm_f32le", str(out)])
+    return Path(out)
 
 
 # ====================================================================== title and credit cards

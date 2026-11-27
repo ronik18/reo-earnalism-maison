@@ -276,6 +276,8 @@ def vtt_cues(text):
         if not block.strip():
             continue
         lines = block.strip("\n").split("\n")
+        if lines[0].isdigit():          # a cue identifier (srt_to_vtt keeps the SRT index)
+            lines = lines[1:]
         mt = re.fullmatch(r"(\d\d):(\d\d):(\d\d)\.(\d{3}) --> (\d\d):(\d\d):(\d\d)\.(\d{3})", lines[0])
         assert mt, lines[0]
         g = list(map(int, mt.groups()))
@@ -580,6 +582,171 @@ class ShotFilmTests(unittest.TestCase):
         meta = film.cards("ক্ষ", "রবীন্দ্রনাথ ঠাকুর", "v", self.d / "c2")
         font = ImageFont.truetype(meta["fonts"]["bengali_display"]["file"], 100, layout_engine=ImageFont.Layout.RAQM)
         self.assertLess(font.getlength("ক্ষ"), font.getlength("ক") + font.getlength("্") + font.getlength("ষ") - 1)
+
+
+class FixRoundOneTests(unittest.TestCase):
+    """Review of Task 8: R10 true peak, mix/picture drift, camera fields, SRT, faster-than-15-cps captions."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    # ---- 1. true peak -1.5 for shot films, -1.0 kept for the old assemble
+    def test_shot_film_true_peak_gate_is_minus_one_and_a_half(self):
+        self.assertEqual(film.SHOT_TP_MAX, -1.5)
+        self.assertEqual(film.TP_MAX, -1.0)
+        clips = []
+        for i in range(2):
+            p = self.d / f"c{i}.mp4"
+            lavfi_clip(p, 2)
+            clips.append(p)
+        peaky = self.d / "peaky.wav"
+        click = "if(lt(mod(t,0.5),0.0005),0.95,0)"
+        m.ff("-f", "lavfi", "-i", f"aevalsrc='0.16*sin(2*PI*220*t)+{click}|0.16*sin(2*PI*220*t)+{click}'"
+             ":s=48000:d=4", str(peaky))
+        out = self.d / "f.mp4"
+        info = film.assemble_shots(clips, [2.0, 2.0], [0.0], peaky, out, fade_out_s=0)
+        self.assertLessEqual(mix.measure(out)["true_peak"], -1.5)
+        self.assertFalse(info["body_gain_fallback"])
+
+    # ---- 2. scene mixes are held to their frame-aligned scene length
+    def test_scene_frames_use_the_same_cumulative_rounding_as_the_picture(self):
+        self.assertEqual(film.scene_frames([11.51, 11.51, 11.51], 24), [276, 276, 277])
+        self.assertEqual(sum(film.scene_frames([11.51, 11.51, 11.51], 24)), round(34.53 * 24))
+
+    def test_join_scene_mixes_keeps_audio_within_a_frame_of_picture(self):
+        secs = [2.0, 2.3, 1.7, 2.1, 2.0]
+        mixes = []
+        for i, sec in enumerate(secs):
+            p = self.d / f"s{i}.wav"
+            m.sine_wav(p, sec - 0.1)            # each mix 0.1 s short of its scene
+            mixes.append(p)
+        frames = film.scene_frames(secs, 24)
+        out = self.d / "film.wav"
+        film.join_scene_mixes(mixes, frames, out, 24)
+        got = m.samples(out).size / 48000
+        self.assertAlmostEqual(got, sum(frames) / 24, delta=1 / 24)
+        # a long mix is cut, too
+        m.sine_wav(mixes[0], secs[0] + 0.14)
+        film.join_scene_mixes(mixes, frames, out, 24)
+        self.assertAlmostEqual(m.samples(out).size / 48000, sum(frames) / 24, delta=1 / 24)
+
+    def test_shots_must_tile_the_scene(self):
+        good = [{"n": 1, "start": 0.0, "end": 5.0}, {"n": 2, "start": 5.0, "end": 9.0}]
+        film.check_shot_coverage("s", good, 9.0)
+        for bad in ([{"n": 1, "start": 0.2, "end": 9.0}],                                   # starts late
+                    [{"n": 1, "start": 0.0, "end": 5.0}, {"n": 2, "start": 5.5, "end": 9.0}],  # gap
+                    [{"n": 1, "start": 0.0, "end": 5.5}, {"n": 2, "start": 5.0, "end": 9.0}],  # overlap
+                    [{"n": 1, "start": 0.0, "end": 8.0}]):                                 # ends early
+            with self.assertRaises(ValueError):
+                film.check_shot_coverage("s", bad, 9.0)
+
+    # ---- 3. camera fields reach render_shot; flat glide needs no depth
+    def test_flat_glide_renders_without_a_depth_map(self):
+        from unittest import mock
+        img = self.d / "still.png"
+        Image.new("RGB", (64, 36), "teal").save(img)
+        calls = []
+
+        def render(image, depth, out, seconds, **kw):
+            calls.append((depth, kw))
+            m.ff("-f", "lavfi", "-i", "color=c=black:s=64x36:r=24:d=0.5", "-c:v", "libx264", str(out))
+            return {"frames": int(round(seconds * 24)), "base_overscan": 1.03}
+        shot = {"n": 1, "scene_id": "s", "motion": "glide", "seconds": 1.0,
+                "camera": {"move": "push", "zoom": 0.15, "pan_x": 0, "ease": "out", "flat": True}}
+        with mock.patch("eav.glide.render", side_effect=render):
+            film.render_shot(shot, {"image": img}, self.d / "cache")
+        self.assertIsNone(calls[0][0])
+        self.assertTrue(calls[0][1]["flat"])
+
+    def test_flat_glide_really_renders(self):
+        try:
+            import cv2  # noqa: F401
+        except ImportError:
+            self.skipTest("OpenCV not installed")
+        img = self.d / "still.png"
+        Image.new("RGB", (192, 108), "teal").save(img)
+        shot = {"n": 1, "scene_id": "s", "motion": "glide", "seconds": 0.25,
+                "camera": {"move": "push", "zoom": 0.1, "pan_x": 0, "ease": "both", "flat": True}}
+        out = film.render_shot(shot, {"image": img}, self.d / "cache")
+        self.assertEqual(frame_count(out), 6)
+
+    def test_shot_assets_for_a_flat_glide_need_no_depth_map(self):
+        from types import SimpleNamespace
+        from eav import cli
+        stills = self.d / "stills"
+        stills.mkdir()
+        Image.new("RGB", (64, 36), "teal").save(stills / "s1-1.png")
+        shot = {"n": 1, "motion": "glide", "camera": {"flat": True}}
+        got = cli._shot_assets(SimpleNamespace(root=self.d), "film-01", "s1", shot, {}, {}, stills)
+        self.assertEqual(set(got), {"image"})
+        with self.assertRaises(cli.Stop):   # not flat: a depth map is required
+            cli._shot_assets(SimpleNamespace(root=self.d), "film-01", "s1",
+                             {"n": 1, "motion": "glide", "camera": {}}, {}, {}, stills)
+
+    # ---- 4. SRT
+    def test_captions_srt_matches_the_webvtt_cues(self):
+        v = vtt_cues(film.captions(BN_CAP_TIMING, BN_CAP_UNITS, "bn", offset=4.0))
+        srt = film.captions(BN_CAP_TIMING, BN_CAP_UNITS, "bn", offset=4.0, fmt="srt")
+        self.assertTrue(srt.startswith("1\n00:00:04,000 --> "))
+        from eav import film_bundle
+        back = vtt_cues(film_bundle.srt_to_vtt(srt))
+        self.assertEqual(back, v)
+        with self.assertRaises(ValueError):
+            film.captions(BN_CAP_TIMING, BN_CAP_UNITS, "bn", fmt="ass")
+
+    # ---- 5. faster than 15 cps: extend, merge, refuse
+    FAST = "আমি এখনই সেই পুরাতন ঘরে ফিরিয়া যাইব।"   # 32 visible characters
+
+    def _caps(self, timing, units, **kw):
+        return vtt_cues(film.captions(timing, units, "bn", **kw))
+
+    def test_too_fast_unit_next_to_silence_is_extended_within_the_allowance(self):
+        tm = [{"unit_key": "a", "start": 5.0, "end": 6.5}, {"unit_key": "b", "start": 12.0, "end": 14.0}]
+        un = [{"unit_key": "a", "text": self.FAST}, {"unit_key": "b", "text": "পরে।"}]
+        cues = self._caps(tm, un)
+        s, e, _ = cues[0]
+        self.assertGreaterEqual(s, 5.0 - 0.3 - 1e-9)
+        self.assertLessEqual(e, 6.5 + 1.0 + 1e-9)
+        self.assertLessEqual(film._visible_len(self.FAST) / (e - s), 15.0 + 1e-9)
+        self.assertTrue(s < 5.0 or e > 6.5)     # it really used the allowance
+
+    def test_unit_between_tight_neighbours_merges_with_a_neighbour(self):
+        tm = [{"unit_key": "a", "start": 0.0, "end": 2.5}, {"unit_key": "b", "start": 2.5, "end": 4.0},
+              {"unit_key": "c", "start": 4.0, "end": 8.0}]
+        un = [{"unit_key": "a", "text": "ভোর হইল।"}, {"unit_key": "b", "text": self.FAST},
+              {"unit_key": "c", "text": "সে চলিয়া গেল।"}]
+        cues = self._caps(tm, un)
+        joined = ["".join("".join(c[2]) for c in cues)][0]
+        self.assertEqual("".join(joined.split()), "".join("".join(u["text"] for u in un).split()))
+        prev = 0.0
+        for s, e, lines in cues:
+            self.assertGreaterEqual(s, prev - 1e-9)
+            self.assertLessEqual(len(lines), 2)
+            self.assertTrue(all(len(ln) <= 42 for ln in lines))
+            self.assertTrue(1.0 - 1e-9 <= e - s <= 7.0 + 1e-9)
+            self.assertLessEqual(film._visible_len(" ".join(lines)) / (e - s), 15.0 + 1e-9)
+            prev = e
+        self.assertLess(len(cues), 3)           # a merge happened
+
+    def test_impossible_caption_is_still_refused(self):
+        tm = [{"unit_key": "a", "start": 0.0, "end": 1.0}, {"unit_key": "b", "start": 1.0, "end": 2.0}]
+        un = [{"unit_key": "a", "text": BN_LONG[:110]}, {"unit_key": "b", "text": BN_LONG[110:230]}]
+        with self.assertRaises(ValueError):
+            self._caps(tm, un)
+
+    def test_extension_never_overlaps_the_neighbour_cues(self):
+        tm = [{"unit_key": "a", "start": 0.0, "end": 1.5}, {"unit_key": "b", "start": 2.0, "end": 3.6},
+              {"unit_key": "c", "start": 3.9, "end": 7.9}]
+        un = [{"unit_key": "a", "text": self.FAST}, {"unit_key": "b", "text": self.FAST},
+              {"unit_key": "c", "text": "সে চলিয়া গেল।"}]
+        prev = -1.0
+        for s, e, _ in self._caps(tm, un):
+            self.assertGreaterEqual(s, prev - 1e-9)
+            prev = e
 
 
 if __name__ == "__main__":

@@ -76,6 +76,18 @@ class SrtTests(unittest.TestCase):
                 film_bundle.srt_to_vtt(text)
 
 
+class ShotFilmSrtTests(unittest.TestCase):
+    def test_bundle_film_reads_the_srt_the_shots_film_writes(self):
+        from eav import film
+        units = [{"unit_key": "a", "text": "প্রথম পরিচ্ছেদ।"}, {"unit_key": "b", "text": "ভোর হইল, পাখি ডাকিল।"}]
+        timing = [{"unit_key": "a", "start": 0.0, "end": 2.2}, {"unit_key": "b", "start": 2.6, "end": 6.0}]
+        srt = film.captions(timing, units, "bn", offset=4.0, fmt="srt")
+        vtt = film_bundle.srt_to_vtt(srt)
+        self.assertTrue(vtt.startswith("WEBVTT"))
+        self.assertIn("00:00:04.000 --> ", vtt)
+        self.assertIn("প্রথম পরিচ্ছেদ।", vtt)
+
+
 class FaststartTests(unittest.TestCase):
     def test_is_faststart_true_for_faststart(self):
         with tempfile.TemporaryDirectory() as t:

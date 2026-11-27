@@ -104,12 +104,35 @@ def _need(shot: dict, n: int, key: str, kind=str):
     return v
 
 
+GLIDE_EXTRAS = {"zoom0": "positive number", "pan_y": "number", "near_gain": "positive number",
+                "flat": "true or false", "sweep": "down-left, down-right or null", "drain": "true or false"}
+SWEEPS = ("down-left", "down-right")   # glide.SWEEPS
+
+
+def _num(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+
+
+def _glide_extras(cam: dict, n: int) -> dict:
+    """The optional glide.render fields a shot may carry (type-checked; absent means glide.render's default)."""
+    out = {}
+    for k, v in cam.items():
+        if k not in GLIDE_EXTRAS:
+            continue
+        ok = ((_num(v) and v > 0) if k in ("zoom0", "near_gain") else _num(v) if k == "pan_y"
+              else isinstance(v, bool) if k in ("flat", "drain") else v is None or v in SWEEPS)
+        if not ok:
+            raise ValueError(f"shot {n} camera {k} must be {GLIDE_EXTRAS[k]}, not {v!r}")
+        out[k] = v
+    return out
+
+
 def _camera(shot: dict, n: int) -> dict:
     cam = shot.get("camera")
     if shot["motion"] == "glide":
         if not isinstance(cam, dict) or not all(k in cam for k in ("move", "zoom", "pan_x", "ease")):
             raise ValueError(f"shot {n} is a glide and needs camera {{move, zoom, pan_x, ease}}")
-        return {k: cam[k] for k in ("move", "zoom", "pan_x", "ease")}
+        return {**{k: cam[k] for k in ("move", "zoom", "pan_x", "ease")}, **_glide_extras(cam, n)}
     base = {"move": "none", "zoom": 0.0, "pan_x": 0.0, "ease": "none"}
     return {**base, **{k: cam[k] for k in base if k in cam}} if isinstance(cam, dict) else base
 
