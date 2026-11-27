@@ -18,7 +18,7 @@ import {
 } from "./state.ts";
 import { readFileSync } from "node:fs";
 import { wrapTextSpan } from "./follow-dom.ts";
-import { splitSentences, currentHighlight, autoscrollAllowed, isUserScroll, highlightSpan, utf16Index, type FollowMap } from "./sentences.ts";
+import { splitSentences, currentHighlight, autoscrollAllowed, isUserScroll, mapFetchPlan, mapFailed, MAP_RETRY_MS, MAP_RETRY_MAX_MS, highlightSpan, utf16Index, type FollowMap } from "./sentences.ts";
 test("Unicode selection offsets use code points, including Bengali and astral characters", () => {
   assert.equal(codePointOffset("আ🌸লো", 3), 2);
   assert.equal(codePointOffset("A🌸B", 3), 2);
@@ -735,4 +735,24 @@ test("fallback drawing across an annotation mark keeps the text; clearing restor
   const cleared = merge(unwrap(root.kids));
   assert.equal(flat(cleared), text);
   assert.deepEqual(cleared.map((k) => (k instanceof FakeText ? k.data : `${k.kind}:${flat(k.kids)}`)), ["alpha ", "gold:beta gamma", " delta."]);
+});
+
+test("test_map_fetch_backoff: a failure does not refetch at once, retries after the backoff, and asks the player only after success", () => {
+  const t0 = 1_000_000;
+  assert.equal(mapFetchPlan(undefined, t0), "fetch");
+  assert.equal(mapFetchPlan("loading", t0), "wait");
+  assert.equal(mapFetchPlan({ maps: [] }, t0), "use");
+  const failed = mapFailed(undefined, t0);
+  assert.equal(failed.failures, 1);
+  assert.equal(mapFetchPlan(failed, t0), "wait"); // the replayed playback event must not refetch
+  assert.equal(mapFetchPlan(failed, t0 + MAP_RETRY_MS - 1), "wait");
+  assert.equal(mapFetchPlan(failed, t0 + MAP_RETRY_MS), "fetch"); // exactly one refetch after the backoff
+  const again = mapFailed(failed, t0 + MAP_RETRY_MS);
+  assert.equal(again.failures, 2);
+  assert.equal(mapFetchPlan(again, t0 + MAP_RETRY_MS + MAP_RETRY_MS), "wait"); // doubled
+  assert.equal(mapFetchPlan(again, t0 + MAP_RETRY_MS + 2 * MAP_RETRY_MS), "fetch");
+  let f = failed;
+  for (let i = 0; i < 20; i++) f = mapFailed(f, t0);
+  assert.equal(mapFetchPlan(f, t0 + MAP_RETRY_MAX_MS - 1), "wait");
+  assert.equal(mapFetchPlan(f, t0 + MAP_RETRY_MAX_MS), "fetch"); // capped
 });

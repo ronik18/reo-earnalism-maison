@@ -232,6 +232,17 @@ class ServingRenditionsTests(TestCase):
         unknown=mappings(self.user,self.revision.id,asset_id=uuid.uuid4())
         self.assertEqual([m['asset_id'] for m in unknown['maps']],[str(high.id)])  # unknown asset: the chosen rendition, as before
 
+    def test_mappings_malformed_asset_id_is_422(self):
+        from django.test import RequestFactory
+        from . import views
+        self.live()
+        def get(query):
+            request=RequestFactory().get(f'/api/v1/content/mappings/{self.revision.id}?{query}');request.user=self.user;request.territory='IN'
+            return views.mappings(request,self.revision.id).status_code
+        self.assertEqual(get('asset_id=not-a-uuid'),422)
+        self.assertEqual(get('asset_id=00000000-0000-1000-8000-000000000000'),422)  # not a UUID4
+        self.assertEqual(get(f'asset_id={self.asset.id}'),200)
+
     def test_unexpected_preference_error_propagates(self):
         from unittest.mock import PropertyMock
         self.live()

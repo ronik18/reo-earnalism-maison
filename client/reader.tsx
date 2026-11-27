@@ -15,6 +15,9 @@ import {
   autoscrollAllowed,
   currentHighlight,
   isUserScroll,
+  mapFailed,
+  mapFetchPlan,
+  type MapEntry,
   OWN_SCROLL_MS,
   PLAYBACK_EVENT,
   PLAYBACK_REQUEST_EVENT,
@@ -544,7 +547,7 @@ function Reader({ boot }: { boot: Boot }) {
   const [follow, setFollow] = useState<{ anchor: string; range: [number, number] | null; playing: boolean }>();
   const followNow = useRef(follow);
   /** Maps by the asset actually playing; null once the server said that rendition has none. */
-  const followMaps = useRef<Map<string, FollowMap[] | null | "loading">>(new Map());
+  const followMaps = useRef<Map<string, MapEntry>>(new Map());
   const [followUnavailable, setFollowUnavailable] = useState(false);
   const lastUserScroll = useRef<number | undefined>(undefined);
   const ownScrollUntil = useRef(0);
@@ -563,19 +566,21 @@ function Reader({ boot }: { boot: Boot }) {
         setFollowUnavailable(false);
         return;
       }
-      const known = followMaps.current.get(d.asset_id);
-      if (known === undefined) {
+      const entry = followMaps.current.get(d.asset_id);
+      const plan = mapFetchPlan(entry, Date.now());
+      if (plan === "fetch") {
         followMaps.current.set(d.asset_id, "loading");
         api<{ maps: (FollowMap & { asset_id: string })[] }>(`/content/mappings/${boot.edition_revision_id}?unit_id=${boot.unit_id}&asset_id=${d.asset_id}`)
           .then((r) => {
             const mine = r.maps.filter((m) => m.asset_id === d.asset_id);
-            followMaps.current.set(d.asset_id, mine.length ? mine : null);
+            followMaps.current.set(d.asset_id, { maps: mine.length ? mine : null });
+            if (!cancelled) window.dispatchEvent(new Event(PLAYBACK_REQUEST_EVENT)); // only after a successful load
           })
-          .catch(() => followMaps.current.delete(d.asset_id)) // retried on the next event
-          .finally(() => { if (!cancelled) window.dispatchEvent(new Event(PLAYBACK_REQUEST_EVENT)); });
+          .catch(() => followMaps.current.set(d.asset_id, mapFailed(entry, Date.now()))); // backs off; no replay request
         return;
       }
-      if (known === "loading") return;
+      if (plan === "wait" || !entry || entry === "loading" || "failures" in entry) return;
+      const known = entry.maps as FollowMap[] | null;
       setFollowUnavailable(known === null);
       if (known === null) {
         followNow.current = undefined;

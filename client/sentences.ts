@@ -84,6 +84,24 @@ export function isUserScroll(type: string, key: string | undefined, now: number,
   return false;
 }
 
+export const MAP_RETRY_MS = 30_000;
+export const MAP_RETRY_MAX_MS = 300_000;
+/** A mappings fetch that failed: when, and how many times in a row. */
+export interface MapFailure { failedAt: number; failures: number }
+export type MapEntry = "loading" | MapFailure | { maps: unknown[] | null };
+const isFailure = (e: MapEntry): e is MapFailure => typeof e === "object" && "failures" in e;
+export function mapFailed(previous: MapEntry | undefined, now: number): MapFailure {
+  return { failedAt: now, failures: previous && isFailure(previous) ? previous.failures + 1 : 1 };
+}
+/** What to do on a playback event: fetch, wait (loading, or backing off after a failure: 30 s doubling to 5 min), or use the maps. */
+export function mapFetchPlan(entry: MapEntry | undefined, now: number): "fetch" | "wait" | "use" {
+  if (entry === undefined) return "fetch";
+  if (entry === "loading") return "wait";
+  if (!isFailure(entry)) return "use";
+  const wait = Math.min(MAP_RETRY_MS * 2 ** (entry.failures - 1), MAP_RETRY_MAX_MS);
+  return now - entry.failedAt >= wait ? "fetch" : "wait";
+}
+
 export const AUTOSCROLL_PAUSE_MS = 5000;
 /** Follow with scrolling only when the reader has not scrolled by hand in the last 5 seconds. */
 export function autoscrollAllowed(now: number, lastUserScrollAt: number | undefined): boolean {
