@@ -1,7 +1,89 @@
 # The Earnalism Voice
 
-One recognisable narrator per language, in every film and reel. It is a **fixed preset
-plus a direction method**, not a new voice.
+One recognisable narrator per language, in every film and reel: one chosen voice per title, driven by a
+direction method, never a different voice per scene.
+
+## Current standard (owner, 26 and 27 November 2026): Eleven v4, passages, redo only failures
+
+The owner rated the first বিচারক film's narration 6/10, "mechanical/robotic texture in specific
+areas ... make it fully natural human, dramatically expressive and story-telling". The narration
+standard now is:
+
+1. **Model: Eleven v4** (owner choice, 26 Nov), the title's owner-picked voice (বিচারক: "Subhajit –
+   Grounded Bengali Storyteller", `j5PhP1QJv2DvlhRv3mEv`; The Selfish Giant: "Sakshi – Warm Bedtime
+   Storyteller", `XdbTvfQSkW1sgZYKdZdF`). Credits only, within the 24 Nov limits below. Pass the v4
+   model id exactly as ElevenLabs lists it as `--model`; the CLI records the string it is given.
+2. **One take per passage of 15–30 s**, split at sentence or paragraph ends, never mid-sentence. A
+   scene is one or more passages; each is a tagged script `<passage_id>.txt` with its take
+   `<passage_id>.mp3`, imported with `import-take` (words must equal the book once tags are removed).
+   At most **one audio tag per sentence**; carry the previous passage's mood tag across the join;
+   **never open a passage on a bare `[softly]`** (start on the words, or on a tag that sets a mood the
+   whole passage keeps). Tags describe delivery only, never action or sound.
+3. **One take, redo only the failures** (owner choice, 26 Nov; best-of-three costs 45k credits per film
+   and was rejected). Budget about 15,000–20,000 credits per 20-minute film (v4 costs about one
+   credit per character: a 47 s Bengali scene take is about 656). A failed passage is regenerated from
+   the same tagged script (or a corrected one) as a new generation within the monthly 60,000 credits
+   (a plan resets on the 23rd), never "retried" blindly.
+4. **Pauses are re-timed by punctuation (`retime`)** and filled with real room tone.
+5. **The redo gate (`voicecheck`)** decides which takes are redone; the owner's ear decides the film.
+
+### `retime`: pauses by punctuation, room tone, no digital zero
+
+```
+python3 -m eav.cli retime <take.wav> <out.wav> --text <script.txt> [--seed N] [--cuts t1,t2,...]
+```
+
+Finds the take's own pauses (silencedetect), maps them in order to the punctuation of the script text
+(audio tags are ignored; a run of marks counts once, as its strongest) and sets each to a seeded
+target: comma `,` `;` `—` 0.40–0.55 s; `।` or `?` 0.8–1.0 s; an emotional `!` before a turn
+1.4–1.6 s; scene break 2.0 s; a পরিচ্ছেদ heading 2.5–3.0 s before and 1.5 s after. Each length is
+varied ±15%. Each pause keeps 40 ms of the original at both sides, the middle is the take's **own room
+tone** (level-matched −62 to −68 dBFS; a synthetic −65 dBFS floor if the take has none), joins are
+40 ms equal-power crossfades. **Digital zero is never allowed.** `--cuts` maps old-timeline cut
+times (e.g. unit boundaries) into the new timeline. The measured, re-timed timing then feeds
+`plan-shots` and captions.
+
+### `voicecheck`: the automatic redo gate
+
+```
+python3 -m eav.cli voicecheck take1.wav take2.wav ... --expected 47.2,52.0 [--profile voicecheck-profile.json] [--prev-tail prev.wav] [--out DIR]
+```
+
+Without `--profile` it measures the book's running medians from the given takes and **saves
+`voicecheck-profile.json`**; **every redo run must pass `--profile`** (otherwise the redone takes
+would redefine "normal"). It writes `<take-stem>.voicecheck.json` beside each take (or in `--out`)
+and prints PASS or `REDO <codes>` per take; **it exits 1 if any take fails**, and the `Next:` line says
+to regenerate only those and rerun with the profile. Checks (codes in brackets):
+
+| Check | Limit |
+|---|---|
+| duration | within ±12% of expected (`duration`) |
+| median pitch | within ±1.5 semitones of the book median (`pitch_median`) |
+| pitch spread | 10th–90th percentile at least 3.0 semitones (`pitch_spread`) |
+| monotone | no more than 20% of 2 s windows with spread under 1.5 semitones (`monotone`) |
+| breath | no stretch over 9 s without a pause of 0.15 s or more (`no_breath`) |
+| tail | last 50 ms no louder than −50 dBFS (`tail`) |
+| brightness | within ±2 dB of the book median (`brightness`) |
+| spectral jumps | within 1.5× the profile, floored at 0.1 per speech second (`jumps`) |
+| clicks | no more than 0.2 per second (`clicks`) |
+| digital zero | no run over 50 ms (`digital_zero`) |
+| join | with `--prev-tail`: within ±1.5 LU and ±1.5 semitones (`join`) |
+| true peak | below −0.1 dBFS (`true_peak`) |
+
+One narration feeds both the film and the audiobook, so the stricter audiobook limits (joins 1.5 LU
+and ±1.5 semitones, 30–50 ms crossfades) apply to both. Measurement is not listening: a PASS means
+"not flagged", and the owner's review is the listening assessment (see Never).
+
+**Word check (not yet a command).** The spec adds a Whisper (MIT) character-error check, run in Colab
+against the source and read relative to the accepted takes, to catch dropped or changed words that
+tags and punctuation hide. No `eav` command runs it yet: until one exists, `import-take` (which
+refuses a script whose words differ from the book once tags are removed) is the only word gate, and
+the reviewer listens for dropped words. Do not claim a Whisper check was run.
+
+## Parler route (legacy; kept for audition and Parler-only titles)
+
+Everything from here to the owner decision is the Indic Parler-TTS route of 24 Nov. It is not the
+production narration of a cinematic film.
 
 ## Identity
 
@@ -183,6 +265,12 @@ after the free Parler storyteller audition fell short of a natural, dramatic sto
 
 A take that sounds wrong is regenerated from the same tagged script and imported again as a
 new job (the newer import wins); never edit or trim a take by hand.
+
+**27 Nov 2026 amendment (cinematic standard).** The decision above stays; what changed is the
+engine version (Eleven v4, above), the take size (a passage of 15–30 s rather than a whole
+scene), and the rule that takes are checked by `voicecheck` and **only failures are regenerated**.
+The route is otherwise unchanged: `--list-units`, tagged scripts, `import-take --model <v4 id>`.
+Pauses in a v4 take are re-set by `retime`, so the take's own pauses are not trusted.
 
 ## Never
 

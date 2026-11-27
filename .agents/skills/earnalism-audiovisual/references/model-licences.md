@@ -77,6 +77,35 @@ patent-free. Touch-up follows the same child-depiction rule as retouch: only res
 described dress or bare skin (a plain white sari edge, a bare forehead, earlobes or wrists), never
 alter a child's body, and never in a way that sexualises, demeans or endangers a child.
 
+## Cinematic film models (27 November 2026)
+
+Determined from each card's `license` field as the notebooks re-read it at run time (the check
+fails closed: a card that cannot be read means the model is not loaded).
+
+- **Wan 2.2 TI2V-5B** (`Wan-AI/Wan2.2-TI2V-5B-Diffusers`): Apache-2.0, commercial use of the model
+  and its output permitted; no OpenRAIL attachment. Generator audio is always muted. `film_clips`
+  allowlist: `apache-2.0` only.
+- **Depth Anything V2 Small** (`depth-anything/Depth-Anything-V2-Small-hf`): Apache-2.0. **Base and
+  Large are non-commercial and excluded**; the notebook raises on any other depth repo. Depth maps are
+  working files for the glide, never published.
+- **MediaPipe Face and Hand Landmarker**: Apache-2.0 (their model cards); gate-only, nothing published.
+- **OWLv2** (`google/owlv2-base-patch16-ensemble`) and **DINOv2-small** (`facebook/dinov2-small`):
+  Apache-2.0 on the Hub (read 27 Nov 2026). Gate-only. Run-time allowlist for gate models:
+  `apache-2.0`, `mit`.
+- **CLIP is excluded.** Its model card carries no licence and puts any deployed use, commercial or
+  not, out of scope; the character-lock check uses DINOv2-small instead. Adding a model needs a card
+  that grants commercial use and the owner's approval.
+- **Whisper** (MIT): permits commercial use; listed for the planned word check (not yet a command).
+- **Eleven v4 narration**: ElevenLabs Creator plan, whose paid tier carries the commercial licence for
+  generated audio (owner decision 24 Nov 2026, v4 chosen 26 Nov); credits only, never top-ups.
+- **Sound effects**: only CC0 files, or public-domain files whose author released them to the public
+  domain worldwide (Commons categories show the author's own release); country-limited or age-based
+  public-domain files (PD-US, PD-old, PD-Art …) are refused because the 47-region publication policy
+  needs worldwide status. Original synthesis is dedicated to CC0. Each file's page and licence are
+  recorded.
+- The child-depiction rule above applies to every new still, clip and edit: named minors only in
+  dignified close-ups.
+
 ## How the record and clearance carry this
 
 - Each retouch job records the model repos, resolved revisions and the card licence

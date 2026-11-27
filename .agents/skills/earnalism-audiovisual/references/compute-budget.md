@@ -1,8 +1,12 @@
 # Compute budget
 
-Standing owner allowance: **60 Colab compute units (CU) per title over the title's whole
-life** (every month counts) and **100 CU per calendar month** across all titles. Every GPU batch is forecast before it is built; the
-forecast is reserved on the ledger; the actual units are settled on import.
+Standing owner allowance: a **per-title lifetime cap** (every month counts) and **100 CU per calendar
+month** across all titles. The default title cap is 60 CU; a title can have its own cap in
+`title-caps.json` beside the ledger (`production/audiovisual/title-caps.json`, a JSON object of
+title slug → units; every value a finite number above 0). Owner decision 27 Nov 2026: **বিচারক
+(`bicharak`) is 100 CU**; every other title stays at 60 until the owner sets another number there.
+Never change a cap yourself: it is the owner's number. Every GPU batch is forecast before it is built;
+the forecast is reserved on the ledger; the actual units are settled on import.
 
 ## Forecast
 
@@ -60,8 +64,54 @@ Numbers above are the shape, not measurements to copy. Known observations (L4,
 about 31 s/step; an L4 session showed about 1.94 CU/hour. For narration, one "step" is one
 voice unit (`items` = number of units).
 
-Planning size per title: narration ~2–10 CU, stills ~3–5 CU, ACE-Step cues ~2–3 CU,
-reel clips ~20–40 CU (the largest). About 30–60 CU per title, two titles a month.
+Planning size per title (pre-cinematic reels): narration ~2–10 CU, stills ~3–5 CU, ACE-Step cues
+~2–3 CU, reel clips ~20–40 CU (the largest). About 30–60 CU per title, two titles a month.
+
+### Cinematic film (`film_clips`, stills with gates)
+
+```
+seconds = ((HD clips × clip_s_hd[_a100] + SD clips × clip_s_sd) × takes × 1.15) + decode_s + export_s + sfx_s
+units   = seconds / 3600 × units_per_hour_<gpu>          (gpu = a100 when the spec's min_vram_gib > 24, else l4)
+stills:   ((4 × s_per_step × items × candidates + decode_s + export_s) × 1.15) + gate_s
+          gate_s = gate_setup_s 300 + gate_s_per_still 6 × stills     (ESTIMATE until a gated run is measured)
+```
+
+`rates.json` `film_clips` (measured 26–27 Nov pilots): `clip_s_hd` 900 (880–920 s per 1280×704 clip on
+an L4), `clip_s_hd_a100` 215 (212–215 s), `clip_s_sd` 435 (896×512 on an L4; the A100 SD clip is
+unmeasured and forecast at the L4 figure), `units_per_hour_l4` 2.4, `units_per_hour_a100` 4.5;
+`decode_s` 900 and `export_s` 120 are ESTIMATES borrowed from stills. FLUX stills take about 10 s each
+on an L4 int8 (about 0.1 CU per 4-candidate job); ACE-Step about 13 s per 60 s stem; a Colab session
+sets up in 5–8 minutes. Without a measured value for every key the CLI refuses to forecast.
+
+Per-film forecast (বিচারক at the new density, about 275 shots, 25–35% animated at 1.3 takes each, so
+about 90–125 clips): **about 25–34 CU on an A100** (about 0.27 CU per HD clip), about 55–75 CU on an
+L4 (about 0.6 CU per HD clip); stills add about 5 CU. This is why A100 is preferred for the film and
+why বিচারক's cap is 100 CU; ordinary titles at 60 CU need the animated share kept to peaks and named
+actions, and each scene's `plan-shots` output prints a planning estimate (Wan clips and CU) to check
+against the remaining allowance before the batch is built. The job's own forecast (derived from
+`rates.json`, never the planning figure) is what the ledger reserves.
+
+Batches fit one Colab session (at most about 70 min wall clock, the notebook's own hard stop); once the
+owner approves a scene's paper edit, no per-batch signature is needed (`film_clips`; the reel rules of
+≤ 5 clips and a signed authority file stay for reels). Resume is journalled: `done.json` keeps finished
+clips, and a rerun skips them. A stalled or stopped batch is `close`d with the units Colab shows.
+
+### Lessons from the pilots (carry into every new job)
+
+- **A hard stop must leave time for the manifest and the upload after every cell.** Pilot v4's timer
+  unassigned the runtime after the fourth clip, before the manifest and upload: its outputs survived
+  only because each clip had been written to Drive. `film_clips` therefore runs the cheap sound stage
+  first and writes each finished clip into the Drive job folder as soon as it is journalled (`done.json`),
+  so a lost archive can still be downloaded from Drive; never shorten the forecast's reserve to "fit".
+- **Never build a Colab job while uncommitted skill changes are in the tree.** The bundle embeds the
+  tree's templates and code; with uncommitted changes the record cannot name the code that ran.
+- **A prompt past the T5 limit loses its tail silently.** `job stills` now refuses an item whose
+  house-style-first prompt is estimated over 180 tokens: put the character lines first and keep an item
+  prompt to about 85–90 words.
+- **Commons labels country-limited public domain as "Public domain".** The sfx stage keeps only CC0 or
+  author-released worldwide PD (see film-recipe.md, Score and sound).
+- **A pull-back glide needs `zoom0` high enough** that `zoom0 · (1 + min(0, zoom) · near_gain) ≥ 1` (scene 14 needs about 1.17),
+  else the shot is refused: a re-render costs nothing, but an unnoticed edge band would cost a clip.
 
 ## The ledger
 

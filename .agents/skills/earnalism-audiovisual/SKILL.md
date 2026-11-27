@@ -6,8 +6,9 @@ description: Use when the owner names a book (English or Bengali) and wants its 
 # Earnalism audiovisual (single entry point)
 
 One instruction ("Make the audiovisual of বিচারক") becomes one reviewable package:
-a full-length **audiobook film** (illustrated scenes, gentle motion, Earnalism Voice,
-theme-fit score, SRT subtitles) and **one or two Squint-grade story reels** (1080×1920,
+a full-length **cinematic audiobook film** (beat-locked shots, a camera that always moves, real
+animation where the text names an action, Earnalism Voice on Eleven v4, a cue and ambience for every
+scene, captions) and **one or two Squint-grade story reels** (1080×1920,
 60 s or 120 s). Zero extra spend: Claude plans, assembles and checks; the owner runs
 each GPU job in the existing Colab Pro account.
 
@@ -15,7 +16,8 @@ each GPU job in the existing Colab Pro account.
 an existing Earnalism skill, every gate is enforced by the `eav` CLI, and the CLI's
 `Next:` line is the only next step. Read it, do it, run `status` again.
 
-Binding authority: `docs/superpowers/specs/2026-11-23-earnalism-audiovisual-design.md`,
+Binding authority: `docs/superpowers/specs/2026-11-27-earnalism-cinematic-film-design.md` (the film,
+narration and score standard; rules R1–R11), `docs/superpowers/specs/2026-11-23-earnalism-audiovisual-design.md`,
 `docs/EARNALISM_AUDIOVISUAL_PIPELINE.md`, `AGENTS.md`. They win over anything here.
 
 ## Run the CLI
@@ -25,22 +27,29 @@ cd skills/earnalism-audiovisual/software
 python3 -m eav.cli status --root <title root>      # prints the next owner action
 ```
 
-Commands: `init`, `plan`, `job`, `exchange-stage`, `exchange-collect`, `import`, `import-take`,
-`supersede` (never ran), `close` (ran, not imported: settles the actual CU), `film`,
-`reel`, `qc`, `status`, `bundle-audio` (usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
+Commands: `init`, `plan`, `plan-shots`, `job` (kinds incl. `stills`, `film_clips`, `music`), `exchange-stage`,
+`exchange-collect`, `import`, `import-take`, `pick`, `supersede` (never ran), `close` (ran, not imported:
+settles the actual CU), `glide`, `retime`, `voicecheck`, `cue`, `film`, `reel`, `qc`, `status`,
+`bundle-audio` (`--profile audiobook|film`), `bundle-film`, plus the older `hold`, `touchup`
+(usage in `eav/cli.py`; `--help`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
 inputs to get past it.
 
 ## Stage order and who owns each stage
 
+**Cinematic film flow (the standard, [film recipe](references/film-recipe.md)):** plan-shots → stills+gates → film_clips → voice (v4 passages, retime, voicecheck) → cue → film --shots → qc → owner review.
+Each scene's paper edit is approved (Claude plus an independent reviewer) before any generation; the
+table below lists the stages by who owns them, in their detailed order.
+
 | # | Stage | CLI | Delegated skill (read it for the stage) |
 |---|---|---|---|
 | 1 | Resolve exact edition and cleared text | server: `python manage.py export_audiovisual_source <slug> --out src.json`; then `init src.json --root <dir> --slug <slug>` | `earnalism-book-production` |
 | 2 | Read the whole work; context map (speakers, turns, reveals, ending) | `plan` (30–90 s scenes, 1 still per 8–15 s; series past 40 min) | `earnalism-audiobook-go-live` (`references/narrative-performance.md`) |
-| 3 | Earnalism Voice narration (dry, frozen before timing) | ElevenLabs (owner decision 24 Nov 2026): tagged script per scene → one Eleven v3 take per scene → `import-take film-NN\|reel-N`; Parler: `job narration` → owner runs Colab → `import` | `earnalism-audiobook-go-live`, `references/earnalism-voice.md` |
-| 4 | World bible, anchor stills, film keyframes (FLUX.1-schnell) | `job stills --spec` → Colab → `import` | `earnalism-video`, `earnalism-covers` (cover/thumbnail) |
-| 5 | Score: VCSL editorial route by default, ACE-Step cues for colour | score bed or `job music` → Colab → `import` | `earnalism-audiobook-score` |
-| 6 | Film assembly (measured timing, ducked mix, motion, logo, END) | `film` | `earnalism-video` |
+| 3 | Earnalism Voice narration (frozen before timing) | ElevenLabs Eleven v4 (owner decisions 24 and 26 Nov 2026): one tagged take per 15–30 s passage → `import-take film-NN\|reel-N` → `retime` (pauses by punctuation, room tone) → `voicecheck` (redo only failures; redo runs pass `--profile`). Parler: `job narration` → owner runs Colab → `import` | `earnalism-audiobook-go-live`, `references/earnalism-voice.md` |
+| 4 | World bible, anchor stills, shot stills with gates (FLUX.1-schnell; MediaPipe, OWLv2, DINOv2-small gates) | `plan-shots` (approve) → `job stills --spec` (3 candidates per shot, T5 limit enforced) → Colab → `import` → `pick` |
+| 4b | Animated beats and depth maps (Wan 2.2 TI2V-5B, depth Small only) and CC0 sound | `job film_clips --spec` (items bound to the plan's Wan shots) → Colab → `import` | `earnalism-video`, `earnalism-covers` (cover/thumbnail) |
+| 5 | Score: one ACE-Step cue per scene (film); VCSL editorial bed for the older route | `job music` → Colab → `import` → `cue --pick`, `cue --scene` | `earnalism-audiobook-score` |
+| 6 | Film assembly (24 fps, measured timing, scene mixes, glides and clips, captions, logo, END) | `film --shots` (older films: `film`) | `earnalism-video` |
 | 7 | Reels: script, narration (measured), shot plan, keyframes, Wan clips in batches of ≤ 5, assembly | `reel N --script`, `job narration --reel N`, `reel N --plan-shots`, `job stills --reel N`, `job reel_clips --reel N` per batch, `reel N` | `earnalism-video` (Wan22 route) |
 | 8 | Review: automated checks, contact sheets, owner review | `qc`; owner watches the first package | `earnalism-book-audiovisual` |
 | 9 | Publish, only when told and only where told | `bundle-audio` → Maison `attach_audiovisual_audio stage|publish`; social private staging | `earnalism-book-audiovisual`, `earnalism-book-production` |
@@ -83,9 +92,10 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
 | **No cleared source** (no export, missing text/hash, title not imported) | Stop. Say which edition is missing what. Route to `earnalism-book-production`. | Fetch or type the text yourself, pick another edition, "start with the reels". |
 | **Non-public-domain title** (`public_domain_evidence` false) | `init` refuses. Hold the title; it is out of scope. | Draft clearance for it, or produce social reels of it anyway. |
 | **Audio format not cleared on Maison** (only Reader read/preview) | Keep producing: film, reels and review need no Maison grant. `bundle-audio` drafts the per-title evidence; the owner completes and approves it; only then `stage`. | Write `publication_clearance` or rights rows by hand, call the draft "cleared", or publish audio before stage + fresh browser report. |
-| **Budget exceeded** (exit 3: forecast over 60 CU per title (keyed by edition) for its whole life, or 100 CU per calendar month) | Stop. Hold for the owner with the forecast, the remaining allowance and the CLI's fit (for `reel_clips`: how many of the batch's shots still fit). | Write or edit a spec `compute` block (it is derived and refused if it differs), lower steps/resolution of a prepared job, split a job to slip under the cap, shrink measured rates, edit, reset or swap the ledger pinned at `init`, init a second root for the edition, use another Colab account, or spend money. |
+| **Budget exceeded** (exit 3: forecast over the title's lifetime cap (keyed by edition; 60 CU by default, set per title in `title-caps.json` beside the ledger, 100 for বিচারক) or 100 CU per calendar month) | Stop. Hold for the owner with the forecast, the remaining allowance and the CLI's fit (for `reel_clips`: how many of the batch's shots still fit). | Write or edit a spec `compute` block (it is derived and refused if it differs), lower steps/resolution of a prepared job, split a job to slip under the cap, shrink measured rates, edit, reset or swap the ledger pinned at `init`, init a second root for the edition, use another Colab account, or spend money. |
 | **Import held** (exit 4: missing, extra or mismatched file, or an `INCOMPLETE` manifest) | Re-download the complete output of that exact job and re-run `import`. A job that ran but can never be imported (crash, hard stop, lost download): `close <job_id> --units <CU Colab shows> --reason "..."`, then hold for the owner. | Rebuild/rerun the GPU job, copy files in by hand, edit `manifest.json`, or `supersede` a job that ran (supersede is for never-run jobs only). |
-| **QC failure** (exit 5: loudness, true peak, loop close, size, hook onset, reel narration that does not fit its length ± 3 s) | Fix only the failing item (one shot, one still, the mix), re-assemble, re-run `qc`. Reel narration that does not fit: rewrite the script's words, `reel N --script`, new reel narration. | Lower a gate, trim narration, or call unheard audio "reviewed". |
+| **QC failure** (exit 5: loudness, true peak, loop close, size, hook onset, reel narration that does not fit its length ± 3 s; film: R1/R4/R5/R10 gates, per-scene margin, silence at peaks, digital zero on the delivered film, any gate `not_run`) | Fix only the failing item (one shot, one still, one scene's cue or mix), re-assemble (the shot cache re-renders only what changed), re-run `qc`. Reel narration that does not fit: rewrite the script's words, `reel N --script`, new reel narration. | Lower a gate, trim narration, or call unheard audio "reviewed". |
+| **Plan not approved / gate fails** (a spec with `"scene"` or `cue` on an unapproved plan; `plan-shots` exit 1 on R1–R3; a certain-fail still gate; `voicecheck` exit 1) | Fix the cause: split the shot, regenerate the still or take, get the independent reviewer's approval. | Edit the plan after approval, use `hold`, borrow a neighbouring still or cue, `--override-fail` for schedule, or lower a limit. |
 | **Maison film path not built yet** (owner decision 2026-11-24: full films from private R2, see `references/publishing.md`) | The film goes to owner review and is archived to private R2. Social destinations the owner names get reels, Shorts and trailers only. Maison gets audio until its film grant and player exist. | Upload to Cloudflare Stream, post a full film to a social platform, make a film object public, or hand out an unsigned or long-lived R2 URL. |
 
 ## Non-negotiables
@@ -100,12 +110,12 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
   kept). Candidates never voice production. No impersonation, no spoken stage directions.
   ElevenLabs route: the owner-picked voice of the title, one tagged-script take per scene,
   `import-take` (refuses any script whose words differ from the book).
-- **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0), SDXL inpainting 0.1 + CLIPSeg (retouch), Qwen-Image-Edit-2511 (edit, Apache-2.0), OpenCV (touch-up) and
-  VCSL samples (CC0). MusicGen (CC-BY-NC weights) and FLUX.1-dev (non-commercial) are
+- **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x (film: 2.2 TI2V-5B), ACE-Step (Apache-2.0), Depth Anything V2 **Small**, the gate models MediaPipe, OWLv2 and DINOv2-small (Apache-2.0), SDXL inpainting 0.1 + CLIPSeg (retouch), Qwen-Image-Edit-2511 (edit, Apache-2.0), OpenCV (touch-up), Whisper (MIT) and
+  VCSL samples (CC0). MusicGen (CC-BY-NC weights), FLUX.1-dev (non-commercial), Depth Anything V2 Base and Large (non-commercial) and CLIP (card puts deployed use out of scope) are
   forbidden even if the owner names them; offer the licensed equivalent instead.
   No paid generator or credit-spending connector (Kling, Suno, Runway, Adobe/Canva
-  credits): not for "just one test" either. The one exception is ElevenLabs Eleven v3
-  narration within the plan's included credits (owner decision 24 Nov 2026,
+  credits): not for "just one test" either. The one exception is ElevenLabs Eleven v4
+  (v3 before 26 Nov) narration within the plan's included credits (owner decision 24 Nov 2026,
   `references/earnalism-voice.md`).
 - **Colab.** The owner runs every job. Narration, stills, retouch, edit and music notebooks are inert
   until `RUN = True` and stop at their forecast seconds (hard stop). Their default route
@@ -127,7 +137,7 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
 - "The owner pre-authorised public-domain clearance, so I can mark audio cleared."
   (Pre-authorisation covers the *pattern*; the per-title record still needs completing
   and the owner's approval before `stage`.)
-- "70 CU is only a little over; the month still has room." (The title cap is 60.)
+- "70 CU is only a little over; the month still has room." (The title's cap is in `title-caps.json`: 60 by default.)
 - "I'll drop Wan to 16 steps so it fits." (Never lower a prepared job's quality.)
 - "MusicGen sounds better and it's free." (Free to run is not free to publish.)
 - "The import mismatch is just one file; I'll copy it over." (Held means held.)
@@ -139,6 +149,12 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
   evidence is the owner's; Claude prints what it must contain, nothing more.)
 - "The job crashed, so it cost nothing: supersede it." (It ran: `close` it with the CU
   Colab shows.)
+- "The still failed the gate; hold the neighbour's under it for now." (No holds: regenerate it.)
+- "A 9 s push-in is fine, the voice is calm." (R1/R2: split it; a glide adds no new information.)
+- "Reuse scene 14's cue under scene 15." (One cue per scene; borrowed music is an anti-goal.)
+- "Commons says Public domain, so the sound is cleared." (Worldwide, by the author's own release, or CC0.)
+- "I'll start the Colab job with these skill edits uncommitted." (Commit first; the record must name the code.)
+- "Put every costume detail in the prompt." (T5 cuts at 256 tokens: character lines first, about 90 words.)
 
 ## Rationalizations
 

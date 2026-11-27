@@ -97,5 +97,57 @@ class SkillFileTests(unittest.TestCase):
         self.assertRegex(text, r"--profile film[^.]*until[^.]*interface note")
 
 
+    def _ref(self, name):
+        return " ".join((SKILL / "references" / name).read_text(encoding="utf-8").split())
+
+    def test_film_recipe_states_rules_r1_to_r11(self):
+        text = self._ref("film-recipe.md")
+        for n in range(1, 12):
+            self.assertRegex(text, rf"\bR{n}\b", f"R{n}")
+        for phrase in ("plan-shots", "no holds", "6 s", "24 fps", "--shots", "glide", "film_clips",
+                       "reference scene", "scene 14", "J- or L-cut", "1.5 dBTP", "17 dB"):
+            self.assertIn(phrase.lower(), text.lower(), phrase)
+
+    def test_voice_reference_names_v4_and_redo_gate(self):
+        text = self._ref("earnalism-voice.md")
+        for phrase in ("Eleven v4", "passage", "retime", "voicecheck", "--profile",
+                       "redo", "voicecheck-profile.json", "24 November 2026", "eleven_v3",
+                       "never open a passage on a bare"):
+            self.assertIn(phrase, text, phrase)
+
+    def test_free_stack_excludes_depth_base_large(self):
+        text = self._ref("free-stack.md")
+        self.assertIn("Depth-Anything-V2-Small", text)
+        self.assertRegex(text, r"Base and Large[^.]*(non-commercial|excluded|refused)")
+        for phrase in ("Wan 2.2 TI2V-5B", "MediaPipe", "OWLv2", "Whisper", "MIT"):
+            self.assertIn(phrase, text, phrase)
+
+    def test_free_stack_names_dinov2_not_clip(self):
+        text = self._ref("free-stack.md")
+        self.assertIn("DINOv2", text)
+        self.assertRegex(text, r"CLIP[^.]*(excluded|out of scope|not used)")
+        table = "\n".join(l for l in (SKILL / "references" / "free-stack.md").read_text(
+            encoding="utf-8").splitlines() if l.startswith("|"))
+        self.assertNotIn("CLIP-image", table)
+
+    def test_skill_md_stage_order(self):
+        order = ["plan-shots", "stills", "film_clips", "voice", "retime", "voicecheck", "cue",
+                 "film --shots", "qc", "owner review"]
+        flow = next(l for l in self.text.splitlines() if "plan-shots" in l and "film_clips" in l
+                    and "owner review" in l)
+        pos = [flow.index(k) for k in order]
+        self.assertEqual(pos, sorted(pos), flow)
+        self.assertNotIn("a fixed 60 CU", self.text)
+        self.assertIn("title-caps.json", self.text)
+        self.assertNotIn("fixed 60 CU", self._ref("compute-budget.md"))
+
+    def test_pressure_tests_cover_cinematic_scenarios(self):
+        text = self._ref("pressure-tests.md")
+        for phrase in ("hold", "regenerate", "9 s glide", "split", "music borrowed",
+                       "one cue per scene", "T5", "voicecheck", "country-limited"):
+            self.assertIn(phrase, text, phrase)
+        self.assertEqual(text.count("Observed with the skill (2026-11-23): PASS"), 3)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -11,8 +11,10 @@ needs the owner.
   backgrounds; expressive faces with large luminous eyes; cinematic framing.
 - One consistent character design per person for the whole film: the world bible's character
   line is repeated word for word, and the same seed family is reused per character.
-- Smooth motion between stills: the film's slow push-in on every still and a 0.8 s
-  cross-dissolve on narration boundaries (`eav.film.assemble`); no hard cuts, no flashy wipes.
+- Motion: pre-cinematic films use a slow push-in on every still and a 0.8 s cross-dissolve on
+  narration boundaries (`eav.film.assemble`). Cinematic films (`film --shots`) use depth glides, Wan
+  beats and planned transitions: dissolves only between layers of time, hard or match cuts inside a
+  layer ([film recipe](film-recipe.md)); no flashy wipes either way.
 
 ## How it is enforced
 
