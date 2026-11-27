@@ -126,3 +126,17 @@
 - **Deploy:** `dep-dc4k8mlg1s2s73eomkhg` is live. No migrations, no static change, so the static release stays the same.
 - **Render job** `job-dc4kb2vf3r2c73bn18vg` (`queue_intake_packets --slug kshudhita-pashan`) succeeded at 08:56Z. The draft clearance for the corrected text (two scan-verified insertions of " না") is pending on the Monday page. Nothing is approved, revised or published.
 - **After the owner approves it:** run `publish_cleared_editions revise`, then the browser acceptance check, then `evidence` and `publish`. Reader positions, notes, highlights and bookmarks move to the corrected revision in the same transaction.
+
+## #77 deploy (27 Nov 2026): wider side-by-side reader, one Back link, track sign-in redirect
+
+- **Merge:** ronik18/reo-earnalism-maison#77, squash commit `24ae17d`, merged after CI passed on head `6f0bf75`.
+- **Static release `99383d318667e1b130569d9094b907b19c0621f28405ec14a32417ba7619b62c`:**
+  - 222 files from a clean build; 220 are byte-identical to `864a29c6…`, and only `app.css` and `room.css` differ.
+  - Uploaded to R2 (222 × 200) and verified over HTTPS (222/222).
+  - Rollback: set `STATIC_RELEASE_ID` to `864a29c6e590bf096d29cfd4436a9460a24337c3dc034bf6cb56802c0a2059bc` and redeploy.
+- **Deploy:** `dep-dc4o8amc6qcc73ebucg0` is live. No migrations. `MAISON_REVIEW_STANDING_FROM=2027-11-30T00:00:00+05:30` takes effect with this deploy.
+- **Live checks** (1440×900):
+  - `/en/`, Explore, Learn, the ক্ষুধিত পাষাণ title page and its reader return 200 and load the new static release;
+  - the reader shows one Back link;
+  - a signed-out `/en/tracks/<id>/` redirects to sign-in with `return_to`;
+  - no console errors.
