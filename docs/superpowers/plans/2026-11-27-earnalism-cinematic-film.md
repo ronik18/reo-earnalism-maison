@@ -404,6 +404,71 @@ New pure modules:
 - [ ] Step 4: run the full suite, `python3 -m pytest -q -p no:cacheprovider tests`. Expected: all pass, the mirror included.
 - [ ] Step 5: commit `earnalism-audiovisual: skill text and references for the cinematic standard`.
 
+## Gap tasks added 27 Nov (spec §3 and §4 requirements no earlier task built)
+
+The Task 12 review found three spec requirements with no code: Eleven v4 passage import, the Whisper word check and the per-clip motion gate. AGENTS.md says to "fix gaps toward that baseline", so they are added here and must be done before the final review.
+
+### Task 13: Eleven v4 passages, imported and joined (`import-take`, `eav/passages.py`)
+
+**Files:**
+- Modify: `cli.py`.
+  - `import-take` accepts the owner-chosen v4 model id, read from the title's voice settings, alongside `eleven_v3`.
+  - It accepts per-passage takes `<scene>-p<NN>.txt` and `.mp3` for one scene.
+- Create: `eav/passages.py`: `split_passages(scene_text) -> list[str]` and `join_passages(takes: list[Path], out: Path) -> dict`.
+- Test: `tests/test_passages.py` and `tests/test_cli.py`.
+
+**Interfaces:**
+- Produces: `film/film-NN/voice/<scene>.wav`, the path `cue` already reads.
+- Each passage runs `retime` then `voicecheck`. A failed passage is listed for redo, never joined.
+
+- [ ] Step 1: write the failing tests.
+  - `test_split_passages_15_to_30s_at_sentence_or_paragraph_ends`: estimate length with the measured characters-per-second.
+  - `test_passages_reproduce_scene_text_exactly`: joining the passages gives the source text back.
+  - `test_import_take_accepts_v4_per_passage_takes`
+  - `test_failed_passage_blocks_the_join`
+  - `test_join_uses_room_tone_and_10ms_crossfade_no_digital_zero`
+- [ ] Step 2: run the tests. Expected: FAIL.
+- [ ] Step 3: implement.
+- [ ] Step 4: run the tests. Expected: PASS.
+- [ ] Step 5: mirror, then commit `eav: Eleven v4 passages imported, checked and joined per scene`.
+
+### Task 14: Whisper word check (`voicecheck` code `words`)
+
+**Files:**
+- Modify: `eav/voicecheck.py`.
+- Create: `eav/templates/words_cell.py.txt`, a Colab cell for when a local CPU run is not possible.
+- Test: `tests/test_voicecheck.py`.
+
+**Interfaces:**
+- `check(..., transcript: str | None, source: str | None)` adds the failure code `words` when the character error rate exceeds the book profile's accepted-take median plus a margin.
+- The CER is computed on normalised Bengali text: NFC, punctuation stripped, whitespace collapsed.
+- The Whisper model is the MIT-licensed `openai/whisper-*`. Its licence is checked at run time.
+
+- [ ] Step 1: write the failing tests.
+  - `test_cer_normalises_bengali_and_ignores_punctuation`
+  - `test_words_fails_on_dropped_sentence`
+  - `test_words_passes_on_match`
+  - `test_no_transcript_means_check_not_run_not_pass`
+- [ ] Steps 2–4: RED, then implement, then GREEN.
+- [ ] Step 5: mirror, then commit `eav: Whisper word check in the narration redo gate`.
+
+### Task 15: Per-clip motion gate (`eav/motiongate.py`, run on `film_clips` import)
+
+**Files:**
+- Create: `eav/motiongate.py`: `check_clip(mp4) -> {"near_duplicate_runs", "diff_spikes", "contact_sheet", "pass", "needs_review"}`.
+- Modify: `eav/importer.py` so the `film_clips` import writes `<key>.motion.json` and a contact sheet of every 4th frame.
+- Modify: `cli.py`: `film --shots` refuses a Wan take whose motion gate failed, unless a recorded override exists. This follows the Task 11 override pattern.
+- Test: `tests/test_motiongate.py`.
+
+- [ ] Step 1: write the failing tests on synthetic clips.
+  - `test_periodic_near_duplicate_frames_flagged`: a clip that repeats frames.
+  - `test_difference_spike_flagged`: a one-frame jump.
+  - `test_smooth_clip_passes`
+  - `test_contact_sheet_every_4_frames`
+  - `test_film_refuses_failed_take_without_override`
+- [ ] Steps 2–4: RED, then implement, then GREEN.
+- [ ] Step 5: mirror, then commit `eav: per-clip motion gate on film_clips import`.
+
 ## After the plan (not code tasks)
 
 - Build scene 14 v4 with the new commands as the acceptance test. Get the owner's approval, then re-render বিচারক (December, A100 preferred), then The Selfish Giant.
