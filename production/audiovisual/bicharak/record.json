@@ -6641,6 +6641,20 @@
       },
       "path": "music/music-film-01-r4/cue-4-prison-and-ring_input_params.json",
       "sha256": "939bde9ccf13e31876bf9ecba397d7bf503d3bc4dfb8207a43e89a175319eaab"
+    },
+    {
+      "bytes": 15221,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.69161,
+        "inputs_zip": "jobs/stills-film-01-r5-sample8/inputs.zip",
+        "job_id": "stills-film-01-r5-sample8",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r5-sample8/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r5-sample8/stills.ipynb",
+      "sha256": "ae6209e0a268598480f2cf4464f89bc9173e647e50e9e1315fc1fdaadecc30b2"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -7721,6 +7735,51 @@
       },
       "result": "accepted",
       "stage": "import"
+    },
+    {
+      "at": "2026-11-27T07:05:24.339265+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r4-c2of2",
+        "reason": "Ran on Modal L4 and ran out of GPU memory before generating; its keys are rebuilt from the hardened r3 prompts",
+        "runner": "modal",
+        "units": 0.0
+      },
+      "result": "closing",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T07:05:24.347457+00:00",
+      "detail": {
+        "imported": false,
+        "job_id": "stills-film-01-r4-c2of2",
+        "ran": true,
+        "reason": "Ran on Modal L4 and ran out of GPU memory before generating; its keys are rebuilt from the hardened r3 prompts",
+        "runner": "modal",
+        "units": 0.0,
+        "usd": 0.346122
+      },
+      "result": "closed",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T07:05:24.617964+00:00",
+      "detail": {
+        "forecast_units": 0.69161,
+        "job_id": "stills-film-01-r5-sample8",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T07:05:24.625055+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r5-sample8",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
     }
   ],
   "ledger": "../allowance-ledger.json",

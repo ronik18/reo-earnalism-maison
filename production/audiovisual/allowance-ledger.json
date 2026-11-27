@@ -484,14 +484,16 @@
     "title": "bicharak",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak",
     "reserved_units": 1.5740944444444445,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-27T05:50:24+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.346122,
+    "cu_equivalent": 3.46
   },
   {
     "job_id": "music-film-01-r3",
@@ -524,6 +526,20 @@
     "modal_runs_issued": 1,
     "usd": 0.109019,
     "cu_equivalent": 1.09
+  },
+  {
+    "job_id": "stills-film-01-r5-sample8",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak",
+    "reserved_units": 0.69161,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-27T07:05:24+00:00",
+    "modal_runs_issued": 1
   },
   {
     "modal_spend": "2026-11",
@@ -651,6 +667,14 @@
         "seconds": 392.861404317,
         "at": "2026-11-27T06:27:40+00:00",
         "status": "ok"
+      },
+      {
+        "run_id": "stills-film-01-r5-sample8#1",
+        "job_id": "stills-film-01-r5-sample8",
+        "usd": 1.4789824999999999,
+        "seconds": 0.0,
+        "at": "2026-11-27T07:05:24+00:00",
+        "status": "pending"
       }
     ]
   }
