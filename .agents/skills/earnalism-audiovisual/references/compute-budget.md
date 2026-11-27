@@ -43,6 +43,11 @@ Numbers above are the shape, not measurements to copy. Known observations (L4,
 about 31 s/step; an L4 session showed about 1.94 CU/hour. For narration, one "step" is one
 voice unit (`items` = number of units).
 
+Seed re-runs are not reproducible across batches: the same FLUX prompt and seed in another
+batch, chunk or GPU gives another picture, so never plan spend on "pick a seed and regenerate
+it". A still with a small defect is fixed with `retouch` ($0, local, recorded;
+[film recipe](film-recipe.md)); anything else gets a new prompt in a new small stills job.
+
 Planning size per title: narration ~2–10 CU, stills ~3–5 CU, ACE-Step cues ~2–3 CU,
 reel clips ~20–40 CU (the largest). About 30–60 CU per title, two titles a month.
 

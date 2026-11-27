@@ -40,7 +40,7 @@ inputs to get past it.
 | 1 | Resolve exact edition and cleared text | server: `python manage.py export_audiovisual_source <slug> --out src.json`; then `init src.json --root <dir> --slug <slug>` | `earnalism-book-production` |
 | 2 | Read the whole work; context map (speakers, turns, reveals, ending) | `plan` (30–90 s scenes, 1 still per 8–15 s; series past 40 min) | `earnalism-audiobook-go-live` (`references/narrative-performance.md`) |
 | 3 | Earnalism Voice narration (dry, frozen before timing) | `job narration` → Colab (owner) or `modal-run` → `import` | `earnalism-audiobook-go-live` |
-| 4 | World bible, anchor stills, film keyframes (FLUX.1-schnell) | `job stills --spec` → Colab or `modal-run` → `import` (per key the newest imported still is used: a small new job replaces only its keys) | `earnalism-video`, `earnalism-covers` (cover/thumbnail) |
+| 4 | World bible, anchor stills, film keyframes (FLUX.1-schnell) | `job stills --spec` → Colab or `modal-run` → `import` (per key the newest imported still is used: a small new job replaces only its keys); small defects only: `retouch <key> --film N --region x,y,w,h[:rect] --reason "..."` ($0, local, recorded) | `earnalism-video`, `earnalism-covers` (cover/thumbnail) |
 | 5 | Score: VCSL editorial route by default, ACE-Step cues for colour | score bed or `job music` → Colab or `modal-run` → `import` | `earnalism-audiobook-score` |
 | 6 | Film assembly (measured timing, ducked mix, motion, logo, END) | `film` | `earnalism-video` |
 | 7 | Reels: script, narration (measured), shot plan, keyframes, Wan clips in batches of ≤ 5, assembly | `reel N --script`, `job narration --reel N`, `reel N --plan-shots`, `job stills --reel N`, `job reel_clips --reel N` per batch, `reel N` | `earnalism-video` (Wan22 route) |
@@ -122,6 +122,13 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 - **Listening.** Automated checks are advisory. Owner review of the first package is
   the listening assessment, and narrations are not spent at scale before the owner has listened
   to the first narration package; anything not reviewed stays `unassessed`.
+- **Retouch.** A small defect regeneration does not reliably remove (a bindi dot on a widow's
+  forehead, a small earring, a scrawl or lettering in a corner or on a wall) is painted over from
+  the surrounding texture with `retouch` (each region ≤ 3% of the still, ≤ 6% in all; $0,
+  deterministic, recorded with source, regions, method, hashes and reason). Never to change a
+  character, a face, a pose or the composition: that is a new prompt and a stills job. Look at
+  the retouched still; `retouch-undo` retires it. A newer import of the key makes it stale
+  ([film recipe](references/film-recipe.md)).
 - **Publishing.** Only after an explicit owner instruction naming the destination.
   A finished package, a Maison release or "go live" for Reader does not authorise
   social posting.
@@ -152,6 +159,10 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   Colab work with `--units` at import/close.)
 - "Wan is faster on Modal." (Reels stay on Colab with the owner-signed authority file.)
 - "The chunk failed, rebuild the whole job." (`close` it, then `--replace-chunk` that chunk.)
+- "That seed was nearly right; regenerate it once more with the same seed." (Seed re-runs are not
+  reproducible across batches. A small defect: `retouch`; anything else: a new prompt.)
+- "The face drifted from the bible; a retouch can fix it." (Retouch removes small defects only;
+  identity, pose and composition are regenerated.)
 
 ## Rationalizations
 

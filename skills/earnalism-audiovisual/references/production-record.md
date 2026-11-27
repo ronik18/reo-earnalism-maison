@@ -32,6 +32,10 @@ One title root, one record, one writer. `record.json` (schema
   id is the group id plus `narration_chunk_job_ids` (every chunk, in order).
 - **Chunks**: a chunk's `colab_job` artifact, `job/built` and `cli/job_target` events, `job.json`
   and build manifest carry `chunk: {index, of, group}`.
+- **Retouches**: a `still_retouch` artifact (`stills/retouch/<key>-<n>.png`) and a
+  `retouch/applied` event per retouch, holding target, key, source path, sha256 and job id, the
+  source retouch when chained, regions, method, output sha256 and reason; `retouch/undone`
+  retires one. The film artifact's `stills_by_key` names each retouched key's retouch.
 - **Renditions**: film and reel hashes, durations, loudness, true peak, loop score.
 - **Review**: QC report, owner review result, everything not reviewed marked `unassessed`.
 - **Licences**: Apache-2.0 (Parler, FLUX.1-schnell, Wan, ACE-Step), CC0 (VCSL).

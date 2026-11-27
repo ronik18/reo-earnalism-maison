@@ -10,6 +10,14 @@
                          (rebuilds only that chunk's items as <chunk id>-r<k>; the group keeps its other chunks)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> [--units <CU>]
                          [--archive-sha256 <sha>]           (reel_clips)
+  python3 -m eav.cli retouch <key> --root <dir> (--target film-NN|reel-N | --film N | --reel N)
+                         --region x,y,w,h[:ellipse|rect] [--region ...] --reason "<what is removed>"
+                         (small defects only: each region <= 3% of the still, all <= 6%; paints them over
+                          from the surrounding texture at $0, deterministically, into
+                          stills/retouch/<key>-<n>.png; it supplies the key while its source import
+                          stays current; a second retouch of the key starts from the first)
+  python3 -m eav.cli retouch-undo <key> --root <dir> (--target ... | --film N | --reel N) --reason "<why>"
+                         (retires the key's newest current retouch; kept on record)
   python3 -m eav.cli modal-run <job_id> --root <dir> --colab-units <CU, 0 if none> [--download <dir>] [--dry-run]
                          (runs the built notebook headlessly on a Modal GPU (L4, or L40S for stills); --dry-run only checks and prints the plan;
                           leaves the job folder `import` expects; refuses (exit 3) past the 30 USD UTC-month or the
@@ -95,6 +103,7 @@ FILM_LUFS, REEL_LUFS, LUFS_TOL, TP_MAX = -16.0, -14.0, 1.0, -1.0
 LOOP_MIN = 0.8
 HOOK_ONSET_MAX_S = 0.2
 MP3_END_SLACK_MS = 50
+RETOUCH_DIR = "retouch"  # <root>/stills/retouch/<key>-<n>.png
 
 
 class Stop(Exception):
@@ -328,12 +337,77 @@ def _still_file(folder: Path, key: str):
     return found[0] if found else None
 
 
-def _stills_by_key(rec, target, after=-1) -> dict:
+def _retouches(rec, target, key=None) -> list:
+    """Recorded retouches (artifact still_retouch) of a target, oldest first, each with
+    `undone` set when retouch-undo retired it."""
+    undone = {e["detail"]["path"] for e in rec.data["events"]
+              if e["stage"] == "retouch" and e["result"] == "undone"}
+    return [{**a, "undone": a["path"] in undone} for a in rec.data["artifacts"]
+            if a["kind"] == "still_retouch" and a["meta"].get("target") == target
+            and (key is None or a["meta"].get("key") == key)]
+
+
+def _retouch_view(a) -> dict:
+    m = a["meta"]
+    return {"path": a["path"], "sha256": a["sha256"], "n": m["n"], "reason": m["reason"],
+            "source_path": m["source_path"], "source_sha256": m["source_sha256"],
+            "source_job_id": m["source_job_id"], "regions": m["regions"],
+            "method": m["method"]["name"]}
+
+
+def _apply_retouches(rec, target, base: dict) -> dict:
+    """A retouch supplies its key in place of its source still while the import it was made
+    from (source_job_id) is still the key's current import; the newest live retouch of that
+    chain wins (n+1 was made from n). `intact` is False when the retouched file is missing or no
+    longer matches its recorded sha256 (_check_retouches stops film and reel on it)."""
+    out = dict(base)
+    for key, v in base.items():
+        chain = [a for a in _retouches(rec, target, key)
+                 if not a["undone"] and a["meta"]["source_job_id"] == v["job_id"]]
+        if not chain:
+            continue
+        head = chain[-1]
+        path = rec.root / head["path"]
+        out[key] = {"job_id": v["job_id"], "path": path, "import_path": v["path"],
+                    "retouch": _retouch_view(head),
+                    "intact": path.is_file() and sha256_file(path) == head["sha256"]}
+    return out
+
+
+def _tampered(have: dict) -> str:
+    """next_action text when a current retouch no longer matches its record, else ''."""
+    bad = [v["retouch"]["path"] for v in have.values() if not v.get("intact", True)]
+    return (f"Restore {', '.join(bad)} from git (a retouched still no longer matches its recorded "
+            f"sha256), or retire it: {PROG} retouch-undo <key> --root <root> --target <target> "
+            "--reason \"<why>\"") if bad else ""
+
+
+def _check_retouches(rec, target, have: dict) -> None:
+    bad = [k for k, v in have.items() if not v.get("intact", True)]
+    if bad:
+        paths = ", ".join(have[k]["retouch"]["path"] for k in bad)
+        raise Stop(f"retouched still(s) {paths} (key(s) {', '.join(bad)}) are missing or no longer "
+                   "match their recorded sha256; retouches are never edited by hand",
+                   f"Restore them from git, or retire each: {PROG} retouch-undo <key> --root {rec.root} "
+                   f"--target {target} --reason \"<why>\"")
+
+
+def _stale_retouches(rec, target) -> list:
+    """Live (not undone) retouches no longer used: a newer stills import (or the retirement of
+    their source job) changed the key's current import."""
+    base = _stills_by_key(rec, target, retouched=False)
+    return [a for a in _retouches(rec, target) if not a["undone"]
+            and (base.get(a["meta"]["key"]) or {}).get("job_id") != a["meta"]["source_job_id"]]
+
+
+def _stills_by_key(rec, target, after=-1, retouched=True) -> dict:
     """Per-key replacement rule for stills: key -> {job_id, path}, each key's still taken from the
     most recently IMPORTED, non-retired stills job (a plain job or one chunk) for the target that
     provides it. A newer small job therefore replaces only the keys it holds; every other key keeps
     its earlier still. Superseded, closed and retired jobs never supply a key; a retired group or
-    job is never used again."""
+    job is never used again. With retouched=True (the default) a current retouch of a key's
+    import supplies that key instead (path = the retouched file; `retouch` holds its provenance,
+    `import_path` the imported still)."""
     imports = {}
     for i, e in enumerate(rec.data["events"]):
         if e["stage"] == "import" and e["result"] == "accepted":
@@ -347,7 +421,7 @@ def _stills_by_key(rec, target, after=-1) -> dict:
             path = _still_file(folder, key)
             if path is not None:
                 out[key] = {"job_id": j["job_id"], "path": path}
-    return out
+    return _apply_retouches(rec, target, out) if retouched else out
 
 
 def _stills_expected(rec, target, after=-1) -> list:
@@ -694,6 +768,8 @@ def next_action(root) -> str:
             return (f"{PROG} job narration {r} --film {i} --rates <rates.json with measured "
                     f"s_per_step, units_per_hour, steps, decode_s, export_s>")
         have, missing = _stills_view(rec, t)
+        if _tampered(have):
+            return _tampered(have)
         if have and missing:
             return (f"{t} has no imported still for key(s) {', '.join(missing)}: write prompts for "
                     f"exactly those keys (references/film-recipe.md) into a stills spec, then: {PROG} "
@@ -729,6 +805,8 @@ def next_action(root) -> str:
         if shots is None:
             return f"{PROG} reel {n} {r} --plan-shots"
         have, missing = _stills_view(rec, t, after=planned)
+        if _tampered(have):
+            return _tampered(have)
         missing += [sh["id"] for sh in shots if sh["id"] not in have and sh["id"] not in missing]
         if not have:
             return (f"Write one keyframe prompt per shot of {folder / 'shots.json'} into stills.json "
@@ -745,13 +823,16 @@ def next_action(root) -> str:
             batch = todo[:colab_jobs.MAX_CLIPS_PER_BATCH]
             dirs = list(dict.fromkeys(str(v["path"].parent) for v in have.values()))
             names = [v["path"].name for v in have.values()]
-            clash = any(sum((Path(d) / nm).is_file() for d in dirs) > 1 for nm in names)
-            art = ({v["path"].name: str(v["path"]) for v in have.values()} if clash else
+            clash = (any(sum((Path(d) / nm).is_file() for d in dirs) > 1 for nm in names)
+                     or any("retouch" in v for v in have.values()))
+            # a retouched file is <key>-<n>.png: the map names it by the key's own image name
+            art = ({f"{k}{v['import_path'].suffix}" if "retouch" in v else v["path"].name:
+                    str(v["path"]) for k, v in have.items()} if clash else
                    dirs if len(dirs) > 1 else dirs[0])
             return (f"Write clips.json per references/reel-recipe.md (Clips spec): art_dir = "
                     + (json.dumps(art, ensure_ascii=False) + (
-                        " (image name -> the still the per-key rule uses: a newer stills job "
-                        "replaced some keys)" if clash else " (the stills' folders; each shot's image "
+                        " (image name -> the still the per-key rule uses: a newer stills job or a "
+                        "retouch replaced some keys)" if clash else " (the stills' folders; each shot's image "
                         "is taken from the one that holds it)")
                        if not isinstance(art, str) else art) + ", "
                     f"prior_attempt_evidence = the retained Wan "
@@ -910,6 +991,9 @@ def _job_spec(rec, args, kind, target):
         if args.job_id in taken:  # a job id or a chunk group id names one thing only
             raise Stop(f"--job-id {args.job_id} is already a job or chunk group id in this record",
                        "Pass a new --job-id (or none: a fresh id is made)")
+        if args.job_id == RETOUCH_DIR:  # stills/retouch/ holds the recorded retouches
+            raise Stop(f"--job-id {RETOUCH_DIR} is reserved (stills/{RETOUCH_DIR}/ holds retouched stills)",
+                       "Pass another --job-id (or none: a fresh id is made)")
         spec["job_id"] = args.job_id
     return spec, colab_jobs.job_items(kind, spec)
 
@@ -1943,6 +2027,7 @@ def cmd_film(args):
                    + _incomplete(rec, "narration", t) + _incomplete(rec, "stills", t)
                    + (f" (no imported still for key(s) {', '.join(missing)})" if have and missing else ""),
                    next_action(rec.root))
+    _check_retouches(rec, t, have)
     sources = _stills_sources(have)
     lang = plan["language"]
     scs = films[args.film - 1]["scenes"]
@@ -1993,7 +2078,13 @@ def cmd_film(args):
                                                 "true_peak": m["true_peak"], "score": score_info,
                                                 "narration_job_id": narr["job_id"],
                                                 "stills_job_ids": list(sources),
-                                                "stills_by_key": {k: v["job_id"] for k, v in have.items()},
+                                                # a retouched key: {job_id, retouch provenance}
+                                                "stills_by_key": {k: ({"job_id": v["job_id"],
+                                                                       "retouch": v["retouch"]}
+                                                                      if "retouch" in v else v["job_id"])
+                                                                  for k, v in have.items()},
+                                                "retouched_keys": sorted(k for k, v in have.items()
+                                                                         if "retouch" in v),
                                                 "suspect_truncated": suspects,
                                                 "qc_accepted": sorted(accepted), **info})
     rec.event("film", "assembled", {"target": t, "duration": info["duration"]})
@@ -2001,6 +2092,8 @@ def cmd_film(args):
           f"TP {m['true_peak']:.1f} dBTP, from narration job {_used(narr)} and stills job"
           f"{'s' if len(sources) > 1 else ''} "
           + ", ".join(f"{j} ({len(k)} keys)" for j, k in sources.items())
+          + "".join(f"; retouched: {k} ({v['retouch']['path']})" for k, v in have.items()
+                    if "retouch" in v)
           + ". Maison video stays held (Stream cost not approved).")
 
 
@@ -2483,6 +2576,17 @@ def cmd_status(args):
                   "non-retired job)" + (f"; no imported still yet for {', '.join(missing)}" if missing else ""))
             for job_id, keys in _stills_sources(have).items():
                 print(f"    {job_id}: {', '.join(keys)}")
+            for k, v in have.items():
+                if "retouch" in v:
+                    r = v["retouch"]
+                    print(f"    retouched {k}: {r['path']} (from {r['source_path']}; {r['reason']})"
+                          + ("" if v["intact"] else " -- MODIFIED or missing since recorded: restore "
+                             "it from git or retouch-undo it"))
+            for a in _stale_retouches(rec, t):
+                m = a["meta"]
+                print(f"    stale retouch {m['key']}: {a['path']} was made from {m['source_job_id']}, "
+                      "which a newer stills import replaced for that key (not used; retouch the new "
+                      "still if it still needs it)")
 
 
 REPO = Path(__file__).resolve().parents[4]
@@ -2548,7 +2652,119 @@ def cmd_social(args):
           "destination instruction and turning on each platform's AI-content label.")
 
 
+def _retouch_target(args) -> str:
+    given = [x for x in (args.target, args.film, args.reel) if x is not None]
+    if len(given) != 1:
+        raise Stop("name the still's target exactly once: --target film-NN|reel-N, --film N or --reel N",
+                   f"{PROG} {args.command} {args.key} --root {args.root} --film 1 ...")
+    if args.film is not None:
+        return _film_target(args.film)
+    if args.reel is not None:
+        return f"reel-{args.reel}"
+    if not re.fullmatch(r"film-\d{2,}|reel-\d+", args.target):
+        raise Stop(f"--target {args.target!r} is not film-NN or reel-N", "Pass e.g. --target film-01")
+    return args.target
+
+
+def _rel(rec, path) -> str:
+    return Path(path).resolve().relative_to(rec.root.resolve()).as_posix()
+
+
+def _next_retouch_n(rec, key) -> int:
+    """n for <key>-<n>.png: one past every recorded retouch of the key (any target) and every
+    file already in stills/retouch/, so a number is never reused."""
+    taken = [a["meta"]["n"] for a in rec.data["artifacts"]
+             if a["kind"] == "still_retouch" and a["meta"].get("key") == key]
+    folder = rec.root / "stills" / RETOUCH_DIR
+    if folder.is_dir():
+        pat = re.compile(re.escape(key) + r"-(\d+)\.png")
+        taken += [int(m.group(1)) for p in folder.iterdir() if (m := pat.fullmatch(p.name))]
+    return max(taken, default=0) + 1
+
+
+def cmd_retouch(args):
+    """Paint small defects (a bindi dot, an earring, stray lettering) out of the still that
+    currently supplies a key, deterministically and at $0; the result supplies that key while
+    its source import stays current."""
+    from PIL import Image
+
+    from . import retouch
+
+    rec = _record(args.root)
+    t = _retouch_target(args)
+    redo = (f"{PROG} retouch {args.key} --root {rec.root} --target {t} --region x,y,w,h[:ellipse|rect] "
+            "--reason \"<what is removed>\"")
+    reason = (args.reason or "").strip()
+    if not reason:
+        raise Stop("--reason is empty: say what the retouch removes (e.g. \"bindi dot on the "
+                   "widow's forehead\")", redo)
+    if any(j["job_id"] == RETOUCH_DIR for j in _jobs(rec)):
+        raise Stop(f"a job named {RETOUCH_DIR} owns stills/{RETOUCH_DIR}/; retouches cannot be kept apart",
+                   "Report this; never retouch into an imported job's folder")
+    have = _stills_by_key(rec, t)
+    cur = have.get(args.key)
+    if cur is None:
+        raise Stop(f"{t} has no current still for key {args.key!r} (no imported, non-retired stills "
+                   "job supplies it)", next_action(rec.root))
+    _check_retouches(rec, t, {args.key: cur})
+    try:
+        regions = [retouch.parse_region(r) for r in args.region or []]
+        src = cur["path"]
+        src_sha = sha256_file(src)
+        with Image.open(src) as im:
+            im.load()
+            out_img, method = retouch.retouch(im, regions, retouch.seed_from_sha(src_sha))
+    except ValueError as e:
+        raise Stop(f"retouch refused: {e}", "Retouch is for small defects only; to change a "
+                   "character or the composition, write a new prompt and build a stills job for "
+                   "that key (references/film-recipe.md)")
+    n = _next_retouch_n(rec, args.key)
+    out = rec.root / "stills" / RETOUCH_DIR / f"{args.key}-{n}.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    tmp = out.with_name(f".{out.name}.tmp")
+    out_img.save(tmp, format="PNG")
+    os.replace(tmp, out)
+    prev = cur.get("retouch")
+    meta = {"target": t, "key": args.key, "n": n, "source_path": _rel(rec, src),
+            "source_sha256": src_sha, "source_job_id": cur["job_id"],
+            "source_retouch": prev["path"] if prev else None, "regions": regions,
+            "method": method, "output_sha256": sha256_file(out), "reason": reason}
+    art = rec.add_artifact("still_retouch", out, meta)
+    rec.event("retouch", "applied", {**meta, "path": art["path"]})
+    print(f"Retouched {t} key {args.key}: {art['path']} from {meta['source_path']} "
+          f"(job {cur['job_id']}{', retouch ' + str(prev['n']) if prev else ''}); {len(regions)} "
+          f"region(s), {method['masked_pixels']} px masked, {method['iterations']} iterations"
+          f"{'' if method['converged'] else ' (iteration cap reached)'}; sha256 {art['sha256'][:12]}. "
+          "It supplies the key while that import stays current; look at it before the film uses it.")
+
+
+def cmd_retouch_undo(args):
+    """Retire the newest current retouch of a key: the key falls back to the retouch before it,
+    else to its imported still. Kept on record (artifact, file, events)."""
+    rec = _record(args.root)
+    t = _retouch_target(args)
+    reason = (args.reason or "").strip()
+    if not reason:
+        raise Stop("--reason is empty: say why the retouch is retired",
+                   f"{PROG} retouch-undo {args.key} --root {rec.root} --target {t} --reason \"<why>\"")
+    base = _stills_by_key(rec, t, retouched=False).get(args.key)
+    chain = [a for a in _retouches(rec, t, args.key) if not a["undone"]
+             and base is not None and a["meta"]["source_job_id"] == base["job_id"]]
+    if not chain:
+        stale = [a["path"] for a in _retouches(rec, t, args.key) if not a["undone"]]
+        raise Stop(f"{t} key {args.key!r} has no current retouch"
+                   + (f" (stale, already unused: {', '.join(stale)})" if stale else ""),
+                   f"{PROG} status --root {rec.root}")
+    head = chain[-1]
+    rec.event("retouch", "undone", {"target": t, "key": args.key, "path": head["path"],
+                                    "n": head["meta"]["n"], "reason": reason})
+    now = _stills_by_key(rec, t)[args.key]
+    print(f"Retired retouch {head['path']} of {t} key {args.key} (kept on record); the key is now "
+          f"supplied by {_rel(rec, now['path'])}.")
+
+
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
+            "retouch": cmd_retouch, "retouch-undo": cmd_retouch_undo,
             "supersede": cmd_supersede, "close": cmd_close, "retire": cmd_retire,
             "modal-run": cmd_modal_run, "modal-settle": cmd_modal_settle,
             "modal-request": cmd_modal_request, "r2-upload": cmd_r2_upload,
@@ -2633,6 +2849,18 @@ def _parser():
     s.add_argument("--discard-finished", action="store_true",
                    help="owner only: also retire a job whose Modal run finished (ok), giving up its "
                    "paid outputs (re-request or import recovers them instead)")
+    for name in ("retouch", "retouch-undo"):
+        s = add(name)
+        s.add_argument("key", help="the still's key, e.g. s03-2 or shot-04")
+        s.add_argument("--target", help="film-NN or reel-N")
+        s.add_argument("--film", type=int)
+        s.add_argument("--reel", type=int)
+        s.add_argument("--reason", required=True,
+                       help="what is removed" if name == "retouch" else "why the retouch is retired")
+        if name == "retouch":
+            s.add_argument("--region", action="append", metavar="X,Y,W,H[:ellipse|rect]",
+                           help="in the still's own pixels; repeatable; ellipse by default; each "
+                           "<= 3%% of the image, all together <= 6%%")
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)
