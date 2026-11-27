@@ -112,13 +112,21 @@ class CorrectionQueueTests(TestCase):
     def setUp(self):
         self.owner = get_user_model().objects.create_user("owner@example.test", "Test-Only-Passphrase-47", is_verified=True)
 
-    def test_queue_puts_the_corrected_clearance_cover_and_translation_on_the_monday_page_without_approving(self):
+    def test_queue_puts_the_corrected_clearance_and_cover_on_the_monday_page_without_approving(self):
+        from library.models import Edition, Revision, Work
         from operations.models import ReviewItem
+        # As in production: The Hungry Stone is live, so its edition files are informational and not queued.
+        work = Work.objects.create(slug=SLUG, title="ক্ষুধিত পাষাণ", creators=["রবীন্দ্রনাথ ঠাকুর"], house="golpo")
+        english = Edition.objects.create(work=work, slug="kshudhita-pashan-en", locale="en")
+        revision = Revision.objects.create(edition=english, title="The Hungry Stone", content_sha256="")
+        Revision.objects.filter(pk=revision.pk).update(state="live")
+        Edition.objects.filter(pk=english.pk).update(live_revision=revision)
         out = io.StringIO()
         call_command("queue_intake_packets", "--slug", SLUG, "--slug", "kshudhita-pashan-en", stdout=out)
+        self.assertIn("kshudhita-pashan-en: edition files skipped (informational: the edition is already live)", out.getvalue())
+        self.assertFalse(ReviewItem.objects.filter(kind="edition").exists())
         items = {(i.kind, i.ref): i for i in ReviewItem.objects.all()}
-        for kind, ref in (("clearance", CORRECTED_CLEARANCE), ("cover", COVER),
-                          ("edition", "library/intake/kshudhita-pashan-en/translation.json")):
+        for kind, ref in (("clearance", CORRECTED_CLEARANCE), ("cover", COVER)):
             item = items[(kind, ref)]
             self.assertEqual(item.sha256, command.sha256((REPO / ref).read_bytes()))
             self.assertEqual((item.status, item.decided_by, item.standing), ("pending", None, False))
@@ -354,6 +362,92 @@ class ReviseStageTests(TestCase):
         edition.refresh_from_db()
         self.assertEqual(str(edition.live_revision_id), first["revision_id"])
         self.assertNotIn("publication_clearance", Revision.objects.get(pk=expected).validation_evidence)
+
+    def test_publish_moves_positions_notes_and_highlights_to_the_corrected_revision_once(self):
+        import uuid
+        from library.models import Edition, Paragraph, Revision
+        from reader.models import Annotation, Progress
+        from reader.services import annotation_data
+        first = self.publish_first()
+        old = Revision.objects.get(pk=first["revision_id"])
+        edition = old.edition
+        unit = old.units.get()
+        p = {n: Paragraph.objects.get(unit=unit, ordinal=n) for n in (6, 10, 37)}
+        users = [get_user_model().objects.create_user(f"reader{i}@example.test", "Test-Only-Passphrase-47", is_verified=True)
+                 for i in range(3)]
+        six, thirty_seven = p[6].text, p[37].text
+        after_insert = six.index("রাত্রিযাপন করিবেন") + len("রাত্রিযাপন করিবেন") + 1  # just after the danda
+        start37, end37 = thirty_seven.index("লাগিল"), thirty_seven.index("কিন্তু") + len("কিন্তু")
+        ten_end = p[10].text.index(" ", 5)  # a word boundary
+
+        def rng(paragraph, start, end):
+            return {"unit_id": str(unit.id), "start_anchor_id": str(paragraph.anchor_id), "start_offset_chars": start,
+                    "end_anchor_id": str(paragraph.anchor_id), "end_offset_chars": end, "offset_unit": "unicode_code_point"}
+
+        def progress(user, paragraph, offset):
+            return Progress.objects.create(user=user, edition=edition, revision=old, format="reader", last_operation_id=uuid.uuid4(),
+                location={"format": "reader", "unit_id": str(unit.id), "anchor_id": str(paragraph.anchor_id), "offset_chars": offset})
+
+        note_unchanged = Annotation.objects.create(user=users[0], revision=old, kind="note", range=rng(p[10], 0, ten_end),
+                                                   note_text="unchanged", quoted_text=p[10].text[:ten_end])
+        note_changed = Annotation.objects.create(user=users[0], revision=old, kind="note", range=rng(p[37], start37, end37),
+                                                 note_text="changed", quoted_text=thirty_seven[start37:end37])
+        highlight = Annotation.objects.create(user=users[1], revision=old, kind="highlight", color="gold",
+                                              range=rng(p[6], 0, after_insert), quoted_text=six[:after_insert])
+        bookmark = Annotation.objects.create(user=users[1], revision=old, kind="bookmark", range=rng(p[6], after_insert, after_insert))
+        saved_changed, saved_unchanged = progress(users[0], p[6], after_insert), progress(users[1], p[10], ten_end)
+        before_updated = Progress.objects.get(pk=saved_unchanged.pk).updated_at
+
+        self.apply_correction()
+        self.approve(("clearance", CORRECTED_CLEARANCE, SLUG), ("cover", COVER, SLUG))
+        revised = self.run_command("revise", SLUG)[SLUG]
+        new = Revision.objects.get(pk=revised["revision_id"])
+        record = new.validation_evidence["source_revision"]
+        self.assertEqual(len(record["anchor_map"]), 59)
+        self.assertEqual(record["unit_map"], {str(unit.id): str(new.units.get().id)})
+        self.assertEqual(Progress.objects.filter(revision=old).count(), 2)  # nothing moves before publish
+        self.run_command("evidence", SLUG, extra=self.browser({SLUG: revised["sha256"]}))
+        published = self.run_command("publish", SLUG)[SLUG]
+        self.assertEqual(published["steps"][-1]["reader_state_moved"], {"progress": 2, "annotations": 4, "left_unmapped": 0})
+
+        new_unit = new.units.get()
+        q = {n: Paragraph.objects.get(unit=new_unit, ordinal=n) for n in (6, 10, 37)}
+        self.assertEqual(record["anchor_map"][str(p[6].anchor_id)], str(q[6].anchor_id))
+        for row in (note_unchanged, note_changed, highlight, bookmark):
+            row.refresh_from_db()
+            self.assertEqual(row.revision_id, new.id)
+            self.assertEqual(row.range["unit_id"], str(new_unit.id))
+            self.assertEqual(row.version, 2)
+            self.assertEqual(annotation_data(row)["anchor_status"], "valid")
+        self.assertEqual((note_unchanged.range["start_anchor_id"], note_unchanged.range["end_offset_chars"]), (str(q[10].anchor_id), ten_end))
+        self.assertEqual(note_unchanged.quoted_text, q[10].text[:ten_end])
+        self.assertEqual(note_changed.range["start_anchor_id"], str(q[37].anchor_id))
+        self.assertEqual(note_changed.quoted_text, "লাগিল জানি না কিন্তু")  # the range spans the restored word
+        self.assertEqual(highlight.range["end_offset_chars"], after_insert + 3)
+        self.assertTrue(highlight.quoted_text.endswith("রাত্রিযাপন করিবেন না।"))
+        self.assertEqual((bookmark.range["start_offset_chars"], bookmark.range["end_offset_chars"]), (after_insert + 3, after_insert + 3))
+        saved_changed.refresh_from_db(); saved_unchanged.refresh_from_db()
+        self.assertEqual((saved_changed.revision_id, saved_changed.location["anchor_id"], saved_changed.location["offset_chars"]),
+                         (new.id, str(q[6].anchor_id), after_insert + 3))
+        self.assertLessEqual(saved_changed.location["offset_chars"], len(q[6].text))
+        self.assertEqual((saved_unchanged.location["anchor_id"], saved_unchanged.location["offset_chars"]), (str(q[10].anchor_id), ten_end))
+        self.assertEqual(saved_unchanged.updated_at, before_updated)  # the Continue shelf order is kept
+
+        again = self.run_command("publish", SLUG)[SLUG]  # re-run: already live, nothing moves twice
+        self.assertEqual(again["steps"], [])
+        from operations.revision_remap import remap_reader_state
+        self.assertEqual(remap_reader_state(old.id, new), {"progress": 0, "annotations": 0, "left_unmapped": 0})
+        self.assertEqual(sorted(Annotation.objects.values_list("version", flat=True)), [2, 2, 2, 2])
+        self.assertEqual(sorted(Progress.objects.values_list("version", flat=True)), [2, 2])
+        self.assertEqual(Edition.objects.get(pk=edition.pk).live_revision_id, new.id)
+
+    def test_map_offset_follows_an_insertion_and_clamps(self):
+        from operations.revision_remap import map_offset
+        old, new = "জানি কিন্তু", "জানি না কিন্তু"
+        self.assertEqual(map_offset(old, new, old.index("কিন্তু"), "start"), new.index("কিন্তু"))
+        self.assertEqual(map_offset(old, new, len("জানি"), "end"), len("জানি"))
+        self.assertEqual(map_offset(old, new, len(old), "end"), len(new))
+        self.assertEqual(map_offset("abcdef", "abc", 6, "start"), 3)  # clamped to the new length
 
     def test_revise_refuses_a_structural_change(self):
         self.publish_first()
