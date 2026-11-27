@@ -384,7 +384,7 @@ body.room-focused{background:var(--paper),#1A0E12;--surface:#2A1820;--raised:#35
    and gives the space back with an equal negative margin (or grows into empty space), so nothing visible moves. */
 .room-footer a,.book-row h3 a,.series-episodes h2 a,.unit-list a{min-width:44px}
 .focus-toolbar>a{padding:0 7px;margin:0 -7px}
-.actions>a:not(.button){padding:9px 0;margin:-9px 0}
+.title-layout .actions>a:not(.button):not(.text-link){padding:9px 0;margin:-9px 0}
 [data-preview-fallback] a{padding:11px 0}
 /* stacked carousel cards sit back in perspective (down to 0.94x), so their links get 4px of spare height */
 .turn-actions .room-link{min-height:48px;margin:-2px 0}

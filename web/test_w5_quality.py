@@ -52,6 +52,7 @@ class W5PageTests(TestCase):
                 self.assertTrue(url.endswith(f"maison/art/hero-{width}.{extension}"), url)
                 self.assertTrue((ART / f"hero-{width}.{extension}").is_file())
             self.assertTrue(sizes.endswith(", 574px"))
+            self.assertIn("(max-width: 1200px) calc(53.5vw - 68px)", sizes)  # .room-wrap stops growing at 1200px
         img = re.search(r"<img [^>]*>", figure).group(0)
         self.assertIn('src="/static/maison/art/hero.png"', img)
         self.assertIn('fetchpriority="high"', img)  # above the fold: never lazy
@@ -126,13 +127,17 @@ class W5TapTargetStyleTests(TestCase):
         for rule in (
             ".room-footer a,.book-row h3 a,.series-episodes h2 a,.unit-list a{min-width:44px}",
             ".focus-toolbar>a{padding:0 7px;margin:0 -7px}",
-            ".actions>a:not(.button){padding:9px 0;margin:-9px 0}",
+            ".title-layout .actions>a:not(.button):not(.text-link){padding:9px 0;margin:-9px 0}",
             "[data-preview-fallback] a{padding:11px 0}",
             ".turn-actions .room-link{min-height:48px;margin:-2px 0}",
             ".room-logo-mini{box-sizing:content-box;padding:5px 0 6px;margin:-5px 0 -6px;background:none;outline:0;isolation:isolate}",
             ".room-hero-picture{display:contents}",
         ):
             self.assertIn(rule, self.css)
+        # the 44px box grows only the title page's sign-in link, never a .text-link (whose 16px top margin must hold)
+        for line in self.css.splitlines():
+            if "padding:9px 0;margin:-9px 0" in line:
+                self.assertTrue(line.startswith(".title-layout .actions>a:not(.button):not(.text-link){"), line)
 
     def test_mini_logo_tile_is_redrawn_by_pseudo_elements(self):
         self.assertIn(".room-logo-mini::before{content:\"\";position:absolute;z-index:-1;inset:5px 0 6px;border-radius:6px;background:var(--ivory)}", self.css)
