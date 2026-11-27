@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="{% static 'maison/room/room.css' %}?v={% asset_version 'maison/room/room.css' %}">
 <script src="{% static 'maison/app.js' %}?v={% asset_version 'maison/app.js' %}" defer></script>
 <script src="{% static 'maison/room/room.js' %}?v={% asset_version 'maison/room/room.js' %}" defer></script>{% block scripts %}{% endblock %}</head>
-<body data-route="{{ request.resolver_match.url_name }}" data-member-id="{{ request.user.public_id|default:'' }}" data-member="{{ request.user.is_authenticated|yesno:'true,false' }}" data-offline-enabled="{{ offline_enabled|yesno:'true,false' }}" class="room maison theme-{{ app_theme }}{% if focused %} room-focused{% endif %}{% if reduced_motion %} reduced-motion{% endif %}" lang="en">
+<body data-route="{{ request.resolver_match.url_name }}" data-member-id="{{ request.user.public_id|default:'' }}" data-member="{{ request.user.is_authenticated|yesno:'true,false' }}" data-offline-enabled="{{ offline_enabled|yesno:'true,false' }}" class="room maison theme-{{ app_theme }}{% if focused %} room-focused{% endif %}{% if reduced_motion %} reduced-motion{% endif %}{% if reader_theme %} reader-theme-{{ reader_theme }}{% endif %}"{% if reader_theme %} data-reader-theme-saved="{{ reader_theme }}"{% endif %} lang="en">{% block early_theme %}{% endblock %}
 <svg class="sprite" aria-hidden="true" focusable="false">
   <symbol id="i-book" viewBox="0 0 24 24"><path d="M3 5.5C5.5 4.5 8.5 4.5 12 6.5c3.5-2 6.5-2 9-1V19c-2.5-1-5.5-1-9 1-3.5-2-6.5-2-9-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 6.5V20" stroke="currentColor" stroke-width="1.6"/></symbol>
   <symbol id="i-head" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="14" width="4.5" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="16.5" y="14" width="4.5" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
@@ -31,7 +31,7 @@
 {% if focused %}<header class="room-top room-evening"><div class="room-wrap">
   <a class="room-back" href="{% if edition.edition_id %}{% url 'web:title' ui_locale edition.edition_id %}{% else %}{% url 'web:home' ui_locale %}{% endif %}"><svg aria-hidden="true"><use href="#i-back"/></svg><span>{% ui 'back' %}</span></a>
   <span class="room-evening-title">{{ edition.title|default:ui.site_name }}</span>
-  <a class="room-logo room-logo-mini" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="" width="1400" height="500"></a>
+  <a class="room-logo room-logo-mini logo-plate" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="" width="1400" height="500"></a>
 </div></header>{% else %}<header class="room-top"><div class="room-wrap">
   <a class="room-logo" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="Earnalism — Where Learning Becomes Earning — A Reo Enterprise venture" width="1400" height="500"></a>
   <nav class="room-nav" aria-label="Main">

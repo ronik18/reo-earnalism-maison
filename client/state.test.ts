@@ -15,6 +15,7 @@ import {
   placeTitle,
   measuredSeek,
   validReturnPath,
+  initialReaderTheme,
 } from "./state.ts";
 import { readFileSync } from "node:fs";
 import { wrapTextSpan } from "./follow-dom.ts";
@@ -755,4 +756,15 @@ test("test_map_fetch_backoff: a failure does not refetch at once, retries after 
   for (let i = 0; i < 20; i++) f = mapFailed(f, t0);
   assert.equal(mapFetchPlan(f, t0 + MAP_RETRY_MAX_MS - 1), "wait");
   assert.equal(mapFetchPlan(f, t0 + MAP_RETRY_MAX_MS), "fetch"); // capped
+});
+
+test("a saved Light or Sepia theme is never switched to dark by the system setting", () => {
+  assert.equal(initialReaderTheme("light", true), "light");
+  assert.equal(initialReaderTheme("sepia", true), "sepia");
+  assert.equal(initialReaderTheme("true_black", false), "true_black");
+});
+test("with nothing saved the system dark setting picks dark, otherwise light", () => {
+  assert.equal(initialReaderTheme(null, true), "dark");
+  assert.equal(initialReaderTheme(null, false), "light");
+  assert.equal(initialReaderTheme("bogus", true), "dark");
 });

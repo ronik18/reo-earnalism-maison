@@ -191,3 +191,11 @@ export function mediaMetadataFor(
     artwork: boot.cover_url ? [{ src: boot.cover_url, ...(sized ? { sizes: `${boot.cover_width}x${boot.cover_height}` } : {}) }] : [],
   };
 }
+
+export type ReaderTheme = "light" | "sepia" | "dark" | "true_black";
+const READER_THEMES: readonly string[] = ["light", "sepia", "dark", "true_black"];
+/** Night first: a saved theme always wins; the device's dark setting only picks the start when nothing is saved. */
+export function initialReaderTheme(saved: string | null | undefined, prefersDark: boolean): ReaderTheme {
+  if (saved && READER_THEMES.includes(saved)) return saved as ReaderTheme;
+  return prefersDark ? "dark" : "light";
+}

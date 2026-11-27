@@ -231,6 +231,26 @@ class ExperienceTests(TestCase):
         notes = self.client.get("/api/v1/me/annotations?edition_revision_id=" + revision).json()["items"]
         self.assertEqual(notes[0]["note_text"], "A local reader note.")
 
+    def test_reader_header_carries_theme_class(self):
+        from accounts.models import Preferences
+        self.login()
+        url = f"/en/read/{self.edition}/{self.unit}/"
+        Preferences.objects.update_or_create(user=self.user, defaults={"reader_theme": "sepia"})
+        html = self.client.get(url).content.decode()
+        body = re.search(r"<body[^>]*>", html).group(0)
+        self.assertIn("reader-theme-sepia", body)
+        self.assertIn('data-reader-theme-saved="sepia"', body)
+        self.assertIn("logo-plate", html.split("<header", 1)[1].split("</header>", 1)[0])
+        self.assertIn("maison/room/reader-theme.js", html)
+        self.assertNotIn("<script>", html.split("<main", 1)[0].lower().replace("<script src", ""))
+
+    def test_anonymous_reader_has_no_server_theme_so_the_device_can_choose(self):
+        html = self.client.get(f"/en/read/{self.edition}/{self.unit}/").content.decode()
+        self.assertNotIn("reader-theme-", re.search(r"<body[^>]*>", html).group(0))
+        script = (Path(settings.BASE_DIR) / "static/maison/room/reader-theme.js").read_text()
+        self.assertIn("prefers-color-scheme: dark", script)
+        self.assertIn("maison.reader.preferences", script)
+
     def test_saved_filter_and_full_reader_preferences_persist(self):
         self.login()
         old = self.client.get("/api/v1/me/preferences").json()

@@ -58,3 +58,24 @@ class PeacockShellTests(SimpleTestCase):
         html=render_to_string('web/base.html',context(request,'bn'),request=request)
         main=html.split('<main',1)[1].split('</main>',1)[0]
         for route in ('privacy','terms','contact'):self.assertIn('/en/'+route+'/',main)
+
+
+class LogoPlateTests(SimpleTestCase):
+    def test_logo_img_has_no_filter_and_same_src(self):
+        root=Path(settings.BASE_DIR)/'static/maison'
+        for name in ('app.css','room/room.css'):
+            css=(root/name).read_text()
+            for rule in re.findall(r'([^{}]*)\{([^{}]*)\}',css):
+                selector,body=rule
+                if 'logo-plate' in selector and 'img' in selector or re.search(r'\.room-logo(-mini)?\s+img',selector):
+                    for prop in ('filter','opacity','mix-blend-mode','backdrop-filter'):
+                        self.assertNotRegex(body,r'(^|[;\s])'+prop+r'\s*:',(name,selector))
+        request=RequestFactory().get('/en/read/x/y/');request.user=AnonymousUser()
+        request.resolver_match=SimpleNamespace(url_name='reader')
+        html=render_to_string('web/base.html',context(request,'en',focused=True),request=request)
+        self.assertRegex(html,r'class="room-logo room-logo-mini logo-plate"[^>]*>\s*<img src="[^"]*maison/logo\.png[^"]*"')
+    def test_logo_plate_is_ivory_in_every_reader_theme(self):
+        css=(Path(settings.BASE_DIR)/'static/maison/room/room.css').read_text()
+        self.assertRegex(css,r'\.logo-plate\{[^}]*background:var\(--ivory\)')
+        for theme in ('light','sepia','dark','true_black'):
+            self.assertIn('body.reader-theme-'+theme,css)

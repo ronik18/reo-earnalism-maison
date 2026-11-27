@@ -258,7 +258,13 @@ def reader(request, locale, edition_id, unit_id=None):
     if document.get("preview"):
         bootstrap["next_unit_url"]=None
         bootstrap["player_url"]=None
-    return page(request, locale, "web/reader.html", document=document, edition=edition, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination)
+    saved_theme = None
+    if request.user.is_authenticated:
+        try:
+            saved_theme = request.user.preferences.reader_theme
+        except ObjectDoesNotExist:
+            pass
+    return page(request, locale, "web/reader.html", document=document, edition=edition, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination, reader_theme=saved_theme)
 
 
 class EmailForm(forms.Form):

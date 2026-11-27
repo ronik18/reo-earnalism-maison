@@ -39,6 +39,7 @@ import {
   samePosition,
   pageCount,
   type Position,
+  initialReaderTheme,
 } from "./state";
 interface Boot {
   edition_id: string;
@@ -85,6 +86,13 @@ interface Annotation {
   color: string;
   anchor_status: string;
   range: Range;
+}
+function prefersDark(): boolean {
+  try {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  } catch {
+    return false;
+  }
 }
 const defaultPreferences = {
   reader_font_size: 20,
@@ -157,12 +165,14 @@ function Reader({ boot }: { boot: Boot }) {
   const conflictPosition = useRef<Position | undefined>(undefined);
   const [preferences, setPreferences] = useState<Partial<Preferences>>(() => {
     try {
-      const prefs = {
-        ...defaultPreferences,
-        ...JSON.parse(
-          localStorage.getItem("maison.reader.preferences") || "{}",
-        ),
-      };
+      const stored = JSON.parse(
+        localStorage.getItem("maison.reader.preferences") || "{}",
+      );
+      const prefs = { ...defaultPreferences, ...stored };
+      prefs.reader_theme = initialReaderTheme(
+        document.body.dataset.readerThemeSaved || stored.reader_theme,
+        prefersDark(),
+      );
       prefs.reader_line_height = Math.max(
         prefs.reader_line_height,
         boot.content_locale === "bn" ? 1.8 : 1.5,
@@ -506,6 +516,11 @@ function Reader({ boot }: { boot: Boot }) {
     for (const name of ["light", "paper", "sepia", "dark", "ink", "true_black"])
       reader.classList.remove("reader-" + name);
     reader.classList.add("reader-" + (preferences.reader_theme || "light"));
+    for (const name of ["light", "sepia", "dark", "true_black"])
+      document.body.classList.remove("reader-theme-" + name);
+    document.body.classList.add(
+      "reader-theme-" + (preferences.reader_theme || "light"),
+    );
     reader.classList.toggle("sans", preferences.reader_typeface === "sans");
     reader.dataset.layout = preferences.reader_layout || "scroll";
   }, [preferences]);

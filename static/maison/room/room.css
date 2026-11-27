@@ -372,3 +372,13 @@ body.room-focused{background:var(--paper),#1A0E12;--surface:#2A1820;--raised:#35
 .room-page button.icon-button:not(.turn-btn):not(.turn-dot){width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px}
 .room-focused .player-panel :focus-visible{outline-color:var(--gold-on-dark)}
 .icon-button svg{width:24px;height:24px}
+
+/* night first: the reader's theme reaches the header; the logo stays unaltered on its ivory plate */
+.logo-plate{background:var(--ivory);outline:4px solid var(--ivory);border-radius:6px}
+body.reader-theme-light .room-evening{background:#FBF6EC;border-bottom-color:#DCCAA8;color:#24161A}
+body.reader-theme-sepia .room-evening{background:#E3CFAA;border-bottom-color:#C9B07F;color:#24161A}
+body.reader-theme-dark .room-evening{background:linear-gradient(180deg,#2A1820,#1A0E12);border-bottom-color:#4A3038;color:var(--night-ink)}
+body.reader-theme-true_black .room-evening{background:#000;border-bottom-color:#3A2A30;color:var(--night-ink)}
+body.reader-theme-light .room-evening .room-back,body.reader-theme-sepia .room-evening .room-back{color:#24161A}
+body.reader-theme-light .room-evening .room-back:hover,body.reader-theme-sepia .room-evening .room-back:hover{background:rgba(36,22,26,.08)}
+body.reader-theme-light .room-evening :focus-visible,body.reader-theme-sepia .room-evening :focus-visible{outline-color:var(--wine)}
