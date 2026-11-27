@@ -48,9 +48,9 @@ def _stems(d, s=14.0):
     return d
 
 
-def _voice(path, total=TOTAL, amp=0.3):
+def _voice(path, total=TOTAL, amp=0.3, always=False):
     t = _t(total)
-    gate = ((t % 3.0) < 1.8).astype(float)               # speech 0-1.8 s, gap 1.8-3 s, repeating
+    gate = np.ones(len(t)) if always else ((t % 3.0) < 1.8).astype(float)   # speech 0-1.8 s, gap 1.8-3 s, repeating
     _wav(path, amp * np.sin(2 * np.pi * 220 * t) * gate)
     return path
 
@@ -59,9 +59,10 @@ def _noise(path, s, amp=0.1):
     _wav(path, amp * _rng.standard_normal(int(s * SR)))
 
 
-def _mix(tmp_path, peak_at=7.0, total=TOTAL, cuts=(0.0, 2.5, 5.0, 6.0), amb=(), foley=()):
+def _mix(tmp_path, peak_at=7.0, total=TOTAL, cuts=(0.0, 2.5, 5.0, 6.0), amb=(), foley=(), amp=0.3, always=False,
+         voice_total=None):
     stems = _stems(tmp_path / "stems")
-    voice = _voice(tmp_path / "v.wav", total)
+    voice = _voice(tmp_path / "v.wav", voice_total or total, amp, always)
     out = tmp_path / "scene.wav"
     r = cue.scene_mix(voice, list(cuts), peak_at, {k: stems / f"{n}.wav" for k, n in
                       (("drone", "drone"), ("solo", "pluck"), ("phrase", "chord"))}, list(amb), list(foley), out, total)
@@ -105,6 +106,42 @@ def test_peak_silence_at_scene_end_is_clipped(tmp_path):
 def test_voice_over_music_in_range_16_to_18(tmp_path):
     r, _ = _mix(tmp_path)
     assert 16.0 <= r["voice_over_music_db"] <= 18.0, r
+
+
+def test_margin_holds_for_quiet_and_loud_voices(tmp_path):
+    for i, amp in enumerate((0.05, 0.15, 0.6)):
+        d = tmp_path / str(i)
+        d.mkdir()
+        r, _ = _mix(d, amp=amp)
+        assert 16.0 <= r["voice_over_music_db"] <= 18.0, (amp, r)
+        assert abs(r["lufs"] + 16) <= 1.0 and r["true_peak"] <= -1.5
+
+
+def test_true_peak_over_limit_is_refused(tmp_path, monkeypatch):
+    import pytest
+    from eav import mix
+    real = mix._loudnorm_gated
+    monkeypatch.setattr(mix, "_loudnorm_gated", lambda pre, out, t: {**real(pre, out, t), "true_peak": -1.2})
+    with pytest.raises(ValueError, match="true peak"):
+        _mix(tmp_path)
+
+
+def test_no_end_fade_voice_and_room_tone_survive_to_the_end(tmp_path):
+    n1 = tmp_path / "amb.wav"
+    _noise(n1, TOTAL)
+    _, out = _mix(tmp_path, always=True, amb=[{"path": n1, "at": 0.0, "gain_db": -36, "fin": 0.0, "fout": 0.0}])
+    y = samples(out)
+    assert np.abs(y[-int(0.05 * SR):]).max() > 1e-3
+    assert abs(rms_db(y[-SR:]) - rms_db(y[-3 * SR:-2 * SR])) < 1.5
+
+
+def test_voice_length_must_match_plan(tmp_path):
+    import pytest
+    with pytest.raises(ValueError, match="voice"):
+        _mix(tmp_path, voice_total=TOTAL + 0.5)
+    with pytest.raises(ValueError, match="voice"):
+        _mix(tmp_path / "x" if (tmp_path / "x").mkdir() is None else tmp_path, voice_total=TOTAL - 0.2)
+    _mix(tmp_path / "ok" if (tmp_path / "ok").mkdir() is None else tmp_path, voice_total=TOTAL + 0.03)
 
 
 def test_output_is_stereo_and_meets_loudness(tmp_path):

@@ -16,8 +16,10 @@ the plan's dramatic peak, `total` = scene length). The spike's scene 14 map c0..
   silence music is exactly zero over [peak_at, peak_at + 0.4]; the window is clipped to `total` (a peak at the
           very end gets a shorter or no window and no return).
 Levels: the stems are high-passed at 90 Hz (two cascaded 2-pole ffmpeg stages) and RMS-normalised to
--22 / -19 / -20 dBFS (drone / solo / phrase) before ducking, which with 8 dB of duck leaves the music about
-16-18 dB under the speech. Ducking: 80 ms attack, 400 ms hold, 800 ms release. The ambience bus ducks half-depth.
+-22 / -19 / -20 dBFS (drone / solo / phrase) for their relative balance; after ducking the whole music bus is scaled
+so the in-speech margin is 17 dB whatever the voice level, and scene_mix raises unless it is 16-18 dB, the written
+master is one linear gain (so the margin holds) and the true peak is <= -1.5 dBTP. The voice must match `total`
+within 50 ms. No fade is applied to voice or ambience (the film's last scene fades, in assembly). Ducking: 80 ms attack, 400 ms hold, 800 ms release. The ambience bus ducks half-depth.
 """
 import json
 import re
@@ -34,7 +36,10 @@ STEM_EXTS = (".wav", ".flac", ".mp3")
 STEM_DB = {"drone": -22.0, "solo": -19.0, "phrase": -20.0}
 SILENCE_S = 0.4
 DUCK_DB = 8.0
-END_FADE_S = 1.6
+MARGIN_DB = 17.0
+MARGIN_RANGE = (16.0, 18.0)
+TRUE_PEAK_MAX = -1.5
+MAX_VOICE_DRIFT_S = 0.05
 HIGHPASS = "highpass=f=90:poles=2,highpass=f=90:poles=2"
 _PC = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 
@@ -156,21 +161,27 @@ def scene_mix(voice: Path, cuts: list, peak_at: float, stems: dict, ambience: li
     """Mix one scene. `stems` maps drone/solo/phrase to audio files. Returns the measured
     {"voice_over_music_db", "lufs", "true_peak"} (loudness measured on the written `out`)."""
     n = int(round(total * SR))
-    v = read(voice, ch=1)[:, 0][:n]
-    v = np.pad(v, (0, n - len(v)))
+    v = read(voice, ch=1)[:, 0]
+    if abs(len(v) - n) > MAX_VOICE_DRIFT_S * SR:
+        raise ValueError(f"voice {voice} is {len(v) / SR:.3f} s but the plan says {total:.3f} s "
+                         f"(more than {MAX_VOICE_DRIFT_S * 1000:.0f} ms apart); use the re-timed narration of this plan")
+    v = np.pad(v[:n], (0, max(0, n - len(v))))
     dec = {r: rms_norm(read(stems[r], af=HIGHPASS), STEM_DB[r]) for r in ("drone", "solo", "phrase")}
     music = music_bus(dec, cuts, peak_at, total)
     g = duck_env(v)
     g = np.pad(g, (0, n - len(g)), constant_values=1.0)[:n, None]
-    amb = _fx_bus(list(ambience) + list(foley), n)
-    ducked = music * g
-    mixed = v[:, None] + ducked + amb * (0.5 + 0.5 * g)
-    fade = min(int(END_FADE_S * SR), n)
-    mixed[-fade:] *= np.linspace(1, 0, fade)[:, None]
     _, act = _active(v, SR // 100)
     sp = np.repeat(act, SR // 100)
     sp = np.pad(sp, (0, n - len(sp)))[:n]
-    vm = 20 * np.log10(np.sqrt(np.mean(v[sp] ** 2) + 1e-18) / (np.sqrt(np.mean(ducked[sp] ** 2)) + 1e-9)) if sp.any() else float("inf")
+    if not sp.any():
+        raise ValueError(f"voice {voice} has no speech to measure the music margin against")
+    vrms = np.sqrt(np.mean(v[sp] ** 2) + 1e-18)
+    # keep the stems' relative levels; scale the whole bus so the ducked music sits MARGIN_DB under the speech
+    music = music * db(20 * np.log10(vrms / (np.sqrt(np.mean((music * g)[sp] ** 2)) + 1e-9)) - MARGIN_DB)
+    ducked = music * g
+    vm = 20 * np.log10(vrms / (np.sqrt(np.mean(ducked[sp] ** 2)) + 1e-9))
+    amb = _fx_bus(list(ambience) + list(foley), n)
+    mixed = v[:, None] + ducked + amb * (0.5 + 0.5 * g)   # no whole-mix fade: the film's last scene fades (Task 8)
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as td:
@@ -178,6 +189,18 @@ def scene_mix(voice: Path, cuts: list, peak_at: float, stems: dict, ambience: li
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(SR), "-ac", "2", "-i", "-", str(pre)],
                        input=mixed.astype(np.float32).tobytes(), check=True)
         res = mix._loudnorm_gated(pre, out, -16.0)
+        # the master must be one gain on the bus (linear loudnorm), which keeps the margin; verify on the written file
+        a, w = read(pre).ravel(), read(out).ravel()
+        m = min(len(a), len(w))
+        a, w = a[:m], w[:m]
+        gain = float(np.dot(a, w) / (np.dot(a, a) + 1e-18))
+        resid = float(np.linalg.norm(w - gain * a) / (np.linalg.norm(w) + 1e-18))
+    if resid > 0.02:
+        raise ValueError(f"scene master is not a single linear gain (residual {resid:.3f}); the music margin is unverified")
+    if res["true_peak"] > TRUE_PEAK_MAX:
+        raise ValueError(f"scene true peak {res['true_peak']:.1f} dBTP is above {TRUE_PEAK_MAX} dBTP")
+    if not MARGIN_RANGE[0] <= vm <= MARGIN_RANGE[1]:
+        raise ValueError(f"voice over music is {vm:.1f} dB, outside {MARGIN_RANGE[0]}-{MARGIN_RANGE[1]} dB")
     return {"voice_over_music_db": round(float(vm), 1), "lufs": res["lufs"], "true_peak": res["true_peak"]}
 
 
