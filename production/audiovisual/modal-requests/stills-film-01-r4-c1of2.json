@@ -1,35 +1,12 @@
 {
   "colab_units": 0.0,
-  "error": "RuntimeError: Failed to import diffusers.pipelines.flux.pipeline_flux because of the following error (look up to see its traceback):\ncannot import name 'dispatch_model' from partially initialized module 'accelerate.big_modeling' (most likely due to a circular import) (/usr/local/lib/python3.12/site-packages/accelerate/big_modeling.py)",
-  "files": [
-    {
-      "bytes": 25685,
-      "path": "inputs.zip",
-      "sha256": "0370f613967c850b03280614e42fd281cacc84b2426cc8e086cac531d7f8c5ae"
-    },
-    {
-      "bytes": 97,
-      "path": "sessions.jsonl",
-      "sha256": "4e3e0ee4bc511aba365537284c08accfebfd8accbe1e7b4bd5f4d330c9e0f426"
-    }
-  ],
-  "finished_at": "2026-11-27T05:55:48+00:00",
+  "gpu": "L40S",
   "job_id": "stills-film-01-r4-c1of2",
-  "modal_contacted_at": "2026-11-27T05:54:55+00:00",
-  "pending_run_id": "stills-film-01-r4-c1of2#1",
-  "r2_prefix": "gpu-jobs/bicharak/stills-film-01-r4-c1of2/run-1/",
-  "requested_at": "2026-11-27T05:50:24+00:00",
-  "run": {
-    "error": "RuntimeError: Failed to import diffusers.pipelines.flux.pipeline_flux because of the following error (look up to see its traceback):\ncannot import name 'dispatch_model' from partially initialized module 'accelerate.big_modeling' (most likely due to a circular import) (/usr/local/lib/python3.12/site-packages/accelerate/big_modeling.py)",
-    "run_id": "stills-film-01-r4-c1of2#1",
-    "seconds": 48.279070617,
-    "status": "failed",
-    "usd": 0.0133974420962175
-  },
+  "pending_run_id": "stills-film-01-r4-c1of2#2",
+  "r2_prefix": "gpu-jobs/bicharak/stills-film-01-r4-c1of2/run-2/",
+  "requested_at": "2026-11-27T06:23:50+00:00",
   "schema": "earnalism.modal-request.v1",
-  "seconds": 48.279070617,
-  "status": "failed",
+  "status": "requested",
   "title_root": "production/audiovisual/bicharak",
-  "usd": 0.0133974420962175,
-  "worst_case_usd": 1.072815
+  "worst_case_usd": 2.619215
 }

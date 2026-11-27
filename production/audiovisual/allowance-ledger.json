@@ -475,7 +475,7 @@
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-27T05:50:24+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 2
   },
   {
     "job_id": "stills-film-01-r4-c2of2",
@@ -614,6 +614,14 @@
         "usd": 0.7856025,
         "seconds": 0.0,
         "at": "2026-11-27T06:18:41+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "stills-film-01-r4-c1of2#2",
+        "job_id": "stills-film-01-r4-c1of2",
+        "usd": 2.6192149999999996,
+        "seconds": 0.0,
+        "at": "2026-11-27T06:23:50+00:00",
         "status": "pending"
       }
     ]
