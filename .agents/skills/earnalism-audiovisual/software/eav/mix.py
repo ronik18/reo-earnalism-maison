@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 
 RATE = 48000
-TRUE_PEAK_LIMIT = -1.5   # loudnorm ceiling; leaves headroom under the -1.0 dBTP gate
+TRUE_PEAK_LIMIT = -2.0   # loudnorm ceiling: AAC encoding adds ~0.6 dB on peaks, so -1.5 measured -0.9 in the bicharak film; -2.0 keeps the encoded film under the -1.0 dBTP gate
 SCORE_GAIN_DB = -12.0    # score sits this far under speech before ducking
 CROSSFADE_S = 1.0
 
