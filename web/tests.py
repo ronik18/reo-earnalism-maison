@@ -613,14 +613,47 @@ class TitleFormatRowTests(TestCase):
         self.login()
         with mock.patch("web.views.media_formats_ready", return_value=(True, True)):
             html = self.client.get(f"/en/read/{self.edition}/{self.unit}/").content.decode()
-        switch = html.split('id="reader-format-slot">', 1)[1].split("</span>", 1)[0]
+        switch = html.split('id="reader-format-slot">', 1)[1].split("</nav>", 1)[0]
         self.assertRegex(switch, r'<a [^>]*href="[^"]*"[^>]*aria-current="page">Read</a>')
         self.assertEqual(switch.count('aria-current'), 1)
         self.assertIn('data-format-switch="listen"', switch)
         self.assertIn('data-format-switch="watch"', switch)
-        source = (Path(settings.BASE_DIR) / "client/reader.tsx").read_text()
-        self.assertIn('"/content/switch-position"', source)
-        self.assertIn("data-format-switch", source)  # the Listen link carries the saved position before navigating
+        # the click behaviour (anchor sent, player opened at the returned position) is tested in client/state.test.ts
         with mock.patch("web.views.media_formats_ready", return_value=(False, False)):
             html = self.client.get(f"/en/read/{self.edition}/{self.unit}/").content.decode()
         self.assertNotIn("format-switch-item", html)  # only formats that exist are offered
+
+    def _read_item(self, html):
+        row = html.split('class="format-row"', 1)[1].split("</ul>", 1)[0]
+        return re.search(r"<li>(?:(?!</li>).)*?Read.*?</li>", row, re.S).group(0)
+
+    def _locked(self):
+        from library import services
+        real = services.edition_detail
+        def locked(*args, **kwargs):
+            return {**real(*args, **kwargs), "preview_available": False}
+        return mock.patch("library.services.edition_detail", locked)
+
+    def test_read_with_access_or_preview_links_to_the_reader(self):
+        item = self._read_item(self._title())  # signed out, fixture has a preview
+        self.assertIn(f'href="/en/read/{self.edition}/{self.unit}/"', item)
+        self.assertNotIn("Coming soon", item)
+
+    def test_read_locked_for_signed_out_goes_to_sign_in_not_coming_soon(self):
+        with self._locked():
+            item = self._read_item(self._title())
+        self.assertNotIn("Coming soon", item)
+        self.assertIn("/en/sign-in/?return_to=", item)
+        self.assertIn("%2Fen%2Fread%2F", item)
+        self.assertIn("Sign in free", item)
+
+    def test_read_is_coming_soon_only_without_ready_text(self):
+        with mock.patch("library.services.edition_units", return_value=[]):
+            item = self._read_item(self._title())
+        self.assertIn("Coming soon", item)
+        self.assertNotIn("href", item)
+
+    def test_format_row_separators_are_visible_but_not_announced(self):
+        row = self._title().split('class="format-row"', 1)[1].split("</ul>", 1)[0]
+        self.assertEqual(row.count('<span class="format-sep" aria-hidden="true">·</span>'), 2)
+        self.assertRegex(re.sub(r"<[^>]+>", " ", row), r"Read.*·.*Listen.*·.*Film")

@@ -40,6 +40,8 @@ import {
   samePosition,
   pageCount,
   type Position,
+  runListenSwitch,
+  type ListenSwitchResult,
   initialReaderTheme,
   progressFraction,
   minutesRemaining,
@@ -978,25 +980,16 @@ function Reader({ boot }: { boot: Boot }) {
   }
   async function switchToListen() {
     await act(async () => {
-      const result = await api<{
-        outcome: string;
-        to_location?: { format: "audio"; unit_id: string; position_ms: number };
-      }>("/content/switch-position", {
-        method: "POST",
-        key: crypto.randomUUID(),
-        body: {
-          edition_revision_id: boot.edition_revision_id,
-          from_location: position.current,
-          to_format: "audio",
-        },
+      const outcome = await runListenSwitch({
+        call: (path, body) =>
+          api<ListenSwitchResult>(path, { method: "POST", key: crypto.randomUUID(), body }),
+        editionRevisionId: boot.edition_revision_id,
+        position: position.current,
+        playerUrl: boot.player_url ?? "",
+        save: () => savePosition(),
+        go: (url) => window.location.assign(url),
       });
-      await savePosition();
-      if (result.outcome === "mapped" && result.to_location?.format === "audio")
-        window.location.assign(
-          boot.player_url +
-            `?unit_id=${result.to_location.unit_id}&position_ms=${result.to_location.position_ms}`,
-        );
-      else {
+      if (outcome === "unmapped") {
         setStatus(t("switch_unmapped_audio"));
         setSwitchOpen(true); // no exact spot: the sheet offers the chapter start instead
       }
@@ -1039,17 +1032,6 @@ function Reader({ boot }: { boot: Boot }) {
           >
             {t("next_chapter")}
           </a>
-        ) : null}
-        {fullReader && boot.player_url ? (
-          <button
-            disabled={busy}
-            onClick={() => {
-              setStatus("");
-              setSwitchOpen(true);
-            }}
-          >
-            {t("switch_to_listen")}
-          </button>
         ) : null}
       </nav>
       <div

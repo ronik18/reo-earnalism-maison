@@ -1383,3 +1383,43 @@ test("splitTitleSlot leaves the title slot between the two halves", () => {
   );
   assert.deepEqual(splitTitleSlot("No slot"), ["No slot", ""]);
 });
+
+import { runListenSwitch } from "./state.ts";
+
+test("the toolbar Listen action sends the current anchor and opens the player at the returned position", async () => {
+  const calls: Array<{ path: string; body: Record<string, unknown> }> = [];
+  const went: string[] = [];
+  const order: string[] = [];
+  const position = { format: "reader", unit_id: "u1", anchor_id: "a-42", offset_chars: 17 } as never;
+  const outcome = await runListenSwitch({
+    call: async (path, body) => {
+      calls.push({ path, body });
+      order.push("call");
+      return { outcome: "mapped", to_location: { format: "audio", unit_id: "u1", position_ms: 61500 } };
+    },
+    editionRevisionId: "rev-1",
+    position,
+    playerUrl: "/en/listen/e1/",
+    save: async () => { order.push("save"); },
+    go: (url) => { order.push("go"); went.push(url); },
+  });
+  assert.equal(outcome, "mapped");
+  assert.equal(calls[0].path, "/content/switch-position");
+  assert.deepEqual(calls[0].body, { edition_revision_id: "rev-1", from_location: position, to_format: "audio" });
+  assert.deepEqual(went, ["/en/listen/e1/?unit_id=u1&position_ms=61500"]);
+  assert.deepEqual(order, ["call", "save", "go"]);
+});
+
+test("an unmapped Listen switch stays on the page", async () => {
+  const went: string[] = [];
+  const outcome = await runListenSwitch({
+    call: async () => ({ outcome: "unmapped" }),
+    editionRevisionId: "rev-1",
+    position: { format: "reader", unit_id: "u1", anchor_id: "a", offset_chars: 0 } as never,
+    playerUrl: "/en/listen/e1/",
+    save: async () => {},
+    go: (url) => went.push(url),
+  });
+  assert.equal(outcome, "unmapped");
+  assert.deepEqual(went, []);
+});

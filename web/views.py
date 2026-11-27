@@ -221,9 +221,13 @@ def title(request, locale, identifier):
     download_bootstrap = {"edition_revision_id":edition["edition_revision_id"],"unit_ids":[u["unit_id"] for u in units],"units":[{"unit_id":u["unit_id"],"title":u["title"]} for u in units],"formats":edition["downloadable_formats"],"title":edition["title"],"locale":edition["locale"]} if django_settings.FEATURES.get("offline_text_audio") and edition["published_at"] and request.user.is_authenticated else None
     sample = public_preview_data(request, edition) if django_settings.FEATURES.get("audio") else {}
     listen_ready, watch_ready = media_formats_ready(edition)
-    reader_ready = bool(units) and "reader" in edition["formats"] and (reader_access or edition["preview_available"])
+    reader_ready = bool(units) and "reader" in edition["formats"]  # text exists; access is a separate question
+    reader_url = reverse("web:reader", args=[locale, edition["edition_id"], units[0]["unit_id"]]) if reader_ready else None
+    read_needs_sign_in = reader_ready and not (reader_access or edition["preview_available"]) and not request.user.is_authenticated
+    if read_needs_sign_in:
+        reader_url = reverse("web:sign-in", args=[locale]) + "?" + urlencode({"return_to": reader_url})
     title_formats = [
-        {"kind": "read", "available": reader_ready, "url": reverse("web:reader", args=[locale, edition["edition_id"], units[0]["unit_id"]]) if reader_ready else None},
+        {"kind": "read", "available": reader_ready, "url": reader_url, "needs_sign_in": read_needs_sign_in},
         {"kind": "listen", "available": listen_ready, "url": reverse("web:player", args=[locale, edition["edition_id"]]) if listen_ready else None},
         {"kind": "film", "available": watch_ready, "url": reverse("web:video", args=[locale, edition["edition_id"]]) if watch_ready else None},
     ]
@@ -235,7 +239,7 @@ READ_CHARS_PER_MINUTE = 900  # The one Python estimate: title length, preview en
 
 
 def media_formats_ready(edition):
-    """(listen, watch): the format is switched on and the edition really offers it. One rule for the title page, the player link and the preview ending."""
+    """(listen, watch): the format is switched on and offered; edition["formats"] is already limited to formats backed by a ready asset (library.services.available_formats). One rule for the title page, the player link and the preview ending."""
     formats = edition.get("formats", [])
     return bool(django_settings.FEATURES.get("audio")) and "audio" in formats, bool(django_settings.FEATURES.get("video")) and "video" in formats
 

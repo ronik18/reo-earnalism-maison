@@ -473,3 +473,31 @@ export function createSaveQueue<T>(options: {
     inFlight: () => running !== undefined,
   };
 }
+
+export interface ListenSwitchResult {
+  outcome: string;
+  to_location?: { format: "audio"; unit_id: string; position_ms: number };
+}
+
+/** The toolbar's Listen action: sends the reader's current spot to /content/switch-position and opens the player there. */
+export async function runListenSwitch(deps: {
+  call: (path: string, body: Record<string, unknown>) => Promise<ListenSwitchResult>;
+  editionRevisionId: string;
+  position: Position;
+  playerUrl: string;
+  save: () => Promise<unknown>;
+  go: (url: string) => void;
+}): Promise<"mapped" | "unmapped"> {
+  const result = await deps.call("/content/switch-position", {
+    edition_revision_id: deps.editionRevisionId,
+    from_location: deps.position,
+    to_format: "audio",
+  });
+  await deps.save();
+  const to = result.to_location;
+  if (result.outcome === "mapped" && to?.format === "audio") {
+    deps.go(`${deps.playerUrl}?unit_id=${to.unit_id}&position_ms=${to.position_ms}`);
+    return "mapped";
+  }
+  return "unmapped";
+}
