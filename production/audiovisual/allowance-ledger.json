@@ -479,5 +479,14 @@
     "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
+  },
+  {
+    "job_id": "stills-f01s014-scene-r1",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.3,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
   }
 ]
