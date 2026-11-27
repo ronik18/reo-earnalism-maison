@@ -1002,3 +1002,293 @@ class FilmClipsTests(unittest.TestCase):
         self.assertIn("quality=10", t)
         self.assertIn("near-lossless", t)
         self.assertIn("raise RuntimeError", t[t.index("quality=10") - 400:t.index("quality=10") + 600])
+
+
+class StillsGateTests(unittest.TestCase):
+    """Task 11: the character-and-period gate cell after the stills (Colab) and its anchor input."""
+    setUp, build, nb, cells = (ColabJobTests.setUp, ColabJobTests.build, ColabJobTests.nb, ColabJobTests.cells)
+
+    def stills(self, **kw):
+        return self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1, "candidates": 2}], **kw})
+
+    def gate_src(self, r=None):
+        r = r or self.stills()
+        return next(c for c in self.cells(r) if "GATE_LABELS" in c)
+
+    def gate_ns(self):
+        src = self.gate_src()
+        ns = {}
+        exec(src[src.index("GATE_LICENCE_ALLOWLIST ="):src.index("# --- gate helper end")], ns)
+        return ns
+
+    def test_stills_notebook_has_gate_cell_and_allowlist(self):
+        import ast
+        codes = self.cells(self.stills())
+        gate = self.gate_src(self.stills(job_id="stills-b"))
+        ast.parse(gate)
+        idx = [i for i, c in enumerate(codes) if "GATE_LABELS" in c]
+        self.assertEqual(len(idx), 1)
+        self.assertGreater(idx[0], max(i for i, c in enumerate(codes) if "def look_first" in c))
+        self.assertLess(idx[0], min(i for i, c in enumerate(codes) if "manifest.json written" in c))
+        self.assertIn("RUN is not True", gate)
+        for label in ("gas cylinder", "air conditioner", "electric cable", "spotlight", "modern eyeglasses",
+                      "plastic", "utility pole", "modern high-rise building"):
+            self.assertIn(label, gate)
+        for model in ("google/owlv2-base-patch16-ensemble", "openai/clip-vit-base-patch32",
+                      "face_landmarker", "hand_landmarker"):
+            self.assertIn(model, gate)
+        self.assertIn("GATE_LICENCE_ALLOWLIST = ('apache-2.0', 'mit')", gate)
+        self.assertIn(".gate.json", gate)
+        self.assertIn("_gate_time_ok(", gate)
+        self.assertNotIn("may_start(", gate)   # running out of time must not mark the stills INCOMPLETE
+        self.assertIn("mediapipe", "".join(colab_jobs.PACKAGES["stills"]))
+
+    def test_gate_licence_check_refuses_off_list_and_unknown(self):
+        ns = self.gate_ns()
+        self.assertEqual(ns["gate_licence"]("m", "Apache-2.0", "mit"), ("apache-2.0", None))
+        self.assertEqual(ns["gate_licence"]("m", None, "mit")[0], "mit")  # card silent: declared, noted
+        self.assertIn("declared", ns["gate_licence"]("m", None, "mit")[1])
+        self.assertIsNone(ns["gate_licence"]("m", "cc-by-nc-4.0", "mit")[0])
+        self.assertIsNone(ns["gate_licence"]("m", None, None)[0])
+        self.assertIsNone(ns["gate_licence"]("m", None, "gpl-3.0")[0])
+
+    def test_eyes_and_frontal_from_landmarks(self):
+        ns = self.gate_ns()
+        lm = ns["synthetic_face"](open_eyes=2, yaw=0.5)
+        self.assertEqual(ns["face_report"](lm), {"eyes": 2, "frontal": True})
+        self.assertEqual(ns["face_report"](ns["synthetic_face"](open_eyes=1, yaw=0.5)), {"eyes": 1, "frontal": True})
+        self.assertEqual(ns["face_report"](ns["synthetic_face"](open_eyes=1, yaw=0.9)), {"eyes": 1, "frontal": False})
+
+    def test_hand_attachment_heuristic(self):
+        ns = self.gate_ns()
+        diag = 1000.0
+        person = [(100, 100, 500, 900)]
+        self.assertIs(ns["hand_detached"]((300, 800), person, [], diag), False)
+        self.assertIs(ns["hand_detached"]((900, 300), person, [], diag), True)
+        self.assertIsNone(ns["hand_detached"]((900, 300), [], [], diag))   # nothing to judge against
+
+    def test_decide_matrix(self):
+        ns = self.gate_ns()
+        d = ns["decide"]
+        ok_face = [{"eyes": 2, "frontal": True}]
+        base = dict(faces=ok_face, hands=[False], anachronisms=[], possible=[], similarity=0.9, anchor=True)
+        r = d(**base)
+        self.assertEqual((r["pass"], r["needs_review"], r["eyes"], r["hands_detached"]), (True, False, 2, False))
+        self.assertEqual(set(r) >= {"eyes", "hands_detached", "anachronisms", "anchor_similarity", "pass",
+                                    "needs_review"}, True)
+        r = d(**{**base, "faces": [{"eyes": 1, "frontal": True}]})
+        self.assertEqual((r["pass"], r["needs_review"]), (False, False))        # frontal with one eye: fail
+        r = d(**{**base, "faces": [{"eyes": 1, "frontal": False}]})
+        self.assertEqual((r["pass"], r["needs_review"]), (False, True))         # profile: a person looks
+        r = d(**{**base, "hands": [True]})
+        self.assertEqual((r["pass"], r["needs_review"], r["hands_detached"]), (False, False, True))
+        r = d(**{**base, "hands": [None]})
+        self.assertEqual((r["pass"], r["needs_review"]), (False, True))
+        r = d(**{**base, "anachronisms": ["gas cylinder"]})
+        self.assertEqual((r["pass"], r["needs_review"], r["anachronisms"]), (False, False, ["gas cylinder"]))
+        r = d(**{**base, "possible": ["plastic"]})
+        self.assertEqual((r["pass"], r["needs_review"]), (False, True))
+        r = d(**{**base, "similarity": 0.5})
+        self.assertEqual((r["pass"], r["needs_review"]), (False, True))         # never an automatic fail
+        # a model that failed or returned nothing is never a pass
+        for k in ("faces", "hands", "anachronisms", "similarity"):
+            r = d(**{**base, k: None})
+            self.assertEqual((r["pass"], r["needs_review"]), (False, True), k)
+        r = d(**{**base, "faces": []})                                           # character expected, no face
+        self.assertEqual((r["pass"], r["needs_review"]), (False, True))
+        r = d(faces=[], hands=[], anachronisms=[], possible=[], similarity=None, anchor=False)
+        self.assertEqual((r["pass"], r["needs_review"], r["anchor_similarity"]), (True, False, None))
+
+    def test_anchor_goes_into_inputs_zip_and_candidates_inherit_it(self):
+        art = self.root / "anchors"
+        art.mkdir()
+        (art / "hemshashi.png").write_bytes(b"anchor-png")
+        r = self.build("stills", {"art_dir": str(art), "items": [
+            {"key": "a", "prompt": "a lamp", "seed": 1, "candidates": 2, "anchor": "hemshashi.png"},
+            {"key": "b", "prompt": "a door", "seed": 5}]})
+        with zipfile.ZipFile(r["inputs_zip"]) as z:
+            job = json.loads(z.read("job.json"))
+            self.assertEqual(z.read("anchors/hemshashi.png"), b"anchor-png")
+        by = {i["key"]: i for i in job["items"]}
+        self.assertEqual(by["a--c1"]["anchor"], "anchors/hemshashi.png")
+        self.assertEqual(by["a--c2"]["anchor"], "anchors/hemshashi.png")
+        self.assertNotIn("anchor", by["b"])
+
+    def test_anchor_must_be_a_png_in_art_dir(self):
+        art = self.root / "anchors"
+        art.mkdir()
+        for bad, spec in (("../x.png", {}), ("missing.png", {"art_dir": str(art)}),
+                          ("a.jpg", {"art_dir": str(art)}), ("a.png", {})):
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError) as c:
+                    self.build("stills", {**spec, "items": [{"key": "a", "prompt": "a lamp", "seed": 1,
+                                                             "anchor": bad}]})
+                self.assertIn("anchor", str(c.exception))
+
+
+class SfxCellTests(unittest.TestCase):
+    """Task 11: the optional CC0 sound fetch of a film_clips job (Wikimedia Commons, no key)."""
+    setUp, build, nb, cells = (ColabJobTests.setUp, ColabJobTests.build, ColabJobTests.nb, ColabJobTests.cells)
+    spec = FilmClipsTests.spec
+
+    def template(self):
+        return (colab_jobs._TEMPLATES / "sfx_cell.py.txt").read_text()
+
+    def ns(self, **extra):
+        t = self.template()
+        ns = {"RUN": True}
+        # everything but the final dispatch (which needs the Colab OUT_DIR/JOB); extras override after
+        exec(t[t.index("import json, re, time"):t.index("if (OUT_DIR / \"sfx-licences.json\").is_file()")], ns)
+        ns.update(extra)
+        return ns
+
+    def test_sfx_cell_keeps_only_cc0_or_pd(self):
+        ns = self.ns()
+        ok = ns["sfx_licence_ok"]
+        for lic in ("CC0", "CC0 1.0", "Public domain", "public domain", "PD-old", "PD"):
+            self.assertTrue(ok(lic), lic)
+        for lic in ("CC BY 4.0", "CC BY-SA 3.0", "GFDL", "", None, "Attribution", "CC BY-NC 4.0"):
+            self.assertFalse(ok(lic), lic)
+
+    def test_extension_comes_from_the_url_path_never_the_query(self):
+        ns = self.ns()
+        url = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Birds.ogg?utm_source=x&utm_campaign=org&utm_x=1.org"
+        self.assertEqual(ns["sfx_ext"](url), "ogg")
+        self.assertEqual(ns["sfx_ext"]("https://u.org/a/b/Crow.OGA"), "oga")
+        self.assertIsNone(ns["sfx_ext"]("https://u.org/a/b/noext?x=.ogg"))
+        self.assertIsNone(ns["sfx_ext"]("https://u.org/a/b/Page.html"))
+        name = ns["sfx_filename"]("birds", 1, ns["sfx_ext"](url))
+        self.assertEqual(name, "sfx-birds-1.ogg")
+        import re
+        self.assertRegex(name, r"[A-Za-z0-9._-]+")
+        self.assertIsNone(ns["sfx_filename"]("birds", 1, None))
+        self.assertIsNone(ns["sfx_filename"]("bi rds&x", 1, "ogg"))
+
+    def test_relevance_needs_a_query_keyword_in_the_file_title(self):
+        ns = self.ns()
+        rel = ns["sfx_relevant"]
+        self.assertFalse(rel("File:Tooth brushing.ogg", "broom sweeping"))
+        self.assertFalse(rel("File:Berlin mall ambience.ogg", "crowd murmur"))
+        self.assertTrue(rel("File:Crowd in a market.ogg", "crowd murmur"))
+        self.assertTrue(rel("File:Crow call 3.ogg", "crows cawing morning"))   # plural stem
+        self.assertTrue(rel("File:Broom sweeping floor.wav", "broom sweeping"))
+        self.assertFalse(rel("File:Anything.ogg", "of the"))                    # no real keyword
+
+    def meta(self, title, lic, url="https://upload.wikimedia.org/x/Crow.ogg?utm_a=b", size=1000):
+        return {"title": title, "imageinfo": [{"url": url, "size": size, "descriptionurl": "https://c/wiki/" + title,
+                                               "extmetadata": {"LicenseShortName": {"value": lic},
+                                                               "Artist": {"value": "<a>Ann</a>"}}}]}
+
+    def test_pick_files_applies_licence_relevance_extension_and_size(self):
+        ns = self.ns()
+        pages = [self.meta("File:Crow call.ogg", "CC BY 4.0"),
+                 self.meta("File:Crow flock.ogg", "CC0"),
+                 self.meta("File:Mall.ogg", "CC0"),
+                 self.meta("File:Crow big.ogg", "CC0", size=99_000_000),
+                 self.meta("File:Crow page.ogg", "CC0", url="https://u.org/Crow"),
+                 self.meta("File:Crow morning.ogg", "Public domain")]
+        got = ns["sfx_pick"](pages, "crows cawing", "crows", limit=2)
+        self.assertEqual([g["file"] for g in got], ["sfx-crows-1.ogg", "sfx-crows-2.ogg"])
+        self.assertEqual([g["title"] for g in got], ["File:Crow flock.ogg", "File:Crow morning.ogg"])
+        self.assertEqual(got[0]["licence"], "CC0")
+        self.assertEqual(got[0]["author"], "Ann")
+        self.assertTrue(got[0]["page"].startswith("https://commons.wikimedia.org/wiki/File:Crow_flock"))
+
+    def test_api_error_response_does_not_raise_and_retries_three_times(self):
+        calls = []
+
+        def opener(url):
+            calls.append(url)
+            return {"error": {"code": "maxlag"}}
+        ns = self.ns(_sfx_open=opener, _sfx_sleep=lambda s: None)
+        self.assertIsNone(ns["sfx_api"]({"action": "query"}))
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(ns["sfx_search_pages"]({"error": {"code": "x"}}), [])
+        self.assertEqual(ns["sfx_search_pages"](None), [])
+
+    def test_run_never_fails_the_job_and_writes_licences(self):
+        out = self.root / "out"
+        out.mkdir()
+        ns = self.ns(OUT_DIR=out, JOB={"sfx": {"crows": "crows cawing"}}, _sfx_sleep=lambda s: None)
+
+        def boom(url):
+            raise OSError("network down")
+        ns["_sfx_open"] = boom
+        ns["run_sfx_stage"]()                                # must not raise
+        self.assertEqual(json.loads((out / "sfx-licences.json").read_text()), {})
+
+    def test_run_downloads_kept_files_with_clean_names(self):
+        out = self.root / "out"
+        out.mkdir()
+        pages = {"query": {"pages": {"1": self.meta("File:Crow flock.ogg", "CC0"),
+                                     "2": self.meta("File:Mall.ogg", "CC0")}}}
+
+        def opener(url):
+            if "list=search" in url:
+                return {"query": {"search": [{"title": "File:Crow flock.ogg"}, {"title": "File:Mall.ogg"}]}}
+            return pages
+        ns = self.ns(OUT_DIR=out, JOB={"sfx": {"crows": "crows cawing"}}, _sfx_open=opener,
+                     _sfx_fetch=lambda url: b"OggS-bytes", _sfx_sleep=lambda s: None)
+        ns["run_sfx_stage"]()
+        self.assertEqual(sorted(p.name for p in out.iterdir()), ["sfx-crows-1.ogg", "sfx-licences.json"])
+        lic = json.loads((out / "sfx-licences.json").read_text())
+        self.assertEqual(lic["sfx-crows-1.ogg"]["licence"], "CC0")
+        self.assertEqual(set(lic["sfx-crows-1.ogg"]), {"title", "page", "licence", "author"})
+
+    def test_sfx_spec_adds_the_cell_before_wan_and_reserves_its_budget(self):
+        import ast
+        plain = self.build("film_clips", self.spec(job_id="film-plain"))
+        with_sfx = self.build("film_clips", self.spec(job_id="film-sfx", sfx={"crows": "crows cawing morning"}))
+        for c in self.cells(with_sfx):
+            ast.parse(c)
+        codes = self.cells(with_sfx)
+        i_sfx = next(i for i, c in enumerate(codes) if "def run_sfx_stage" in c)
+        i_wan = next(i for i, c in enumerate(codes) if "WanImageToVideoPipeline" in c and "def fit" in c)
+        i_clock = next(i for i, c in enumerate(codes) if "def may_start" in c)
+        i_verify = next(i for i, c in enumerate(codes) if "inputs verified for" in c)
+        self.assertTrue(i_clock < i_verify < i_sfx < i_wan)
+        self.assertFalse(any("def run_sfx_stage" in c for c in self.cells(plain)))
+        self.assertGreater(with_sfx["forecast_units"], plain["forecast_units"])
+        src = "\n".join(codes)
+        self.assertIn("SFX_BUDGET_S = 480", src)
+        with zipfile.ZipFile(with_sfx["inputs_zip"]) as z:
+            self.assertEqual(json.loads(z.read("job.json"))["sfx"], {"crows": "crows cawing morning"})
+        with zipfile.ZipFile(plain["inputs_zip"]) as z:
+            self.assertNotIn("sfx", json.loads(z.read("job.json")))
+
+    def test_sfx_spec_validation(self):
+        for bad in ({"Crows": "x"}, {"crows": ""}, {"crows": 5}, ["crows"], {}, {"a b": "x"}):
+            with self.subTest(bad=bad):
+                with self.assertRaises(ValueError) as c:
+                    self.build("film_clips", self.spec(sfx=bad))
+                self.assertIn("sfx", str(c.exception))
+
+
+class StillsT5LimitTests(unittest.TestCase):
+    """FLUX.1-schnell's T5 reads 256 tokens; a longer house-style-first prompt loses its tail (the character
+    lines). The builder refuses it, using a conservative local estimate (no tokenizer is installed)."""
+    setUp, build, nb, cells = (ColabJobTests.setUp, ColabJobTests.build, ColabJobTests.nb, ColabJobTests.cells)
+
+    @staticmethod
+    def words(n):
+        base = ("a veiled mother stands at the courtyard gate holding a brass pot while crows gather "
+                "on the clay wall behind her and morning light crosses the dusty ground").split()
+        return " ".join((base * (n // len(base) + 1))[:n]) + "."
+
+    def test_estimate_overcounts_long_words_and_punctuation(self):
+        est = colab_jobs.estimate_t5_tokens
+        self.assertEqual(est("a lamp"), 2)
+        self.assertEqual(est("extraordinarily, beautifully"), 4)  # 2 long words x 1.3 + comma, rounded up
+        self.assertGreaterEqual(est(self.words(100)), 100)
+
+    def test_a_210_word_prompt_with_house_style_is_refused(self):
+        with self.assertRaises(ValueError) as c:
+            self.build("stills", {"items": [{"key": "f01s014-3", "prompt": self.words(210), "seed": 1}]})
+        msg = str(c.exception)
+        self.assertIn("f01s014-3", msg)
+        self.assertIn("256", msg)
+        self.assertRegex(msg, r"about \d+ tokens")
+        self.assertEqual(list(self.out.iterdir()), [])
+
+    def test_an_85_word_prompt_with_house_style_passes(self):
+        self.build("stills", {"items": [{"key": "a", "prompt": self.words(85), "seed": 1}]})

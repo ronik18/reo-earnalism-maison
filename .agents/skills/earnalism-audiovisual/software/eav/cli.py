@@ -785,7 +785,8 @@ def _job_spec(rec, args, kind, target):
             if args.reel:
                 raise Stop(f"{kind} jobs patch a film's stills", "Pass --film <n>, not --reel")
             spec["target"] = target
-        if kind in ("reel_clips", "film_clips") and not Path(spec.get("art_dir", ".")).is_absolute():
+        if (kind in ("reel_clips", "film_clips") or (kind == "stills" and "art_dir" in spec)) \
+                and not Path(spec.get("art_dir", ".")).is_absolute():
             spec["art_dir"] = str((Path(args.spec).parent / spec.get("art_dir", ".")).resolve())
         if kind == "reel_clips":
             _check_clip_batch(rec, args.reel, spec)
@@ -1489,6 +1490,28 @@ def _latest_pick(rec, job_id):
     return picks[-1]["meta"]["choices"] if picks else None
 
 
+def _gate_of(path: Path, any_gated: bool):
+    """The still's gate verdict (<stem>.gate.json beside it): (gate dict | None, why it blocks | None).
+    No gate file in the whole job (an older job) blocks nothing; a missing, unreadable or malformed one in a
+    gated job, or needs_review, blocks as needs-review; pass false blocks as failed."""
+    gate_path = path.with_name(path.stem + ".gate.json")
+    if not gate_path.is_file():
+        return None, ("no gate result for this candidate although the job was gated (needs review)"
+                      if any_gated else None)
+    try:
+        gate = json.loads(gate_path.read_text(encoding="utf-8"))
+        if not isinstance(gate, dict) or not isinstance(gate.get("pass"), bool):
+            raise ValueError("not a gate verdict")
+    except (OSError, ValueError):
+        return None, "its gate.json is unreadable (needs review)"
+    if gate["pass"] is True and not gate.get("needs_review"):
+        return gate, None
+    why = "; ".join(str(n) for n in gate.get("notes") or []) or ", ".join(gate.get("anachronisms") or []) or "failed"
+    if gate.get("needs_review"):
+        return gate, "gate needs review: " + why
+    return gate, "gate failed: " + why
+
+
 def cmd_pick(args):
     """Record the reviewer's choice among a stills, retouch, touchup or edit job's candidates (<key>--cN
     images; a retouch or touchup job's <key>--mask is for review only and never a candidate)."""
@@ -1509,7 +1532,13 @@ def cmd_pick(args):
     if not choices:
         raise Stop("the choices file has no choices", f"Name at least one key of {args.job}: "
                    f"{', '.join(sorted(cands))}")
-    picked = {}
+    picked, overrides, blocked = {}, {}, []
+    override = args.override
+    if override is not None and not override.strip():
+        raise Stop("--override needs a reason", "Say why the gate's verdict is wrong or accepted, "
+                   "e.g. --override \"owner viewed it: the cylinder is a period lamp\"")
+    folder = rec.root / job["kind"] / args.job
+    any_gated = any(folder.glob("*.gate.json"))
     for key, n in choices.items():
         if key not in cands:
             raise Stop(f"{key!r} has no candidates in {args.job}",
@@ -1519,15 +1548,30 @@ def cmd_pick(args):
                        f"{', '.join(str(c) for c in sorted(cands[key]))}",
                        f"Fix {args.choices} and rerun pick")
         path = cands[key][n]
+        gate, why = _gate_of(path, any_gated)
+        if why and override is None:
+            blocked.append(f"{key} c{n}: {why}")
+        elif why:
+            overrides[key] = {"candidate": n, "reason": override.strip(), "why": why,
+                              "gate": None if gate is None else {k: gate.get(k) for k in (
+                                  "pass", "needs_review", "anachronisms", "hands_detached", "eyes",
+                                  "anchor_similarity", "notes")}}
         picked[key] = {"candidate": n, "file": path.relative_to(rec.root).as_posix(),
                        "sha256": sha256_file(path)}
+    if blocked:
+        raise Stop("the gate does not pass: " + " | ".join(blocked),
+                   "Pick a candidate whose gate passed, or look at it yourself and rerun with "
+                   "--override \"<reason>\" (the reason is recorded in the pick)")
     version = len(_artifacts(rec, "stills_pick", job_id=args.job)) + 1
+    extra = {"overrides": overrides} if overrides else {}
     path = _write_json(rec.root / "picks" / f"{args.job}.pick-{version}.json",
-                       {"job_id": args.job, "choices": picked})
+                       {"job_id": args.job, "choices": picked, **extra})
     rec.add_artifact("stills_pick", path, {"job_id": args.job, "choices": picked,
-                                           "version": version})
+                                           "version": version, **extra})
     rec.event("pick", "recorded", {"job_id": args.job, "version": version,
-                                   "choices": {k: v["candidate"] for k, v in picked.items()}})
+                                   "choices": {k: v["candidate"] for k, v in picked.items()},
+                                   **({"overrides": {k: v["reason"] for k, v in overrides.items()}}
+                                      if overrides else {})})
     print(f"Picked {len(picked)} still(s) of {args.job}: "
           + ", ".join(f"{k} -> c{v['candidate']}" for k, v in sorted(picked.items()))
           + ". The film uses only these candidates; a later pick replaces this one.")
@@ -2551,6 +2595,8 @@ def _parser():
     s.add_argument("--job", required=True,
                    help="the imported stills, retouch, touchup or edit job with <key>--cN candidates")
     s.add_argument("--choices", required=True, help='JSON file {"<key>": <candidate number>, ...}')
+    s.add_argument("--override", help="reason to pick a candidate whose character-and-period gate failed or "
+                   "needs review (recorded in the pick and its event)")
     s = add("hold", help="show the nearest approved still of the scene for shots with none yet")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--keys", help="comma-separated held still keys, e.g. f01s007-4,f01s007-5")

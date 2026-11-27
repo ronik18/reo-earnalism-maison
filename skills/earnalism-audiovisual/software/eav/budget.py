@@ -35,7 +35,7 @@ def forecast_seconds(job: dict, rates: dict) -> float:
     if job["kind"] == "film_clips":  # measured seconds per finished clip by resolution and GPU, margin on the clips
         hd = rate["clip_s_hd_a100"] if job["gpu"] == "a100" else rate["clip_s_hd"]
         return ((job["hd"] * hd + job["sd"] * rate["clip_s_sd"]) * job["takes"] * MARGIN
-                + job["decode_s"] + job["export_s"])
+                + job["decode_s"] + job["export_s"] + job.get("sfx_s", 0))
     return (job["steps"] * rate["s_per_step"] * job["items"] * job["takes"]
             + job["decode_s"] + job["export_s"]) * MARGIN
 

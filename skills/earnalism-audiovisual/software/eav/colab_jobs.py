@@ -124,6 +124,23 @@ MAX_CANDIDATES = 4
 CANDIDATE_SUFFIX = re.compile(r"--c\d+$")
 STYLE_CONFLICTS = ("photoreal", "photograph", "oil-on-canvas", "realism", "watercolour", "watercolor",
                    "gouache", "3d render", "not a cartoon", "not anime", "not a flat illustration")
+# Stills gate (Task 11): every model's licence must be on this list at run time (a refused model is not
+# run and the still is marked needs_review). MediaPipe Face/Hand Landmarker (Apache-2.0, declared by
+# the model cards: not on the Hub), OWLv2 google/owlv2-base-patch16-ensemble (Hub card apache-2.0) and
+# CLIP openai/clip-vit-base-patch32 (MIT per github.com/openai/CLIP; its Hub card carries no licence
+# field, so the cell uses the declared "mit" and prints that it did).
+GATE_LICENCE_ALLOWLIST = ("apache-2.0", "mit")
+# CLIP ViT-B/32 image-image cosine of a still against the character's anchor still. Same character in
+# a new pose/setting is typically ~0.80-0.95, a different character of the same house style ~0.60-0.80
+# (general CLIP behaviour, not yet measured on these stills). Below 0.80 sets needs_review, never an
+# automatic fail: the whole frame is compared with a character image, so a low figure is a prompt to
+# look. Calibrate on the first gated job and change it here.
+GATE_ANCHOR_PASS = 0.80
+GATE_MARKER = "# === gate cell ===\n"
+# film_clips sound fetch (optional spec "sfx"): its own wall-clock budget, reserved inside the job forecast.
+SFX_BUDGET_S = 480
+SFX_EXTENSIONS = ("ogg", "oga", "opus", "wav", "flac", "mp3")
+_SFX_NAME = re.compile(r"[a-z0-9][a-z0-9-]*")
 KINDS = ("narration", "stills", "music", "retouch", "edit", "reel_clips", "film_clips")
 JOB_SCHEMA = "earnalism.audiovisual-job.v1"
 EXCHANGE_SCHEMA = "earnalism.colab-exchange.v1"
@@ -419,7 +436,7 @@ PACKAGES = {"film_clips": ("diffusers", "transformers", "accelerate", "safetenso
                            "huggingface_hub", "imageio", "ftfy"),
             "narration": ("parler_tts", "transformers", "torch", "soundfile", "protobuf"),
             "stills": ("diffusers", "transformers", "accelerate", "sentencepiece", "protobuf",
-                       "bitsandbytes", "torch"),
+                       "bitsandbytes", "torch", "mediapipe"),
             "retouch": ("diffusers", "transformers", "accelerate", "safetensors", "torch",
                         "huggingface_hub"),
             "edit": ("diffusers", "transformers", "accelerate", "safetensors", "bitsandbytes",
@@ -438,8 +455,20 @@ def min_vram_gib(spec: dict) -> int:
     return v
 
 
+def _template_cells(kind, template: Path) -> list:
+    """The job's own cells: a stills template carries its gate cell after the stills, split at the marker
+    (the gate's licence allowlist and anchor threshold are baked in from this module)."""
+    text = template.read_text(encoding="utf-8")
+    if kind != "stills" or GATE_MARKER not in text:
+        return [text]
+    stills, gate = text.split(GATE_MARKER, 1)
+    config = (f"GATE_LICENCE_ALLOWLIST = {GATE_LICENCE_ALLOWLIST!r}\n"
+              f"GATE_ANCHOR_PASS = {GATE_ANCHOR_PASS!r}")
+    return [stills.rstrip("\n") + "\n", gate.replace("GATE_CONFIG_HERE", config, 1)]
+
+
 def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, deadline_s,
-              min_vram=0, clip_s=None) -> bytes:
+              min_vram=0, clip_s=None, sfx=False) -> bytes:
     retouch, edit, film = kind == "retouch", kind == "edit", kind == "film_clips"
     config = (_GUARD +
               f"import pathlib\nJOB_ID = {job_id!r}\nTITLE = {title!r}\nKIND = {kind!r}\n"
@@ -482,7 +511,9 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
              *([("code", _LICENCE)] if retouch or edit or film else []),
              *([("code", _EDIT_PREFLIGHT)] if edit else []),
              *([("code", _FILM_PREFLIGHT)] if film else []), ("code", _CLOCK),
-             ("code", _VERIFY), ("code", template.read_text(encoding="utf-8")),
+             ("code", _VERIFY),
+             *([("code", (_TEMPLATES / "sfx_cell.py.txt").read_text(encoding="utf-8"))] if film and sfx else []),
+             *[("code", t) for t in _template_cells(kind, template)],
              ("code", _MANIFEST)]
     nb = {"nbformat": 4, "nbformat_minor": 5,
           "metadata": {"kernelspec": {"name": "python3", "display_name": "Python 3"},
@@ -583,6 +614,8 @@ def derive_compute(kind: str, spec: dict, rates: dict, items: int) -> dict:
         shapes = [FILM_RES[(c["width"], c["height"])] for c in _film_items(spec)]
         compute.update(hd=shapes.count("hd"), sd=shapes.count("sd"),
                        gpu="a100" if film_min_vram(spec) > FILM_A100_FROM_GIB else "l4")
+        if _film_sfx(spec):  # the sound stage runs before the clips, inside the forecast the clock enforces
+            compute["sfx_s"] = SFX_BUDGET_S
     declared = spec.get("compute")
     if declared is not None:
         if not isinstance(declared, dict):
@@ -614,6 +647,17 @@ def narration_units(spec: dict) -> list:
         for scene in spec["scenes"]:
             units += voice_units(scene, spec["preset"], spec.get("clause"), lang, style, directions)
     return units
+
+
+T5_MAX = 256  # FLUX.1-schnell's T5 limit: tokens past it are cut (the stills template says the same)
+
+
+def estimate_t5_tokens(text: str) -> int:
+    """A deliberately high estimate of the T5 token count (no tokenizer is installed here): every word and
+    every punctuation mark is one piece, a word over 6 letters counts 1.3 (rounded up). Real SentencePiece
+    counts for plain English prose run below this, so a prompt it passes fits."""
+    pieces = re.findall(r"\w+|[^\w\s]", text)
+    return math.ceil(sum(1.3 if len(p) > 6 else 1.0 for p in pieces))
 
 
 def negative_words(prompt: str) -> list:
@@ -878,6 +922,9 @@ def _film_items(spec: dict) -> list:
         if not isinstance(key, str) or not _SAFE.fullmatch(key):
             raise ValueError(f"film_clips item {n} key must be lowercase letters, digits and hyphens, "
                              f"not {key!r}")
+        if key.startswith("sfx-"):
+            raise ValueError(f"film_clips key {key!r} must not start with \"sfx-\" (that prefix names the "
+                             "fetched sound files)")
         if key in seen:
             raise ValueError(f"film_clips key {key!r} is used twice")
         res = (s.get("width"), s.get("height"))
@@ -907,6 +954,24 @@ def _film_items(spec: dict) -> list:
         out.append({"key": key, "image": image, "width": res[0], "height": res[1], "seed": seed,
                     "prompt": prompt.strip(), "continue_from": cont,
                     **({"shot": shot} if shot is not None else {})})
+    return out
+
+
+def _film_sfx(spec: dict) -> dict:
+    """The optional sound fetch: {"sfx": {"<name>": "<search words>"}} (lowercase name; a Commons search)."""
+    sfx = spec.get("sfx")
+    if sfx is None:
+        return {}
+    if not isinstance(sfx, dict) or not sfx:
+        raise ValueError("film_clips sfx must be an object {\"<name>\": \"<search words>\"} "
+                         "(omit it for no sound fetch)")
+    out = {}
+    for name, query in sfx.items():
+        if not isinstance(name, str) or not _SFX_NAME.fullmatch(name):
+            raise ValueError(f"film_clips sfx name {name!r} must be lowercase letters, digits and hyphens")
+        if not isinstance(query, str) or not query.strip() or len(query) > 120:
+            raise ValueError(f"film_clips sfx {name!r} needs search words (1-120 characters)")
+        out[name] = query.strip()
     return out
 
 
@@ -958,6 +1023,26 @@ def _film_files(spec: dict, items: list) -> dict:
     return files
 
 
+def _stills_anchor(spec: dict, item: dict, files: dict):
+    """A stills item's optional "anchor": the character's anchor still, a .png inside the spec's art_dir.
+    It rides in inputs.zip as anchors/<name> and the gate compares the item's still (CLIP similarity) to it."""
+    name = item.get("anchor")
+    if name is None:
+        return None
+    if not isinstance(name, str) or name != Path(name).name or not name.lower().endswith(".png"):
+        raise ValueError(f"stills item {item.get('key')!r} anchor must be a .png file name inside art_dir, "
+                         f"not {name!r}")
+    art = spec.get("art_dir")
+    if not art:
+        raise ValueError(f"stills item {item.get('key')!r} has an anchor, so the spec needs art_dir "
+                         "(the folder holding the anchor stills)")
+    path = Path(art) / name
+    if not path.is_file():
+        raise ValueError(f"stills item {item.get('key')!r} anchor {name!r} is not in art_dir {art}")
+    files["anchors/" + name] = path.read_bytes()
+    return "anchors/" + name
+
+
 def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
     """Validate the spec; return everything needed to write, without touching disk."""
     compute = derive_compute(kind, spec, rates, job_items(kind, spec))
@@ -988,7 +1073,7 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                 "revision": NARRATION_REVISION, "steps": 1, "compute": compute}
     if kind == "stills":
         _check_model(kind, spec, STILLS_REPO)
-        items = []
+        items, files = [], {}
         for s in spec["items"]:
             clash = [w for w in STYLE_CONFLICTS if w in s["prompt"].lower()]
             if clash:
@@ -998,6 +1083,12 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                 raise ValueError(f"stills key {s['key']!r} ends like a candidate file (--cN); "
                                  "use candidates instead")
             prompt = s["prompt"].rstrip() + " " + HOUSE_STYLE
+            tokens = estimate_t5_tokens(prompt)  # look_first reorders the same tokens
+            if tokens > T5_MAX:
+                raise ValueError(f"stills prompt {s['key']!r} (with the house style) is about {tokens} tokens, "
+                                 f"over FLUX.1-schnell's T5 limit of {T5_MAX}: the tail, usually the "
+                                 "character lines, would be cut. Shorten the prompt (the house style alone "
+                                 f"is about {estimate_t5_tokens(HOUSE_STYLE)} tokens)")
             negative = negative_words(prompt)
             if negative:
                 raise ValueError(f"stills prompt {s['key']!r} uses the negative word {negative[0]!r}: "
@@ -1006,15 +1097,17 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                                  " (references/visual-style.md, Prompt wording)")
             n, seed = _candidates(s), int(s["seed"])
             size = {"width": int(s.get("width", 1024)), "height": int(s.get("height", 1024))}
+            anchor = _stills_anchor(spec, s, files)
+            extra = {"anchor": anchor} if anchor else {}
             if n == 1:
-                items.append({"key": s["key"], "prompt": prompt, "seed": seed, **size})
+                items.append({"key": s["key"], "prompt": prompt, "seed": seed, **size, **extra})
                 continue
             # one entry per candidate image, so EXPECTED, the deadline and the manifest see each file
             items += [{"key": f"{s['key']}--c{c}", "base": s["key"], "candidate": c,
-                       "prompt": prompt, "seed": seed + c - 1, **size} for c in range(1, n + 1)]
+                       "prompt": prompt, "seed": seed + c - 1, **size, **extra} for c in range(1, n + 1)]
         if not items:
             raise ValueError("no stills requested")
-        return {"payload": {"items": items}, "repo": STILLS_REPO,
+        return {"payload": {"items": items}, "files": files, "repo": STILLS_REPO,
                 "revision": "resolved-at-run-time", "steps": STILLS_STEPS, "compute": compute}
     if kind == "music":
         _check_model(kind, spec, MUSIC_REPO)
@@ -1038,9 +1131,10 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
         _check_model(kind, spec, FILM_REPO)
         _check_depth_model(spec)
         items = _film_items(spec)
+        sfx = _film_sfx(spec)
         return {"payload": {"items": items, "negative_prompt": FILM_NEGATIVE, "steps": FILM_STEPS,
                             "guidance": FILM_GUIDANCE, "frames": FILM_FRAMES, "fps": FILM_FPS,
-                            "depth_model": FILM_DEPTH_REPO},
+                            "depth_model": FILM_DEPTH_REPO, **({"sfx": sfx} if sfx else {})},
                 "files": _film_files(spec, items), "repo": FILM_REPO, "revision": "resolved-at-run-time",
                 "steps": FILM_STEPS, "compute": compute, "diffusers": FILM_DIFFUSERS,
                 "clip_s": {"hd": rates[kind]["clip_s_hd_a100" if compute["gpu"] == "a100" else "clip_s_hd"],
@@ -1178,7 +1272,8 @@ def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s:
                                        + "\n").encode("utf-8"), **plan.get("files", {})})
     zip_sha = hashlib.sha256(archive).hexdigest()
     nb = _notebook(kind, job_id, title, zip_sha, plan["repo"], plan["revision"],
-                   plan["steps"], _TEMPLATES / f"{kind}_cell.py.txt", deadline_s, min_vram, plan.get("clip_s"))
+                   plan["steps"], _TEMPLATES / f"{kind}_cell.py.txt", deadline_s, min_vram, plan.get("clip_s"),
+                   sfx=bool(plan["payload"].get("sfx")))
     manifest = {"schema": "earnalism.audiovisual-build.v1", "job_id": job_id, "kind": kind,
                 "title": title, "inputs_sha256": zip_sha,
                 "notebook_sha256": hashlib.sha256(nb).hexdigest(),

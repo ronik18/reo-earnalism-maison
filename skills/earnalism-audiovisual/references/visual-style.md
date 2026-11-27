@@ -185,3 +185,33 @@ The style does not fix content. Check every imported still at full size for:
 
 Regenerate only the failing stills as a small patch job with candidates, then pick (`film`
 applies a later partial stills job, or a candidates job's picks, over the full set).
+
+## Gate (character and period check of the stills)
+
+Every `job stills` notebook runs a gate cell after the stills and writes `<key>.gate.json` per image:
+`{eyes, hands_detached, anachronisms, anchor_similarity, pass, needs_review, notes}`. Checks: MediaPipe
+Face Landmarker (open eyes per face; a frontal face with other than 2 is a fail, a profile with fewer a
+review), MediaPipe Hand Landmarker (a wrist outside every OWLv2 person/arm box and face box, grown by 3% of
+the diagonal, is detached; nothing to judge against is a review), OWLv2 labels gas cylinder, air
+conditioner, electric cable, spotlight, modern eyeglasses, plastic, utility pole, modern high-rise
+building (score >= 0.30 fail, 0.15-0.30 review) and CLIP ViT-B/32 similarity to the character's anchor still
+(< 0.80 review, never an automatic fail; the figure is not yet calibrated on these stills). A model that
+failed, was refused by the licence allowlist (apache-2.0, mit) or returned nothing is `needs_review`, never
+`pass`. The gate's seconds are not in the forecast: when the clock runs out the remaining stills are left
+ungated (listed in the manifest) and `pick` treats an ungated candidate of a gated job as needing review.
+
+Anchor: a stills item may carry `"anchor": "<name>.png"`; the spec's `art_dir` holds that file and the builder
+puts it in inputs.zip as `anchors/<name>.png` (candidates inherit it).
+
+`pick` refuses a candidate whose gate did not pass or needs review unless `--override "<reason>"`; the reason
+and the gate verdict are recorded in the pick and its event. Candidates of jobs with no gate files pick as before.
+
+The builder refuses a stills prompt whose house-style-first text is estimated over FLUX's 256 T5 tokens.
+
+## Sound fetch (film_clips)
+
+A film_clips spec with `"sfx": {"crows": "crows cawing morning", ...}` adds a cell before the Wan clips that
+searches Wikimedia Commons (no key), keeps up to two files per name that are CC0 or public domain (the file's
+own licence), whose title holds a search word, and writes `sfx-<name>-<n>.<ext>` and `sfx-licences.json`
+(title, page, licence, author). Eight minutes at most, reserved in the forecast; it never fails the job.
+Import places them under `film_clips/<job_id>/sfx/`.

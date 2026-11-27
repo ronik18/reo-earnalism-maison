@@ -412,6 +412,22 @@ class FilmClipsImportTests(unittest.TestCase):
         self.assertEqual((self.record.root / base / "clips" / "c1.mp4").read_bytes(), b"mp4")
         self.assertEqual(self.ledger._load()[0]["state"], "settled")
 
+    def test_film_clips_sfx_outputs_are_placed_under_sfx(self):
+        extra = {"sfx-crows-1.ogg": b"ogg", "sfx-licences.json": b"{}"}
+        arts = importer.import_job(self.record, self.job, self.outputs_tar(extra=extra), self.ledger, 1.0)
+        base = self.record.root / "film_clips" / self.job["job_id"] / "sfx"
+        self.assertEqual(sorted(p.name for p in base.iterdir()), ["crows-1.ogg", "licences.json"])
+        self.assertEqual((base / "crows-1.ogg").read_bytes(), b"ogg")
+        self.assertIn(f"film_clips/{self.job['job_id']}/sfx/crows-1.ogg", [a["path"] for a in arts])
+
+    def test_film_clips_sfx_name_with_query_junk_is_refused(self):
+        for bad in ("sfx-birds-1.org&utm_campaign=x", "sfx-x.exe", "sfx-.ogg"):
+            with self.assertRaises(Exception):
+                importer.import_job(self.record, self.job, self.outputs_tar(extra={bad: b"x"}),
+                                    self.ledger, 1.0)
+            shutil.rmtree(self.root / "dl", ignore_errors=True)
+        self.assertFalse((self.record.root / "film_clips").exists())
+
     def test_film_clips_missing_item_or_bad_hash_holds(self):
         for kw in ({"drop": ("c1.mp4",)}, {"tamper": "c1.mp4"}):
             folder = self.outputs_tar(**kw)

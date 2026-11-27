@@ -110,13 +110,25 @@ def _job_keys(inputs_zip, kind) -> list:
     return keys
 
 
-def _film_sub(name: str) -> str:
-    """film_clips layout: each clip's files under clips/, a still's depth map under depth/."""
+_SFX = re.compile(r"sfx-([a-z0-9][a-z0-9-]*-[0-9]+\.(?:ogg|oga|opus|wav|flac|mp3)|licences\.json)")
+
+
+def _film_place(name: str) -> tuple:
+    """film_clips layout: (subfolder, file name) of one output. Each clip's files go under clips/, a still's
+    depth map under depth/, and the fetched sounds (flat Drive names sfx-<name>-<n>.<ext> and
+    sfx-licences.json) under sfx/ without the prefix."""
     if name.endswith((".mp4", ".last.png", ".last-depth.png")):
-        return "clips"
+        return "clips", name
     if name.endswith(".depth.png"):
-        return "depth"
+        return "depth", name
+    m = _SFX.fullmatch(name)
+    if m:
+        return "sfx", m.group(1)
     raise ImportHeld(f"unexpected film_clips output: {name!r}")
+
+
+def _film_sub(name: str) -> str:
+    return _film_place(name)[0]
 
 
 def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path):
@@ -173,11 +185,13 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     staging = Path(tempfile.mkdtemp(dir=record.root, prefix=".import-"))
     try:
         for name in outputs:
-            sub = staging / _film_sub(name) if film else staging
+            sub_name, dest_name = _film_place(name) if film else (None, name)
+            sub = staging / sub_name if film else staging
             sub.mkdir(exist_ok=True)
-            shutil.copy2(present[name], sub / name)
+            shutil.copy2(present[name], sub / dest_name)
         for name, digest in outputs.items():  # re-verify the copies
-            if sha256_file((staging / _film_sub(name) if film else staging) / name) != digest:
+            sub_name, dest_name = _film_place(name) if film else (None, name)
+            if sha256_file((staging / sub_name if film else staging) / dest_name) != digest:
                 raise ImportHeld(f"copy sha256 mismatch: {name}")
         dest.parent.mkdir(parents=True, exist_ok=True)
         staging.rename(dest)
@@ -186,8 +200,14 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
         raise
     meta = {"job_id": job_id, "job_kind": kind, "model": model, "packages": packages,
             "input_zip_sha256": zip_sha}
+    def placed(name):
+        if not film:
+            return dest / name
+        sub, final = _film_place(name)
+        return dest / sub / final
+
     artifacts = [record.add_artifact("retouch_mask" if kind == "retouch" and name.endswith("--mask.png")
-                                     else kind, (dest / _film_sub(name) if film else dest) / name, meta)
+                                     else kind, placed(name), meta)
                  for name in sorted(outputs)]
     return artifacts, {"model": model, "packages": packages, "input_zip_sha256": zip_sha}
 
