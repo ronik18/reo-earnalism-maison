@@ -1,0 +1,46 @@
+{
+ "note": "PILOT v6 (spike) animation for scene f01s014 after the v4 review: one mother throughout (veiled, careworn): a quiet 10 s beat at the door (13q + continuation 13r) for the 9 s clause, the pot drop at the empty cot (2 takes), the paan mat. Stills from stills-pilot7 (Hem eye 7-c1, paan 14-c2, pot 9-c4; gate FAIL on 9-c4 overridden by eye: hands hold the pot, the detector found no person box) and the pilot-6 mother still.",
+ "art_dir": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v6/art",
+ "items": [
+  {
+   "key": "f01s014-13q",
+   "image": "f01s014-13.png",
+   "seed": 61013,
+   "prompt": "A careworn Bengali mother with her white red-bordered sari drawn over her head stands still at dawn holding a long broom pole; her eyes slowly settle on the closed wooden door on the left, she draws one slow breath, her hands stay still on the pole, the edge of her veil stirs in a light breeze, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  },
+  {
+   "key": "f01s014-13r",
+   "continue_from": "f01s014-13q",
+   "seed": 61113,
+   "prompt": "A careworn Bengali mother with her white red-bordered sari drawn over her head keeps looking at the closed door, then slowly lowers her eyes, her shoulders sink a little, she stays still holding the broom pole, the veil edge stirs, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  },
+  {
+   "key": "f01s014-9p",
+   "image": "f01s014-9.png",
+   "seed": 61009,
+   "prompt": "A careworn Bengali mother with her white red-bordered sari drawn over her head stands in a doorway holding a brass water pot and stares at the empty cot; the pot slips from her hands and falls to the floor, she freezes and slowly raises one hand to her mouth, her hands and arms stay whole and attached, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  },
+  {
+   "key": "f01s014-9q",
+   "image": "f01s014-9.png",
+   "seed": 61109,
+   "prompt": "A careworn Bengali mother with her white red-bordered sari drawn over her head stands in a doorway holding a brass water pot and stares at the empty cot; the pot slips from her hands and falls to the floor, she freezes and slowly raises one hand to her mouth, her hands and arms stay whole and attached, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  },
+  {
+   "key": "f01s014-14w",
+   "image": "f01s014-14.png",
+   "seed": 61014,
+   "prompt": "A careworn Bengali mother with her white red-bordered sari drawn over her head sits alone on a straw mat slowly folding a green betel leaf with her eyes lowered, then pauses and glances at the empty place beside her, her hands stay whole, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  }
+ ]
+}
