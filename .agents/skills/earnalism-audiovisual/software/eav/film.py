@@ -806,6 +806,13 @@ def _vtt_ts(ms: int) -> str:
 
 
 CAP_LEAD_S, CAP_HOLD_S = 0.3, 1.0   # a cue may start this much before its speech and end this much after
+CAP_HOLD_HEADING_S = 1.5            # ... when a chapter heading follows (the long chapter-break pause)
+
+
+def _is_heading(text: str) -> bool:
+    """A chapter heading line ("প্রথম পরিচ্ছেদ।"): the recognition retime.py uses. Headings keep their own cue."""
+    from .retime import _HEADING_LINE
+    return bool(_HEADING_LINE.match(text.strip()))
 
 
 def _split_span(key, lines, t0, t1):
@@ -824,7 +831,7 @@ def _split_span(key, lines, t0, t1):
                      f"{CAP_MAX_S:g} s each within {(t1 - t0) / 1000:.2f} s")
 
 
-def _place(key, text, start, end, prev_end, next_start, cps, single):
+def _place(key, text, start, end, prev_end, next_start, cps, single, hold=CAP_HOLD_S):
     """The cues of one unit (or of merged units when `single`: one cue only). The span starts at the speech
     and runs to max(speech end, enough time for `cps`); when that does not fit before the next unit it may
     start up to CAP_LEAD_S earlier and end up to CAP_HOLD_S later, never into the previous cue nor the next
@@ -836,7 +843,7 @@ def _place(key, text, start, end, prev_end, next_start, cps, single):
     need = max(math.ceil(chars / cps * 1000), round(CAP_MIN_S * 1000))
     s0, e0 = round(start * 1000), round(end * 1000)
     s_min = max(s0 - round(CAP_LEAD_S * 1000), prev_end)
-    e_max = e0 + round(CAP_HOLD_S * 1000)
+    e_max = e0 + round(hold * 1000)
     if next_start is not None:
         e_max = min(e_max, round(next_start * 1000))
     if s0 < prev_end:
@@ -865,30 +872,35 @@ def _caption_cues(timing: list, units: list, lang: str, offset: float) -> list:
     while i < len(order):
         prev_end = groups[-1][2][-1][1] if groups else 0
         nxt = lambda j: order[j + 1]["start"] if j + 1 < len(order) else None
+        head = lambda j: j + 1 < len(order) and _is_heading(text[order[j + 1]["unit_key"]])
+        hold = lambda j: CAP_HOLD_HEADING_S if head(j) else CAP_HOLD_S
         t = order[i]
+        is_h = lambda j: _is_heading(text[order[j]["unit_key"]])
         try:
-            cues = _place(t["unit_key"], text[t["unit_key"]], t["start"], t["end"], prev_end, nxt(i), cps, False)
+            cues = _place(t["unit_key"], text[t["unit_key"]], t["start"], t["end"], prev_end, nxt(i), cps, False,
+                          hold(i))
             groups.append((i, i, cues))
             i += 1
             continue
         except ValueError as first:
             err = first
         merged = None
-        if i + 1 < len(order):           # merge with the next unit
+        if i + 1 < len(order) and not is_h(i) and not is_h(i + 1):   # merge with the next unit; never a heading
             n = order[i + 1]
             try:
                 merged = (i, i + 1, _place(f"{t['unit_key']}+{n['unit_key']}",
                                            text[t["unit_key"]] + " " + text[n["unit_key"]], t["start"], n["end"],
-                                           prev_end, nxt(i + 1), cps, True))
+                                           prev_end, nxt(i + 1), cps, True, hold(i + 1)))
             except ValueError:
                 merged = None
-        if merged is None and groups and len(groups[-1][2]) == 1:   # or with the previous one
+        if (merged is None and groups and len(groups[-1][2]) == 1 and not is_h(i)
+                and not any(is_h(k) for k in range(groups[-1][0], i))):   # or with the previous one
             f, l, _ = groups[-1]
             p_end = groups[-2][2][-1][1] if len(groups) > 1 else 0
             joined = " ".join(text[order[k]["unit_key"]] for k in range(f, i + 1))
             try:
                 merged = (f, i, _place("+".join(order[k]["unit_key"] for k in range(f, i + 1)), joined,
-                                       order[f]["start"], t["end"], p_end, nxt(i), cps, True))
+                                       order[f]["start"], t["end"], p_end, nxt(i), cps, True, hold(i)))
                 groups.pop()
             except ValueError:
                 merged = None

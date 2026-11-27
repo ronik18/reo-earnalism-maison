@@ -732,6 +732,24 @@ class FixRoundOneTests(unittest.TestCase):
             prev = e
         self.assertLess(len(cues), 3)           # a merge happened
 
+    def test_a_merge_never_crosses_a_chapter_heading(self):
+        tm = [{"unit_key": "a", "start": 0.0, "end": 3.0}, {"unit_key": "b", "start": 3.1, "end": 4.2},
+              {"unit_key": "h", "start": 4.2, "end": 6.2}]
+        un = [{"unit_key": "a", "text": "ভোর হইল।"}, {"unit_key": "b", "text": self.FAST},
+              {"unit_key": "h", "text": "দ্বিতীয় পরিচ্ছেদ।"}]
+        cues = self._caps(tm, un)
+        self.assertEqual(cues[-1][2], ["দ্বিতীয় পরিচ্ছেদ।"])          # the heading keeps its own cue
+        self.assertEqual(len(cues), 2)                                  # b merged with the previous unit a
+        self.assertIn("ভোর হইল।", " ".join(cues[0][2]))
+        self.assertIn("আমি এখনই", " ".join(cues[0][2]))
+
+    def test_hold_grows_to_one_and_a_half_seconds_before_a_heading(self):
+        tm = [{"unit_key": "a", "start": 0.0, "end": 0.5}, {"unit_key": "h", "start": 9.0, "end": 11.0}]
+        un = [{"unit_key": "a", "text": self.FAST}, {"unit_key": "h", "text": "দ্বিতীয় পরিচ্ছেদ।"}]
+        cues = self._caps(tm, un)
+        self.assertGreater(cues[0][1], 0.5 + 1.0 + 1e-6)    # 27 chars need 1.8 s: 0.5 + 1.5 is allowed
+        self.assertLessEqual(cues[0][1], 0.5 + 1.5 + 1e-9)
+
     def test_impossible_caption_is_still_refused(self):
         tm = [{"unit_key": "a", "start": 0.0, "end": 1.0}, {"unit_key": "b", "start": 1.0, "end": 2.0}]
         un = [{"unit_key": "a", "text": BN_LONG[:110]}, {"unit_key": "b", "text": BN_LONG[110:230]}]
