@@ -1087,10 +1087,11 @@ def check_film_plan(spec: dict, plan: dict, covered=()) -> None:
         if any(c.get("shot") != n for c in chain):
             raise ValueError(f"film_clips chain of {chain[0]['key']!r} mixes shots: a continuation continues its shot")
         have = shotplan.chain_frames(len(chain))
-        if have < need[n]:
+        if not shotplan.chain_covers(len(chain), need[n]):
             raise ValueError(f"shot {n} of scene {plan['scene_id']} renders {need[n]} frames ({need[n] / FILM_FPS:.2f} s "
-                             f"with its transition halves) but the take ending {chain[-1]['key']!r} chains "
-                             f"{len(chain)} clip(s) = {have} frames: add continuation item(s) (continue_from) up to "
+                             f"with its transition halves) plus a {shotplan.CHAIN_MARGIN}-frame margin, but the take "
+                             f"ending {chain[-1]['key']!r} chains {len(chain)} clip(s) = {have} frames: add "
+                             f"continuation item(s) (continue_from) up to "
                              f"{shotplan.clips_for(need[n])} clips, each with its own action")
     missing = sorted(set(wan) - taken - set(covered))
     if missing:

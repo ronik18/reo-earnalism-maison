@@ -1565,3 +1565,21 @@ class StillsT5LimitTests(unittest.TestCase):
         self.assertIn("f01s014-3", str(c.exception))
         self.assertEqual(list(self.out.iterdir()), [])
         self.build("stills", {"items": [{"key": "a", "prompt": self.words(60), "seed": 1}]})
+
+
+def test_film_chain_needs_a_one_frame_margin_over_its_shot():
+    """N1: a planned chain covers its shot's render length plus one frame, so assembly never runs it short."""
+    import pytest
+    from eav import shotplan
+
+    def plan(span_frames):
+        return {"scene_id": "f01s014", "shots": [{"n": 1, "start": 0.0, "end": span_frames / 24, "motion": "wan",
+                                                  "wan_res": "1280x704", "transition_in": "cut"}]}
+    item = {"shot": 1, "width": 1280, "height": 704, "prompt": "She turns; static locked-off camera."}
+    spec = {"scene": "f01s014", "items": [{**item, "key": "f01s014-1a", "image": "a.png", "seed": 1, "continue_from": None},
+                                          {**item, "key": "f01s014-1b", "image": None, "seed": 2,
+                                           "continue_from": "f01s014-1a"}]}
+    assert shotplan.render_frames(plan(231)["shots"])[1] == 241     # span + 1 (cut in) + 9 (half a dissolve out)
+    with pytest.raises(ValueError, match="1-frame margin"):
+        colab_jobs.check_film_plan(spec, plan(231))                 # 241 frames for 241: no frame to spare
+    colab_jobs.check_film_plan(spec, plan(230))                     # 241 frames for 240 + 1

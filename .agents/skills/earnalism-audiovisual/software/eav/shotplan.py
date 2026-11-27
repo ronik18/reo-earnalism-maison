@@ -52,6 +52,9 @@ _PIXELS = {"1280x704": 1280 * 704, "896x512": 896 * 512}
 # clip's last frame, which assembly drops, so a chain of k clips plays 120 k + 1 frames. A shot's render length is
 # its span plus the halves of its transitions (film.edit_lengths; a dissolve is film.DISSOLVE_S, a cut one frame).
 CLIP_FRAMES, FPS, DISSOLVE_S = 121, 24, 0.8
+# N1: a planned chain covers its shot's render length plus this many frames, so frame rounding between the plan
+# (render_frames) and assembly (film.edit_lengths) can never leave a chain one frame short.
+CHAIN_MARGIN = 1
 _WORDS = re.compile(r"\s+")
 _MARKS = (",", ".", ";", ":", "!", "?", "\u0964", "\u0965", "\u2014", "\u2013", "\u2026")  # , . ; : ! ? । ॥ — – …
 _CLOSERS = " \"'\u201c\u201d\u2018\u2019)]"
@@ -150,10 +153,15 @@ def chain_frames(clips: int) -> int:
     return CLIP_FRAMES * clips - max(0, clips - 1)
 
 
+def chain_covers(clips: int, frames: int) -> bool:
+    """A chain of `clips` covers a shot that renders `frames`, with the CHAIN_MARGIN frame(s) to spare (N1)."""
+    return chain_frames(clips) >= frames + CHAIN_MARGIN
+
+
 def clips_for(frames: int) -> int:
-    """The fewest chained clips that cover `frames`."""
+    """The fewest chained clips that cover `frames` with the CHAIN_MARGIN to spare."""
     k = 1
-    while chain_frames(k) < frames:
+    while not chain_covers(k, frames):
         k += 1
     return k
 

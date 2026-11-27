@@ -117,7 +117,10 @@ def test_a_long_wan_shot_needs_one_action_per_6_s():
 def test_planning_compute_counts_the_continuations_a_wan_shot_needs():
     """F15/M4: a 9.5 s Wan shot renders more than one 5.04 s clip, so its chain is two clips (or more)."""
     assert shotplan.chain_frames(1) == 121 and shotplan.chain_frames(2) == 241
-    assert shotplan.clips_for(121) == 1 and shotplan.clips_for(122) == 2
+    # N1: a chain covers its shot with a 1-frame margin, so plan and assembly rounding never leave it short
+    assert shotplan.CHAIN_MARGIN == 1
+    assert shotplan.clips_for(120) == 1 and shotplan.clips_for(121) == 2 and shotplan.clips_for(240) == 2
+    assert shotplan.chain_covers(2, 240) and not shotplan.chain_covers(2, 241)
     p = _plan()
     need = shotplan.wan_clips_needed(p)
     assert need == {3: 2, 9: 2}
