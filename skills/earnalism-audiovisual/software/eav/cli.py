@@ -1967,9 +1967,8 @@ def cmd_qc(args):
                                                          a["meta"]["scenes"], _plan(rec)["language"])
             checks.update(gate_checks)
             item["gates"] = detail
-            if not_run:
-                item["not_run"] = not_run
-                report["advisory_only"] += [f"{target}: {r}" for r in not_run]
+            item["not_run"] = not_run          # a gate that cannot run fails the QC, it never passes
+            failed += [f"{target}:not_run:{g}" for g in not_run]
         if a["kind"] == "reel":
             item["loop_ssim"] = qc.loop_score(video)
             checks["loop_close"] = item["loop_ssim"] >= LOOP_MIN
@@ -1983,6 +1982,7 @@ def cmd_qc(args):
         failed += [f"{target}:{k}" for k, v in checks.items() if not v]
         report["items"][target] = item
     report["result"] = "fail" if failed else "pass"
+    report["failed"] = failed
     rec.add_artifact("qc_report", _write_json(out / "report.json", report), {"failed": failed})
     rec.event("qc", report["result"], {"failed": failed})
     for target, item in report["items"].items():

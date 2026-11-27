@@ -380,6 +380,26 @@ class ShotFilmTests(unittest.TestCase):
         self.assertLess(m.rms_db(m.samples(last)), m.rms_db(m.samples(mid)) - 15)
         self.assertGreater(m.rms_db(m.samples(last)), -90)   # a fade, never digital silence at the join
 
+    def test_no_digital_silence_under_cards_and_end(self):
+        """The title stretch, the credits stretch and a silent END carry room tone, never exact zero samples."""
+        import numpy as np
+        clips, audio = self._clips(2), self.d / "a.wav"
+        m.sine_wav(audio, 2.0)
+        endc, title, credits = self.d / "end.png", self.d / "t.png", self.d / "cr.png"
+        for p_, c in ((endc, "black"), (title, "navy"), (credits, "green")):
+            Image.new("RGB", (320, 180), c).save(p_)
+        out = self.d / "f.mp4"
+        info = film.assemble_shots(clips, [1.0, 1.0], [0.0], audio, out, end_card=endc, title_card=title,
+                                   credits_card=credits, title_s=1.0, credits_s=1.0, fade_out_s=0.5)
+        x = m.samples(out)
+        self.assertAlmostEqual(len(x) / 48000, info["duration"], delta=0.1)
+        zero = np.concatenate(([0], (x == 0).astype(np.int8), [0]))
+        edges = np.flatnonzero(np.diff(zero))
+        longest = max(((b - a) for a, b in zip(edges[::2], edges[1::2])), default=0)
+        self.assertLess(longest / 48000, 0.05)
+        self.assertLess(m.rms_db(x[:int(0.8 * 48000)]), -55)     # quiet, not silent: -62...-68 dBFS tone
+        self.assertGreater(m.rms_db(x[:int(0.8 * 48000)]), -80)
+
     def test_burned_captions_change_the_picture_not_the_length(self):
         clips, audio = self._clips(1, 2), self.d / "a.wav"
         m.sine_wav(audio, 2.0)

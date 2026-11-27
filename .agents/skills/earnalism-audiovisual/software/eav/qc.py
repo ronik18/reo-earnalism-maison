@@ -67,6 +67,8 @@ HITCH_MIN_STEP = 0.3     # luma levels (0-255) a step must move to belong to a d
 BAR_FRAC = 0.02          # a black band of at least 2% of the frame height/width from an edge
 BAR_BLACK, BAR_INTERIOR = 24, 40
 MARGIN_RANGE = (16.0, 18.0)    # voice over music, dB in speech (cue.MARGIN_RANGE)
+RESIDUAL_MARGIN_MIN = 15.0     # voice over everything that is not voice (music + ambience + foley), per scene
+PEAK_SILENCE_DB = -80.0        # spec 7: the music-only bus over the dramatic peak is below this (dBFS)
 ZERO_RUN_S = 0.05        # digital zero: any run of exact-zero samples longer than this
 LUFS_TARGET, LUFS_TOL = -16.0, 1.0
 TP_MAX_LEGACY = -1.0     # old films; a shot-based film uses film.SHOT_TP_MAX (-1.5)
@@ -159,12 +161,13 @@ def new_info_gaps(video: Path, threshold: float, fps: float = NEW_INFO_FPS, max_
     return gaps
 
 
-def hold_hashes(shot_plan_dir: Path, stills_dir: Path = None) -> list:
+def hold_hashes(shot_plan_dir: Path, stills_dir: Path = None, scenes: list = None) -> list:
     """Scenes whose shots reuse one still file (same sha256) with no Wan shot between the two: a hold, not a new
     picture. Reads the approved plans `<scene>.json` in `shot_plan_dir` (not `*.input.json`/`*.av.md`) and the
     stills `<scene>-<n>.<ext>` of `stills_dir` (default: the sibling `stills` folder). A shot without a still
-    file (a Wan shot) is skipped."""
+    file (a Wan shot) is skipped. `scenes` limits the check to those scene ids."""
     import hashlib
+    from . import film
     shot_plan_dir = Path(shot_plan_dir)
     stills = Path(stills_dir) if stills_dir else shot_plan_dir.parent / "stills"
     held = []
@@ -172,13 +175,15 @@ def hold_hashes(shot_plan_dir: Path, stills_dir: Path = None) -> list:
         if plan.name.endswith(".input.json"):
             continue
         sp = json.loads(plan.read_text(encoding="utf-8"))
+        if scenes is not None and (sp.get("scene_id") or plan.stem) not in scenes:
+            continue
         sid, seen = sp.get("scene_id") or plan.stem, {}
         for shot in sorted(sp.get("shots") or [], key=lambda s: s["n"]):
             if shot.get("motion") == "wan":
                 seen.clear()                   # a Wan beat: new information, reuse before it no longer counts
                 continue
             f = next((p for p in sorted(stills.glob(f"{sid}-{shot['n']}.*"))
-                      if p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp")), None)
+                      if p.suffix.lower() in film.STILL_EXTS), None)
             if f is None:
                 continue
             h = hashlib.sha256(f.read_bytes()).hexdigest()
@@ -192,7 +197,6 @@ def hold_hashes(shot_plan_dir: Path, stills_dir: Path = None) -> list:
 def black_bars(video: Path, fps: float = 2.0) -> list:
     """Seconds (sampled at `fps`) of frames with a black band (every pixel of the outer BAR_FRAC of the height
     or width at most luma 24) while the picture inside is visible (mean luma above 40, so a fade is no bar)."""
-    import numpy as np
     out = []
     for i, f in _gray_frames(video, 320, 180, fps):
         kh, kw = max(2, math.ceil(BAR_FRAC * f.shape[0])), max(2, math.ceil(BAR_FRAC * f.shape[1]))
@@ -261,17 +265,28 @@ def planned_cuts(plans: list) -> list:
     return cuts
 
 
-def audio_gates(mix: Path, voice: Path, shots: bool = False) -> dict:
-    """Audio gates on a finished film mix. `shots` selects the cinematic film's limits (true peak at most
-    film.SHOT_TP_MAX = -1.5 dBTP; -1.0 for an older film); loudness is -16 +-1 LUFS either way.
-    Voice over music: the music is not available here, so it is estimated as the residual of the mix after a
-    least-squares fit of the voice into it (one gain over both channels), and the margin is the rms of the fitted
-    voice over the rms of that residual, over the frames where the voice speaks (10 ms frames above 30 dB under the
-    95th-percentile level, cue._active). The residual holds the ambience and foley as well, so the figure reads at
-    most a little low. Must be 16-18 dB (cue.MARGIN_DB = 17). Digital zero: a run of exact-zero samples (every
-    channel) longer than 50 ms anywhere fails. `mix` and `voice` must start together."""
+def digital_zero_runs(audio: Path, exempt_tail_s: float = 0.0) -> list:
+    """(start, end) seconds of every run of exact-zero samples (all channels) longer than 50 ms in the decoded
+    `audio` (any file ffmpeg reads, so the delivered film itself). Runs that start within the last
+    `exempt_tail_s` seconds (the film's final fade) are not reported."""
     import numpy as np
-    from . import cue, film, mix as mixmod
+    from . import cue
+    m = cue.read(audio, ch=2)
+    zero = np.all(m == 0.0, axis=1)
+    edges = np.flatnonzero(np.diff(np.concatenate(([0], zero.astype(np.int8), [0]))))
+    total = len(m) / cue.SR
+    return [(round(a / cue.SR, 3), round(b / cue.SR, 3)) for a, b in zip(edges[::2], edges[1::2])
+            if (b - a) / cue.SR > ZERO_RUN_S and a / cue.SR < total - exempt_tail_s]
+
+
+def residual_margin(mix: Path, voice: Path):
+    """Voice over everything else in `mix`, dB, or None when the voice never speaks: the voice is fitted into the
+    stereo mix with one least-squares gain and the margin is rms(fitted voice) / rms(residual) over the speech
+    frames (10 ms frames above 30 dB under the 95th-percentile level, cue._active). The residual is the music plus
+    ambience and foley (the music alone is not available), so it reads below the cue's music-only margin. `mix` and
+    `voice` must start together and are judged for one scene (one master gain)."""
+    import numpy as np
+    from . import cue
     m = cue.read(mix, ch=2)
     v = cue.read(voice, ch=1)[:, 0]
     n = min(len(m), len(v))
@@ -280,31 +295,35 @@ def audio_gates(mix: Path, voice: Path, shots: bool = False) -> dict:
     _, act = cue._active(v, hop)
     sp = np.repeat(act, hop)
     sp = np.pad(sp, (0, n - len(sp)))[:n]
-    margin = None
-    if sp.any():
-        vs, ms = v[sp], m[sp]
-        g = float((ms * vs[:, None]).sum() / (2 * (vs * vs).sum() + 1e-18))
-        resid = ms - g * vs[:, None]
-        margin = round(float(20 * np.log10(abs(g) * np.sqrt(np.mean(vs ** 2)) / (np.sqrt(np.mean(resid ** 2)) + 1e-12))), 1)
-    zero = np.all(m == 0.0, axis=1)
-    runs, k = [], 0
-    edges = np.flatnonzero(np.diff(np.concatenate(([0], zero.astype(np.int8), [0]))))
-    for a, b in zip(edges[::2], edges[1::2]):
-        if (b - a) / cue.SR > ZERO_RUN_S:
-            runs.append((round(a / cue.SR, 3), round(b / cue.SR, 3)))
+    if not sp.any():
+        return None
+    vs, ms = v[sp], m[sp]
+    g = float((ms * vs[:, None]).sum() / (2 * (vs * vs).sum() + 1e-18))
+    resid = ms - g * vs[:, None]
+    return round(float(20 * np.log10(abs(g) * np.sqrt(np.mean(vs ** 2)) / (np.sqrt(np.mean(resid ** 2)) + 1e-12))), 1)
+
+
+def audio_gates(mix: Path, voice: Path, shots: bool = False, margin_range: tuple = MARGIN_RANGE) -> dict:
+    """Audio gates on one mix (a scene or a short film). `shots` selects the cinematic film's limits (true peak at
+    most film.SHOT_TP_MAX = -1.5 dBTP; -1.0 for an older film); loudness is -16 +-1 LUFS either way. The margin is
+    `residual_margin` (voice over music+ambience+foley) within `margin_range` (16-18 dB, cue.MARGIN_DB = 17; the film
+    gate judges it per scene with RESIDUAL_MARGIN_MIN and the cue's own music-only record). Digital zero: a run of
+    exact-zero samples longer than 50 ms anywhere in `mix` fails."""
+    from . import film, mix as mixmod
+    margin = residual_margin(mix, voice)
+    runs = digital_zero_runs(mix)
     meas = mixmod.measure(mix)
     tp_max = film.SHOT_TP_MAX if shots else TP_MAX_LEGACY
-    out = {"margin_db": margin, "margin_ok": margin is not None and MARGIN_RANGE[0] <= margin <= MARGIN_RANGE[1],
-           "digital_zero": runs, "digital_zero_ok": not runs, "lufs": meas["lufs"], "true_peak": meas["true_peak"],
-           "true_peak_max": tp_max, "true_peak_ok": meas["true_peak"] <= tp_max,
-           "loudness_ok": abs(meas["lufs"] - LUFS_TARGET) <= LUFS_TOL}
-    return out
+    return {"margin_db": margin, "margin_ok": margin is not None and margin_range[0] <= margin <= margin_range[1],
+            "digital_zero": runs, "digital_zero_ok": not runs, "lufs": meas["lufs"], "true_peak": meas["true_peak"],
+            "true_peak_max": tp_max, "true_peak_ok": meas["true_peak"] <= tp_max,
+            "loudness_ok": abs(meas["lufs"] - LUFS_TARGET) <= LUFS_TOL}
 
 
 def sound_on_picture(shot_plan: dict, fx: list) -> list:
     """R4: every sfx a shot's plan lists under sound.sfx needs a placed ambience/foley entry over that shot.
     `fx` is the cue's entries [{path, at, dur?, ...}] (scene seconds); an entry matches a name when its `sfx`/`name`
-    field equals it or the name is in its file stem, and it overlaps the shot when it plays at any point of
+    field equals it or the name is a whole word of its file stem (split at - _ . and spaces), and it overlaps the shot when it plays at any point of
     [start, end) (`dur` from the entry, else the file's length when it exists, else an instant at `at`).
     Returns ["shot N: name", ...] for what is missing."""
     spans = []
@@ -317,7 +336,7 @@ def sound_on_picture(shot_plan: dict, fx: list) -> list:
     for shot in sorted(shot_plan.get("shots") or [], key=lambda s: s["n"]):
         for name in (shot.get("sound") or {}).get("sfx") or []:
             def hit(e, a, b):
-                named = name in (e.get("sfx"), e.get("name")) or name.lower() in Path(e["path"]).stem.lower()
+                named = name in (e.get("sfx"), e.get("name")) or name.lower() in re.split(r"[-_. ]+", Path(e["path"]).stem.lower())
                 return named and a < shot["end"] and (b > shot["start"] or shot["start"] <= a)
             if not any(hit(*s) for s in spans):
                 missing.append(f"shot {shot['n']}: {name}")
@@ -363,49 +382,80 @@ def check_captions(text: str, lang: str) -> list:
 
 def film_gates(video: Path, film_dir: Path, scene_ids: list, lang: str) -> tuple:
     """Run every cinematic-film gate on the finished `video` of the shot-based film in `film_dir`
-    (film/film-NN: shots/<scene>.json plans, stills/, voice/<scene>.wav, audio/film.mix.wav, audio/<scene>.mix.json
-    with its "fx", and <film-NN>.vtt). Returns (checks {name: bool}, detail {name: ...}, not_run [reasons]):
-    a gate whose inputs are not on disk is listed in not_run, never passed silently."""
-    import tempfile
+    (film/film-NN: shots/<scene>.json plans, stills/, voice/<scene>.wav, audio/<scene>.mix.wav with
+    audio/<scene>.mix.json as cue writes it, and <film-NN>.vtt). Returns (checks {name: bool}, detail {name: ...},
+    not_run {gate: reason}): a gate whose inputs are missing is in not_run (the caller fails the QC), never passed.
+    margin (per scene): the cue's recorded music-only voice_over_music_db within 16-18 dB and the residual margin of
+    the scene mix (voice over music+ambience+foley) at least 15 dB. peak_silence: the cue's recorded
+    music_bus_peak_rms_db below -80 dBFS. digital_zero: on the delivered film's own audio, only the last 1.6 s (the
+    fade tail) exempt; film assembly lays room tone under every silent stretch."""
     from . import film
     film_dir = Path(film_dir)
-    plans = [json.loads((film_dir / "shots" / f"{s}.json").read_text(encoding="utf-8")) for s in scene_ids]
-    checks, detail, not_run = {}, {}, []
-    gaps = new_info_gaps(video, NEW_INFO_SIM)
-    held = hold_hashes(film_dir / "shots")
-    bars, hitches = black_bars(video), frame_hitches(video)
-    fl = flashes(video, planned_cuts(plans))
-    detail.update(new_info_gaps=gaps, holds=held, black_bars=bars, hitches=hitches, flashes=fl)
-    checks.update(new_info=not gaps, holds=not held, black_bars=not bars, hitches=not hitches,
-                  flashes=fl["max_per_s"] <= FLASH_MAX_PER_S and not fl["unplanned"])
-    missing = []
-    for sid, sp in zip(scene_ids, plans):
-        mj = film_dir / "audio" / f"{sid}.mix.json"
-        fx_doc = json.loads(mj.read_text(encoding="utf-8")).get("fx") if mj.is_file() else None
-        if fx_doc is None:
-            if any((s.get("sound") or {}).get("sfx") for s in sp["shots"]):
-                not_run.append(f"sound_on_picture: no cue fx recorded for scene {sid} (rerun cue)")
-            continue
-        base = Path(fx_doc.get("base", "."))
-        fx = [{**e, "path": str(base / e["path"])} for k in ("ambience", "foley") for e in fx_doc.get(k, [])]
-        missing += [f"{sid} {m}" for m in sound_on_picture(sp, fx)]
-    if not any("sound_on_picture" in r for r in not_run):
-        checks["sound_on_picture"] = not missing
+    checks, detail, not_run = {}, {}, {}
+    plans = {}
+    for s in scene_ids:
+        f = film_dir / "shots" / f"{s}.json"
+        if f.is_file():
+            plans[s] = json.loads(f.read_text(encoding="utf-8"))
+    if len(plans) != len(scene_ids):
+        gone = [s for s in scene_ids if s not in plans]
+        reason = f"no shot plan for scene(s) {', '.join(gone)}"
+        for g in ("new_info", "holds", "black_bars", "hitches", "flashes", "sound_on_picture"):
+            not_run[g] = reason
+    else:
+        gaps = new_info_gaps(video, NEW_INFO_SIM)
+        held = hold_hashes(film_dir / "shots", scenes=scene_ids)
+        bars, hitches = black_bars(video), frame_hitches(video)
+        fl = flashes(video, planned_cuts([plans[s] for s in scene_ids]))
+        detail.update(new_info_gaps=gaps, holds=held, black_bars=bars, hitches=hitches, flashes=fl)
+        checks.update(new_info=not gaps, holds=not held, black_bars=not bars, hitches=not hitches,
+                      flashes=fl["max_per_s"] <= FLASH_MAX_PER_S and not fl["unplanned"])
+    infos = {s: json.loads((film_dir / "audio" / f"{s}.mix.json").read_text(encoding="utf-8"))
+             for s in scene_ids if (film_dir / "audio" / f"{s}.mix.json").is_file()}
+    if plans and len(plans) == len(scene_ids):      # R4: misses of the scenes that have fx are kept either way
+        missing, no_fx = [], []
+        for sid in scene_ids:
+            fx_doc = infos.get(sid, {}).get("fx")
+            if fx_doc is None:
+                if any((s.get("sound") or {}).get("sfx") for s in plans[sid]["shots"]):
+                    no_fx.append(sid)
+                continue
+            fx = [e for k in ("ambience", "foley") for e in fx_doc.get(k, [])]
+            missing += [f"{sid} {m}" for m in sound_on_picture(plans[sid], fx)]
         detail["sound_on_picture"] = missing
+        if missing or not no_fx:
+            checks["sound_on_picture"] = not missing
+        if no_fx:
+            not_run["sound_on_picture"] = f"no cue fx recorded for scene(s) {', '.join(no_fx)} (rerun cue)"
     vtt = film_dir / f"{film_dir.name}.vtt"
     if vtt.is_file():
         problems = check_captions(vtt.read_text(encoding="utf-8"), lang)
         checks["captions"], detail["captions"] = not problems, problems
     else:
-        not_run.append(f"captions: {vtt.name} is not on disk")
-    mixed, voices = film_dir / "audio" / "film.mix.wav", [film_dir / "voice" / f"{s}.wav" for s in scene_ids]
-    if mixed.is_file() and all(v.is_file() for v in voices):
-        with tempfile.TemporaryDirectory() as td:
-            joined = film.join_scene_mixes(voices, film.scene_frames([sp["seconds"] for sp in plans]),
-                                           Path(td) / "voice.wav")
-            a = audio_gates(mixed, joined, shots=True)
-        detail["audio"] = a
-        checks.update(margin=a["margin_ok"], digital_zero=a["digital_zero_ok"])
+        not_run["captions"] = f"{vtt.name} is not on disk"
+    per, absent = {}, []
+    for sid in scene_ids:
+        mx, vo = film_dir / "audio" / f"{sid}.mix.wav", film_dir / "voice" / f"{sid}.wav"
+        rec_db = infos.get(sid, {}).get("voice_over_music_db")
+        if not (mx.is_file() and vo.is_file() and rec_db is not None):
+            absent.append(sid)
+            continue
+        res = residual_margin(mx, vo)
+        per[sid] = {"music_db": rec_db, "residual_db": res,
+                    "music_ok": MARGIN_RANGE[0] <= rec_db <= MARGIN_RANGE[1],
+                    "residual_ok": res is not None and res >= RESIDUAL_MARGIN_MIN}
+    if absent:
+        not_run["margin"] = f"scene mix, voice or cue record missing for scene(s) {', '.join(absent)}"
     else:
-        not_run.append("margin, digital_zero: the film mix or a scene voice is not on disk")
+        detail["margin"] = per
+        checks["margin"] = all(v["music_ok"] and v["residual_ok"] for v in per.values())
+    peaks = {s: infos[s].get("music_bus_peak_rms_db") for s in scene_ids if s in infos}
+    if len(peaks) == len(scene_ids) and all(v is not None for v in peaks.values()):
+        detail["peak_silence"] = peaks
+        checks["peak_silence"] = all(v < PEAK_SILENCE_DB for v in peaks.values())
+    else:
+        not_run["peak_silence"] = "the cue did not record music_bus_peak_rms_db for every scene (rerun cue)"
+    runs = digital_zero_runs(video, film.FADE_OUT_S)
+    detail["digital_zero"] = runs
+    checks["digital_zero"] = not runs
     return checks, detail, not_run

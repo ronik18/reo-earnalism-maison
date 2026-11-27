@@ -695,6 +695,16 @@ def assemble_shots(shot_clips: list, lens: list, transitions: list, audio: Path,
                                     tp_max=SHOT_TP_MAX)
     graph += _audio_graph(audio_idx, end_idx if end_audio else None, total, end_s,
                           lim["ceiling_db"], lim["gain_db"], shape)
+    # room tone under the whole film (the title stretch, the credits stretch, a silent END, the fade tail): the
+    # delivered audio never holds exact-zero samples (QC digital-zero gate); -62...-68 dBFS, from the mix itself
+    from . import retime
+    tone = work / "room-tone.wav"
+    retime.write(tone, retime.room_tone(retime.read(audio), int((full + 1.0) * retime.SR)))
+    args += ["-i", str(tone)]
+    graph[-1] = graph[-1][:-3] + "[ab]"
+    graph.append(f"[{nxt}:a]aresample={RATE},aformat=channel_layouts=stereo[tn]")
+    graph.append("[ab][tn]amix=inputs=2:normalize=0:duration=first[a]")
+    nxt += 1
     maps = ["-map", "[v]", "-map", "[a]"]
     if captions_vtt is not None and not burn:
         args += ["-i", str(captions_vtt)]

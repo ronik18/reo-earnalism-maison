@@ -1161,12 +1161,18 @@ class CliTests(RoundTwo, unittest.TestCase):
         (fd / "shots" / "s1.json").write_text(json.dumps({"scene_id": "s1", "seconds": 4.0, "shots": [
             {"n": 1, "motion": "glide", "start": 0.0, "end": 4.0, "sound": {"sfx": []}}]}))
         Record.load(self.root).add_artifact("film", video, {"target": "film-01", "mode": "shots", "scenes": ["s1"]})
-        run("qc", "--root", self.root)
-        item = json.loads((self.root / "qc" / "report.json").read_text())["items"]["film-01"]
+        code, _ = run("qc", "--root", self.root)
+        report = json.loads((self.root / "qc" / "report.json").read_text())
+        item = report["items"]["film-01"]
         for gate in ("new_info", "holds", "black_bars", "hitches", "flashes"):
             self.assertIn(gate, item["checks"])
-        self.assertTrue(any("margin" in r for r in item["not_run"]))     # no mix or voice on disk: said, not passed
+        self.assertIn("margin", item["not_run"])                       # no scene mix or voice on disk
         self.assertNotIn("margin", item["checks"])
+        self.assertEqual(report["result"], "fail")                      # a gate that cannot run never passes
+        self.assertEqual(code, 5)
+        for gate in ("margin", "captions", "peak_silence"):
+            self.assertIn(f"film-01:not_run:{gate}", report["failed"])
+        self.assertFalse(cli._qc_passed(Record.load(self.root)))
 
     def scores(self):
         d = self.d / "scores"

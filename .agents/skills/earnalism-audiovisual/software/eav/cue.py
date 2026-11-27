@@ -179,6 +179,9 @@ def scene_mix(voice: Path, cuts: list, peak_at: float, stems: dict, ambience: li
     # keep the stems' relative levels; scale the whole bus so the ducked music sits MARGIN_DB under the speech
     music = music * db(20 * np.log10(vrms / (np.sqrt(np.mean((music * g)[sp] ** 2)) + 1e-9)) - MARGIN_DB)
     ducked = music * g
+    pk = slice(min(int(round(peak_at * SR)), n), min(int(round((peak_at + SILENCE_S) * SR)), n))
+    # spec 7 "silence at peaks": RMS of the music-only bus over the peak window (-200 when empty or silent)
+    peak_rms_db = 20 * np.log10(float(np.sqrt(np.mean(ducked[pk] ** 2))) + 1e-10) if pk.stop > pk.start else -200.0
     vm = 20 * np.log10(vrms / (np.sqrt(np.mean(ducked[sp] ** 2)) + 1e-9))
     amb = _fx_bus(list(ambience) + list(foley), n)
     mixed = v[:, None] + ducked + amb * (0.5 + 0.5 * g)   # no whole-mix fade: the film's last scene fades (Task 8)
@@ -201,7 +204,8 @@ def scene_mix(voice: Path, cuts: list, peak_at: float, stems: dict, ambience: li
         raise ValueError(f"scene true peak {res['true_peak']:.1f} dBTP is above {TRUE_PEAK_MAX} dBTP")
     if not MARGIN_RANGE[0] <= vm <= MARGIN_RANGE[1]:
         raise ValueError(f"voice over music is {vm:.1f} dB, outside {MARGIN_RANGE[0]}-{MARGIN_RANGE[1]} dB")
-    return {"voice_over_music_db": round(float(vm), 1), "lufs": res["lufs"], "true_peak": res["true_peak"]}
+    return {"voice_over_music_db": round(float(vm), 1), "lufs": res["lufs"], "true_peak": res["true_peak"],
+            "music_bus_peak_rms_db": round(float(peak_rms_db), 1)}
 
 
 # ------------------------------------------------------------------ stem picking

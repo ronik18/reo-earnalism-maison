@@ -103,6 +103,13 @@ def test_peak_silence_at_scene_end_is_clipped(tmp_path):
     assert out.is_file() and r["lufs"] is not None
 
 
+def test_peak_silence_is_recorded_for_the_qc_gate(tmp_path):
+    r, _ = _mix(tmp_path)
+    assert r["music_bus_peak_rms_db"] < -80          # spec 7: silence at the peak, measured on the music-only bus
+    r, _ = _mix(tmp_path, peak_at=11.95)              # clipped to the scene end: still recorded, still silent
+    assert r["music_bus_peak_rms_db"] < -80
+
+
 def test_voice_over_music_in_range_16_to_18(tmp_path):
     r, _ = _mix(tmp_path)
     assert 16.0 <= r["voice_over_music_db"] <= 18.0, r
@@ -180,3 +187,4 @@ def test_cue_cli_pick_then_mix_needs_approved_plan(tmp_path):
     assert code == 0, out
     res = json.loads((root / "film" / "film-01" / "audio" / "f01s014.mix.json").read_text(encoding="utf-8"))
     assert res["peak_at"] == sp["peak"]["at"] and abs(res["lufs"] + 16) <= 1 and res["true_peak"] <= -1.5
+    assert res["music_bus_peak_rms_db"] < -80 and "fx" in res

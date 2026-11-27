@@ -235,6 +235,9 @@ class SoundOnPictureTests(unittest.TestCase):
         fx.append({"path": "foley/door.wav", "at": 4.5, "dur": 1.0})     # starts in shot 1
         self.assertEqual(qc.sound_on_picture(self.PLAN, fx), [])
         self.assertEqual(qc.sound_on_picture(self.PLAN, []), ["shot 1: rain", "shot 1: door", "shot 2: door"])
+        # a name is a whole word of the file stem: "rain" is not in "train", "door" is not in "indoor"
+        wrong = [{"path": "foley/train.wav", "at": 0.0, "dur": 12.0}, {"path": "foley/indoor-room.wav", "at": 0.0, "dur": 12.0}]
+        self.assertEqual(len(qc.sound_on_picture(self.PLAN, wrong)), 3)
 
 
 class CaptionGateTests(unittest.TestCase):
@@ -268,35 +271,163 @@ class FilmGatesTests(unittest.TestCase):
         self.assertEqual(cuts[-1], lead + 7.0 + film.CREDITS_S)
 
 
-class FilmGateRunTests(unittest.TestCase):
-    def test_gates_run_over_a_film_folder(self):
+class DigitalZeroTests(unittest.TestCase):
+    def test_zero_runs_on_the_delivered_audio(self):
+        rate = 48000
+        t = np.arange(6 * rate) / rate
+        body = 0.3 * np.sin(2 * np.pi * 220 * t)
+        floor = np.random.default_rng(3).standard_normal(len(t)) * 5e-4        # room tone, about -63 dBFS
         with tempfile.TemporaryDirectory() as td:
-            fd = Path(td) / "film-01"
-            for d in ("shots", "stills", "voice", "audio"):
-                (fd / d).mkdir(parents=True)
-            video = Path(td) / "film.mp4"
-            _lavfi(video, "testsrc2", 4)
-            sp = {"scene_id": "s1", "seconds": 4.0, "shots": [
-                {"n": 1, "motion": "glide", "start": 0.0, "end": 4.0, "sound": {"sfx": ["rain"]}}]}
-            (fd / "shots" / "s1.json").write_text(json.dumps(sp))
-            voice, mixed = _speech_and_music()
-            _wav(fd / "voice" / "s1.wav", voice)
-            _wav(fd / "audio" / "film.mix.wav", mixed)
-            (fd / "audio" / "s1.mix.json").write_text(json.dumps(
-                {"fx": {"base": "x", "ambience": [{"path": "rain.wav", "at": 0.0, "dur": 4.0}], "foley": []}}))
-            timing = [{"unit_key": "a", "start": 0.5, "end": 3.0}]
-            (fd / "film-01.vtt").write_text(film.captions(timing, [{"unit_key": "a", "text": "A quiet line."}], "en"))
-            checks, detail, not_run = qc.film_gates(video, fd, ["s1"], "en")
-            self.assertEqual(not_run, [])
-            self.assertTrue(all(checks.values()), checks)
-            self.assertEqual(set(checks), {"new_info", "holds", "black_bars", "hitches", "flashes",
-                                           "sound_on_picture", "captions", "margin", "digital_zero"})
-            (fd / "audio" / "s1.mix.json").write_text(json.dumps({"fx": {"ambience": [], "foley": []}}))
-            checks, detail, _ = qc.film_gates(video, fd, ["s1"], "en")
-            self.assertFalse(checks["sound_on_picture"])
-            self.assertEqual(detail["sound_on_picture"], ["s1 shot 1: rain"])
-            (fd / "audio" / "film.mix.wav").unlink()
-            self.assertTrue(qc.film_gates(video, fd, ["s1"], "en")[2])
+            td = Path(td)
+            silent_title = body.copy()
+            silent_title[:rate] = 0.0                                            # exact zero under the title card
+            toned = body.copy()
+            toned[:rate] = floor[:rate]
+            hole = toned.copy()
+            hole[3 * rate:3 * rate + 4800] = 0.0                                 # 100 ms inside the body
+            tail = toned.copy()
+            tail[-int(1.6 * rate):] = 0.0                                        # the final fade tail
+            for name, x in (("silent", silent_title), ("toned", toned), ("hole", hole), ("tail", tail)):
+                _wav(td / f"{name}.wav", x)
+            self.assertEqual(qc.digital_zero_runs(td / "silent.wav", 1.6), [(0.0, 1.0)])
+            self.assertEqual(qc.digital_zero_runs(td / "toned.wav", 1.6), [])
+            self.assertEqual(len(qc.digital_zero_runs(td / "hole.wav", 1.6)), 1)
+            self.assertEqual(qc.digital_zero_runs(td / "tail.wav", 1.6), [])     # only the fade tail is exempt
+            self.assertEqual(len(qc.digital_zero_runs(td / "tail.wav")), 1)
+
+
+def _fixture(root, scene="s1", gain=1.0, ambience_db=None, margin=17.0, recorded=17.0, peak_db=-200.0, sfx=(), seed=1):
+    """One scene of a film folder: plan, voice, scene mix (+ mix.json as cue writes it)."""
+    for d in ("shots", "stills", "voice", "audio"):
+        (root / d).mkdir(parents=True, exist_ok=True)
+    voice, mixed = _speech_and_music(margin_db=margin, seed=seed)
+    if ambience_db is not None:        # ambience ambience_db under the music: music rms is voice rms - margin
+        amb = np.random.default_rng(seed + 50).standard_normal(len(voice))
+        music_rms = 0.3 / np.sqrt(2) * 10 ** (-margin / 20)
+        mixed = mixed + amb / amb.std() * music_rms * 10 ** (-ambience_db / 20)
+    _wav(root / "voice" / f"{scene}.wav", voice)
+    _wav(root / "audio" / f"{scene}.mix.wav", mixed * gain)
+    (root / "shots" / f"{scene}.json").write_text(json.dumps({"scene_id": scene, "seconds": 4.0, "shots": [
+        {"n": 1, "motion": "glide", "start": 0.0, "end": 4.0, "sound": {"sfx": list(sfx)}}]}))
+    (root / "audio" / f"{scene}.mix.json").write_text(json.dumps(
+        {"voice_over_music_db": recorded, "music_bus_peak_rms_db": peak_db,
+         "fx": {"ambience": [{"path": "rain.wav", "at": 0.0, "dur": 4.0}], "foley": []}}))
+    return voice, mixed * gain
+
+
+def _film_audio(root, voice_mix, video):
+    """The delivered film: a picture with the scene's mix as its audio (room tone is in the mix itself)."""
+    _wav(root / "delivered.wav", voice_mix)
+    ff("-i", str(video), "-i", str(root / "delivered.wav"), "-c:v", "copy", "-c:a", "aac", "-shortest",
+       str(root / "film.mp4"))
+    return root / "film.mp4"
+
+
+class FilmGateRunTests(unittest.TestCase):
+    def setUp(self):
+        self._td = tempfile.TemporaryDirectory()
+        self.td = Path(self._td.name)
+        self.fd = self.td / "film-01"
+        self.video = self.td / "picture.mp4"
+        _lavfi(self.video, "testsrc2", 4)
+        timing = [{"unit_key": "a", "start": 0.5, "end": 3.0}]
+        self.vtt = film.captions(timing, [{"unit_key": "a", "text": "A quiet line."}], "en")
+
+    def tearDown(self):
+        self._td.cleanup()
+
+    def run_gates(self, scenes=("s1",), **fixture):
+        voice, mixed = None, None
+        for sid in scenes:
+            voice, mixed = _fixture(self.fd, sid, **fixture)
+        (self.fd / "film-01.vtt").write_text(self.vtt)
+        self.film = _film_audio(self.td, mixed, self.video)
+        return qc.film_gates(self.film, self.fd, list(scenes), "en")
+
+    def test_gates_run_over_a_film_folder(self):
+        checks, detail, not_run = self.run_gates(sfx=["rain"])
+        self.assertEqual(not_run, {})
+        self.assertTrue(all(checks.values()), checks)
+        self.assertEqual(set(checks), {"new_info", "holds", "black_bars", "hitches", "flashes", "sound_on_picture",
+                                       "captions", "margin", "digital_zero", "peak_silence"})
+
+    def test_margin_is_judged_per_scene_not_over_the_film(self):
+        """Two scenes at 17 dB voice over music whose masters differ by 1.6 dB (each is loudness-normalised with
+        its own gain) pass: one fit over the whole film would read 15.5 dB."""
+        _fixture(self.fd, "s1")
+        _fixture(self.fd, "s2", gain=10 ** (1.6 / 20), seed=2)
+        (self.fd / "film-01.vtt").write_text(self.vtt)
+        voice, mixed = _speech_and_music()
+        film_audio = _film_audio(self.td, np.concatenate([mixed, mixed * 10 ** (1.6 / 20)]), self.video)
+        checks, detail, not_run = qc.film_gates(film_audio, self.fd, ["s1", "s2"], "en")
+        self.assertTrue(checks["margin"], detail["margin"])
+        self.assertAlmostEqual(detail["margin"]["s2"]["residual_db"], 17.0, delta=0.6)
+
+    def test_ambience_is_judged_on_the_residual(self):
+        checks, detail, _ = self.run_gates(ambience_db=2.0)
+        m = detail["margin"]["s1"]
+        self.assertTrue(m["music_ok"])                              # cue's recorded music-only margin is 17
+        self.assertAlmostEqual(m["residual_db"], 14.9, delta=0.5)   # music + ambience only 15 dB under the voice
+        self.assertEqual(m["residual_ok"], m["residual_db"] >= qc.RESIDUAL_MARGIN_MIN)
+        checks, detail, _ = self.run_gates(ambience_db=6.0)
+        self.assertTrue(checks["margin"], detail["margin"])
+
+    def test_a_scene_at_12_db_fails(self):
+        checks, detail, _ = self.run_gates(margin=12.0)
+        self.assertFalse(checks["margin"])
+        self.assertFalse(detail["margin"]["s1"]["residual_ok"])
+        checks, detail, _ = self.run_gates(recorded=14.0)           # the cue's own record outside 16-18
+        self.assertFalse(checks["margin"])
+        self.assertFalse(detail["margin"]["s1"]["music_ok"])
+
+    def test_peak_silence_gate(self):
+        self.assertTrue(self.run_gates(peak_db=-85.0)[0]["peak_silence"])
+        self.assertFalse(self.run_gates(peak_db=-60.0)[0]["peak_silence"])
+        _fixture(self.fd)
+        info = json.loads((self.fd / "audio" / "s1.mix.json").read_text())
+        del info["music_bus_peak_rms_db"]
+        (self.fd / "audio" / "s1.mix.json").write_text(json.dumps(info))
+        self.assertIn("peak_silence", qc.film_gates(self.film, self.fd, ["s1"], "en")[2])
+
+    def test_digital_zero_is_checked_on_the_delivered_film(self):
+        voice, mixed = _fixture(self.fd)
+        (self.fd / "film-01.vtt").write_text(self.vtt)
+        holed = mixed.copy()
+        holed[48000:48000 + 4800] = 0.0
+        checks, detail, _ = qc.film_gates(_film_audio(self.td, holed, self.video), self.fd, ["s1"], "en")
+        self.assertFalse(checks["digital_zero"])
+        silent = mixed.copy()
+        silent[:48000] = 0.0                                        # exact-zero title silence
+        checks, _, _ = qc.film_gates(_film_audio(self.td, silent, self.video), self.fd, ["s1"], "en")
+        self.assertFalse(checks["digital_zero"])
+        checks, _, _ = qc.film_gates(_film_audio(self.td, mixed, self.video), self.fd, ["s1"], "en")
+        self.assertTrue(checks["digital_zero"])
+
+    def test_gates_that_cannot_run_are_named(self):
+        self.run_gates(sfx=["rain"])
+        (self.fd / "voice" / "s1.wav").unlink()
+        (self.fd / "film-01.vtt").unlink()
+        info = json.loads((self.fd / "audio" / "s1.mix.json").read_text())
+        del info["fx"]
+        (self.fd / "audio" / "s1.mix.json").write_text(json.dumps(info))
+        checks, detail, not_run = qc.film_gates(self.film, self.fd, ["s1"], "en")
+        self.assertEqual(set(not_run), {"margin", "captions", "sound_on_picture"})
+        self.assertNotIn("margin", checks)
+        (self.fd / "shots" / "s1.json").unlink()                     # a missing plan is named, not a traceback
+        self.assertTrue(qc.film_gates(self.film, self.fd, ["s1"], "en")[2])
+
+    def test_sound_on_picture_keeps_misses_when_a_scene_has_no_fx(self):
+        _fixture(self.fd, "s1", sfx=["door"])
+        _fixture(self.fd, "s2", sfx=["door"], seed=2)
+        info = json.loads((self.fd / "audio" / "s2.mix.json").read_text())
+        del info["fx"]
+        (self.fd / "audio" / "s2.mix.json").write_text(json.dumps(info))
+        (self.fd / "film-01.vtt").write_text(self.vtt)
+        voice, mixed = _speech_and_music()
+        checks, detail, not_run = qc.film_gates(_film_audio(self.td, mixed, self.video), self.fd, ["s1", "s2"], "en")
+        self.assertIn("sound_on_picture", not_run)
+        self.assertEqual(detail["sound_on_picture"], ["s1 shot 1: door"])   # s1's miss survives
+        self.assertFalse(checks["sound_on_picture"])
 
 
 if __name__ == "__main__":
