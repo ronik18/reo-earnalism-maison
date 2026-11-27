@@ -1,0 +1,396 @@
+{
+ "scene": {
+  "scene_id": "f01s014",
+  "seconds": 44.5,
+  "text": "মনে হইতে লাগিল, পৃথিবীতে ঘরে ঘরে সমস্ত কুলকন্যারা এখন গভীর সুষুপ্তিতে নিমগ্ন। সেই আপনার ঘরে আপনার শয্যাটির মধ্যে নিস্তব্ধ রাত্রের নিশ্চিন্ত নিদ্রা যে কত সুখের তাহা ইতিপূর্ব্বে কেন সে বুঝিতে পারে নাই! ঘরের মেয়েরা কাল সকালবেলায় ঘরের মধ্যে জাগিয়া উঠিবে, নিঃসঙ্কোচে নিত্যকর্ম্মের মধ্যে প্রবৃত্ত হইবে,আর গৃহচ্যুতা হেমশশির এই নিদ্রাহীন রাত্রি কোন্‌খানে গিয়া প্রভাত হইবে, এবং সেই নিরানন্দ প্রভাতে তাহাদের সেই গলির ধারের ছোটখাট ঘরকন্নাটির উপর যখন সকালবেলাকার চিরপরিচিত শান্তিময় হাস্যপূর্ণ রৌদ্রটি আসিয়া পতিত হইবে তখন সেখানে সহসা কি লজ্জা প্রকাশিত হইয়া পড়িবে, কি লাঞ্ছনা কি হাহাকার জাগ্রত হইয়া উঠিবে!"
+ },
+ "duration": 51.919,
+ "cuts_retimed": [
+  7.675,
+  15.649,
+  18.87,
+  26.563,
+  32.256,
+  43.954,
+  48.097
+ ],
+ "timing": [
+  {
+   "start": 0.0,
+   "end": 1.578,
+   "text": "মনে হইতে লাগিল,"
+  },
+  {
+   "start": 2.028,
+   "end": 7.172,
+   "text": "পৃথিবীতে ঘরে ঘরে সমস্ত কুলকন্যারা এখন গভীর সুষুপ্তিতে নিমগ্ন।"
+  },
+  {
+   "start": 8.172,
+   "end": 15.501,
+   "text": "সেই আপনার ঘরে আপনার শয্যাটির মধ্যে নিস্তব্ধ রাত্রের নিশ্চিন্ত নিদ্রা যে কত সুখের তাহা ইতিপূর্ব্বে কেন সে"
+  },
+  {
+   "start": 15.801,
+   "end": 18.068,
+   "text": "বুঝিতে পারে নাই!"
+  },
+  {
+   "start": 19.668,
+   "end": 22.89,
+   "text": "ঘরের মেয়েরা কাল সকালবেলায় ঘরের মধ্যে জাগিয়া উঠিবে,"
+  },
+  {
+   "start": 23.44,
+   "end": 26.262,
+   "text": "নিঃসঙ্কোচে নিত্যকর্ম্মের মধ্যে প্রবৃত্ত হইবে,"
+  },
+  {
+   "start": 26.862,
+   "end": 30.217,
+   "text": "আর গৃহচ্যুতা হেমশশির এই নিদ্রাহীন রাত্রি"
+  },
+  {
+   "start": 30.437,
+   "end": 31.928,
+   "text": "কোন্‌খানে গিয়া প্রভাত হইবে,"
+  },
+  {
+   "start": 32.578,
+   "end": 34.274,
+   "text": "এবং সেই নিরানন্দ প্রভাতে"
+  },
+  {
+   "start": 34.594,
+   "end": 43.606,
+   "text": "তাহাদের সেই গলির ধারের ছোটখাট ঘরকন্নাটির উপর যখন সকালবেলাকার চিরপরিচিত শান্তিময় হাস্যপূর্ণ রৌদ্রটি আসিয়া পতিত হইবে"
+  },
+  {
+   "start": 44.306,
+   "end": 47.75,
+   "text": "তখন সেখানে সহসা কি লজ্জা প্রকাশিত হইয়া পড়িবে,"
+  },
+  {
+   "start": 48.45,
+   "end": 51.919,
+   "text": "কি লাঞ্ছনা কি হাহাকার জাগ্রত হইয়া উঠিবে!"
+  }
+ ],
+ "bible": {
+  "characters": {
+   "kshiroda": {
+    "description": "Kshiroda, a beautiful 38-year-old Bengali woman with a graceful, dignified oval face, fine features, smooth skin, softly arched heavy brows and a small dark mole just below the left eye, large dark sorrowful eyes, glossy black hair in a loose low bun, faded maroon cotton sari with a thin black border",
+    "appearance": "Kshiroda, a beautiful dignified 38-year-old Bengali woman, graceful oval face, smooth clear skin, softly arched heavy brows, small dark mole below the left eye, large dark sorrowful eyes, glossy black hair in a low bun, small simple gold stud earrings, bare wrists, faded maroon cotton sari with a thin black border",
+    "owner_decisions": [
+     "2026-11-25: small simple earrings allowed (the story does not require bare ears for Kshiroda); round-9 stills with them are consistent"
+    ]
+   },
+   "hemshashi": {
+    "description": "Hemshashi, a 14-year-old Bengali widow with a gentle, shy, tender oval face, softly arched heavy brows and a small dark mole just below the left eye, slender, large dark eyes, long loose black hair, a plain pure-white widow's sari, white to the very edge, a bare forehead, bare earlobes, bare wrists and a bare neck",
+    "appearance": "Hemshashi, a 14-year-old Bengali girl-widow, gentle shy oval face, softly arched heavy brows, small dark mole below the left eye, large dark eyes, long loose black hair, bare forehead, bare earlobes, bare wrists and neck, plain undecorated white cotton sari with a plain white edge over a white blouse"
+   },
+   "young_mohit": {
+    "description": "young Mohit, a 20-year-old Bengali college student of 1880s Calcutta with round gold-rimmed spectacles, a moustache and short beard, hair parted and combed in the Victorian English style, a long dark Victorian frock coat with a high stiff collar over a white shirt",
+    "appearance": "young Mohit, a 20-year-old Bengali college student, round gold-rimmed spectacles, black hair parted and combed in the Victorian English style, black moustache and short black beard, 1880s Bengali gentleman's frock coat, long and dark with a high stiff white collar over a white shirt"
+   },
+   "judge_mohit": {
+    "description": "Judge Mohit, a 44-year-old Bengali man with a smooth, fully clean-shaven face: smooth chin, cheeks and clean upper lip; bald crown with a small tuft of hair at the back, dark brown eyes, stern mouth, dark buttoned chapkan coat over a white dhoti",
+    "appearance": "Judge Mohit, a stern 44-year-old Bengali man, smooth clean-shaven face and chin, clean upper lip, bald crown with a small tuft of hair at the back, dark brown eyes, dark buttoned chapkan coat over a white dhoti"
+   },
+   "boy": {
+    "description": "a thin three-year-old Bengali boy",
+    "appearance": "a thin three-year-old Bengali toddler boy with short black hair"
+   },
+   "ring": {
+    "description": "a small gold ring set with a tiny oil portrait on ivory of a young man with moustache and beard",
+    "appearance": "a small round gold finger-ring whose bezel holds a tiny oval painted miniature on ivory of a young man with moustache and beard"
+   },
+   "judge_hand": {
+    "description": "a middle-aged Bengali man's open hand, the cuff of a dark buttoned chapkan sleeve at the wrist",
+    "appearance": "a middle-aged Bengali man's open hand, the cuff of a dark buttoned chapkan sleeve at the wrist"
+   },
+   "hem_mother": {
+    "description": "Hemshashi's mother, a 40-year-old Bengali woman of a poor clerk's household with a kind, careworn round face, red bindi and sindoor, small gold earrings, an ivory-white cotton sari with a thin red border worn over her head, a red blouse",
+    "appearance": "Hemshashi's mother, a 40-year-old Bengali woman, kind careworn round face, red bindi, small gold earrings, an ivory-white cotton sari with a thin red border draped over her head, red blouse",
+    "anchor": "film-01 still f01s013-3 (memory scene) and pilot v3 f01s014-9 (candidate c3)",
+    "added": "2026-11-27, from the audio-visual re-review (R6 character lock)"
+   }
+  }
+ },
+ "input": {
+  "spine": "Hemshashi lies awake in a strange bed and imagines the household waking without her: the quiet of the lane in the morning becomes the lane's shame.",
+  "motifs": [
+   "the empty bed"
+  ],
+  "shots": [
+   {
+    "beats": [
+     0,
+     0
+    ],
+    "subject": "Hemshashi, wide-eyed on a narrow bed in a lamp-lit upper room",
+    "framing": "medium close-up",
+    "motion": "glide",
+    "layer": "present",
+    "transition_in": "cut",
+    "bible_refs": [
+     "hemshashi"
+    ],
+    "sound": {
+     "sfx": [
+      "night crickets",
+      "oil lamp hiss"
+     ],
+     "music": "drone"
+    },
+    "camera": {
+     "move": "push",
+     "zoom": 0.08,
+     "pan_x": 0,
+     "ease": "both"
+    }
+   },
+   {
+    "beats": [
+     1,
+     1
+    ],
+    "subject": "Her hand on the unfamiliar quilt, the lamp low on the sill",
+    "framing": "close-up",
+    "motion": "glide",
+    "layer": "present",
+    "transition_in": "cut",
+    "bible_refs": [
+     "hemshashi"
+    ],
+    "sound": {
+     "sfx": [
+      "oil lamp hiss"
+     ],
+     "music": null
+    },
+    "camera": {
+     "move": "push",
+     "zoom": 0.06,
+     "pan_x": 15,
+     "ease": "both"
+    }
+   },
+   {
+    "beats": [
+     2,
+     2
+    ],
+    "subject": "Rows of shuttered windows along the lane; one shutter opens, a woman looks out into the dark",
+    "framing": "wide",
+    "motion": "wan",
+    "layer": "imagined",
+    "transition_in": "dissolve",
+    "bible_refs": [],
+    "sound": {
+     "sfx": [
+      "distant dog",
+      "shutter creak"
+     ],
+     "music": null
+    },
+    "camera": null,
+    "wan_res": "1280x704"
+   },
+   {
+    "beats": [
+     3,
+     3
+    ],
+    "subject": "A small house, its bed empty and the sheet smooth, night not yet over",
+    "framing": "medium",
+    "motion": "glide",
+    "layer": "memory",
+    "transition_in": "dissolve",
+    "bible_refs": [
+     "hem_mother"
+    ],
+    "sound": {
+     "sfx": [
+      "a slow clock"
+     ],
+     "music": null
+    },
+    "camera": {
+     "move": "push",
+     "zoom": 0.06,
+     "pan_x": 30,
+     "ease": "both"
+    }
+   },
+   {
+    "beats": [
+     4,
+     4
+    ],
+    "subject": "The same room, morning light creeping under the shutter",
+    "framing": "close-up",
+    "motion": "glide",
+    "layer": "memory",
+    "transition_in": "dissolve",
+    "bible_refs": [
+     "hem_mother"
+    ],
+    "sound": {
+     "sfx": [
+      "a slow clock"
+     ],
+     "music": null
+    },
+    "camera": {
+     "move": "push",
+     "zoom": 0.05,
+     "pan_x": -20,
+     "ease": "both"
+    }
+   },
+   {
+    "beats": [
+     5,
+     5
+    ],
+    "subject": "The same bed, the window shutter opened onto pale dawn light",
+    "framing": "close-up",
+    "motion": "static",
+    "layer": "imagined",
+    "transition_in": "match",
+    "bible_refs": [],
+    "sound": {
+     "sfx": [],
+     "music": null
+    }
+   },
+   {
+    "beats": [
+     6,
+     6
+    ],
+    "subject": "Hemshashi turns her face into the pillow, the lamp low beside her",
+    "framing": "close-up",
+    "motion": "glide",
+    "layer": "present",
+    "transition_in": "cut",
+    "bible_refs": [
+     "hemshashi"
+    ],
+    "sound": {
+     "sfx": [
+      "fabric rustle"
+     ],
+     "music": null
+    },
+    "camera": {
+     "move": "push",
+     "zoom": 0.05,
+     "pan_x": 0,
+     "ease": "both"
+    }
+   },
+   {
+    "beats": [
+     7,
+     8
+    ],
+    "subject": "The lane in early morning, a doorway, a woman sweeping, soft sun on brick",
+    "framing": "wide",
+    "motion": "glide",
+    "layer": "imagined",
+    "transition_in": "dissolve",
+    "bible_refs": [],
+    "sound": {
+     "sfx": [
+      "broom on stone",
+      "birdsong"
+     ],
+     "music": null
+    },
+    "camera": {
+     "move": "push",
+     "zoom": 0.07,
+     "pan_x": 25,
+     "ease": "both"
+    }
+   },
+   {
+    "beats": [
+     9,
+     9
+    ],
+    "subject": "Sunlight falls across the small house's doorstep; neighbours stop and look at the empty threshold",
+    "framing": "medium",
+    "motion": "wan",
+    "layer": "imagined",
+    "transition_in": "match",
+    "bible_refs": [],
+    "sound": {
+     "sfx": [
+      "a hush, then one gasp"
+     ],
+     "music": "drone out"
+    },
+    "wan_res": "1280x704",
+    "plants": [
+     8
+    ]
+   },
+   {
+    "beats": [
+     10,
+     10
+    ],
+    "subject": "A neighbour's hand covers her mouth in the doorway",
+    "framing": "close-up",
+    "motion": "glide",
+    "layer": "imagined",
+    "transition_in": "cut",
+    "bible_refs": [],
+    "sound": {
+     "sfx": [],
+     "music": null
+    },
+    "camera": {
+     "move": "push",
+     "zoom": 0.06,
+     "pan_x": 0,
+     "ease": "both"
+    }
+   },
+   {
+    "beats": [
+     11,
+     11
+    ],
+    "subject": "Hemshashi in the dark room, eyes shut, the lamp guttering",
+    "framing": "close-up",
+    "motion": "glide",
+    "layer": "present",
+    "transition_in": "dissolve",
+    "bible_refs": [
+     "hemshashi"
+    ],
+    "sound": {
+     "sfx": [
+      "lamp gutter"
+     ],
+     "music": "drone"
+    },
+    "camera": {
+     "move": "push",
+     "zoom": 0.04,
+     "pan_x": 0,
+     "ease": "both"
+    }
+   }
+  ],
+  "peak": {
+   "shot": 9,
+   "at": 40.0
+  },
+  "fidelity": "Reviewed against scenes 13 and 15: she is awake and clothed in white, the lamp is lit, no carriage or open window appears."
+ }
+}

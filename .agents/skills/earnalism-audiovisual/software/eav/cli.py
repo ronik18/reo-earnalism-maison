@@ -39,6 +39,20 @@
   python3 -m eav.cli retime <take.mp3|wav> <out.wav> --text <script text file> [--seed 0 --cuts 1.2,3.4]
                          (no --root: pauses detected, re-timed by punctuation, filled with the take's room tone;
                          prints JSON with the cut times mapped into the new timeline and the new duration)
+  python3 -m eav.cli plan-shots --root <dir> --film N --scene ID [--bible <world-bible.json>] [--approve --by <name> --reviewer <name>]
+                         (the paper edit, R11: lays film/film-NN/shots/<scene>.input.json out on its measured timing,
+                         writes <scene>.json and the two-column <scene>.av.md and prints rules R1-R3 (hard) and
+                         R7?/R8? (soft: "?" = reviewer must look, never a refusal). The input is written by Claude
+                         and an independent reviewer; the code never invents content:
+                           {"timing": [{"start","end","text"}, ...]  measured clauses, re-timed narration seconds,
+                            "spine", "fidelity" (R7 note), "motifs": [...], "peak": {"shot": n, "at": s},
+                            "shots": [{"beats": [first, last], "subject", "framing", "motion": wan|glide|static,
+                              "layer": present|memory|imagined, "transition_in": cut|dissolve|match,
+                              "bible_refs": [character keys], "camera": {"move","zoom","pan_x","ease"} (glide),
+                              "wan_res": "1280x704"|"896x512" (wan), "sound": {"sfx": [...], "music"},
+                              "plants": [earlier shot n] (the peak shot)}]}
+                         --approve records approved {by, at, reviewer}; the two names must differ and rules R1-R3
+                         must pass. A job spec that declares "scene" is refused until its plan is approved.)
   python3 -m eav.cli voicecheck <take...> --expected S[,S...] [--profile profile.json] [--prev-tail <wav>] [--out <dir>]
                          (no --root: the narration redo gate; writes <take-stem>.voicecheck.json beside each take (or into --out)
                          with pass, failures and metrics; exits 1 if any take fails. Without --profile the book
@@ -84,7 +98,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
-from . import glide, retime, touchup, voicecheck
+from . import glide, retime, shotplan, touchup, voicecheck
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, unit_anchors, voice_units
@@ -774,6 +788,11 @@ def cmd_job(args):
     target = (AUDITION_TARGET if kind == "narration" and args.audition
               else f"reel-{args.reel}" if args.reel else _film_target(args.film))
     spec, items = _job_spec(rec, args, kind, target)
+    if kind == "stills" and spec.get("scene"):  # R11: a shot-plan-driven job needs the approved paper edit
+        try:
+            shotplan.require_approved(rec.root / "film" / target, spec["scene"])
+        except shotplan.NotApproved as e:
+            raise Stop(str(e), f"{PROG} plan-shots --root {rec.root} --film {args.film or '<n>'} --scene {spec['scene']}")
     if args.list_units:  # for writing directions.json: the keys this job would use; nothing built
         for u in colab_jobs.narration_units(spec):
             print(f"{u['unit_key']}\t{u['text']}")
@@ -2111,9 +2130,50 @@ def cmd_voicecheck(args):
     return 0
 
 
+def cmd_plan_shots(args):
+    rec = _record(args.root)
+    if args.approve and not (args.by and args.reviewer):
+        raise Stop("--approve needs --by and --reviewer", "Pass both names: Claude plus an independent reviewer")
+    if args.approve and args.by.strip().lower() == args.reviewer.strip().lower():
+        raise Stop("approval needs an independent reviewer: --by and --reviewer must be different people",
+                   "Have the reviewer approve, not the author")
+    films = _plan(rec)["plan"]["films"]
+    if not 1 <= args.film <= len(films):
+        raise Stop(f"film {args.film} is not in the plan ({len(films)} films)", f"{PROG} status --root {rec.root}")
+    scene = next((sc for sc in films[args.film - 1]["scenes"] if sc["scene_id"] == args.scene), None)
+    if scene is None:
+        raise Stop(f"scene {args.scene} is not in film {args.film}", f"{PROG} status --root {rec.root}")
+    film_dir = rec.root / "film" / _film_target(args.film)
+    paths = shotplan.paths(film_dir, args.scene)
+    if not paths["input"].is_file():
+        raise Stop(f"no planner input at {paths['input']}",
+                   f"Write it (Claude and the reviewer; format: {PROG} --help, plan-shots) and rerun")
+    bible = Path(args.bible) if args.bible else rec.root / "specs" / "world-bible.json"
+    if not bible.is_file():
+        raise Stop(f"{bible} does not exist", "Pass --bible <world-bible.json>")
+    inp = _json(paths["input"])
+    sp = shotplan.plan({**inp, "scene_id": args.scene, "text": scene["text"]}, inp.get("timing") or [], _json(bible))
+    if args.approve:
+        try:
+            sp = shotplan.approve(sp, args.by, args.reviewer)
+        except ValueError as e:
+            raise Stop(f"not approved: {e}", f"Fix {paths['input']} and rerun plan-shots without --approve")
+    shotplan.write(film_dir, sp)
+    found = shotplan.check(sp)
+    for code, msg in found:
+        print(f"{code}: {msg}")
+    hard = [c for c, _ in found if not c.endswith("?")]
+    print(f"Wrote {paths['plan']} and {paths['av']}: {len(sp['shots'])} shots, {sp['seconds']:.1f} s, "
+          f"{sp['compute']['wan_clips']} Wan clip(s), about {sp['compute']['cu']} CU (planning estimate)"
+          + (f"; approved by {sp['approved']['by']} with {sp['approved']['reviewer']}." if args.approve else
+             ("; hard rules fail, fix the input." if hard else "; rules R1-R3 pass, ready for approval.")))
+    return 1 if hard else 0
+
+
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take,
             "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide, "retime": cmd_retime, "voicecheck": cmd_voicecheck,
+            "plan-shots": cmd_plan_shots,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio,
@@ -2217,6 +2277,13 @@ def _parser():
     s.add_argument("--profile", help="saved voicecheck-profile.json; always pass it on redo runs (default: measured from the given takes and saved)")
     s.add_argument("--prev-tail", help="the take before the first listed one, for the join check")
     s.add_argument("--out", help="folder for the profile and results (default: beside each take)")
+    s = add("plan-shots", help="the paper edit: shot plan and two-column AV script for one scene (R11)")
+    s.add_argument("--film", type=int, required=True)
+    s.add_argument("--scene", required=True)
+    s.add_argument("--bible", help="world bible (default <root>/specs/world-bible.json)")
+    s.add_argument("--approve", action="store_true", help="record the approval; needs --by and --reviewer")
+    s.add_argument("--by")
+    s.add_argument("--reviewer")
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)
