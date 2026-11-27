@@ -1,6 +1,6 @@
 # Earnalism cinematic film upgrade: design
 
-Status: DRAFT for owner approval. It amends `2026-11-23-earnalism-audiovisual-design.md`, including that design's 24 Nov owner amendment on film hosting. Where the two differ, this document wins for the film, the narration and the score. Everything not mentioned here stays as written there.
+Status: APPROVED by the owner, 27 Nov 2026. The owner's instruction was "go ahead with the design document for the full upgrade and enhance all of our respective skills permanently"; the open questions were answered as recorded below. It amends `2026-11-23-earnalism-audiovisual-design.md`, including that design's 24 Nov owner amendment on film hosting. Where the two differ, this document wins for the film, the narration and the score. Everything not mentioned here stays as written there.
 
 ## Intent
 
@@ -356,7 +356,13 @@ The pilot files and the two-column AV script are kept in `production/audiovisual
   - Bundle-contract changes (sentence-level timing maps, chapter markers) go to root as interface notes.
   - Sections 9 (player) and 10 (reader) are owner-gated frontend and backend work. They get their own plan once approved.
 
-## Open questions for the owner
+## Owner decisions, 27 Nov 2026
+
+1. **Compute: (a).** বিচারক's lifetime cap rises from 60 to **100 CU**, and the 100 CU monthly cap stays. Budget code makes per-title caps configurable; the default stays 60 for other titles.
+2. **Read and Listen UX (sections 9–10): approved now.** They get their own plan, run by the frontend and backend lanes in parallel with the film work.
+3. **Paper-edit approval (R11):** Claude plus an independent reviewer approve each scene's paper edit. The owner approves the reference scene (scene 14 v4) and each finished film.
+
+### The questions as asked
 
 1. **Compute for the বিচারক re-render** (the builder's top finding).
    - At the new density the film is about 275 shots. With about 25–35% animated and 1.3 takes each, that's about 90–125 clips.
