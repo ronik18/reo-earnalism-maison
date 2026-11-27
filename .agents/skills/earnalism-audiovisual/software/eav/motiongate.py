@@ -5,7 +5,7 @@ between consecutive frames and looks for two defects:
 
   * periodic near-duplicate frames (the frame-interpolation stutter signature): pairs whose difference is far
     below the clip's median, recurring at a regular spacing at least MIN_PERIODIC_RUNS times;
-  * difference spikes: a single pair far above the median, not sustained (a run of high pairs is fast motion
+  * difference spikes: a single pair far above the median that is an outlier frame (pops out and back) or an isolated step, not sustained or clustered motion (a run of high pairs is fast motion
     or a cut, not a glitch).
 
 It returns {"near_duplicate_runs", "diff_spikes", "contact_sheet", "pass", "needs_review", ...}. `pass` is
@@ -39,6 +39,8 @@ THRESHOLDS = {
     "spike_abs": 3.0,           # ... and above this absolute difference (real Wan takes: median 0.08-1.2, peak <= 8.8)
     "review_spike_rel": 4.0,    # borderline spike (needs_review) above this * median (and review_spike_abs)
     "review_spike_abs": 1.5,    # ... and above this absolute difference
+    "outlier_back_ratio": 0.5,  # glitch: diff(n-1, n+1) < this * diff(n-1, n), i.e. frame n pops out and back
+    "cluster_frames": 12,       # high pairs within this many frames of each other are one action, not glitches
     "sustained_pairs": 3,       # three or more adjacent high pairs are sustained motion, not a glitch
 }
 
@@ -140,19 +142,31 @@ def check_clip(mp4, sheet=True, thresholds: dict = None) -> dict:
         res["needs_review"] = True
         res["notes"].append(f"{len(runs)} near-duplicate runs without a regular spacing")
     high = [int(i) for i in np.nonzero((d > t["review_spike_rel"] * base) & (d > t["review_spike_abs"]))[0]]
-    for s, n in _runs(high):
-        if n >= t["sustained_pairs"]:
-            continue  # sustained: fast motion, not a glitch
+    hruns = [(s, n) for s, n in _runs(high) if n < t["sustained_pairs"]]  # longer runs: fast motion
+    for s, n in hruns:
         peak = float(d[s:s + n].max())
-        clear = peak > t["spike_rel"] * base and peak > t["spike_abs"]
-        res["diff_spikes"].append({"index": s, "length": n, "diff": round(peak, 3),
-                                   "ratio": round(peak / base, 2), "clear": clear})
+        big = peak > t["spike_rel"] * base and peak > t["spike_abs"]
+        fwd = float(d[s])
+        back = float(np.abs(f[s] - f[s + 2]).mean()) if s + 2 < len(f) else None
+        near = [o for o, _ in hruns if o != s and abs(o - s) <= t["cluster_frames"]]
+        if back is not None and n == 2 and back < t["outlier_back_ratio"] * fwd:
+            kind = "glitch"      # frame s+1 pops out and back: an outlier frame
+        elif back is not None and n == 1 and 0 < s and not near:
+            kind = "jump"        # a step that stays, isolated with calm pairs on both sides
+        else:
+            kind = "motion"      # continues or clustered: performed action
+        clear = big and kind != "motion"
+        res["diff_spikes"].append({"index": s, "length": n, "diff": round(peak, 3), "ratio": round(peak / base, 2),
+                                   "fwd": round(fwd, 3), "back": None if back is None else round(back, 3),
+                                   "kind": kind, "clustered": bool(near), "clear": clear})
         if clear:
             res["pass"] = False
-            res["notes"].append(f"difference spike at frame {s + 1}: {peak:.1f} = {peak / base:.1f}x the median")
+            res["notes"].append(f"{'outlier frame' if kind == 'glitch' else 'isolated jump'} at frame {s + 1}: "
+                                f"{peak:.1f} = {peak / base:.1f}x the median (back {back:.2f} vs fwd {fwd:.2f})")
         else:
             res["needs_review"] = True
-            res["notes"].append(f"borderline difference spike at frame {s + 1}: {peak / base:.1f}x the median")
+            res["notes"].append(f"difference spike at frame {s + 1} looks like motion, not an outlier: "
+                                f"{peak / base:.1f}x the median")
     res["measured"]["peak_diff"] = round(float(d.max()), 4)
     if not res["pass"]:
         res["needs_review"] = False  # a clear fail is not advisory

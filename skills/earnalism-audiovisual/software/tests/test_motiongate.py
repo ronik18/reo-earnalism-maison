@@ -80,6 +80,27 @@ class MotionGateTests(unittest.TestCase):
         r = motiongate.check_clip(write_clip(self.d / "sj2.mp4", order, shifts={1: 150}), sheet=False)
         self.assertFalse(r["pass"], r)
 
+    def test_quick_localised_change_that_continues_does_not_fail(self):
+        # a region changes over 2 frames and stays (a blink/turn on a still background): performed action
+        slow = dict(kernel=121, contrast=20)
+        base = write_clip(self.d / "b.mp4", range(N), **slow)
+        fr = motiongate._frames(base, motiongate.THRESHOLDS)
+        out = []
+        for i, f in enumerate(fr):
+            f = f.copy()
+            k = min(max(i - 19, 0), 2) / 2                    # frames 20-21 ramp to a +120 patch that stays
+            f[20:70, 40:120] = np.clip(f[20:70, 40:120].astype(np.float32) + 120 * k, 0, 255).astype(np.uint8)
+            out.append(f)
+        p = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "gray", "-s", f"{W}x{H}",
+                              "-r", "24", "-i", "-", "-c:v", "libx264", "-crf", "12", "-pix_fmt", "yuv420p",
+                              str(self.d / "patch.mp4")], stdin=subprocess.PIPE)
+        p.communicate(b"".join(f.tobytes() for f in out))
+        r = motiongate.check_clip(self.d / "patch.mp4", sheet=False)
+        self.assertTrue(r["pass"], r)
+        self.assertTrue(r["diff_spikes"], r)                   # seen, and recorded with back/fwd and a kind
+        self.assertEqual(r["diff_spikes"][0]["kind"], "motion")
+        self.assertIn("back", r["diff_spikes"][0])
+
     def test_single_duplicate_is_not_stutter(self):
         order = list(range(N))
         order[20] = 19
