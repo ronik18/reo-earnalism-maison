@@ -8737,6 +8737,34 @@
       },
       "path": "jobs/stills-film-01-r7-candidates2/stills.ipynb",
       "sha256": "6b5c6c60ce337cf20094fb47466af671d92710c1d48f1a3efb8d5d1dba8eefeb"
+    },
+    {
+      "bytes": 15241,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.8923999999999999,
+        "inputs_zip": "jobs/stills-film-01-r7-candidates3/inputs.zip",
+        "job_id": "stills-film-01-r7-candidates3",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r7-candidates3/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r7-candidates3/stills.ipynb",
+      "sha256": "e8d3a0f1b62079caf71d5bd7ac13fff0a412626fba821c4a45a3fe4b9b170587"
+    },
+    {
+      "bytes": 15181,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.8105966666666665,
+        "inputs_zip": "jobs/stills-film-01-r7/inputs.zip",
+        "job_id": "stills-film-01-r7",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r7/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r7/stills.ipynb",
+      "sha256": "430ee0d3418c33111503c623dfd775bd0db065cfec4f001f6fe37e8f36e3e559"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -10079,6 +10107,90 @@
       "at": "2026-11-27T08:06:36.011197+00:00",
       "detail": {
         "job_id": "stills-film-01-r7-candidates2",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T08:22:09.089268+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r7-candidates2",
+        "reason": "selection round 2: candidates viewed, never imported; chosen seeds go to r7",
+        "runner": "modal",
+        "units": 0.0
+      },
+      "result": "closing",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T08:22:09.102563+00:00",
+      "detail": {
+        "imported": false,
+        "job_id": "stills-film-01-r7-candidates2",
+        "ran": true,
+        "reason": "selection round 2: candidates viewed, never imported; chosen seeds go to r7",
+        "runner": "modal",
+        "units": 0.0,
+        "usd": 0.441415
+      },
+      "result": "closed",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T08:22:09.312345+00:00",
+      "detail": {
+        "forecast_units": 0.8923999999999999,
+        "job_id": "stills-film-01-r7-candidates3",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T08:22:09.325145+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r7-candidates3",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T08:22:55.272154+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r7-candidates3",
+        "reason": "never requested: it would exceed the title cap; the judge restaging goes straight into r7",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T08:22:55.283510+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r7-candidates3",
+        "reason": "never requested: it would exceed the title cap; the judge restaging goes straight into r7"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T08:23:20.651377+00:00",
+      "detail": {
+        "forecast_units": 0.8105966666666665,
+        "job_id": "stills-film-01-r7",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T08:23:20.659904+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r7",
         "kind": "stills",
         "target": "film-01"
       },
