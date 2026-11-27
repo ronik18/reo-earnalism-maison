@@ -1,12 +1,86 @@
 {
   "colab_units": 0.0,
+  "error": null,
+  "files": [
+    {
+      "bytes": 1338940,
+      "path": "f01s001-1.png",
+      "sha256": "3e1061c3a54ae3f21de8b9191198de9c1de0787135a90510afcc8b3397d5c42a"
+    },
+    {
+      "bytes": 1401782,
+      "path": "f01s002-2.png",
+      "sha256": "709f2152e8418f4ba3c6775dca476b3602212445419a10ecccd7d24a6bc1d858"
+    },
+    {
+      "bytes": 1439705,
+      "path": "f01s005-2.png",
+      "sha256": "adf654808fc11ce5dffb532ba5e61595a90190a58442af41cb82af3d073caa5c"
+    },
+    {
+      "bytes": 1519714,
+      "path": "f01s006-3.png",
+      "sha256": "254c359556423d6bdbadb942d98f4e2987cf1c68f28646e9cd89c3c04daa4fcb"
+    },
+    {
+      "bytes": 1413774,
+      "path": "f01s007-2.png",
+      "sha256": "83265d2e90fb269db79452c04dced86e580d0bf18b6428755d3b4eb13da070da"
+    },
+    {
+      "bytes": 1294631,
+      "path": "f01s007-5.png",
+      "sha256": "b85d9e59018be914120db9d47d7677f65d5d4aa38366cc7dcce8cb3abae4ac6b"
+    },
+    {
+      "bytes": 1339061,
+      "path": "f01s008-3.png",
+      "sha256": "f885898e369e68c69e5cfcd7cde1919503a52e95fcbc314c9da517c5ca61b533"
+    },
+    {
+      "bytes": 1625724,
+      "path": "f01s009-3.png",
+      "sha256": "066031d2b6c6691537d51af3d63406709d884640ff7f23d67fd337897ee4e368"
+    },
+    {
+      "bytes": 7089,
+      "path": "inputs.zip",
+      "sha256": "094189b3d23e077bd42408f2b56eb90826fcde097625a18572d058bf488ecc84"
+    },
+    {
+      "bytes": 1378,
+      "path": "manifest.json",
+      "sha256": "8f297f3ed80f406ecefbcbe72378a42c1f96d8f43a5dcea7bfec7de8502fc06a"
+    },
+    {
+      "bytes": 1720,
+      "path": "progress.jsonl",
+      "sha256": "f89c586d9fa2655213dc3c21c1d2af2a68c57b2a2a14683e995ce32e805c6e2c"
+    },
+    {
+      "bytes": 841,
+      "path": "sessions.jsonl",
+      "sha256": "a482685229d425a2fe2cf16f6dad4284492b3782eb53b3bcc81278654394dfbe"
+    }
+  ],
+  "finished_at": "2026-11-27T07:09:25+00:00",
   "gpu": "L40S",
   "job_id": "stills-film-01-r5-sample8",
+  "modal_contacted_at": "2026-11-27T07:06:20+00:00",
   "pending_run_id": "stills-film-01-r5-sample8#1",
   "r2_prefix": "gpu-jobs/bicharak/stills-film-01-r5-sample8/run-1/",
   "requested_at": "2026-11-27T07:05:24+00:00",
+  "run": {
+    "error": null,
+    "run_id": "stills-film-01-r5-sample8#1",
+    "seconds": 160.035507219,
+    "status": "ok",
+    "usd": 0.1084240561408725
+  },
   "schema": "earnalism.modal-request.v1",
-  "status": "running",
+  "seconds": 160.035507219,
+  "status": "done",
   "title_root": "production/audiovisual/bicharak",
+  "usd": 0.1084240561408725,
   "worst_case_usd": 1.478982
 }
