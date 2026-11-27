@@ -35133,6 +35133,817 @@
       },
       "path": "jobs/motion-pilot6-f01s014/film_clips.ipynb",
       "sha256": "dfc8a0ae7fba69e2f3dbe19531752815d63d9df54c7aa837ab67d5e1f770ee06"
+    },
+    {
+      "bytes": 757733,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/depth/f01s014-13.depth.png",
+      "sha256": "c233ca42f8ae32b42c5d8ed6f8a47d0c917186a2c23ddcb8f7fe2ce9b607e6dd"
+    },
+    {
+      "bytes": 682826,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-13q.last-depth.png",
+      "sha256": "c55ba3fdd58387beb2fec8fd24226fa2c33e2f616308f8bad0da979669837b9e"
+    },
+    {
+      "bytes": 1072963,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-13q.last.png",
+      "sha256": "64214229607137ec6fd76c817aa74bde44836fb62e85634e978cf86a1c37f886"
+    },
+    {
+      "bytes": 24539864,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-13q.mp4",
+      "sha256": "506db66e125d58fc991f0733d3e9f4fc40ac9ba07eb2e039ac095a8ca63270ba"
+    },
+    {
+      "bytes": 688538,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-13r.last-depth.png",
+      "sha256": "ff8bdcc3404f5f3d31728323a26afb76f42797df6d60501b8754511510d0cc29"
+    },
+    {
+      "bytes": 1118811,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-13r.last.png",
+      "sha256": "bf4d34e2371eac9c4f991fec708230bcbb8eca1c99cb8cc221ec6159cbc55304"
+    },
+    {
+      "bytes": 27363633,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-13r.mp4",
+      "sha256": "65046dd5da00c91e8a9909e0965de45c4b4682ed2dd7da7fd5c620bd73029440"
+    },
+    {
+      "bytes": 798712,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/depth/f01s014-14.depth.png",
+      "sha256": "62d268f79face3c45665805059bdddc54b8527122c48a59faf9701caad89f42e"
+    },
+    {
+      "bytes": 698208,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-14w.last-depth.png",
+      "sha256": "06dad634de23758602699f9eee64cde87c290b7ae6367a4e60e08b753c8f4697"
+    },
+    {
+      "bytes": 689958,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-14w.last.png",
+      "sha256": "fccaff3d22c1fd38f129f404d34fa7a6c5f99182819acf864fd36efab3694cdc"
+    },
+    {
+      "bytes": 19087326,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-14w.mp4",
+      "sha256": "7b6c43f832f25c458617cb483e644e7dc5144740a8c4a3bdee6d39cfade2633b"
+    },
+    {
+      "bytes": 694148,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/depth/f01s014-9.depth.png",
+      "sha256": "0a00f6d5d03bf7406133e495fdc6d82792a0565338ae55d79a21ea48a9a4ed3a"
+    },
+    {
+      "bytes": 607668,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-9p.last-depth.png",
+      "sha256": "573ae7ce19fd53ffe923123e72595f02685d7bb599716043f6c01591d2de8f95"
+    },
+    {
+      "bytes": 810746,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-9p.last.png",
+      "sha256": "30651db32df4869faf85a3a6c11379f77f0f4cf44ed8a2a51bd4c875231ec194"
+    },
+    {
+      "bytes": 21267362,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-9p.mp4",
+      "sha256": "2a13b6d59363b4fe19a6212d8132d07b5af1efec2fba8386afb78c6ee106ea63"
+    },
+    {
+      "bytes": 504933,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-9q.last-depth.png",
+      "sha256": "a491fb64197405cb6d000b3b716c997070f6b6f354a3ca861e791a654d601f27"
+    },
+    {
+      "bytes": 755985,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-9q.last.png",
+      "sha256": "49e71d9fe724a8e3ea1058547bffb08c21e0c10eee8150434e8f0a3d464576ef"
+    },
+    {
+      "bytes": 20993040,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-9q.mp4",
+      "sha256": "3f9f9ebbba632723eb833807b00dc541cbd3c65b9e3764f6d554fea3539d6164"
+    },
+    {
+      "bytes": 775,
+      "kind": "motion_gate",
+      "meta": {
+        "clip": "f01s014-13q.mp4",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-13q.motion.json",
+      "sha256": "670748288fa8391c017723f9656d7be1f3c8b2aee651d548d0b4ab608ff37126"
+    },
+    {
+      "bytes": 1035,
+      "kind": "motion_gate",
+      "meta": {
+        "clip": "f01s014-13r.mp4",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-13r.motion.json",
+      "sha256": "27d9e2a8b6d10d143eb3f6f73e6bbdacbc3b22cff8cf07831eef103fbdd62486"
+    },
+    {
+      "bytes": 774,
+      "kind": "motion_gate",
+      "meta": {
+        "clip": "f01s014-14w.mp4",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-14w.motion.json",
+      "sha256": "c3057f2c1d3b87b62a6c028212c0b09b1b93b441d3d9987ad4863d67821df163"
+    },
+    {
+      "bytes": 2325,
+      "kind": "motion_gate",
+      "meta": {
+        "clip": "f01s014-9p.mp4",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-9p.motion.json",
+      "sha256": "9150f93e3e174fb1b7c1b488498fde7f233ec0fdc1a5cbe9b5102678fe388c5d"
+    },
+    {
+      "bytes": 2309,
+      "kind": "motion_gate",
+      "meta": {
+        "clip": "f01s014-9q.mp4",
+        "job_id": "motion-pilot6-f01s014",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/motion-pilot6-f01s014/clips/f01s014-9q.motion.json",
+      "sha256": "2790e962aac1cf5b61500f05a4fd3a5357a9aebe3da254fb6a615a68578c568b"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -39452,6 +40263,99 @@
         "outputs_key": "exports/colab-exchange/bicharak/motion-pilot6-f01s014/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T17:47:23.925722+00:00",
+      "detail": {
+        "actual_units": 3.93,
+        "files": [
+          "film_clips/motion-pilot6-f01s014/depth/f01s014-13.depth.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-13q.last-depth.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-13q.last.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-13q.mp4",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-13r.last-depth.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-13r.last.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-13r.mp4",
+          "film_clips/motion-pilot6-f01s014/depth/f01s014-14.depth.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-14w.last-depth.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-14w.last.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-14w.mp4",
+          "film_clips/motion-pilot6-f01s014/depth/f01s014-9.depth.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-9p.last-depth.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-9p.last.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-9p.mp4",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-9q.last-depth.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-9q.last.png",
+          "film_clips/motion-pilot6-f01s014/clips/f01s014-9q.mp4"
+        ],
+        "input_zip_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13q": 919.1,
+            "f01s014-13r": 879.3,
+            "f01s014-14w": 875.6,
+            "f01s014-9p": 877.0,
+            "f01s014-9q": 876.9
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-27T17:47:23.977507+00:00",
+      "detail": {
+        "job_id": "motion-pilot6-f01s014",
+        "members": [
+          "f01s014-13.depth.png",
+          "f01s014-13q.last-depth.png",
+          "f01s014-13q.last.png",
+          "f01s014-13q.mp4",
+          "f01s014-13r.last-depth.png",
+          "f01s014-13r.last.png",
+          "f01s014-13r.mp4",
+          "f01s014-14.depth.png",
+          "f01s014-14w.last-depth.png",
+          "f01s014-14w.last.png",
+          "f01s014-14w.mp4",
+          "f01s014-9.depth.png",
+          "f01s014-9p.last-depth.png",
+          "f01s014-9p.last.png",
+          "f01s014-9p.mp4",
+          "f01s014-9q.last-depth.png",
+          "f01s014-9q.last.png",
+          "f01s014-9q.mp4",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/motion-pilot6-f01s014/outputs.tar",
+        "outputs_tar_sha256": "7a4ec309c67eabc6883c2d7ca9bab15d031eba92334a99f1b4e6e2b0010147cf"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],

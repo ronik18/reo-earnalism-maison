@@ -25,6 +25,8 @@ production/audiovisual/*/retouch/*/
 production/audiovisual/*/edit/*/
 production/audiovisual/*/touchup/*/
 production/audiovisual/*/music/*/
+production/audiovisual/*/film_clips/*/
+production/audiovisual/*/pilot/*/
 production/audiovisual/*/film/*/*.wav
 production/audiovisual/*/film/*/*.mp4
 production/audiovisual/*/film/*/stills/
