@@ -1,8 +1,9 @@
 """Pause re-timing: narration pauses are re-set by punctuation and filled with the take's own room tone.
 
 TTS takes come with commas and sentence ends too short, and joins filled with digital silence. Here
-`detect_pauses` finds the gaps (ffmpeg silencedetect), `plan_pauses` maps them in order to the
-punctuation of the script text and picks a seeded target length, and `retime` rebuilds the take: each
+`detect_pauses` finds the gaps (ffmpeg silencedetect), `plan_pauses` matches them by position to the
+punctuation of the script text (`match_pauses`: an unpunctuated breath keeps its place and length) and picks a
+seeded target length, and `retime` rebuilds the take: each
 pause keeps 40 ms of the original at both sides, the middle becomes room tone, and every join is a
 40 ms equal-power crossfade, so there is no click and no digital zero. `room_tone` loops the quietest
 0.25 s of the take (30 ms crossfades), level-matched to -62...-68 dBFS; a take whose quietest part is
@@ -128,15 +129,109 @@ def clauses(text: str) -> list[tuple[str, str | None]]:
     return [tuple(c) for c in out]
 
 
-def plan_pauses(text: str, pauses: list[tuple[float, float]], rng_seed: int) -> list[tuple[float, float, float]]:
-    """(start, end, target_s) per detected pause: pauses map in order to the text's punctuation, each target
-    is drawn from its kind's range and varied +-15 % (seeded). A pause with no punctuation keeps its length."""
+# Pause mapping (G3): a pause is matched to a punctuation mark by POSITION, never by order alone. Each mark's place
+# in the take is estimated from its character offset in the text, spread over the take's speech time (its pauses
+# excluded); each pause sits at the speech time spoken before it. A monotonic alignment then pairs marks with pauses
+# at the least total cost: |estimated - measured| seconds for a pair, POS_SKIP_PER_S per second of a pause left
+# unmatched (a long pause is more likely punctuation than a breath), and a mark left unmatched costs more than any
+# pair inside the tolerance. An unmatched pause is a breath and keeps its place and length.
+POS_TOL_S, POS_TOL_FRAC = 2.5, 0.12   # a mark pairs only with a pause within max(2.5 s, 12 % of the speech time)
+POS_SKIP_PER_S = 2.0
+_SPOKEN = re.compile(r"[\s\"'“”‘’()…]")
+
+
+def _spoken_len(text: str) -> int:
+    return len(_SPOKEN.sub("", text))
+
+
+def match_pauses(text: str, pauses: list[tuple[float, float]], bounds: tuple[float, float] | None = None) -> list[dict]:
+    """The text's interior pause marks (`clauses`, every clause boundary in order) matched to the measured pauses by
+    position. `bounds` is the take's speech (first, last) in seconds; without it the speech is taken to run from 0
+    to the last pause's end. Returns one row per boundary: {"clause": index of the clause the mark ends, "kind",
+    "pause": index into `pauses` or None, "expected_s": the mark's estimated time in the take, "error_s": measured
+    pause start minus expected (None when unmatched)}. The final clause's own closing mark is not a boundary: the
+    trailing silence of a take is never a pause."""
+    cl = clauses(text)
+    marks = cl[:-1]
+    pauses = sorted(pauses)
+    if bounds is None:
+        bounds = (0.0, max((e for _, e in pauses), default=0.0))
+    t0, t1 = bounds
+    inner = [(s, e) for s, e in pauses]
+    speech = max((t1 - t0) - sum(e - s for s, e in inner), 1e-6)
+    total = max(sum(_spoken_len(c) for c, _ in cl), 1)
+    expected, cum = [], 0
+    for c, _ in marks:
+        cum += _spoken_len(c)
+        expected.append(cum / total * speech)
+    at, spoken, prev = [], 0.0, t0
+    for s, e in inner:
+        spoken += max(0.0, s - prev)
+        at.append(spoken)
+        prev = max(prev, e)
+    tol = max(POS_TOL_S, POS_TOL_FRAC * speech)
+    miss = tol + 1.0
+    k_n, p_n = len(marks), len(inner)
+    inf = float("inf")
+    cost = [[inf] * (p_n + 1) for _ in range(k_n + 1)]
+    back = [[None] * (p_n + 1) for _ in range(k_n + 1)]
+    cost[0][0] = 0.0
+    for k in range(k_n + 1):
+        for j in range(p_n + 1):
+            c = cost[k][j]
+            if c == inf:
+                continue
+            if j < p_n:   # pause j is a breath
+                v = c + POS_SKIP_PER_S * (inner[j][1] - inner[j][0])
+                if v < cost[k][j + 1]:
+                    cost[k][j + 1], back[k][j + 1] = v, "breath"
+            if k < k_n:   # mark k has no pause
+                v = c + miss
+                if v < cost[k + 1][j]:
+                    cost[k + 1][j], back[k + 1][j] = v, "unpaused"
+            if k < k_n and j < p_n and abs(expected[k] - at[j]) <= tol:
+                v = c + abs(expected[k] - at[j])
+                if v < cost[k + 1][j + 1]:
+                    cost[k + 1][j + 1], back[k + 1][j + 1] = v, "pair"
+    pair = [None] * k_n
+    k, j = k_n, p_n
+    while k or j:
+        step = back[k][j]
+        if step == "pair":
+            k, j = k - 1, j - 1
+            pair[k] = j
+        elif step == "breath":
+            j -= 1
+        else:
+            k -= 1
+
+    def timeline(sp):   # a speech time back on the take's timeline (the pauses before it added back)
+        t, before = t0 + sp, 0.0
+        for (s, e), a in zip(inner, at):
+            if a <= sp:
+                before += e - s
+        return t + before
+    rows = []
+    for k, (c, kind) in enumerate(marks):
+        j = pair[k]
+        exp_t = timeline(expected[k])
+        rows.append({"clause": k, "kind": kind, "pause": j, "expected_s": round(exp_t, 3),
+                     "error_s": None if j is None else round(inner[j][0] - exp_t, 3)})
+    return rows
+
+
+def plan_pauses(text: str, pauses: list[tuple[float, float]], rng_seed: int,
+                bounds: tuple[float, float] | None = None) -> list[tuple[float, float, float]]:
+    """(start, end, target_s) per detected pause: each pause matched by position to the punctuation mark nearest
+    its place in the text (`match_pauses`; never by order alone) gets a target drawn from that mark's kind range and
+    varied +-15 % (seeded). A pause matched to no mark (an unpunctuated breath) keeps its place and length."""
     rng = random.Random(rng_seed)
-    kinds = _kinds(text)
+    pauses = sorted(pauses)
+    kind_of = {r["pause"]: r["kind"] for r in match_pauses(text, pauses, bounds) if r["pause"] is not None}
     plan = []
     for i, (s, e) in enumerate(pauses):
-        if i < len(kinds):
-            lo, hi = TARGETS[kinds[i]]
+        if i in kind_of:
+            lo, hi = TARGETS[kind_of[i]]
             target = rng.uniform(lo, hi) * rng.uniform(1 - JITTER, 1 + JITTER)
         else:
             target = e - s
@@ -148,18 +243,18 @@ def sentence_spans(text: str, start: float, end: float, pauses: list[tuple[float
                    tol: float = 0.02) -> tuple[list[tuple[float, float]], str] | None:
     """(start, end) seconds of each sentence of `text` (eav.text.sentences) inside a passage that runs
     start..end, cut at the measured pauses: a sentence ends where its pause begins and the next starts where
-    it ends. Pauses map in order to the text's punctuation (as plan_pauses does), keeping the ones at a
-    sentence end; when a comma pause was not detected, the n-1 longest pauses inside the passage are the
-    sentence ends (a heuristic choice among measured pauses). Returns (spans, mapping) with mapping
+    it ends. Pauses are matched by position to the text's punctuation (`match_pauses`, as plan_pauses does), keeping
+    the ones at a sentence end; when a sentence end matched no pause, the n-1 longest pauses inside the passage are
+    the sentence ends (a heuristic choice among measured pauses). Returns (spans, mapping) with mapping
     "single" | "punctuation" | "longest", or None when the passage holds fewer pauses than sentence ends."""
     n = len(sentences(text))
     if n <= 1:
         return [(start, end)], "single"
-    inner = [(s, e) for s, e in pauses if s >= start - tol and e <= end + tol]
-    kinds = _kinds(text)
-    ends = [i for i, k in enumerate(kinds[:-1]) if k in ("sentence", "turn")]
-    if len(inner) == len(kinds) - 1 and len(ends) == n - 1:
-        cuts, mapping = [inner[i] for i in ends], "punctuation"
+    inner = sorted((s, e) for s, e in pauses if s >= start - tol and e <= end + tol)
+    rows = match_pauses(text, inner, (start, end))
+    ends = [r for r in rows if r["kind"] in ("sentence", "turn")]
+    if len(ends) == n - 1 and all(r["pause"] is not None for r in ends):
+        cuts, mapping = [inner[r["pause"]] for r in ends], "punctuation"
     elif len(inner) >= n - 1:
         cuts, mapping = sorted(sorted(inner, key=lambda p: p[0] - p[1])[:n - 1]), "longest"
     else:
