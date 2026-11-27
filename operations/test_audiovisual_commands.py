@@ -731,17 +731,48 @@ class FilmCommandTests(AudiovisualFixture):
             self.assertFalse(Asset.objects.filter(kind__in=["video", "video_captions"]).exists())
             self.assertFalse(TimingMap.objects.exists())
             self.assertFalse(AuditEvent.objects.filter(action__in=["timing_map.create", "asset.complete"], detail__kind="video").exists())
-            self.assertEqual({r.state for r in Revision.objects.filter(edition=live.edition).exclude(pk=live.pk)} - {"draft"}, set())
+            self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)  # refused before any clone
         folder, unit = self.film_bundle(unit_id, timing=doc, timing_sha256="a" * 64)
         with self.subTest("hash"), self.assertRaisesMessage(CommandError, "timing_sha256"):
             self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag="hash"))
         folder, unit = self.film_bundle(unit_id, timing=b"{not json")
         with self.subTest("notjson"), self.assertRaisesMessage(CommandError, "not JSON"):
             self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag="notjson"))
-        self.assertFalse(Asset.objects.filter(kind__in=["video", "video_captions"]).exists())
+        self.assert_nothing_staged(live)
         folder, unit = self.film_bundle(unit_id, timing=doc)
         staged = self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag="retry"))  # a valid map still stages
         self.assertEqual(len(staged["timing_maps"]), 2)
+
+    def test_refused_map_then_corrected_bundle_reuses_one_clone_and_keeps_staged_audio(self):
+        live = self.publish_bicharak()
+        source = self.export()
+        unit_id = source["units"][0]["unit_id"]
+        folder, audio_sha = self.bundle(source)
+        audio = self.stage(folder, self.evidence(source, audio_sha, formats=["reader", "audio"], tag="audio"))
+        bad = self.timing_doc(source)
+        bad["maps"][0]["segments"][-1]["end_ms"] = 5000
+        folder, unit = self.film_bundle(unit_id, timing=bad)
+        evidence = self.film_evidence(source, [unit["mp4_sha256"]], tag="both", formats=["reader", "audio", "video"])
+        with self.assertRaisesMessage(CommandError, "film map"):
+            self.stage_film(folder, evidence)
+        self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 2)  # live + the staged audio draft only
+        folder, unit = self.film_bundle(unit_id, timing=self.timing_doc(source))
+        staged = self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag="both", formats=["reader", "audio", "video"]))
+        self.assertEqual(staged["revision_id"], audio["revision_id"])
+        self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 2)
+        draft = Revision.objects.get(pk=staged["revision_id"])
+        self.assertEqual(draft.assets.filter(kind="audio_chapter").count(), 1)
+        self.assertEqual(draft.assets.filter(kind="video").count(), 1)
+        self.assertEqual(draft.timing_maps.filter(asset__kind="video").count(), 2)
+
+    def test_stage_warns_when_the_film_has_no_timing_map(self):
+        self.publish_bicharak()
+        source = self.export()
+        folder, unit = self.film_bundle(source["units"][0]["unit_id"])
+        out = io.StringIO()
+        call_command("attach_audiovisual_film", "stage", "bicharak", "--publisher", str(self.publisher.public_id), "--bundle", str(folder),
+                     "--evidence", self.film_evidence(source, [unit["mp4_sha256"]], tag="warn"), stdout=out)
+        self.assertIn("Watch will open at the part start", out.getvalue())
 
     def test_stage_without_a_timing_map_keeps_today_behaviour(self):
         _, source, folder, unit, _, staged = self.staged_film()

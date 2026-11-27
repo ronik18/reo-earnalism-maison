@@ -63,8 +63,9 @@ from django.utils import timezone
 from core.api import DomainError
 from core.services import audit
 from library import storage
-from library.film_timing import FilmTimingError, anchor_map_by_ordinal, film_timing_maps, read_film_timing, MAX_BYTES as MAX_TIMING_BYTES
-from library.models import Asset, Revision
+from library.film_timing import FilmTimingError, _check_shape, anchor_map_by_ordinal, film_timing_maps, read_film_timing, MAX_BYTES as MAX_TIMING_BYTES
+from library.models import Asset, Paragraph, Revision, TimingMap
+from library.timing import validated_segments
 from library.services import canonical_bytes, digest
 from operations.management.commands import attach_audiovisual_audio as audio
 from operations.management.commands.export_audiovisual_source import has_public_domain_evidence
@@ -232,10 +233,6 @@ def check_film_evidence(doc, slug, live, bundle):
     audio.check_record_complete(doc)
 
 
-class _DryRun(Exception):
-    """Ends the savepoint that proves a film's maps before any upload; always rolled back."""
-
-
 class Command(audio.Command):
     help = ("Stage an owner-cleared full film with captions on a clone of a live edition (private R2), then publish "
             "after browser acceptance. Bundle layout and evidence schema: see this module's docstring.")
@@ -260,6 +257,7 @@ class Command(audio.Command):
             raise CommandError(f"{slug}: live revision lacks passing public-domain publication clearance; refused.")
         check_film_evidence(doc, slug, live, bundle)
         plan = self.preflight(live, bundle)
+        self.warn_without_timing(plan)
         draft = self.find_or_clone(actor, edition, live, bundle)
         if draft.state == "draft" and not draft.assets.filter(kind="video").exists():
             self.attach(actor, live, draft, bundle, plan, evidence_ref)
@@ -287,8 +285,43 @@ class Command(audio.Command):
                                               text_sha256=live.content_sha256)
                 except FilmTimingError as exc:
                     raise CommandError(f"unit {units[item['unit_id']]} film timing refused: {exc}") from None
+            if parsed:
+                self.check_timing_geometry(live, item, parsed)
             plan.append({**item, "unit_ordinal": units[item["unit_id"]], "timing_parsed": parsed})
         return plan
+
+    @staticmethod
+    def check_timing_geometry(live, item, parsed):
+        """Shape and geometry (film duration, order, coverage) through validated_segments against the live revision's
+        rows, in memory like the audio importer's in_memory_check: nothing is saved, so a bad map is refused before any
+        clone, join, upload or write. The clone keeps the live paragraphs and text (anchor_map_by_ordinal re-checks)."""
+        unit = live.units.get(pk=item["unit_id"])
+        paragraphs = {str(p.anchor_id): p for p in Paragraph.objects.filter(unit=unit)}
+        texts = {anchor: p.text for anchor, p in paragraphs.items()}
+        probe = Revision(id=live.id, edition_id=live.edition_id, content_sha256=live.content_sha256)
+        video = Asset(id=stable_id("film-timing-probe", live.id, unit.id), revision=probe, unit=unit, kind="video",
+                      state="ready", provider="r2", sha256=item["mp4"]["sha256"], duration_ms=item["mp4"]["duration_ms"])
+        spans = None
+        try:
+            for precision, segments in parsed["maps"]:  # paragraph map first
+                for seg in segments:
+                    if seg["anchor_id"] not in paragraphs:
+                        raise FilmTimingError(f"{precision} map anchor {seg['anchor_id']} is not a paragraph of the film's unit.")
+                _check_shape(precision, segments, texts, spans)
+                if precision == "paragraph":
+                    spans = {seg["anchor_id"]: (seg["start_ms"], seg["end_ms"]) for seg in segments}
+                validated_segments(TimingMap(revision=probe, asset=video, text_sha256=live.content_sha256, asset_sha256=video.sha256,
+                                             precision=precision, measured=True, segments=segments), paragraphs)
+        except FilmTimingError as exc:
+            raise CommandError(f"unit {unit.ordinal} film timing refused: {exc}") from None
+        except DomainError as exc:
+            raise CommandError(f"unit {unit.ordinal} film timing refused: {precision} film map: {exc.message}") from None
+
+    def warn_without_timing(self, plan):
+        for item in plan:
+            if not item["timing_parsed"]:
+                self.stdout.write(f"WARNING: unit {item['unit_ordinal']} film has no timing map (film.timing.json); "
+                                  "Watch will open at the part start, not at the reader's place.")
 
     @staticmethod
     def timing_rows(revision, live_unit, draft_unit, video, parsed):
@@ -312,17 +345,6 @@ class Command(audio.Command):
                           duration_ms=mp4["duration_ms"])
             captions = Asset(id=captions_id, revision=draft, unit=unit, kind="video_captions", state="ready", provider="r2",
                              storage_key=captions_key, sha256=vtt["sha256"], bytes=vtt["bytes"], content_type="text/vtt")
-            if item["timing_parsed"]:
-                # Prove the map against the draft in a savepoint that is always rolled back (the live revision is
-                # frozen, so this needs the clone): a map that fails the geometry checks refuses the film before a
-                # single byte is uploaded. Only the empty clone remains, as after any refusal past the clone.
-                try:
-                    with transaction.atomic():
-                        video.save()
-                        self.timing_rows(draft, live_units[unit.ordinal], unit, video, item["timing_parsed"])
-                        raise _DryRun
-                except _DryRun:
-                    pass
             prepared.append((item, unit, video, captions, video_key, captions_key))
         for item, unit, video, captions, video_key, captions_key in prepared:
             mp4, vtt = item["mp4"], item["vtt"]
