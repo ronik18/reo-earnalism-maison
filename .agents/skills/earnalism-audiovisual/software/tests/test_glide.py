@@ -58,13 +58,19 @@ def inside(ext):
 
 
 def test_pan_never_samples_outside_source():
-    """Codec-independent: the warp maps at full progress stay inside the source, with a negative control."""
-    res = glide.overscan(300, 0)
-    assert res >= 1.03 + 2 * 300 * 1.2 / 1920
-    for e in (0.0, 0.5, 1.0):
-        assert inside(glide.sample_extent(e, pan_x=300)), e
-        assert inside(glide.sample_extent(e, pan_x=-300, pan_y=100))
+    """Codec-independent: the warp maps stay inside the source, with a negative control."""
+    assert glide.overscan(300, 0) >= 1.03 + 2 * 300 * 1.2 / 1920
+    for px, py in ((300, 0), (-300, 200), (300, -200), (0, 250)):
+        for e in (0.0, 0.5, 1.0):
+            assert inside(glide.sample_extent(e, pan_x=px, pan_y=py)), (px, py, e)
     assert not inside(glide.sample_extent(1.0, pan_x=300, base=1.03))  # too little overscan reaches outside
+
+
+def test_overscan_refuses_too_large_move():
+    with pytest.raises(ValueError):
+        glide.overscan(900, 0)
+    with pytest.raises(ValueError):
+        glide.overscan(0, 500)
 
 
 def test_render_reports_the_overscan_it_uses(still):

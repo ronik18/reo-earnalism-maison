@@ -71,8 +71,16 @@ def _ease(ease, t):
 
 
 def overscan(pan_x: float, pan_y: float, near_gain: float = 1.2) -> float:
-    """Base scale so the largest layer shift never exposes an edge (pans need more)."""
-    return 1.03 + max(2 * abs(pan_x) * near_gain / W, 2 * abs(pan_y) * near_gain / H)
+    """Base scale at which the largest layer shift never samples outside the source.
+
+    A layer scaled by z about the centre has a margin of half*(1 - 1/z) per axis; the near layer shifts
+    by s = |pan|*near_gain, so z >= 1.03 / (1 - 2s/size) always keeps it inside. A move that takes 90% or
+    more of the frame is refused."""
+    fx, fy = 2 * abs(pan_x) * near_gain / W, 2 * abs(pan_y) * near_gain / H
+    if fx >= 0.9 or fy >= 0.9:
+        raise ValueError(f"pan ({pan_x}, {pan_y}) with near_gain {near_gain} is too large for the still "
+                         f"(shift must stay under 45% of the frame on each axis)")
+    return 1.03 * max(1 / (1 - fx), 1 / (1 - fy))
 
 
 def warp_maps(xx, yy, z, dx, dy):
