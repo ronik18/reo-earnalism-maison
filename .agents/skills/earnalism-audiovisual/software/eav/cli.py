@@ -39,6 +39,11 @@
   python3 -m eav.cli retime <take.mp3|wav> <out.wav> --text <script text file> [--seed 0 --cuts 1.2,3.4]
                          (no --root: pauses detected, re-timed by punctuation, filled with the take's room tone;
                          prints JSON with the cut times mapped into the new timeline and the new duration)
+  python3 -m eav.cli voicecheck <take...> --expected S[,S...] [--profile profile.json] [--prev-tail <wav>] [--out <dir>]
+                         (no --root: the narration redo gate; writes voicecheck.json (one entry per take, with pass,
+                         failures and metrics) into --out, default the first take's folder; the book profile is
+                         measured from the given takes unless --profile; --expected is one value for all or one per
+                         take; --prev-tail is the preceding take, for the join check of the first listed take)
   python3 -m eav.cli pick --root <dir> --job <stills|retouch|touchup|edit job id> --choices <{"<key>": N} json file>
                          (after review: one candidate per <key>--cN still; film uses only picks)
   python3 -m eav.cli hold --root <dir> --film N --keys k1,k2,... [--clear]
@@ -78,7 +83,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
-from . import glide, retime, touchup
+from . import glide, retime, touchup, voicecheck
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, unit_anchors, voice_units
@@ -2068,9 +2073,31 @@ def cmd_retime(args):
     print(json.dumps({"pauses": len(pauses), **res}))
 
 
+def cmd_voicecheck(args):
+    takes = [Path(t) for t in args.takes]
+    for t in takes:
+        if not t.is_file():
+            raise Stop(f"{t} does not exist", "Fix the path and rerun")
+    exp = [float(v) for v in args.expected.split(",")]
+    if len(exp) not in (1, len(takes)):
+        raise Stop("--expected needs one value or one per take", "Fix --expected and rerun")
+    exp = exp * len(takes) if len(exp) == 1 else exp
+    prof = json.loads(Path(args.profile).read_text()) if args.profile else voicecheck.profile(takes)
+    results, prev = {}, Path(args.prev_tail) if args.prev_tail else None
+    for t, e in zip(takes, exp):
+        results[t.name] = voicecheck.check(t, e, prof, prev)
+        prev = t
+    out = Path(args.out) if args.out else takes[0].parent
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "voicecheck.json").write_text(json.dumps(results, indent=1, ensure_ascii=False))
+    for name, r in results.items():
+        print(f"{name}: {'PASS' if r['pass'] else 'REDO ' + ','.join(r['failures'])}")
+    print(f"Wrote {out / 'voicecheck.json'}.")
+
+
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take,
-            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide, "retime": cmd_retime,
+            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide, "retime": cmd_retime, "voicecheck": cmd_voicecheck,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio,
@@ -2168,6 +2195,12 @@ def _parser():
     s.add_argument("--text", required=True, help="the narrated script text (UTF-8)")
     s.add_argument("--seed", type=int, default=0)
     s.add_argument("--cuts", help="comma-separated cut times in the old timeline to map into the new one")
+    s = sub.add_parser("voicecheck", help="narration redo gate: flag robotic/monotone/flawed takes (standalone: no record)")
+    s.add_argument("takes", nargs="+")
+    s.add_argument("--expected", required=True, help="expected duration in seconds: one value, or one per take (comma-separated)")
+    s.add_argument("--profile", help="book profile json; default: measured from the given takes")
+    s.add_argument("--prev-tail", help="the take before the first listed one, for the join check")
+    s.add_argument("--out", help="folder for voicecheck.json (default: the first take's folder)")
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)
