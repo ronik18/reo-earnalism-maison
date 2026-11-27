@@ -174,8 +174,14 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
         key = uuid.uuid4().hex[:10]
         work = Work.objects.create(slug='read-listen-acceptance-' + key, title=TITLE, creators=['Maison acceptance fixture'])
         self.edition = Edition.objects.create(work=work, slug=work.slug, locale='en')
+        # The *_with_watch tests also offer Watch: video allowed, a ready r2 film asset and a video read right.
+        self.watch = self._testMethodName.endswith('_with_watch')
+        if self.watch:
+            video = override_settings(FEATURES={**FEATURES, 'video': True}, FEATURE_FLAGS={**FEATURES, 'video': True}, VIDEO_PROVIDER='r2')
+            video.enable()
+            self.addCleanup(video.disable)
         self.revision = Revision.objects.create(edition=self.edition, title=TITLE, description='An original two-part test edition about a river.',
-                                                access_policy={'reader': 'free', 'audio': 'free', 'video': 'deny'},
+                                                access_policy={'reader': 'free', 'audio': 'free', 'video': 'free' if self.watch else 'deny'},
                                                 download_policy={'reader': False, 'audio': False, 'video': False})
         self.parts, self.segments = [], {}
         evidence = {}
@@ -209,7 +215,14 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
         Asset.objects.create(revision=self.revision, kind='cover', state='ready', storage_key=cover_key, sha256=digest(cover),
                              bytes=len(cover), content_type='image/png')
         now = timezone.now()
-        for fmt, actions in (('reader', ('read', 'preview')), ('audio', ('read',))):
+        if self.watch:
+            film = (Path(settings.BASE_DIR) / 'library/fixtures/film/synthetic-film.mp4').read_bytes()
+            film_key = f'revisions/{self.revision.id}/film/{uuid.uuid4().hex}.mp4'
+            storage.put_private(film_key, film, 'video/mp4')
+            Asset.objects.create(revision=self.revision, unit=self.parts[0]['unit'], kind='video', provider='r2', state='ready',
+                                 storage_key=film_key, sha256=hashlib.sha256(film).hexdigest(), bytes=len(film),
+                                 content_type='video/mp4', duration_ms=8000)
+        for fmt, actions in (('reader', ('read', 'preview')), ('audio', ('read',))) + ((('video', ('read',)),) if self.watch else ()):
             for action in actions:
                 Rights.objects.create(revision=self.revision, format=fmt, action=action, territories=['IN'], starts_at=now - timedelta(days=1),
                                       ends_at=now + timedelta(days=30), approved=True, test_only=True, evidence='synthetic browser acceptance')
@@ -570,7 +583,7 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
         page.wait_for_timeout(400)
         layout = page.evaluate("""() => { const bar = document.querySelector('.reader-toolbar'); const tools = bar.querySelector('.reader-tools');
             const title = bar.querySelector('.room-evening-title, h1, [class*=title]'); const t = title && title.getBoundingClientRect(); const r = tools.getBoundingClientRect();
-            return {scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth, toolsTop: r.top, toolsLeft: r.left, toolsRight: r.right,
+            return {barScrollWidth: bar.scrollWidth, barClientWidth: bar.clientWidth, scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth, toolsTop: r.top, toolsLeft: r.left, toolsRight: r.right,
                     titleBottom: t && t.bottom, titleTop: t && t.top, barHeight: bar.getBoundingClientRect().height,
                     overflow: [...bar.querySelectorAll('a, button, [role=progressbar], .reader-minutes, .logo-plate')].filter(e => { const b = e.getBoundingClientRect(); return b.width && (b.right > innerWidth + 0.5 || b.left < -0.5); }).map(e => { const b = e.getBoundingClientRect(); return `${e.tagName}.${e.className} [${Math.round(b.left)},${Math.round(b.right)}] ${e.getAttribute('src') || ''}`; }),
                     toolsHeight: r.height,
@@ -581,6 +594,7 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
         self.shot(page, 'toolbar-360-top')
         print('\nTOOLBAR 360 ' + json.dumps(layout))
         self.assertLessEqual(layout['scrollWidth'], 360, f'no horizontal scroll at 360 px: {layout}')
+        self.assertLessEqual(layout['barScrollWidth'], layout['barClientWidth'], f'no horizontal overflow inside the toolbar at 360 px: {layout}')
         self.assertEqual(layout['overflow'], [], layout)
         self.assertGreaterEqual(layout['toolsTop'], layout['titleBottom'] - 1, f'tools must sit on a second row: {layout}')
         with self.subTest('BUG frontend static CSS: the 360 px toolbar wraps to three rows'):
@@ -695,10 +709,10 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
                 self.assertTrue(rect['top'] >= 0 and rect['bottom'] <= rect['vh'], f'after {control} the highlight must stay in the viewport: {rect}')
         final = rects[-1][1]
         with self.subTest('BUG frontend client/reader.tsx: follow-along centring ignores the docked player'):
-            # spec §10: the follow-along highlight must stay visible. reader.tsx (~:839) only scrolls when the sentence leaves [0, innerHeight], so the docked
+            # Basis: Task 9 carry item (task-13-carry.md: the follow-along highlight stays visible and re-centres while settings change) and Task 6 deferred minor (the mini player may cover the highlight). reader.tsx (~:839) only scrolls when the sentence leaves [0, innerHeight], so the docked
             # player (or the toolbar) can cover it. Checked once, after all the setting changes.
             self.assertTrue(final['top'] >= final['toolbarBottom'] and (final['playerTop'] is None or final['bottom'] <= final['playerTop']),
-                            f'spec §10: the follow-along highlight must stay visible: after all the comfort changes it must not sit under the toolbar or the docked player: {final}')
+                            f'Task 9 carry item / Task 6 deferred minor: the highlight must stay visible: after all the comfort changes it must not sit under the toolbar or the docked player: {final}')
 
     def test_follow_along_sentence_is_not_left_under_the_docked_player(self):
         page = self.context(1280, 900)
@@ -723,4 +737,38 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
         print('\nFOLLOW UNDER PLAYER ' + json.dumps(rect))
         with self.subTest('BUG frontend client/reader.tsx: follow-along centring ignores the docked player'):
             self.assertTrue(rect['bottom'] <= rect['playerTop'],
-                            f'spec §10: the follow-along highlight must stay visible; the narrated sentence must be scrolled clear of the docked player, not left under it: {rect}')
+                            f'Task 9 carry item / Task 6 deferred minor: the highlight must stay visible; the narrated sentence must be scrolled clear of the docked player, not left under it: {rect}')
+
+    # ---------------------------------------------------------------- carried 4: narrow widths and the Watch switch
+    TOOLBAR_FIT = """() => { const bar = document.querySelector('.reader-toolbar');
+      const targets = [...bar.querySelectorAll('a, button')].filter(e => e.offsetParent !== null && getComputedStyle(e).visibility !== 'hidden')
+        .map(e => { const b = e.getBoundingClientRect(); return {label: (e.getAttribute('aria-label') || e.textContent).trim().slice(0, 30), w: Math.round(b.width), h: Math.round(b.height),
+                                                             left: Math.round(b.left), right: Math.round(b.right)}; });
+      return {barScrollWidth: bar.scrollWidth, barClientWidth: bar.clientWidth, docScrollWidth: document.documentElement.scrollWidth, innerWidth,
+              watch: !!bar.querySelector('[data-format-switch="watch"]'), listen: !!bar.querySelector('[data-format-switch="listen"]'),
+              small: targets.filter(t => t.w < 44 || t.h < 44), outside: targets.filter(t => t.left < 0 || t.right > innerWidth), targets}; }"""
+
+    def toolbar_fits(self, width, watch):
+        page = self.context(width, 700)
+        self.sign_in(page)
+        page.goto(f'/en/read/{self.edition.pk}/{self.unit1.pk}/')
+        page.wait_for_selector('.reader-toolbar .reader-tools')
+        self.wait(page, "() => document.documentElement.style.getPropertyValue('--reader-toolbar-h')", message='the reader must hydrate')
+        fit = page.evaluate(self.TOOLBAR_FIT)
+        self.shot(page, f'toolbar-{width}{"-watch" if watch else ""}')
+        print(f'\nTOOLBAR FIT {width}{" watch" if watch else ""} ' + json.dumps({k: v for k, v in fit.items() if k != 'targets'}))
+        self.assertTrue(fit['listen'], fit)
+        self.assertEqual(fit['watch'], watch, f'the fixture must {"" if watch else "not "}offer Watch: {fit}')
+        with self.subTest('BUG frontend static CSS: reader toolbar overflows horizontally', width=width, watch=watch):
+            self.assertLessEqual(fit['barScrollWidth'], fit['barClientWidth'], f'no horizontal overflow inside the toolbar at {width} px: {fit}')
+            self.assertLessEqual(fit['docScrollWidth'], fit['innerWidth'], f'no horizontal page scroll at {width} px: {fit}')
+            self.assertEqual(fit['outside'], [], f'every toolbar control on screen at {width} px')
+        with self.subTest('BUG frontend static CSS: reader toolbar targets under 44 px', width=width, watch=watch):
+            self.assertEqual(fit['small'], [], f'every toolbar target at least 44x44 px at {width} px')
+
+    def test_toolbar_fits_at_320_without_watch(self):
+        self.toolbar_fits(320, watch=False)
+
+    def test_toolbar_fits_at_320_and_360_with_watch(self):
+        for width in (320, 360):
+            self.toolbar_fits(width, watch=True)
