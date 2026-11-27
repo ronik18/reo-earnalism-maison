@@ -3263,6 +3263,496 @@
       },
       "path": "jobs/clips-f01s014-door-r3/film_clips.ipynb",
       "sha256": "58c9a644a037cf4703756141ce34e612c3fba55c51c80e5be0488ba7dffc8a26"
+    },
+    {
+      "bytes": 648281,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/depth/f01s014-1.depth.png",
+      "sha256": "7e0b83b37ea3e32feb1d488a3d7b0089dc4a3fd36db60a0659b0e43d2521f8c2"
+    },
+    {
+      "bytes": 760915,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/depth/f01s014-12.depth.png",
+      "sha256": "661307eb210fac1ae71567d99a52f140abafc4d0c4efa4b95b7f4c736bfc3365"
+    },
+    {
+      "bytes": 757733,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/depth/f01s014-13.depth.png",
+      "sha256": "c233ca42f8ae32b42c5d8ed6f8a47d0c917186a2c23ddcb8f7fe2ce9b607e6dd"
+    },
+    {
+      "bytes": 675299,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/clips/f01s014-13s.last-depth.png",
+      "sha256": "9847c56c7ed3d571b489b3d6466e8e9afe6e22a5f070eab66b639e9982586a34"
+    },
+    {
+      "bytes": 1053492,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/clips/f01s014-13s.last.png",
+      "sha256": "cf2d063063db690719f8f30468e3106b6e680e1594af48a3ce4e01b75f47aa7d"
+    },
+    {
+      "bytes": 28034624,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/clips/f01s014-13s.mp4",
+      "sha256": "d32cb44fc93899b0403b9816c745d93f0f93831b8c3a1fdc3b69ea24e189639d"
+    },
+    {
+      "bytes": 692713,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/clips/f01s014-13t.last-depth.png",
+      "sha256": "c7bbca324ac7533e7d990593e39e7da3f2cb82fb89696053328ec3afc0749ce0"
+    },
+    {
+      "bytes": 1039142,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/clips/f01s014-13t.last.png",
+      "sha256": "b3c3756a935d0903b6ff34c3695cd5a91686c09f7fc8e96841552a911f2bc42a"
+    },
+    {
+      "bytes": 24948944,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/clips/f01s014-13t.mp4",
+      "sha256": "de6de3bb0b939dd938b1b612d2592d7820ddc7d75d97dcc2f3747bcdc8079a4d"
+    },
+    {
+      "bytes": 919181,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/depth/f01s014-2.depth.png",
+      "sha256": "5aba5579cb4332ff81bffc2a00e30bc8b3ad9a70e50dfc2f1f3740c3bfd71758"
+    },
+    {
+      "bytes": 643603,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/depth/f01s014-3.depth.png",
+      "sha256": "d62db89d373ee1b5c5fec55bad66d4fd585c38b17f91e53069babf067f537458"
+    },
+    {
+      "bytes": 859036,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-door-r3/depth/f01s014-6.depth.png",
+      "sha256": "486c80c38d8f17d118f0420ce7b6463727a7e453449c5812e32cb68e77f1d3ea"
+    },
+    {
+      "bytes": 775,
+      "kind": "motion_gate",
+      "meta": {
+        "clip": "f01s014-13s.mp4",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/clips-f01s014-door-r3/clips/f01s014-13s.motion.json",
+      "sha256": "eddc109589e4d2aac891f648b6b97fe70737e6f18cde0ffd57f67427a5f8c385"
+    },
+    {
+      "bytes": 773,
+      "kind": "motion_gate",
+      "meta": {
+        "clip": "f01s014-13t.mp4",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/clips-f01s014-door-r3/clips/f01s014-13t.motion.json",
+      "sha256": "12585355211c9f7d0c1704b6421ca21b4392db0876492f8aa2ef3c6625153ee2"
     }
   ],
   "created_at": "2026-11-27T17:58:04.798975+00:00",
@@ -3851,6 +4341,84 @@
         "outputs_key": "exports/colab-exchange/bicharak/clips-f01s014-door-r3/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T21:35:18.192532+00:00",
+      "detail": {
+        "actual_units": 1.6,
+        "files": [
+          "film_clips/clips-f01s014-door-r3/depth/f01s014-1.depth.png",
+          "film_clips/clips-f01s014-door-r3/depth/f01s014-12.depth.png",
+          "film_clips/clips-f01s014-door-r3/depth/f01s014-13.depth.png",
+          "film_clips/clips-f01s014-door-r3/clips/f01s014-13s.last-depth.png",
+          "film_clips/clips-f01s014-door-r3/clips/f01s014-13s.last.png",
+          "film_clips/clips-f01s014-door-r3/clips/f01s014-13s.mp4",
+          "film_clips/clips-f01s014-door-r3/clips/f01s014-13t.last-depth.png",
+          "film_clips/clips-f01s014-door-r3/clips/f01s014-13t.last.png",
+          "film_clips/clips-f01s014-door-r3/clips/f01s014-13t.mp4",
+          "film_clips/clips-f01s014-door-r3/depth/f01s014-2.depth.png",
+          "film_clips/clips-f01s014-door-r3/depth/f01s014-3.depth.png",
+          "film_clips/clips-f01s014-door-r3/depth/f01s014-6.depth.png"
+        ],
+        "input_zip_sha256": "ec00a2476fdf5d0d4340d9b3304e2e4d2abd614a1d6636c7a8d79458bae4c121",
+        "job_id": "clips-f01s014-door-r3",
+        "kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA L4",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-13s": 905.2,
+            "f01s014-13t": 868.2
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-27T21:35:18.206610+00:00",
+      "detail": {
+        "job_id": "clips-f01s014-door-r3",
+        "members": [
+          "f01s014-1.depth.png",
+          "f01s014-12.depth.png",
+          "f01s014-13.depth.png",
+          "f01s014-13s.last-depth.png",
+          "f01s014-13s.last.png",
+          "f01s014-13s.mp4",
+          "f01s014-13t.last-depth.png",
+          "f01s014-13t.last.png",
+          "f01s014-13t.mp4",
+          "f01s014-2.depth.png",
+          "f01s014-3.depth.png",
+          "f01s014-6.depth.png",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/clips-f01s014-door-r3/outputs.tar",
+        "outputs_tar_sha256": "728137a0701e186a3c9e0bc7db7af4d18c3daf07d93b127ebb2e56e89d9cee63"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],
