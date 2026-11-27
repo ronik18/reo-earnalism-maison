@@ -47,6 +47,19 @@ class BudgetTests(unittest.TestCase):
         with self.assertRaises(BudgetExceeded):
             self.ledger.reserve("bicharak", "2026-11", 61, "j1")
 
+    def test_scratch_ledger_reads_the_real_caps_above_it(self):
+        """G11: a scratch or test ledger inside a title's tree takes the real title-caps.json above it, never 60."""
+        self._caps({"bicharak": 100})
+        scratch = Ledger(Path(self.tmp.name) / "bicharak" / "pilot" / "v5" / "allowance-ledger.json")
+        self.assertEqual(title_cap(scratch.path, "bicharak"), 100.0)
+        scratch.reserve("bicharak", "2026-11", 95, "j1")
+        pinned = Path(self.tmp.name) / "owner" / "title-caps.json"
+        pinned.parent.mkdir()
+        pinned.write_text(json.dumps({"bicharak": 80}), encoding="utf-8")
+        self.assertEqual(title_cap(scratch.path, "bicharak", pinned), 80.0)   # a pinned file wins
+        with self.assertRaises(ValueError):                                     # a pinned file is never assumed
+            title_cap(scratch.path, "bicharak", Path(self.tmp.name) / "gone.json")
+
     def test_title_caps_file_rejects_non_numbers(self):
         for bad in ({"bicharak": "100"}, {"bicharak": True}, {"bicharak": -1}):
             self._caps(bad)

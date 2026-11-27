@@ -1,7 +1,8 @@
 """Compute-unit forecast and the standing Colab Pro allowance ledger.
 
 Allowance: 60 units per title over the title's whole life (all months) unless the
-owner raised it in title-caps.json next to the ledger, and 100 units per calendar
+owner raised it in title-caps.json (pinned in the record, else next to the ledger or in the
+nearest folder above it), and 100 units per calendar
 month across titles. Reservations count as spent until
 settled with the actual units.
 The ledger assumes one writer process at a time.
@@ -60,11 +61,30 @@ def fit_reel_job(job: dict, rates: dict, remaining_units: float):
             return None
 
 
-def title_cap(ledger_path, title) -> float:
-    """Lifetime cap for one title: its title-caps.json entry next to the ledger, else TITLE_CAP."""
-    path = Path(ledger_path).parent / "title-caps.json"
-    if not path.exists():
+CAPS_FILE = "title-caps.json"
+
+
+def caps_path(ledger_path, pinned=None):
+    """The title-caps.json that sets the ledger's lifetime caps (G11): the one pinned in the record (`pinned`),
+    else the one beside the ledger, else the nearest one in a folder above the ledger (a scratch or test ledger
+    inside a title's tree reads the real caps), else None (TITLE_CAP for every title, which callers print)."""
+    if pinned is not None:
+        return Path(pinned)
+    here = Path(ledger_path).resolve().parent
+    for folder in (here, *here.parents):
+        if (folder / CAPS_FILE).is_file():
+            return folder / CAPS_FILE
+    return None
+
+
+def title_cap(ledger_path, title, caps=None) -> float:
+    """Lifetime cap for one title: its entry in caps_path(ledger_path, caps), else TITLE_CAP. A pinned caps file
+    that is missing is an error, never a silent TITLE_CAP."""
+    path = caps_path(ledger_path, caps)
+    if path is None:
         return TITLE_CAP
+    if not path.is_file():
+        raise ValueError(f"the pinned {CAPS_FILE} {path} does not exist; the caps are never assumed")
     caps = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(caps, dict):
         raise ValueError(f"{path.name} must be a JSON object of title -> units")
@@ -83,8 +103,9 @@ def _check_units(units) -> float:
 
 
 class Ledger:
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, caps=None):
         self.path = Path(path)
+        self.caps = caps   # a title-caps.json pinned in the record (G11), else caps_path finds it
 
     def _load(self) -> list:
         if not self.path.exists():
@@ -141,7 +162,7 @@ class Ledger:
             if others:
                 raise ValueError(f"edition {edition_id} already has a title root on this ledger "
                                  f"({', '.join(sorted(others))}); one root per edition")
-        cap = title_cap(self.path, title)
+        cap = title_cap(self.path, title, self.caps)
         if self._sum(entries, title, None, edition_id) + units > cap:  # lifetime, all months
             raise BudgetExceeded(f"title cap {cap:g} units exceeded for {title!r}")
         if self._sum(entries, None, month) + units > MONTH_CAP:
@@ -174,7 +195,7 @@ class Ledger:
             edition = entry.get("edition_id")
             title_now = self._sum(after, entry["title"], None, edition) + actual_units
             month_now = self._sum(after, None, entry["month"]) + actual_units
-            cap = title_cap(self.path, entry["title"])
+            cap = title_cap(self.path, entry["title"], self.caps)
             if title_now > cap + 1e-9:
                 raise BudgetExceeded(f"settling {job_id} at {actual_units:g} units would take {entry['title']!r} to "
                                      f"{title_now:.2f} units, past its lifetime cap {cap:g}")
