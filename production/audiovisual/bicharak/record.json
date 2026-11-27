@@ -9341,6 +9341,776 @@
       },
       "path": "stills/stills-film-01-r7/f01s019-2.png",
       "sha256": "37d4ebd9948a6e926ad642a73636cd9f0b090cdbb6d2ef8330c71d0ea3e95160"
+    },
+    {
+      "bytes": 1545777,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s007-2",
+        "method": {
+          "changed_pixels_max": 5884,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 740,
+          "masked_pixels": 4600,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 4308084841438463840,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "41cb0f453c92f9845d4aca8f6cd49021823e6bfd28dbce2afd158e0aac2c6912",
+        "reason": "widow's bindi; corner signature",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 822,
+            "y": 203
+          },
+          {
+            "h": 34,
+            "shape": "rect",
+            "w": 124,
+            "x": 1188,
+            "y": 726
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s007-2.png",
+        "source_retouch": null,
+        "source_sha256": "3bc964568c2f4760b90b0f3ca70a88c2c4ee81ae90f148ba5bd97259831ee2ba",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s007-2-1.png",
+      "sha256": "41cb0f453c92f9845d4aca8f6cd49021823e6bfd28dbce2afd158e0aac2c6912"
+    },
+    {
+      "bytes": 1544112,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s011-4",
+        "method": {
+          "changed_pixels_max": 7060,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 357,
+          "masked_pixels": 5716,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 1462864507748997757,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "56377f93fb9bab8eb8dd24ba181995b265f53125c32ac0b4da0154edc0bc1b82",
+        "reason": "widow's bindi and hoop earring",
+        "regions": [
+          {
+            "h": 24,
+            "shape": "ellipse",
+            "w": 24,
+            "x": 771,
+            "y": 146
+          },
+          {
+            "h": 86,
+            "shape": "ellipse",
+            "w": 78,
+            "x": 940,
+            "y": 252
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s011-4.png",
+        "source_retouch": null,
+        "source_sha256": "144d2384eae7da7d5aee797f05d8dba44b60392435e4927a9efd2016a2ad6ddf",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s011-4-1.png",
+      "sha256": "56377f93fb9bab8eb8dd24ba181995b265f53125c32ac0b4da0154edc0bc1b82"
+    },
+    {
+      "bytes": 1543736,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s011-4",
+        "method": {
+          "changed_pixels_max": 5788,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 406,
+          "masked_pixels": 4072,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 1462864507748997757,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 2,
+        "output_sha256": "4191a4a688cd33d1a43ded64c32a206b9d9635cd4ebb48846aa26039965e0567",
+        "reason": "widow's bindi; gold hoop earring (painted out along the ring only)",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 742,
+            "y": 147
+          },
+          {
+            "h": 64,
+            "shape": "rect",
+            "w": 19,
+            "x": 1000,
+            "y": 262
+          },
+          {
+            "h": 24,
+            "shape": "rect",
+            "w": 66,
+            "x": 944,
+            "y": 313
+          },
+          {
+            "h": 42,
+            "shape": "rect",
+            "w": 17,
+            "x": 939,
+            "y": 276
+          },
+          {
+            "h": 10,
+            "shape": "rect",
+            "w": 40,
+            "x": 966,
+            "y": 258
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s011-4.png",
+        "source_retouch": null,
+        "source_sha256": "144d2384eae7da7d5aee797f05d8dba44b60392435e4927a9efd2016a2ad6ddf",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s011-4-2.png",
+      "sha256": "4191a4a688cd33d1a43ded64c32a206b9d9635cd4ebb48846aa26039965e0567"
+    },
+    {
+      "bytes": 1407537,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s007-4",
+        "method": {
+          "changed_pixels_max": 6456,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 1815,
+          "masked_pixels": 5184,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 15195152713924290046,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "ec38f3bfb2ecb7ec0d668c4ea194d400350099c5bcc51c022ef3f7f64537ae90",
+        "reason": "widow's bindi; corner lettering",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 797,
+            "y": 225
+          },
+          {
+            "h": 46,
+            "shape": "rect",
+            "w": 84,
+            "x": 1260,
+            "y": 4
+          },
+          {
+            "h": 26,
+            "shape": "rect",
+            "w": 36,
+            "x": 0,
+            "y": 8
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s007-4.png",
+        "source_retouch": null,
+        "source_sha256": "d2e006e2cd4525fe1fa2071d4b52f4eac4d35f101f35029163cfac65e40a43d4",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s007-4-1.png",
+      "sha256": "ec38f3bfb2ecb7ec0d668c4ea194d400350099c5bcc51c022ef3f7f64537ae90"
+    },
+    {
+      "bytes": 1428284,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s007-5",
+        "method": {
+          "changed_pixels_max": 2385,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 963,
+          "masked_pixels": 1704,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 5832966882149630991,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "e8cacc7096ef90b70e76bcbe98344f65a99e896925fd593221aba6f903771d67",
+        "reason": "widow's bindi; corner signature",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 585,
+            "y": 218
+          },
+          {
+            "h": 22,
+            "shape": "rect",
+            "w": 60,
+            "x": 1284,
+            "y": 744
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s007-5.png",
+        "source_retouch": null,
+        "source_sha256": "50f2dc799525840f315616ac41f899097092aa07acddf37e64f810d9b1221bd0",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s007-5-1.png",
+      "sha256": "e8cacc7096ef90b70e76bcbe98344f65a99e896925fd593221aba6f903771d67"
+    },
+    {
+      "bytes": 1412789,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s009-2",
+        "method": {
+          "changed_pixels_max": 684,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 39,
+          "masked_pixels": 384,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 15978021058998131019,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "bc6ee0c28991883b351b4998d83359019bd1fe7dd6ecd6ebc8c7bb61528e0e29",
+        "reason": "widow's bindi",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 683,
+            "y": 267
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s009-2.png",
+        "source_retouch": null,
+        "source_sha256": "ddbd557f7b4b594b4dc8b73b399d3c742bf1c02c0c2beb78a0c80fd5d8ad4c6c",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s009-2-1.png",
+      "sha256": "bc6ee0c28991883b351b4998d83359019bd1fe7dd6ecd6ebc8c7bb61528e0e29"
+    },
+    {
+      "bytes": 1267809,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s009-4",
+        "method": {
+          "changed_pixels_max": 684,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 39,
+          "masked_pixels": 384,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 16570130328638786727,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "4fe98aa70dc000cf1d665b54e6fa4519e6d34b5ea1730f1db804fbcab0f0ae64",
+        "reason": "widow's bindi",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 629,
+            "y": 194
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s009-4.png",
+        "source_retouch": null,
+        "source_sha256": "e5f4edbdd8710ca7dde242429f2dafd759b83200478bc85a28a44384dfcc81f3",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s009-4-1.png",
+      "sha256": "4fe98aa70dc000cf1d665b54e6fa4519e6d34b5ea1730f1db804fbcab0f0ae64"
+    },
+    {
+      "bytes": 1267010,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s012-1",
+        "method": {
+          "changed_pixels_max": 6540,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 783,
+          "masked_pixels": 5256,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 5271014532336142878,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "cccfabd2db224d764b5379e6d1aad004b646a2cd2873d11ea40216657994f784",
+        "reason": "widow's bindi; corner signature",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 744,
+            "y": 213
+          },
+          {
+            "h": 42,
+            "shape": "rect",
+            "w": 116,
+            "x": 1192,
+            "y": 722
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s012-1.png",
+        "source_retouch": null,
+        "source_sha256": "492667ca45d14a1eac3a0639f2ae0dccf2295c51a26d2c37381b677e071532cd",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s012-1-1.png",
+      "sha256": "cccfabd2db224d764b5379e6d1aad004b646a2cd2873d11ea40216657994f784"
+    },
+    {
+      "bytes": 1213526,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s015-3",
+        "method": {
+          "changed_pixels_max": 1412,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 269,
+          "masked_pixels": 800,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 4296699813610056289,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "3f02eb0e48d03b80b77a5cc005424180445d4799d11bcb5b0b426ba22e19024d",
+        "reason": "widow's bindi; stud earring",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 603,
+            "y": 137
+          },
+          {
+            "h": 26,
+            "shape": "ellipse",
+            "w": 20,
+            "x": 437,
+            "y": 228
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s015-3.png",
+        "source_retouch": null,
+        "source_sha256": "3ba0f1b730b6ea613d9f8fe615f6ced57169aa53d992fcaea748736078ed0ca6",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s015-3-1.png",
+      "sha256": "3f02eb0e48d03b80b77a5cc005424180445d4799d11bcb5b0b426ba22e19024d"
+    },
+    {
+      "bytes": 1266828,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s011-3",
+        "method": {
+          "changed_pixels_max": 4896,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 1301,
+          "masked_pixels": 3588,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 830902056263839623,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "7926d83fa097a2d982aa1a76602c3b51b1ed0f0478009a7a63ea1430b6c8d831",
+        "reason": "widow's bindi; earring; corner signature",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 704,
+            "y": 166
+          },
+          {
+            "h": 36,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 430,
+            "y": 230
+          },
+          {
+            "h": 30,
+            "shape": "rect",
+            "w": 86,
+            "x": 1258,
+            "y": 728
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s011-3.png",
+        "source_retouch": null,
+        "source_sha256": "0b87f50492bf6f877906160eb7f30714c7049301ef866ba9817992431c3ba0d8",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s011-3-1.png",
+      "sha256": "7926d83fa097a2d982aa1a76602c3b51b1ed0f0478009a7a63ea1430b6c8d831"
+    },
+    {
+      "bytes": 1200748,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s013-1",
+        "method": {
+          "changed_pixels_max": 684,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 37,
+          "masked_pixels": 384,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 2996633554641432949,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "57b82a4e7262edf17ec67b5e9432808aece204d0605cb639d62da2115d6487c4",
+        "reason": "widow's bindi",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 693,
+            "y": 202
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s013-1.png",
+        "source_retouch": null,
+        "source_sha256": "29962e57526b31756d0223d1b1191715ff11f501e6727d8accdf3074f075c4e2",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s013-1-1.png",
+      "sha256": "57b82a4e7262edf17ec67b5e9432808aece204d0605cb639d62da2115d6487c4"
+    },
+    {
+      "bytes": 1409028,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s015-1",
+        "method": {
+          "changed_pixels_max": 684,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 38,
+          "masked_pixels": 384,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 2643707673396039411,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "1dfd7e63b4a1aa5995f5de283f10845c2a4df2266738d827599c32c8f085a730",
+        "reason": "widow's bindi",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 493,
+            "y": 173
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s015-1.png",
+        "source_retouch": null,
+        "source_sha256": "24b0561f3abecef319b051dfbc5cd36189227677c20d4940e9a7e3d57dec0dd3",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s015-1-1.png",
+      "sha256": "1dfd7e63b4a1aa5995f5de283f10845c2a4df2266738d827599c32c8f085a730"
+    },
+    {
+      "bytes": 1412422,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s009-2",
+        "method": {
+          "changed_pixels_max": 684,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 38,
+          "masked_pixels": 384,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 15978021058998131019,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 2,
+        "output_sha256": "201e55fe024106a46410a347d562ebced091eff5bd0b2af66b6ee78a28d93ef3",
+        "reason": "widow's bindi",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 682,
+            "y": 202
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s009-2.png",
+        "source_retouch": null,
+        "source_sha256": "ddbd557f7b4b594b4dc8b73b399d3c742bf1c02c0c2beb78a0c80fd5d8ad4c6c",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s009-2-2.png",
+      "sha256": "201e55fe024106a46410a347d562ebced091eff5bd0b2af66b6ee78a28d93ef3"
+    },
+    {
+      "bytes": 1233410,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s018-3",
+        "method": {
+          "changed_pixels_max": 44571,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 1521,
+          "masked_pixels": 38292,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 3101841966090955955,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "81c0500dbf68fd2b555bf2ff2086265b1419ec42c9e1856b2f68c41bc018b9dc",
+        "reason": "Devanagari lettering painted on the jail wall (wrong script and period); scrawled signatures",
+        "regions": [
+          {
+            "h": 42,
+            "shape": "rect",
+            "w": 172,
+            "x": 32,
+            "y": 466
+          },
+          {
+            "h": 30,
+            "shape": "rect",
+            "w": 90,
+            "x": 180,
+            "y": 496
+          },
+          {
+            "h": 32,
+            "shape": "rect",
+            "w": 95,
+            "x": 180,
+            "y": 575
+          },
+          {
+            "h": 92,
+            "shape": "rect",
+            "w": 32,
+            "x": 0,
+            "y": 570
+          },
+          {
+            "h": 92,
+            "shape": "rect",
+            "w": 135,
+            "x": 30,
+            "y": 648
+          },
+          {
+            "h": 160,
+            "shape": "rect",
+            "w": 44,
+            "x": 1280,
+            "y": 570
+          },
+          {
+            "h": 30,
+            "shape": "rect",
+            "w": 108,
+            "x": 1236,
+            "y": 736
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s018-3.png",
+        "source_retouch": null,
+        "source_sha256": "2b0bf4d57a402cb3f932033c84b6934a0e9c35664dce8ccf0f5a9f759e7d598f",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s018-3-1.png",
+      "sha256": "81c0500dbf68fd2b555bf2ff2086265b1419ec42c9e1856b2f68c41bc018b9dc"
+    },
+    {
+      "bytes": 1500164,
+      "kind": "still_retouch",
+      "meta": {
+        "key": "f01s013-3",
+        "method": {
+          "changed_pixels_max": 6481,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 1098,
+          "masked_pixels": 5644,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 17548657063722410176,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "3d15fd1e74d3bcbab8143fdfd897e9a7c4315f2d4966507d59d3581001dd38c8",
+        "reason": "widow's faint bindi; corner signature",
+        "regions": [
+          {
+            "h": 20,
+            "shape": "ellipse",
+            "w": 20,
+            "x": 558,
+            "y": 194
+          },
+          {
+            "h": 36,
+            "shape": "rect",
+            "w": 148,
+            "x": 1196,
+            "y": 732
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s013-3.png",
+        "source_retouch": null,
+        "source_sha256": "f3895a9f6852e0c06eb9eb03b9fd3c96dcc5ba81dad5126059fc561270de8b24",
+        "target": "film-01"
+      },
+      "path": "stills/retouch/f01s013-3-1.png",
+      "sha256": "3d15fd1e74d3bcbab8143fdfd897e9a7c4315f2d4966507d59d3581001dd38c8"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -10822,6 +11592,800 @@
       },
       "result": "accepted",
       "stage": "import"
+    },
+    {
+      "at": "2026-11-27T08:55:59.188465+00:00",
+      "detail": {
+        "key": "f01s007-2",
+        "method": {
+          "changed_pixels_max": 5884,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 740,
+          "masked_pixels": 4600,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 4308084841438463840,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "41cb0f453c92f9845d4aca8f6cd49021823e6bfd28dbce2afd158e0aac2c6912",
+        "path": "stills/retouch/f01s007-2-1.png",
+        "reason": "widow's bindi; corner signature",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 822,
+            "y": 203
+          },
+          {
+            "h": 34,
+            "shape": "rect",
+            "w": 124,
+            "x": 1188,
+            "y": 726
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s007-2.png",
+        "source_retouch": null,
+        "source_sha256": "3bc964568c2f4760b90b0f3ca70a88c2c4ee81ae90f148ba5bd97259831ee2ba",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:56:00.927214+00:00",
+      "detail": {
+        "key": "f01s011-4",
+        "method": {
+          "changed_pixels_max": 7060,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 357,
+          "masked_pixels": 5716,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 1462864507748997757,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "56377f93fb9bab8eb8dd24ba181995b265f53125c32ac0b4da0154edc0bc1b82",
+        "path": "stills/retouch/f01s011-4-1.png",
+        "reason": "widow's bindi and hoop earring",
+        "regions": [
+          {
+            "h": 24,
+            "shape": "ellipse",
+            "w": 24,
+            "x": 771,
+            "y": 146
+          },
+          {
+            "h": 86,
+            "shape": "ellipse",
+            "w": 78,
+            "x": 940,
+            "y": 252
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s011-4.png",
+        "source_retouch": null,
+        "source_sha256": "144d2384eae7da7d5aee797f05d8dba44b60392435e4927a9efd2016a2ad6ddf",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:56:15.213784+00:00",
+      "detail": {
+        "key": "f01s011-4",
+        "n": 1,
+        "path": "stills/retouch/f01s011-4-1.png",
+        "reason": "wrong bindi position; earring fill smudged the jaw",
+        "target": "film-01"
+      },
+      "result": "undone",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:56:29.516875+00:00",
+      "detail": {
+        "key": "f01s011-4",
+        "method": {
+          "changed_pixels_max": 5788,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 406,
+          "masked_pixels": 4072,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 1462864507748997757,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 2,
+        "output_sha256": "4191a4a688cd33d1a43ded64c32a206b9d9635cd4ebb48846aa26039965e0567",
+        "path": "stills/retouch/f01s011-4-2.png",
+        "reason": "widow's bindi; gold hoop earring (painted out along the ring only)",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 742,
+            "y": 147
+          },
+          {
+            "h": 64,
+            "shape": "rect",
+            "w": 19,
+            "x": 1000,
+            "y": 262
+          },
+          {
+            "h": 24,
+            "shape": "rect",
+            "w": 66,
+            "x": 944,
+            "y": 313
+          },
+          {
+            "h": 42,
+            "shape": "rect",
+            "w": 17,
+            "x": 939,
+            "y": 276
+          },
+          {
+            "h": 10,
+            "shape": "rect",
+            "w": 40,
+            "x": 966,
+            "y": 258
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s011-4.png",
+        "source_retouch": null,
+        "source_sha256": "144d2384eae7da7d5aee797f05d8dba44b60392435e4927a9efd2016a2ad6ddf",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:57:44.598632+00:00",
+      "detail": {
+        "key": "f01s007-4",
+        "method": {
+          "changed_pixels_max": 6456,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 1815,
+          "masked_pixels": 5184,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 15195152713924290046,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "ec38f3bfb2ecb7ec0d668c4ea194d400350099c5bcc51c022ef3f7f64537ae90",
+        "path": "stills/retouch/f01s007-4-1.png",
+        "reason": "widow's bindi; corner lettering",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 797,
+            "y": 225
+          },
+          {
+            "h": 46,
+            "shape": "rect",
+            "w": 84,
+            "x": 1260,
+            "y": 4
+          },
+          {
+            "h": 26,
+            "shape": "rect",
+            "w": 36,
+            "x": 0,
+            "y": 8
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s007-4.png",
+        "source_retouch": null,
+        "source_sha256": "d2e006e2cd4525fe1fa2071d4b52f4eac4d35f101f35029163cfac65e40a43d4",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:58:00.164265+00:00",
+      "detail": {
+        "key": "f01s007-5",
+        "method": {
+          "changed_pixels_max": 2385,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 963,
+          "masked_pixels": 1704,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 5832966882149630991,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "e8cacc7096ef90b70e76bcbe98344f65a99e896925fd593221aba6f903771d67",
+        "path": "stills/retouch/f01s007-5-1.png",
+        "reason": "widow's bindi; corner signature",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 585,
+            "y": 218
+          },
+          {
+            "h": 22,
+            "shape": "rect",
+            "w": 60,
+            "x": 1284,
+            "y": 744
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s007-5.png",
+        "source_retouch": null,
+        "source_sha256": "50f2dc799525840f315616ac41f899097092aa07acddf37e64f810d9b1221bd0",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:58:00.848042+00:00",
+      "detail": {
+        "key": "f01s009-2",
+        "method": {
+          "changed_pixels_max": 684,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 39,
+          "masked_pixels": 384,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 15978021058998131019,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "bc6ee0c28991883b351b4998d83359019bd1fe7dd6ecd6ebc8c7bb61528e0e29",
+        "path": "stills/retouch/f01s009-2-1.png",
+        "reason": "widow's bindi",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 683,
+            "y": 267
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s009-2.png",
+        "source_retouch": null,
+        "source_sha256": "ddbd557f7b4b594b4dc8b73b399d3c742bf1c02c0c2beb78a0c80fd5d8ad4c6c",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:58:01.534411+00:00",
+      "detail": {
+        "key": "f01s009-4",
+        "method": {
+          "changed_pixels_max": 684,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 39,
+          "masked_pixels": 384,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 16570130328638786727,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "4fe98aa70dc000cf1d665b54e6fa4519e6d34b5ea1730f1db804fbcab0f0ae64",
+        "path": "stills/retouch/f01s009-4-1.png",
+        "reason": "widow's bindi",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 629,
+            "y": 194
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s009-4.png",
+        "source_retouch": null,
+        "source_sha256": "e5f4edbdd8710ca7dde242429f2dafd759b83200478bc85a28a44384dfcc81f3",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:58:11.902937+00:00",
+      "detail": {
+        "key": "f01s012-1",
+        "method": {
+          "changed_pixels_max": 6540,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 783,
+          "masked_pixels": 5256,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 5271014532336142878,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "cccfabd2db224d764b5379e6d1aad004b646a2cd2873d11ea40216657994f784",
+        "path": "stills/retouch/f01s012-1-1.png",
+        "reason": "widow's bindi; corner signature",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 744,
+            "y": 213
+          },
+          {
+            "h": 42,
+            "shape": "rect",
+            "w": 116,
+            "x": 1192,
+            "y": 722
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s012-1.png",
+        "source_retouch": null,
+        "source_sha256": "492667ca45d14a1eac3a0639f2ae0dccf2295c51a26d2c37381b677e071532cd",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:58:12.907839+00:00",
+      "detail": {
+        "key": "f01s015-3",
+        "method": {
+          "changed_pixels_max": 1412,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 269,
+          "masked_pixels": 800,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 4296699813610056289,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "3f02eb0e48d03b80b77a5cc005424180445d4799d11bcb5b0b426ba22e19024d",
+        "path": "stills/retouch/f01s015-3-1.png",
+        "reason": "widow's bindi; stud earring",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 603,
+            "y": 137
+          },
+          {
+            "h": 26,
+            "shape": "ellipse",
+            "w": 20,
+            "x": 437,
+            "y": 228
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s015-3.png",
+        "source_retouch": null,
+        "source_sha256": "3ba0f1b730b6ea613d9f8fe615f6ced57169aa53d992fcaea748736078ed0ca6",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:58:38.299670+00:00",
+      "detail": {
+        "key": "f01s011-3",
+        "method": {
+          "changed_pixels_max": 4896,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 1301,
+          "masked_pixels": 3588,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 830902056263839623,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "7926d83fa097a2d982aa1a76602c3b51b1ed0f0478009a7a63ea1430b6c8d831",
+        "path": "stills/retouch/f01s011-3-1.png",
+        "reason": "widow's bindi; earring; corner signature",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 704,
+            "y": 166
+          },
+          {
+            "h": 36,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 430,
+            "y": 230
+          },
+          {
+            "h": 30,
+            "shape": "rect",
+            "w": 86,
+            "x": 1258,
+            "y": 728
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s011-3.png",
+        "source_retouch": null,
+        "source_sha256": "0b87f50492bf6f877906160eb7f30714c7049301ef866ba9817992431c3ba0d8",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:58:38.975645+00:00",
+      "detail": {
+        "key": "f01s013-1",
+        "method": {
+          "changed_pixels_max": 684,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 37,
+          "masked_pixels": 384,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 2996633554641432949,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "57b82a4e7262edf17ec67b5e9432808aece204d0605cb639d62da2115d6487c4",
+        "path": "stills/retouch/f01s013-1-1.png",
+        "reason": "widow's bindi",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 693,
+            "y": 202
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s013-1.png",
+        "source_retouch": null,
+        "source_sha256": "29962e57526b31756d0223d1b1191715ff11f501e6727d8accdf3074f075c4e2",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:58:39.695542+00:00",
+      "detail": {
+        "key": "f01s015-1",
+        "method": {
+          "changed_pixels_max": 684,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 38,
+          "masked_pixels": 384,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 2643707673396039411,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "1dfd7e63b4a1aa5995f5de283f10845c2a4df2266738d827599c32c8f085a730",
+        "path": "stills/retouch/f01s015-1-1.png",
+        "reason": "widow's bindi",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 493,
+            "y": 173
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s015-1.png",
+        "source_retouch": null,
+        "source_sha256": "24b0561f3abecef319b051dfbc5cd36189227677c20d4940e9a7e3d57dec0dd3",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:58:57.816565+00:00",
+      "detail": {
+        "key": "f01s009-2",
+        "n": 1,
+        "path": "stills/retouch/f01s009-2-1.png",
+        "reason": "region missed the bindi",
+        "target": "film-01"
+      },
+      "result": "undone",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T08:58:58.588288+00:00",
+      "detail": {
+        "key": "f01s009-2",
+        "method": {
+          "changed_pixels_max": 684,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 38,
+          "masked_pixels": 384,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 15978021058998131019,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 2,
+        "output_sha256": "201e55fe024106a46410a347d562ebced091eff5bd0b2af66b6ee78a28d93ef3",
+        "path": "stills/retouch/f01s009-2-2.png",
+        "reason": "widow's bindi",
+        "regions": [
+          {
+            "h": 22,
+            "shape": "ellipse",
+            "w": 22,
+            "x": 682,
+            "y": 202
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s009-2.png",
+        "source_retouch": null,
+        "source_sha256": "ddbd557f7b4b594b4dc8b73b399d3c742bf1c02c0c2beb78a0c80fd5d8ad4c6c",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T09:00:00.942992+00:00",
+      "detail": {
+        "key": "f01s018-3",
+        "method": {
+          "changed_pixels_max": 44571,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 1521,
+          "masked_pixels": 38292,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 3101841966090955955,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "81c0500dbf68fd2b555bf2ff2086265b1419ec42c9e1856b2f68c41bc018b9dc",
+        "path": "stills/retouch/f01s018-3-1.png",
+        "reason": "Devanagari lettering painted on the jail wall (wrong script and period); scrawled signatures",
+        "regions": [
+          {
+            "h": 42,
+            "shape": "rect",
+            "w": 172,
+            "x": 32,
+            "y": 466
+          },
+          {
+            "h": 30,
+            "shape": "rect",
+            "w": 90,
+            "x": 180,
+            "y": 496
+          },
+          {
+            "h": 32,
+            "shape": "rect",
+            "w": 95,
+            "x": 180,
+            "y": 575
+          },
+          {
+            "h": 92,
+            "shape": "rect",
+            "w": 32,
+            "x": 0,
+            "y": 570
+          },
+          {
+            "h": 92,
+            "shape": "rect",
+            "w": 135,
+            "x": 30,
+            "y": 648
+          },
+          {
+            "h": 160,
+            "shape": "rect",
+            "w": 44,
+            "x": 1280,
+            "y": 570
+          },
+          {
+            "h": 30,
+            "shape": "rect",
+            "w": 108,
+            "x": 1236,
+            "y": 736
+          }
+        ],
+        "source_job_id": "stills-film-01-r7",
+        "source_path": "stills/stills-film-01-r7/f01s018-3.png",
+        "source_retouch": null,
+        "source_sha256": "2b0bf4d57a402cb3f932033c84b6934a0e9c35664dce8ccf0f5a9f759e7d598f",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
+    },
+    {
+      "at": "2026-11-27T09:00:19.963925+00:00",
+      "detail": {
+        "key": "f01s013-3",
+        "method": {
+          "changed_pixels_max": 6481,
+          "converged": true,
+          "feather_px": 3,
+          "highpass_box_radius": 2,
+          "iterations": 1098,
+          "masked_pixels": 5644,
+          "max_iterations": 6000,
+          "mode": "RGB",
+          "name": "harmonic-sor+ring-texture+feather",
+          "noise": "ring high-pass residuals, sampled with numpy default_rng(noise_seed)",
+          "noise_seed": 17548657063722410176,
+          "ring_px": 6,
+          "tolerance": 0.01,
+          "version": 1
+        },
+        "n": 1,
+        "output_sha256": "3d15fd1e74d3bcbab8143fdfd897e9a7c4315f2d4966507d59d3581001dd38c8",
+        "path": "stills/retouch/f01s013-3-1.png",
+        "reason": "widow's faint bindi; corner signature",
+        "regions": [
+          {
+            "h": 20,
+            "shape": "ellipse",
+            "w": 20,
+            "x": 558,
+            "y": 194
+          },
+          {
+            "h": 36,
+            "shape": "rect",
+            "w": 148,
+            "x": 1196,
+            "y": 732
+          }
+        ],
+        "source_job_id": "stills-film-01-r6",
+        "source_path": "stills/stills-film-01-r6/f01s013-3.png",
+        "source_retouch": null,
+        "source_sha256": "f3895a9f6852e0c06eb9eb03b9fd3c96dcc5ba81dad5126059fc561270de8b24",
+        "target": "film-01"
+      },
+      "result": "applied",
+      "stage": "retouch"
     }
   ],
   "ledger": "../allowance-ledger.json",

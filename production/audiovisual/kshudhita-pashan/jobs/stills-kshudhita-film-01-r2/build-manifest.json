@@ -1,0 +1,15 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 3077,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/kshudhita-pashan/stills-kshudhita-film-01-r2",
+  "inputs_sha256": "cc8d977423fba469c1088f5ecf7c305750c0cc22a7b5c482cbd0f8c47754af32",
+  "job_id": "stills-kshudhita-film-01-r2",
+  "kind": "stills",
+  "model": {
+    "repo": "black-forest-labs/FLUX.1-schnell",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "b6055cec0cc97c256ff0dc2b576b2d0bf454fce5398d2d314f7d40edec739b44",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "kshudhita-pashan"
+}

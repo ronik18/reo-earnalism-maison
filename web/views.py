@@ -103,6 +103,11 @@ def domain_view(fn):
                 raise Http404
             return fn(request, locale="en", **kwargs)
         except DomainError as exc:
+            if (getattr(exc, "status", 400) == 401 and request.method in ("GET", "HEAD")
+                    and not request.user.is_authenticated):
+                # A page that needs an account sends a signed-out reader to sign in and back.
+                return HttpResponseRedirect(reverse("web:sign-in", args=["en"]) + "?" + urlencode(
+                    {"return_to": safe_return(request.get_full_path(), "en")}))
             return error_page(request, locale, getattr(exc, "code", "error"), getattr(exc, "status", 400))
         except (ObjectDoesNotExist, ValueError):
             return error_page(request, locale, "not_found", 404)

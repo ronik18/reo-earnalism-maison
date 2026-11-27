@@ -130,7 +130,8 @@ def _stills(stills_dir, scene_id: str) -> list:
     map key -> file (the per-key rule: each key's still from the newest imported job holding it)."""
     mine = lambda stem: stem == scene_id or stem.startswith(scene_id + "-") or stem.startswith(scene_id + "_")
     if isinstance(stills_dir, dict):
-        found = sorted((Path(p) for k, p in stills_dir.items() if mine(k)), key=lambda p: p.stem)
+        # ordered by key: a retouched still's file is <key>-<n>.png
+        found = [Path(p) for k, p in sorted(stills_dir.items()) if mine(k)]
         if not found:
             raise ValueError(f"no still for scene {scene_id!r} in the stills map")
         return found

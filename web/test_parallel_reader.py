@@ -4,11 +4,13 @@ import re
 import tempfile
 import uuid
 from datetime import timedelta
+from pathlib import Path
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.core.management import call_command
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
@@ -123,3 +125,15 @@ class ParallelReaderTests(TestCase):
         Entitlement.objects.create(grant_key=f'pass:{uuid.uuid4()}', user=self.member, source='subscription_invoice', scope='platform',
                                    formats=['reader', 'audio'], valid_from=now - timedelta(minutes=1), valid_until=now + timedelta(days=30))
         self.assertIn('id="parallel-toggle"', self.read())
+
+
+class ParallelReaderWidthStyleTests(SimpleTestCase):
+    """Owner-approved 27 Nov 2026: side-by-side reading widens to 1040px on desktop; single-language stays 780px."""
+    room = (Path(settings.BASE_DIR) / 'static/maison/room/room.css').read_text()
+    app = (Path(settings.BASE_DIR) / 'static/maison/app.css').read_text()
+
+    def test_room_css_is_the_one_source_of_the_reader_widths(self):
+        self.assertIn('.room .reader{max-width:780px;', self.room)
+        self.assertIn('.room .reader[data-parallel=on]{max-width:1040px}', self.room)
+        self.assertIn('.room-focused .room-page:has(>.reader[data-parallel=on]){max-width:calc(1040px + 64px)}', self.room)
+        self.assertNotRegex(self.app, r'\.reader\[data-parallel=on\]\{max-width:')

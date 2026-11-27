@@ -342,6 +342,7 @@ body.room-focused{background:var(--paper),#1A0E12;--surface:#2A1820;--raised:#35
 .room-focused .room-page .button{background:var(--gold);border-color:var(--gold-deep);color:var(--burgundy-deep)}
 .room-focused .room-page .button.secondary{background:transparent;color:var(--gold);border-color:var(--gold)}
 .room .reader{max-width:780px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,.2),0 30px 60px -30px rgba(0,0,0,.6);background:var(--paper),#F5EDDF}
+.room .reader[data-parallel=on]{max-width:1040px}.room-focused .room-page:has(>.reader[data-parallel=on]){max-width:calc(1040px + 64px)}
 .room .reader.reader-sepia{background:var(--paper),#E3CFAA}.room .reader.reader-ink,.room .reader.reader-dark{background:#21181A}.room .reader.reader-true_black{background:#000}
 .room .reader p{color:inherit}
 .room .reader .notice{background:transparent;box-shadow:none}

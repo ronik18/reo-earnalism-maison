@@ -1,0 +1,62 @@
+{
+ "derived_from": "specs/stills-film-01-r2.json",
+ "purpose": "8-frame sample of the hardened prompts (one per main character and setting) before the full 138",
+ "items": [
+  {
+   "key": "f01s001-2",
+   "prompt": "Gouache painting of the narrator, a 22-year-old Bengali man, slim, clean-shaven with a smooth bare chin and smooth bare upper lip, short side-parted black hair, white dhoti, cream cotton panjabi and a brown shawl over one shoulder, together with his theosophist relative, a 30-year-old Bengali man with a thin moustache over a smooth shaven chin, round steel-rimmed spectacles, white dhoti and black alpaca chapkan coat, a small notebook in hand, seated side by side on the slatted teak bench of an 1890s railway compartment, listening wide-eyed. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Nizam-era Hyderabad state, Deccan India, 1890s, lit only by oil lamps, candles, moon and sun. Palette of moonlit marble white, deep indigo, saffron, rose and old gold; cool dusk and moonlight on white marble with small warm lamp glints.",
+   "seed": 1101,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "f01s001-6",
+   "prompt": "Gouache painting of the narrator, a 22-year-old Bengali man, slim, clean-shaven with a smooth bare chin and smooth bare upper lip, short side-parted black hair, white dhoti, cream cotton panjabi and a brown shawl over one shoulder, together with his theosophist relative, a 30-year-old Bengali man with a thin moustache over a smooth shaven chin, round steel-rimmed spectacles, white dhoti and black alpaca chapkan coat, a small notebook in hand, exchanging an impressed look in a swaying 1890s railway compartment, reverence growing on their faces. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Nizam-era Hyderabad state, Deccan India, 1890s, lit only by oil lamps, candles, moon and sun. Palette of moonlit marble white, deep indigo, saffron, rose and old gold; cool dusk and moonlight on white marble with small warm lamp glints.",
+   "seed": 1103,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "f01s001-1",
+   "prompt": "Gouache painting of the storyteller babu, a 45-year-old Bengali man with a square jaw, a thick upturned moustache going grey and a thin scar through the right eyebrow, smooth shaven chin and cheeks, close-cropped greying hair, long dark-green sherwani buttoned to the throat, white churidar, a dark embroidered round cap, seated by the window of a wooden-bodied 1890s Indian railway compartment with slatted teak benches and a ceiling oil lamp, holding forth with one raised finger, the dusk countryside passing outside. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Nizam-era Hyderabad state, Deccan India, 1890s, lit only by oil lamps, candles, moon and sun. Palette of moonlit marble white, deep indigo, saffron, rose and old gold; cool dusk and moonlight on white marble with small warm lamp glints.",
+   "seed": 2102,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "f01s003-3",
+   "prompt": "Gouache painting of the young cotton-tax collector, a 26-year-old sturdy Bengali man with a square jaw, a thick black upturned moustache and a thin scar through the right eyebrow, smooth shaven chin and cheeks, short black hair, white sola topi, short khaki English jacket, tight white trousers, riding boots, standing in a sunlit arcaded courtyard of the Nizam's government in Hyderabad, a folded appointment paper with a red wax seal in his hand, Deccan domes and minarets behind. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Nizam-era Hyderabad state, Deccan India, 1890s, lit only by oil lamps, candles, moon and sun. Palette of moonlit marble white, deep indigo, saffron, rose and old gold; cool dusk and moonlight on white marble with small warm lamp glints.",
+   "seed": 2101,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "f01s021-2",
+   "prompt": "Gouache painting of the young collector, a 26-year-old sturdy Bengali man with a square jaw, a thick black upturned moustache and a thin scar through the right eyebrow, smooth shaven chin and cheeks, red velvet fez, loose white pyjama, flower-embroidered kaba and a long pale silk choga robe, before a tall mirror at night, settling his fez with great care. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Nizam-era Hyderabad state, Deccan India, 1890s, lit only by oil lamps, candles, moon and sun. Palette of moonlit marble white, deep indigo, saffron, rose and old gold; cool dusk and moonlight on white marble with small warm lamp glints.",
+   "seed": 2103,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "f01s023-1",
+   "prompt": "Gouache painting of the phantom Persian girl, a young woman of about 20 with very large dark eyes and a pale face, fully and modestly clothed in saffron silk pyjama trousers, a long-sleeved gold-embroidered bodice under a sheer rose veil-jacket, a small red cap with a fringe of gold coins around her brow and cheeks, curled gold-thread slippers, half-translucent like a memory, glimpsed for an instant in a dark marble doorway like a flash of lightning. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Nizam-era Hyderabad state, Deccan India, 1890s, lit only by oil lamps, candles, moon and sun. Palette of moonlit marble white, deep indigo, saffron, rose and old gold; cool dusk and moonlight on white marble with small warm lamp glints.",
+   "seed": 3101,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "f01s004-2",
+   "prompt": "Gouache painting of a lone 250-year-old Deccan-sultanate white marble palace with pointed carved arches and jali screens, standing on a towering stone ghat of a hundred and fifty steps at the river's edge, at the foot of forested hills, wild forest all around. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Nizam-era Hyderabad state, Deccan India, 1890s, lit only by oil lamps, candles, moon and sun. Palette of moonlit marble white, deep indigo, saffron, rose and old gold; cool dusk and moonlight on white marble with small warm lamp glints.",
+   "seed": 5101,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "f01s004-4",
+   "prompt": "Gouache painting of the bathhouse of a Deccan-sultanate white marble palace in its prime 250 years ago: rose-scented fountain jets rising, carved marble seats around a clear pool, a long-necked setar resting on a cushion, silk scarves and small slippers left on the empty marble edge, candle glow. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. a remembered dream of the old Persian and Mughal world, centuries ago, lit only by oil lamps, candles, moon and sun. Palette of moonlit marble white, deep indigo, saffron, rose and old gold; cool dusk and moonlight on white marble with small warm lamp glints.",
+   "seed": 5106,
+   "width": 1344,
+   "height": 768
+  }
+ ]
+}

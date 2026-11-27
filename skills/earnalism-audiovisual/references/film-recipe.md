@@ -50,6 +50,41 @@ Write it once per title and reuse it in every prompt:
   film artifact records it (`stills_by_key`). Retiring the replacement brings the earlier stills
   back. A chunk that ran but was closed needs its keys from a newer job (`--replace-chunk`, or a
   new stills job with new prompts); `film` refuses while any expected key has no imported still.
+- Do not "pick a seed and regenerate it": FLUX re-runs with the same seed are not reproducible
+  across batches (another batch, chunk or GPU gives another picture), so a still that was nearly
+  right is not recovered that way. Fix the prompt, or retouch a small defect (below).
+
+## 3a. Retouch (small defects only)
+
+Some defects survive every regeneration: a bindi dot on a widow's forehead, a small earring, a
+scrawled signature or lettering in a corner or on a plaster wall. Paint them over locally, at $0:
+
+```
+python3 -m eav.cli retouch <key> --root <title root> --film N \
+    --region x,y,w,h[:ellipse|rect] [--region ...] --reason "<what is removed>"
+```
+
+- Coordinates are the still's own pixels; `ellipse` is the default shape. Each region is at most
+  3% of the image and all of them at most 6%; the CLI refuses a region outside the image, a larger
+  one, and an empty reason. Use it **only** for small defects; never to change a character, a face,
+  clothing, a pose or the composition (that is a new prompt and a stills job for that key).
+- The source is the still that currently supplies the key under the per-key rule. The fill is
+  deterministic (numpy + Pillow): harmonic (Laplace) inpainting from the region's boundary, then
+  texture sampled from a ring of untouched pixels around it with a generator seeded from the
+  source's sha256, and a 3 px feathered edge; every other pixel is copied byte for byte. The same
+  source and regions always give the same file.
+- It writes `stills/retouch/<key>-<n>.png` and records a `still_retouch` artifact and a
+  `retouch`/`applied` event: source path, sha256 and job id, the regions, the method (with its
+  iteration count and noise seed), the output sha256 and the reason.
+- The retouch supplies its key in place of its source while that source is still the key's current
+  import. A newer stills import of the key makes it **stale**: it is no longer used and `status`
+  says so (retouch the new still if it needs it). A second retouch of a key starts from the first.
+  `retouch-undo <key> --root ... --film N --reason "..."` retires the newest (kept on record); the
+  key falls back to the retouch before it, else to the import. A retouched file that no longer
+  matches its recorded sha256 stops `film`.
+- Look at the retouched still before the film uses it. `status` lists the retouched keys; the film
+  artifact's `stills_by_key` gives a retouched key as `{job_id, retouch: {path, sha256, n, reason,
+  source_path, source_sha256, ...}}` and `retouched_keys` lists them.
 
 ## 4. Score
 
