@@ -88,14 +88,14 @@ fails closed: a card that cannot be read means the model is not loaded).
 - **Depth Anything V2 Small** (`depth-anything/Depth-Anything-V2-Small-hf`): Apache-2.0. **Base and
   Large are non-commercial and excluded**; the notebook raises on any other depth repo. Depth maps are
   working files for the glide, never published.
-- **MediaPipe Face and Hand Landmarker**: Apache-2.0 (their model cards); gate-only, nothing published.
+- **MediaPipe Face and Hand Landmarker**: Apache-2.0, declared in the notebook (there is no Hub card to read); gate-only, nothing published.
 - **OWLv2** (`google/owlv2-base-patch16-ensemble`) and **DINOv2-small** (`facebook/dinov2-small`):
   Apache-2.0 on the Hub (read 27 Nov 2026). Gate-only. Run-time allowlist for gate models:
   `apache-2.0`, `mit`.
 - **CLIP is excluded.** Its model card carries no licence and puts any deployed use, commercial or
   not, out of scope; the character-lock check uses DINOv2-small instead. Adding a model needs a card
   that grants commercial use and the owner's approval.
-- **Whisper** (MIT): permits commercial use; listed for the planned word check (not yet a command).
+- **Whisper** (MIT): permits commercial use; listed for the planned word check (not yet built, planned: Task 14).
 - **Eleven v4 narration**: ElevenLabs Creator plan, whose paid tier carries the commercial licence for
   generated audio (owner decision 24 Nov 2026, v4 chosen 26 Nov); credits only, never top-ups.
 - **Sound effects**: only CC0 files, or public-domain files whose author released them to the public

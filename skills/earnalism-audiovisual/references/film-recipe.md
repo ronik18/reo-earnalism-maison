@@ -92,7 +92,7 @@ do not rewrite the plan's numbers to pass, change the shot.
 
 **No holds.** A picture that contradicts its words, including a still borrowed from a neighbouring
 shot, is a failure. A failed still is regenerated or the shot re-planned, never filled with a
-neighbour. `qc` rejects a scene whose stills share a file hash. (The CLI's `hold` command is the old pre-cinematic stopgap that shows a neighbouring still;
+neighbour. `qc` (`hold_hashes`) flags a scene that reuses one still file within the scene with no animated beat between (it does not catch borrowing across scenes). (The CLI's `hold` command is the old pre-cinematic stopgap that shows a neighbouring still;
 never use it on a cinematic film.)
 
 ## 5. Voice first (details: [earnalism-voice.md](earnalism-voice.md))
@@ -118,8 +118,8 @@ room tone), then `voicecheck` (only the takes that fail are redone). The re-time
   `<scene_id>-<k>`. A spec carrying a top-level `"scene"` is shot-plan-driven and is refused until that
   scene's plan is approved (R11); a spec without it builds as a pilot or legacy round, so **every
   new-film job declares `"scene"`**.
-- **Gates run in Colab next to the stills** (Apache-2.0 models, licence re-read from each card before
-  any download; a card that cannot be read means the model is not loaded and its checks become
+- **Gates run in Colab next to the stills** (Apache-2.0 models, licence re-read from each Hub card before
+  any download, declared `apache-2.0` for MediaPipe, which has no Hub card; a card that cannot be read means the model is not loaded and its checks become
   `needs_review`): MediaPipe Face/Hand Landmarker (eye count and both eyes visible; hand count,
   detached hands), OWLv2 open-vocabulary detection with eight labels (the six anachronism labels plus
   utility pole and modern high-rise building; gas cylinders, AC boxes, cables, modern glasses/belts,
@@ -193,7 +193,7 @@ room tone), then `voicecheck` (only the takes that fail are redone). The re-time
 
 Every scene needs its **approved** plan (`film/film-NN/shots/<scene>.json`) and its scene mix. Each
 shot renders by `eav.film.render_shot` (glide from its still `<scene>-<n>` and the imported depth map,
-the imported Wan clip, or a held still) into `film/film-NN/shots-cache`, keyed by the sha256 of the
+the imported Wan clip, or a static still) into `film/film-NN/shots-cache`, keyed by the sha256 of the
 shot, its input files and the code version, so a rerun re-renders only what changed (never a whole
 film for one shot). A Wan shot with several takes needs `film/film-NN/clip-picks.json`
 (`{"<scene>/<n>": "<take's last key>"}`). A still whose `gate.json` is a certain fail is refused
@@ -221,6 +221,8 @@ zero on the **delivered** film (only the last 1.6 s fade tail is exempt) and sil
 It writes a contact sheet: look at it. Then the candidate-bound review, frame by frame (picture,
 motion, sound): opening, every join, the climax and the full ending. The owner approves each finished
 film; anything not reviewed stays `unassessed`.
+
+**Per-clip motion gate: not yet built (planned: Task 15).** The spec (section 3) wants every Wan clip checked for periodic near-duplicate frames and difference spikes, with a hands-and-eyes contact sheet every 4 frames, then pass or re-seed. No command does this yet: review every clip by eye at full size (hands, eyes, floating objects) before `film --shots`, and never claim a motion gate ran.
 
 ## 11. The reference scene: বিচারক scene 14 v4
 

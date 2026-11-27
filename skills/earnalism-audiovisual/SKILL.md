@@ -45,8 +45,8 @@ table below lists the stages by who owns them, in their detailed order.
 |---|---|---|---|
 | 1 | Resolve exact edition and cleared text | server: `python manage.py export_audiovisual_source <slug> --out src.json`; then `init src.json --root <dir> --slug <slug>` | `earnalism-book-production` |
 | 2 | Read the whole work; context map (speakers, turns, reveals, ending) | `plan` (30–90 s scenes, 1 still per 8–15 s; series past 40 min) | `earnalism-audiobook-go-live` (`references/narrative-performance.md`) |
-| 3 | Earnalism Voice narration (frozen before timing) | ElevenLabs Eleven v4 (owner decisions 24 and 26 Nov 2026): one tagged take per 15–30 s passage → `import-take film-NN\|reel-N` → `retime` (pauses by punctuation, room tone) → `voicecheck` (redo only failures; redo runs pass `--profile`). Parler: `job narration` → owner runs Colab → `import` | `earnalism-audiobook-go-live`, `references/earnalism-voice.md` |
-| 4 | World bible, anchor stills, shot stills with gates (FLUX.1-schnell; MediaPipe, OWLv2, DINOv2-small gates) | `plan-shots` (approve) → `job stills --spec` (3 candidates per shot, T5 limit enforced) → Colab → `import` → `pick` |
+| 3 | Earnalism Voice narration (frozen before timing) | ElevenLabs (owner decisions 24 and 26 Nov 2026): today one `eleven_v3` tagged take per scene → `import-take film-NN\|reel-N` (or a pre-retimed scene wav placed at `film/film-NN/voice/<scene>.wav`) → `retime` (pauses by punctuation, room tone) → `voicecheck` (redo only failures; redo runs pass `--profile`). Eleven v4 and 15–30 s passage import are not yet built (planned: Task 13). Parler: `job narration` → owner runs Colab → `import` | `earnalism-audiobook-go-live`, `references/earnalism-voice.md` |
+| 4 | World bible, anchor stills, shot stills with gates (FLUX.1-schnell; MediaPipe, OWLv2, DINOv2-small gates) | `plan-shots` (approve) → `job stills --spec` (3 candidates per shot, T5 limit enforced) → Colab → `import` → `pick` | `earnalism-video`, `earnalism-covers` (cover/thumbnail) |
 | 4b | Animated beats and depth maps (Wan 2.2 TI2V-5B, depth Small only) and CC0 sound | `job film_clips --spec` (items bound to the plan's Wan shots) → Colab → `import` | `earnalism-video`, `earnalism-covers` (cover/thumbnail) |
 | 5 | Score: one ACE-Step cue per scene (film); VCSL editorial bed for the older route | `job music` → Colab → `import` → `cue --pick`, `cue --scene` | `earnalism-audiobook-score` |
 | 6 | Film assembly (24 fps, measured timing, scene mixes, glides and clips, captions, logo, END) | `film --shots` (older films: `film`) | `earnalism-video` |
@@ -108,14 +108,13 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
   `references/storyteller-voices.json`), the owner picks (`OWNER_SELECTED`), then narrate with
   `--voice <pick> --expressive` (grouping, emotion direction, varied pauses; exact text
   kept). Candidates never voice production. No impersonation, no spoken stage directions.
-  ElevenLabs route: the owner-picked voice of the title, one tagged-script take per scene,
+  ElevenLabs route: the owner-picked voice of the title, one tagged-script `eleven_v3` take per scene (Eleven v4 passages: not yet built, Task 13),
   `import-take` (refuses any script whose words differ from the book).
 - **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x (film: 2.2 TI2V-5B), ACE-Step (Apache-2.0), Depth Anything V2 **Small**, the gate models MediaPipe, OWLv2 and DINOv2-small (Apache-2.0), SDXL inpainting 0.1 + CLIPSeg (retouch), Qwen-Image-Edit-2511 (edit, Apache-2.0), OpenCV (touch-up), Whisper (MIT) and
   VCSL samples (CC0). MusicGen (CC-BY-NC weights), FLUX.1-dev (non-commercial), Depth Anything V2 Base and Large (non-commercial) and CLIP (card puts deployed use out of scope) are
   forbidden even if the owner names them; offer the licensed equivalent instead.
   No paid generator or credit-spending connector (Kling, Suno, Runway, Adobe/Canva
-  credits): not for "just one test" either. The one exception is ElevenLabs Eleven v4
-  (v3 before 26 Nov) narration within the plan's included credits (owner decision 24 Nov 2026,
+  credits): not for "just one test" either. The one exception is ElevenLabs narration (the owner chose Eleven v4 on 26 Nov; the CLI imports only `eleven_v3` today) within the plan's included credits (owner decision 24 Nov 2026,
   `references/earnalism-voice.md`).
 - **Colab.** The owner runs every job. Narration, stills, retouch, edit and music notebooks are inert
   until `RUN = True` and stop at their forecast seconds (hard stop). Their default route

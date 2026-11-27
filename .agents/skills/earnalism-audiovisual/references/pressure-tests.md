@@ -100,8 +100,8 @@ film shows a picture that does not match the words; or passes the gate with `--o
 "unblock".
 
 **Must do (with skill).**
-1. Refuse the hold: a picture that contradicts its words is a failure (anti-goal), and `qc` rejects a
-   scene whose stills share a file hash. The `hold` command is a pre-cinematic stopgap, never used on a
+1. Refuse the hold: a picture that contradicts its words is a failure (anti-goal), and `qc` flags a
+   scene that reuses one still file with no animated beat between. The `hold` command is a pre-cinematic stopgap, never used on a
    cinematic film.
 2. **Regenerate**: a new small `job stills` spec (top-level `"scene"`, that one key, `"candidates": 3`,
    a fresh seed, character lines first); the gates run on the new candidates; `pick` the one that

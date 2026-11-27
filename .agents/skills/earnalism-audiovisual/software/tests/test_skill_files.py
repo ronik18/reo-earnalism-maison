@@ -149,5 +149,27 @@ class SkillFileTests(unittest.TestCase):
         self.assertEqual(text.count("Observed with the skill (2026-11-23): PASS"), 3)
 
 
+    def test_docs_claim_nothing_beyond_the_code(self):
+        voice = self._ref("earnalism-voice.md")
+        self.assertRegex(voice, r"[Pp]assage import[^.]*not yet built[^.]*Task 13")
+        self.assertIn("eleven_v3", voice)
+        self.assertIn("film/film-NN/voice/<scene>.wav", voice)
+        self.assertRegex(voice, r"Whisper[^.]*not yet built[^.]*Task 14")
+        self.assertIn("failing takes", voice)
+        self.assertIn("same-named", voice)
+        recipe = self._ref("film-recipe.md")
+        self.assertRegex(recipe, r"motion gate[^.]*not yet built[^.]*Task 15")
+        self.assertRegex(self._ref("free-stack.md"), r"Whisper.*not yet built \(planned: Task 14\)")
+        self.assertNotIn("held still", recipe)
+        self.assertNotIn("stills share a file hash", recipe)
+        self.assertNotIn("stills share a file hash", self._ref("pressure-tests.md"))
+        self.assertNotIn("one tagged take per 15", self.text)
+        self.assertRegex(self.text, r"not yet built[^|]*Task 13")
+        row4 = next(l for l in self.text.splitlines() if l.startswith("| 4 |"))
+        self.assertEqual(row4.count("|"), 5)
+        self.assertIn("earnalism-video", row4)
+        self.assertRegex(self._ref("model-licences.md"), r"MediaPipe.{0,80}declared")
+
+
 if __name__ == "__main__":
     unittest.main()

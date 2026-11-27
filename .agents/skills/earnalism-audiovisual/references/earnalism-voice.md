@@ -11,14 +11,22 @@ standard now is:
 
 1. **Model: Eleven v4** (owner choice, 26 Nov), the title's owner-picked voice (বিচারক: "Subhajit –
    Grounded Bengali Storyteller", `j5PhP1QJv2DvlhRv3mEv`; The Selfish Giant: "Sakshi – Warm Bedtime
-   Storyteller", `XdbTvfQSkW1sgZYKdZdF`). Credits only, within the 24 Nov limits below. Pass the v4
-   model id exactly as ElevenLabs lists it as `--model`; the CLI records the string it is given.
-2. **One take per passage of 15–30 s**, split at sentence or paragraph ends, never mid-sentence. A
-   scene is one or more passages; each is a tagged script `<passage_id>.txt` with its take
-   `<passage_id>.mp3`, imported with `import-take` (words must equal the book once tags are removed).
-   At most **one audio tag per sentence**; carry the previous passage's mood tag across the join;
-   **never open a passage on a bare `[softly]`** (start on the words, or on a tag that sets a mood the
-   whole passage keeps). Tags describe delivery only, never action or sound.
+   Storyteller", `XdbTvfQSkW1sgZYKdZdF`). Credits only, within the 24 Nov limits below.
+2. **One take per passage of 15–30 s**, split at sentence or paragraph ends, never mid-sentence, a
+   tagged script and take per passage. At most **one audio tag per sentence**; carry the previous
+   passage's mood tag across the join; **never open a passage on a bare `[softly]`** (start on the
+   words, or on a tag that sets a mood the whole passage keeps). Tags describe delivery only, never
+   action or sound.
+
+**Not yet built (planned: Task 13): passage import and Eleven v4 import** (passage import and v4 import are both missing). Today `import-take`
+accepts only `--engine elevenlabs --model eleven_v3` (anything else stops) and requires exactly one
+tagged script `<scene_id>.txt` and one take per scene of the target in one call; no command joins
+passages into a scene wav. **Working route today:** (a) one `eleven_v3` take per scene through
+`import-take`, as in the 24 Nov route below, then `retime` and `voicecheck` on it; or (b) as the
+scene-14 pilot does, a pre-retimed scene wav placed by hand at `film/film-NN/voice/<scene>.wav`,
+which `cue` reads. Do not pass a v4 model id to `import-take`, and never claim v4 or passages were
+imported.
+
 3. **One take, redo only the failures** (owner choice, 26 Nov; best-of-three costs 45k credits per film
    and was rejected). Budget about 15,000–20,000 credits per 20-minute film (v4 costs about one
    credit per character: a 47 s Bengali scene take is about 656). A failed passage is regenerated from
@@ -52,7 +60,7 @@ python3 -m eav.cli voicecheck take1.wav take2.wav ... --expected 47.2,52.0 [--pr
 Without `--profile` it measures the book's running medians from the given takes and **saves
 `voicecheck-profile.json`**; **every redo run must pass `--profile`** (otherwise the redone takes
 would redefine "normal"). It writes `<take-stem>.voicecheck.json` beside each take (or in `--out`)
-and prints PASS or `REDO <codes>` per take; **it exits 1 if any take fails**, and the `Next:` line says
+and prints PASS or `REDO <codes>` per take (the saved profile is measured from all the takes given, failing takes included, and same-named takes from different folders share one result file under `--out`); **it exits 1 if any take fails**, and the `Next:` line says
 to regenerate only those and rerun with the profile. Checks (codes in brackets):
 
 | Check | Limit |
@@ -74,11 +82,11 @@ One narration feeds both the film and the audiobook, so the stricter audiobook l
 and ±1.5 semitones, 30–50 ms crossfades) apply to both. Measurement is not listening: a PASS means
 "not flagged", and the owner's review is the listening assessment (see Never).
 
-**Word check (not yet a command).** The spec adds a Whisper (MIT) character-error check, run in Colab
+**Word check (not yet built; planned: Task 14).** The spec adds a Whisper (MIT) character-error check, run in Colab
 against the source and read relative to the accepted takes, to catch dropped or changed words that
 tags and punctuation hide. No `eav` command runs it yet: until one exists, `import-take` (which
 refuses a script whose words differ from the book once tags are removed) is the only word gate, and
-the reviewer listens for dropped words. Do not claim a Whisper check was run.
+the reviewer listens for dropped words. Do not claim a Whisper check was run; the Whisper check is not yet built (Task 14).
 
 ## Parler route (legacy; kept for audition and Parler-only titles)
 
@@ -266,11 +274,11 @@ after the free Parler storyteller audition fell short of a natural, dramatic sto
 A take that sounds wrong is regenerated from the same tagged script and imported again as a
 new job (the newer import wins); never edit or trim a take by hand.
 
-**27 Nov 2026 amendment (cinematic standard).** The decision above stays; what changed is the
-engine version (Eleven v4, above), the take size (a passage of 15–30 s rather than a whole
-scene), and the rule that takes are checked by `voicecheck` and **only failures are regenerated**.
-The route is otherwise unchanged: `--list-units`, tagged scripts, `import-take --model <v4 id>`.
-Pauses in a v4 take are re-set by `retime`, so the take's own pauses are not trusted.
+**27 Nov 2026 amendment (cinematic standard).** The decision above stays; the owner's standard is
+now Eleven v4, passages of 15–30 s, and `voicecheck` with only failures regenerated. The v4 and
+passage import is not yet built (planned: Task 13, see "Current standard"): until it lands the route
+above works as written with `eleven_v3`, one take per scene. In either case a take's own pauses are
+re-set by `retime`.
 
 ## Never
 
