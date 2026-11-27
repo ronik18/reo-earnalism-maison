@@ -44,6 +44,7 @@ import {
   minutesRemaining,
   headingsFor,
   toolbarHidden,
+  toolbarPinned,
 } from "./state";
 interface Boot {
   edition_id: string;
@@ -667,8 +668,8 @@ function Reader({ boot }: { boot: Boot }) {
   }, []);
   // Immersive toolbar: hides on a scroll down by hand, returns on scroll up, tap or focus. The reader's own
   // follow-along autoscroll (ownScroll, then the scroll event it causes) neither hides nor shows it, so it never
-  // fights the audio; only isUserScroll() events count. Focus inside it keeps it shown (CSS :focus-within too).
-  const headings = useRef(headingsFor(reading.innerHTML));
+  // fights the audio; only isUserScroll() events count. Focus inside it keeps it shown (keyboard focus only, so a tap does not pin it; CSS :has(:focus-visible) too).
+  const [headings] = useState(() => headingsFor(reading.innerHTML));
   const [chaptersOpen, setChaptersOpen] = useState(false);
   useEffect(() => {
     const bar = document.querySelector<HTMLElement>(".reader-toolbar");
@@ -692,11 +693,31 @@ function Reader({ boot }: { boot: Boot }) {
             window.innerHeight,
           );
       if (fill) fill.style.transform = `scaleX(${fraction})`;
-      hairline?.setAttribute("aria-valuenow", String(Math.round(fraction * 100)));
       const left = minutesRemaining(Math.round(chars * (1 - fraction)));
+      const pct = Math.round(fraction * 100);
+      hairline?.setAttribute("aria-valuenow", String(pct));
+      hairline?.setAttribute(
+        "aria-valuetext",
+        left ? `${pct}%, ${left} ${t("min_left")}` : `${pct}%`,
+      );
       if (minutes) minutes.textContent = left ? `${left} ${t("min_left")}` : "";
     };
-    const pinned = () => !!bar?.matches(":focus-within");
+    const keyboardInside = () => {
+      const f = document.activeElement;
+      return toolbarPinned(
+        !!f && !!bar?.contains(f),
+        !!f && f.matches(":focus-visible"),
+      );
+    };
+    const pinned = keyboardInside;
+    const measureBar = () =>
+      document.documentElement.style.setProperty(
+        "--reader-toolbar-h",
+        `${bar?.offsetHeight ?? 60}px`,
+      );
+    measureBar();
+    const barSize = bar ? new ResizeObserver(measureBar) : undefined;
+    if (bar) barSize?.observe(bar);
     const place = (hidden: boolean) => bar?.classList.toggle("is-hidden", hidden);
     const onScroll = () => {
       measureProgress();
@@ -711,9 +732,11 @@ function Reader({ boot }: { boot: Boot }) {
     const onTap = () => {
       if (bar?.classList.contains("is-hidden")) place(false);
     };
-    const onFocus = () => place(false);
+    const onFocus = () => {
+      if (keyboardInside()) place(false);
+    };
     const openChapters = () => setChaptersOpen(true);
-    if (chapters) chapters.hidden = headings.current.length === 0;
+    if (chapters) chapters.hidden = headings.length === 0;
     measureProgress();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", measureProgress);
@@ -728,6 +751,7 @@ function Reader({ boot }: { boot: Boot }) {
       reader.removeEventListener("click", onTap);
       bar?.removeEventListener("focusin", onFocus);
       chapters?.removeEventListener("click", openChapters);
+      barSize?.disconnect();
     };
   }, []);
   function jumpToChapter(id: string) {
@@ -1175,7 +1199,7 @@ function Reader({ boot }: { boot: Boot }) {
         onClose={() => setChaptersOpen(false)}
       >
         <ol className="reader-chapter-list" lang={boot.content_locale}>
-          {headings.current.map((h) => (
+          {headings.map((h) => (
             <li key={h.id}>
               <button type="button" onClick={() => jumpToChapter(h.id)}>
                 {h.text}

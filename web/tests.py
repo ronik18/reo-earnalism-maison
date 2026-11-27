@@ -250,14 +250,15 @@ class ExperienceTests(TestCase):
 
     def test_reader_has_single_back_and_title(self):
         html = self._reader_html()
-        body = html.split("<main", 1)[0] + html.split("<main", 1)[1]
         self.assertEqual(len(re.findall(r'class="room-back"', html)), 1)
         self.assertNotIn("focus-toolbar", html)
         self.assertEqual(len(re.findall(r'class="room-evening-title"', html)), 1)
         self.assertNotIn('class="reader-meta"', html)
-        title = html.split('class="room-evening-title">', 1)[1].split("</span>", 1)[0]
+        self.assertRegex(html, r'class="room-evening-title" lang="en">')
+        title = html.split('lang="en">', 1)[1].split("</span>", 1)[0] if 'room-evening-title" lang="en">' in html else ""
+        title = html.split('class="room-evening-title" lang="en">', 1)[1].split("</span>", 1)[0]
         self.assertEqual(html.count(f">{title}<"), 1)
-        self.assertEqual(len(re.findall(r">\s*Back\s*<", body.split("<main", 1)[0])), 1)
+        self.assertEqual(len(re.findall(r">\s*Back\s*<", html.split("<main", 1)[0])), 1)
         self.assertIn("maison/logo.png", html)
         self.assertIn("room-logo-mini", html.split("<header", 1)[1].split("</header>", 1)[0])
 
@@ -275,11 +276,37 @@ class ExperienceTests(TestCase):
         self.assertRegex(source, r"ownScrollUntil\.current")
 
     def test_toolbar_shows_on_focus_within(self):
-        css = (Path(settings.BASE_DIR) / "static/maison/room/room.css").read_text()
-        self.assertRegex(css, r"\.reader-toolbar:focus-within[^{]*\{[^}]*transform:none")
+        """Keyboard focus pins the toolbar; a tap's leftover focus does not."""
+        root = Path(settings.BASE_DIR)
+        css = (root / "static/maison/room/room.css").read_text()
+        self.assertRegex(css, r"\.reader-toolbar:has\(:focus-visible\)[^{]*\{[^}]*transform:none")
+        self.assertNotIn(":focus-within", css.split("Read: one immersive toolbar", 1)[1])
         self.assertRegex(css, r"prefers-reduced-motion:\s*reduce\)\s*\{[^@]*\.reader-toolbar\{[^}]*transition:none")
         self.assertRegex(css, r"body\.reduced-motion \.reader-toolbar[^{]*\{[^}]*transition:none")
-        self.assertIn(":focus-within", (Path(settings.BASE_DIR) / "client/reader.tsx").read_text())
+        source = (root / "client/reader.tsx").read_text()
+        self.assertIn(":focus-visible", source)
+        self.assertNotIn(":focus-within", source)
+
+    def test_chapter_jump_clears_the_toolbar_and_mobile_rows_are_controlled(self):
+        css = (Path(settings.BASE_DIR) / "static/maison/room/room.css").read_text()
+        self.assertRegex(css, r"\.reading-text h2[^{]*\{[^}]*scroll-margin-top:calc\(var\(--reader-toolbar-h")
+        mobile = re.search(r"@media \(max-width:767px\)\{(\.reader-toolbar[^@]*)\}\s*(?:@|body|/\*|$)", css)
+        self.assertIsNotNone(mobile)
+        mobile = mobile.group(1)
+        self.assertRegex(mobile, r"\.reader-tools\{[^}]*order:3[^}]*flex:1 1 100%[^}]*flex-wrap:wrap")
+        self.assertRegex(mobile, r"\.room-evening-title\{[^}]*min-width:0")
+        self.assertRegex(mobile, r"\.room-logo-mini\{[^}]*order:2")
+
+    def test_hairline_color_is_themed_and_progress_has_valuetext(self):
+        css = (Path(settings.BASE_DIR) / "static/maison/room/room.css").read_text()
+        self.assertRegex(css, r"body\.reader-theme-light \.reader-progress[^{]*\{[^}]*--hairline:var\(--gold-text\)")
+        self.assertRegex(css, r"body\.reader-theme-dark \.reader-progress[^{]*\{[^}]*--hairline:var\(--gold-on-dark\)")
+        self.assertIn("aria-valuetext", self._reader_html())
+
+    def test_chapters_button_is_hidden_server_side_without_headings(self):
+        html = self._reader_html()
+        button = re.search(r'<button[^>]*id="reader-chapters-trigger"[^>]*>', html).group(0)
+        self.assertEqual(" hidden" in button, "<h2 " not in html.split('id="reading-text"', 1)[1].split("</div>", 1)[0])
 
     def test_progress_hairline_2px_gold_and_minutes_remaining(self):
         html = self._reader_html()

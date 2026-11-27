@@ -334,3 +334,8 @@ export function toolbarHidden(
   if (delta < -TOOLBAR_JITTER_PX) return false;
   return hidden;
 }
+
+/** Pinned open only by keyboard focus inside the toolbar; a tap's leftover focus does not hold it. */
+export function toolbarPinned(focusInside: boolean, focusVisible: boolean): boolean {
+  return focusInside && focusVisible;
+}

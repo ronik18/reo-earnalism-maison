@@ -266,7 +266,7 @@ def reader(request, locale, edition_id, unit_id=None):
                 saved_theme = None
         except ObjectDoesNotExist:
             pass
-    return page(request, locale, "web/reader.html", document=document, edition=edition, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination, reader_theme=saved_theme)
+    return page(request, locale, "web/reader.html", document=document, edition=edition, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination, reader_theme=saved_theme, has_chapters=any(p.get("kind") == "heading" for p in document.get("paragraphs", [])))
 
 
 class EmailForm(forms.Form):

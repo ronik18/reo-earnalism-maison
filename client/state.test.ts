@@ -20,6 +20,7 @@ import {
   minutesRemaining,
   headingsFor,
   toolbarHidden,
+  toolbarPinned,
 } from "./state.ts";
 import { readFileSync } from "node:fs";
 import { wrapTextSpan } from "./follow-dom.ts";
@@ -1217,7 +1218,15 @@ test("reader toolbar CSS: 2px gold hairline, transform, no transition under redu
   assert.match(css, /\.reader-progress[^{]*\{[^}]*height:2px/);
   assert.match(css, /\.reader-progress[^{]*\{[^}]*var\(--gold/);
   assert.match(css, /\.reader-toolbar\.is-hidden[^{]*\{[^}]*transform:translateY\(-100%\)/);
-  assert.match(css, /\.reader-toolbar:focus-within[^{]*\{[^}]*transform:none/);
+  assert.match(css, /\.reader-toolbar:has\(:focus-visible\)[^{]*\{[^}]*transform:none/);
   assert.match(css, /prefers-reduced-motion:\s*reduce\)\s*\{[^@]*\.reader-toolbar\{[^}]*transition:none/);
   assert.match(css, /body\.reduced-motion \.reader-toolbar[^{]*\{[^}]*transition:none/);
+});
+
+test("the toolbar is pinned only by keyboard focus, not by a tap's leftover focus", () => {
+  assert.equal(toolbarPinned(true, true), true);
+  assert.equal(toolbarPinned(true, false), false);
+  assert.equal(toolbarPinned(false, true), false);
+  assert.equal(toolbarHidden(false, 100, 300, toolbarPinned(true, false)), true);
+  assert.equal(toolbarHidden(false, 100, 300, toolbarPinned(true, true)), false);
 });
