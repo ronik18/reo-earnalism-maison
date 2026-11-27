@@ -2,6 +2,12 @@
 
   python3 -m eav.cli init <source.json> --root <dir> [--slug <maison-edition-slug>]
   python3 -m eav.cli plan --root <dir>
+  python3 -m eav.cli rebase-source <corrected export.json> --root <dir> --reason "<why>"
+                         (a corrected revision of the SAME edition: same language, units and paragraph
+                          count per unit; maps plan anchors by position, refreshes plan text, keeps
+                          scene ids and still keys; supersedes never-run film narration built from the
+                          old text and marks imported film narration stale; the old export stays as
+                          source-<old revision>.json)
   python3 -m eav.cli job <narration|stills|music|reel_clips> --root <dir> --rates <rates.json>
                          [--film N | --reel N] [--spec <spec.json>] [--clause "..."]
                          (narration/stills forecast over 3600 s: built as chunks <id>-c<i>of<n>, each
@@ -89,6 +95,7 @@ from pathlib import Path, PureWindowsPath
 from . import (budget, colab_jobs, film, importer, mix, modal_requests, modal_run, preview,
                qc, reel, scenes, social)
 from .record import Record, sha256_file
+from .text import estimate_seconds, sentences
 from .voice import block_parts, voice_units
 
 PROG = "python3 -m eav.cli"
@@ -311,11 +318,40 @@ def _chunk_ids(job) -> list:
 
 
 def _latest_job(rec, kind, target, imported=True, after=-1):
-    """The latest live job (or complete chunk group, when imported=True) for kind and target."""
+    """The latest live job (or complete chunk group, when imported=True) for kind and target.
+    Film narration built before a text-changing rebase-source is stale and never current."""
+    if kind == "narration" and str(target).startswith("film-"):
+        after = max(after, _rebase_index(rec))
     found = [j for j in _logical(rec) if j["kind"] == kind and j["target"] == target
              and not _ended(j) and j["order"] > after and (j["imported"] or not imported)]
     found.sort(key=lambda j: j["order"])  # the newest by build order (never a retired one)
     return found[-1] if found else None
+
+
+def _rebase_index(rec) -> int:
+    """Index of the last rebase-source event that changed narrated text, or -1. Film narration
+    built before it was made from the old text."""
+    return max((i for i, e in enumerate(rec.data["events"]) if e["stage"] == "rebase_source"
+                and e["result"] == "ok" and e["detail"].get("narration_stale")), default=-1)
+
+
+def _text_stale(rec, job) -> bool:
+    """A film narration job (or chunk group) built from text a later rebase-source corrected."""
+    return (job["kind"] == "narration" and str(job["target"] or "").startswith("film-")
+            and job["order"] < _rebase_index(rec))
+
+
+def _stale_narration(rec, target=None) -> list:
+    """Imported film narration made from the text before the last text-changing rebase."""
+    return [j for j in _logical(rec) if j["imported"] and not j["retired"] and _text_stale(rec, j)
+            and (target is None or j["target"] == target)]
+
+
+def _current_films(rec, target) -> list:
+    """Assembled films of target whose narration is not stale."""
+    stale = {j["job_id"] for j in _stale_narration(rec, target)}
+    return [a for a in _artifacts(rec, "film", target=target)
+            if a["meta"].get("narration_job_id") not in stale]
 
 
 def _item_keys(job, rec=None) -> list:
@@ -779,7 +815,7 @@ def next_action(root) -> str:
             return (f"Write the world bible and one FLUX prompt per keyframe (keys <scene_id>-<k>, "
                     f"references/film-recipe.md) into stills.json, then: {PROG} job stills {r} "
                     f"--film {i} --rates <rates.json> --spec stills.json")
-        if not _artifacts(rec, "film", target=t):
+        if not _current_films(rec, t):
             return (f"{PROG} film {r} --film {i} --logo <approved logo lockup> --end-card <approved END> "
                     f"--score <score bed from earnalism-audiobook-score> --score-route vcsl "
                     f"(or --cues-job <imported ACE-Step music job_id>)")
@@ -865,8 +901,8 @@ def next_action(root) -> str:
 
 
 # ---------------------------------------------------------------- commands
-def cmd_init(args):
-    src_path = Path(args.source)
+def _validate_export(src_path: Path) -> dict:
+    """The checks init makes on a Maison export (rebase-source makes the same ones)."""
     try:
         src = _json(src_path)
     except (OSError, ValueError) as e:
@@ -886,6 +922,13 @@ def cmd_init(args):
         raise Stop("the revision carries no passing public-domain publication clearance; "
                    "non-public-domain titles are out of scope for this skill",
                    "Hold the title. Clear the Reader edition first (`earnalism-book-production`)")
+    return src
+
+
+def cmd_init(args):
+    src_path = Path(args.source)
+    src = _validate_export(src_path)
+    units = src["units"]
     slug = args.slug or src_path.stem
     if not SLUG.fullmatch(slug):
         raise Stop(f"slug {slug!r} is not a Maison edition slug", "Pass --slug <maison-edition-slug>")
@@ -915,6 +958,220 @@ def cmd_init(args):
     if not audio_read:
         print("Maison audio is not cleared on this revision yet: production continues; Maison audio "
               "publication waits for the per-title evidence (bundle-audio drafts it, the owner approves it).")
+
+
+def _rebase_plan(plan, old_src, new_src, amap, umap, lang):
+    """plan.json moved to the new revision by position: anchors and unit ids mapped, block, scene
+    and voice text refreshed; scene ids, structure, keyframes (still keys) and flags unchanged.
+    Returns (new plan, changed scene ids, changed voice unit keys)."""
+    old_text = {p["anchor_id"]: p["text"] for u in old_src["units"] for p in u["paragraphs"]}
+    new_text = {p["anchor_id"]: p["text"] for u in new_src["units"] for p in u["paragraphs"]}
+    by_anchor = {}
+    for f in plan["plan"]["films"]:
+        for sc in f["scenes"]:
+            for b in sc["blocks"]:
+                if b["anchor_id"] not in old_text:
+                    raise Stop(f"plan.json scene {sc['scene_id']} names anchor {b['anchor_id']}, "
+                               "which is not in source.json; the plan does not match the source",
+                               "Report this; restore plan.json and source.json from git")
+                by_anchor.setdefault(b["anchor_id"], []).append(b)
+    block_text = {}  # id(old block) -> its text in the new revision
+    for a, blocks in by_anchor.items():
+        old_s, new_s = sentences(old_text[a], lang), sentences(new_text[amap[a]], lang)
+        counts = [len(sentences(b["text"], lang)) for b in blocks]
+        cuts = [sum(counts[:i]) for i in range(len(counts) + 1)]
+        if cuts[-1] != len(old_s) or any(" ".join(old_s[cuts[i]:cuts[i + 1]]) != b["text"]
+                                         for i, b in enumerate(blocks)):
+            raise Stop(f"plan.json text of paragraph {a} does not match source.json",
+                       "Report this; restore plan.json and source.json from git")
+        if len(blocks) > 1 and len(new_s) != len(old_s):
+            raise Stop(f"paragraph {a} is split across scenes and the corrected text has "
+                       f"{len(new_s)} sentences instead of {len(old_s)}; its scenes cannot be kept "
+                       "by position; nothing was changed",
+                       "Hold for the owner: the corrected revision needs a new title root (its "
+                       f"stills and music do not carry over): {PROG} init <export> --root <new dir>")
+        for i, b in enumerate(blocks):
+            block_text[id(b)] = (" ".join(new_s) if len(blocks) == 1
+                                 else " ".join(new_s[cuts[i]:cuts[i + 1]]))
+    films, changed_scenes, changed_units = [], [], []
+    for f in plan["plan"]["films"]:
+        out = []
+        for sc in f["scenes"]:
+            blocks = [{**b, "anchor_id": amap[b["anchor_id"]], "text": block_text[id(b)]}
+                      for b in sc["blocks"]]
+            text = "\n\n".join(b["text"] for b in blocks)
+            new = {**sc, "anchor_ids": [amap[a] for a in sc["anchor_ids"]], "blocks": blocks,
+                   "text": text}
+            if text != sc["text"]:
+                new["seconds"] = estimate_seconds(text, lang, plan.get("wpm", 120))
+                changed_scenes.append(sc["scene_id"])
+                old_u = {u["unit_key"]: u["text"]
+                         for u in voice_units(sc, {"description": ""}, None, lang)}
+                new_u = {u["unit_key"]: u["text"]
+                         for u in voice_units(new, {"description": ""}, None, lang)}
+                changed_units += [k for k in dict.fromkeys([*old_u, *new_u])
+                                  if old_u.get(k) != new_u.get(k)]
+            out.append(new)
+        films.append({**f, "unit_ids": [umap[u] for u in f["unit_ids"]], "scenes": out})
+    new_plan = {**plan, "plan": {**plan["plan"], "films": films}}
+    covered = []
+    for f in films:
+        for sc in f["scenes"]:
+            covered += [a for a in sc["anchor_ids"] if not covered or covered[-1] != a]
+    if covered != [p["anchor_id"] for u in new_src["units"] for p in u["paragraphs"]]:
+        raise Stop("the mapped plan does not cover every paragraph in order", "Report this as a bug")
+    dumped = json.dumps(new_plan)
+    kept = set(amap.values()) | set(umap.values())
+    left = [x for x in (*amap, *umap) if x not in kept and json.dumps(x) in dumped]
+    if left:
+        raise Stop(f"plan.json still names old id(s) {', '.join(left[:3])} after mapping",
+                   "Report this as a bug")
+    return new_plan, changed_scenes, changed_units
+
+
+def cmd_rebase_source(args):
+    """Move this title root to a corrected revision of the same edition (references/
+    production-record.md, "Correcting a published text"). Everything is checked before any write."""
+    rec = _record(args.root)
+    if not args.reason.strip():
+        raise Stop("a reason is required", 'Pass --reason "<why the text was corrected>"')
+    new_path = Path(args.source)
+    new = _validate_export(new_path)
+    s = rec.data["source"]
+    cur_path = rec.root / "source.json"
+    cur = _json(cur_path)
+    if cur.get("revision_id") != s["revision_id"] or sha256_file(cur_path) != s.get("export_sha256"):
+        raise Stop("source.json is not the export record.json binds", "Restore it from git")
+    restart = (f"Start a new title root for that export ({PROG} init <export> --root <new dir>); "
+               "this root's plan, stills and music are bound to its edition and paragraph structure")
+    if new["edition_id"] != s["edition_id"]:
+        raise Stop(f"the export is edition {new['edition_id']}, this root is edition "
+                   f"{s['edition_id']}; rebase-source only takes a corrected revision of the same "
+                   "edition", restart)
+    if new["language"] != s["language"]:
+        raise Stop(f"the export is in {new['language']}, this root in {s['language']}", restart)
+    old_units, new_units = cur["units"], new["units"]
+    shape = lambda units: [len(u.get("paragraphs") or []) for u in units]
+    if shape(old_units) != shape(new_units):
+        raise Stop(f"the export has {len(new_units)} unit(s) with {shape(new_units)} paragraph(s); "
+                   f"this root has {len(old_units)} with {shape(old_units)}; paragraphs are mapped by "
+                   "position only when the unit and paragraph counts are the same", restart)
+    kinds = lambda units: [p.get("kind", "paragraph") for u in units for p in u["paragraphs"]]
+    if kinds(old_units) != kinds(new_units):
+        raise Stop("a paragraph changed kind (heading/paragraph); the scene plan cannot be kept "
+                   "by position", restart)
+    if new["revision_id"] == s["revision_id"] or new["content_sha256"] == s["content_sha256"]:
+        raise Stop(f"this root is already on revision {s['revision_id']} (content "
+                   f"{s['content_sha256'][:12]})", f"{PROG} status --root {rec.root}")
+    old_rev, new_rev = s["revision_id"], new["revision_id"]
+    old_content = s["content_sha256"]
+    backup = rec.root / f"source-{old_rev}.json"
+    if backup.exists() and sha256_file(backup) != sha256_file(cur_path):
+        raise Stop(f"{backup.name} exists and is not the current source.json", "Report this")
+
+    amap, umap, mapping, changed, n = {}, {}, [], [], 0
+    for ui, (ou, nu) in enumerate(zip(old_units, new_units), 1):
+        umap[ou["unit_id"]] = nu["unit_id"]
+        paras = []
+        for pi, (op, np_) in enumerate(zip(ou["paragraphs"], nu["paragraphs"]), 1):
+            n += 1
+            amap[op["anchor_id"]] = np_["anchor_id"]
+            paras.append({"position": pi, "ordinal": n, "old_anchor_id": op["anchor_id"],
+                          "new_anchor_id": np_["anchor_id"]})
+            if " ".join(op["text"].split()) != " ".join(np_["text"].split()):
+                changed.append({"unit": ui, "position": pi, "ordinal": n,
+                                "old_anchor_id": op["anchor_id"], "new_anchor_id": np_["anchor_id"],
+                                "old_text": op["text"], "new_text": np_["text"]})
+        mapping.append({"unit": ui, "old_unit_id": ou["unit_id"], "new_unit_id": nu["unit_id"],
+                        "paragraphs": paras})
+
+    plan_path = rec.root / "plan.json"
+    new_plan, changed_scenes, changed_units = None, [], []
+    if plan_path.is_file():
+        new_plan, changed_scenes, changed_units = _rebase_plan(
+            _json(plan_path), cur, new, amap, umap, new["language"])
+    stale_text = bool(changed)  # film narration speaks every paragraph: a text change makes it stale
+    live, stale = [], []
+    if stale_text:
+        ledger = _ledger(rec, args)
+        for j in _logical(rec):
+            if j["kind"] != "narration" or not str(j["target"] or "").startswith("film-") or j["retired"]:
+                continue
+            if j["unfinished"]:
+                raise Stop(f"narration job {j['job_id']} has an unfinished supersede/close; nothing "
+                           "was changed", next_action(rec.root))
+            if j["imported"]:
+                stale.append(j["job_id"])
+                continue
+            todo = [c for c in j["all_chunks" if "of" in j else "chunks"]
+                    if not c["imported"] and not _ended(c)]
+            ran = [c["job_id"] for c in todo if ledger.is_modal_job(c["job_id"])]
+            if ran:
+                raise Stop(f"narration job(s) {', '.join(ran)} ran on Modal from the old text and are "
+                           "not imported; nothing was changed",
+                           f"Import or close each first ({PROG} close <job_id> --root {rec.root} "
+                           "--reason \"...\"), then rerun rebase-source")
+            if todo:
+                live.append(j)
+
+    reason = f"source rebased to {new_rev}"
+    superseded = []
+    for j in live:  # built from the old text, never ran: released at 0 CU (R23 per job)
+        ns = argparse.Namespace(root=args.root, ledger=args.ledger, reason=reason,
+                                job_id=j["job_id"], group="of" in j)
+        if "of" in j:
+            _supersede_group(ns)
+        else:
+            _end_job(ns, "supersede", j["job_id"])
+        superseded.append(j["job_id"])
+
+    rec = _record(args.root)  # the supersedes wrote to the record
+    if not backup.exists():
+        shutil.copyfile(cur_path, backup)
+    detail = {"reason": args.reason,
+              "old_revision_id": old_rev, "new_revision_id": new_rev,
+              "old_content_sha256": old_content, "new_content_sha256": new["content_sha256"],
+              "old_export_sha256": rec.data["source"].get("export_sha256"),
+              "new_export_sha256": sha256_file(new_path),
+              "changed_paragraphs": changed, "anchor_mapping": mapping,
+              "plan_changed_scenes": changed_scenes, "plan_changed_voice_units": changed_units,
+              "narration_stale": stale_text, "superseded_narration_jobs": superseded,
+              "stale_narration_jobs": stale,
+              "kept": "stills and music (text-independent: scene ids and still keys unchanged)"}
+    diff_path = _write_json(rec.root / "rebases" / f"{old_rev}-to-{new_rev}.json",
+                            {"schema": "earnalism.audiovisual-source-rebase.v1", **detail})
+    if new_plan is not None:
+        _write_json(plan_path, new_plan)
+    if new_path.resolve() != cur_path.resolve():
+        shutil.copyfile(new_path, cur_path)
+    rec.data["source"].update(revision_id=new_rev, content_sha256=new["content_sha256"],
+                              state=new.get("state"), rights=new.get("rights", {}),
+                              export_sha256=sha256_file(cur_path), public_domain_evidence=True)
+    rec._save()
+    rec.add_artifact("source_previous", backup, {"revision_id": old_rev})
+    rec.add_artifact("source", cur_path, {"revision_id": new_rev, "rebased_from": old_rev})
+    rec.add_artifact("source_rebase", diff_path, {"old_revision_id": old_rev,
+                                                  "new_revision_id": new_rev})
+    if new_plan is not None:
+        rec.add_artifact("plan", plan_path, {"films": len(new_plan["plan"]["films"]),
+                                             "series": new_plan["plan"]["series"],
+                                             "rebased_to": new_rev})
+    rec.event("rebase_source", "ok", detail)
+    print(f"Rebased {rec.data['title_slug']} from revision {old_rev} (content {old_content[:12]}) "
+          f"to {new_rev} (content {new['content_sha256'][:12]}): {len(changed)} paragraph(s) changed"
+          + (" (" + ", ".join(f"¶{c['ordinal']}" for c in changed) + ")" if changed else "")
+          + f"; {n} anchors and {len(umap)} unit id(s) mapped by position. Previous export kept as "
+          f"{backup.name}; diff in {diff_path.relative_to(rec.root)}.")
+    if new_plan is not None:
+        print("plan.json: anchors mapped, scene ids and still keys unchanged; text changed in scene(s) "
+              + (", ".join(changed_scenes) or "none") + "; voice unit(s) "
+              + (", ".join(changed_units) or "none") + ".")
+    if superseded:
+        print(f"Superseded never-run narration from the old text: {', '.join(superseded)}.")
+    if stale:
+        print(f"Imported narration now stale (film refuses it): {', '.join(stale)}.")
+    print("Stills and music kept: they are text-independent."
+          + (" Narration is rebuilt from the corrected text." if stale_text else ""))
 
 
 def cmd_plan(args):
@@ -1014,6 +1271,9 @@ def _replace_chunk(rec, args):
                    "--clause do not apply", "Drop them and rerun")
     c = old["chunk"]
     group = _find(rec, c["group"])
+    if _text_stale(rec, group):
+        raise Stop(f"chunk group {c['group']} was built from the text before the last rebase-source; "
+                   "it is never rebuilt", next_action(rec.root))
     if old["retired"] or group["retired"]:
         raise Stop(f"chunk group {c['group']} is retired (a newer build replaced it); it is never "
                    "rebuilt", next_action(rec.root))
@@ -2021,6 +2281,11 @@ def cmd_film(args):
     if not 1 <= args.film <= len(films):
         raise Stop(f"film {args.film} is not in the plan", f"{PROG} status --root {rec.root}")
     narr = _latest_job(rec, "narration", t)
+    stale = _stale_narration(rec, t)
+    if not narr and stale:
+        raise Stop(f"{t}: imported narration {', '.join(_used(j) for j in stale)} is stale: it was made "
+                   f"from the text before the source was rebased to revision "
+                   f"{rec.data['source']['revision_id']}; film never uses it", next_action(rec.root))
     have, missing = _stills_view(rec, t)  # per key: the most recently imported still
     if not narr or not have or missing:
         raise Stop(f"{t} needs imported narration and stills jobs"
@@ -2323,7 +2588,7 @@ def cmd_bundle_audio(args):
         for sc in f["scenes"]:
             scene_film[sc["scene_id"]] = (i, sc)
     films = [_film_target(i) for i in range(1, len(plan["plan"]["films"]) + 1)]
-    if not all(_artifacts(rec, "film", target=t) for t in films) or not _qc_passed(rec):
+    if not all(_current_films(rec, t) for t in films) or not _qc_passed(rec):
         raise Stop("bundle-audio needs every film assembled and a passing qc after the last assembly",
                    f"{PROG} qc --root {rec.root}, fix any failure, then the owner's review")
     if args.dry and (args.score_dir or args.score_route):
@@ -2439,7 +2704,10 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                 "chapter_wav_sha256": prov["track_sha256"], "mastered_with": mastered,
                 "score_sha256": score_sha,
                 "mp3_sha256": sha256_file(mp3), "mp3_duration_ms": dur_ms,
-                "encoder": "ffmpeg libmp3lame 96 kbps CBR stereo 48 kHz"}
+                "encoder": "ffmpeg libmp3lame 96 kbps CBR stereo 48 kHz",
+                # gaps between consecutive voice units, [end_ms, next_start_ms]: where the preview may end
+                "voice_unit_pauses_ms": [[round(a["end"] * 1000), round(b["start"] * 1000)]
+                                         for a, b in zip(timing, timing[1:]) if b["start"] > a["end"]]}
             if "narration_chunk_job_ids" in prov:
                 prov_units[unit["unit_id"]]["narration_chunk_job_ids"] = prov["narration_chunk_job_ids"]
     ids = sorted(job_ids)
@@ -2509,7 +2777,15 @@ def cmd_preview(args):
         raise Stop(f"{out} is not empty", "Pass a new --out directory")
     out.mkdir(parents=True, exist_ok=True)
     try:
-        record = preview.cut_preview(chapter, out / "preview.mp3", unit_id)
+        bundle_timing = _json(Path(args.bundle) / "timing.json")
+        pauses = (((bundle_timing.get("provenance") or {}).get("units") or {}).get(unit_id) or {}).get(
+            "voice_unit_pauses_ms")
+        segments = ([{"start_ms": 0, "end_ms": pauses[0][0]}]
+                    + [{"start_ms": a[1], "end_ms": b[0]} for a, b in zip(pauses, pauses[1:])]
+                    + [{"start_ms": pauses[-1][1], "end_ms": pauses[-1][1] + 1}] if pauses else
+                    next((u.get("segments") for u in bundle_timing.get("units") or []
+                          if u.get("unit_id") == unit_id), None))
+        record = preview.cut_preview(chapter, out / "preview.mp3", unit_id, segments)
     except ValueError as e:
         shutil.rmtree(out, ignore_errors=True)
         raise Stop(f"preview: {e}", "Give chapter 1 narration a pause within its first two minutes",
@@ -2552,6 +2828,9 @@ def cmd_status(args):
                      else "waiting for Colab")
             if j["retired"]:
                 state = f"retired, never used as current ({state})"
+            elif j["imported"] and _text_stale(rec, j):
+                state = ("imported but STALE: made from the text before the source was rebased to "
+                         f"{s['revision_id']}; film, bundle-audio and preview never use it")
             c = j["chunk"]
             part = f" chunk {c['index']}/{c['of']} of {c['group']}" if c else ""
             print(f"  {j['job_id']} {j['kind']} {j['target']}{part}: {state} "
@@ -2567,6 +2846,17 @@ def cmd_status(args):
                          else "incomplete")
                 print(f"  group {g['job_id']} {g['kind']} {g['target']}: {done} of {g['of']} chunks "
                       f"imported ({state})")
+        rebases = [e["detail"] for e in rec.data["events"] if e["stage"] == "rebase_source"
+                   and e["result"] == "ok"]
+        if rebases:
+            d = rebases[-1]
+            print(f"  source rebased from {d['old_revision_id']} to {d['new_revision_id']} "
+                  f"({len(d['changed_paragraphs'])} paragraph(s) changed: "
+                  + (", ".join(f"¶{c['ordinal']}" for c in d["changed_paragraphs"]) or "none")
+                  + "): film narration "
+                  + ("is rebuilt from the corrected text (`job narration`); " if d["narration_stale"]
+                     else "is unaffected (no narrated text changed); ")
+                  + "stills and music are kept (text-independent: scene ids and still keys unchanged)")
         targets = list(dict.fromkeys(j["target"] for j in _jobs(rec) if j["kind"] == "stills"))
         for t in targets:  # per-key rule: which imported job supplies each still
             have, missing = _stills_view(rec, t)
@@ -2763,7 +3053,7 @@ def cmd_retouch_undo(args):
           f"supplied by {_rel(rec, now['path'])}.")
 
 
-COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
+COMMANDS = {"init": cmd_init, "plan": cmd_plan, "rebase-source": cmd_rebase_source, "job": cmd_job, "import": cmd_import,
             "retouch": cmd_retouch, "retouch-undo": cmd_retouch_undo,
             "supersede": cmd_supersede, "close": cmd_close, "retire": cmd_retire,
             "modal-run": cmd_modal_run, "modal-settle": cmd_modal_settle,
@@ -2787,6 +3077,9 @@ def _parser():
     s.add_argument("source")
     s.add_argument("--slug")
     add("plan").add_argument("--wpm", type=float, default=120)
+    s = add("rebase-source")
+    s.add_argument("source", help="the corrected export of the same edition")
+    s.add_argument("--reason", required=True, help="why the text was corrected (owner approval)")
     s = add("job")
     s.add_argument("kind", choices=colab_jobs.KINDS)
     s.add_argument("--rates", required=True)

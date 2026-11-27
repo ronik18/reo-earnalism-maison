@@ -8,6 +8,7 @@ docs/evidence/*
 !docs/evidence/publication-clearance-20261123.json
 !docs/evidence/publication-clearance-*.json
 !docs/evidence/publication-browser-*.json
+!docs/evidence/audiovisual-clearance-*.json
 
 node_modules
 .env

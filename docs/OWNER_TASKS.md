@@ -4,7 +4,7 @@ Things only the owner can do. Claude keeps this list current; tick an item by te
 Last updated: 27 Nov 2026.
 
 ## Approvals
-- [ ] **Monday review page:** https://theearnalism.com/en/staff/review/ (sign in as account #4). **Pending: the ক্ষুধিত পাষাণ correction.** You told Codex "Approve these two insertions" ("না" in paragraphs 6 and 37), but the staff page needed sign-in, so nothing is recorded yet. Sign in and press Approve on that item yourself; Claude then publishes the corrected revision, and readers' places, notes and bookmarks move with it. The cover provenance row was left untouched on purpose.
+- [x] **Monday review page** (27 Nov, 18:54Z): you approved the ক্ষুধিত পাষাণ correction and its cover. It is live (revision 335dd363, published 19:33Z); readers' places and notes moved with it. New titles will appear on https://theearnalism.com/en/staff/review/ as they are packaged.
 - [ ] **Check the new titles while signed in** (optional): open a few of the 13 titles from Explore and try the "Side by side" toggle on ক্ষুধিত পাষাণ. Every title passed the browser check before publishing; anonymous visitors see the free preview and are asked to sign in for the rest.
 - Standing instruction (25 Nov): publish every title that is ready (clearance and cover approved, browser acceptance passed, deployed). Each title you approve on the Monday page follows.
 
@@ -33,8 +33,9 @@ Last updated: 27 Nov 2026.
 - [x] **Apple Podcasts / Spotify for Creators accounts** (checked 28 Nov): Apple Podcasts Connect works for "Earnalism by Reo Enterprise", with no shows and no pending agreement ("Add a Legal Entity" left untouched). Spotify for Creators is signed in, with no shows yet. Nothing is created until the first preview episode exists; Claude will then give the submission steps.
 
 ## Decisions
+- [x] **Colours and icons approved** (28 Nov IST): the gold fill #D8B25E and the new site icon and share card are live (#78).
 - [x] **Site quality decisions (26 Nov 2026):** cache public covers and serve small sizes; darken gold text only (before/after screenshots first); longer free preview (first chapter, up to ~1,500 words); one Back link in the reader.
-- [ ] **Listen to বিচারক narration** (sent 26 Nov; 20.7 min). At 07:31 (unit f01s007-007), check that every word of this line is spoken: "সে জানিত না এই জগৎযন্ত্রটার কলকারখানা অত্যন্ত জটিল এবং লৌহকঠিন,— সুখে দুঃখে সম্পদে বিপদে, সংশয়ে সঙ্কটে ও নৈরাশ্যে পরিতাপে বিমিশ্রিত।" It runs about 1.7 times faster than the rest, so words may be missing. The film assembly waits for your answer. Say "Voice approved" (the line is complete), "Approved, but redo 07:31", or what to change. The other 13 narrations run only after this.
+- [x] **বিচারক voice, music and film** (28 Nov IST): "Voice approved" (covers the 07:31 line), "Music approved" for বিচারক and ক্ষুধিত পাষাণ, "Film approved" for the বিচারক review film; "Preview approved" for its 1:53 public preview clip. The 12 other narrations are running on Modal; any line flagged as possibly clipped will be sent to you as one short listening set.
 - [ ] **Import further approved titles as unpublished drafts** (nothing visible to readers) for their narration jobs: say so per title after you approve it on the Monday page.
 - [x] **Founding member trigger for US/UK accounts** (27 Nov 2026): **10** paying Indian Pass members starts the US/UK accounts design (Phase 9, T15). Purchases are still off while free access is on.
 - [x] **Standing permission start date** (27 Nov 2026): `MAISON_REVIEW_STANDING_FROM=2027-11-30T00:00:00+05:30`, set on Render; it takes effect at the next deploy. Until then every title needs your Monday approval.

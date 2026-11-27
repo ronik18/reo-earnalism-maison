@@ -1,0 +1,141 @@
+{
+ "audio_sha256": [
+  "af296d06c86fe2b5f49c2d80447b797af528e860fa1ecc4712d2a60129de77a0"
+ ],
+ "cover_provenance": {
+  "ref": "docs/evidence/publication-clearance-20261123.json books.bicharak.covers",
+  "note": "the audio release reuses the edition's approved covers; no new artwork"
+ },
+ "dry_narration": false,
+ "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+ "edition_slug": "bicharak",
+ "formats": [
+  "reader",
+  "audio"
+ ],
+ "generators": [
+  {
+   "job_ids": [
+    "narration-film-01-r4"
+   ],
+   "licence": "Apache-2.0",
+   "model": "ai4bharat/indic-parler-tts",
+   "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca",
+   "voice": "bn_arnav::story"
+  }
+ ],
+ "music": {
+  "licence": "Apache-2.0",
+  "mix": "per-chapter score bed, ducked under speech (eav.mix.duck_and_master, -16 LUFS)",
+  "music_job_id": "music-film-01-r4",
+  "route": "ace-step:music-film-01-r4",
+  "score_sha256": {
+   "2285d936-802f-49d8-8034-18a0e3393929": "a18fcde1ae80129577f622d1dcfc397749201a0bf77da57aebf6a7c89161c7a3"
+  },
+  "source_and_licence": "ACE-Step ACE-Step/ACE-Step-v1-3.5B, Apache-2.0, instrumental cues from imported music job music-film-01-r4 (revision, seeds and hashes in its manifest)"
+ },
+ "owner_approval": {
+  "by": "owner (Earnalism; \"Audio approved\" in the Claude session)",
+  "at": "2026-11-27T20:53:37+00:00"
+ },
+ "schema": "earnalism.audiovisual-clearance-evidence.v1",
+ "source_content_sha256": "400c8b98521511a8a50de510b346b7f4c2f9422be333518fa98d6fe6e440e74d",
+ "source_revision_id": "5206c8ca-c195-44fa-aa37-711c764bb400",
+ "status": "APPROVED_BY_OWNER: Maison audio for বিচারক (reader + audio) in the 9 active territories",
+ "term_per_territory": {
+  "IN": {
+   "region": "India",
+   "rule": "Copyright Act 1957 s.22: life + 60 years from the year following death",
+   "source": "https://copyright.gov.in/Copyright_Act_1957/chapter_v.html",
+   "expired_end_of": 2001,
+   "status": "public_domain"
+  },
+  "US": {
+   "region": "United States",
+   "rule": "17 U.S.C. 304 / Circular 15a: works first published before 1 January 1931 are in the public domain",
+   "source": "https://www.copyright.gov/circs/circ15a.pdf",
+   "expired_end_of": "n/a: first published 1895, before 1931",
+   "status": "public_domain"
+  },
+  "GB": {
+   "region": "United Kingdom",
+   "rule": "CDPA 1988 s.12: life + 70 years from the end of the calendar year of death",
+   "source": "https://www.legislation.gov.uk/ukpga/1988/48/section/12",
+   "expired_end_of": 2011,
+   "status": "public_domain"
+  },
+  "BR": {
+   "region": "Brazil",
+   "rule": "Law 9610/1998 art.41: life + 70 years from 1 January following death",
+   "source": "https://www.planalto.gov.br/ccivil_03/leis/l9610.htm",
+   "expired_end_of": 2011,
+   "status": "public_domain"
+  },
+  "SG": {
+   "region": "Singapore",
+   "rule": "Copyright Act 2021 s.114: life + 70; terms already expired under the earlier life + 50 rule (before the 2004 extension) are not revived",
+   "source": "https://sso.agc.gov.sg/Act/CA2021?ProvIds=P13-&ViewType=Advance&WiAl=1",
+   "expired_end_of": 2011,
+   "status": "public_domain"
+  },
+  "MY": {
+   "region": "Malaysia",
+   "rule": "Copyright Act 1987 s.17: life + 50 years from the year following death",
+   "source": "https://www.myipo.gov.my/faq/",
+   "expired_end_of": 1991,
+   "status": "public_domain"
+  },
+  "ID": {
+   "region": "Indonesia",
+   "rule": "Law 28/2014 art.58: life + 70 years from 1 January following death",
+   "source": "https://www.wipo.int/wipolex/en/legislation/details/15600",
+   "expired_end_of": 2011,
+   "status": "public_domain"
+  },
+  "PH": {
+   "region": "Philippines",
+   "rule": "IP Code s.213.1: life + 50 years from the year following death",
+   "source": "https://ilaw.ipophil.gov.ph/pluginfile.php/146/mod_resource/content/2/Philippine%20IP%20Code.pdf",
+   "expired_end_of": 1991,
+   "status": "public_domain"
+  },
+  "TH": {
+   "region": "Thailand",
+   "rule": "Copyright Act B.E. 2537 s.19: life + 50 years from the death of the author",
+   "source": "https://web2026.ipthailand.go.th/wp-content/uploads/2025/05/COPYRIGHT-ACT-B.E.-2537-1994.pdf",
+   "expired_end_of": 1991,
+   "status": "public_domain"
+  }
+ },
+ "territories": [
+  "IN",
+  "US",
+  "GB",
+  "BR",
+  "SG",
+  "MY",
+  "ID",
+  "PH",
+  "TH"
+ ],
+ "territories_note": "must equal the active whitelist (contracts/publication-policy.json / MAISON_PUBLICATION_TERRITORIES)",
+ "text_source_licence": {
+  "text": "Bengali Wikisource, গল্প-দশক/বিচারক oldid 1624865; transcription layer under CC BY-SA 4.0 (attribution and ShareAlike carried by the edition licence notice); underlying literary text public domain",
+  "ref": "https://bn.wikisource.org/w/index.php?title=%E0%A6%97%E0%A6%B2%E0%A7%8D%E0%A6%AA-%E0%A6%A6%E0%A6%B6%E0%A6%95%2F%E0%A6%AC%E0%A6%BF%E0%A6%9A%E0%A6%BE%E0%A6%B0%E0%A6%95&oldid=1624865",
+  "author": "রবীন্দ্রনাথ ঠাকুর (Rabindranath Tagore)",
+  "author_died": 1941,
+  "first_published": 1895,
+  "text_clearance": "docs/evidence/publication-clearance-20261123.json (books.bicharak, owner-approved 23 Nov 2026)"
+ },
+ "timing_json_sha256": "a3cd1dc6c30de16276619736e0bb1c4c95a276b0b6143ae2955eacc084284560",
+ "owner_reviews": {
+  "voice": "\"Voice approved\" (owner, 28 Nov 2026 IST; covers line f01s007-007 at 07:31)",
+  "music": "\"Music approved\" (owner, 28 Nov 2026 IST)",
+  "film": "\"Film approved\" (owner, 28 Nov 2026 IST)",
+  "preview": "\"Preview approved\" (owner, 28 Nov 2026 IST)"
+ },
+ "labels": {
+  "narration": "AI narration (Earnalism Voice, ai4bharat/indic-parler-tts, Apache-2.0)",
+  "music": "AI-generated instrumental score (ACE-Step v1 3.5B, Apache-2.0)"
+ }
+}

@@ -1,0 +1,34 @@
+{
+  "advisory_only": [
+    "contact sheets need a human/visual check",
+    "ASR comparison not run here"
+  ],
+  "items": {
+    "film-01": {
+      "checks": {
+        "loudness": "pass",
+        "true_peak": "pass"
+      },
+      "contact_sheet": "film-01-contact.jpg",
+      "lufs": -16.0,
+      "qc_accepted": [
+        "f01s007-007"
+      ],
+      "sha256": "5b578745d06acc98305ae1a4c3fcf89de0cb8bb8fbd7d04e0329150c976d210d",
+      "suspect_truncated": [
+        {
+          "chars": 133,
+          "chars_per_s": 18.78,
+          "reasons": [
+            "18.8 chars/s > 1.6 x job median 11.2"
+          ],
+          "seconds": 7.082,
+          "unit_key": "f01s007-007"
+        }
+      ],
+      "true_peak": -1.3
+    }
+  },
+  "listening": "unassessed until the owner reviews the package",
+  "result": "pass"
+}

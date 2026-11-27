@@ -1,0 +1,41 @@
+{
+ "schema": "earnalism.deliverables.v1",
+ "title": "বিচারক",
+ "bucket": "reo-earnalism-maison-private",
+ "prefix": "deliverables/bicharak/2026-11-27/",
+ "status": {
+  "film": "owner approved 28 Nov 2026 IST (\"Film approved\"); private; nothing posted",
+  "audio_bundle": "built; Maison audio waits for the owner-approved clearance evidence",
+  "preview": "sent to owner for approval"
+ },
+ "qc": {
+  "film": "-16.0 LUFS, -2.0 dBTP, 1255.5 s, 1920x1080",
+  "preview": "113.7 s, 96 kbps MP3, cut at a narration pause"
+ },
+ "files": {
+  "film-01.mp4": {
+   "sha256": "5b578745d06acc98305ae1a4c3fcf89de0cb8bb8fbd7d04e0329150c976d210d",
+   "bytes": 238833515
+  },
+  "film-01.srt": {
+   "sha256": "4c861c66efafaec6f9f7657227536dbc6f91d474b4e81c726684386a298b2d70",
+   "bytes": 41275
+  },
+  "audio/unit-001.mp3": {
+   "sha256": "af296d06c86fe2b5f49c2d80447b797af528e860fa1ecc4712d2a60129de77a0",
+   "bytes": 15031053
+  },
+  "audio/timing.json": {
+   "sha256": "a3cd1dc6c30de16276619736e0bb1c4c95a276b0b6143ae2955eacc084284560",
+   "bytes": 30506
+  },
+  "preview/preview.mp3": {
+   "sha256": "979938aa56657186a1a62922f01d800469d00ed1786b9ede24a0fe78153bbb32",
+   "bytes": 1364877
+  },
+  "preview/preview.json": {
+   "sha256": "3ea43a0f77d346bc996285729a98300598e62b4cebe700111eac7e4c666abf54",
+   "bytes": 616
+  }
+ }
+}

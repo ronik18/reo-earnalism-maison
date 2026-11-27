@@ -287,8 +287,8 @@
     "job_id": "narration-9187e43e-r2",
     "title": "kshudhita-pashan",
     "month": "2026-11",
-    "units": 1.861893444444444,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
     "root": "kshudhita-pashan"
   },
@@ -339,28 +339,32 @@
     "title": "manbhanjan",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "906f2df9-a6bf-4676-a8d5-dafe055a8b7b",
     "root": "manbhanjan",
     "reserved_units": 1.673869722222222,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-27T19:02:35+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.486241,
+    "cu_equivalent": 4.86
   },
   {
     "job_id": "narration-52b24258-r2-c1of2",
     "title": "atithi",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "cf7ae583-f5ff-4f18-9852-27ce39e7f0c6",
     "root": "atithi",
     "reserved_units": 1.5061728888888886,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-27T19:02:36+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.532488,
+    "cu_equivalent": 5.32
   },
   {
     "job_id": "narration-52b24258-r2-c2of2",
@@ -760,6 +764,20 @@
     "cu_equivalent": 10.72
   },
   {
+    "job_id": "narration-5ea27171",
+    "title": "kshudhita-pashan",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
+    "root": "kshudhita-pashan",
+    "reserved_units": 1.861893444444444,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-27T20:07:04+00:00",
+    "modal_runs_issued": 1
+  },
+  {
     "modal_spend": "2026-11",
     "rows": [
       {
@@ -977,18 +995,18 @@
       {
         "run_id": "narration-1bc7990f-r2#1",
         "job_id": "narration-1bc7990f-r2",
-        "usd": 1.111665,
-        "seconds": 0.0,
+        "usd": 0.4862413371134325,
+        "seconds": 1752.221034643,
         "at": "2026-11-27T19:02:35+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-52b24258-r2-c1of2#1",
         "job_id": "narration-52b24258-r2-c1of2",
-        "usd": 1.025085,
-        "seconds": 0.0,
+        "usd": 0.5324880731887726,
+        "seconds": 1918.8759394190001,
         "at": "2026-11-27T19:02:36+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-52b24258-r2-c2of2#1",
@@ -1100,6 +1118,14 @@
         "usd": 0.92574,
         "seconds": 0.0,
         "at": "2026-11-27T19:02:39+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-5ea27171#1",
+        "job_id": "narration-5ea27171",
+        "usd": 1.2085125,
+        "seconds": 0.0,
+        "at": "2026-11-27T20:07:04+00:00",
         "status": "pending"
       }
     ]

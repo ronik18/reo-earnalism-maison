@@ -48,3 +48,18 @@ class PreviewClipTests(unittest.TestCase):
         m.sine_wav(src, 150)
         with self.assertRaises(ValueError):
             preview.cut_preview(src, self.d / "p.mp3", "u")
+
+    def test_score_bed_under_speech_cuts_at_a_narration_pause_from_timing(self):
+        src = self.d / "scored.wav"
+        m.sine_wav(src, 150)  # a continuous bed: no silence anywhere
+        segments = [{"start_ms": 0, "end_ms": 40000}, {"start_ms": 41000, "end_ms": 90000},
+                    {"start_ms": 91600, "end_ms": 125000}, {"start_ms": 126000, "end_ms": 150000}]
+        rec = preview.cut_preview(src, self.d / "p.mp3", "u", segments)
+        self.assertEqual(rec["cut_method"], "pause")
+        self.assertAlmostEqual(rec["cut_at_ms"], 90800, delta=5)  # the latest pause within the bound
+        self.assertLessEqual(rec["duration_ms"], preview.MAX_DURATION_MS)
+        self.assertIn("narration pause", rec["measurement_evidence"])
+
+    def test_pause_points_are_gap_midpoints(self):
+        self.assertEqual(preview.pause_points([{"start_ms": 2000, "end_ms": 3000},
+                                               {"start_ms": 0, "end_ms": 1000}]), [1.5])
