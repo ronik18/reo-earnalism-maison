@@ -6,7 +6,7 @@
   "r2_prefix": "gpu-jobs/thakurda/narration-775c2abc-r2/run-1/",
   "requested_at": "2026-11-27T19:02:39+00:00",
   "schema": "earnalism.modal-request.v1",
-  "status": "requested",
+  "status": "running",
   "title_root": "production/audiovisual/thakurda",
   "worst_case_usd": 1.040903
 }
