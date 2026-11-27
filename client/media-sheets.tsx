@@ -91,7 +91,7 @@ export function PreviewEnding({ title, lang, minutes, formats, signInUrl, listen
   const [before, after] = splitTitleSlot(t("preview_signin_finish"));
   return <>
     <p className="preview-ending-copy">{before}<span lang={lang}>{title}</span>{after}</p>
-    {minutes && minutes > 0 ? <p className="fine">{minutes} {t("preview_minutes_left")}</p> : null}
+    {minutes && minutes > 0 ? <p className="fine">{minutes} {t(minutes === 1 ? "preview_minute_left" : "preview_minutes_left")}</p> : null}
     <p className="actions">
       <a className="button" href={validReturnPath(signInUrl)}>{t("sign_in_free")}</a>
       {formats?.listen && listenUrl ? <a className="button secondary" href={validReturnPath(listenUrl)}>{t("preview_listen_free")}</a> : null}

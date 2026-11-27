@@ -33,6 +33,7 @@ import {
   stepLeading,
   radioKeyTarget,
   createSaveQueue,
+  observedPosition,
 } from "./state.ts";
 import { readFileSync } from "node:fs";
 import { wrapTextSpan } from "./follow-dom.ts";
@@ -47,6 +48,9 @@ import {
   MAP_RETRY_MAX_MS,
   highlightSpan,
   utf16Index,
+  domOffset,
+  crlfIndexes,
+  followScrollDelta,
   type FollowMap,
 } from "./sentences.ts";
 test("Unicode selection offsets use code points, including Bengali and astral characters", () => {
@@ -1422,4 +1426,70 @@ test("an unmapped Listen switch stays on the page", async () => {
   });
   assert.equal(outcome, "unmapped");
   assert.deepEqual(went, []);
+});
+
+// What the HTML parser leaves in a text node: CRLF and a lone CR each become one LF.
+const parsed = (stored: string) => stored.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+test("CRLF: stored-text sentence offsets map onto the parsed page text without shifting", () => {
+  const stored = "Morning fog lifts slowly.\r\nThe miller opens the gate. Water rushes under the wheel.";
+  const page = parsed(stored);
+  const crlf = crlfIndexes(stored);
+  assert.deepEqual(crlf, [25]);
+  const sentences = splitSentences(stored); // the server's partition, in stored code points
+  assert.equal(sentences.length, 3);
+  for (const [start, end] of sentences) {
+    const [a, b] = highlightSpan(page, [start, end], crlf);
+    assert.equal(page.slice(a, b), parsed(stored.slice(start, end)));
+  }
+  // Unmapped, the CRLF shifts every later sentence one character late (the browser defect this fixes).
+  const [s, e] = sentences[1];
+  const [a, b] = highlightSpan(page, [s, e]);
+  assert.equal(page.slice(a, b), "he miller opens the gate. W");
+  // An offset between the CR and its LF lands on the LF; offsets before the CRLF are unchanged.
+  assert.equal(domOffset(26, crlf), 25);
+  assert.equal(domOffset(25, crlf), 25);
+  assert.equal(domOffset(10, crlf), 10);
+  assert.equal(domOffset(stored.length, crlf), page.length);
+});
+
+test("lone CR keeps its length; several CRLFs and astral text map together", () => {
+  const cr = "Children race along the bank.\rTheir shouts carry far. Nobody minds the noise.";
+  assert.deepEqual(crlfIndexes(cr), []);
+  for (const [start, end] of splitSentences(cr)) {
+    const [a, b] = highlightSpan(parsed(cr), [start, end], crlfIndexes(cr));
+    assert.equal(parsed(cr).slice(a, b), parsed(cr.slice(start, end)));
+  }
+  const mixed = "One 🌸.\r\nTwo.\rThree.\r\n\r\nFour.";
+  const crlf = crlfIndexes(mixed);
+  assert.equal(crlf.length, 3);
+  const page = parsed(mixed);
+  const points = Array.from(mixed);
+  for (const [start, end] of splitSentences(mixed)) {
+    // splitSentences gives UTF-16 indices; the server's offsets are code points.
+    const cpStart = Array.from(mixed.slice(0, start)).length;
+    const cpEnd = Array.from(mixed.slice(0, end)).length;
+    const [a, b] = highlightSpan(page, [cpStart, cpEnd], crlf);
+    assert.equal(page.slice(a, b), parsed(points.slice(cpStart, cpEnd).join("")));
+  }
+});
+
+test("follow-along scroll centres the sentence in the band between the toolbar and the docked player", () => {
+  const band = { top: 61, bottom: 567 };
+  assert.equal(followScrollDelta({ top: 200, bottom: 228 }, band), 0); // already visible
+  // Under the docked player (the browser report: 704-732 with the player at 567): centred in the band.
+  const delta = followScrollDelta({ top: 704, bottom: 732 }, band);
+  assert.equal(704 - delta + 14, Math.round((61 + 567) / 2));
+  assert.ok(704 - delta >= band.top && 732 - delta <= band.bottom);
+  // Under the toolbar: scrolled up into the band.
+  assert.ok(followScrollDelta({ top: 40, bottom: 68 }, band) < 0);
+  // Taller than the band: its top goes to the band top.
+  assert.equal(followScrollDelta({ top: 600, bottom: 1300 }, band), 539);
+});
+
+test("the scroll observer keeps an exact restored place until the reader scrolls by hand", () => {
+  const exact = { format: "reader" as const, unit_id: "u", anchor_id: "a", offset_chars: 90 };
+  assert.equal(observedPosition(exact, "u", "b", true), exact); // held after a jump
+  assert.equal(observedPosition(exact, "u", "a", false), exact); // same paragraph keeps its offset
+  assert.deepEqual(observedPosition(exact, "u", "b", false), { format: "reader", unit_id: "u", anchor_id: "b", offset_chars: 0 });
 });

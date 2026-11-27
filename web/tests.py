@@ -304,7 +304,11 @@ class ExperienceTests(TestCase):
         mobile = re.search(r"@media \(max-width:767px\)\{(\.reader-toolbar[^@]*)\}\s*(?:@|body|/\*|$)", css)
         self.assertIsNotNone(mobile)
         mobile = mobile.group(1)
-        self.assertRegex(mobile, r"\.reader-tools\{[^}]*order:3[^}]*flex:1 1 100%[^}]*flex-wrap:wrap")
+        # Two toolbar rows in all: the tools keep one row (integration_tests/test_read_listen.py measures it at 360 px).
+        self.assertRegex(mobile, r"\.reader-tools\{[^}]*order:3[^}]*flex:1 1 100%[^}]*flex-wrap:nowrap")
+        narrow = re.search(r"@media \(max-width:479px\)\{(\.reader-tools[^@]*)\}", css)
+        self.assertIsNotNone(narrow)
+        self.assertRegex(narrow.group(1), r"\.reader-tools \.reader-tool\{[^}]*white-space:normal")
         self.assertRegex(mobile, r"\.room-evening-title\{[^}]*min-width:0")
         self.assertRegex(mobile, r"\.room-logo-mini\{[^}]*order:2")
 
@@ -667,3 +671,18 @@ class TitleFormatRowTests(TestCase):
         row = self._title().split('class="format-row"', 1)[1].split("</ul>", 1)[0]
         self.assertEqual(row.count('<span class="format-sep" aria-hidden="true">·</span>'), 2)
         self.assertRegex(re.sub(r"<[^>]+>", " ", row), r"Read.*·.*Listen.*·.*Film")
+
+
+class ReaderCrlfBootstrapTests(SimpleTestCase):
+    """The reader bootstrap tells the client where a CRLF sits, so follow-along offsets (stored-text code points,
+    library/sentences.py) map onto the text the HTML parser leaves, where each CRLF is one LF."""
+    def test_crlf_indexes_lists_only_crlf_paragraphs_by_code_point(self):
+        from library.sentences import split_sentences
+        from .views import crlf_indexes
+        text = 'Morning 🌸 fog.\r\nThe miller opens the gate.\r\n\r\nWater.'
+        found = crlf_indexes([{'anchor_id': 'a', 'text': text}, {'anchor_id': 'b', 'text': 'Lone\rcarriage return.'}, {'anchor_id': 'c', 'text': 'Plain.\n'}])
+        self.assertEqual(list(found), ['a'])
+        self.assertEqual(found['a'], [i for i, c in enumerate(text) if text[i:i + 2] == '\r\n'])
+        self.assertEqual(text[found['a'][0]:found['a'][0] + 2], '\r\n')
+        # The same index space as the sentence offsets the server stores.
+        self.assertEqual(split_sentences(text)[1][0], found['a'][0] + 2)

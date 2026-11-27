@@ -343,6 +343,9 @@ body.room-focused{background:var(--paper),#1A0E12;--surface:#2A1820;--raised:#35
 .room-focused .room-page .button.secondary{background:transparent;color:var(--gold);border-color:var(--gold)}
 .room .reader{max-width:780px;border-radius:6px;box-shadow:0 2px 4px rgba(0,0,0,.2),0 30px 60px -30px rgba(0,0,0,.6);background:var(--paper),#F5EDDF}
 .room .reader.reader-sepia{background:var(--paper),#E3CFAA}.room .reader.reader-ink,.room .reader.reader-dark{background:#21181A}.room .reader.reader-true_black{background:#000}
+/* On the ivory and sepia papers the focused gold outline is unreadable (1.4:1); a secondary action there is dark burgundy (primary stays the gold fill). */
+.room .reader:is(.reader-light,.reader-paper,.reader-sepia) .button.secondary{color:var(--burgundy);border-color:var(--burgundy)}
+.room .reader:is(.reader-light,.reader-paper,.reader-sepia) .button.secondary:hover{background:rgba(74,28,39,.08)}
 .room .reader p{color:inherit}
 .room .reader .notice{background:transparent;box-shadow:none}
 .room-focused .room-page .reader a{color:var(--wine)}
@@ -407,7 +410,9 @@ a.format-row-item{text-decoration:underline;text-underline-offset:4px}
 body.reader-theme-light .reader-tool:hover,body.reader-theme-sepia .reader-tool:hover{background:rgba(36,22,26,.08)}
 .reader-chapter-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .reader-chapter-list button{width:100%;min-height:44px;text-align:start;justify-content:flex-start}
-@media (max-width:767px){.reader-toolbar .room-wrap{flex-wrap:wrap;row-gap:4px;padding-top:6px;padding-bottom:6px}.reader-toolbar .room-evening-title{min-width:0}.reader-toolbar .room-logo-mini{order:2}.reader-tools{order:3;flex:1 1 100%;flex-wrap:wrap;justify-content:flex-end}.reader-tool{padding:0 10px}}
+@media (max-width:767px){.reader-toolbar .room-wrap{flex-wrap:wrap;row-gap:4px;padding-top:6px;padding-bottom:6px}.reader-toolbar .room-evening-title{min-width:0}.reader-toolbar .room-logo-mini{order:2}.reader-tools{order:3;flex:1 1 100%;flex-wrap:nowrap;justify-content:flex-end;min-width:0}.reader-tool{padding:0 10px}}
+/* Narrow phones: the tools keep one row (two toolbar rows in all) by letting two-word labels break inside their 44 px pills. */
+@media (max-width:479px){.reader-tools{gap:6px}.format-switch{gap:4px}.reader-minutes{white-space:normal;width:min-content;flex:none;line-height:1.15;text-align:end}.reader-tools .reader-tool,.reader-tools .format-switch-item{padding:0 8px;font-size:.8125rem;line-height:1.1}.reader-tools .reader-tool{width:min-content;white-space:normal}}
 body.reader-theme-light .reader-progress,body.reader-theme-sepia .reader-progress{--hairline:var(--gold-text)}
 body.reader-theme-dark .reader-progress,body.reader-theme-true_black .reader-progress{--hairline:var(--gold-on-dark)}
 @media (prefers-reduced-motion:reduce){.reader-toolbar{transition:none}}

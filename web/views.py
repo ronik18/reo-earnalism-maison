@@ -261,6 +261,18 @@ def remaining_read_minutes(revision_id, shown_chars):
     return read_minutes(total_read_chars(revision_id) - shown_chars) or None
 
 
+def crlf_indexes(paragraphs):
+    """Per anchor, the stored code-point index of each CR that starts a CRLF. Sentence offsets count both characters
+    (library/sentences.py, Python len on the untouched text) while the HTML parser folds CRLF into one LF, so the
+    reader maps offsets past them (client/sentences.ts domOffset). Only paragraphs that hold a CRLF are listed."""
+    found = {}
+    for p in paragraphs:
+        text = p.get("text") or ""
+        if "\r\n" in text:
+            found[str(p["anchor_id"])] = [i for i in range(len(text) - 1) if text[i] == "\r" and text[i + 1] == "\n"]
+    return found
+
+
 def preview_ending(request, locale, edition_id, edition, document, destination):
     """Fields for the signed-out preview ending: title, minutes left, and the other formats that really exist."""
     listen, watch = media_formats_ready(edition)
@@ -294,6 +306,7 @@ def reader(request, locale, edition_id, unit_id=None):
     except (TypeError, ValueError):
         offset = 0
     bootstrap = {"edition_id": str(edition_id), "edition_revision_id": str(edition["edition_revision_id"]), "unit_id": str(unit_id), "content_locale": edition["locale"], "authenticated": request.user.is_authenticated, "anchor": request.GET.get("anchor", ""), "offset_chars": offset,"member_id":str(request.user.public_id) if request.user.is_authenticated else None,"device_id":str(request.device.id) if getattr(request,"device",None) else None}
+    bootstrap["crlf"] = crlf_indexes(document.get("paragraphs", []))
     units=edition_units(edition_id,territory=trusted_territory(request),user=request.user)
     index=next((i for i,u in enumerate(units) if u["unit_id"]==str(unit_id)),0)
     bootstrap["previous_unit_url"]=reverse("web:reader",args=[locale,edition_id,units[index-1]["unit_id"]]) if index>0 else None

@@ -500,6 +500,7 @@ STRINGS.update({
     "preview_signin_finish": ("Sign in free to finish {title} \u2014 your place is kept", "Sign in free to finish {title} \u2014 your place is kept"),
     "sign_in_free": ("Sign in free", "Sign in free"),
     "preview_minutes_left": ("minutes left to read", "minutes left to read"),
+    "preview_minute_left": ("minute left to read", "minute left to read"),
     "preview_listen_free": ("Sign in free to listen", "Sign in free to listen"),
     "preview_watch_free": ("Sign in free to watch", "Sign in free to watch"),
 })

@@ -15,6 +15,7 @@ import { clearFollow, drawFollow } from "./follow-dom";
 import {
   autoscrollAllowed,
   currentHighlight,
+  followScrollDelta,
   isUserScroll,
   mapFailed,
   mapFetchPlan,
@@ -38,6 +39,7 @@ import {
   progressConflictDecision,
   meaningfulSelection,
   samePosition,
+  observedPosition,
   pageCount,
   type Position,
   runListenSwitch,
@@ -84,6 +86,8 @@ interface Boot {
   formats?: { listen?: boolean; watch?: boolean };
   listen_sign_in_url?: string;
   watch_sign_in_url?: string;
+  /** Per anchor, the stored index of each CR that starts a CRLF (web/views.py crlf_indexes); see sentences.ts domOffset. */
+  crlf?: Record<string, number[]>;
 }
 interface Progress {
   version: number;
@@ -257,11 +261,15 @@ function Reader({ boot }: { boot: Boot }) {
   const [pages, setPages] = useState({ current: 1, total: 1 });
   const progressPath = `/me/progress/${boot.edition_id}/reader`;
   const completePath = `/me/completion/${boot.edition_id}/reader`;
+  /** An exact place set by jump() stays as it is until the reader scrolls by hand (see observedPosition). */
+  const heldPosition = useRef(false);
   function jump(p?: Position) {
     if (!p) return;
     const item = paragraphs.current.find((n) => n.anchor === p.anchor_id);
     if (item) {
       position.current = p;
+      heldPosition.current = true;
+      ownScrollUntil.current = Date.now() + OWN_SCROLL_MS; // the scroll event this jump causes is not the reader's
       item.node.scrollIntoView({ block: "start", behavior: "instant" });
     }
   }
@@ -460,15 +468,23 @@ function Reader({ boot }: { boot: Boot }) {
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         const first = visible[0]?.target as HTMLElement | undefined;
         if (first)
-          position.current = {
-            format: "reader",
-            unit_id: boot.unit_id,
-            anchor_id: first.dataset.anchor!,
-            offset_chars: 0,
-          };
+          position.current = observedPosition(
+            position.current,
+            boot.unit_id,
+            first.dataset.anchor!,
+            heldPosition.current,
+          );
       },
       { rootMargin: "-15% 0px -55% 0px" },
     );
+    // A hand scroll releases a place held by jump(): from then on the observer follows the reader again.
+    const release = (event: Event) => {
+      if (isUserScroll(event.type, (event as KeyboardEvent).key, Date.now(), ownScrollUntil.current))
+        heldPosition.current = false;
+    };
+    for (const type of ["wheel", "touchmove", "keydown"])
+      window.addEventListener(type, release, { passive: true });
+    window.addEventListener("scroll", release, { passive: true, capture: true });
     paragraphs.current.forEach((p) => observer.observe(p.node));
     const measure = () =>
       setPages({
@@ -542,6 +558,9 @@ function Reader({ boot }: { boot: Boot }) {
     trigger?.addEventListener("click", show);
     return () => {
       observer.disconnect();
+      for (const type of ["wheel", "touchmove", "keydown"])
+        window.removeEventListener(type, release);
+      window.removeEventListener("scroll", release, { capture: true });
       resize.disconnect();
       clearInterval(timer);
       reading.removeEventListener("scroll", measure);
@@ -750,7 +769,8 @@ function Reader({ boot }: { boot: Boot }) {
         "aria-valuetext",
         left ? `${pct}%, ${left} ${t("min_left")}` : `${pct}%`,
       );
-      if (minutes) minutes.textContent = left ? `${left} ${t("min_left")}` : "";
+      // The number stays with "min" (no-break space) when a narrow toolbar breaks the label over two lines.
+      if (minutes) minutes.textContent = left ? `${left}\u00a0${t("min_left")}` : "";
     };
     const keyboardInside = () => {
       const f = document.activeElement;
@@ -815,7 +835,7 @@ function Reader({ boot }: { boot: Boot }) {
     if (!follow) return clearFollow(reading);
     const p = paragraphs.current.find((item) => item.anchor === follow.anchor);
     if (!p) return;
-    const rect = drawFollow(p.node, follow.range);
+    const rect = drawFollow(p.node, follow.range, boot.crlf?.[follow.anchor]);
     if (
       !follow.playing ||
       !rect ||
@@ -836,12 +856,22 @@ function Reader({ boot }: { boot: Boot }) {
         ownScroll();
         reading.scrollTo({ left, behavior: "instant" });
       }
-    } else if (box.top < 0 || box.bottom > window.innerHeight) {
-      ownScroll();
-      window.scrollBy({
-        top: box.top - window.innerHeight * 0.3,
-        behavior: "instant",
-      });
+    } else {
+      // The visible band: below the toolbar (while shown) and above the docked persistent player.
+      const bar = document.querySelector<HTMLElement>(".reader-toolbar");
+      const barBottom = bar && !bar.classList.contains("is-hidden") ? bar.getBoundingClientRect().bottom : 0;
+      const top = Math.max(0, barBottom);
+      const dock = document
+        .querySelector<HTMLElement>("#persistent-media [data-persistent-player]")
+        ?.getBoundingClientRect();
+      let bottom = window.innerHeight;
+      if (dock && dock.height > 0 && dock.top > top && dock.top < bottom) bottom = dock.top;
+      if (bottom - top < 120) bottom = window.innerHeight; // an expanded player leaves no band: use the screen
+      const delta = followScrollDelta(box, { top, bottom });
+      if (delta) {
+        ownScroll();
+        window.scrollBy({ top: delta, behavior: "instant" });
+      }
     }
   }, [follow, notes, preferences.reader_font_size, preferences.reader_margins, preferences.reader_layout, preferences.reader_typeface, preferences.reader_alignment, preferences.reader_line_height]);
   function selectParagraph(anchor: string) {

@@ -48,13 +48,13 @@ export function clearFollow(root: ParentNode = document) {
 }
 
 /**
- * Highlight [start,end) (code points, null for all) of `el`'s text. Uses the CSS Custom Highlight API when the
+ * Highlight [start,end) (stored-text code points, null for all; `crlf` as in highlightSpan) of `el`'s text. Uses the CSS Custom Highlight API when the
  * browser has it (no DOM change at all); otherwise wraps the covered text in <mark> elements by splitting text
  * nodes. The text content of `el` is identical either way.
  */
-export function drawFollow(el: HTMLElement, range: [number, number] | null): (() => DOMRect) | undefined {
+export function drawFollow(el: HTMLElement, range: [number, number] | null, crlf: readonly number[] = []): (() => DOMRect) | undefined {
   clearFollow(el.ownerDocument);
-  const [start, end] = highlightSpan(el.textContent || "", range);
+  const [start, end] = highlightSpan(el.textContent || "", range, crlf);
   const kind = range ? NAME : PARAGRAPH;
   const nodes = textNodes(el);
   const reg = registry();

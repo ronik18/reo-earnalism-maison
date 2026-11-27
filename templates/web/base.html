@@ -56,6 +56,6 @@
   </div>
   <p class="room-legal">{% if local_build %}{% ui 'local_notice' %}{% elif india_first_launch %}Earnalism · Free access in India · A Reo Enterprise Venture{% else %}© 2026 Earnalism · operated by Reo Enterprise. Public-domain works and licensed editions keep their own terms.{% endif %}</p>
 </div></footer>{% endif %}
-<div id="persistent-media" aria-label="{% ui 'audio' %}"></div>
+<div id="persistent-media"></div>
 {{ ui|json_script:'ui-catalogue' }}{% island_script 'shell' %}{% block bootstrap %}{% endblock %}
 </body></html>

@@ -61,12 +61,46 @@ export function currentHighlight(maps: readonly FollowMap[], anchorId: string | 
   return { anchorId: found.anchor_id, range: sentence ? [found.start_offset_chars, found.end_offset_chars] : null };
 }
 
-/** The UTF-16 range to highlight inside `text`; the whole text when the highlight is a paragraph or its offsets do not fit. */
-export function highlightSpan(text: string, range: [number, number] | null): [number, number] {
+/**
+ * A stored-text offset (code points, as library/sentences.py counts with Python len) as a code-point offset into the
+ * text the HTML parser left in the page. The parser turns each CRLF into one LF (a lone CR into one LF too, same
+ * length), so every CRLF before the offset counts one less. `crlf` holds the stored code-point index of each CR that
+ * starts a CRLF (the reader bootstrap's `crlf[anchor]`); an offset between that CR and its LF lands on the LF.
+ */
+export function domOffset(codePoints: number, crlf: readonly number[] = []): number {
+  let before = 0;
+  for (const cr of crlf) if (cr < codePoints) before++;
+  return codePoints - before;
+}
+
+/**
+ * The UTF-16 range to highlight inside `text` (the page text); the whole text when the highlight is a paragraph or
+ * its offsets do not fit. `range` is in stored-text code points; `crlf` maps them past the parser's CRLF folding.
+ */
+export function highlightSpan(text: string, range: [number, number] | null, crlf: readonly number[] = []): [number, number] {
   if (!range) return [0, text.length];
-  const start = utf16Index(text, range[0]);
-  const end = utf16Index(text, range[1]);
+  const start = utf16Index(text, domOffset(range[0], crlf));
+  const end = utf16Index(text, domOffset(range[1], crlf));
   return start < end ? [start, end] : [0, text.length];
+}
+
+/** Stored code-point index of each CR that starts a CRLF in `text` (the server-side rule, for tests and fixtures). */
+export function crlfIndexes(text: string): number[] {
+  const found: number[] = [];
+  const chars = Array.from(text);
+  chars.forEach((c, i) => { if (c === "\r" && chars[i + 1] === "\n") found.push(i); });
+  return found;
+}
+
+/**
+ * Follow-along scrolling: how far (px, positive is down) to scroll so the highlighted `box` sits in the middle of the
+ * visible band `view` (viewport y from below the toolbar to above a docked player); 0 when it is already inside.
+ * A box taller than the band is brought to the band's top.
+ */
+export function followScrollDelta(box: { top: number; bottom: number }, view: { top: number; bottom: number }): number {
+  if (box.top >= view.top && box.bottom <= view.bottom) return 0;
+  if (box.bottom - box.top >= view.bottom - view.top) return Math.round(box.top - view.top);
+  return Math.round((box.top + box.bottom) / 2 - (view.top + view.bottom) / 2);
 }
 
 const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown", "Home", "End", " "]);

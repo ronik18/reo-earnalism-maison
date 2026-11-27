@@ -7,6 +7,16 @@ export interface Position {
 export function codePointOffset(text: string, utf16Offset: number): number {
   return Array.from(text.slice(0, utf16Offset)).length;
 }
+/**
+ * The reader's place after the scroll observer reports `anchor` as the first paragraph in its reading band.
+ * An exact place set by a jump (a sign-in return, a restored or saved position) is `held` until the reader scrolls
+ * by hand, so the observer's first report after the jump cannot reset its offset; the same paragraph keeps its
+ * offset; only a different paragraph starts again at offset 0.
+ */
+export function observedPosition(current: Position, unitId: string, anchor: string, held: boolean): Position {
+  if (held || (anchor === current.anchor_id && unitId === current.unit_id)) return current;
+  return { format: "reader", unit_id: unitId, anchor_id: anchor, offset_chars: 0 };
+}
 export function samePosition(a: Position | undefined, b: Position): boolean {
   return (
     !!a &&

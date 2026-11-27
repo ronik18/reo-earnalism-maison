@@ -128,6 +128,12 @@ class PreviewEndingTests(TestCase):
             response=self.page()
         self.assertIsNone(self.boot(response)['remaining_minutes'])
         self.assertNotIn('minutes left to read',response.content.decode().split('data-preview-fallback',1)[1].split('</section>',1)[0])
+    def test_preview_end_minutes_singular_for_one(self):
+        for minutes,expected in ((1,'1 minute left to read'),(2,'2 minutes left to read')):
+            with self.subTest(minutes=minutes),patch('web.views.remaining_read_minutes',return_value=minutes):
+                fallback=self.page().content.decode().split('data-preview-fallback',1)[1].split('</section>',1)[0]
+                self.assertIn(expected,fallback)
+                self.assertNotIn(f'{minutes} minute left' if minutes!=1 else '1 minutes',fallback)
     def test_preview_end_offers_listen_and_watch_when_available(self):
         both=self.page(formats=['reader','audio','video'])
         boot=self.boot(both);html=both.content.decode().split('data-preview-fallback',1)[1].split('</section>',1)[0]
