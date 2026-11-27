@@ -32,6 +32,9 @@ EN_CLEARANCE = "docs/evidence/publication-clearance-kshudhita-pashan-en-draft.js
 EN_COVER = "library/intake/kshudhita-pashan-en/cover_provenance.json"
 # Queries of one ordinary (no anchor map) Reader publish through transition_revision with prepared validation.
 ORDINARY_PUBLISH_QUERIES = 69
+# Queries of a reader position save and a note create on the live revision (hot path), unchanged by round 6.
+READER_SET_PROGRESS_QUERIES = 14
+READER_CREATE_ANNOTATION_QUERIES = 13
 
 
 def load(path):
@@ -610,6 +613,117 @@ class ReviseStageTests(TestCase):
             services.transition_revision(self.publisher, draft.id, "publish", state["version"], draft.content_sha256,
                                          "First publish (test)", prepared=prepared)
         self.assertFalse(any(getattr(c, "__name__", "") == "after_commit" for c in callbacks))
+
+    # --- reader writes against a replaced revision (round 6) ------------------------------------------------------
+    def position_input(self, revision_id, unit_id, anchor_id, offset):
+        import uuid
+        return {"operation_id": str(uuid.uuid4()), "edition_revision_id": str(revision_id),
+                "location": {"format": "reader", "unit_id": str(unit_id), "anchor_id": str(anchor_id), "offset_chars": offset},
+                "occurred_at": timezone.now().isoformat().replace("+00:00", "Z")}
+
+    def note_input(self, revision_id, unit_id, anchor_id, start, end):
+        import uuid
+        return {"annotation_id": str(uuid.uuid4()), "edition_revision_id": str(revision_id), "kind": "note", "note_text": "n",
+                "range": {"unit_id": str(unit_id), "start_anchor_id": str(anchor_id), "start_offset_chars": start,
+                          "end_anchor_id": str(anchor_id), "end_offset_chars": end, "offset_unit": "unicode_code_point"}}
+
+    def member(self, email):
+        return get_user_model().objects.create_user(email, "Test-Only-Passphrase-47", is_verified=True)
+
+    def publish_correction(self):
+        from library.models import Paragraph
+        old, new, _ = self.prepare_correction()
+        self.run_command("publish", SLUG)
+        old.refresh_from_db(); new.refresh_from_db()
+        return old, new, {n: Paragraph.objects.get(unit__revision=old, ordinal=n) for n in (6, 10, 37)}
+
+    def test_reader_writes_on_the_live_revision_cost_no_extra_queries(self):
+        import uuid
+        from library.models import Paragraph, Revision
+        from reader import services as reader
+        first = self.publish_first()
+        live = Revision.objects.get(pk=first["revision_id"])
+        paragraph = Paragraph.objects.get(unit__revision=live, ordinal=10)
+        user = self.member("hot@example.test")
+        end = paragraph.text.index(" ", 5)
+        with self.assertNumQueries(READER_SET_PROGRESS_QUERIES):
+            reader.set_progress(user, live.edition_id, "reader", self.position_input(live.id, paragraph.unit_id, paragraph.anchor_id, end), 0)
+        with self.assertNumQueries(READER_CREATE_ANNOTATION_QUERIES):
+            reader.create_annotation(user, self.note_input(live.id, paragraph.unit_id, paragraph.anchor_id, 0, end), str(uuid.uuid4()))
+
+    def test_first_ever_note_posted_against_the_replaced_revision_lands_mapped_on_the_correction(self):
+        import uuid
+        from library.models import Paragraph
+        from reader import services as reader
+        from reader.models import Annotation
+        old, new, p = self.publish_correction()
+        user = self.member("late-note@example.test")
+        text = p[37].text
+        start, end = text.index("লাগিল"), text.index("কিন্তু") + len("কিন্তু")
+        status, body = reader.create_annotation(user, self.note_input(old.id, p[37].unit_id, p[37].anchor_id, start, end), str(uuid.uuid4()))[:2]
+        self.assertEqual(status, 201)
+        row = Annotation.objects.get(pk=body["annotation_id"])
+        target = Paragraph.objects.get(unit__revision=new, ordinal=37)
+        self.assertEqual((row.revision_id, row.range["start_anchor_id"], row.range["unit_id"]), (new.id, str(target.anchor_id), str(target.unit_id)))
+        self.assertEqual(row.quoted_text, "লাগিল জানি না কিন্তু")
+        self.assertEqual((body["edition_revision_id"], body["anchor_status"]), (str(new.id), "valid"))
+
+    def test_first_ever_position_saved_against_the_replaced_revision_lands_mapped_on_the_correction(self):
+        from library.models import Paragraph
+        from reader import services as reader
+        from reader.models import Progress
+        old, new, p = self.publish_correction()
+        user = self.member("late-position@example.test")
+        after = p[6].text.index("রাত্রিযাপন করিবেন") + len("রাত্রিযাপন করিবেন") + 1  # after the danda
+        status, body = reader.set_progress(user, old.edition_id, "reader", self.position_input(old.id, p[6].unit_id, p[6].anchor_id, after), 0)[:2]
+        self.assertEqual(status, 200)
+        row = Progress.objects.get(user=user)
+        target = Paragraph.objects.get(unit__revision=new, ordinal=6)
+        self.assertEqual((row.revision_id, row.location["anchor_id"], row.location["offset_chars"]), (new.id, str(target.anchor_id), after + 3))
+        self.assertEqual(body["edition_revision_id"], str(new.id))
+
+    def test_a_note_whose_revision_was_read_before_the_switch_is_rechecked_and_mapped(self):
+        import uuid
+        from library.models import Revision
+        from reader import services as reader
+        from reader.models import Annotation
+        old, new, p = self.publish_correction()
+        real = reader.authorize_revision
+        calls = []
+
+        def stale_then_real(user, revision, *args, **kwargs):  # the first read happened before publish committed
+            calls.append(revision)
+            return Revision.objects.select_related("edition").get(pk=old.id) if len(calls) == 1 else real(user, revision, *args, **kwargs)
+        end = p[10].text.index(" ", 5)
+        with mock.patch.object(reader, "authorize_revision", side_effect=stale_then_real):
+            body = reader.create_annotation(self.member("race@example.test"), self.note_input(old.id, p[10].unit_id, p[10].anchor_id, 0, end), str(uuid.uuid4()))[1]
+        row = Annotation.objects.get(pk=body["annotation_id"])
+        self.assertEqual(row.revision_id, new.id)
+        self.assertEqual(row.range["start_anchor_id"], new.validation_evidence["source_revision"]["anchor_map"][str(p[10].anchor_id)])
+
+    def test_a_write_against_an_unrelated_stale_revision_keeps_todays_response(self):
+        import uuid
+        from core.api import DomainError
+        from library import services
+        from library.models import Revision
+        from reader import services as reader
+        from reader.models import Annotation, Progress
+        old, new, paragraph = self.prepare_correction()
+        evidence = new.validation_evidence
+        evidence["source_revision"]["replaces_revision_id"] = str(uuid.uuid4())  # the live map does not name `old`
+        Revision.objects.filter(pk=new.pk).update(validation_evidence=evidence)
+        for action in ("mark-ready", "publish"):
+            new.refresh_from_db()
+            services.transition_revision(self.publisher, new.id, action, new.version, new.content_sha256, "Staff UI (test)")
+        user = self.member("stale@example.test")
+        with self.assertRaises(DomainError) as raised:
+            reader.set_progress(user, old.edition_id, "reader", self.position_input(old.id, paragraph.unit_id, paragraph.anchor_id, 0), 0)
+        self.assertEqual((raised.exception.code, raised.exception.status), ("edition_revision_changed", 409))
+        end = paragraph.text.index(" ", 5)
+        with self.assertRaises(DomainError) as raised:
+            reader.create_annotation(user, self.note_input(old.id, paragraph.unit_id, paragraph.anchor_id, 0, end), str(uuid.uuid4()))
+        self.assertEqual((raised.exception.code, raised.exception.status), ("content_unavailable", 404))
+        self.assertFalse(Progress.objects.filter(user=user).exists() or Annotation.objects.filter(user=user).exists())
 
     def test_map_offset_follows_an_insertion_and_clamps(self):
         from operations.revision_remap import map_offset

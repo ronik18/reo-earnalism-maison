@@ -3,7 +3,7 @@ import unicodedata
 import uuid
 from functools import lru_cache
 from decimal import Decimal
-from django.db import transaction
+from django.db import connection,transaction
 from django.db.models import Count,Exists,OuterRef,Q
 from django.db.models.functions import Length
 from django.utils import timezone
@@ -90,13 +90,53 @@ def get_progress(user,edition_id,format='reader',territory='IN'):
     return progress_data(row,edition,format)
 
 
+def _shared_edition(value,user=None):
+    """_edition in one query that also takes FOR SHARE on the edition row. A publish holds FOR UPDATE on it, so a
+    reader write waits for an in-flight publish and then reads the new live pointer (same query count as _edition;
+    concurrent reader writes do not block each other). Lock order matches publish: actor, edition, reader rows."""
+    row=next(iter(Edition.objects.raw('SELECT * FROM maison_edition WHERE id=%s FOR SHARE',[public_uuid(value)])),None)
+    if row:
+        from library.services import reviewable_edition
+        row=reviewable_edition(row,user)
+    if not row or not row.live_revision_id:raise DomainError('not_found','Published edition not found.',404)
+    return row
+
+
+def _correction_map(live,replaced_id):
+    """The live revision's text-correction record when it replaces `replaced_id` (publish_cleared_editions revise)."""
+    record=(getattr(live,'validation_evidence',None) or {}).get('source_revision') or {}
+    if record.get('replaces_revision_id')==str(replaced_id) and record.get('anchor_map') and record.get('unit_map'):return record
+    return None
+
+
+def _mapped_point(record,old_revision_id,new_revision_id,unit_id,anchor_id,offset,side):
+    """(unit_id, anchor_id, offset) on the replaced revision carried onto its correction, or None when not mapped."""
+    from operations.revision_remap import map_offset,snap
+    unit,anchor=record['unit_map'].get(str(unit_id)),record['anchor_map'].get(str(anchor_id))
+    if not unit or not anchor or type(offset)!=int:return None
+    old=Paragraph.objects.filter(anchor_id=public_uuid(anchor_id),unit__revision_id=old_revision_id).values_list('text',flat=True).first()
+    new=Paragraph.objects.filter(anchor_id=anchor,unit__revision_id=new_revision_id).values_list('text',flat=True).first()
+    if old is None or new is None or not 0<=offset<=len(old):return None
+    return unit,anchor,snap(new,map_offset(old,new,offset,side))
+
+
 def set_progress(user,edition_id,format,data,base_version,territory='IN'):
     payload={'edition_id':str(edition_id),'format':format,'base_version':base_version,**data}
     def mutate():
-        edition=_edition(edition_id,user)
-        if str(data.get('edition_revision_id'))!=str(edition.live_revision_id):raise DomainError('edition_revision_changed','Reload this edition revision before choosing a position.',409)
-        revision=authorize_revision(user,edition.live_revision,format,territory=territory)
-        loc,fraction=_location(revision,format,data.get('location'))
+        edition=_shared_edition(edition_id,user)
+        location=data.get('location')
+        if str(data.get('edition_revision_id'))!=str(edition.live_revision_id):
+            # Cold path: a position on the revision that a text correction just replaced moves onto the correction.
+            live=Revision.objects.filter(pk=edition.live_revision_id).only('id','validation_evidence').first()
+            record=_correction_map(live,data.get('edition_revision_id')) if format=='reader' else None
+            point=None
+            if record and isinstance(location,dict) and set(location)=={'format','unit_id','anchor_id','offset_chars'}:
+                try:point=_mapped_point(record,public_uuid(data['edition_revision_id']),live.id,location['unit_id'],location['anchor_id'],location['offset_chars'],'start')
+                except DomainError:point=None
+            if not point:raise DomainError('edition_revision_changed','Reload this edition revision before choosing a position.',409)
+            location={**location,'unit_id':point[0],'anchor_id':point[1],'offset_chars':point[2]}
+        revision=authorize_revision(user,edition.live_revision_id,format,territory=territory)
+        loc,fraction=_location(revision,format,location)
         row=Progress.objects.select_for_update().filter(user=user,edition=edition,format=format).first()
         current=progress_data(row,edition,format)
         if current['version']!=base_version:raise DomainError('version_conflict','Progress changed on another device.',412,current)
@@ -170,13 +210,59 @@ def _note(value):
     return value
 
 
+def _mapped_range(record,old_id,new_id,value,kind):
+    """An annotation range on the replaced revision carried onto its correction, or None when it cannot be mapped."""
+    if not isinstance(value,dict) or set(value)!={'unit_id','start_anchor_id','start_offset_chars','end_anchor_id','end_offset_chars','offset_unit'}:return None
+    try:
+        start=_mapped_point(record,old_id,new_id,value['unit_id'],value['start_anchor_id'],value['start_offset_chars'],'start')
+        collapsed=value['start_anchor_id']==value['end_anchor_id'] and value['start_offset_chars']==value['end_offset_chars']
+        end=start if collapsed else _mapped_point(record,old_id,new_id,value['unit_id'],value['end_anchor_id'],value['end_offset_chars'],'end')
+    except DomainError:return None
+    if not start or not end:return None
+    return {**value,'unit_id':start[0],'start_anchor_id':start[1],'start_offset_chars':start[2],'end_anchor_id':end[1],'end_offset_chars':end[2]}
+
+
+def _correction_for(user,old_id,territory):
+    """Cold path: (live correction revision, record) when the edition's live revision replaces `old_id`, else None.
+    The edition row is read FOR SHARE, so an in-flight publish is waited for."""
+    old=Revision.objects.filter(pk=old_id).only('id','edition_id').first()
+    if old is None:return None
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT live_revision_id FROM maison_edition WHERE id=%s FOR SHARE',[old.edition_id])
+        live_id=(cursor.fetchone() or [None])[0]
+    live=Revision.objects.filter(pk=live_id).only('id','validation_evidence').first() if live_id else None
+    record=_correction_map(live,old.id)
+    return (authorize_revision(user,live.id,territory=territory),record) if record else None
+
+
 def create_annotation(user,data,operation_id,territory='IN'):
     def mutate():
-        revision=authorize_revision(user,data['edition_revision_id'],territory=territory)
+        value=data['range']
+        try:revision=authorize_revision(user,data['edition_revision_id'],territory=territory)
+        except DomainError as error:
+            if error.code!='content_unavailable':raise
+            old_id=public_uuid(data['edition_revision_id'])
+            found=_correction_for(user,old_id,territory)
+            value=_mapped_range(found[1],old_id,found[0].id,value,data.get('kind')) if found else None
+            if value is None:raise
+            revision=found[0]
         kind=data.get('kind');color=data.get('color');note=_note(data.get('note_text'))
         if kind not in ['bookmark','highlight','note'] or color not in [None,'gold','mint','rose','lavender'] or (kind=='highlight' and color is None) or (kind=='note' and not note):raise DomainError('validation_error','Invalid annotation fields.',422)
-        location,quote,truncated=_range(revision,data['range'],kind);identifier=public_uuid(data['annotation_id'])
-        if Annotation.objects.filter(pk=identifier).exists():raise DomainError('annotation_exists','This annotation ID is already used.',409)
+        location,quote,truncated=_range(revision,value,kind);identifier=public_uuid(data['annotation_id'])
+        # One query (it replaces the plain exists check): the id check plus the live pointer read FOR SHARE, so a
+        # publish that committed while this request read the revision is seen here.
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT EXISTS(SELECT 1 FROM maison_annotation WHERE id=%s), e.live_revision_id '
+                           'FROM (SELECT live_revision_id FROM maison_edition WHERE id=%s FOR SHARE) e',[identifier,revision.edition_id])
+            exists,live_id=cursor.fetchone() or (False,None)
+        if exists:raise DomainError('annotation_exists','This annotation ID is already used.',409)
+        if live_id and live_id!=revision.id:
+            live=Revision.objects.filter(pk=live_id).only('id','validation_evidence').first()
+            record=_correction_map(live,revision.id)
+            mapped=_mapped_range(record,revision.id,live.id,value,kind) if record else None
+            if mapped is not None:  # otherwise today's behaviour: the row stays on the revision it was made against
+                revision=authorize_revision(user,live.id,territory=territory)
+                location,quote,truncated=_range(revision,mapped,kind)
         row=Annotation.objects.create(id=identifier,user=user,revision=revision,kind=kind,range=location,color=color,note_text=note,quoted_text=quote,quoted_text_truncated=truncated)
         return 201,annotation_data(row,user),row.version
     return apply_operation(user,operation_id,'annotation.create',data,mutate)
