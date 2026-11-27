@@ -1001,10 +1001,10 @@
       {
         "run_id": "narration-52b24258-r2-c1of2#1",
         "job_id": "narration-52b24258-r2-c1of2",
-        "usd": 1.025085,
-        "seconds": 0.0,
+        "usd": 0.5324880731887726,
+        "seconds": 1918.8759394190001,
         "at": "2026-11-27T19:02:36+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-52b24258-r2-c2of2#1",
