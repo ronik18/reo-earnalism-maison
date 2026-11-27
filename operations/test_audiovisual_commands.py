@@ -443,11 +443,9 @@ class AudiobookBundleTests(AudiovisualFixture):
             row["sentences"][1]["end_ms"] = row["sentences"][0]["end_ms"]
         self.assert_refused(source, "sentences[1]", mutate=overlap)
 
-        def before_segment(row, timing):
-            second = row["segments"][1]["anchor_id"]
-            target = next(r for r in row["sentences"] if r["anchor_id"] == second)
-            target["start_ms"] = row["segments"][0]["start_ms"]
-        self.assert_refused(source, "segment", mutate=before_segment)
+        def short_segment(row, timing):
+            row["segments"][-1]["end_ms"] -= 1
+        self.assert_refused(source, "outside the segment", mutate=short_segment)
 
     def test_read_bundle_refuses_unknown_row_keys(self):
         source = self.read_source()
