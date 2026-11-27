@@ -27,6 +27,7 @@ LIMITS = {"duration_pct": 0.12, "pitch_median_st": 1.5, "pitch_spread_st": 3.0, 
           "monotone_frac": 0.20, "max_run_s": 9.0, "pause_s": 0.15, "tail_db": -50.0, "brightness_db": 2.0,
           "jump_ratio": 1.5, "clicks_per_s": 0.2, "zero_run_s": 0.05, "join_lu": 1.5, "join_st": 1.5,
           "true_peak_db": -0.1}
+# a jump-free profile (rate 0) would make "1.5x the profile" fail every later take; controller ruling R-a keeps this floor
 JUMP_FLOOR = 0.1
 CODES = ("duration", "pitch_median", "pitch_spread", "monotone", "no_breath", "tail", "brightness", "jumps",
          "clicks", "digital_zero", "join", "true_peak")
@@ -38,7 +39,7 @@ def _frames(x: np.ndarray, win: int, hop: int) -> np.ndarray:
 
 
 def yin(x: np.ndarray, sr: int = SR, fmin=65, fmax=400, hop=HOP, win=0.040, thr=0.15):
-    """Per-10 ms (f0 Hz or nan, confidence). Works at sr/3 for speed."""
+    """Per-10 ms (f0 Hz or nan, confidence). Works at 16 kHz for speed."""
     k = sr // 16000
     x16 = x[:len(x) // k * k].reshape(-1, k).mean(1)
     s = sr // k
@@ -117,8 +118,14 @@ def _speech_mask(rms: np.ndarray) -> np.ndarray:
 def _true_peak_db(x: np.ndarray) -> float:
     if len(x) == 0:
         return -120.0
-    up = np.fft.irfft(np.fft.rfft(x), 4 * len(x)) * 4
-    return float(20 * np.log10(max(float(np.max(np.abs(up))), 1e-12)))
+    blk, pad = SR, int(0.01 * SR)   # 1 s blocks with 10 ms context each side: bounded memory, no wrap at joins
+    peak = 0.0
+    for a in range(0, len(x), blk):
+        seg = x[max(0, a - pad):a + blk + pad].astype(np.float64)
+        up = np.fft.irfft(np.fft.rfft(seg), 4 * len(seg)) * 4
+        lo = 4 * (a - max(0, a - pad))
+        peak = max(peak, float(np.max(np.abs(up[lo:lo + 4 * min(blk, len(x) - a)]))))
+    return float(20 * np.log10(max(peak, 1e-12)))
 
 
 def _zero_run_s(x: np.ndarray) -> float:
@@ -131,9 +138,15 @@ def _zero_run_s(x: np.ndarray) -> float:
 def _clicks(x: np.ndarray) -> int:
     if len(x) < 400:
         return 0
-    hpd = np.diff(x.astype(np.float64), 2)
-    lr = np.sqrt(np.convolve(hpd ** 2, np.ones(320) / 320, "same")) + 1e-6
-    idx = np.where(np.abs(hpd) / lr > 9)[0]
+    blk, pad = 10 * SR, 400   # 10 s blocks with context, so the local-RMS window never sees a block edge
+    parts = []
+    for a in range(0, len(x) - 2, blk):
+        lo = max(0, a - pad)
+        hpd = np.diff(x[lo:a + blk + pad].astype(np.float64), 2)
+        lr = np.sqrt(np.convolve(hpd ** 2, np.ones(320) / 320, "same")) + 1e-6
+        hit = np.where(np.abs(hpd) / lr > 9)[0] + lo
+        parts.append(hit[(hit >= a) & (hit < a + blk)])
+    idx = np.concatenate(parts) if parts else np.zeros(0, int)
     n, last = 0, -10 ** 9
     for c in idx:
         if c - last > 0.02 * SR:
@@ -246,7 +259,9 @@ def check(take: Path, expected_s: float, prof: dict, prev_tail: Path | None = No
     if abs(m["duration_s"] - expected_s) > L["duration_pct"] * expected_s:
         fails.append("duration")
     if not m.get("empty"):
-        if "pitch_median_hz" in prof and abs(12 * np.log2(m["pitch_median_hz"] / prof["pitch_median_hz"])) > L["pitch_median_st"]:
+        if m["pitch_median_hz"] is None:  # no voiced frame at all (noise, whisper, broken take)
+            fails.append("pitch_median")
+        elif "pitch_median_hz" in prof and abs(12 * np.log2(m["pitch_median_hz"] / prof["pitch_median_hz"])) > L["pitch_median_st"]:
             fails.append("pitch_median")
         if m["pitch_spread_st"] < L["pitch_spread_st"]:
             fails.append("pitch_spread")

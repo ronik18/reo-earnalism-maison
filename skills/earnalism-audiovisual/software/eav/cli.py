@@ -40,10 +40,11 @@
                          (no --root: pauses detected, re-timed by punctuation, filled with the take's room tone;
                          prints JSON with the cut times mapped into the new timeline and the new duration)
   python3 -m eav.cli voicecheck <take...> --expected S[,S...] [--profile profile.json] [--prev-tail <wav>] [--out <dir>]
-                         (no --root: the narration redo gate; writes voicecheck.json (one entry per take, with pass,
-                         failures and metrics) into --out, default the first take's folder; the book profile is
-                         measured from the given takes unless --profile; --expected is one value for all or one per
-                         take; --prev-tail is the preceding take, for the join check of the first listed take)
+                         (no --root: the narration redo gate; writes <take-stem>.voicecheck.json beside each take (or into --out)
+                         with pass, failures and metrics; exits 1 if any take fails. Without --profile the book
+                         profile is measured from the given takes and saved as voicecheck-profile.json; REDO RUNS MUST
+                         PASS --profile <that file>. --expected is one value for all or one per take; --prev-tail is
+                         the take before the first listed one, for the join check)
   python3 -m eav.cli pick --root <dir> --job <stills|retouch|touchup|edit job id> --choices <{"<key>": N} json file>
                          (after review: one candidate per <key>--cN still; film uses only picks)
   python3 -m eav.cli hold --root <dir> --film N --keys k1,k2,... [--clear]
@@ -2082,17 +2083,32 @@ def cmd_voicecheck(args):
     if len(exp) not in (1, len(takes)):
         raise Stop("--expected needs one value or one per take", "Fix --expected and rerun")
     exp = exp * len(takes) if len(exp) == 1 else exp
-    prof = json.loads(Path(args.profile).read_text()) if args.profile else voicecheck.profile(takes)
-    results, prev = {}, Path(args.prev_tail) if args.prev_tail else None
-    for t, e in zip(takes, exp):
-        results[t.name] = voicecheck.check(t, e, prof, prev)
-        prev = t
     out = Path(args.out) if args.out else takes[0].parent
     out.mkdir(parents=True, exist_ok=True)
-    (out / "voicecheck.json").write_text(json.dumps(results, indent=1, ensure_ascii=False))
-    for name, r in results.items():
-        print(f"{name}: {'PASS' if r['pass'] else 'REDO ' + ','.join(r['failures'])}")
-    print(f"Wrote {out / 'voicecheck.json'}.")
+    if args.profile:
+        pf = Path(args.profile)
+        if not pf.is_file():
+            raise Stop(f"{pf} does not exist", "Fix --profile and rerun")
+        prof = json.loads(pf.read_text())
+    else:
+        prof = voicecheck.profile(takes)
+        (out / "voicecheck-profile.json").write_text(json.dumps(prof, indent=1))
+    prev = Path(args.prev_tail) if args.prev_tail else None
+    if prev is not None and not prev.is_file():
+        raise Stop(f"{prev} does not exist", "Fix --prev-tail and rerun")
+    failed = 0
+    for t, e in zip(takes, exp):
+        r = voicecheck.check(t, e, prof, prev)
+        prev = t
+        (t.parent if not args.out else out).joinpath(f"{t.stem}.voicecheck.json").write_text(
+            json.dumps(r, indent=1, ensure_ascii=False))
+        failed += not r["pass"]
+        print(f"{t.name}: {'PASS' if r['pass'] else 'REDO ' + ','.join(r['failures'])}")
+    print(f"Wrote <take>.voicecheck.json per take{'' if args.profile else ' and ' + str(out / 'voicecheck-profile.json')}.")
+    if failed:
+        print(f"Next: regenerate the {failed} REDO take(s), then rerun with --profile {out / 'voicecheck-profile.json'}")
+        return 1
+    return 0
 
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
@@ -2198,9 +2214,9 @@ def _parser():
     s = sub.add_parser("voicecheck", help="narration redo gate: flag robotic/monotone/flawed takes (standalone: no record)")
     s.add_argument("takes", nargs="+")
     s.add_argument("--expected", required=True, help="expected duration in seconds: one value, or one per take (comma-separated)")
-    s.add_argument("--profile", help="book profile json; default: measured from the given takes")
+    s.add_argument("--profile", help="saved voicecheck-profile.json; always pass it on redo runs (default: measured from the given takes and saved)")
     s.add_argument("--prev-tail", help="the take before the first listed one, for the join check")
-    s.add_argument("--out", help="folder for voicecheck.json (default: the first take's folder)")
+    s.add_argument("--out", help="folder for the profile and results (default: beside each take)")
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)
@@ -2233,7 +2249,9 @@ def _parser():
 def main(argv=None) -> int:
     args = _parser().parse_args(argv)
     try:
-        COMMANDS[args.command](args)
+        rc = COMMANDS[args.command](args)
+        if rc:
+            return rc
     except Stop as e:
         print(f"STOP: {e}")
         print(f"Next: {e.next_action}")

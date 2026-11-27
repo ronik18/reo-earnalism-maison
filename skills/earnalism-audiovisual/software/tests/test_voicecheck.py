@@ -131,5 +131,42 @@ def test_cli_writes_voicecheck_json(tmp_path):
     y = _phrases()
     take = _write(tmp_path / "a.wav", y)
     code = cli.main(["voicecheck", str(take), "--expected", str(len(y) / SR)])
-    out = json.loads((tmp_path / "voicecheck.json").read_text())
-    assert out["a.wav"]["pass"] is True and code in (0, None)
+    out = json.loads((tmp_path / "a.voicecheck.json").read_text())
+    assert out["pass"] is True and code == 0
+
+
+def test_unvoiced_take_fails_instead_of_crashing(tmp_path):
+    y = (RNG.standard_normal(3 * SR) * 0.1).astype(np.float32)
+    p = _write(tmp_path / "noise.wav", y)
+    r = voicecheck.check(p, 3.0, {"pitch_median_hz": 180.0})
+    assert r["pass"] is False and "pitch_median" in r["failures"]
+
+
+def test_true_peak_blocks_match_reference_and_long_take_completes():
+    y = (RNG.standard_normal(2 * SR) * 0.2).astype(np.float32)
+    ref = float(20 * np.log10(np.max(np.abs(np.fft.irfft(np.fft.rfft(y), 4 * len(y)) * 4))))
+    assert abs(voicecheck._true_peak_db(y) - ref) < 0.1
+    long = (RNG.standard_normal(600 * SR) * 0.05).astype(np.float32)
+    assert voicecheck._true_peak_db(long) < 0
+    assert voicecheck._clicks(long) >= 0
+
+
+def test_cli_profile_saved_per_take_files_and_exit_code(tmp_path):
+    from eav import cli
+    a = _write(tmp_path / "a.wav", _phrases())
+    b = _write(tmp_path / "b.wav", _phrases())
+    n = len(_phrases()) / SR
+    assert cli.main(["voicecheck", str(a), str(b), "--expected", str(n)]) == 0
+    prof_file = tmp_path / "voicecheck-profile.json"
+    assert "pitch_median_hz" in json.loads(prof_file.read_text())
+    assert json.loads((tmp_path / "a.voicecheck.json").read_text())["pass"] is True
+    assert (tmp_path / "b.voicecheck.json").exists()
+    # same take shifted +3 st: resample by 2**(3/12) via index mapping
+    y = _phrases()
+    idx = np.arange(0, len(y) - 1, 2 ** (3 / 12))
+    shifted = _write(tmp_path / "hi.wav", np.interp(idx, np.arange(len(y)), y).astype(np.float32))
+    code = cli.main(["voicecheck", str(shifted), "--expected", str(len(idx) / SR), "--profile", str(prof_file)])
+    res = json.loads((tmp_path / "hi.voicecheck.json").read_text())
+    assert "pitch_median" in res["failures"] and code == 1
+    assert json.loads((tmp_path / "a.voicecheck.json").read_text())["pass"] is True  # untouched
+    assert json.loads(prof_file.read_text()) == json.loads(prof_file.read_text())
