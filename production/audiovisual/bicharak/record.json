@@ -11369,6 +11369,17 @@
       },
       "path": "film/film-01/film-01.mp4",
       "sha256": "c19b84a7d5ed50a20eef70447ed6d7772dd08d50b0ea48ba3e2f0e67ee90d53b"
+    },
+    {
+      "bytes": 814,
+      "kind": "qc_report",
+      "meta": {
+        "failed": [
+          "film-01:true_peak"
+        ]
+      },
+      "path": "qc/report.json",
+      "sha256": "78aa8c7b073332eec98cc1c0b06eed2f102d9413c479e56f284cf8250c363e4b"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -13746,6 +13757,16 @@
       },
       "result": "assembled",
       "stage": "film"
+    },
+    {
+      "at": "2026-11-27T19:56:07.072609+00:00",
+      "detail": {
+        "failed": [
+          "film-01:true_peak"
+        ]
+      },
+      "result": "fail",
+      "stage": "qc"
     }
   ],
   "ledger": "../allowance-ledger.json",

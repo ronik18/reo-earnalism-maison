@@ -1,6 +1,7 @@
 import subprocess
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from eav import qc
@@ -27,6 +28,20 @@ class QcTests(unittest.TestCase):
             sheet = td / "sheet.jpg"
             qc.contact_sheet(v, sheet, every_s=1.0)
             self.assertGreater(sheet.stat().st_size, 0)
+
+
+class LongFilmSheetTests(unittest.TestCase):
+    def test_a_long_film_gets_a_sheet_within_jpeg_limits(self):
+        from PIL import Image
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            v = td / "long.mp4"  # 300 s at 1 s per thumbnail would be 60 rows of 320 px
+            ff("-f", "lavfi", "-i", "testsrc2=s=64x36:r=2:d=300", "-pix_fmt", "yuv420p", str(v))
+            sheet = td / "sheet.jpg"
+            with unittest.mock.patch.object(qc, "MAX_SHEET_FRAMES", 20):
+                qc.contact_sheet(v, sheet, every_s=1.0)
+            w, h = Image.open(sheet).size
+            self.assertLessEqual(h, 4 * 320 + 8)  # 20 thumbnails = 4 rows of 5
 
 
 class OnsetTests(unittest.TestCase):

@@ -64,8 +64,14 @@ def speech_onset(audio, threshold_db=-40.0, rate=16000):
     return round(float(loud[0]) / rate, 4) if loud.size else None
 
 
+MAX_SHEET_FRAMES = 120  # 24 rows of 5 at 320 px: 7,680 px tall
+
+
 def contact_sheet(video, out, every_s=1.0, cols=5, thumb_h=320):
-    """Tile one thumbnail per `every_s` seconds into a single image."""
+    """Tile one thumbnail per `every_s` seconds into a single image. A long film is sampled
+    more sparsely so the sheet stays at most MAX_SHEET_FRAMES thumbnails (JPEG caps a side at
+    65,500 px; a 21-minute film at 1 s per thumbnail would need 80,640 px)."""
+    every_s = max(every_s, _duration(video) / MAX_SHEET_FRAMES)
     n = max(1, int(math.ceil(_duration(video) / every_s)))
     rows = math.ceil(n / cols)
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(video), "-vf",
