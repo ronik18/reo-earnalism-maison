@@ -65,7 +65,7 @@ def import_job(record, job: dict, downloaded_dir, ledger, actual_units: float,
     if build.get("job_id", job_id) != job_id:
         raise ImportHeld("build manifest belongs to a different job")
     _preflight_ledger(ledger, job_id, actual_units)
-    if kind not in ("narration", "stills", "music", "retouch", "edit", "reel_clips"):
+    if kind not in ("narration", "stills", "music", "retouch", "edit", "reel_clips", "film_clips"):
         raise ImportHeld(f"unknown job kind: {kind!r}")
     dest = record.root / kind / job_id
     if dest.exists():
@@ -108,6 +108,15 @@ def _job_keys(inputs_zip, kind) -> list:
     if kind == "retouch":  # every retouched still also returns its <key>--mask for review
         keys += list(data.get("masks") or [])
     return keys
+
+
+def _film_sub(name: str) -> str:
+    """film_clips layout: each clip's files under clips/, a still's depth map under depth/."""
+    if name.endswith((".mp4", ".last.png", ".last-depth.png")):
+        return "clips"
+    if name.endswith(".depth.png"):
+        return "depth"
+    raise ImportHeld(f"unexpected film_clips output: {name!r}")
 
 
 def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path):
@@ -153,6 +162,10 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     packages = manifest.get("packages")
     if not isinstance(packages, dict) or not any(packages.values()):
         raise ImportHeld("manifest.json records no resolved package versions (packages)")
+    film = kind == "film_clips"
+    if film:
+        for name in outputs:
+            _film_sub(name)
     missing = [k for k in _job_keys(job["inputs_zip"], kind)
                if not any(Path(name).stem == k for name in outputs)]
     if missing:
@@ -160,9 +173,11 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     staging = Path(tempfile.mkdtemp(dir=record.root, prefix=".import-"))
     try:
         for name in outputs:
-            shutil.copy2(present[name], staging / name)
+            sub = staging / _film_sub(name) if film else staging
+            sub.mkdir(exist_ok=True)
+            shutil.copy2(present[name], sub / name)
         for name, digest in outputs.items():  # re-verify the copies
-            if sha256_file(staging / name) != digest:
+            if sha256_file((staging / _film_sub(name) if film else staging) / name) != digest:
                 raise ImportHeld(f"copy sha256 mismatch: {name}")
         dest.parent.mkdir(parents=True, exist_ok=True)
         staging.rename(dest)
@@ -172,7 +187,8 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     meta = {"job_id": job_id, "job_kind": kind, "model": model, "packages": packages,
             "input_zip_sha256": zip_sha}
     artifacts = [record.add_artifact("retouch_mask" if kind == "retouch" and name.endswith("--mask.png")
-                                     else kind, dest / name, meta) for name in sorted(outputs)]
+                                     else kind, (dest / _film_sub(name) if film else dest) / name, meta)
+                 for name in sorted(outputs)]
     return artifacts, {"model": model, "packages": packages, "input_zip_sha256": zip_sha}
 
 

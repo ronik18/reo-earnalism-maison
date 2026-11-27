@@ -790,9 +790,15 @@ def cmd_job(args):
     spec, items = _job_spec(rec, args, kind, target)
     if kind in ("stills", "film_clips") and spec.get("scene"):  # R11: a shot-plan-driven job needs the approved paper edit
         try:
-            shotplan.require_approved(rec.root / "film" / target, spec["scene"])
+            approved = shotplan.require_approved(rec.root / "film" / target, spec["scene"])
         except shotplan.NotApproved as e:
             raise Stop(str(e), f"{PROG} plan-shots --root {rec.root} --film {args.film or '<n>'} --scene {spec['scene']}")
+        if kind == "film_clips":  # the approved plan limits what is built: its wan shots, at its wan_res
+            try:
+                colab_jobs.check_film_plan(spec, approved)
+            except ValueError as e:
+                raise Stop(f"job not built: {e}", "Give every item the number of an approved wan shot "
+                           "(\"shot\") at that shot's wan_res, and every wan shot at least one item")
     if args.list_units:  # for writing directions.json: the keys this job would use; nothing built
         for u in colab_jobs.narration_units(spec):
             print(f"{u['unit_key']}\t{u['text']}")

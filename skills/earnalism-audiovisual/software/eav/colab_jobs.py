@@ -439,7 +439,7 @@ def min_vram_gib(spec: dict) -> int:
 
 
 def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, deadline_s,
-              min_vram=0) -> bytes:
+              min_vram=0, clip_s=None) -> bytes:
     retouch, edit, film = kind == "retouch", kind == "edit", kind == "film_clips"
     config = (_GUARD +
               f"import pathlib\nJOB_ID = {job_id!r}\nTITLE = {title!r}\nKIND = {kind!r}\n"
@@ -465,7 +465,9 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
     if film:
         config += (f"GUIDANCE = {FILM_GUIDANCE!r}\nFRAMES = {FILM_FRAMES}\nFPS = {FILM_FPS}\n"
                    f"LICENCE_ALLOWLIST = {FILM_LICENCE_ALLOWLIST!r}\nDEPTH_REPO = {FILM_DEPTH_REPO!r}\n"
-                   f"LICENCE_REPOS = (MODEL_REPO, DEPTH_REPO)\nDIFFUSERS_PIN = {FILM_DIFFUSERS!r}\n")
+                   f"LICENCE_REPOS = (MODEL_REPO, DEPTH_REPO)\nDIFFUSERS_PIN = {FILM_DIFFUSERS!r}\n"
+                   f"# measured seconds per finished clip by resolution (this job's GPU class), for may_start\n"
+                   f"CLIP_S = {clip_s!r}\n")
     intro = (f"# Earnalism {kind} job `{job_id}`\n\n**Prepared, not run.** Input zip SHA256 "
              f"`{zip_sha}`. Set `RUN = True` in the first cell, then run all. With the R2 exchange "
              f"(`exchange.json` in `{DRIVE_ROOT}/{title}/{job_id}/`) the notebook downloads "
@@ -885,6 +887,9 @@ def _film_items(spec: dict) -> list:
         seed = s.get("seed")
         if isinstance(seed, bool) or not isinstance(seed, int):
             raise ValueError(f"film_clips item {key!r} needs an integer seed")
+        shot = s.get("shot")
+        if shot is not None and (isinstance(shot, bool) or not isinstance(shot, int) or shot < 1):
+            raise ValueError(f"film_clips item {key!r} shot must be a shot number of the plan (1, 2, ...)")
         cont, image = s.get("continue_from"), s.get("image")
         if cont is not None and cont not in seen:
             raise ValueError(f"film_clips item {key!r} continue_from {cont!r} must name an earlier item "
@@ -900,8 +905,35 @@ def _film_items(spec: dict) -> list:
             raise ValueError(f"film_clips item {key!r} needs a non-empty prompt")
         seen.add(key)
         out.append({"key": key, "image": image, "width": res[0], "height": res[1], "seed": seed,
-                    "prompt": prompt.strip(), "continue_from": cont})
+                    "prompt": prompt.strip(), "continue_from": cont,
+                    **({"shot": shot} if shot is not None else {})})
     return out
+
+
+def check_film_plan(spec: dict, plan: dict) -> None:
+    """A spec that declares "scene" is bound to that scene's approved shot plan: every item names (shot)
+    a motion == "wan" shot at that shot's wan_res, and every wan shot has at least one item (several
+    takes of a shot are allowed). Raises ValueError otherwise."""
+    wan = {s["n"]: s for s in plan["shots"] if s["motion"] == "wan"}
+    taken = set()
+    for item in _film_items(spec):
+        n = item.get("shot")
+        if n is None:
+            raise ValueError(f"film_clips item {item['key']!r} needs \"shot\": the number of a wan shot of "
+                             f"scene {plan['scene_id']} (wan shots: {', '.join(map(str, sorted(wan))) or 'none'})")
+        if n not in wan:
+            raise ValueError(f"film_clips item {item['key']!r} names shot {n}, which is not a motion == "
+                             f"\"wan\" shot of the approved plan of scene {plan['scene_id']} (wan shots: "
+                             f"{', '.join(map(str, sorted(wan))) or 'none'})")
+        want = wan[n]["wan_res"]
+        if f"{item['width']}x{item['height']}" != want:
+            raise ValueError(f"film_clips item {item['key']!r} is {item['width']}x{item['height']} but "
+                             f"shot {n} of the approved plan is {want}")
+        taken.add(n)
+    missing = sorted(set(wan) - taken)
+    if missing:
+        raise ValueError(f"the approved plan of scene {plan['scene_id']} has wan shot(s) with no "
+                         f"film_clips item: shot {', '.join(map(str, missing))}")
 
 
 def _check_depth_model(spec: dict) -> None:
@@ -1011,6 +1043,8 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                             "depth_model": FILM_DEPTH_REPO},
                 "files": _film_files(spec, items), "repo": FILM_REPO, "revision": "resolved-at-run-time",
                 "steps": FILM_STEPS, "compute": compute, "diffusers": FILM_DIFFUSERS,
+                "clip_s": {"hd": rates[kind]["clip_s_hd_a100" if compute["gpu"] == "a100" else "clip_s_hd"],
+                           "sd": rates[kind]["clip_s_sd"]},
                 "licences": {"recorded": dict(FILM_LICENCES), "allowlist": list(FILM_LICENCE_ALLOWLIST)}}
     if kind == "edit":
         _check_model(kind, spec, EDIT_REPO)
@@ -1144,7 +1178,7 @@ def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s:
                                        + "\n").encode("utf-8"), **plan.get("files", {})})
     zip_sha = hashlib.sha256(archive).hexdigest()
     nb = _notebook(kind, job_id, title, zip_sha, plan["repo"], plan["revision"],
-                   plan["steps"], _TEMPLATES / f"{kind}_cell.py.txt", deadline_s, min_vram)
+                   plan["steps"], _TEMPLATES / f"{kind}_cell.py.txt", deadline_s, min_vram, plan.get("clip_s"))
     manifest = {"schema": "earnalism.audiovisual-build.v1", "job_id": job_id, "kind": kind,
                 "title": title, "inputs_sha256": zip_sha,
                 "notebook_sha256": hashlib.sha256(nb).hexdigest(),

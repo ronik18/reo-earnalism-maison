@@ -91,6 +91,7 @@ todo = remaining_keys(OUT_DIR, [i["key"] for i in ITEMS])
 print("clips to make:", len(todo), "of", len(ITEMS), "(done.json skips the finished ones)")
 if todo:
     from huggingface_hub import HfApi
+    import diffusers
     from diffusers import AutoencoderKLWan, WanImageToVideoPipeline
     from diffusers.utils import export_to_video
     revision = HfApi().model_info(MODEL_REPO).sha
@@ -104,6 +105,15 @@ if todo:
         pipe.to("cuda")
     else:
         pipe.enable_model_cpu_offload()
+
+
+# --- estimate helper begin (plain function; the may_start test execs this block alone) ---
+def clip_need(item, last_by_res):
+    """Seconds the next clip needs: the measured figure for its resolution, or the slowest clip of that
+    resolution made so far in this run if that took longer."""
+    res = "hd" if item["width"] >= 1280 else "sd"
+    return max(float(CLIP_S[res]), last_by_res.get(res, 0.0))
+# --- estimate helper end ---
 
 
 def fit(img, w, h):
@@ -129,12 +139,12 @@ def start_image(zf, item):
     return Image.open(zf.open(item["image"])).convert("RGB")
 
 
-last = 0.0  # seconds the previous clip took; an HD clip takes about twice a standard one
+last_by_res = {}  # slowest clip so far per resolution ("hd"/"sd"), seconds
 with zipfile.ZipFile(INPUT_ZIP) as z:
     for item in ITEMS:
         if item["key"] not in todo:
             continue
-        if not may_start(last):
+        if not may_start(clip_need(item, last_by_res)):
             break
         started = time.time()
         img = fit(start_image(z, item), item["width"], item["height"])
@@ -142,10 +152,13 @@ with zipfile.ZipFile(INPUT_ZIP) as z:
                       height=item["height"], width=item["width"], num_frames=FRAMES,
                       num_inference_steps=STEPS, guidance_scale=GUIDANCE,
                       generator=torch.Generator("cpu").manual_seed(item["seed"])).frames[0]
-        try:  # near-lossless: the default export is ~300 kbps and softens the picture
+        # near-lossless (quality=10): the default export is ~300 kbps and softens the picture, so there is
+        # no fallback; a clip that cannot be saved near-lossless stops the job and is never journaled.
+        try:
             export_to_video(frames, str(OUT_DIR / (item["key"] + ".mp4")), fps=FPS, quality=10)
-        except TypeError:
-            export_to_video(frames, str(OUT_DIR / (item["key"] + ".mp4")), fps=FPS)
+        except TypeError as e:
+            raise RuntimeError("export_to_video does not accept quality=10 (near-lossless) in diffusers "
+                               + diffusers.__version__ + ": " + str(e) + "; nothing softened was written") from None
         _last = frames[-1]
         if not isinstance(_last, Image.Image):
             _arr = np.asarray(_last)
@@ -153,9 +166,11 @@ with zipfile.ZipFile(INPUT_ZIP) as z:
         _last.save(OUT_DIR / (item["key"] + ".last.png"))
         save_depth(_last, item["key"] + ".last-depth.png")
         record_done(OUT_DIR, item["key"])  # last: every file of the key is on Drive
-        last = time.time() - started
-        SECONDS[item["key"]] = round(last, 1)
-        print("wrote", item["key"], "%dx%d" % (item["width"], item["height"]), "in %.1f s" % last)
+        took = time.time() - started
+        _res = "hd" if item["width"] >= 1280 else "sd"
+        last_by_res[_res] = max(last_by_res.get(_res, 0.0), took)
+        SECONDS[item["key"]] = round(took, 1)
+        print("wrote", item["key"], "%dx%d" % (item["width"], item["height"]), "in %.1f s" % took)
         gc.collect()
         torch.cuda.empty_cache()
 MODEL_INFO["seconds_per_clip"] = SECONDS

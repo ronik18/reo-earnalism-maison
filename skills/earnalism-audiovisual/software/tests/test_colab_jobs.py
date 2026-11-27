@@ -962,3 +962,43 @@ class FilmClipsTests(unittest.TestCase):
         spec = self.spec(2)
         spec["items"][1].update(continue_from=spec["items"][0]["key"], image=None)
         self.build("film_clips", spec)
+
+    # --- fix round 1 -----------------------------------------------------------------------
+    def test_film_clips_config_bakes_measured_seconds_per_resolution(self):
+        src = "\n".join(self.cells(self.build("film_clips", self.spec())))
+        self.assertIn("CLIP_S = {'hd': 900, 'sd': 435}", src)
+        a100 = "\n".join(self.cells(self.build("film_clips", self.spec(min_vram_gib=30, job_id="film-a"))))
+        self.assertIn("CLIP_S = {'hd': 215, 'sd': 435}", a100)
+
+    def test_film_clips_may_start_uses_per_resolution_estimates(self):
+        import sys, time, types
+        t = self.template()
+        helper = t[t.index("# --- estimate helper begin"):t.index("# --- estimate helper end")]
+        clock = next(c for c in self.cells(self.build("film_clips", self.spec())) if "def may_start" in c)
+        colab = types.ModuleType("google.colab")
+        colab.runtime = types.SimpleNamespace(unassign=lambda: None)
+        google = types.ModuleType("google")
+        google.colab = colab
+        g = {"RUN": True, "DEADLINE_SECONDS": 1000, "MANIFEST_RESERVE_S": 60, "CLIP_S": {"hd": 900, "sd": 435}}
+        with patch.dict(sys.modules, {"google": google, "google.colab": colab}):
+            exec(clock, g)
+        exec(helper, g)
+        g["JOB_STARTED"] = time.time() - 500          # about 500 s left
+        hd = {"width": 1280, "height": 704}
+        sd = {"width": 896, "height": 512}
+        self.assertTrue(g["may_start"](g["clip_need"](sd, {})))                 # 435 + 60 fits
+        self.assertFalse(g["may_start"](g["clip_need"](hd, {})))                # the first clip is HD
+        g["INCOMPLETE"] = False
+        self.assertFalse(g["may_start"](g["clip_need"](hd, {"sd": 100.0})))     # an SD last time says nothing about HD
+        g["INCOMPLETE"] = False
+        self.assertFalse(g["may_start"](g["clip_need"](sd, {"sd": 460.0})))     # the last SD clip was slower
+        self.assertEqual(g["clip_need"](hd, {"hd": 950.0}), 950.0)
+
+    def test_film_clips_export_has_no_silent_quality_fallback(self):
+        t = self.template()
+        self.assertEqual(t.count("export_to_video(frames"), 1)  # no second, softer export call
+        self.assertNotIn("fps=FPS)\n", t)  # every export passes quality=10
+        self.assertIn("except TypeError as e:\n            raise RuntimeError", t)
+        self.assertIn("quality=10", t)
+        self.assertIn("near-lossless", t)
+        self.assertIn("raise RuntimeError", t[t.index("quality=10") - 400:t.index("quality=10") + 600])

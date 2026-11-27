@@ -299,6 +299,11 @@ def test_stills_job_with_scene_key_needs_approval_but_legacy_spec_does_not(tmp_p
     assert code == 0 and "Built stills job" in out, out
 
 
+def _wan_item(key, shot, w=1280, h=704):
+    return {"key": key, "shot": shot, "image": "s.png", "width": w, "height": h, "seed": 1,
+            "prompt": "A girl turns her face, static locked-off camera.", "continue_from": None}
+
+
 def test_film_clips_job_with_scene_key_needs_approval_but_a_pilot_spec_does_not(tmp_path):
     root, run = _title(tmp_path)
     art = tmp_path / "art"
@@ -308,8 +313,7 @@ def test_film_clips_job_with_scene_key_needs_approval_but_a_pilot_spec_does_not(
     rates.write_text(json.dumps({"film_clips": {"clip_s_hd": 900, "clip_s_hd_a100": 215, "clip_s_sd": 435,
                                                 "units_per_hour_l4": 2.4, "units_per_hour_a100": 4.5,
                                                 "decode_s": 900, "export_s": 120}}), encoding="utf-8")
-    items = [{"key": "f01s014-1", "image": "s.png", "width": 1280, "height": 704, "seed": 1,
-              "prompt": "A girl turns her face, static locked-off camera.", "continue_from": None}]
+    items = [_wan_item("f01s014-03", 3), _wan_item("f01s014-09", 9)]
     spec = tmp_path / "clips.json"
     spec.write_text(json.dumps({"scene": "f01s014", "art_dir": str(art), "items": items}), encoding="utf-8")
     args = ("job", "film_clips", "--root", root, "--film", 1, "--rates", rates, "--spec", spec)
@@ -322,7 +326,37 @@ def test_film_clips_job_with_scene_key_needs_approval_but_a_pilot_spec_does_not(
     assert run("plan-shots", "--root", root, "--film", 1, "--scene", "f01s014", "--approve", "--by", "claude", "--reviewer", "rev")[0] == 0
     code, out = run(*args)
     assert code == 0 and "Built film_clips job" in out, out
-    spec.write_text(json.dumps({"art_dir": str(art), "items": items}), encoding="utf-8")  # pilot: no scene key
-    (root / "film" / "film-01" / "shots" / "f01s014.json").unlink()
+    pilot = [{k: v for k, v in _wan_item("pilot", 1).items() if k != "shot"}]
+    spec.write_text(json.dumps({"art_dir": str(art), "items": pilot}), encoding="utf-8")  # pilot: no scene key
     code, out = run(*args, "--job-id", "film-clips-pilot")
+    assert code == 0 and "Built film_clips job" in out, out
+
+
+def test_film_clips_job_is_bound_to_the_approved_wan_shots(tmp_path):
+    root, run = _title(tmp_path)
+    art = tmp_path / "art"
+    art.mkdir()
+    (art / "s.png").write_bytes(b"png")
+    rates = tmp_path / "r.json"
+    rates.write_text(json.dumps({"film_clips": {"clip_s_hd": 900, "clip_s_hd_a100": 215, "clip_s_sd": 435,
+                                                "units_per_hour_l4": 2.4, "units_per_hour_a100": 4.5,
+                                                "decode_s": 900, "export_s": 120}}), encoding="utf-8")
+    assert run("plan-shots", "--root", root, "--film", 1, "--scene", "f01s014")[0] == 0
+    assert run("plan-shots", "--root", root, "--film", 1, "--scene", "f01s014", "--approve", "--by", "claude", "--reviewer", "rev")[0] == 0
+    spec = tmp_path / "clips.json"
+
+    def attempt(items, *extra):
+        spec.write_text(json.dumps({"scene": "f01s014", "art_dir": str(art), "items": items}), encoding="utf-8")
+        return run("job", "film_clips", "--root", root, "--film", 1, "--rates", rates, "--spec", spec, *extra)
+
+    code, out = attempt([_wan_item("a", 3), _wan_item("b", 4)])           # shot 4 is a glide shot
+    assert code == 2 and "shot 4" in out and "wan" in out
+    code, out = attempt([_wan_item("a", 3), _wan_item("b", 9, 896, 512)])  # wrong resolution
+    assert code == 2 and "1280x704" in out
+    code, out = attempt([_wan_item("a", 3)])                               # wan shot 9 has no item
+    assert code == 2 and "shot 9" in out
+    code, out = attempt([{k: v for k, v in _wan_item("a", 3).items() if k != "shot"}, _wan_item("b", 9)])
+    assert code == 2 and "shot" in out
+    assert not (root / "jobs").exists() or not list((root / "jobs").iterdir())
+    code, out = attempt([_wan_item("a", 3), _wan_item("a2", 3), _wan_item("b", 9)])  # two takes of shot 3
     assert code == 0 and "Built film_clips job" in out, out

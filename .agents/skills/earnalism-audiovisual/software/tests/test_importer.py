@@ -1,4 +1,6 @@
 import hashlib
+import io
+import shutil
 import json
 import tempfile
 import unittest
@@ -353,3 +355,73 @@ class ReelImportTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FilmClipsImportTests(unittest.TestCase):
+    """film_clips outputs (a fake outputs.tar through the exchange extractor) land under clips/ and depth/."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = Path(tmp.name)
+        self.record = Record.create(self.root / "rec", "garden-book", {"x": 1})
+        self.ledger = Ledger(self.root / "ledger.json")
+        out = self.root / "rec" / "jobs"
+        out.mkdir()
+        art = self.root / "art"
+        art.mkdir()
+        (art / "still.png").write_bytes(b"png")
+        rates = {"film_clips": {"clip_s_hd": 900, "clip_s_hd_a100": 215, "clip_s_sd": 435,
+                                "units_per_hour_l4": 2.4, "units_per_hour_a100": 4.5,
+                                "decode_s": 900, "export_s": 120}}
+        item = {"key": "c1", "image": "still.png", "width": 1280, "height": 704, "seed": 1,
+                "prompt": "A girl turns, static locked-off camera.", "continue_from": None}
+        self.job = colab_jobs.build_job("film_clips", self.record, {"art_dir": str(art), "items": [item]},
+                                        self.ledger, rates, out, month="2026-11")
+        self.zip_sha = sha(Path(self.job["inputs_zip"]).read_bytes())
+
+    def outputs_tar(self, drop=(), tamper=None, extra=None):
+        import tarfile
+        files = {"c1.mp4": b"mp4", "c1.last.png": b"last", "c1.last-depth.png": b"ld", "still.depth.png": b"d",
+                 **(extra or {})}
+        manifest = {"schema": "earnalism.audiovisual-outputs.v1", "job_id": self.job["job_id"],
+                    "kind": "film_clips", "input_zip_sha256": self.zip_sha, "model": MODEL_INFO,
+                    "status": "COMPLETE", "packages": {"diffusers": "0.37.0"},
+                    "outputs": {n: sha(d) for n, d in files.items() if n not in drop}}
+        tar = self.root / "outputs.tar"
+        with tarfile.open(tar, "w", format=tarfile.PAX_FORMAT) as t:
+            for name, data in {**{n: d for n, d in files.items() if n not in drop},
+                               "manifest.json": json.dumps(manifest).encode()}.items():
+                if tamper == name:
+                    data = data + b"x"
+                info = tarfile.TarInfo(name)
+                info.size = len(data)
+                t.addfile(info, io.BytesIO(data))
+        from eav import exchange
+        folder = self.root / "dl"
+        exchange.safe_extract(tar, folder)
+        return folder
+
+    def test_film_clips_outputs_are_placed_under_clips_and_depth(self):
+        arts = importer.import_job(self.record, self.job, self.outputs_tar(), self.ledger, 1.0)
+        jid = self.job["job_id"]
+        base = f"film_clips/{jid}"
+        self.assertEqual(sorted(a["path"] for a in arts),
+                         [f"{base}/clips/c1.last-depth.png", f"{base}/clips/c1.last.png",
+                          f"{base}/clips/c1.mp4", f"{base}/depth/still.depth.png"])
+        self.assertEqual((self.record.root / base / "clips" / "c1.mp4").read_bytes(), b"mp4")
+        self.assertEqual(self.ledger._load()[0]["state"], "settled")
+
+    def test_film_clips_missing_item_or_bad_hash_holds(self):
+        for kw in ({"drop": ("c1.mp4",)}, {"tamper": "c1.mp4"}):
+            folder = self.outputs_tar(**kw)
+            with self.assertRaises(ImportHeld):
+                importer.import_job(self.record, self.job, folder, self.ledger, 1.0)
+            self.assertFalse((self.record.root / "film_clips").exists())
+            self.assertEqual(self.ledger._load()[0]["state"], "reserved")
+            shutil.rmtree(self.root / "dl")
+
+    def test_film_clips_unknown_output_name_holds(self):
+        with self.assertRaises(ImportHeld):
+            importer.import_job(self.record, self.job, self.outputs_tar(extra={"notes.txt": b"x"}), self.ledger, 1.0)
+        self.assertFalse((self.record.root / "film_clips").exists())
