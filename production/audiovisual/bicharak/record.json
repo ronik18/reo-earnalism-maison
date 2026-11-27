@@ -6393,6 +6393,254 @@
       },
       "path": "stills/stills-film-01-r4-c1of2/f01s009-4.png",
       "sha256": "efd4f8ae91b7c45a9953bf4a799e75301df24d03378c3390f2f522ba481d517b"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-1-kshiroda-night.wav",
+      "sha256": "06f22370ed473a90656b6410b65f555df7d98d35942692b9a68cd755be2f774b"
+    },
+    {
+      "bytes": 1441,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-1-kshiroda-night_input_params.json",
+      "sha256": "8c350945f1360a0577090573d9451a2a9eeee356a20c86d75c43dd4456815cae"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-2-window-and-judge.wav",
+      "sha256": "f384a22085aa2d013fd45e2fbdc1416dac2621a1dacc34a7579a2ca3e28cff2c"
+    },
+    {
+      "bytes": 1460,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-2-window-and-judge_input_params.json",
+      "sha256": "99b5beefb1c4e6f523f450711b4f049bff797565e2b3bdfdf9ee8f1447ec8e39"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-3-dream-and-carriage.wav",
+      "sha256": "cbdf3cb9145860d5bb93754bfd14a41a58d956f24504881844d35485bb9714a0"
+    },
+    {
+      "bytes": 1447,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-3-dream-and-carriage_input_params.json",
+      "sha256": "3e492312f3d25d8d3ef39d58f32df80440362c520e0b03dc220640082161d570"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-4-prison-and-ring.wav",
+      "sha256": "75c5af873f8b6e059c66fdd6ba06141940788baf7ebe9fb3bea143dcf85ac765"
+    },
+    {
+      "bytes": 1459,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-film-01-r4/cue-4-prison-and-ring_input_params.json",
+      "sha256": "939bde9ccf13e31876bf9ecba397d7bf503d3bc4dfb8207a43e89a175319eaab"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -7428,6 +7676,47 @@
           "sentencepiece": "0.2.3",
           "torch": "2.15.0",
           "transformers": "5.24.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-27T06:47:07.798519+00:00",
+      "detail": {
+        "actual_units": 0.0,
+        "files": [
+          "music/music-film-01-r4/cue-1-kshiroda-night.wav",
+          "music/music-film-01-r4/cue-1-kshiroda-night_input_params.json",
+          "music/music-film-01-r4/cue-2-window-and-judge.wav",
+          "music/music-film-01-r4/cue-2-window-and-judge_input_params.json",
+          "music/music-film-01-r4/cue-3-dream-and-carriage.wav",
+          "music/music-film-01-r4/cue-3-dream-and-carriage_input_params.json",
+          "music/music-film-01-r4/cue-4-prison-and-ring.wav",
+          "music/music-film-01-r4/cue-4-prison-and-ring_input_params.json"
+        ],
+        "input_zip_sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d",
+        "job_id": "music-film-01-r4",
+        "kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
         }
       },
       "result": "accepted",
