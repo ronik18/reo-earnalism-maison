@@ -32191,6 +32191,20 @@
       },
       "path": "music/music-pilot3b-f01s014/p3-sunrise-3_input_params.json",
       "sha256": "f2d3446481818bcc8a0285460d895b460aa9ce73330e9791c92277218beb2c9e"
+    },
+    {
+      "bytes": 19718,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.9295833333333332,
+        "inputs_zip": "jobs/stills-pilot4-f01s014/inputs.zip",
+        "job_id": "stills-pilot4-f01s014",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-pilot4-f01s014/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-pilot4-f01s014/stills.ipynb",
+      "sha256": "3cdcfa1b8680cd54a7f0faf82212ee5ab050907d7971d30f77e5b4e5838cb783"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -35932,6 +35946,49 @@
         "outputs_tar_sha256": "081cf0154418af7494ee59d98ec61ca09f93d8dc3b9c9ec0db3826dda196f9e4"
       },
       "result": "exchange_collected",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T04:48:07.130125+00:00",
+      "detail": {
+        "forecast_units": 0.9295833333333332,
+        "job_id": "stills-pilot4-f01s014",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T04:48:07.157107+00:00",
+      "detail": {
+        "job_id": "stills-pilot4-f01s014",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T04:48:14.812405+00:00",
+      "detail": {
+        "bytes": 13544,
+        "job_id": "stills-pilot4-f01s014",
+        "key": "exports/colab-exchange/bicharak/stills-pilot4-f01s014/inputs.zip",
+        "sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T04:49:34.040268+00:00",
+      "detail": {
+        "expires_at": "2026-11-28T04:48:24.460280+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-pilot4-f01s014/inputs.zip",
+        "inputs_sha256": "c2f79e390fb95a8a7f3bc913669d3c6f14fa30110787f5f0f196c16bd7cefb88",
+        "job_id": "stills-pilot4-f01s014",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-pilot4-f01s014/outputs.tar"
+      },
+      "result": "exchange_staged",
       "stage": "job"
     }
   ],

@@ -216,9 +216,108 @@ The planner turns each scene's text plus the measured narration timing into a **
   - the audio gates (voice-over-music margin, silence at peaks, digital zero, loudness).
 - A frame-by-frame review (picture, motion, sound) runs before the owner sees a cut.
 
-### 8. Read and Listen (owner re-review, 27 Nov)
+### 8. Film-wide rules enforced by `eav qc` (from the 27 Nov audio-visual re-review)
 
-[Filled from the Read and Listen reviews.]
+- **R1 New information.** No stretch longer than 6 s without a new subject, action or composition. A camera glide alone does not count.
+- **R2 Shot density.**
+  - At least one shot per 6 s of narration.
+  - No shot over 8 s unless it contains a performed action.
+- **R3 Peak.** One marked peak per scene, placed at 70–85% of the way through, with:
+  - a preceding shot that motivates it (a planted image paid off at the peak);
+  - at least 4 s on screen;
+  - a mark in the sound (silence or a synced effect).
+- **R4 Sound matches picture.**
+  - Every visible sound source is heard, and day or night ambience matches the picture.
+  - Each scene ends with a J- or L-cut into the next.
+- **R5 Captions.**
+  - On by default, muxed as a subtitle track, with a burned-in rendition on request.
+  - At most 2 lines, at most 42 characters per line, 1–7 s per cue.
+  - At most 15 characters per second for Bengali.
+- **R6 Character lock.**
+  - Every on-screen person has a world-bible entry and an anchor still.
+  - An automatic check against the anchor covers eye colour and count, mole, jewellery and sari border.
+- **R7 Fidelity.** No frame contradicts the current or neighbouring scene's text. Example: a "shut carriage" has no open window.
+- **R8 Motifs.** Each scene reuses at least one motif from earlier, changed (the empty bed, the birdcage, the slats).
+- **R9 Opener, closer, disclosure.**
+  - 0.5–1 s of breath before the first word.
+  - A title card ("বিচারক — রবীন্দ্রনাথ ঠাকুর").
+  - Closing credits naming the author, the narration voice, and that the images and narration are AI-generated, before the logo lockup.
+- **R10 Audio and safety.**
+  - Film master at −16 LUFS ±1, true peak ≤ −1.5 dBTP.
+  - At most 3 flashes per second.
+  - Luminance jumps over 25% only on a deliberate cut.
+- **R11 Paper edit first.** Each scene's two-column AV script, shot list and compute budget are approved, with a stopwatch pass, before anything is generated.
+
+### 9. Listen: the audiobook (from the 27 Nov Listen re-review)
+
+- **Narration fixes in `eav`:**
+  - Takes render with tails of at least 400 ms, cut only in silence, with 30–50 ms crossfades. No take ends at speaking level.
+  - Continuous room tone at −62 to −68 dBFS; digital zero is never allowed.
+  - Joins matched to within 1.5 LU and ±1.5 semitones of the book median.
+  - Pause lengths by punctuation (as in section 4), each varied ±15%. A পরিচ্ছেদ heading gets 2.5–3 s before it and 1.5 s after.
+  - The redo check from section 4 adds:
+    - last 50 ms above −50 dBFS;
+    - brightness within ±2 dB of the book median;
+    - phrase-end pitch spread of at least 3 semitones over 45 s;
+    - at least 95% of । followed by a pause of 0.45 s or more.
+- **The audiobook gets its own master, separate from the film:**
+  - −18 LUFS ±1, true peak ≤ −2 dBTP after encoding, loudness range 4–8 LU, mono 64 kbps, encoded once from PCM.
+  - Music only for the intro, outro and part changes. Any bed sits at least 24 LU under the voice with a 6 dB duck and 1.5 s release, never pumping in pauses.
+  - Opens with the title and author; ends with 3 s of tail, "সমাপ্ত" and room tone.
+- **Chapters and sync:** পরিচ্ছেদ chapter markers in the bundle; sentence-level timing maps (not paragraph-only) so the reader and player can follow along.
+- **Player (frontend lane, `client/player.tsx`; proposed, needs owner approval as a design-behaviour change):**
+  - on-screen −15 s and +30 s buttons, at least 44 px;
+  - playback speed remembered between sessions;
+  - full Media Session: artwork, author, part, lock-screen position and previous/next part;
+  - a sleep timer driven by playback time, with a 15 s fade and "end of part";
+  - a parts list;
+  - text-follow highlighting;
+  - the position-conflict prompt shows both positions;
+  - Bengali labels and digits in the Bengali UI.
+
+### 10. Read: the reader (from the 27 Nov Read re-review; frontend and backend lanes)
+
+The typography is excellent and stays: Noto Serif Bengali 20 px, line-height 1.8, correct conjuncts and old spellings. The following changes are proposed and need owner approval as design-behaviour changes to the approved reading-room design (`2026-11-22-reading-room-all-screens-design.md`):
+
+1. **Night first.** The reader theme defaults to the system's dark setting. The theme reaches the header, and the logo dims in dark themes.
+2. **Immersive chrome with progress.**
+   - One toolbar that hides on scroll down and returns on tap or scroll up, replacing the duplicated Back/title.
+   - A 2 px gold progress hairline, minutes remaining, and a পরিচ্ছেদ drawer.
+3. **A live "Reading comfort" bottom sheet.**
+   - A−/A+ steppers, theme swatches, and Narrow/Medium/Wide. Changes apply live, with no save button.
+   - "Justified" hidden for Bengali.
+4. **A preview ending that converts.** The exact free sign-in path ("Sign in free to finish বিচারক — your place is kept"), the remaining length, and Listen/Watch alternatives.
+5. **Visible cross-format journey.**
+   - A Read · Listen · Film row on the title page, including "coming soon" states.
+   - One Read/Listen/Watch switch in the reader that keeps the reader's position.
+6. **Small fixes:**
+   - on mobile, the primary action above the fold, with length and parts;
+   - Latin-script search ("bicharak" finds বিচারক);
+   - `lang="bn"` on the header title.
+
+## Reference scene: বিচারক scene 14 v4 (the standard every scene is held to)
+
+**Spine:** Hem, sleepless in a shut carriage, realises that morning will bring shame to her home.
+
+It runs 55.5 s in 11 shots, about one shot per 4.7 s. The voice starts 0.85 s in.
+
+The scene plants **Hem's own bed, empty** early. Sunlight later crawls onto the empty pillow, and that motivates the peak: the mother drops the pot on a hard cut into silence.
+
+Shots:
+- the night lane;
+- a daughter asleep;
+- Hem's empty bed;
+- Hem's close-up in the shut carriage, with slats of moonlight (animated: she turns into the light, one slow blink);
+- the mother sweeping, pausing toward Hem's door (animated);
+- the paan-making place from scene 13, with Hem's place empty;
+- Hem's eye at the slat, match-cut to the sunrise wall;
+- sunlight onto the empty pillow;
+- the mother's discovery (peak);
+- neighbours gathering, with murmur and a distant wail, colour draining, and carriage wheels bridging into scene 15.
+
+New material: 4 stills, 2–3 animated clips, CC0 ambience (crows, broom, crowd, wheels).
+
+The pilot files and the two-column AV script are kept in `production/audiovisual/bicharak/pilot/`.
 
 ## Rollout
 
@@ -227,6 +326,45 @@ The planner turns each scene's text plus the measured narration timing into a **
 3. Re-render বিচারক at the new standard (about 22 CU, spread over December). Then do The Selfish Giant.
 4. Review each film frame by frame, then owner approval, new clearance hashes, and staging.
 
+## Builder-check items settled as the builder's call (27 Nov)
+
+- **Reference scene status.** Scene 14 v4 is a target, built first. Its 4 stills are staged as `stills-pilot4-f01s014`, its 2–3 Wan clips follow, and it must pass the owner before the spike code is ported. Tests pin to its measured outputs.
+- **Shot density (sections 1 and 8 reconciled).**
+  - shots = max(ceil(narration s / 6), beats);
+  - 4–8 s per shot, up to 12 s only when the shot holds a performed action.
+  - R2 is the rule; section 1's "/7" is superseded.
+- **Voice thresholds.** One narration feeds both the film and the audiobook, so the stricter section 9 limits apply to both: joins within 1.5 LU and ±1.5 semitones, 30–50 ms crossfades. Section 4's looser numbers are superseded.
+- **Film animation jobs.**
+  - A new `film_clips` job kind, separate from `reel_clips`.
+  - Batches sized to one Colab session (≤70 min wall clock, the notebook's own hard stop); A100 is preferred when offered.
+  - Per-clip resolution is set in the shot list: 1280×704 for faces, hands and climax beats; 896×512 for environments.
+  - The forecast passes `budget.forecast` within the title and month caps. Once the owner approves the scene's paper edit, no per-batch signature is needed.
+  - The reel rules (≤5 clips, 2,700 s, a signed authority file) stay as they are for reels.
+  - Resume is journalled: completed clips are kept, and a rerun skips them.
+- **Detection models for the automatic gates.** Apache-2.0 only, verified on each model card at run time, and run in Colab next to the stills:
+  - MediaPipe Face Landmarker and Hand Landmarker for eye count, hand count and detached hands;
+  - OWLv2 open-vocabulary detection for anachronisms;
+  - a CLIP-image similarity check against the anchor still for character lock.
+  
+  Where a model can't decide, the gate makes a contact sheet for a person; an unclear result never counts as a pass.
+- **CC0 sound.**
+  - Wikimedia Commons CC0 or public-domain files, fetched in Colab: the API needs no key, and the licence is read per file and recorded.
+  - Otherwise original synthesis dedicated to CC0.
+  - Freesound is not used (it needs a key).
+- **Lane scope.**
+  - This upgrade's implementation plan covers the `eav` media work and the audiobook master, timing data and chapter markers.
+  - Bundle-contract changes (sentence-level timing maps, chapter markers) go to root as interface notes.
+  - Sections 9 (player) and 10 (reader) are owner-gated frontend and backend work. They get their own plan once approved.
+
 ## Open questions for the owner
 
-[Filled after the builder check.]
+1. **Compute for the বিচারক re-render** (the builder's top finding).
+   - At the new density the film is about 275 shots. With about 25–35% animated and 1.3 takes each, that's about 90–125 clips.
+   - On A100 (about 0.27 CU per HD clip) that's about 25–34 CU; on L4 (about 0.6 CU) about 55–75 CU. Stills add about 5 CU.
+   - বিচারক has about 23.9 CU left under its 60 CU lifetime cap.
+   - Options:
+     - (a) raise বিচারক's lifetime cap to 100 CU; the Colab balance is about 418 CU, and the 100 CU monthly cap still applies;
+     - (b) animate only peaks and named actions, about 12% of shots, about 20 CU;
+     - (c) spread the film over two titles' worth of caps.
+2. **Read and Listen UX (sections 9–10):** approve them now as part of this upgrade, or as a separate project after the films?
+3. **Paper-edit approval (R11):** I and an independent reviewer approve each scene's paper edit, and you approve the reference scene and each finished film. Or do you want to approve every scene's paper edit yourself?
