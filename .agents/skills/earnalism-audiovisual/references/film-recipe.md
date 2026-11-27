@@ -97,7 +97,9 @@ never use it on a cinematic film.)
 
 ## 5. Voice first (details: [earnalism-voice.md](earnalism-voice.md))
 
-Eleven v4, one take per **passage** of 15–30 s, `import-take`, `retime` (punctuation pauses with real
+Today: one eleven_v3 take per scene via `import-take`, or a pre-retimed scene wav at
+`film/film-NN/voice/<scene>.wav` (v4 and passage import not yet built, planned: Task 13). The standard
+is Eleven v4, one take per **passage** of 15–30 s; the route is then `import-take`, `retime` (punctuation pauses with real
 room tone), then `voicecheck` (only the takes that fail are redone). The re-timed scene voice goes to
 `film/film-NN/voice/<scene>.wav`, which `cue` reads. About 0.85 s of breath leads the first word.
 

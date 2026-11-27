@@ -161,6 +161,9 @@ class SkillFileTests(unittest.TestCase):
         self.assertRegex(recipe, r"motion gate[^.]*not yet built[^.]*Task 15")
         self.assertRegex(self._ref("free-stack.md"), r"Whisper.*not yet built \(planned: Task 14\)")
         self.assertNotIn("held still", recipe)
+        sec5 = recipe[recipe.index("## 5. Voice first"):recipe.index("## 6.")]
+        self.assertRegex(sec5, r"Today: one eleven_v3 take per scene via `import-take`")
+        self.assertRegex(sec5, r"not yet built, planned: Task 13")
         self.assertNotIn("stills share a file hash", recipe)
         self.assertNotIn("stills share a file hash", self._ref("pressure-tests.md"))
         self.assertNotIn("one tagged take per 15", self.text)
