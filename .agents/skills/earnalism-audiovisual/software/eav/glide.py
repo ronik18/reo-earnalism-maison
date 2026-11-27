@@ -70,6 +70,28 @@ def _ease(ease, t):
     return t
 
 
+def overscan(pan_x: float, pan_y: float, near_gain: float = 1.2) -> float:
+    """Base scale so the largest layer shift never exposes an edge (pans need more)."""
+    return 1.03 + max(2 * abs(pan_x) * near_gain / W, 2 * abs(pan_y) * near_gain / H)
+
+
+def warp_maps(xx, yy, z, dx, dy):
+    """Source sampling coordinates (map_x, map_y) of a layer scaled by z about the centre and shifted."""
+    return (xx - W / 2) / z + W / 2 - dx, (yy - H / 2) / z + H / 2 - dy
+
+
+def sample_extent(e: float, *, zoom: float = 0.12, pan_x: float = 0.0, pan_y: float = 0.0,
+                  near_gain: float = 1.2, zoom0: float = 1.0, base: float | None = None) -> dict:
+    """Min/max source coordinates the far and near layers sample at eased progress e (0..1)."""
+    base = overscan(pan_x, pan_y, near_gain) if base is None else base
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    out = {}
+    for name, gain in (("far", 1.0), ("near", near_gain)):
+        mx, my = warp_maps(xx, yy, base * zoom0 * (1 + zoom * gain * e), pan_x * gain * e, pan_y * gain * e)
+        out[name] = (float(mx.min()), float(mx.max()), float(my.min()), float(my.max()))
+    return out
+
+
 def render(image: Path, depth: Path | None, out: Path, seconds: float, *, zoom: float = 0.12,
            pan_x: float = 0.0, pan_y: float = 0.0, near_gain: float = 1.2, zoom0: float = 1.0,
            ease: str = "both", flat: bool = False, sweep: str | None = None, drain: bool = False,
@@ -101,17 +123,14 @@ def render(image: Path, depth: Path | None, out: Path, seconds: float, *, zoom: 
     bg = np.where(grow[..., None] > 0, bg_fill, img)
     n = int(round(seconds * fps))
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
-    cx, cy = W / 2, H / 2
     # overscan: enough that the largest layer shift never exposes an edge (pans need more)
-    sx, sy = abs(pan_x) * near_gain, abs(pan_y) * near_gain
-    base = 1.03 + max(2 * sx / W, 2 * sy / H)
+    base = overscan(pan_x, pan_y, near_gain)
     p = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}",
                           "-r", str(fps), "-i", "-", "-c:v", "libx264", "-preset", "medium", "-crf", "15",
                           "-pix_fmt", "yuv420p", "-r", str(fps), str(out)], stdin=subprocess.PIPE)
 
     def warp(s, z, dx, dy, border):
-        mx = (xx - cx) / z + cx - dx
-        my = (yy - cy) / z + cy - dy
+        mx, my = warp_maps(xx, yy, z, dx, dy)
         return cv2.remap(s, mx, my, cv2.INTER_CUBIC, borderMode=border)
 
     try:

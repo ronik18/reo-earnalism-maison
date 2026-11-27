@@ -53,13 +53,23 @@ def test_frame_count_matches_seconds_at_24fps(still):
     assert int(s["nb_read_frames"]) == 24 and s["r_frame_rate"] == "24/1"
 
 
-def test_pan_never_samples_outside_source(still):
-    res, out = run(still, "pan", pan_x=300)
-    assert res["base_overscan"] >= 1.03 + 2 * 300 * 1.2 / 1920
-    last = frames(out)[-1].astype(np.int32)
-    for edge in (last, last[:, ::-1]):  # a reflected border band of b px mirrors itself about column b
-        for b in range(2, 21):
-            assert not np.array_equal(edge[:, :b][:, ::-1], edge[:, b:2 * b])
+def inside(ext):
+    return all(x0 >= 0 and x1 <= W - 1 and y0 >= 0 and y1 <= H - 1 for x0, x1, y0, y1 in ext.values())
+
+
+def test_pan_never_samples_outside_source():
+    """Codec-independent: the warp maps at full progress stay inside the source, with a negative control."""
+    res = glide.overscan(300, 0)
+    assert res >= 1.03 + 2 * 300 * 1.2 / 1920
+    for e in (0.0, 0.5, 1.0):
+        assert inside(glide.sample_extent(e, pan_x=300)), e
+        assert inside(glide.sample_extent(e, pan_x=-300, pan_y=100))
+    assert not inside(glide.sample_extent(1.0, pan_x=300, base=1.03))  # too little overscan reaches outside
+
+
+def test_render_reports_the_overscan_it_uses(still):
+    res, _ = run(still, "pan", pan_x=300)
+    assert res["base_overscan"] == glide.overscan(300, 0)
 
 
 def test_ease_out_ends_at_rest(still):
