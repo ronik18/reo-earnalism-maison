@@ -1,0 +1,13 @@
+{
+ "note": "PILOT v5 (spike) for scene f01s014: redo of the mother still after pilot v4 — veiled head, grave face, period courtyard (mud wall, thatch, open sky only), body and gaze toward Hem's door on the left. World-bible lines for hem_mother. Four candidates.",
+ "items": [
+  {
+   "key": "f01s014-13",
+   "prompt": "Wide shot at first light in the small beaten-earth courtyard of a poor Calcutta lane house, 1880s: on the left a closed weathered wooden door of the house with two worn stone steps; on the right exactly one woman holding a long straw broom low to the ground, paused mid-stroke, her body turned toward the closed door on the left, her face in three-quarter view looking at that door with a grave, sorrowful, unsmiling expression, lips pressed together. A tulsi plant on a clay pedestal and a brass water pot by the steps. The courtyard is enclosed by a low whitewashed mud-brick wall and a thatched lean-to roof, with only open pale dawn sky above the wall. She is Hemshashi's mother, a 40-year-old Bengali woman, careworn round face, red bindi, small gold earrings, an ivory-white cotton sari with a thin red border, its red-bordered end drawn up over her head and covering her hair down to the forehead, red blouse. Bengal, 1880s Calcutta. Palette pale gold, ivory, soft indigo; cool grey-blue dawn light turning gold at the wall top.",
+   "seed": 15313,
+   "width": 1344,
+   "height": 768,
+   "candidates": 4
+  }
+ ]
+}

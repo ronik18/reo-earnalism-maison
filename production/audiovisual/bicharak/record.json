@@ -32577,6 +32577,20 @@
       },
       "path": "stills/stills-pilot4-f01s014/f01s014-14--c3.png",
       "sha256": "71f5a51a6fb2a47837f45a452ed203434d41be49f380def34a1f8d496ca430af"
+    },
+    {
+      "bytes": 19752,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.7312722222222222,
+        "inputs_zip": "jobs/stills-pilot5-f01s014/inputs.zip",
+        "job_id": "stills-pilot5-f01s014",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-pilot5-f01s014/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-pilot5-f01s014/stills.ipynb",
+      "sha256": "d0d6bf7ad9d953f9f3646aeb3d0f81e166ffbc018feb73933e9b3944734f2ca9"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -36431,6 +36445,37 @@
         "outputs_tar_sha256": "2eb30207e9ed67d5a29a79dcf338da04a0612e7948b57c0175d3b5640d822bf1"
       },
       "result": "exchange_collected",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T09:21:03.622347+00:00",
+      "detail": {
+        "forecast_units": 0.7312722222222222,
+        "job_id": "stills-pilot5-f01s014",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T09:21:03.653271+00:00",
+      "detail": {
+        "job_id": "stills-pilot5-f01s014",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T09:21:11.092272+00:00",
+      "detail": {
+        "bytes": 6405,
+        "job_id": "stills-pilot5-f01s014",
+        "key": "exports/colab-exchange/bicharak/stills-pilot5-f01s014/inputs.zip",
+        "sha256": "1f4f492b4731c988bff34a7e54141fb4e0678d17008db91f903166d0a0078b86"
+      },
+      "result": "exchange_uploaded",
       "stage": "job"
     }
   ],

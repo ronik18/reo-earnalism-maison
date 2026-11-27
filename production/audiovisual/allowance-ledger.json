@@ -434,5 +434,14 @@
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak",
     "note": "SPIKE: CPU recovery of motion-pilot4 (sfx + manifest + upload) incl. an idle T4 session found and deleted; Colab 414.38 -> 414.24"
+  },
+  {
+    "job_id": "stills-pilot5-f01s014",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.7312722222222222,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
   }
 ]
