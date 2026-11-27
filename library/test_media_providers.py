@@ -189,12 +189,51 @@ class ServingRenditionsTests(TestCase):
     def test_48_96_assets_unchanged(self):self.check_unchanged(96)
 
     def check_unchanged(self,kbps):
-        if True:
-            self.set_kbps(kbps);self.prefer(kbps);self.live()
-            chapters=svc.media_chapters(self.user,self.revision.id)
-            self.assertEqual([(c['asset_id'],c['quality_kbps'],c['duration_ms'],c['sha256']) for c in chapters],[(str(self.asset.id),kbps,self.unit.duration_ms,self.asset.sha256)])
-            self.assertEqual(svc.media_grant(self.user,{'asset_id':str(self.asset.id),'device_id':str(self.device.pk),'purpose':'online'})['quality_kbps'],kbps)
-            self.assertNotIn('markers',chapters[0])
+        self.set_kbps(kbps);self.prefer(kbps);self.live()
+        chapters=svc.media_chapters(self.user,self.revision.id)
+        self.assertEqual([(c['asset_id'],c['quality_kbps'],c['duration_ms'],c['sha256']) for c in chapters],[(str(self.asset.id),kbps,self.unit.duration_ms,self.asset.sha256)])
+        self.assertEqual(svc.media_grant(self.user,{'asset_id':str(self.asset.id),'device_id':str(self.device.pk),'purpose':'online'})['quality_kbps'],kbps)
+        self.assertNotIn('markers',chapters[0])
+        self.assertEqual([r['quality_kbps'] for r in chapters[0]['renditions']],[kbps])
+
+    def two_renditions(self,preference):
+        """Unit with 48 (self.asset) and 96 renditions, each with its own paragraph map."""
+        self.set_kbps(48);high=self.add_rendition(96)
+        TimingMap.objects.create(revision=self.revision,asset=high,text_sha256=self.map.text_sha256,asset_sha256=high.sha256,measured=True,segments=self.map.segments)
+        self.prefer(preference);self.live();return high
+
+    def test_48_and_96_unit_picks_the_preferred_rendition_exactly(self):
+        high=self.two_renditions(48)
+        chapter=svc.media_chapters(self.user,self.revision.id)[0]
+        self.assertEqual((chapter['asset_id'],chapter['quality_kbps']),(str(self.asset.id),48))
+        self.assertEqual([(r['asset_id'],r['quality_kbps']) for r in chapter['renditions']],[(str(self.asset.id),48),(str(high.id),96)])
+        self.assertEqual(set(chapter['renditions'][0]),{'asset_id','quality_kbps','duration_ms','sha256'})
+        self.prefer(96)
+        chapter=svc.media_chapters(self.user,self.revision.id)[0]
+        self.assertEqual((chapter['asset_id'],chapter['quality_kbps']),(str(high.id),96))
+        self.assertEqual(len(chapter['renditions']),2)
+
+    def test_64k_only_unit_lists_one_rendition(self):
+        self.set_kbps(64);self.live()
+        self.assertEqual([r['quality_kbps'] for r in svc.media_chapters(self.user,self.revision.id)[0]['renditions']],[64])
+
+    def test_mappings_cap_and_choice_follow_the_chosen_rendition(self):
+        high=self.two_renditions(96)
+        result=mappings(self.user,self.revision.id)
+        self.assertEqual([m['asset_id'] for m in result['maps']],[str(high.id)])
+
+    def test_unexpected_preference_error_propagates(self):
+        from unittest.mock import PropertyMock
+        self.live()
+        with patch.object(type(self.user),'preferences',new_callable=PropertyMock,side_effect=RuntimeError('db down')):
+            with self.assertRaises(RuntimeError):svc.media_chapters(self.user,self.revision.id)
+
+    def test_missing_preferences_row_defaults_to_96(self):
+        from accounts.models import Preferences
+        self.set_kbps(48);high=self.add_rendition(96)
+        Preferences.objects.filter(user=self.user).delete();self.live()
+        user=get_user_model().objects.get(pk=self.user.pk)
+        self.assertEqual(svc.media_chapters(user,self.revision.id)[0]['asset_id'],str(high.id))
 
     def test_audio_preview_accepts_64_kbps_clip(self):
         from .audio_preview import prepared_clip

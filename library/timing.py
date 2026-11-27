@@ -50,8 +50,11 @@ def mappings(user,revision_id,territory='IN',unit_id=None):
     except DomainError:return {'edition_revision_id':str(revision.id),'status':'unreleased','maps':[]}
     rows=revision.timing_maps.filter(asset__state='ready',asset__kind='audio_chapter').select_related('revision','asset','asset__unit','asset__revision').annotate(_rank=_precision_rank()).order_by('asset__unit__ordinal','asset_id','_rank','id')
     if unit_id:rows=rows.filter(asset__unit_id=unit_id)
+    from .services import chosen_audio
+    chosen_ids=[asset.id for asset,_ in chosen_audio(user,revision)[0]]
+    rows=rows.filter(asset_id__in=chosen_ids)  # the rendition the player bootstrap lists for each unit
     maps=[]
-    done=set()  # one map per asset (best precision that validates); the cap counts assets
+    done=set()  # one map per unit (best precision that validates); the cap counts units
     for row in rows:
         if row.asset_id in done:continue
         try:maps.append(map_dto(row))

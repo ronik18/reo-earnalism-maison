@@ -919,13 +919,25 @@ def prepared_audio(asset):
 
 
 def _preferred_kbps(user):
+    from django.core.exceptions import ObjectDoesNotExist
     try:return int(user.preferences.audio_quality_kbps)
-    except Exception:return 96
+    except (ObjectDoesNotExist,AttributeError):return 96  # anonymous user or no preferences row
 
 
 def _pick_rendition(options,preferred):
     """The preferred rendition, else the only one, else the nearest (higher quality on a tie)."""
     return min(options,key=lambda o:(abs(o[0]-preferred),-o[0]))[1]
+
+
+def chosen_audio(user,revision):
+    """([(asset,prepared)] one per unit in unit order, {unit_id: [(kbps,(asset,prepared))] every rendition})."""
+    preferred=_preferred_kbps(user)
+    by_unit={}
+    for asset in revision.assets.filter(kind='audio_chapter',state='ready').select_related('unit','revision').order_by('unit__ordinal','id'):
+        try:data=prepared_audio(asset)
+        except DomainError:continue
+        by_unit.setdefault(asset.unit_id,[]).append((data['quality_kbps'],(asset,data)))
+    return [_pick_rendition(options,preferred) for options in by_unit.values()],by_unit
 
 
 def media_chapters(user,revision_id,territory='IN'):
@@ -934,20 +946,16 @@ def media_chapters(user,revision_id,territory='IN'):
     from .models import TimingMap
     from .audio_chapters import validate_chapters
     revision=authorize_revision(user,revision_id,'audio',territory=territory)
-    preferred=_preferred_kbps(user)
-    by_unit={}
-    for asset in revision.assets.filter(kind='audio_chapter',state='ready').select_related('unit','revision').order_by('unit__ordinal','id'):
-        try:data=prepared_audio(asset)
-        except DomainError:continue
-        by_unit.setdefault(asset.unit_id,[]).append((data['quality_kbps'],(asset,data)))
-    chosen=[_pick_rendition(options,preferred) for options in by_unit.values()]
+    chosen,by_unit=chosen_audio(user,revision)
     maps={}
     for row in TimingMap.objects.filter(revision=revision,measured=True,asset_id__in=[a.id for a,_ in chosen]).order_by('id'):
         maps.setdefault(row.asset_id,[]).append(row)
     result=[]
     for asset,data in chosen:
         entry={'asset_id':str(asset.id),'unit_id':str(asset.unit_id),'duration_ms':data['duration_ms'],
-               'sha256':asset.sha256,'quality_kbps':data['quality_kbps'],'title':asset.unit.title}
+               'sha256':asset.sha256,'quality_kbps':data['quality_kbps'],'title':asset.unit.title,
+               'renditions':[{'asset_id':str(a.id),'quality_kbps':k,'duration_ms':d['duration_ms'],'sha256':a.sha256}
+                             for k,(a,d) in sorted(by_unit[asset.unit_id],key=lambda o:(o[0],str(o[1][0].id)))]}
         for row in sorted(maps.get(asset.id,[]),key=lambda m:m.precision!='sentence'):
             if row.chapters and not validate_chapters(row.chapters,data['duration_ms']):
                 entry['markers']=[{'title':c['title'],'start_ms':c['start_ms']} for c in row.chapters];break
