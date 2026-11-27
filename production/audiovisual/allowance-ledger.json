@@ -645,10 +645,10 @@
       {
         "run_id": "music-film-01-r4#1",
         "job_id": "music-film-01-r4",
-        "usd": 0.7856025,
-        "seconds": 0.0,
+        "usd": 0.10901903969796749,
+        "seconds": 392.861404317,
         "at": "2026-11-27T06:27:40+00:00",
-        "status": "pending"
+        "status": "ok"
       }
     ]
   }
