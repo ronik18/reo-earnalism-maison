@@ -1954,3 +1954,168 @@ class SentenceSanity(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ImportPassagesCliTests(unittest.TestCase):
+    """Eleven v4 narration (owner 26 Nov): one take per passage, retimed, checked and joined per scene.
+    The v4 model id is read from <root>/voice.json; "eleven_v4_test" below is a test value only."""
+    V4 = "eleven_v4_test"
+    VOICE4 = ("--engine", "elevenlabs", "--model", V4, "--voice-id", "XdbTvfQSkW1sgZYKdZdF",
+              "--voice-name", "Sakshi – Warm Bedtime Storyteller")
+    PASSAGES = {"f01s001": ["The Garden Every afternoon the children played in the garden.",
+                            "It was large and lovely."],
+                "f01s002": ["The giant came back. He had been away for seven years."]}
+    setUp0 = CliTests.setUp
+    fake_job, noise, wav = RoundTwo.fake_job, RoundTwo.noise, RoundTwo.wav
+    init_and_plan = CliTests.init_and_plan
+    VOICE = ImportTakeCliTests.VOICE
+    scenes, write_take = ImportTakeCliTests.scenes, ImportTakeCliTests.write_take
+    film_takes, import_take = ImportTakeCliTests.film_takes, ImportTakeCliTests.import_take
+
+    def setUp(self):
+        self.setUp0()
+        self.init_and_plan()
+        self.scripts, self.audio = self.d / "scripts", self.d / "takes"
+        (self.root / "voice.json").write_text(json.dumps({"model_id": self.V4}), encoding="utf-8")
+        for key, texts in self.PASSAGES.items():
+            for n, text in enumerate(texts, 1):
+                self.write_passage(f"{key}-p{n:02d}", text)
+
+    def write_passage(self, stem, text, tagged=None):
+        from tests.test_take import gap, tone, write_wav
+        import numpy as np
+        self.scripts.mkdir(exist_ok=True)
+        self.audio.mkdir(exist_ok=True)
+        (self.scripts / f"{stem}.txt").write_text(tagged or text, encoding="utf-8")
+        wav = self.d / f"{stem}-src.wav"
+        write_wav(wav, np.concatenate([gap(0.05), tone(0.8, 210), gap(0.4), tone(0.8, 190), gap(0.05)]))
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(wav), "-c:a", "libmp3lame", "-b:a", "128k",
+                        str(self.audio / f"{stem}.mp3")], check=True)
+
+    def import_passages(self, *extra, voice=None):
+        return run("import-take", "film-01", "--root", self.root, "--scripts", self.scripts, "--audio", self.audio,
+                   *(voice or self.VOICE4), "--credits", 420, "--cps", 5, *extra)
+
+    @staticmethod
+    def passing(take, expected_s, prof, prev_tail=None):
+        return {"pass": True, "failures": [], "metrics": {"duration_s": expected_s}}
+
+    def test_import_take_accepts_v4_per_passage_takes(self):
+        seen = []
+
+        def check(take, expected_s, prof, prev_tail=None):
+            seen.append((take.name, prev_tail.name if prev_tail else None))
+            return self.passing(take, expected_s, prof, prev_tail)
+        with mock.patch.object(cli.voicecheck, "check", side_effect=check):
+            code, out = self.import_passages()
+        self.assertEqual(code, 0, out)
+        voice = self.root / "film" / "film-01" / "voice"
+        from tests._media import samples
+        for key in self.PASSAGES:
+            self.assertGreater(len(samples(voice / f"{key}.wav")), 48000, key)
+        # each passage was retimed then checked; the join check looks at the passage before it in the scene
+        self.assertEqual(seen, [("f01s001-p01.wav", None), ("f01s001-p02.wav", "f01s001-p01.wav"),
+                                ("f01s002-p01.wav", None)])
+        work = voice / "passages"
+        self.assertTrue((work / "voicecheck-profile.json").is_file())
+        self.assertTrue((work / "f01s001-p01.voicecheck.json").is_file())
+        manifest = json.loads((voice / "f01s001.passages.json").read_text())
+        self.assertEqual((manifest["model"], manifest["voice_id"], manifest["credits"]),
+                         (self.V4, "XdbTvfQSkW1sgZYKdZdF", 420))
+        self.assertEqual([p["id"] for p in manifest["passages"]], ["f01s001-p01", "f01s001-p02"])
+        self.assertEqual(manifest["join"]["crossfade_ms"], 10)
+        for p in manifest["passages"]:
+            self.assertEqual(p["take_sha256"], hashlib.sha256((self.audio / f"{p['id']}.mp3").read_bytes()).hexdigest())
+        rec = Record.load(self.root)
+        ev = [e for e in rec.data["events"] if e["result"] == "passages_joined"][-1]["detail"]
+        self.assertEqual((ev["target"], ev["model"], ev["scenes"]), ("film-01", self.V4, ["f01s001", "f01s002"]))
+        self.assertEqual(sorted(a["path"] for a in rec.data["artifacts"] if a["kind"] == "scene_voice"),
+                         ["film/film-01/voice/f01s001.wav", "film/film-01/voice/f01s002.wav"])
+
+    def test_failed_passage_blocks_the_join(self):
+        def check(take, expected_s, prof, prev_tail=None):
+            bad = take.stem == "f01s001-p02"
+            return {"pass": not bad, "failures": ["pitch_spread"] if bad else [], "metrics": {}}
+        with mock.patch.object(cli.voicecheck, "check", side_effect=check):
+            code, out = self.import_passages()
+        self.assertNotEqual(code, 0)
+        self.assertIn("f01s001-p02", out)
+        self.assertIn("pitch_spread", out)
+        self.assertNotIn("f01s002-p01 (", out)
+        voice = self.root / "film" / "film-01" / "voice"
+        self.assertEqual(list(voice.glob("*.wav")), [])  # no scene wav, not even the passing scene's
+        self.assertEqual([e for e in Record.load(self.root).data["events"] if e["result"] == "passages_joined"], [])
+        # redo only the failure: the same call joins, reusing the saved profile
+        self.write_passage("f01s001-p02", self.PASSAGES["f01s001"][1])
+        with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing), \
+                mock.patch.object(cli.voicecheck, "profile", side_effect=AssertionError("profile re-measured")):
+            code, out = self.import_passages()
+        self.assertEqual(code, 0, out)
+        self.assertTrue((voice / "f01s001.wav").is_file())
+
+    def test_model_must_be_listed_in_the_title_voice_settings(self):
+        (self.root / "voice.json").unlink()
+        code, out = self.import_passages()
+        self.assertNotEqual(code, 0)
+        self.assertIn("voice.json", out)
+        (self.root / "voice.json").write_text(json.dumps({"model_id": "eleven_other"}), encoding="utf-8")
+        code, out = self.import_passages()
+        self.assertNotEqual(code, 0)
+        self.assertIn("not the approved narration engine", out)
+        self.assertFalse((self.root / "film" / "film-01" / "voice").exists())
+
+    def test_v3_one_take_per_scene_import_is_unchanged(self):
+        self.film_takes()
+        code, out = self.import_take()
+        self.assertEqual(code, 0, out)
+        self.assertFalse((self.root / "film" / "film-01" / "voice").exists())
+        # v3 still wants <scene>.txt, not passage files
+        for p in self.scripts.glob("f01s001.txt"):
+            p.unlink()
+        code, out = self.import_take("film-01")
+        self.assertNotEqual(code, 0)
+
+    def test_script_rules_stop_the_import(self):
+        self.write_passage("f01s001-p01", self.PASSAGES["f01s001"][0],
+                           "[softly] The Garden Every afternoon the children played in the garden.")
+        with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing):
+            code, out = self.import_passages()
+        self.assertNotEqual(code, 0)
+        self.assertIn("bare [softly]", out)
+        self.write_passage("f01s001-p01", self.PASSAGES["f01s001"][0], "[warmly] The Garden Every afternoon the children played in the garden.")
+        with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing):
+            code, out = self.import_passages()
+        self.assertNotEqual(code, 0)
+        self.assertIn("carry", out)  # the next passage dropped [warmly]
+
+    def test_missing_passage_take_and_a_gap_in_numbering_stop(self):
+        (self.audio / "f01s001-p02.mp3").unlink()
+        code, out = self.import_passages()
+        self.assertNotEqual(code, 0)
+        self.assertIn("f01s001-p02", out)
+
+    def test_a_hand_placed_scene_wav_is_not_overwritten(self):
+        voice = self.root / "film" / "film-01" / "voice"
+        voice.mkdir(parents=True)
+        (voice / "f01s002.wav").write_bytes(b"RIFF hand placed")
+        with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing):
+            code, out = self.import_passages()
+        self.assertNotEqual(code, 0)
+        self.assertIn("f01s002.wav", out)
+        self.assertEqual((voice / "f01s002.wav").read_bytes(), b"RIFF hand placed")
+
+    def test_passages_serve_films_not_reels(self):
+        code, out = run("import-take", "reel-1", "--root", self.root, "--scripts", self.scripts,
+                        "--audio", self.audio, *self.VOICE4, "--credits", 1)
+        self.assertNotEqual(code, 0)
+
+    def test_split_passages_writes_the_untagged_passage_scripts(self):
+        out_dir = self.d / "split"
+        code, out = run("split-passages", "film-01", "--root", self.root, "--out", out_dir, "--cps", 2)
+        self.assertEqual(code, 0, out)
+        names = sorted(p.name for p in out_dir.glob("*.txt"))
+        self.assertEqual(names, ["f01s001-p01.txt", "f01s001-p02.txt", "f01s002-p01.txt"][:len(names)])
+        joined = " ".join(p.read_text(encoding="utf-8").strip() for p in sorted(out_dir.glob("f01s001-p*.txt")))
+        self.assertEqual(joined, " ".join(self.PASSAGES["f01s001"]))
+        code, out = run("split-passages", "film-01", "--root", self.root, "--out", out_dir, "--cps", 2)
+        self.assertNotEqual(code, 0)  # never overwrites a tagged script

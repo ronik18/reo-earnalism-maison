@@ -18,14 +18,42 @@ standard now is:
    words, or on a tag that sets a mood the whole passage keeps). Tags describe delivery only, never
    action or sound.
 
-**Not yet built (planned: Task 13): passage import and Eleven v4 import** (passage import and v4 import are both missing). Today `import-take`
-accepts only `--engine elevenlabs --model eleven_v3` (anything else stops) and requires exactly one
-tagged script `<scene_id>.txt` and one take per scene of the target in one call; no command joins
-passages into a scene wav. **Working route today:** (a) one `eleven_v3` take per scene through
-`import-take`, as in the 24 Nov route below, then `retime` and `voicecheck` on it; or (b) as the
-scene-14 pilot does, a pre-retimed scene wav placed by hand at `film/film-NN/voice/<scene>.wav`,
-which `cue` reads. Do not pass a v4 model id to `import-take`, and never claim v4 or passages were
-imported.
+**Built (Task 13): Eleven v4 passages, imported, checked and joined.** The v4 model id is not hard-coded:
+the title keeps it in its voice settings, `<root>/voice.json` = `{"model_id": "<the Eleven v4 model id the
+owner chose>"}`, and `import-take` accepts that exact id (and `eleven_v3`); any other model stops. With the
+v4 id, `import-take` takes **per-passage** files instead of one take per scene:
+
+```
+python3 -m eav.cli split-passages film-01 --root <root> --out <scripts dir> [--cps 13]
+# tag each <scene>-p<NN>.txt, generate one take per passage, download as <scene>-p<NN>.mp3
+python3 -m eav.cli import-take film-01 --root <root> --scripts <scripts dir> --audio <takes dir> \
+  --engine elevenlabs --model <model_id of voice.json> --voice-id <id> --voice-name "<name>" \
+  --credits <credits used> [--cps 13] [--profile voicecheck-profile.json]
+```
+
+`split-passages` cuts each scene at sentence or paragraph ends into passages of about 15–30 s (never
+mid-sentence; a sentence over 30 s stays whole; passages joined give the scene text back exactly) and
+refuses to overwrite a file. The length is estimated at `--cps` characters per second: the default 13 is a
+**documented estimate** (about 120 words/min, the plan's default rate, at ~6.5 characters per Bengali word),
+not a measurement, because no real v4 take is on record yet; set `--cps` from the first real takes (it also
+sets each passage's expected duration for `voicecheck`). `import-take` then, per passage: checks the tagged
+script (words exactly the book's in order; at most one audio tag per sentence; no passage but the last ending
+mid-sentence; a passage opening on `[softly]` only when that is the mood carried from the passage before; a
+passage after one that ended in a mood tag must open on a mood tag, the carried one or a deliberate new one;
+`[pause]` tags set no mood), runs `retime` (pauses by the script's punctuation), then `voicecheck` against the
+title's profile (`film/film-NN/voice/passages/voicecheck-profile.json`, measured on the first run and reused
+on every redo, or `--profile`; the join check compares each passage with the one before it). **Any failed
+passage stops the import before anything is joined**, with the passages and failure codes listed: regenerate
+only those from the same tagged script, download over the old `<passage id>.mp3` and rerun the same call.
+When all pass, each scene is joined to `film/film-NN/voice/<scene>.wav` (the file `cue` reads): the seam
+between passages is about 0.9 s of the take's own room tone (`eav.retime.room_tone`, −62 to −68 dBFS),
+joined by 10 ms equal-power crossfades, the take edges beside it cut back to 20 ms of speech, so no digital
+zero is left. Beside each wav `<scene>.passages.json` records the model, voice, credits and the sha256 of
+every script, take and retimed passage; the record gets a `passages_joined` event and `scene_voice` and
+`passage_manifest` artifacts. A scene wav placed by hand is never overwritten. Passages serve film scenes, not
+reels (a reel stays one `eleven_v3` take). **One-take-per-scene `eleven_v3` import is unchanged** (the 24 Nov
+route below). Not certified: the judgement that a passage sounds natural stays with `voicecheck` and the
+owner's ear.
 
 3. **One take, redo only the failures** (owner choice, 26 Nov; best-of-three costs 45k credits per film
    and was rejected). Budget about 15,000–20,000 credits per 20-minute film (v4 costs about one
@@ -276,9 +304,8 @@ new job (the newer import wins); never edit or trim a take by hand.
 
 **27 Nov 2026 amendment (cinematic standard).** The decision above stays; the owner's standard is
 now Eleven v4, passages of 15–30 s, and `voicecheck` with only failures regenerated. The v4 and
-passage import is not yet built (planned: Task 13, see "Current standard"): until it lands the route
-above works as written with `eleven_v3`, one take per scene. In either case a take's own pauses are
-re-set by `retime`.
+passage import is built (Task 13, see "Current standard"); the route above stays as written for
+`eleven_v3`, one take per scene. In either case a take's own pauses are re-set by `retime`.
 
 ## Never
 

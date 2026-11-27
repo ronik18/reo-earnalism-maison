@@ -97,11 +97,12 @@ never use it on a cinematic film.)
 
 ## 5. Voice first (details: [earnalism-voice.md](earnalism-voice.md))
 
-Today: one eleven_v3 take per scene via `import-take`, or a pre-retimed scene wav at
-`film/film-NN/voice/<scene>.wav` (v4 and passage import not yet built, planned: Task 13). The standard
-is Eleven v4, one take per **passage** of 15–30 s; the route is then `import-take`, `retime` (punctuation pauses with real
-room tone), then `voicecheck` (only the takes that fail are redone). The re-timed scene voice goes to
-`film/film-NN/voice/<scene>.wav`, which `cue` reads. About 0.85 s of breath leads the first word.
+The standard is Eleven v4, one take per **passage** of 15–30 s: `split-passages film-NN` writes the
+passages, then `import-take` (model id from the title's `voice.json`) retimes each passage (punctuation
+pauses with real room tone), runs `voicecheck` on it (a failed passage is listed for redo and nothing is
+joined; only the failures are redone), and joins the scene over room tone with 10 ms crossfades. The
+voice goes to `film/film-NN/voice/<scene>.wav`, which `cue` reads. Still available: one `eleven_v3` take per scene via `import-take`
+(then `retime`, `voicecheck`), or a pre-retimed scene wav placed there by hand. About 0.85 s of breath leads the first word.
 
 ## 6. Stills and their gates (`job stills --film N --spec stills.json`)
 

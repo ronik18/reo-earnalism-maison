@@ -52,7 +52,7 @@ One title root, one record, one writer. `record.json` (schema
   the sha256 of the planner input the approval is bound to (an edit afterwards voids it).
 - **Gates**: each candidate's `gate.json` (models and resolved revisions, licences read, scores), every
   `pick` with its overrides and reasons, and the calibration file once present.
-- **Voice (cinematic)**: model (`eleven_v3` today; Eleven v4 and passages are not yet built, Task 13), voice id, tagged scripts and takes,
+- **Voice (cinematic)**: model (the Eleven v4 id of `voice.json`, or `eleven_v3`), voice id, tagged scripts and takes (per passage for v4: `film/film-NN/voice/<scene>.passages.json`),
   credits, `voicecheck` profile and per-take results, which takes were redone and why.
 - **Sound**: per sound file its Commons page, licence and categories checked, or the CC0 dedication of
   synthesis (`sfx/README.md`).

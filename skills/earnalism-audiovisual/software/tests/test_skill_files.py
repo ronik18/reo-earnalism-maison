@@ -151,7 +151,12 @@ class SkillFileTests(unittest.TestCase):
 
     def test_docs_claim_nothing_beyond_the_code(self):
         voice = self._ref("earnalism-voice.md")
-        self.assertRegex(voice, r"[Pp]assage import[^.]*not yet built[^.]*Task 13")
+        # Task 13 is built: the docs describe the route and keep no "not yet built" for it
+        self.assertNotRegex(voice, r"(?i)(passage|v4)[^.]*not yet built")
+        self.assertIn("Built (Task 13)", voice)
+        for phrase in ("split-passages", "voice.json", "model_id", "Any failed passage stops the import before anything is joined",
+                       "10 ms equal-power crossfades", "unchanged"):
+            self.assertIn(phrase, voice, phrase)
         self.assertIn("eleven_v3", voice)
         self.assertIn("film/film-NN/voice/<scene>.wav", voice)
         self.assertRegex(voice, r"Whisper[^.]*not yet built[^.]*Task 14")
@@ -162,12 +167,15 @@ class SkillFileTests(unittest.TestCase):
         self.assertRegex(self._ref("free-stack.md"), r"Whisper.*not yet built \(planned: Task 14\)")
         self.assertNotIn("held still", recipe)
         sec5 = recipe[recipe.index("## 5. Voice first"):recipe.index("## 6.")]
-        self.assertRegex(sec5, r"Today: one eleven_v3 take per scene via `import-take`")
-        self.assertRegex(sec5, r"not yet built, planned: Task 13")
+        self.assertRegex(sec5, r"`split-passages film-NN`")
+        self.assertRegex(sec5, r"Still available: one `eleven_v3` take per scene via `import-take`")
+        self.assertNotIn("Task 13", sec5)
         self.assertNotIn("stills share a file hash", recipe)
         self.assertNotIn("stills share a file hash", self._ref("pressure-tests.md"))
         self.assertNotIn("one tagged take per 15", self.text)
-        self.assertRegex(self.text, r"not yet built[^|]*Task 13")
+        self.assertNotRegex(self.text, r"not yet built[^|]*Task 13")
+        self.assertIn("`split-passages film-NN`", self.text)
+        self.assertNotIn("Task 13", self._ref("production-record.md"))
         row4 = next(l for l in self.text.splitlines() if l.startswith("| 4 |"))
         self.assertEqual(row4.count("|"), 5)
         self.assertIn("earnalism-video", row4)
