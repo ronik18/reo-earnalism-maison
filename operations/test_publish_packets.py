@@ -15,6 +15,30 @@ from django.test import SimpleTestCase, TestCase, override_settings
 from operations.management.commands import publish_cleared_editions as command
 
 CLEARANCE = "docs/evidence/publication-clearance-kshudhita-pashan.json"
+CORRECTED_CLEARANCE = "docs/evidence/publication-clearance-kshudhita-pashan-draft.json"
+# The scan-verified correction of 27 Nov 2026 (scan pages ১৭৬, ১৮২): (corrected, as first published).
+CORRECTIONS = (("রাত্রিযাপন করিবেন না।", "রাত্রিযাপন করিবেন।"), ("জানি না কিন্তু", "জানি কিন্তু"))
+
+
+def first_published_bytes(raw):
+    """The corrected source with the two restored words removed again: the text published on 25 Nov 2026."""
+    for corrected, published in CORRECTIONS:
+        if raw.count(corrected.encode()) != 1:
+            raise AssertionError(f"expected exactly one {corrected!r}")
+        raw = raw.replace(corrected.encode(), published.encode())
+    return raw
+
+
+def as_first_published(folder):
+    """Rewrite a copied kshudhita-pashan packet to the text and in-file approved record of 25 Nov 2026 (test fixture)."""
+    source = Path(folder) / "source.json"
+    raw = first_published_bytes(source.read_bytes())
+    source.write_bytes(raw)
+    path = Path(folder) / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["source"].update(sha256=command.sha256(raw), bytes=len(raw))
+    manifest["provenance"]["rights_evidence_refs"] = ["reo-earnalism-maison:" + CLEARANCE]
+    path.write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
 class PublishPacketDiscoveryTests(TestCase):
@@ -24,6 +48,7 @@ class PublishPacketDiscoveryTests(TestCase):
         self.root = Path(directory.name)
         self.intake = self.root / "library" / "intake"
         shutil.copytree(command.INTAKE / "kshudhita-pashan", self.intake / "kshudhita-pashan")
+        as_first_published(self.intake / "kshudhita-pashan")
         (self.root / CLEARANCE).parent.mkdir(parents=True)
         shutil.copy(command.ROOT / CLEARANCE, self.root / CLEARANCE)
 
@@ -77,10 +102,11 @@ class PublishPacketDiscoveryTests(TestCase):
         listed = command.approved_packets()
         self.assertIn("bicharak", listed)
         self.assertIn("the-selfish-giant", listed)
-        self.assertIn("kshudhita-pashan", listed)
         self.assertEqual(listed["bicharak"]["edition_slug"], "bicharak")
         self.assertEqual(listed["bicharak"]["clearance_path"], command.CLEARANCE_DOC)
-        self.assertEqual(listed["kshudhita-pashan"]["clearance_path"], CLEARANCE)
+        # The corrected source (27 Nov 2026) waits for the Monday page; the fixture copy keeps the 25 Nov record.
+        self.assertNotIn("kshudhita-pashan", listed)
+        self.assertEqual(self.packets()["kshudhita-pashan"]["clearance_path"], CLEARANCE)
 
     def test_status_must_be_exactly_owner_approved(self):
         self.edit_clearance(lambda r: r.update(status="OWNER_APPROVED_COVER_PENDING"))
@@ -100,11 +126,12 @@ class PublishPacketDiscoveryTests(TestCase):
             command.approved_packets(self.intake, root=self.root, check={"kshudhita-pashan"})
 
     def test_kshudhita_reason_and_clearance_reference_its_own_record(self):
-        packet = command.approved_packets()["kshudhita-pashan"]
+        packet = self.packets()["kshudhita-pashan"]
         reason = command.reason_for(packet)
         self.assertIn(CLEARANCE + "#sha256=" + packet["clearance_sha256"], reason)
         self.assertNotIn(command.CLEARANCE_DOC, reason)
-        doc, doc_sha = command.clearance_document(packet)
+        with mock.patch.object(command, "ROOT", self.root):
+            doc, doc_sha = command.clearance_document(packet)
         self.assertEqual(doc_sha, packet["clearance_sha256"])
         self.assertIn("kshudhita-pashan", doc["books"])
 
@@ -120,6 +147,7 @@ class MondayApprovalTests(TestCase):
         self.root = Path(directory.name)
         self.intake = self.root / "library" / "intake"
         shutil.copytree(command.INTAKE / self.SLUG, self.intake / self.SLUG)
+        as_first_published(self.intake / self.SLUG)
         (self.root / CLEARANCE).parent.mkdir(parents=True)
         shutil.copy(command.ROOT / CLEARANCE, self.root / CLEARANCE)
         self.edit_clearance(lambda r: (r.update(status="DRAFT_PENDING_OWNER_APPROVAL"), r.pop("approval", None)))
@@ -331,6 +359,7 @@ class PublishStageGuardTests(TestCase):
         root = Path(directory.name)
         intake = root / "library" / "intake"
         shutil.copytree(command.INTAKE, intake)
+        as_first_published(intake / "kshudhita-pashan")
         (root / CLEARANCE).parent.mkdir(parents=True)
         shutil.copy(command.ROOT / CLEARANCE, root / CLEARANCE)
         shutil.copy(command.ROOT / command.CLEARANCE_DOC, root / command.CLEARANCE_DOC)
@@ -466,6 +495,7 @@ class TranslationPacketSharesSourceWorkTests(TestCase):
         self.root = Path(directory.name)
         self.intake = self.root / "library" / "intake"
         shutil.copytree(command.INTAKE / "kshudhita-pashan", self.intake / "kshudhita-pashan")
+        as_first_published(self.intake / "kshudhita-pashan")
         (self.root / CLEARANCE).parent.mkdir(parents=True)
         shutil.copy(command.ROOT / CLEARANCE, self.root / CLEARANCE)
 
