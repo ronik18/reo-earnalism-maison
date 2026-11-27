@@ -1226,9 +1226,10 @@ def _import_passages(args, rec, plan, lang, credits):
     elif (work / "voicecheck-profile.json").is_file():  # a redo run keeps the film's profile (voicecheck rule)
         prof = json.loads((work / "voicecheck-profile.json").read_text())
     else:
-        prof = voicecheck.profile([r[2] for r in retimed],
-                                  [voicecheck.cer(w[1], w[0]) for w in words.values()])
+        prof = voicecheck.profile([r[2] for r in retimed])
         (work / "voicecheck-profile.json").write_text(json.dumps(prof, indent=1))
+    saved_prof = not args.profile
+    results = {}
     failed, prev, last_key, unchecked = {}, None, None, False
     for (sc, pid, dst, _, _), exp in zip(retimed, expected):
         prev = prev if last_key == sc["key"] else None
@@ -1237,13 +1238,22 @@ def _import_passages(args, rec, plan, lang, credits):
         unchecked = unchecked or bool(res.get("not_run"))
         if not measured and "duration" in res["failures"]:  # only a guessed rate: a warning, not a failure
             res["failures"] = [f for f in res["failures"] if f != "duration"]
-            res["warnings"] = ["duration"]
-            res["pass"] = not res["failures"]
+            res["warnings"] = res.get("warnings", []) + ["duration"]
+            res["pass"] = False if res["failures"] else (None if res.get("not_run") else True)
         res["expected_s"] = round(exp, 3)
         (work / f"{pid}.voicecheck.json").write_text(json.dumps(res, indent=1, ensure_ascii=False))
-        if not res["pass"]:
+        results[pid] = res
+        if res["failures"]:
             failed.setdefault(sc["key"], []).append(f"{pid} ({', '.join(res['failures'])})")
         prev, last_key = dst, sc["key"]
+    if saved_prof and tdata is not None:   # only takes accepted in this run enter the saved profile's median
+        acc = voicecheck.accepted_cers({k: v for k, v in results.items() if "words" in v["metrics"]})
+        if acc:
+            (work / "voicecheck-profile.json").write_text(json.dumps(voicecheck.with_words(prof, acc), indent=1))
+    if any("words" in r.get("warnings", []) for r in results.values()):
+        print("Word check WARNING: CER above the provisional ceiling "
+              f"{voicecheck.WORDS_CEILING:g} (fewer than {voicecheck.WORDS_MIN_TAKES} accepted takes with a "
+              "transcript, so no calibrated median yet); listen to the listed passage(s). Not a redo.")
     if unchecked:
         print("Word check NOT RUN for passage(s) without a matching Whisper transcript (--transcripts, "
               "templates/words_cell.py.txt); a passing take is not word-checked.")
@@ -2749,7 +2759,12 @@ def _load_transcripts(path) -> dict:
 def _transcript_for(data, stem, take_file):
     """The transcript text of one take, or None (not run) when absent or made for another file's bytes."""
     row = (data or {}).get("takes", {}).get(stem)
-    if not isinstance(row, dict) or row.get("sha256") != voicecheck.sha256_file(take_file):
+    if not isinstance(row, dict):
+        return None
+    if row.get("sha256") != voicecheck.sha256_file(take_file):
+        print(f"Warning: the transcript of {stem} was made for different file bytes than {take_file}; "
+              "it is not applied (word check NOT RUN). Transcribe the exact file you pass here, with no "
+              "conversion in between (references/earnalism-voice.md).")
         return None
     return row.get("text")
 
@@ -2781,27 +2796,34 @@ def cmd_voicecheck(args):
         src = Path(args.sources or ".") / f"{t.stem}.txt" if data is not None else None
         text = _transcript_for(data, t.stem, t) if src is not None and src.is_file() else None
         if text is not None:
-            words[t] = (text, src.read_text(encoding="utf-8"))
+            words[t] = (text, take.strip_tags(src.read_text(encoding="utf-8")))
     if args.profile:
         pf = Path(args.profile)
         if not pf.is_file():
             raise Stop(f"{pf} does not exist", "Fix --profile and rerun")
         prof = json.loads(pf.read_text())
     else:
-        prof = voicecheck.profile(takes, [voicecheck.cer(s_, t_) for t_, s_ in words.values()])
+        prof = voicecheck.profile(takes)
         (out / "voicecheck-profile.json").write_text(json.dumps(prof, indent=1))
     prev = Path(args.prev_tail) if args.prev_tail else None
     if prev is not None and not prev.is_file():
         raise Stop(f"{prev} does not exist", "Fix --prev-tail and rerun")
-    failed = 0
+    failed, results = 0, {}
     for t, e in zip(takes, exp):
         r = _words_note(voicecheck.check(t, e, prof, prev, *words.get(t, (None, None))), data)
         prev = t
+        results[t.stem] = r
         (t.parent if not args.out else out).joinpath(f"{t.stem}.voicecheck.json").write_text(
             json.dumps(r, indent=1, ensure_ascii=False))
-        failed += not r["pass"]
-        print(f"{t.name}: {'PASS' if r['pass'] else 'REDO ' + ','.join(r['failures'])}"
-              + (" (word check NOT RUN: no matching transcript)" if r.get("not_run") else ""))
+        failed += bool(r["failures"])
+        print(f"{t.name}: {'REDO ' + ','.join(r['failures']) if r['failures'] else 'PASS'}"
+              + (" (word check NOT RUN: no matching transcript)" if r.get("not_run") else "")
+              + (f" (word check WARNING: CER {r['metrics']['words']['cer']:.3f} above the provisional ceiling "
+                 f"{r['metrics']['words']['threshold']:g}; listen)" if "words" in r.get("warnings", []) else ""))
+    if not args.profile and data is not None:   # the saved profile's median is of the accepted takes only
+        acc = voicecheck.accepted_cers(results)
+        if acc:
+            (out / "voicecheck-profile.json").write_text(json.dumps(voicecheck.with_words(prof, acc), indent=1))
     print(f"Wrote <take>.voicecheck.json per take{'' if args.profile else ' and ' + str(out / 'voicecheck-profile.json')}.")
     if failed:
         print(f"Next: regenerate the {failed} REDO take(s), then rerun with --profile {out / 'voicecheck-profile.json'}")

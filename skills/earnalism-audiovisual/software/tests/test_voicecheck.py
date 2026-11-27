@@ -98,7 +98,7 @@ def test_clean_take_passes_all(tmp_path):
     y = _phrases()
     p = _write(tmp_path / "c.wav", y)
     r = voicecheck.check(p, len(y) / SR, _prof(p))
-    assert r["failures"] == [] and r["pass"] is True
+    assert r["failures"] == [] and r["pass"] is None and r["not_run"] == ["words"]   # words unchecked: not a pass
     assert set(r["metrics"]) >= {"duration_s", "pitch_median_hz", "pitch_spread_st", "true_peak_dbfs"}
 
 
@@ -132,7 +132,7 @@ def test_cli_writes_voicecheck_json(tmp_path):
     take = _write(tmp_path / "a.wav", y)
     code = cli.main(["voicecheck", str(take), "--expected", str(len(y) / SR)])
     out = json.loads((tmp_path / "a.voicecheck.json").read_text())
-    assert out["pass"] is True and code == 0
+    assert out["pass"] is None and out["failures"] == [] and code == 0
 
 
 def test_unvoiced_take_fails_instead_of_crashing(tmp_path):
@@ -159,7 +159,7 @@ def test_cli_profile_saved_per_take_files_and_exit_code(tmp_path):
     assert cli.main(["voicecheck", str(a), str(b), "--expected", str(n)]) == 0
     prof_file = tmp_path / "voicecheck-profile.json"
     assert "pitch_median_hz" in json.loads(prof_file.read_text())
-    assert json.loads((tmp_path / "a.voicecheck.json").read_text())["pass"] is True
+    assert json.loads((tmp_path / "a.voicecheck.json").read_text())["failures"] == []
     assert (tmp_path / "b.voicecheck.json").exists()
     # same take shifted +3 st: resample by 2**(3/12) via index mapping
     y = _phrases()
@@ -168,7 +168,7 @@ def test_cli_profile_saved_per_take_files_and_exit_code(tmp_path):
     code = cli.main(["voicecheck", str(shifted), "--expected", str(len(idx) / SR), "--profile", str(prof_file)])
     res = json.loads((tmp_path / "hi.voicecheck.json").read_text())
     assert "pitch_median" in res["failures"] and code == 1
-    assert json.loads((tmp_path / "a.voicecheck.json").read_text())["pass"] is True  # untouched
+    assert json.loads((tmp_path / "a.voicecheck.json").read_text())["failures"] == []  # untouched
     assert json.loads(prof_file.read_text()) == json.loads(prof_file.read_text())
 
 
@@ -206,9 +206,34 @@ def test_words_passes_on_match(tmp_path):
 def test_words_fails_on_dropped_sentence(tmp_path):
     p, n = _clean(tmp_path)
     dropped = "রাজা বললেন, আমি আজ যাব। শেষে সভা ভাঙল।"   # the middle two sentences are gone
-    r = voicecheck.check(p, n, _prof(p), transcript=dropped, source=SRC)
-    assert "words" in r["failures"] and r["pass"] is False
-    assert r["metrics"]["words"]["cer"] > voicecheck.WORDS_CEILING
+    cal = dict(_prof(p), words_cer_median=0.04, words_cer_n=voicecheck.WORDS_MIN_TAKES)   # calibrated: hard failure
+    r = voicecheck.check(p, n, cal, transcript=dropped, source=SRC)
+    assert "words" in r["failures"] and r["pass"] is False and "warnings" not in r
+    assert r["metrics"]["words"]["cer"] > cal["words_cer_median"] + voicecheck.WORDS_MARGIN
+
+
+def test_provisional_ceiling_only_warns_never_a_redo(tmp_path):
+    p, n = _clean(tmp_path)
+    dropped = "রাজা বললেন, আমি আজ যাব। শেষে সভা ভাঙল।"
+    for prof in (_prof(p), dict(_prof(p), words_cer_median=0.01, words_cer_n=voicecheck.WORDS_MIN_TAKES - 1)):
+        r = voicecheck.check(p, n, prof, transcript=dropped, source=SRC)
+        w = r["metrics"]["words"]
+        assert r["failures"] == [] and r["warnings"] == ["words"] and r["pass"] is True
+        assert w["provisional"] is True and w["cer"] > w["threshold"] == voicecheck.WORDS_CEILING
+    # a warned take is not accepted: it cannot feed the median
+    assert voicecheck.accepted_cers({"a": r}) == {}
+
+
+def test_accepted_cers_and_profile_merge(tmp_path):
+    p, n = _clean(tmp_path)
+    ok = voicecheck.check(p, n, _prof(p), transcript=SRC, source=SRC)
+    bad = voicecheck.check(p, n, {}, transcript="রাজা", source=SRC)
+    redo = voicecheck.check(p, 1.0, {}, transcript=SRC, source=SRC)   # a failing duration: not accepted
+    assert redo["failures"] == ["duration"]
+    assert voicecheck.accepted_cers({"a": ok, "b": bad, "c": redo, "d": voicecheck.check(p, n, {})}) == {"a": 0.0}
+    prof = voicecheck.with_words({"rate": 1.0}, {"a": 0.0, "b": 0.2})
+    prof = voicecheck.with_words(prof, {"b": 0.04})   # a redo's accepted take replaces its stem's entry
+    assert prof["words_cer_n"] == 2 and abs(prof["words_cer_median"] - 0.02) < 1e-9 and prof["rate"] == 1.0
 
 
 def test_words_threshold_is_accepted_take_median_plus_margin(tmp_path):
@@ -230,36 +255,41 @@ def test_no_transcript_means_check_not_run_not_pass(tmp_path):
         r = voicecheck.check(p, n, _prof(p), **kw)
         assert r["metrics"]["words"]["run"] is False
         assert r["not_run"] == ["words"] and "words" not in r["failures"]
+        assert r["pass"] is not True   # unchecked words are never a pass
         assert "cer" not in r["metrics"]["words"]
 
 
-def test_cli_words_standalone_stale_transcript_and_profile(tmp_path):
+def test_cli_words_standalone_accepted_only_profile_tags_and_stale_transcript(tmp_path, capsys):
     from eav import cli
-    p, n = _clean(tmp_path, "s1.wav")
+    good, n = _clean(tmp_path, "s1.wav")
+    bad, _ = _clean(tmp_path, "s2.wav")
     (tmp_path / "src").mkdir()
-    (tmp_path / "src" / "s1.txt").write_text(SRC, encoding="utf-8")
+    (tmp_path / "src" / "s1.txt").write_text("[calm] " + SRC.replace("রাজা", "[sad] রাজা"), encoding="utf-8")   # tagged source
+    (tmp_path / "src" / "s2.txt").write_text(SRC, encoding="utf-8")
     tr = tmp_path / "transcripts.json"
     model = {"repo": "openai/whisper-small", "revision": "r", "licence": "mit"}
 
-    def write(text, sha=None):
-        tr.write_text(json.dumps({"schema": voicecheck.TRANSCRIPT_SCHEMA, "model": model,
-                                  "takes": {"s1": {"sha256": sha or voicecheck.sha256_file(p), "text": text}}}),
-                      encoding="utf-8")
-    args = ["voicecheck", str(p), "--expected", str(n), "--transcripts", str(tr), "--sources", str(tmp_path / "src")]
-    write("রাজা বললেন")
-    assert cli.main(args) == 1
-    res = json.loads((tmp_path / "s1.voicecheck.json").read_text())
-    assert "words" in res["failures"] and res["metrics"]["words"]["model"] == model
-    assert json.loads((tmp_path / "voicecheck-profile.json").read_text())["words_cer_n"] == 1
-    write(SRC)   # the accepted take's own CER enters the saved profile
-    assert cli.main(args) == 0
-    prof = json.loads((tmp_path / "voicecheck-profile.json").read_text())
-    assert prof["words_cer_median"] == 0.0 and prof["words_cer_n"] == 1
-    write(SRC, sha="0" * 64)   # a transcript of another file (a redo under the same name) is not applied
+    def write(texts, sha1=None):
+        tr.write_text(json.dumps({"schema": voicecheck.TRANSCRIPT_SCHEMA, "model": model, "takes": {
+            "s1": {"sha256": sha1 or voicecheck.sha256_file(good), "text": texts[0]},
+            "s2": {"sha256": voicecheck.sha256_file(bad), "text": texts[1]}}}), encoding="utf-8")
+    args = ["voicecheck", str(good), str(bad), "--expected", str(n), "--transcripts", str(tr), "--sources", str(tmp_path / "src")]
+    write([SRC, "রাজা বললেন"])   # s1 matches the book once the tags are stripped; s2 drops most words
+    assert cli.main(args) == 0   # provisional ceiling: a warning, not a redo
+    r1 = json.loads((tmp_path / "s1.voicecheck.json").read_text())
+    r2 = json.loads((tmp_path / "s2.voicecheck.json").read_text())
+    assert r1["metrics"]["words"]["cer"] == 0.0 and r1["metrics"]["words"]["model"] == model
+    assert r2["warnings"] == ["words"] and r2["failures"] == []
+    assert "WARNING" in capsys.readouterr().out
+    prof = json.loads((tmp_path / "voicecheck-profile.json").read_text())   # only the accepted take s1
+    assert prof["words_cer_n"] == 1 and prof["words_cer_median"] == 0.0 and set(prof["words_cers"]) == {"s1"}
+    write([SRC, SRC], sha1="0" * 64)   # a transcript of other bytes is not applied, and says so
     cli.main(args)
+    out = capsys.readouterr().out
+    assert "different file bytes" in out
     res = json.loads((tmp_path / "s1.voicecheck.json").read_text())
-    assert res["not_run"] == ["words"] and "words" not in res["failures"]
-    assert "words_cer_median" not in json.loads((tmp_path / "voicecheck-profile.json").read_text())
+    assert res["not_run"] == ["words"] and res["pass"] is not True
+    assert set(json.loads((tmp_path / "voicecheck-profile.json").read_text()).get("words_cers", {})) == {"s2"}
 
 
 def test_words_cell_is_valid_python_checks_licence_and_matches_the_transcript_schema():

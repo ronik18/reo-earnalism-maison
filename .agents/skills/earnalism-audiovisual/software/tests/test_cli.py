@@ -2093,16 +2093,26 @@ class ImportPassagesCliTests(unittest.TestCase):
             "f01s001-p01": {"sha256": sha("f01s001-p01"), "text": "The Garden Every afternoon"},   # dropped words
             "f01s001-p02": {"sha256": sha("f01s001-p02"), "text": plain["f01s001-p02"]},
             "f01s002-p01": {"sha256": "0" * 64, "text": plain["f01s002-p01"]}}}), encoding="utf-8")
-        code, out = self.import_passages("--transcripts", tr)
-        self.assertNotEqual(code, 0)
+        real = voicecheck.check
+
+        def words_only(*a, **k):   # the synthetic tones fail the pitch gates; keep only what this test is about
+            r = real(*a, **k)
+            r["failures"] = [c for c in r["failures"] if c == "words"]
+            r["pass"] = False if r["failures"] else (None if r.get("not_run") else True)
+            return r
+        with mock.patch.object(cli.voicecheck, "check", side_effect=words_only):
+            code, out = self.import_passages("--transcripts", tr)
         work = self.root / "film" / "film-01" / "voice" / "passages"
         res = {n: json.loads((work / f"{n}.voicecheck.json").read_text()) for n in plain}
-        self.assertIn("words", res["f01s001-p01"]["failures"])
         self.assertNotIn("words", res["f01s001-p02"]["failures"])
         self.assertEqual(res["f01s001-p02"]["metrics"]["words"]["cer"], 0.0)
         self.assertEqual(res["f01s002-p01"]["not_run"], ["words"])
         self.assertIn("Word check NOT RUN", out)
-        self.assertEqual(json.loads((work / "voicecheck-profile.json").read_text())["words_cer_n"], 2)
+        prof = json.loads((work / "voicecheck-profile.json").read_text())   # accepted takes only
+        self.assertEqual(prof["words_cer_n"], 1)
+        self.assertEqual(list(prof["words_cers"]), ["f01s001-p02"])
+        self.assertEqual(res["f01s001-p01"]["warnings"], ["words"])   # provisional ceiling: warning, not a redo
+        self.assertEqual(res["f01s001-p01"]["failures"], [])
         code, out = self.import_passages("--transcripts", self.d / "nope.json")
         self.assertNotEqual(code, 0)
         self.assertIn("not a transcripts.json", out)

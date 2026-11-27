@@ -163,7 +163,7 @@ class SkillFileTests(unittest.TestCase):
         self.assertNotRegex(voice, r"(?i)(whisper|word check)[^.]*not yet built")
         self.assertIn("Word check (built, Task 14; failure code `words`)", voice)
         for phrase in ("words_cell.py.txt", "--transcripts", "--sources", "words_cer_median", "0.15", "provisional",
-                       '"not_run": ["words"]', "ZWNJ/ZWJ", "not a job kind"):
+                       '"not_run": ["words"]', "different file bytes", "WARNING", "ZWNJ/ZWJ", "not a job kind"):
             self.assertIn(phrase, voice, phrase)
         self.assertTrue((SKILL / "software" / "eav" / "templates" / "words_cell.py.txt").is_file())
         self.assertIn("failing takes", voice)

@@ -137,14 +137,21 @@ the book's untagged source text, to catch dropped, added or misread words that t
 - *Measure.* Character error rate (Levenshtein distance / source length) after normalising both texts: Unicode
   NFC, lower case, Bengali digits to ASCII, ZWNJ/ZWJ and all punctuation (`।`, `॥`, quotes, dashes) removed,
   whitespace collapsed.
-- *Threshold.* `words` fails when the CER exceeds the median CER of the book's accepted takes plus 0.05
-  (`voicecheck-profile.json`: `words_cer_median`, `words_cer_n`, built only from takes given to the profile, so
-  give it accepted takes). Until three accepted takes carry a transcript, the absolute ceiling 0.15 applies and
-  the result says `provisional`. Both numbers are estimates, not calibrated; re-tune after the first real takes.
+- *Threshold.* `words` fails (REDO) when the CER exceeds the median CER of the book's accepted takes plus
+  0.05 (`voicecheck-profile.json`: `words_cer_median`, `words_cer_n`, `words_cers` by take). Accepted means a
+  take that passed every check with its words checked and within the limit: failing, warned and not-run takes
+  never enter the median, and a redo's newly accepted take replaces its own entry. Until three accepted takes
+  carry a transcript, the absolute ceiling 0.15 is uncalibrated, so exceeding it is only a WARNING (`warnings:
+  ["words"]`, `provisional`, printed with the CER): listen to that take, it is not a redo. Both numbers are
+  estimates; re-tune after the first real takes.
 - *Not run is not a pass.* A take with no transcript, no source text, or a transcript made for different file
-  bytes (a redo under the same name) is recorded as `metrics.words.run: false` and `"not_run": ["words"]`, and
-  the CLI prints that the word check was not run. `pass` then means only that the measured checks found
-  nothing. Do not claim a word check for a take that has no `words` result with `run: true`.
+  bytes is recorded as `metrics.words.run: false` and `"not_run": ["words"]`, `pass` is `null` (never `true`),
+  and the CLI prints that the word check was not run. It is not a REDO either. Do not claim a word check for a
+  take that has no `words` result with `run: true`.
+- *Which file.* The sha256 is of the file bytes the cell read. Transcribe exactly the files you later pass to
+  `voicecheck` (or put in `import-take --audio`): the ElevenLabs mp3 as downloaded, with no conversion or
+  re-export. A transcript of other bytes is not applied and the CLI warns "made for different file bytes". The
+  standalone `--sources` text may carry audio tags: they are stripped before the CER.
 - *Limit.* Whisper's Bengali is imperfect: a `words` failure is a prompt to listen to that take, a clean
   result does not replace the owner's listening review.
 

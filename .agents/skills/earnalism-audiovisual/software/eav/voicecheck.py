@@ -15,10 +15,12 @@ second so a jump-free profile does not fail every later take.
 Word check (`words`): the character error rate of a Whisper transcript of the take against the book's
 untagged source text, both normalised (see `normalise`). The transcript comes from the Colab cell
 templates/words_cell.py.txt; this module only compares text. Threshold: the median CER of the book's
-accepted takes (profile key words_cer_median, from at least WORDS_MIN_TAKES takes) plus WORDS_MARGIN;
-before that, the absolute WORDS_CEILING, reported as provisional. With no transcript or no source the
-check is NOT RUN: it is recorded as such (metrics.words.run false, "not_run": ["words"]) and is never
-a pass.
+accepted takes (profile key words_cer_median, from at least WORDS_MIN_TAKES takes) plus WORDS_MARGIN.
+"Accepted" means a take that passed every check with its words checked (see `accepted_cers`). Before that
+median exists the absolute WORDS_CEILING is uncalibrated, so exceeding it is only a WARNING (result
+"warnings": ["words"], metrics.words.provisional true), never a redo. With no transcript or no source the
+check is NOT RUN: recorded as such (metrics.words.run false, "not_run": ["words"]) and the result's
+`pass` is None, never True.
 """
 import hashlib
 import json
@@ -82,6 +84,24 @@ def cer(reference: str, hypothesis: str) -> float:
             cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
         prev = cur
     return prev[-1] / len(a)
+
+
+def with_words(prof: dict, cers: dict) -> dict:
+    """The profile with the accepted takes' CERs merged in ({take stem: cer}) and the median/count rebuilt
+    from all of them (a redo's newly accepted take replaces its stem's earlier entry)."""
+    merged = {**prof.get("words_cers", {}), **cers}
+    out = dict(prof)
+    if merged:
+        out.update(words_cers=merged, words_cer_median=float(np.median(list(merged.values()))),
+                   words_cer_n=len(merged))
+    return out
+
+
+def accepted_cers(results: dict) -> dict:
+    """{stem: cer} of the results that pass every check with the words actually checked and within the
+    limit: no failure, no `words` warning, word check run. Only these may feed the profile median."""
+    return {k: r["metrics"]["words"]["cer"] for k, r in results.items()
+            if not r["failures"] and "words" not in r.get("warnings", []) and r["metrics"]["words"]["run"]}
 
 
 def words_threshold(prof: dict) -> tuple[float, bool]:
@@ -280,18 +300,15 @@ def measure(path: Path) -> dict:
     }
 
 
-def profile(takes: list[Path], cers: list[float] | None = None) -> dict:
-    """The book's running medians over the takes (keys with no measurable value are left out). `cers` are the
-    word-check CERs of the takes that had a transcript: they give words_cer_median and words_cer_n."""
+def profile(takes: list[Path]) -> dict:
+    """The book's running medians over the takes (keys with no measurable value are left out). The word-check median is
+    not measured here: it comes from takes AFTER they are checked (`with_words`)."""
     ms = [measure(Path(t)) for t in takes]
     prof = {}
     for key in ("pitch_median_hz", "rate", "brightness_db", "jump_rate", "click_rate"):
         v = [m[key] for m in ms if m.get(key) is not None]
         if v:
             prof[key] = float(np.median(v))
-    if cers:
-        prof["words_cer_median"] = float(np.median(cers))
-        prof["words_cer_n"] = len(cers)
     return prof
 
 
@@ -316,8 +333,8 @@ def check(take: Path, expected_s: float, prof: dict, prev_tail: Path | None = No
           transcript: str | None = None, source: str | None = None) -> dict:
     """Measure one take and list failure codes; pass is True when none fail. With a Whisper `transcript` of
     the take and the book's untagged `source` text, the CER is checked (`words`); without both the word check
-    is not run: metrics.words.run is false and "not_run" lists it. `pass` then says only that the
-    measured checks found nothing; it never means the words were checked."""
+    is not run: metrics.words.run is false, "not_run" lists it and `pass` is None (not True) when the
+    measured checks found nothing. A CER above the provisional ceiling is a warning, not a failure."""
     take = Path(take)
     m = measure(take)
     fails: list[str] = []
@@ -359,19 +376,22 @@ def check(take: Path, expected_s: float, prof: dict, prev_tail: Path | None = No
             fails.append("join")
     if m["true_peak_dbfs"] >= L["true_peak_db"]:
         fails.append("true_peak")
-    not_run = []
+    not_run, warns = [], []
     if transcript is not None and transcript.strip() and source is not None and source.strip():
         limit, provisional = words_threshold(prof)
         c = cer(source, transcript)
         m["words"] = {"run": True, "cer": c, "threshold": limit, "provisional": provisional,
                       "source_chars": len(normalise(source))}
         if c > limit:
-            fails.append("words")
+            (warns if provisional else fails).append("words")
     else:
         m["words"] = {"run": False, "reason": "no Whisper transcript or no source text given"}
         not_run.append("words")
     fails.sort(key=CODES.index)
-    res = {"pass": not fails, "failures": fails, "metrics": json.loads(json.dumps(m, default=float))}
+    res = {"pass": False if fails else (None if not_run else True), "failures": fails,
+           "metrics": json.loads(json.dumps(m, default=float))}
     if not_run:
         res["not_run"] = not_run
+    if warns:
+        res["warnings"] = warns
     return res
