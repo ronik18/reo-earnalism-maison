@@ -548,13 +548,29 @@
     "title": "bicharak",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak",
     "reserved_units": 1.20474,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-27T07:10:56+00:00",
+    "modal_runs_issued": 1,
+    "usd": 0.610342,
+    "cu_equivalent": 6.1
+  },
+  {
+    "job_id": "stills-film-01-r7-candidates",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak",
+    "reserved_units": 1.2791066666666666,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-27T07:38:33+00:00",
     "modal_runs_issued": 1
   },
   {
@@ -699,6 +715,14 @@
         "seconds": 900.874159027,
         "at": "2026-11-27T07:10:56+00:00",
         "status": "ok"
+      },
+      {
+        "run_id": "stills-film-01-r7-candidates#1",
+        "job_id": "stills-film-01-r7-candidates",
+        "usd": 2.2174575,
+        "seconds": 0.0,
+        "at": "2026-11-27T07:38:33+00:00",
+        "status": "pending"
       }
     ]
   }

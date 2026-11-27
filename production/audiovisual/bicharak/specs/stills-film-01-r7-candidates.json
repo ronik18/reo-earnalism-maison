@@ -1,0 +1,664 @@
+{
+ "derived_from": "specs/stills-film-01-r4.json",
+ "purpose": "selection round: 3 seed candidates for each of the 29 keys that failed r6 QC (judge facial hair, widow bindi/earrings, stray text, electric lamp); candidates are viewed, never imported, and the chosen seeds are rebuilt as stills-film-01-r7 for film-01",
+ "qc_failures": {
+  "judge_facial_hair": [
+   "f01s005-2",
+   "f01s005-3",
+   "f01s006-1",
+   "f01s016-1",
+   "f01s016-2",
+   "f01s016-3",
+   "f01s017-1",
+   "f01s018-3",
+   "f01s019-2"
+  ],
+  "hemshashi_bindi_or_earrings": [
+   "f01s007-4",
+   "f01s007-5",
+   "f01s007-6",
+   "f01s009-2",
+   "f01s009-4",
+   "f01s011-2",
+   "f01s011-3",
+   "f01s011-4",
+   "f01s012-1",
+   "f01s012-2",
+   "f01s013-1",
+   "f01s013-4",
+   "f01s013-5",
+   "f01s015-1",
+   "f01s015-3"
+  ],
+  "text_or_anachronism": [
+   "f01s003-4",
+   "f01s007-2",
+   "f01s008-2",
+   "f01s013-3",
+   "f01s014-2"
+  ]
+ },
+ "prompt_changes": {
+  "judge": [
+   "a clean-shaven 44-year-old Bengali man with a smooth bare chin and bare upper lip, no facial hair,",
+   "a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip,"
+  ],
+  "hemshashi": [
+   "with a bare clean forehead and bare earlobes,",
+   "her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears,"
+  ],
+  "f01s008-2": "plain lime-washed wall (r6 drew a printed poster)",
+  "f01s014-2": "clay pots and tulsi, sunlight only (r6 drew an electric bulb and wires)"
+ },
+ "items": [
+  {
+   "key": "cand-f01s005-2-s34101",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, seated on the raised wooden bench of a colonial sessions courtroom with whitewashed walls and tall shuttered windows, Bengali lawyers in black gowns pleading below him. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 34101,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s005-2-s44101",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, seated on the raised wooden bench of a colonial sessions courtroom with whitewashed walls and tall shuttered windows, Bengali lawyers in black gowns pleading below him. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 44101,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s005-2-s54101",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, seated on the raised wooden bench of a colonial sessions courtroom with whitewashed walls and tall shuttered windows, Bengali lawyers in black gowns pleading below him. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 54101,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s005-3-s34102",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, stern face pronouncing a sentence from the wooden bench, a dip pen in hand above a sheet of paper. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 34102,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s005-3-s44102",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, stern face pronouncing a sentence from the wooden bench, a dip pen in hand above a sheet of paper. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 44102,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s005-3-s54102",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, stern face pronouncing a sentence from the wooden bench, a dip pen in hand above a sheet of paper. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 54102,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s006-1-s34103",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, seated at a wooden desk in the morning, a straight razor and a brass bowl of water beside him. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 34103,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s006-1-s44103",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, seated at a wooden desk in the morning, a straight razor and a brass bowl of water beside him. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 44103,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s006-1-s54103",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, seated at a wooden desk in the morning, a straight razor and a brass bowl of water beside him. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 54103,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s016-1-s24104",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, offering water from cupped hands at a river ghat with worn stone steps at sunrise. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 24104,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s016-1-s34104",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, offering water from cupped hands at a river ghat with worn stone steps at sunrise. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 34104,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s016-1-s44104",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, offering water from cupped hands at a river ghat with worn stone steps at sunrise. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 44104,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s016-2-s24105",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, reading palm-leaf scriptures at a low wooden desk, the pages seen from the side. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 24105,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s016-2-s34105",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, reading palm-leaf scriptures at a low wooden desk, the pages seen from the side. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 34105,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s016-2-s44105",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, reading palm-leaf scriptures at a low wooden desk, the pages seen from the side. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 44105,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s016-3-s24106",
+   "prompt": "Gouache painting of small boys in white dhotis sitting cross-legged in yoga posture before Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 24106,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s016-3-s34106",
+   "prompt": "Gouache painting of small boys in white dhotis sitting cross-legged in yoga posture before Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 34106,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s016-3-s44106",
+   "prompt": "Gouache painting of small boys in white dhotis sitting cross-legged in yoga posture before Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 44106,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s017-1-s24107",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, in a jail vegetable garden, a woven basket of gourds and greens beside him. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 24107,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s017-1-s34107",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, in a jail vegetable garden, a woven basket of gourds and greens beside him. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 34107,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s017-1-s44107",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, in a jail vegetable garden, a woven basket of gourds and greens beside him. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 44107,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s018-3-s24108",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, a faint scornful smile, inside a whitewashed jail cell. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 24108,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s018-3-s34108",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, a faint scornful smile, inside a whitewashed jail cell. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 34108,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s018-3-s44108",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, a faint scornful smile, inside a whitewashed jail cell. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 44108,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s019-2-s24109",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, startled, as if he holds a burning coal, staring at a small gold ring in his palm. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 24109,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s019-2-s34109",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, startled, as if he holds a burning coal, staring at a small gold ring in his palm. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 34109,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s019-2-s44109",
+   "prompt": "Gouache painting of Judge Mohit, a 44-year-old Bengali Brahmin judge with a fully shaven smooth face like a shaven Hindu pandit, smooth bare chin and smooth bare upper lip, bald crown with a small tuft of hair at the back, stern mouth, dark buttoned chapkan coat over a white dhoti, startled, as if he holds a burning coal, staring at a small gold ring in his palm. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 44109,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-4-s32122",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, at the barred window, the world beyond glowing like a far mysterious pleasure garden. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32122,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-4-s42122",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, at the barred window, the world beyond glowing like a far mysterious pleasure garden. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42122,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-4-s52122",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, at the barred window, the world beyond glowing like a far mysterious pleasure garden. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 52122,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-5-s32123",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, a soft spring wind lifting the end of her white sari, the sky full of light, bare blue sky around her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32123,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-5-s42123",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, a soft spring wind lifting the end of her white sari, the sky full of light, bare blue sky around her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42123,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-5-s52123",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, a soft spring wind lifting the end of her white sari, the sky full of light, bare blue sky around her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 52123,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-6-s32124",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, dreamlike, the world around her unfolding like the soft petals of a red lotus, layer on layer. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32124,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-6-s42124",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, dreamlike, the world around her unfolding like the soft petals of a red lotus, layer on layer. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42124,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-6-s52124",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, dreamlike, the world around her unfolding like the soft petals of a red lotus, layer on layer. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 52124,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s009-2-s32126",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, at the barred window gazing down with worshipful, dreaming eyes. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32126,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s009-2-s42126",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, at the barred window gazing down with worshipful, dreaming eyes. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42126,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s009-2-s52126",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, at the barred window gazing down with worshipful, dreaming eyes. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 52126,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s009-4-s32127",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, awake late at night, watching moving shadows on a bare plaster wall, a small bamboo birdcage with a caged bird by her window. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32127,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s009-4-s42127",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, awake late at night, watching moving shadows on a bare plaster wall, a small bamboo birdcage with a caged bird by her window. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42127,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s009-4-s52127",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, awake late at night, watching moving shadows on a bare plaster wall, a small bamboo birdcage with a caged bird by her window. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 52127,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s011-2-s22129",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, taking a folded blank letter through the window bars at dusk, startled. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22129,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s011-2-s32129",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, taking a folded blank letter through the window bars at dusk, startled. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32129,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s011-2-s42129",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, taking a folded blank letter through the window bars at dusk, startled. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42129,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s011-3-s22130",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, writing a reply with a reed pen by lamplight, anxious, ink on her fingers, the page seen from the back. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22130,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s011-3-s32130",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, writing a reply with a reed pen by lamplight, anxious, ink on her fingers, the page seen from the back. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32130,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s011-3-s42130",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, writing a reply with a reed pen by lamplight, anxious, ink on her fingers, the page seen from the back. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42130,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s011-4-s22131",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, in a whirl of wind and scattered folded letters, the room blurring around her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22131,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s011-4-s32131",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, in a whirl of wind and scattered folded letters, the room blurring around her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32131,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s011-4-s42131",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, in a whirl of wind and scattered folded letters, the room blurring around her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42131,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s012-1-s22132",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, slipping out of her house door at deep night, looking back. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22132,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s012-1-s32132",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, slipping out of her house door at deep night, looking back. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32132,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s012-1-s42132",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, slipping out of her house door at deep night, looking back. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42132,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s012-2-s22133",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, shrinking away to the far corner of a closed horse carriage at night, afraid, young Mohit in gold-rimmed round spectacles, moustache and short beard, dark frock coat seated apart opposite her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22133,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s012-2-s32133",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, shrinking away to the far corner of a closed horse carriage at night, afraid, young Mohit in gold-rimmed round spectacles, moustache and short beard, dark frock coat seated apart opposite her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32133,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s012-2-s42133",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, shrinking away to the far corner of a closed horse carriage at night, afraid, young Mohit in gold-rimmed round spectacles, moustache and short beard, dark frock coat seated apart opposite her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42133,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-1-s22134",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, weeping in the dark of a closed horse carriage, eyes shut in memory. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22134,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-1-s32134",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, weeping in the dark of a closed horse carriage, eyes shut in memory. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32134,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-1-s42134",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, weeping in the dark of a closed horse carriage, eyes shut in memory. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42134,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-4-s22137",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, her mother braiding her hair, a memory in afternoon light. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22137,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-4-s32137",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, her mother braiding her hair, a memory in afternoon light. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32137,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-4-s42137",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, her mother braiding her hair, a memory in afternoon light. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42137,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-5-s22138",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, fanning her father with a palm-leaf fan while a small brother eats from her hand, a memory. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22138,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-5-s32138",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, fanning her father with a palm-leaf fan while a small brother eats from her hand, a memory. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32138,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-5-s42138",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, fanning her father with a palm-leaf fan while a small brother eats from her hand, a memory. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42138,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s015-1-s22139",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, pleading with folded hands inside a closed horse carriage, young Mohit in gold-rimmed round spectacles, moustache and short beard, dark frock coat looking away. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22139,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s015-1-s32139",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, pleading with folded hands inside a closed horse carriage, young Mohit in gold-rimmed round spectacles, moustache and short beard, dark frock coat looking away. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32139,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s015-1-s42139",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, pleading with folded hands inside a closed horse carriage, young Mohit in gold-rimmed round spectacles, moustache and short beard, dark frock coat looking away. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42139,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s015-3-s22140",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, standing alone in a muddy lane, the hem of her white sari soiled. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22140,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s015-3-s32140",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, standing alone in a muddy lane, the hem of her white sari soiled. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32140,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s015-3-s42140",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, standing alone in a muddy lane, the hem of her white sari soiled. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42140,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s003-4-s32118",
+   "prompt": "Gouache painting of Kshiroda, a 38-year-old Bengali woman with a clearly visible dark mole on her left cheek under the left eye, an oval face, softly arched heavy brows, a tired face, large dark eyes, a bare forehead, hair in a loose low bun, faded maroon cotton sari with a thin black border, lying face down on the hard floor of a bolted bare room, hair loose, exhausted. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32118,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s003-4-s42118",
+   "prompt": "Gouache painting of Kshiroda, a 38-year-old Bengali woman with a clearly visible dark mole on her left cheek under the left eye, an oval face, softly arched heavy brows, a tired face, large dark eyes, a bare forehead, hair in a loose low bun, faded maroon cotton sari with a thin black border, lying face down on the hard floor of a bolted bare room, hair loose, exhausted. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42118,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s003-4-s52118",
+   "prompt": "Gouache painting of Kshiroda, a 38-year-old Bengali woman with a clearly visible dark mole on her left cheek under the left eye, an oval face, softly arched heavy brows, a tired face, large dark eyes, a bare forehead, hair in a loose low bun, faded maroon cotton sari with a thin black border, lying face down on the hard floor of a bolted bare room, hair loose, exhausted. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 52118,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-2-s32102",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, sitting at an iron-barred window, chin on her hand, gazing out, a bare lime-plastered wall beside her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32102,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-2-s42102",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, sitting at an iron-barred window, chin on her hand, gazing out, a bare lime-plastered wall beside her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42102,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s007-2-s52102",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists, sitting at an iron-barred window, chin on her hand, gazing out, a bare lime-plastered wall beside her. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 52102,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s008-2-s35113",
+   "prompt": "Gouache painting of a thin Bengali clerk father in a plain cotton vest and dhoti counting a few copper coins at a bare wooden table against a plain bare lime-washed wall beside a clay oil lamp. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 35113,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s008-2-s45113",
+   "prompt": "Gouache painting of a thin Bengali clerk father in a plain cotton vest and dhoti counting a few copper coins at a bare wooden table against a plain bare lime-washed wall beside a clay oil lamp. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 45113,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s008-2-s55113",
+   "prompt": "Gouache painting of a thin Bengali clerk father in a plain cotton vest and dhoti counting a few copper coins at a bare wooden table against a plain bare lime-washed wall beside a clay oil lamp. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 55113,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-3-s22136",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists and her mother folding betel leaves together on a mat, a memory in morning light. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 22136,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-3-s32136",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists and her mother folding betel leaves together on a mat, a memory in morning light. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 32136,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s013-3-s42136",
+   "prompt": "Gouache painting of Hemshashi, a 14-year-old Bengali child widow her forehead bare and unpainted like every Hindu widow's, her loose hair falling over her ears, an oval face, softly arched heavy brows, a clearly visible dark mole on her left cheek under the left eye, slender, large dark eyes, long loose black hair, modestly wrapped in a plain undyed white borderless widow's sari of coarse cotton, bare neck and bare wrists and her mother folding betel leaves together on a mat, a memory in morning light. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 42136,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s014-2-s25122",
+   "prompt": "Gouache painting of morning sunlight falling into the beaten-earth courtyard of a small lane house with clay pots and a tulsi plant, lit only by the sun. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 25122,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s014-2-s35122",
+   "prompt": "Gouache painting of morning sunlight falling into the beaten-earth courtyard of a small lane house with clay pots and a tulsi plant, lit only by the sun. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 35122,
+   "width": 1344,
+   "height": 768
+  },
+  {
+   "key": "cand-f01s014-2-s45122",
+   "prompt": "Gouache painting of morning sunlight falling into the beaten-earth courtyard of a small lane house with clay pots and a tulsi plant, lit only by the sun. Hand-painted gouache illustration, painterly illustrated cinema, visible brushwork, matte paper grain, soft film grain, 35 mm lens, shallow depth of field. Bengal in the 1880s, lit only by oil lamps, candles, moon and sun. Palette of indigo night, lamp amber, faded vermilion, ivory white and old gold; warm low oil-lamp light against deep blue dusk.",
+   "seed": 45122,
+   "width": 1344,
+   "height": 768
+  }
+ ]
+}
