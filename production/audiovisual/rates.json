@@ -14,6 +14,9 @@
     "steps": 4,
     "decode_s": 900,
     "export_s": 120,
+    "gate_setup_s": 300,
+    "gate_s_per_still": 6,
+    "gate_source": "ESTIMATE — the stills gate (pip install mediapipe, two MediaPipe files, OWLv2 + DINOv2 downloads and load: 300 s; face, hand, OWLv2 and DINOv2 per still: 6 s). Replace with measured values from the first gated run; forecast gate_s = gate_setup_s + gate_s_per_still x stills, added after the margin.",
     "source": "ESTIMATE — replace with measured values after the first run",
     "basis": "FLUX.1-schnell, 4 steps, guidance 0, enable_model_cpu_offload on L4: no measured run in this repo. 10 s/step (40 s per image incl. offload swaps) is a conservative allowance. decode_s covers pip install, the ~33 GB weight download and load. units_per_hour 1.94 as for narration."
   },

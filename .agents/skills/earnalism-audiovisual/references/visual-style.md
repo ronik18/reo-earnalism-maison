@@ -189,29 +189,47 @@ applies a later partial stills job, or a candidates job's picks, over the full s
 ## Gate (character and period check of the stills)
 
 Every `job stills` notebook runs a gate cell after the stills and writes `<key>.gate.json` per image:
-`{eyes, hands_detached, anachronisms, anchor_similarity, pass, needs_review, notes}`. Checks: MediaPipe
-Face Landmarker (open eyes per face; a frontal face with other than 2 is a fail, a profile with fewer a
-review), MediaPipe Hand Landmarker (a wrist outside every OWLv2 person/arm box and face box, grown by 3% of
-the diagonal, is detached; nothing to judge against is a review), OWLv2 labels gas cylinder, air
-conditioner, electric cable, spotlight, modern eyeglasses, plastic, utility pole, modern high-rise
-building (score >= 0.30 fail, 0.15-0.30 review) and CLIP ViT-B/32 similarity to the character's anchor still
-(< 0.80 review, never an automatic fail; the figure is not yet calibrated on these stills). A model that
-failed, was refused by the licence allowlist (apache-2.0, mit) or returned nothing is `needs_review`, never
-`pass`. The gate's seconds are not in the forecast: when the clock runs out the remaining stills are left
-ungated (listed in the manifest) and `pick` treats an ungated candidate of a gated job as needing review.
+`{eyes, hands_detached, anachronisms, anchor_similarity, pass, needs_review, notes}`. Checks:
+- MediaPipe Face Landmarker: open eyes per face by eye aspect ratio (this measures openness, not a malformed
+  eye). A frontal face without two open eyes is a certain fail, a profile with fewer a review.
+- MediaPipe Hand Landmarker: a wrist outside every OWLv2 person/arm box and face box, grown 3% of the
+  diagonal, is detached (fail). Nothing to judge against is a review. No hands detected is a valid result.
+- OWLv2 labels gas cylinder, air conditioner, electric cable, spotlight, modern eyeglasses, plastic, utility
+  pole, modern high-rise building: score >= 0.30 fail, 0.15-0.30 review.
+- DINOv2-small (`facebook/dinov2-small`, Apache-2.0) cosine of the largest person-box crop to the character's
+  anchor still; below 0.55 is a review. The figure is uncalibrated. (CLIP was dropped: its card puts any
+  deployed use out of scope.)
+
+A check that did not run (model error, licence refused, unreadable card) is `needs_review` with the reason in
+`notes`, never `pass`. Licences are read from each Hub card at run time and must be apache-2.0 or mit; an
+unreadable card means the model is not loaded, and a model loads only at the revision whose card was read.
+
+The gate is clocked: it is skipped when the job is INCOMPLETE or the seconds left do not cover its set-up
+(300 s), 6 s per still and the manifest reserve, and the forecast includes those seconds (`gate_s`, an ESTIMATE
+in `rates.json`). Any failure inside the gate leaves the stills, manifest and upload alone; the manifest's
+`model.gate` records the intent and lists `ungated` stills.
 
 Anchor: a stills item may carry `"anchor": "<name>.png"`; the spec's `art_dir` holds that file and the builder
 puts it in inputs.zip as `anchors/<name>.png` (candidates inherit it).
 
-`pick` refuses a candidate whose gate did not pass or needs review unless `--override "<reason>"`; the reason
-and the gate verdict are recorded in the pick and its event. Candidates of jobs with no gate files pick as before.
+At `pick`: a certain fail (pass false, needs_review false) is refused unless `--override-fail KEY=reason`.
+`needs_review` is advisory (warned and recorded in the pick as `advisories`) until the title has a
+`gate-calibration.json` beside its record.json (written from approved stills; the gate's thresholds are
+unmeasured until then); after it, a needs_review candidate needs `--override KEY=reason`. Both flags are
+repeatable and per key; reasons are recorded in the pick and its event. A job whose gate was intended but left
+no result for a candidate counts as needs_review. A job that was never gated picks as before. `film` refuses a
+still whose gate.json is a certain fail unless a reason is recorded (a pick `--override-fail`, or
+`picks/gate-overrides.json` `{"<key>": "<reason>"}` for a single image).
 
-The builder refuses a stills prompt whose house-style-first text is estimated over FLUX's 256 T5 tokens.
+The builder refuses a stills prompt whose house-style-first text is over 180 on the calibrated token estimate
+(FLUX's T5 cuts at 256 real tokens); the limit comes from the six recorded truncated jobs
+(`tests/fixtures/t5_recorded_prompts.json`).
 
 ## Sound fetch (film_clips)
 
 A film_clips spec with `"sfx": {"crows": "crows cawing morning", ...}` adds a cell before the Wan clips that
-searches Wikimedia Commons (no key), keeps up to two files per name that are CC0 or public domain (the file's
-own licence), whose title holds a search word, and writes `sfx-<name>-<n>.<ext>` and `sfx-licences.json`
+searches Wikimedia Commons (no key), keeps up to two files per name that are CC0 or worldwide public domain
+("CC0", "Public domain", "PD"; country-limited tags such as PD-US are refused) in the file's own licence, whose
+title holds a search word as a whole word, and writes `sfx-<name>-<n>.<ext>` and `sfx-licences.json`
 (title, page, licence, author). Eight minutes at most, reserved in the forecast; it never fails the job.
 Import places them under `film_clips/<job_id>/sfx/`.

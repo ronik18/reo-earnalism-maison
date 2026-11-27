@@ -17,7 +17,9 @@ SFX_MAX_BYTES = 40_000_000
 _SFX_UA = {"User-Agent": "EarnalismAudiovisual/1.0 (CC0 sound fetch; https://www.mediawiki.org/wiki/API:Etiquette)"}
 _SFX_API = "https://commons.wikimedia.org/w/api.php?"
 _SFX_EXT = ("ogg", "oga", "opus", "wav", "flac", "mp3")
-_SFX_OK = re.compile(r"^(cc[ -]?0\b|public domain\b|pd\b|pd-)", re.I)
+# Only CC0 and worldwide public domain (the Commons short names "CC0", "Public domain", "PD"). Country-limited
+# tags (PD-US, PD-USGov, PD-old-70, "Public domain in the US"...) are refused: the 47-region publication policy.
+_SFX_OK = re.compile(r"(cc[ -]?0(?: 1\.0(?: universal)?)?|public domain|pd)", re.I)
 _SFX_STOP = {"the", "and", "for", "with", "of", "a", "an", "in", "on", "at", "to", "sound", "audio", "filetype"}
 _SFX_SAFE = re.compile(r"[A-Za-z0-9._-]+")
 
@@ -41,7 +43,7 @@ def _sfx_fetch(url):
 
 def sfx_licence_ok(licence):
     """Only CC0 and public domain (the file's own LicenseShortName); anything else is dropped."""
-    return bool(licence) and bool(_SFX_OK.match(str(licence).strip()))
+    return bool(licence) and bool(_SFX_OK.fullmatch(str(licence).strip()))
 
 
 def sfx_ext(url):
@@ -71,10 +73,10 @@ def sfx_keywords(query):
 
 
 def sfx_relevant(title, query):
-    """At least one search word (plural stemmed) appears in the file title: Commons search also matches
+    """At least one search word (plural stemmed) appears as a whole word in the file title ("crow" is not "crowd"): Commons search also matches
     descriptions, which is how a broom search returned a tooth-brushing clip."""
-    low = str(title).lower()
-    return any(k in low for k in sfx_keywords(query))
+    words = set(re.findall(r"[a-z0-9]+", str(title).lower()))
+    return any(k in words or k + "s" in words or k + "es" in words for k in sfx_keywords(query))
 
 
 def sfx_api(params):

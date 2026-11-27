@@ -124,18 +124,22 @@ MAX_CANDIDATES = 4
 CANDIDATE_SUFFIX = re.compile(r"--c\d+$")
 STYLE_CONFLICTS = ("photoreal", "photograph", "oil-on-canvas", "realism", "watercolour", "watercolor",
                    "gouache", "3d render", "not a cartoon", "not anime", "not a flat illustration")
-# Stills gate (Task 11): every model's licence must be on this list at run time (a refused model is not
-# run and the still is marked needs_review). MediaPipe Face/Hand Landmarker (Apache-2.0, declared by
-# the model cards: not on the Hub), OWLv2 google/owlv2-base-patch16-ensemble (Hub card apache-2.0) and
-# CLIP openai/clip-vit-base-patch32 (MIT per github.com/openai/CLIP; its Hub card carries no licence
-# field, so the cell uses the declared "mit" and prints that it did).
+# Stills gate (Task 11): every model's licence must be on this list at run time, read from its Hub card
+# (a card that cannot be read, or a licence off the list, means the model is not loaded and its checks
+# are needs_review). MediaPipe Face/Hand Landmarker are not on the Hub: Apache-2.0 as their model cards
+# declare. OWLv2 google/owlv2-base-patch16-ensemble and DINOv2-small facebook/dinov2-small carry
+# `license: apache-2.0` on the Hub (read 2026-11-27 through the Hub connector). CLIP was dropped: its card
+# has no licence and puts any deployed use out of scope.
 GATE_LICENCE_ALLOWLIST = ("apache-2.0", "mit")
-# CLIP ViT-B/32 image-image cosine of a still against the character's anchor still. Same character in
-# a new pose/setting is typically ~0.80-0.95, a different character of the same house style ~0.60-0.80
-# (general CLIP behaviour, not yet measured on these stills). Below 0.80 sets needs_review, never an
-# automatic fail: the whole frame is compared with a character image, so a low figure is a prompt to
-# look. Calibrate on the first gated job and change it here.
-GATE_ANCHOR_PASS = 0.80
+# DINOv2-small cosine of a still's person-box crop against the character's anchor still. UNCALIBRATED
+# (no measurement on these stills; DINOv2 cosines for the same character in a new pose are usually lower
+# than CLIP's): a figure below it sets needs_review only, and needs_review is advisory at pick until the
+# title has a gate-calibration.json. Re-tune it from approved stills.
+GATE_ANCHOR_PASS = 0.55
+# The gate's seconds are part of the stills forecast (gate_s): ESTIMATE, not measured. Set-up covers the
+# pip install, the two MediaPipe files and the OWLv2 + DINOv2 downloads; the rest is per still.
+GATE_SETUP_S = 300
+GATE_PER_STILL_S = 6
 GATE_MARKER = "# === gate cell ===\n"
 # film_clips sound fetch (optional spec "sfx"): its own wall-clock budget, reserved inside the job forecast.
 SFX_BUDGET_S = 480
@@ -463,7 +467,8 @@ def _template_cells(kind, template: Path) -> list:
         return [text]
     stills, gate = text.split(GATE_MARKER, 1)
     config = (f"GATE_LICENCE_ALLOWLIST = {GATE_LICENCE_ALLOWLIST!r}\n"
-              f"GATE_ANCHOR_PASS = {GATE_ANCHOR_PASS!r}")
+              f"GATE_ANCHOR_PASS = {GATE_ANCHOR_PASS!r}\n"
+              f"GATE_SETUP_S = {GATE_SETUP_S!r}\nGATE_PER_STILL_S = {GATE_PER_STILL_S!r}")
     return [stills.rstrip("\n") + "\n", gate.replace("GATE_CONFIG_HERE", config, 1)]
 
 
@@ -610,6 +615,9 @@ def derive_compute(kind: str, spec: dict, rates: dict, items: int) -> dict:
     compute = {"kind": kind, "steps": steps, "items": items, "takes": 1}
     if kind != "reel_clips":
         compute.update(decode_s=rate["decode_s"], export_s=rate["export_s"])
+    if kind == "stills":  # the gate's set-up and per-still seconds (ESTIMATE, rates.json may restate them)
+        compute["gate_s"] = (rate.get("gate_setup_s", GATE_SETUP_S) + rate.get("gate_s_per_still", GATE_PER_STILL_S)
+                             * items)
     if kind == "film_clips":  # clips by resolution and the GPU the job needs: both set the forecast
         shapes = [FILM_RES[(c["width"], c["height"])] for c in _film_items(spec)]
         compute.update(hd=shapes.count("hd"), sd=shapes.count("sd"),
@@ -650,14 +658,22 @@ def narration_units(spec: dict) -> list:
 
 
 T5_MAX = 256  # FLUX.1-schnell's T5 limit: tokens past it are cut (the stills template says the same)
+# Refuse above this estimate, well under T5_MAX: calibrated on the six recorded truncated stills jobs
+# (bicharak r8-house, r9, r10, pilot2, pilot4, pilot5), whose truncated prompts all estimate 188 or more
+# with estimate_t5_tokens, against the clean pilot6 prompt at 178. Some clean prompts (up to ~207 on the
+# older estimate) must now be shortened; that is the intended cost.
+T5_ESTIMATE_LIMIT = 180
 
 
 def estimate_t5_tokens(text: str) -> int:
-    """A deliberately high estimate of the T5 token count (no tokenizer is installed here): every word and
-    every punctuation mark is one piece, a word over 6 letters counts 1.3 (rounded up). Real SentencePiece
-    counts for plain English prose run below this, so a prompt it passes fits."""
-    pieces = re.findall(r"\w+|[^\w\s]", text)
-    return math.ceil(sum(1.3 if len(p) > 6 else 1.0 for p in pieces))
+    """A calibrated estimate of the T5 token count (no tokenizer is installed here): every word is one
+    piece, a word over 6 letters (names, Bengali words, compounds that SentencePiece splits into 2-3) is
+    1.8, a punctuation mark 0.5, rounded up. Judged only by the recorded truncations (T5_ESTIMATE_LIMIT),
+    not as an exact count."""
+    total = 0.0
+    for piece in re.findall(r"\w+|[^\w\s]", text):
+        total += (1.8 if len(piece) > 6 else 1.0) if (piece[0].isalnum() or piece[0] == "_") else 0.5
+    return math.ceil(total)
 
 
 def negative_words(prompt: str) -> list:
@@ -1084,11 +1100,12 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                                  "use candidates instead")
             prompt = s["prompt"].rstrip() + " " + HOUSE_STYLE
             tokens = estimate_t5_tokens(prompt)  # look_first reorders the same tokens
-            if tokens > T5_MAX:
-                raise ValueError(f"stills prompt {s['key']!r} (with the house style) is about {tokens} tokens, "
-                                 f"over FLUX.1-schnell's T5 limit of {T5_MAX}: the tail, usually the "
-                                 "character lines, would be cut. Shorten the prompt (the house style alone "
-                                 f"is about {estimate_t5_tokens(HOUSE_STYLE)} tokens)")
+            if tokens > T5_ESTIMATE_LIMIT:
+                raise ValueError(f"stills prompt {s['key']!r} (with the house style) is about {tokens} tokens "
+                                 f"by the calibrated estimate, over its limit of {T5_ESTIMATE_LIMIT} "
+                                 f"(FLUX.1-schnell's T5 cuts at {T5_MAX}): the tail, usually the character "
+                                 "lines, would be cut. Shorten the prompt (the house style alone is about "
+                                 f"{estimate_t5_tokens(HOUSE_STYLE)} tokens)")
             negative = negative_words(prompt)
             if negative:
                 raise ValueError(f"stills prompt {s['key']!r} uses the negative word {negative[0]!r}: "

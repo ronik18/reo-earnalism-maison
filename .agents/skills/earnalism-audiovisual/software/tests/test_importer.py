@@ -421,8 +421,9 @@ class FilmClipsImportTests(unittest.TestCase):
         self.assertIn(f"film_clips/{self.job['job_id']}/sfx/crows-1.ogg", [a["path"] for a in arts])
 
     def test_film_clips_sfx_name_with_query_junk_is_refused(self):
-        for bad in ("sfx-birds-1.org&utm_campaign=x", "sfx-x.exe", "sfx-.ogg"):
-            with self.assertRaises(Exception):
+        from eav import exchange
+        for bad in ("sfx-birds-1.org&utm_campaign=x", "sfx-x.exe", "sfx-.ogg", "sfx-birds.ogg"):
+            with self.assertRaises((ImportHeld, exchange.ExchangeError)):  # the extractor or the importer
                 importer.import_job(self.record, self.job, self.outputs_tar(extra={bad: b"x"}),
                                     self.ledger, 1.0)
             shutil.rmtree(self.root / "dl", ignore_errors=True)

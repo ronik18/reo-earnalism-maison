@@ -280,7 +280,18 @@ class ColabJobTests(unittest.TestCase):
         items = [{"key": k, "prompt": "a lamp", "seed": i} for i, k in enumerate("abc")]
         r = self.build("stills", {"items": items})
         # 3 stills x 4 pinned FLUX steps x 1 s/step + 30 + 20, x 1.15 margin, at 10 CU/h
-        self.assertAlmostEqual(r["forecast_units"], (3 * 4 * 1.0 + 30 + 20) * 1.15 / 3600 * 10)
+        # plus the gate's seconds, not margined: set-up 300 s + 6 s per still (ESTIMATE)
+        self.assertAlmostEqual(r["forecast_units"], ((3 * 4 * 1.0 + 30 + 20) * 1.15 + 300 + 6 * 3) / 3600 * 10)
+
+    def test_stills_forecast_includes_gate_seconds_and_rates_may_restate_them(self):
+        items = [{"key": k, "prompt": "a lamp", "seed": i} for i, k in enumerate("abc")]
+        from eav import colab_jobs as cj
+        self.assertEqual(cj.derive_compute("stills", {"items": items}, RATES, 3)["gate_s"], 300 + 6 * 3)
+        rates = {**RATES, "stills": {**RATES["stills"], "gate_setup_s": 100, "gate_s_per_still": 10}}
+        self.assertEqual(cj.derive_compute("stills", {"items": items}, rates, 3)["gate_s"], 130)
+        from eav.budget import forecast_seconds
+        c = cj.derive_compute("stills", {"items": items}, RATES, 3)
+        self.assertEqual(forecast_seconds(c, RATES) - forecast_seconds({**c, "gate_s": 0}, RATES), 318)
 
     def test_spec_compute_that_disagrees_with_the_job_is_refused(self):
         items = [{"key": k, "prompt": "a lamp", "seed": i} for i, k in enumerate("abc")]
@@ -808,8 +819,9 @@ class PositivePromptTests(unittest.TestCase):
         from eav.budget import MARGIN
         rate = RATES["stills"]
         per_image = colab_jobs.STILLS_STEPS * rate["s_per_step"] * MARGIN / 3600 * rate["units_per_hour"]
-        # four images against one: the forecast grows by exactly three images' worth
-        self.assertAlmostEqual(three["forecast_units"] - one["forecast_units"], 3 * per_image)
+        gate = colab_jobs.GATE_PER_STILL_S / 3600 * rate["units_per_hour"]
+        # four images against one: the forecast grows by exactly three images' worth (gate seconds included)
+        self.assertAlmostEqual(three["forecast_units"] - one["forecast_units"], 3 * (per_image + gate))
         self.assertEqual(colab_jobs.job_items("stills", {"items": [
             {"key": "a", "candidates": 3}, {"key": "b"}]}), 4)
         src = "".join("".join(c["source"]) for c in self.nb(three)["cells"])
@@ -1034,38 +1046,74 @@ class StillsGateTests(unittest.TestCase):
         for label in ("gas cylinder", "air conditioner", "electric cable", "spotlight", "modern eyeglasses",
                       "plastic", "utility pole", "modern high-rise building"):
             self.assertIn(label, gate)
-        for model in ("google/owlv2-base-patch16-ensemble", "openai/clip-vit-base-patch32",
-                      "face_landmarker", "hand_landmarker"):
+        for model in ("google/owlv2-base-patch16-ensemble", "facebook/dinov2-small", "face_landmarker",
+                      "hand_landmarker"):
             self.assertIn(model, gate)
+        self.assertNotIn("clip-vit", gate)   # CLIP's card puts any deployed use out of scope
         self.assertIn("GATE_LICENCE_ALLOWLIST = ('apache-2.0', 'mit')", gate)
         self.assertIn(".gate.json", gate)
         self.assertIn("_gate_time_ok(", gate)
         self.assertNotIn("may_start(", gate)   # running out of time must not mark the stills INCOMPLETE
-        self.assertIn("mediapipe", "".join(colab_jobs.PACKAGES["stills"]))
+        self.assertIn("mediapipe", colab_jobs.PACKAGES["stills"])
 
-    def test_gate_licence_check_refuses_off_list_and_unknown(self):
+    def test_gate_is_guarded_so_a_failure_cannot_stop_the_manifest(self):
+        gate = self.gate_src()
+        # the intent is recorded before anything can fail; pip, imports and model loads sit in run_gate,
+        # which is called inside try/except
+        self.assertLess(gate.index('MODEL_INFO["gate"] = GATE_INFO'), gate.index("def run_gate"))
+        self.assertIn("try:\n    run_gate()\nexcept Exception", gate)
+        self.assertNotIn("check=True", gate[:gate.index("def _load_models")])
+        self.assertEqual(gate.count('"pip", "install"'), 1)
+        self.assertLess(gate.index("def _load_models"), gate.index('"pip", "install"'))
+        self.assertIn("try:\n        subprocess.run([sys.executable", gate)
+
+    def test_gate_plan_skips_when_incomplete_or_short_of_time(self):
+        plan = self.gate_ns()["gate_plan"]
+        self.assertEqual(plan(5000, False, 10, 300, 6, 60), (True, None))
+        self.assertEqual(plan(5000, True, 10, 300, 6, 60)[0], False)           # INCOMPLETE: skip
+        run, why = plan(400, False, 10, 300, 6, 60)                            # needs 300 + 60 + 60
+        self.assertFalse(run)
+        self.assertIn("400", why)
+        self.assertEqual(plan(420, False, 10, 300, 6, 60), (True, None))
+
+    def test_gate_licence_check_fails_closed(self):
         ns = self.gate_ns()
-        self.assertEqual(ns["gate_licence"]("m", "Apache-2.0", "mit"), ("apache-2.0", None))
-        self.assertEqual(ns["gate_licence"]("m", None, "mit")[0], "mit")  # card silent: declared, noted
-        self.assertIn("declared", ns["gate_licence"]("m", None, "mit")[1])
-        self.assertIsNone(ns["gate_licence"]("m", "cc-by-nc-4.0", "mit")[0])
-        self.assertIsNone(ns["gate_licence"]("m", None, None)[0])
-        self.assertIsNone(ns["gate_licence"]("m", None, "gpl-3.0")[0])
+        g = ns["gate_licence"]
+        self.assertEqual(g("m", "Apache-2.0", "mit"), ("apache-2.0", None))
+        self.assertEqual(g("m", None, "mit")[0], "mit")                        # card read, no licence field
+        self.assertIn("declared", g("m", None, "mit")[1])
+        self.assertIsNone(g("m", "cc-by-nc-4.0", "mit")[0])
+        self.assertIsNone(g("m", None, None)[0])
+        self.assertIsNone(g("m", None, "gpl-3.0")[0])
+        lic, why = g("owlv2", None, "apache-2.0", card_read=False)             # card unreadable: not loaded
+        self.assertIsNone(lic)
+        self.assertIn("could not be read", why)
+        self.assertIsNone(g("owlv2", "apache-2.0", "apache-2.0", card_read=False)[0])
+
+    def test_models_load_only_at_the_checked_revision(self):
+        gate = self.gate_src()
+        self.assertIn("revision=rev", gate)
+        self.assertNotIn("revision=None", gate)
+        self.assertIn("rev, read = info.sha, bool(info.sha)", gate)
 
     def test_eyes_and_frontal_from_landmarks(self):
         ns = self.gate_ns()
-        lm = ns["synthetic_face"](open_eyes=2, yaw=0.5)
-        self.assertEqual(ns["face_report"](lm), {"eyes": 2, "frontal": True})
+        self.assertEqual(ns["face_report"](ns["synthetic_face"](open_eyes=2, yaw=0.5)), {"eyes": 2, "frontal": True})
         self.assertEqual(ns["face_report"](ns["synthetic_face"](open_eyes=1, yaw=0.5)), {"eyes": 1, "frontal": True})
         self.assertEqual(ns["face_report"](ns["synthetic_face"](open_eyes=1, yaw=0.9)), {"eyes": 1, "frontal": False})
 
     def test_hand_attachment_heuristic(self):
         ns = self.gate_ns()
-        diag = 1000.0
         person = [(100, 100, 500, 900)]
-        self.assertIs(ns["hand_detached"]((300, 800), person, [], diag), False)
-        self.assertIs(ns["hand_detached"]((900, 300), person, [], diag), True)
-        self.assertIsNone(ns["hand_detached"]((900, 300), [], [], diag))   # nothing to judge against
+        self.assertIs(ns["hand_detached"]((300, 800), person, [], 1000.0), False)
+        self.assertIs(ns["hand_detached"]((900, 300), person, [], 1000.0), True)
+        self.assertIsNone(ns["hand_detached"]((900, 300), [], [], 1000.0))
+
+    def test_crop_box_is_the_largest_person_box_clipped(self):
+        cb = self.gate_ns()["crop_box"]
+        self.assertEqual(cb([(10, 10, 100, 100), (50, -20, 400, 600)], (300, 500)), (50, 0, 300, 500))
+        self.assertIsNone(cb([], (300, 500)))
+        self.assertIsNone(cb([(10, 10, 20, 20)], (300, 500)))
 
     def test_decide_matrix(self):
         ns = self.gate_ns()
@@ -1074,12 +1122,12 @@ class StillsGateTests(unittest.TestCase):
         base = dict(faces=ok_face, hands=[False], anachronisms=[], possible=[], similarity=0.9, anchor=True)
         r = d(**base)
         self.assertEqual((r["pass"], r["needs_review"], r["eyes"], r["hands_detached"]), (True, False, 2, False))
-        self.assertEqual(set(r) >= {"eyes", "hands_detached", "anachronisms", "anchor_similarity", "pass",
-                                    "needs_review"}, True)
+        self.assertTrue(set(r) >= {"eyes", "hands_detached", "anachronisms", "anchor_similarity", "pass",
+                                   "needs_review"})
         r = d(**{**base, "faces": [{"eyes": 1, "frontal": True}]})
-        self.assertEqual((r["pass"], r["needs_review"]), (False, False))        # frontal with one eye: fail
+        self.assertEqual((r["pass"], r["needs_review"]), (False, False))        # frontal with one eye: certain fail
         r = d(**{**base, "faces": [{"eyes": 1, "frontal": False}]})
-        self.assertEqual((r["pass"], r["needs_review"]), (False, True))         # profile: a person looks
+        self.assertEqual((r["pass"], r["needs_review"]), (False, True))
         r = d(**{**base, "hands": [True]})
         self.assertEqual((r["pass"], r["needs_review"], r["hands_detached"]), (False, False, True))
         r = d(**{**base, "hands": [None]})
@@ -1088,16 +1136,55 @@ class StillsGateTests(unittest.TestCase):
         self.assertEqual((r["pass"], r["needs_review"], r["anachronisms"]), (False, False, ["gas cylinder"]))
         r = d(**{**base, "possible": ["plastic"]})
         self.assertEqual((r["pass"], r["needs_review"]), (False, True))
-        r = d(**{**base, "similarity": 0.5})
+        r = d(**{**base, "similarity": 0.1})
         self.assertEqual((r["pass"], r["needs_review"]), (False, True))         # never an automatic fail
-        # a model that failed or returned nothing is never a pass
-        for k in ("faces", "hands", "anachronisms", "similarity"):
+        for k in ("faces", "hands", "anachronisms", "similarity"):               # a check that did not run
             r = d(**{**base, k: None})
             self.assertEqual((r["pass"], r["needs_review"]), (False, True), k)
         r = d(**{**base, "faces": []})                                           # character expected, no face
         self.assertEqual((r["pass"], r["needs_review"]), (False, True))
         r = d(faces=[], hands=[], anachronisms=[], possible=[], similarity=None, anchor=False)
         self.assertEqual((r["pass"], r["needs_review"], r["anchor_similarity"]), (True, False, None))
+        # a fail that also has something unclear is a certain fail (needs_review false): pick keys on that
+        r = d(**{**base, "anachronisms": ["plastic"], "hands": [None]})
+        self.assertEqual((r["pass"], r["needs_review"]), (False, False))
+
+    def test_no_hands_detected_is_a_valid_result_a_model_error_is_not(self):
+        d = self.gate_ns()["decide"]
+        base = dict(faces=[{"eyes": 2, "frontal": True}], anachronisms=[], possible=[], similarity=None,
+                    anchor=False)
+        none_found = d(hands=[], **base)
+        self.assertEqual((none_found["pass"], none_found["notes"]), (True, []))
+        broke = d(hands=None, errors={"hands": "RuntimeError: hand model not loaded"}, **base)
+        self.assertEqual((broke["pass"], broke["needs_review"]), (False, True))
+        self.assertIn("hand check did not run: RuntimeError: hand model not loaded", broke["notes"])
+        owl = d(**{**base, "anachronisms": None, "possible": None}, hands=[],
+                errors={"owl": "AttributeError: post_process"})
+        self.assertIn("period check did not run: AttributeError: post_process", owl["notes"])
+
+    def test_owl_post_processing_works_under_either_transformers_name(self):
+        ns = self.gate_ns()
+        texts = ["gas cylinder", "person"]
+        calls = []
+
+        class Newer:
+            def post_process_grounded_object_detection(self, outputs, threshold, target_sizes, text_labels):
+                calls.append(("grounded", text_labels))
+                return [{"scores": [0.4], "text_labels": ["gas cylinder"], "labels": [0], "boxes": [[1, 2, 3, 4]]}]
+
+        class Older:
+            def post_process_object_detection(self, outputs, threshold, target_sizes):
+                calls.append(("legacy", None))
+                return [{"scores": [0.2], "labels": [1], "boxes": [[5, 6, 7, 8]]}]
+
+        class Neither:
+            pass
+        self.assertEqual(ns["owl_detect"](Newer(), object(), None, 0.15, texts), [(0.4, "gas cylinder", [1.0, 2.0, 3.0, 4.0])])
+        self.assertEqual(ns["owl_detect"](Older(), object(), None, 0.15, texts), [(0.2, "person", [5.0, 6.0, 7.0, 8.0])])
+        self.assertEqual([c[0] for c in calls], ["grounded", "legacy"])
+        self.assertEqual(calls[0][1], [texts])
+        with self.assertRaises(AttributeError):
+            ns["owl_detect"](Neither(), object(), None, 0.15, texts)
 
     def test_anchor_goes_into_inputs_zip_and_candidates_inherit_it(self):
         art = self.root / "anchors"
@@ -1142,12 +1229,14 @@ class SfxCellTests(unittest.TestCase):
         ns.update(extra)
         return ns
 
-    def test_sfx_cell_keeps_only_cc0_or_pd(self):
-        ns = self.ns()
-        ok = ns["sfx_licence_ok"]
-        for lic in ("CC0", "CC0 1.0", "Public domain", "public domain", "PD-old", "PD"):
+    def test_sfx_cell_keeps_only_cc0_or_worldwide_public_domain(self):
+        ok = self.ns()["sfx_licence_ok"]
+        for lic in ("CC0", "CC0 1.0", "Public domain", "public domain", "PD", "cc-0"):
             self.assertTrue(ok(lic), lic)
-        for lic in ("CC BY 4.0", "CC BY-SA 3.0", "GFDL", "", None, "Attribution", "CC BY-NC 4.0"):
+        # country-limited public-domain tags and every attribution licence are refused (47-region policy)
+        for lic in ("PD-US", "PD-USGov", "PD-USGov-NASA", "PD-old-70", "PD-old", "PD-Art", "PD-UK-unknown",
+                    "Public domain in the US", "CC BY 4.0", "CC BY-SA 3.0", "GFDL", "", None, "Attribution",
+                    "CC BY-NC 4.0"):
             self.assertFalse(ok(lic), lic)
 
     def test_extension_comes_from_the_url_path_never_the_query(self):
@@ -1159,20 +1248,20 @@ class SfxCellTests(unittest.TestCase):
         self.assertIsNone(ns["sfx_ext"]("https://u.org/a/b/Page.html"))
         name = ns["sfx_filename"]("birds", 1, ns["sfx_ext"](url))
         self.assertEqual(name, "sfx-birds-1.ogg")
-        import re
-        self.assertRegex(name, r"[A-Za-z0-9._-]+")
+        self.assertRegex(name, r"^[A-Za-z0-9._-]+$")
         self.assertIsNone(ns["sfx_filename"]("birds", 1, None))
         self.assertIsNone(ns["sfx_filename"]("bi rds&x", 1, "ogg"))
 
-    def test_relevance_needs_a_query_keyword_in_the_file_title(self):
-        ns = self.ns()
-        rel = ns["sfx_relevant"]
+    def test_relevance_needs_a_whole_query_word_in_the_file_title(self):
+        rel = self.ns()["sfx_relevant"]
         self.assertFalse(rel("File:Tooth brushing.ogg", "broom sweeping"))
         self.assertFalse(rel("File:Berlin mall ambience.ogg", "crowd murmur"))
         self.assertTrue(rel("File:Crowd in a market.ogg", "crowd murmur"))
         self.assertTrue(rel("File:Crow call 3.ogg", "crows cawing morning"))   # plural stem
+        self.assertFalse(rel("File:Crowd noise.ogg", "crows cawing morning"))  # "crow" is not "crowd"
+        self.assertTrue(rel("File:Crows at dawn.ogg", "crows cawing morning"))
         self.assertTrue(rel("File:Broom sweeping floor.wav", "broom sweeping"))
-        self.assertFalse(rel("File:Anything.ogg", "of the"))                    # no real keyword
+        self.assertFalse(rel("File:Anything.ogg", "of the"))
 
     def meta(self, title, lic, url="https://upload.wikimedia.org/x/Crow.ogg?utm_a=b", size=1000):
         return {"title": title, "imageinfo": [{"url": url, "size": size, "descriptionurl": "https://c/wiki/" + title,
@@ -1184,6 +1273,7 @@ class SfxCellTests(unittest.TestCase):
         pages = [self.meta("File:Crow call.ogg", "CC BY 4.0"),
                  self.meta("File:Crow flock.ogg", "CC0"),
                  self.meta("File:Mall.ogg", "CC0"),
+                 self.meta("File:Crow US.ogg", "PD-US"),
                  self.meta("File:Crow big.ogg", "CC0", size=99_000_000),
                  self.meta("File:Crow page.ogg", "CC0", url="https://u.org/Crow"),
                  self.meta("File:Crow morning.ogg", "Public domain")]
@@ -1249,8 +1339,7 @@ class SfxCellTests(unittest.TestCase):
         self.assertTrue(i_clock < i_verify < i_sfx < i_wan)
         self.assertFalse(any("def run_sfx_stage" in c for c in self.cells(plain)))
         self.assertGreater(with_sfx["forecast_units"], plain["forecast_units"])
-        src = "\n".join(codes)
-        self.assertIn("SFX_BUDGET_S = 480", src)
+        self.assertIn("SFX_BUDGET_S = 480", "\n".join(codes))
         with zipfile.ZipFile(with_sfx["inputs_zip"]) as z:
             self.assertEqual(json.loads(z.read("job.json"))["sfx"], {"crows": "crows cawing morning"})
         with zipfile.ZipFile(plain["inputs_zip"]) as z:
@@ -1266,8 +1355,9 @@ class SfxCellTests(unittest.TestCase):
 
 class StillsT5LimitTests(unittest.TestCase):
     """FLUX.1-schnell's T5 reads 256 tokens; a longer house-style-first prompt loses its tail (the character
-    lines). The builder refuses it, using a conservative local estimate (no tokenizer is installed)."""
+    lines). The builder refuses at a calibrated estimate (no tokenizer is installed locally)."""
     setUp, build, nb, cells = (ColabJobTests.setUp, ColabJobTests.build, ColabJobTests.nb, ColabJobTests.cells)
+    FIXTURE = Path(__file__).with_name("fixtures") / "t5_recorded_prompts.json"
 
     @staticmethod
     def words(n):
@@ -1275,20 +1365,34 @@ class StillsT5LimitTests(unittest.TestCase):
                 "on the clay wall behind her and morning light crosses the dusty ground").split()
         return " ".join((base * (n // len(base) + 1))[:n]) + "."
 
-    def test_estimate_overcounts_long_words_and_punctuation(self):
+    def test_estimate_is_calibrated_to_count_long_words_and_punctuation_higher(self):
         est = colab_jobs.estimate_t5_tokens
         self.assertEqual(est("a lamp"), 2)
-        self.assertEqual(est("extraordinarily, beautifully"), 4)  # 2 long words x 1.3 + comma, rounded up
-        self.assertGreaterEqual(est(self.words(100)), 100)
+        self.assertEqual(est("extraordinarily, beautifully"), 5)   # 2 x 1.8 + 0.5, rounded up
+        self.assertEqual(colab_jobs.T5_ESTIMATE_LIMIT, 180)
 
-    def test_a_210_word_prompt_with_house_style_is_refused(self):
+    def test_every_recorded_truncated_prompt_is_refused_and_the_clean_pilot6_prompt_passes(self):
+        data = json.loads(self.FIXTURE.read_text(encoding="utf-8"))
+        est = lambda p: colab_jobs.estimate_t5_tokens(p.rstrip() + " " + colab_jobs.HOUSE_STYLE)
+        self.assertEqual(sorted(data["truncated"]), ["stills-film-01-r10", "stills-film-01-r8-house",
+                                                     "stills-film-01-r9", "stills-pilot2-f01s014",
+                                                     "stills-pilot4-f01s014", "stills-pilot5-f01s014"])
+        for job, prompts in data["truncated"].items():
+            for key, prompt in prompts.items():
+                with self.subTest(job=job, key=key):
+                    with self.assertRaises(ValueError) as c:
+                        self.build("stills", {"items": [{"key": "a", "prompt": prompt, "seed": 1}]})
+                    self.assertIn("'a'", str(c.exception))
+                    self.assertRegex(str(c.exception), r"about \d+ tokens")
+                    self.assertGreater(est(prompt), colab_jobs.T5_ESTIMATE_LIMIT)
+        for prompt in data["clean"]["stills-pilot6-f01s014"].values():
+            self.assertEqual(len(prompt.split()), 85)
+            self.assertLessEqual(est(prompt), colab_jobs.T5_ESTIMATE_LIMIT)
+            self.build("stills", {"items": [{"key": "a", "prompt": prompt, "seed": 1}]})
+
+    def test_a_210_word_prompt_is_refused_and_a_short_one_passes(self):
         with self.assertRaises(ValueError) as c:
             self.build("stills", {"items": [{"key": "f01s014-3", "prompt": self.words(210), "seed": 1}]})
-        msg = str(c.exception)
-        self.assertIn("f01s014-3", msg)
-        self.assertIn("256", msg)
-        self.assertRegex(msg, r"about \d+ tokens")
+        self.assertIn("f01s014-3", str(c.exception))
         self.assertEqual(list(self.out.iterdir()), [])
-
-    def test_an_85_word_prompt_with_house_style_passes(self):
-        self.build("stills", {"items": [{"key": "a", "prompt": self.words(85), "seed": 1}]})
+        self.build("stills", {"items": [{"key": "a", "prompt": self.words(60), "seed": 1}]})

@@ -90,11 +90,14 @@ for item in JOB["items"]:
 # Character-and-period gate, run on every still just written (after the stills; nothing here changes
 # an image). Per still it writes <key>.gate.json:
 #   {"eyes": open eyes found over all detected faces, "hands_detached": bool, "anachronisms": [labels],
-#    "anchor_similarity": CLIP cosine to the character's anchor still (null without an anchor),
-#    "pass": bool, "needs_review": bool, "notes": [...]}
+#    "anchor_similarity": DINOv2 cosine of the character's person-box crop to its anchor still (null
+#    without an anchor), "pass": bool, "needs_review": bool, "notes": [...]}
 # pass is true only when every check ran and found nothing. A model that failed, was refused by the
 # licence check or returned nothing sets needs_review, never pass. `pick` refuses a candidate whose gate
-# did not pass unless the reviewer gives --override "<reason>" (references/visual-style.md, Gate).
+# is a certain fail unless --override-fail KEY=reason; needs_review is advisory until the title has a
+# gate-calibration.json (references/visual-style.md, Gate).
+# The whole gate is guarded: it is skipped when the clock is short or the job INCOMPLETE, and any failure
+# inside it leaves the stills, the manifest and the upload untouched (the keys are listed as ungated).
 if RUN is not True:
     raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
 import gc, hashlib, json, os, pathlib, subprocess, sys, time, urllib.request, zipfile
@@ -105,6 +108,7 @@ GATE_LABELS = ["gas cylinder", "air conditioner", "electric cable", "spotlight",
 GATE_PERSON_LABELS = ["person", "arm"]       # only used to judge whether a hand belongs to a body
 GATE_OWL_FAIL = 0.30        # OWLv2 score at or above which an anachronism label counts as found
 GATE_OWL_POSSIBLE = 0.15    # between this and GATE_OWL_FAIL: a person must look (needs_review)
+GATE_PERSON_SCORE = 0.20    # OWLv2 score at or above which a person/arm box is used
 GATE_EYE_OPEN_EAR = 0.15    # eye aspect ratio at or above which an eye counts as open
 GATE_FRONTAL = (0.38, 0.62)  # nose-tip position between the cheek edges: inside = frontal face
 GATE_MODELS = {
@@ -113,7 +117,7 @@ GATE_MODELS = {
     "hand_landmarker": {"declared": "apache-2.0", "hub": None, "url":
         "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"},
     "owlv2": {"declared": "apache-2.0", "hub": "google/owlv2-base-patch16-ensemble"},
-    "clip": {"declared": "mit", "hub": "openai/clip-vit-base-patch32"},
+    "dinov2": {"declared": "apache-2.0", "hub": "facebook/dinov2-small"},
 }
 
 
@@ -133,8 +137,9 @@ def eye_aspect(lm, ids):
 
 
 def face_report(lm):
-    """lm: pixel (x, y) landmarks of one face. eyes = eyes whose aspect ratio says open; frontal = the nose
-    tip sits between GATE_FRONTAL of the way across the cheek edges."""
+    """lm: pixel (x, y) landmarks of one face. eyes = eyes whose aspect ratio says open (this measures
+    openness, not a malformed eye: a closed frontal eye counts as not visible); frontal = the nose tip sits
+    between GATE_FRONTAL of the way across the cheek edges."""
     eyes = sum(1 for ids in _EYES if eye_aspect(lm, ids) >= GATE_EYE_OPEN_EAR)
     span = lm[_CHEEK_R][0] - lm[_CHEEK_L][0]
     ratio = (lm[_NOSE][0] - lm[_CHEEK_L][0]) / span if span > 0 else 0.5
@@ -166,9 +171,23 @@ def hand_detached(wrist, persons, faces, diag):
     return True
 
 
-def gate_licence(name, card_licence, declared):
-    """(licence, note): the card's licence if it has one, else the declared one with a note; (None, why)
-    if it is not on GATE_LICENCE_ALLOWLIST or unknown. Never raises: a refused model is not run."""
+def crop_box(persons, size):
+    """The largest person box clipped to the image (x0, y0, x1, y1 ints), or None if there is none (or it is
+    under 16 px): the anchor comparison then uses the whole frame."""
+    best = None
+    for x0, y0, x1, y1 in persons:
+        x0, y0, x1, y1 = max(0, int(x0)), max(0, int(y0)), min(size[0], int(x1)), min(size[1], int(y1))
+        if x1 - x0 >= 16 and y1 - y0 >= 16 and (best is None or (x1 - x0) * (y1 - y0) > (best[2] - best[0]) * (best[3] - best[1])):
+            best = (x0, y0, x1, y1)
+    return best
+
+
+def gate_licence(name, card_licence, declared, card_read=True):
+    """(licence, note), failing closed: a Hub card that could not be read (card_read False) gives (None, why)
+    and the model is not loaded. The declared licence stands in only for a card that was read and carries no
+    licence field, or for a model with no Hub card. (None, why) too if it is off GATE_LICENCE_ALLOWLIST."""
+    if not card_read:
+        return None, name + ": model card could not be read; model not loaded"
     card = str(card_licence).strip().lower() if card_licence else None
     lic = card or (str(declared).strip().lower() if declared else None)
     if lic is None:
@@ -178,15 +197,57 @@ def gate_licence(name, card_licence, declared):
     return lic, (None if card else name + ": card carries no licence; declared " + lic + " used")
 
 
-def decide(faces, hands, anachronisms, possible, similarity, anchor):
-    """The verdict. faces: [{"eyes", "frontal"}] | None (model failed); hands: [True|False|None] | None;
-    anachronisms / possible: [labels] | None; similarity: float | None; anchor: the still has an anchor image.
-    fail = a certain defect; needs_review = something unclear; pass only if neither."""
+def gate_plan(left_s, incomplete, n_stills, setup_s, per_still_s, reserve_s):
+    """(run, why): the whole gate runs only if the job is not INCOMPLETE and the seconds left cover the
+    set-up, every still and the manifest reserve. Otherwise it is skipped and the stills stay ungated."""
+    if incomplete:
+        return False, "the job is INCOMPLETE (a hard stop was reached)"
+    need = setup_s + per_still_s * n_stills + reserve_s
+    if left_s < need:
+        return False, "%.0f s left, the gate needs about %.0f s plus the manifest reserve" % (left_s, need)
+    return True, None
+
+
+def owl_results(res, texts):
+    """[(score, label, [x0, y0, x1, y1])] from one OWLv2 post-processed result, whichever transformers
+    version made it: labels as text (text_labels, or label strings) or as indices into texts."""
+    names = res.get("text_labels")
+    if names is None:
+        names = list(res["labels"])
+    out = []
+    for score, name, box in zip(res["scores"], names, res["boxes"]):
+        label = name if isinstance(name, str) else texts[int(name)]
+        out.append((float(score), label, [float(v) for v in box]))
+    return out
+
+
+def owl_detect(processor, outputs, target_sizes, threshold, texts):
+    """OWLv2 post-processing under either transformers name: post_process_grounded_object_detection (newer)
+    or post_process_object_detection (older)."""
+    grounded = getattr(processor, "post_process_grounded_object_detection", None)
+    if grounded is not None:
+        res = grounded(outputs=outputs, threshold=threshold, target_sizes=target_sizes, text_labels=[texts])[0]
+    else:
+        legacy = getattr(processor, "post_process_object_detection", None)
+        if legacy is None:
+            raise AttributeError("the OWLv2 processor has neither post_process_grounded_object_detection "
+                                 "nor post_process_object_detection")
+        res = legacy(outputs=outputs, threshold=threshold, target_sizes=target_sizes)[0]
+    return owl_results(res, texts)
+
+
+def decide(faces, hands, anachronisms, possible, similarity, anchor, errors=None):
+    """The verdict. faces: [{"eyes", "frontal"}] | None (check did not run); hands: [True|False|None] | None;
+    anachronisms / possible: [labels] | None; similarity: float | None; anchor: the still has an anchor image;
+    errors: {"faces"|"hands"|"owl"|"anchor": why the check did not run}. An empty faces or hands list is a
+    valid result (nothing detected), not an error. fail = a certain defect (needs_review is then false);
+    needs_review = something unclear; pass only if neither."""
+    errors = errors or {}
     fail, review, notes = False, False, []
     eyes_total = 0
     if faces is None:
         review = True
-        notes.append("face model gave no result")
+        notes.append("face check did not run: " + errors.get("faces", "no reason recorded"))
     else:
         for f in faces:
             eyes_total += f["eyes"]
@@ -203,7 +264,7 @@ def decide(faces, hands, anachronisms, possible, similarity, anchor):
     detached = False
     if hands is None:
         review = True
-        notes.append("hand model gave no result")
+        notes.append("hand check did not run: " + errors.get("hands", "no reason recorded"))
     else:
         if any(h is True for h in hands):
             detached = True
@@ -214,7 +275,7 @@ def decide(faces, hands, anachronisms, possible, similarity, anchor):
             notes.append("a hand could not be judged attached or detached")
     if anachronisms is None or possible is None:
         review = True
-        notes.append("period detector gave no result")
+        notes.append("period check did not run: " + errors.get("owl", "no reason recorded"))
         anachronisms = anachronisms or []
     else:
         if anachronisms:
@@ -226,13 +287,13 @@ def decide(faces, hands, anachronisms, possible, similarity, anchor):
     if anchor:
         if similarity is None:
             review = True
-            notes.append("anchor similarity gave no result")
+            notes.append("anchor similarity did not run: " + errors.get("anchor", "no reason recorded"))
         elif similarity < GATE_ANCHOR_PASS:
             review = True
-            notes.append("anchor similarity %.2f is below %.2f" % (similarity, GATE_ANCHOR_PASS))
+            notes.append("anchor similarity %.2f is below %.2f (uncalibrated)" % (similarity, GATE_ANCHOR_PASS))
     return {"eyes": eyes_total, "hands_detached": detached, "anachronisms": list(anachronisms),
             "anchor_similarity": None if similarity is None else round(float(similarity), 4),
-            "pass": not fail and not review, "needs_review": review, "notes": notes}
+            "pass": not fail and not review, "needs_review": review and not fail, "notes": notes}
 # --- gate helper end ---
 
 
@@ -241,82 +302,93 @@ assert face_report(synthetic_face(2, 0.5)) == {"eyes": 2, "frontal": True}
 assert face_report(synthetic_face(1, 0.9)) == {"eyes": 1, "frontal": False}
 assert hand_detached((900, 300), [(100, 100, 500, 900)], [], 1000.0) is True
 assert decide([{"eyes": 2, "frontal": True}], [False], [], [], None, False)["pass"] is True
+assert decide([], [], [], [], None, False)["pass"] is True        # nothing detected is a valid result
 
-_gate_t0 = time.time()
-_gate_dir = pathlib.Path("/content/gate-models")
-_gate_dir.mkdir(exist_ok=True)
-for _n in ("pipe", "transformer", "enc"):   # the stills are done: free the GPU for the gate models
-    globals().pop(_n, None)
-gc.collect()
-import torch
-torch.cuda.empty_cache()
-subprocess.run([sys.executable, "-m", "pip", "install", "-q", "mediapipe"], check=True)
-import numpy as np
-from PIL import Image
-from huggingface_hub import HfApi
+# The gate's intent is recorded first: if anything below fails, the manifest still says it was meant to run.
+GATE_INFO = {"intended": True, "ran": False, "models": {}, "refused": [], "ungated": [], "skipped": None,
+             "error": None, "thresholds": {
+                 "owl_fail": GATE_OWL_FAIL, "owl_possible": GATE_OWL_POSSIBLE, "person_score": GATE_PERSON_SCORE,
+                 "eye_open_ear": GATE_EYE_OPEN_EAR, "frontal": list(GATE_FRONTAL),
+                 "anchor_pass": GATE_ANCHOR_PASS, "setup_s": GATE_SETUP_S, "per_still_s": GATE_PER_STILL_S}}
+MODEL_INFO["gate"] = GATE_INFO
+FACE = HAND = OWL = DINO = None
 
-GATE_INFO = {"models": {}, "refused": [], "thresholds": {
-    "owl_fail": GATE_OWL_FAIL, "owl_possible": GATE_OWL_POSSIBLE, "eye_open_ear": GATE_EYE_OPEN_EAR,
-    "frontal": list(GATE_FRONTAL), "anchor_pass": GATE_ANCHOR_PASS}, "ungated": []}
-_licences = {}
-for _name, _m in GATE_MODELS.items():  # each licence checked against the allowlist before the model is used
-    _card = None
-    if _m["hub"]:
+
+def _licence_and_revision(name, token):
+    """Check one model's licence against the allowlist (failing closed) and return (licence, pinned revision).
+    A Hub model loads only at the revision whose card was just read."""
+    m = GATE_MODELS[name]
+    card, rev, read = None, None, True
+    if m["hub"]:
+        read = False
         try:
-            _info = HfApi().model_info(_m["hub"], token=os.environ.get("HF_TOKEN"))
-            _cd = getattr(_info, "card_data", None) or {}
-            _card = (_cd.get("license") if hasattr(_cd, "get") else getattr(_cd, "license", None)) or next(
-                (t.split(":", 1)[1] for t in (getattr(_info, "tags", None) or []) if t.startswith("license:")), None)
-            GATE_INFO["models"][_name] = {"repo": _m["hub"], "revision": _info.sha}
-        except Exception as _e:
-            print("gate:", _name, "card unreadable:", type(_e).__name__)
-    _lic, _note = gate_licence(_name, _card, _m["declared"])
-    print("gate model licence:", _name, "->", _lic, "(allowlist: %s)" % ", ".join(GATE_LICENCE_ALLOWLIST))
-    if _note:
-        print("gate:", _note)
-    if _lic is None:
-        GATE_INFO["refused"].append(_name)
-    _licences[_name] = _lic
-    GATE_INFO["models"].setdefault(_name, {})["licence"] = _lic
-    GATE_INFO["models"][_name]["declared_licence"] = _m["declared"]
+            from huggingface_hub import HfApi
+            info = HfApi().model_info(m["hub"], token=token)
+            data = getattr(info, "card_data", None) or {}
+            card = (data.get("license") if hasattr(data, "get") else getattr(data, "license", None)) or next(
+                (t.split(":", 1)[1] for t in (getattr(info, "tags", None) or []) if t.startswith("license:")), None)
+            rev, read = info.sha, bool(info.sha)
+        except Exception as e:
+            print("gate:", name, "card unreadable:", type(e).__name__)
+    lic, note = gate_licence(name, card, m["declared"], read)
+    print("gate model licence:", name, "->", lic, "(allowlist: %s)" % ", ".join(GATE_LICENCE_ALLOWLIST))
+    if note:
+        print("gate:", note)
+    info = {"licence": lic, "declared_licence": m["declared"], "revision": rev}
+    GATE_INFO["models"][name] = info
+    if lic is None:
+        GATE_INFO["refused"].append(name)
+    return lic, rev
 
-FACE = HAND = OWL = CLIP = None
-try:
-    import mediapipe as mp
-    from mediapipe.tasks import python as _mpt
-    from mediapipe.tasks.python import vision as _mpv
 
-    def _task_file(name):
-        path = _gate_dir / (name + ".task")
-        if not path.is_file():
-            urllib.request.urlretrieve(GATE_MODELS[name]["url"], path)
-        GATE_INFO["models"][name]["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
-        return str(path)
-    if _licences["face_landmarker"]:
-        FACE = _mpv.FaceLandmarker.create_from_options(_mpv.FaceLandmarkerOptions(
-            base_options=_mpt.BaseOptions(model_asset_path=_task_file("face_landmarker")), num_faces=6))
-    if _licences["hand_landmarker"]:
-        HAND = _mpv.HandLandmarker.create_from_options(_mpv.HandLandmarkerOptions(
-            base_options=_mpt.BaseOptions(model_asset_path=_task_file("hand_landmarker")), num_hands=6))
-except Exception as _e:
-    print("gate: MediaPipe unavailable:", type(_e).__name__, str(_e)[:200])
-try:
-    from transformers import CLIPModel, CLIPProcessor, Owlv2ForObjectDetection, Owlv2Processor
-    if _licences["owlv2"]:
-        _rev = GATE_INFO["models"]["owlv2"].get("revision")
-        OWL = (Owlv2Processor.from_pretrained(GATE_MODELS["owlv2"]["hub"], revision=_rev),
-               Owlv2ForObjectDetection.from_pretrained(GATE_MODELS["owlv2"]["hub"], revision=_rev).to("cuda").eval())
-    if _licences["clip"]:
-        _rev = GATE_INFO["models"]["clip"].get("revision")
-        CLIP = (CLIPProcessor.from_pretrained(GATE_MODELS["clip"]["hub"], revision=_rev),
-                CLIPModel.from_pretrained(GATE_MODELS["clip"]["hub"], revision=_rev).to("cuda").eval())
-except Exception as _e:
-    print("gate: transformers models unavailable:", type(_e).__name__, str(_e)[:200])
-print("gate models ready: face", FACE is not None, "hand", HAND is not None, "owlv2", OWL is not None,
-      "clip", CLIP is not None)
+def _load_models():
+    global FACE, HAND, OWL, DINO
+    import numpy as np
+    token = os.environ.get("HF_TOKEN")
+    lic = {n: _licence_and_revision(n, token) for n in GATE_MODELS}
+    gate_dir = pathlib.Path("/content/gate-models")
+    gate_dir.mkdir(exist_ok=True)
+    try:
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", "mediapipe"], check=True)
+        import mediapipe as mp
+        from mediapipe.tasks import python as mpt
+        from mediapipe.tasks.python import vision as mpv
+
+        def task_file(name):
+            path = gate_dir / (name + ".task")
+            if not path.is_file():
+                urllib.request.urlretrieve(GATE_MODELS[name]["url"], path)
+            GATE_INFO["models"][name]["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+            return str(path)
+        if lic["face_landmarker"][0]:
+            FACE = mpv.FaceLandmarker.create_from_options(mpv.FaceLandmarkerOptions(
+                base_options=mpt.BaseOptions(model_asset_path=task_file("face_landmarker")), num_faces=6))
+        if lic["hand_landmarker"][0]:
+            HAND = mpv.HandLandmarker.create_from_options(mpv.HandLandmarkerOptions(
+                base_options=mpt.BaseOptions(model_asset_path=task_file("hand_landmarker")), num_hands=6))
+        globals()["mp"] = mp
+    except Exception as e:
+        print("gate: MediaPipe unavailable:", type(e).__name__, str(e)[:200])
+    try:
+        import torch
+        from transformers import AutoImageProcessor, AutoModel, Owlv2ForObjectDetection, Owlv2Processor
+        if lic["owlv2"][0]:
+            repo, rev = GATE_MODELS["owlv2"]["hub"], lic["owlv2"][1]
+            OWL = (Owlv2Processor.from_pretrained(repo, revision=rev),
+                   Owlv2ForObjectDetection.from_pretrained(repo, revision=rev).to("cuda").eval())
+        if lic["dinov2"][0]:
+            repo, rev = GATE_MODELS["dinov2"]["hub"], lic["dinov2"][1]
+            DINO = (AutoImageProcessor.from_pretrained(repo, revision=rev),
+                    AutoModel.from_pretrained(repo, revision=rev).to("cuda").eval())
+    except Exception as e:
+        print("gate: transformers models unavailable:", type(e).__name__, str(e)[:200])
+    print("gate models ready: face", FACE is not None, "hand", HAND is not None, "owlv2", OWL is not None,
+          "dinov2", DINO is not None)
 
 
 def _detect_faces(img):
+    """(faces, boxes); faces is None when the model is not loaded (an empty list is a valid result)."""
+    import numpy as np
     if FACE is None:
         return None, []
     res = FACE.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=np.asarray(img)))
@@ -327,7 +399,8 @@ def _detect_faces(img):
 
 
 def _detect_owl(img):
-    """(anachronisms, possible, person boxes) or (None, None, None)."""
+    """(anachronisms, possible, person boxes); None x3 when the model is not loaded."""
+    import torch
     if OWL is None:
         return None, None, None
     proc, model = OWL
@@ -336,13 +409,10 @@ def _detect_owl(img):
     with torch.no_grad():
         out = model(**inputs)
     side = max(img.size)  # OWLv2 pads the image to a square
-    res = proc.post_process_object_detection(out, threshold=GATE_OWL_POSSIBLE,
-                                             target_sizes=torch.tensor([[side, side]]))[0]
     found, possible, persons = set(), set(), []
-    for score, label, box in zip(res["scores"].tolist(), res["labels"].tolist(), res["boxes"].tolist()):
-        text = texts[label]
+    for score, text, box in owl_detect(proc, out, torch.tensor([[side, side]]), GATE_OWL_POSSIBLE, texts):
         if text in GATE_PERSON_LABELS:
-            if score >= 0.2:
+            if score >= GATE_PERSON_SCORE:
                 persons.append(tuple(box))
         elif score >= GATE_OWL_FAIL:
             found.add(text)
@@ -352,8 +422,12 @@ def _detect_owl(img):
 
 
 def _detect_hands(img, persons, faces):
-    if HAND is None or persons is None:
-        return None
+    """[True|False|None] per hand ([] = no hands, a valid result); None when it could not run."""
+    import numpy as np
+    if HAND is None:
+        raise RuntimeError("hand model not loaded")
+    if persons is None:
+        raise RuntimeError("needs the person boxes of the period check, which did not run")
     res = HAND.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=np.asarray(img)))
     w, h = img.size
     diag = (w * w + h * h) ** 0.5
@@ -363,19 +437,23 @@ def _detect_hands(img, persons, faces):
 _anchor_cache = {}
 
 
-def _clip_feature(img):
-    proc, model = CLIP
+def _embed(img):
+    import torch
+    proc, model = DINO
     with torch.no_grad():
-        f = model.get_image_features(**proc(images=img, return_tensors="pt").to("cuda"))
+        f = model(**proc(images=img, return_tensors="pt").to("cuda")).pooler_output
     return (f / f.norm(dim=-1, keepdim=True))[0].cpu()
 
 
-def _similarity(img, anchor_name, zf):
-    if CLIP is None:
-        return None
+def _similarity(img, anchor_name, zf, persons):
+    """DINOv2 cosine of the largest person-box crop (the whole frame if there is none) to the anchor still."""
+    from PIL import Image
+    if DINO is None:
+        raise RuntimeError("DINOv2 not loaded")
     if anchor_name not in _anchor_cache:
-        _anchor_cache[anchor_name] = _clip_feature(Image.open(zf.open(anchor_name)).convert("RGB"))
-    return float((_clip_feature(img) * _anchor_cache[anchor_name]).sum())
+        _anchor_cache[anchor_name] = _embed(Image.open(zf.open(anchor_name)).convert("RGB"))
+    box = crop_box(persons or [], img.size)
+    return float((_embed(img.crop(box) if box else img) * _anchor_cache[anchor_name]).sum())
 
 
 def _gate_time_ok(last_s):
@@ -384,34 +462,72 @@ def _gate_time_ok(last_s):
     return DEADLINE_SECONDS - (time.time() - JOB_STARTED) >= last_s + MANIFEST_RESERVE_S
 
 
-_last = 0.0
-with zipfile.ZipFile(INPUT_ZIP) as _z:
-    for _item in JOB["items"]:
-        _png = OUT_DIR / (_item["key"] + ".png")
-        if not _png.is_file():
-            continue
-        if not _gate_time_ok(_last):
-            GATE_INFO["ungated"].append(_item["key"])
-            continue
-        _t = time.time()
-        _img = Image.open(_png).convert("RGB")
-        _faces = _hands = _anach = _poss = _sim = None
-        _boxes = []
-        try:
-            _faces, _boxes = _detect_faces(_img)
-            _anach, _poss, _persons = _detect_owl(_img)
-            _hands = _detect_hands(_img, _persons, _boxes)
-            if _item.get("anchor"):
-                _sim = _similarity(_img, _item["anchor"], _z)
-        except Exception as _e:  # whatever failed stays None: needs_review, never pass
-            print("gate:", _item["key"], "check failed:", type(_e).__name__, str(_e)[:200])
-        _verdict = decide(_faces, _hands, _anach, _poss, _sim, bool(_item.get("anchor")))
-        (OUT_DIR / (_item["key"] + ".gate.json")).write_text(json.dumps(_verdict, indent=1, sort_keys=True) + "\n")
-        _last = time.time() - _t
-        print("gate", _item["key"], "pass" if _verdict["pass"] else ("REVIEW" if _verdict["needs_review"] else "FAIL"),
-              "; ".join(_verdict["notes"]))
+def run_gate():
+    from PIL import Image
+    t0 = time.time()
+    keys = [i["key"] for i in JOB["items"] if (OUT_DIR / (i["key"] + ".png")).is_file()]
+    run, why = gate_plan(DEADLINE_SECONDS - (time.time() - JOB_STARTED), INCOMPLETE, len(keys),
+                         GATE_SETUP_S, GATE_PER_STILL_S, MANIFEST_RESERVE_S)
+    if not run:
+        GATE_INFO["skipped"] = why
+        print("gate skipped:", why)
+        return
+    for n in ("pipe", "transformer", "enc"):   # the stills are done: free the GPU for the gate models
+        globals().pop(n, None)
+    gc.collect()
+    import torch
+    torch.cuda.empty_cache()
+    _load_models()
+    last = 0.0
+    with zipfile.ZipFile(INPUT_ZIP) as z:
+        for item in JOB["items"]:
+            png = OUT_DIR / (item["key"] + ".png")
+            if not png.is_file() or not _gate_time_ok(last):
+                continue
+            t = time.time()
+            img = Image.open(png).convert("RGB")
+            faces = hands = anach = poss = sim = persons = None
+            boxes, errors = [], {}
+            for name, fn in (("faces", lambda: _detect_faces(img)), ("owl", lambda: _detect_owl(img))):
+                try:
+                    got = fn()
+                    if name == "faces":
+                        faces, boxes = got
+                        if faces is None:
+                            errors["faces"] = "model not loaded"
+                    else:
+                        anach, poss, persons = got
+                        if anach is None:
+                            errors["owl"] = "model not loaded"
+                except Exception as e:
+                    errors[name] = type(e).__name__ + ": " + str(e)[:120]
+                    print("gate:", item["key"], name, "failed:", type(e).__name__, str(e)[:200])
+            try:
+                hands = _detect_hands(img, persons, boxes)
+            except Exception as e:
+                errors["hands"] = type(e).__name__ + ": " + str(e)[:120]
+            if item.get("anchor"):
+                try:
+                    sim = _similarity(img, item["anchor"], z, persons)
+                except Exception as e:
+                    errors["anchor"] = type(e).__name__ + ": " + str(e)[:120]
+            verdict = decide(faces, hands, anach, poss, sim, bool(item.get("anchor")), errors)
+            if item.get("anchor") and sim is not None and not crop_box(persons or [], img.size):
+                verdict["notes"].append("no person box: similarity used the whole frame")
+            (OUT_DIR / (item["key"] + ".gate.json")).write_text(json.dumps(verdict, indent=1, sort_keys=True) + "\n")
+            last = time.time() - t
+            print("gate", item["key"], "pass" if verdict["pass"] else ("REVIEW" if verdict["needs_review"] else "FAIL"),
+                  "; ".join(verdict["notes"]))
+    GATE_INFO["ran"] = True
+    GATE_INFO["seconds"] = round(time.time() - t0, 1)
+
+
+try:
+    run_gate()
+except Exception as _e:   # nothing in the gate may stop the manifest and upload
+    GATE_INFO["error"] = type(_e).__name__ + ": " + str(_e)[:200]
+    print("gate failed, stills untouched:", GATE_INFO["error"])
+GATE_INFO["ungated"] = sorted(i["key"] for i in JOB["items"] if (OUT_DIR / (i["key"] + ".png")).is_file()
+                              and not (OUT_DIR / (i["key"] + ".gate.json")).is_file())
 if GATE_INFO["ungated"]:
-    print("gate: ran out of time; ungated:", ", ".join(GATE_INFO["ungated"]))
-GATE_INFO["seconds"] = round(time.time() - _gate_t0, 1)
-MODEL_INFO["gate"] = GATE_INFO
-EXPECTED += [k + ".gate.json" for k in (i["key"] for i in JOB["items"]) if k not in GATE_INFO["ungated"]]
+    print("gate: ungated stills:", ", ".join(GATE_INFO["ungated"]))

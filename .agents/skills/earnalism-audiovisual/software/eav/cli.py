@@ -1490,26 +1490,52 @@ def _latest_pick(rec, job_id):
     return picks[-1]["meta"]["choices"] if picks else None
 
 
-def _gate_of(path: Path, any_gated: bool):
-    """The still's gate verdict (<stem>.gate.json beside it): (gate dict | None, why it blocks | None).
-    No gate file in the whole job (an older job) blocks nothing; a missing, unreadable or malformed one in a
-    gated job, or needs_review, blocks as needs-review; pass false blocks as failed."""
+def _job_gated(rec, job_id) -> bool:
+    """Was the job's gate intended? The imported manifest's MODEL_INFO carries "gate" (recorded before the
+    gate runs, so a gate that was skipped or failed still shows it), and every artifact of the job keeps it
+    in its meta. Not inferred from the gate.json files on disk."""
+    return any(isinstance((a["meta"].get("model") or {}).get("gate"), dict)
+               for a in rec.data["artifacts"] if a["meta"].get("job_id") == job_id)
+
+
+def _gate_of(path: Path, gated: bool):
+    """The still's gate verdict (<stem>.gate.json beside it): (gate dict | None, level, why) with level None
+    (nothing to say), "review" (needs review, advisory until the title is calibrated) or "fail" (a certain
+    fail: pass false and needs_review false). A gated job's missing or unreadable gate.json is "review"; a job
+    that was never gated has no verdicts and blocks nothing."""
     gate_path = path.with_name(path.stem + ".gate.json")
     if not gate_path.is_file():
-        return None, ("no gate result for this candidate although the job was gated (needs review)"
-                      if any_gated else None)
+        return (None, "review", "no gate result for this candidate although the job's gate was intended "
+                "(it was skipped, ran out of time or failed)") if gated else (None, None, None)
     try:
         gate = json.loads(gate_path.read_text(encoding="utf-8"))
         if not isinstance(gate, dict) or not isinstance(gate.get("pass"), bool):
             raise ValueError("not a gate verdict")
     except (OSError, ValueError):
-        return None, "its gate.json is unreadable (needs review)"
+        return None, "review", "its gate.json is unreadable"
     if gate["pass"] is True and not gate.get("needs_review"):
-        return gate, None
+        return gate, None, None
     why = "; ".join(str(n) for n in gate.get("notes") or []) or ", ".join(gate.get("anachronisms") or []) or "failed"
     if gate.get("needs_review"):
-        return gate, "gate needs review: " + why
-    return gate, "gate failed: " + why
+        return gate, "review", "gate needs review: " + why
+    return gate, "fail", "gate failed: " + why
+
+
+def _reasons(items, flag):
+    """{key: reason} from repeated KEY=reason flags."""
+    out = {}
+    for item in items or []:
+        key, sep, reason = item.partition("=")
+        if not sep or not key.strip() or not reason.strip():
+            raise Stop(f"{flag} needs KEY=reason (a still key and why), not {item!r}",
+                       f"e.g. {flag} f01s014-12=\"owner viewed it: the cylinder is a period lamp\"")
+        out[key.strip()] = reason.strip()
+    return out
+
+
+def _latest_pick_overrides(rec, job_id) -> dict:
+    picks = _artifacts(rec, "stills_pick", job_id=job_id)
+    return dict(picks[-1]["meta"].get("overrides") or {}) if picks else {}
 
 
 def cmd_pick(args):
@@ -1532,13 +1558,14 @@ def cmd_pick(args):
     if not choices:
         raise Stop("the choices file has no choices", f"Name at least one key of {args.job}: "
                    f"{', '.join(sorted(cands))}")
-    picked, overrides, blocked = {}, {}, []
-    override = args.override
-    if override is not None and not override.strip():
-        raise Stop("--override needs a reason", "Say why the gate's verdict is wrong or accepted, "
-                   "e.g. --override \"owner viewed it: the cylinder is a period lamp\"")
-    folder = rec.root / job["kind"] / args.job
-    any_gated = any(folder.glob("*.gate.json"))
+    picked, overrides, advisories, blocked = {}, {}, {}, []
+    review_over, fail_over = _reasons(args.override, "--override"), _reasons(args.override_fail, "--override-fail")
+    for key in list(review_over) + list(fail_over):
+        if key not in choices:
+            raise Stop(f"override names {key!r}, which is not in the choices file",
+                       f"Name only keys you are picking: {', '.join(sorted(choices))}")
+    gated = _job_gated(rec, args.job)
+    calibrated = (rec.root / "gate-calibration.json").is_file()
     for key, n in choices.items():
         if key not in cands:
             raise Stop(f"{key!r} has no candidates in {args.job}",
@@ -1548,22 +1575,32 @@ def cmd_pick(args):
                        f"{', '.join(str(c) for c in sorted(cands[key]))}",
                        f"Fix {args.choices} and rerun pick")
         path = cands[key][n]
-        gate, why = _gate_of(path, any_gated)
-        if why and override is None:
-            blocked.append(f"{key} c{n}: {why}")
-        elif why:
-            overrides[key] = {"candidate": n, "reason": override.strip(), "why": why,
-                              "gate": None if gate is None else {k: gate.get(k) for k in (
-                                  "pass", "needs_review", "anachronisms", "hands_detached", "eyes",
-                                  "anchor_similarity", "notes")}}
+        gate, level, why = _gate_of(path, gated)
+        if level:
+            record = {"candidate": n, "level": level, "why": why,
+                      "gate": None if gate is None else {k: gate.get(k) for k in (
+                          "pass", "needs_review", "anachronisms", "hands_detached", "eyes",
+                          "anchor_similarity", "notes")}}
+            if level == "fail":
+                if key in fail_over:
+                    overrides[key] = {**record, "reason": fail_over[key]}
+                else:
+                    blocked.append(f"{key} c{n}: {why} (certain fail: --override-fail {key}=\"<reason>\")")
+            elif calibrated:
+                if key in review_over:
+                    overrides[key] = {**record, "reason": review_over[key]}
+                else:
+                    blocked.append(f"{key} c{n}: {why} (--override {key}=\"<reason>\")")
+            else:  # no gate-calibration.json yet: advisory, warned and recorded, never blocking
+                advisories[key] = {"candidate": n, "why": why}
         picked[key] = {"candidate": n, "file": path.relative_to(rec.root).as_posix(),
                        "sha256": sha256_file(path)}
     if blocked:
         raise Stop("the gate does not pass: " + " | ".join(blocked),
-                   "Pick a candidate whose gate passed, or look at it yourself and rerun with "
-                   "--override \"<reason>\" (the reason is recorded in the pick)")
+                   "Pick a candidate whose gate passed, or look at it yourself and rerun with the "
+                   "per-key override named above (the reason is recorded in the pick)")
     version = len(_artifacts(rec, "stills_pick", job_id=args.job)) + 1
-    extra = {"overrides": overrides} if overrides else {}
+    extra = {**({"overrides": overrides} if overrides else {}), **({"advisories": advisories} if advisories else {})}
     path = _write_json(rec.root / "picks" / f"{args.job}.pick-{version}.json",
                        {"job_id": args.job, "choices": picked, **extra})
     rec.add_artifact("stills_pick", path, {"job_id": args.job, "choices": picked,
@@ -1571,7 +1608,12 @@ def cmd_pick(args):
     rec.event("pick", "recorded", {"job_id": args.job, "version": version,
                                    "choices": {k: v["candidate"] for k, v in picked.items()},
                                    **({"overrides": {k: v["reason"] for k, v in overrides.items()}}
-                                      if overrides else {})})
+                                      if overrides else {}),
+                                   **({"advisories": {k: v["why"] for k, v in advisories.items()}}
+                                      if advisories else {})})
+    for key, adv in sorted(advisories.items()):
+        print(f"WARNING (advisory until {rec.root.name}/gate-calibration.json exists): {key} c{adv['candidate']}: "
+              f"{adv['why']}")
     print(f"Picked {len(picked)} still(s) of {args.job}: "
           + ", ".join(f"{k} -> c{v['candidate']}" for k, v in sorted(picked.items()))
           + ". The film uses only these candidates; a later pick replaces this one.")
@@ -1720,6 +1762,37 @@ def cmd_touchup(args):
           f"full size, then {PROG} pick --root {rec.root} --job {job_id} --choices <json>.")
 
 
+def _refuse_gate_fails(rec, files, jobs, base):
+    """A still whose gate.json is a certain fail (pass false, needs_review false) does not enter the film
+    unless an override reason is recorded: in the pick that chose it (--override-fail) or, for a single image,
+    in picks/gate-overrides.json {"<key>": "<reason>"}. needs_review stays advisory."""
+    allowed = {}
+    path = rec.root / "picks" / "gate-overrides.json"
+    if path.is_file():
+        allowed.update({k: v for k, v in _json(path).items() if isinstance(v, str) and v.strip()})
+    for job, _, cands in jobs[base + 1:]:
+        if cands:
+            allowed.update({k: v.get("reason") for k, v in _latest_pick_overrides(rec, job["job_id"]).items()
+                            if v.get("level") == "fail" and v.get("reason")})
+    blocked = []
+    for key, src in files.items():
+        gate_path = src.with_name(src.stem + ".gate.json")
+        if not gate_path.is_file():
+            continue
+        try:
+            gate = json.loads(gate_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(gate, dict) and gate.get("pass") is False and not gate.get("needs_review") \
+                and key not in allowed:
+            blocked.append(f"{key} ({'; '.join(str(n) for n in gate.get('notes') or []) or 'gate failed'})")
+    if blocked:
+        raise Stop("the film's stills include a certain gate fail: " + " | ".join(sorted(blocked)),
+                   f"Redo the still, pick another candidate, or record why it stands: --override-fail on "
+                   f"{PROG} pick, or a reason in {rec.root / 'picks' / 'gate-overrides.json'} "
+                   "({\"<key>\": \"<reason>\"})")
+
+
 def _film_stills(rec, t, out):
     """The film's stills: the latest complete stills job, with any later imported job whose
     keys are all already in it applied as a patch (it replaces just those stills, e.g. one
@@ -1771,6 +1844,7 @@ def _film_stills(rec, t, out):
     held = [k for k in held if k not in released]
     if held:
         files, substitutes = _apply_hold(files, held)
+    _refuse_gate_fails(rec, files, jobs, base)
     merged = out / "stills"
     if merged.exists():
         shutil.rmtree(merged)
@@ -2595,8 +2669,11 @@ def _parser():
     s.add_argument("--job", required=True,
                    help="the imported stills, retouch, touchup or edit job with <key>--cN candidates")
     s.add_argument("--choices", required=True, help='JSON file {"<key>": <candidate number>, ...}')
-    s.add_argument("--override", help="reason to pick a candidate whose character-and-period gate failed or "
-                   "needs review (recorded in the pick and its event)")
+    s.add_argument("--override", action="append", metavar="KEY=reason",
+                   help="pick a candidate whose gate needs review after gate-calibration.json exists (repeatable; "
+                   "the reason is recorded in the pick and its event)")
+    s.add_argument("--override-fail", action="append", metavar="KEY=reason",
+                   help="pick a candidate whose gate is a certain fail (repeatable; the reason is recorded)")
     s = add("hold", help="show the nearest approved still of the scene for shots with none yet")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--keys", help="comma-separated held still keys, e.g. f01s007-4,f01s007-5")

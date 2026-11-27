@@ -765,66 +765,144 @@ class RoundTwo:
         self.assertTrue(any(e["stage"] == "pick" and e["result"] == "recorded"
                             and e["detail"]["job_id"] == job for e in rec.data["events"]))
 
-    def gated_ready(self, gates):
-        """candidates_ready whose candidates carry <key>--cN.gate.json from {n: gate dict}."""
+    def gated_ready(self, gates, intended=True):
+        """candidates_ready whose candidates carry <key>--cN.gate.json from {n: gate dict}; the stills
+        artifacts keep MODEL_INFO.gate (the gate's recorded intent) unless intended=False (a legacy job)."""
         self.film_ready()
         scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
         first = f"{scenes[0]['scene_id']}-1"
 
         def cands(rec, job_id, job_dir, out):
             for c in (1, 2, 3):
-                Image.new("RGB", (320, 180), (10 * c, 0, 0)).save(out / f"{first}--c{c}.png")
+                png = out / f"{first}--c{c}.png"
+                Image.new("RGB", (320, 180), (10 * c, 0, 0)).save(png)
+                rec.add_artifact("stills", png, {"job_id": job_id, "model": (
+                    {"gate": {"intended": True}} if intended else {"repo": "flux"})})
                 if c in gates:
                     (out / f"{first}--c{c}.gate.json").write_text(json.dumps(gates[c]))
         return first, self.fake_job("stills", "film-01", cands)
 
+    def calibrate(self):
+        (self.root / "gate-calibration.json").write_text(json.dumps({"anchor_pass": 0.5}))
+
     PASS = {"eyes": 2, "hands_detached": False, "anachronisms": [], "anchor_similarity": 0.9,
-            "pass": True, "needs_review": False}
-    FAIL = {**PASS, "anachronisms": ["gas cylinder"], "pass": False}
-    REVIEW = {**PASS, "pass": False, "needs_review": True}
+            "pass": True, "needs_review": False, "notes": []}
+    FAIL = {**PASS, "anachronisms": ["gas cylinder"], "pass": False, "notes": ["anachronism: gas cylinder"]}
+    REVIEW = {**PASS, "pass": False, "needs_review": True, "notes": ["profile face with 1 visible eye(s)"]}
 
-    def test_pick_refuses_failed_gate_without_override(self):
-        first, job = self.gated_ready({1: self.PASS, 2: self.FAIL, 3: self.REVIEW})
-        for n, word in ((2, "gas cylinder"), (3, "needs review")):
-            code, out = self.pick(job, {first: n})
-            self.assertNotEqual(code, 0, out)
-            self.assertIn("STOP", out)
-            self.assertIn("--override", out)
-            self.assertIn(word, out)
-        self.assertFalse([a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "stills_pick"])
-        self.assertEqual(self.pick(job, {first: 1})[0], 0)           # a passing gate is pickable
-
-    def test_pick_override_records_the_reason(self):
-        first, job = self.gated_ready({1: self.PASS, 2: self.FAIL})
+    def pick_with(self, job, choices, *flags):
         path = self.d / "choices.json"
-        path.write_text(json.dumps({first: 2}))
-        code, out = run("pick", "--root", self.root, "--job", job, "--choices", path,
-                        "--override", "owner viewed it: the cylinder is a period lamp")
+        path.write_text(json.dumps(choices), encoding="utf-8")
+        return run("pick", "--root", self.root, "--job", job, "--choices", path, *flags)
+
+    def picks(self):
+        return [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "stills_pick"]
+
+    def test_pick_refuses_a_certain_fail_without_override_fail(self):
+        first, job = self.gated_ready({1: self.PASS, 2: self.FAIL, 3: self.REVIEW})
+        code, out = self.pick(job, {first: 2})
+        self.assertNotEqual(code, 0, out)
+        self.assertIn("STOP", out)
+        self.assertIn("gas cylinder", out)
+        self.assertIn(f'--override-fail {first}=', out)
+        self.assertFalse(self.picks())
+        code, out = self.pick_with(job, {first: 2}, "--override", f"{first}=looks fine")   # wrong flag for a fail
+        self.assertNotEqual(code, 0, out)
+        self.assertFalse(self.picks())
+        self.assertEqual(self.pick(job, {first: 1})[0], 0)                                  # a pass is pickable
+
+    def test_override_fail_records_the_reason_per_key(self):
+        first, job = self.gated_ready({1: self.PASS, 2: self.FAIL})
+        code, out = self.pick_with(job, {first: 2}, "--override-fail",
+                                   f"{first}=owner viewed it: the cylinder is a period lamp")
         self.assertEqual(code, 0, out)
         rec = Record.load(self.root)
-        art = [a for a in rec.data["artifacts"] if a["kind"] == "stills_pick"][-1]
+        art = self.picks()[-1]
         ov = art["meta"]["overrides"][first]
-        self.assertEqual(ov["reason"], "owner viewed it: the cylinder is a period lamp")
-        self.assertEqual(ov["candidate"], 2)
+        self.assertEqual((ov["reason"], ov["candidate"], ov["level"]),
+                         ("owner viewed it: the cylinder is a period lamp", 2, "fail"))
         self.assertEqual(ov["gate"]["anachronisms"], ["gas cylinder"])
         self.assertEqual(json.loads((self.root / art["path"]).read_text())["overrides"], art["meta"]["overrides"])
         ev = [e for e in rec.data["events"] if e["stage"] == "pick" and e["result"] == "recorded"][-1]
         self.assertEqual(ev["detail"]["overrides"], {first: "owner viewed it: the cylinder is a period lamp"})
-        code, out = run("pick", "--root", self.root, "--job", job, "--choices", path, "--override", "  ")
-        self.assertNotEqual(code, 0)
-        self.assertIn("reason", out)
 
-    def test_pick_without_any_gate_files_is_unchanged(self):
-        scenes, first, job = self.candidates_ready()                 # legacy job: no gate.json at all
-        self.assertEqual(self.pick(job, {first: 1})[0], 0)
-        art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "stills_pick"][-1]
+    def test_needs_review_is_advisory_until_the_title_is_calibrated(self):
+        first, job = self.gated_ready({1: self.PASS, 3: self.REVIEW})
+        code, out = self.pick(job, {first: 3})
+        self.assertEqual(code, 0, out)
+        self.assertIn("WARNING", out)
+        self.assertIn("profile face", out)
+        art = self.picks()[-1]
+        self.assertEqual(art["meta"]["advisories"][first]["candidate"], 3)
         self.assertNotIn("overrides", art["meta"])
+        ev = [e for e in Record.load(self.root).data["events"] if e["stage"] == "pick"][-1]
+        self.assertIn(first, ev["detail"]["advisories"])
 
-    def test_partial_gating_needs_review(self):
-        first, job = self.gated_ready({1: self.PASS})                # c2 was never gated
+    def test_needs_review_blocks_after_calibration_and_takes_a_per_key_override(self):
+        first, job = self.gated_ready({1: self.PASS, 3: self.REVIEW})
+        self.calibrate()
+        code, out = self.pick(job, {first: 3})
+        self.assertNotEqual(code, 0, out)
+        self.assertIn(f"--override {first}=", out)
+        self.assertFalse(self.picks())
+        code, out = self.pick_with(job, {first: 3}, "--override", f"{first}=owner checked the profile")
+        self.assertEqual(code, 0, out)
+        ov = self.picks()[-1]["meta"]["overrides"][first]
+        self.assertEqual((ov["reason"], ov["level"]), ("owner checked the profile", "review"))
+        for bad in ("noequals", f"{first}=", "=why"):
+            code, out = self.pick_with(job, {first: 3}, "--override", bad)
+            self.assertNotEqual(code, 0, bad)
+            self.assertIn("KEY=reason", out)
+        code, out = self.pick_with(job, {first: 1}, "--override", "f99s999-1=why")
+        self.assertNotEqual(code, 0)
+        self.assertIn("not in the choices", out)
+
+    def test_pick_of_an_ungated_legacy_job_is_unchanged(self):
+        scenes, first, job = self.candidates_ready()                 # no gate.json, no recorded intent
+        self.assertEqual(self.pick(job, {first: 1})[0], 0)
+        meta = self.picks()[-1]["meta"]
+        self.assertNotIn("overrides", meta)
+        self.assertNotIn("advisories", meta)
+
+    def test_a_gated_job_whose_candidate_has_no_gate_result_is_advisory_needs_review(self):
+        first, job = self.gated_ready({1: self.PASS})                # c2 was never gated (gate ran out of time)
+        code, out = self.pick(job, {first: 2})
+        self.assertEqual(code, 0, out)
+        self.assertIn("intended", out)
+        self.calibrate()
         code, out = self.pick(job, {first: 2})
         self.assertNotEqual(code, 0, out)
-        self.assertIn("no gate", out)
+
+    def test_gate_intent_comes_from_the_manifest_not_from_files_on_disk(self):
+        # gate.json files exist but the job's recorded model has no gate: not gated, nothing is read as blocking
+        first, job = self.gated_ready({1: self.PASS, 2: self.FAIL}, intended=False)
+        self.calibrate()
+        self.assertNotEqual(self.pick(job, {first: 2})[0], 0)        # a file that says fail still blocks
+
+    def test_a_gated_job_with_no_gate_files_at_all_is_not_treated_as_legacy(self):
+        first, job = self.gated_ready({})                            # intent recorded, gate produced nothing
+        code, out = self.pick(job, {first: 1})
+        self.assertEqual(code, 0, out)                               # advisory before calibration...
+        self.assertIn("WARNING", out)
+        self.calibrate()
+        self.assertNotEqual(self.pick(job, {first: 1})[0], 0)        # ...blocking after it
+
+    def test_film_refuses_a_certain_fail_still_unless_a_reason_is_recorded(self):
+        scenes, first, job = self.candidates_ready()
+        base = [j for j in cli._jobs(Record.load(self.root)) if j["kind"] == "stills"][0]["job_id"]
+        gate = self.root / "stills" / base / f"{first}.gate.json"
+        gate.write_text(json.dumps(self.FAIL))
+        code, out = self.film_run()
+        self.assertNotEqual(code, 0, out)
+        self.assertIn("certain gate fail", out)
+        self.assertIn(first, out)
+        (self.root / "picks").mkdir(exist_ok=True)
+        (self.root / "picks" / "gate-overrides.json").write_text(json.dumps({first: "owner accepted it"}))
+        code, out = self.film_run()
+        self.assertEqual(code, 0, out)
+        (self.root / "picks" / "gate-overrides.json").unlink()
+        gate.write_text(json.dumps(self.REVIEW))                     # needs_review never blocks the film
+        self.assertEqual(self.film_run()[0], 0)
 
     def test_pick_refuses_bad_jobs_keys_and_numbers(self):
         scenes, first, job = self.candidates_ready()
@@ -1057,7 +1135,8 @@ class CliTests(RoundTwo, unittest.TestCase):
         code, out = run("job", "stills", "--root", self.root, "--rates", self.rates, "--spec", spec)
         self.assertEqual(code, 0, out)
         entry = json.loads(self.ledger.read_text())[0]
-        self.assertAlmostEqual(entry["units"], (4 * 10.0 * 3 + 10 + 10) * 1.15 / 3600 * 5.0)
+        # plus the gate's seconds (set-up 300 s + 6 s x 3 stills), added after the margin
+        self.assertAlmostEqual(entry["units"], ((4 * 10.0 * 3 + 10 + 10) * 1.15 + 300 + 6 * 3) / 3600 * 5.0)
 
     def test_job_needs_measured_rates(self):
         self.init_and_plan()
