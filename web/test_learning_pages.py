@@ -36,3 +36,22 @@ class LearningPageNavigationTests(TestCase):
   self.assertIn('<p class="fine">Sponsored by <a href="https://sponsor.example.test/" rel="sponsored noopener"',html);self.assertIn('Acme &lt;b&gt;Labs&lt;/b&gt;',html);self.assertNotIn('<b>Labs</b>',html)
   t.sponsor_name='';t.sponsor_url='';t.sponsor_approved_by=None;t.save()
   self.assertNotIn('rel="sponsored',views.question(self.request('/en/question/'),locale='en',track_id=t.id,question_id=q.id).content.decode())
+
+
+@override_settings(FREE_ACCESS_ENABLED=True)
+class SignedOutTrackTests(TestCase):
+ """During free access a track needs an account: a signed-out visitor is sent to sign in and back."""
+ def test_signed_out_track_redirects_to_sign_in_with_return(self):
+  t=Track.objects.create(title='Original signed-out track',locale='en',kind='learning',access='free',published=True)
+  response=self.client.get(f'/en/tracks/{t.id}/')
+  self.assertEqual(response.status_code,302)
+  self.assertTrue(response['Location'].startswith('/en/sign-in/?return_to='))
+  self.assertIn(f'%2Fen%2Ftracks%2F{t.id}%2F',response['Location'])
+
+ def test_signed_out_post_still_gets_the_error_page(self):
+  from django.test import RequestFactory
+  from django.contrib.auth.models import AnonymousUser
+  from core.api import DomainError
+  def boom(request,locale,**kw): raise DomainError('authentication_required','Sign in to continue.',401)
+  r=RequestFactory().post('/en/x/');r.user=AnonymousUser()
+  self.assertEqual(views.domain_view(boom)(r,'en').status_code,401)
