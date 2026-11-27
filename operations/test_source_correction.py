@@ -213,6 +213,9 @@ class ReviseStageTests(TestCase):
         self.assertEqual(revised["changed_paragraphs"], {"chapter-001": [6, 37]})
         self.assertEqual(revised["replaces_revision_id"], str(old.id))
         self.assertEqual(revised["state"], "draft")
+        # IDs and the text hash depend only on the slug and the corrected source, so a replica predicts production.
+        self.assertEqual((revised["revision_id"], revised["sha256"]),
+                         ("335dd363-de06-427c-bd43-b57373553eee", "7514f67a84623d233ac24c58a41a237f91ff160e8aa0d37c96cbcaa94464ce86"))
         new = Revision.objects.get(pk=revised["revision_id"])
         self.assertEqual(new.anchor_revision, old.anchor_revision + 1)
         self.assertEqual((new.title, new.description, new.edition_id), (old.title, old.description, old.edition_id))
