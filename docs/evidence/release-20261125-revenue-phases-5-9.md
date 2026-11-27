@@ -140,3 +140,19 @@
   - the reader shows one Back link;
   - a signed-out `/en/tracks/<id>/` redirects to sign-in with `return_to`;
   - no console errors.
+
+## #78 deploy and the ক্ষুধিত পাষাণ correction (27 Nov 2026)
+
+- **Merge:** ronik18/reo-earnalism-maison#78, squash commit `6f98e6a`, merged after CI passed on head `ef46d91`. It carries the W4 colours and W6 icons (owner-approved 28 Nov IST), the carousel `role=group` fix and the corrected-text browser report.
+- **Static release `efe9bcff6780576ad5b3ec9227314b4cb21c01e513cc18919d847c173b443664`:**
+  - 228 files, uploaded and verified (228/228).
+  - Compared with `99383d31…`, it adds the icon set and the share card and changes `room.css`.
+  - Rollback: switch `STATIC_RELEASE_ID` back to `99383d318667e1b130569d9094b907b19c0621f28405ec14a32417ba7619b62c` and redeploy.
+- **Deploy:** `dep-dc4tk0k9v7es738bncag` is live. No migrations.
+- **Correction:**
+  1. The owner approved the clearance and cover items on the Monday page on 27 Nov at 18:54Z.
+  2. `revise` (`job-dc4t68gu01pc73fa6o20`) built draft `335dd363-de06-427c-bd43-b57373553eee`, sha `7514f67a…`, changing ¶6 and ¶37.
+  3. Browser report: `docs/evidence/publication-browser-20261127-kshudhita-pashan-r2.json` (pass).
+  4. `evidence` (`job-dc4tlc7f3r2c73cnd1vg`) recorded it, then `publish` (`job-dc4tlmjl550s73ami9c0`) ran.
+  5. `335dd363` went live at 19:33:12Z. `3cb6a0b9` is retired, and reader state moves with the switch.
+  6. Live check: the reader shows "রাত্রিযাপন করিবেন না।" in ¶6, and the old wording is gone.
