@@ -1099,10 +1099,10 @@
       {
         "run_id": "narration-775c2abc-r2#1",
         "job_id": "narration-775c2abc-r2",
-        "usd": 1.0409025,
-        "seconds": 0.0,
+        "usd": 0.370002391531815,
+        "seconds": 1333.341951466,
         "at": "2026-11-27T19:02:39+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-781b8abc-r2-c1of2#1",
