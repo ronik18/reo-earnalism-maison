@@ -131,6 +131,16 @@ class ExperienceTests(TestCase):
         self.assertContains(response, english)
         self.assertContains(response, "Mark finished")
 
+    def test_header_title_has_book_lang(self):
+        self.login()
+        for edition, unit, lang in (
+            (self.edition, self.unit, "en"),
+            ("20000000-0000-4000-8000-000000000002", "40000000-0000-4000-8000-000000000002", "bn"),
+        ):
+            html = self.client.get(f"/en/read/{edition}/{unit}/").content.decode()
+            self.assertRegex(html, rf'class="room-evening-title" lang="{lang}">')
+            self.assertIn('<html lang="en"', html)
+
     def test_bengali_book_keeps_its_text_and_language_in_the_english_reader(self):
         self.login()
         from library.models import Paragraph

@@ -14,9 +14,28 @@ from django.utils import timezone
 
 from core.api import DomainError
 from .models import Revision
+from .romanize import normalize_latin_query, romanize_bn
 from .search_models import SearchAlias, SearchDocument
 
 INDEX = 'live_revision__search_index__'
+# Romanized-title stage reads at most this many published Bengali titles per request.
+ROMANIZE_SCAN_LIMIT = 5000
+
+
+def romanized_title_ids(queryset, query):
+    """Pks of already-published editions whose Bengali title reads as the Latin query.
+
+    Computed per request from the caller's (published/locale-scoped) queryset, so a
+    draft title can never match; no table or cache. Cost is linear in the number of
+    Bengali titles (capped by ROMANIZE_SCAN_LIMIT); at catalogue scale precompute the
+    variants on SearchDocument at refresh time and index them instead.
+    """
+    key = normalize_latin_query(query)
+    if len(key) < 3:
+        return []
+    rows = queryset.filter(**{INDEX + 'title_normalized__regex': '[\u0980-\u09ff]'}).values_list(
+        'pk', INDEX + 'title_normalized')[:ROMANIZE_SCAN_LIMIT]
+    return [pk for pk, title in rows if any(form.startswith(key) for form in romanize_bn(title))]
 
 
 def normalize_search_text(value):
@@ -55,7 +74,7 @@ def refresh_revision_search(revision):
 
 
 def search_editions(queryset, query, locale=None):
-    """Rank live editions exact > prefix > reviewed alias > FTS > title typo.
+    """Rank live editions exact > prefix > reviewed alias > romanized Bengali title > FTS > title typo.
 
     Candidate predicates use the GIN text/vector and trigram indexes. Fuzzy
     matching is disabled for very short input; no per-session threshold changes
@@ -86,6 +105,7 @@ def search_editions(queryset, query, locale=None):
     aliases=SearchAlias.objects.filter(active=True,reviewed_at__lte=timezone.now(),alias_normalized__in=alias_keys)
     if locale is not None:aliases=aliases.filter(locale=locale)
     targets=list(aliases.order_by('locale','alias_normalized').values_list('locale','target_normalized')[:16])
+    romanized_match=Q(pk__in=romanized_title_ids(queryset,query))
     simple_query=SearchQuery(query,config='simple',search_type='plain')
     languages={locale} if locale is not None else {'en'}
     languages.update(language for language,_ in targets)
@@ -104,10 +124,10 @@ def search_editions(queryset, query, locale=None):
     fuzzy = Q(TrigramSimilar(F(title), Value(query)))
     rank = Coalesce(Case(*ranking,default=SearchRank(F(INDEX+'document'),simple_query,normalization=32),output_field=FloatField()),Value(0.0))
     similarity = TrigramSimilarity(F(title), Value(query))
-    return queryset.filter(exact | prefix | alias_match | fts | fuzzy).annotate(
+    return queryset.filter(exact | prefix | alias_match | romanized_match | fts | fuzzy).annotate(
         search_score=Case(
             When(exact, then=Value(5.0)), When(prefix, then=Value(4.0)),
-            When(alias_match, then=Value(3.0)), When(fts, then=Value(2.0)),
+            When(alias_match, then=Value(3.0)), When(romanized_match, then=Value(2.5)), When(fts, then=Value(2.0)),
             default=Value(1.0), output_field=FloatField(),
         ) + rank * Value(0.1) + similarity * Value(0.01),
     ).order_by('-search_score', '-id')

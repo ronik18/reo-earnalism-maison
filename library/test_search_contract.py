@@ -38,9 +38,9 @@ class SearchContractTests(TestCase):
         self.assertEqual(connection.vendor, 'postgresql')
 
     def test_reviewed_banglish_aliases_are_locale_and_time_scoped(self):
-        target, _ = self.edition('বিচারক', locale='bn')
+        target, _ = self.edition('ন্যায়বিচার', locale='bn')
         reviewer = get_user_model().objects.create_user('search-reviewer@example.test', 'Long-Search-Passphrase-47')
-        alias = SearchAlias.objects.create(locale='bn', alias_normalized='bicharok', target_normalized='বিচারক',
+        alias = SearchAlias.objects.create(locale='bn', alias_normalized='bicharok', target_normalized='ন্যায়বিচার',
                                           reviewed_by=reviewer, reviewed_at=timezone.now())
         self.assertEqual([e.pk for e in self.results('BICHAROK', 'bn')], [target.pk])
         alias.active=False; alias.save()
@@ -90,6 +90,33 @@ class SearchContractTests(TestCase):
             with self.assertRaises(DomainError): self.results(value)
         found=self.results('journey')
         self.assertTrue(found and all(isinstance(row.search_score, float) for row in found))
+
+    def test_bicharak_finds_bicharak_edition(self):
+        from .romanize import romanize_bn
+        self.assertEqual(romanize_bn('বিচারক'), {'bicharak', 'bicharok'})
+        target, _ = self.edition('বিচারক', locale='bn')
+        self.assertEqual([e.pk for e in self.results('bicharak', 'bn')], [target.pk])
+        self.assertEqual([e.pk for e in self.results('Bi-Char ak', 'bn')], [target.pk])
+        self.assertEqual([e.pk for e in self.results('bicharak')], [])  # English locale scope
+
+    def test_bicharok_also_matches(self):
+        target, _ = self.edition('বিচারক', locale='bn')
+        self.assertEqual([e.pk for e in self.results('bicharok', 'bn')], [target.pk])
+        self.assertEqual([e.pk for e in list(search_editions(Edition.objects.all(), 'bicharok'))], [target.pk])
+
+    def test_draft_bengali_title_is_not_found_by_its_latin_form(self):
+        self.edition('বিচারক', locale='bn', live=False)
+        self.assertEqual(self.results('bicharak', 'bn'), [])
+        self.assertEqual(list(search_editions(Edition.objects.all(), 'bicharok')), [])
+
+    def test_reviewed_alias_still_ranks_first(self):
+        romanized, _ = self.edition('বিচারক', locale='bn')
+        aliased, _ = self.edition('ন্যায়বিচার', locale='bn')
+        reviewer = get_user_model().objects.create_user('search-rank@example.test', 'Long-Search-Passphrase-47')
+        SearchAlias.objects.create(locale='bn', alias_normalized='bicharok', target_normalized='ন্যায়বিচার',
+                                  reviewed_by=reviewer, reviewed_at=timezone.now())
+        found = [e.pk for e in self.results('bicharok', 'bn')]
+        self.assertEqual(found[:2], [aliased.pk, romanized.pk])
 
 
 class FilmGrantContractExampleTests(TestCase):
