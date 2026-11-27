@@ -20,11 +20,15 @@ import time
 import types
 from pathlib import Path, PurePosixPath
 
-# Modal's published L4 rate (about $0.80 per hour).
-L4_USD_PER_S = 0.000222
-# Every Modal figure (the pending worst case and the recorded spend) is wall seconds x the L4 rate x
-# this factor: it covers the CPU and memory surcharges and the image build that the GPU rate leaves
-# out. It stays an estimate: `eav modal-settle` replaces a row with the billed amount.
+# One Modal GPU per job kind: narration and music fit an L4 (24 GB, ~22 GB usable); stills need an
+# L40S (48 GB) because the FLUX.1-schnell transformer alone is ~24 GB in bf16 (an L4 ran out of memory).
+GPU_FOR_KIND = {"narration": "L4", "music": "L4", "stills": "L40S"}
+# Modal's published per-second GPU rates (Oct-Nov 2026). CPU and memory are billed on top; they are
+# covered by MODAL_OVERHEAD_FACTOR, not listed here.
+USD_PER_S = {"L4": 0.000222, "L40S": 0.000542}
+# Every Modal figure (the pending worst case and the recorded spend) is wall seconds x the job
+# kind's GPU rate x this factor: it covers the CPU and memory surcharges and the image build that the
+# GPU rate leaves out. It stays an estimate: `eav modal-settle` replaces a row with the billed amount.
 MODAL_OVERHEAD_FACTOR = 1.25
 APP_NAME = "earnalism-eav"
 VOLUME_NAME = "earnalism-eav-jobs"
@@ -155,11 +159,17 @@ class _Shim:
         self.job_dir, self.saved = job_dir, {}
 
     def __enter__(self):
+        import importlib.machinery
         mod = types.ModuleType("google.colab")
+        # Libraries such as transformers probe importlib.util.find_spec("google.colab"); a module in
+        # sys.modules with __spec__ None makes that raise ValueError, so give the shim a real spec.
+        mod.__spec__ = importlib.machinery.ModuleSpec("google.colab", None)
         exec(compile(colab_shim(self.job_dir), "<colab_shim>", "exec"), mod.__dict__)
         pkg = sys.modules.get("google") or types.ModuleType("google")
         if not hasattr(pkg, "__path__"):
             pkg.__path__ = []
+        if getattr(pkg, "__spec__", None) is None:
+            pkg.__spec__ = importlib.machinery.ModuleSpec("google", None, is_package=True)
         for name, value in (("google", pkg), ("google.colab", mod)):
             self.saved[name] = sys.modules.get(name)
             sys.modules[name] = value
@@ -243,9 +253,19 @@ def run_local(notebook, inputs_zip, work_dir) -> dict:
             "hard_stopped": g["HARD_STOPPED"]}
 
 
-def modal_cost(seconds: float) -> float:
-    """Estimated USD for wall seconds: the L4 rate x MODAL_OVERHEAD_FACTOR (CPU, memory, build)."""
-    return seconds * L4_USD_PER_S * MODAL_OVERHEAD_FACTOR
+def gpu_for_kind(kind) -> str:
+    """The Modal GPU for a job kind; an unknown kind is refused."""
+    if kind not in GPU_FOR_KIND:
+        raise ValueError(f"no Modal GPU for job kind {kind!r}; expected one of {sorted(GPU_FOR_KIND)}")
+    return GPU_FOR_KIND[kind]
+
+
+def modal_cost(seconds: float, gpu: str) -> float:
+    """Estimated USD for wall seconds on a GPU: its per-second rate x MODAL_OVERHEAD_FACTOR
+    (CPU, memory, build)."""
+    if gpu not in USD_PER_S:
+        raise ValueError(f"no Modal rate for GPU {gpu!r}; expected one of {sorted(USD_PER_S)}")
+    return seconds * USD_PER_S[gpu] * MODAL_OVERHEAD_FACTOR
 
 
 def remote_python_version() -> str:
@@ -253,15 +273,16 @@ def remote_python_version() -> str:
     return f"{sys.version_info.major}.{sys.version_info.minor}"
 
 
-def plan(notebook, inputs_zip, gpu="L4") -> dict:
+def plan(notebook, inputs_zip) -> dict:
     """What run_modal would do, computed offline: nothing is executed or contacted."""
     cells, config, _ = _prepare(notebook, inputs_zip)
     deadline = int(config["DEADLINE_SECONDS"])
+    gpu = gpu_for_kind(config["KIND"])
     return {"job_id": config["JOB_ID"], "kind": config["KIND"], "cells": len(cells),
             "gpu": gpu, "app": APP_NAME, "python_version": remote_python_version(),
             "timeout_seconds": deadline + TIMEOUT_MARGIN_S,
             "volume": f"{VOLUME_NAME}:{VOLUME_MOUNT}/{config['JOB_ID']}",
-            "forecast_seconds": deadline, "forecast_usd": modal_cost(deadline)}
+            "forecast_seconds": deadline, "forecast_usd": modal_cost(deadline, gpu)}
 
 
 def execute_remote(cells: list, job_id: str, archive: bytes, volume_mount: str = VOLUME_MOUNT,
@@ -322,15 +343,15 @@ def _download(volume, job_id, dest: Path) -> None:
             shutil.rmtree(tmp, ignore_errors=True)
 
 
-def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None,
+def run_modal(notebook, inputs_zip, download_dir, on_contact=None,
               expected_sha256=None) -> dict:
     """Run the notebook on a Modal GPU, then download the job folder to download_dir/<job_id>/.
 
     Returns {"seconds": wall seconds measured locally around the remote call (cold start
-    included), "usd": seconds * L4_USD_PER_S, "folder", "status": "ok" | "hard_stopped" |
+    included), "usd": modal_cost(seconds, gpu), "folder", "status": "ok" | "hard_stopped" |
     "failed", "error": text or None}. A failed or timed-out remote call still returns (it was
     paid for) and still downloads whatever the volume holds. The cost is an estimate (modal_cost:
-    the L4 rate x MODAL_OVERHEAD_FACTOR). on_contact() is called once, immediately before Modal
+    the job kind's GPU rate x MODAL_OVERHEAD_FACTOR; GPU_FOR_KIND picks the GPU). on_contact() is called once, immediately before Modal
     is first contacted (the workflow records modal_contacted_at). The folder lives on the persistent volume
     `earnalism-eav-jobs` at /jobs/<job_id>, so rerunning the same job resumes from it. The
     HF_TOKEN, if set in the launching environment, is attached as an in-memory Modal secret
@@ -342,6 +363,7 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None,
     The download replaces download_dir/<job_id>/ with exactly what the volume holds."""
     cells, config, archive = _prepare(notebook, inputs_zip, expected_sha256)
     job_id, deadline = config["JOB_ID"], int(config["DEADLINE_SECONDS"])
+    gpu = gpu_for_kind(config["KIND"])
     import modal  # optional dependency, only needed to launch
 
     token = os.environ.get("HF_TOKEN") or ""
@@ -386,5 +408,5 @@ def run_modal(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None,
         dest.mkdir(parents=True, exist_ok=True)
     if token and error:  # no error text (remote call or download) ever carries the token
         error = error.replace(token, "***")
-    return {"seconds": seconds, "usd": modal_cost(seconds), "folder": dest,
+    return {"seconds": seconds, "usd": modal_cost(seconds, gpu), "folder": dest,
             "status": status, "error": error}

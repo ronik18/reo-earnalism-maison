@@ -587,6 +587,91 @@ class ChunkCliTests(unittest.TestCase):
         self.assertEqual(code, 2, out)
         self.assertIn("retired", out)
 
+    # --- S1: per-key replacement of stills ------------------------------------------------------
+    def keyed_spec(self, name, keys, seed0):
+        spec = self.d / name
+        spec.write_text(json.dumps({"items": [{"key": k, "prompt": f"{name} {k}", "seed": seed0 + i}
+                                              for i, k in enumerate(keys)]}), encoding="utf-8")
+        return spec
+
+    def test_film_uses_per_key_the_most_recently_imported_still(self):
+        """Chunk 2 of a stills group ran but was closed; a new job with new prompts holds its keys,
+        and a small replacement job regenerates two keys of chunk 1. Per key the film uses the
+        still of the most recently imported, non-retired job; status says which job supplies each
+        key; retiring the replacement brings the earlier stills back."""
+        self.assertEqual(run("job", "narration", "--root", self.root, "--rates", self.rates,
+                             "--job-id", "narr")[0], 0)
+        self.import_chunk(self.root / "jobs" / "narr", "narration")
+        spec, keys = self.stills_spec()
+        self.assertEqual(run("job", "stills", "--root", self.root, "--rates", self.rates,
+                             "--spec", spec, "--job-id", "st")[0], 0)
+        chunks = [d for d in self.jobs() if d.name.startswith("st-c")]
+        self.assertEqual(len(chunks), 3)
+        ckeys = [[it["key"] for it in _job_json(d)["items"]] for d in chunks]
+        self.import_chunk(chunks[0], "stills")
+        self.import_chunk(chunks[2], "stills")
+        code, out = run("close", chunks[1].name, "--root", self.root, "--units", 0.5, "--reason", "OOM")
+        self.assertEqual(code, 0, out)
+        nxt = cli.next_action(self.root)
+        self.assertIn(f"--replace-chunk {chunks[1].name}", nxt)
+        self.assertIn("the film uses, per key, the most recently imported still", nxt)
+        code, out = run(*self.film_args())  # chunk 2's keys have no still: never a partial film
+        self.assertEqual(code, 2, out)
+        self.assertIn("no imported still for key(s) " + ", ".join(ckeys[1]), out)
+        code, out = run("status", "--root", self.root)
+        self.assertIn(f"stills film-01: {len(ckeys[0]) + len(ckeys[2])} key(s) supplied", out)
+        self.assertIn("no imported still yet for " + ", ".join(ckeys[1]), out)
+        # a new job (new prompts, new seeds) for chunk 2's keys: Next no longer offers --replace-chunk
+        self.assertEqual(run("job", "stills", "--root", self.root, "--rates", self.rates, "--spec",
+                             self.keyed_spec("c2.json", ckeys[1], 500), "--job-id", "st-c2-new")[0], 0)
+        nxt = cli.next_action(self.root)
+        self.assertNotIn("--replace-chunk", nxt)
+        self.assertIn("st-c2-new", nxt)
+        self.import_chunk(self.root / "jobs" / "st-c2-new", "stills")
+        fix = [ckeys[0][1], ckeys[2][0]]
+        self.assertEqual(run("job", "stills", "--root", self.root, "--rates", self.rates, "--spec",
+                             self.keyed_spec("fix.json", fix, 900), "--job-id", "st-fix")[0], 0)
+        self.import_chunk(self.root / "jobs" / "st-fix", "stills")
+        rec = Record.load(self.root)
+        have = cli._stills_by_key(rec, "film-01")
+        self.assertEqual(set(have), set(keys))
+        want = {k: ("st-fix" if k in fix else "st-c2-new" if k in ckeys[1]
+                    else chunks[0].name if k in ckeys[0] else chunks[2].name) for k in keys}
+        self.assertEqual({k: v["job_id"] for k, v in have.items()}, want)
+        self.assertEqual(have[fix[0]]["path"], self.root / "stills" / "st-fix" / f"{fix[0]}.png")
+        code, out = run("status", "--root", self.root)
+        self.assertIn(f"stills film-01: {len(keys)} key(s) supplied", out)
+        self.assertIn(f"    st-fix: {', '.join(fix)}", out)
+        self.assertIn(f"    st-c2-new: {', '.join(ckeys[1])}", out)
+        self.assertNotIn("no imported still yet", out)
+        self.assertIn("python3 -m eav.cli film", cli.next_action(self.root))
+        code, out = run(*self.film_args())
+        self.assertEqual(code, 0, out)
+        self.assertIn("stills jobs", out)
+        self.assertIn("st-fix (2 keys)", out)
+        art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
+        self.assertEqual(art["meta"]["stills_by_key"], want)
+        self.assertEqual(art["meta"]["clips"], len(keys))
+        # retiring the replacement job: its keys come from chunk 1 and 3 again
+        code, out = run("retire", "st-fix", "--root", self.root, "--reason", "owner preferred the originals")
+        self.assertEqual(code, 0, out)
+        have = cli._stills_by_key(Record.load(self.root), "film-01")
+        self.assertEqual(have[fix[0]]["job_id"], chunks[0].name)
+        self.assertEqual(have[fix[1]]["job_id"], chunks[2].name)
+
+    def test_reel_clips_art_dir_may_map_image_names_to_files(self):
+        a, b = self.d / "a", self.d / "b"
+        a.mkdir(), b.mkdir()
+        for d in (a, b):
+            Image.new("RGB", (8, 8)).save(d / "shot-01.png")
+        spec = {"shots": [{"id": "shot-01", "image": "shot-01.png"}]}
+        with self.assertRaisesRegex(ValueError, "in 2 of the art_dir"):
+            colab_jobs.art_images({**spec, "art_dir": [str(a), str(b)]})
+        got = colab_jobs.art_images({**spec, "art_dir": {"shot-01.png": str(b / "shot-01.png")}})
+        self.assertEqual(got, {"shot-01.png": b / "shot-01.png"})
+        with self.assertRaisesRegex(ValueError, "maps no existing file"):
+            colab_jobs.art_images({**spec, "art_dir": {"shot-01.png": str(a / "missing.png")}})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -9,27 +9,25 @@ Last updated: 26 Nov 2026.
 - Standing instruction (25 Nov): publish every title that is ready (clearance and cover approved, browser acceptance passed, deployed). Each title you approve on the Monday page follows.
 
 ## Assets
-- [ ] **Check two clauses in ক্ষুধিত পাষাণ against the 1895 scan** (published text follows the proofread transcription): open https://bn.wikisource.org/wiki/পাতা:গল্প-দশক_-_রবীন্দ্রনাথ_ঠাকুর.pdf/১৭৬ and see whether the printed line reads “…কখনো এখানে রাত্রিযাপন করিবেন।” or “…করিবেন না।” (later printings have “না”). A second likely case is “জানি” (probably “জানি না”) later in the story. If the scan has “না”, tell Claude: the transcription gets corrected and a revised edition goes to the Monday page.
+- [x] **ক্ষুধিত পাষাণ scan check** (27 Nov 2026): the 1895 print has "করিবেন না" (p. ১৭৬) and "জানি না" (p. ১৮২). Claude is preparing the corrected text; it will appear on the Monday page for your approval. The English edition already reads both correctly.
 - Covers already in your Cloudinary for later titles (no action needed): কাবুলিওয়ালা, পোস্টমাস্টার, ছুটি.
-- [ ] **কাবুলিওয়ালা early scan:** open https://icvtesting.nvli.in/rarebooks/galapagaucacha-1ma-khanada from India; if a PDF/page images appear, put the file in Google Drive and share the path.
+- [ ] **কাবুলিওয়ালা early scan:** open https://icvtesting.nvli.in/rarebooks/galapagaucacha-1ma-khanada from India; if a PDF/page images appear, put the file in Google Drive and share the path. (27 Nov: the NVLI link timed out twice from the browser agent; still open — try from an Indian network.)
 
 ## Held stories
 - [ ] **Five held stories (সুভা, স্ত্রীর পত্র, হৈমন্তী, একরাত্রি, খাতা; also পোস্টমাস্টার, কাবুলিওয়ালা, ছুটি re-checked):** the early-edition survey (`docs/evidence/early-edition-survey-20261125.json`) found no eligible printing. Pick a route: (1) validate the সুভা 1894 scan pp. 61–72 on Wikisource; (2) transcribe the 1914 সবুজ পত্র pages for স্ত্রীর পত্র and হৈমন্তী and decide whether a magazine issue counts as an eligible printing; (3) change the rule.
 
 ## Production runs
-- [ ] **বিচারক Colab jobs** (narration, stills, music): follow `production/audiovisual/bicharak/RUN_SHEET.md`, then tell Claude the job names and compute units used. This unlocks the first film, the first audio, podcast preview episodes and the founding Pass count.
-- [ ] **ক্ষুধিত পাষাণ narration Colab job** (`narration-9187e43e`, forecast 4.24 CU): follow `production/audiovisual/kshudhita-pashan/RUN_SHEET.md`; can run alongside বিচারক's.
-- [ ] **Colab: ক্ষুধিত পাষাণ stills and music jobs** (next to its narration job): same run sheet, `production/audiovisual/kshudhita-pashan/RUN_SHEET.md`; tell Claude the job names and compute units used.
-- [ ] **Narration Colab jobs for the 12 pipeline titles** (64.70 CU): `production/audiovisual/RUN_SHEET-pipeline-narration.md`.
+- [x] **Colab jobs replaced by Modal (26 Nov 2026):** Claude runs every narration/stills/music job on Modal through GitHub Actions within the $30/month and $6/title caps; no Colab runs are needed from you. বিচারক narration is done (r4); the other 13 narrations wait only for your voice approval.
 
 ## Accounts and keys
-- [ ] **Rotate the Gmail SMTP app password** (`EMAIL_HOST_PASSWORD` on Render): on 26 Nov Claude's settings check printed it into the session log by mistake (nowhere else). Create a new app password for sales@ in Google Account → Security → App passwords, put it in Render, then revoke the old one.
+- [x] **Gmail SMTP app password rotated** (27 Nov 2026): new `earnalism-smtp-2026-11` in Render (deploy `dep-dc4gof6i0phs73a6bgag`), old one revoked; Render job `job-dc4hje49v7es73f0ntng` logged in to SMTP successfully (no email sent).
 - [x] **Modal account, token and GitHub secrets** (26 Nov 2026).
 - [x] **Modal payment method** added, workspace spend limit $30/month (26 Nov 2026).
 - [x] **Hugging Face read token** added as GitHub secret `HF_TOKEN` (26 Nov 2026).
 - [x] **YouTube Studio sign-in** for channel UCw-UnAXdRzqij8_B2TlgQjQ (owner confirmed 26 Nov 2026).
 - [ ] **YouTube upload token, at the first private upload only:** once a finished film exists (after the বিচারক Colab jobs), Claude asks through the secure credential form for a short-lived OAuth access token for `www.googleapis.com` (scope `youtube.upload`, from Google's OAuth Playground signed in to this channel). The token is never pasted in chat or stored in the repo. The bridge checks it belongs to this channel before uploading, and uploads stay private.
-- [ ] **Razorpay test keys**, then live sign-off and merchant approval (founding Pass).
+- [x] **Razorpay test keys and webhook** (27 Nov 2026): test key, key secret and webhook secret in Render; webhook `payment.captured` + `order.paid` → /api/v1/webhooks/razorpay; Render job `job-dc4hje6q1p3s73e2mnng` authenticated against the Razorpay test API.
+- [ ] **Turn purchases on** (later decision): checkout is disabled by design while free access is on, so Razorpay stays switched off until you end free access (G0.5 threshold). Then Claude sets `RAZORPAY_MODE=test`, the merchant configuration version and `RAZORPAY_ENABLED=true` and runs a sandbox payment; live mode needs merchant approval and your live sign-off.
 - [ ] **Google Play Books partner account** (store export).
 - [ ] **Finance and tax profile for schools** (real institution invoices).
 - [ ] **Apple Podcasts / Spotify for Creators accounts**, once the first preview episode exists (Claude will give the submission steps).

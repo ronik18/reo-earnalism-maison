@@ -304,7 +304,7 @@ if not complete:
 # Distributions whose resolved versions each manifest records (R26).
 PACKAGES = {"narration": ("parler_tts", "transformers", "torch", "soundfile"),
             "stills": ("diffusers", "transformers", "accelerate", "sentencepiece", "protobuf", "torch"),
-            "music": ("ace-step", "acestep", "torch", "transformers", "diffusers", "huggingface_hub")}
+            "music": ("ace-step", "acestep", "torch", "transformers", "diffusers", "huggingface_hub", "torchcodec", "torchaudio")}
 MANIFEST_RESERVE_S = 60
 
 
@@ -508,9 +508,22 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
 
 
 def art_images(spec: dict) -> dict:
-    """image basename -> its file. art_dir is one folder, or a list of folders (the chunk folders
-    of a chunked stills job: each shot's image is taken from the one folder that holds it)."""
+    """image basename -> its file. art_dir is one folder, a list of folders (the chunk folders
+    of a chunked stills job: each shot's image is taken from the one folder that holds it), or a
+    map image name -> file (the stills the per-key rule uses when a newer stills job replaced some
+    keys, so one name can be in two folders)."""
     dirs = spec.get("art_dir")
+    if isinstance(dirs, dict):
+        out = {}
+        for shot in spec.get("shots") or []:
+            name = shot.get("image")
+            if not isinstance(name, str) or not name or Path(name).name != name:
+                raise ValueError(f"shot {shot.get('id')!r}: image must be a file name in art_dir")
+            f = dirs.get(name)
+            if not isinstance(f, (str, Path)) or Path(f).name != name or not Path(f).is_file():
+                raise ValueError(f"shot {shot.get('id')!r}: art_dir maps no existing file named {name}")
+            out[name] = Path(f)
+        return out
     dirs = [dirs] if isinstance(dirs, (str, Path)) else dirs
     if not isinstance(dirs, list) or not dirs or not all(isinstance(d, (str, Path)) for d in dirs):
         raise ValueError("reel_clips spec art_dir must be a folder or a list of folders")

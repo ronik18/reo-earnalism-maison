@@ -24,7 +24,12 @@ Write it once per title and reuse it in every prompt:
 - **Character sheets**: for each recurring person a fixed one-line description (age, face,
   hair, clothing, one distinguishing detail), repeated word-for-word in every prompt.
 - **2–3 anchor stills** generated first and reviewed; later prompts quote the same bible.
-- **Negative list**: no text, letters, logos, watermarks, extra fingers, modern objects.
+- **Exclusions, said positively**: FLUX.1-schnell runs at guidance 0 with no negative prompt and
+  tends to draw what a prompt names, so never write "no text, no watermark, no modern objects".
+  Name what is there instead: "bare plaster wall", "plain white borderless widow's sari, bare
+  wrists and ears", "1880s men's dhoti and chador", "unlettered paper". Put the same style clause
+  at the FRONT of every prompt ("hand-painted gouache illustration, visible brushwork, ...") so one
+  look dominates the whole film, then each character's fixed signature, then the beat.
 
 ## 3. Stills spec (`job stills --film N --spec stills.json`)
 
@@ -38,7 +43,13 @@ Write it once per title and reuse it in every prompt:
 - Each prompt shows what the text says at that beat; never contradict the text. Same seed
   family per character for stability.
 - After import, look at every still: anatomy, identity drift, stray text, continuity.
-  Regenerate only failing stills (a new small stills job), never the whole set.
+  Regenerate only failing stills (a new small stills job with new seeds), never the whole set.
+  Per-key rule: `film`, the reel stills step and `status` take each key's still from the most
+  recently **imported**, non-retired stills job (plain job or chunk) that provides it, so a small
+  replacement job replaces exactly its keys; `status` lists which job supplies each key and the
+  film artifact records it (`stills_by_key`). Retiring the replacement brings the earlier stills
+  back. A chunk that ran but was closed needs its keys from a newer job (`--replace-chunk`, or a
+  new stills job with new prompts); `film` refuses while any expected key has no imported still.
 
 ## 4. Score
 

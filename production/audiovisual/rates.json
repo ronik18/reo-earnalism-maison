@@ -9,13 +9,13 @@
     "basis": "54 voice units (batch 8, bf16, default attention) took 437.7 s of notebook time including model load: 8.1 s per unit, rounded up to 8.2. Units are now <= 200 characters (shorter than in that run), so this is conservative. decode_s 900 kept: the first Modal run spent ~915 s on image build, pip and model download before the clock; later runs reuse the cached weights. units_per_hour 1.94 is the Colab L4 rate (Colab CU accounting only; Modal is capped in dollars)."
   },
   "stills": {
-    "s_per_step": 10.0,
+    "s_per_step": 3.0,
     "units_per_hour": 1.94,
     "steps": 4,
     "decode_s": 900,
     "export_s": 120,
-    "source": "ESTIMATE — replace with measured values after the first run",
-    "basis": "FLUX.1-schnell, 4 steps, guidance 0, enable_model_cpu_offload on L4: no measured run in this repo. 10 s/step (40 s per image incl. offload swaps) is a conservative allowance. decode_s covers pip install, the ~33 GB weight download and load. units_per_hour 1.94 as for narration."
+    "source": "MEASURED — Modal L40S, run of stills-film-01-r4-c1of2 (বিচারক film stills chunk 1), 27 Nov 2026",
+    "basis": "39 stills (FLUX.1-schnell, 4 steps, guidance 0, 1344x768, enable_model_cpu_offload) took 519.9 s of notebook time including model load: 11.9 s per still including offload swaps, about 3.0 s per step at 4 steps. decode_s 900 and export_s 120 kept (the first run also paid image build, pip and weight download; later runs reuse the cached weights), so the forecast stays conservative. units_per_hour 1.94 is the Colab L4 rate (Colab CU accounting only; Modal is capped in dollars)."
   },
   "music": {
     "s_per_step": 3.0,

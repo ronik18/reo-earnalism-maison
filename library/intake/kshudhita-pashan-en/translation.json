@@ -4,5 +4,14 @@
  "credit": "",
  "model": "claude-opus-5-5",
  "date": "2026-11-26",
- "source_sha256": "ab59291cb20526088d47abf99af52527c9d7d53f3c9f100912ecbc80d0215ccf"
+ "source_sha256": "2b33c5116e0d982982fe470e3934779621a4e00d35086b0d5c5667958bd97f66",
+ "source_corrections": [
+  {
+   "date": "2026-11-27",
+   "translated_from_sha256": "ab59291cb20526088d47abf99af52527c9d7d53f3c9f100912ecbc80d0215ccf",
+   "source_sha256": "2b33c5116e0d982982fe470e3934779621a4e00d35086b0d5c5667958bd97f66",
+   "change": "Source packet corrected by two scan-verified insertions of \" না\" (paragraphs 6 and 37; scan pages ১৭৬ and ১৮২). The translation was made from the earlier source and already renders both negations (\"never spend the night there\"; \"Someone, I do not know who, kept forbidding me\"), so the English text, paragraph count and kinds are unchanged.",
+   "clearance_record": "docs/evidence/publication-clearance-kshudhita-pashan-draft.json"
+  }
+ ]
 }

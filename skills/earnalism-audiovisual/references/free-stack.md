@@ -9,7 +9,7 @@ else runs in Claude's container (CPU, ffmpeg).
 | Stage | Model / asset | Licence | Where | Pin |
 |---|---|---|---|---|
 | Narration | Indic Parler-TTS `ai4bharat/indic-parler-tts` | Apache-2.0 | Colab or Modal GPU (`job narration`), batched (pinned `batch`, default 8), bf16/fp16 + SDPA | revision `7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca` |
-| Stills | FLUX.1-schnell `black-forest-labs/FLUX.1-schnell` | Apache-2.0 | Colab or Modal GPU (`job stills`), 4 steps, guidance 0 | revision resolved and recorded by the notebook |
+| Stills | FLUX.1-schnell `black-forest-labs/FLUX.1-schnell` | Apache-2.0 | Colab or Modal GPU (`job stills`; Modal L40S 48 GB at $0.000542/s, narration and music on an L4 at $0.000222/s), 4 steps, guidance 0 | revision resolved and recorded by the notebook |
 | Score cues (optional) | ACE-Step `ACE-Step/ACE-Step-v1-3.5B` | Apache-2.0 | Colab or Modal GPU (`job music`), instrumental only | revision, seed, prompt and output hashes recorded |
 | Score (default) | VCSL piano/harp samples via `editorial_score.py` | CC0 | container | `earnalism-video/software/assets/music/vcsl-piano-harp-v1` |
 | Reel motion | Wan 2.2 TI2V-5B (existing `wan22` builder) | Apache-2.0 | Colab L4 only (never Modal), profile `l4-balanced-v2` (512×896, 24 steps) | model revision pinned in `wan22/batch.py` |

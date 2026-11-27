@@ -1,0 +1,166 @@
+{
+  "colab_units": 0.0,
+  "error": null,
+  "files": [
+    {
+      "bytes": 1370539,
+      "path": "f01s003-4.png",
+      "sha256": "a9d74fb2e9d25e2b44a9f20fb96ad9b53429f63a60db449bb10cfb3a31d475b9"
+    },
+    {
+      "bytes": 1216905,
+      "path": "f01s005-2.png",
+      "sha256": "39f6fad56de07fb675a516bd605763c46c96ca487090427f35800bd8bc8ef200"
+    },
+    {
+      "bytes": 1141178,
+      "path": "f01s005-3.png",
+      "sha256": "23eb602f5b1c74ce0d8b50c5ec2dbc8c42c6600cdfdcf4e251181c91828c1d7b"
+    },
+    {
+      "bytes": 1181165,
+      "path": "f01s006-1.png",
+      "sha256": "da47ca2ddf699ce78ea1b87bb93aff329203c57372b45aa9a48f1e1270008449"
+    },
+    {
+      "bytes": 1546966,
+      "path": "f01s007-2.png",
+      "sha256": "3bc964568c2f4760b90b0f3ca70a88c2c4ee81ae90f148ba5bd97259831ee2ba"
+    },
+    {
+      "bytes": 1408256,
+      "path": "f01s007-4.png",
+      "sha256": "d2e006e2cd4525fe1fa2071d4b52f4eac4d35f101f35029163cfac65e40a43d4"
+    },
+    {
+      "bytes": 1429131,
+      "path": "f01s007-5.png",
+      "sha256": "50f2dc799525840f315616ac41f899097092aa07acddf37e64f810d9b1221bd0"
+    },
+    {
+      "bytes": 1305721,
+      "path": "f01s007-6.png",
+      "sha256": "edc69b319dc73b7abef0a77cf36d4021932a40884f88286887161f5ec4e649fb"
+    },
+    {
+      "bytes": 1438844,
+      "path": "f01s008-2.png",
+      "sha256": "f6d70357b2f99a89410948ef391843df31aa40b1772b592969038ddb8066e069"
+    },
+    {
+      "bytes": 1412525,
+      "path": "f01s009-2.png",
+      "sha256": "ddbd557f7b4b594b4dc8b73b399d3c742bf1c02c0c2beb78a0c80fd5d8ad4c6c"
+    },
+    {
+      "bytes": 1267693,
+      "path": "f01s009-4.png",
+      "sha256": "e5f4edbdd8710ca7dde242429f2dafd759b83200478bc85a28a44384dfcc81f3"
+    },
+    {
+      "bytes": 1308681,
+      "path": "f01s011-2.png",
+      "sha256": "66b8c5fc6cd497cdb433ca45207d89a6fbd5f373e6483c1a7b58c42461f8c9fb"
+    },
+    {
+      "bytes": 1266934,
+      "path": "f01s012-1.png",
+      "sha256": "492667ca45d14a1eac3a0639f2ae0dccf2295c51a26d2c37381b677e071532cd"
+    },
+    {
+      "bytes": 1198725,
+      "path": "f01s012-2.png",
+      "sha256": "ffd0514a35bdf658239604941309e9b6780783f4c8b47ebb2548f81f4a8ca212"
+    },
+    {
+      "bytes": 1388797,
+      "path": "f01s013-4.png",
+      "sha256": "5cf44f6d894700cb650b613bc16b4576007d9221a89cecd95f5c3651a59f175c"
+    },
+    {
+      "bytes": 1322674,
+      "path": "f01s013-5.png",
+      "sha256": "abcf141610f1620805b1bf2f6ea35b69be522f63ef40a3daee374d0d9de5c688"
+    },
+    {
+      "bytes": 1165304,
+      "path": "f01s014-2.png",
+      "sha256": "f9f612d565487354223811dc195ed828b1d82fb028f3f7b93a35588f7119c58f"
+    },
+    {
+      "bytes": 1213821,
+      "path": "f01s015-3.png",
+      "sha256": "3ba0f1b730b6ea613d9f8fe615f6ced57169aa53d992fcaea748736078ed0ca6"
+    },
+    {
+      "bytes": 1245470,
+      "path": "f01s016-1.png",
+      "sha256": "6d56484fed4ac6106793770638b040d6e589b70e97224eafab1cb291a6801910"
+    },
+    {
+      "bytes": 1257621,
+      "path": "f01s016-2.png",
+      "sha256": "fb719f70e40c8c6ae4bee9baf6c2b51f17d2d047eae62bffeaa0eb7bff5caaa3"
+    },
+    {
+      "bytes": 1366548,
+      "path": "f01s016-3.png",
+      "sha256": "d951440bf3daccb1e9e131aaa1e0c216cb5f8bfe0833fd1c85f65428978099e8"
+    },
+    {
+      "bytes": 1580105,
+      "path": "f01s017-1.png",
+      "sha256": "fd9ac049ec8879c75b349c4ac686ba3cb3d0fd46ba70961363e4752846d55dfd"
+    },
+    {
+      "bytes": 1248484,
+      "path": "f01s018-3.png",
+      "sha256": "2b0bf4d57a402cb3f932033c84b6934a0e9c35664dce8ccf0f5a9f759e7d598f"
+    },
+    {
+      "bytes": 814205,
+      "path": "f01s019-2.png",
+      "sha256": "37d4ebd9948a6e926ad642a73636cd9f0b090cdbb6d2ef8330c71d0ea3e95160"
+    },
+    {
+      "bytes": 22243,
+      "path": "inputs.zip",
+      "sha256": "0ed77bad5da5a255e39727056ccc3321db56ccc9322200a220df31b3b6b6a208"
+    },
+    {
+      "bytes": 2794,
+      "path": "manifest.json",
+      "sha256": "260ec198abafaf2eab88cb63ff68305538719c438005037cce18d7e64a77b439"
+    },
+    {
+      "bytes": 5160,
+      "path": "progress.jsonl",
+      "sha256": "0a87fca89a256b37403d8b13a5f1c6b0669c577b8fbba84ea90ccb96b3c78e75"
+    },
+    {
+      "bytes": 2191,
+      "path": "sessions.jsonl",
+      "sha256": "2053828c43c99bb90379f7f9e1c85568535b91c7085bb2f189cd47f60b3f7d28"
+    }
+  ],
+  "finished_at": "2026-11-27T08:31:57+00:00",
+  "gpu": "L40S",
+  "job_id": "stills-film-01-r7",
+  "modal_contacted_at": "2026-11-27T08:24:25+00:00",
+  "pending_run_id": "stills-film-01-r7#1",
+  "r2_prefix": "gpu-jobs/bicharak/stills-film-01-r7/run-1/",
+  "requested_at": "2026-11-27T08:23:20+00:00",
+  "run": {
+    "error": null,
+    "run_id": "stills-film-01-r7#1",
+    "seconds": 382.456353511,
+    "status": "ok",
+    "usd": 0.25911417950370247
+  },
+  "schema": "earnalism.modal-request.v1",
+  "seconds": 382.456353511,
+  "status": "done",
+  "title_root": "production/audiovisual/bicharak",
+  "usd": 0.25911417950370247,
+  "worst_case_usd": 1.62871
+}

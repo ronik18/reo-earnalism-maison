@@ -338,7 +338,7 @@ class ModalRunTests(unittest.TestCase):
         self.assertEqual(result["status"], "failed")
         self.assertIn("function timed out", result["error"])
         self.assertGreaterEqual(result["seconds"], 0)
-        self.assertAlmostEqual(result["usd"], result["seconds"] * modal_run.L4_USD_PER_S * 1.25)
+        self.assertAlmostEqual(result["usd"], result["seconds"] * modal_run.USD_PER_S["L4"] * 1.25)
         self.assertTrue((result["folder"] / "partial.wav").is_file())
         self.assertFalse((result["folder"] / "manifest.json").exists())
 
@@ -478,10 +478,39 @@ class ModalRunTests(unittest.TestCase):
     def test_cost_arithmetic(self):
         """I1: wall seconds x the L4 rate x 1.25 (CPU, memory and image build overhead)."""
         self.assertEqual(modal_run.MODAL_OVERHEAD_FACTOR, 1.25)
-        self.assertAlmostEqual(modal_run.modal_cost(3600), 0.7992 * 1.25)
-        self.assertEqual(modal_run.modal_cost(0), 0)
-        self.assertAlmostEqual(modal_run.modal_cost(100), 100 * modal_run.L4_USD_PER_S * 1.25)
-        self.assertEqual(modal_run.L4_USD_PER_S, 0.000222)
+        self.assertAlmostEqual(modal_run.modal_cost(3600, "L4"), 0.7992 * 1.25)
+        self.assertEqual(modal_run.modal_cost(0, "L4"), 0)
+        self.assertAlmostEqual(modal_run.modal_cost(100, "L4"), 100 * 0.000222 * 1.25)
+        self.assertEqual(modal_run.USD_PER_S, {"L4": 0.000222, "L40S": 0.000542})
+        self.assertAlmostEqual(modal_run.modal_cost(100, "L40S"), 100 * 0.000542 * 1.25)
+        self.assertAlmostEqual(modal_run.modal_cost(3600, "L40S"), 1.9512 * 1.25)
+        with self.assertRaises(ValueError):
+            modal_run.modal_cost(1, "H100")
+
+    def test_gpu_per_kind(self):
+        self.assertEqual(modal_run.GPU_FOR_KIND,
+                         {"narration": "L4", "music": "L4", "stills": "L40S"})
+        self.assertEqual(modal_run.gpu_for_kind("stills"), "L40S")
+        with self.assertRaises(ValueError):
+            modal_run.gpu_for_kind("video")
+
+    def test_plan_picks_the_gpu_and_rate_by_kind(self):
+        for kind, spec, gpu in (("narration", None, "L4"),
+                                ("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]},
+                                 "L40S")):
+            job = self.build(kind, spec)
+            p = modal_run.plan(job["notebook"], job["inputs_zip"])
+            self.assertEqual((p["kind"], p["gpu"]), (kind, gpu))
+            self.assertAlmostEqual(p["forecast_usd"],
+                                   p["forecast_seconds"] * modal_run.USD_PER_S[gpu] * 1.25)
+
+    def test_run_modal_uses_the_l40s_for_stills(self):
+        job = self.build("stills", {"items": [{"key": "a", "prompt": "a lamp", "seed": 1}]})
+        fm = FakeModal(self.root / "vol", lambda *a: {"hard_stopped": False})
+        with mock.patch.dict(sys.modules, {"modal": fm.module()}):
+            result = modal_run.run_modal(job["notebook"], job["inputs_zip"], self.root / "dl")
+        self.assertEqual(fm.function_kwargs["gpu"], "L40S")
+        self.assertAlmostEqual(result["usd"], result["seconds"] * 0.000542 * 1.25)
 
     def test_module_imports_without_modal(self):
         job = self.build()
@@ -561,6 +590,7 @@ class ModalRunCliTests(unittest.TestCase):
         self.assertEqual(line["job_id"], self.job_id)
         self.assertEqual((line["gpu"], line["timeout_seconds"]),
                          ("L4", line["forecast_seconds"] + 900))
+        self.assertEqual(modal_run.GPU_FOR_KIND[line["kind"]], line["gpu"])
         self.assertEqual(line["volume"], f"earnalism-eav-jobs:/jobs/{self.job_id}")
         self.assertAlmostEqual(line["forecast_usd"], line["forecast_seconds"] * 0.000222 * 1.25, places=4)
         self.assertFalse((self.root / "modal-downloads").exists())
@@ -648,7 +678,7 @@ class ModalRunCliTests(unittest.TestCase):
 
 def fake_runner(usd, status="ok", seconds=100.0, calls=None):
     """A stand-in for modal_run.run_modal: no Modal client, a canned bill."""
-    def runner(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None, expected_sha256=None):
+    def runner(notebook, inputs_zip, download_dir, on_contact=None, expected_sha256=None):
         if calls is not None:
             calls.append(download_dir)
         if on_contact is not None:
@@ -678,8 +708,8 @@ class ModalCapTests(unittest.TestCase):
 
     def with_worst_case(self, usd):
         """Make the worst case (deadline + 900 s at the L4 rate x the overhead factor) equal usd."""
-        return mock.patch.object(modal_run, "L4_USD_PER_S",
-                                 usd / (self.timeout_s * modal_run.MODAL_OVERHEAD_FACTOR))
+        return mock.patch.dict(modal_run.USD_PER_S, {"L4":
+                                 usd / (self.timeout_s * modal_run.MODAL_OVERHEAD_FACTOR)})
 
     def seed(self, usd, job_id="other-job", month=None):
         # this job's own earlier spend is a run that did not finish ok (an ok run is imported,
@@ -703,6 +733,21 @@ class ModalCapTests(unittest.TestCase):
         for word in ("29.50", "0.60", "0.50"):  # spent, forecast, remaining
             self.assertIn(word, out)
         self.assertEqual(self.ledger.modal_month_usd(self.MONTH), 29.50)
+
+    def test_cap_refusal_uses_the_kinds_gpu_rate(self):
+        """A worst case that fits at the L4 rate is refused once the kind's GPU is the L40S (what
+        stills run on): the cap check reads the rate of plan()'s GPU, never a fixed L4 rate."""
+        self.seed(29.50)
+        l4_worst = self.timeout_s * 0.000222 * 1.25
+        self.assertLess(l4_worst, 0.50)  # fits the 0.50 remaining on an L4
+        calls = []
+        with mock.patch.dict(modal_run.GPU_FOR_KIND, {"narration": "L40S"}):
+            l40s_worst = self.timeout_s * 0.000542 * 1.25
+            self.assertGreater(l40s_worst, 0.50)
+            code, out = self.go(fake_runner(0.1, calls=calls))
+        self.assertEqual(code, 3, out)
+        self.assertEqual(calls, [])
+        self.assertIn(f"{l40s_worst:.2f}", out)
 
     def test_cap_allows_just_under(self):
         self.seed(29.00)
@@ -977,3 +1022,12 @@ class ModalCapTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ColabShimSpecTests(unittest.TestCase):
+    def test_find_spec_works_while_the_shim_is_installed(self):
+        import importlib.util, tempfile
+        from eav.modal_run import _Shim
+        with tempfile.TemporaryDirectory() as d, _Shim(d):
+            self.assertIsNotNone(importlib.util.find_spec("google.colab"))
+            self.assertIsNotNone(importlib.util.find_spec("google"))

@@ -1,0 +1,86 @@
+{
+  "colab_units": 0.0,
+  "error": null,
+  "files": [
+    {
+      "bytes": 46062522,
+      "path": "cue-1-kshiroda-night.wav",
+      "sha256": "06f22370ed473a90656b6410b65f555df7d98d35942692b9a68cd755be2f774b"
+    },
+    {
+      "bytes": 1441,
+      "path": "cue-1-kshiroda-night_input_params.json",
+      "sha256": "8c350945f1360a0577090573d9451a2a9eeee356a20c86d75c43dd4456815cae"
+    },
+    {
+      "bytes": 46062522,
+      "path": "cue-2-window-and-judge.wav",
+      "sha256": "f384a22085aa2d013fd45e2fbdc1416dac2621a1dacc34a7579a2ca3e28cff2c"
+    },
+    {
+      "bytes": 1460,
+      "path": "cue-2-window-and-judge_input_params.json",
+      "sha256": "99b5beefb1c4e6f523f450711b4f049bff797565e2b3bdfdf9ee8f1447ec8e39"
+    },
+    {
+      "bytes": 46062522,
+      "path": "cue-3-dream-and-carriage.wav",
+      "sha256": "cbdf3cb9145860d5bb93754bfd14a41a58d956f24504881844d35485bb9714a0"
+    },
+    {
+      "bytes": 1447,
+      "path": "cue-3-dream-and-carriage_input_params.json",
+      "sha256": "3e492312f3d25d8d3ef39d58f32df80440362c520e0b03dc220640082161d570"
+    },
+    {
+      "bytes": 46062522,
+      "path": "cue-4-prison-and-ring.wav",
+      "sha256": "75c5af873f8b6e059c66fdd6ba06141940788baf7ebe9fb3bea143dcf85ac765"
+    },
+    {
+      "bytes": 1459,
+      "path": "cue-4-prison-and-ring_input_params.json",
+      "sha256": "939bde9ccf13e31876bf9ecba397d7bf503d3bc4dfb8207a43e89a175319eaab"
+    },
+    {
+      "bytes": 1837,
+      "path": "inputs.zip",
+      "sha256": "0c1bddeead19a44f83356126631ca2b541b53f708a001d463d267b6b8c079e0d"
+    },
+    {
+      "bytes": 2121,
+      "path": "manifest.json",
+      "sha256": "68ef76e84139bec150f9aefa288c6bee10ddf0f1480e5ff085fc532d2ef3270b"
+    },
+    {
+      "bytes": 962,
+      "path": "progress.jsonl",
+      "sha256": "dded89f6428bebb76f8b90981fe732582c088ce2689cccf5bdfc2a6135e3ae1a"
+    },
+    {
+      "bytes": 1194,
+      "path": "sessions.jsonl",
+      "sha256": "70efc2920827a56a832f3d27e35de8ab5e65b1d6d9c8665da9a26ad6afb4edce"
+    }
+  ],
+  "finished_at": "2026-11-27T06:45:46+00:00",
+  "gpu": "L4",
+  "job_id": "music-film-01-r4",
+  "modal_contacted_at": "2026-11-27T06:38:31+00:00",
+  "pending_run_id": "music-film-01-r4#1",
+  "r2_prefix": "gpu-jobs/bicharak/music-film-01-r4/run-1/",
+  "requested_at": "2026-11-27T06:27:40+00:00",
+  "run": {
+    "error": null,
+    "run_id": "music-film-01-r4#1",
+    "seconds": 392.861404317,
+    "status": "ok",
+    "usd": 0.10901903969796749
+  },
+  "schema": "earnalism.modal-request.v1",
+  "seconds": 392.861404317,
+  "status": "done",
+  "title_root": "production/audiovisual/bicharak",
+  "usd": 0.10901903969796749,
+  "worst_case_usd": 0.785602
+}

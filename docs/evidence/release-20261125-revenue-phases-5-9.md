@@ -111,3 +111,11 @@
   - the preview is about a quarter of each story (400 to 1,500 words, never the protected end);
   - the duplicate Back link is removed (merged with W4 once the colours are approved).
 - **Held for the owner:** the gold button colours (W4 is ready on its branch, with before/after screenshots sent) and the বিচারক narration listening review.
+
+## #75 deploy (27 Nov 2026): lighter home hero, 44 px tap boxes, reader descriptions
+
+- **Merge:** ronik18/reo-earnalism-maison#75, squash commit `7d98366`, merged after CI passed on head `c1d5e05`.
+- **Static release `864a29c6e590bf096d29cfd4436a9460a24337c3dc034bf6cb56802c0a2059bc`:** 222 files, uploaded and verified (222/222). Against `6cff6d6c…` it adds 10 hero renditions and changes `asset-manifest.json` and `room.css`. To roll back, set `STATIC_RELEASE_ID` to `6cff6d6c6eb137d393a49de203d4de75d7454ca93d0ebe771676f08c5898e2c2` and redeploy.
+- **Deploy:** `dep-dc4g6es9v7es73es5440` is live. No migrations.
+- **Live measurement** (Chromium, CDP encodedDataLength, first load of `/en/`): mobile 390×844 is 1,004 KB (was about 3.8 MB) and loads `hero-480.avif`; desktop 1440×900 is 1,122 KB and loads `hero-640.avif`. No console errors and no horizontal overflow.
+- **Still waiting on the owner:** gold button colours (W4), the site icon and share card (W6, previews sent), and the বিচারক narration listening review.

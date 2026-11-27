@@ -981,6 +981,46 @@ def transition_revision(user,revision_id,action,expected_version,expected_sha256
     return _transition_revision(user,revision_id,action,expected_version,expected_sha256,reason,publish_at,prepared=prepared)
 
 
+def move_reader_state(user,replaced_id,revision):
+    """Every publish path (staff API, admin, scheduled worker, server jobs) runs this as a revision goes live.
+
+    Only a text-correction revision built by publish_cleared_editions revise (validation_evidence.source_revision with
+    an anchor_map for the revision it replaces) moves readers' positions and annotations, in this same transaction (a
+    failure rolls the publish back). A second idempotent pass after commit is best effort: it moves a row written
+    against the old revision that committed before it runs; a row committing later stays on the old revision (resume
+    at the story start, orphaned note). That pass never fails the publish: errors are logged and audited by class."""
+    record=(revision.validation_evidence or {}).get('source_revision') or {}
+    if not replaced_id or not record.get('anchor_map') or record.get('replaces_revision_id')!=str(replaced_id):return None
+    from core.services import audit
+    from operations import revision_remap
+    counts=revision_remap.remap_reader_state(replaced_id,revision)
+    audit(user,'revision.reader_state_moved',revision,{'replaced_revision_id':str(replaced_id),'pass':'publish',**counts})
+    revision_id,edition_id=revision.id,revision.edition_id
+
+    def after_commit():
+        try:
+            with transaction.atomic():
+                from django.db import connection
+                with connection.cursor() as cursor:  # FOR SHARE: a newer publish waits until this pass commits
+                    cursor.execute('SELECT 1 FROM maison_edition WHERE id=%s AND live_revision_id=%s FOR SHARE',[edition_id,revision_id])
+                    if cursor.fetchone() is None:return  # superseded since
+                current=Revision.objects.get(pk=revision_id)
+                late=revision_remap.remap_reader_state(replaced_id,current)
+                if late['progress'] or late['annotations'] or late['left_unmapped']:
+                    audit(user,'revision.reader_state_moved',current,{'replaced_revision_id':str(replaced_id),'pass':'after_commit',**late})
+        except Exception as error:  # the publish has committed; never fail its caller
+            import logging
+            logging.getLogger(__name__).warning('reader_state_move_after_commit_failed revision=%s error=%s',revision_id,type(error).__name__)
+            try:
+                with transaction.atomic():
+                    audit(user,'revision.reader_state_move_failed',Revision(pk=revision_id),
+                          {'replaced_revision_id':str(replaced_id),'pass':'after_commit','error':type(error).__name__})
+            except Exception:
+                logging.getLogger(__name__).warning('reader_state_move_failure_audit_failed revision=%s',revision_id)
+    transaction.on_commit(after_commit,robust=True)
+    return counts
+
+
 @transaction.atomic
 def _transition_revision(user,revision_id,action,expected_version,expected_sha256,reason='',publish_at=None,*,prepared=None):
     if not user.is_active or not user.is_staff or not user.has_perm('library.publish_revision'):
@@ -1008,13 +1048,16 @@ def _transition_revision(user,revision_id,action,expected_version,expected_sha25
             if not publish_at or publish_at<=timezone.now(): raise DomainError('invalid_schedule','Choose a future UTC publication time.',400)
             revision.scheduled_for=publish_at
         else:
+            replaced=None
             if edition.live_revision_id and edition.live_revision_id!=revision.id:
                 old=Revision.objects.select_for_update().get(pk=edition.live_revision_id)
                 old.state='retired';old.version+=1;old.save(update_fields=['state','version','updated_at'])
+                replaced=old.id
             revision.state='live';revision.published_at=timezone.now();revision.scheduled_for=None
             # The cross-row FK guard requires the pointed-to revision to be live in this transaction.
             revision.version+=1;revision.save()
             edition.live_revision=revision;edition.version+=1;edition.full_clean();edition.save()
+            move_reader_state(user,replaced,revision)
             from .search import refresh_revision_search
             refresh_revision_search(revision)
             queue_catalog_purge(revision)

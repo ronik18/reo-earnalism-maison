@@ -5,12 +5,14 @@ storage, rights rows, validation and transition_revision -- as a named verified
 publisher, so no web staff session is needed. Every publication check still runs;
 nothing here skips validate_revision. Each stage is idempotent and hash-bound.
 
-Stages: import (create the বিচারক draft from library/intake/bicharak), evidence
+Stages: import (create the বিচারক draft from library/intake/bicharak), revise (a corrected source
+of an already-live edition becomes a new draft revision; text-only, see revise_book), evidence
 (record clearance + browser acceptance against the exact text and asset hashes),
 publish (mark-ready then publish). Output is JSON on stdout; no secrets are printed.
 """
 import hashlib
 import json
+import os
 import uuid
 from datetime import timedelta
 from pathlib import Path
@@ -24,9 +26,12 @@ from django.utils import timezone
 from core.services import audit
 from library import storage
 from operations.review import approved_for
-from library.general_import import finalize_import, start_import
-from library.models import Asset, Edition, Revision, Rights
-from library.services import prepare_revision_validation, transition_revision, validate_revision
+from library.general_import import DENIED, NO_DOWNLOADS, finalize_import, start_import
+from library.models import Asset, Edition, Paragraph, Revision, Rights, Unit
+from library.services import (canonical_bytes, digest, paragraph_dto, prepare_reader_package, prepare_revision_validation,
+                              transition_revision, validate_revision)
+from core.models import AuditEvent
+from operations.book_source import SourceError, read_source_bytes, reader_batches, reader_derivative, validate_manifest
 
 ROOT = Path(settings.BASE_DIR)
 INTAKE = ROOT / "library" / "intake"
@@ -38,6 +43,8 @@ LEGACY_BOOKS = {
     "bicharak": {"edition": "bicharak", "intake": "bicharak", "import": True},
 }
 EVIDENCE_PREFIX = "reo-earnalism-maison:"
+# The only asset kinds the revise stage rebuilds; any other kind on the live revision makes revise refuse.
+REVISE_REBUILT_KINDS = ("reader_package", "reader_source", "cover")
 
 
 def sha256(raw):
@@ -257,6 +264,79 @@ def draft_for(packet):
     return edition.revisions.order_by("-created_at").first()
 
 
+def correction_record(packet):
+    """The approved clearance record's source_correction block for this packet, or None for a first publication."""
+    if packet.get("legacy") or not packet.get("clearance_path"):
+        return None
+    doc, _ = clearance_document(packet)
+    book = (doc.get("books") or {}).get(packet.get("book_key", packet["slug"])) or {}
+    correction = book.get("source_correction")
+    return correction if isinstance(correction, dict) else None
+
+
+def revise_revision_id(packet):
+    """The deterministic ID of the revision the revise stage builds from this packet's approved source."""
+    return stable_id(packet["slug"], "revise", sha256((Path(packet["folder"]) / "source.json").read_bytes()), "revision")
+
+
+def _single_insertion(old, new, inserted):
+    """True when `new` is `old` with `inserted` added once at one position."""
+    if not inserted or len(new) != len(old) + len(inserted):
+        return False
+    start = len(os.path.commonprefix([old, new]))  # the insertion point is at most len(inserted) before this
+    return any(old[:i] + inserted + old[i:] == new for i in range(max(0, start - len(inserted)), start + 1))
+
+
+def check_approved_correction(packet, live, derived, live_units, changed, source_sha):
+    """revise publishes only the correction the owner approved: the clearance record's source_correction names the
+    source the live revision was built from and every changed paragraph; the changes derived from the approved
+    source (bound by its sha256) must be exactly those, each with its recorded printed and transcription text."""
+    slug = packet["slug"]
+    record = correction_record(packet)
+    if record is None:
+        raise CommandError(f"{slug}: REVISE_CORRECTION_RECORD_REQUIRED: the approved clearance record has no source_correction.")
+    doc, _ = clearance_document(packet)
+    book = doc["books"][packet.get("book_key", slug)]
+    if book.get("source_sha256") != source_sha:
+        raise CommandError(f"{slug}: SOURCE_HASH_MISMATCH: source.json differs from the approved clearance record.")
+    revises = record.get("revises") or {}
+    live_sources = sorted(live.assets.filter(kind="reader_source").values_list("sha256", flat=True))
+    if not revises.get("source_sha256") or live_sources != [revises["source_sha256"]]:
+        raise CommandError(f"{slug}: REVISE_LIVE_SOURCE_MISMATCH: the live revision was built from {live_sources or 'no recorded source'}, "
+                           f"not the source the approved correction revises ({revises.get('source_sha256')}).")
+    changes = record.get("changes") or []
+    approved = {(c.get("unit_key"), c.get("paragraph_ordinal")) for c in changes}
+    found = {(key, n) for key, ordinals in changed.items() for n in ordinals}
+    if len(approved) != len(changes) or approved != found:
+        raise CommandError(f"{slug}: REVISE_CHANGES_DIFFER_FROM_APPROVED: the approved correction names "
+                           f"{sorted(approved, key=str)}, but the source changes {sorted(found)}.")
+    units = {row["key"]: (row, unit) for row, unit in zip(derived["units"], live_units)}
+    for change in changes:
+        row, unit = units[change["unit_key"]]
+        n = change["paragraph_ordinal"]
+        new, old = row["paragraphs"][n - 1]["text"], list(unit.paragraphs.all())[n - 1].text
+        printed = str(change.get("printed", "")).strip("…")
+        had = str(change.get("transcription_had", "")).strip("…")
+        inserted = change.get("inserted")
+        if (not printed or printed not in new or not had or had not in old
+                or (inserted is not None and not _single_insertion(old, new, inserted))):
+            raise CommandError(f"{slug}: REVISE_CHANGES_DIFFER_FROM_APPROVED: {change['unit_key']} paragraph {n} does not "
+                               "carry exactly the approved correction.")
+
+
+def target_revision(packet):
+    """The revision evidence and publish act on. For a correction packet this is exactly the revise stage's
+    revision for the approved source sha; a different newest revision (another draft) is refused."""
+    revision = draft_for(packet)
+    if correction_record(packet) is None:
+        return revision
+    expected = revise_revision_id(packet)
+    if revision is None or revision.id != expected:
+        raise CommandError(f"{packet['slug']}: REVISE_TARGET_MISMATCH: the approved correction is revision {expected}, "
+                           f"but the newest revision is {revision.id if revision else 'none'}; run revise or reconcile the other revision.")
+    return revision
+
+
 def read_translation(folder, intake=None):
     """Validated translation labels from a packet's translation.json, or None for a plain packet."""
     path = Path(folder) / "translation.json"
@@ -307,7 +387,7 @@ class Command(BaseCommand):
     help = "Import, evidence and publish the owner-cleared editions without a web staff session."
 
     def add_arguments(self, parser):
-        parser.add_argument("stage", choices=("import", "evidence", "publish", "status"))
+        parser.add_argument("stage", choices=("import", "revise", "evidence", "publish", "status"))
         parser.add_argument("--publisher", required=True, help="public_id of an active verified staff publisher")
         parser.add_argument("--book", action="append", choices=sorted(approved_packets(check=())), help="limit to these books")
         parser.add_argument("--all", action="store_true", help="act on every approved book (required for evidence/publish without --book)")
@@ -317,6 +397,8 @@ class Command(BaseCommand):
         actor = get_user_model().objects.filter(public_id=options["publisher"], is_active=True, is_staff=True).first()
         if actor is None or not actor.is_verified or not actor.has_perm("library.publish_revision"):
             raise CommandError("An active verified staff publisher with library.publish_revision is required.")
+        if options["stage"] == "revise" and not options["book"]:
+            raise CommandError("BOOK_REQUIRED: the revise stage needs --book <slug>.")
         if options["stage"] in ("evidence", "publish") and not options["book"] and not options["all"]:
             raise CommandError(f"BOOK_REQUIRED: the {options['stage']} stage needs --book <slug> or --all.")
         out = {}
@@ -327,6 +409,10 @@ class Command(BaseCommand):
             stage = options["stage"]
             if stage == "import":
                 out[slug] = self.import_book(actor, packet) if packet["import"] else {"skipped": "already imported"}
+            elif stage == "revise":
+                if packet["legacy"]:
+                    raise CommandError(f"{slug}: REVISE_NOT_SUPPORTED: legacy books keep their 23 Nov 2026 record.")
+                out[slug] = self.revise_book(actor, packet)
             elif stage == "evidence":
                 out[slug] = self.record_evidence(actor, packet, options.get("browser_report"))
             elif stage == "publish":
@@ -360,12 +446,127 @@ class Command(BaseCommand):
                 revision.version, str(stable_id(slug, "finalize")))
             revision.refresh_from_db()
         if revision.state != "draft":
-            return {"note": "revision is no longer a draft; nothing changed"}
+            return {"note": "revision is no longer a draft; nothing changed (a corrected source of a live edition uses the revise stage)"}
         if translation:
             apply_translation(revision.edition, translation)
         self.attach_covers(actor, revision, folder)
         self.offer_reader(actor, revision, packet)
         return {"imported": True}
+
+    # --- revise -------------------------------------------------------------------------------
+    def revise_book(self, actor, packet):
+        """A corrected source for an edition that is already live becomes a NEW draft revision of that edition.
+
+        A live revision is frozen (Revision.clean and the PostgreSQL guards), so a correction is never made in place.
+        The new revision follows clone_revision's rules: the same edition, anchor_revision + 1 and fresh anchors
+        (anchor_id is unique across revisions); Reader resume moves to the same chapter's start and annotations on the
+        old revision stay as orphaned quotes (reader.services). Only paragraph text may change: units, unit titles,
+        kinds and paragraph counts must equal the live revision's, so a translation stays paired by ordinal and kind.
+        IDs derive from the corrected source sha256, so a rerun reuses the same draft. Covers, Reader access, preview
+        and rights then follow the import stage (attach_covers, offer_reader); evidence and publish are unchanged."""
+        reverify_approval(packet)
+        slug, folder = packet["slug"], Path(packet["folder"])
+        manifest = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
+        raw = (folder / "source.json").read_bytes()
+        source_sha = sha256(raw)
+        if source_sha != manifest["source"]["sha256"] or len(raw) != manifest["source"]["bytes"]:
+            raise CommandError("Intake source differs from its manifest.")
+        edition = Edition.objects.filter(slug=packet["edition_slug"]).first()
+        if edition is None or edition.live_revision_id is None:
+            raise CommandError(f"{slug}: REVISE_NEEDS_LIVE_EDITION: import and publish the first revision instead.")
+        revision_id = stable_id(slug, "revise", source_sha, "revision")
+        revision = Revision.objects.filter(pk=revision_id).first()
+        if revision is None:
+            latest = draft_for(packet)
+            if latest.id != edition.live_revision_id:
+                raise CommandError(f"{slug}: REVISE_PENDING_REVISION: revision {latest.id} ({latest.state}) is newer than "
+                                   "the live revision; reconcile it first.")
+            revision = self.build_revision(actor, packet, edition, latest, manifest, raw, source_sha, revision_id)
+        if revision.state != "draft":
+            return {"note": "revision is no longer a draft; nothing changed"}
+        self.attach_covers(actor, revision, folder)
+        self.offer_reader(actor, revision, packet)
+        record = revision.validation_evidence.get("source_revision", {})
+        return {"revised": True, "replaces_revision_id": record.get("replaces_revision_id"),
+                "changed_paragraphs": record.get("changed_paragraphs")}
+
+    def build_revision(self, actor, packet, edition, live, manifest, raw, source_sha, revision_id):
+        slug = packet["slug"]
+        media = sorted(set(live.assets.exclude(kind__in=REVISE_REBUILT_KINDS).values_list("kind", flat=True)))
+        if media:
+            raise CommandError(f"{slug}: REVISE_LIVE_HAS_MEDIA: the live revision {live.id} holds {', '.join(media)} assets. "
+                               "revise rebuilds only reader packages, the reader source and covers, so publishing its draft "
+                               "would drop them. Media made from the old text would no longer match the corrected text and "
+                               "must be re-made from the corrected revision, not carried over; nothing was changed.")
+        try:
+            source = read_source_bytes(raw)
+            derived, transform = reader_derivative(source, source_sha)
+            batches = reader_batches(source)
+            manifest_sha = validate_manifest(manifest)
+        except (SourceError, ValueError, TypeError, KeyError):
+            raise CommandError(f"{slug}: INVALID_BOOK_SOURCE: the corrected source must match the bounded source schema.") from None
+        if source["language"] != edition.locale:
+            raise CommandError(f"{slug}: SOURCE_LANGUAGE_MISMATCH: the source language differs from the edition.")
+        live_units = list(live.units.order_by("ordinal").prefetch_related("paragraphs"))
+        live_shape = [(u.title, u.kind, [p.kind for p in u.paragraphs.all()]) for u in live_units]
+        new_shape = [(row["title"], row["kind"], [p["kind"] for p in row["paragraphs"]]) for row in derived["units"]]
+        if live_shape != new_shape:
+            raise CommandError(f"{slug}: REVISION_STRUCTURE_CHANGED: units, titles, kinds and paragraph counts must equal "
+                               "the live revision; only paragraph text may be corrected.")
+        changed = {row["key"]: [n for n, (p, old) in enumerate(zip(row["paragraphs"], unit.paragraphs.all()), 1) if p["text"] != old.text]
+                   for row, unit in zip(derived["units"], live_units)}
+        changed = {key: ordinals for key, ordinals in changed.items() if ordinals}
+        if not changed:
+            raise CommandError(f"{slug}: NOTHING_TO_REVISE: the source text equals the live revision.")
+        check_approved_correction(packet, live, derived, live_units, changed, source_sha)
+        revision = Revision(id=revision_id, edition=edition, title=live.title, description=live.description,
+            anchor_revision=live.anchor_revision + 1, access_policy=dict(DENIED), download_policy=dict(NO_DOWNLOADS), preview=[])
+        units, paragraphs, groups = [], [], []
+        for ordinal, (row, unit_batches, old) in enumerate(zip(derived["units"], batches, live_units), 1):
+            label = f"{source_sha}:{row['key']}"
+            unit = Unit(id=stable_id(slug, "revise", label, "unit"), revision=revision, title=row["title"], kind=row["kind"],
+                        ordinal=ordinal, duration_ms=old.duration_ms, preview=old.preview)
+            rows = [Paragraph(id=stable_id(slug, "revise", label, "paragraph", n), anchor_id=stable_id(slug, "revise", label, "anchor", n),
+                              unit=unit, ordinal=n, kind=p["kind"], text=p["text"]) for n, p in enumerate(row["paragraphs"], 1)]
+            for number, indexes in enumerate(unit_batches):
+                groups.append((unit, [rows[i] for i in indexes], stable_id(slug, "revise", label, "chunk", number)))
+            units.append(unit)
+            paragraphs.extend(rows)
+        revision.content_sha256 = digest(canonical_bytes([{"unit_id": str(u.id), "title": u.title, "ordinal": u.ordinal,
+            "paragraphs": [paragraph_dto(p) for p in paragraphs if p.unit_id == u.id]} for u in units]))
+        packages = [prepare_reader_package(unit, chunk, asset_id=asset_id) for unit, chunk, asset_id in groups]
+        source_id = stable_id(slug, "revise", source_sha, "reader_source")
+        key = f"revisions/{revision.id}/{source_id}"
+        storage.put_private(key, raw, "application/json")
+        source_asset = Asset(id=source_id, revision=revision, kind="reader_source", state="ready", storage_key=key,
+                             sha256=source_sha, bytes=len(raw), content_type="application/json")
+        live_source = (live.validation_evidence.get("general_source_import") or {}).get("manifest", {}).get("source", {}).get("sha256")
+        revision.validation_evidence = {"source_revision": {
+            "schema": "earnalism.source_revision.v1", "manifest_sha256": manifest_sha, "source_sha256": source_sha,
+            "source_bytes": len(raw), "source_asset_id": str(source_id), "source_transform": transform,
+            "replaces_revision_id": str(live.id), "replaces_content_sha256": live.content_sha256,
+            "replaces_source_sha256": live_source, "anchor_revision": revision.anchor_revision,
+            "changed_paragraphs": changed, "reader_asset_ids": [str(a.id) for a in packages],
+            # Every unit and paragraph, old -> new (like clone_revision's anchor_map); publish moves reader state with it.
+            "unit_map": {str(old.id): str(new.id) for old, new in zip(live_units, units)},
+            "anchor_map": {str(old.anchor_id): str(new.anchor_id) for old_unit, new_unit in zip(live_units, units)
+                           for old, new in zip(old_unit.paragraphs.all(), [p for p in paragraphs if p.unit_id == new_unit.id])},
+            "clearance_ref": packet["clearance_path"] + "#sha256=" + packet["clearance_sha256"],
+            "rights_approval_created": False, "publication": False}}
+        with transaction.atomic():
+            current = Edition.objects.select_for_update().get(pk=edition.pk)
+            if current.live_revision_id != live.id or Revision.objects.filter(pk=revision_id).exists():
+                raise CommandError(f"{slug}: version_conflict: the edition changed while the corrected revision was prepared.")
+            revision.save()
+            Unit.objects.bulk_create(units)
+            Paragraph.objects.bulk_create(paragraphs, batch_size=1000)
+            for package in packages:  # Reader coverage orders packages by created_at, then id
+                package.save()
+            source_asset.save()
+            audit(actor, "book.source_revision", revision, {"source_sha256": source_sha, "replaces_revision_id": str(live.id),
+                "changed_paragraphs": changed, "anchor_revision": revision.anchor_revision, "channel": "server_job"})
+        revision.refresh_from_db()
+        return revision
 
     def attach_covers(self, actor, revision, folder):
         pair = dict(revision.validation_evidence.get("cover_pair", {}))
@@ -417,7 +618,7 @@ class Command(BaseCommand):
     def record_evidence(self, actor, packet, report_path):
         slug = packet["slug"]
         require_translation_labels(packet)
-        revision = draft_for(packet)
+        revision = target_revision(packet)
         if revision is None or revision.state != "draft":
             raise CommandError(f"{slug}: a draft revision is required.")
         doc, doc_sha = clearance_document(packet)
@@ -463,7 +664,7 @@ class Command(BaseCommand):
     def publish(self, actor, packet):
         reverify_approval(packet)
         require_translation_labels(packet)
-        revision = draft_for(packet)
+        revision = target_revision(packet)
         if revision is None:
             raise CommandError(f"{packet['slug']}: no revision.")
         reason = reason_for(packet)
@@ -472,9 +673,16 @@ class Command(BaseCommand):
             revision.refresh_from_db()
             if (action == "mark-ready" and revision.state != "draft") or (action == "publish" and revision.state != "ready"):
                 continue
-            state = transition_revision(actor, revision.id, action, revision.version, revision.content_sha256, reason)
-            audit(actor, "revision." + action, revision, {"reason": reason, "channel": "server_job"})
-            steps.append({"action": action, "state": state["state"], "version": state["version"]})
+            with transaction.atomic():  # the server-job audit commits with the transition (on-commit pass runs after)
+                state = transition_revision(actor, revision.id, action, revision.version, revision.content_sha256, reason)
+                audit(actor, "revision." + action, revision, {"reason": reason, "channel": "server_job"})
+            step = {"action": action, "state": state["state"], "version": state["version"]}
+            if action == "publish":  # transition_revision moved readers' state for a revise revision (move_reader_state)
+                moved = AuditEvent.objects.filter(action="revision.reader_state_moved", entity_id=str(revision.id),
+                                                  detail__pass="publish").order_by("-created_at").first()
+                if moved:
+                    step["reader_state_moved"] = {k: moved.detail[k] for k in ("progress", "annotations", "left_unmapped")}
+            steps.append(step)
         return {"steps": steps}
 
     # --- status -------------------------------------------------------------------------------

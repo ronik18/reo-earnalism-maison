@@ -12,7 +12,7 @@ reservation entry is marked `runner: "modal"`; the CU Colab already used on it (
 released (the original forecast is kept as `reserved_units`). Such a job settles with both
 portions: the Modal rows in USD (`usd`, with `cu_equivalent` kept as information only) and its
 Colab CU (those recorded at the move plus any Colab run after it) against the CU caps.
-A Modal row's `usd` is an estimate (wall seconds x the L4 rate x MODAL_OVERHEAD_FACTOR, see
+A Modal row's `usd` is an estimate (wall seconds x the job kind's GPU rate x MODAL_OVERHEAD_FACTOR, see
 modal_run) until `eav modal-settle` replaces it with the amount the Modal dashboard billed
 (`billed: true`, the estimate kept as `estimated_usd`); the caps always read the rows.
 run_ids are `<job_id>#<n>` and are never reused: n is one more than the highest n ever issued for

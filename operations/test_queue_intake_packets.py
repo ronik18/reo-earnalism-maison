@@ -77,6 +77,18 @@ class QueueIntakePacketsTests(TestCase):
         run()
         self.assertEqual(sorted(ReviewItem.objects.values_list('kind', flat=True)), ['clearance', 'cover', 'edition', 'edition'])
 
+    def test_live_translation_edition_files_are_informational_and_not_queued(self):
+        from library.models import Edition, Revision, Work
+        self.packet('book-en', translation=True)
+        work = Work.objects.create(slug='w-book', title='Work', creators=['a'], house='golpo')
+        edition = Edition.objects.create(work=work, slug='book-en', locale='en')
+        revision = Revision.objects.create(edition=edition, title='Book', content_sha256='')
+        Revision.objects.filter(pk=revision.pk).update(state='live')
+        Edition.objects.filter(pk=edition.pk).update(live_revision=revision)
+        out = run()
+        self.assertIn('edition files skipped (informational: the edition is already live)', out)
+        self.assertEqual(sorted(ReviewItem.objects.values_list('kind', flat=True)), ['clearance', 'cover'])
+
     def test_changed_file_supersedes_pending(self):
         folder = self.packet('book')
         run()
