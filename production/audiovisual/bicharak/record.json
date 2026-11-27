@@ -5443,6 +5443,20 @@
       },
       "path": "jobs/music-film-01-r3/music.ipynb",
       "sha256": "e5a329656f9ab5c3a605b8d6357587607d100c0a108b2639ae70045a7a3a7e5d"
+    },
+    {
+      "bytes": 16882,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.0411333333333332,
+        "inputs_zip": "jobs/music-film-01-r4/inputs.zip",
+        "job_id": "music-film-01-r4",
+        "job_kind": "music",
+        "manifest": "jobs/music-film-01-r4/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/music-film-01-r4/music.ipynb",
+      "sha256": "b059f5038eddea442bd4db515af8d7b4ae26c605d4c2fbfd5e6740b5ea903e5c"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -6367,6 +6381,51 @@
       "at": "2026-11-27T05:50:19.634823+00:00",
       "detail": {
         "job_id": "music-film-01-r3",
+        "kind": "music",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T06:27:31.203963+00:00",
+      "detail": {
+        "job_id": "music-film-01-r3",
+        "reason": "ACE-Step save failed on Modal: torchaudio needs torchcodec; template fixed, rebuilt as music-film-01-r4",
+        "runner": "modal",
+        "units": 0.0
+      },
+      "result": "closing",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T06:27:31.212268+00:00",
+      "detail": {
+        "imported": false,
+        "job_id": "music-film-01-r3",
+        "ran": true,
+        "reason": "ACE-Step save failed on Modal: torchaudio needs torchcodec; template fixed, rebuilt as music-film-01-r4",
+        "runner": "modal",
+        "units": 0.0,
+        "usd": 0.168349
+      },
+      "result": "closed",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T06:27:31.463231+00:00",
+      "detail": {
+        "forecast_units": 1.0411333333333332,
+        "job_id": "music-film-01-r4",
+        "kind": "music"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T06:27:31.470811+00:00",
+      "detail": {
+        "job_id": "music-film-01-r4",
         "kind": "music",
         "target": "film-01"
       },

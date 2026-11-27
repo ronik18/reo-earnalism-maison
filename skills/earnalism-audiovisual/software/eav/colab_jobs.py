@@ -304,7 +304,7 @@ if not complete:
 # Distributions whose resolved versions each manifest records (R26).
 PACKAGES = {"narration": ("parler_tts", "transformers", "torch", "soundfile"),
             "stills": ("diffusers", "transformers", "accelerate", "sentencepiece", "protobuf", "torch"),
-            "music": ("ace-step", "acestep", "torch", "transformers", "diffusers", "huggingface_hub")}
+            "music": ("ace-step", "acestep", "torch", "transformers", "diffusers", "huggingface_hub", "torchcodec", "torchaudio")}
 MANIFEST_RESERVE_S = 60
 
 
