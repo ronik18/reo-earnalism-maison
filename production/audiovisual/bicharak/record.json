@@ -39441,6 +39441,18 @@
       },
       "result": "exchange_uploaded",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-27T12:36:01.240872+00:00",
+      "detail": {
+        "expires_at": "2026-11-28T12:34:57+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/motion-pilot6-f01s014/inputs.zip",
+        "inputs_sha256": "f3697f43e6243a2be4e1c85e3e89fbb536918312d840a14367234c0325e30264",
+        "job_id": "motion-pilot6-f01s014",
+        "outputs_key": "exports/colab-exchange/bicharak/motion-pilot6-f01s014/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
