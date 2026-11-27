@@ -13,6 +13,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+from . import motiongate
 from .budget import _check_units
 from .colab_jobs import _load_wan_batch
 from .record import sha256_file
@@ -193,6 +194,9 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
             sub_name, dest_name = _film_place(name) if film else (None, name)
             if sha256_file((staging / sub_name if film else staging) / dest_name) != digest:
                 raise ImportHeld(f"copy sha256 mismatch: {name}")
+        if film:  # motion gate: <key>.motion.json and a contact sheet beside each take (advisory until calibrated)
+            for clip in sorted((staging / "clips").glob("*.mp4")):
+                motiongate.gate_clip(clip)
         dest.parent.mkdir(parents=True, exist_ok=True)
         staging.rename(dest)
     except BaseException:

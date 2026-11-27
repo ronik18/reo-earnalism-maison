@@ -122,7 +122,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
-from . import cue, glide, passages, retime, shotplan, touchup, voicecheck
+from . import cue, glide, motiongate, passages, retime, shotplan, touchup, voicecheck
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, _segments, _style, unit_anchors, voice_units
@@ -1550,6 +1550,30 @@ def _film_clip_items(rec, t) -> dict:
     return found
 
 
+def _refuse_motion_fails(rec, files, sid, n):
+    """A Wan take whose <key>.motion.json says pass false (a clear stutter or jump) does not enter the film unless
+    its key has a reason in picks/gate-overrides.json {"<key>": "<reason>"} (the file the still gate uses).
+    needs_review stays advisory; a take without a motion.json (imported before the gate) is not blocked."""
+    allowed = {}
+    path = rec.root / "picks" / "gate-overrides.json"
+    if path.is_file():
+        allowed = {k: v for k, v in _json(path).items() if isinstance(v, str) and v.strip()}
+    for f in files:
+        mj = f.with_name(f.stem + ".motion.json")
+        if not mj.is_file() or f.stem in allowed:
+            continue
+        try:
+            gate = json.loads(mj.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(gate, dict) and gate.get("pass") is False:
+            raise Stop(f"scene {sid} shot {n}: take {f.stem} failed the motion gate ("
+                       f"{'; '.join(str(x) for x in gate.get('notes') or []) or 'motion gate failed'})",
+                       f"Re-seed the shot, pick another take in clip-picks.json, or record why it stands: a reason "
+                       f"in {path} ({{\"{f.stem}\": \"<reason>\"}}). Contact sheet: "
+                       f"{f.with_name(str(gate.get('contact_sheet') or f.stem + '.contact.png'))}")
+
+
 def _shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir) -> dict:
     """Inputs of one shot: its imported Wan clip(s), or its still (stem <scene>-<n>) and imported depth map."""
     n = shot["n"]
@@ -1563,6 +1587,7 @@ def _shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir) -> dict:
         absent = [f for f in files if not f.is_file()]
         if absent:
             raise Stop(f"scene {sid} shot {n}: clip {absent[0]} is missing", f"{PROG} status --root {rec.root}")
+        _refuse_motion_fails(rec, files, sid, n)
         return {"clips": files}
     stem = f"{sid}-{n}"
     still = next((p for p in sorted(Path(stills_dir).iterdir()) if p.stem == stem and p.suffix.lower() in film.STILL_EXTS),
@@ -2776,6 +2801,29 @@ def _words_note(res, data):
     return res
 
 
+def cmd_motiongate(args):
+    clips = []
+    for a in args.clips:
+        p = Path(a)
+        if p.is_dir():
+            clips += sorted(p.glob("*.mp4"))
+        elif p.is_file():
+            clips.append(p)
+        else:
+            raise Stop(f"{p} does not exist", "Fix the path and rerun")
+    if not clips:
+        raise Stop("no .mp4 clips given", "Pass clip files or a folder of clips")
+    out = Path(args.out) if args.out else None
+    failed = 0
+    for c in clips:
+        r = motiongate.gate_clip(c, out)
+        verdict = "FAIL" if not r["pass"] else ("REVIEW" if r["needs_review"] else "pass")
+        failed += not r["pass"]
+        print(f"{verdict:6} {c.name}: " + ("; ".join(r["notes"]) or "smooth"))
+    print(f"{len(clips)} clip(s) gated, {failed} failed. Written beside each clip (or in --out): "
+          "<key>.motion.json and <key>.contact.png; the clips are untouched. Thresholds are uncalibrated.")
+
+
 def cmd_voicecheck(args):
     takes = [Path(t) for t in args.takes]
     for t in takes:
@@ -2922,7 +2970,7 @@ def cmd_plan_shots(args):
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take, "split-passages": cmd_split_passages,
-            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide, "retime": cmd_retime, "voicecheck": cmd_voicecheck,
+            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide, "retime": cmd_retime, "voicecheck": cmd_voicecheck, "motiongate": cmd_motiongate,
             "cue": cmd_cue, "plan-shots": cmd_plan_shots,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
@@ -3039,6 +3087,9 @@ def _parser():
     s.add_argument("--text", required=True, help="the narrated script text (UTF-8)")
     s.add_argument("--seed", type=int, default=0)
     s.add_argument("--cuts", help="comma-separated cut times in the old timeline to map into the new one")
+    s = sub.add_parser("motiongate", help="motion gate for Wan takes: stutter, jumps, contact sheet (standalone: no record; clips untouched)")
+    s.add_argument("clips", nargs="+", help="clip .mp4 files or folders of them")
+    s.add_argument("--out", help="folder for <key>.motion.json and <key>.contact.png (default: beside each clip)")
     s = sub.add_parser("voicecheck", help="narration redo gate: flag robotic/monotone/flawed takes (standalone: no record)")
     s.add_argument("takes", nargs="+")
     s.add_argument("--expected", required=True, help="expected duration in seconds: one value, or one per take (comma-separated)")
