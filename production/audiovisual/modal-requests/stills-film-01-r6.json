@@ -6,7 +6,7 @@
   "r2_prefix": "gpu-jobs/bicharak/stills-film-01-r6/run-1/",
   "requested_at": "2026-11-27T07:10:56+00:00",
   "schema": "earnalism.modal-request.v1",
-  "status": "requested",
+  "status": "running",
   "title_root": "production/audiovisual/bicharak",
   "worst_case_usd": 2.123962
 }
