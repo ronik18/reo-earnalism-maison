@@ -19,7 +19,19 @@ import {
 } from "./state.ts";
 import { readFileSync } from "node:fs";
 import { wrapTextSpan } from "./follow-dom.ts";
-import { splitSentences, currentHighlight, autoscrollAllowed, isUserScroll, mapFetchPlan, mapFailed, MAP_RETRY_MS, MAP_RETRY_MAX_MS, highlightSpan, utf16Index, type FollowMap } from "./sentences.ts";
+import {
+  splitSentences,
+  currentHighlight,
+  autoscrollAllowed,
+  isUserScroll,
+  mapFetchPlan,
+  mapFailed,
+  MAP_RETRY_MS,
+  MAP_RETRY_MAX_MS,
+  highlightSpan,
+  utf16Index,
+  type FollowMap,
+} from "./sentences.ts";
 test("Unicode selection offsets use code points, including Bengali and astral characters", () => {
   assert.equal(codePointOffset("আ🌸লো", 3), 2);
   assert.equal(codePointOffset("A🌸B", 3), 2);
@@ -428,95 +440,259 @@ test("Checkout retry identity is scoped to the immutable offer and terms snapsho
   );
 });
 
-import {orderStatusKey} from "./commerce-state";
+import { orderStatusKey } from "./commerce-state";
 test("Checkout reflects server terminal states without granting pending or refunded access", () => {
-  assert.equal(orderStatusKey({status:"paid",fulfillment_status:"granted"}),"payment_confirmed");
-  for (const fulfillment_status of ["pending","refund_pending","refunded","review","fulfilled"]) {
-    assert.equal(accessGranted({status:"paid",fulfillment_status}),false);
-    assert.equal(orderStatusKey({status:"paid",fulfillment_status}),fulfillment_status === "refund_pending" ? "payment_refund_pending" : fulfillment_status === "refunded" ? "order_refunded" : "payment_access_pending");
+  assert.equal(
+    orderStatusKey({ status: "paid", fulfillment_status: "granted" }),
+    "payment_confirmed",
+  );
+  for (const fulfillment_status of [
+    "pending",
+    "refund_pending",
+    "refunded",
+    "review",
+    "fulfilled",
+  ]) {
+    assert.equal(accessGranted({ status: "paid", fulfillment_status }), false);
+    assert.equal(
+      orderStatusKey({ status: "paid", fulfillment_status }),
+      fulfillment_status === "refund_pending"
+        ? "payment_refund_pending"
+        : fulfillment_status === "refunded"
+          ? "order_refunded"
+          : "payment_access_pending",
+    );
   }
-  for (const status of ["failed","cancelled","expired","refunded"]) {
-    assert.equal(orderStatusKey({status,fulfillment_status:"pending"}),"order_"+status);
+  for (const status of ["failed", "cancelled", "expired", "refunded"]) {
+    assert.equal(
+      orderStatusKey({ status, fulfillment_status: "pending" }),
+      "order_" + status,
+    );
   }
 });
 
 // Media capabilities remain bound to their actual format and exact edition revision.
 import "./media-state.test.ts";
 
-import {checkoutReturnPath} from "./commerce-state";
-test("Checkout retains exact content return in the shared English journey",()=>{
-  assert.equal(checkoutReturnPath("/en/read/book/unit/?anchor=p1&offset=12","bn"),"/en/read/book/unit/?anchor=p1&offset=12");
-  for (const path of ["https://other.test/en/read/book/","//other.test/en/read/book/","/en/sign-out/","/en/checkout/order/"]) assert.equal(checkoutReturnPath(path,"bn"),"/en/vault/");
+import { checkoutReturnPath } from "./commerce-state";
+test("Checkout retains exact content return in the shared English journey", () => {
+  assert.equal(
+    checkoutReturnPath("/en/read/book/unit/?anchor=p1&offset=12", "bn"),
+    "/en/read/book/unit/?anchor=p1&offset=12",
+  );
+  for (const path of [
+    "https://other.test/en/read/book/",
+    "//other.test/en/read/book/",
+    "/en/sign-out/",
+    "/en/checkout/order/",
+  ])
+    assert.equal(checkoutReturnPath(path, "bn"), "/en/vault/");
 });
 
-import {approvedFinancialPDFURL} from "./billing-state.ts";
-test("Financial PDF grants remain fresh and bound to their local document route",()=>{
- const now=Date.now(),origin="https://maison.example",path="/api/v1/commerce/credit-notes/note/file";
- const grant={url:origin+path+"?token=fixture",expires_at:new Date(now+120000).toISOString(),content_type:"application/pdf",sha256:"a".repeat(64),bytes:100};
- assert.equal(approvedFinancialPDFURL(grant,path,origin,now),grant.url);
- assert.equal(approvedFinancialPDFURL(grant,"/api/v1/commerce/invoices/invoice/file",origin,now),undefined);
- for(const override of [{url:origin+"/en/sign-in/"},{url:"http://private.example/document"},{url:"https://user:secret@private.example/document"},{url:grant.url+"#token"},{expires_at:new Date(now).toISOString()},{expires_at:new Date(now+126000).toISOString()},{sha256:"bad"},{content_type:"text/html"}])assert.equal(approvedFinancialPDFURL({...grant,...override},path,origin,now),undefined);
- assert.equal(approvedFinancialPDFURL({...grant,url:"https://private.example/retained.pdf?signed=fixture"},path,origin,now),"https://private.example/retained.pdf?signed=fixture");
+import { approvedFinancialPDFURL } from "./billing-state.ts";
+test("Financial PDF grants remain fresh and bound to their local document route", () => {
+  const now = Date.now(),
+    origin = "https://maison.example",
+    path = "/api/v1/commerce/credit-notes/note/file";
+  const grant = {
+    url: origin + path + "?token=fixture",
+    expires_at: new Date(now + 120000).toISOString(),
+    content_type: "application/pdf",
+    sha256: "a".repeat(64),
+    bytes: 100,
+  };
+  assert.equal(approvedFinancialPDFURL(grant, path, origin, now), grant.url);
+  assert.equal(
+    approvedFinancialPDFURL(
+      grant,
+      "/api/v1/commerce/invoices/invoice/file",
+      origin,
+      now,
+    ),
+    undefined,
+  );
+  for (const override of [
+    { url: origin + "/en/sign-in/" },
+    { url: "http://private.example/document" },
+    { url: "https://user:secret@private.example/document" },
+    { url: grant.url + "#token" },
+    { expires_at: new Date(now).toISOString() },
+    { expires_at: new Date(now + 126000).toISOString() },
+    { sha256: "bad" },
+    { content_type: "text/html" },
+  ])
+    assert.equal(
+      approvedFinancialPDFURL({ ...grant, ...override }, path, origin, now),
+      undefined,
+    );
+  assert.equal(
+    approvedFinancialPDFURL(
+      { ...grant, url: "https://private.example/retained.pdf?signed=fixture" },
+      path,
+      origin,
+      now,
+    ),
+    "https://private.example/retained.pdf?signed=fixture",
+  );
 });
 
-
-test("Stream renewal primes playback before real metadata and seeks once after load", async()=>{
-  const original=globalThis.document;
-  globalThis.document={getElementById:()=>null,documentElement:{dataset:{}}} as unknown as Document;
+test("Stream renewal primes playback before real metadata and seeks once after load", async () => {
+  const original = globalThis.document;
+  globalThis.document = {
+    getElementById: () => null,
+    documentElement: { dataset: {} },
+  } as unknown as Document;
   try {
-    const {streamRestoration}=await import("./video");
-    let plays=0,position=0,current=true,restored=0;
-    const sdk={duration:180,paused:true,controls:true,get currentTime(){return position},set currentTime(value:number){position=value},play:()=>{plays++;return Promise.resolve()},pause:()=>{},addEventListener:()=>{},removeEventListener:()=>{}};
-    const lifecycle=streamRestoration(sdk,155000,true,()=>current,()=>assert.fail("Unexpected playback failure"),()=>{restored++});
-    lifecycle.prime();assert.equal(plays,1);assert.equal(position,0);assert.equal(lifecycle.ready(),false);
-    lifecycle.metadata();assert.equal(position,155);assert.equal(restored,1);
-    position=157;lifecycle.metadata();assert.equal(position,157);assert.equal(restored,1);
-    current=false;const stale=streamRestoration(sdk,80000,true,()=>current,()=>{},()=>assert.fail("Stale iframe restored"));stale.prime();stale.metadata();assert.equal(plays,1);assert.equal(position,157);
-    const paused=streamRestoration(sdk,80000,false,()=>true,()=>{},()=>{});paused.prime();assert.equal(plays,1);paused.metadata();assert.equal(position,80);
-  } finally {globalThis.document=original;}
+    const { streamRestoration } = await import("./video");
+    let plays = 0,
+      position = 0,
+      current = true,
+      restored = 0;
+    const sdk = {
+      duration: 180,
+      paused: true,
+      controls: true,
+      get currentTime() {
+        return position;
+      },
+      set currentTime(value: number) {
+        position = value;
+      },
+      play: () => {
+        plays++;
+        return Promise.resolve();
+      },
+      pause: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    };
+    const lifecycle = streamRestoration(
+      sdk,
+      155000,
+      true,
+      () => current,
+      () => assert.fail("Unexpected playback failure"),
+      () => {
+        restored++;
+      },
+    );
+    lifecycle.prime();
+    assert.equal(plays, 1);
+    assert.equal(position, 0);
+    assert.equal(lifecycle.ready(), false);
+    lifecycle.metadata();
+    assert.equal(position, 155);
+    assert.equal(restored, 1);
+    position = 157;
+    lifecycle.metadata();
+    assert.equal(position, 157);
+    assert.equal(restored, 1);
+    current = false;
+    const stale = streamRestoration(
+      sdk,
+      80000,
+      true,
+      () => current,
+      () => {},
+      () => assert.fail("Stale iframe restored"),
+    );
+    stale.prime();
+    stale.metadata();
+    assert.equal(plays, 1);
+    assert.equal(position, 157);
+    const paused = streamRestoration(
+      sdk,
+      80000,
+      false,
+      () => true,
+      () => {},
+      () => {},
+    );
+    paused.prime();
+    assert.equal(plays, 1);
+    paused.metadata();
+    assert.equal(position, 80);
+  } finally {
+    globalThis.document = original;
+  }
 });
 
 import { downloadLicensePages } from "./download-pages.ts";
 test("Download reconciliation includes licenses after the first page", async () => {
   const calls: string[] = [];
-  const local = [{license_id:"older-saved-book"}];
-  const remote = await downloadLicensePages<{license_id:string}>(async path => {
-    calls.push(path);
-    return calls.length === 1 ? {items:[{license_id:"new-book"}],next_cursor:"older+page/="} : {items:local,next_cursor:null};
-  });
-  assert.deepEqual(calls,["/me/downloads","/me/downloads?cursor=older%2Bpage%2F%3D"]);
-  assert.equal(local.filter(book => !remote.some(row => row.license_id === book.license_id)).length,0);
+  const local = [{ license_id: "older-saved-book" }];
+  const remote = await downloadLicensePages<{ license_id: string }>(
+    async (path) => {
+      calls.push(path);
+      return calls.length === 1
+        ? { items: [{ license_id: "new-book" }], next_cursor: "older+page/=" }
+        : { items: local, next_cursor: null };
+    },
+  );
+  assert.deepEqual(calls, [
+    "/me/downloads",
+    "/me/downloads?cursor=older%2Bpage%2F%3D",
+  ]);
+  assert.equal(
+    local.filter(
+      (book) => !remote.some((row) => row.license_id === book.license_id),
+    ).length,
+    0,
+  );
 });
 test("A failed later download-license page yields no partial reconciliation snapshot", async () => {
-  let calls=0, reconciled=false;
-  await assert.rejects(async()=>{
-    await downloadLicensePages(async()=>{
-      if(++calls===2)throw new Error("connection lost");
-      return {items:[{license_id:"new-book"}],next_cursor:"next"};
+  let calls = 0,
+    reconciled = false;
+  await assert.rejects(async () => {
+    await downloadLicensePages(async () => {
+      if (++calls === 2) throw new Error("connection lost");
+      return { items: [{ license_id: "new-book" }], next_cursor: "next" };
     });
-    reconciled=true;
-  },/connection lost/);
-  assert.equal(calls,2);assert.equal(reconciled,false);
+    reconciled = true;
+  }, /connection lost/);
+  assert.equal(calls, 2);
+  assert.equal(reconciled, false);
 });
 test("Download-license pagination rejects a repeated cursor before reconciliation", async () => {
-  let calls=0;
-  await assert.rejects(downloadLicensePages(async()=>{
-    calls++;return {items:[],next_cursor:"same"};
-  }),/download_failed/);
-  assert.equal(calls,2);
+  let calls = 0;
+  await assert.rejects(
+    downloadLicensePages(async () => {
+      calls++;
+      return { items: [], next_cursor: "same" };
+    }),
+    /download_failed/,
+  );
+  assert.equal(calls, 2);
 });
 
-
-test("Legacy UI return links preserve content language, query and anchor in the English journey",()=>{
- assert.equal(validReturnPath("/bn/read/book/unit/?content_locale=bn&anchor=p1#selection","bn"),"/en/read/book/unit/?content_locale=bn&anchor=p1#selection");
- assert.equal(checkoutReturnPath("/bn/read/book/unit/?anchor=p1","bn"),"/en/read/book/unit/?anchor=p1");
- assert.equal(validReturnPath("//other.test/bn/read/book/","bn"),"/en/");
+test("Legacy UI return links preserve content language, query and anchor in the English journey", () => {
+  assert.equal(
+    validReturnPath(
+      "/bn/read/book/unit/?content_locale=bn&anchor=p1#selection",
+      "bn",
+    ),
+    "/en/read/book/unit/?content_locale=bn&anchor=p1#selection",
+  );
+  assert.equal(
+    checkoutReturnPath("/bn/read/book/unit/?anchor=p1", "bn"),
+    "/en/read/book/unit/?anchor=p1",
+  );
+  assert.equal(validReturnPath("//other.test/bn/read/book/", "bn"), "/en/");
 });
 
-import { rememberSpeed, recallSpeed, mediaMetadataFor, seekTarget, withRendition } from "./state";
+import {
+  rememberSpeed,
+  recallSpeed,
+  mediaMetadataFor,
+  seekTarget,
+  withRendition,
+} from "./state";
 test("test_speed_is_remembered_and_clamped", () => {
   const store = new Map<string, string>();
-  (globalThis as any).localStorage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v) };
+  (globalThis as any).localStorage = {
+    getItem: (k: string) => store.get(k) ?? null,
+    setItem: (k: string, v: string) => void store.set(k, v),
+  };
   assert.equal(recallSpeed(), 1);
   rememberSpeed(1.5);
   assert.equal(store.get("maison.player.rate"), "1.5");
@@ -529,32 +705,84 @@ test("test_speed_is_remembered_and_clamped", () => {
   assert.equal(recallSpeed(), 1);
   store.set("maison.player.rate", "9");
   assert.equal(recallSpeed(), 2);
-  (globalThis as any).localStorage = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } };
+  (globalThis as any).localStorage = {
+    getItem() {
+      throw new Error("blocked");
+    },
+    setItem() {
+      throw new Error("blocked");
+    },
+  };
   assert.equal(recallSpeed(), 1);
   assert.doesNotThrow(() => rememberSpeed(1.25));
   delete (globalThis as any).localStorage;
 });
 test("test_media_metadata_has_author_part_and_artwork", () => {
-  const m = mediaMetadataFor({ title: "Book", author: "A. Writer", cover_url: "/c.webp" }, { title: "Chapter 2" });
+  const m = mediaMetadataFor(
+    { title: "Book", author: "A. Writer", cover_url: "/c.webp" },
+    { title: "Chapter 2" },
+  );
   assert.equal(m.title, "Chapter 2");
   assert.equal(m.artist, "A. Writer");
   assert.equal(m.album, "Book");
   assert.equal(m.artwork.length, 1);
   assert.equal(m.artwork[0].src, "/c.webp");
-  assert.deepEqual(mediaMetadataFor({ title: "Book" }, { title: "" }).artwork, []);
+  assert.deepEqual(
+    mediaMetadataFor({ title: "Book" }, { title: "" }).artwork,
+    [],
+  );
   assert.equal(m.artwork[0].sizes, undefined);
-  assert.equal(mediaMetadataFor({ title: "Book", cover_url: "/c.webp", cover_width: 600, cover_height: 900 }, { title: "x" }).artwork[0].sizes, "600x900");
-  assert.equal(mediaMetadataFor({ title: "Book" }, { title: "" }).title, "Book");
+  assert.equal(
+    mediaMetadataFor(
+      {
+        title: "Book",
+        cover_url: "/c.webp",
+        cover_width: 600,
+        cover_height: 900,
+      },
+      { title: "x" },
+    ).artwork[0].sizes,
+    "600x900",
+  );
+  assert.equal(
+    mediaMetadataFor({ title: "Book" }, { title: "" }).title,
+    "Book",
+  );
 });
 test("test_media_metadata_omits_artist_without_author", () => {
   const m = mediaMetadataFor({ title: "Book" }, { title: "Part" });
   assert.equal("artist" in m, false);
-  assert.equal(mediaMetadataFor({ title: "Book", author: "" }, { title: "Part" }).artist, undefined);
+  assert.equal(
+    mediaMetadataFor({ title: "Book", author: "" }, { title: "Part" }).artist,
+    undefined,
+  );
 });
 test("test_rendition_swap_changes_asset_not_unit", () => {
-  const unit = { asset_id: "a48", unit_id: "u1", title: "One", quality_kbps: 48, sha256: "x", duration_ms: 1000 };
-  const out = withRendition(unit, { asset_id: "a96", quality_kbps: 96, sha256: "y", duration_ms: 1010 });
-  assert.deepEqual([out.asset_id, out.unit_id, out.title, out.quality_kbps, out.sha256, out.duration_ms], ["a96", "u1", "One", 96, "y", 1010]);
+  const unit = {
+    asset_id: "a48",
+    unit_id: "u1",
+    title: "One",
+    quality_kbps: 48,
+    sha256: "x",
+    duration_ms: 1000,
+  };
+  const out = withRendition(unit, {
+    asset_id: "a96",
+    quality_kbps: 96,
+    sha256: "y",
+    duration_ms: 1010,
+  });
+  assert.deepEqual(
+    [
+      out.asset_id,
+      out.unit_id,
+      out.title,
+      out.quality_kbps,
+      out.sha256,
+      out.duration_ms,
+    ],
+    ["a96", "u1", "One", 96, "y", 1010],
+  );
   assert.equal(withRendition(unit, undefined), unit);
   assert.equal(unit.asset_id, "a48");
 });
@@ -567,12 +795,31 @@ test("test_seek_back_15_forward_30_clamp_to_bounds", () => {
   assert.equal(seekTarget(5, -15, Infinity), 0);
 });
 
-const base = { paused: false, ended: false, elapsedMs: 250, playedMs: 0, timer: undefined, endOfPart: false, unitMs: 600000, currentMs: 0, rate: 1 };
+const base = {
+  paused: false,
+  ended: false,
+  elapsedMs: 250,
+  playedMs: 0,
+  timer: undefined,
+  endOfPart: false,
+  unitMs: 600000,
+  currentMs: 0,
+  rate: 1,
+};
 test("sleepTick does not count paused or ended time", () => {
   const timer = { setAt: 0, ms: 60000 };
-  assert.equal(sleepTick({ ...base, timer, paused: true, elapsedMs: 1000 }).playedMs, 0);
-  assert.equal(sleepTick({ ...base, timer, ended: true, elapsedMs: 1000 }).playedMs, 0);
-  assert.equal(sleepTick({ ...base, timer, paused: true, elapsedMs: 1000 }).action, "none");
+  assert.equal(
+    sleepTick({ ...base, timer, paused: true, elapsedMs: 1000 }).playedMs,
+    0,
+  );
+  assert.equal(
+    sleepTick({ ...base, timer, ended: true, elapsedMs: 1000 }).playedMs,
+    0,
+  );
+  assert.equal(
+    sleepTick({ ...base, timer, paused: true, elapsedMs: 1000 }).action,
+    "none",
+  );
   assert.equal(sleepTick({ ...base, timer, elapsedMs: 250 }).playedMs, 250);
 });
 test("sleepTick caps one tick at 2000 ms so a long system sleep cannot stop the timer at once", () => {
@@ -583,7 +830,11 @@ test("sleepTick caps one tick at 2000 ms so a long system sleep cannot stop the 
 });
 test("sleepTick: a minutes timer fades over the last 15 s and stops at 0", () => {
   const timer = { setAt: 0, ms: 60000 };
-  assert.deepEqual(sleepTick({ ...base, timer, playedMs: 30000 }), { playedMs: 30250, action: "none", gain: 1 });
+  assert.deepEqual(sleepTick({ ...base, timer, playedMs: 30000 }), {
+    playedMs: 30250,
+    action: "none",
+    gain: 1,
+  });
   const mid = sleepTick({ ...base, timer, playedMs: 52250 });
   assert.equal(mid.action, "fade");
   assert.equal(mid.gain, 0.5);
@@ -604,10 +855,17 @@ test("sleepTick: end of part fades in real time and stops at the end", () => {
   assert.equal(end.gain, 1);
 });
 test("sleepTick with no timer or after cancel leaves the volume alone", () => {
-  assert.deepEqual(sleepTick({ ...base, currentMs: 599000 }), { playedMs: 250, action: "none", gain: 1 });
+  assert.deepEqual(sleepTick({ ...base, currentMs: 599000 }), {
+    playedMs: 250,
+    action: "none",
+    gain: 1,
+  });
 });
 test("active marker and place titles", () => {
-  const markers = [{ title: "One", start_ms: 0 }, { title: "Two", start_ms: 60000 }];
+  const markers = [
+    { title: "One", start_ms: 0 },
+    { title: "Two", start_ms: 60000 },
+  ];
   assert.equal(activeMarkerIndex(markers, 59999), 0);
   assert.equal(activeMarkerIndex(markers, 60000), 1);
   assert.equal(activeMarkerIndex(undefined, 5), -1);
@@ -616,26 +874,60 @@ test("active marker and place titles", () => {
   assert.equal(placeTitle({ title: "Part", markers }, 0), "One");
   assert.equal(placeTitle({ title: "Part" }, 61000), "Part");
   assert.equal(placeTitle(undefined, 5), "");
-  assert.equal(positionLabel(placeTitle({ title: "Part", markers }, 61000), 61000), "Two, 01:01");
+  assert.equal(
+    positionLabel(placeTitle({ title: "Part", markers }, 61000), 61000),
+    "Two, 01:01",
+  );
 });
 
 const sentenceMap = (anchor: string): FollowMap => ({
   asset_id: "a",
   segments: [
-    { anchor_id: anchor, start_ms: 0, end_ms: 1000, start_offset_chars: 0, end_offset_chars: 17, sentence_index: 0 },
-    { anchor_id: anchor, start_ms: 1000, end_ms: 2500, start_offset_chars: 17, end_offset_chars: 35, sentence_index: 1 },
-    { anchor_id: "unmeasured", start_ms: 2500, end_ms: 4000, start_offset_chars: 0, end_offset_chars: 60 },
+    {
+      anchor_id: anchor,
+      start_ms: 0,
+      end_ms: 1000,
+      start_offset_chars: 0,
+      end_offset_chars: 17,
+      sentence_index: 0,
+    },
+    {
+      anchor_id: anchor,
+      start_ms: 1000,
+      end_ms: 2500,
+      start_offset_chars: 17,
+      end_offset_chars: 35,
+      sentence_index: 1,
+    },
+    {
+      anchor_id: "unmeasured",
+      start_ms: 2500,
+      end_ms: 4000,
+      start_offset_chars: 0,
+      end_offset_chars: 60,
+    },
   ],
 });
 test("test_split_matches_golden: client sentence offsets equal the shared Python golden", () => {
-  const golden = JSON.parse(readFileSync("contracts/sentence-split-golden.json", "utf8"));
+  const golden = JSON.parse(
+    readFileSync("contracts/sentence-split-golden.json", "utf8"),
+  );
   assert.ok(golden.cases.length >= 12);
   for (const c of golden.cases) {
     assert.deepEqual(splitSentences(c.text), c.offsets, c.name);
     // the golden is BMP-only, so UTF-16 indices and Python code points coincide
-    assert.ok(![...c.text].some((ch: string) => ch.codePointAt(0)! > 0xffff), c.name);
+    assert.ok(
+      ![...c.text].some((ch: string) => ch.codePointAt(0)! > 0xffff),
+      c.name,
+    );
     const spans = splitSentences(c.text);
-    assert.deepEqual(spans.map(([a, b]) => c.text.slice(a, b).split(/\s+/).filter(Boolean).join(" ")), c.sentences, c.name);
+    assert.deepEqual(
+      spans.map(([a, b]) =>
+        c.text.slice(a, b).split(/\s+/).filter(Boolean).join(" "),
+      ),
+      c.sentences,
+      c.name,
+    );
   }
 });
 test("code-point offsets from the API become UTF-16 indices for text with astral characters", () => {
@@ -647,16 +939,44 @@ test("code-point offsets from the API become UTF-16 indices for text with astral
 });
 test("test_highlight_sentence_at_time", () => {
   const maps = [sentenceMap("p1")];
-  assert.deepEqual(currentHighlight(maps, null, 0), { anchorId: "p1", range: [0, 17] });
-  assert.deepEqual(currentHighlight(maps, null, 999), { anchorId: "p1", range: [0, 17] });
-  assert.deepEqual(currentHighlight(maps, "p1", 1000), { anchorId: "p1", range: [17, 35] });
-  assert.deepEqual(currentHighlight(maps, null, 4000), { anchorId: null, range: null });
+  assert.deepEqual(currentHighlight(maps, null, 0), {
+    anchorId: "p1",
+    range: [0, 17],
+  });
+  assert.deepEqual(currentHighlight(maps, null, 999), {
+    anchorId: "p1",
+    range: [0, 17],
+  });
+  assert.deepEqual(currentHighlight(maps, "p1", 1000), {
+    anchorId: "p1",
+    range: [17, 35],
+  });
+  assert.deepEqual(currentHighlight(maps, null, 4000), {
+    anchorId: null,
+    range: null,
+  });
 });
 test("test_unmeasured_anchor_falls_back_to_paragraph", () => {
   const maps = [sentenceMap("p1")];
-  assert.deepEqual(currentHighlight(maps, "p1", 3000), { anchorId: "unmeasured", range: null });
-  const paragraphOnly: FollowMap = { segments: [{ anchor_id: "p9", start_ms: 0, end_ms: 500, start_offset_chars: 0, end_offset_chars: 40 }] };
-  assert.deepEqual(currentHighlight([paragraphOnly], null, 100), { anchorId: "p9", range: null });
+  assert.deepEqual(currentHighlight(maps, "p1", 3000), {
+    anchorId: "unmeasured",
+    range: null,
+  });
+  const paragraphOnly: FollowMap = {
+    segments: [
+      {
+        anchor_id: "p9",
+        start_ms: 0,
+        end_ms: 500,
+        start_offset_chars: 0,
+        end_offset_chars: 40,
+      },
+    ],
+  };
+  assert.deepEqual(currentHighlight([paragraphOnly], null, 100), {
+    anchorId: "p9",
+    range: null,
+  });
 });
 test("test_no_autoscroll_within_5s_of_user_scroll", () => {
   assert.equal(autoscrollAllowed(10_000, undefined), true);
@@ -667,8 +987,20 @@ test("test_no_autoscroll_within_5s_of_user_scroll", () => {
 
 test("test_user_scroll_classification: page turns, horizontal keys and foreign scroll events count; the reader's own do not", () => {
   const now = 10_000;
-  for (const type of ["wheel", "touchmove", "page-button"]) assert.equal(isUserScroll(type, undefined, now, 0), true, type);
-  for (const key of ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown", "Home", "End", " "]) assert.equal(isUserScroll("keydown", key, now, 0), true, key);
+  for (const type of ["wheel", "touchmove", "page-button"])
+    assert.equal(isUserScroll(type, undefined, now, 0), true, type);
+  for (const key of [
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "PageUp",
+    "PageDown",
+    "Home",
+    "End",
+    " ",
+  ])
+    assert.equal(isUserScroll("keydown", key, now, 0), true, key);
   assert.equal(isUserScroll("keydown", "a", now, 0), false);
   assert.equal(isUserScroll("keydown", undefined, now, 0), false);
   assert.equal(isUserScroll("scroll", undefined, now, 0), true); // scrollbar drag
@@ -676,27 +1008,51 @@ test("test_user_scroll_classification: page turns, horizontal keys and foreign s
   assert.equal(isUserScroll("click", undefined, now, 0), false);
 });
 function luminance(hex: string) {
-  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  const [r, g, b] = [1, 3, 5]
+    .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
-const contrast = (a: string, b: string) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+const contrast = (a: string, b: string) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
 test("follow highlight uses a token, is not a note colour, and keeps 4.5:1 text contrast on every reader theme", () => {
   const css = readFileSync("static/maison/app.css", "utf8");
   const rule = css.slice(css.indexOf("::highlight(follow-sentence)"));
   assert.ok(!/#[0-9a-f]{3,6}/i.test(rule), "no raw hex in the follow rules");
   assert.match(rule, /background:var\(--follow-bg\)/);
-  const notes = ["gold", "mint", "rose", "lavender"].map((n) => new RegExp(`mark\\.${n}\\{background:(#[0-9a-f]{6})`).exec(css)![1]);
-  for (const theme of ["paper", "light", "sepia", "ink", "dark", "true_black"]) {
-    const bg = new RegExp(`\\.reader-${theme}[^{]*\\{[^}]*--follow-bg:(#[0-9a-f]{6})`).exec(css)?.[1];
-    const surface = new RegExp(`\\.reader-${theme}[^{]*\\{background:(#[0-9a-f]{3,6});color:(#[0-9a-f]{6})`).exec(css);
+  const notes = ["gold", "mint", "rose", "lavender"].map(
+    (n) => new RegExp(`mark\\.${n}\\{background:(#[0-9a-f]{6})`).exec(css)![1],
+  );
+  for (const theme of [
+    "paper",
+    "light",
+    "sepia",
+    "ink",
+    "dark",
+    "true_black",
+  ]) {
+    const bg = new RegExp(
+      `\\.reader-${theme}[^{]*\\{[^}]*--follow-bg:(#[0-9a-f]{6})`,
+    ).exec(css)?.[1];
+    const surface = new RegExp(
+      `\\.reader-${theme}[^{]*\\{background:(#[0-9a-f]{3,6});color:(#[0-9a-f]{6})`,
+    ).exec(css);
     assert.ok(bg && surface, theme);
-    assert.ok(contrast(surface![2], bg!) >= 4.5, `${theme} text on follow tint`);
+    assert.ok(
+      contrast(surface![2], bg!) >= 4.5,
+      `${theme} text on follow tint`,
+    );
     assert.ok(!notes.includes(bg!), `${theme} differs from the note colours`);
   }
 });
 // A tiny fake of the text pieces the fallback splits: a parent holds an ordered list of text pieces and mark wrappers.
 class FakeText {
-  constructor(public data: string, public parent: { kids: (FakeText | FakeMark)[] }) {}
+  constructor(
+    public data: string,
+    public parent: { kids: (FakeText | FakeMark)[] },
+  ) {}
   splitText(offset: number): FakeText {
     const rest = new FakeText(this.data.slice(offset), this.parent);
     this.data = this.data.slice(0, offset);
@@ -704,22 +1060,39 @@ class FakeText {
     return rest;
   }
 }
-class FakeMark { constructor(public kind: string, public kids: FakeText[]) {} }
-const flat = (kids: (FakeText | FakeMark)[]): string => kids.map((k) => (k instanceof FakeText ? k.data : flat(k.kids))).join("");
+class FakeMark {
+  constructor(
+    public kind: string,
+    public kids: FakeText[],
+  ) {}
+}
+const flat = (kids: (FakeText | FakeMark)[]): string =>
+  kids.map((k) => (k instanceof FakeText ? k.data : flat(k.kids))).join("");
 test("fallback drawing across an annotation mark keeps the text; clearing restores the original structure", () => {
   // "alpha " + <mark gold>beta gamma</mark> + " delta."  (the paragraph after the annotation effect)
   const root: { kids: (FakeText | FakeMark)[] } = { kids: [] };
   const note = new FakeMark("gold", []);
-  const inner = new FakeText("beta gamma", note as unknown as { kids: (FakeText | FakeMark)[] });
+  const inner = new FakeText(
+    "beta gamma",
+    note as unknown as { kids: (FakeText | FakeMark)[] },
+  );
   note.kids.push(inner);
-  root.kids.push(new FakeText("alpha ", root), note, new FakeText(" delta.", root));
+  root.kids.push(
+    new FakeText("alpha ", root),
+    note,
+    new FakeText(" delta.", root),
+  );
   const text = flat(root.kids);
   const pieces = [root.kids[0] as FakeText, inner, root.kids[2] as FakeText];
   const wrapped: FakeText[] = [];
   const count = wrapTextSpan(pieces, 3, 20, (piece) => {
     const mark = new FakeMark("follow-sentence", [piece]);
     const holder = piece.parent;
-    holder.kids.splice(holder.kids.indexOf(piece), 1, mark as unknown as FakeText);
+    holder.kids.splice(
+      holder.kids.indexOf(piece),
+      1,
+      mark as unknown as FakeText,
+    );
     piece.parent = mark as unknown as { kids: (FakeText | FakeMark)[] };
     wrapped.push(piece);
   });
@@ -727,15 +1100,35 @@ test("fallback drawing across an annotation mark keeps the text; clearing restor
   assert.equal(flat(root.kids), text);
   assert.equal(wrapped.map((p) => p.data).join(""), text.slice(3, 20));
   // clear: unwrap every follow mark, then merge adjacent text pieces (what Node.normalize does)
-  const unwrap = (kids: (FakeText | FakeMark)[]): (FakeText | FakeMark)[] => kids.flatMap((k) => (k instanceof FakeMark ? (k.kind.startsWith("follow") ? unwrap(k.kids) : [Object.assign(k, { kids: unwrap(k.kids) as FakeText[] })]) : [k]));
-  const merge = (kids: (FakeText | FakeMark)[]) => kids.reduce<(FakeText | FakeMark)[]>((out, k) => {
-    const last = out[out.length - 1];
-    if (k instanceof FakeText && last instanceof FakeText) last.data += k.data; else out.push(k instanceof FakeMark ? Object.assign(k, { kids: merge(k.kids) as FakeText[] }) : k);
-    return out;
-  }, []);
+  const unwrap = (kids: (FakeText | FakeMark)[]): (FakeText | FakeMark)[] =>
+    kids.flatMap((k) =>
+      k instanceof FakeMark
+        ? k.kind.startsWith("follow")
+          ? unwrap(k.kids)
+          : [Object.assign(k, { kids: unwrap(k.kids) as FakeText[] })]
+        : [k],
+    );
+  const merge = (kids: (FakeText | FakeMark)[]) =>
+    kids.reduce<(FakeText | FakeMark)[]>((out, k) => {
+      const last = out[out.length - 1];
+      if (k instanceof FakeText && last instanceof FakeText)
+        last.data += k.data;
+      else
+        out.push(
+          k instanceof FakeMark
+            ? Object.assign(k, { kids: merge(k.kids) as FakeText[] })
+            : k,
+        );
+      return out;
+    }, []);
   const cleared = merge(unwrap(root.kids));
   assert.equal(flat(cleared), text);
-  assert.deepEqual(cleared.map((k) => (k instanceof FakeText ? k.data : `${k.kind}:${flat(k.kids)}`)), ["alpha ", "gold:beta gamma", " delta."]);
+  assert.deepEqual(
+    cleared.map((k) =>
+      k instanceof FakeText ? k.data : `${k.kind}:${flat(k.kids)}`,
+    ),
+    ["alpha ", "gold:beta gamma", " delta."],
+  );
 });
 
 test("test_map_fetch_backoff: a failure does not refetch at once, retries after the backoff, and asks the player only after success", () => {
@@ -751,7 +1144,10 @@ test("test_map_fetch_backoff: a failure does not refetch at once, retries after 
   const again = mapFailed(failed, t0 + MAP_RETRY_MS);
   assert.equal(again.failures, 2);
   assert.equal(mapFetchPlan(again, t0 + MAP_RETRY_MS + MAP_RETRY_MS), "wait"); // doubled
-  assert.equal(mapFetchPlan(again, t0 + MAP_RETRY_MS + 2 * MAP_RETRY_MS), "fetch");
+  assert.equal(
+    mapFetchPlan(again, t0 + MAP_RETRY_MS + 2 * MAP_RETRY_MS),
+    "fetch",
+  );
   let f = failed;
   for (let i = 0; i < 20; i++) f = mapFailed(f, t0);
   assert.equal(mapFetchPlan(f, t0 + MAP_RETRY_MAX_MS - 1), "wait");
@@ -767,4 +1163,8 @@ test("with nothing saved the system dark setting picks dark, otherwise light", (
   assert.equal(initialReaderTheme(null, true), "dark");
   assert.equal(initialReaderTheme(null, false), "light");
   assert.equal(initialReaderTheme("bogus", true), "dark");
+});
+test("the account value system is not a saved choice", () => {
+  assert.equal(initialReaderTheme("system", true), "dark");
+  assert.equal(initialReaderTheme("system", false), "light");
 });

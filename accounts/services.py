@@ -289,7 +289,7 @@ def update_preferences(user,data,base_version):
     pref,_=Preferences.objects.get_or_create(user=user)
     pref=Preferences.objects.select_for_update().get(pk=pref.pk)
     if pref.version!=base_version:raise DomainError('version_conflict','Preferences changed on another device.',412,preferences_data(pref))
-    choices={'locale':['en','bn'],'theme':['light','dark','true_black'],'reader_theme':['light','sepia','dark','true_black'],
+    choices={'locale':['en','bn'],'theme':['light','dark','true_black'],'reader_theme':['system','light','sepia','dark','true_black'],
         'reader_font_size':[16,20,23,26,30],'reader_typeface':['serif','sans'],'reader_margins':['compact','comfortable','wide'],
         'reader_alignment':['start','justify'],'reader_layout':['scroll','paginated'],'audio_quality_kbps':[48,96],'goal':['relax','learn','interview']}
     allowed=set(preferences_data(pref))-{'version','updated_at'}

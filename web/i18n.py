@@ -477,4 +477,5 @@ STRINGS.update({
 STRINGS.update({
     "follow_in_text": ("Follow in text", "Follow in text"),
     "follow_unavailable": ("Text follow isn't available for this audio quality", "Text follow isn't available for this audio quality"),
+    "match_device": ("Match device", "Match device"),
 })

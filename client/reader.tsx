@@ -99,7 +99,7 @@ const defaultPreferences = {
   reader_line_height: 1.65,
   reader_margins: "comfortable",
   reader_alignment: "start",
-  reader_theme: "light",
+  reader_theme: "system",
   reader_typeface: "serif",
   reader_layout: "scroll",
 };
@@ -169,10 +169,11 @@ function Reader({ boot }: { boot: Boot }) {
         localStorage.getItem("maison.reader.preferences") || "{}",
       );
       const prefs = { ...defaultPreferences, ...stored };
-      prefs.reader_theme = initialReaderTheme(
-        document.body.dataset.readerThemeSaved || stored.reader_theme,
-        prefersDark(),
-      );
+      prefs.reader_theme =
+        document.body.dataset.readerThemeSaved ||
+        (["light", "sepia", "dark", "true_black"].includes(stored.reader_theme)
+          ? stored.reader_theme
+          : "system");
       prefs.reader_line_height = Math.max(
         prefs.reader_line_height,
         boot.content_locale === "bn" ? 1.8 : 1.5,
@@ -515,12 +516,11 @@ function Reader({ boot }: { boot: Boot }) {
     );
     for (const name of ["light", "paper", "sepia", "dark", "ink", "true_black"])
       reader.classList.remove("reader-" + name);
-    reader.classList.add("reader-" + (preferences.reader_theme || "light"));
+    const theme = initialReaderTheme(preferences.reader_theme, prefersDark());
+    reader.classList.add("reader-" + theme);
     for (const name of ["light", "sepia", "dark", "true_black"])
       document.body.classList.remove("reader-theme-" + name);
-    document.body.classList.add(
-      "reader-theme-" + (preferences.reader_theme || "light"),
-    );
+    document.body.classList.add("reader-theme-" + theme);
     reader.classList.toggle("sans", preferences.reader_typeface === "sans");
     reader.dataset.layout = preferences.reader_layout || "scroll";
   }, [preferences]);
@@ -559,7 +559,11 @@ function Reader({ boot }: { boot: Boot }) {
     });
   }, [notes]);
   /** Follow-along: the sentence (or paragraph) the persistent player is narrating, drawn without changing the text. */
-  const [follow, setFollow] = useState<{ anchor: string; range: [number, number] | null; playing: boolean }>();
+  const [follow, setFollow] = useState<{
+    anchor: string;
+    range: [number, number] | null;
+    playing: boolean;
+  }>();
   const followNow = useRef(follow);
   /** Maps by the asset actually playing; null once the server said that rendition has none. */
   const followMaps = useRef<Map<string, MapEntry>>(new Map());
@@ -567,15 +571,23 @@ function Reader({ boot }: { boot: Boot }) {
   const lastUserScroll = useRef<number | undefined>(undefined);
   const ownScrollUntil = useRef(0);
   const noteUserScroll = (type: string, key?: string) => {
-    if (isUserScroll(type, key, Date.now(), ownScrollUntil.current)) lastUserScroll.current = Date.now();
+    if (isUserScroll(type, key, Date.now(), ownScrollUntil.current))
+      lastUserScroll.current = Date.now();
   };
-  const ownScroll = () => { ownScrollUntil.current = Date.now() + OWN_SCROLL_MS; };
+  const ownScroll = () => {
+    ownScrollUntil.current = Date.now() + OWN_SCROLL_MS;
+  };
   useEffect(() => {
     if (!fullReader || !boot.player_url) return;
     let cancelled = false;
     const heard = (event: Event) => {
       const d = (event as CustomEvent<PlaybackDetail | undefined>).detail;
-      if (!d || d.closed || d.edition_id !== boot.edition_id || d.unit_id !== boot.unit_id) {
+      if (
+        !d ||
+        d.closed ||
+        d.edition_id !== boot.edition_id ||
+        d.unit_id !== boot.unit_id
+      ) {
         followNow.current = undefined;
         setFollow(undefined);
         setFollowUnavailable(false);
@@ -585,16 +597,29 @@ function Reader({ boot }: { boot: Boot }) {
       const plan = mapFetchPlan(entry, Date.now());
       if (plan === "fetch") {
         followMaps.current.set(d.asset_id, "loading");
-        api<{ maps: (FollowMap & { asset_id: string })[] }>(`/content/mappings/${boot.edition_revision_id}?unit_id=${boot.unit_id}&asset_id=${d.asset_id}`)
+        api<{ maps: (FollowMap & { asset_id: string })[] }>(
+          `/content/mappings/${boot.edition_revision_id}?unit_id=${boot.unit_id}&asset_id=${d.asset_id}`,
+        )
           .then((r) => {
             const mine = r.maps.filter((m) => m.asset_id === d.asset_id);
-            followMaps.current.set(d.asset_id, { maps: mine.length ? mine : null });
-            if (!cancelled) window.dispatchEvent(new Event(PLAYBACK_REQUEST_EVENT)); // only after a successful load
+            followMaps.current.set(d.asset_id, {
+              maps: mine.length ? mine : null,
+            });
+            if (!cancelled)
+              window.dispatchEvent(new Event(PLAYBACK_REQUEST_EVENT)); // only after a successful load
           })
-          .catch(() => followMaps.current.set(d.asset_id, mapFailed(entry, Date.now()))); // backs off; no replay request
+          .catch(() =>
+            followMaps.current.set(d.asset_id, mapFailed(entry, Date.now())),
+          ); // backs off; no replay request
         return;
       }
-      if (plan === "wait" || !entry || entry === "loading" || "failures" in entry) return;
+      if (
+        plan === "wait" ||
+        !entry ||
+        entry === "loading" ||
+        "failures" in entry
+      )
+        return;
       const known = entry.maps as FollowMap[] | null;
       setFollowUnavailable(known === null);
       if (known === null) {
@@ -605,19 +630,33 @@ function Reader({ boot }: { boot: Boot }) {
       const before = followNow.current;
       const now = currentHighlight(known, before?.anchor ?? null, d.ms);
       if (!now.anchorId) return; // before the first segment or in a silent gap: keep what is shown
-      if (before && before.anchor === now.anchorId && before.playing === d.playing && before.range?.[0] === now.range?.[0] && before.range?.[1] === now.range?.[1]) return;
-      followNow.current = { anchor: now.anchorId, range: now.range, playing: d.playing };
+      if (
+        before &&
+        before.anchor === now.anchorId &&
+        before.playing === d.playing &&
+        before.range?.[0] === now.range?.[0] &&
+        before.range?.[1] === now.range?.[1]
+      )
+        return;
+      followNow.current = {
+        anchor: now.anchorId,
+        range: now.range,
+        playing: d.playing,
+      };
       setFollow(followNow.current);
     };
-    const byHand = (event: Event) => noteUserScroll(event.type, (event as KeyboardEvent).key);
+    const byHand = (event: Event) =>
+      noteUserScroll(event.type, (event as KeyboardEvent).key);
     window.addEventListener(PLAYBACK_EVENT, heard);
-    for (const type of ["wheel", "touchmove", "keydown"]) window.addEventListener(type, byHand, { passive: true });
+    for (const type of ["wheel", "touchmove", "keydown"])
+      window.addEventListener(type, byHand, { passive: true });
     window.addEventListener("scroll", byHand, { passive: true, capture: true });
     window.dispatchEvent(new Event(PLAYBACK_REQUEST_EVENT));
     return () => {
       cancelled = true;
       window.removeEventListener(PLAYBACK_EVENT, heard);
-      for (const type of ["wheel", "touchmove", "keydown"]) window.removeEventListener(type, byHand);
+      for (const type of ["wheel", "touchmove", "keydown"])
+        window.removeEventListener(type, byHand);
       window.removeEventListener("scroll", byHand, { capture: true });
       clearFollow(reading);
     };
@@ -627,15 +666,32 @@ function Reader({ boot }: { boot: Boot }) {
     const p = paragraphs.current.find((item) => item.anchor === follow.anchor);
     if (!p) return;
     const rect = drawFollow(p.node, follow.range);
-    if (!follow.playing || !rect || !autoscrollAllowed(Date.now(), lastUserScroll.current)) return;
+    if (
+      !follow.playing ||
+      !rect ||
+      !autoscrollAllowed(Date.now(), lastUserScroll.current)
+    )
+      return;
     const box = rect();
     if (preferences.reader_layout === "paginated") {
       const page = reading.clientWidth + 50;
-      const left = Math.floor((box.left - reading.getBoundingClientRect().left + reading.scrollLeft) / page) * page;
-      if (Math.abs(left - reading.scrollLeft) > 1) { ownScroll(); reading.scrollTo({ left, behavior: "instant" }); }
+      const left =
+        Math.floor(
+          (box.left -
+            reading.getBoundingClientRect().left +
+            reading.scrollLeft) /
+            page,
+        ) * page;
+      if (Math.abs(left - reading.scrollLeft) > 1) {
+        ownScroll();
+        reading.scrollTo({ left, behavior: "instant" });
+      }
     } else if (box.top < 0 || box.bottom > window.innerHeight) {
       ownScroll();
-      window.scrollBy({ top: box.top - window.innerHeight * 0.3, behavior: "instant" });
+      window.scrollBy({
+        top: box.top - window.innerHeight * 0.3,
+        behavior: "instant",
+      });
     }
   }, [follow, notes]);
   function selectParagraph(anchor: string) {
@@ -797,7 +853,13 @@ function Reader({ boot }: { boot: Boot }) {
           </a>
         ) : null}
         {fullReader && boot.player_url ? (
-          <button disabled={busy} onClick={() => { setStatus(""); setSwitchOpen(true); }}>
+          <button
+            disabled={busy}
+            onClick={() => {
+              setStatus("");
+              setSwitchOpen(true);
+            }}
+          >
             {t("switch_to_listen")}
           </button>
         ) : null}
@@ -905,7 +967,11 @@ function Reader({ boot }: { boot: Boot }) {
               </span>
             ))}
           </p>
-          {followUnavailable ? <p className="notice" role="status">{t("follow_unavailable")}</p> : null}
+          {followUnavailable ? (
+            <p className="notice" role="status">
+              {t("follow_unavailable")}
+            </p>
+          ) : null}
           {boot.member_id ? <QueueRecovery member={boot.member_id} /> : null}
           <div id="progress-conflict" className="notice" hidden={!conflict}>
             <p>{t("conflict")}</p>
@@ -998,8 +1064,46 @@ function Reader({ boot }: { boot: Boot }) {
           </section>
         </>
       ) : null}
-      {boot.preview ? <section className="preview-boundary" aria-label={t("preview_end")}><p>{t("preview_end")}</p><button onClick={() => setBoundaryOpen(true)}>{t("continue_beyond_preview")}</button><PreviewBoundary editionId={boot.edition_id} format="reader" freeAccess={boot.free_access === true} authenticated={boot.authenticated} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.reload()} /></section> : null}
-      {fullReader && boot.player_url ? <FormatSwitch open={switchOpen} onClose={() => setSwitchOpen(false)} busy={busy} status={status} onExact={() => void switchToListen()} chapterUrl={boot.player_url + `?unit_id=${boot.unit_id}`} target="audio" /> : null}
+      {boot.preview ? (
+        <section className="preview-boundary" aria-label={t("preview_end")}>
+          <p>{t("preview_end")}</p>
+          <button onClick={() => setBoundaryOpen(true)}>
+            {t("continue_beyond_preview")}
+          </button>
+          <PreviewBoundary
+            editionId={boot.edition_id}
+            format="reader"
+            freeAccess={boot.free_access === true}
+            authenticated={boot.authenticated}
+            titleUrl={
+              boot.title_url ||
+              `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`
+            }
+            signInUrl={
+              boot.sign_in_url ||
+              `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`
+            }
+            passUrl={
+              boot.pass_url ||
+              `/${document.documentElement.dataset.uiLocale || "en"}/pass/`
+            }
+            open={boundaryOpen}
+            onClose={() => setBoundaryOpen(false)}
+            onRetry={() => location.reload()}
+          />
+        </section>
+      ) : null}
+      {fullReader && boot.player_url ? (
+        <FormatSwitch
+          open={switchOpen}
+          onClose={() => setSwitchOpen(false)}
+          busy={busy}
+          status={status}
+          onExact={() => void switchToListen()}
+          chapterUrl={boot.player_url + `?unit_id=${boot.unit_id}`}
+          target="audio"
+        />
+      ) : null}
       <dialog
         ref={settings}
         id="reading-settings"
@@ -1073,7 +1177,7 @@ function Reader({ boot }: { boot: Boot }) {
                 ["compact", "comfortable", "wide"],
                 ["start", "justify"],
                 ["scroll", "paginated"],
-                ["light", "sepia", "dark", "true_black"],
+                ["system", "light", "sepia", "dark", "true_black"],
               ][index];
               return (
                 <label key={key}>
@@ -1097,6 +1201,7 @@ function Reader({ boot }: { boot: Boot }) {
                               {
                                 start: "align_start",
                                 justify: "align_justify",
+                                system: "match_device",
                                 light: "paper",
                                 dark: "ink",
                                 true_black: "black",
@@ -1234,7 +1339,9 @@ function Reader({ boot }: { boot: Boot }) {
   );
 }
 export function mount() {
-  document.querySelector<HTMLElement>("[data-preview-fallback]")?.setAttribute("hidden", "");
+  document
+    .querySelector<HTMLElement>("[data-preview-fallback]")
+    ?.setAttribute("hidden", "");
   mountIsland(document.getElementById("reader-controls"), () => (
     <Reader boot={readBootstrap<Boot>("reader-bootstrap")} />
   ));

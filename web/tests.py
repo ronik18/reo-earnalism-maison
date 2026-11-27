@@ -240,9 +240,25 @@ class ExperienceTests(TestCase):
         body = re.search(r"<body[^>]*>", html).group(0)
         self.assertIn("reader-theme-sepia", body)
         self.assertIn('data-reader-theme-saved="sepia"', body)
-        self.assertIn("logo-plate", html.split("<header", 1)[1].split("</header>", 1)[0])
-        self.assertIn("maison/room/reader-theme.js", html)
-        self.assertNotIn("<script>", html.split("<main", 1)[0].lower().replace("<script src", ""))
+        self.assertIn("room-logo-mini", html.split("<header", 1)[1].split("</header>", 1)[0])
+        self.assertNotIn("reader-theme.js", html)
+        self.assertIsNone(re.search(r"<script(?![^>]*\bsrc=)[^>]*>\s*\S", html.split("<main", 1)[0], re.I))
+
+    def test_signed_in_default_follows_the_device_and_a_saved_light_stays_light(self):
+        from accounts.models import Preferences
+        self.login()
+        url = f"/en/read/{self.edition}/{self.unit}/"
+        Preferences.objects.update_or_create(user=self.user, defaults={"reader_theme": "system"})
+        html = self.client.get(url).content.decode()
+        self.assertNotIn("reader-theme-", re.search(r"<body[^>]*>", html).group(0))
+        self.assertRegex(html, r"maison/room/reader-theme\.js\?v=")
+        self.assertEqual(Preferences._meta.get_field("reader_theme").default, "system")
+        Preferences.objects.filter(user=self.user).update(reader_theme="light")
+        html = self.client.get(url).content.decode()
+        self.assertIn("reader-theme-light", re.search(r"<body[^>]*>", html).group(0))
+        self.assertNotIn("reader-theme.js", html)
+        old = self.client.get("/api/v1/me/preferences").json()
+        self.assertEqual(self.api_write("PATCH", "/me/preferences", {"reader_theme": "system"}, old["version"]).status_code, 200)
 
     def test_anonymous_reader_has_no_server_theme_so_the_device_can_choose(self):
         html = self.client.get(f"/en/read/{self.edition}/{self.unit}/").content.decode()

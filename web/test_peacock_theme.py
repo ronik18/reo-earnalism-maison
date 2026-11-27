@@ -67,15 +67,21 @@ class LogoPlateTests(SimpleTestCase):
             css=(root/name).read_text()
             for rule in re.findall(r'([^{}]*)\{([^{}]*)\}',css):
                 selector,body=rule
-                if 'logo-plate' in selector and 'img' in selector or re.search(r'\.room-logo(-mini)?\s+img',selector):
+                if re.search(r'\.room-logo-mini\s+img',selector) or re.search(r'\.room-logo(-mini)?\s+img',selector):
                     for prop in ('filter','opacity','mix-blend-mode','backdrop-filter'):
                         self.assertNotRegex(body,r'(^|[;\s])'+prop+r'\s*:',(name,selector))
         request=RequestFactory().get('/en/read/x/y/');request.user=AnonymousUser()
         request.resolver_match=SimpleNamespace(url_name='reader')
         html=render_to_string('web/base.html',context(request,'en',focused=True),request=request)
-        self.assertRegex(html,r'class="room-logo room-logo-mini logo-plate"[^>]*>\s*<img src="[^"]*maison/logo\.png[^"]*"')
+        self.assertRegex(html,r'class="room-logo room-logo-mini"[^>]*>\s*<img src="[^"]*maison/logo\.png[^"]*"')
     def test_logo_plate_is_ivory_in_every_reader_theme(self):
         css=(Path(settings.BASE_DIR)/'static/maison/room/room.css').read_text()
-        self.assertRegex(css,r'\.logo-plate\{[^}]*background:var\(--ivory\)')
+        self.assertRegex(css,r'\.room-logo-mini\{[^}]*background:var\(--ivory\)')
         for theme in ('light','sepia','dark','true_black'):
             self.assertIn('body.reader-theme-'+theme,css)
+        self.assertRegex(css,r'reader-theme-dark \.room-evening :focus-visible[^{]*\{outline-color:var\(--gold-on-dark\)')
+    def test_new_header_rules_use_tokens_not_raw_hex_for_light_themes(self):
+        css=(Path(settings.BASE_DIR)/'static/maison/room/room.css').read_text()
+        for theme in ('light','sepia'):
+            for rule in re.findall(r'body\.reader-theme-'+theme+r'[^{]*\{([^}]*)\}',css):
+                self.assertNotRegex(rule,r'#[0-9A-Fa-f]{3,6}\b')

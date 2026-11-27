@@ -18163,6 +18163,7 @@
           "reader_theme": {
             "type": "string",
             "enum": [
+              "system",
               "light",
               "sepia",
               "dark",
@@ -18305,6 +18306,7 @@
           "reader_theme": {
             "type": "string",
             "enum": [
+              "system",
               "light",
               "sepia",
               "dark",

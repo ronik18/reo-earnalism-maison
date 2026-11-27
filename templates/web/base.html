@@ -31,7 +31,7 @@
 {% if focused %}<header class="room-top room-evening"><div class="room-wrap">
   <a class="room-back" href="{% if edition.edition_id %}{% url 'web:title' ui_locale edition.edition_id %}{% else %}{% url 'web:home' ui_locale %}{% endif %}"><svg aria-hidden="true"><use href="#i-back"/></svg><span>{% ui 'back' %}</span></a>
   <span class="room-evening-title">{{ edition.title|default:ui.site_name }}</span>
-  <a class="room-logo room-logo-mini logo-plate" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="" width="1400" height="500"></a>
+  <a class="room-logo room-logo-mini" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="" width="1400" height="500"></a>
 </div></header>{% else %}<header class="room-top"><div class="room-wrap">
   <a class="room-logo" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="Earnalism — Where Learning Becomes Earning — A Reo Enterprise venture" width="1400" height="500"></a>
   <nav class="room-nav" aria-label="Main">

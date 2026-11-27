@@ -50,7 +50,7 @@ class Preferences(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE,related_name='preferences')
     locale=models.CharField(max_length=2,default='en',choices=[('en','English'),('bn','বাংলা')])
     theme=models.CharField(max_length=12,default='light',choices=[(x,x) for x in ['light','dark','true_black']])
-    reader_theme=models.CharField(max_length=12,default='light',choices=[(x,x) for x in ['light','sepia','dark','true_black']])
+    reader_theme=models.CharField(max_length=12,default='system',choices=[(x,x) for x in ['system','light','sepia','dark','true_black']])
     reader_font_size=models.PositiveSmallIntegerField(default=20)
     reader_typeface=models.CharField(max_length=12,default='serif',choices=[('serif','Serif'),('sans','Sans')])
     reader_line_height=models.DecimalField(max_digits=3,decimal_places=2,default='1.80')
@@ -70,6 +70,7 @@ class Preferences(models.Model):
     class Meta:
         db_table='maison_preferences'
         constraints=[models.CheckConstraint(condition=models.Q(reader_font_size__in=[16,20,23,26,30]),name='maison_pref_font_size'),
+                     models.CheckConstraint(condition=models.Q(reader_theme__in=['system','light','sepia','dark','true_black']),name='maison_pref_reader_theme'),
                      models.CheckConstraint(condition=models.Q(reader_line_height__gte=1.5,reader_line_height__lte=2.4),name='maison_pref_leading'),
                      models.CheckConstraint(condition=models.Q(audio_quality_kbps__in=[48,96]),name='maison_pref_audio_quality'),
                      models.CheckConstraint(condition=models.Q(daily_goal_minutes__gte=5,daily_goal_minutes__lte=120),name='maison_pref_goal')]
