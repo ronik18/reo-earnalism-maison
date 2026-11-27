@@ -168,8 +168,11 @@ than the highest n ever issued for the job, including rows released since (the j
 keeps `modal_runs_issued`).
 
 **The figures are estimates, reconciled from the bill.** Every Modal amount the ledger writes is
-wall seconds x `L4_USD_PER_S` ($0.000222) x `MODAL_OVERHEAD_FACTOR` (1.25, which covers the CPU and
-memory surcharges and the image build that the GPU rate leaves out), for the worst case and for the
+wall seconds x the job kind's GPU rate (`USD_PER_S[GPU_FOR_KIND[kind]]`) x `MODAL_OVERHEAD_FACTOR` (1.25, which covers the CPU and
+memory surcharges and the image build that the GPU rate leaves out). One GPU per kind: narration and music on an
+L4 ($0.000222/s, about $0.80/h); stills on an L40S, 48 GB ($0.000542/s, about $1.95/h), because the
+FLUX.1-schnell transformer alone is about 24 GB in bf16 and ran out of memory on an L4 (22 GB usable); rates are
+Modal's published per-second GPU rates (Oct-Nov 2026), CPU and memory billed on top, for the worst case and for the
 recorded spend alike. The recorded estimate is at most the worst case the caps were checked with
 (the wall clock also holds image build and GPU queue time, which the function timeout does not
 bound and Modal does not bill as GPU time); a larger wall-clock figure is kept on the row as
@@ -183,7 +186,7 @@ payment method, before any request is made or re-made.** That limit is the hard 
 is set, hold every Modal request.
 
 - Before contacting Modal, `modal-run` forecasts the worst case the function timeout allows,
-  `(DEADLINE_SECONDS + 900) x L4_USD_PER_S x MODAL_OVERHEAD_FACTOR`, and refuses (exit 3, naming spent, forecast and
+  `(DEADLINE_SECONDS + 900) x USD_PER_S[GPU_FOR_KIND[kind]] x MODAL_OVERHEAD_FACTOR`, and refuses (exit 3, naming spent, forecast and
   remaining) if the month's spend plus that exceeds $30.00, or the title's lifetime Modal spend
   (every month, pending rows included) plus that exceeds $6.00. Hold and ask the owner; never run
   past either. A run that may still be going in the next UTC month (start + timeout + 1800 s of

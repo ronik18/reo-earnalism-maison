@@ -11,7 +11,7 @@
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> [--units <CU>]
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli modal-run <job_id> --root <dir> --colab-units <CU, 0 if none> [--download <dir>] [--dry-run]
-                         (runs the built notebook headlessly on a Modal L4; --dry-run only checks and prints the plan;
+                         (runs the built notebook headlessly on a Modal GPU (L4, or L40S for stills); --dry-run only checks and prints the plan;
                           leaves the job folder `import` expects; refuses (exit 3) past the 30 USD UTC-month or the
                           6 USD lifetime title Modal cap; keeps --colab-units (the CU Colab already showed for the job)
                           on the Colab caps and releases the rest of its CU reservation (Modal is capped in USD only);
@@ -1128,14 +1128,14 @@ def _move_to_modal(rec, ledger, job_id, colab_units, now):
 
 
 def _reserve_modal(args, rec, job, colab_units, local=False):
-    """Both Modal dollar caps against the worst case (deadline + timeout margin at the L4 rate x
+    """Both Modal dollar caps against the worst case (deadline + timeout margin at the kind's GPU rate x
     MODAL_OVERHEAD_FACTOR, pending rows counted), the move to Modal, then the provisional worst-case pending row. The row
     counts against the caps until the actual spend replaces it; if the process dies (Ctrl-C, kill,
     an error after the paid run) it stays pending until `modal-settle`. Returns
     (ledger, run_id, worst_usd)."""
     ledger, month = _ledger(rec, args), _month()
     plan = modal_run.plan(job["notebook"], job["inputs_zip"])
-    worst = modal_run.modal_cost(plan["timeout_seconds"])  # deadline + margin, x overhead factor
+    worst = modal_run.modal_cost(plan["timeout_seconds"], plan["gpu"])  # deadline + margin, x overhead factor
     try:
         ledger.check_modal(month, rec.data["title_slug"], worst, rec.data["source"].get("edition_id"))
         _check_spill(ledger, job, worst)
@@ -1356,6 +1356,7 @@ def cmd_modal_request(args):
             "requested_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "status": "requested", "colab_units": colab_units, "pending_run_id": run_id,
             "worst_case_usd": round(worst, 6),
+            "gpu": modal_run.plan(job["notebook"], job["inputs_zip"])["gpu"],
             "r2_prefix": modal_requests.r2_prefix(rec.data["title_slug"], args.job_id, run_id)})
     except BaseException:  # no request file: the row it would carry must not stay pending
         try:

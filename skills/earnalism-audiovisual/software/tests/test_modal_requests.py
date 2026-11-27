@@ -97,8 +97,8 @@ class ModalRequestTests(unittest.TestCase):
 
     def rate(self, usd):
         """Make the request's worst case (deadline + margin x the overhead factor) equal usd."""
-        return mock.patch.object(modal_run, "L4_USD_PER_S",
-                                 usd / (self.timeout_s * modal_run.MODAL_OVERHEAD_FACTOR))
+        return mock.patch.dict(modal_run.USD_PER_S, {"L4":
+                                 usd / (self.timeout_s * modal_run.MODAL_OVERHEAD_FACTOR)})
 
     def request(self, *extra):
         if "--colab-units" not in extra:
@@ -128,7 +128,7 @@ class ModalRequestTests(unittest.TestCase):
         self.assertRegex(req["requested_at"], r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\+00:00$")
         self.assertEqual(req["colab_units"], 0.75)
         self.assertEqual(req["r2_prefix"], f"gpu-jobs/{self.slug}/{self.job_id}/run-1/")
-        worst = modal_run.modal_cost(self.timeout_s)
+        worst = modal_run.modal_cost(self.timeout_s, "L4")
         self.assertEqual(self.rows(), [("pending", round(worst, 6))])
         self.assertEqual(req["pending_run_id"], self.ledger.modal_rows(job_id=self.job_id)[0]["run_id"])
         (entry,) = [e for e in json.loads(self.ledger_bytes()) if e.get("job_id") == self.job_id]
@@ -561,7 +561,7 @@ class ModalRequestTests(unittest.TestCase):
         self.set_status("running")
         seen = []
 
-        def runner(notebook, inputs_zip, download_dir, gpu="L4", on_contact=None, expected_sha256=None):
+        def runner(notebook, inputs_zip, download_dir, on_contact=None, expected_sha256=None):
             self.assertNotIn("modal_contacted_at", self.req())
             on_contact()
             seen.append(self.req()["modal_contacted_at"])

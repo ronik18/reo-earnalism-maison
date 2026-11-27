@@ -86,7 +86,7 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
   Spend is capped in dollars only (owner decision of 26 Nov 2026): **$30 per UTC month** and
   **$6 per title over its whole life**. The worst case is checked against both before Modal is
   contacted and recorded first as a `pending` ledger row, replaced afterwards by an estimate (wall
-  seconds x the L4 rate x 1.25 for CPU, memory and image build); after each run, reconcile the row
+  seconds x the kind's GPU rate x 1.25 for CPU, memory and image build; GPU per kind: narration and music on an L4 at $0.000222/s, stills on an L40S (48 GB) at $0.000542/s, because FLUX.1-schnell does not fit an L4); after each run, reconcile the row
   from the Modal usage page with `modal-settle <job_id> --usd <billed> [--run <run_id>]` (also for a
   run that died). The ledger is an estimate, not a hard dollar stop: **when the owner adds the Modal
   payment method, the owner also sets the workspace spend limit to $30/month or less, before any
