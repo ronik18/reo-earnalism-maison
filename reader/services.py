@@ -112,11 +112,13 @@ def _correction_map(live,replaced_id):
 def _mapped_point(record,old_revision_id,new_revision_id,unit_id,anchor_id,offset,side):
     """(unit_id, anchor_id, offset) on the replaced revision carried onto its correction, or None when not mapped."""
     from operations.revision_remap import map_offset,snap
-    unit,anchor=record['unit_map'].get(str(unit_id)),record['anchor_map'].get(str(anchor_id))
+    unit_id,anchor_id=str(public_uuid(unit_id)),str(public_uuid(anchor_id))  # normalised like every other id lookup
+    unit,anchor=record['unit_map'].get(unit_id),record['anchor_map'].get(anchor_id)
     if not unit or not anchor or type(offset)!=int:return None
-    old=Paragraph.objects.filter(anchor_id=public_uuid(anchor_id),unit__revision_id=old_revision_id).values_list('text',flat=True).first()
-    new=Paragraph.objects.filter(anchor_id=anchor,unit__revision_id=new_revision_id).values_list('text',flat=True).first()
-    if old is None or new is None or not 0<=offset<=len(old):return None
+    # The anchor must belong to the supplied unit of the replaced revision, and the offset be a boundary there.
+    old=Paragraph.objects.filter(anchor_id=anchor_id,unit_id=unit_id,unit__revision_id=old_revision_id).values_list('text',flat=True).first()
+    new=Paragraph.objects.filter(anchor_id=anchor,unit_id=unit,unit__revision_id=new_revision_id).values_list('text',flat=True).first()
+    if old is None or new is None or not _boundary(old,offset):return None
     return unit,anchor,snap(new,map_offset(old,new,offset,side))
 
 
@@ -133,10 +135,15 @@ def set_progress(user,edition_id,format,data,base_version,territory='IN'):
             if record and isinstance(location,dict) and set(location)=={'format','unit_id','anchor_id','offset_chars'}:
                 try:point=_mapped_point(record,public_uuid(data['edition_revision_id']),live.id,location['unit_id'],location['anchor_id'],location['offset_chars'],'start')
                 except DomainError:point=None
-            if not point:raise DomainError('edition_revision_changed','Reload this edition revision before choosing a position.',409)
-            location={**location,'unit_id':point[0],'anchor_id':point[1],'offset_chars':point[2]}
-        revision=authorize_revision(user,edition.live_revision_id,format,territory=territory)
-        loc,fraction=_location(revision,format,location)
+            stale=DomainError('edition_revision_changed','Reload this edition revision before choosing a position.',409)
+            if not point:raise stale
+            try:  # a mapped position that the live revision cannot take keeps today's 409
+                revision=authorize_revision(user,edition.live_revision_id,format,territory=territory)
+                loc,fraction=_location(revision,format,{**location,'unit_id':point[0],'anchor_id':point[1],'offset_chars':point[2]})
+            except DomainError:raise stale from None
+        else:
+            revision=authorize_revision(user,edition.live_revision_id,format,territory=territory)
+            loc,fraction=_location(revision,format,location)
         row=Progress.objects.select_for_update().filter(user=user,edition=edition,format=format).first()
         current=progress_data(row,edition,format)
         if current['version']!=base_version:raise DomainError('version_conflict','Progress changed on another device.',412,current)
@@ -241,10 +248,13 @@ def create_annotation(user,data,operation_id,territory='IN'):
         try:revision=authorize_revision(user,data['edition_revision_id'],territory=territory)
         except DomainError as error:
             if error.code!='content_unavailable':raise
-            old_id=public_uuid(data['edition_revision_id'])
-            found=_correction_for(user,old_id,territory)
-            value=_mapped_range(found[1],old_id,found[0].id,value,data.get('kind')) if found else None
-            if value is None:raise
+            try:  # any failure to map onto the correction keeps today's response (the original error)
+                old_id=public_uuid(data['edition_revision_id'])
+                found=_correction_for(user,old_id,territory)
+                value=_mapped_range(found[1],old_id,found[0].id,value,data.get('kind')) if found else None
+                if value is None:raise error
+                _range(found[0],value,data.get('kind'))
+            except DomainError:raise error from None
             revision=found[0]
         kind=data.get('kind');color=data.get('color');note=_note(data.get('note_text'))
         if kind not in ['bookmark','highlight','note'] or color not in [None,'gold','mint','rose','lavender'] or (kind=='highlight' and color is None) or (kind=='note' and not note):raise DomainError('validation_error','Invalid annotation fields.',422)
@@ -261,8 +271,10 @@ def create_annotation(user,data,operation_id,territory='IN'):
             record=_correction_map(live,revision.id)
             mapped=_mapped_range(record,revision.id,live.id,value,kind) if record else None
             if mapped is not None:  # otherwise today's behaviour: the row stays on the revision it was made against
-                revision=authorize_revision(user,live.id,territory=territory)
-                location,quote,truncated=_range(revision,mapped,kind)
+                try:
+                    target=authorize_revision(user,live.id,territory=territory)
+                    location,quote,truncated,revision=(*_range(target,mapped,kind),target)
+                except DomainError:pass  # the correction cannot take it: today's behaviour
         row=Annotation.objects.create(id=identifier,user=user,revision=revision,kind=kind,range=location,color=color,note_text=note,quoted_text=quote,quoted_text_truncated=truncated)
         return 201,annotation_data(row,user),row.version
     return apply_operation(user,operation_id,'annotation.create',data,mutate)

@@ -1000,7 +1000,10 @@ def move_reader_state(user,replaced_id,revision):
     def after_commit():
         try:
             with transaction.atomic():
-                if not Edition.objects.filter(pk=edition_id,live_revision_id=revision_id).exists():return  # superseded since
+                from django.db import connection
+                with connection.cursor() as cursor:  # FOR SHARE: a newer publish waits until this pass commits
+                    cursor.execute('SELECT 1 FROM maison_edition WHERE id=%s AND live_revision_id=%s FOR SHARE',[edition_id,revision_id])
+                    if cursor.fetchone() is None:return  # superseded since
                 current=Revision.objects.get(pk=revision_id)
                 late=revision_remap.remap_reader_state(replaced_id,current)
                 if late['progress'] or late['annotations'] or late['left_unmapped']:

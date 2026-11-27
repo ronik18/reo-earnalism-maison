@@ -701,6 +701,73 @@ class ReviseStageTests(TestCase):
         self.assertEqual(row.revision_id, new.id)
         self.assertEqual(row.range["start_anchor_id"], new.validation_evidence["source_revision"]["anchor_map"][str(p[10].anchor_id)])
 
+    def assert_domain(self, call, code, status):
+        from core.api import DomainError
+        with self.assertRaises(DomainError) as raised:
+            call()
+        self.assertEqual((raised.exception.code, raised.exception.status), (code, status))
+
+    def test_a_highlight_that_collapses_after_snapping_keeps_the_original_404(self):
+        import uuid
+        from operations import revision_remap
+        from reader import services as reader
+        from reader.models import Annotation
+        old, new, p = self.publish_correction()
+        user = self.member("collapse@example.test")
+        end = p[10].text.index(" ", 5)
+        data = {**self.note_input(old.id, p[10].unit_id, p[10].anchor_id, 0, end), "kind": "highlight", "color": "gold", "note_text": None}
+        with mock.patch.object(revision_remap, "map_offset", return_value=0):  # both ends snap to 0: a collapsed highlight
+            self.assert_domain(lambda: reader.create_annotation(user, data, str(uuid.uuid4())), "content_unavailable", 404)
+        self.assertFalse(Annotation.objects.filter(user=user).exists())
+
+    def test_a_correction_the_reader_cannot_access_keeps_todays_responses(self):
+        import uuid
+        from library.models import Revision, Rights
+        from reader import services as reader
+        from reader.models import Annotation
+        old, new, p = self.publish_correction()
+        Rights.objects.filter(revision=new).update(approved=False)  # the live revision's access differs (403 for it)
+        user = self.member("noaccess@example.test")
+        end = p[10].text.index(" ", 5)
+        note = self.note_input(old.id, p[10].unit_id, p[10].anchor_id, 0, end)
+        self.assert_domain(lambda: reader.create_annotation(user, note, str(uuid.uuid4())), "content_unavailable", 404)
+        self.assert_domain(lambda: reader.set_progress(user, old.edition_id, "reader",
+                           self.position_input(old.id, p[10].unit_id, p[10].anchor_id, 0), 0), "edition_revision_changed", 409)
+        # The race path: the revision was read as live just before the switch; the row stays where it was made.
+        real = reader.authorize_revision
+        calls = []
+
+        def stale_then_real(u, revision, *args, **kwargs):
+            calls.append(revision)
+            return Revision.objects.select_related("edition").get(pk=old.id) if len(calls) == 1 else real(u, revision, *args, **kwargs)
+        with mock.patch.object(reader, "authorize_revision", side_effect=stale_then_real):
+            body = reader.create_annotation(user, self.note_input(old.id, p[10].unit_id, p[10].anchor_id, 0, end), str(uuid.uuid4()))[1]
+        self.assertEqual(Annotation.objects.get(pk=body["annotation_id"]).revision_id, old.id)
+
+    def test_mapped_points_require_the_supplied_unit_a_boundary_and_normalise_ids(self):
+        import uuid
+        from library.models import Paragraph, Revision
+        from reader import services as reader
+        from reader.models import Progress
+        old, new, p = self.publish_correction()
+        text = p[10].text
+        inside = next(i for i in range(1, len(text)) if not reader._boundary(text, i))  # inside a grapheme cluster
+        user = self.member("points@example.test")
+        stale = lambda unit, anchor, offset: (lambda: reader.set_progress(  # noqa: E731
+            user, old.edition_id, "reader", self.position_input(old.id, unit, anchor, offset), 0))
+        self.assert_domain(stale(p[10].unit_id, p[10].anchor_id, inside), "edition_revision_changed", 409)
+        fake_unit = str(uuid.uuid4())  # a unit the map names, but the anchor belongs to another unit of R_old
+        evidence = new.validation_evidence
+        evidence["source_revision"]["unit_map"][fake_unit] = str(new.units.get().id)
+        Revision.objects.filter(pk=new.pk).update(validation_evidence=evidence)
+        self.assert_domain(stale(fake_unit, p[10].anchor_id, 0), "edition_revision_changed", 409)
+        self.assertFalse(Progress.objects.filter(user=user).exists())
+        status = reader.set_progress(user, old.edition_id, "reader", self.position_input(
+            old.id, str(p[10].unit_id).upper(), str(p[10].anchor_id).upper(), 0), 0)[0]  # uppercase ids, as elsewhere
+        self.assertEqual(status, 200)
+        target = Paragraph.objects.get(unit__revision=new, ordinal=10)
+        self.assertEqual(Progress.objects.get(user=user).location["anchor_id"], str(target.anchor_id))
+
     def test_a_write_against_an_unrelated_stale_revision_keeps_todays_response(self):
         import uuid
         from core.api import DomainError
