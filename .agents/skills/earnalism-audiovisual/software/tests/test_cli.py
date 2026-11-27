@@ -1149,6 +1149,25 @@ class CliTests(RoundTwo, unittest.TestCase):
                              "fail" if tag == "late" else "pass", tag)
             self.assertAlmostEqual(report["items"]["reel-1"]["hook_onset_s"], lead, delta=0.03)
 
+    def test_qc_runs_the_cinematic_gates_on_a_shots_film(self):
+        self.init_and_plan()
+        fd = self.root / "film" / "film-01"
+        for sub in ("shots", "stills", "voice", "audio"):
+            (fd / sub).mkdir(parents=True)
+        video = fd / "film-01.mp4"
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", "testsrc2=s=160x90:d=4:r=24",
+                        "-f", "lavfi", "-i", "sine=f=220:d=4:r=48000", "-shortest", "-pix_fmt", "yuv420p",
+                        str(video)], check=True)
+        (fd / "shots" / "s1.json").write_text(json.dumps({"scene_id": "s1", "seconds": 4.0, "shots": [
+            {"n": 1, "motion": "glide", "start": 0.0, "end": 4.0, "sound": {"sfx": []}}]}))
+        Record.load(self.root).add_artifact("film", video, {"target": "film-01", "mode": "shots", "scenes": ["s1"]})
+        run("qc", "--root", self.root)
+        item = json.loads((self.root / "qc" / "report.json").read_text())["items"]["film-01"]
+        for gate in ("new_info", "holds", "black_bars", "hitches", "flashes"):
+            self.assertIn(gate, item["checks"])
+        self.assertTrue(any("margin" in r for r in item["not_run"]))     # no mix or voice on disk: said, not passed
+        self.assertNotIn("margin", item["checks"])
+
     def scores(self):
         d = self.d / "scores"
         d.mkdir()

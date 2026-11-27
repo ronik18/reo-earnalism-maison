@@ -1958,8 +1958,18 @@ def cmd_qc(args):
         m = mix.measure(video)
         sheet = qc.contact_sheet(video, out / f"{target}-contact.jpg")
         lufs = REEL_LUFS if a["kind"] == "reel" else FILM_LUFS
-        checks = {"loudness": abs(m["lufs"] - lufs) <= LUFS_TOL, "true_peak": m["true_peak"] <= TP_MAX}
+        shots_film = a["kind"] == "film" and a["meta"].get("mode") == "shots"   # R10: -1.5 dBTP, not -1.0
+        checks = {"loudness": abs(m["lufs"] - lufs) <= LUFS_TOL,
+                  "true_peak": m["true_peak"] <= (film.SHOT_TP_MAX if shots_film else TP_MAX)}
         item = {"sha256": sha256_file(video), **m, "contact_sheet": sheet.name}
+        if shots_film:
+            gate_checks, detail, not_run = qc.film_gates(video, rec.root / "film" / target,
+                                                         a["meta"]["scenes"], _plan(rec)["language"])
+            checks.update(gate_checks)
+            item["gates"] = detail
+            if not_run:
+                item["not_run"] = not_run
+                report["advisory_only"] += [f"{target}: {r}" for r in not_run]
         if a["kind"] == "reel":
             item["loop_ssim"] = qc.loop_score(video)
             checks["loop_close"] = item["loop_ssim"] >= LOOP_MIN
@@ -2323,7 +2333,9 @@ def cmd_cue(args):
     out = film_dir / "audio" / f"{args.scene}.mix.wav"
     res = cue.scene_mix(voice, [s["start"] for s in sp["shots"]], sp["peak"]["at"], stems,
                         items["ambience"], items["foley"], out, sp["seconds"])
-    _write_json(out.with_suffix(".json"), {"scene": args.scene, "stems": roles, "peak_at": sp["peak"]["at"], **res})
+    _write_json(out.with_suffix(".json"), {"scene": args.scene, "stems": roles, "peak_at": sp["peak"]["at"],
+                                      "fx": {k: [{**e, "path": str(Path(e["path"]).resolve())} for e in v] for k, v in items.items()},
+                                      **res})
     print(f"Mixed {out}: {res['lufs']:.1f} LUFS, {res['true_peak']:.1f} dBTP, voice over music {res['voice_over_music_db']:.1f} dB.")
     return 0
 
