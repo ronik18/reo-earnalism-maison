@@ -8723,6 +8723,20 @@
       },
       "path": "jobs/stills-film-01-r7-candidates/stills.ipynb",
       "sha256": "8d622c3d3c36fbc22528f05d362805ab9661932250192c6403289727e8f651f1"
+    },
+    {
+      "bytes": 15241,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.9593299999999999,
+        "inputs_zip": "jobs/stills-film-01-r7-candidates2/inputs.zip",
+        "job_id": "stills-film-01-r7-candidates2",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r7-candidates2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r7-candidates2/stills.ipynb",
+      "sha256": "6b5c6c60ce337cf20094fb47466af671d92710c1d48f1a3efb8d5d1dba8eefeb"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -10020,6 +10034,51 @@
       "at": "2026-11-27T07:38:24.263884+00:00",
       "detail": {
         "job_id": "stills-film-01-r7-candidates",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T08:06:30.039997+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r7-candidates",
+        "reason": "selection round: candidates viewed, never imported; chosen seeds go to r7",
+        "runner": "modal",
+        "units": 0.0
+      },
+      "result": "closing",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T08:06:30.051501+00:00",
+      "detail": {
+        "imported": false,
+        "job_id": "stills-film-01-r7-candidates",
+        "ran": true,
+        "reason": "selection round: candidates viewed, never imported; chosen seeds go to r7",
+        "runner": "modal",
+        "units": 0.0,
+        "usd": 0.840138
+      },
+      "result": "closed",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T08:06:36.001905+00:00",
+      "detail": {
+        "forecast_units": 0.9593299999999999,
+        "job_id": "stills-film-01-r7-candidates2",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T08:06:36.011197+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r7-candidates2",
         "kind": "stills",
         "target": "film-01"
       },
