@@ -21,6 +21,14 @@ median exists the absolute WORDS_CEILING is uncalibrated, so exceeding it is onl
 "warnings": ["words"], metrics.words.provisional true), never a redo. With no transcript or no source the
 check is NOT RUN: recorded as such (metrics.words.run false, "not_run": ["words"]) and the result's
 `pass` is None, never True.
+
+Uncalibrated absolute limits (owner ruling, final review I4): pitch_spread, monotone, no_breath, tail and clicks
+are fixed numbers from the 26 Nov review that no accepted v4 take has calibrated yet (the owner-endorsed scene 14
+v4 take runs 9.012 s without a pause in a clause the book prints without one). Until the profile carries a
+calibrated limit for a code (profile key "calibrated_limits": {code: limit}, written only after listening to
+accepted v4 takes), exceeding it is a WARNING with the measured value and the limit ("warnings" and
+"warning_values"), never a redo, exactly like the words check's provisional ceiling. digital_zero and true_peak
+(signal facts) and the profile-relative checks stay redos.
 """
 import hashlib
 import json
@@ -52,6 +60,12 @@ WORDS_MARGIN = 0.05
 WORDS_CEILING = 0.15
 WORDS_MIN_TAKES = 3
 TRANSCRIPT_SCHEMA = "earnalism.audiovisual-transcripts.v1"
+# code -> (LIMITS key, metrics key, "max" when a measured value above the limit fails, "min" when below)
+PROVISIONAL = {"pitch_spread": ("pitch_spread_st", "pitch_spread_st", "min"),
+               "monotone": ("monotone_frac", "monotone_frac", "max"),
+               "no_breath": ("max_run_s", "max_run_s", "max"),
+               "tail": ("tail_db", "tail_dbfs", "max"),
+               "clicks": ("clicks_per_s", "click_rate", "max")}
 _BN_DIGITS = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
 
 
@@ -338,7 +352,22 @@ def check(take: Path, expected_s: float, prof: dict, prev_tail: Path | None = No
     take = Path(take)
     m = measure(take)
     fails: list[str] = []
+    warns: list[str] = []
+    values: dict = {}
     L = LIMITS
+    calibrated = prof.get("calibrated_limits") if isinstance(prof.get("calibrated_limits"), dict) else {}
+
+    def absolute(code: str) -> None:
+        """An uncalibrated absolute limit warns with its measured value; a calibrated one is a redo."""
+        lim_key, met_key, sense = PROVISIONAL[code]
+        limit = calibrated.get(code, L[lim_key])
+        v = m[met_key]
+        if (v < limit) if sense == "min" else (v > limit):
+            if code in calibrated:
+                fails.append(code)
+            else:
+                warns.append(code)
+                values[code] = {"measured": round(float(v), 4), "limit": limit, "calibrated": False}
     if abs(m["duration_s"] - expected_s) > L["duration_pct"] * expected_s:
         fails.append("duration")
     if not m.get("empty"):
@@ -346,21 +375,16 @@ def check(take: Path, expected_s: float, prof: dict, prev_tail: Path | None = No
             fails.append("pitch_median")
         elif "pitch_median_hz" in prof and abs(12 * np.log2(m["pitch_median_hz"] / prof["pitch_median_hz"])) > L["pitch_median_st"]:
             fails.append("pitch_median")
-        if m["pitch_spread_st"] < L["pitch_spread_st"]:
-            fails.append("pitch_spread")
-        if m["monotone_frac"] > L["monotone_frac"]:
-            fails.append("monotone")
-        if m["max_run_s"] > L["max_run_s"]:
-            fails.append("no_breath")
-    if m["tail_dbfs"] > L["tail_db"]:
-        fails.append("tail")
+        absolute("pitch_spread")
+        absolute("monotone")
+        absolute("no_breath")
+    absolute("tail")
     if not m.get("empty"):
         if "brightness_db" in prof and m["brightness_db"] is not None and abs(m["brightness_db"] - prof["brightness_db"]) > L["brightness_db"]:
             fails.append("brightness")
         if "jump_rate" in prof and m["jump_rate"] > L["jump_ratio"] * max(prof["jump_rate"], JUMP_FLOOR):
             fails.append("jumps")
-        if m["click_rate"] > L["clicks_per_s"]:
-            fails.append("clicks")
+        absolute("clicks")
     if m["zero_run_s"] > L["zero_run_s"]:
         fails.append("digital_zero")
     if prev_tail is not None and not m.get("empty"):
@@ -376,7 +400,7 @@ def check(take: Path, expected_s: float, prof: dict, prev_tail: Path | None = No
             fails.append("join")
     if m["true_peak_dbfs"] >= L["true_peak_db"]:
         fails.append("true_peak")
-    not_run, warns = [], []
+    not_run = []
     if transcript is not None and transcript.strip() and source is not None and source.strip():
         limit, provisional = words_threshold(prof)
         c = cer(source, transcript)
@@ -393,5 +417,7 @@ def check(take: Path, expected_s: float, prof: dict, prev_tail: Path | None = No
     if not_run:
         res["not_run"] = not_run
     if warns:
-        res["warnings"] = warns
+        res["warnings"] = sorted(warns, key=CODES.index)
+    if values:
+        res["warning_values"] = values
     return res

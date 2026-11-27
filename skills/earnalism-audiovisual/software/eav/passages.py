@@ -5,7 +5,9 @@ ends and never alters a character, so the passages concatenated are the scene te
 holds the tagged scripts to the voice rules: the words are the book's, at most one audio tag per sentence,
 no passage opens on a bare `[softly]`, and a mood tag still in force at the end of a passage is carried
 into the next one. After `retime` and `voicecheck` of each passage, `join_passages` builds the scene wav:
-each seam is the take's own room tone (never digital zero) joined by 10 ms equal-power crossfades.
+each seam is the take's own room tone (never digital zero) joined by 40 ms equal-power crossfades (the binding
+30-50 ms), and the scene gets its R9 lead-in (room tone so the first word lands LEAD_IN_S in) and an R4 tail of room
+tone (TAIL_S) for the J/L-cut into the next scene.
 Needs numpy and ffmpeg (through eav.retime).
 """
 import random
@@ -27,8 +29,11 @@ from .text import sentences
 CPS_BN = 13.0
 MIN_S, MAX_S = 15.0, 30.0
 SEAM_S = 0.9            # room tone between two passages: the middle of the sentence pause (0.8-1.0 s)
-XF_S = 0.010            # crossfade at each join
-EDGE_KEEP_S = 0.020     # take edge kept beyond the last/first audible sample at a seam (2 x the crossfade)
+XF_S = 0.040            # crossfade at each join: the binding 30-50 ms (spec section 9, global constraints)
+EDGE_KEEP_S = 0.080     # take edge kept beyond the last/first audible sample at a seam (2 x the crossfade)
+LEAD_IN_S = 0.85        # R9: 0.5-1 s of breath before the first word (the reference scene's 0.85 s)
+LEAD_IN_RANGE = (0.5, 1.0)
+TAIL_S = 2.0            # R4: room tone after the last word, the room a J/L-cut into the next scene needs
 EDGE_DB = -50.0         # below this a sample is take edge silence, not speech
 PAUSE_TAGS = {"pause", "short pause", "long pause"}   # tags that do not set a mood
 MIN_RUN = 3             # passages a run needs for its own measured rate (below: the --cps estimate, warning only)
@@ -202,12 +207,16 @@ def expected_durations(chars: list[int], durations: list[float], cps: float = CP
     return [c / cps for c in chars], False
 
 
-def join_passages(takes: list[Path], out: Path, seams: list[float] | None = None, seam_s: float = SEAM_S) -> dict:
+def join_passages(takes: list[Path], out: Path, seams: list[float] | None = None, seam_s: float = SEAM_S,
+                  lead_in_s: float | None = None, tail_s: float | None = None) -> dict:
     """Join the retimed passage wavs into one scene wav at `out`. Each seam is the take's own room tone
     (retime.room_tone of the passage before it, -62...-68 dBFS) of `seams[i]` seconds (default `seam_s`), joined
-    to both sides by 10 ms equal-power crossfades; the take edges beside a seam are cut back to 20 ms of the
-    audible speech, so no raw edge silence (or digital zero) is left in the seam. The outer ends are the
-    takes' own. Returns {"passages", "duration", "crossfade_ms", "seams": [{"at", "length_s"}]}."""
+    to both sides by 40 ms equal-power crossfades; the take edges beside a seam are cut back to 80 ms of the
+    audible speech, so no raw edge silence (or digital zero) is left in the seam. With `lead_in_s` the scene opens
+    on room tone so its first audible sample lands at that second (R9), and with `tail_s` it ends that long after
+    the last audible sample (R4); without them the outer ends are the takes' own.
+    Returns {"passages", "duration", "crossfade_ms", "seams": [{"at", "length_s"}], "offsets": [seconds of each
+    passage's sample 0 on the scene timeline], "speech_start", "speech_end", "lead_in_s", "tail_s"}."""
     takes = [Path(t) for t in takes]
     if not takes:
         raise ValueError("no passages to join")
@@ -216,20 +225,46 @@ def join_passages(takes: list[Path], out: Path, seams: list[float] | None = None
         raise ValueError("one seam length per join")
     xs = [retime.read(t) for t in takes]
     xf, keep = int(XF_S * SR), int(EDGE_KEEP_S * SR)
-    acc, marks = np.zeros(0, np.float32), []
+    acc, marks, offsets = np.zeros(0, np.float32), [], []
+    first_a = _bounds(xs[0])[0]
+    head = 0
+    if lead_in_s is not None:   # cut the first take's own edge silence, then lay room tone up to the lead-in
+        head = max(0, first_a - keep)
+        pad = int(round(lead_in_s * SR)) - (first_a - head)
+        if pad > 0:
+            acc = retime.room_tone(xs[0], pad + xf)
     for i, x in enumerate(xs):
         a, b = _bounds(x)
-        piece = x[max(0, a - keep) if i > 0 else 0:min(len(x), b + keep) if i < len(xs) - 1 else len(x)]
+        lo = max(0, a - keep) if i > 0 else head
+        last = i == len(xs) - 1
+        hi = min(len(x), b + keep) if (not last or tail_s is not None) else len(x)
+        piece = x[lo:hi].copy()
+        if lo < a:            # the kept take edge carries room tone too: no digital zero at a seam or lead-in
+            piece[:a - lo] += retime.room_tone(x, a - lo)
+        if hi > b and (not last or tail_s is not None):
+            piece[b - lo:] += retime.room_tone(x, hi - b)
         if i == 0:
-            acc = piece.copy()
+            start = max(0, len(acc) - xf) if len(acc) else 0
+            acc = retime._crossfade(acc, piece, xf) if len(acc) else piece.copy()
+            offsets.append((start - lo) / SR)
             continue
         n = int(seams[i - 1] * SR) + 2 * xf
         before = len(acc)
         acc = retime._crossfade(acc, retime.room_tone(xs[i - 1], n), xf)
         seam_end = len(acc) - xf
+        offsets.append((len(acc) - xf - lo) / SR)
         acc = retime._crossfade(acc, piece, xf)
-        marks.append({"at": round((before - xf + seam_end) / 2 / SR, 3),
-                      "length_s": round((seam_end - before + xf) / SR, 3)})
+        marks.append({"at": round((before + seam_end) / 2 / SR, 3),     # the seam's pure room tone, between
+                      "length_s": round((seam_end - before) / SR, 3)})    # its two crossfades
+    b_last = _bounds(xs[-1])[1]
+    speech_end = offsets[-1] + b_last / SR
+    if tail_s is not None:
+        want = int(round((speech_end + tail_s) * SR))
+        if want > len(acc):
+            acc = retime._crossfade(acc, retime.room_tone(xs[-1], want - len(acc) + xf), xf)
+        acc = acc[:want]
     retime.write(Path(out), acc)
+    speech_start = offsets[0] + first_a / SR
     return {"passages": len(takes), "duration": round(len(acc) / SR, 3), "crossfade_ms": round(XF_S * 1000),
-            "seams": marks}
+            "seams": marks, "offsets": [round(o, 4) for o in offsets], "speech_start": round(speech_start, 3),
+            "speech_end": round(speech_end, 3), "lead_in_s": lead_in_s, "tail_s": tail_s}

@@ -1,6 +1,8 @@
 import json
+from pathlib import Path
 
 import numpy as np
+import pytest
 
 from eav import retime, voicecheck
 from eav.retime import SR
@@ -48,10 +50,21 @@ def _prof(path):
     return voicecheck.profile([path])
 
 
-def test_flat_tone_fails_pitch_spread_and_monotone(tmp_path):
+CALIBRATED = {"calibrated_limits": {"pitch_spread": 3.0, "monotone": 0.20, "no_breath": 9.0, "tail": -50.0,
+                                    "clicks": 0.2}}
+
+
+def test_flat_tone_warns_pitch_spread_and_monotone_until_calibrated(tmp_path):
+    """I4: the absolute limits are uncalibrated, so a miss is a warning with the measured value, never a redo;
+    once the profile carries a calibrated limit the same miss is a redo."""
     y = np.concatenate([_voice(np.zeros(int(2.0 * SR))), _floor(int(0.4 * SR))] * 3)
     p = _write(tmp_path / "flat.wav", y)
     r = voicecheck.check(p, len(y) / SR, _prof(p))
+    assert "pitch_spread" in r["warnings"] and "monotone" in r["warnings"]
+    assert "pitch_spread" not in r["failures"] and r["pass"] is not False
+    v = r["warning_values"]["pitch_spread"]
+    assert v["limit"] == 3.0 and v["measured"] < 3.0 and v["calibrated"] is False
+    r = voicecheck.check(p, len(y) / SR, {**_prof(p), **CALIBRATED})
     assert "pitch_spread" in r["failures"] and "monotone" in r["failures"]
     assert r["pass"] is False
 
@@ -68,14 +81,34 @@ def test_abrupt_tail_fails_tail(tmp_path):
     y = np.concatenate([y[:-int(0.4 * SR)], _voice(_vib(0.4))])  # ends on a full-level sine
     p = _write(tmp_path / "t.wav", y)
     r = voicecheck.check(p, len(y) / SR, _prof(p))
-    assert "tail" in r["failures"]
+    assert "tail" in r["warnings"] and "tail" not in r["failures"]
+    assert "tail" in voicecheck.check(p, len(y) / SR, {**_prof(p), **CALIBRATED})["failures"]
 
 
-def test_long_run_fails_no_breath(tmp_path):
+def test_long_run_warns_no_breath_with_its_measured_run(tmp_path):
     y = np.concatenate([_voice(_vib(10.0)), _floor(int(0.4 * SR))])
     p = _write(tmp_path / "l.wav", y)
     r = voicecheck.check(p, len(y) / SR, _prof(p))
-    assert "no_breath" in r["failures"]
+    assert "no_breath" in r["warnings"] and "no_breath" not in r["failures"]
+    assert r["warning_values"]["no_breath"]["measured"] > 9.0
+    assert "no_breath" in voicecheck.check(p, len(y) / SR, {**_prof(p), **CALIBRATED})["failures"]
+
+
+REFERENCE = (Path(__file__).resolve().parents[4] / "production" / "audiovisual" / "bicharak" / "pilot" / "voice"
+             / "v2" / "v4-retimed.wav")
+
+
+@pytest.mark.skipif(not REFERENCE.is_file(), reason="the owner-endorsed v4 reference take is local media")
+def test_owner_endorsed_v4_reference_take_is_never_a_redo(tmp_path):
+    """I4: the scene 14 v4 take (9.012 s without a pause in a clause the book prints without one) warns, never
+    asks for a credit-spending redo. Its output goes to a scratch folder only, never beside the take."""
+    before = sorted(p.name for p in REFERENCE.parent.iterdir())
+    from eav import cli
+    code = cli.main(["voicecheck", str(REFERENCE), "--expected", "51.92", "--out", str(tmp_path)])
+    assert code == 0
+    r = json.loads((tmp_path / "v4-retimed.voicecheck.json").read_text())
+    assert r["failures"] == [] and "no_breath" in r["warnings"]
+    assert sorted(p.name for p in REFERENCE.parent.iterdir()) == before
 
 
 def test_zero_gap_fails_digital_zero(tmp_path):

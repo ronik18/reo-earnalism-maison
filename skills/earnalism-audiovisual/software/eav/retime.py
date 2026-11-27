@@ -73,6 +73,61 @@ def _kinds(text: str) -> list[str]:
     return kinds
 
 
+def clauses(text: str) -> list[tuple[str, str | None]]:
+    """The text cut at exactly the pause points `_kinds` counts, in order: [(clause text, kind of the pause after
+    it)], the last clause's kind being its own closing mark's (or None). The clauses joined with spaces spell the
+    text (whitespace aside); a heading line is its own clause between heading_before and heading_after. A scene-
+    break line is not spoken: it only sets the pause before the next clause."""
+    out: list[list] = []
+    cur: list[str] = []
+    fresh = False
+
+    def flush(kind):
+        body = " ".join("".join(cur).split())
+        if body:
+            out.append([body, kind])
+        cur.clear()
+    for line in _TAG.sub("", text).splitlines():
+        if _SCENE_LINE.match(line):
+            if fresh and out and out[-1][1] in ("sentence", "turn"):
+                out[-1][1] = "scene"
+            else:
+                flush("scene")
+            fresh = False
+            continue
+        if _HEADING_LINE.match(line):
+            if fresh and out and out[-1][1] in ("sentence", "turn"):
+                out[-1][1] = "heading_before"
+            else:
+                flush("heading_before")
+            out.append([" ".join(line.split()), "heading_after"])
+            fresh = False
+            continue
+        run = None
+        for ch in line:
+            kind = _MARK.get(ch)
+            if kind:
+                run = kind if run is None or _STRENGTH[kind] > _STRENGTH[run] else run
+                cur.append(ch)
+                fresh = True
+                continue
+            if run and ch in "“‘(":   # an opening quote belongs to the clause it opens
+                flush(run)
+                run = None
+            if not ch.isspace() and ch not in "\"'“”‘’()…":
+                if run:
+                    flush(run)
+                    run = None
+                fresh = False
+            cur.append(ch)
+        if run:
+            flush(run)
+            fresh = True
+        cur.append(" ")
+    flush(None)
+    return [tuple(c) for c in out]
+
+
 def plan_pauses(text: str, pauses: list[tuple[float, float]], rng_seed: int) -> list[tuple[float, float, float]]:
     """(start, end, target_s) per detected pause: pauses map in order to the text's punctuation, each target
     is drawn from its kind's range and varied +-15 % (seeded). A pause with no punctuation keeps its length."""

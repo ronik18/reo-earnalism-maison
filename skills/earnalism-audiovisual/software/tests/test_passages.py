@@ -90,7 +90,7 @@ def _passage_wav(path, seconds, freq, edge_zero=0.3):
     retime.write(path, np.concatenate([z, tone(seconds, freq), z]).astype(np.float32))
 
 
-def test_join_uses_room_tone_and_10ms_crossfade_no_digital_zero(tmp_path):
+def test_join_uses_room_tone_and_40ms_crossfade_no_digital_zero(tmp_path):
     # passages with floors of digital zero at both edges (what a raw take must never leave at a join)
     takes = []
     for i, f in enumerate((200, 260, 220)):
@@ -100,7 +100,8 @@ def test_join_uses_room_tone_and_10ms_crossfade_no_digital_zero(tmp_path):
     out = tmp_path / "scene.wav"
     info = passages.join_passages(takes, out)
     y = samples(out)
-    assert info["passages"] == 3 and info["crossfade_ms"] == 10 and len(info["seams"]) == 2
+    assert info["passages"] == 3 and info["crossfade_ms"] == 40 and len(info["seams"]) == 2   # I7: 30-50 ms
+    assert 0.030 <= passages.XF_S <= 0.050 and passages.EDGE_KEEP_S >= 2 * passages.XF_S
     assert abs(info["duration"] - len(y) / SR) < 0.01
     # no run of digital zero inside the seams (the outer edges are the takes' own)
     for s in info["seams"]:
@@ -160,3 +161,24 @@ def test_a_cut_is_allowed_at_a_paragraph_end_and_the_sentence_rule_is_text_sente
         passages.check_passage_scripts(scene, ["পরিচ্ছেদ\n\nপ্রথম", "বাক্য এখানে। দ্বিতীয় বাক্য।"])
     ps = passages.split_passages(scene, cps=0.5)   # a heading line is its own chunk, kept as written
     assert "".join(ps) == scene
+
+
+def test_join_lays_the_r9_lead_in_and_r4_tail_and_records_offsets(tmp_path):
+    """I6/F4: the scene opens on room tone with its first word LEAD_IN_S in and ends TAIL_S after its last word;
+    the offsets place each passage on the scene timeline (scene-timing maps clause times through them)."""
+    takes = []
+    for i, f in enumerate((200, 260)):
+        p = tmp_path / f"p{i}.wav"
+        _passage_wav(p, 1.0, f)
+        takes.append(p)
+    out = tmp_path / "scene.wav"
+    info = passages.join_passages(takes, out, [0.9], lead_in_s=passages.LEAD_IN_S, tail_s=passages.TAIL_S)
+    y = samples(out)
+    first = int(np.flatnonzero(np.abs(y) > 10 ** (passages.EDGE_DB / 20))[0]) / SR
+    assert abs(info["speech_start"] - passages.LEAD_IN_S) < 0.01 and abs(first - passages.LEAD_IN_S) < 0.05
+    assert abs(info["duration"] - (info["speech_end"] + passages.TAIL_S)) < 0.01
+    assert _zero_run_s(y) < 0.012                        # lead-in and tail are room tone, never digital zero
+    assert -69 <= rms_db(y[:int(0.6 * SR)]) <= -61
+    a1 = passages._bounds(retime.read(takes[1]))[0] / SR
+    seam_end = info["seams"][0]["at"] + info["seams"][0]["length_s"] / 2
+    assert abs(info["offsets"][1] + a1 - (seam_end + passages.EDGE_KEEP_S)) < 0.01   # its first word, placed
