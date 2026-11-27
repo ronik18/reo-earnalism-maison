@@ -378,5 +378,18 @@ class WikisourceCommandTests(TestCase):
                          '--author-died', '1941', '--creator', 'রবীন্দ্রনাথ ঠাকুর',
                          '--keep-hyphen-after', '১৭৫', '--root', directory, '--write', stdout=out)
             made = (Path(directory) / 'library/intake/kshudhita-pashan/source.json').read_bytes()
-        self.assertEqual(made, (committed / 'source.json').read_bytes())
-        self.assertEqual(hashlib.sha256(made).hexdigest(), expected['source']['sha256'])
+        # The Wikisource transcription reproduces the text as first published and approved on 25 Nov.
+        self.assertEqual(hashlib.sha256(made).hexdigest(),
+                         'ab59291cb20526088d47abf99af52527c9d7d53f3c9f100912ecbc80d0215ccf')
+        # The committed source is that text plus exactly the two scan-verified insertions of " না"
+        # (printed pages ১৭৬ and ১৮২, correction of 27 Nov); nothing else differs.
+        current = (committed / 'source.json').read_bytes()
+        self.assertEqual(hashlib.sha256(current).hexdigest(), expected['source']['sha256'])
+        import difflib
+        a, b = made.decode('utf-8'), current.decode('utf-8')
+        ops = [(tag, a[i1:i2], b[j1:j2]) for tag, i1, i2, j1, j2
+               in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes() if tag != 'equal']
+        # difflib may place a space on either side of the inserted word; both mean one inserted " না".
+        self.assertEqual([(tag, old, new.strip(), len(new)) for tag, old, new in ops],
+                         [('insert', '', 'না', 3), ('insert', '', 'না', 3)])
+        self.assertEqual(len(b) - len(a), 6)
