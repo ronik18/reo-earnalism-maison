@@ -1,6 +1,7 @@
 import wave
 
 import numpy as np
+import pytest
 
 from eav import cue
 from tests._media import rms_db, samples
@@ -164,27 +165,131 @@ def test_output_is_stereo_and_meets_loudness(tmp_path):
 
 
 # ----------------------------------------------------------------------------- CLI
+def _music_job(root, job_id, scene, roles):
+    """An imported ACE-Step music job as the record sees it, its job.json items labelled by role."""
+    import json, zipfile
+    from eav.record import Record
+    rec = Record.load(root)
+    jd = root / "jobs" / job_id
+    jd.mkdir(parents=True)
+    with zipfile.ZipFile(jd / "inputs.zip", "w") as z:
+        z.writestr("job.json", json.dumps({"items": [{"key": k, "role": r} for k, r in roles.items()],
+                                           **({"scene": scene} if scene else {})}))
+    for name in ("build-manifest.json", "music.ipynb"):
+        (jd / name).write_text("{}")
+    rec.add_artifact("colab_job", jd / "music.ipynb", {"job_id": job_id, "job_kind": "music", "forecast_units": 0.0,
+                                                       "month": "2026-11", "inputs_zip": f"jobs/{job_id}/inputs.zip",
+                                                       "manifest": f"jobs/{job_id}/build-manifest.json"})
+    rec.event("cli", "job_target", {"job_id": job_id, "target": "film-01", "kind": "music",
+                                    **({"scene": scene} if scene else {})})
+    _stems(root / "music" / job_id)
+    rec.event("import", "accepted", {"job_id": job_id})
+
+
+ROLES = {"drone": "drone", "kick": "drone", "pluck": "solo", "chord": "phrase"}
+
+
 def _cli_title(tmp_path):
     from tests.test_shotplan import _title
     root, run = _title(tmp_path)
-    _stems(root / "music" / "m1")
+    _music_job(root, "m1", "f01s014", ROLES)
     return root, run
+
+
+def _approved(root, run):
+    import json
+    for extra in ([], ["--approve", "--by", "claude", "--reviewer", "rev"]):
+        assert run("plan-shots", "--root", root, "--film", 1, "--scene", "f01s014", *extra)[0] == 0
+    sp = json.loads((root / "film" / "film-01" / "shots" / "f01s014.json").read_text(encoding="utf-8"))
+    (root / "film" / "film-01" / "voice").mkdir(exist_ok=True)
+    _voice(root / "film" / "film-01" / "voice" / "f01s014.wav", sp["seconds"])
+    return sp
 
 
 def test_cue_cli_pick_then_mix_needs_approved_plan(tmp_path):
     import json
     root, run = _cli_title(tmp_path)
-    code, out = run("cue", "--root", root, "--film", 1, "--stems", "m1", "--pick", "--tonic", "D")
+    code, out = run("cue", "--root", root, "--film", 1, "--scene", "f01s014", "--stems", "m1", "--pick", "--tonic", "D")
     assert code == 0 and '"drone": "drone"' in out and (root / "music" / "m1" / "cue-pick.json").is_file()
     code, out = run("cue", "--root", root, "--film", 1, "--scene", "f01s014", "--stems", "m1")
     assert code == 2 and "no shot plan" in out                       # R11: nothing is built before approval
-    for extra in ([], ["--approve", "--by", "claude", "--reviewer", "rev"]):
-        assert run("plan-shots", "--root", root, "--film", 1, "--scene", "f01s014", *extra)[0] == 0
-    sp = json.loads((root / "film" / "film-01" / "shots" / "f01s014.json").read_text(encoding="utf-8"))
-    (root / "film" / "film-01" / "voice").mkdir()
-    _voice(root / "film" / "film-01" / "voice" / "f01s014.wav", sp["seconds"])
+    sp = _approved(root, run)
     code, out = run("cue", "--root", root, "--film", 1, "--scene", "f01s014", "--stems", "m1")
     assert code == 0, out
     res = json.loads((root / "film" / "film-01" / "audio" / "f01s014.mix.json").read_text(encoding="utf-8"))
     assert res["peak_at"] == sp["peak"]["at"] and abs(res["lufs"] + 16) <= 1 and res["true_peak"] <= -1.5
     assert res["music_bus_peak_rms_db"] < -80 and "fx" in res
+    assert res["stems_job"] == "m1" and res["voice"].endswith("f01s014.wav")
+
+
+def test_cue_refuses_stems_that_are_not_the_scenes_own_imported_music_job(tmp_path):
+    """I9/F13: a folder copied in by hand, another scene's job, an unbound job, or a job another scene's mix
+    already used is refused: a scene never borrows another scene's cue."""
+    import json
+    root, run = _cli_title(tmp_path)
+    _stems(root / "music" / "copied")
+    base = ("cue", "--root", root, "--film", 1, "--scene", "f01s014", "--pick", "--tonic", "D", "--stems")
+    code, out = run(*base, "copied")
+    assert code == 2 and "not an imported music job" in out
+    _music_job(root, "m-other", "f01s013", ROLES)
+    code, out = run(*base, "m-other")
+    assert code == 2 and "scene f01s013" in out
+    _music_job(root, "m-unbound", None, ROLES)
+    code, out = run(*base, "m-unbound")
+    assert code == 2 and "not bound to a scene" in out
+    audio = root / "film" / "film-01" / "audio"
+    audio.mkdir(parents=True)
+    (audio / "f01s013.mix.json").write_text(json.dumps({"scene": "f01s013", "stems_job": "m1"}))
+    code, out = run(*base, "m1")
+    assert code == 2 and "never borrows" in out
+
+
+def test_cue_pick_keeps_each_role_in_its_family(tmp_path):
+    """I9/F7: the drone comes from the drone family (never the esraj), the phrase from the phrase family."""
+    d = _stems(tmp_path / "stems")
+    pick = cue.pick_stems(d, "D", {"drone": "drone", "kick": "drone", "pluck": "solo", "chord": "phrase"})
+    assert pick == {"drone": "drone", "solo": "pluck", "phrase": "chord"}
+    pick = cue.pick_stems(d, "D", {"drone": "solo", "kick": "drone", "pluck": "solo", "chord": "phrase"})
+    assert pick["drone"] == "kick"          # the only drone, whatever its pulse: never a solo stem as the drone
+    with pytest.raises(ValueError, match="no phrase stem"):
+        cue.pick_stems(d, "D", {"drone": "drone", "kick": "drone", "pluck": "solo", "chord": "solo"})
+    assert cue.stem_role("p3-drone-2") == "drone" and cue.stem_role("p3-esraj-4") is None
+    assert cue.stem_role("p3-esraj-4", "solo") == "solo"
+
+
+def test_cue_refuses_a_manual_stem_outside_its_family(tmp_path):
+    root, run = _cli_title(tmp_path)
+    _approved(root, run)
+    code, out = run("cue", "--root", root, "--film", 1, "--scene", "f01s014", "--stems", "m1",
+                    "--drone", "pluck", "--solo", "drone", "--phrase", "chord")
+    assert code == 2 and "pluck as the drone" in out
+
+
+def test_cue_fx_needs_a_licence_record_for_every_sound(tmp_path):
+    """I10: every ambience or foley file needs a CC0 or author-released public-domain record in the licences.json
+    beside it; anything else fails closed. The record's basis is copied into mix.json."""
+    import json
+    root, run = _cli_title(tmp_path)
+    _approved(root, run)
+    sfx = tmp_path / "sfx"
+    sfx.mkdir()
+    _noise(sfx / "wheels.wav", 2.0, 0.01)
+    fx = sfx / "fx.json"
+    fx.write_text(json.dumps({"ambience": [{"path": "wheels.wav", "at": 0.5, "gain_db": -40, "fin": 0.2, "fout": 0.2}]}))
+    args = ("cue", "--root", root, "--film", 1, "--scene", "f01s014", "--stems", "m1", "--drone", "drone",
+            "--solo", "pluck", "--phrase", "chord", "--fx", fx)
+    code, out = run(*args)
+    assert code == 2 and "without a licence" in out and "wheels.wav" in out
+    (sfx / "licences.json").write_text(json.dumps({"wheels.wav": {"title": "wheels", "licence": "CC BY 4.0",
+                                                                  "author": "x", "basis": {"rule": "cc0"}}}))
+    code, out = run(*args)
+    assert code == 2 and "CC BY 4.0" in out
+    (sfx / "licences.json").write_text(json.dumps({"wheels.wav": {"title": "wheels", "licence": "CC0-1.0",
+                                                                  "author": "Earnalism", "basis": {"rule": "cc0-synthesis"}}}))
+    code, out = run(*args)
+    assert code == 0, out
+    res = json.loads((root / "film" / "film-01" / "audio" / "f01s014.mix.json").read_text(encoding="utf-8"))
+    assert res["fx"]["ambience"][0]["licence"]["basis"] == "cc0-synthesis"
+    rec = {"title": "File:Crows.ogg", "licence": "Public domain", "author": "x", "basis": {"rule": "author-release"}}
+    assert cue.licence_ok(rec) == "author-release"
+    assert cue.licence_ok({**rec, "basis": {"rule": "pd-us"}}) is None

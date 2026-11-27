@@ -252,8 +252,59 @@ def _unit(vals: dict) -> dict:
     return {k: (v - lo) / (hi - lo) if hi > lo else 0.0 for k, v in vals.items()}
 
 
-def pick_stems(stems_dir: Path, tonic: str) -> dict:
+ROLES = ("drone", "solo", "phrase")
+_CC0 = re.compile(r"cc[ -]?0(?:[ -]1\.0(?: universal)?)?", re.I)
+_PD = re.compile(r"public domain|pd", re.I)
+
+
+def stem_role(key: str, declared: str = None):
+    """A stem's family: the role its music spec item declared, else a whole hyphen-separated token of its key
+    (p3-drone-2 is a drone); None when neither says (an unlabelled stem is never picked for a role)."""
+    if declared in ROLES:
+        return declared
+    tokens = str(key).lower().split("-")
+    found = [r for r in ROLES if r in tokens]
+    return found[0] if len(found) == 1 else None
+
+
+def licence_ok(record) -> str | None:
+    """The basis a sound's licence record gives for using it (the sfx licence format: {title, page, licence,
+    author, basis}), or None. Only CC0 (a recording, or original synthesis dedicated to CC0) and public domain by
+    the author's own worldwide release (basis.rule "author-release") pass; anything else fails closed."""
+    if not isinstance(record, dict):
+        return None
+    lic = str(record.get("licence") or "").strip()
+    rule = (record.get("basis") or {}).get("rule") if isinstance(record.get("basis"), dict) else None
+    if (_CC0.fullmatch(lic) or lic.upper() == "CC0-1.0") and rule in (None, "cc0", "cc0-synthesis"):
+        return "cc0-synthesis" if rule == "cc0-synthesis" else "cc0"
+    if _PD.fullmatch(lic) and rule == "author-release":
+        return "author-release"
+    return None
+
+
+def sound_licence(path) -> dict:
+    """The licence record of one ambience or foley file: the licences.json beside it (imported film_clips
+    sfx/licences.json keys files as sfx-<name>-<n>.<ext>; a synthesis folder keys them by file name). Raises
+    ValueError when there is none or it is not CC0 / author-released public domain."""
+    path = Path(path)
+    lic = path.parent / "licences.json"
+    try:
+        records = json.loads(lic.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        raise ValueError(f"{path.name} has no readable licence record ({lic} is missing or not JSON)") from None
+    rec = (records.get(path.name) or records.get("sfx-" + path.name)) if isinstance(records, dict) else None
+    basis = licence_ok(rec)
+    if basis is None:
+        raise ValueError(f"{path.name} has no CC0 or author-released public-domain licence record in {lic}"
+                         + (f" (it says {rec.get('licence')!r})" if isinstance(rec, dict) else ""))
+    return {"basis": basis, "licence": rec.get("licence"), "record": str(lic.resolve()),
+            **{k: rec[k] for k in ("title", "page", "author") if rec.get(k)}}
+
+
+def pick_stems(stems_dir: Path, tonic: str, roles: dict = None) -> dict:
     """Choose {"drone", "solo", "phrase"} keys from <stems_dir>/<key>.wav|.flac|.mp3, never reusing a key.
+    With `roles` ({key: drone|solo|phrase}) each role picks only among its own family (F7: an esraj is never the
+    drone, and a tanpura's cycle is only weighed against other drones); a role with no stem of its family raises.
 
     Per stem: t = 1 when the tonic is in the chroma top-2, else 0; o, p, l = onset rate, pulse autocorrelation
     and energy below 120 Hz, each min-max normalised across the stems (0 best). Scores, highest wins, assigned
@@ -275,7 +326,13 @@ def pick_stems(stems_dir: Path, tonic: str) -> dict:
              "phrase": lambda k: t[k] - p[k] - l[k]}
     free, pick = list(keys), {}
     for role, fn in score.items():
-        pick[role] = max(free, key=lambda k: (round(fn(k), 9), [-ord(c) for c in k]))
+        pool = [k for k in free if roles is None or roles.get(k) == role]
+        if not pool:
+            raise ValueError(f"no {role} stem in {stems_dir}: label each stem drone, solo or phrase (the music spec "
+                             "item's \"role\", or the word in its key)")
+        if roles is not None:   # within one family the measures compare like with like
+            o, p, l = (_unit({k: feats[k][m] for k in pool}) for m in ("onset_rate", "pulse", "low_energy"))
+        pick[role] = max(pool, key=lambda k: (round(score[role](k), 9), [-ord(c) for c in k]))
         free.remove(pick[role])
     return pick
 
