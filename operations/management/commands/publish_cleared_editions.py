@@ -30,7 +30,7 @@ from library.general_import import DENIED, NO_DOWNLOADS, finalize_import, start_
 from library.models import Asset, Edition, Paragraph, Revision, Rights, Unit
 from library.services import (canonical_bytes, digest, paragraph_dto, prepare_reader_package, prepare_revision_validation,
                               transition_revision, validate_revision)
-from operations.revision_remap import remap_reader_state
+from core.models import AuditEvent
 from operations.book_source import SourceError, read_source_bytes, reader_batches, reader_derivative, validate_manifest
 
 ROOT = Path(settings.BASE_DIR)
@@ -673,16 +673,14 @@ class Command(BaseCommand):
             revision.refresh_from_db()
             if (action == "mark-ready" and revision.state != "draft") or (action == "publish" and revision.state != "ready"):
                 continue
-            replaced = (Edition.objects.filter(pk=revision.edition_id).values_list("live_revision_id", flat=True).first()
-                        if action == "publish" else None)
-            with transaction.atomic():  # the reader-state move commits or rolls back with the live switch
-                state = transition_revision(actor, revision.id, action, revision.version, revision.content_sha256, reason)
-                audit(actor, "revision." + action, revision, {"reason": reason, "channel": "server_job"})
-                step = {"action": action, "state": state["state"], "version": state["version"]}
-                if replaced and replaced != revision.id and (revision.validation_evidence.get("source_revision") or {}).get("anchor_map"):
-                    step["reader_state_moved"] = remap_reader_state(replaced, revision)
-                    audit(actor, "revision.reader_state_moved", revision, {"replaced_revision_id": str(replaced),
-                        **step["reader_state_moved"], "channel": "server_job"})
+            state = transition_revision(actor, revision.id, action, revision.version, revision.content_sha256, reason)
+            audit(actor, "revision." + action, revision, {"reason": reason, "channel": "server_job"})
+            step = {"action": action, "state": state["state"], "version": state["version"]}
+            # transition_revision moves readers' state for a revise revision (library.services.move_reader_state).
+            moved = AuditEvent.objects.filter(action="revision.reader_state_moved", entity_id=str(revision.id),
+                                              detail__pass="publish").order_by("-created_at").first()
+            if action == "publish" and moved:
+                step["reader_state_moved"] = {k: moved.detail[k] for k in ("progress", "annotations", "left_unmapped")}
             steps.append(step)
         return {"steps": steps}
 

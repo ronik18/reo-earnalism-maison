@@ -441,6 +441,65 @@ class ReviseStageTests(TestCase):
         self.assertEqual(sorted(Progress.objects.values_list("version", flat=True)), [2, 2])
         self.assertEqual(Edition.objects.get(pk=edition.pk).live_revision_id, new.id)
 
+    def prepare_correction(self):
+        from library.models import Paragraph, Revision
+        first = self.publish_first()
+        old = Revision.objects.get(pk=first["revision_id"])
+        self.apply_correction()
+        self.approve(("clearance", CORRECTED_CLEARANCE, SLUG), ("cover", COVER, SLUG))
+        revised = self.run_command("revise", SLUG)[SLUG]
+        self.run_command("evidence", SLUG, extra=self.browser({SLUG: revised["sha256"]}))
+        paragraph = Paragraph.objects.get(unit__revision=old, ordinal=10)
+        return old, Revision.objects.get(pk=revised["revision_id"]), paragraph
+
+    def reader_progress(self, old, paragraph, email):
+        import uuid
+        from reader.models import Progress
+        user = get_user_model().objects.create_user(email, "Test-Only-Passphrase-47", is_verified=True)
+        return Progress.objects.create(user=user, edition=old.edition, revision=old, format="reader", last_operation_id=uuid.uuid4(),
+            location={"format": "reader", "unit_id": str(paragraph.unit_id), "anchor_id": str(paragraph.anchor_id), "offset_chars": 0})
+
+    def test_after_commit_pass_moves_a_position_written_against_the_old_revision_during_publish(self):
+        from core.models import AuditEvent
+        old, new, paragraph = self.prepare_correction()
+        early = self.reader_progress(old, paragraph, "early@example.test")
+        with self.captureOnCommitCallbacks(execute=False) as callbacks:
+            self.run_command("publish", SLUG)
+        early.refresh_from_db()
+        self.assertEqual(early.revision_id, new.id)  # moved inside the publish transaction
+        late = self.reader_progress(old, paragraph, "late@example.test")  # written while publish ran, against the old revision
+        self.assertEqual(len(callbacks), 1)
+        callbacks[0]()
+        late.refresh_from_db()
+        self.assertEqual((late.revision_id, late.location["anchor_id"]),
+                         (new.id, new.validation_evidence["source_revision"]["anchor_map"][str(paragraph.anchor_id)]))
+        self.assertEqual(AuditEvent.objects.filter(action="revision.reader_state_moved", detail__pass="after_commit").count(), 1)
+        callbacks[0]()  # idempotent: a second pass finds nothing and records nothing
+        self.assertEqual(late.version, type(late).objects.get(pk=late.pk).version)
+        self.assertEqual(AuditEvent.objects.filter(action="revision.reader_state_moved", detail__pass="after_commit").count(), 1)
+
+    def test_any_publish_path_through_transition_revision_moves_reader_state(self):
+        from library import services
+        old, new, paragraph = self.prepare_correction()
+        saved = self.reader_progress(old, paragraph, "staff-path@example.test")
+        # As the staff API, Django admin and the scheduled-publication worker do: transition_revision directly.
+        for action in ("mark-ready", "publish"):
+            new.refresh_from_db()
+            services.transition_revision(self.publisher, new.id, action, new.version, new.content_sha256, "Staff UI publish (test)")
+        saved.refresh_from_db()
+        self.assertEqual(saved.revision_id, new.id)
+        self.assertEqual(saved.location["anchor_id"], new.validation_evidence["source_revision"]["anchor_map"][str(paragraph.anchor_id)])
+
+    def test_publishing_a_revision_without_an_anchor_map_moves_nothing(self):
+        from library import services
+        from library.models import Revision
+        from reader.models import Progress
+        old, new, paragraph = self.prepare_correction()
+        saved = self.reader_progress(old, paragraph, "plain@example.test")
+        self.assertIsNone(services.move_reader_state(self.publisher, old.id, Revision(validation_evidence={})))
+        self.assertIsNone(services.move_reader_state(self.publisher, None, new))
+        self.assertEqual(Progress.objects.get(pk=saved.pk).revision_id, old.id)
+
     def test_map_offset_follows_an_insertion_and_clamps(self):
         from operations.revision_remap import map_offset
         old, new = "জানি কিন্তু", "জানি না কিন্তু"

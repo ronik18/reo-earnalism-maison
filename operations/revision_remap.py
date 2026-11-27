@@ -2,7 +2,8 @@
 
 The revise stage (publish_cleared_editions) records, in the new revision's validation_evidence.source_revision,
 an old -> new map for every unit and paragraph anchor (`unit_map`, `anchor_map`), like clone_revision's in-memory
-anchor_map. When that revision is published, remap_reader_state moves exactly the rows that still point at the
+anchor_map. When that revision is published (library.services.move_reader_state, called by transition_revision on
+every publish path, in the publish transaction and once more after commit), remap_reader_state moves exactly the rows that still point at the
 replaced revision: reader Progress locations and Annotation ranges (bookmarks, highlights, notes). Offsets follow
 the text through the correction (difflib over the old and new paragraph text; a position at an insertion point
 stays before the inserted text for a range end, after it for a start), then snap down to a grapheme boundary and

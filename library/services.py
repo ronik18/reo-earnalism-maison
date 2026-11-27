@@ -981,6 +981,30 @@ def transition_revision(user,revision_id,action,expected_version,expected_sha256
     return _transition_revision(user,revision_id,action,expected_version,expected_sha256,reason,publish_at,prepared=prepared)
 
 
+def move_reader_state(user,replaced_id,revision):
+    """Every publish path (staff API, admin, scheduled worker, server jobs) runs this as a revision goes live.
+
+    Only a text-correction revision built by publish_cleared_editions revise (validation_evidence.source_revision with
+    an anchor_map for the revision it replaces) moves readers' positions and annotations, in this same transaction;
+    a second idempotent pass after commit catches a row written against the old revision while publish ran."""
+    record=(revision.validation_evidence or {}).get('source_revision') or {}
+    if not replaced_id or not record.get('anchor_map') or record.get('replaces_revision_id')!=str(replaced_id):return None
+    from core.services import audit
+    from operations.revision_remap import remap_reader_state
+    counts=remap_reader_state(replaced_id,revision)
+    audit(user,'revision.reader_state_moved',revision,{'replaced_revision_id':str(replaced_id),'pass':'publish',**counts})
+    revision_id=revision.id
+
+    def after_commit():
+        with transaction.atomic():
+            current=Revision.objects.get(pk=revision_id)
+            late=remap_reader_state(replaced_id,current)
+            if late['progress'] or late['annotations'] or late['left_unmapped']:
+                audit(None,'revision.reader_state_moved',current,{'replaced_revision_id':str(replaced_id),'pass':'after_commit',**late})
+    transaction.on_commit(after_commit)
+    return counts
+
+
 @transaction.atomic
 def _transition_revision(user,revision_id,action,expected_version,expected_sha256,reason='',publish_at=None,*,prepared=None):
     if not user.is_active or not user.is_staff or not user.has_perm('library.publish_revision'):
@@ -1008,13 +1032,16 @@ def _transition_revision(user,revision_id,action,expected_version,expected_sha25
             if not publish_at or publish_at<=timezone.now(): raise DomainError('invalid_schedule','Choose a future UTC publication time.',400)
             revision.scheduled_for=publish_at
         else:
+            replaced=None
             if edition.live_revision_id and edition.live_revision_id!=revision.id:
                 old=Revision.objects.select_for_update().get(pk=edition.live_revision_id)
                 old.state='retired';old.version+=1;old.save(update_fields=['state','version','updated_at'])
+                replaced=old.id
             revision.state='live';revision.published_at=timezone.now();revision.scheduled_for=None
             # The cross-row FK guard requires the pointed-to revision to be live in this transaction.
             revision.version+=1;revision.save()
             edition.live_revision=revision;edition.version+=1;edition.full_clean();edition.save()
+            move_reader_state(user,replaced,revision)
             from .search import refresh_revision_search
             refresh_revision_search(revision)
             queue_catalog_purge(revision)
