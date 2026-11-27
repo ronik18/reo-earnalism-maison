@@ -379,7 +379,7 @@ def measure_mp3(path, *, timeout_seconds=20):
     import subprocess
     try:
         result = subprocess.run(["ffprobe", "-v", "error", "-protocol_whitelist", "file,pipe", "-show_entries",
-            "format=duration:stream=codec_name,codec_type,bit_rate", "-of", "json", str(Path(path).resolve())],
+            "format=duration:stream=codec_name,codec_type,bit_rate,channels", "-of", "json", str(Path(path).resolve())],
             capture_output=True, check=True, timeout=max(.1, min(20, timeout_seconds)))
         if len(result.stdout) > 65536:
             raise ValueError
@@ -389,13 +389,25 @@ def measure_mp3(path, *, timeout_seconds=20):
             raise ValueError
         duration = float(measured["format"]["duration"])
         bitrate = int(streams[0]["bit_rate"])
-        if not math.isfinite(duration) or duration <= 0 or bitrate not in {48000, 96000}:
+        # 48 and 96 kbps as before; 64 kbps is the audiobook rendition and must be mono.
+        if (not math.isfinite(duration) or duration <= 0
+                or not (bitrate in {48000, 96000} or (bitrate == 64000 and streams[0].get("channels") == 1))):
             raise ValueError
     except Exception:
-        raise HandoffError("EXACT_MEASURED_48_OR_96_KBPS_MP3_REQUIRED") from None
+        raise HandoffError("EXACT_MEASURED_48_96_OR_64_MONO_KBPS_MP3_REQUIRED") from None
     return {"duration_ms": round(duration * 1000), "quality_kbps": bitrate // 1000,
             "measurement_sha256": hashlib.sha256(result.stdout).hexdigest(),
             "method": "ffprobe exact retained MP3; container metadata only, not listening QA"}
+
+
+def _valid_chapter(chapter):
+    from core.api import DomainError
+    from .validation import validate_schema
+    try:
+        validate_schema(chapter, "AudioChapter")
+    except DomainError:
+        return False
+    return bool(chapter["title"].strip())
 
 
 def attach_private(manifest, asset_root, staged, actor, expected_etag, operation_id, *, execute=False, measure=measure_mp3):
@@ -508,8 +520,11 @@ def _attach_verified(manifest, asset_root, staged, actor, expected_etag, operati
                 raise HandoffError("MEASURED_MAP_AUDIO_AND_PRECISION_REQUIRED")
             asset.revision = revision
             asset.state = "ready"  # In-memory geometry validation only; never saved as ready.
+            chapters = row.get("chapters", [])
+            if not isinstance(chapters, list) or any(not _valid_chapter(c) for c in chapters):
+                raise HandoffError("MEASURED_MAP_CHAPTERS_INVALID")
             mapping = TimingMap(revision=revision, asset=asset, text_sha256=revision.content_sha256,
-                asset_sha256=asset.sha256, precision=row["precision"], measured=True, segments=row["segments"])
+                asset_sha256=asset.sha256, precision=row["precision"], measured=True, segments=row["segments"], chapters=chapters)
             mapping.full_clean(); prepared_audio(asset); validated_segments(mapping)
             mapping.save(); map_ids.append(str(mapping.id))
         history[digest] = {"schema": "earnalism.attached_production_bundle.v1", "assets": staged["assets"],

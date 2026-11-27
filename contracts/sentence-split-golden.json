@@ -1,0 +1,244 @@
+{
+  "rule": "Mirror of eav.text.sentences: split after . ? ! and the Bengali danda (optionally followed by one closing quote or parenthesis) when whitespace follows. offsets partition text: first starts at 0, each later one at its first visible character, trailing whitespace stays with the earlier sentence, last ends at len(text). sentences = eav.text.sentences output (whitespace collapsed); for every sentence, ' '.join(text[start:end].split()) must equal it.",
+  "cases": [
+    {
+      "name": "bengali_danda",
+      "text": "আমি বাড়ি গেলাম। তুমি কোথায় ছিলে? কী আশ্চর্য! সবাই চুপ করে রইল।",
+      "sentences": [
+        "আমি বাড়ি গেলাম।",
+        "তুমি কোথায় ছিলে?",
+        "কী আশ্চর্য!",
+        "সবাই চুপ করে রইল।"
+      ],
+      "offsets": [
+        [
+          0,
+          17
+        ],
+        [
+          17,
+          35
+        ],
+        [
+          35,
+          47
+        ],
+        [
+          47,
+          64
+        ]
+      ]
+    },
+    {
+      "name": "question_and_exclaim",
+      "text": "কে এসেছিল? কেউ জানে না! তবু দরজা খোলা।",
+      "sentences": [
+        "কে এসেছিল?",
+        "কেউ জানে না!",
+        "তবু দরজা খোলা।"
+      ],
+      "offsets": [
+        [
+          0,
+          11
+        ],
+        [
+          11,
+          24
+        ],
+        [
+          24,
+          38
+        ]
+      ]
+    },
+    {
+      "name": "quotes_after_terminal",
+      "text": "সে বলল, “আমি যাব।” তারপর চলে গেল। ‘কেন?’ সে জিজ্ঞাসা করল।",
+      "sentences": [
+        "সে বলল, “আমি যাব।”",
+        "তারপর চলে গেল।",
+        "‘কেন?’",
+        "সে জিজ্ঞাসা করল।"
+      ],
+      "offsets": [
+        [
+          0,
+          19
+        ],
+        [
+          19,
+          34
+        ],
+        [
+          34,
+          41
+        ],
+        [
+          41,
+          57
+        ]
+      ]
+    },
+    {
+      "name": "ascii_quotes_and_paren",
+      "text": "He said \"go.\" Then (quietly.) he left. 'Why?' she asked.",
+      "sentences": [
+        "He said \"go.\"",
+        "Then (quietly.)",
+        "he left.",
+        "'Why?'",
+        "she asked."
+      ],
+      "offsets": [
+        [
+          0,
+          14
+        ],
+        [
+          14,
+          30
+        ],
+        [
+          30,
+          39
+        ],
+        [
+          39,
+          46
+        ],
+        [
+          46,
+          56
+        ]
+      ]
+    },
+    {
+      "name": "conjuncts",
+      "text": "শ্রীকান্ত বিস্মিত হইয়া কহিল, ক্ষমা চাই। ধর্মের তত্ত্ব কঠিন; কিন্তু সত্য সরল।",
+      "sentences": [
+        "শ্রীকান্ত বিস্মিত হইয়া কহিল, ক্ষমা চাই।",
+        "ধর্মের তত্ত্ব কঠিন; কিন্তু সত্য সরল।"
+      ],
+      "offsets": [
+        [
+          0,
+          41
+        ],
+        [
+          41,
+          77
+        ]
+      ]
+    },
+    {
+      "name": "english_sentence",
+      "text": "This is a plain English sentence. It has two parts, and 3.14 stays whole!",
+      "sentences": [
+        "This is a plain English sentence.",
+        "It has two parts, and 3.14 stays whole!"
+      ],
+      "offsets": [
+        [
+          0,
+          34
+        ],
+        [
+          34,
+          73
+        ]
+      ]
+    },
+    {
+      "name": "heading_line",
+      "text": "# প্রথম পরিচ্ছেদ\n\nএকদিন সকালে সে উঠিল।",
+      "sentences": [
+        "# প্রথম পরিচ্ছেদ একদিন সকালে সে উঠিল।"
+      ],
+      "offsets": [
+        [
+          0,
+          38
+        ]
+      ]
+    },
+    {
+      "name": "no_terminal",
+      "text": "কোনো দাঁড়ি নেই এই লাইনে",
+      "sentences": [
+        "কোনো দাঁড়ি নেই এই লাইনে"
+      ],
+      "offsets": [
+        [
+          0,
+          24
+        ]
+      ]
+    },
+    {
+      "name": "whitespace_edges",
+      "text": "  প্রথম বাক্য।   দ্বিতীয় বাক্য?  \n",
+      "sentences": [
+        "প্রথম বাক্য।",
+        "দ্বিতীয় বাক্য?"
+      ],
+      "offsets": [
+        [
+          0,
+          17
+        ],
+        [
+          17,
+          35
+        ]
+      ]
+    },
+    {
+      "name": "single_terminal",
+      "text": "একটি মাত্র বাক্য।",
+      "sentences": [
+        "একটি মাত্র বাক্য।"
+      ],
+      "offsets": [
+        [
+          0,
+          17
+        ]
+      ]
+    },
+    {
+      "name": "ellipsis_and_abbrev",
+      "text": "সে থামল... তারপর হাসল। Dr. Roy এল।",
+      "sentences": [
+        "সে থামল...",
+        "তারপর হাসল।",
+        "Dr.",
+        "Roy এল।"
+      ],
+      "offsets": [
+        [
+          0,
+          11
+        ],
+        [
+          11,
+          23
+        ],
+        [
+          23,
+          27
+        ],
+        [
+          27,
+          34
+        ]
+      ]
+    },
+    {
+      "name": "blank",
+      "text": "   ",
+      "sentences": [],
+      "offsets": []
+    }
+  ]
+}

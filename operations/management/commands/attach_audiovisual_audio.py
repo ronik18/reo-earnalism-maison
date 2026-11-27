@@ -13,9 +13,24 @@ Bundle layout (--bundle <dir>), nothing else is accepted:
   <dir>/timing.json   {"units": [{"unit_id": "<live unit id>", "mp3": "<file name in dir>",
                                   "segments": [{"anchor_id": "<live paragraph anchor>",
                                                 "start_offset_chars": 0, "end_offset_chars": <len>,
-                                                "start_ms": <int>, "end_ms": <int>}, ...]}, ...]}
+                                                "start_ms": <int>, "end_ms": <int>}, ...],
+                                  "chapters": [{"title": "<text>", "start_ms": <int>}, ...],      # optional
+                                  "sentences": [{"anchor_id": "<live paragraph anchor>",
+                                                 "sentence_index": <int>, "start_ms": <int>,
+                                                 "end_ms": <int>}, ...]}, ...]}                  # optional
   <dir>/<file>.mp3    one chapter MP3 per listed unit; a single mp3 audio stream at exactly 48 or
-                      96 kbps (ffprobe-measured; the measured duration becomes the unit duration).
+                      96 kbps, or 64 kbps mono (the audiobook rendition) (ffprobe-measured; the measured
+                      duration becomes the unit duration).
+
+chapters/sentences are the audiobook profile's optional per-unit keys (a bundle without them imports exactly as
+before, at paragraph precision). chapters: non-empty, strictly increasing integer start_ms inside the measured
+duration, each with a non-blank title; stored on the unit's TimingMap as `chapters`. sentences: ordered,
+non-overlapping rows whose anchor_id is one of the unit's segment anchors, sentence_index contiguous from 0 per
+anchor, each inside that anchor's segment time span and the measured duration; the sentence count of an anchor
+must equal library.sentences.split_sentences of its live text. Stage then writes, besides the paragraph map, a
+precision "sentence" map (segments carry sentence_index and the sentence's character offsets), where an anchor
+listed in provenance.units[<unit_id>].sentences_unmeasured keeps its paragraph segments. Any invalid chapters or
+sentences row refuses the whole bundle, naming the unit id and the reason, before any write.
 
 unit_id/anchor_id are the ids written by export_audiovisual_source for the current live revision.
 Segments follow library.timing.validated_segments: ordered, non-overlapping in time, ending within
@@ -75,6 +90,7 @@ from core.services import audit
 from library import storage
 from library.models import Asset, Paragraph, Revision, Rights, TimingMap
 from library.production_handoff import HandoffError, measure_mp3
+from library.sentences import split_sentences
 from library.services import (FORMATS, canonical_bytes, clone_revision, digest, prepare_revision_validation,
                               transition_revision, validate_revision)
 from library.timing import validated_segments
@@ -85,6 +101,8 @@ EVIDENCE_SCHEMA = "earnalism.audiovisual-clearance-evidence.v1"
 STREAM_HELD = ("Stream hosting held: the owner has not approved Stream hosting cost, so only timing.json and chapter "
                "MP3 files are accepted; remove {name!r} from the bundle.")
 MAX_TIMING_BYTES = 4 * 1024 * 1024
+REQUIRED_ROW_KEYS = {"unit_id", "mp3", "segments"}
+OPTIONAL_ROW_KEYS = {"chapters", "sentences"}  # audiobook profile; absent in every film-profile / older bundle
 # Staged media sharing one draft of a live revision: validation_evidence marker -> (asset kind, browser check).
 # attach_audiovisual_audio and attach_audiovisual_film stage into the same draft and publish it together.
 STAGED_MEDIA = {"audiovisual_audio": ("audio_chapter", "audio_playback"), "audiovisual_film": ("video", "video_playback")}
@@ -118,11 +136,15 @@ def read_bundle(folder):
         if not isinstance(rows, list) or not rows:
             raise ValueError
         for row in rows:
-            if (not isinstance(row, dict) or set(row) != {"unit_id", "mp3", "segments"} or not isinstance(row["unit_id"], str)
+            if (not isinstance(row, dict) or not REQUIRED_ROW_KEYS <= set(row) or not isinstance(row["unit_id"], str)
                     or not isinstance(row["mp3"], str) or not isinstance(row["segments"], list)):
                 raise ValueError
+            if set(row) - REQUIRED_ROW_KEYS - OPTIONAL_ROW_KEYS:
+                extra = ", ".join(sorted(set(row) - REQUIRED_ROW_KEYS - OPTIONAL_ROW_KEYS))
+                raise CommandError(f"timing.json unit {row['unit_id']}: unexpected key(s) {extra}; "
+                                   f"allowed: unit_id, mp3, segments, chapters, sentences.")
     except (ValueError, KeyError, TypeError, UnicodeDecodeError):
-        raise CommandError('timing.json must be {"units": [{"unit_id", "mp3", "segments"}]}.') from None
+        raise CommandError('timing.json must be {"units": [{"unit_id", "mp3", "segments"[, "chapters", "sentences"]}]}.') from None
     names = [row["mp3"] for row in rows]
     mp3s = {e.name for e in entries if e.suffix.lower() == ".mp3"}
     if len(set(names)) != len(names) or len({r["unit_id"] for r in rows}) != len(rows) or set(names) != mp3s:
@@ -135,10 +157,75 @@ def read_bundle(folder):
         except HandoffError as exc:
             raise CommandError(f"{name}: {exc}") from None
         files[name] = {"path": path, "sha256": file_sha256(path), "bytes": path.stat().st_size, **measured}
-    bundle_sha = digest(canonical_bytes({"timing_sha256": sha256(raw), "mp3": {n: f["sha256"] for n, f in files.items()}}))
     provenance = timing.get("provenance") if isinstance(timing, dict) else None
-    return {"rows": rows, "files": files, "bundle_sha256": bundle_sha,
-            "provenance": provenance if isinstance(provenance, dict) else {}}
+    provenance = provenance if isinstance(provenance, dict) else {}
+    for row in rows:
+        check_chapters_and_sentences(row, files[row["mp3"]]["duration_ms"], provenance)
+    bundle_sha = digest(canonical_bytes({"timing_sha256": sha256(raw), "mp3": {n: f["sha256"] for n, f in files.items()}}))
+    return {"rows": rows, "files": files, "bundle_sha256": bundle_sha, "provenance": provenance}
+
+
+def _is_int(value):
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def check_chapters_and_sentences(row, duration_ms, provenance):
+    """Refuse the whole bundle on any invalid optional chapters/sentences key (nothing is written yet)."""
+    unit = row["unit_id"]
+
+    def refuse(reason):
+        raise CommandError(f"timing.json unit {unit}: {reason}")
+
+    if "chapters" in row:
+        chapters = row["chapters"]
+        if not isinstance(chapters, list) or not chapters:
+            refuse("chapters must not be empty (a list of {title, start_ms}).")
+        previous = -1
+        for i, chapter in enumerate(chapters):
+            if (not isinstance(chapter, dict) or set(chapter) != {"title", "start_ms"} or not isinstance(chapter["title"], str)
+                    or not chapter["title"].strip() or not _is_int(chapter["start_ms"]) or chapter["start_ms"] < 0):
+                refuse(f"chapters[{i}] must be {{title: non-blank text, start_ms: integer >= 0}}.")
+            if chapter["start_ms"] <= previous:
+                refuse(f"chapters[{i}].start_ms {chapter['start_ms']} is not after the previous marker ({previous}).")
+            if chapter["start_ms"] >= duration_ms:
+                refuse(f"chapters[{i}].start_ms {chapter['start_ms']} is not inside the measured duration {duration_ms} ms.")
+            previous = chapter["start_ms"]
+    units = provenance.get("units")
+    flagged = units.get(unit, {}).get("sentences_unmeasured") if isinstance(units, dict) and isinstance(units.get(unit), dict) else None
+    if flagged is not None and (not isinstance(flagged, list) or not all(isinstance(a, str) for a in flagged)):
+        refuse("provenance sentences_unmeasured must be a list of anchor ids.")
+    if "sentences" not in row:
+        return
+    sentences = row["sentences"]
+    if not isinstance(sentences, list):
+        refuse("sentences must be a list of {anchor_id, sentence_index, start_ms, end_ms}.")
+    spans = {}
+    for segment in row["segments"]:
+        if isinstance(segment, dict) and isinstance(segment.get("anchor_id"), str) and _is_int(segment.get("start_ms")) and _is_int(segment.get("end_ms")):
+            low, high = spans.get(segment["anchor_id"], (segment["start_ms"], segment["end_ms"]))
+            spans[segment["anchor_id"]] = (min(low, segment["start_ms"]), max(high, segment["end_ms"]))
+    seen, previous_end = {}, 0
+    for i, sentence in enumerate(sentences):
+        if (not isinstance(sentence, dict) or set(sentence) != {"anchor_id", "sentence_index", "start_ms", "end_ms"}
+                or not isinstance(sentence["anchor_id"], str) or not all(_is_int(sentence[k]) for k in ("sentence_index", "start_ms", "end_ms"))):
+            refuse(f"sentences[{i}] must be {{anchor_id, sentence_index, start_ms, end_ms}} with integer numbers.")
+        anchor = sentence["anchor_id"]
+        if anchor not in spans:
+            refuse(f"sentences[{i}] anchor {anchor} is not an anchor of this unit's segments.")
+        if sentence["sentence_index"] != seen.get(anchor, 0):
+            refuse(f"sentences[{i}] sentence_index {sentence['sentence_index']} for anchor {anchor} "
+                   f"must be {seen.get(anchor, 0)} (contiguous from 0).")
+        if sentence["start_ms"] < 0 or sentence["end_ms"] <= sentence["start_ms"]:
+            refuse(f"sentences[{i}] needs 0 <= start_ms < end_ms.")
+        if sentence["start_ms"] < previous_end:
+            refuse(f"sentences[{i}] starts at {sentence['start_ms']} ms before the previous sentence ends ({previous_end} ms).")
+        if sentence["end_ms"] > duration_ms:
+            refuse(f"sentences[{i}] ends at {sentence['end_ms']} ms past the measured duration {duration_ms} ms.")
+        low, high = spans[anchor]
+        if sentence["start_ms"] < low or sentence["end_ms"] > high:
+            refuse(f"sentences[{i}] lies outside the segment of anchor {anchor} ({low}-{high} ms).")
+        seen[anchor] = sentence["sentence_index"] + 1
+        previous_end = sentence["end_ms"]
 
 
 def score_mixed(bundle):
@@ -232,7 +319,7 @@ def check_record_complete(doc):
         raise CommandError("Clearance evidence music needs route, licence and source_and_licence (or dry_narration true).")
 
 
-def in_memory_check(revision, unit, segments, measured, sha, evidence):
+def in_memory_check(revision, unit, segments, measured, sha, evidence, precision="paragraph"):
     """Geometry check through validated_segments against revision rows; nothing is saved."""
     unit.duration_ms = measured["duration_ms"]
     probe = Revision(id=revision.id, edition_id=revision.edition_id, content_sha256=revision.content_sha256,
@@ -241,11 +328,42 @@ def in_memory_check(revision, unit, segments, measured, sha, evidence):
                   state="ready", provider="r2", sha256=sha, duration_ms=measured["duration_ms"])
     evidence.setdefault("media_assets", {})[str(asset.id)] = media_value(asset, measured, "probe")
     mapping = TimingMap(revision=probe, asset=asset, text_sha256=revision.content_sha256, asset_sha256=sha,
-                        precision="paragraph", measured=True, segments=segments)
+                        precision=precision, measured=True, segments=segments)
     try:
         validated_segments(mapping)
     except DomainError as exc:
         raise CommandError(f"timing.json unit {unit.ordinal}: {exc.message}") from None
+
+
+def sentence_segments(row, texts, unmeasured):
+    """Segments of the unit's sentence-precision map, keyed by the bundle's anchor ids.
+
+    An anchor with sentence rows (and not listed in sentences_unmeasured) contributes one segment per sentence with
+    its character offsets from library.sentences; any other anchor keeps its paragraph segments. Returns None when no
+    anchor has sentence rows, so no sentence map is written. Refuses a sentence count the live text does not have.
+    """
+    wanted = {}
+    for sentence in row.get("sentences", []):
+        if sentence["anchor_id"] not in unmeasured:
+            wanted.setdefault(sentence["anchor_id"], []).append(sentence)
+    if not wanted:
+        return None
+    segments, done = [], set()
+    for segment in row["segments"]:
+        anchor = segment["anchor_id"]
+        if anchor not in wanted:
+            segments.append(dict(segment))
+        elif anchor not in done:
+            done.add(anchor)
+            spans = split_sentences(texts[anchor])
+            if len(spans) != len(wanted[anchor]):
+                raise CommandError(f"timing.json unit {row['unit_id']}: anchor {anchor} has {len(wanted[anchor])} sentence "
+                                   f"row(s) but its live text splits into {len(spans)} sentence(s).")
+            for sentence, (start, end) in zip(wanted[anchor], spans):
+                segments.append({"anchor_id": anchor, "sentence_index": sentence["sentence_index"],
+                                 "start_ms": sentence["start_ms"], "end_ms": sentence["end_ms"],
+                                 "start_offset_chars": start, "end_offset_chars": end})
+    return segments
 
 
 def media_value(asset, measured, bundle_sha):
@@ -370,14 +488,23 @@ class Command(BaseCommand):
             unit = units.get(row["unit_id"])
             if unit is None:
                 raise CommandError(f"timing.json unit {row['unit_id']} is not a unit of the live revision.")
-            ordinals = {str(p.anchor_id): p.ordinal for p in Paragraph.objects.filter(unit=unit)}
+            paragraphs = list(Paragraph.objects.filter(unit=unit))
+            ordinals = {str(p.anchor_id): p.ordinal for p in paragraphs}
+            texts = {str(p.anchor_id): p.text for p in paragraphs}
             for segment in row["segments"]:
                 if not isinstance(segment, dict) or segment.get("anchor_id") not in ordinals:
                     raise CommandError(f"timing.json unit {unit.ordinal}: segment anchor is not in this live unit.")
             measured = bundle["files"][row["mp3"]]
             in_memory_check(live, unit, row["segments"], measured, measured["sha256"], {})
-            plan.append({"unit_ordinal": unit.ordinal, "file": measured,
-                         "segments": [{**s, "paragraph_ordinal": ordinals[s["anchor_id"]]} for s in row["segments"]]})
+            unit_provenance = bundle["provenance"].get("units", {}).get(row["unit_id"])
+            unmeasured = set(unit_provenance.get("sentences_unmeasured", [])) if isinstance(unit_provenance, dict) else set()
+            sentences = sentence_segments(row, texts, unmeasured)
+            if sentences is not None:
+                in_memory_check(live, unit, sentences, measured, measured["sha256"], {}, precision="sentence")
+            plan.append({"unit_ordinal": unit.ordinal, "file": measured, "chapters": row.get("chapters", []),
+                         "segments": [{**s, "paragraph_ordinal": ordinals[s["anchor_id"]]} for s in row["segments"]],
+                         "sentences": None if sentences is None else
+                         [{**s, "paragraph_ordinal": ordinals[s["anchor_id"]]} for s in sentences]})
         return plan
 
     # --- clone (or resume the unfinished clone of this exact bundle) ---------------------------
@@ -466,15 +593,22 @@ class Command(BaseCommand):
                 segments = [{"anchor_id": anchors[(unit.ordinal, s["paragraph_ordinal"])],
                              **{k: s[k] for k in ("start_offset_chars", "end_offset_chars", "start_ms", "end_ms")}}
                             for s in item["segments"]]
-                mapping = TimingMap(revision=current, asset=asset, text_sha256=current.content_sha256, asset_sha256=asset.sha256,
-                                    precision="paragraph", measured=True, segments=segments)
-                try:
-                    validated_segments(mapping)
-                except DomainError as exc:
-                    raise CommandError(f"timing map for unit {unit.ordinal}: {exc.message}") from None
-                mapping.save()
-                audit(actor, "timing_map.create", mapping, {"asset_id": str(asset.id), "asset_sha256": asset.sha256,
-                      "text_sha256": current.content_sha256, "channel": "server_job"})
+                maps = [("paragraph", segments)]
+                if item["sentences"] is not None:
+                    maps.append(("sentence", [{**{k: v for k, v in s.items() if k not in ("anchor_id", "paragraph_ordinal")},
+                                               "anchor_id": anchors[(unit.ordinal, s["paragraph_ordinal"])]}
+                                              for s in item["sentences"]]))
+                for precision, mapped in maps:
+                    mapping = TimingMap(revision=current, asset=asset, text_sha256=current.content_sha256,
+                                        asset_sha256=asset.sha256, precision=precision, measured=True, segments=mapped,
+                                        chapters=item["chapters"])
+                    try:
+                        validated_segments(mapping)
+                    except DomainError as exc:
+                        raise CommandError(f"{precision} timing map for unit {unit.ordinal}: {exc.message}") from None
+                    mapping.save()
+                    audit(actor, "timing_map.create", mapping, {"asset_id": str(asset.id), "asset_sha256": asset.sha256,
+                          "text_sha256": current.content_sha256, "precision": precision, "channel": "server_job"})
             self.approve_rights(actor, live, current, evidence_ref, now)
             self.record_clearance(actor, live, current, evidence_ref, now)
 

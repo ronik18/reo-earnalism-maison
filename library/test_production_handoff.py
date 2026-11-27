@@ -14,7 +14,7 @@ from operations.production_bundle import verify_bundle, BundleError
 from operations.production_journal import OperationJournal
 
 
-def packet(root, *, edition=None, revision=None, unit=None, anchor=None, text_sha="c" * 64):
+def packet(root, *, edition=None, revision=None, unit=None, anchor=None, text_sha="c" * 64, chapters=None):
     edition, revision, unit, anchor = [str(x or uuid.uuid4()) for x in (edition, revision, unit, anchor)]
     assets = []
     def add(ident, role, mime, raw, **extra):
@@ -25,7 +25,8 @@ def packet(root, *, edition=None, revision=None, unit=None, anchor=None, text_sh
     add("audio", "audio", "audio/mpeg", b"synthetic MP3 protocol fixture, not measured media", unit_id=unit, duration_ms=1000, native_wav="native")
     mapping = dict(schema="earnalism.measured_audio_maps.v1", edition_revision_id=revision, text_sha256=text_sha,
         maps=[dict(audio_asset_id="audio", precision="paragraph", measured=True, measurement_evidence_ref="synthetic-local-only/alignment",
-            segments=[dict(anchor_id=anchor, start_offset_chars=0, end_offset_chars=5, start_ms=0, end_ms=1000)])])
+            segments=[dict(anchor_id=anchor, start_offset_chars=0, end_offset_chars=5, start_ms=0, end_ms=1000)],
+            **({} if chapters is None else dict(chapters=chapters)))])
     add("map", "timing_map", "application/json", h.canonical(mapping), unit_id=unit)
     add("captions", "captions", "text/vtt", b"WEBVTT\n\n00:00.000 --> 00:01.000\nHello\n")
     add("qa", "qa_report", "application/json", b'{"listening":"UNASSESSED","synthetic_fixture":true}')
@@ -278,6 +279,28 @@ class ClientTests(unittest.TestCase):
         with patch("subprocess.run", return_value=result), self.assertRaises(h.HandoffError):
             h.measure_mp3(self.root / "audio")
 
+    def test_measure_mp3_accepts_64k_mono(self):
+        def probe(bitrate, channels):
+            body = ('{"streams":[{"codec_name":"mp3","codec_type":"audio","bit_rate":"%s","channels":%s}],'
+                    '"format":{"duration":"2.0"}}' % (bitrate, channels)).encode()
+            return type("Result", (), {"stdout": body})()
+        with patch("subprocess.run", return_value=probe(64000, 1)):
+            proof = h.measure_mp3(self.root / "audio")
+        self.assertEqual((proof["quality_kbps"], proof["duration_ms"]), (64, 2000))
+        for bitrate, channels in ((64000, 2), (128000, 1), (80000, 1)):
+            with patch("subprocess.run", return_value=probe(bitrate, channels)), self.assertRaises(h.HandoffError):
+                h.measure_mp3(self.root / "audio")
+
+    def test_actual_64k_mono_mp3_measures(self):
+        import shutil
+        import subprocess
+        if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
+            self.skipTest("Local ffmpeg/ffprobe unavailable; no measurement qualification claimed")
+        path = self.root / "audiobook-fixture.mp3"
+        subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", "sine=frequency=440:duration=0.5",
+            "-ac", "1", "-b:a", "64k", str(path)], check=True, capture_output=True, timeout=10)
+        self.assertEqual(h.measure_mp3(path)["quality_kbps"], 64)
+
     def test_actual_mp3_container_measurement_on_synthetic_local_tone(self):
         import shutil
         import subprocess
@@ -295,6 +318,10 @@ try:
 except ImportError:
     TestCase = None
 
+MAP_CHAPTERS = {"test_map_chapters_are_stored": [{"title": "One", "start_ms": 0}, {"title": "Two", "start_ms": 600}],
+    "test_map_with_invalid_chapters_attaches_nothing": [{"title": " ", "start_ms": 0}]}
+
+
 if TestCase is not None:
     class AttachmentTests(TestCase):
         """Actual existing ORM/CAS/operation receipts. Isolated PostgreSQL test DB."""
@@ -311,7 +338,8 @@ if TestCase is not None:
             para = Paragraph.objects.create(unit=self.unit, ordinal=1, text="Hello")
             self.revision.content_sha256 = revision_hash(self.revision); self.revision.save()
             self.bundle = packet(self.root, edition=self.edition.id, revision=self.revision.id, unit=self.unit.id,
-                anchor=para.anchor_id, text_sha=self.revision.content_sha256)
+                anchor=para.anchor_id, text_sha=self.revision.content_sha256,
+                chapters=MAP_CHAPTERS.get(self._testMethodName))
             plan = h.prepare_handoff(self.bundle, self.root); assets = {}
             for item in plan["uploads"]:
                 b = item["body"]; ident = uuid.uuid4()
@@ -349,6 +377,17 @@ if TestCase is not None:
             record = self.revision.validation_evidence["production_handoffs"][self.staged["bundle_sha256"]]
             self.assertFalse(record["actual_listening"]); self.assertFalse(record["rights_approval_created"])
             self.assertEqual(record["evidence_references"], self.bundle["evidence"])
+
+        def test_map_chapters_are_stored(self):
+            from library.models import TimingMap
+            self.attach(execute=True)
+            self.assertEqual(TimingMap.objects.get().chapters, MAP_CHAPTERS["test_map_chapters_are_stored"])
+
+        def test_map_with_invalid_chapters_attaches_nothing(self):
+            from library.models import TimingMap
+            with self.assertRaisesRegex(h.HandoffError, "MEASURED_MAP_CHAPTERS_INVALID"):
+                self.attach(execute=True)
+            self.assertEqual(TimingMap.objects.count(), 0)
 
         def test_stale_etag_rolls_back_all_attachment_mutations(self):
             from core.api import DomainError

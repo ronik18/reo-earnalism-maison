@@ -198,6 +198,7 @@ class TimingMap(RevisionContent):
     precision = models.CharField(max_length=12, default='paragraph')
     measured = models.BooleanField(default=False)
     segments = models.JSONField(default=list)
+    chapters = models.JSONField(default=list, blank=True)  # [{title, start_ms}] chapter markers inside the unit's audio
     class Meta:
         db_table = 'maison_timing_map'
 

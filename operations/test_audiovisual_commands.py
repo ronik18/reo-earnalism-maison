@@ -13,9 +13,11 @@ from django.contrib.auth.models import Permission
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
+from operations.management.commands.attach_audiovisual_audio import read_bundle
 
 from core.models import AuditEvent
-from library.models import Asset, Edition, Revision, TimingMap
+from library.sentences import split_sentences
+from library.models import Asset, Edition, Paragraph, Revision, TimingMap
 from library.services import prepare_revision_validation, revision_hash, validate_revision
 
 EVIDENCE_DIR = Path(settings.BASE_DIR) / "docs" / "evidence"
@@ -343,6 +345,189 @@ class AudiovisualCommandTests(AudiovisualFixture):
         with self.assertRaisesMessage(CommandError, "evidence"):
             self.stage(folder, "docs/evidence/audiovisual-clearance-missing-test-only.json")
         self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
+        self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)
+
+
+class AudiobookBundleTests(AudiovisualFixture):
+    """Audiobook-profile rows: optional per-unit chapters and sentence timing (interface note 2026-11-27)."""
+    DURATION = 30
+
+    def audiobook_bundle(self, source, kbps=96, chapters="default", sentences=True, unmeasured=(), mutate=None):
+        """One unit, mono MP3 at `kbps`; every paragraph gets its sentences evenly spread over its segment."""
+        folder = self.tmp / "bundle"
+        if folder.exists():
+            shutil.rmtree(folder)
+        folder.mkdir()
+        mp3 = folder / "unit-01.mp3"
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", f"sine=frequency=440:duration={self.DURATION}",
+                        "-ac", "1", "-ar", "44100", "-c:a", "libmp3lame", "-b:a", f"{kbps}k", str(mp3)], check=True)
+        unit = source["units"][0]
+        total = self.DURATION * 1000
+        step = total // len(unit["paragraphs"])
+        segments, rows = [], []
+        for i, p in enumerate(unit["paragraphs"]):
+            start, end = i * step, (i + 1) * step
+            segments.append({"anchor_id": p["anchor_id"], "start_offset_chars": 0, "end_offset_chars": len(p["text"]),
+                             "start_ms": start, "end_ms": end})
+            spans = split_sentences(p["text"])
+            part = (end - start) // len(spans)
+            rows += [{"anchor_id": p["anchor_id"], "sentence_index": n, "start_ms": start + n * part,
+                      "end_ms": end if n == len(spans) - 1 else start + (n + 1) * part} for n in range(len(spans))]
+        row = {"unit_id": unit["unit_id"], "mp3": mp3.name, "segments": segments}
+        if chapters == "default":
+            chapters = [{"title": "Unit title", "start_ms": 0}, {"title": "Second", "start_ms": segments[1]["start_ms"]}]
+        if chapters is not None:
+            row["chapters"] = chapters
+        if sentences:
+            row["sentences"] = rows
+        timing = {"units": [row]}
+        if unmeasured:
+            timing["provenance"] = {"profile": "audiobook", "units": {unit["unit_id"]: {"sentences_unmeasured": list(unmeasured)}}}
+        if mutate:
+            mutate(row, timing)
+        (folder / "timing.json").write_text(json.dumps(timing))
+        return folder, hashlib.sha256(mp3.read_bytes()).hexdigest()
+
+    def read_source(self):
+        self.publish_bicharak()
+        return self.export()
+
+    def test_read_bundle_accepts_chapters_and_sentences(self):
+        source = self.read_source()
+        folder, _ = self.audiobook_bundle(source, kbps=64)
+        bundle = read_bundle(folder)
+        row = bundle["rows"][0]
+        self.assertEqual(row["chapters"][0], {"title": "Unit title", "start_ms": 0})
+        self.assertEqual(row["sentences"][0]["sentence_index"], 0)
+        self.assertEqual(bundle["files"]["unit-01.mp3"]["quality_kbps"], 64)
+
+    def assert_refused(self, source, reason, **options):
+        folder, _ = self.audiobook_bundle(source, kbps=64, **options)
+        with self.assertRaises(CommandError) as caught:
+            read_bundle(folder)
+        message = str(caught.exception)
+        self.assertIn(source["units"][0]["unit_id"], message)
+        self.assertIn(reason, message)
+
+    def test_read_bundle_rejects_chapters_not_increasing_or_past_duration(self):
+        source = self.read_source()
+        self.assert_refused(source, "chapters[1]", chapters=[{"title": "A", "start_ms": 100}, {"title": "B", "start_ms": 100}])
+        self.assert_refused(source, "chapters[1]", chapters=[{"title": "A", "start_ms": 0}, {"title": "B", "start_ms": self.DURATION * 1000 + 1000}])
+        self.assert_refused(source, "chapters must not be empty", chapters=[])
+        self.assert_refused(source, "chapters[0]", chapters=[{"title": "", "start_ms": 0}])
+        self.assert_refused(source, "chapters[0]", chapters=[{"title": "A", "start_ms": 0.5}])
+
+    def test_read_bundle_rejects_sentence_index_gap_or_outside_anchor_segment(self):
+        source = self.read_source()
+
+        def gap(row, timing):
+            counts = {}
+            for r in row["sentences"]:
+                counts[r["anchor_id"]] = counts.get(r["anchor_id"], 0) + 1
+            anchor = next((k for k, v in counts.items() if v > 1), None)
+            if anchor is None:
+                self.skipTest("no multi-sentence paragraph")
+            [r for r in row["sentences"] if r["anchor_id"] == anchor][1]["sentence_index"] = 5
+        self.assert_refused(source, "sentence_index", mutate=gap)
+
+        def outside(row, timing):
+            row["sentences"][-1]["end_ms"] = self.DURATION * 1000 + 1
+        self.assert_refused(source, "sentences[", mutate=outside)
+
+        def other_anchor(row, timing):
+            row["sentences"][1]["anchor_id"] = "no-such-anchor"
+        self.assert_refused(source, "anchor", mutate=other_anchor)
+
+        def overlap(row, timing):
+            row["sentences"][1]["start_ms"] = row["sentences"][0]["start_ms"]
+            row["sentences"][1]["end_ms"] = row["sentences"][0]["end_ms"]
+        self.assert_refused(source, "sentences[1]", mutate=overlap)
+
+        def before_segment(row, timing):
+            second = row["segments"][1]["anchor_id"]
+            target = next(r for r in row["sentences"] if r["anchor_id"] == second)
+            target["start_ms"] = row["segments"][0]["start_ms"]
+        self.assert_refused(source, "segment", mutate=before_segment)
+
+    def test_read_bundle_refuses_unknown_row_keys(self):
+        source = self.read_source()
+        self.assert_refused(source, "unexpected", mutate=lambda row, timing: row.update(extra=1))
+
+    def test_old_bundle_without_new_keys_imports_unchanged(self):
+        _, _, _, _, staged = self.staged()
+        draft = Revision.objects.get(pk=staged["revision_id"])
+        asset = Asset.objects.get(revision=draft, kind="audio_chapter")
+        maps = list(TimingMap.objects.filter(revision=draft))
+        self.assertEqual(len(maps), 1)
+        self.assertEqual((maps[0].precision, maps[0].chapters, maps[0].asset_id), ("paragraph", [], asset.id))
+        self.assertTrue(all("sentence_index" not in s for s in maps[0].segments))
+
+    def stage_audiobook(self, **options):
+        self.publish_bicharak()
+        source = self.export()
+        folder, audio_sha = self.audiobook_bundle(source, **options)
+        staged = self.stage(folder, self.evidence(source, audio_sha))
+        return source, Revision.objects.get(pk=staged["revision_id"])
+
+    def test_stage_writes_paragraph_map_and_sentence_map_with_chapters(self):
+        source, draft = self.stage_audiobook()
+        asset = Asset.objects.get(revision=draft, kind="audio_chapter")
+        paragraph = TimingMap.objects.get(revision=draft, asset=asset, precision="paragraph")
+        sentence = TimingMap.objects.get(revision=draft, asset=asset, precision="sentence")
+        self.assertEqual(TimingMap.objects.filter(revision=draft).count(), 2)
+        self.assertEqual(paragraph.chapters, sentence.chapters)
+        self.assertEqual([c["title"] for c in sentence.chapters], ["Unit title", "Second"])
+        self.assertTrue(all("sentence_index" not in s for s in paragraph.segments))
+        self.assertTrue(all(set(s) == {"anchor_id", "sentence_index", "start_ms", "end_ms", "start_offset_chars", "end_offset_chars"}
+                            for s in sentence.segments))
+        by_anchor = {}
+        for s in sentence.segments:
+            by_anchor.setdefault(s["anchor_id"], []).append(s)
+        texts = {str(p.anchor_id): p.text for p in Paragraph.objects.filter(unit=asset.unit)}
+        self.assertEqual(set(by_anchor), set(texts))
+        for anchor, rows in by_anchor.items():
+            self.assertEqual([r["sentence_index"] for r in rows], list(range(len(rows))))
+            self.assertEqual([(r["start_offset_chars"], r["end_offset_chars"]) for r in rows], split_sentences(texts[anchor]))
+        checks = {c["code"]: c["status"] for c in validate_revision(draft, prepared=prepare_revision_validation(draft.id))["checks"]}
+        self.assertEqual(checks["timing_map"], "pass")
+
+    def test_sentence_map_skips_unmeasured_anchors(self):
+        self.publish_bicharak()
+        source = self.export()
+        skipped = source["units"][0]["paragraphs"][1]["anchor_id"]
+        folder, audio_sha = self.audiobook_bundle(source, unmeasured=[skipped])
+        staged = self.stage(folder, self.evidence(source, audio_sha))
+        draft = Revision.objects.get(pk=staged["revision_id"])
+        sentence = TimingMap.objects.get(revision=draft, precision="sentence")
+        paragraph = TimingMap.objects.get(revision=draft, precision="paragraph")
+        draft_anchor = {str(p.ordinal): str(p.anchor_id) for p in Paragraph.objects.filter(unit__revision=draft, unit__ordinal=1)}["2"]
+        rows = [s for s in sentence.segments if s["anchor_id"] == draft_anchor]
+        self.assertEqual(len(rows), 1)
+        self.assertNotIn("sentence_index", rows[0])
+        self.assertEqual(rows[0], next(s for s in paragraph.segments if s["anchor_id"] == draft_anchor))
+        self.assertTrue(any("sentence_index" in s for s in sentence.segments))
+
+    def test_chapters_without_sentences_store_on_the_paragraph_map_only(self):
+        _, draft = self.stage_audiobook(sentences=False)
+        maps = TimingMap.objects.filter(revision=draft)
+        self.assertEqual([(m.precision, [c["title"] for c in m.chapters]) for m in maps], [("paragraph", ["Unit title", "Second"])])
+
+    def test_stage_refuses_sentence_count_that_differs_from_the_text_before_any_mutation(self):
+        live = self.publish_bicharak()
+        source = self.export()
+
+        def drop(row, timing):
+            counts = {}
+            for r in row["sentences"]:
+                counts[r["anchor_id"]] = counts.get(r["anchor_id"], 0) + 1
+            anchor = next((k for k, v in counts.items() if v > 1), None)
+            if anchor is None:
+                self.skipTest("no multi-sentence paragraph")
+            last = max(i for i, r in enumerate(row["sentences"]) if r["anchor_id"] == anchor)
+            del row["sentences"][last]
+        folder, audio_sha = self.audiobook_bundle(source, mutate=drop)
+        with self.assertRaises(CommandError):
+            self.stage(folder, self.evidence(source, audio_sha))
         self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)
 
 
