@@ -1,0 +1,86 @@
+{
+  "advisories": {
+    "f01s014-1": {
+      "candidate": 1,
+      "why": "gate needs review: possible anachronism: electric cable, spotlight"
+    },
+    "f01s014-12": {
+      "candidate": 1,
+      "why": "gate needs review: a character is expected but no face was detected; possible anachronism: modern eyeglasses; anchor similarity 0.51 is below 0.55 (uncalibrated)"
+    },
+    "f01s014-8": {
+      "candidate": 2,
+      "why": "gate needs review: a character is expected but no face was detected; no person box: similarity used the whole frame"
+    }
+  },
+  "choices": {
+    "f01s014-1": {
+      "candidate": 1,
+      "file": "stills/stills-f01s014-scene-r1/f01s014-1--c1.png",
+      "sha256": "04426c19d83dcd6ca50b7a827ad1b7aa1c9c7df2d607429c5c82247d700366e7"
+    },
+    "f01s014-12": {
+      "candidate": 1,
+      "file": "stills/stills-f01s014-scene-r1/f01s014-12--c1.png",
+      "sha256": "7de73c294ab4b50e1b0702996d2e989cfa4516fe64a76708c0c41b49ee9d5147"
+    },
+    "f01s014-2": {
+      "candidate": 1,
+      "file": "stills/stills-f01s014-scene-r1/f01s014-2--c1.png",
+      "sha256": "1b790dc1c0aa7a9bf2139c05e9b75c62c92b5a9cb6c8cac2eded49075d1335c9"
+    },
+    "f01s014-3": {
+      "candidate": 2,
+      "file": "stills/stills-f01s014-scene-r1/f01s014-3--c2.png",
+      "sha256": "b8f950d6dfb59866c263d827b82c5300f2fbdae2388c571589ae2f562f3b8f91"
+    },
+    "f01s014-6": {
+      "candidate": 1,
+      "file": "stills/stills-f01s014-scene-r1/f01s014-6--c1.png",
+      "sha256": "14ac93ddaaf05986fd7bdb09cb69f8aa192414baaa1279e7fa5ba1e0c60990a1"
+    },
+    "f01s014-8": {
+      "candidate": 2,
+      "file": "stills/stills-f01s014-scene-r1/f01s014-8--c2.png",
+      "sha256": "f0d71d6eb47c5c5cd5644d66d8f9185d9fd6b30e668dff7f572d38f95cb4da9b"
+    }
+  },
+  "job_id": "stills-f01s014-scene-r1",
+  "overrides": {
+    "f01s014-2": {
+      "candidate": 1,
+      "gate": {
+        "anachronisms": [],
+        "anchor_similarity": null,
+        "eyes": 2,
+        "hands_detached": true,
+        "needs_review": false,
+        "notes": [
+          "a hand with no body or arm near its wrist",
+          "possible anachronism: spotlight"
+        ],
+        "pass": false
+      },
+      "level": "fail",
+      "reason": "Owner pick 27 Nov 2026 (c1) after viewing the candidates; the still gate is uncalibrated (no gate-calibration.json). Gate result quoted: pass false, needs_review false, hands_detached true, eyes 2, notes \"a hand with no body or arm near its wrist\"; \"possible anachronism: spotlight\".",
+      "why": "gate failed: a hand with no body or arm near its wrist; possible anachronism: spotlight"
+    },
+    "f01s014-6": {
+      "candidate": 1,
+      "gate": {
+        "anachronisms": [],
+        "anchor_similarity": null,
+        "eyes": 2,
+        "hands_detached": true,
+        "needs_review": false,
+        "notes": [
+          "a hand with no body or arm near its wrist"
+        ],
+        "pass": false
+      },
+      "level": "fail",
+      "reason": "Owner pick 27 Nov 2026 (c1) after viewing the candidates; the still gate is uncalibrated (no gate-calibration.json). Gate result quoted: pass false, needs_review false, hands_detached true, eyes 2, notes \"a hand with no body or arm near its wrist\".",
+      "why": "gate failed: a hand with no body or arm near its wrist"
+    }
+  }
+}

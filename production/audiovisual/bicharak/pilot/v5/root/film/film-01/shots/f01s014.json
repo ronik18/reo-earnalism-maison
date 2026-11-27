@@ -229,7 +229,7 @@
       },
       "motion": "glide",
       "wan_res": null,
-      "subject": "match cut from the carriage slats to the barred window: the house wall at sunrise, light crawling along the rays, the birdcage in the window (uncropped still stills-pilot2 f01s014-8 c2 with its motion-pilot2 depth map)",
+      "subject": "plain dissolve from Hem in the carriage to the barred window (owner change 27 Nov 2026: shot 8's picked still has horizontal slats, so no match cut): the house wall at sunrise, light crawling along the rays, the birdcage in the window (uncropped still stills-pilot2 f01s014-8 c2 with its motion-pilot2 depth map)",
       "bible_refs": [],
       "sound": {
         "vo": "কোন্‌খানে গিয়া প্রভাত হইবে, এবং সেই নিরানন্দ প্রভাতে",
@@ -240,7 +240,7 @@
         "music": "hushed sunrise phrase"
       },
       "layer": "imagined",
-      "transition_in": "match"
+      "transition_in": "dissolve"
     },
     {
       "n": 10,
@@ -357,8 +357,8 @@
   },
   "approved": {
     "by": "Claude",
-    "at": "2026-11-27T19:17:31+00:00",
-    "reviewer": "independent reviewer (paper-edit-f01s014-review.md): APPROVE WITH CHANGES, 27 Nov 2026; the reviewer's 10 changes applied and the new cut times re-checked by Claude on the --no-retime voice; plus the owner decisions of 27 Nov 2026 (adopt 12a, 7-c1 without the mole, 14w, 9p; re-take the door beat with real sweeping; stills run for shots 1, 2, 3, 6, 8, 12; 4 s minimum waived for shots 5, 6, 7; eleven_v4); shots 2, 3 and 8 under 4 s are not waived",
-    "input_sha256": "468013bb11b3103591b8d2a40845a5a72465a65887b2b23631e30d1a9bf3343a"
+    "at": "2026-11-27T19:45:12+00:00",
+    "reviewer": "independent reviewer (paper-edit-f01s014-review.md): APPROVE WITH CHANGES, 27 Nov 2026; the reviewer's 10 changes applied and the new cut times re-checked by Claude on the --no-retime voice; plus the owner decisions of 27 Nov 2026 (adopt 12a, 7-c1 without the mole, 14w, 9p; re-take the door beat with real sweeping; stills run for shots 1, 2, 3, 6, 8, 12; 4 s minimum waived for shots 5, 6, 7; eleven_v4); shots 2, 3 and 8 under 4 s are not waived; plus the owner change of 27 Nov 2026 after the stills pick: shot 9 transition match -> dissolve (shot 8's picked c2 has horizontal slats; the owner accepted a plain dissolve), the door re-take approved at about 2.0 CU on A100",
+    "input_sha256": "5bdab8df9daf4172ae9f1bf2a24b9767171bca2a7e873161a6cd841b65fa474c"
   }
 }

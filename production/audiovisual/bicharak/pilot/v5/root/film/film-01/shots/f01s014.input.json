@@ -17,6 +17,15 @@
    "the 4 s minimum is waived for shots 5, 6 and 7",
    "no mole on Hem: 7-c1 retouched locally (eav touchup), the original kept"
   ],
+  "owner_decisions_27_nov_2026_after_stills": [
+   "picks of stills-f01s014-scene-r1: f01s014-1 c1, f01s014-2 c1, f01s014-3 c2, f01s014-6 c1, f01s014-8 c2, f01s014-12 c1 (gate results and the owner's reasons in picks/gate-overrides.json and the pick)",
+   "shot 9 transition changed from match to dissolve: shot 8's picked still (c2) has horizontal carriage slats, so shot 9 opens with a plain dissolve, not a match cut; the owner accepted this",
+   "the door beat (shot 10) re-take approved at about 2.0 CU on an A100: 2 clips (13s the mother actually sweeping, 13t its continuation where she turns to the door), with the depth maps of the picked non-flat glide stills in the same run"
+  ],
+  "accepted_flaws_for_frame_review": {
+   "3": "f01s014-3 c2: a Western-style cot with a round doorknob in view (owner accepted, 27 Nov 2026)",
+   "8": "f01s014-8 c2: the carriage slats are horizontal, so shot 9 opens with a plain dissolve, not a match cut (owner accepted, 27 Nov 2026)"
+  },
   "owner_waivers": {
    "4s_minimum": [
     5,
@@ -309,7 +318,7 @@
     9,
     10
    ],
-   "subject": "match cut from the carriage slats to the barred window: the house wall at sunrise, light crawling along the rays, the birdcage in the window (uncropped still stills-pilot2 f01s014-8 c2 with its motion-pilot2 depth map)",
+   "subject": "plain dissolve from Hem in the carriage to the barred window (owner change 27 Nov 2026: shot 8's picked still has horizontal slats, so no match cut): the house wall at sunrise, light crawling along the rays, the birdcage in the window (uncropped still stills-pilot2 f01s014-8 c2 with its motion-pilot2 depth map)",
    "framing": "wide",
    "motion": "glide",
    "camera": {
@@ -320,7 +329,7 @@
     "sweep": "down-left"
    },
    "layer": "imagined",
-   "transition_in": "match",
+   "transition_in": "dissolve",
    "bible_refs": [],
    "sound": {
     "sfx": [
