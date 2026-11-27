@@ -474,3 +474,43 @@ test("Legacy UI return links preserve content language, query and anchor in the 
  assert.equal(checkoutReturnPath("/bn/read/book/unit/?anchor=p1","bn"),"/en/read/book/unit/?anchor=p1");
  assert.equal(validReturnPath("//other.test/bn/read/book/","bn"),"/en/");
 });
+
+import { rememberSpeed, recallSpeed, mediaMetadataFor, seekTarget } from "./state";
+test("test_speed_is_remembered_and_clamped", () => {
+  const store = new Map<string, string>();
+  (globalThis as any).localStorage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v) };
+  assert.equal(recallSpeed(), 1);
+  rememberSpeed(1.5);
+  assert.equal(store.get("maison.player.rate"), "1.5");
+  assert.equal(recallSpeed(), 1.5);
+  rememberSpeed(5);
+  assert.equal(recallSpeed(), 2);
+  rememberSpeed(0.1);
+  assert.equal(recallSpeed(), 0.75);
+  store.set("maison.player.rate", "junk");
+  assert.equal(recallSpeed(), 1);
+  store.set("maison.player.rate", "9");
+  assert.equal(recallSpeed(), 2);
+  (globalThis as any).localStorage = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); } };
+  assert.equal(recallSpeed(), 1);
+  assert.doesNotThrow(() => rememberSpeed(1.25));
+  delete (globalThis as any).localStorage;
+});
+test("test_media_metadata_has_author_part_and_artwork", () => {
+  const m = mediaMetadataFor({ title: "Book", author: "A. Writer", cover_url: "/c.webp" }, { title: "Chapter 2" });
+  assert.equal(m.title, "Chapter 2");
+  assert.equal(m.artist, "A. Writer");
+  assert.equal(m.album, "Book");
+  assert.equal(m.artwork.length, 1);
+  assert.equal(m.artwork[0].src, "/c.webp");
+  assert.deepEqual(mediaMetadataFor({ title: "Book" }, { title: "" }).artwork, []);
+  assert.equal(mediaMetadataFor({ title: "Book" }, { title: "" }).title, "Book");
+});
+test("test_seek_back_15_forward_30_clamp_to_bounds", () => {
+  assert.equal(seekTarget(100, -15, 600), 85);
+  assert.equal(seekTarget(100, 30, 600), 130);
+  assert.equal(seekTarget(10, -15, 600), 0);
+  assert.equal(seekTarget(590, 30, 600), 600);
+  assert.equal(seekTarget(5, 30, NaN), 35);
+  assert.equal(seekTarget(5, -15, Infinity), 0);
+});

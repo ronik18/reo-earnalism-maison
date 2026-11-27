@@ -756,6 +756,7 @@ def player(request, locale, edition_id, unit_id=None):
     chapters=media_chapters(request.user,edition["edition_revision_id"],territory=trusted_territory(request))
     if not chapters:return error_page(request,locale,"not_available",404)
     bootstrap={"edition_id":str(edition_id),"edition_revision_id":edition["edition_revision_id"],"title":edition["title"],"locale":edition["locale"],"chapters":chapters,"reader_url":reverse("web:reader-start",args=[locale,edition_id])}
+    if edition.get("cover"):bootstrap["cover_url"]=edition["cover"]["url"]
     selected=next((chapter for chapter in chapters if chapter["asset_id"]==request.GET.get("asset") or chapter["unit_id"]==str(unit_id or request.GET.get("unit_id"))),None)
     if selected:
         try:start=max(0,min(selected["duration_ms"],int(request.GET.get("position_ms","0"))))

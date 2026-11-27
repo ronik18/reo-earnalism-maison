@@ -461,3 +461,8 @@ STRINGS.update({
 })
 
 STRINGS.update({'support_not_collected': ('The contact form is unavailable. No message was collected. Please email sales@reoenterprise.org.', 'যোগাযোগের ফর্ম এখন উপলব্ধ নয়। কোনো বার্তা সংগ্রহ করা হয়নি। sales@reoenterprise.org-এ ইমেল করুন।')})
+
+STRINGS.update({
+    'back_15_seconds': ('Back 15 seconds', 'Back 15 seconds'),
+    'forward_30_seconds': ('Forward 30 seconds', 'Forward 30 seconds'),
+})

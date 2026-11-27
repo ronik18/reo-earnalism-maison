@@ -85,3 +85,11 @@ test("Film renewal rejects an invalid replacement grant without changing the sou
   assert.equal(element.src,"first");
   assert.equal(renewing.current,false);
 });
+
+test("Audio and samples accept the 64 kbps audiobook rendition but no other rate", () => {
+  const mono={...chapter,quality_kbps:64};
+  assert.equal(approvedAudioURL({...audioGrant,quality_kbps:64},mono,"revision","https://maison.example",now),audioGrant.url);
+  assert.equal(approvedAudioURL({...audioGrant,quality_kbps:128},{...chapter,quality_kbps:128},"revision","https://maison.example",now),undefined);
+  const preview={asset_id:"clip",edition_revision_id:"revision",unit_id:"unit",url:"/api/v1/content/audio-previews/clip",sha256:"a".repeat(64),bytes:8000,content_type:"audio/mpeg",duration_ms:6000,quality_kbps:64};
+  assert.equal(approvedAudioPreviewURL(preview,"revision","https://maison.example"),"https://maison.example"+preview.url);
+});

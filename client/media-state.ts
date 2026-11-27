@@ -37,7 +37,7 @@ export function approvedAudioPreviewURL(preview: AudioPreviewDescriptor, revisio
         preview.content_type !== "audio/mpeg" || !/^[a-f0-9]{64}$/.test(preview.sha256) ||
         !Number.isInteger(preview.bytes) || preview.bytes < 1 || preview.bytes > 2 * 1024 * 1024 ||
         !Number.isInteger(preview.duration_ms) || preview.duration_ms < 1 || preview.duration_ms > 120000 ||
-        ![48, 96].includes(preview.quality_kbps)) return undefined;
+        ![48, 64, 96].includes(preview.quality_kbps)) return undefined;
     return url.href;
   } catch { return undefined; }
 }
@@ -46,7 +46,7 @@ export function approvedAudioURL(grant: AudioGrant, expected: {asset_id:string;s
     const url = new URL(grant.url, origin), page = new URL(origin);
     const expiry = Date.parse(grant.expires_at);
     const local = grant.transport === "local_signed" && ["localhost", "127.0.0.1", "[::1]"].includes(page.hostname) && url.origin === page.origin;
-    if (grant.asset_id !== expected.asset_id || grant.edition_revision_id !== revisionId || grant.sha256 !== expected.sha256 || grant.duration_ms !== expected.duration_ms || grant.quality_kbps !== expected.quality_kbps || ![48,96].includes(grant.quality_kbps) || grant.content_type !== "audio/mpeg" || !Number.isFinite(expiry) || expiry <= now || expiry > now + 120000 || url.username || url.password || !(local || (grant.transport === "r2_s3_presigned" && url.protocol === "https:"))) return undefined;
+    if (grant.asset_id !== expected.asset_id || grant.edition_revision_id !== revisionId || grant.sha256 !== expected.sha256 || grant.duration_ms !== expected.duration_ms || grant.quality_kbps !== expected.quality_kbps || ![48,64,96].includes(grant.quality_kbps) || grant.content_type !== "audio/mpeg" || !Number.isFinite(expiry) || expiry <= now || expiry > now + 120000 || url.username || url.password || !(local || (grant.transport === "r2_s3_presigned" && url.protocol === "https:"))) return undefined;
     return url.href;
   } catch { return undefined; }
 }

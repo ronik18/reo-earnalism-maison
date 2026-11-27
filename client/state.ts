@@ -104,3 +104,33 @@ export function progressConflictDecision(
     ? "retry_own"
     : "conflict";
 }
+
+const RATE_KEY = "maison.player.rate";
+const clampRate = (rate: number) => (Number.isFinite(rate) ? Math.min(2, Math.max(0.75, rate)) : 1);
+/** Remember the listener's playback speed on this device (0.75 to 2). */
+export function rememberSpeed(rate: number): void {
+  try { localStorage.setItem(RATE_KEY, String(clampRate(rate))); } catch { /* storage may be blocked */ }
+}
+export function recallSpeed(): number {
+  try {
+    const raw = localStorage.getItem(RATE_KEY);
+    return raw === null ? 1 : clampRate(Number(raw));
+  } catch { return 1; }
+}
+/** Position in seconds after skipping by `delta`, kept inside 0..duration (duration ignored when unknown). */
+export function seekTarget(current: number, delta: number, duration: number): number {
+  const next = Math.max(0, current + delta);
+  return Number.isFinite(duration) ? Math.min(duration, next) : next;
+}
+export interface MediaMetadataSource { title: string; author?: string; cover_url?: string }
+export function mediaMetadataFor(
+  boot: MediaMetadataSource,
+  part: { title: string },
+): { title: string; artist: string; album: string; artwork: { src: string; sizes: string }[] } {
+  return {
+    title: part.title || boot.title,
+    artist: boot.author || "Earnalism",
+    album: boot.title,
+    artwork: boot.cover_url ? [{ src: boot.cover_url, sizes: "512x512" }] : [],
+  };
+}
