@@ -1,0 +1,15 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 2760,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/kshudhita-pashan/music-kshudhita-film-01-r2",
+  "inputs_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+  "job_id": "music-kshudhita-film-01-r2",
+  "kind": "music",
+  "model": {
+    "repo": "ACE-Step/ACE-Step-v1-3.5B",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "09a68564d600b9ec12085769e284bee8ed3411812fde89c6d5a0029b4b028f9e",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "kshudhita-pashan"
+}

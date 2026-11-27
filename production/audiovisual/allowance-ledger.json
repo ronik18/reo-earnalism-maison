@@ -81,8 +81,8 @@
     "job_id": "stills-d095a5f0",
     "title": "kshudhita-pashan",
     "month": "2026-11",
-    "units": 4.052983333333333,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
     "root": "kshudhita-pashan"
   },
@@ -90,8 +90,8 @@
     "job_id": "music-a45f086f",
     "title": "kshudhita-pashan",
     "month": "2026-11",
-    "units": 1.4873333333333334,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
     "root": "kshudhita-pashan"
   },
@@ -617,6 +617,34 @@
     "cu_equivalent": 2.59
   },
   {
+    "job_id": "stills-film-01-r2-sample8",
+    "title": "kshudhita-pashan",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
+    "root": "kshudhita-pashan",
+    "reserved_units": 0.69161,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-27T11:33:34+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "music-kshudhita-film-01-r2",
+    "title": "kshudhita-pashan",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
+    "root": "kshudhita-pashan",
+    "reserved_units": 1.4873333333333334,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-27T11:33:42+00:00",
+    "modal_runs_issued": 1
+  },
+  {
     "modal_spend": "2026-11",
     "rows": [
       {
@@ -782,6 +810,22 @@
         "seconds": 382.456353511,
         "at": "2026-11-27T08:23:20+00:00",
         "status": "ok"
+      },
+      {
+        "run_id": "stills-film-01-r2-sample8#1",
+        "job_id": "stills-film-01-r2-sample8",
+        "usd": 1.4789824999999999,
+        "seconds": 0.0,
+        "at": "2026-11-27T11:33:34+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "music-kshudhita-film-01-r2#1",
+        "job_id": "music-kshudhita-film-01-r2",
+        "usd": 1.01565,
+        "seconds": 0.0,
+        "at": "2026-11-27T11:33:42+00:00",
+        "status": "pending"
       }
     ]
   }

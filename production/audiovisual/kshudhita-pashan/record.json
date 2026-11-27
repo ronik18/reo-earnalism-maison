@@ -74,6 +74,34 @@
       },
       "path": "jobs/narration-9187e43e-r2/narration.ipynb",
       "sha256": "7ae4f7cf1f48f067e1f73634c3fd56a47cdf4cb1368bde8c35978a42f61960e1"
+    },
+    {
+      "bytes": 15245,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.69161,
+        "inputs_zip": "jobs/stills-film-01-r2-sample8/inputs.zip",
+        "job_id": "stills-film-01-r2-sample8",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r2-sample8/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r2-sample8/stills.ipynb",
+      "sha256": "8f81257eb3313058eae83ea3adca2b82cef24072d3e243111f60a7579225b5c0"
+    },
+    {
+      "bytes": 16956,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.4873333333333334,
+        "inputs_zip": "jobs/music-kshudhita-film-01-r2/inputs.zip",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "manifest": "jobs/music-kshudhita-film-01-r2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/music-kshudhita-film-01-r2/music.ipynb",
+      "sha256": "09a68564d600b9ec12085769e284bee8ed3411812fde89c6d5a0029b4b028f9e"
     }
   ],
   "created_at": "2026-11-25T11:16:00.930973+00:00",
@@ -191,6 +219,84 @@
       "detail": {
         "job_id": "narration-9187e43e-r2",
         "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T11:33:33.175025+00:00",
+      "detail": {
+        "job_id": "stills-d095a5f0",
+        "reason": "never run; prompts hardened (specs/stills-film-01-r2.json)",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T11:33:33.177281+00:00",
+      "detail": {
+        "job_id": "stills-d095a5f0",
+        "reason": "never run; prompts hardened (specs/stills-film-01-r2.json)"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T11:33:33.316375+00:00",
+      "detail": {
+        "job_id": "music-a45f086f",
+        "reason": "never run; rebuilt with the current music template (torchcodec) for Modal",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T11:33:33.318758+00:00",
+      "detail": {
+        "job_id": "music-a45f086f",
+        "reason": "never run; rebuilt with the current music template (torchcodec) for Modal"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T11:33:33.789816+00:00",
+      "detail": {
+        "forecast_units": 0.69161,
+        "job_id": "stills-film-01-r2-sample8",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T11:33:33.790874+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r2-sample8",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T11:33:42.504023+00:00",
+      "detail": {
+        "forecast_units": 1.4873333333333334,
+        "job_id": "music-kshudhita-film-01-r2",
+        "kind": "music"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T11:33:42.506611+00:00",
+      "detail": {
+        "job_id": "music-kshudhita-film-01-r2",
+        "kind": "music",
         "target": "film-01"
       },
       "result": "job_target",
