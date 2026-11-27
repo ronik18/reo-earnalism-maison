@@ -93,6 +93,120 @@ class MeasuredAudioTests(TestCase):
         self.revision.validation_evidence['media_assets'][str(self.asset.id)]['duration_ms']=1;self.revision.save()
         with self.assertRaises(DomainError):svc.prepared_audio(self.asset)
 
+class ServingRenditionsTests(TestCase):
+    """64 kbps audiobooks, one player entry per unit, sentence-first timing."""
+    def setUp(self):
+        MeasuredAudioTests.setUp(self)
+        from accounts.models import Device
+        self.device=Device.objects.create(user=self.user,token_binding_sha256='0'*64,expires_at=timezone.now()+timedelta(days=1))
+
+    def live(self):
+        self.revision.state='live';self.revision.published_at=timezone.now();self.revision.save()
+        self.revision.edition.live_revision=self.revision;self.revision.edition.save()
+
+    def set_kbps(self,kbps,asset=None):
+        asset=asset or self.asset
+        self.revision.validation_evidence['media_assets'][str(asset.id)]['quality_kbps']=kbps;self.revision.save()
+
+    def add_rendition(self,kbps):
+        raw=('rendition %d'%kbps).encode()
+        asset=Asset.objects.create(revision=self.revision,unit=self.unit,kind='audio_chapter',state='ready',storage_key=f'revisions/{self.revision.id}/{uuid.uuid4()}',sha256=hashlib.sha256(raw).hexdigest(),bytes=len(raw),content_type='audio/mpeg')
+        storage.put_private(asset.storage_key,raw,'audio/mpeg')
+        self.revision.validation_evidence['media_assets'][str(asset.id)]={'sha256':asset.sha256,'unit_id':str(self.unit.id),'duration_ms':self.unit.duration_ms,'quality_kbps':kbps,'prepared':True,'measurement_evidence':'synthetic isolated test only'}
+        self.revision.save();return asset
+
+    def prefer(self,kbps):
+        from accounts.models import Preferences
+        prefs,_=Preferences.objects.get_or_create(user=self.user);prefs.audio_quality_kbps=kbps;prefs.save()
+        self.user=get_user_model().objects.get(pk=self.user.pk)
+
+    def test_64k_only_unit_plays_for_96_preference(self):
+        self.set_kbps(64);self.prefer(96);self.live()
+        chapters=svc.media_chapters(self.user,self.revision.id)
+        self.assertEqual([(c['asset_id'],c['quality_kbps']) for c in chapters],[(str(self.asset.id),64)])
+        self.assertEqual(svc.prepared_audio(self.asset)['quality_kbps'],64)
+        grant=svc.media_grant(self.user,{'asset_id':str(self.asset.id),'device_id':str(self.device.pk),'purpose':'online','quality_kbps':64})
+        self.assertEqual(grant['quality_kbps'],64)
+        with self.assertRaises(DomainError) as error:svc.media_grant(self.user,{'asset_id':str(self.asset.id),'device_id':str(self.device.pk),'purpose':'online','quality_kbps':96})
+        self.assertEqual(error.exception.code,'quality_unavailable')
+
+    def test_other_bitrates_are_still_refused(self):
+        self.set_kbps(32)
+        with self.assertRaises(DomainError):svc.prepared_audio(self.asset)
+
+    def test_media_chapters_lists_each_unit_once(self):
+        low=self.add_rendition(64);self.set_kbps(96);self.prefer(96);self.live()
+        chapters=svc.media_chapters(self.user,self.revision.id)
+        self.assertEqual(len(chapters),1);self.assertEqual(chapters[0]['unit_id'],str(self.unit.id))
+        self.assertEqual(chapters[0]['asset_id'],str(self.asset.id));self.assertEqual(chapters[0]['quality_kbps'],96)
+        self.prefer(48)  # nearest to 48 among {64,96} is 64
+        chapters=svc.media_chapters(self.user,self.revision.id)
+        self.assertEqual((len(chapters),chapters[0]['asset_id'],chapters[0]['quality_kbps']),(1,str(low.id),64))
+        self.assertEqual(chapters[0]['title'],self.unit.title)
+
+    def test_media_chapters_omit_markers_without_chapters(self):
+        self.live()
+        self.assertNotIn('markers',svc.media_chapters(self.user,self.revision.id)[0])
+
+    def test_media_chapters_carry_paragraph_map_markers(self):
+        markers=[{'title':'One','start_ms':0},{'title':'Two','start_ms':500}]
+        self.map.chapters=markers;self.map.save();self.live()
+        self.assertEqual(svc.media_chapters(self.user,self.revision.id)[0]['markers'],markers)
+
+    def test_media_chapters_prefer_sentence_map_markers(self):
+        self.map.chapters=[{'title':'P','start_ms':0}];self.map.save()
+        TimingMap.objects.create(revision=self.revision,asset=self.asset,text_sha256=self.map.text_sha256,asset_sha256=self.asset.sha256,measured=True,precision='sentence',segments=self.map.segments,chapters=[{'title':'S','start_ms':0}])
+        self.live()
+        self.assertEqual(svc.media_chapters(self.user,self.revision.id)[0]['markers'],[{'title':'S','start_ms':0}])
+
+    def sentence_map(self):
+        segments=[]
+        for i,p in enumerate(self.paragraphs):
+            mid=max(1,len(p.text)//2)
+            segments+=[{'anchor_id':str(p.anchor_id),'sentence_index':0,'start_offset_chars':0,'end_offset_chars':mid,'start_ms':i*1000,'end_ms':i*1000+500},
+                       {'anchor_id':str(p.anchor_id),'sentence_index':1,'start_offset_chars':mid,'end_offset_chars':len(p.text),'start_ms':i*1000+500,'end_ms':(i+1)*1000}]
+        return TimingMap.objects.create(revision=self.revision,asset=self.asset,text_sha256=self.map.text_sha256,asset_sha256=self.asset.sha256,measured=True,precision='sentence',segments=segments)
+
+    def test_mappings_include_sentence_index(self):
+        sentence=self.sentence_map();self.live()
+        result=mappings(self.user,self.revision.id)
+        self.assertEqual(result['status'],'mapped');self.assertEqual(len(result['maps']),1)
+        row=result['maps'][0];self.assertEqual(row['precision'],'sentence');self.assertEqual(row['map_id'],str(sentence.id))
+        self.assertEqual([s['sentence_index'] for s in row['segments'][:2]],[0,1])
+
+    def test_paragraph_only_map_emits_no_sentence_index(self):
+        self.live();row=mappings(self.user,self.revision.id)['maps'][0]
+        self.assertEqual(row['precision'],'paragraph');self.assertTrue(all('sentence_index' not in s for s in row['segments']))
+
+    def test_switch_position_prefers_sentence_map(self):
+        sentence=self.sentence_map();p=self.paragraphs[0];self.live()
+        loc={'format':'reader','unit_id':str(self.unit.id),'anchor_id':str(p.anchor_id),'offset_chars':len(p.text)-1}
+        result=switch_position(self.user,{'edition_revision_id':str(self.revision.id),'from_location':loc,'to_format':'audio'})
+        self.assertEqual((result['map_id'],result['precision'],result['to_location']['position_ms']),(str(sentence.id),'sentence',500))
+
+    def test_48_assets_unchanged(self):self.check_unchanged(48)
+
+    def test_48_96_assets_unchanged(self):self.check_unchanged(96)
+
+    def check_unchanged(self,kbps):
+        if True:
+            self.set_kbps(kbps);self.prefer(kbps);self.live()
+            chapters=svc.media_chapters(self.user,self.revision.id)
+            self.assertEqual([(c['asset_id'],c['quality_kbps'],c['duration_ms'],c['sha256']) for c in chapters],[(str(self.asset.id),kbps,self.unit.duration_ms,self.asset.sha256)])
+            self.assertEqual(svc.media_grant(self.user,{'asset_id':str(self.asset.id),'device_id':str(self.device.pk),'purpose':'online'})['quality_kbps'],kbps)
+            self.assertNotIn('markers',chapters[0])
+
+    def test_audio_preview_accepts_64_kbps_clip(self):
+        from .audio_preview import prepared_clip
+        raw=b'clip'
+        clip=Asset.objects.create(revision=self.revision,unit=self.unit,kind='preview_audio',state='ready',provider='r2',storage_key=f'revisions/{self.revision.id}/{uuid.uuid4()}.mp3',sha256=svc.digest(raw),bytes=len(raw),content_type='audio/mpeg',duration_ms=1500)
+        proof={'asset_id':str(clip.id),'unit_id':str(self.unit.id),'sha256':clip.sha256,'duration_ms':1500,'quality_kbps':64,'prepared':True,'measurement_evidence':'synthetic'}
+        self.revision.validation_evidence['audio_preview']=proof;self.revision.save();clip.revision=self.revision
+        self.assertEqual(prepared_clip(clip)['quality_kbps'],64)
+        proof['quality_kbps']=32
+        with self.assertRaises(DomainError):prepared_clip(clip)
+
+
 class ImmutableWriteRecoveryTests(SimpleTestCase):
     @override_settings(MEDIA_STORAGE_BACKEND='r2',R2_PRIVATE_BUCKET='private-test')
     def test_unknown_small_write_reconciles_exact_bytes_without_overwrite(self):

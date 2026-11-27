@@ -530,6 +530,22 @@ class AudiobookBundleTests(AudiovisualFixture):
         self.assertEqual(rows[0], next(s for s in paragraph.segments if s["anchor_id"] == draft_anchor))
         self.assertTrue(any("sentence_index" in s for s in sentence.segments))
 
+    def test_stage_imports_a_64_kbps_mono_audiobook_that_serving_accepts(self):
+        from library.services import prepared_audio
+        _, draft = self.stage_audiobook(kbps=64)
+        asset = Asset.objects.get(revision=draft, kind="audio_chapter")
+        self.assertEqual(draft.validation_evidence["media_assets"][str(asset.id)]["quality_kbps"], 64)
+        self.assertEqual(prepared_audio(asset)["quality_kbps"], 64)
+        self.assertEqual(TimingMap.objects.filter(revision=draft).count(), 2)
+
+    def test_export_lists_one_preferred_map_per_asset(self):
+        _, draft = self.stage_audiobook()
+        out = self.tmp / "draft-source.json"
+        call_command("export_audiovisual_source", "bicharak", "--revision", str(draft.id), "--out", str(out), stdout=io.StringIO())
+        maps = json.loads(out.read_text())["timing_maps"]
+        sentence = TimingMap.objects.get(revision=draft, precision="sentence")
+        self.assertEqual([(m["map_id"], m["precision"]) for m in maps], [(str(sentence.id), "sentence")])
+
     def test_chapters_without_sentences_store_on_the_paragraph_map_only(self):
         _, draft = self.stage_audiobook(sentences=False)
         maps = TimingMap.objects.filter(revision=draft)

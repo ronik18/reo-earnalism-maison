@@ -58,6 +58,16 @@ def has_public_domain_evidence(revision):
                 and clearance.get("sha256") == revision.content_sha256)
 
 
+def preferred_maps(revision):
+    """One measured map per audio asset: sentence precision if stored, else paragraph, else word."""
+    rank = {"sentence": 0, "paragraph": 1, "word": 2}
+    best = {}
+    for m in revision.timing_maps.filter(measured=True).order_by("asset__unit__ordinal", "asset_id", "id"):
+        if m.asset_id not in best or rank.get(m.precision, 3) < rank.get(best[m.asset_id].precision, 3):
+            best[m.asset_id] = m
+    return list(best.values())
+
+
 def source_document(edition, revision):
     if revision_hash(revision) != revision.content_sha256:
         raise CommandError(f"{edition.slug}: live text differs from its recorded hash; refusing to export.")
@@ -73,7 +83,7 @@ def source_document(edition, revision):
                        for a in revision.assets.filter(state="ready").order_by("kind", "created_at", "id")],
             "timing_maps": [{"map_id": str(m.id), "asset_id": str(m.asset_id), "asset_sha256": m.asset_sha256,
                              "text_sha256": m.text_sha256, "precision": m.precision, "segments": m.segments}
-                            for m in revision.timing_maps.filter(measured=True).order_by("asset__unit__ordinal", "id")]}
+                            for m in preferred_maps(revision)]}
 
 
 class Command(BaseCommand):

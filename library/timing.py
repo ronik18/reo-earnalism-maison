@@ -36,18 +36,28 @@ def map_dto(mapping):
         'format':'audio','precision':mapping.precision,'measured':True,'segments':segments,'next_cursor':None}
 
 
+def _precision_rank():
+    """Sentence first, then paragraph, then word; anything else last."""
+    from django.db.models import Case,IntegerField,Value,When
+    return Case(When(precision='sentence',then=Value(0)),When(precision='paragraph',then=Value(1)),When(precision='word',then=Value(2)),default=Value(3),output_field=IntegerField())
+
+
 def mappings(user,revision_id,territory='IN',unit_id=None):
     from .services import authorize_revision
     revision=authorize_revision(user,revision_id,territory=territory)
     if not settings.FEATURES.get('audio'):return {'edition_revision_id':str(revision.id),'status':'feature_disabled','maps':[]}
     try:authorize_revision(user,revision,'audio',territory=territory)
     except DomainError:return {'edition_revision_id':str(revision.id),'status':'unreleased','maps':[]}
-    rows=revision.timing_maps.filter(asset__state='ready',asset__kind='audio_chapter').select_related('revision','asset','asset__unit','asset__revision').order_by('asset__unit__ordinal','id')
+    rows=revision.timing_maps.filter(asset__state='ready',asset__kind='audio_chapter').select_related('revision','asset','asset__unit','asset__revision').annotate(_rank=_precision_rank()).order_by('asset__unit__ordinal','asset_id','_rank','id')
     if unit_id:rows=rows.filter(asset__unit_id=unit_id)
     maps=[]
-    for row in rows[:5]:
+    done=set()  # one map per asset (best precision that validates); the cap counts assets
+    for row in rows:
+        if row.asset_id in done:continue
         try:maps.append(map_dto(row))
         except DomainError:continue
+        done.add(row.asset_id)
+        if len(done)==5:break
     return {'edition_revision_id':str(revision.id),'status':'mapped' if maps else 'unmapped','maps':maps}
 
 
@@ -63,7 +73,7 @@ def switch_position(user,data,territory='IN'):
     if not settings.FEATURES.get('audio'):return result('feature_disabled',reason='audio_not_enabled')
     try:authorize_revision(user,revision,target,territory=territory)
     except DomainError:return result('unreleased',reason='target_format_unavailable')
-    rows=revision.timing_maps.filter(asset__unit_id=location['unit_id'],asset__kind='audio_chapter',asset__state='ready').select_related('revision','asset','asset__unit','asset__revision').order_by('id')
+    rows=revision.timing_maps.filter(asset__unit_id=location['unit_id'],asset__kind='audio_chapter',asset__state='ready').select_related('revision','asset','asset__unit','asset__revision').annotate(_rank=_precision_rank()).order_by('_rank','id')
     for row in rows:
         try:segments=validated_segments(row)
         except DomainError:continue

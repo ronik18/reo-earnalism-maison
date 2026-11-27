@@ -24,7 +24,7 @@ def prepared_clip(asset):
         or not 0<asset.bytes<=MAX_BYTES or asset.content_type!='audio/mpeg' or not isinstance(proof,dict)
         or proof.get('asset_id')!=str(asset.id) or proof.get('unit_id')!=str(asset.unit_id)
         or proof.get('sha256')!=asset.sha256 or proof.get('duration_ms')!=asset.duration_ms
-        or proof.get('quality_kbps') not in {48,96} or proof.get('prepared') is not True
+        or proof.get('quality_kbps') not in {48,64,96} or proof.get('prepared') is not True
         or not isinstance(proof.get('measurement_evidence'),str) or not proof['measurement_evidence'].strip()):
         raise DomainError('preview_not_ready','No independently prepared bounded audio sample is available.',409)
     return proof
