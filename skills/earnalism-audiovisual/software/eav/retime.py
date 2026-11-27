@@ -30,7 +30,8 @@ _STRENGTH = {"comma": 1, "sentence": 2, "turn": 3}
 _MARK = {",": "comma", ";": "comma", "—": "comma", "।": "sentence", "?": "sentence", "!": "turn"}
 _TAG = re.compile(r"\[[^\]]*\]")
 _SCENE_LINE = re.compile(r"^\s*(\*{3,}|-{3,}|—{3,}|#\s*scene.*)\s*$", re.I)
-_HEADING_LINE = re.compile(r"^\s*(#+\s*)?পরিচ্ছেদ")
+# a short heading line: an ordinal then পরিচ্ছেদ ("প্রথম পরিচ্ছেদ।"), or পরিচ্ছেদ with a number; not prose
+_HEADING_LINE = re.compile(r"^\s*(#+\s*)?(\S+\s+পরিচ্ছেদ|পরিচ্ছেদ(\s+[\d০-৯]+)?)\s*[।.]?\s*$")
 
 
 def _kinds(text: str) -> list[str]:
@@ -131,12 +132,16 @@ def _db(x: np.ndarray) -> float:
     return 20 * np.log10(max(float(np.sqrt(np.mean(x.astype(np.float64) ** 2))), 1e-12))
 
 
-def room_tone(x: np.ndarray, n: int) -> np.ndarray:
-    """n samples of the take's quietest 0.25 s, looped with 30 ms crossfades, level-matched to -62...-68 dBFS."""
+def _tone_seed(x: np.ndarray) -> np.ndarray:
+    """The level-matched seed segment (quietest 0.25 s of the take) that room tone loops."""
     w = min(int(0.25 * SR), len(x))
     hop = int(0.05 * SR)
-    starts = range(0, max(len(x) - w, 0) + 1, hop)
-    i = min(starts, key=lambda k: float(np.mean(x[k:k + w].astype(np.float64) ** 2)))
+    if len(x) > w:  # window energies from a cumulative sum: one pass over the take
+        c = np.concatenate([[0.0], np.cumsum(x.astype(np.float64) ** 2)])
+        starts = np.arange(0, len(x) - w + 1, hop)
+        i = int(starts[int(np.argmin(c[starts + w] - c[starts]))])
+    else:
+        i = 0
     seg = x[i:i + w].astype(np.float32)
     seg = seg - np.float32(np.mean(seg))
     if w < int(0.1 * SR) or _db(seg) < -100:  # digital silence (or no usable audio): smooth synthetic floor
@@ -145,36 +150,75 @@ def room_tone(x: np.ndarray, n: int) -> np.ndarray:
         target = TONE_FALLBACK_DB
     else:
         target = min(max(_db(seg), TONE_DB[0]), TONE_DB[1])
-    seg = seg * np.float32(10 ** ((target - _db(seg)) / 20))
+    return seg * np.float32(10 ** ((target - _db(seg)) / 20))
+
+
+def _loop(seg: np.ndarray, n: int) -> np.ndarray:
     xf = int(LOOP_XF_S * SR)
-    out = seg.copy()
-    while len(out) < n:
-        out = _crossfade(out, seg, xf)
+    pieces = [seg]
+    total = len(seg)
+    while total < n:
+        pieces.append(seg[xf:])
+        total += len(seg) - xf
+    out = seg
+    if len(pieces) > 1:  # equal-power loop joins, built once
+        th = np.linspace(0, np.pi / 2, xf, dtype=np.float32)
+        fade_out, fade_in = np.cos(th), np.sin(th)
+        body = [seg[:-xf]]
+        for _ in range(len(pieces) - 1):
+            body.append(seg[-xf:] * fade_out + seg[:xf] * fade_in)
+            body.append(seg[xf:-xf])
+        body.append(seg[-xf:])
+        out = np.concatenate(body)
     return out[:n]
+
+
+def room_tone(x: np.ndarray, n: int) -> np.ndarray:
+    """n samples of the take's quietest 0.25 s, looped with 30 ms crossfades, level-matched to -62...-68 dBFS."""
+    return _loop(_tone_seed(x), n)
 
 
 def retime(src: Path, dst: Path, plan: list[tuple[float, float, float]], cuts: list[float]) -> dict:
     """Rebuild src with each planned pause set to its target length (room tone inside, 40 ms equal-power
     joins) and write dst. Returns {"cuts": cut times mapped into the new timeline, "duration": seconds}."""
     x = read(src)
-    out = np.zeros(0, np.float32)
+    seed = _tone_seed(x) if plan else None
+    parts: list[np.ndarray] = []
+    total = 0
+
+    def join(b: np.ndarray, xf: int) -> None:
+        """Append b, overlapping its head with the tail of what is built by an equal-power xf-sample fade."""
+        nonlocal total
+        while parts and xf > 0 and len(parts[-1]) < xf and len(parts) > 1:
+            parts[-2:] = [np.concatenate(parts[-2:])]  # a tiny piece: fade across it into the one before
+        xf = min(xf, len(b), len(parts[-1])) if parts else 0
+        if xf > 0:
+            th = np.linspace(0, np.pi / 2, xf, dtype=np.float32)
+            mid = parts[-1][-xf:] * np.cos(th) + b[:xf] * np.sin(th)
+            parts[-1] = parts[-1][:-xf]
+            parts.extend([mid, b[xf:]])
+        else:
+            parts.append(b)
+        total += len(b) - xf
+
     last, join_xf = 0, 0
     anchors = [(0.0, 0.0)]  # (old_t, new_t) at the middle of each pause
     for s, e, target in sorted(plan):
         a, b = int(s * SR), int(e * SR)
         keep = min(int(KEEP_S * SR), (b - a) // 2)
         xf = min(int(XF_S * SR), keep)
-        out = _crossfade(out, x[last:a + keep], join_xf)
-        new_start = len(out) - keep
+        join(x[last:a + keep], join_xf)
+        new_start = total - keep
         fill = int(target * SR) - 2 * keep
         if fill > 0:
-            out = _crossfade(out, room_tone(x, fill + 2 * xf), xf)
+            join(_loop(seed, fill + 2 * xf), xf)
             new_len = 2 * keep + fill
         else:
             new_len = 2 * keep - xf
         anchors.append(((s + e) / 2, (new_start + new_len / 2) / SR))
         last, join_xf = b - keep, xf
-    y = _crossfade(out, x[last:], join_xf)
+    join(x[last:], join_xf)
+    y = np.concatenate(parts) if parts else x[:0]
     write(dst, y)
     anchors.append((len(x) / SR, len(y) / SR))
     old, new = zip(*anchors)

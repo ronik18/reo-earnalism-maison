@@ -81,3 +81,31 @@ def test_no_click_at_joins(tmp_path):
         for lo, hi in ((start, start + 0.04), (start + length - 0.04, start + length - 0.002)):
             seg = y[int(lo * SR):int(hi * SR)]  # the two 40 ms crossfade zones of this pause
             assert float(np.max(np.abs(np.diff(seg)))) < 10 ** (-50 / 20)
+
+
+def test_ordinal_chapter_headings_are_headings():
+    for heading in ("প্রথম পরিচ্ছেদ।", "দ্বিতীয় পরিচ্ছেদ", "# তৃতীয় পরিচ্ছেদ।"):
+        plan = retime.plan_pauses(f"এক।\n{heading}\nদুই", [(1, 1.2), (2, 2.3), (3, 3.4)], 5)
+        t = [p[2] for p in plan]
+        assert 2.5 * 0.85 <= t[0] <= 3.0 * 1.15, heading   # replaces the sentence end before it
+        assert 1.5 * 0.85 <= t[1] <= 1.5 * 1.15, heading   # its own danda adds no extra pause
+        assert abs(t[2] - 0.4) < 1e-3, heading             # nothing left to match: keeps its length
+
+
+def test_prose_containing_chapter_word_is_not_a_heading():
+    plan = retime.plan_pauses("আমি প্রথম পরিচ্ছেদ পড়লাম।", [(1, 1.2)], 5)
+    assert 0.68 <= plan[0][2] <= 1.15
+
+
+def test_chapter_length_take_retimes_in_bounded_time(tmp_path):
+    import time
+    t = np.arange(int(2.5 * SR)) / SR
+    burst = (0.3 * np.sin(2 * np.pi * 220 * t)).astype(np.float32)
+    gap = np.zeros(int(0.5 * SR), np.float32)
+    src = tmp_path / "long.wav"
+    retime.write(src, np.concatenate([np.concatenate([burst, gap]) for _ in range(200)]))
+    plan = [(3.0 * i + 2.5, 3.0 * i + 3.0, 0.9) for i in range(199)]
+    t0 = time.time()
+    res = retime.retime(src, tmp_path / "o.wav", plan, [])
+    assert time.time() - t0 < 20
+    assert abs(res["duration"] - (600 - 199 * 0.5 + 199 * 0.9)) < 0.05
