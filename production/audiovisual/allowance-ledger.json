@@ -621,14 +621,16 @@
     "title": "kshudhita-pashan",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
     "root": "kshudhita-pashan",
     "reserved_units": 0.69161,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-27T11:33:34+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.116104,
+    "cu_equivalent": 1.16
   },
   {
     "job_id": "music-kshudhita-film-01-r2",
@@ -645,6 +647,20 @@
     "modal_runs_issued": 1,
     "usd": 0.166048,
     "cu_equivalent": 1.66
+  },
+  {
+    "job_id": "stills-kshudhita-film-01-r2",
+    "title": "kshudhita-pashan",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
+    "root": "kshudhita-pashan",
+    "reserved_units": 1.6583766666666664,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-27T11:52:21+00:00",
+    "modal_runs_issued": 1
   },
   {
     "modal_spend": "2026-11",
@@ -828,6 +844,14 @@
         "seconds": 598.37133305,
         "at": "2026-11-27T11:33:42+00:00",
         "status": "ok"
+      },
+      {
+        "run_id": "stills-kshudhita-film-01-r2#1",
+        "job_id": "stills-kshudhita-film-01-r2",
+        "usd": 2.6944174999999997,
+        "seconds": 0.0,
+        "at": "2026-11-27T11:52:21+00:00",
+        "status": "pending"
       }
     ]
   }
