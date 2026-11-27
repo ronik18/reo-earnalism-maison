@@ -355,14 +355,16 @@
     "title": "atithi",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "cf7ae583-f5ff-4f18-9852-27ce39e7f0c6",
     "root": "atithi",
     "reserved_units": 1.5061728888888886,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-27T19:02:36+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.532488,
+    "cu_equivalent": 5.32
   },
   {
     "job_id": "narration-52b24258-r2-c2of2",
