@@ -154,7 +154,7 @@ class SkillFileTests(unittest.TestCase):
         # Task 13 is built: the docs describe the route and keep no "not yet built" for it
         self.assertNotRegex(voice, r"(?i)(passage|v4)[^.]*not yet built")
         self.assertIn("Built (Task 13)", voice)
-        for phrase in ("split-passages", "voice.json", "model_id", "Any failed passage stops the import before anything is joined",
+        for phrase in ("split-passages", "voice.json", "model_id", "A scene\nwith a failed passage is not joined".replace("\n", " "), "passages_checked", "median measured rate",
                        "10 ms equal-power crossfades", "unchanged"):
             self.assertIn(phrase, voice, phrase)
         self.assertIn("eleven_v3", voice)

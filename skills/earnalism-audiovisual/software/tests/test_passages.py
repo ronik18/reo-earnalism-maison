@@ -120,3 +120,43 @@ def test_join_single_passage_is_a_copy_and_empty_is_refused(tmp_path):
     assert info["seams"] == [] and out.is_file()
     with pytest.raises(ValueError):
         passages.join_passages([], out)
+
+
+def test_seams_follow_the_final_punctuation_with_seeded_jitter():
+    plains = ["প্রথম বাক্য এখানে।", "দ্বিতীয় কি?", "তৃতীয় থামো!", "চতুর্থ।"]
+    ids = ["s-p01", "s-p02", "s-p03", "s-p04"]
+    a = passages.seam_lengths(plains, ids)
+    assert a == passages.seam_lengths(plains, ids)                      # seeded: repeatable
+    assert 0.8 * 0.85 <= a[0] <= 1.15 and 0.8 * 0.85 <= a[1] <= 1.15     # । and ? : 0.8-1.0 s +-15 %
+    assert 1.4 * 0.85 <= a[2] <= 1.6 * 1.15 and a[2] > 1.15             # ! : 1.4-1.6 s +-15 %
+    heading = passages.seam_lengths(["এক।", "পরিচ্ছেদ শুরু। কথা।"], ["a", "b"], headings=["পরিচ্ছেদ শুরু।"])
+    assert 2.5 * 0.85 <= heading[0] <= 3.0 * 1.15
+
+
+def test_a_passage_ending_in_exclamation_gets_a_longer_seam_in_the_joined_wav(tmp_path):
+    takes = []
+    for i, f in enumerate((200, 260)):
+        p = tmp_path / f"p{i}.wav"
+        _passage_wav(p, 1.0, f)
+        takes.append(p)
+    seams = passages.seam_lengths(["থামো!", "এবার।"], ["x-p01", "x-p02"])
+    info = passages.join_passages(takes, tmp_path / "o.wav", seams)
+    assert 1.19 <= info["seams"][0]["length_s"] <= 1.85
+    assert abs(info["seams"][0]["length_s"] - seams[0]) < 0.03
+
+
+def test_expected_duration_is_the_runs_own_median_pace():
+    chars, durs = [100, 200, 150, 100], [10.0, 20.0, 15.0, 22.0]
+    exp, measured = passages.expected_durations(chars, durs, cps=13)
+    assert measured and [round(e, 3) for e in exp] == [10.0, 20.0, 15.0, 10.0]   # median 10 chars/s
+    exp, measured = passages.expected_durations([130, 260], [1.0, 1.0], cps=13)  # < 3 passages: the estimate
+    assert not measured and exp == [10.0, 20.0]
+
+
+def test_a_cut_is_allowed_at_a_paragraph_end_and_the_sentence_rule_is_text_sentences():
+    scene = "পরিচ্ছেদ\n\nপ্রথম বাক্য এখানে। দ্বিতীয় বাক্য।"
+    passages.check_passage_scripts(scene, ["পরিচ্ছেদ", "প্রথম বাক্য এখানে। [pause] দ্বিতীয় বাক্য।"])
+    with pytest.raises(ValueError, match="mid-sentence"):
+        passages.check_passage_scripts(scene, ["পরিচ্ছেদ\n\nপ্রথম", "বাক্য এখানে। দ্বিতীয় বাক্য।"])
+    ps = passages.split_passages(scene, cps=0.5)   # a heading line is its own chunk, kept as written
+    assert "".join(ps) == scene

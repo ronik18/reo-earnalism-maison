@@ -31,29 +31,41 @@ python3 -m eav.cli import-take film-01 --root <root> --scripts <scripts dir> --a
   --credits <credits used> [--cps 13] [--profile voicecheck-profile.json]
 ```
 
-`split-passages` cuts each scene at sentence or paragraph ends into passages of about 15–30 s (never
-mid-sentence; a sentence over 30 s stays whole; passages joined give the scene text back exactly) and
-refuses to overwrite a file. The length is estimated at `--cps` characters per second: the default 13 is a
-**documented estimate** (about 120 words/min, the plan's default rate, at ~6.5 characters per Bengali word),
-not a measurement, because no real v4 take is on record yet; set `--cps` from the first real takes (it also
-sets each passage's expected duration for `voicecheck`). `import-take` then, per passage: checks the tagged
-script (words exactly the book's in order; at most one audio tag per sentence; no passage but the last ending
-mid-sentence; a passage opening on `[softly]` only when that is the mood carried from the passage before; a
-passage after one that ended in a mood tag must open on a mood tag, the carried one or a deliberate new one;
-`[pause]` tags set no mood), runs `retime` (pauses by the script's punctuation), then `voicecheck` against the
-title's profile (`film/film-NN/voice/passages/voicecheck-profile.json`, measured on the first run and reused
-on every redo, or `--profile`; the join check compares each passage with the one before it). **Any failed
-passage stops the import before anything is joined**, with the passages and failure codes listed: regenerate
-only those from the same tagged script, download over the old `<passage id>.mp3` and rerun the same call.
-When all pass, each scene is joined to `film/film-NN/voice/<scene>.wav` (the file `cue` reads): the seam
-between passages is about 0.9 s of the take's own room tone (`eav.retime.room_tone`, −62 to −68 dBFS),
-joined by 10 ms equal-power crossfades, the take edges beside it cut back to 20 ms of speech, so no digital
-zero is left. Beside each wav `<scene>.passages.json` records the model, voice, credits and the sha256 of
-every script, take and retimed passage; the record gets a `passages_joined` event and `scene_voice` and
-`passage_manifest` artifacts. A scene wav placed by hand is never overwritten. Passages serve film scenes, not
-reels (a reel stays one `eleven_v3` take). **One-take-per-scene `eleven_v3` import is unchanged** (the 24 Nov
-route below). Not certified: the judgement that a passage sounds natural stays with `voicecheck` and the
-owner's ear.
+`split-passages` cuts each scene at sentence (`eav.text.sentences`) or paragraph ends into passages of about
+15–30 s (never mid-sentence; a sentence over 30 s stays whole; a paragraph or heading boundary stays a blank
+line; passages joined give the scene text back exactly) and refuses to overwrite a file. The length is
+estimated at `--cps` characters per second: the default 13 is a **documented estimate** (about 120 words/min,
+the plan's default rate, at ~6.5 characters per Bengali word), not a measurement, because no real v4 take is
+on record yet. `import-take` imports every scene whose `<scene>-p01.txt` is present, or only `--scene ID`;
+a scene wav placed by hand blocks only that scene (it is skipped, or refused with `--scene`; never
+overwritten). Per passage it checks the tagged script (words exactly the book's in order; at most one audio
+tag per sentence; no passage but the last ending mid-sentence; a passage opening on `[softly]` only when
+that is the mood carried from the passage before; a passage after one that ended in a mood tag must open
+on a mood tag, the carried one or a deliberate new one; `[pause]` tags set no mood), runs `retime` (pauses by
+the script's punctuation), then `voicecheck` against the film's profile
+(`film/film-NN/voice/passages/voicecheck-profile.json`, measured on the first run and reused on every redo,
+or `--profile`; the join check compares each passage with the one before it). The expected duration of a
+passage is its characters divided by **the run's own median measured rate** (characters per second of the
+run's retimed passages), so only a passage out of pace with its run (truncated, runaway) misses `duration`;
+a run of fewer than 3 passages has no such rate: it uses `--cps` and reports `duration` as a warning, not a
+failure (a uniformly mis-paced scene is then not caught on length; the other gates still apply). **A scene
+with a failed passage is not joined**, with the passages and failure codes listed (the other scenes of the call
+still are): regenerate only those passages from the same tagged script, download over the old
+`<passage id>.mp3` and rerun the same call. **Credits:** every run, passing or failing, records a
+`passages_checked` event with its `--credits`, so on a redo give the credits of that regeneration only (the
+account sums the events against the 60,000 monthly limit). When a scene passes it is joined to
+`film/film-NN/voice/<scene>.wav` (the file `cue` reads; `film --shots` and `cue` need no narration job): the
+seam between passages is the take's own room tone (`eav.retime.room_tone`, −62 to −68 dBFS) sized by the
+punctuation that ends the passage (`।` or `?` 0.8–1.0 s, `!` 1.4–1.6 s, before a heading 2.5–3.0 s, each
+varied ±15% by a draw seeded with the passage id, as `retime` does), joined by 10 ms equal-power crossfades,
+the take edges beside it cut back to 20 ms of speech, so no digital zero is left. Beside each wav
+`<scene>.passages.json` records the model, the sha256 of `voice.json`, voice, credits and the sha256 of every
+script, take and retimed passage; the record gets `passages_checked` and `passages_joined` events and
+`scene_voice` and `passage_manifest` artifacts. `voice.json` may not name `eleven_v3` (that model is the
+one-take route and never needs the file), and a malformed `voice.json` does not block that route. Passages
+serve film scenes, not reels (a reel stays one `eleven_v3` take). **One-take-per-scene `eleven_v3` import is
+unchanged** (the 24 Nov route below). Not certified: the judgement that a passage sounds natural stays
+with `voicecheck` and the owner's ear.
 
 3. **One take, redo only the failures** (owner choice, 26 Nov; best-of-three costs 45k credits per film
    and was rejected). Budget about 15,000–20,000 credits per 20-minute film (v4 costs about one

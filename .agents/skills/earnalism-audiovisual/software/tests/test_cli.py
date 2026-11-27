@@ -80,8 +80,9 @@ class RoundTwo:
         subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
                         f"anoisesrc=d={seconds}:c=pink:r=48000:a=0.2", "-ac", "2", str(path)], check=True)
 
-    def film_ready(self):
-        self.init_and_plan()
+    def film_ready(self, narration=True, init=True):
+        if init:
+            self.init_and_plan()
         plan = json.loads((self.root / "plan.json").read_text())
         scenes = plan["plan"]["films"][0]["scenes"]
         from eav.voice import voice_units
@@ -95,7 +96,8 @@ class RoundTwo:
             for i, sc in enumerate(scenes):
                 Image.new("RGB", (320, 180), (60 * i, 90, 120)).save(out / f"{sc['scene_id']}-1.png")
 
-        self.fake_job("narration", "film-01", narr)
+        if narration:
+            self.fake_job("narration", "film-01", narr)
         self.fake_job("stills", "film-01", stills)
         Image.new("RGBA", (64, 64), (255, 255, 255, 255)).save(self.d / "logo.png")
         Image.new("RGB", (320, 180), (0, 0, 0)).save(self.d / "end.png")
@@ -628,9 +630,12 @@ class RoundTwo:
 
     def test_film_shots_assembles_approved_scenes_end_to_end(self):
         """Two approved scenes of static shots, their scene mixes, cards, captions: one 24 fps film."""
+        self.shots_end_to_end()
+
+    def shots_end_to_end(self, narration=True, init=True):
         import re
         from eav import shotplan
-        self.film_ready()
+        self.film_ready(narration, init)
         plan = json.loads((self.root / "plan.json").read_text())
         scenes = plan["plan"]["films"][0]["scenes"]
         fdir = self.root / "film" / "film-01"
@@ -1968,6 +1973,7 @@ class ImportPassagesCliTests(unittest.TestCase):
     setUp0 = CliTests.setUp
     fake_job, noise, wav = RoundTwo.fake_job, RoundTwo.noise, RoundTwo.wav
     init_and_plan = CliTests.init_and_plan
+    film_ready, shots_end_to_end = RoundTwo.film_ready, CliTests.shots_end_to_end
     VOICE = ImportTakeCliTests.VOICE
     scenes, write_take = ImportTakeCliTests.scenes, ImportTakeCliTests.write_take
     film_takes, import_take = ImportTakeCliTests.film_takes, ImportTakeCliTests.import_take
@@ -1981,14 +1987,16 @@ class ImportPassagesCliTests(unittest.TestCase):
             for n, text in enumerate(texts, 1):
                 self.write_passage(f"{key}-p{n:02d}", text)
 
-    def write_passage(self, stem, text, tagged=None):
+    def write_passage(self, stem, text, tagged=None, pace=0.025):
+        """Takes last `pace` s per character (two tones and a gap), so a run's passages share one rate."""
         from tests.test_take import gap, tone, write_wav
         import numpy as np
         self.scripts.mkdir(exist_ok=True)
         self.audio.mkdir(exist_ok=True)
         (self.scripts / f"{stem}.txt").write_text(tagged or text, encoding="utf-8")
         wav = self.d / f"{stem}-src.wav"
-        write_wav(wav, np.concatenate([gap(0.05), tone(0.8, 210), gap(0.4), tone(0.8, 190), gap(0.05)]))
+        half = max(0.3, len(text) * pace / 2 - 0.2)
+        write_wav(wav, np.concatenate([gap(0.05), tone(half, 210), gap(0.4), tone(half, 190), gap(0.05)]))
         subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(wav), "-c:a", "libmp3lame", "-b:a", "128k",
                         str(self.audio / f"{stem}.mp3")], check=True)
 
@@ -2017,11 +2025,24 @@ class ImportPassagesCliTests(unittest.TestCase):
         self.assertEqual(seen, [("f01s001-p01.wav", None), ("f01s001-p02.wav", "f01s001-p01.wav"),
                                 ("f01s002-p01.wav", None)])
         work = voice / "passages"
+        # the expected duration is characters / the run's own median measured rate (not the --cps guess)
+        import statistics
+        from eav import retime
+        ids = ("f01s001-p01", "f01s001-p02", "f01s002-p01")
+        chars = [len(t) for ts in self.PASSAGES.values() for t in ts]
+        durs = [len(retime.read(work / f"{n}.wav")) / retime.SR for n in ids]
+        rate = statistics.median(c / d for c, d in zip(chars, durs))
+        for n, c in zip(ids, chars):
+            got = json.loads((work / f"{n}.voicecheck.json").read_text())["expected_s"]
+            self.assertAlmostEqual(got, c / rate, places=2)
         self.assertTrue((work / "voicecheck-profile.json").is_file())
         self.assertTrue((work / "f01s001-p01.voicecheck.json").is_file())
         manifest = json.loads((voice / "f01s001.passages.json").read_text())
         self.assertEqual((manifest["model"], manifest["voice_id"], manifest["credits"]),
                          (self.V4, "XdbTvfQSkW1sgZYKdZdF", 420))
+        self.assertEqual(manifest["voice_json_sha256"],
+                         hashlib.sha256((self.root / "voice.json").read_bytes()).hexdigest())
+        self.assertEqual(len(manifest["join"]["seams"]), 1)
         self.assertEqual([p["id"] for p in manifest["passages"]], ["f01s001-p01", "f01s001-p02"])
         self.assertEqual(manifest["join"]["crossfade_ms"], 10)
         for p in manifest["passages"]:
@@ -2032,7 +2053,7 @@ class ImportPassagesCliTests(unittest.TestCase):
         self.assertEqual(sorted(a["path"] for a in rec.data["artifacts"] if a["kind"] == "scene_voice"),
                          ["film/film-01/voice/f01s001.wav", "film/film-01/voice/f01s002.wav"])
 
-    def test_failed_passage_blocks_the_join(self):
+    def test_failed_passage_blocks_only_its_own_scene_and_credits_are_recorded_every_run(self):
         def check(take, expected_s, prof, prev_tail=None):
             bad = take.stem == "f01s001-p02"
             return {"pass": not bad, "failures": ["pitch_spread"] if bad else [], "metrics": {}}
@@ -2041,17 +2062,60 @@ class ImportPassagesCliTests(unittest.TestCase):
         self.assertNotEqual(code, 0)
         self.assertIn("f01s001-p02", out)
         self.assertIn("pitch_spread", out)
-        self.assertNotIn("f01s002-p01 (", out)
         voice = self.root / "film" / "film-01" / "voice"
-        self.assertEqual(list(voice.glob("*.wav")), [])  # no scene wav, not even the passing scene's
-        self.assertEqual([e for e in Record.load(self.root).data["events"] if e["result"] == "passages_joined"], [])
-        # redo only the failure: the same call joins, reusing the saved profile
+        self.assertTrue((voice / "f01s002.wav").is_file())       # the other scene still joins
+        self.assertFalse((voice / "f01s001.wav").exists())       # the failed scene never does
+        events = Record.load(self.root).data["events"]
+        checked = [e["detail"] for e in events if e["result"] == "passages_checked"]
+        self.assertEqual([(c["credits"], c["joined"], list(c["failed"])) for c in checked],
+                         [(420, ["f01s002"], ["f01s001"])])       # the failed run's credits are on record
+        # redo only the failure: the same call (credits of that regeneration) joins, reusing the saved profile
         self.write_passage("f01s001-p02", self.PASSAGES["f01s001"][1])
         with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing), \
                 mock.patch.object(cli.voicecheck, "profile", side_effect=AssertionError("profile re-measured")):
-            code, out = self.import_passages()
+            code, out = run("import-take", "film-01", "--root", self.root, "--scripts", self.scripts,
+                            "--audio", self.audio, *self.VOICE4, "--credits", 35, "--cps", 5)
         self.assertEqual(code, 0, out)
         self.assertTrue((voice / "f01s001.wav").is_file())
+        checked = [e["detail"]["credits"] for e in Record.load(self.root).data["events"]
+                   if e["result"] == "passages_checked"]
+        self.assertEqual(checked, [420, 35])
+
+    def test_duration_is_checked_by_the_real_gate_against_the_runs_own_pace(self):
+        """Unmocked voicecheck: passages at one pace meet their expected duration; an out-of-pace take misses."""
+        self.write_passage("f01s001-p02", self.PASSAGES["f01s001"][1], pace=0.07)  # 2.8x slower than the run
+        code, out = self.import_passages()
+        self.assertNotEqual(code, 0)  # the synthetic tones fail other gates (pitch); only `duration` is asked
+        work = self.root / "film" / "film-01" / "voice" / "passages"
+        codes = {n: json.loads((work / f"{n}.voicecheck.json").read_text())["failures"]
+                 for n in ("f01s001-p01", "f01s001-p02", "f01s002-p01")}
+        self.assertNotIn("duration", codes["f01s001-p01"])
+        self.assertNotIn("duration", codes["f01s002-p01"])
+        self.assertIn("duration", codes["f01s001-p02"])
+
+    def test_fewer_than_three_passages_make_duration_a_warning(self):
+        code, out = self.import_passages("--scene", "f01s002")
+        self.assertNotEqual(code, 0)  # tones fail the pitch gates, not duration
+        res = json.loads((self.root / "film" / "film-01" / "voice" / "passages" / "f01s002-p01.voicecheck.json").read_text())
+        self.assertNotIn("duration", res["failures"])
+        self.assertIn("fewer than 3 passages", out)
+
+    def test_scene_option_and_scenes_without_passage_scripts(self):
+        with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing):
+            code, out = self.import_passages("--scene", "f01s002")
+        self.assertEqual(code, 0, out)
+        voice = self.root / "film" / "film-01" / "voice"
+        self.assertEqual([p.name for p in voice.glob("*.wav")], ["f01s002.wav"])
+        code, out = self.import_passages("--scene", "nope")
+        self.assertNotEqual(code, 0)
+        (self.scripts / "f01s001-p01.txt").unlink()
+        (self.scripts / "f01s001-p02.txt").unlink()
+        (voice / "f01s002.wav").unlink()
+        (voice / "f01s002.passages.json").unlink()
+        with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing):
+            code, out = self.import_passages()   # no --scene: only scenes whose p01 is present
+        self.assertEqual(code, 0, out)
+        self.assertEqual([p.name for p in voice.glob("*.wav")], ["f01s002.wav"])
 
     def test_model_must_be_listed_in_the_title_voice_settings(self):
         (self.root / "voice.json").unlink()
@@ -2062,9 +2126,15 @@ class ImportPassagesCliTests(unittest.TestCase):
         code, out = self.import_passages()
         self.assertNotEqual(code, 0)
         self.assertIn("not the approved narration engine", out)
+        # eleven_v3 may not be the "v4" id: it would send the one-take route down the passage path
+        (self.root / "voice.json").write_text(json.dumps({"model_id": "eleven_v3"}), encoding="utf-8")
+        code, out = self.import_passages()
+        self.assertNotEqual(code, 0)
+        self.assertIn("eleven_v3", out)
         self.assertFalse((self.root / "film" / "film-01" / "voice").exists())
 
     def test_v3_one_take_per_scene_import_is_unchanged(self):
+        (self.root / "voice.json").write_text("{ not json", encoding="utf-8")  # never blocks the v3 route
         self.film_takes()
         code, out = self.import_take()
         self.assertEqual(code, 0, out)
@@ -2094,12 +2164,16 @@ class ImportPassagesCliTests(unittest.TestCase):
         self.assertNotEqual(code, 0)
         self.assertIn("f01s001-p02", out)
 
-    def test_a_hand_placed_scene_wav_is_not_overwritten(self):
+    def test_a_hand_placed_scene_wav_blocks_only_its_own_scene(self):
         voice = self.root / "film" / "film-01" / "voice"
         voice.mkdir(parents=True)
         (voice / "f01s002.wav").write_bytes(b"RIFF hand placed")
         with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing):
             code, out = self.import_passages()
+            self.assertEqual(code, 0, out)
+            self.assertIn("f01s002", out)
+            self.assertTrue((voice / "f01s001.wav").is_file())
+            code, out = self.import_passages("--scene", "f01s002")
         self.assertNotEqual(code, 0)
         self.assertIn("f01s002.wav", out)
         self.assertEqual((voice / "f01s002.wav").read_bytes(), b"RIFF hand placed")
@@ -2109,13 +2183,22 @@ class ImportPassagesCliTests(unittest.TestCase):
                         "--audio", self.audio, *self.VOICE4, "--credits", 1)
         self.assertNotEqual(code, 0)
 
-    def test_split_passages_writes_the_untagged_passage_scripts(self):
+    def test_split_passages_writes_the_untagged_passage_scripts_keeping_blocks(self):
         out_dir = self.d / "split"
-        code, out = run("split-passages", "film-01", "--root", self.root, "--out", out_dir, "--cps", 2)
+        code, out = run("split-passages", "film-01", "--root", self.root, "--out", out_dir, "--cps", 5)
         self.assertEqual(code, 0, out)
         names = sorted(p.name for p in out_dir.glob("*.txt"))
-        self.assertEqual(names, ["f01s001-p01.txt", "f01s001-p02.txt", "f01s002-p01.txt"][:len(names)])
-        joined = " ".join(p.read_text(encoding="utf-8").strip() for p in sorted(out_dir.glob("f01s001-p*.txt")))
-        self.assertEqual(joined, " ".join(self.PASSAGES["f01s001"]))
-        code, out = run("split-passages", "film-01", "--root", self.root, "--out", out_dir, "--cps", 2)
+        self.assertEqual(names, ["f01s001-p01.txt", "f01s002-p01.txt"])
+        # the heading stays its own block (not joined to the sentence by a space)
+        self.assertEqual((out_dir / "f01s001-p01.txt").read_text(encoding="utf-8").strip(),
+                         "The Garden\n\nEvery afternoon the children played in the garden. It was large and lovely.")
+        code, out = run("split-passages", "film-01", "--root", self.root, "--out", out_dir, "--cps", 5)
         self.assertNotEqual(code, 0)  # never overwrites a tagged script
+
+    def test_film_shots_needs_no_narration_job_on_the_v4_route(self):
+        with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing):
+            self.assertEqual(self.import_passages()[0], 0)
+        rec = Record.load(self.root)
+        self.assertFalse([a for a in rec.data["artifacts"] if a["kind"] == "narration"])
+        self.assertFalse([e for e in rec.data["events"] if e["result"] == "job_target"])
+        self.shots_end_to_end(narration=False, init=False)

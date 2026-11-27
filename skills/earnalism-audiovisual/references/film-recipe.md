@@ -99,7 +99,7 @@ never use it on a cinematic film.)
 
 The standard is Eleven v4, one take per **passage** of 15–30 s: `split-passages film-NN` writes the
 passages, then `import-take` (model id from the title's `voice.json`) retimes each passage (punctuation
-pauses with real room tone), runs `voicecheck` on it (a failed passage is listed for redo and nothing is
+pauses with real room tone), runs `voicecheck` on it (a scene with a failed passage is listed for redo and not
 joined; only the failures are redone), and joins the scene over room tone with 10 ms crossfades. The
 voice goes to `film/film-NN/voice/<scene>.wav`, which `cue` reads. Still available: one `eleven_v3` take per scene via `import-take`
 (then `retime`, `voicecheck`), or a pre-retimed scene wav placed there by hand. About 0.85 s of breath leads the first word.

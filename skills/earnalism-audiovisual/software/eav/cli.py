@@ -25,7 +25,7 @@
   python3 -m eav.cli import-take film-NN --root <dir> --scripts <dir of <scene>-p<NN>.txt> --audio
                          <dir of <scene>-p<NN>.mp3> --engine elevenlabs --model <model_id of <root>/voice.json>
                          --voice-id <id> --voice-name "<name>" --credits <credits used> [--cps 13]
-                         [--profile voicecheck-profile.json]   (Eleven v4: each passage retimed and voicechecked,
+                         [--profile voicecheck-profile.json] [--scene ID]   (Eleven v4: each passage retimed and voicechecked,
                          the scene joined to film/film-NN/voice/<scene>.wav; a failed passage blocks the join)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
                          [--archive-sha256 <sha>]           (reel_clips)
@@ -122,7 +122,7 @@ from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc
 from . import cue, glide, passages, retime, shotplan, touchup, voicecheck
 from .record import Record, sha256_file
 from .text import sentences
-from .voice import CONTINUOUS, EXPRESSIVE, unit_anchors, voice_units
+from .voice import CONTINUOUS, EXPRESSIVE, _segments, _style, unit_anchors, voice_units
 
 PROG = "python3 -m eav.cli"
 ROSTER = (Path(__file__).resolve().parents[3] / "earnalism-audiobook-go-live" / "references"
@@ -962,7 +962,7 @@ def cmd_import_take(args):
     rec = _record(args.root)
     plan = _plan(rec)
     lang = plan["language"]
-    v4 = _v4_model(rec)
+    v4 = _v4_model(rec) if args.model != "eleven_v3" else None  # a bad voice.json never blocks the v3 route
     per_passage = args.engine == "elevenlabs" and v4 is not None and args.model == v4
     if args.model not in TAKE_ENGINES.get(args.engine, ()) and not per_passage:
         raise Stop(f"engine/model {args.engine}/{args.model} is not the approved narration engine",
@@ -1100,6 +1100,9 @@ def _v4_model(rec):
         raise Stop(f"{path} is not a JSON object", f'Write {{"model_id": "<the Eleven v4 model id>"}} in {path}')
     if not isinstance(model, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{2,63}", model):
         raise Stop(f"{path} has no valid model_id", f'Write {{"model_id": "<the Eleven v4 model id>"}} in {path}')
+    if model in TAKE_ENGINES["elevenlabs"]:
+        raise Stop(f"{path} names {model}, the one-take route's model, as the Eleven v4 id",
+                   f'Write the Eleven v4 model id in {path}; {model} is imported without voice.json')
     return model
 
 
@@ -1128,10 +1131,25 @@ def _passage_files(scripts: Path, audio: Path, key: str) -> list:
     return rows
 
 
+def _scene_text(sc, lang):
+    """(text, heading texts): the scene's units joined by a space within a block and a blank line between
+    blocks, so paragraph and heading boundaries survive for the passage cuts and seams."""
+    parts, prev, headings = [], None, set()
+    for block, text, _ in _segments(sc, lang, _style(CONTINUOUS)):
+        if prev is not None:
+            parts.append(" " if block is prev else "\n\n")
+        parts.append(text)
+        if block.get("kind") == "heading":
+            headings.add(" ".join(text.split()))
+        prev = block
+    return "".join(parts), headings
+
+
 def _import_passages(args, rec, plan, lang, credits):
     """Eleven v4: one take per passage of a scene. Each passage is retimed, then voicechecked (against the
-    saved profile of the title when present); only when every passage passes are the scenes joined into
-    film/film-NN/voice/<scene>.wav, the file `cue` reads. A failed passage is listed for redo, nothing joined."""
+    film's saved profile when present); a scene whose passages all pass is joined into
+    film/film-NN/voice/<scene>.wav, the file `cue` reads. A scene with a failed passage is listed for redo and
+    not joined; the other scenes of the call still are. Credits are recorded on every run."""
     target, todo = _take_target(rec, plan, args.target)
     if not target.startswith("film-"):
         raise Stop(f"{target} is a reel: passage narration builds film scene voice", "Pass film-NN")
@@ -1142,27 +1160,42 @@ def _import_passages(args, rec, plan, lang, credits):
     cps = args.cps
     if not cps or cps <= 0:
         raise Stop(f"--cps must be a positive number of characters per second, got {args.cps!r}", "Fix --cps and rerun")
+    if args.scene:
+        todo = [t for t in todo if t[0] == args.scene]
+        if not todo:
+            raise Stop(f"{args.scene} is not a scene of {target}", f"{PROG} status --root {rec.root}")
+    else:  # the scenes whose first passage script is present
+        todo = [t for t in todo if (scripts / f"{t[0]}-p01.txt").is_file()]
+        if not todo:
+            raise Stop(f"no <scene>-p01.txt passage script of {target} in {scripts}",
+                       f"{PROG} split-passages {target} --root {rec.root} --out <dir>, tag the passages, "
+                       "generate one take per passage")
     voice_dir = rec.root / "film" / target / "voice"
     work = voice_dir / "passages"
-    scenes = []
+    scenes, blocked = [], []
     for key, sc in todo:
-        text = " ".join(u["text"] for u in voice_units(sc, {"description": ""}, None, lang, CONTINUOUS))
+        wav = voice_dir / f"{key}.wav"
+        if wav.is_file() and not (voice_dir / f"{key}.passages.json").is_file():
+            if args.scene:
+                raise Stop(f"{wav} was placed by hand (no {key}.passages.json); it is not overwritten",
+                           "Move that file away if the passages should replace it")
+            blocked.append(key)
+            continue
+        text, headings = _scene_text(sc, lang)
         rows = _passage_files(scripts, audio, key)
-        tagged = [r[1].read_text(encoding="utf-8") for r in rows]
         try:
-            plain = passages.check_passage_scripts(text, tagged)
+            plain = passages.check_passage_scripts(text, [r[1].read_text(encoding="utf-8") for r in rows])
         except ValueError as e:
             raise Stop(f"passage scripts of {key} rejected: {e}",
                        "Fix the tagged passage scripts (the words are exactly the book's) and regenerate only "
                        "the passages whose script changed")
-        if (voice_dir / f"{key}.wav").is_file() and not (voice_dir / f"{key}.passages.json").is_file():
-            raise Stop(f"{voice_dir / (key + '.wav')} was placed by hand (no {key}.passages.json); "
-                       "it is not overwritten", "Move that file away if the passages should replace it")
-        scenes.append({"key": key, "rows": rows, "plain": plain})
+        scenes.append({"key": key, "rows": rows, "plain": plain, "headings": headings})
+    if not scenes:
+        raise Stop(f"every requested scene has a hand-placed wav ({', '.join(blocked)}); none is overwritten",
+                   "Move the wav away if the passages should replace it")
     work.mkdir(parents=True, exist_ok=True)
     for sub in ("scripts", "takes"):
         (work / sub).mkdir(exist_ok=True)
-    cps = args.cps
     retimed = []
     for sc in scenes:
         for (pid, script, take_path), plain in zip(sc["rows"], sc["plain"]):
@@ -1170,76 +1203,97 @@ def _import_passages(args, rec, plan, lang, credits):
             shutil.copy2(take_path, work / "takes" / take_path.name)
             dst = work / f"{pid}.wav"
             pauses = retime.detect_pauses(take_path)
-            plan_p = retime.plan_pauses(plain, pauses, zlib.crc32(pid.encode()))
-            retime.retime(take_path, dst, plan_p, [])
-            retimed.append((sc, pid, dst, len(plain.strip()) / cps))
+            retime.retime(take_path, dst, retime.plan_pauses(plain, pauses, zlib.crc32(pid.encode())), [])
+            retimed.append((sc, pid, dst, len(plain.strip()), len(retime.read(dst)) / retime.SR))
+    expected, measured = passages.expected_durations([r[3] for r in retimed], [r[4] for r in retimed], cps)
     if args.profile:
         pf = Path(args.profile)
-        if not pf.is_file():
-            raise Stop(f"{pf} does not exist", "Fix --profile and rerun")
-        prof = json.loads(pf.read_text())
-    elif (work / "voicecheck-profile.json").is_file():  # a redo run keeps the title's profile (voicecheck rule)
+        try:
+            prof = json.loads(pf.read_text())
+        except (OSError, ValueError):
+            raise Stop(f"{pf} is not a readable voicecheck profile", "Fix --profile and rerun")
+    elif (work / "voicecheck-profile.json").is_file():  # a redo run keeps the film's profile (voicecheck rule)
         prof = json.loads((work / "voicecheck-profile.json").read_text())
     else:
         prof = voicecheck.profile([r[2] for r in retimed])
         (work / "voicecheck-profile.json").write_text(json.dumps(prof, indent=1))
-    failed, prev, last_key = [], None, None
-    for sc, pid, dst, expected in retimed:
+    failed, prev, last_key = {}, None, None
+    for (sc, pid, dst, _, _), exp in zip(retimed, expected):
         prev = prev if last_key == sc["key"] else None
-        res = voicecheck.check(dst, expected, prof, prev)
+        res = voicecheck.check(dst, exp, prof, prev)
+        if not measured and "duration" in res["failures"]:  # only a guessed rate: a warning, not a failure
+            res["failures"] = [f for f in res["failures"] if f != "duration"]
+            res["warnings"] = ["duration"]
+            res["pass"] = not res["failures"]
+        res["expected_s"] = round(exp, 3)
         (work / f"{pid}.voicecheck.json").write_text(json.dumps(res, indent=1, ensure_ascii=False))
         if not res["pass"]:
-            failed.append(f"{pid} ({', '.join(res['failures'])})")
+            failed.setdefault(sc["key"], []).append(f"{pid} ({', '.join(res['failures'])})")
         prev, last_key = dst, sc["key"]
-    if failed:
-        raise Stop(f"{len(failed)} passage(s) failed voicecheck and are listed for redo: {'; '.join(failed)}. "
-                   "Nothing was joined",
-                   "Regenerate only those passages from the same tagged scripts, download each over its old "
-                   f"<passage id>.mp3 and rerun the same import-take call (the profile {work / 'voicecheck-profile.json'} "
-                   "is reused)")
-    stage = Path(tempfile.mkdtemp(dir=rec.root, prefix=".passages-"))
-    try:
-        manifests = {}
-        for sc in scenes:
-            wavs = [work / f"{r[0]}.wav" for r in sc["rows"]]
-            joined = passages.join_passages(wavs, stage / f"{sc['key']}.wav")
-            manifests[sc["key"]] = {
-                "schema": PASSAGES_SCHEMA, "scene": sc["key"], "target": target, "engine": args.engine,
-                "model": args.model, "voice_id": args.voice_id, "voice_name": args.voice_name,
-                "credits": credits, "cps": cps,
-                "passages": [{"id": pid, "script": f"film/{target}/voice/passages/scripts/{script.name}",
-                              "script_sha256": sha256_file(script), "take": f"film/{target}/voice/passages/takes/{tk.name}",
-                              "take_sha256": sha256_file(tk), "retimed": f"film/{target}/voice/passages/{pid}.wav",
-                              "retimed_sha256": sha256_file(work / f"{pid}.wav"),
-                              "voicecheck": f"film/{target}/voice/passages/{pid}.voicecheck.json"}
-                             for pid, script, tk in sc["rows"]],
-                "join": joined, "wav_sha256": sha256_file(stage / f"{sc['key']}.wav")}
-        voice_dir.mkdir(parents=True, exist_ok=True)
-        snapshot = (list(rec.data["artifacts"]), list(rec.data["events"]))
-        placed = []
+    if not measured:
+        print(f"Warning: fewer than {passages.MIN_RUN} passages, so the expected duration is only the --cps "
+              f"{cps:g} estimate: a duration miss is a warning, not a failure.")
+    voice_json = rec.root / VOICE_SETTINGS
+    joined = [sc for sc in scenes if sc["key"] not in failed]
+    if joined:
+        stage = Path(tempfile.mkdtemp(dir=rec.root, prefix=".passages-"))
         try:
-            for sc in scenes:
-                k = sc["key"]
-                _write_json(voice_dir / f"{k}.passages.json", manifests[k])
-                os.replace(stage / f"{k}.wav", voice_dir / f"{k}.wav")
-                placed.append(k)
-                meta = {"model": args.model, "passages": len(sc["rows"]), "voice_id": args.voice_id}
-                rec.add_artifact("scene_voice", voice_dir / f"{k}.wav", meta)
-                rec.add_artifact("passage_manifest", voice_dir / f"{k}.passages.json", meta)
-            rec.event("import", "passages_joined", {"target": target, "engine": args.engine, "model": args.model,
-                                                    "voice_id": args.voice_id, "credits": credits,
-                                                    "scenes": [sc["key"] for sc in scenes],
-                                                    "passages": sum(len(sc["rows"]) for sc in scenes)})
-        except BaseException:
-            rec.rollback(snapshot)
-            raise
-    finally:
-        shutil.rmtree(stage, ignore_errors=True)
-    n = sum(len(sc["rows"]) for sc in scenes)
-    print(f"Imported {n} passage take(s) of {len(scenes)} scene(s) for {target} ({args.model}, voice "
-          f"{args.voice_name}): each retimed and voicechecked, joined by 10 ms crossfades over room tone into "
-          f"{voice_dir}/<scene>.wav; {credits:g} credits recorded. Next: {PROG} cue --root {rec.root} "
-          f"--film {int(target[5:])} --scene <ID> --stems <music job>")
+            manifests = {}
+            for sc in joined:
+                ids = [r[0] for r in sc["rows"]]
+                seams = passages.seam_lengths(sc["plain"], ids, sc["headings"])
+                info = passages.join_passages([work / f"{i}.wav" for i in ids], stage / f"{sc['key']}.wav", seams)
+                manifests[sc["key"]] = {
+                    "schema": PASSAGES_SCHEMA, "scene": sc["key"], "target": target, "engine": args.engine,
+                    "model": args.model, "voice_json_sha256": sha256_file(voice_json), "voice_id": args.voice_id,
+                    "voice_name": args.voice_name, "credits": credits, "cps": cps,
+                    "passages": [{"id": pid, "script": f"film/{target}/voice/passages/scripts/{script.name}",
+                                  "script_sha256": sha256_file(script),
+                                  "take": f"film/{target}/voice/passages/takes/{tk.name}",
+                                  "take_sha256": sha256_file(tk), "retimed": f"film/{target}/voice/passages/{pid}.wav",
+                                  "retimed_sha256": sha256_file(work / f"{pid}.wav"),
+                                  "voicecheck": f"film/{target}/voice/passages/{pid}.voicecheck.json"}
+                                 for pid, script, tk in sc["rows"]],
+                    "join": info, "wav_sha256": sha256_file(stage / f"{sc['key']}.wav")}
+            voice_dir.mkdir(parents=True, exist_ok=True)
+            snapshot = (list(rec.data["artifacts"]), list(rec.data["events"]))
+            try:
+                for sc in joined:
+                    k = sc["key"]
+                    _write_json(voice_dir / f"{k}.passages.json", manifests[k])
+                    os.replace(stage / f"{k}.wav", voice_dir / f"{k}.wav")
+                    meta = {"model": args.model, "passages": len(sc["rows"]), "voice_id": args.voice_id}
+                    rec.add_artifact("scene_voice", voice_dir / f"{k}.wav", meta)
+                    rec.add_artifact("passage_manifest", voice_dir / f"{k}.passages.json", meta)
+                rec.event("import", "passages_joined", {"target": target, "engine": args.engine, "model": args.model,
+                                                        "voice_id": args.voice_id,
+                                                        "scenes": [sc["key"] for sc in joined],
+                                                        "passages": sum(len(sc["rows"]) for sc in joined)})
+            except BaseException:
+                rec.rollback(snapshot)
+                raise
+        finally:
+            shutil.rmtree(stage, ignore_errors=True)
+    # the credits of THIS run (a redo's: its regenerated passages), recorded whether or not anything joined
+    rec.event("import", "passages_checked", {"target": target, "model": args.model, "voice_id": args.voice_id,
+                                             "credits": credits, "scenes": [sc["key"] for sc in scenes],
+                                             "joined": [sc["key"] for sc in joined], "failed": failed,
+                                             "skipped_hand_placed": blocked})
+    n = sum(len(sc["rows"]) for sc in joined)
+    if joined:
+        print(f"Imported {n} passage take(s) of {len(joined)} scene(s) for {target} ({args.model}, voice "
+              f"{args.voice_name}): each retimed and voicechecked, joined by 10 ms crossfades over room tone "
+              f"into {voice_dir}/<scene>.wav. Next: {PROG} cue --root {rec.root} --film {int(target[5:])} "
+              "--scene <ID> --stems <music job>")
+    print(f"{credits:g} credits recorded for this run.")
+    if blocked:
+        print(f"Skipped (a hand-placed wav is never overwritten): {', '.join(blocked)}")
+    if failed:
+        listing = "; ".join(f"{k}: {', '.join(v)}" for k, v in failed.items())
+        raise Stop(f"passage(s) failed voicecheck and are listed for redo: {listing}. Those scenes were not joined",
+                   "Regenerate only those passages from the same tagged scripts, download each over its old "
+                   "<passage id>.mp3 and rerun the same import-take call with --credits of that regeneration only "
+                   f"(the profile {work / 'voicecheck-profile.json'} is reused)")
 
 
 def cmd_split_passages(args):
@@ -1252,7 +1306,7 @@ def cmd_split_passages(args):
     out = Path(args.out)
     files = {}
     for key, sc in todo:
-        text = " ".join(u["text"] for u in voice_units(sc, {"description": ""}, None, plan["language"], CONTINUOUS))
+        text, _ = _scene_text(sc, plan["language"])
         for n, p in enumerate(passages.split_passages(text, cps=args.cps), 1):
             files[out / f"{key}-p{n:02d}.txt"] = p.strip()
     clash = [p.name for p in files if p.exists()]
@@ -2840,6 +2894,8 @@ def _parser():
     s.add_argument("--cps", type=float, default=passages.CPS_BN,
                    help="Eleven v4 passages: characters per second of narration, for each passage's expected "
                         f"duration (default {passages.CPS_BN:g}, an estimate; use the rate of the first real takes)")
+    s.add_argument("--scene", help="Eleven v4 passages: import only this scene id (default: every scene whose "
+                                   "<scene>-p01.txt is present)")
     s.add_argument("--profile", help="Eleven v4 passages: saved voicecheck-profile.json (default: the title's "
                                      "saved one under film/film-NN/voice/passages, else measured and saved)")
     s = add("split-passages", help="write the untagged passage scripts of a film (Eleven v4)")
