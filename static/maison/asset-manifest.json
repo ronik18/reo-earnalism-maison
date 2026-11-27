@@ -110,6 +110,76 @@
       "file": "art/ford-gold-wash.webp",
       "sha256": "08446c9f43d2d9397098a165d848b559d1f3acc52728e12021406c1fc1c0e428",
       "bytes": 136396
+    },
+    {
+      "file": "art/hero-1200.avif",
+      "sha256": "c77d46a74be7ebf1e0f26b0bba29e754e5e52f16586389ab0336007cd2d3f817",
+      "bytes": 272343,
+      "derived_from": "art/hero.png",
+      "note": "responsive rendition (resized, AVIF/WebP), W5 26 Nov 2026"
+    },
+    {
+      "file": "art/hero-1200.webp",
+      "sha256": "0b2a6d52840899320219f001bc3b3d6ef92b57c5b10b4a279b60ae9d27d01052",
+      "bytes": 284846,
+      "derived_from": "art/hero.png",
+      "note": "responsive rendition (resized, AVIF/WebP), W5 26 Nov 2026"
+    },
+    {
+      "file": "art/hero-1480.avif",
+      "sha256": "cb886ac7bd88e7531198f3c48889e0d2206da04afd3c600d36cf5351761569ce",
+      "bytes": 374842,
+      "derived_from": "art/hero.png",
+      "note": "responsive rendition (resized, AVIF/WebP), W5 26 Nov 2026"
+    },
+    {
+      "file": "art/hero-1480.webp",
+      "sha256": "4ff18539e2e0ac4aad04a69c73ae9d314f82e1115e46ea3805643eefbdca7ce0",
+      "bytes": 389764,
+      "derived_from": "art/hero.png",
+      "note": "responsive rendition (resized, AVIF/WebP), W5 26 Nov 2026"
+    },
+    {
+      "file": "art/hero-480.avif",
+      "sha256": "2e0ac4d45f8a1b9253b7199db84c18148296f88d20806d925b233b314c8fed23",
+      "bytes": 54549,
+      "derived_from": "art/hero.png",
+      "note": "responsive rendition (resized, AVIF/WebP), W5 26 Nov 2026"
+    },
+    {
+      "file": "art/hero-480.webp",
+      "sha256": "6878bddb5ba48b8d967bd83c8a09381c846517f1c8898cbeee081d19aad26e7b",
+      "bytes": 54470,
+      "derived_from": "art/hero.png",
+      "note": "responsive rendition (resized, AVIF/WebP), W5 26 Nov 2026"
+    },
+    {
+      "file": "art/hero-640.avif",
+      "sha256": "d9f35e69cc6f9f7d285cd2d744852d2827aa1918f57e40756e22d83ab646fec8",
+      "bytes": 93134,
+      "derived_from": "art/hero.png",
+      "note": "responsive rendition (resized, AVIF/WebP), W5 26 Nov 2026"
+    },
+    {
+      "file": "art/hero-640.webp",
+      "sha256": "ad0de10b9dd7d26146ab0ed76862efefb74b19a6f20768d8816f52bf6170a27c",
+      "bytes": 93442,
+      "derived_from": "art/hero.png",
+      "note": "responsive rendition (resized, AVIF/WebP), W5 26 Nov 2026"
+    },
+    {
+      "file": "art/hero-800.avif",
+      "sha256": "ba541c08c3a634b96377a4d4a5928cd5e59d45971fccca8ce2985e5ce9eaee17",
+      "bytes": 140155,
+      "derived_from": "art/hero.png",
+      "note": "responsive rendition (resized, AVIF/WebP), W5 26 Nov 2026"
+    },
+    {
+      "file": "art/hero-800.webp",
+      "sha256": "d60d6ff1e8f3d2524289d42e239c75824a1d8a8df3e1047d0abbb61b518f7666",
+      "bytes": 143204,
+      "derived_from": "art/hero.png",
+      "note": "responsive rendition (resized, AVIF/WebP), W5 26 Nov 2026"
     }
   ]
 }

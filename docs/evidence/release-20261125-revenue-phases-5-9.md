@@ -86,3 +86,28 @@
 - **Neon:** all 13 editions have a live revision; the IDs match the deterministic replica IDs in the browser reports. `kshudhita-pashan-en` (`793553c3-b137-481d-9d27-8aa309a9373e`) has `translated_from` = ক্ষুধিত পাষাণ (`54f37caa-050b-47c3-95c2-3cbc214d6485`), which makes the side-by-side pair.
 - **Live checks:** each title page returns 200, and each reader returns 200 after the redirect to its first chapter, showing the free preview to anonymous visitors. Full-text rendering, the মেঘ ও রৌদ্র footnote and the side-by-side toggle were verified signed in on the release-code replica before publishing (the browser reports above). No production test account was created for a signed-in recheck.
 - Nothing posted or charged.
+
+## #74 deploy (26 Nov 2026): live-site quality, covers, preview, Modal GPU runner
+
+- **Merged:** ronik18/reo-earnalism-maison#74, squashed as `aa0c258`, after CI passed on head `90aa06b`. The CI timeout was raised from 12 to 25 minutes because the suite outgrew it.
+- **Static release `6cff6d6c6eb137d393a49de203d4de75d7454ca93d0ebe771676f08c5898e2c2`:**
+  - 212 files from a clean build.
+  - Against the live release `603e33a0…`, only 3 files changed: `dist/manifest.json`, the reader bundle and `room/room.css`.
+  - Uploaded to R2 (212 × 200) and verified over HTTPS (212/212).
+  - Rollback: set `STATIC_RELEASE_ID` back to `603e33a086435db6e0dc29f67016c9f2a8c77333af4818d37e32311221e05694` and redeploy.
+- **Deploy:** `dep-dc4a4au1egvs73fpltrg` is live.
+  - Migration `library/0010` (help text only) was applied by Render job `job-dc4a4up7lnhs73fra6e0`, which succeeded. Setting a pre-deploy command through the API did not persist, so the migration ran as this job.
+- **Cloudflare cache rule added**, as part of the owner's 26 Nov cover decision ("Maison public cover renditions"):
+  - It covers `/api/v1/content/covers/*` with no query string, anonymous GET/HEAD requests, and the 9 whitelist countries.
+  - Edge lifetime follows the origin headers, which are capped by rights.
+  - Verified: the first request was a MISS and later ones HIT; a request with a query string returned 404 and was not cached; pages are still DYNAMIC.
+- **Live checks:**
+  - These return 200: `/en/`, `/en/explore/`, `/en/learn/`, `/sitemap.xml` (19 URLs) and `/robots.txt`. The robots file includes the Sitemap line, which Cloudflare's managed robots file merges in. `/favicon.ico` redirects to the logo.
+  - Title pages carry a unique `<title>`, a UUID canonical and an `og:image` pointing at the w800 cover.
+  - The w160 cover is 9.5 KB, against 172 KB for the original, and is served with `public, max-age=31536000, immutable` (capped by rights).
+  - The anonymous বিচারক preview is about 550 words of about 1,988.
+- **Owner decisions applied (26 Nov):**
+  - covers cached and served in smaller sizes;
+  - the preview is about a quarter of each story (400 to 1,500 words, never the protected end);
+  - the duplicate Back link is removed (merged with W4 once the colours are approved).
+- **Held for the owner:** the gold button colours (W4 is ready on its branch, with before/after screenshots sent) and the বিচারক narration listening review.
