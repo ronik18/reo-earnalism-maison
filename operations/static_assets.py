@@ -14,7 +14,7 @@ CHUNK_BYTES=1024*1024
 CACHE_CONTROL='public, max-age=31536000, immutable'
 MIME={'.js':'text/javascript','.css':'text/css','.woff2':'font/woff2','.woff':'font/woff','.ttf':'font/ttf','.otf':'font/otf',
       '.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.avif':'image/avif','.svg':'image/svg+xml',
-      '.ico':'image/vnd.microsoft.icon','.json':'application/json','.txt':'text/plain','.md':'text/markdown'}
+      '.ico':'image/vnd.microsoft.icon','.json':'application/json','.webmanifest':'application/manifest+json','.txt':'text/plain','.md':'text/markdown'}
 PRIVATE_PARTS={'private','intake','exports','revisions','evidence','credentials','secrets','books','manuscripts'}
 
 

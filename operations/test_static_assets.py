@@ -29,6 +29,13 @@ class StaticReleaseTests(SimpleTestCase):
         value={key:item for key,item in first.items() if key!='release_id'}
         self.assertEqual(hashlib.sha256(canonical_manifest(value)).hexdigest(),first['release_id'])
         (self.root/'maison/app.css').write_bytes(b'changed');self.assertNotEqual(tree_manifest(self.root)['release_id'],first['release_id'])
+    def test_icon_set_manifest_and_share_card_ship_with_their_types(self):
+        extra={'maison/icons/site.webmanifest':'application/manifest+json','maison/icons/favicon.ico':'image/vnd.microsoft.icon',
+               'maison/icons/icon-512.png':'image/png','maison/share/earnalism-share-1200x630.jpg':'image/jpeg'}
+        for name in extra:
+            path=self.root/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(b'synthetic')
+        types={item['path']:item['content_type'] for item in tree_manifest(self.root)['assets']}
+        for name,mime in extra.items():self.assertEqual(types.get(name),mime,name)
     def test_prepare_and_default_publish_make_no_provider_calls(self):
         with override_settings(BASE_DIR=self.root),patch('operations.static_assets._public_client',side_effect=AssertionError('No provider calls')):
             output=io.StringIO();call_command('prepare_public_assets',collected_directory=str(self.root),stdout=output)
