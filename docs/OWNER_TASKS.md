@@ -1,10 +1,10 @@
 # Owner tasks
 
 Things only the owner can do. Claude keeps this list current; tick an item by telling Claude it is done.
-Last updated: 26 Nov 2026.
+Last updated: 27 Nov 2026.
 
 ## Approvals
-- [ ] **Monday review page:** https://theearnalism.com/en/staff/review/ (signed in as account #4). Nothing is pending there now; new titles appear as they are packaged. One item was left untouched on purpose: the ক্ষুধিত পাষাণ cover provenance row (that title is already live).
+- [ ] **Monday review page:** https://theearnalism.com/en/staff/review/ (signed in as account #4). **Pending now: the ক্ষুধিত পাষাণ correction.** The clearance for the corrected text restores "না" twice, as you checked on scan pages ১৭৬ and ১৮২; nothing else changes. Approve it there. Claude then publishes the corrected revision, and readers' places, notes and bookmarks move with it. The cover provenance row for that title was left untouched on purpose.
 - [ ] **Check the new titles while signed in** (optional): open a few of the 13 titles from Explore and try the "Side by side" toggle on ক্ষুধিত পাষাণ. Every title passed the browser check before publishing; anonymous visitors see the free preview and are asked to sign in for the rest.
 - Standing instruction (25 Nov): publish every title that is ready (clearance and cover approved, browser acceptance passed, deployed). Each title you approve on the Monday page follows.
 

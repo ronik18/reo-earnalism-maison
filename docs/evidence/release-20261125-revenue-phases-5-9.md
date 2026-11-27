@@ -119,3 +119,10 @@
 - **Deploy:** `dep-dc4g6es9v7es73es5440` is live. No migrations.
 - **Live measurement** (Chromium, CDP encodedDataLength, first load of `/en/`): mobile 390×844 is 1,004 KB (was about 3.8 MB) and loads `hero-480.avif`; desktop 1440×900 is 1,122 KB and loads `hero-640.avif`. No console errors and no horizontal overflow.
 - **Still waiting on the owner:** gold button colours (W4), the site icon and share card (W6, previews sent), and the বিচারক narration listening review.
+
+## #76 deploy (27 Nov 2026): ক্ষুধিত পাষাণ correction prepared, reader-state remap on revise
+
+- **Merge:** ronik18/reo-earnalism-maison#76, squash commit `f4c28dd`, merged after CI passed on head `c62642b`.
+- **Deploy:** `dep-dc4k8mlg1s2s73eomkhg` is live. No migrations, no static change, so the static release stays the same.
+- **Render job** `job-dc4kb2vf3r2c73bn18vg` (`queue_intake_packets --slug kshudhita-pashan`) succeeded at 08:56Z. The draft clearance for the corrected text (two scan-verified insertions of " না") is pending on the Monday page. Nothing is approved, revised or published.
+- **After the owner approves it:** run `publish_cleared_editions revise`, then the browser acceptance check, then `evidence` and `publish`. Reader positions, notes, highlights and bookmarks move to the corrected revision in the same transaction.
