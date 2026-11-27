@@ -1323,25 +1323,67 @@ class SfxCellTests(unittest.TestCase):
         self.assertEqual(got["basis"], {"rule": "author-release", "categories": ["PD-self", "Self-published work"]})
         self.assertEqual(pick([cc0], "crow", "crows")[0]["basis"], {"rule": "cc0", "categories": []})
 
-    def test_the_stage_asks_for_categories_in_the_same_imageinfo_query(self):
+    def stage(self, cat_response, titles=("File:Crow self.ogg",)):
+        """Run the stage against a fake Commons: search, one imageinfo query, then one categories query per
+        public-domain candidate title (cat_response(url) answers those)."""
         urls = []
         out = self.root / "out"
-        out.mkdir()
+        out.mkdir(exist_ok=True)
 
         def opener(url):
             urls.append(url)
             if "list=search" in url:
-                return {"query": {"search": [{"title": "File:Crow self.ogg"}]}}
-            return {"query": {"pages": {"1": self.meta("File:Crow self.ogg", "Public domain",
-                                                       cats=["PD-self", "Self-published work"])}}}
+                return {"query": {"search": [{"title": t} for t in titles]}}
+            if "prop=categories" in url:
+                return cat_response(url)
+            return {"query": {"pages": {str(i): self.meta(t, "Public domain") for i, t in enumerate(titles)}}}
         ns = self.ns(OUT_DIR=out, JOB={"sfx": {"crows": "crows"}}, _sfx_open=opener,
                      _sfx_fetch=lambda url: b"x", _sfx_sleep=lambda s: None)
         ns["run_sfx_stage"]()
-        self.assertEqual(len(urls), 2)                         # one search, one imageinfo+categories query
-        self.assertIn("prop=imageinfo%7Ccategories", urls[1])
-        self.assertIn("cllimit=max", urls[1])
+        return urls, out
+
+    @staticmethod
+    def cats(*names, cont=False):
+        data = {"query": {"pages": {"7": {"title": "File:Crow self.ogg",
+                                          "categories": [{"ns": 14, "title": "Category:" + n} for n in names]}}}}
+        if cont:
+            data["continue"] = {"clcontinue": "7|Some_category", "continue": "||"}
+        return data
+
+    def test_categories_are_queried_one_title_at_a_time(self):
+        urls, out = self.stage(lambda url: self.cats("PD-self", "Self-published work"),
+                               titles=("File:Crow self.ogg", "File:Crow other.ogg"))
+        cat_urls = [u for u in urls if "prop=categories" in u]
+        self.assertEqual(len(cat_urls), 2)                       # one request per candidate title
+        self.assertTrue(all("cllimit=max" in u for u in cat_urls))
+        self.assertTrue(all("%7C" not in u.split("titles=")[1].split("&")[0] for u in cat_urls))  # one title each
+        self.assertNotIn("categories", urls[1])                   # the imageinfo query no longer carries them
         lic = json.loads((out / "sfx-licences.json").read_text())
         self.assertEqual(lic["sfx-crows-1.ogg"]["basis"]["rule"], "author-release")
+
+    def test_a_complete_single_title_category_list_with_pd_self_is_kept(self):
+        urls, out = self.stage(lambda url: self.cats("PD-self", "Self-published work"))
+        self.assertEqual(sorted(p.name for p in out.iterdir()), ["sfx-crows-1.ogg", "sfx-licences.json"])
+
+    def test_a_category_list_with_a_continuation_is_refused_as_incomplete(self):
+        # PD-self shows, but the PD-US category sits in the dropped continuation
+        urls, out = self.stage(lambda url: self.cats("PD-self", "Self-published work", cont=True))
+        self.assertEqual([p.name for p in out.iterdir()], ["sfx-licences.json"])
+        self.assertEqual(json.loads((out / "sfx-licences.json").read_text()), {})
+
+    def test_category_lookup_failure_or_budget_use_refuses_the_file(self):
+        urls, out = self.stage(lambda url: {"error": {"code": "maxlag"}})
+        self.assertEqual([p.name for p in out.iterdir()], ["sfx-licences.json"])
+        pick = self.ns()["sfx_pick"]
+        page = self.meta("File:Crow self.ogg", "Public domain")
+        self.assertEqual(pick([page], "crow", "crows", fetch_categories=lambda t: (None, False)), [])
+        self.assertEqual(pick([page], "crow", "crows", fetch_categories=lambda t: (["Category:PD-self"], True)), [])
+        got = pick([page], "crow", "crows", fetch_categories=lambda t: (["Category:PD-self"], False))
+        self.assertEqual(got[0]["basis"]["rule"], "author-release")
+        cc0 = self.meta("File:Crow cc0.ogg", "CC0")
+        called = []
+        self.assertEqual(len(pick([cc0], "crow", "crows", fetch_categories=lambda t: called.append(t))), 1)
+        self.assertEqual(called, [])                              # CC0 needs no category request
 
     def test_api_error_response_does_not_raise_and_retries_three_times(self):
         calls = []

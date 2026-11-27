@@ -66,7 +66,7 @@ def _sfx_cat(title):
     return (t.split(":", 1)[1] if t.lower().startswith("category:") else t).strip()
 
 
-def sfx_basis(licence, code, categories):
+def sfx_basis(licence, code, categories, incomplete=False):
     """(basis, why): why a file's rights are acceptable, or None. (a) CC0 by LicenseShortName/License; or (b)
     public domain by the author's own release: a public-domain licence plus a PD-self / author-release category
     and no category naming a country-limited or age/term-based basis. Commons reports PD-USGov-NASA, PD-old and
@@ -77,6 +77,8 @@ def sfx_basis(licence, code, categories):
         return {"rule": "cc0", "categories": [_sfx_cat(c) for c in categories or []]}, None
     if not (_SFX_PD.fullmatch(lic) and code in ("", "pd")):
         return None, "licence %r is not CC0 or public domain" % lic
+    if incomplete:
+        return None, "categories incomplete"   # the list was cut (continue.clcontinue): a PD-US one may be missing
     if categories is None:
         return None, "its categories were not returned, so the public-domain basis is unknown"
     names = [_sfx_cat(c) for c in categories]
@@ -148,7 +150,21 @@ def sfx_search_pages(data):
     return list(pages.values()) if isinstance(pages, dict) else []
 
 
-def sfx_pick(pages, query, name, limit=SFX_PER_NAME):
+def sfx_page_categories(title, budget_ok=lambda: True):
+    """(category titles | None, incomplete) of ONE file, from its own prop=categories query (cllimit=max). A
+    response that still carries continue.clcontinue is incomplete: a PD-US category may sit in the part that was
+    cut, so the caller refuses the file. A failed query (or an used-up budget) gives (None, False): unknown."""
+    if not budget_ok():
+        return None, False
+    data = sfx_api({"action": "query", "prop": "categories", "titles": title, "cllimit": "max"})
+    pages = sfx_search_pages(data)
+    if not pages:
+        return None, False
+    incomplete = bool(isinstance((data or {}).get("continue"), dict) and "clcontinue" in data["continue"])
+    return [c.get("title", "") for c in pages[0].get("categories") or []], incomplete
+
+
+def sfx_pick(pages, query, name, limit=SFX_PER_NAME, fetch_categories=None):
     """Metadata filter: [{file, url, title, page, licence, author}] for the pages that are CC0/PD, relevant,
     a sound by URL path, and not too large; at most `limit`, named sfx-<name>-<n>.<ext>."""
     kept = []
@@ -161,7 +177,13 @@ def sfx_pick(pages, query, name, limit=SFX_PER_NAME):
         if not url or not sfx_licence_ok(licence) or not sfx_relevant(title, query):
             continue
         cats = p.get("categories")
-        basis, _why = sfx_basis(licence, code, [c.get("title", "") for c in cats] if isinstance(cats, list) else None)
+        incomplete = bool(p.get("categories_incomplete"))
+        cc0 = _SFX_CC0.fullmatch(str(licence).strip()) or str(code).strip().lower() in ("cc0", "cc-0", "cc0-1.0")
+        if cats is None and not cc0 and fetch_categories is not None:   # one request for this title alone
+            got, incomplete = fetch_categories(title)
+            cats = None if got is None else [{"title": c} for c in got]
+        basis, _why = sfx_basis(licence, code, [c.get("title", "") for c in cats] if isinstance(cats, list) else None,
+                                incomplete)
         if basis is None:
             continue
         if (info.get("size") or 0) > SFX_MAX_BYTES:
@@ -194,11 +216,11 @@ def run_sfx_stage():
                 if not titles:
                     print("sfx", name, "no results")
                     continue
-                info = sfx_api({"action": "query", "prop": "imageinfo|categories", "titles": "|".join(titles),
-                                "iiprop": "url|size|extmetadata|mime",
-                                "cllimit": "max"})
+                info = sfx_api({"action": "query", "prop": "imageinfo", "titles": "|".join(titles),
+                                "iiprop": "url|size|extmetadata|mime"})
                 kept = 0
-                for item in sfx_pick(sfx_search_pages(info), query, name):
+                for item in sfx_pick(sfx_search_pages(info), query, name, fetch_categories=lambda t: sfx_page_categories(
+                        t, lambda: time.time() - started <= SFX_BUDGET_S)):
                     if time.time() - started > SFX_BUDGET_S:
                         break
                     try:

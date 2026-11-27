@@ -230,8 +230,8 @@ The builder refuses a stills prompt whose house-style-first text is over 180 on 
 A film_clips spec with `"sfx": {"crows": "crows cawing morning", ...}` adds a cell before the Wan clips that
 searches Wikimedia Commons (no key), keeps up to two files per name whose title holds a search word as a whole
 word and whose rights are clear: CC0, or public domain by the author's own release (a PD-self / "Public domain
-due to author's release" / "Self-published work" category, read with `prop=categories` in the same query, hidden
-categories included). Commons reports PD-USGov and PD-old files as "Public domain" too, so a file with any
+due to author's release" / "Self-published work" category, read with one `prop=categories` query per candidate title, hidden
+categories included; a list cut by `continue.clcontinue` is refused as "categories incomplete"). Commons reports PD-USGov and PD-old files as "Public domain" too, so a file with any
 country-limited or age-based category (PD-US*, PD-USGov*, PD-old*, PD-Art*, *-exempt, "Works of the United
 States government") or no clear basis is refused. The basis is recorded per file in `sfx-licences.json`
 (title, page, licence, author, basis). Writes `sfx-<name>-<n>.<ext>` and `sfx-licences.json`.
