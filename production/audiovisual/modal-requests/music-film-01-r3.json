@@ -1,11 +1,35 @@
 {
   "colab_units": 0.0,
+  "error": "ImportError: TorchCodec is required for save_with_torchcodec. Please install torchcodec to use this function.",
+  "files": [
+    {
+      "bytes": 1837,
+      "path": "inputs.zip",
+      "sha256": "bfc00f89fbf9db0623ef5a408167444c95a8b7514b6607de6050f8b58d5e6be8"
+    },
+    {
+      "bytes": 938,
+      "path": "sessions.jsonl",
+      "sha256": "7375d89b1855db69865bb54432e89f75d6ec574686fb336a04becafad45bf37a"
+    }
+  ],
+  "finished_at": "2026-11-27T06:26:27+00:00",
   "job_id": "music-film-01-r3",
+  "modal_contacted_at": "2026-11-27T06:19:19+00:00",
   "pending_run_id": "music-film-01-r3#2",
   "r2_prefix": "gpu-jobs/bicharak/music-film-01-r3/run-2/",
   "requested_at": "2026-11-27T06:18:41+00:00",
+  "run": {
+    "error": "ImportError: TorchCodec is required for save_with_torchcodec. Please install torchcodec to use this function.",
+    "run_id": "music-film-01-r3#2",
+    "seconds": 423.30443675900005,
+    "status": "failed",
+    "usd": 0.11746698120062252
+  },
   "schema": "earnalism.modal-request.v1",
-  "status": "running",
+  "seconds": 423.30443675900005,
+  "status": "failed",
   "title_root": "production/audiovisual/bicharak",
+  "usd": 0.11746698120062252,
   "worst_case_usd": 0.785602
 }

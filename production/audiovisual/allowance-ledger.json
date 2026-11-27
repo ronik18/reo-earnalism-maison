@@ -601,6 +601,14 @@
         "status": "failed"
       },
       {
+        "run_id": "stills-film-01-r4-c1of2#2",
+        "job_id": "stills-film-01-r4-c1of2",
+        "usd": 2.6192149999999996,
+        "seconds": 0.0,
+        "at": "2026-11-27T06:23:50+00:00",
+        "status": "pending"
+      },
+      {
         "run_id": "music-film-01-r3#1",
         "job_id": "music-film-01-r3",
         "usd": 0.050882180194747495,
@@ -611,18 +619,10 @@
       {
         "run_id": "music-film-01-r3#2",
         "job_id": "music-film-01-r3",
-        "usd": 0.7856025,
-        "seconds": 0.0,
+        "usd": 0.11746698120062252,
+        "seconds": 423.30443675900005,
         "at": "2026-11-27T06:18:41+00:00",
-        "status": "pending"
-      },
-      {
-        "run_id": "stills-film-01-r4-c1of2#2",
-        "job_id": "stills-film-01-r4-c1of2",
-        "usd": 2.6192149999999996,
-        "seconds": 0.0,
-        "at": "2026-11-27T06:23:50+00:00",
-        "status": "pending"
+        "status": "failed"
       }
     ]
   }
