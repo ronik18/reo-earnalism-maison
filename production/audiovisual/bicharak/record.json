@@ -36477,6 +36477,18 @@
       },
       "result": "exchange_uploaded",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-27T09:22:23.679442+00:00",
+      "detail": {
+        "expires_at": "2026-11-28T09:21:26.859819+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-pilot5-f01s014/inputs.zip",
+        "inputs_sha256": "1f4f492b4731c988bff34a7e54141fb4e0678d17008db91f903166d0a0078b86",
+        "job_id": "stills-pilot5-f01s014",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-pilot5-f01s014/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
