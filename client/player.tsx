@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { mountIsland, closePlayer } from "./lifecycle";
 import { api, ApiError, errorText, readBootstrap, session, t } from "./api";
 import { IconButton } from "./icon-button";
+import { currentHighlight, PLAYBACK_EVENT, PLAYBACK_REQUEST_EVENT, type FollowMap, type PlaybackDetail } from "./sentences";
 import { mediaMetadataFor, recallSpeed, rememberSpeed, activeMarkerIndex, afterPartEnds, clockLabel, placeTitle, positionLabel, seekTarget, sleepTick, validReturnPath, withRendition } from "./state";
 interface Rendition {
   asset_id: string;
@@ -528,6 +529,45 @@ function Player({ boot }: { boot: Boot }) {
       setStatus(errorText(e));
     } finally { setBusy(false); }
   }
+  /** Tell the reader (and anyone else listening) where the narration is. Not announced for the short preview. */
+  function announce(closed = false) {
+    if (boot.preview) return;
+    const el = audio.current;
+    const unit = unitAt(activeChapter.current);
+    if (!closed && (!el || !unit)) return;
+    const detail: PlaybackDetail = {
+      edition_id: boot.edition_id,
+      unit_id: unit?.unit_id || "",
+      asset_id: unit?.asset_id || "",
+      ms: Math.max(0, Math.round((el?.currentTime || 0) * 1000)),
+      playing: !!el && !el.paused && !el.ended,
+      closed,
+    };
+    window.dispatchEvent(new CustomEvent<PlaybackDetail>(PLAYBACK_EVENT, { detail }));
+  }
+  const announcer = useRef(announce);
+  announcer.current = announce;
+  useEffect(() => {
+    const again = () => announcer.current();
+    window.addEventListener(PLAYBACK_REQUEST_EVENT, again);
+    return () => {
+      window.removeEventListener(PLAYBACK_REQUEST_EVENT, again);
+      announcer.current(true);
+    };
+  }, []);
+  const [timings, setTimings] = useState<{ unit_id: string; maps: (FollowMap & { asset_id: string })[] }>();
+  useEffect(() => {
+    if (boot.preview || boot.authenticated === false || boot.reader_available === false || !chapter) return;
+    let cancelled = false;
+    setTimings(undefined);
+    api<{ maps: (FollowMap & { asset_id: string })[] }>(`/content/mappings/${boot.edition_revision_id}?unit_id=${chapter.unit_id}`)
+      .then((r) => { if (!cancelled) setTimings({ unit_id: chapter.unit_id, maps: r.maps }); })
+      .catch(() => {}); // no timing, no Follow in text link
+    return () => { cancelled = true; };
+  }, [chapter?.unit_id]);
+  const followAt = timings?.unit_id === chapter?.unit_id
+    ? currentHighlight(timings!.maps.filter((m) => m.asset_id === chapter.asset_id), null, position * 1000)
+    : undefined;
   const playingMarker = activeMarkerIndex(chapter?.markers, position * 1000);
   if (!chapter) return <p className="notice">{t("not_available")}</p>;
   return (
@@ -559,13 +599,15 @@ function Player({ boot }: { boot: Boot }) {
         controls
         preload="metadata"
         aria-label={chapter.title}
-        onPlay={() => { setPlaying(true); if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing"; }}
+        onSeeked={() => announce()}
+        onPlay={() => { announce(); setPlaying(true); if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing"; }}
         onRateChange={syncPositionState}
         onLoadedMetadata={syncPositionState}
         onWaiting={() => setBuffering(true)}
         onCanPlay={() => setBuffering(false)}
         onPlaying={() => setBuffering(false)}
         onPause={() => {
+          announce();
           setPlaying(false);
           if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
           void persist().catch((e) => setStatus(errorText(e)));
@@ -578,6 +620,7 @@ function Player({ boot }: { boot: Boot }) {
           const el = audio.current;
           if (el) {
             setPosition(el.currentTime);
+            announce();
             syncPositionState();
             if (boot.preview && el.currentTime * 1000 >= boot.preview.duration_ms) {
               el.pause();
@@ -668,7 +711,12 @@ function Player({ boot }: { boot: Boot }) {
         </button>
         <a href={validReturnPath(boot.reader_url + chapter.unit_id + "/")}>
           {t("read_from_chapter")}
-        </a></> : null}
+        </a>
+        {followAt?.anchorId ? (
+          <a href={validReturnPath(`${boot.reader_url}${chapter.unit_id}/?anchor=${encodeURIComponent(followAt.anchorId)}&offset=${followAt.range?.[0] ?? 0}`)}>
+            {t("follow_in_text")}
+          </a>
+        ) : null}</> : null}
       </div>
       <FormatSwitch open={switchOpen} onClose={() => setSwitchOpen(false)} busy={busy} status={status} onExact={() => void switchToRead()} chapterUrl={boot.reader_url + chapter.unit_id + "/"} target="reader" />
       {boot.preview ? <><button onClick={() => setBoundaryOpen(true)}>{t("preview_end_options")}</button><PreviewBoundary editionId={boot.edition_id} format="audio" freeAccess={boot.free_access === true} authenticated={boot.authenticated === true} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.assign(validReturnPath(boot.full_player_url || location.pathname + location.search))} /></> : null}

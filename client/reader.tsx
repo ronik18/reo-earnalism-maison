@@ -10,6 +10,15 @@ import {
   type FormEvent,
 } from "react";
 import { mountIsland } from "./lifecycle";
+import { clearFollow, drawFollow } from "./follow-dom";
+import {
+  autoscrollAllowed,
+  currentHighlight,
+  PLAYBACK_EVENT,
+  PLAYBACK_REQUEST_EVENT,
+  type FollowMap,
+  type PlaybackDetail,
+} from "./sentences";
 import {
   api,
   ApiError,
@@ -529,6 +538,64 @@ function Reader({ boot }: { boot: Boot }) {
       p.node.replaceChildren(fragment);
     });
   }, [notes]);
+  /** Follow-along: the sentence (or paragraph) the persistent player is narrating, drawn without changing the text. */
+  const [follow, setFollow] = useState<{ anchor: string; range: [number, number] | null; playing: boolean }>();
+  const followNow = useRef(follow);
+  const followMaps = useRef<FollowMap[]>([]);
+  const lastUserScroll = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (!fullReader || !boot.player_url) return;
+    let cancelled = false;
+    const heard = (event: Event) => {
+      const d = (event as CustomEvent<PlaybackDetail | undefined>).detail;
+      if (!d || d.closed || d.edition_id !== boot.edition_id || d.unit_id !== boot.unit_id) {
+        followNow.current = undefined;
+        setFollow(undefined);
+        return;
+      }
+      const maps = followMaps.current.filter((m) => m.asset_id === d.asset_id);
+      const before = followNow.current;
+      const now = currentHighlight(maps, before?.anchor ?? null, d.ms);
+      if (!now.anchorId) return; // before the first segment or in a silent gap: keep what is shown
+      if (before && before.anchor === now.anchorId && before.playing === d.playing && before.range?.[0] === now.range?.[0] && before.range?.[1] === now.range?.[1]) return;
+      followNow.current = { anchor: now.anchorId, range: now.range, playing: d.playing };
+      setFollow(followNow.current);
+    };
+    const byHand = (event: Event) => {
+      if (event.type === "keydown" && !["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes((event as KeyboardEvent).key)) return;
+      lastUserScroll.current = Date.now();
+    };
+    window.addEventListener(PLAYBACK_EVENT, heard);
+    for (const type of ["wheel", "touchmove", "keydown"]) window.addEventListener(type, byHand, { passive: true });
+    api<{ maps: FollowMap[] }>(`/content/mappings/${boot.edition_revision_id}?unit_id=${boot.unit_id}`)
+      .then((r) => {
+        if (cancelled) return;
+        followMaps.current = r.maps;
+        window.dispatchEvent(new Event(PLAYBACK_REQUEST_EVENT));
+      })
+      .catch(() => {}); // no timing: the reader simply does not follow
+    return () => {
+      cancelled = true;
+      window.removeEventListener(PLAYBACK_EVENT, heard);
+      for (const type of ["wheel", "touchmove", "keydown"]) window.removeEventListener(type, byHand);
+      clearFollow(reading);
+    };
+  }, []);
+  useEffect(() => {
+    if (!follow) return clearFollow(reading);
+    const p = paragraphs.current.find((item) => item.anchor === follow.anchor);
+    if (!p) return;
+    const rect = drawFollow(p.node, follow.range);
+    if (!follow.playing || !rect || !autoscrollAllowed(Date.now(), lastUserScroll.current)) return;
+    const box = rect();
+    if (preferences.reader_layout === "paginated") {
+      const page = reading.clientWidth + 50;
+      const left = Math.floor((box.left - reading.getBoundingClientRect().left + reading.scrollLeft) / page) * page;
+      if (Math.abs(left - reading.scrollLeft) > 1) reading.scrollTo({ left, behavior: "instant" });
+    } else if (box.top < 0 || box.bottom > window.innerHeight) {
+      window.scrollBy({ top: box.top - window.innerHeight * 0.3, behavior: "instant" });
+    }
+  }, [follow, notes]);
   function selectParagraph(anchor: string) {
     const p =
       paragraphs.current.find((p) => p.anchor === anchor) ||

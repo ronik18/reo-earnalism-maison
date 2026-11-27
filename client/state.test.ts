@@ -16,6 +16,8 @@ import {
   measuredSeek,
   validReturnPath,
 } from "./state.ts";
+import { readFileSync } from "node:fs";
+import { splitSentences, currentHighlight, autoscrollAllowed, highlightSpan, utf16Index, type FollowMap } from "./sentences.ts";
 test("Unicode selection offsets use code points, including Bengali and astral characters", () => {
   assert.equal(codePointOffset("আ🌸লো", 3), 2);
   assert.equal(codePointOffset("A🌸B", 3), 2);
@@ -613,4 +615,50 @@ test("active marker and place titles", () => {
   assert.equal(placeTitle({ title: "Part" }, 61000), "Part");
   assert.equal(placeTitle(undefined, 5), "");
   assert.equal(positionLabel(placeTitle({ title: "Part", markers }, 61000), 61000), "Two, 01:01");
+});
+
+const sentenceMap = (anchor: string): FollowMap => ({
+  asset_id: "a",
+  segments: [
+    { anchor_id: anchor, start_ms: 0, end_ms: 1000, start_offset_chars: 0, end_offset_chars: 17, sentence_index: 0 },
+    { anchor_id: anchor, start_ms: 1000, end_ms: 2500, start_offset_chars: 17, end_offset_chars: 35, sentence_index: 1 },
+    { anchor_id: "unmeasured", start_ms: 2500, end_ms: 4000, start_offset_chars: 0, end_offset_chars: 60 },
+  ],
+});
+test("test_split_matches_golden: client sentence offsets equal the shared Python golden", () => {
+  const golden = JSON.parse(readFileSync("contracts/sentence-split-golden.json", "utf8"));
+  assert.ok(golden.cases.length >= 12);
+  for (const c of golden.cases) {
+    assert.deepEqual(splitSentences(c.text), c.offsets, c.name);
+    // the golden is BMP-only, so UTF-16 indices and Python code points coincide
+    assert.ok(![...c.text].some((ch: string) => ch.codePointAt(0)! > 0xffff), c.name);
+    const spans = splitSentences(c.text);
+    assert.deepEqual(spans.map(([a, b]) => c.text.slice(a, b).split(/\s+/).filter(Boolean).join(" ")), c.sentences, c.name);
+  }
+});
+test("code-point offsets from the API become UTF-16 indices for text with astral characters", () => {
+  assert.equal(utf16Index("A🌸B", 2), 3);
+  assert.equal(utf16Index("আমি", 2), 2);
+  assert.deepEqual(highlightSpan("A🌸B. C", [2, 4]), [3, 5]);
+  assert.deepEqual(highlightSpan("abc", null), [0, 3]);
+  assert.deepEqual(highlightSpan("abc", [2, 2]), [0, 3]);
+});
+test("test_highlight_sentence_at_time", () => {
+  const maps = [sentenceMap("p1")];
+  assert.deepEqual(currentHighlight(maps, null, 0), { anchorId: "p1", range: [0, 17] });
+  assert.deepEqual(currentHighlight(maps, null, 999), { anchorId: "p1", range: [0, 17] });
+  assert.deepEqual(currentHighlight(maps, "p1", 1000), { anchorId: "p1", range: [17, 35] });
+  assert.deepEqual(currentHighlight(maps, null, 4000), { anchorId: null, range: null });
+});
+test("test_unmeasured_anchor_falls_back_to_paragraph", () => {
+  const maps = [sentenceMap("p1")];
+  assert.deepEqual(currentHighlight(maps, "p1", 3000), { anchorId: "unmeasured", range: null });
+  const paragraphOnly: FollowMap = { segments: [{ anchor_id: "p9", start_ms: 0, end_ms: 500, start_offset_chars: 0, end_offset_chars: 40 }] };
+  assert.deepEqual(currentHighlight([paragraphOnly], null, 100), { anchorId: "p9", range: null });
+});
+test("test_no_autoscroll_within_5s_of_user_scroll", () => {
+  assert.equal(autoscrollAllowed(10_000, undefined), true);
+  assert.equal(autoscrollAllowed(10_000, 6_000), false);
+  assert.equal(autoscrollAllowed(10_000, 5_001), false);
+  assert.equal(autoscrollAllowed(10_000, 5_000), true);
 });

@@ -474,3 +474,6 @@ STRINGS.update({
     "position_device": ("On this device", "On this device"),
     "position_unavailable": ("Unavailable", "Unavailable"),
 })
+STRINGS.update({
+    "follow_in_text": ("Follow in text", "Follow in text"),
+})
