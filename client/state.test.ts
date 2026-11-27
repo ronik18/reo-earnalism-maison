@@ -4,8 +4,12 @@ import {
   codePointOffset,
   samePosition,
   pageCount,
-  sleepDeadline,
-  timerExpired,
+  sleepRemaining,
+  fadeGain,
+  FADE_MS,
+  afterPartEnds,
+  clockLabel,
+  positionLabel,
   measuredSeek,
   validReturnPath,
 } from "./state.ts";
@@ -27,12 +31,39 @@ test("Pagination tolerates an unmeasured viewport and includes the last column",
   assert.equal(pageCount(0, 0), 1);
   assert.equal(pageCount(1250, 600), 2);
 });
-test("Sleep uses an elapsed monotonic deadline, not wall-clock changes", () => {
-  const d = sleepDeadline(5, 100);
-  assert.equal(d, 300100);
-  assert.equal(timerExpired(d, 300099), false);
-  assert.equal(timerExpired(d, 300100), true);
-  assert.equal(sleepDeadline(0, 100), undefined);
+test("test_sleep_counts_playback_time_not_wall_time", () => {
+  // 5 minute timer set after 100 s of listening; only listening time moves the clock.
+  assert.equal(sleepRemaining(100000, 100000, 300000), 300000);
+  assert.equal(sleepRemaining(100000 + 60000, 100000, 300000), 240000);
+  assert.equal(sleepRemaining(100000 + 300000, 100000, 300000), 0);
+  assert.equal(sleepRemaining(100000 + 400000, 100000, 300000), 0);
+  assert.equal(sleepRemaining(50000, 100000, 300000), 300000);
+  assert.equal(sleepRemaining(0, 0, Number.NaN), Infinity);
+});
+test("test_fade_is_15s_linear", () => {
+  assert.equal(FADE_MS, 15000);
+  assert.equal(fadeGain(60000), 1);
+  assert.equal(fadeGain(15000), 1);
+  assert.equal(fadeGain(7500), 0.5);
+  assert.equal(fadeGain(3750), 0.25);
+  assert.equal(fadeGain(0), 0);
+  assert.equal(fadeGain(-5), 0);
+  assert.equal(fadeGain(Infinity), 1);
+});
+test("test_end_of_part_on_last_part_stops", () => {
+  assert.equal(afterPartEnds(2, 3, true), "stop");
+  assert.equal(afterPartEnds(2, 3, false), "stop");
+  assert.equal(afterPartEnds(0, 3, true), "stop");
+  assert.equal(afterPartEnds(0, 3, false), "advance");
+  assert.equal(afterPartEnds(0, 1, false), "stop");
+});
+test("test_conflict_prompt_shows_both_positions", () => {
+  assert.equal(clockLabel(0), "00:00");
+  assert.equal(clockLabel(65432), "01:05");
+  assert.equal(clockLabel(3725000), "62:05");
+  assert.equal(clockLabel(-4), "00:00");
+  assert.equal(positionLabel("Chapter Two", 125000), "Chapter Two, 02:05");
+  assert.equal(positionLabel("", 5000), "00:05");
 });
 test("Exact format switching rejects overlapping or out-of-bounds maps", () => {
   const rows = [

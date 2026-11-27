@@ -24,19 +24,31 @@ export function pageCount(
     ? Math.max(1, Math.ceil((scrollWidth + gap) / (width + gap)))
     : 1;
 }
-export function sleepDeadline(
-  minutes: number,
-  now: number,
-): number | undefined {
-  return Number.isFinite(minutes) && minutes > 0
-    ? now + minutes * 60000
-    : undefined;
+/** The sleep timer's fade-out length. */
+export const FADE_MS = 15000;
+/** Listening time left on a timer set after `setAtPlayedMs` of playback; only time spent playing moves it. */
+export function sleepRemaining(playedMs: number, setAtPlayedMs: number, durationMs: number): number {
+  if (!Number.isFinite(durationMs)) return Infinity;
+  return Math.max(0, durationMs - Math.max(0, playedMs - setAtPlayedMs));
 }
-export function timerExpired(
-  deadline: number | undefined,
-  now: number,
-): boolean {
-  return deadline !== undefined && now >= deadline;
+/** Volume multiplier: 1 until the last 15 s, then a straight ramp down to 0. */
+export function fadeGain(remainingMs: number): number {
+  if (Number.isNaN(remainingMs)) return 1;
+  return Math.min(1, Math.max(0, remainingMs / FADE_MS));
+}
+/** What playback does when a part ends: "end of part" and the last part both stop; nothing jumps to another title. */
+export function afterPartEnds(index: number, count: number, endOfPart: boolean): "stop" | "advance" {
+  return !endOfPart && index + 1 < count ? "advance" : "stop";
+}
+/** mm:ss for a position in milliseconds (minutes grow past 59 rather than wrapping). */
+export function clockLabel(ms: number): string {
+  const total = Number.isFinite(ms) ? Math.max(0, Math.floor(ms / 1000)) : 0;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(Math.floor(total / 60))}:${pad(total % 60)}`;
+}
+/** "Chapter title, mm:ss" (just the time when the title is unknown). */
+export function positionLabel(title: string, ms: number): string {
+  return title ? `${title}, ${clockLabel(ms)}` : clockLabel(ms);
 }
 export interface TimingSegment {
   unit_id: string;

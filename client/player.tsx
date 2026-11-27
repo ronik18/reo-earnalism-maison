@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { mountIsland, closePlayer } from "./lifecycle";
 import { api, ApiError, errorText, readBootstrap, session, t } from "./api";
 import { IconButton } from "./icon-button";
-import { mediaMetadataFor, recallSpeed, rememberSpeed, seekTarget, sleepDeadline, timerExpired, validReturnPath, withRendition } from "./state";
+import { mediaMetadataFor, recallSpeed, rememberSpeed, afterPartEnds, clockLabel, fadeGain, positionLabel, seekTarget, sleepRemaining, validReturnPath, withRendition } from "./state";
 interface Rendition {
   asset_id: string;
   quality_kbps: number;
@@ -77,14 +77,19 @@ function Player({ boot }: { boot: Boot }) {
   const pending = useRef<
     { key: string; version: number; body: unknown } | undefined
   >(undefined);
-  const deadline = useRef<number | undefined>(undefined);
-  const endChapter = useRef(false);
+  /** Sleep timer: listening time played so far, and the timer's start and length in that time. */
+  const played = useRef(0);
+  const sleepTimer = useRef<{ setAt: number; ms: number } | undefined>(undefined);
+  const endPart = useRef(false);
+  /** The element's own volume while a fade is dimming it, so it can be put back. */
+  const fadeBase = useRef<number | undefined>(undefined);
   const lastSaved = useRef(0);
   const renewal = useRef(false);
   const activeChapter = useRef(0);
   const saving = useRef(false);
   const conflictRef = useRef(false);
   const [conflict, setConflict] = useState(false);
+  const [positions, setPositions] = useState<{ server?: string; device: string }>();
   const [, setOverrides] = useState<Record<string, Rendition>>({});
   const overridesRef = useRef<Record<string, Rendition>>({});
   const actions = useRef({ previous: () => {}, next: () => {} });
@@ -100,6 +105,42 @@ function Player({ boot }: { boot: Boot }) {
   const loadGeneration = useRef(0);
   const previewEnded = useRef(false);
   const previewRenewed = useRef(false);
+  /** Dim the audio to `gain` of the listener's volume; 1 puts the listener's volume back. */
+  function applyFade(gain: number) {
+    const el = audio.current;
+    if (!el) return;
+    if (gain >= 1) {
+      if (fadeBase.current !== undefined) el.volume = fadeBase.current;
+      fadeBase.current = undefined;
+      return;
+    }
+    fadeBase.current ??= el.volume;
+    el.volume = fadeBase.current * gain;
+  }
+  function stopTimer(off = true) {
+    sleepTimer.current = undefined;
+    endPart.current = false;
+    applyFade(1);
+    if (off) setSleep("off");
+  }
+  function chooseTimer(value: string) {
+    applyFade(1);
+    setSleep(value);
+    endPart.current = value === "part";
+    const minutes = Number(value);
+    sleepTimer.current = Number.isFinite(minutes) && minutes > 0 ? { setAt: played.current, ms: minutes * 60000 } : undefined;
+  }
+  /** Name where the server and this device each are, so the listener can choose knowingly. */
+  async function describePositions() {
+    const el = audio.current;
+    const titleOf = (unitId?: string) => boot.chapters.find((c) => c.unit_id === unitId)?.title ?? "";
+    const device = positionLabel(unitAt(activeChapter.current)?.title ?? "", Math.round((el?.currentTime || 0) * 1000));
+    setPositions({ device });
+    try {
+      const latest = await api<Progress>(path);
+      if (latest.location) setPositions({ device, server: positionLabel(titleOf(latest.location.unit_id), latest.location.position_ms) });
+    } catch { /* the prompt still names this device's position */ }
+  }
   async function persist(keepalive = false) {
     const element = audio.current,
       c = unitAt(activeChapter.current);
@@ -141,6 +182,7 @@ function Player({ boot }: { boot: Boot }) {
       if (error instanceof ApiError && error.status === 412) {
         conflictRef.current = true;
         setConflict(true);
+        void describePositions();
       }
       throw error;
     } finally {
@@ -263,18 +305,30 @@ function Player({ boot }: { boot: Boot }) {
         );
       })
       .catch((e) => setStatus(errorText(e)));
+    let lastTick = performance.now();
     const timer = window.setInterval(() => {
       const el = audio.current;
+      const now = performance.now();
+      const elapsed = now - lastTick;
+      lastTick = now;
       if (!el) return;
-      if (timerExpired(deadline.current, performance.now())) {
-        el.pause();
-        deadline.current = undefined;
-        setSleep("off");
-        setStatus(t("sleep_finished"));
+      if (!el.paused && !el.ended) {
+        played.current += elapsed;
+        const unit = unitAt(activeChapter.current);
+        const left = endPart.current
+          ? (unit ? unit.duration_ms : Infinity) - el.currentTime * 1000
+          : sleepTimer.current
+            ? sleepRemaining(played.current, sleepTimer.current.setAt, sleepTimer.current.ms)
+            : Infinity;
+        if (left <= 0 && (endPart.current || sleepTimer.current)) {
+          el.pause();
+          stopTimer();
+          setStatus(t("sleep_finished"));
+        } else applyFade(fadeGain(left));
       }
-      if (!el.paused && performance.now() - lastSaved.current >= 15000)
+      if (!el.paused && now - lastSaved.current >= 15000)
         void persist().catch((e) => setStatus(errorText(e)));
-    }, 1000);
+    }, 250);
     const hidden = () => {
       if (document.hidden) void persist(true).catch(() => {});
     };
@@ -375,6 +429,28 @@ function Player({ boot }: { boot: Boot }) {
       await load(index, Math.round((audio.current?.currentTime || 0) * 1000), playing, target);
     } catch (error) {
       setStatus(errorText(error));
+    }
+  }
+  /** Index of the marker playing now in the current unit (the last one at or before the position). */
+  function activeMarker(markers: { start_ms: number }[]): number {
+    let found = -1;
+    markers.forEach((m, k) => { if (m.start_ms <= position * 1000) found = k; });
+    return found;
+  }
+  /** Play part `i` from `at` ms: a seek inside the current part, otherwise load that part there. */
+  async function openPart(i: number, at: number) {
+    if (busy) return;
+    const el = audio.current;
+    if (i === index && el && el.src) {
+      el.currentTime = seekTarget(0, at / 1000, durationBound());
+      return;
+    }
+    if (boot.preview) previewRenewed.current = false;
+    try {
+      await persist();
+      await load(i, at, playing);
+    } catch (e) {
+      setStatus(errorText(e));
     }
   }
   async function nextChapter(i: number) {
@@ -514,13 +590,11 @@ function Player({ boot }: { boot: Boot }) {
           if (boot.preview) { if (!previewEnded.current) { previewEnded.current = true; setBoundaryOpen(true); } return; }
           void persist()
             .then(() => {
-              if (endChapter.current) {
-                endChapter.current = false;
-                setSleep("off");
+              if (afterPartEnds(index, boot.chapters.length, endPart.current) === "advance") void load(index + 1, 0, true);
+              else if (endPart.current) {
+                stopTimer();
                 setStatus(t("sleep_finished"));
-              } else {
-                if (index + 1 < boot.chapters.length) void load(index + 1, 0, true);
-              }
+              } else applyFade(1);
             })
             .catch((e) => setStatus(errorText(e)));
         }}
@@ -538,6 +612,10 @@ function Player({ boot }: { boot: Boot }) {
       {conflict ? (
         <div className="notice">
           <p>{t("conflict")}</p>
+          <dl className="conflict-positions">
+            {positions?.server ? <><dt>{t("position_saved")}</dt><dd lang={boot.locale}>{positions.server}</dd></> : null}
+            {positions ? <><dt>{t("position_device")}</dt><dd lang={boot.locale}>{positions.device}</dd></> : null}
+          </dl>
           <button disabled={busy} onClick={() => void resolveProgress(false)}>
             {t("use_server")}
           </button>
@@ -574,14 +652,7 @@ function Player({ boot }: { boot: Boot }) {
           {t("sleep_timer")}
           <select
             value={sleep}
-            onChange={(e) => {
-              setSleep(e.target.value);
-              endChapter.current = e.target.value === "chapter";
-              deadline.current = sleepDeadline(
-                Number(e.target.value),
-                performance.now(),
-              );
-            }}
+            onChange={(e) => chooseTimer(e.target.value)}
           >
             <option value="off">{t("off")}</option>
             {[5, 15, 30, 60].map((m) => (
@@ -589,7 +660,7 @@ function Player({ boot }: { boot: Boot }) {
                 {m} {t("minutes")}
               </option>
             ))}
-            <option value="chapter">{t("end_of_chapter")}</option>
+            <option value="part">{t("end_of_part")}</option>
           </select>
         </label>
         {boot.reader_available !== false ? <><button disabled={busy || !!boot.preview} onClick={() => { setStatus(""); setSwitchOpen(true); }}>
@@ -601,16 +672,34 @@ function Player({ boot }: { boot: Boot }) {
       </div>
       <FormatSwitch open={switchOpen} onClose={() => setSwitchOpen(false)} busy={busy} status={status} onExact={() => void switchToRead()} chapterUrl={boot.reader_url + chapter.unit_id + "/"} target="reader" />
       {boot.preview ? <><button onClick={() => setBoundaryOpen(true)}>{t("preview_end_options")}</button><PreviewBoundary editionId={boot.edition_id} format="audio" freeAccess={boot.free_access === true} authenticated={boot.authenticated === true} titleUrl={boot.title_url || `/${document.documentElement.dataset.uiLocale || "en"}/titles/${boot.edition_id}/`} signInUrl={boot.sign_in_url || `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`} passUrl={boot.pass_url || `/${document.documentElement.dataset.uiLocale || "en"}/pass/`} open={boundaryOpen} onClose={() => setBoundaryOpen(false)} onRetry={() => location.assign(validReturnPath(boot.full_player_url || location.pathname + location.search))} /></> : null}
-      <ol className="unit-list" hidden={mini}>
+      <ol className="unit-list parts-list" aria-label={t("parts")} hidden={mini}>
         {boot.chapters.map((c, i) => (
           <li key={c.asset_id}>
             <button
+              lang={boot.locale}
               disabled={busy || (!!boot.preview && i !== 0)}
               aria-current={i === index ? "true" : undefined}
-              onClick={() => void nextChapter(i)}
+              onClick={() => void openPart(i, 0)}
             >
               {c.title}
             </button>
+            {c.markers?.length ? (
+              <ol className="marker-list" aria-label={t("chapters_in_part")}>
+                {c.markers.map((m, k) => (
+                  <li key={k}>
+                    <button
+                      lang={boot.locale}
+                      disabled={busy || (!!boot.preview && (i !== 0 || m.start_ms >= boot.preview.duration_ms))}
+                      aria-current={i === index && k === activeMarker(c.markers!) ? "true" : undefined}
+                      onClick={() => void openPart(i, m.start_ms)}
+                    >
+                      {m.title}
+                      <span className="marker-time">{clockLabel(m.start_ms)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            ) : null}
           </li>
         ))}
       </ol>

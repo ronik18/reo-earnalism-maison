@@ -466,3 +466,10 @@ STRINGS.update({
     'back_15_seconds': ('Back 15 seconds', 'Back 15 seconds'),
     'forward_30_seconds': ('Forward 30 seconds', 'Forward 30 seconds'),
 })
+STRINGS.update({
+    "end_of_part": ("End of part", "End of part"),
+    "parts": ("Parts", "Parts"),
+    "chapters_in_part": ("Chapters in this part", "Chapters in this part"),
+    "position_saved": ("Saved to your account", "Saved to your account"),
+    "position_device": ("On this device", "On this device"),
+})
