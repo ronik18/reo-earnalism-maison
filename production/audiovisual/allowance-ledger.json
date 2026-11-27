@@ -401,8 +401,8 @@
     "job_id": "music-pilot3b-f01s014",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 1.598883333333333,
-    "state": "reserved",
+    "units": 0.29,
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   }

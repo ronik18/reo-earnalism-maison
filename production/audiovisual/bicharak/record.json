@@ -31669,6 +31669,528 @@
       },
       "path": "jobs/music-pilot3b-f01s014/music.ipynb",
       "sha256": "b12e81399a3b8533e292603878b39e84551e6b1b0790a995c31db11ad991d2fe"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-drone-1.wav",
+      "sha256": "5e55f443ee07c735735ea0ca4d7a4fd873ea8b6cd4d741ce221c82de84e9330f"
+    },
+    {
+      "bytes": 1451,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-drone-1_input_params.json",
+      "sha256": "4bab951d40182f33ed27c890c391bd8c91fa950631415839fc398f3d8f5d4c34"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-drone-2.wav",
+      "sha256": "9c7faca57283b658f56acfa3f534288f7fdeab54e47bb351eb5b64ac1bd6f8a5"
+    },
+    {
+      "bytes": 1451,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-drone-2_input_params.json",
+      "sha256": "6730312ece4d1e5d287cc791888cf3fe25c6765f3028ccf62a24dbad9cc061ed"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-esraj-1.wav",
+      "sha256": "fe4b486afe1dc25232979473720cd25eb46cb7b243876c029fe122029a2d0626"
+    },
+    {
+      "bytes": 1544,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-esraj-1_input_params.json",
+      "sha256": "d521162c2b8cec8a6ed9b5e641b305aaa3b4f978c6926c825fcf779e777a2953"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-esraj-2.wav",
+      "sha256": "0a0c69b2fadace4ebb25684b946e279374c54e473c58f8350889d741404e4fe3"
+    },
+    {
+      "bytes": 1544,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-esraj-2_input_params.json",
+      "sha256": "f9ef2df9fe3d5f532c6441504baa9e237d1ca8e5ba8ef6202cd61a58834f7602"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-esraj-3.wav",
+      "sha256": "204d24ebb140e2c63f63eb9dffcd54553715c5195b982c953e2ecdb94318f1ac"
+    },
+    {
+      "bytes": 1544,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-esraj-3_input_params.json",
+      "sha256": "c1350dab289684e92c0bf7427a1e0c10127cf547b91fb8533e397b0af7594edf"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-esraj-4.wav",
+      "sha256": "1851f3440534535549dd6d3672fd4f8ac03083175d1b09241d342b87c956716a"
+    },
+    {
+      "bytes": 1542,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-esraj-4_input_params.json",
+      "sha256": "6f356988b5f84958ac85dfdd9e7b8f2dadec515a2d47280e45838c7903ddd593"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-sunrise-1.wav",
+      "sha256": "3701a91f86bb097582ae8e309c1db53ccd9ff77beadf47c89bc12131bfe3bc94"
+    },
+    {
+      "bytes": 1488,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-sunrise-1_input_params.json",
+      "sha256": "3d304339625a98cf4b0481a936ebc96b9516a09fc341c16f025c7bda0775b7a2"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-sunrise-2.wav",
+      "sha256": "f81835e8b09dd64111f88b31e8e8a7cdd487cf3a07e2672a785fb8a3c336253f"
+    },
+    {
+      "bytes": 1487,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-sunrise-2_input_params.json",
+      "sha256": "e9dfe75fd3d28e05e7732724553918b5a30ec81c35f41632840bb1caa0029e10"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-sunrise-3.wav",
+      "sha256": "79ac103671dcfd3fcf2103af08429f7ea00aaac4808354a3077677eb1f91883d"
+    },
+    {
+      "bytes": 1487,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-pilot3b-f01s014/p3-sunrise-3_input_params.json",
+      "sha256": "f2d3446481818bcc8a0285460d895b460aa9ce73330e9791c92277218beb2c9e"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -35330,6 +35852,86 @@
         "outputs_key": "exports/colab-exchange/bicharak/music-pilot3b-f01s014/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T04:10:39.468138+00:00",
+      "detail": {
+        "actual_units": 0.29,
+        "files": [
+          "music/music-pilot3b-f01s014/p3-drone-1.wav",
+          "music/music-pilot3b-f01s014/p3-drone-1_input_params.json",
+          "music/music-pilot3b-f01s014/p3-drone-2.wav",
+          "music/music-pilot3b-f01s014/p3-drone-2_input_params.json",
+          "music/music-pilot3b-f01s014/p3-esraj-1.wav",
+          "music/music-pilot3b-f01s014/p3-esraj-1_input_params.json",
+          "music/music-pilot3b-f01s014/p3-esraj-2.wav",
+          "music/music-pilot3b-f01s014/p3-esraj-2_input_params.json",
+          "music/music-pilot3b-f01s014/p3-esraj-3.wav",
+          "music/music-pilot3b-f01s014/p3-esraj-3_input_params.json",
+          "music/music-pilot3b-f01s014/p3-esraj-4.wav",
+          "music/music-pilot3b-f01s014/p3-esraj-4_input_params.json",
+          "music/music-pilot3b-f01s014/p3-sunrise-1.wav",
+          "music/music-pilot3b-f01s014/p3-sunrise-1_input_params.json",
+          "music/music-pilot3b-f01s014/p3-sunrise-2.wav",
+          "music/music-pilot3b-f01s014/p3-sunrise-2_input_params.json",
+          "music/music-pilot3b-f01s014/p3-sunrise-3.wav",
+          "music/music-pilot3b-f01s014/p3-sunrise-3_input_params.json"
+        ],
+        "input_zip_sha256": "f43fc06a97cb0a57c83f7b79caf573f102e44e5462f97118e421b1ba58aad96a",
+        "job_id": "music-pilot3b-f01s014",
+        "kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "4.50.0"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-27T04:10:39.504779+00:00",
+      "detail": {
+        "job_id": "music-pilot3b-f01s014",
+        "members": [
+          "manifest.json",
+          "p3-drone-1.wav",
+          "p3-drone-1_input_params.json",
+          "p3-drone-2.wav",
+          "p3-drone-2_input_params.json",
+          "p3-esraj-1.wav",
+          "p3-esraj-1_input_params.json",
+          "p3-esraj-2.wav",
+          "p3-esraj-2_input_params.json",
+          "p3-esraj-3.wav",
+          "p3-esraj-3_input_params.json",
+          "p3-esraj-4.wav",
+          "p3-esraj-4_input_params.json",
+          "p3-sunrise-1.wav",
+          "p3-sunrise-1_input_params.json",
+          "p3-sunrise-2.wav",
+          "p3-sunrise-2_input_params.json",
+          "p3-sunrise-3.wav",
+          "p3-sunrise-3_input_params.json"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/music-pilot3b-f01s014/outputs.tar",
+        "outputs_tar_sha256": "081cf0154418af7494ee59d98ec61ca09f93d8dc3b9c9ec0db3826dda196f9e4"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],
