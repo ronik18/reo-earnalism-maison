@@ -203,8 +203,9 @@ class TimingMap(RevisionContent):
         db_table = 'maison_timing_map'
 
     def clean(self):
-        if self.asset.revision_id != self.revision_id or self.asset.kind != 'audio_chapter':
-            raise ValidationError('Timing map must reference the same revision audio output.')
+        # An audio chapter's map, or a film's map (narration on the film timeline; library.film_timing).
+        if self.asset.revision_id != self.revision_id or self.asset.kind not in ('audio_chapter', 'video'):
+            raise ValidationError('Timing map must reference the same revision audio or film output.')
         if self.asset_sha256 != self.asset.sha256 or self.text_sha256 != self.revision.content_sha256:
             raise ValidationError('Timing map hashes must match immutable media and text.')
         if not self.measured:

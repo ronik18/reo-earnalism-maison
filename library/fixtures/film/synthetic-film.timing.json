@@ -1,0 +1,120 @@
+{
+  "schema": "earnalism.audiovisual-film-timing.v1",
+  "unit_id": "b0000000-0000-4000-8000-000000000001",
+  "mp4_sha256": "2ece89ec515164d44bdca28b5db0cd7ee0905675c90aa67c019d6c44f67c728a",
+  "text_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "measurement_evidence_ref": "synthetic local fixture: 1000 ms title card, six narrated paragraphs, 500 ms credits; not a measured production film",
+  "maps": [
+    {
+      "precision": "paragraph",
+      "segments": [
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000001",
+          "start_offset_chars": 0,
+          "end_offset_chars": 186,
+          "start_ms": 1000,
+          "end_ms": 2000
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000002",
+          "start_offset_chars": 0,
+          "end_offset_chars": 211,
+          "start_ms": 2100,
+          "end_ms": 3100
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000003",
+          "start_offset_chars": 0,
+          "end_offset_chars": 217,
+          "start_ms": 3200,
+          "end_ms": 4200
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000004",
+          "start_offset_chars": 0,
+          "end_offset_chars": 185,
+          "start_ms": 4300,
+          "end_ms": 5300
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000005",
+          "start_offset_chars": 0,
+          "end_offset_chars": 190,
+          "start_ms": 5400,
+          "end_ms": 6400
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000006",
+          "start_offset_chars": 0,
+          "end_offset_chars": 204,
+          "start_ms": 6500,
+          "end_ms": 7500
+        }
+      ]
+    },
+    {
+      "precision": "sentence",
+      "segments": [
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000001",
+          "sentence_index": 0,
+          "start_offset_chars": 0,
+          "end_offset_chars": 47,
+          "start_ms": 1000,
+          "end_ms": 1300
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000001",
+          "sentence_index": 1,
+          "start_offset_chars": 47,
+          "end_offset_chars": 96,
+          "start_ms": 1300,
+          "end_ms": 1600
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000001",
+          "sentence_index": 2,
+          "start_offset_chars": 96,
+          "end_offset_chars": 186,
+          "start_ms": 1600,
+          "end_ms": 2000
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000002",
+          "start_offset_chars": 0,
+          "end_offset_chars": 211,
+          "start_ms": 2100,
+          "end_ms": 3100
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000003",
+          "start_offset_chars": 0,
+          "end_offset_chars": 217,
+          "start_ms": 3200,
+          "end_ms": 4200
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000004",
+          "start_offset_chars": 0,
+          "end_offset_chars": 185,
+          "start_ms": 4300,
+          "end_ms": 5300
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000005",
+          "start_offset_chars": 0,
+          "end_offset_chars": 190,
+          "start_ms": 5400,
+          "end_ms": 6400
+        },
+        {
+          "anchor_id": "a0000000-0000-4000-8000-000000000006",
+          "start_offset_chars": 0,
+          "end_offset_chars": 204,
+          "start_ms": 6500,
+          "end_ms": 7500
+        }
+      ]
+    }
+  ]
+}
