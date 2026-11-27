@@ -122,9 +122,11 @@ calibrated on accepted v4 takes; they never ask for a credit-spending redo. The 
 (then `retime`, `voicecheck`), or a pre-retimed scene wav placed there by hand (`scene-timing` times it as one
 passage).
 
-`scene-timing` matches each clause boundary to its pause **by position** (not by count): an unpunctuated
-breath stays inside its clause (listed as `breaths` in `<scene>.timing.json`), and a boundary with no pause near
-its words, or one whose pause lies far from them, stops with the clause named; nothing is guessed.
+`scene-timing` matches each clause boundary to its pause **by position** (not by count), within a window of 10
+characters at the local speaking rate (0.3–0.6 s; 1.5× for a pause already as long as its punctuation pause),
+recorded per boundary (`tol_s`) in `<scene>.timing.json`: an unpunctuated breath stays inside its clause (listed as
+`breaths`), and a boundary with no pause in its window stops with the clause named, never paired with a breath;
+nothing is guessed.
 
 ## 6. Stills and their gates (`job stills --film N --spec stills.json`)
 
@@ -244,8 +246,11 @@ instead of being generated again. `adopt.json`:
 output sha256 eav recorded when it imported the job, or, for a pilot job folder eav never imported, against that
 job's own outputs `manifest.json` (COMPLETE, `input_zip_sha256` equal to its `inputs.zip`). No manifest is ever
 written or edited. A hand-copied file needs the operator's `reason`; its sha256 is recorded and its provenance
-traced (byte-identical to a job's output or input image), or a declared `from` derivation is recorded as declared;
-an untraced file's licence is recorded as unverified and warned. A take chain must continue as its job built it,
+traced (byte-identical to a job's output or input image), or a declared `from` derivation is recorded as declared
+(it inherits the licence of a source verified at adoption, with a warning naming it). A hand copy no gated job output
+vouches for has no gate verdict: `film --shots` refuses it until `picks/gate-overrides.json` records a reason. An
+untraced file's licence is None: it is warned and carried as a **release blocker** into the film's meta, the `qc`
+report (a failing `licences` check) and the clearance draft (`release_blockers`). A take chain must continue as its job built it,
 match the shot's `wan_res` and cover the shot with the 1-frame margin; a take without a recorded motion verdict
 is gated on adoption, and a clear fail needs a reason in `picks/gate-overrides.json`. A depth map is adopted only
 for the exact still it was made from (same image sha256; its job must record Depth Anything V2 Small, or its

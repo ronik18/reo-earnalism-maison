@@ -1578,8 +1578,14 @@ def _import_passages(args, rec, plan, lang, credits):
                 x = retime.read(take_path)
                 a, b = passages._bounds(x)
                 pauses = retime.detect_pauses(take_path)
-                retime.retime(take_path, dst, retime.plan_pauses(plain, pauses, zlib.crc32(pid.encode()),
-                                                                 bounds=(a / retime.SR, b / retime.SR)), [])
+                span = (a / retime.SR, b / retime.SR)
+                retime.retime(take_path, dst, retime.plan_pauses(plain, pauses, zlib.crc32(pid.encode()), bounds=span), [])
+                cl_ = retime.clauses(plain)
+                for r_ in retime.match_pauses(plain, pauses, span):   # I1: reported, never filled from a breath
+                    if r_["pause"] is None:
+                        print(f"Note {pid}: no pause near the {r_['kind']} ending «{' '.join(cl_[r_['clause']][0].split()[-3:])}» "
+                              f"(about {r_['expected_s']:.2f} s into the take); none is inserted, no breath is stretched "
+                              "into it: listen there")
             retimed.append((sc, pid, dst, len(plain.strip()), len(retime.read(dst)) / retime.SR))
     tdata = _load_transcripts(args.transcripts) if args.transcripts else None
     words = {}   # passage id -> (transcript of the downloaded take, untagged passage text)
@@ -2066,6 +2072,37 @@ def _shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir, depth_maps=No
     return assets
 
 
+def _adopted_bindings(rec) -> dict:
+    """{(adopted stills job id, key): its binding in adoption.json} of every active adopted stills job (I2)."""
+    out = {}
+    for j in _jobs(rec):
+        if j["adopted"] and j["kind"] == "stills" and not _ended(j):
+            for key, b in ((_json(j["adoption"]).get("binding") or {}).get("stills") or {}).items():
+                out[(j["job_id"], key)] = b
+    return out
+
+
+def _ungated_copy(b) -> bool:
+    """A hand copy that no gated job output vouches for (untraced, or only a declared derivation): it has no gate
+    verdict of its own, so it enters a film only on a recorded reason (I2)."""
+    return bool(b.get("hand_copied")) and str((b.get("gate") or {}).get("why", "")).startswith("hand-copied")
+
+
+def _release_blocker(job_id, key, b):
+    """A still whose licence is not verified (None): a blocking item for release (I2), or None."""
+    lic = b.get("licence") or {}
+    if lic.get("licence") is not None:
+        return None
+    src = b.get("hand_copied") or b.get("source") or {}
+    return {"key": key, "job_id": job_id, "file": src.get("file"), "sha256": src.get("sha256"),
+            "licence": None, "blocker": "licence unverified (provenance untraced): the owner must clear it "
+                                        "before any release"}
+
+
+def _release_blockers(rec) -> list:
+    return [x for (jid, key), b in sorted(_adopted_bindings(rec).items()) for x in [_release_blocker(jid, key, b)] if x]
+
+
 def _cinematic_stills(rec, t, scenes, out) -> tuple:
     """C2: the stills of the cinematic film: for every glide or static shot, the operator's recorded pick of the
     scene's own stills jobs, linked into <film>/stills as <scene>-<n>. A shot with no pick stops the film; nothing
@@ -2086,6 +2123,27 @@ def _cinematic_stills(rec, t, scenes, out) -> tuple:
                    "falls back to an older still with the same key",
                    f"Build the scene's stills job (spec \"scene\", one item per glide/static shot key, candidates), "
                    f"review the candidates and {PROG} pick --root {rec.root} --job <job> --choices <json>")
+    adopted = _adopted_bindings(rec)
+    path = rec.root / "picks" / "gate-overrides.json"
+    allowed = {k: v for k, v in (_json(path).items() if path.is_file() else []) if isinstance(v, str) and v.strip()}
+    ungated, blockers, overridden = [], [], {}
+    for key, inf in info.items():
+        b = adopted.get((inf["job_id"], key))
+        if b is None:
+            continue
+        if _ungated_copy(b):
+            if key in allowed:
+                overridden[key] = allowed[key]
+            else:
+                ungated.append(key)
+        blk = _release_blocker(inf["job_id"], key, b)
+        if blk:
+            blockers.append(blk)
+    if ungated:
+        raise Stop(f"still(s) {', '.join(ungated)} are hand copies with no gate verdict of their own (untraced, or a "
+                   "declared derivation): they never enter the film ungated",
+                   f"Look at each at full size and record why it stands: a reason in {path} "
+                   + "{" + ", ".join(f'"{k}": "<reason>"' for k in ungated) + "}, or adopt a gated job's candidate")
     merged = out / "stills"
     if merged.exists():
         shutil.rmtree(merged)
@@ -2096,7 +2154,11 @@ def _cinematic_stills(rec, t, scenes, out) -> tuple:
             os.link(src, dst)
         except OSError:
             shutil.copy2(src, dst)
-    return merged, {"picks": info}
+    extra = {**({"gate_overrides": overridden} if overridden else {}),
+             **({"release_blockers": blockers} if blockers else {})}
+    for blk in blockers:
+        print(f"RELEASE BLOCKER {blk['key']}: {blk['blocker']} ({blk['job_id']}, sha256 {str(blk['sha256'])[:12]}...)")
+    return merged, {"picks": info, **extra}
 
 
 def _film_shots(args, rec, plan, t, scs):
@@ -2903,12 +2965,21 @@ def cmd_qc(args):
     for target, a in sorted(latest.items()):
         video = rec.root / a["path"]
         m = mix.measure(video)
-        sheet = qc.contact_sheet(video, out / f"{target}-contact.jpg")
+        # C1: one flat file per target ("film-01/f01s014" -> "film-01--f01s014"; "--" never occurs in a film or reel
+        # target), so a scene cut and the whole film never share or nest an output path
+        sheet_path = out / f"{target.replace('/', '--')}-contact.jpg"
+        sheet_path.parent.mkdir(parents=True, exist_ok=True)
+        sheet = qc.contact_sheet(video, sheet_path)
         lufs = REEL_LUFS if a["kind"] == "reel" else FILM_LUFS
         shots_film = a["kind"] in ("film", "scene_film") and a["meta"].get("mode") == "shots"   # R10: -1.5 dBTP
         checks = {"loudness": abs(m["lufs"] - lufs) <= LUFS_TOL,
                   "true_peak": m["true_peak"] <= (film.SHOT_TP_MAX if shots_film else TP_MAX)}
         item = {"sha256": sha256_file(video), **m, "contact_sheet": sheet.name}
+        blockers = ((a["meta"].get("stills") or {}).get("release_blockers") or []) if a["kind"] != "reel" else []
+        if blockers:   # I2: an unverified licence blocks release; qc fails until the owner clears it
+            item["release_blockers"] = blockers
+            checks["licences"] = False
+            report["advisory_only"] += [f"{target} still {b['key']}: {b['blocker']}" for b in blockers]
         if shots_film:
             film_dir = rec.root / "film" / a["meta"]["target"]
             gate_checks, detail, not_run = qc.film_gates(video, film_dir, a["meta"]["scenes"], _plan(rec)["language"],
@@ -3295,8 +3366,10 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                     if args.profile == "audiobook" else
                     "per-chapter score bed, ducked under speech (eav.mix.duck_and_master, -16 LUFS)"),
             "score_sha256": {u: v["score_sha256"] for u, v in prov_units.items()}},
+        "release_blockers": _release_blockers(rec),
         "owner_must_complete": ["territories", "term_per_territory", "text_source_licence",
-                                "cover_provenance", "status", "owner_approval"],
+                                "cover_provenance", "status", "owner_approval"]
+        + (["release_blockers"] if _release_blockers(rec) else []),
         "owner_approval": None,
         "owner_approval_required": {"by": "<who approved>", "at": "<ISO 8601 time>"}})
     rec.add_artifact("evidence_draft", draft, {"bundle": str(bundle), "audio_sha256": audio})
@@ -3664,11 +3737,13 @@ def _scene_clauses(film_dir, sid) -> list:
     return _json(tf)["timing"] if tf.is_file() else []
 
 
-TIMING_POS_TOL_S, TIMING_POS_TOL_FRAC = 2.0, 0.08   # G5: a clause boundary's pause lies within max(2 s, 8 %) of its words
+TIMING_TOLERANCE = (f"each clause boundary's pause within {retime.POS_TOL_CHARS} characters at the local speaking rate of "
+                    f"its local estimate, {retime.POS_TOL_MIN_S:g}-{retime.POS_TOL_MAX_S:g} s (x{retime.POS_TOL_LONG:g} for a "
+                    "pause already as long as its punctuation pause); see each boundary's tol_s")
 
 
 def _passage_clauses(wav: Path, plain: str, offset: float, pid: str, threshold_db: float, min_pause: float) -> tuple:
-    """(clauses, breaths) of one retimed passage: its clauses (retime.clauses) with each boundary at the measured
+    """(clauses, breaths, boundaries with their tolerance) of one retimed passage: its clauses (retime.clauses) with each boundary at the measured
     pause its punctuation matches by position (retime.match_pauses), and the pauses no mark explains (breaths inside
     a clause, kept as they are). A boundary with no pause near its words, or whose pause lies far from them, is a
     mislabelled clause: it stops, nothing is guessed."""
@@ -3678,7 +3753,6 @@ def _passage_clauses(wav: Path, plain: str, offset: float, pid: str, threshold_d
     t0, t1 = a / retime.SR, b / retime.SR
     pauses = sorted((ps, pe) for ps, pe in retime.detect_pauses(wav, threshold_db, min_pause) if t0 < ps and pe < t1)
     rows = retime.match_pauses(plain, pauses, (t0, t1))
-    lim = max(TIMING_POS_TOL_S, TIMING_POS_TOL_FRAC * (t1 - t0))
 
     def short(text):
         w = text.split()
@@ -3687,9 +3761,11 @@ def _passage_clauses(wav: Path, plain: str, offset: float, pid: str, threshold_d
     for r in rows:
         where = f"clause {r['clause'] + 1} «{short(cl[r['clause']][0])}» ({r['kind']})"
         if r["pause"] is None:
-            bad.append(f"{where} ends at no measured pause of at least {min_pause:g} s (its words put the end near "
-                       f"{offset + r['expected_s']:.2f} s)")
-        elif abs(r["error_s"]) > lim:
+            near = min(pauses, key=lambda p_: abs(p_[0] - r["expected_s"]), default=None)
+            bad.append(f"{where} ends at no measured pause of at least {min_pause:g} s within {r['tol_s']:.2f} s of where "
+                       f"its words put the end ({offset + r['expected_s']:.2f} s)"
+                       + (f"; the nearest pause, at {offset + near[0]:.2f} s, is too far to be it and is not used" if near else ""))
+        elif abs(r["error_s"]) > r["tol_s"]:
             ps = pauses[r["pause"]][0]
             bad.append(f"{where} would end at the pause at {offset + ps:.2f} s, {abs(r['error_s']):.1f} s from where "
                        f"its words put it ({offset + r['expected_s']:.2f} s)")
@@ -3706,7 +3782,10 @@ def _passage_clauses(wav: Path, plain: str, offset: float, pid: str, threshold_d
            for i, (c, _) in enumerate(cl)]
     breaths = [{"start": round(offset + ps, 3), "end": round(offset + pe, 3)}
                for j, (ps, pe) in enumerate(pauses) if j not in used]
-    return out, breaths
+    bounds_ = [{"passage": pid, "clause": r["clause"] + 1, "kind": r["kind"],
+                "expected_s": round(offset + r["expected_s"], 3), "error_s": r["error_s"], "tol_s": r["tol_s"],
+                "local_s_per_char": r["local_s_per_char"]} for r in rows]
+    return out, breaths, bounds_
 
 
 def cmd_scene_timing(args):
@@ -3729,7 +3808,7 @@ def cmd_scene_timing(args):
     if not voice.is_file():
         raise Stop(f"scene {args.scene} has no voice {voice}", next_action(rec.root))
     manifest_path = film_dir / "voice" / f"{args.scene}.passages.json"
-    rows, breaths = [], []
+    rows, breaths, bounds_ = [], [], []
     if manifest_path.is_file():
         man = _json(manifest_path)
         if man.get("wav_sha256") != sha256_file(voice):
@@ -3744,16 +3823,17 @@ def cmd_scene_timing(args):
             plains = passages.check_passage_scripts(text, [(rec.root / p_["script"]).read_text(encoding="utf-8")
                                                            for p_ in man["passages"]])
         for p_, plain, off in zip(man["passages"], plains, offsets):
-            got, br = _passage_clauses(rec.root / p_["retimed"], plain, off, p_["id"], args.threshold_db, args.min_pause)
-            rows, breaths = rows + got, breaths + br
+            got, br, bd = _passage_clauses(rec.root / p_["retimed"], plain, off, p_["id"], args.threshold_db, args.min_pause)
+            rows, breaths, bounds_ = rows + got, breaths + br, bounds_ + bd
     else:
         text, _ = _scene_text(sc, plan["language"])
-        rows, breaths = _passage_clauses(voice, text, 0.0, args.scene, args.threshold_db, args.min_pause)
+        rows, breaths, bounds_ = _passage_clauses(voice, text, 0.0, args.scene, args.threshold_db, args.min_pause)
     length = len(retime.read(voice)) / retime.SR
     lead, tail = rows[0]["start"], length - rows[-1]["end"]
     lo, hi = passages.LEAD_IN_RANGE
     out = _write_json(_timing_path(film_dir, args.scene), {
-        "schema": TIMING_SCHEMA, "scene": args.scene, "timing": rows, "breaths": breaths, "length_s": round(length, 3),
+        "schema": TIMING_SCHEMA, "scene": args.scene, "timing": rows, "breaths": breaths, "boundaries": bounds_,
+        "position_tolerance": TIMING_TOLERANCE, "length_s": round(length, 3),
         "speech_start": rows[0]["start"], "speech_end": rows[-1]["end"], "lead_in_s": round(lead, 3),
         "tail_s": round(tail, 3), "r9_lead_in_ok": lo <= lead <= hi, "voice_sha256": sha256_file(voice),
         "method": "eav.cli scene-timing: retime.clauses matched by position (retime.match_pauses) to "
@@ -3901,11 +3981,17 @@ def _adopt_stills(rec, spec, base, sid, shots, load, everything, advisories):
                 declared = {"job_id": d_src.job_id, "file": Path(declared["file"]).name, "sha256": d_sha,
                             "relation": "identical" if d_sha == sha else
                             "derived by hand, as the operator declares (not byte-identical; not verified)"}
-                if lic is None and d_src.kind in PICK_KINDS:
+                if lic is None and d_src.kind in PICK_KINDS:   # only from a source verified just now (d_src.file)
                     lic = d_src.licence("image")
+                    if declared["relation"] != "identical":
+                        advisories[key] = (f"licence {lic['licence']} inherited from {d_src.job_id}/{declared['file']} "
+                                           "(verified) by the operator's declared derivation, which is not verified; "
+                                           "no gate verdict: film --shots needs a reason in picks/gate-overrides.json")
             if lic is None:
                 lic = {"model": None, "licence": None, "note": "unverified: no job output matches it and none is declared"}
-                advisories[key] = "licence unverified (provenance untraced): the owner checks it before release"
+                advisories[key] = ("licence unverified (provenance untraced): a release blocker in film, qc and the "
+                                   "clearance draft until the owner clears it; no gate verdict: film --shots needs a "
+                                   "reason in picks/gate-overrides.json")
             how = {"hand_copied": {"file": _rel(path, rec.root), "sha256": sha, "reason": entry["reason"].strip(),
                                    "traced": traced, **({"declared_from": declared} if declared else {})}}
             if gate is None:

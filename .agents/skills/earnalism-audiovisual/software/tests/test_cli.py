@@ -816,6 +816,23 @@ class RoundTwo:
         self.assertEqual([a for a in rec.data["artifacts"] if a["kind"] == "film"], whole)   # whole film untouched
         self.assertIn(f"{cli.PROG} qc --root {self.root}", out.split("Next:")[-1])
         self.assertNotIn("--scene", cli.next_action(self.root))            # the whole film keeps its own route
+        # C1: qc checks the scene cut and the whole film side by side, each with its own flat output paths
+        code, out = run("qc", "--root", self.root)
+        self.assertIn(code, (0, 5), out)                                     # a gate may fail; qc never stops
+        report = json.loads((self.root / "qc" / "report.json").read_text())
+        self.assertEqual(sorted(report["items"]), ["film-01", f"film-01/{s2}"])
+        sheets = {k: v["contact_sheet"] for k, v in report["items"].items()}
+        self.assertEqual(sheets, {"film-01": "film-01-contact.jpg", f"film-01/{s2}": f"film-01--{s2}-contact.jpg"})
+        self.assertTrue(all((self.root / "qc" / v).is_file() for v in sheets.values()))
+        with mock.patch.object(cli.film, "ENCODE_PRESET", "ultrafast"), \
+                mock.patch.object(cli.film, "FRAME", (640, 360)), \
+                mock.patch.object(glide, "W", 640), mock.patch.object(glide, "H", 360):
+            code, out = run(*[a for a in args if a not in ("--scene", s2)])  # then the whole film again
+        self.assertEqual(code, 0, out)
+        code, out = run("qc", "--root", self.root)
+        self.assertIn(code, (0, 5), out)
+        self.assertEqual(sorted(json.loads((self.root / "qc" / "report.json").read_text())["items"]),
+                         ["film-01", f"film-01/{s2}"])
         code, out = run("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card", self.d / "end.png",
                         "--scene", s2)
         self.assertEqual(code, 2, out)
@@ -1747,6 +1764,49 @@ class CliTests(RoundTwo, unittest.TestCase):
                          (f"ace-step:{music}", "Apache-2.0", music))
         self.assertIn("ACE-Step", ev["music"]["source_and_licence"])
 
+    def fake_adopted_copy(self):
+        """An adopted stills job binding an untraced hand copy (licence None), as `adopt` records it (I2)."""
+        rec = Record.load(self.root)
+        jid = "adopt-f01s001-stills-0000000000"
+        doc = self.root / "jobs" / jid / "adoption.json"
+        doc.parent.mkdir(parents=True)
+        doc.write_text(json.dumps({"binding": {"stills": {"f01s001-1": {
+            "hand_copied": {"file": "art/lane.png", "sha256": "a" * 64, "reason": "pilot still", "traced": []},
+            "licence": {"model": None, "licence": None}, "gate": {"level": None, "why": "hand-copied file with no gate"}}}},
+            "job": {"items": []}}))
+        rec.add_artifact(cli.ADOPT_JOB, doc, {"job_id": jid, "job_kind": "stills", "forecast_units": 0.0,
+                                              "manifest": f"jobs/{jid}/adoption.json", "adopted": True})
+        rec.event("cli", "job_target", {"job_id": jid, "target": "film-01", "kind": "stills", "scene": "f01s001"})
+        rec.event("import", "accepted", {"job_id": jid})
+
+    def test_unverified_licence_is_a_release_blocker_in_the_clearance_draft(self):
+        """I2: an adopted still whose licence is unverified is listed in the evidence draft and the owner must
+        clear it before release."""
+        self.reviewed()
+        self.fake_adopted_copy()
+        code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "bundle", "--dry")
+        self.assertEqual(code, 0, out)
+        ev = json.loads((self.root / "maison" / cli.EVIDENCE_DRAFT).read_text())
+        self.assertEqual([(b["key"], b["licence"]) for b in ev["release_blockers"]], [("f01s001-1", None)])
+        self.assertIn("release_blockers", ev["owner_must_complete"])
+
+    def test_qc_fails_a_film_that_carries_a_release_blocker(self):
+        """I2: the film's unverified still licence reaches the qc report as a failing check (it blocks bundle-film)."""
+        self.init_and_plan()
+        fdir = self.root / "film" / "film-01"
+        fdir.mkdir(parents=True)
+        mp4 = fdir / "film-01.mp4"
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", "testsrc2=s=320x180:r=24:d=2", "-f", "lavfi",
+                        "-i", "anoisesrc=d=2:c=pink:a=0.2", "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                        "-c:a", "aac", str(mp4)], check=True)
+        blk = {"key": "f01s001-1", "job_id": "adopt-x", "licence": None, "blocker": "licence unverified"}
+        Record.load(self.root).add_artifact("film", mp4, {"target": "film-01", "stills": {"release_blockers": [blk]}})
+        code, out = run("qc", "--root", self.root)
+        self.assertEqual(code, 5, out)
+        report = json.loads((self.root / "qc" / "report.json").read_text())
+        self.assertIn("film-01:licences", report["failed"])
+        self.assertEqual(report["items"]["film-01"]["release_blockers"], [blk])
+
     def test_bundle_audio_dry_is_recorded(self):
         self.reviewed()
         code, out = run("bundle-audio", "--profile", "film", "--root", self.root, "--out", self.d / "bundle", "--dry")
@@ -2614,11 +2674,11 @@ class SceneTimingPositionTests(unittest.TestCase):
     """G5: scene-timing matches each clause boundary to its pause by position, not by count."""
     TEXT = "এক দুই তিন চার, পাঁচ ছয় সাত আট নয়। দশ এগারো বারো তেরো চোদ্দ পনেরো ষোলো সতেরো!"
 
-    def take(self, path, gaps, breaths=()):
+    def take(self, path, gaps, breaths=(), rates=None):
         import numpy as np
         from eav import retime
         from tests.test_retime import _placed
-        pauses, (t0, t1) = _placed(self.TEXT, gaps, rate=0.12, breaths=breaths)
+        pauses, (t0, t1) = _placed(self.TEXT, gaps, rate=0.12, breaths=breaths, rates=rates)
         lead = 0.3
         n = int((t1 + 2 * lead) * retime.SR)
         t = np.arange(n) / retime.SR
@@ -2634,12 +2694,28 @@ class SceneTimingPositionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             wav = Path(d) / "p.wav"
             pauses = self.take(wav, [0.5, 0.9], breaths=[(2, 0.5, 0.45)])
-            rows, breaths = cli._passage_clauses(wav, self.TEXT, 0.0, "p", -38, 0.3)
+            rows, breaths, bounds = cli._passage_clauses(wav, self.TEXT, 0.0, "p", -38, 0.3)
         self.assertEqual([r["text"][-1] for r in rows], [",", "।", "!"])
         self.assertAlmostEqual(rows[0]["end"], pauses[0][0], delta=0.03)
         self.assertAlmostEqual(rows[1]["end"], pauses[1][0], delta=0.03)
         self.assertEqual(len(breaths), 1)
         self.assertAlmostEqual(breaths[0]["start"], pauses[2][0], delta=0.03)
+        self.assertTrue(all(0.3 <= b["tol_s"] <= 0.9 for b in bounds))      # I1: a tolerance well under a second
+
+    def test_a_comma_without_its_pause_is_reported_not_paired_with_a_breath_1_2_s_later(self):
+        """I1: the comma's pause is missing and a breath sits 1.2 s after it, inside the next clause: the boundary is
+        reported and stops; the breath is never taken as the comma."""
+        text = self.TEXT
+        n1 = cli.retime._spoken_len(cli.retime.clauses(text)[1][0])
+        with tempfile.TemporaryDirectory() as d:
+            wav = Path(d) / "p.wav"
+            self.take(wav, [0.05, 0.9], breaths=[(1, 1.2 / (n1 * 0.12), 0.35)])
+            with self.assertRaises(cli.Stop) as stop:
+                cli._passage_clauses(wav, self.TEXT, 0.0, "f01s014-p01", -38, 0.3)
+        msg = str(stop.exception)
+        self.assertIn("clause 1", msg)
+        self.assertIn("ends at no measured pause", msg)
+        self.assertIn("too far to be it", msg)
 
     def test_a_mislabelled_clause_stops_with_its_name(self):
         """The count matches (two pauses for two boundaries), but the sentence end has no pause and a breath sits
@@ -2653,3 +2729,13 @@ class SceneTimingPositionTests(unittest.TestCase):
         self.assertIn("clause 2", msg)
         self.assertIn("পাঁচ ছয় সাত আট নয়।", msg)
         self.assertIn("ends at no measured pause", msg)
+
+    def test_uneven_pace_still_times_every_clause(self):
+        """I1: a fast clause next to a slow one: every boundary still finds its own (short) pause in its window."""
+        with tempfile.TemporaryDirectory() as d:
+            wav = Path(d) / "p.wav"
+            pauses = self.take(wav, [0.35, 0.35], rates=[0.08, 0.13, 0.10])
+            rows, breaths, bounds = cli._passage_clauses(wav, self.TEXT, 0.0, "p", -38, 0.3)
+        self.assertAlmostEqual(rows[0]["end"], pauses[0][0], delta=0.03)
+        self.assertAlmostEqual(rows[1]["end"], pauses[1][0], delta=0.03)
+        self.assertEqual(breaths, [])

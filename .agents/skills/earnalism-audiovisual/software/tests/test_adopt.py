@@ -252,6 +252,54 @@ class AdoptTests(unittest.TestCase):
                       hand["hand_copied"]["traced"])
         self.assertEqual(hand["licence"]["model"], FLUX)
 
+    def stills_of_shot_1(self):
+        rec = Record.load(self.root)
+        sp = shotplan.require_approved(self.root / "film" / "film-01", self.sid)
+        shot = next(x for x in sp["shots"] if x["n"] == 1)
+        return lambda: cli._cinematic_stills(Record.load(self.root), "film-01", [(self.sid, {"shots": [shot]}, None)],
+                                             self.d / "out")
+
+    def test_untraced_hand_copy_needs_a_gate_reason_and_blocks_release(self):
+        """I2: an untraced hand copy has no gate verdict and no verified licence: film --shots refuses it until a
+        reason is recorded, and then carries its licence (None) as a release blocker."""
+        s = self.sid
+        (self.d / "art" / "lane.png").write_bytes(png_bytes((5, 5, 60)))
+        self.write_spec(stills={f"{s}-1": {"file": "art/lane.png", "reason": "night lane used in the pilots"}})
+        code, out = self.adopt()
+        self.assertEqual(code, 0, out)
+        self.assertIn("licence unverified", out)
+        stills = self.stills_of_shot_1()
+        with self.assertRaises(cli.Stop) as stop:
+            stills()
+        self.assertIn("never enter the film ungated", str(stop.exception))
+        (self.root / "picks" / "gate-overrides.json").write_text(json.dumps({f"{s}-1": "owner viewed it at full size"}))
+        _, info = stills()
+        self.assertEqual(info["gate_overrides"], {f"{s}-1": "owner viewed it at full size"})
+        self.assertEqual([(b["key"], b["licence"]) for b in info["release_blockers"]], [(f"{s}-1", None)])
+        self.assertEqual([b["key"] for b in cli._release_blockers(Record.load(self.root))], [f"{s}-1"])
+
+    def test_declared_derivation_inherits_only_a_verified_source_licence_with_a_warning(self):
+        s = self.sid
+        (self.d / "art" / "touched.png").write_bytes(png_bytes((11, 121, 201)))     # a hand touch-up of c1
+        entry = {"file": "art/touched.png", "reason": "lettering painted out by hand",
+                 "from": {"job": self.stills_job, "file": f"{s}-1--c1.png"}}
+        self.write_spec(stills={f"{s}-1": entry})
+        src = self.root / "stills" / self.stills_job / f"{s}-1--c1.png"
+        src.write_bytes(png_bytes((1, 1, 1)))                                        # the source no longer verifies
+        code, out = self.adopt()
+        self.assertEqual(code, 2, out)
+        self.assertIn("not the file the job made", out)
+        src.write_bytes(self.still_bytes)
+        code, out = self.adopt()
+        self.assertEqual(code, 0, out)
+        self.assertIn(f"inherited from {self.stills_job}/{s}-1--c1.png", out)
+        b = json.loads(self.adopted_jobs()[0]["adoption"].read_text())["binding"]["stills"][f"{s}-1"]
+        self.assertEqual(b["licence"]["model"], FLUX)
+        self.assertIn("not verified", b["hand_copied"]["declared_from"]["relation"])
+        with self.assertRaises(cli.Stop):                                            # no gate verdict of its own
+            self.stills_of_shot_1()()
+        self.assertEqual(cli._release_blockers(Record.load(self.root)), [])           # its licence is the source's
+
     def test_adoption_needs_the_approved_paper_edit(self):
         fdir = self.root / "film" / "film-01"
         sp = json.loads((fdir / "shots" / f"{self.sid}.json").read_text())
