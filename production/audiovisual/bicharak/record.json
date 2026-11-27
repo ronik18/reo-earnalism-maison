@@ -11999,6 +11999,18 @@
       },
       "path": "maison/audiovisual-clearance-evidence.draft.json",
       "sha256": "a398a1f7431b9da0a2cde5ea90f70a4a9cd9027c6635d4004f1fe0bd18090449"
+    },
+    {
+      "bytes": 2075,
+      "kind": "evidence_draft",
+      "meta": {
+        "audio_sha256": [
+          "af296d06c86fe2b5f49c2d80447b797af528e860fa1ecc4712d2a60129de77a0"
+        ],
+        "bundle": "/tmp/claude-0/-home-user-reo-earnalism-maison/003be0f2-5053-5579-8db4-26cf3d2f164a/scratchpad/bicharak-bundle"
+      },
+      "path": "maison/audiovisual-clearance-evidence.draft.json",
+      "sha256": "6dca6e2dddebd39aa58eb12a9f985627e45e3b5e437b9b891c834911866ee776"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -14436,6 +14448,42 @@
         "duration_ms": 24048,
         "narration_job_id": "narration-film-01-r4",
         "sha256": "4ff911e7c7bc0fab2b27f2cba3f5024cf03617afb98e0acd12c13f66d3d1e35b"
+      },
+      "result": "cut",
+      "stage": "preview"
+    },
+    {
+      "at": "2026-11-27T20:29:15.052608+00:00",
+      "detail": {
+        "audio_sha256": [
+          "af296d06c86fe2b5f49c2d80447b797af528e860fa1ecc4712d2a60129de77a0"
+        ],
+        "bundle": "/tmp/claude-0/-home-user-reo-earnalism-maison/003be0f2-5053-5579-8db4-26cf3d2f164a/scratchpad/bicharak-bundle",
+        "qc_accepted": [
+          "f01s007-007"
+        ],
+        "suspect_truncated": [
+          {
+            "chars": 133,
+            "chars_per_s": 18.78,
+            "reasons": [
+              "18.8 chars/s > 1.6 x job median 11.2"
+            ],
+            "seconds": 7.082,
+            "unit_key": "f01s007-007"
+          }
+        ],
+        "timing_json_sha256": "a3cd1dc6c30de16276619736e0bb1c4c95a276b0b6143ae2955eacc084284560"
+      },
+      "result": "drafted",
+      "stage": "bundle_audio"
+    },
+    {
+      "at": "2026-11-27T20:29:17.948020+00:00",
+      "detail": {
+        "duration_ms": 113712,
+        "narration_job_id": "narration-film-01-r4",
+        "sha256": "979938aa56657186a1a62922f01d800469d00ed1786b9ede24a0fe78153bbb32"
       },
       "result": "cut",
       "stage": "preview"

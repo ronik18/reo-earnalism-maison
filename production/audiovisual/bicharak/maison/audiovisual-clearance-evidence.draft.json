@@ -52,5 +52,5 @@
   "territories": [],
   "territories_note": "must equal the active whitelist (contracts/publication-policy.json / MAISON_PUBLICATION_TERRITORIES)",
   "text_source_licence": null,
-  "timing_json_sha256": "ec52773dc0aedf44f898ccff299ff63331a00f4adaeaee5f7946e578d7134d77"
+  "timing_json_sha256": "a3cd1dc6c30de16276619736e0bb1c4c95a276b0b6143ae2955eacc084284560"
 }
