@@ -7,14 +7,14 @@
     "film-01": {
       "checks": {
         "loudness": "pass",
-        "true_peak": "fail"
+        "true_peak": "pass"
       },
       "contact_sheet": "film-01-contact.jpg",
       "lufs": -16.0,
       "qc_accepted": [
         "f01s007-007"
       ],
-      "sha256": "c19b84a7d5ed50a20eef70447ed6d7772dd08d50b0ea48ba3e2f0e67ee90d53b",
+      "sha256": "5b578745d06acc98305ae1a4c3fcf89de0cb8bb8fbd7d04e0329150c976d210d",
       "suspect_truncated": [
         {
           "chars": 133,
@@ -26,9 +26,9 @@
           "unit_key": "f01s007-007"
         }
       ],
-      "true_peak": -0.9
+      "true_peak": -1.3
     }
   },
   "listening": "unassessed until the owner reviews the package",
-  "result": "fail"
+  "result": "pass"
 }
