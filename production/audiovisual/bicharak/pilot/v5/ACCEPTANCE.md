@@ -1,3 +1,128 @@
+# বিচারক scene 14 v5: finish run (27 Nov 2026, after the door re-take)
+
+Operator run, `eav` commands only, from a clean worktree of HEAD `e3e19c2` (`claude/great-gates-tpoz8n`), at
+`<scratchpad>/wt-s14e`. `B` = `production/audiovisual/bicharak`, `V` = `B/pilot/v5`, `R` = `V/root`. Nothing was
+spent: no GPU, no Colab, no ElevenLabs. The source transcript (`source.json`) and all source media are unchanged. No
+signed URL or `exchange.json` is in any tracked file.
+
+**Status: STOPPED AT STEP 1 (sound effects). Two sounds the plan lists have no CC0 / author-released PD clip.**
+`cue`, `film --shots`, `qc` and the frame review were **not run**, so `scene14-v5.mp4` and
+`scene14-v5.burned.mp4` do not exist. Every other input of the scene is ready (`status --scene f01s014` exit 0,
+`Next:` = `cue`).
+
+## Commands, in order
+
+All from `skills/earnalism-audiovisual/software` as `python3 -m eav.cli …`.
+
+1. `status --root R --scene f01s014`: exit 0. Every job of the scene is imported or adopted;
+   `Next:` = `cue … --stems adopt-f01s014-music-f5b90329a1 --pick --tonic <note>`, then `cue … --fx`.
+2. Recorded the owner decisions of 27 Nov in `R/film/film-01/shots/f01s014.input.json` (the documented planner
+   input; before-copy kept in the scratchpad): the 4 s minimum waived for shots **2, 3, 5, 6, 7 and 8**
+   (`fidelity` sentence and `approval_record.owner_waivers`; the old `not_waived_under_4s` entry removed), and a new
+   `approval_record.owner_decisions_27_nov_2026_finish` (the waiver; f01s014-5 = the retouched 7-c1 with its
+   override reason; the accepted flaws of shots 3 and 8; the broom kept on shot 10). The accepted flaws of
+   shots 3 and 8 were already in `accepted_flaws_for_frame_review`.
+3. `plan-shots --root R --film 1 --scene f01s014 --bible B/specs/world-bible.json`: exit 0, "12 shots, 54.6 s,
+   5 Wan clip(s); rules R1-R3 pass".
+4. The same with `--approve --by "Claude" --reviewer "<the existing approval text> … plus the owner decisions of
+   27 Nov 2026 at the finish: the 4 s minimum waived for shots 2, 3, 5, 6, 7 and 8; f01s014-5 is the retouched
+   7-c1 (no mole); shot 3 cot/doorknob and shot 8 horizontal slats accepted for frame review; broom kept on shot
+   10"`: exit 0. New input sha256 `eb7b54c3…`.
+5. `R/picks/gate-overrides.json`: added `"f01s014-5": "owner: no mole; retouched 7-c1 so shots 4 and 5 match
+   (27 Nov)"` (the owner's words).
+6. `status --root R --scene f01s014`: exit 0, same `Next:` (the re-approval left every job bound).
+7. Sound inventory and licence check (below). Made `V/sfx/`: byte copies of the six licensed synthesis files,
+   with `licences.json` in the skill's synthesis format (`licence` `CC0-1.0`, `basis.rule` `cc0-synthesis`, source
+   path, declaring README and sha256 per file) and a `README.md`.
+8. Wikimedia Commons from this container: 4 requests to `commons.wikimedia.org/w/api.php` (the first metadata
+   query for the motion-pilot4 bird files, then retries after the server's `retry-after`), **all HTTP 429**
+   ("You are making too many requests to the API"). Stopped there, as instructed. The other CC0 hosts tried
+   (opengameart.org, archive.org, bigsoundbank.com, api.wikimedia.org) are refused by this container's proxy
+   (one HEAD each, no body fetched).
+
+Not run (each comes after the stop): `cue --pick --tonic D`, `cue --fx`, `film --shots --scene f01s014`, `qc`,
+frame extraction and review, the copy to `V/scene14-v5*.mp4`.
+
+## Sound effects (R4)
+
+| Sound | Shots | Clip | Licence record | Verified |
+|---|---|---|---|---|
+| night | 1, 2, 3 | `V/sfx/night2.wav` (= `pilot/sfx/night2.wav`, `95577e82…`) | CC0-1.0, original synthesis | `pilot/sfx/README.md` declares original synthesis, no third-party recording, CC0 1.0. No generator script is on file for it. |
+| wheels | 1, 4, 5, 8, 12 | `V/sfx/wheels.wav` (= `v4/sfx`, `b36dd28b…`) | CC0-1.0, original synthesis | `v4/sfx/README.md` + `v4/tools/synth_sfx.py` (numpy noise, no input recording) |
+| breeze | 6, 7, 9, 10 | `V/sfx/breeze.wav` (= `v4/sfx`, `6e87be47…`) | CC0-1.0, original synthesis | same |
+| broom | 10 | `V/sfx/broom.wav` (= `v4/sfx`, `f414a078…`) | CC0-1.0, original synthesis | same. **Its strokes are timed to the old v2 6 + 6x take, not 13s/13t** (see S3) |
+| pot | 11 | `V/sfx/pot-drop.wav` (= `pilot/sfx`, `7cacc212…`) | CC0-1.0, original synthesis | `pilot/sfx/README.md` |
+| murmur | 12 | `V/sfx/murmur.wav` (= `v4/sfx`, `a1881bd6…`) | CC0-1.0, original synthesis | `v4/sfx/README.md` + `synth_sfx.py` |
+| **hooves** | 1 | **missing** | none | no clip on file anywhere in the pilot |
+| **crows / morning birds** | 9, 10 | **missing** | none | see below |
+
+Rejected (no usable licence record): `motion-pilot4-f01s014/out/sfx-licences.json`.
+- Every entry says only `"licence": "Public domain"` with no `basis`; `cue` (`licence_ok`) needs
+  `basis.rule` `author-release` for PD, and the author-release categories could not be checked (Commons 429).
+- The content does not fit either: `sfx-broom-1/2` are "Brushing ones teeth.ogg" / "Brushing teeth.ogg";
+  `sfx-crowd-1` is a Berlin shopping mall and `sfx-crowd-2` church footsteps; `sfx-birds-2`
+  ("En-us-dawn chorus.oga", CC0) is a Wiktionary pronunciation of the words "dawn chorus", not birds.
+- `sfx-birds-1` ("Dawnchorus-uk.ogg", Silas S. Brown, "Public domain") is the only plausible birds clip; its
+  author-release basis is unverified, and it is a UK dawn chorus (period/place fit for Calcutta crows unreviewed).
+
+**Would a CPU-only Colab SFX cell get them?** Probably, at about 0 CU, but there is no eav route for it today.
+- Colab has its own IP, so the Commons rate limit that stops this container should not apply there, and the
+  skill's own sfx cell (`eav/templates/sfx_cell.py.txt`) already checks exactly the needed rule (CC0, or PD with a
+  PD-self / author-release category and no country- or age-limited category; keyword as a whole word in the title).
+- Whether Commons holds a CC0/PD-self "hooves" and a "crow" recording that passes that filter is not known until it
+  runs.
+- The gap: `job film_clips` refuses a job with no clip or depth item (`colab_jobs.py:977`: "needs at least one
+  item (or depth_stills only)"), and its notebook asks for a GPU (`gpuType` L4/A100). An `sfx`-only, CPU-runtime
+  film_clips job is a code change for the skill owner, not an operator step. Running the sfx cell by hand outside
+  an eav job would not be an import eav can verify.
+- Until then the other route the skill allows is original synthesis dedicated to CC0 (as v4 did for wheels and
+  broom), which this run was not asked to make.
+
+## QC
+
+**Not run**: there is no scene cut. All gates (loudness, true_peak, new_info, holds, black_bars, hitches,
+flashes, sound_on_picture, captions, margin, peak_silence, digital_zero, licences) are not run. Nothing is
+listened to or frame-reviewed; everything is **unassessed**.
+
+## Findings
+
+- **S1 (blocker): no CC0 / author-released PD clip for hooves (shot 1) or crows/morning birds (shots 9, 10).**
+  R4 (`qc sound_on_picture`) needs every listed sound placed over its shot, and `cue --fx` refuses a clip without a
+  licence record. Commons is rate-limited (429) from this container; other CC0 hosts are blocked by its proxy.
+- **S2 (record): the motion-pilot4 Commons fetch has unusable licence records and mismatched content** (above).
+  It predates the sfx cell's author-release check.
+- **S3 (sync): `broom.wav` is timed to the old sweeping take** (motion-pilot2 6 + 6x, v4 shot 10). Over 13s/13t
+  its strokes will not land on the mother's strokes. It is licensed and can be placed, but the sync needs review
+  (or a new broom clip timed to 13s).
+- **S4 (verification limit): `night2.wav` and `pot-drop.wav`** rest on the `pilot/sfx/README.md` declaration;
+  no generator script for them is on file.
+- **Tonic for the cue: D.** Every stem of `adopt-f01s014-music-f5b90329a1` (music-pilot3b) was generated on
+  "tonic D" / "drone on D" (its adoption.json items). That is what `cue --pick --tonic` should be given.
+
+## Owner-review items
+
+1. **Sounds:** choose how hooves and crows are obtained: a CPU-only Commons fetch cell in Colab (needs an
+   `sfx`-only film_clips route in eav, ~0 CU), CC0 original synthesis, or drop the sounds from shots 1, 9 and 10
+   (a plan change and re-approval).
+2. Whether `sfx-birds-1` (UK dawn chorus) should be checked for author release, or a crow recording sought instead.
+3. The broom sync over 13s/13t (S3).
+4. Still open for the frame review once the film exists: the veiled mother's continuity (white sari, red border,
+   head covered); no mole on Hem (shots 4, 5, 8); shot 3's Western cot and round doorknob and shot 8's horizontal
+   slats (owner-accepted); captions; anachronisms (gate advisories on shots 1, 2 and 12).
+
+## Next, once the two sounds exist with records
+
+`cue --root R --film 1 --scene f01s014 --stems adopt-f01s014-music-f5b90329a1 --pick --tonic D`, then
+`cue … --fx V/sfx/fx-f01s014.json` (music silent 0.4 s on the cut into shot 11, then low drone; the sunrise phrase
+cut dead at the peak), then `film --root R --film 1 --shots --scene f01s014 --logo
+skills/earnalism-video/software/assets/standard-intro/v1/production-lockup.png --end-card
+…/standard-intro/v1/landscape.mp4 --title বিচারক --author "রবীন্দ্রনাথ ঠাকুর" --narrator "Subhajit – Grounded Bengali
+Storyteller" --burn`, then `qc`.
+
+---
+
+# Earlier v5 record (superseded by the run above; kept for history)
+
 # বিচারক scene 14 v5: acceptance test of the fixed `earnalism-audiovisual` skill (eav commands only)
 
 Built 27 Nov 2026 in a scratch title root, `pilot/v5/root`. Everything ran locally. No Colab or GPU job was
