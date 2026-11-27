@@ -1506,7 +1506,7 @@ test("splitTitleSlot leaves the title slot between the two halves", () => {
   assert.deepEqual(splitTitleSlot("No slot"), ["No slot", ""]);
 });
 
-import { runListenSwitch, listenFallback, flushPreferenceSave } from "./state.ts";
+import { runListenSwitch, runWatchSwitch, runReadSwitch, listenFallback, flushPreferenceSave } from "./state.ts";
 import { annotationSpan } from "./sentences.ts";
 
 test("the toolbar Listen action sends the current anchor and opens the player at the returned position", async () => {
@@ -1715,4 +1715,85 @@ test("the scroll observer keeps an exact restored place until the reader scrolls
   assert.equal(observedPosition(exact, "u", "b", true), exact); // held after a jump
   assert.equal(observedPosition(exact, "u", "a", false), exact); // same paragraph keeps its offset
   assert.deepEqual(observedPosition(exact, "u", "b", false), { format: "reader", unit_id: "u", anchor_id: "b", offset_chars: 0 });
+});
+
+const watchPosition = { format: "reader", unit_id: "u1", anchor_id: "a-9", offset_chars: 4 } as never;
+
+test("the toolbar Watch action sends the exact anchor and offset and opens the film at the mapped position", async () => {
+  const calls: Array<{ path: string; body: Record<string, unknown> }> = [];
+  const went: string[] = [];
+  const outcome = await runWatchSwitch({
+    call: async (path, body) => {
+      calls.push({ path, body });
+      return { outcome: "mapped", to_location: { format: "video", unit_id: "u1", position_ms: 83250 } };
+    },
+    editionRevisionId: "rev-1",
+    position: watchPosition,
+    videoUrl: "/en/watch/e1/",
+    save: async () => {},
+    go: (url) => went.push(url),
+  });
+  assert.equal(outcome, "mapped");
+  assert.equal(calls[0].path, "/content/switch-position");
+  assert.deepEqual(calls[0].body, { edition_revision_id: "rev-1", from_location: watchPosition, to_format: "video" });
+  assert.deepEqual(went, ["/en/watch/e1/?unit_id=u1&position_ms=83250"]);
+});
+
+test("an unmapped Watch switch does not navigate, so the caller follows the part-start link", async () => {
+  for (const unmapped of [{ outcome: "unmapped" }, { outcome: "unreleased" }, { outcome: "feature_disabled" },
+    { outcome: "mapped", to_location: { format: "audio", unit_id: "u1", position_ms: 5 } },
+    { outcome: "mapped", to_location: { format: "video", unit_id: "u1" } }]) {
+    const went: string[] = [];
+    const outcome = await runWatchSwitch({
+      call: async () => unmapped,
+      editionRevisionId: "rev-1", position: watchPosition, videoUrl: "/en/watch/e1/",
+      save: async () => {}, go: (url) => went.push(url),
+    });
+    assert.equal(outcome, "unmapped", JSON.stringify(unmapped));
+    assert.deepEqual(went, []);
+  }
+});
+
+test("a failed Watch switch reports failed, saves nothing and does not navigate", async () => {
+  const went: string[] = [], errors: unknown[] = [];
+  let saved = 0;
+  const outcome = await runWatchSwitch({
+    call: async () => { throw new Error("network"); },
+    editionRevisionId: "rev-1", position: watchPosition, videoUrl: "/en/watch/e1/",
+    save: async () => { saved++; }, go: (url) => went.push(url), onError: (e) => errors.push(e),
+  });
+  assert.equal(outcome, "failed");
+  assert.deepEqual(went, []);
+  assert.equal(errors.length, 1);
+  assert.equal(saved, 0);
+});
+
+test("a failing position save does not stop a mapped Watch switch", async () => {
+  const went: string[] = [];
+  const outcome = await runWatchSwitch({
+    call: async () => ({ outcome: "mapped", to_location: { format: "video", unit_id: "u1", position_ms: 0 } }),
+    editionRevisionId: "rev-1", position: watchPosition, videoUrl: "/en/watch/e1/",
+    save: async () => { throw new Error("conflict"); }, go: (url) => went.push(url),
+  });
+  assert.equal(outcome, "mapped");
+  assert.deepEqual(went, ["/en/watch/e1/?unit_id=u1&position_ms=0"]);
+});
+
+test("Watch to Read sends the film position and opens the reader at the mapped anchor and offset", async () => {
+  const calls: Array<Record<string, unknown>> = [];
+  const went: string[] = [];
+  const deps = {
+    editionRevisionId: "rev-1", unitId: "u1", positionMs: 12345.6,
+    readerUnitUrl: (unit: string) => `/en/read/e1/${unit}/`,
+    go: (url: string) => went.push(url),
+  };
+  assert.equal(await runReadSwitch({
+    ...deps,
+    call: async (_p, body) => { calls.push(body); return { outcome: "mapped", to_location: { format: "reader", unit_id: "u2", anchor_id: "a 7", offset_chars: 31 } }; },
+  }), "mapped");
+  assert.deepEqual(calls[0], { edition_revision_id: "rev-1", from_location: { format: "video", unit_id: "u1", position_ms: 12346 }, to_format: "reader" });
+  assert.deepEqual(went, ["/en/read/e1/u2/?anchor=a+7&offset=31"]);
+  assert.equal(await runReadSwitch({ ...deps, call: async () => ({ outcome: "unmapped" }) }), "unmapped");
+  assert.equal(await runReadSwitch({ ...deps, call: async () => { throw new Error("x"); } }), "failed");
+  assert.equal(went.length, 1);
 });

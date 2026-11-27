@@ -758,11 +758,16 @@ def video(request,locale,edition_id):
                         boot["stream_customer_host"] = customer_host()
                     if selected:
                         boot["start_asset_id"] = str(selected.id)
+                        # The reader's Watch switch opens the film at the mapped place: an integer within the film.
+                        raw_start = request.GET.get("position_ms", "")
+                        if raw_start.isascii() and raw_start.isdigit() and len(raw_start) <= 12:
+                            boot["start_ms"] = min(int(raw_start), selected.duration_ms)
             except DomainError as exc:
                 if exc.code not in {"entitlement_required", "access_denied", "email_verification_required"}:
                     raise
     if "reader" in edition["formats"]:
         boot["reader_url"]=reverse("web:reader-start",args=[locale,edition_id])
+        boot["reader_unit_url"]=reverse("web:reader",args=[locale,edition_id,UUID(int=0)]).replace(str(UUID(int=0)),"{unit_id}")
     if django_settings.FEATURES.get("audio") and "audio" in edition["formats"]:
         boot["player_url"]=reverse("web:player",args=[locale,edition_id])
     return page(request,locale,"web/video.html",edition=edition,bootstrap=boot,next_cursor=next_cursor,focused=True,active_nav="series")

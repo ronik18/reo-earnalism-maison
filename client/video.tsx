@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { mountIsland } from "./lifecycle";
 import { api, ApiError, errorText, readBootstrap, session, t } from "./api";
-import { validReturnPath } from "./state";
+import { validReturnPath, runReadSwitch, type ListenSwitchResult } from "./state";
 import { approvedFilmURL, approvedStreamURL, renewExpiredFilm, type FilmGrant, type StreamGrant } from "./media-state";
 import { loadStreamSDK, type StreamPlayerAPI, type StreamFactory } from "./stream-sdk";
 
@@ -9,8 +9,8 @@ interface Chapter { asset_id: string; unit_id: string; duration_ms: number; titl
 interface Boot {
   edition_id: string; edition_revision_id: string; title: string; locale: string;
   enabled: boolean; authenticated?: boolean; stream_customer_host?: string;
-  asset_id?: string; unit_id?: string; duration_ms?: number; start_asset_id?: string;
-  chapters?: Chapter[]; reader_url?: string; player_url?: string; sign_in_url?: string;
+  asset_id?: string; unit_id?: string; duration_ms?: number; start_asset_id?: string; start_ms?: number;
+  chapters?: Chapter[]; reader_url?: string; reader_unit_url?: string; player_url?: string; sign_in_url?: string;
 }
 interface Progress { version: number; location?: { unit_id: string; position_ms: number } }
 interface Source { url: string; chapter: Chapter; generation: number; at: number; resume: boolean; film: boolean }
@@ -74,6 +74,8 @@ function Video({boot}: {boot: Boot}) {
         const latest = await api<Progress>(path,{signal:abort.signal}); progress.current = latest;
         const desired = boot.start_asset_id ? chapters.findIndex(c=>c.asset_id===boot.start_asset_id) : at === undefined ? chapters.findIndex(c=>c.unit_id===latest.location?.unit_id) : -1;
         if (desired >= 0) i = desired;
+        /* An explicit start (the reader's Watch switch) wins over the saved place; load() clamps it to the film. */
+        if (at === undefined && boot.start_asset_id && Number.isFinite(boot.start_ms) && chapters[i].asset_id === boot.start_asset_id) at = boot.start_ms;
         at ??= latest.location?.unit_id===chapters[i].unit_id ? latest.location.position_ms : 0;
       }
       const c = chapters[i];
@@ -153,6 +155,20 @@ function Video({boot}: {boot: Boot}) {
     return()=>{mounted.current=false;generation.current++;controller.current?.abort();clearInterval(timer);window.removeEventListener("online",network);window.removeEventListener("offline",network);document.removeEventListener("visibilitychange",hidden);window.removeEventListener("pagehide",leaving);window.removeEventListener("maison:before-navigate",leaving);};
   },[]);
   async function choose(i:number) {try {await save();if(!conflicting.current)await load(i,0,playing.current,true);}catch(error){setStatus(errorText(error));}}
+  async function readHere(event: ReactMouseEvent<HTMLAnchorElement>) {
+    const template = boot.reader_unit_url, c = chapters[active.current];
+    if (!template || !c || !boot.authenticated || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const fallback = event.currentTarget.href;
+    setBusy(true);
+    const outcome = await runReadSwitch({
+      call:(p,body)=>api<ListenSwitchResult>(p,{method:"POST",key:crypto.randomUUID(),body}),
+      editionRevisionId:boot.edition_revision_id, unitId:c.unit_id, positionMs:point(c).position_ms,
+      readerUnitUrl:unit=>template.replace("{unit_id}",unit),
+      save:()=>save(), go:url=>location.assign(url), onError:()=>{},
+    });
+    if (outcome !== "mapped") location.assign(fallback); // never a dead end: the reader opens at its start
+  }
   async function resolve(useLocal:boolean) {
     setBusy(true);
     try {
@@ -172,7 +188,7 @@ function Video({boot}: {boot: Boot}) {
     {conflict?<div className="notice"><p>{t("conflict")}</p><button disabled={busy} onClick={()=>void resolve(false)}>{t("use_server")}</button><button disabled={busy} onClick={()=>void resolve(true)}>{t("resolve_keep_local")}</button></div>:null}
     {chapters.length>1?<ol className="unit-list">{chapters.map((c,i)=><li key={c.asset_id}><button disabled={busy||conflict} aria-current={i===index?"true":undefined} onClick={()=>void choose(i)}>{c.title}</button></li>)}</ol>:null}
     <p className="notice">{t("video_caption_status")}</p><p>{t("video_pip_help")}</p>
-    <div className="actions">{boot.reader_url?<a className="button secondary" href={validReturnPath(boot.reader_url)}>{t("reader")}</a>:null}{boot.player_url?<a className="button secondary" href={validReturnPath(boot.player_url)}>{t("audio")}</a>:null}</div>
+    <div className="actions">{boot.reader_url?<a className="button secondary" href={validReturnPath(boot.reader_url)} onClick={boot.reader_unit_url?e=>void readHere(e):undefined}>{t("reader")}</a>:null}{boot.player_url?<a className="button secondary" href={validReturnPath(boot.player_url)}>{t("audio")}</a>:null}</div>
   </section>;
 }
 export function mount(){const host=document.getElementById("video-island");if(host)mountIsland(host,()=> <Video boot={readBootstrap<Boot>("video-bootstrap")} />);}

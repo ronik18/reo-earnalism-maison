@@ -547,15 +547,52 @@ export function flushPreferenceSave<T extends Record<string, unknown>>(
 
 export interface ListenSwitchResult {
   outcome: string;
-  to_location?: { format: "audio"; unit_id: string; position_ms: number };
+  to_location?: { format: string; unit_id: string; position_ms?: number; anchor_id?: string; offset_chars?: number };
 }
 
 /**
- * The toolbar's Listen action: sends the reader's current spot to /content/switch-position and opens the player there.
- * Never throws: a failed call returns "failed" (the caller offers the chapter start), and a failed position save
+ * One format switch (Listen, Watch, or Watch to Read): sends the current spot to /content/switch-position and opens the
+ * destination `destination(to_location)` builds (null: the location does not fit, so treat it as unmapped).
+ * Never throws: a failed call returns "failed" (the caller follows the part-start link), and a failed position save
  * (network, 412) is reported through onError but does not stop a mapped switch: the page-hide save retries it.
  */
-export async function runListenSwitch(deps: {
+export async function runFormatSwitch(deps: {
+  call: (path: string, body: Record<string, unknown>) => Promise<ListenSwitchResult>;
+  editionRevisionId: string;
+  from: Record<string, unknown>;
+  toFormat: "audio" | "video" | "reader";
+  destination: (to: NonNullable<ListenSwitchResult["to_location"]>) => string | null;
+  save?: () => Promise<unknown>;
+  go: (url: string) => void;
+  onError?: (error: unknown) => void;
+}): Promise<"mapped" | "unmapped" | "failed"> {
+  let result: ListenSwitchResult;
+  try {
+    result = await deps.call("/content/switch-position", {
+      edition_revision_id: deps.editionRevisionId,
+      from_location: deps.from,
+      to_format: deps.toFormat,
+    });
+  } catch (error) {
+    deps.onError?.(error);
+    return "failed";
+  }
+  try {
+    await deps.save?.();
+  } catch (error) {
+    deps.onError?.(error);
+  }
+  const to = result.to_location;
+  const url = result.outcome === "mapped" && to ? deps.destination(to) : null;
+  if (url) {
+    deps.go(url);
+    return "mapped";
+  }
+  return "unmapped";
+}
+
+/** The toolbar's Listen action: the reader's current spot to the audio player. */
+export function runListenSwitch(deps: {
   call: (path: string, body: Record<string, unknown>) => Promise<ListenSwitchResult>;
   editionRevisionId: string;
   position: Position;
@@ -564,28 +601,66 @@ export async function runListenSwitch(deps: {
   go: (url: string) => void;
   onError?: (error: unknown) => void;
 }): Promise<"mapped" | "unmapped" | "failed"> {
-  let result: ListenSwitchResult;
-  try {
-    result = await deps.call("/content/switch-position", {
-      edition_revision_id: deps.editionRevisionId,
-      from_location: deps.position,
-      to_format: "audio",
-    });
-  } catch (error) {
-    deps.onError?.(error);
-    return "failed";
-  }
-  try {
-    await deps.save();
-  } catch (error) {
-    deps.onError?.(error);
-  }
-  const to = result.to_location;
-  if (result.outcome === "mapped" && to?.format === "audio") {
-    deps.go(`${deps.playerUrl}?unit_id=${to.unit_id}&position_ms=${to.position_ms}`);
-    return "mapped";
-  }
-  return "unmapped";
+  return runFormatSwitch({
+    call: deps.call,
+    editionRevisionId: deps.editionRevisionId,
+    from: deps.position as unknown as Record<string, unknown>,
+    toFormat: "audio",
+    destination: (to) =>
+      to.format === "audio" && Number.isFinite(to.position_ms) ? `${deps.playerUrl}?unit_id=${to.unit_id}&position_ms=${to.position_ms}` : null,
+    save: deps.save,
+    go: deps.go,
+    onError: deps.onError,
+  });
+}
+
+/** The toolbar's Watch action: the reader's current spot to the film. `videoUrl` has no query. */
+export function runWatchSwitch(deps: {
+  call: (path: string, body: Record<string, unknown>) => Promise<ListenSwitchResult>;
+  editionRevisionId: string;
+  position: Position;
+  videoUrl: string;
+  save: () => Promise<unknown>;
+  go: (url: string) => void;
+  onError?: (error: unknown) => void;
+}): Promise<"mapped" | "unmapped" | "failed"> {
+  return runFormatSwitch({
+    call: deps.call,
+    editionRevisionId: deps.editionRevisionId,
+    from: deps.position as unknown as Record<string, unknown>,
+    toFormat: "video",
+    destination: (to) =>
+      to.format === "video" && Number.isFinite(to.position_ms) ? `${deps.videoUrl}?unit_id=${to.unit_id}&position_ms=${to.position_ms}` : null,
+    save: deps.save,
+    go: deps.go,
+    onError: deps.onError,
+  });
+}
+
+/** The film page's Read action: the film's current spot to the reader at the mapped anchor and offset. */
+export function runReadSwitch(deps: {
+  call: (path: string, body: Record<string, unknown>) => Promise<ListenSwitchResult>;
+  editionRevisionId: string;
+  unitId: string;
+  positionMs: number;
+  readerUnitUrl: (unitId: string) => string;
+  save?: () => Promise<unknown>;
+  go: (url: string) => void;
+  onError?: (error: unknown) => void;
+}): Promise<"mapped" | "unmapped" | "failed"> {
+  return runFormatSwitch({
+    call: deps.call,
+    editionRevisionId: deps.editionRevisionId,
+    from: { format: "video", unit_id: deps.unitId, position_ms: Math.max(0, Math.round(deps.positionMs)) },
+    toFormat: "reader",
+    destination: (to) =>
+      to.format === "reader" && to.anchor_id
+        ? `${deps.readerUnitUrl(to.unit_id)}?${new URLSearchParams({ anchor: to.anchor_id, offset: String(Math.max(0, Math.round(to.offset_chars ?? 0))) })}`
+        : null,
+    save: deps.save,
+    go: deps.go,
+    onError: deps.onError,
+  });
 }
 
 /** After a toolbar Listen click: nothing more, the format sheet (chapter start), or the link's own destination. */

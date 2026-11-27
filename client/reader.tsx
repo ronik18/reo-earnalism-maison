@@ -45,6 +45,7 @@ import {
   pageCount,
   type Position,
   runListenSwitch,
+  runWatchSwitch,
   listenFallback,
   flushPreferenceSave,
   type ListenSwitchResult,
@@ -1053,23 +1054,27 @@ function Reader({ boot }: { boot: Boot }) {
   }
   const hasSwitchSheet = fullReader && !!boot.player_url;
   /** Returns "link" when the caller should follow the toolbar link itself (no sheet to fall back to). */
-  async function switchToListen(): Promise<"none" | "sheet" | "link"> {
+  async function switchToFormat(kind: "audio" | "video", videoUrl = ""): Promise<"none" | "sheet" | "link"> {
     setBusy(true);
     try {
       let failure: unknown;
-      const outcome = await runListenSwitch({
-        call: (path, body) =>
+      const deps = {
+        call: (path: string, body: Record<string, unknown>) =>
           api<ListenSwitchResult>(path, { method: "POST", key: crypto.randomUUID(), body }),
         editionRevisionId: boot.edition_revision_id,
         position: position.current,
-        playerUrl: boot.player_url ?? "",
         save: () => savePosition(),
-        go: (url) => window.location.assign(url),
-        onError: (e) => {
+        go: (url: string) => window.location.assign(url),
+        onError: (e: unknown) => {
           failure ??= e;
         },
-      });
-      const next = listenFallback(outcome, hasSwitchSheet);
+      };
+      const outcome =
+        kind === "audio"
+          ? await runListenSwitch({ ...deps, playerUrl: boot.player_url ?? "" })
+          : await runWatchSwitch({ ...deps, videoUrl });
+      // Watch has no chapter-start sheet: its fallback is always the link's own part-start destination.
+      const next = listenFallback(outcome, kind === "audio" && hasSwitchSheet);
       if (next === "sheet") {
         // No exact spot, or the switch call failed: the sheet offers the chapter start instead.
         setStatus(outcome === "failed" ? errorText(failure) : t("switch_unmapped_audio"));
@@ -1080,24 +1085,40 @@ function Reader({ boot }: { boot: Boot }) {
       setBusy(false);
     }
   }
-  // The toolbar's Listen link is a real link; with scripts on it carries the reader's position first. It never dead
-  // ends: a failed or unmapped switch opens the format sheet (chapter start) or, with no sheet, follows the link.
+  const switchToListen = () => switchToFormat("audio");
+  // The toolbar's Listen and Watch links are real links; with scripts on they carry the reader's position first. They
+  // never dead end: a failed or unmapped switch opens the format sheet (Listen, chapter start) or follows the link
+  // (the part start).
   const toolbarListen = useRef(switchToListen);
   toolbarListen.current = switchToListen;
+  const toolbarWatch = useRef(switchToFormat);
+  toolbarWatch.current = switchToFormat;
   useEffect(() => {
-    const link = document.querySelector<HTMLAnchorElement>('[data-format-switch="audio"], [data-format-switch="listen"]');
-    if (!link || !hasSwitchSheet) return; // signed out or no player: the plain link is the whole action
-    const onClick = (event: MouseEvent) => {
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      event.preventDefault();
-      void toolbarListen.current()
-        .then((next) => {
-          if (next === "link") window.location.assign(link.href);
-        })
-        .catch(() => window.location.assign(link.href));
+    const bind = (selector: string, run: (link: HTMLAnchorElement) => Promise<"none" | "sheet" | "link">, enabled: boolean) => {
+      const link = document.querySelector<HTMLAnchorElement>(selector);
+      if (!link || !enabled) return undefined; // signed out or nothing to switch to: the plain link is the whole action
+      const onClick = (event: MouseEvent) => {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        void run(link)
+          .then((next) => {
+            if (next === "link") window.location.assign(link.href);
+          })
+          .catch(() => window.location.assign(link.href));
+      };
+      link.addEventListener("click", onClick);
+      return () => link.removeEventListener("click", onClick);
     };
-    link.addEventListener("click", onClick);
-    return () => link.removeEventListener("click", onClick);
+    const offListen = bind('[data-format-switch="audio"], [data-format-switch="listen"]', () => toolbarListen.current(), hasSwitchSheet);
+    const offWatch = bind(
+      '[data-format-switch="watch"]',
+      (link) => toolbarWatch.current("video", new URL(link.href, window.location.href).pathname),
+      !!fullReader,
+    );
+    return () => {
+      offListen?.();
+      offWatch?.();
+    };
   }, []);
   const paginated = preferences.reader_layout === "paginated";
   return (

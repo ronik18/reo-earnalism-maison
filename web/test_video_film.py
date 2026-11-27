@@ -65,3 +65,30 @@ class VideoFilmBootTests(TestCase):
     @override_settings(VIDEO_PROVIDER='stream', STREAM_CUSTOMER_HOST='customer-fixture.cloudflarestream.com')
     def test_r2_only_rows_are_inert_when_stream_is_chosen(self):
         self.assertFalse(self.boot()['enabled'])  # only r2 rows exist
+
+
+@override_settings(VIDEO_PROVIDER='r2')
+class VideoStartPositionTests(VideoFilmBootTests):
+    """The reader's Watch switch opens the film with ?unit_id=&position_ms=; the page seeds the player from it."""
+
+    def test_position_ms_seeds_the_start_of_the_selected_film(self):
+        boot = self.boot(unit_id=str(self.unit.id), position_ms='4200')
+        self.assertEqual(boot['start_asset_id'], str(self.film.id))
+        self.assertEqual(boot['start_ms'], 4200)
+
+    def test_position_is_clamped_to_the_films_own_duration(self):
+        self.assertEqual(self.boot(unit_id=str(self.unit.id), position_ms='999999')['start_ms'], 9000)  # film is 9000, unit 6000
+        self.assertEqual(self.boot(unit_id=str(self.second.id), position_ms='999999')['start_ms'], 6000)
+
+    def test_invalid_positions_are_ignored(self):
+        for bad in ('', '-5', 'abc', '1.5', '1e3', ' 7', '٣', '9' * 40):
+            boot = self.boot(unit_id=str(self.unit.id), position_ms=bad)
+            self.assertNotIn('start_ms', boot, bad)
+            self.assertEqual(boot['start_asset_id'], str(self.film.id))
+
+    def test_position_without_a_selected_film_is_ignored(self):
+        self.assertNotIn('start_ms', self.boot(position_ms='4200'))
+
+    def test_boot_gives_the_reader_unit_url_template_for_watch_to_read(self):
+        boot = self.boot()
+        self.assertEqual(boot['reader_unit_url'], f'/en/read/{self.revision.edition_id}/{{unit_id}}/')
