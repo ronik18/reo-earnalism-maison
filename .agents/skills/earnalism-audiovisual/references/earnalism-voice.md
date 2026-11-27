@@ -51,14 +51,21 @@ a run of fewer than 3 passages has no such rate: it uses `--cps` and reports `du
 failure (a uniformly mis-paced scene is then not caught on length; the other gates still apply). **A scene
 with a failed passage is not joined**, with the passages and failure codes listed (the other scenes of the call
 still are): regenerate only those passages from the same tagged script, download over the old
-`<passage id>.mp3` and rerun the same call. **Credits:** every run, passing or failing, records a
+`<passage id>.mp3` and rerun the same call. **At most 3 different takes of a passage**: after a third failed
+take the tool stops asking for regeneration and holds the passage for the owner, who listens to it and its
+`voicecheck.json` values and either rewrites its tagged script or has it joined with
+`--accept <passage id>="<reason>"` (recorded in the passage manifest and the `passages_checked` event; an
+accepted passage is joined but never counted as a pass). **Credits:** every run, passing or failing, records a
 `passages_checked` event with its `--credits`, so on a redo give the credits of that regeneration only (the
 account sums the events against the 60,000 monthly limit). When a scene passes it is joined to
 `film/film-NN/voice/<scene>.wav` (the file `cue` reads; `film --shots` and `cue` need no narration job): the
 seam between passages is the take's own room tone (`eav.retime.room_tone`, −62 to −68 dBFS) sized by the
 punctuation that ends the passage (`।` or `?` 0.8–1.0 s, `!` 1.4–1.6 s, before a heading 2.5–3.0 s, each
-varied ±15% by a draw seeded with the passage id, as `retime` does), joined by 10 ms equal-power crossfades,
-the take edges beside it cut back to 20 ms of speech, so no digital zero is left. Beside each wav
+varied ±15% by a draw seeded with the passage id, as `retime` does), joined by 40 ms equal-power crossfades
+(the binding 30–50 ms), the take edges beside it cut back to 80 ms of speech with room tone under them, so no
+digital zero is left. The scene opens on room tone with its first word 0.85 s in (R9's 0.5–1 s breath) and
+ends with 2 s of room tone after its last word (the room for R4's J/L-cut); the manifest records each
+passage's offset on the scene, which `scene-timing` uses to place the measured clauses for `plan-shots`. Beside each wav
 `<scene>.passages.json` records the model, the sha256 of `voice.json`, voice, credits and the sha256 of every
 script, take and retimed passage; the record gets `passages_checked` and `passages_joined` events and
 `scene_voice` and `passage_manifest` artifacts. `voice.json` may not name `eleven_v3` (that model is the
@@ -107,16 +114,25 @@ to regenerate only those and rerun with the profile. Checks (codes in brackets):
 |---|---|
 | duration | within ±12% of expected (`duration`) |
 | median pitch | within ±1.5 semitones of the book median (`pitch_median`) |
-| pitch spread | 10th–90th percentile at least 3.0 semitones (`pitch_spread`) |
-| monotone | no more than 20% of 2 s windows with spread under 1.5 semitones (`monotone`) |
-| breath | no stretch over 9 s without a pause of 0.15 s or more (`no_breath`) |
-| tail | last 50 ms no louder than −50 dBFS (`tail`) |
+| pitch spread | 10th–90th percentile at least 3.0 semitones (`pitch_spread`; uncalibrated: warning) |
+| monotone | no more than 20% of 2 s windows with spread under 1.5 semitones (`monotone`; uncalibrated: warning) |
+| breath | no stretch over 9 s without a pause of 0.15 s or more (`no_breath`; uncalibrated: warning) |
+| tail | last 50 ms no louder than −50 dBFS (`tail`; uncalibrated: warning) |
 | brightness | within ±2 dB of the book median (`brightness`) |
 | spectral jumps | within 1.5× the profile, floored at 0.1 per speech second (`jumps`) |
-| clicks | no more than 0.2 per second (`clicks`) |
+| clicks | no more than 0.2 per second (`clicks`; uncalibrated: warning) |
 | digital zero | no run over 50 ms (`digital_zero`) |
 | join | with `--prev-tail`: within ±1.5 LU and ±1.5 semitones (`join`) |
 | true peak | below −0.1 dBFS (`true_peak`) |
+
+**Uncalibrated absolute limits are warnings (owner ruling, 27 Nov final review).** pitch spread, monotone, breath,
+tail and clicks are fixed numbers that no accepted v4 take has calibrated: the owner-endorsed scene 14 v4 take
+runs 9.012 s without a pause in a clause the book prints without one. Until the profile carries a calibrated
+limit for a code (`"calibrated_limits": {"no_breath": 9.5, ...}` in `voicecheck-profile.json`, written only after
+the owner has listened to accepted v4 takes), exceeding it is a WARNING printed with the measured value and the
+limit (`warnings` and `warning_values` in the result), never a redo and never a credit-spending regeneration,
+exactly like the words check's provisional ceiling. The profile-relative checks, duration, join, digital zero and
+true peak stay redos.
 
 One narration feeds both the film and the audiobook, so the stricter audiobook limits (joins 1.5 LU
 and ±1.5 semitones, 30–50 ms crossfades) apply to both. Measurement is not listening: a PASS means

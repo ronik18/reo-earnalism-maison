@@ -131,8 +131,8 @@ class SkillFileTests(unittest.TestCase):
         self.assertNotIn("CLIP-image", table)
 
     def test_skill_md_stage_order(self):
-        order = ["plan-shots", "stills", "film_clips", "voice", "retime", "voicecheck", "cue",
-                 "film --shots", "qc", "owner review"]
+        order = ["voice", "retime", "voicecheck", "scene-timing", "plan-shots", "stills", "pick", "film_clips",
+                 "music", "cue", "film --shots", "qc", "owner review"]   # C3: the route Next: walks
         flow = next(l for l in self.text.splitlines() if "plan-shots" in l and "film_clips" in l
                     and "owner review" in l)
         pos = [flow.index(k) for k in order]
@@ -155,7 +155,8 @@ class SkillFileTests(unittest.TestCase):
         self.assertNotRegex(voice, r"(?i)(passage|v4)[^.]*not yet built")
         self.assertIn("Built (Task 13)", voice)
         for phrase in ("split-passages", "voice.json", "model_id", "A scene\nwith a failed passage is not joined".replace("\n", " "), "passages_checked", "median measured rate",
-                       "10 ms equal-power crossfades", "unchanged"):
+                       "40 ms equal-power crossfades", "unchanged", "0.85 s in", "--accept", "3 different takes",
+                       "calibrated_limits", "never a redo"):
             self.assertIn(phrase, voice, phrase)
         self.assertIn("eleven_v3", voice)
         self.assertIn("film/film-NN/voice/<scene>.wav", voice)
@@ -169,7 +170,19 @@ class SkillFileTests(unittest.TestCase):
         self.assertIn("failing takes", voice)
         self.assertIn("same-named", voice)
         recipe = self._ref("film-recipe.md")
-        self.assertRegex(recipe, r"motion gate[^.]*not yet built[^.]*Task 15")
+        # I8: the motion gate is built; the docs describe it as built and list the command
+        self.assertNotRegex(recipe, r"(?i)motion gate[^.]*not yet built")
+        self.assertIn("Per-clip motion gate (built", recipe)
+        self.assertIn("`motiongate`", self.text)
+        self.assertIn("`scene-timing`", self.text)
+        # I8: the rules table says what is enforced and what is reviewer only, never "all enforced"
+        self.assertNotIn("all enforced", recipe)
+        self.assertIn("reviewer only (not enforced)", recipe)
+        for gap in ("4 s minimum", "day/night match", "eye colour, mole, jewellery, sari border", "Layer grades"):
+            self.assertIn(gap, recipe, gap)
+        self.assertNotIn("10 ms", recipe)
+        self.assertNotIn("10 ms", self._ref("earnalism-voice.md"))
+        self.assertIn("film_clips notebooks are inert", self.text)
         self.assertNotIn("Task 14", self._ref("free-stack.md"))
         self.assertRegex(self._ref("free-stack.md"), r"Whisper.*words_cell\.py\.txt.*--transcripts")
         self.assertNotIn("Task 14", self._ref("model-licences.md"))
@@ -178,6 +191,7 @@ class SkillFileTests(unittest.TestCase):
         sec5 = recipe[recipe.index("## 5. Voice first"):recipe.index("## 6.")]
         self.assertRegex(sec5, r"`split-passages film-NN`")
         self.assertRegex(sec5, r"Still available: one `eleven_v3` take per scene via `import-take`")
+        self.assertIn("40 ms", sec5)
         self.assertNotIn("Task 13", sec5)
         self.assertNotIn("stills share a file hash", recipe)
         self.assertNotIn("stills share a file hash", self._ref("pressure-tests.md"))

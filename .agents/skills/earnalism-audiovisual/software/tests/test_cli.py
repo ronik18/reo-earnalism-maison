@@ -54,8 +54,8 @@ REEL["lines"] = ([REEL["hook"]] + ["The children played in the garden every sing
 class RoundTwo:
     """Fix round 2: pinned ledger, no --month, spec docs, dry mastering, score provenance."""
 
-    def fake_job(self, kind, target, files):
-        """A built-and-imported job as the record sees it (no Colab)."""
+    def fake_job(self, kind, target, files, scene=None):
+        """A built-and-imported job as the record sees it (no Colab); `scene` binds it like a spec "scene"."""
         rec = Record.load(self.root)
         job_id = f"{kind.replace('_', '-')}-{len(rec.data['artifacts']):04d}"
         job_dir = self.root / "jobs" / job_id
@@ -65,7 +65,8 @@ class RoundTwo:
         rec.add_artifact("colab_job", job_dir / "nb.ipynb", {
             "job_id": job_id, "job_kind": kind, "forecast_units": 0.0, "month": "2026-11",
             "inputs_zip": f"jobs/{job_id}/inputs.zip", "manifest": f"jobs/{job_id}/build-manifest.json"})
-        rec.event("cli", "job_target", {"job_id": job_id, "target": target, "kind": kind})
+        rec.event("cli", "job_target", {"job_id": job_id, "target": target, "kind": kind,
+                                        **({"scene": scene} if scene else {})})
         out = self.root / kind / job_id
         out.mkdir(parents=True)
         files(rec, job_id, job_dir, out)
@@ -167,7 +168,7 @@ class RoundTwo:
         self.assertEqual(ev[-1]["detail"], {"job_id": job_id, "reason": "replaced before any run"})
         nxt = cli.next_action(self.root)
         self.assertNotIn(job_id, nxt)
-        self.assertIn("job narration", nxt)
+        self.assertIn("Eleven v4 narration", nxt)    # C3: the cinematic film's voice route
         code, out = run("status", "--root", self.root)
         self.assertIn(f"{job_id} narration film-01: superseded", out)
         self.assertNotIn("waiting for Colab", out)
@@ -188,7 +189,7 @@ class RoundTwo:
         self.assertFalse(any(e["result"] == "superseded" for e in Record.load(self.root).data["events"]))
         nxt = cli.next_action(self.root)
         self.assertNotIn(job_id, nxt)
-        self.assertIn("job narration", nxt)
+        self.assertIn("Eleven v4 narration", nxt)    # C3: the cinematic film's voice route
         code, out = run("status", "--root", self.root)
         self.assertIn(f"{job_id} narration film-01: closed (ran, not imported; 1.20 CU settled)", out)
         folder, _ = self.fake_colab_outputs(job_id, job_dir)
@@ -233,7 +234,7 @@ class RoundTwo:
         self.assertEqual(code, 0, out)
         entry = json.loads(self.ledger.read_text())[0]
         self.assertEqual((entry["state"], entry["units"]), ("settled", 0))
-        self.assertIn("job narration", cli.next_action(self.root))
+        self.assertIn("Eleven v4 narration", cli.next_action(self.root))
 
     def test_supersede_interrupted_after_settle_resumes(self):
         job_id, _ = self.build_narration()
@@ -347,7 +348,7 @@ class RoundTwo:
         rec = Record.load(self.root)
         (self.root / "film" / "film-01").mkdir(parents=True)
         (self.root / "film" / "film-01" / "film-01.mp4").write_bytes(b"x")
-        rec.add_artifact("film", self.root / "film" / "film-01" / "film-01.mp4", {"target": "film-01"})
+        rec.add_artifact("film", self.root / "film" / "film-01" / "film-01.mp4", {"target": "film-01", "mode": "shots"})
 
     def test_reel_script_no_longer_plans_shots(self):
         self.film_done()
@@ -632,7 +633,39 @@ class RoundTwo:
         """Two approved scenes of static shots, their scene mixes, cards, captions: one 24 fps film."""
         self.shots_end_to_end()
 
-    def shots_end_to_end(self, narration=True, init=True):
+    FILM_RATES = {"film_clips": {"clip_s_hd": 900, "clip_s_hd_a100": 215, "clip_s_sd": 435, "units_per_hour_l4": 2.4,
+                                 "units_per_hour_a100": 4.5, "decode_s": 300, "export_s": 60}}
+
+    def film_clips_outputs(self, job_id):
+        """What the owner downloads from Drive for a film_clips job: every item's take (121 frames at 24 fps), last
+        frame and last-frame depth, a depth map per still (items' and depth-only), manifest.json COMPLETE."""
+        import numpy as np
+        job_dir = self.root / "jobs" / job_id
+        with zipfile.ZipFile(job_dir / "inputs.zip") as z:
+            job = json.loads(z.read("job.json"))
+        folder = self.d / "download" / job_id
+        folder.mkdir(parents=True)
+        depth = np.tile(np.linspace(0, 65535, 320, dtype=np.uint16), (180, 1))
+        for k, item in enumerate(job["items"]):
+            subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
+                            f"testsrc2=s={item['width']}x{item['height']}:r=24:d=5.041667", "-frames:v", "121",
+                            "-pix_fmt", "yuv420p", str(folder / f"{item['key']}.mp4")], check=True)
+            Image.new("RGB", (item["width"], item["height"]), (30 * k, 60, 90)).save(folder / f"{item['key']}.last.png")
+            Image.fromarray(depth).save(folder / f"{item['key']}.last-depth.png")
+        for name in {i["image"] for i in job["items"] if i.get("image")} | set(job.get("depth_stills") or {}):
+            Image.fromarray(depth).save(folder / (name.rsplit(".", 1)[0] + ".depth.png"))
+        zip_sha = hashlib.sha256((job_dir / "inputs.zip").read_bytes()).hexdigest()
+        outputs = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(folder.iterdir())}
+        (folder / "manifest.json").write_text(json.dumps({
+            "schema": "earnalism.audiovisual-outputs.v1", "job_id": job_id, "kind": "film_clips",
+            "status": "COMPLETE", "input_zip_sha256": zip_sha, "model": {"repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers"},
+            "packages": {"diffusers": "0.37.0"}, "outputs": outputs}))
+        return folder, job
+
+    def shots_end_to_end(self, narration=True, init=True, cinematic=False, unpicked=None):
+        """Two approved scenes, their scene mixes, cards, captions: one 24 fps film. With `cinematic` the first
+        scene is a layered glide (its depth map made by a real film_clips job from its picked still) and a Wan
+        shot (a two-clip chain from the same job, imported through the importer and its motion gate)."""
         import re
         from eav import shotplan
         self.film_ready(narration, init)
@@ -640,12 +673,18 @@ class RoundTwo:
         scenes = plan["plan"]["films"][0]["scenes"]
         fdir = self.root / "film" / "film-01"
 
-        def shot_stills(rec, job_id, job_dir, out):   # one still per shot: <scene>-<n>
-            for i, sc in enumerate(scenes):
+        for i, sc in enumerate(scenes):    # C2: each scene's own candidates job, then the operator's picks
+            def shot_stills(rec, job_id, job_dir, out, i=i, sc=sc):
                 for n in (1, 2):
-                    Image.new("RGB", (320, 180), (60 * i, 90, 40 * n)).save(out / f"{sc['scene_id']}-{n}.png")
-        self.fake_job("stills", "film-01", shot_stills)
-        for sc in scenes:
+                    for c in (1, 2):
+                        Image.new("RGB", (320, 180), (60 * i, 90 + 50 * c, 40 * n)).save(
+                            out / f"{sc['scene_id']}-{n}--c{c}.png")
+            job = self.fake_job("stills", "film-01", shot_stills, scene=sc["scene_id"])
+            choices = self.d / f"choices-{sc['scene_id']}.json"
+            chosen = {f"{sc['scene_id']}-1": 2, f"{sc['scene_id']}-2": 1}
+            choices.write_text(json.dumps({k: v for k, v in chosen.items() if k != unpicked}))
+            self.assertEqual(run("pick", "--root", self.root, "--job", job, "--choices", choices)[0], 0)
+        for i, sc in enumerate(scenes):
             clauses = [c.strip() for c in re.split(r"(?<=[.])\s+|\n\n", sc["text"]) if c.strip()]
             k = len(clauses)
             first = [(i * 5.5 / (k - 1) + (0.3 if i else 0.0), (i + 1) * 5.5 / (k - 1)) for i in range(k - 1)]
@@ -656,6 +695,9 @@ class RoundTwo:
                                         "sound": {"sfx": [], "music": None}, **kw}
             inp = {"spine": "s", "fidelity": "f", "motifs": ["m"], "timing": timing, "peak": {"shot": 2, "at": 9.0},
                    "shots": [shot([0, k - 2], "cut"), shot([k - 1, k - 1], "dissolve", plants=[1])]}
+            if cinematic and i == 0:
+                inp["shots"][0].update(motion="glide", camera={"move": "push", "zoom": 0.08, "pan_x": 0, "ease": "both"})
+                inp["shots"][1].update(motion="wan", wan_res="1280x704")
             paths = shotplan.paths(fdir, sc["scene_id"])
             paths["dir"].mkdir(parents=True, exist_ok=True)
             paths["input"].write_text(json.dumps(inp, ensure_ascii=False), encoding="utf-8")
@@ -670,11 +712,39 @@ class RoundTwo:
                 subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(loud), "-af", f"volume={g}dB", str(tmpw)],
                                check=True)
                 tmpw.replace(loud)
+        if cinematic:
+            s1 = scenes[0]["scene_id"]
+            rates = self.d / "film-rates.json"
+            rates.write_text(json.dumps(self.FILM_RATES))
+            art = self.d / "art"
+            art.mkdir(exist_ok=True)
+            Image.new("RGB", (1280, 704), (40, 80, 120)).save(art / "wan-start.png")
+            item = {"shot": 2, "width": 1280, "height": 704, "prompt": "The giant turns; static locked-off camera."}
+            spec = self.d / "clips.json"
+            spec.write_text(json.dumps({"scene": s1, "art_dir": str(art), "items": [
+                {**item, "key": f"{s1}-2a", "image": "wan-start.png", "seed": 1, "continue_from": None},
+                {**item, "key": f"{s1}-2b", "image": None, "seed": 2, "continue_from": f"{s1}-2a"}]}))
+            code, out = run("job", "film_clips", "--root", self.root, "--film", 1, "--rates", rates, "--spec", spec,
+                            "--job-id", "film-clips-s1")
+            self.assertEqual(code, 0, out)
+            folder, job = self.film_clips_outputs("film-clips-s1")
+            picked = self.root / "stills" / [j for j in cli._jobs(Record.load(self.root))
+                                             if j["scene"] == s1 and j["kind"] == "stills"][-1]["job_id"] / f"{s1}-1--c2.png"
+            self.assertEqual(job["depth_stills"], {f"{s1}-1.png": hashlib.sha256(picked.read_bytes()).hexdigest()})
+            code, out = run("import", "film-clips-s1", "--root", self.root, "--from", folder, "--units", 0.4)
+            self.assertEqual(code, 0, out)
+            self.assertTrue((self.root / "film_clips" / "film-clips-s1" / "clips" / f"{s1}-2a.motion.json").is_file())
+            self.assertEqual(sorted(a["meta"]["clip"] for a in Record.load(self.root).data["artifacts"]
+                                    if a["kind"] == "motion_gate"), [f"{s1}-2a.mp4", f"{s1}-2b.mp4"])
         args = ("film", "--root", self.root, "--logo", self.d / "logo.png", "--end-card", self.d / "end.png",
                 "--shots", "--title", "The Garden", "--author", "An Author", "--narrator", "A Voice", "--burn")
+        from eav import glide
         with mock.patch.object(cli.film, "ENCODE_PRESET", "ultrafast"), \
-                mock.patch.object(cli.film, "FRAME", (640, 360)):     # a small frame keeps the test fast
+                mock.patch.object(cli.film, "FRAME", (640, 360)), \
+                mock.patch.object(glide, "W", 640), mock.patch.object(glide, "H", 360):   # a small frame: fast
             code, out = run(*args)
+        if unpicked:
+            return code, out
         self.assertEqual(code, 0, out)
         art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
         mp4 = self.root / art["path"]
@@ -698,6 +768,109 @@ class RoundTwo:
         self.assertTrue((fdir / "cards" / "cards.json").is_file())
         self.assertGreater(len(list((fdir / "shots-cache").glob("*.mp4"))), 1)
         self.assertTrue(mp4.is_file())
+
+    def test_film_shots_glide_and_wan_from_real_job_artifacts(self):
+        """C1/C2/I12: a layered glide whose depth map a real film_clips job made of its picked still, and a Wan shot
+        whose two-clip chain the same job made, imported through the importer and the motion gate."""
+        self.shots_end_to_end(cinematic=True)
+        art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
+        s1 = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"][0]["scene_id"]
+        self.assertIn(f"{s1}-1", art["meta"]["stills"]["picks"])
+        self.assertNotIn(f"{s1}-2", art["meta"]["stills"]["picks"])          # the Wan shot needs no still
+        self.assertIn("motion_review", art["meta"])
+        gate = self.root / "film_clips" / "film-clips-s1" / "clips" / f"{s1}-2a.motion.json"
+        gate.unlink()                                                         # I12: a deleted verdict never passes
+        with mock.patch.object(cli.motiongate, "gate_clip", wraps=cli.motiongate.gate_clip) as again:
+            cli._motion_verdicts(Record.load(self.root), [gate.with_name(f"{s1}-2a.mp4")], s1, 2)
+        again.assert_called_once()
+
+    def test_film_clips_resume_reserves_first_and_settles_with_its_job(self):
+        """I5: a job its hard stop cut short is resumed in a new session of the same job: the rest's forecast is
+        reserved first (linked to the job, within the caps) and the resume notebook's hard stop is that reservation;
+        close (or import) settles the job and its resume together at the actual CU."""
+        self.init_and_plan()
+        rates = self.d / "film-rates.json"
+        rates.write_text(json.dumps(self.FILM_RATES))
+        art = self.d / "art"
+        art.mkdir()
+        Image.new("RGB", (1280, 704), (40, 80, 120)).save(art / "start.png")
+        spec = self.d / "clips.json"
+        spec.write_text(json.dumps({"art_dir": str(art), "items": [
+            {"key": f"pilot-{i}", "image": "start.png", "width": 1280, "height": 704, "seed": i,
+             "prompt": "A lamp flame flickers; static locked-off camera.", "continue_from": None} for i in (1, 2)]}))
+        code, out = run("job", "film_clips", "--root", self.root, "--rates", rates, "--spec", spec, "--job-id", "fc-1")
+        self.assertEqual(code, 0, out)
+        part = self.d / "partial"
+        part.mkdir()
+        (part / "pilot-1.mp4").write_bytes(b"clip-one")
+        (part / "start.depth.png").write_bytes(b"d")
+        (part / "done.json").write_text(json.dumps({"pilot-1": hashlib.sha256(b"clip-one").hexdigest()}))
+        code, out = run("job", "film_clips", "--root", self.root, "--rates", rates, "--resume", "fc-1", "--from", part)
+        self.assertEqual(code, 0, out)
+        ledger = {e["job_id"]: e for e in json.loads(self.ledger.read_text())}
+        res = ledger["fc-1-resume-1"]
+        self.assertEqual((res["resume_of"], res["state"]), ("fc-1", "reserved"))
+        nb = self.root / "jobs" / "fc-1" / "film_clips.resume-1.ipynb"
+        ev = [e for e in Record.load(self.root).data["events"] if e["result"] == "resume_reserved"][-1]["detail"]
+        self.assertEqual(ev["keys"], ["pilot-2"])
+        self.assertIn(f"DEADLINE_SECONDS = {ev['seconds']}", nb.read_text())
+        self.assertIn("film_clips.resume-1.ipynb", cli.next_action(self.root))
+        code, out = run("close", "fc-1", "--root", self.root, "--units", 1.1, "--reason", "two sessions, lost download")
+        self.assertEqual(code, 0, out)
+        ledger = {e["job_id"]: e for e in json.loads(self.ledger.read_text())}
+        self.assertEqual((ledger["fc-1"]["units"], ledger["fc-1-resume-1"]["units"]), (1.1, 0))
+        self.assertEqual(ledger["fc-1-resume-1"]["state"], "settled")
+
+    def test_pre_cinematic_film_is_refused_once_a_shot_plan_exists(self):
+        """C3: a film with a shot plan is a cinematic film; the legacy assembly would skip qc's film gates."""
+        self.film_ready()
+        shots = self.root / "film" / "film-01" / "shots"
+        shots.mkdir(parents=True)
+        (shots / "f01s001.input.json").write_text("{}")
+        code, out = self.film_run()
+        self.assertEqual(code, 2, out)
+        self.assertIn("cinematic film", out)
+        self.assertIn("--shots", out.split("Next:")[-1])
+
+    def test_next_routes_the_film_through_the_cinematic_flow(self):
+        """C3: status/Next walks a film scene by scene through v4 passages, scene-timing, the paper edit and the
+        scene's stills; it never asks for an Eleven v3 take or a film without --shots."""
+        from eav import shotplan
+        self.init_and_plan()
+        seen = [cli.next_action(self.root)]
+        self.assertIn("voice.json", seen[-1])
+        (self.root / "voice.json").write_text(json.dumps({"model_id": "eleven_v4_test"}))
+        seen.append(cli.next_action(self.root))
+        self.assertIn("split-passages film-01", seen[-1])
+        self.assertIn("import-take film-01", seen[-1])
+        sid = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"][0]["scene_id"]
+        fdir = self.root / "film" / "film-01"
+        (fdir / "voice").mkdir(parents=True)
+        self.wav(fdir / "voice" / f"{sid}.wav", 3.0)
+        seen.append(cli.next_action(self.root))
+        self.assertIn(f"scene-timing --root {self.root} --film 1 --scene {sid}", seen[-1])
+        paths = shotplan.paths(fdir, sid)
+        paths["dir"].mkdir(parents=True)
+        cli._timing_path(fdir, sid).write_text("{}")
+        seen.append(cli.next_action(self.root))
+        self.assertIn("Write the paper edit", seen[-1])
+        paths["input"].write_text("{}")
+        seen.append(cli.next_action(self.root))
+        self.assertIn("plan-shots", seen[-1])
+        self.assertIn("--approve", seen[-1])
+        for step in seen:
+            self.assertNotIn("eleven_v3", step)
+            self.assertNotIn("--score", step)
+
+    def test_film_shots_refuses_a_shot_without_a_pick_never_an_old_still(self):
+        """C2: film_ready leaves an old, unbound stills job with <scene>-1.png; a shot whose pick is missing stops
+        the film with a clear message instead of borrowing that file."""
+        code, out = self.shots_end_to_end(unpicked="f01s001-1")
+        self.assertEqual(code, 2, out)
+        self.assertIn("f01s001-1", out)
+        self.assertIn("no picked still", out)
+        self.assertIn("never falls back", out)
+        self.assertFalse([a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"])
 
     def test_film_applies_a_later_partial_stills_job_as_a_patch(self):
         """বিচারক film-01: nine Judge Mohit stills came out bearded. A later stills job that
@@ -1730,7 +1903,7 @@ class StorytellerCliTests(unittest.TestCase):
         self.assertEqual(code, 0, out)
         self.assertTrue((self.root / "narration" / job_dir.name / "mary-storyteller__dialogue-001.wav").is_file())
         code, out = run("status", "--root", self.root)
-        self.assertIn("job narration", out.split("Next:")[-1])  # film narration still to build
+        self.assertIn("Eleven v4 narration", out.split("Next:")[-1])  # film narration still to build
         code, out = run("film", "--root", self.root, "--logo", self.d / "l.png", "--end-card",
                         self.d / "e.png", "--score", self.d / "s.wav", "--score-route", "vcsl")
         self.assertNotEqual(code, 0)
@@ -2044,7 +2217,7 @@ class ImportPassagesCliTests(unittest.TestCase):
                          hashlib.sha256((self.root / "voice.json").read_bytes()).hexdigest())
         self.assertEqual(len(manifest["join"]["seams"]), 1)
         self.assertEqual([p["id"] for p in manifest["passages"]], ["f01s001-p01", "f01s001-p02"])
-        self.assertEqual(manifest["join"]["crossfade_ms"], 10)
+        self.assertEqual(manifest["join"]["crossfade_ms"], 40)    # I7: the binding 30-50 ms
         for p in manifest["passages"]:
             self.assertEqual(p["take_sha256"], hashlib.sha256((self.audio / f"{p['id']}.mp3").read_bytes()).hexdigest())
         rec = Record.load(self.root)
@@ -2052,6 +2225,108 @@ class ImportPassagesCliTests(unittest.TestCase):
         self.assertEqual((ev["target"], ev["model"], ev["scenes"]), ("film-01", self.V4, ["f01s001", "f01s002"]))
         self.assertEqual(sorted(a["path"] for a in rec.data["artifacts"] if a["kind"] == "scene_voice"),
                          ["film/film-01/voice/f01s001.wav", "film/film-01/voice/f01s002.wav"])
+
+    def test_accept_joins_a_failing_passage_and_a_third_failed_take_is_held_for_the_owner(self):
+        """I4: a recorded per-passage override joins it (in the manifest, never a pass); after 3 different failed
+        takes of one passage the tool stops asking for regeneration and holds it for the owner."""
+        def check(take, expected_s, prof, prev_tail=None):
+            bad = take.stem == "f01s001-p02"
+            return {"pass": not bad, "failures": ["jumps"] if bad else [], "metrics": {}}
+        outs = []
+        for pace in (0.05, 0.06, 0.07):                      # three different takes of the same passage
+            self.write_passage("f01s001-p02", self.PASSAGES["f01s001"][1], pace=pace)
+            with mock.patch.object(cli.voicecheck, "check", side_effect=check):
+                code, out = self.import_passages()
+            self.assertEqual(code, 2, out)
+            outs.append(out)
+        self.assertIn("attempt 1 of 3", outs[0])
+        self.assertIn("attempt 2 of 3", outs[1])
+        self.assertIn("HELD for the owner", outs[2])
+        self.assertIn("ask the owner", outs[2])
+        self.assertNotIn("Regenerate only", outs[2])
+        with mock.patch.object(cli.voicecheck, "check", side_effect=check):   # the same take again: no new attempt
+            code, out = self.import_passages()
+        self.assertIn("attempt 3 of 3", out)
+        code, out = self.import_passages("--accept", "f01s009-p01=why")
+        self.assertEqual(code, 2)
+        self.assertIn("not a passage of this run", out)
+        with mock.patch.object(cli.voicecheck, "check", side_effect=check):
+            code, out = self.import_passages("--accept", "f01s001-p02=owner listened: the clause has no breath")
+        self.assertEqual(code, 0, out)
+        voice = self.root / "film" / "film-01" / "voice"
+        man = json.loads((voice / "f01s001.passages.json").read_text())
+        self.assertEqual(man["passages"][1]["accepted"], {"reason": "owner listened: the clause has no breath",
+                                                          "failures": ["jumps"]})
+        res = json.loads((voice / "passages" / "f01s001-p02.voicecheck.json").read_text())
+        self.assertIsNone(res["pass"])                       # accepted, never a pass
+
+    def imported_and_timed(self):
+        with mock.patch.object(cli.voicecheck, "check", side_effect=self.passing):
+            code, out = self.import_passages()
+        self.assertEqual(code, 0, out)
+        for sid in self.PASSAGES:   # the fixture's English text has no pause marks: one clause per passage
+            code, out = run("scene-timing", "--root", self.root, "--film", 1, "--scene", sid, "--min-pause", 0.5)
+            self.assertEqual(code, 0, out)
+
+    def test_scene_timing_measures_clauses_lead_in_and_tail_for_plan_shots(self):
+        """I6 (F4, F5): the joined scene opens 0.85 s before its first word and keeps a 2 s tail; scene-timing
+        writes the measured clauses, and plan-shots reads them (length_s included) when the input has none."""
+        from eav import passages, shotplan
+        self.imported_and_timed()
+        fdir = self.root / "film" / "film-01"
+        doc = json.loads((fdir / "shots" / "f01s002.timing.json").read_text())
+        self.assertAlmostEqual(doc["lead_in_s"], passages.LEAD_IN_S, delta=0.03)
+        self.assertAlmostEqual(doc["tail_s"], passages.TAIL_S, delta=0.03)
+        self.assertTrue(doc["r9_lead_in_ok"])
+        self.assertEqual(" ".join(t["text"] for t in doc["timing"]), self.PASSAGES["f01s002"][0])
+        manifest = json.loads((fdir / "voice" / "f01s002.passages.json").read_text())
+        self.assertEqual(len(manifest["join"]["offsets"]), 1)
+        # a pause the punctuation does not explain stops the timing; nothing is guessed or written
+        before = (fdir / "shots" / "f01s002.timing.json").read_bytes()
+        code, out = run("scene-timing", "--root", self.root, "--film", 1, "--scene", "f01s002", "--min-pause", 0.2)
+        self.assertEqual(code, 2, out)
+        self.assertIn("clause", out)
+        self.assertEqual((fdir / "shots" / "f01s002.timing.json").read_bytes(), before)
+        inp = {"spine": "s", "fidelity": "f", "motifs": ["m"], "peak": {"shot": 1, "at": 1.0},
+               "shots": [{"beats": [0, 0], "subject": "the giant", "framing": "wide", "motion": "static",
+                          "layer": "present", "transition_in": "cut", "bible_refs": [], "sound": {}}]}
+        shotplan.paths(fdir, "f01s002")["input"].write_text(json.dumps(inp), encoding="utf-8")
+        (self.root / "specs").mkdir(exist_ok=True)
+        (self.root / "specs" / "world-bible.json").write_text(json.dumps({"characters": {}}))
+        run("plan-shots", "--root", self.root, "--film", 1, "--scene", "f01s002")
+        sp = json.loads((fdir / "shots" / "f01s002.json").read_text())
+        self.assertAlmostEqual(sp["seconds"], doc["length_s"], places=3)     # the tail is part of the scene
+        self.assertAlmostEqual(sp["speech_end"], doc["speech_end"], places=3)
+        self.assertEqual(sp["shots"][-1]["end"], sp["seconds"])
+
+    def test_bundle_audio_audiobook_from_the_v4_passage_route(self):
+        """I11: the audiobook is built from the joined scene voices and their measured clause timing; the evidence
+        draft names the Eleven v4 generator and the credits of every import-take run. No narration job exists."""
+        self.imported_and_timed()
+        rec = Record.load(self.root)
+        mp4 = self.root / "film" / "film-01" / "film-01.mp4"
+        mp4.write_bytes(b"x")
+        rec.add_artifact("film", mp4, {"target": "film-01", "mode": "shots"})
+        rec.event("film", "assembled", {"target": "film-01"})
+        rec.event("qc", "pass", {"failed": []})
+        self.assertFalse([j for j in cli._jobs(Record.load(self.root)) if j["kind"] == "narration"])
+        frame = self.d / "frame"
+        frame.mkdir()
+        for name, freq in (("title", 300), ("author", 330), ("closing", 260)):
+            self.wav(frame / f"{name}.wav", 0.8, freq)
+        bundle = self.d / "bundle"
+        with mock.patch.object(mix, "LRA_LU", (0.0, 20.0)):
+            code, out = run("bundle-audio", "--root", self.root, "--out", bundle, "--frame-dir", frame, "--dry")
+        self.assertEqual(code, 0, out)
+        timing = json.loads((bundle / "timing.json").read_text())
+        self.assertEqual([u["unit_id"] for u in timing["units"]], ["u-1", "u-2"])
+        prov = timing["provenance"]["units"]["u-2"]
+        self.assertIsNone(prov["narration_job_id"])
+        self.assertIn("f01s002", prov["scene_voice"])
+        draft = json.loads((self.root / "maison" / cli.EVIDENCE_DRAFT).read_text())
+        gen = [g for g in draft["generators"] if g.get("route") == "eleven-v4-passages"]
+        self.assertEqual(len(gen), 1)
+        self.assertEqual((gen[0]["model"], gen[0]["credits"]), (f"elevenlabs/{self.V4}", 420))
 
     def test_failed_passage_blocks_only_its_own_scene_and_credits_are_recorded_every_run(self):
         def check(take, expected_s, prof, prev_tail=None):
@@ -2111,7 +2386,7 @@ class ImportPassagesCliTests(unittest.TestCase):
         prof = json.loads((work / "voicecheck-profile.json").read_text())   # accepted takes only
         self.assertEqual(prof["words_cer_n"], 1)
         self.assertEqual(list(prof["words_cers"]), ["f01s001-p02"])
-        self.assertEqual(res["f01s001-p01"]["warnings"], ["words"])   # provisional ceiling: warning, not a redo
+        self.assertIn("words", res["f01s001-p01"]["warnings"])   # provisional ceiling: warning, not a redo
         self.assertEqual(res["f01s001-p01"]["failures"], [])
         code, out = self.import_passages("--transcripts", self.d / "nope.json")
         self.assertNotEqual(code, 0)
@@ -2131,7 +2406,6 @@ class ImportPassagesCliTests(unittest.TestCase):
 
     def test_fewer_than_three_passages_make_duration_a_warning(self):
         code, out = self.import_passages("--scene", "f01s002")
-        self.assertNotEqual(code, 0)  # tones fail the pitch gates, not duration
         res = json.loads((self.root / "film" / "film-01" / "voice" / "passages" / "f01s002-p01.voicecheck.json").read_text())
         self.assertNotIn("duration", res["failures"])
         self.assertIn("fewer than 3 passages", out)

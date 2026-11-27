@@ -25,8 +25,15 @@
   python3 -m eav.cli import-take film-NN --root <dir> --scripts <dir of <scene>-p<NN>.txt> --audio
                          <dir of <scene>-p<NN>.mp3> --engine elevenlabs --model <model_id of <root>/voice.json>
                          --voice-id <id> --voice-name "<name>" --credits <credits used> [--cps 13]
-                         [--profile voicecheck-profile.json] [--scene ID]   (Eleven v4: each passage retimed and voicechecked,
-                         the scene joined to film/film-NN/voice/<scene>.wav; a failed passage blocks the join)
+                         [--profile voicecheck-profile.json] [--scene ID] [--accept PID=reason]   (Eleven v4: each
+                         passage retimed and voicechecked, the scene joined to film/film-NN/voice/<scene>.wav with a
+                         0.85 s lead-in and a 2 s tail; a failed passage blocks the join; after 3 different failed takes
+                         of a passage the owner decides; --accept joins it on a recorded reason)
+  python3 -m eav.cli scene-timing --root <dir> --film N --scene ID [--min-pause 0.3 --threshold-db -38]
+                         (the measured clause timing of the scene voice for plan-shots, its lead-in and tail:
+                         film/film-NN/shots/<scene>.timing.json; a pause/punctuation mismatch stops)
+  python3 -m eav.cli job film_clips --root <dir> --rates <rates.json> --resume <job_id> [--from <partial download>]
+                         (reserves the rest of a job a hard stop cut short, then writes its resume notebook)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> --units <CU>
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli exchange-stage <job_id> --root <dir> [--account <id> --bucket <name>]
@@ -47,11 +54,12 @@
                          (no --root: pauses detected, re-timed by punctuation, filled with the take's room tone;
                          prints JSON with the cut times mapped into the new timeline and the new duration)
   python3 -m eav.cli cue --root <dir> --film N --scene ID --stems <imported music job id> --tonic D --pick
-                         (measures the job's stems and prints/saves the drone/solo/phrase choice to
-                         music/<job>/cue-pick.json)
+                         (the scene's own music job only; measures its stems and saves the drone/solo/phrase choice,
+                         each within its family (item "role", else the word in its key), to music/<job>/cue-pick.json)
   python3 -m eav.cli cue --root <dir> --film N --scene ID --stems <music job id> [--drone K --solo K --phrase K]
                          [--voice <retimed wav>] [--fx <fx.json>]
-                         (the scene's soundtrack: needs the approved shot plan; cuts = shot starts, peak = plan peak;
+                         (the scene's soundtrack: needs the approved shot plan and every fx file's licence record in
+                         a licences.json beside it (CC0 or author-released public domain); cuts = shot starts, peak = plan peak;
                          voice default film/film-NN/voice/<scene>.wav, writes film/film-NN/audio/<scene>.mix.wav
                          (stereo, -16 LUFS, <= -1.5 dBTP) and <scene>.mix.json. fx.json: {"ambience": [...], "foley": [...]}
                          entries {"path","at","gain_db","fin","fout","start"?,"dur"?}; gain_db = the clip's RMS dBFS)
@@ -60,12 +68,14 @@
                          writes <scene>.json and the two-column <scene>.av.md and prints rules R1-R3 (hard) and
                          R7?/R8? (soft: "?" = reviewer must look, never a refusal). The input is written by Claude
                          and an independent reviewer; the code never invents content:
-                           {"timing": [{"start","end","text"}, ...]  measured clauses, re-timed narration seconds,
+                           {"timing": [{"start","end","text"}, ...]  measured clauses, re-timed narration seconds
+                            (optional: else <scene>.timing.json of scene-timing, its length_s included),
                             "spine", "fidelity" (R7 note), "motifs": [...], "peak": {"shot": n, "at": s},
                             "shots": [{"beats": [first, last], "subject", "framing", "motion": wan|glide|static,
                               "layer": present|memory|imagined, "transition_in": cut|dissolve|match,
                               "bible_refs": [character keys], "camera": {"move","zoom","pan_x","ease"} (glide),
-                              "wan_res": "1280x704"|"896x512" (wan), "sound": {"sfx": [...], "music"},
+                              "wan_res": "1280x704"|"896x512" (wan), "actions": [one per 6 s] (a wan shot over 6 s),
+                              "sound": {"sfx": [...], "music"},
                               "plants": [earlier shot n] (the peak shot)}]}
                          --approve records approved {by, at, reviewer}; the two names must differ and rules R1-R3
                          must pass. A job spec that declares "scene" is refused until its plan is approved.)
@@ -276,6 +286,7 @@ def _jobs(rec) -> list:
                     # narration voice style and storyteller preset (None: the default style/plan voice)
                     "style": details.get(jid, {}).get("voice_style"),
                     "voice": details.get(jid, {}).get("voice"),
+                    "scene": details.get(jid, {}).get("scene"),   # the scene a cinematic job is bound to
                     "notebook": rec.root / a["path"] if colab else None,
                     "inputs_zip": rec.root / m["inputs_zip"] if colab else None,
                     "manifest": rec.root / m["manifest"], "forecast_units": m["forecast_units"],
@@ -544,6 +555,14 @@ def _exchange_events(rec, job_id, result) -> list:
 def _colab_action(rec, job) -> str:
     if job["kind"] == "reel_clips":
         return _wan_action(rec, job)
+    resumed = _exchange_events(rec, job["job_id"], "resume_reserved")
+    if resumed:
+        last = resumed[-1]["detail"]
+        return (f"Resume {last['resume_id']} of {job['job_id']} is reserved ({last['units']:.2f} CU): the owner runs "
+                f"{rec.root / last['notebook']} in Colab in the job's same Drive folder (done.json skips the finished "
+                f"clips), then {PROG} import {job['job_id']} --root {rec.root} --from <downloaded folder> --units <CU of "
+                f"all its sessions>. If it cannot be imported: {PROG} close {job['job_id']} --root {rec.root} --units "
+                '<CU of all its sessions> --reason "<what happened>"')
     drive = _json(job["manifest"]).get("drive_dir", colab_jobs.DRIVE_ROOT)
     r = f"--root {rec.root}"
     staged = _exchange_events(rec, job["job_id"], "exchange_staged")
@@ -560,6 +579,9 @@ def _colab_action(rec, job) -> str:
                 f"Maison (Render one-off job: presign_colab_exchange), save both JSON lines to a file "
                 f"outside the repo, then: {PROG} exchange-stage {job['job_id']} {r} --signed <that file> "
                 "(references/colab-exchange.md)")
+    resume = (f" If the notebook's hard stop cut it short (manifest INCOMPLETE): {PROG} job film_clips --root "
+              f"{rec.root} --rates <rates.json> --resume {job['job_id']} --from <the partial download> (reserves the "
+              "rest before any rerun)." if job["kind"] == "film_clips" else "")
     return (f"Default (R2 exchange, references/colab-exchange.md): {PROG} exchange-stage "
             f"{job['job_id']} {r} --account <cloudflare account id> --bucket <private bucket>. "
             f"Manual fallback: run the {job['kind']} notebook in Colab: copy {job['inputs_zip']} to Drive {drive}/, "
@@ -567,7 +589,92 @@ def _colab_action(rec, job) -> str:
             f"folder, then: {PROG} import {job['job_id']} --root {rec.root} --from <downloaded folder> "
             f"--units <CU shown in Colab>. If it ran but cannot be imported (crash, hard stop, lost "
             f"download): {PROG} close {job['job_id']} --root {rec.root} --units <CU shown in Colab> "
-            '--reason "<what happened>"')
+            '--reason "<what happened>"' + resume)
+
+
+def _scene_next(rec, root, i, sid) -> str:
+    """The cinematic flow's next step for one scene (C3), or "" when its mix is made: v4 passages (voicecheck runs
+    in import-take) -> scene-timing -> plan-shots and approval -> stills job, pick -> film_clips (Wan shots plus
+    the glide stills' depth maps) -> the scene's own music job -> cue."""
+    r, t = f"--root {root}", _film_target(i)
+    film_dir = root / "film" / t
+    voice = film_dir / "voice" / f"{sid}.wav"
+    if not voice.is_file():
+        if not (root / VOICE_SETTINGS).is_file():
+            return (f"Eleven v4 narration (references/earnalism-voice.md): write {root / VOICE_SETTINGS} "
+                    '{"model_id": "<the owner-chosen Eleven v4 model id>"}; then split-passages, tag, one take per '
+                    f"passage and import-take {t} (each passage voicechecked)")
+        return (f"Scene {sid} voice (Eleven v4 passages, references/earnalism-voice.md): {PROG} split-passages {t} {r} "
+                f"--out <dir>; tag each passage; generate one take per passage; then {PROG} import-take {t} {r} "
+                f"--scene {sid} --scripts <dir> --audio <dir> --engine elevenlabs --model <model_id of "
+                f"{VOICE_SETTINGS}> --voice-id <id> --voice-name \"<name>\" --credits <credits used> (each passage is "
+                "retimed and voicechecked; only failed passages are regenerated, at most "
+                f"{MAX_PASSAGE_ATTEMPTS} takes each)")
+    paths = shotplan.paths(film_dir, sid)
+    if not paths["input"].is_file() and not _timing_path(film_dir, sid).is_file():
+        return f"{PROG} scene-timing {r} --film {i} --scene {sid} (the measured clause timing for the paper edit)"
+    try:
+        sp = shotplan.require_approved(film_dir, sid)
+    except shotplan.NotApproved:
+        if not paths["input"].is_file():
+            return (f"Write the paper edit of scene {sid} into {paths['input']} (Claude with an independent reviewer; "
+                    f"{PROG} --help, plan-shots; references/film-recipe.md), then {PROG} plan-shots {r} --film {i} "
+                    f"--scene {sid}")
+        return (f"{PROG} plan-shots {r} --film {i} --scene {sid}; once rules R1-R3 pass: the same with --approve "
+                "--by <name> --reviewer <independent reviewer>")
+    picks = _scene_picks(rec, t, sid)
+    stills = [s for s in _still_shots(sp) if f"{sid}-{s['n']}" not in picks]
+    if stills:
+        jobs = [j for j in _jobs(rec) if j["kind"] == "stills" and j["target"] == t and j["scene"] == sid
+                and j["imported"] and not _ended(j)]
+        if jobs:
+            return (f"Review the candidates of {jobs[-1]['job_id']} (contact sheets; the gate's verdicts), then "
+                    f"{PROG} pick {r} --job {jobs[-1]['job_id']} --choices <{{\"{sid}-<n>\": N}} json> for "
+                    + ", ".join(f"{sid}-{s['n']}" for s in stills))
+        return (f"Write stills.json for scene {sid} (\"scene\": \"{sid}\"; one item per glide/static shot, key "
+                f"{sid}-<n>, \"candidates\": 3; references/film-recipe.md) for "
+                + ", ".join(f"{sid}-{s['n']}" for s in stills) + f", then {PROG} job stills {r} --film {i} "
+                "--rates <rates.json> --spec stills.json")
+    maps = _depth_maps(rec, t)
+    no_depth = [s for s in _depth_shots(sp) if (f"{sid}-{s['n']}.png", picks[f"{sid}-{s['n']}"]["sha256"]) not in maps]
+    items = _film_clip_items(rec, t)
+    no_clip = [s for s in sp["shots"] if s["motion"] == "wan"
+               and not any(c["item"].get("shot") == s["n"] and k.startswith(sid + "-") for k, c in items.items())]
+    if no_depth or no_clip:
+        wan_n = ", ".join(str(s["n"]) for s in no_clip)
+        depth_keys = ", ".join(f"{sid}-{s['n']}" for s in no_depth)
+        what = ([f"Wan shot(s) {wan_n} (each take chained to cover its shot)"] if no_clip else []) + (
+            [f"the depth maps of glide still(s) {depth_keys}"] if no_depth else [])
+        return (f"Write clips.json for scene {sid} (\"scene\": \"{sid}\", art_dir, items {{key {sid}-<n>..., shot, "
+                "image, width, height, seed, prompt, continue_from}}; references/film-recipe.md) for "
+                + " and ".join(what) + f", then {PROG} job film_clips {r} --film {i} --rates <rates.json> --spec "
+                "clips.json (depth stills are filled in from the picks; split per 70-minute session)")
+    if not (film_dir / "audio" / f"{sid}.mix.wav").is_file():
+        music = [j for j in _jobs(rec) if j["kind"] == "music" and j["target"] == t and j["scene"] == sid
+                 and j["imported"] and not _ended(j)]
+        if not music:
+            return (f"Write music.json for scene {sid} (\"scene\": \"{sid}\", stems with \"role\" drone, solo or phrase, "
+                    f"three seeds each; references/film-recipe.md), then {PROG} job music {r} --film {i} --rates "
+                    "<rates.json> --spec music.json")
+        m = music[-1]["job_id"]
+        return (f"{PROG} cue {r} --film {i} --scene {sid} --stems {m} --pick --tonic <note>, then {PROG} cue {r} "
+                f"--film {i} --scene {sid} --stems {m} --fx <fx.json, every sound with its licence record>")
+    return ""
+
+
+def _film_next(rec, root, i, scenes) -> str:
+    """The cinematic flow of film i (C3): every scene through its mix, then `film --shots`; or "" when the film is
+    assembled shot by shot."""
+    t = _film_target(i)
+    if [a for a in _artifacts(rec, "film", target=t) if a["meta"].get("mode") == "shots"]:
+        return ""   # assembled shot by shot: qc and review follow
+    for sc in scenes:
+        step = _scene_next(rec, root, i, sc["scene_id"])
+        if step:
+            return step
+    return (f"{PROG} film --root {root} --film {i} --shots --logo <approved logo lockup> --end-card <approved END> "
+            "--title <title> --author <author> --narrator <narration voice> [--burn], then "
+            f"{PROG} qc --root {root}")
 
 
 def next_action(root) -> str:
@@ -588,23 +695,10 @@ def next_action(root) -> str:
         return _colab_action(rec, pending[0])
     r = f"--root {root}"
     plan = _plan(rec)
-    for i in range(1, len(plan["plan"]["films"]) + 1):
-        t = _film_target(i)
-        if not _latest_job(rec, "narration", t):
-            return (f"ElevenLabs route (owner decision 2026-11-24, references/earnalism-voice.md): one "
-                    f"tagged-script Eleven v3 take per scene of film {i}, then {PROG} import-take "
-                    f"{t} {r} --scripts <dir> --audio <dir> --engine elevenlabs --model eleven_v3 "
-                    f"--voice-id <id> --voice-name \"<name>\" --credits <credits used>. Parler route: "
-                    f"{PROG} job narration {r} --film {i} --rates <rates.json with measured "
-                    f"s_per_step, units_per_hour, steps, decode_s, export_s>")
-        if not _latest_job(rec, "stills", t):
-            return (f"Write the world bible and one FLUX prompt per keyframe (keys <scene_id>-<k>, "
-                    f"references/film-recipe.md) into stills.json, then: {PROG} job stills {r} "
-                    f"--film {i} --rates <rates.json> --spec stills.json")
-        if not _artifacts(rec, "film", target=t):
-            return (f"{PROG} film {r} --film {i} --logo <approved logo lockup> --end-card <approved END> "
-                    f"--score <score bed from earnalism-audiobook-score> --score-route vcsl "
-                    f"(or --cues-job <imported ACE-Step music job_id>)")
+    for i, f in enumerate(plan["plan"]["films"], 1):
+        step = _film_next(rec, root, i, f["scenes"])
+        if step:
+            return step
     n = 1
     while True:
         script = _reel_script(rec, n)
@@ -811,37 +905,202 @@ def _job_spec(rec, args, kind, target):
         raise Stop(f"job not built: {e}", "Fix the directions, audition or clause and rerun")
 
 
+def _job_json(job) -> dict:
+    """The built job.json of a notebook job (inside its inputs.zip), or {}."""
+    try:
+        with zipfile.ZipFile(job["inputs_zip"]) as z:
+            return json.loads(z.read("job.json"))
+    except (OSError, KeyError, ValueError, zipfile.BadZipFile, TypeError):
+        return {}
+
+
+def _scene_picks(rec, t, sid) -> dict:
+    """{"<sid>-<n>": {"path", "sha256", "job_id", "candidate"}}: the operator's recorded picks of the stills (and
+    retouch, touchup, edit) jobs bound to scene `sid` ("scene" in their spec), the latest job's pick winning per key.
+    Nothing else is a cinematic still: no unpicked file, no base job, no older film's still with the same key (C2)."""
+    out = {}
+    for j in sorted(_jobs(rec), key=lambda j: j["order"]):
+        if j["kind"] not in PICK_KINDS or j["target"] != t or not j["imported"] or _ended(j) or j["scene"] != sid:
+            continue
+        for key, c in (_latest_pick(rec, j["job_id"]) or {}).items():
+            if key.rpartition("-")[0] != sid:
+                continue
+            src = rec.root / c["file"]
+            if not src.is_file() or sha256_file(src) != c["sha256"]:
+                raise Stop(f"picked still {c['file']} changed since it was picked",
+                           f"{PROG} pick --root {rec.root} --job {j['job_id']} --choices <json>")
+            out[key] = {"path": src, "sha256": c["sha256"], "job_id": j["job_id"], "candidate": c.get("candidate")}
+    return out
+
+
+def _still_shots(sp) -> list:
+    return [s for s in sp["shots"] if s["motion"] in ("glide", "static")]
+
+
+def _depth_shots(sp) -> list:
+    return [s for s in sp["shots"] if s["motion"] == "glide" and not (s.get("camera") or {}).get("flat")]
+
+
+def _film_clip_jobs(rec, t, imported=None) -> list:
+    return [j for j in _jobs(rec) if j["kind"] == "film_clips" and j["target"] == t and not _ended(j)
+            and (imported is None or j["imported"] == imported)]
+
+
+def _depth_maps(rec, t) -> dict:
+    """{(still name, sha256 of the still): depth map path} of the imported film_clips jobs' depth-only stills."""
+    out = {}
+    for j in _film_clip_jobs(rec, t, imported=True):
+        for name, sha in (_job_json(j).get("depth_stills") or {}).items():
+            path = rec.root / "film_clips" / j["job_id"] / "depth" / (name.rsplit(".", 1)[0] + ".depth.png")
+            if path.is_file():
+                out[(name, sha)] = path
+    return out
+
+
+def _film_clips_scene_spec(rec, args, spec, t, approved):
+    """C1/I3/I5: bind a scene's film_clips spec to its approved plan. The depth stills are filled in from the
+    scene's picks (every non-flat glide shot whose picked still has no depth map yet from an active job), each
+    take's chain must cover its shot, and Wan shots already held by another active job of the scene count."""
+    sid = spec["scene"]
+    picks = _scene_picks(rec, t, sid)
+    unpicked = [f"{sid}-{s['n']}" for s in _depth_shots(approved) if f"{sid}-{s['n']}" not in picks]
+    need = [s for s in _depth_shots(approved) if f"{sid}-{s['n']}" in picks]
+    if unpicked:
+        print(f"NOTE: glide shot(s) {', '.join(unpicked)} have no picked still yet: their depth maps need a later "
+              f"film_clips job of scene {sid} (depth only), built after the pick; film --shots refuses them until then.")
+    held = {}
+    for j in _film_clip_jobs(rec, t):
+        held.update(_job_json(j).get("depth_stills") or {})
+    depth = {f"{sid}-{s['n']}.png": {"path": str(picks[f"{sid}-{s['n']}"]["path"]),
+                                      "sha256": picks[f"{sid}-{s['n']}"]["sha256"]}
+             for s in need if held.get(f"{sid}-{s['n']}.png") != picks[f"{sid}-{s['n']}"]["sha256"]}
+    listed = spec.get("depth_stills")
+    if listed is not None and sorted(listed) != sorted(depth):
+        raise Stop(f"the spec lists depth_stills {sorted(listed)}, but the scene's glide shots need exactly "
+                   f"{sorted(depth)} (their picked stills without a depth map yet)",
+                   "Drop depth_stills from the spec: job film_clips fills it in from the picks")
+    if depth:
+        spec["depth_stills"] = depth
+    else:
+        spec.pop("depth_stills", None)
+    covered = set()
+    for j in _film_clip_jobs(rec, t):
+        jj = _job_json(j)
+        if jj.get("scene") == sid:
+            covered |= {i.get("shot") for i in jj.get("items") or []}
+    if not spec.get("items") and not depth:
+        raise Stop(f"nothing to build for scene {sid}: every Wan shot has a job and every glide still has a depth map",
+                   next_action(rec.root))
+    try:
+        colab_jobs.check_film_plan(spec, approved, covered)
+    except ValueError as e:
+        raise Stop(f"job not built: {e}", "Give every item the number of an approved wan shot (\"shot\") at that "
+                   "shot's wan_res, chain continuations until each take covers its shot, and give every wan shot "
+                   "at least one item")
+    return spec
+
+
+def _resume_film_clips(args, rec):
+    """I5: a film_clips job that a session's hard stop cut short is resumed in a new session of the SAME job (its
+    Drive folder's done.json skips the finished clips). The remaining items' forecast is reserved first, as a
+    ledger entry linked to the job within the title and month caps, and the resume notebook's hard stop is that
+    entry's seconds; import (or close) settles the job and its resumes together at the actual CU."""
+    job = next((j for j in _jobs(rec) if j["job_id"] == args.resume), None)
+    if job is None or job["kind"] != "film_clips":
+        raise Stop(f"{args.resume} is not a film_clips job of this title", f"{PROG} status --root {rec.root}")
+    if job["imported"] or _ended(job) or job["unfinished"]:
+        raise Stop(f"film_clips job {args.resume} is imported, superseded or closed: nothing to resume",
+                   f"{PROG} status --root {rec.root}")
+    jj = _job_json(job)
+    items, depth = jj.get("items") or [], dict(jj.get("depth_stills") or {})
+    done, folder = set(), Path(args.source) if args.source else None
+    if folder is not None:   # the partial Drive download: done.json, checked against the clips it lists
+        try:
+            journal = json.loads((folder / "done.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            journal = {}
+        done = {k for k, sha in (journal if isinstance(journal, dict) else {}).items()
+                if (folder / f"{k}.mp4").is_file() and sha256_file(folder / f"{k}.mp4") == sha}
+        depth = {n: h for n, h in depth.items() if not (folder / (n.rsplit(".", 1)[0] + ".depth.png")).is_file()}
+    left = [i for i in items if i["key"] not in done]
+    if not left and not depth:
+        raise Stop(f"every item of {args.resume} is finished in {folder}", f"Let the notebook's manifest cell finish, "
+                   f"then {PROG} import {args.resume} --root {rec.root} --from <folder> --units <CU of all sessions>")
+    rates = _json(args.rates)
+    build = _json(job["manifest"])
+    with tempfile.TemporaryDirectory() as td, zipfile.ZipFile(job["inputs_zip"]) as z:
+        for name in {i["image"] for i in left if i.get("image")} | set(depth):
+            (Path(td) / name).write_bytes(z.read(name))
+        sub = {"art_dir": td, "items": left, "min_vram_gib": build.get("min_vram_gib", 0),
+               **({"depth_stills": sorted(depth)} if depth else {}),
+               **({"sfx": jj["sfx"]} if jj.get("sfx") and not (folder and (folder / "sfx-licences.json").is_file()) else {})}
+        try:
+            compute = colab_jobs.derive_compute("film_clips", sub, rates, colab_jobs.job_items("film_clips", sub))
+        except ValueError as e:
+            raise Stop(f"resume not built: {e}", "Use the rates.json measured on the last Colab run")
+    secs = budget.forecast_seconds(compute, rates)
+    units = budget.forecast(compute, rates)
+    k = 1 + len(_exchange_events(rec, args.resume, "resume_reserved"))
+    resume_id = f"{args.resume}-resume-{k}"
+    ledger, month = _ledger(rec, args), _month()
+    edition_id = rec.data["source"].get("edition_id")
+    here = Path(os.path.relpath(rec.root.resolve(), ledger.path.parent.resolve())).as_posix()
+    try:
+        ledger.reserve(rec.data["title_slug"], month, units, resume_id, edition_id=edition_id,
+                       root=here if edition_id else None, resume_of=args.resume)
+    except budget.BudgetExceeded as e:
+        raise Stop(f"Budget exceeded: the resume needs {units:.2f} CU: {e}. Nothing was reserved.",
+                   "Hold the job and ask the owner; never retry past a cap.", code=3)
+    nb = colab_jobs.resume_notebook(job["notebook"], job["notebook"].with_name(f"film_clips.resume-{k}.ipynb"),
+                                    secs, resume_id, [i["key"] for i in left] + sorted(depth))
+    rec.event("job", "resume_reserved", {"job_id": args.resume, "resume_id": resume_id, "units": units,
+                                         "seconds": int(secs), "keys": [i["key"] for i in left],
+                                         "depth_stills": sorted(depth),
+                                         "notebook": nb.relative_to(rec.root).as_posix()})
+    print(f"Resume {resume_id} of film_clips job {args.resume}: {len(left)} clip(s) and {len(depth)} depth still(s) "
+          f"left, {int(secs)} s hard stop, {units:.2f} CU reserved (linked to the job). Run {nb} in Colab in the same "
+          f"Drive folder; then {PROG} import {args.resume} --root {rec.root} --from <folder> --units <CU of ALL its "
+          "sessions> (the job and its resumes settle together).")
+
+
 def cmd_job(args):
     rec = _record(args.root)
     kind = args.kind
+    if args.resume:
+        return _resume_film_clips(args, rec)
     if kind == "reel_clips" and not args.reel:
         raise Stop("reel_clips jobs belong to one reel", "Pass --reel <n>")
     target = (AUDITION_TARGET if kind == "narration" and args.audition
               else f"reel-{args.reel}" if args.reel else _film_target(args.film))
     spec, items = _job_spec(rec, args, kind, target)
-    if kind in ("stills", "film_clips") and spec.get("scene"):  # R11: a shot-plan-driven job needs the approved paper edit
+    if kind in ("stills", "film_clips", "music", "retouch", "edit") and spec.get("scene"):  # R11: a shot-plan-driven job needs the approved paper edit
         try:
             approved = shotplan.require_approved(rec.root / "film" / target, spec["scene"])
         except shotplan.NotApproved as e:
             raise Stop(str(e), f"{PROG} plan-shots --root {rec.root} --film {args.film or '<n>'} --scene {spec['scene']}")
         if kind == "film_clips":  # the approved plan limits what is built: its wan shots, at its wan_res
-            try:
-                colab_jobs.check_film_plan(spec, approved)
-            except ValueError as e:
-                raise Stop(f"job not built: {e}", "Give every item the number of an approved wan shot "
-                           "(\"shot\") at that shot's wan_res, and every wan shot at least one item")
+            spec = _film_clips_scene_spec(rec, args, spec, target, approved)
+            items = colab_jobs.job_items(kind, spec)
     if args.list_units:  # for writing directions.json: the keys this job would use; nothing built
         for u in colab_jobs.narration_units(spec):
             print(f"{u['unit_key']}\t{u['text']}")
         return
     rates = _json(args.rates)
+    specs = [spec]
     try:  # R21: items and steps come from the job itself, rates from the last measured run
-        compute = colab_jobs.derive_compute(kind, spec, rates, items)
+        if kind == "film_clips":   # I5: one job per Colab session (70 min), split where needed
+            specs = colab_jobs.split_film_spec(spec, rates)
+            if len(specs) > 1 and spec.get("job_id"):
+                specs = [{**sp, "job_id": f"{spec['job_id']}-{k}"} for k, sp in enumerate(specs, 1)]
+            elif spec.get("job_id"):
+                specs[0]["job_id"] = spec["job_id"]
+        computes = [colab_jobs.derive_compute(kind, sp, rates, colab_jobs.job_items(kind, sp)) for sp in specs]
     except ValueError as e:
         raise Stop(f"job not built: {e}", "Use the values measured on the last Colab run "
                    "(references/compute-budget.md) and never a compute block that differs from the job")
+    compute = computes[0]
     ledger, month = _ledger(rec, args), _month()
-    units = budget.forecast(compute, rates)
+    units = sum(budget.forecast(c, rates) for c in computes)
     remaining = _remaining(ledger, rec, month)
     if units > remaining:
         hint = "Hold the job and ask the owner; never retry past a cap."
@@ -855,19 +1114,34 @@ def cmd_job(args):
         raise Stop(f"Budget exceeded: forecast {units:.2f} CU > remaining {remaining:.2f} CU "
                    f"(caps {budget.title_cap(ledger.path, rec.data['title_slug']):g}/title, {budget.MONTH_CAP:g}/month, {month}). "
                    "Nothing was reserved or written.", hint, code=3)
-    try:
-        result = colab_jobs.build_job(kind, rec, spec, ledger, rates, rec.root / "jobs", month=month)
-    except budget.BudgetExceeded as e:
-        raise Stop(f"Budget exceeded: {e}. Nothing was written.",
-                   "Hold the job and ask the owner; never retry past a cap.", code=3)
-    except (ValueError, FileExistsError, KeyError) as e:
-        raise Stop(f"job not built: {e}", "Fix the spec and rerun")
-    detail = {"job_id": result["job_id"], "target": target, "kind": kind}
-    if spec.get("style"):
-        detail["voice_style"] = spec["style"]
-    if kind == "narration" and args.voice:
-        detail["voice"] = args.voice
-    rec.event("cli", "job_target", detail)
+    built = []
+    for sp in specs:
+        try:
+            result = colab_jobs.build_job(kind, rec, sp, ledger, rates, rec.root / "jobs", month=month)
+        except budget.BudgetExceeded as e:
+            raise Stop(f"Budget exceeded: {e}. Nothing more was written"
+                       + (f" (built before it: {', '.join(built)})" if built else "") + ".",
+                       "Hold the job and ask the owner; never retry past a cap.", code=3)
+        except (ValueError, FileExistsError, KeyError) as e:
+            raise Stop(f"job not built: {e}" + (f" (built before it: {', '.join(built)})" if built else ""),
+                       "Fix the spec and rerun")
+        detail = {"job_id": result["job_id"], "target": target, "kind": kind}
+        if spec.get("style"):
+            detail["voice_style"] = spec["style"]
+        if kind == "narration" and args.voice:
+            detail["voice"] = args.voice
+        if isinstance(spec.get("scene"), str):
+            detail["scene"] = spec["scene"]
+        rec.event("cli", "job_target", detail)
+        built.append(result["job_id"])
+        if len(specs) > 1:
+            print(f"Built {kind} job {result['job_id']} ({len(built)} of {len(specs)}: one Colab session each): "
+                  f"forecast {result['forecast_units']:.2f} CU reserved.")
+    if len(specs) > 1:
+        print(f"Split into {len(specs)} {kind} jobs of at most {colab_jobs.FILM_SESSION_S} s each: {', '.join(built)}; "
+              f"{units:.2f} CU reserved in all ({remaining - units:.2f} CU left under the title and month caps). "
+              "Inert until the owner enables each in Colab.")
+        return
     if target == AUDITION_TARGET:
         print("Audition job: the same passages in "
               + ", ".join(v["name"] for v in spec["audition"]["variants"])
@@ -895,6 +1169,10 @@ def cmd_import(args):
         arts = importer.import_job(rec, {k: job[k] for k in ("job_id", "kind", "notebook",
                                                              "inputs_zip", "manifest")},
                                    args.source, _ledger(rec, args), args.units, **extra)
+    except budget.BudgetExceeded as e:
+        raise Stop(f"Import held: {e}. Nothing was imported; the reservation stays open.",
+                   "Hold for the owner: the run used more CU than its reservation and the caps allow; never "
+                   "settle past a cap", code=3)
     except importer.ImportHeld as e:
         raise Stop(f"Import held: {e}. Nothing was imported; the reservation stays open.",
                    "Re-download the complete output folder (or archive) of this exact job and rerun "
@@ -1229,8 +1507,17 @@ def _import_passages(args, rec, plan, lang, credits):
         prof = voicecheck.profile([r[2] for r in retimed])
         (work / "voicecheck-profile.json").write_text(json.dumps(prof, indent=1))
     saved_prof = not args.profile
+    all_pids = {pid for sc in scenes for pid, _, _ in sc["rows"]}
+    accepts = _reasons(args.accept, "--accept")
+    unknown = sorted(set(accepts) - all_pids)
+    if unknown:
+        raise Stop(f"--accept names {', '.join(unknown)}, which is not a passage of this run",
+                   f"Name passage ids of this run: {', '.join(sorted(all_pids))}")
+    tried = _passage_attempts(rec, target)
+    takes_sha = {pid: sha256_file(tk) for sc in scenes for pid, _, tk in sc["rows"]}
     results = {}
     failed, prev, last_key, unchecked = {}, None, None, False
+    held = []
     for (sc, pid, dst, _, _), exp in zip(retimed, expected):
         prev = prev if last_key == sc["key"] else None
         res = _words_note(voicecheck.check(dst, exp, prof, prev, *words[pid]) if pid in words
@@ -1241,15 +1528,32 @@ def _import_passages(args, rec, plan, lang, credits):
             res["warnings"] = res.get("warnings", []) + ["duration"]
             res["pass"] = False if res["failures"] else (None if res.get("not_run") else True)
         res["expected_s"] = round(exp, 3)
+        if res["failures"] and pid in accepts:   # the operator's recorded override: joined, never a pass
+            res["accepted"] = {"reason": accepts[pid], "failures": res["failures"]}
+            res["failures"], res["pass"] = [], None
         (work / f"{pid}.voicecheck.json").write_text(json.dumps(res, indent=1, ensure_ascii=False))
         results[pid] = res
         if res["failures"]:
-            failed.setdefault(sc["key"], []).append(f"{pid} ({', '.join(res['failures'])})")
+            attempts = len(tried.get(pid, set()) | {takes_sha[pid]})
+            res["attempt"] = attempts
+            (work / f"{pid}.voicecheck.json").write_text(json.dumps(res, indent=1, ensure_ascii=False))
+            note = f"attempt {attempts} of {MAX_PASSAGE_ATTEMPTS}"
+            if attempts >= MAX_PASSAGE_ATTEMPTS:
+                held.append(pid)
+                note += ": HELD for the owner, do not regenerate"
+            failed.setdefault(sc["key"], []).append(f"{pid} ({', '.join(res['failures'])}; {note})")
         prev, last_key = dst, sc["key"]
     if saved_prof and tdata is not None:   # only takes accepted in this run enter the saved profile's median
         acc = voicecheck.accepted_cers({k: v for k, v in results.items() if "words" in v["metrics"]})
         if acc:
             (work / "voicecheck-profile.json").write_text(json.dumps(voicecheck.with_words(prof, acc), indent=1))
+    for pid, r in sorted(results.items()):
+        for code, v in sorted((r.get("warning_values") or {}).items()):
+            print(f"Voicecheck WARNING {pid}: {code} measured {v['measured']:g} against the uncalibrated limit "
+                  f"{v['limit']:g}; listen. Not a redo until the limit is calibrated on accepted v4 takes.")
+        if r.get("accepted"):
+            print(f"Accepted by the operator (--accept): {pid} despite {', '.join(r['accepted']['failures'])}: "
+                  f"{r['accepted']['reason']}")
     if any("words" in r.get("warnings", []) for r in results.values()):
         print("Word check WARNING: CER above the provisional ceiling "
               f"{voicecheck.WORDS_CEILING:g} (fewer than {voicecheck.WORDS_MIN_TAKES} accepted takes with a "
@@ -1262,6 +1566,15 @@ def _import_passages(args, rec, plan, lang, credits):
               f"{cps:g} estimate: a duration miss is a warning, not a failure.")
     voice_json = rec.root / VOICE_SETTINGS
     joined = [sc for sc in scenes if sc["key"] not in failed]
+    # the credits of THIS run (a redo's: its regenerated passages), recorded first, whether or not anything joins
+    rec.event("import", "passages_checked", {"target": target, "model": args.model, "voice_id": args.voice_id,
+                                             "credits": credits, "scenes": [sc["key"] for sc in scenes],
+                                             "joined": [sc["key"] for sc in joined], "failed": failed,
+                                             "takes": takes_sha,
+                                             "failed_passages": sorted(p for p, r in results.items() if r["failures"]),
+                                             "accepted": {p: r["accepted"]["reason"] for p, r in results.items()
+                                                          if r.get("accepted")},
+                                             "skipped_hand_placed": blocked})
     if joined:
         stage = Path(tempfile.mkdtemp(dir=rec.root, prefix=".passages-"))
         try:
@@ -1269,7 +1582,8 @@ def _import_passages(args, rec, plan, lang, credits):
             for sc in joined:
                 ids = [r[0] for r in sc["rows"]]
                 seams = passages.seam_lengths(sc["plain"], ids, sc["headings"])
-                info = passages.join_passages([work / f"{i}.wav" for i in ids], stage / f"{sc['key']}.wav", seams)
+                info = passages.join_passages([work / f"{i}.wav" for i in ids], stage / f"{sc['key']}.wav", seams,
+                                              lead_in_s=passages.LEAD_IN_S, tail_s=passages.TAIL_S)
                 manifests[sc["key"]] = {
                     "schema": PASSAGES_SCHEMA, "scene": sc["key"], "target": target, "engine": args.engine,
                     "model": args.model, "voice_json_sha256": sha256_file(voice_json), "voice_id": args.voice_id,
@@ -1279,8 +1593,10 @@ def _import_passages(args, rec, plan, lang, credits):
                                   "take": f"film/{target}/voice/passages/takes/{tk.name}",
                                   "take_sha256": sha256_file(tk), "retimed": f"film/{target}/voice/passages/{pid}.wav",
                                   "retimed_sha256": sha256_file(work / f"{pid}.wav"),
-                                  "voicecheck": f"film/{target}/voice/passages/{pid}.voicecheck.json"}
-                                 for pid, script, tk in sc["rows"]],
+                                  "voicecheck": f"film/{target}/voice/passages/{pid}.voicecheck.json",
+                                  "plain": plain,
+                                  **({"accepted": results[pid]["accepted"]} if results[pid].get("accepted") else {})}
+                                 for (pid, script, tk), plain in zip(sc["rows"], sc["plain"])],
                     "join": info, "wav_sha256": sha256_file(stage / f"{sc['key']}.wav")}
             voice_dir.mkdir(parents=True, exist_ok=True)
             snapshot = (list(rec.data["artifacts"]), list(rec.data["events"]))
@@ -1301,26 +1617,44 @@ def _import_passages(args, rec, plan, lang, credits):
                 raise
         finally:
             shutil.rmtree(stage, ignore_errors=True)
-    # the credits of THIS run (a redo's: its regenerated passages), recorded whether or not anything joined
-    rec.event("import", "passages_checked", {"target": target, "model": args.model, "voice_id": args.voice_id,
-                                             "credits": credits, "scenes": [sc["key"] for sc in scenes],
-                                             "joined": [sc["key"] for sc in joined], "failed": failed,
-                                             "skipped_hand_placed": blocked})
     n = sum(len(sc["rows"]) for sc in joined)
     if joined:
         print(f"Imported {n} passage take(s) of {len(joined)} scene(s) for {target} ({args.model}, voice "
-              f"{args.voice_name}): each retimed and voicechecked, joined by 10 ms crossfades over room tone "
-              f"into {voice_dir}/<scene>.wav. Next: {PROG} cue --root {rec.root} --film {int(target[5:])} "
-              "--scene <ID> --stems <music job>")
+              f"{args.voice_name}): each retimed and voicechecked, joined by {round(passages.XF_S * 1000)} ms "
+              f"crossfades over room tone with a {passages.LEAD_IN_S:g} s lead-in and a {passages.TAIL_S:g} s tail "
+              f"into {voice_dir}/<scene>.wav. Next: {PROG} scene-timing --root {rec.root} --film {int(target[5:])} "
+              "--scene <ID> (the measured clause timing for plan-shots)")
     print(f"{credits:g} credits recorded for this run.")
     if blocked:
         print(f"Skipped (a hand-placed wav is never overwritten): {', '.join(blocked)}")
+    if held:
+        listing = "; ".join(f"{k}: {', '.join(v)}" for k, v in failed.items())
+        raise Stop(f"passage(s) {', '.join(held)} failed voicecheck on {MAX_PASSAGE_ATTEMPTS} different takes: "
+                   f"{listing}. Those scenes were not joined; no further take is generated",
+                   "Stop regenerating and ask the owner: listen to the take and the voicecheck.json values, then "
+                   f"either rerun the same import-take call with --accept <passage id>=\"<the owner's reason>\" "
+                   "(recorded in the passage manifest) or change the passage's tagged script")
     if failed:
         listing = "; ".join(f"{k}: {', '.join(v)}" for k, v in failed.items())
         raise Stop(f"passage(s) failed voicecheck and are listed for redo: {listing}. Those scenes were not joined",
                    "Regenerate only those passages from the same tagged scripts, download each over its old "
                    "<passage id>.mp3 and rerun the same import-take call with --credits of that regeneration only "
                    f"(the profile {work / 'voicecheck-profile.json'} is reused)")
+
+
+MAX_PASSAGE_ATTEMPTS = 3   # failed takes of one passage before the tool stops asking for regeneration
+
+
+def _passage_attempts(rec, target) -> dict:
+    """{passage id: {sha256 of each different take that failed voicecheck}} from the passages_checked events."""
+    out = {}
+    for e in rec.data["events"]:
+        d = e["detail"]
+        if e["stage"] == "import" and e["result"] == "passages_checked" and d.get("target") == target:
+            for pid in d.get("failed_passages") or []:
+                if (d.get("takes") or {}).get(pid):
+                    out.setdefault(pid, set()).add(d["takes"][pid])
+    return out
 
 
 def cmd_split_passages(args):
@@ -1512,7 +1846,11 @@ def _end_job(args, how):
     if entry is None:
         raise Stop(f"job {args.job_id} is missing from the ledger", f"{PROG} status --root {rec.root}")
     if entry["state"] == "reserved":
-        ledger.settle(args.job_id, units)
+        try:
+            ledger.settle(args.job_id, units)
+        except budget.BudgetExceeded as e:
+            raise Stop(f"not settled: {e}. The reservation stays open and the {how} is unfinished",
+                       "Hold for the owner: never settle past a cap", code=3)
     elif entry["units"] != units:
         raise Stop(f"ledger entry {args.job_id} was settled at {entry['units']:g} CU, not {units:g}",
                    "Report this; never edit the ledger by hand")
@@ -1550,32 +1888,48 @@ def _film_clip_items(rec, t) -> dict:
     return found
 
 
-def _refuse_motion_fails(rec, files, sid, n):
-    """A Wan take whose <key>.motion.json says pass false (a clear stutter or jump) does not enter the film unless
-    its key has a reason in picks/gate-overrides.json {"<key>": "<reason>"} (the file the still gate uses).
-    needs_review stays advisory; a take without a motion.json (imported before the gate) is not blocked."""
+def _motion_verdicts(rec, files, sid, n) -> dict:
+    """I12: the motion gate verdict of each Wan take of a shot, {take key: notes} of those that need review.
+    A take whose <key>.motion.json says pass false (a clear stutter or jump) does not enter the film unless its key
+    has a reason in picks/gate-overrides.json {"<key>": "<reason>"} (the file the still gate uses). A missing,
+    unreadable or edited motion.json (its sha256 differs from the one recorded at import) never passes silently: the
+    take is gated again on demand, here, and that verdict is used. needs_review takes are returned so `film --shots`
+    prints them and records them in the film's meta, and qc lists them."""
     allowed = {}
     path = rec.root / "picks" / "gate-overrides.json"
     if path.is_file():
         allowed = {k: v for k, v in _json(path).items() if isinstance(v, str) and v.strip()}
+    recorded = {a["path"]: a["sha256"] for a in (getattr(rec, "data", None) or {}).get("artifacts", [])
+                if a["kind"] == "motion_gate"}
+    review = {}
     for f in files:
         mj = f.with_name(f.stem + ".motion.json")
-        if not mj.is_file() or f.stem in allowed:
-            continue
-        try:
-            gate = json.loads(mj.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            continue
-        if isinstance(gate, dict) and gate.get("pass") is False:
-            raise Stop(f"scene {sid} shot {n}: take {f.stem} failed the motion gate ("
-                       f"{'; '.join(str(x) for x in gate.get('notes') or []) or 'motion gate failed'})",
+        gate = None
+        if mj.is_file() and recorded.get(mj.relative_to(rec.root).as_posix()) in (None, sha256_file(mj)):
+            try:
+                gate = json.loads(mj.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                gate = None
+        if not isinstance(gate, dict) or not isinstance(gate.get("pass"), bool):
+            print(f"Motion gate: {f.stem} has no readable recorded motion.json; gating it now.")
+            gate = motiongate.gate_clip(f)
+        notes = "; ".join(str(x) for x in gate.get("notes") or [])
+        if gate["pass"] is False and f.stem not in allowed:
+            raise Stop(f"scene {sid} shot {n}: take {f.stem} failed the motion gate ({notes or 'motion gate failed'})",
                        f"Re-seed the shot, pick another take in clip-picks.json, or record why it stands: a reason "
                        f"in {path} ({{\"{f.stem}\": \"<reason>\"}}). Contact sheet: "
                        f"{f.with_name(str(gate.get('contact_sheet') or f.stem + '.contact.png'))}")
+        if gate.get("needs_review") or (gate["pass"] is False and f.stem in allowed):
+            review[f.stem] = {"scene": sid, "shot": n, "notes": notes or "needs review",
+                              **({"override": allowed[f.stem]} if f.stem in allowed else {}),
+                              "contact_sheet": f.with_name(str(gate.get("contact_sheet") or f.stem + ".contact.png"))
+                              .relative_to(rec.root).as_posix()}
+    return review
 
 
-def _shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir) -> dict:
-    """Inputs of one shot: its imported Wan clip(s), or its still (stem <scene>-<n>) and imported depth map."""
+def _shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir, depth_maps=None, review=None) -> dict:
+    """Inputs of one shot: its imported Wan clip(s), or its picked still (C2: the scene's picks only, linked into
+    stills_dir as <scene>-<n>) and, for a layered glide, the depth map made of exactly that still (C1)."""
     n = shot["n"]
     if shot["motion"] == "wan":
         try:
@@ -1587,7 +1941,9 @@ def _shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir) -> dict:
         absent = [f for f in files if not f.is_file()]
         if absent:
             raise Stop(f"scene {sid} shot {n}: clip {absent[0]} is missing", f"{PROG} status --root {rec.root}")
-        _refuse_motion_fails(rec, files, sid, n)
+        found = _motion_verdicts(rec, files, sid, n)
+        if review is not None:
+            review.update(found)
         return {"clips": files}
     stem = f"{sid}-{n}"
     still = next((p for p in sorted(Path(stills_dir).iterdir()) if p.stem == stem and p.suffix.lower() in film.STILL_EXTS),
@@ -1596,12 +1952,47 @@ def _shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir) -> dict:
         raise Stop(f"scene {sid} shot {n} has no still {stem}.png in {stills_dir}", next_action(rec.root))
     assets = {"image": still}
     if shot["motion"] == "glide" and not (shot.get("camera") or {}).get("flat"):
-        depths = sorted((rec.root / "film_clips").glob(f"*/depth/{stem}.depth.png"))
-        if len({sha256_file(d) for d in depths}) != 1:
-            raise Stop(f"scene {sid} shot {n} (glide) needs exactly one depth map {stem}.depth.png from an imported "
-                       f"film_clips job; found {len(depths)} differing", "Import the depth job or remove the stale map")
-        assets["depth"] = depths[-1]
+        depth = (depth_maps or {}).get((f"{stem}.png", sha256_file(still)))
+        if depth is None:
+            raise Stop(f"scene {sid} shot {n} (glide) has no depth map of its picked still {stem}: depth maps come from "
+                       "an imported film_clips job, which fills its depth_stills in from the scene's picks",
+                       f"{PROG} job film_clips --root {rec.root} --film {int(t[5:])} --rates <rates.json> --spec "
+                       f"<clips.json with \"scene\": \"{sid}\">, run it and import it (or set the shot flat)")
+        assets["depth"] = depth
     return assets
+
+
+def _cinematic_stills(rec, t, scenes, out) -> tuple:
+    """C2: the stills of the cinematic film: for every glide or static shot, the operator's recorded pick of the
+    scene's own stills jobs, linked into <film>/stills as <scene>-<n>. A shot with no pick stops the film; nothing
+    falls back to an older film's still with the same key."""
+    files, info, missing = {}, {}, []
+    for sid, sp, _ in scenes:
+        picks = _scene_picks(rec, t, sid)
+        for shot in _still_shots(sp):
+            key = f"{sid}-{shot['n']}"
+            if key not in picks:
+                missing.append(key)
+                continue
+            files[key] = picks[key]["path"]
+            info[key] = {"job_id": picks[key]["job_id"], "candidate": picks[key]["candidate"],
+                         "sha256": picks[key]["sha256"]}
+    if missing:
+        raise Stop(f"shot(s) {', '.join(missing)} have no picked still of their scene's stills jobs; the film never "
+                   "falls back to an older still with the same key",
+                   f"Build the scene's stills job (spec \"scene\", one item per glide/static shot key, candidates), "
+                   f"review the candidates and {PROG} pick --root {rec.root} --job <job> --choices <json>")
+    merged = out / "stills"
+    if merged.exists():
+        shutil.rmtree(merged)
+    merged.mkdir(parents=True)
+    for key, src in files.items():
+        dst = merged / (key + src.suffix)
+        try:
+            os.link(src, dst)
+        except OSError:
+            shutil.copy2(src, dst)
+    return merged, {"picks": info}
 
 
 def _film_shots(args, rec, plan, t, scs):
@@ -1634,18 +2025,18 @@ def _film_shots(args, rec, plan, t, scs):
     picks_path = film_dir / "clip-picks.json"
     picks = _json(picks_path) if picks_path.is_file() else {}
     clip_items = _film_clip_items(rec, t)
-    stills_dir, stills_info = _film_stills(rec, t, film_dir)
+    stills_dir, stills_info = _cinematic_stills(rec, t, scenes, film_dir)
+    depth_maps, review = _depth_maps(rec, t), {}
     shots, assets, units, timing, mixes, at = [], [], [], [], [], 0.0
     starts = [sum(scene_fr[:k]) / film.SHOT_FPS for k in range(len(scenes))]   # frame-aligned scene starts
     for (sid, sp, scene_mix), at in zip(scenes, starts):
-        inp = _json(shotplan.paths(film_dir, sid)["input"])
-        for i, c in enumerate(inp.get("timing") or [], 1):
+        for i, c in enumerate(_scene_clauses(film_dir, sid), 1):
             key = f"{sid}-{i:03d}"
             units.append({"unit_key": key, "text": c["text"]})
             timing.append({"unit_key": key, "start": round(at + c["start"], 3), "end": round(at + c["end"], 3)})
         for shot in sp["shots"]:
             shots.append({**shot, "scene_id": sid})
-            assets.append(_shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir))
+            assets.append(_shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir, depth_maps, review))
         mixes.append(scene_mix)
     durations = [s["end"] - s["start"] for s in shots]
     trans = [film.DISSOLVE_S if s["transition_in"] == "dissolve" else 0.0 for s in shots[1:]]
@@ -1682,6 +2073,7 @@ def _film_shots(args, rec, plan, t, scs):
                    f"is {FILM_LUFS:g} +-{LUFS_TOL:g} LUFS and at most {film.SHOT_TP_MAX} dBTP",
                    "Re-balance the scene mixes (cue) and rerun film", code=5)
     meta = {"target": t, "mode": "shots", "lufs": m["lufs"], "true_peak": m["true_peak"], "stills": stills_info,
+            "motion_review": review,
             "scenes": [s for s, _, _ in scenes], "shots": len(shots), "cards_sha256": sha256_file(film_dir / "cards" / "cards.json"),
             "captions_sha256": sha256_file(vtt), **info}
     rec.add_artifact("mix", mixed, {"target": t})
@@ -1692,6 +2084,10 @@ def _film_shots(args, rec, plan, t, scs):
                                     **({"burned": str(burned)} if burned else {})})
     print(f"Assembled {out}: {info['duration']:.1f} s, {len(shots)} shots at 24 fps, {m['lufs']:.1f} LUFS, "
           f"TP {m['true_peak']:.1f} dBTP, captions {vtt.name}" + (f", burned-in rendition {burned.name}" if burned else "") + ".")
+    for key, r in sorted(review.items()):
+        print(f"MOTION REVIEW {r['scene']} shot {r['shot']} take {key}: {r['notes']}"
+              + (f" (passed on the recorded override: {r['override']})" if r.get("override") else "")
+              + f"; look at {r['contact_sheet']} before the owner sees the cut.")
 
 
 def cmd_film(args):
@@ -1703,6 +2099,12 @@ def cmd_film(args):
         raise Stop(f"film {args.film} is not in the plan", f"{PROG} status --root {rec.root}")
     if args.shots:
         return _film_shots(args, rec, plan, t, films[args.film - 1]["scenes"])
+    planned = sorted(p.name for p in (rec.root / "film" / t / "shots").glob("*.input.json"))
+    if planned:   # C3: the cinematic film is assembled shot by shot and gated by qc's film gates
+        raise Stop(f"{t} has shot plans ({', '.join(planned[:3])}{' ...' if len(planned) > 3 else ''}): it is a "
+                   "cinematic film, and the pre-cinematic assembly would skip its shots and qc's film gates",
+                   f"{PROG} film --root {rec.root} --film {args.film} --shots --logo <lockup> --end-card <END> "
+                   "--title <T> --author <A> --narrator <V>")
     narr = _latest_job(rec, "narration", t)
     stills = _latest_job(rec, "stills", t)
     if not narr or not stills:
@@ -2372,8 +2774,7 @@ def cmd_qc(args):
         raise Stop("nothing assembled yet", next_action(rec.root))
     out = rec.root / "qc"
     out.mkdir(exist_ok=True)
-    report = {"advisory_only": ["contact sheets need a human/visual check",
-                                "ASR comparison not run here"],
+    report = {"advisory_only": ["contact sheets need a human/visual check"],
               "listening": "unassessed until the owner reviews the package", "items": {}}
     failed = []
     for target, a in sorted(latest.items()):
@@ -2388,6 +2789,18 @@ def cmd_qc(args):
         if shots_film:
             gate_checks, detail, not_run = qc.film_gates(video, rec.root / "film" / target,
                                                          a["meta"]["scenes"], _plan(rec)["language"])
+            review = a["meta"].get("motion_review") or {}   # I12: advisory takes reach the owner's report
+            if review:
+                item["motion_review"] = review
+                report["advisory_only"] += [f"{target} {r['scene']} shot {r['shot']}: Wan take {k} needs a look "
+                                            f"({r['notes']}; {r['contact_sheet']})" for k, r in sorted(review.items())]
+            words = sorted(p_.name[:-len(".voicecheck.json")] for p_ in
+                           (rec.root / "film" / target / "voice" / "passages").glob("*.voicecheck.json")
+                           if "words" in (json.loads(p_.read_text(encoding="utf-8")).get("not_run") or []))
+            if words:   # M6: the passages whose word check did not run
+                item["words_not_run"] = words
+                report["advisory_only"].append(f"{target}: word check NOT RUN for {len(words)} passage(s): "
+                                               + ", ".join(words))
             checks.update(gate_checks)
             item["gates"] = detail
             item["not_run"] = not_run          # a gate that cannot run fails the QC, it never passes
@@ -2539,8 +2952,86 @@ def _narration_generators(rec, plan, job_ids) -> list:
     return rows
 
 
+def _passage_generators(rec, targets) -> list:
+    """I11: the evidence draft's rows for Eleven v4 passage narration: model, voice and the credits of every
+    import-take run of the film (passages_checked events, redos included)."""
+    rows = []
+    for t in sorted(targets):
+        runs = [e["detail"] for e in rec.data["events"] if e["stage"] == "import"
+                and e["result"] == "passages_checked" and e["detail"].get("target") == t]
+        mans = [_json(rec.root / a["path"]) for a in rec.data["artifacts"] if a["kind"] == "passage_manifest"
+                and a["path"].startswith(f"film/{t}/")]
+        models = sorted({m["model"] for m in mans})
+        rows.append({"model": [f"elevenlabs/{m}" for m in models] if len(models) != 1 else f"elevenlabs/{models[0]}",
+                     "engine": "elevenlabs", "target": t, "route": "eleven-v4-passages",
+                     "licence": "ElevenLabs paid-plan commercial licence (owner decision 2026-11-24)",
+                     "voice": sorted({m["voice_name"] for m in mans}), "voice_id": sorted({m["voice_id"] for m in mans}),
+                     "credits": sum(r.get("credits") or 0 for r in runs), "scenes": sorted({m["scene"] for m in mans})})
+    return rows
+
+
+def _unit_times(units, clauses) -> tuple:
+    """Each voice unit's (start, end) from the scene's clause timing, by aligning their characters (whitespace
+    aside). A unit edge on a clause edge takes the measured time; one inside a clause is placed by its characters
+    (returned in `estimated`)."""
+    def flat(t):
+        return "".join(t.split())
+    if flat("".join(c["text"] for c in clauses)) != flat("".join(u["text"] for u in units)):
+        raise Stop("the scene's clause timing does not spell its voice units (the book's words)",
+                   "Re-run scene-timing for the scene; never publish narration that differs from the book")
+    edges, pos = [], 0
+    for c in clauses:
+        n = len(flat(c["text"]))
+        edges.append((pos, pos + n, c["start"], c["end"]))
+        pos += n
+
+    def at(ch, end):
+        for a, b, s0, s1 in edges:
+            if (a <= ch < b) if not end else (a < ch <= b):
+                if ch == (b if end else a):
+                    return (s1 if end else s0), False
+                return s0 + (s1 - s0) * (ch - a) / max(1, b - a), True
+        return edges[-1][3], True
+    out, est, pos = [], [], 0
+    for u in units:
+        n = len(flat(u["text"]))
+        (s0, e0), (s1, e1) = at(pos, False), at(pos + n, True)
+        out.append((s0, s1))
+        if e0 or e1:
+            est.append(u["unit_key"])
+        pos += n
+    return out, est
+
+
+def _scene_voice_track(rec, t, scs, units, out: Path) -> tuple:
+    """I11: the chapter wav of a unit narrated by the Eleven v4 passage route (its scenes' joined voices, back to
+    back) and each voice unit's measured timing on it (from each scene's scene-timing clauses)."""
+    film_dir = rec.root / "film" / t
+    parts, timing, offset, est, shas = [], [], 0.0, [], {}
+    for sc in scs:
+        sid = sc["scene_id"]
+        wav, tf = film_dir / "voice" / f"{sid}.wav", _timing_path(film_dir, sid)
+        if not wav.is_file():
+            raise Stop(f"scene {sid}: narration not imported yet (no {wav})", next_action(rec.root))
+        if not tf.is_file() or _json(tf).get("voice_sha256") != sha256_file(wav):
+            raise Stop(f"scene {sid} has no scene timing of its current voice", f"{PROG} scene-timing --root {rec.root} "
+                       f"--film {int(t[5:])} --scene {sid}")
+        x = retime.read(wav)
+        mine = [u for u in units if u["unit_key"].startswith(sid + "-")]
+        spans, e = _unit_times(mine, _json(tf)["timing"])
+        timing += [{"unit_key": u["unit_key"], "start": round(offset + a, 3), "end": round(offset + b, 3)}
+                   for u, (a, b) in zip(mine, spans)]
+        est += e
+        shas[sid] = sha256_file(wav)
+        parts.append(x)
+        offset += len(x) / retime.SR
+    import numpy as np
+    retime.write(out, np.concatenate(parts))
+    return timing, {"wav_sha256": shas, "track_sha256": sha256_file(out), "scene_voice": shas, "estimated": est}
+
+
 def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
-    rows, prov_units, job_ids = [], {}, set()
+    rows, prov_units, job_ids, v4_targets = [], {}, set(), set()
     with tempfile.TemporaryDirectory() as td:
         td = Path(td)
         bundle.mkdir(parents=True, exist_ok=True)
@@ -2550,14 +3041,15 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
             films_used = {fi for fi, _ in mine}
             if not mine or len(films_used) != 1:
                 raise Stop(f"unit {unit['unit_id']} has no single planned film", "Re-plan the title")
-            job = _latest_job(rec, "narration", _film_target(films_used.pop()))
-            if not job:
-                raise Stop(f"unit {unit['unit_id']}: narration not imported yet", next_action(rec.root))
-            job_ids.add(job["job_id"])
+            ft = _film_target(films_used.pop())
+            job = _latest_job(rec, "narration", ft)
+            style = job["style"] if job else CONTINUOUS
+            if job:
+                job_ids.add(job["job_id"])
             units, tags = [], []
             for _, sc in mine:
-                vus = voice_units(sc, {"description": ""}, None, lang, job["style"])
-                tg = unit_anchors(sc, lang, job["style"])
+                vus = voice_units(sc, {"description": ""}, None, lang, style)
+                tg = unit_anchors(sc, lang, style)
                 if len(tg) != len(vus):
                     raise Stop(f"scene {sc['scene_id']}: unit/anchor mismatch", "Report as a bug")
                 units += vus
@@ -2570,8 +3062,12 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                     raise Stop(f"paragraph {p['anchor_id']}: spoken units do not reproduce its text "
                                "exactly", "Refuse; never publish narration that differs from the book")
             chapter = td / f"unit-{n:03d}.wav"
-            timing, prov = _measured_track(units, rec.root / "narration" / job["job_id"], chapter,
-                                           job["job_id"])
+            if job:
+                timing, prov = _measured_track(units, rec.root / "narration" / job["job_id"], chapter,
+                                               job["job_id"])
+            else:   # I11: the Eleven v4 passage route: the joined scene voices and their measured clause timing
+                timing, prov = _scene_voice_track(rec, ft, [sc for _, sc in mine], units, chapter)
+                v4_targets.add(ft)
             master, score_sha = td / f"unit-{n:03d}-master.wav", None
             audiobook = args.profile == "audiobook"
             offset, pauses, master_info = 0.0, [], {}
@@ -2629,7 +3125,8 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                 row.update(chapters=_chapters(unit, segs), sentences=sents)
             rows.append(row)
             prov_units[unit["unit_id"]] = {
-                "narration_job_id": job["job_id"], "wav_sha256": prov["wav_sha256"],
+                "narration_job_id": job["job_id"] if job else None, "wav_sha256": prov["wav_sha256"],
+                **({"scene_voice": prov["scene_voice"], "timing_estimated": prov["estimated"]} if not job else {}),
                 "chapter_wav_sha256": prov["track_sha256"], "mastered_with": mastered,
                 "score_sha256": score_sha,
                 "mp3_sha256": sha256_file(mp3), "mp3_duration_ms": dur_ms,
@@ -2643,8 +3140,9 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                     voice_offset_ms=round(offset * 1000), sentences_unmeasured=unmeasured,
                     sentence_mapping=mapping)
     ids = sorted(job_ids)
-    provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
-                  "narration_job_id": ids[0] if len(ids) == 1 else ids, "units": prov_units}
+    provenance = {"method": "eav.film.narration_track" if ids else "eav.cli scene voices + scene-timing",
+                  "measured_with": "ffprobe",
+                  "narration_job_id": (ids[0] if len(ids) == 1 else ids) if ids else None, "units": prov_units}
     if args.profile == "audiobook":
         provenance.update(profile="audiobook", sentence_splitter="eav.text.sentences",
                           frame_units_sha256={k: sha256_file(Path(args.frame_dir) / f"{k}.wav")
@@ -2663,7 +3161,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
         "formats": ["reader", "audio"], "audio_sha256": audio,
         "timing_json_sha256": sha256_file(timing_path), "term_per_territory": {},
         "text_source_licence": None, "cover_provenance": None,
-        "generators": _narration_generators(rec, plan, job_ids),
+        "generators": _narration_generators(rec, plan, job_ids) + _passage_generators(rec, v4_targets),
         "dry_narration": bool(args.dry),
         "music": None if args.dry else {
             **_music_licence(args.score_route),
@@ -2867,7 +3365,9 @@ def cmd_voicecheck(args):
         print(f"{t.name}: {'REDO ' + ','.join(r['failures']) if r['failures'] else 'PASS'}"
               + (" (word check NOT RUN: no matching transcript)" if r.get("not_run") else "")
               + (f" (word check WARNING: CER {r['metrics']['words']['cer']:.3f} above the provisional ceiling "
-                 f"{r['metrics']['words']['threshold']:g}; listen)" if "words" in r.get("warnings", []) else ""))
+                 f"{r['metrics']['words']['threshold']:g}; listen)" if "words" in r.get("warnings", []) else "")
+              + "".join(f" (WARNING {c}: measured {v['measured']:g} against the uncalibrated limit {v['limit']:g}; "
+                        "listen, not a redo)" for c, v in sorted((r.get("warning_values") or {}).items())))
     if not args.profile and data is not None:   # the saved profile's median is of the accepted takes only
         acc = voicecheck.accepted_cers(results)
         if acc:
@@ -2879,23 +3379,46 @@ def cmd_voicecheck(args):
     return 0
 
 
+def _music_roles(job, stems_dir) -> dict:
+    """{stem key: drone|solo|phrase|None}: the role each item of the music job declared, else the word in its key."""
+    declared = {i["key"]: i.get("role") for i in _job_json(job).get("items") or [] if isinstance(i, dict)}
+    keys = sorted({p.stem for p in Path(stems_dir).iterdir() if p.is_file() and p.suffix.lower() in cue.STEM_EXTS})
+    return {k: cue.stem_role(k, declared.get(k)) for k in keys}
+
+
 def cmd_cue(args):
     rec = _record(args.root)
     t = _film_target(args.film)
+    if not args.scene:
+        raise Stop("cue needs --scene (a cue belongs to one scene)", "Rerun with --scene <ID>")
+    job = next((j for j in _jobs(rec) if j["job_id"] == args.stems and j["kind"] == "music"
+                and j["imported"] and not _ended(j)), None)
     stems_dir = rec.root / "music" / args.stems
-    if not stems_dir.is_dir():
-        raise Stop(f"no imported music job folder {stems_dir}", next_action(rec.root))
+    if job is None or not stems_dir.is_dir():   # I9/F13: an imported music job, never a folder copied by hand
+        raise Stop(f"{args.stems} is not an imported music job of this title", next_action(rec.root))
+    if job["scene"] != args.scene:              # one cue per scene: never another scene's stems
+        raise Stop(f"music job {args.stems} is " + (f"scene {job['scene']}'s own" if job["scene"] else
+                                                    "not bound to a scene") + f", not scene {args.scene}'s",
+                   f"Build scene {args.scene}'s own stems: {PROG} job music --root {rec.root} --film {args.film} "
+                   f"--rates <rates.json> --spec <music.json with \"scene\": \"{args.scene}\" and each item's \"role\">")
+    film_dir = rec.root / "film" / t
+    for other in sorted((film_dir / "audio").glob("*.mix.json")):
+        doc = _json(other)
+        if doc.get("scene") != args.scene and doc.get("stems_job") == args.stems:
+            raise Stop(f"scene {doc.get('scene')} already mixes stems of {args.stems}; a scene never borrows another "
+                       "scene's cue", f"Build scene {args.scene}'s own music job")
+    roles_of = _music_roles(job, stems_dir)
     if args.pick:
         if not args.tonic:
             raise Stop("--pick needs --tonic (e.g. D)", "Rerun with --tonic")
-        pick = cue.pick_stems(stems_dir, args.tonic)
+        try:
+            pick = cue.pick_stems(stems_dir, args.tonic, roles_of)
+        except ValueError as e:
+            raise Stop(str(e), "Label the music job's stems (spec item \"role\": drone|solo|phrase) and rebuild it")
         saved = cue.write_pick(stems_dir, args.tonic, pick)
-        print(f"Picked {json.dumps(pick)} for tonic {args.tonic}; saved {saved}. "
-              f"Next: {PROG} cue --root {rec.root} --film {args.film} --scene <ID> --stems {args.stems}")
+        print(f"Picked {json.dumps(pick)} for tonic {args.tonic}, each within its family; saved {saved}. "
+              f"Next: {PROG} cue --root {rec.root} --film {args.film} --scene {args.scene} --stems {args.stems} --fx <fx.json>")
         return 0
-    if not args.scene:
-        raise Stop("cue needs --scene", "Rerun with --scene <ID>")
-    film_dir = rec.root / "film" / t
     try:
         sp = shotplan.require_approved(film_dir, args.scene)
     except shotplan.NotApproved as e:
@@ -2908,12 +3431,27 @@ def cmd_cue(args):
         if not saved.is_file():
             raise Stop("cue needs --drone, --solo and --phrase (or a saved pick)", f"{PROG} cue --pick --tonic <note> first")
         roles = {r: roles[r] or _json(saved)[r] for r in roles}
+    wrong = [f"{k} as the {r} ({roles_of.get(k) or 'unlabelled'})" for r, k in roles.items() if roles_of.get(k) != r]
+    if wrong:
+        raise Stop("stem roles do not match their families: " + ", ".join(wrong),
+                   "Pick each role from its own family (cue --pick does), or label the stems in the music spec")
     voice = Path(args.voice) if args.voice else film_dir / "voice" / f"{args.scene}.wav"
     if not voice.is_file():
         raise Stop(f"the scene voice {voice} does not exist", "Pass --voice <retimed wav> or put it there")
     fx = _json(args.fx) if args.fx else {}
     base = Path(args.fx).parent if args.fx else Path(".")
     items = {k: [{**e, "path": str(base / e["path"])} for e in fx.get(k, [])] for k in ("ambience", "foley")}
+    licences, refused = {}, []
+    for e in (e for v in items.values() for e in v):   # I10: a licence on file for every sound, fail closed
+        try:
+            licences[e["path"]] = cue.sound_licence(e["path"])
+        except ValueError as err:
+            refused.append(str(err))
+    if refused:
+        raise Stop("sound(s) without a licence on file: " + " | ".join(refused),
+                   "Use CC0 or author-released public-domain sounds with their record: the imported film_clips "
+                   "sfx/licences.json, or a licences.json beside your CC0 synthesis ({\"<file>\": {\"title\", "
+                   "\"licence\": \"CC0-1.0\", \"author\", \"basis\": {\"rule\": \"cc0-synthesis\"}}})")
     try:
         stems = {r: cue.stem_path(stems_dir, k) for r, k in roles.items()}
     except ValueError as e:
@@ -2921,8 +3459,10 @@ def cmd_cue(args):
     out = film_dir / "audio" / f"{args.scene}.mix.wav"
     res = cue.scene_mix(voice, [s["start"] for s in sp["shots"]], sp["peak"]["at"], stems,
                         items["ambience"], items["foley"], out, sp["seconds"])
-    _write_json(out.with_suffix(".json"), {"scene": args.scene, "stems": roles, "peak_at": sp["peak"]["at"],
-                                      "fx": {k: [{**e, "path": str(Path(e["path"]).resolve())} for e in v] for k, v in items.items()},
+    _write_json(out.with_suffix(".json"), {"scene": args.scene, "stems_job": args.stems, "stems": roles,
+                                      "peak_at": sp["peak"]["at"], "voice": str(voice.resolve()),
+                                      "fx": {k: [{**e, "path": str(Path(e["path"]).resolve()),
+                                                  "licence": licences[e["path"]]} for e in v] for k, v in items.items()},
                                       **res})
     print(f"Mixed {out}: {res['lufs']:.1f} LUFS, {res['true_peak']:.1f} dBTP, voice over music {res['voice_over_music_db']:.1f} dB.")
     return 0
@@ -2950,10 +3490,20 @@ def cmd_plan_shots(args):
     if not bible.is_file():
         raise Stop(f"{bible} does not exist", "Pass --bible <world-bible.json>")
     inp = _json(paths["input"])
+    timing_sha = None
+    if not inp.get("timing"):   # I6: the measured clause timing of scene-timing, its length_s included
+        tf = _timing_path(film_dir, args.scene)
+        if not tf.is_file():
+            raise Stop(f"the planner input has no \"timing\" and there is no {tf.name}",
+                       f"{PROG} scene-timing --root {rec.root} --film {args.film} --scene {args.scene}")
+        measured = _json(tf)
+        inp = {**inp, "timing": measured["timing"], **({} if "length_s" in inp else {"length_s": measured["length_s"]})}
+        timing_sha = shotplan.input_sha256(tf)
     sp = shotplan.plan({**inp, "scene_id": args.scene, "text": scene["text"]}, inp.get("timing") or [], _json(bible))
     if args.approve:
         try:
-            sp = shotplan.approve(sp, args.by, args.reviewer, input_sha256=shotplan.input_sha256(paths["input"]))
+            sp = shotplan.approve(sp, args.by, args.reviewer, input_sha256=shotplan.input_sha256(paths["input"]),
+                                  timing_sha256=timing_sha)
         except ValueError as e:
             raise Stop(f"not approved: {e}", f"Fix {paths['input']} and rerun plan-shots without --approve")
     shotplan.write(film_dir, sp)
@@ -2968,10 +3518,106 @@ def cmd_plan_shots(args):
     return 1 if hard else 0
 
 
+TIMING_SCHEMA = "earnalism.audiovisual-scene-timing.v1"
+TIMING_MIN_PAUSE_S = 0.30   # after retime every punctuation pause is >= 0.34 s (0.40 - 15 %); a breath kept short is not
+
+
+def _timing_path(film_dir, sid) -> Path:
+    return shotplan.paths(film_dir, sid)["dir"] / f"{sid}.timing.json"
+
+
+def _scene_clauses(film_dir, sid) -> list:
+    """The scene's measured clause timing [{start, end, text}]: the planner input's own "timing", else the
+    `scene-timing` file <scene>.timing.json beside it."""
+    p = shotplan.paths(film_dir, sid)["input"]
+    inp = _json(p) if p.is_file() else {}
+    if inp.get("timing"):
+        return inp["timing"]
+    tf = _timing_path(film_dir, sid)
+    return _json(tf)["timing"] if tf.is_file() else []
+
+
+def _passage_clauses(wav: Path, plain: str, offset: float, pid: str, threshold_db: float, min_pause: float) -> list:
+    """Clause timing of one retimed passage: its clauses (retime.clauses) mapped in order to its measured pauses."""
+    cl = retime.clauses(plain)
+    x = retime.read(wav)
+    a, b = passages._bounds(x)
+    t0, t1 = a / retime.SR, b / retime.SR
+    pauses = [(ps, pe) for ps, pe in retime.detect_pauses(wav, threshold_db, min_pause) if t0 < ps and pe < t1]
+    if len(pauses) != len(cl) - 1:
+        raise Stop(f"passage {pid}: {len(pauses)} pause(s) of at least {min_pause:g} s for {len(cl) - 1} clause "
+                   f"boundar{'y' if len(cl) == 2 else 'ies'} of its punctuation ({' | '.join(c for c, _ in cl)}); the "
+                   "clause times would be guessed, so none are written",
+                   "Listen to the passage: tune --min-pause / --threshold-db until the pauses match the punctuation, "
+                   "or time this scene's clauses by ear into the planner input's \"timing\"")
+    marks = [t0] + [v for ps in pauses for v in ps] + [t1]
+    return [{"start": round(offset + marks[2 * i], 3), "end": round(offset + marks[2 * i + 1], 3), "text": c}
+            for i, (c, _) in enumerate(cl)]
+
+
+def cmd_scene_timing(args):
+    """I6 (F4, F5): the measured clause timing of a scene's voice for plan-shots, with its R9 lead-in and R4 tail.
+    A passage-joined scene (Eleven v4) is timed passage by passage from its retimed takes and the join's offsets;
+    a scene wav placed by hand is timed as one passage of the scene text. Writes film/film-NN/shots/<scene>.timing.json
+    ({"timing": [{start, end, text}], "length_s", "lead_in_s", "tail_s", ...}); plan-shots reads it when the
+    planner input has no "timing" of its own."""
+    rec = _record(args.root)
+    plan = _plan(rec)
+    films = plan["plan"]["films"]
+    if not 1 <= args.film <= len(films):
+        raise Stop(f"film {args.film} is not in the plan ({len(films)} films)", f"{PROG} status --root {rec.root}")
+    t = _film_target(args.film)
+    sc = next((x for x in films[args.film - 1]["scenes"] if x["scene_id"] == args.scene), None)
+    if sc is None:
+        raise Stop(f"scene {args.scene} is not in film {args.film}", f"{PROG} status --root {rec.root}")
+    film_dir = rec.root / "film" / t
+    voice = film_dir / "voice" / f"{args.scene}.wav"
+    if not voice.is_file():
+        raise Stop(f"scene {args.scene} has no voice {voice}", next_action(rec.root))
+    manifest_path = film_dir / "voice" / f"{args.scene}.passages.json"
+    rows = []
+    if manifest_path.is_file():
+        man = _json(manifest_path)
+        if man.get("wav_sha256") != sha256_file(voice):
+            raise Stop(f"{voice} is not the wav its passage manifest records", "Re-import the scene's passages")
+        offsets = (man.get("join") or {}).get("offsets")
+        if not offsets or len(offsets) != len(man["passages"]):
+            raise Stop(f"the passage manifest of {args.scene} predates the join offsets", "Rerun the same import-take "
+                       "call for the scene (no new takes or credits) to rejoin it with its lead-in, tail and offsets")
+        plains = [p_.get("plain") for p_ in man["passages"]]
+        if not all(plains):
+            text, _ = _scene_text(sc, plan["language"])
+            plains = passages.check_passage_scripts(text, [(rec.root / p_["script"]).read_text(encoding="utf-8")
+                                                           for p_ in man["passages"]])
+        for p_, plain, off in zip(man["passages"], plains, offsets):
+            rows += _passage_clauses(rec.root / p_["retimed"], plain, off, p_["id"], args.threshold_db, args.min_pause)
+    else:
+        text, _ = _scene_text(sc, plan["language"])
+        rows = _passage_clauses(voice, text, 0.0, args.scene, args.threshold_db, args.min_pause)
+    length = len(retime.read(voice)) / retime.SR
+    lead, tail = rows[0]["start"], length - rows[-1]["end"]
+    lo, hi = passages.LEAD_IN_RANGE
+    out = _write_json(_timing_path(film_dir, args.scene), {
+        "schema": TIMING_SCHEMA, "scene": args.scene, "timing": rows, "length_s": round(length, 3),
+        "speech_start": rows[0]["start"], "speech_end": rows[-1]["end"], "lead_in_s": round(lead, 3),
+        "tail_s": round(tail, 3), "r9_lead_in_ok": lo <= lead <= hi, "voice_sha256": sha256_file(voice),
+        "method": "eav.cli scene-timing: retime.clauses mapped to retime.detect_pauses per retimed passage",
+        "threshold_db": args.threshold_db, "min_pause_s": args.min_pause})
+    rec.add_artifact("scene_timing", out, {"target": t, "scene": args.scene})
+    print(f"Timed {len(rows)} clause(s) of {args.scene}: speech {rows[0]['start']:.2f}-{rows[-1]['end']:.2f} s of "
+          f"{length:.2f} s (lead-in {lead:.2f} s, tail {tail:.2f} s); wrote {out}.")
+    if not lo <= lead <= hi:
+        print(f"WARNING R9: the first word lands {lead:.2f} s in, not {lo:g}-{hi:g} s: rejoin the scene (import-take "
+              "pads the lead-in) before the paper edit")
+    print(f"Next: write the planner input {shotplan.paths(film_dir, args.scene)['input']} without \"timing\" (this file "
+          f"is read, length_s included), then {PROG} plan-shots --root {rec.root} --film {args.film} --scene {args.scene}")
+    return 0
+
+
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take, "split-passages": cmd_split_passages,
             "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide, "retime": cmd_retime, "voicecheck": cmd_voicecheck, "motiongate": cmd_motiongate,
-            "cue": cmd_cue, "plan-shots": cmd_plan_shots,
+            "cue": cmd_cue, "plan-shots": cmd_plan_shots, "scene-timing": cmd_scene_timing,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio,
@@ -3007,6 +3653,10 @@ def _parser():
     s.add_argument("--list-units", action="store_true",
                    help="narration: print the unit keys and texts this job would use; build nothing")
     s.add_argument("--job-id")
+    s.add_argument("--resume", metavar="JOB_ID",
+                   help="film_clips: reserve and write a resume session for a job its hard stop cut short")
+    s.add_argument("--from", dest="source",
+                   help="with --resume: the partial download (done.json and the finished clips) to skip")
     s = add("import-take", help="file an ElevenLabs narration job from one take per scene")
     s.add_argument("target", help="film-NN or reel-N")
     s.add_argument("--scripts", required=True, help="folder of <scene_id>.txt tagged scripts")
@@ -3026,6 +3676,9 @@ def _parser():
                                      "saved one under film/film-NN/voice/passages, else measured and saved)")
     s.add_argument("--transcripts", help="Eleven v4 passages: transcripts.json from the Colab words cell, keyed by "
                                          "<passage id>: turns on the Whisper word check (else recorded as not run)")
+    s.add_argument("--accept", action="append", metavar="PID=reason",
+                   help="Eleven v4 passages: join this passage despite its voicecheck failures (repeatable; the "
+                        "reason is recorded in the passage manifest and the passages_checked event)")
     s = add("split-passages", help="write the untagged passage scripts of a film (Eleven v4)")
     s.add_argument("target", help="film-NN")
     s.add_argument("--out", required=True, help="folder for <scene_id>-p<NN>.txt")
@@ -3105,6 +3758,12 @@ def _parser():
     s.add_argument("--approve", action="store_true", help="record the approval; needs --by and --reviewer")
     s.add_argument("--by")
     s.add_argument("--reviewer")
+    s = add("scene-timing", help="measured clause timing of a scene's voice for plan-shots (R9 lead-in, R4 tail)")
+    s.add_argument("--film", type=int, required=True)
+    s.add_argument("--scene", required=True)
+    s.add_argument("--min-pause", type=float, default=TIMING_MIN_PAUSE_S,
+                   help=f"shortest pause that ends a clause (default {TIMING_MIN_PAUSE_S:g} s)")
+    s.add_argument("--threshold-db", type=float, default=-38.0, help="silence threshold (default -38 dBFS)")
     s = add("cue", help="per-scene music cue and film mix from ACE-Step stems (peak silence, smooth ducking)")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--scene")

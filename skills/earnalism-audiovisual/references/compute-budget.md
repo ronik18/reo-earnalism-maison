@@ -91,10 +91,19 @@ actions, and each scene's `plan-shots` output prints a planning estimate (Wan cl
 against the remaining allowance before the batch is built. The job's own forecast (derived from
 `rates.json`, never the planning figure) is what the ledger reserves.
 
-Batches fit one Colab session (at most about 70 min wall clock, the notebook's own hard stop); once the
-owner approves a scene's paper edit, no per-batch signature is needed (`film_clips`; the reel rules of
-≤ 5 clips and a signed authority file stay for reels). Resume is journalled: `done.json` keeps finished
-clips, and a rerun skips them. A stalled or stopped batch is `close`d with the units Colab shows.
+Each `film_clips` job fits one Colab session: its forecast (the notebook's own hard stop) is at most 4200 s
+(70 min); `job film_clips` splits a longer spec into several jobs, a continuation chain never split, each
+reserved within the caps before anything is written. The forecast includes the depth maps (`depth_s`,
+ESTIMATE 90 s + 4 s per image; `rates.json` may restate `depth_setup_s` and `depth_s_per_image`). Once the
+owner approves a scene's paper edit, no per-batch signature is needed (the reel rules of ≤ 5 clips and a
+signed authority file stay for reels). Resume is journalled: `done.json` keeps finished clips. **A resumed
+session is reserved first:** `job film_clips --resume <job_id> --from <the partial download>` reserves the
+remaining items' forecast as a ledger entry linked to the job (`resume_of`), within the title and month caps,
+and writes the resume notebook whose hard stop is that reservation; the job then imports or closes with the
+CU of all its sessions, and the job and its resumes settle together. **Settling never overruns a cap:**
+actual units above the reservation that would take the title past its lifetime cap or the month past 100 CU are
+refused (exit 3, nothing settled): hold for the owner. A stalled batch that cannot be resumed is `close`d with
+the units Colab shows.
 
 ### Lessons from the pilots (carry into every new job)
 
