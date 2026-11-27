@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { mountIsland, closePlayer } from "./lifecycle";
 import { api, ApiError, errorText, readBootstrap, session, t } from "./api";
 import { IconButton } from "./icon-button";
-import { mediaMetadataFor, recallSpeed, rememberSpeed, seekTarget, sleepDeadline, timerExpired, validReturnPath } from "./state";
+import { mediaMetadataFor, recallSpeed, rememberSpeed, seekTarget, sleepDeadline, timerExpired, validReturnPath, withRendition } from "./state";
 interface Rendition {
   asset_id: string;
   quality_kbps: number;
@@ -25,6 +25,8 @@ interface Boot {
   locale: string;
   author?: string;
   cover_url?: string;
+  cover_width?: number;
+  cover_height?: number;
   chapters: Chapter[];
   reader_url: string;
   reader_available?: boolean;
@@ -89,7 +91,7 @@ function Player({ boot }: { boot: Boot }) {
   /** The unit at `i` with any rendition the listener switched to. */
   function unitAt(i: number): Chapter | undefined {
     const base = boot.chapters[i];
-    return base && overridesRef.current[base.unit_id] ? { ...base, ...overridesRef.current[base.unit_id] } : base;
+    return base && withRendition(base, overridesRef.current[base.unit_id]);
   }
   const chapter = unitAt(index) as Chapter;
   const path = `/me/progress/${boot.edition_id}/audio`;
@@ -176,8 +178,10 @@ function Player({ boot }: { boot: Boot }) {
       setBusy(false);
     }
   }
-  async function load(i: number, at = 0, autoplay = false) {
-    const c = unitAt(i);
+  /** `pick` is a rendition the listener asked for; it becomes the unit's rendition only once its grant is approved. */
+  async function load(i: number, at = 0, autoplay = false, pick?: Rendition) {
+    const base = unitAt(i);
+    const c = base && withRendition(base, pick);
     if (!c) return;
     const generation = ++loadGeneration.current;
     setBusy(true);
@@ -210,6 +214,7 @@ function Player({ boot }: { boot: Boot }) {
       const el = audio.current!;
       grant.current = next;
       activeChapter.current = i;
+      if (pick) setRendition(c.unit_id, pick);
       setIndex(i);
       el.src = source;
       el.playbackRate = speed;
@@ -365,13 +370,10 @@ function Player({ boot }: { boot: Boot }) {
   async function chooseQuality(value: number) {
     const target = chapter.renditions?.find((candidate) => candidate.quality_kbps === value);
     if (!target || target.asset_id === chapter.asset_id || busy) return;
-    const previous = overridesRef.current[chapter.unit_id];
     try {
       await persist();
-      setRendition(chapter.unit_id, target);
-      if (!(await load(index, Math.round((audio.current?.currentTime || 0) * 1000), playing))) setRendition(chapter.unit_id, previous);
+      await load(index, Math.round((audio.current?.currentTime || 0) * 1000), playing, target);
     } catch (error) {
-      setRendition(chapter.unit_id, previous);
       setStatus(errorText(error));
     }
   }

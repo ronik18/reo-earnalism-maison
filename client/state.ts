@@ -122,15 +122,20 @@ export function seekTarget(current: number, delta: number, duration: number): nu
   const next = Math.max(0, current + delta);
   return Number.isFinite(duration) ? Math.min(duration, next) : next;
 }
-export interface MediaMetadataSource { title: string; author?: string; cover_url?: string }
+export interface MediaMetadataSource { title: string; author?: string; cover_url?: string; cover_width?: number; cover_height?: number }
+/** A unit with the listener's chosen rendition: same unit and title, that rendition's asset, hash, quality and length. */
+export function withRendition<T extends { asset_id: string }, R extends { asset_id: string }>(unit: T, rendition: R | undefined): T & Partial<R> {
+  return rendition ? { ...unit, ...rendition } : (unit as T & Partial<R>);
+}
 export function mediaMetadataFor(
   boot: MediaMetadataSource,
   part: { title: string },
-): { title: string; artist: string; album: string; artwork: { src: string; sizes: string }[] } {
+): { title: string; artist?: string; album: string; artwork: { src: string; sizes?: string }[] } {
+  const sized = Number.isInteger(boot.cover_width) && Number.isInteger(boot.cover_height) && boot.cover_width! > 0 && boot.cover_height! > 0;
   return {
     title: part.title || boot.title,
-    artist: boot.author || "Earnalism",
+    ...(boot.author ? { artist: boot.author } : {}),
     album: boot.title,
-    artwork: boot.cover_url ? [{ src: boot.cover_url, sizes: "512x512" }] : [],
+    artwork: boot.cover_url ? [{ src: boot.cover_url, ...(sized ? { sizes: `${boot.cover_width}x${boot.cover_height}` } : {}) }] : [],
   };
 }

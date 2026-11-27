@@ -475,7 +475,7 @@ test("Legacy UI return links preserve content language, query and anchor in the 
  assert.equal(validReturnPath("//other.test/bn/read/book/","bn"),"/en/");
 });
 
-import { rememberSpeed, recallSpeed, mediaMetadataFor, seekTarget } from "./state";
+import { rememberSpeed, recallSpeed, mediaMetadataFor, seekTarget, withRendition } from "./state";
 test("test_speed_is_remembered_and_clamped", () => {
   const store = new Map<string, string>();
   (globalThis as any).localStorage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v) };
@@ -504,7 +504,21 @@ test("test_media_metadata_has_author_part_and_artwork", () => {
   assert.equal(m.artwork.length, 1);
   assert.equal(m.artwork[0].src, "/c.webp");
   assert.deepEqual(mediaMetadataFor({ title: "Book" }, { title: "" }).artwork, []);
+  assert.equal(m.artwork[0].sizes, undefined);
+  assert.equal(mediaMetadataFor({ title: "Book", cover_url: "/c.webp", cover_width: 600, cover_height: 900 }, { title: "x" }).artwork[0].sizes, "600x900");
   assert.equal(mediaMetadataFor({ title: "Book" }, { title: "" }).title, "Book");
+});
+test("test_media_metadata_omits_artist_without_author", () => {
+  const m = mediaMetadataFor({ title: "Book" }, { title: "Part" });
+  assert.equal("artist" in m, false);
+  assert.equal(mediaMetadataFor({ title: "Book", author: "" }, { title: "Part" }).artist, undefined);
+});
+test("test_rendition_swap_changes_asset_not_unit", () => {
+  const unit = { asset_id: "a48", unit_id: "u1", title: "One", quality_kbps: 48, sha256: "x", duration_ms: 1000 };
+  const out = withRendition(unit, { asset_id: "a96", quality_kbps: 96, sha256: "y", duration_ms: 1010 });
+  assert.deepEqual([out.asset_id, out.unit_id, out.title, out.quality_kbps, out.sha256, out.duration_ms], ["a96", "u1", "One", 96, "y", 1010]);
+  assert.equal(withRendition(unit, undefined), unit);
+  assert.equal(unit.asset_id, "a48");
 });
 test("test_seek_back_15_forward_30_clamp_to_bounds", () => {
   assert.equal(seekTarget(100, -15, 600), 85);
