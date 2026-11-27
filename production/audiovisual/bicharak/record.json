@@ -5391,6 +5391,58 @@
       },
       "path": "narration/narration-film-01-r4/f01s019-008.wav",
       "sha256": "42ff53e97bfdfd96543299bfed2adb68cff9c577603c85be3ce023d1d4ba7112"
+    },
+    {
+      "bytes": 15211,
+      "kind": "colab_job",
+      "meta": {
+        "chunk": {
+          "group": "stills-film-01-r4",
+          "index": 1,
+          "of": 2
+        },
+        "forecast_units": 1.598883333333333,
+        "inputs_zip": "jobs/stills-film-01-r4-c1of2/inputs.zip",
+        "job_id": "stills-film-01-r4-c1of2",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r4-c1of2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r4-c1of2/stills.ipynb",
+      "sha256": "b659a9d52c5b0ab7a433b6d5c938a616beff7bb437e459722413216e101defdb"
+    },
+    {
+      "bytes": 15211,
+      "kind": "colab_job",
+      "meta": {
+        "chunk": {
+          "group": "stills-film-01-r4",
+          "index": 2,
+          "of": 2
+        },
+        "forecast_units": 1.5740944444444445,
+        "inputs_zip": "jobs/stills-film-01-r4-c2of2/inputs.zip",
+        "job_id": "stills-film-01-r4-c2of2",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r4-c2of2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r4-c2of2/stills.ipynb",
+      "sha256": "ce1d948d2ea650b02cde84716a4e64e30b957119da64b1d674c5307be2198be7"
+    },
+    {
+      "bytes": 16738,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.0411333333333332,
+        "inputs_zip": "jobs/music-film-01-r3/inputs.zip",
+        "job_id": "music-film-01-r3",
+        "job_kind": "music",
+        "manifest": "jobs/music-film-01-r3/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/music-film-01-r3/music.ipynb",
+      "sha256": "e5a329656f9ab5c3a605b8d6357587607d100c0a108b2639ae70045a7a3a7e5d"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -6202,6 +6254,124 @@
       },
       "result": "retired",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-27T05:50:19.062099+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r3",
+        "reason": "Rebuilt with resumable, chunked templates for the Modal runner; never run",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T05:50:19.069833+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r3",
+        "reason": "Rebuilt with resumable, chunked templates for the Modal runner; never run"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T05:50:19.239858+00:00",
+      "detail": {
+        "job_id": "music-film-01-r2",
+        "reason": "Rebuilt with resumable, chunked templates for the Modal runner; never run",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T05:50:19.246882+00:00",
+      "detail": {
+        "job_id": "music-film-01-r2",
+        "reason": "Rebuilt with resumable, chunked templates for the Modal runner; never run"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T05:50:19.425231+00:00",
+      "detail": {
+        "chunk": {
+          "group": "stills-film-01-r4",
+          "index": 1,
+          "of": 2
+        },
+        "forecast_units": 1.598883333333333,
+        "job_id": "stills-film-01-r4-c1of2",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T05:50:19.431461+00:00",
+      "detail": {
+        "chunk": {
+          "group": "stills-film-01-r4",
+          "index": 1,
+          "of": 2
+        },
+        "job_id": "stills-film-01-r4-c1of2",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T05:50:19.446983+00:00",
+      "detail": {
+        "chunk": {
+          "group": "stills-film-01-r4",
+          "index": 2,
+          "of": 2
+        },
+        "forecast_units": 1.5740944444444445,
+        "job_id": "stills-film-01-r4-c2of2",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T05:50:19.453690+00:00",
+      "detail": {
+        "chunk": {
+          "group": "stills-film-01-r4",
+          "index": 2,
+          "of": 2
+        },
+        "job_id": "stills-film-01-r4-c2of2",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T05:50:19.628636+00:00",
+      "detail": {
+        "forecast_units": 1.0411333333333332,
+        "job_id": "music-film-01-r3",
+        "kind": "music"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T05:50:19.634823+00:00",
+      "detail": {
+        "job_id": "music-film-01-r3",
+        "kind": "music",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
     }
   ],
   "ledger": "../allowance-ledger.json",

@@ -54,8 +54,8 @@
     "job_id": "stills-film-01-r3",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 2.540861111111111,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   },
@@ -63,8 +63,8 @@
     "job_id": "music-film-01-r2",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 1.0411333333333332,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   },
@@ -464,6 +464,48 @@
     "root": "pratihingsa"
   },
   {
+    "job_id": "stills-film-01-r4-c1of2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak",
+    "reserved_units": 1.598883333333333,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-27T05:50:24+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "stills-film-01-r4-c2of2",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak",
+    "reserved_units": 1.5740944444444445,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-27T05:50:24+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "music-film-01-r3",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak",
+    "reserved_units": 1.0411333333333332,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-27T05:50:24+00:00",
+    "modal_runs_issued": 1
+  },
+  {
     "modal_spend": "2026-11",
     "rows": [
       {
@@ -541,6 +583,30 @@
         "seconds": 121.04663477,
         "at": "2026-11-26T14:18:34+00:00",
         "status": "ok"
+      },
+      {
+        "run_id": "stills-film-01-r4-c1of2#1",
+        "job_id": "stills-film-01-r4-c1of2",
+        "usd": 1.072815,
+        "seconds": 0.0,
+        "at": "2026-11-27T05:50:24+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "stills-film-01-r4-c2of2#1",
+        "job_id": "stills-film-01-r4-c2of2",
+        "usd": 1.0603274999999999,
+        "seconds": 0.0,
+        "at": "2026-11-27T05:50:24+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "music-film-01-r3#1",
+        "job_id": "music-film-01-r3",
+        "usd": 0.7856025,
+        "seconds": 0.0,
+        "at": "2026-11-27T05:50:24+00:00",
+        "status": "pending"
       }
     ]
   }

@@ -1,0 +1,15 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 1931,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/music-film-01-r3",
+  "inputs_sha256": "bfc00f89fbf9db0623ef5a408167444c95a8b7514b6607de6050f8b58d5e6be8",
+  "job_id": "music-film-01-r3",
+  "kind": "music",
+  "model": {
+    "repo": "ACE-Step/ACE-Step-v1-3.5B",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "e5a329656f9ab5c3a605b8d6357587607d100c0a108b2639ae70045a7a3a7e5d",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}
