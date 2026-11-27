@@ -17,3 +17,7 @@ test-results/
 .superdesign/
 .claude/worktrees/
 .review-test-*/
+
+# Film renders and intermediate audio are large; they live in private R2, not git
+production/audiovisual/*/film/**/*.wav
+production/audiovisual/*/film/**/*.mp4
