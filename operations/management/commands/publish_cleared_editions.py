@@ -41,6 +41,8 @@ LEGACY_BOOKS = {
     "bicharak": {"edition": "bicharak", "intake": "bicharak", "import": True},
 }
 EVIDENCE_PREFIX = "reo-earnalism-maison:"
+# The only asset kinds the revise stage rebuilds; any other kind on the live revision makes revise refuse.
+REVISE_REBUILT_KINDS = ("reader_package", "reader_source", "cover")
 
 
 def sha256(raw):
@@ -415,6 +417,12 @@ class Command(BaseCommand):
 
     def build_revision(self, actor, packet, edition, live, manifest, raw, source_sha, revision_id):
         slug = packet["slug"]
+        media = sorted(set(live.assets.exclude(kind__in=REVISE_REBUILT_KINDS).values_list("kind", flat=True)))
+        if media:
+            raise CommandError(f"{slug}: REVISE_LIVE_HAS_MEDIA: the live revision {live.id} holds {', '.join(media)} assets. "
+                               "revise rebuilds only reader packages, the reader source and covers, so publishing its draft "
+                               "would drop them. Media made from the old text would no longer match the corrected text and "
+                               "must be re-made from the corrected revision, not carried over; nothing was changed.")
         try:
             source = read_source_bytes(raw)
             derived, transform = reader_derivative(source, source_sha)

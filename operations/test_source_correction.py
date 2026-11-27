@@ -246,6 +246,39 @@ class ReviseStageTests(TestCase):
         self.assertTrue(clearance["evidence_ref"].startswith(CORRECTED_CLEARANCE + "#sha256="))
         self.assertIn("review_items=", clearance["evidence_ref"])
 
+    def test_revise_refuses_when_the_live_revision_holds_audio(self):
+        from library.models import Asset, Edition, Revision
+        imported = self.run_command("import", SLUG)[SLUG]
+        draft = Revision.objects.get(pk=imported["revision_id"])
+        Asset.objects.bulk_create([Asset(revision=draft, unit=draft.units.get(), kind="audio_chapter", state="ready",
+            storage_key=f"revisions/{draft.id}/audio-1.mp3", sha256="a" * 64, bytes=1, content_type="audio/mpeg", duration_ms=1000)])
+        # Stand-in for an audio-bearing publication (attach_audiovisual_audio); the frozen-content guards allow this state change.
+        Revision.objects.filter(pk=draft.pk).update(state="live", published_at=timezone.now())
+        Edition.objects.filter(pk=draft.edition_id).update(live_revision=draft)
+        self.apply_correction()
+        self.approve(("clearance", CORRECTED_CLEARANCE, SLUG), ("cover", COVER, SLUG))
+        with self.assertRaises(CommandError) as raised:
+            self.run_command("revise", SLUG)
+        message = str(raised.exception)
+        self.assertIn("REVISE_LIVE_HAS_MEDIA", message)
+        self.assertIn("audio_chapter", message)
+        self.assertIn("must be re-made", message)
+        edition = Edition.objects.get(pk=draft.edition_id)
+        self.assertEqual((edition.live_revision_id, edition.revisions.count()), (draft.id, 1))
+        self.assertFalse(Asset.objects.filter(revision__edition=edition).exclude(revision=draft).exists())
+
+    def test_revise_proceeds_when_the_live_revision_holds_only_text_and_covers(self):
+        from library.models import Revision
+        first = self.publish_first()
+        live = Revision.objects.get(pk=first["revision_id"])
+        self.assertEqual(set(live.assets.values_list("kind", flat=True)), {"reader_package", "reader_source", "cover"})
+        self.apply_correction()
+        self.approve(("clearance", CORRECTED_CLEARANCE, SLUG), ("cover", COVER, SLUG))
+        revised = self.run_command("revise", SLUG)[SLUG]
+        self.assertTrue(revised["revised"])
+        self.assertEqual(set(Revision.objects.get(pk=revised["revision_id"]).assets.values_list("kind", flat=True)),
+                         set(command.REVISE_REBUILT_KINDS))
+
     def test_revise_refuses_a_structural_change(self):
         self.publish_first()
         self.apply_correction()
