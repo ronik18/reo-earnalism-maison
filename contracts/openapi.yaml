@@ -19745,6 +19745,7 @@
             "type": "integer",
             "enum": [
               48,
+              64,
               96
             ]
           },
@@ -19827,6 +19828,7 @@
                 "type": "integer",
                 "enum": [
                   48,
+                  64,
                   96
                 ]
               },
@@ -19957,6 +19959,11 @@
           "end_ms": {
             "type": "integer",
             "minimum": 1
+          },
+          "sentence_index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Optional. Zero-based sentence position inside the paragraph anchor_id; present only on precision sentence maps, where several segments may share an anchor_id."
           }
         },
         "required": [
@@ -19965,6 +19972,25 @@
           "end_offset_chars",
           "start_ms",
           "end_ms"
+        ]
+      },
+      "AudioChapter": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "A chapter marker inside one audio unit. start_ms counts from the start of that unit's audio. Carried as markers on each player bootstrap chapters item; the bootstrap is server-rendered and is not an OpenAPI response.",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start_ms": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "title",
+          "start_ms"
         ]
       },
       "TimingMap": {
@@ -25167,6 +25193,7 @@
             "type": "integer",
             "enum": [
               48,
+              64,
               96
             ]
           },
