@@ -133,25 +133,31 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
     def setUpClass(cls):
         sync_playwright = browser_prerequisites()
         tool_prerequisites()
-        super().setUpClass()
+        super().setUpClass()  # Django registers the live server thread's termination as a class cleanup
         cls.async_unsafe = os.environ.get('DJANGO_ALLOW_ASYNC_UNSAFE')
         os.environ['DJANGO_ALLOW_ASYNC_UNSAFE'] = 'true'
+        # Each acquisition registers its own release, so a failure later in setUpClass (ffmpeg, browser launch)
+        # still stops the live server, removes the audio directory and restores the environment.
+        cls.addClassCleanup(cls.restore_async_unsafe)
         cls.audio_dir = TemporaryDirectory(prefix='maison-read-listen-audio-')
+        cls.addClassCleanup(cls.audio_dir.cleanup)
         cls.tones = {}
         for count in (sum(len(split_sentences(text)) for _, text in PART_ONE), sum(len(split_sentences(text)) for _, text in PART_TWO)):
             cls.tones[count] = tone(Path(cls.audio_dir.name) / f'tone-{count}.mp3', count * SENTENCE_MS / 1000)
         cls.playwright = sync_playwright().start()
+        cls.addClassCleanup(cls.playwright.stop)
         try:
             cls.browser = cls.playwright.chromium.launch()
         except Exception:
             cls.browser = cls.playwright.chromium.launch(executable_path='/opt/pw-browsers/chromium')
+        cls.addClassCleanup(cls.browser.close)
 
     @classmethod
     def tearDownClass(cls):
-        cls.browser.close()
-        cls.playwright.stop()
-        cls.audio_dir.cleanup()
-        super().tearDownClass()
+        super().tearDownClass()  # the browser, audio files and environment are class cleanups (they run even when setUpClass fails)
+
+    @classmethod
+    def restore_async_unsafe(cls):
         if cls.async_unsafe is None:
             os.environ.pop('DJANGO_ALLOW_ASYNC_UNSAFE', None)
         else:
@@ -230,6 +236,10 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
         self.addCleanup(context.close)
         if init:
             context.add_init_script(init)
+        blocked = []
+        context.route('**/*', lambda route: route.continue_() if urlsplit(route.request.url).hostname == '127.0.0.1'
+                      else (blocked.append(route.request.url), route.abort()))
+        self.addCleanup(lambda: self.assertEqual(blocked, [], 'the browser must only reach the loopback server'))
         page = context.new_page()
         page.errors = []
         page.on('pageerror', lambda error: page.errors.append(str(error)))
@@ -351,8 +361,10 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
         with self.subTest('BUG frontend: serious/critical axe violations at the preview ending'):
             self.assertEqual([v['id'] for v in preview_axe if v['impact'] in ('serious', 'critical')], [], preview_axe)
         minutes = page.evaluate("() => [...document.querySelectorAll('.preview-boundary p')].map(p => p.textContent).find(t => t.includes('left to read'))")
-        with self.subTest('BUG frontend web/i18n.py + media-sheets.tsx: "1 minutes left to read"'):
-            self.assertNotRegex(minutes or '', r'^1 minutes\b', f'one minute must not be pluralised: {minutes!r}')
+        self.assertIsNotNone(minutes, 'Task 10: the preview ending shows the minutes left')
+        self.assertRegex(minutes, r'^1 ', f'the fixture leaves about one minute to read: {minutes!r}')
+        with self.subTest('BUG frontend web/i18n.py + media-sheets.tsx: "1 minutes left to read" (English singular rule)'):
+            self.assertNotIn('1 minutes', minutes, f'one minute must not be pluralised: {minutes!r}')
         self.assertEqual(len(visible_sign_in), 1, f'exactly one visible "Sign in free" path at the preview end: {visible_sign_in}')
         boundary = self.p[1]
         return_to = parse_qs(urlsplit(visible_sign_in[0]).query)['return_to'][0]
@@ -395,12 +407,21 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
                           message='the player must start at the switched position')
         self.assertAlmostEqual(start, opened_ms / 1000, delta=0.25)
 
-        # Back 15 clamps at 0; Forward 30 moves 30 s.
-        page.get_by_role('button', name='Back 15 seconds').click()
-        self.wait(page, "() => document.querySelector('audio').currentTime < 0.25", message='Back 15 from under 15 s must clamp to 0')
-        page.get_by_role('button', name='Forward 30 seconds').click()
-        after = self.wait(page, "() => { const t = document.querySelector('audio').currentTime; return t > 29 && t; }", message='Forward 30 must reach 30 s')
-        self.assertAlmostEqual(after, 30, delta=0.5)
+        # Back 15 subtracts 15 s and Forward 30 adds 30 s (paused, so time does not drift); Back 15 clamps at 0.
+        def seek(t):
+            page.evaluate("(t) => { const a = document.querySelector('audio'); a.pause(); a.currentTime = t; }", t)
+            self.wait(page, f"() => Math.abs(document.querySelector('audio').currentTime - {t}) < 0.05", message=f'seek to {t} s')
+        def skip(button, expected):
+            page.get_by_role('button', name=button).click()
+            got = self.wait(page, f"() => {{ const t = document.querySelector('audio').currentTime; return Math.abs(t - {expected}) < 0.3 && {{t}}; }}",
+                            message=f'{button} must land at {expected} s')
+            self.assertAlmostEqual(got['t'], expected, delta=0.3)
+        seek(40.0)
+        skip('Back 15 seconds', 25.0)
+        seek(10.0)
+        skip('Forward 30 seconds', 40.0)
+        seek(9.0)
+        skip('Back 15 seconds', 0.0)
         self.shot(page, 'journey-04-player-1280', full_page=True)
 
         # Sleep timer "End of part": part one ends and playback stops instead of moving to part two.
@@ -552,16 +573,20 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
             return {scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth, toolsTop: r.top, toolsLeft: r.left, toolsRight: r.right,
                     titleBottom: t && t.bottom, titleTop: t && t.top, barHeight: bar.getBoundingClientRect().height,
                     overflow: [...bar.querySelectorAll('a, button, [role=progressbar], .reader-minutes, .logo-plate')].filter(e => { const b = e.getBoundingClientRect(); return b.width && (b.right > innerWidth + 0.5 || b.left < -0.5); }).map(e => { const b = e.getBoundingClientRect(); return `${e.tagName}.${e.className} [${Math.round(b.left)},${Math.round(b.right)}] ${e.getAttribute('src') || ''}`; }),
-                    toolsHeight: r.height, toolRows: new Set([...tools.children].filter(c => c.getBoundingClientRect().height).map(c => Math.round(c.getBoundingClientRect().top))).size}; }""")
+                    toolsHeight: r.height,
+                    // visual rows of the whole toolbar: visible controls grouped by vertical overlap
+                    rows: [...bar.querySelectorAll('a, button, .reader-minutes, .logo-plate, .room-evening-title')]
+                      .map(e => e.getBoundingClientRect()).filter(b => b.width && b.height).sort((a, b) => a.top - b.top)
+                      .reduce((rows, b) => { const last = rows[rows.length - 1]; if (last && b.top < last.bottom - 4) { last.bottom = Math.max(last.bottom, b.bottom); } else rows.push({top: b.top, bottom: b.bottom}); return rows; }, []).length}; }""")
         self.shot(page, 'toolbar-360-top')
         print('\nTOOLBAR 360 ' + json.dumps(layout))
         self.assertLessEqual(layout['scrollWidth'], 360, f'no horizontal scroll at 360 px: {layout}')
         self.assertEqual(layout['overflow'], [], layout)
         self.assertGreaterEqual(layout['toolsTop'], layout['titleBottom'] - 1, f'tools must sit on a second row: {layout}')
         with self.subTest('BUG frontend static CSS: the 360 px toolbar wraps to three rows'):
-            # Task 8 ruling: row 1 Back/title/logo, row 2 .reader-tools. With Task 11's Read/Listen switch in the
-            # tools, flex-wrap pushes "Reading comfort" to a third row (toolbar ~157 px of a 640 px screen).
-            self.assertLessEqual(layout['toolsHeight'], 56, f'the reader tools must fit one row at 360 px: {layout}')
+            # Task 8 ruling "mobile two rows": row 1 Back/title/logo, row 2 the reader tools. With Task 11's
+            # Read/Listen switch in the tools, flex-wrap pushes "Reading comfort" to a third row.
+            self.assertEqual(layout['rows'], 2, f'the 360 px toolbar must be exactly two rows: {layout}')
         hidden = "() => document.querySelector('.reader-toolbar').classList.contains('is-hidden')"
         page.mouse.move(180, 400)
         for _ in range(4):
@@ -667,12 +692,13 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
         for control, rect in rects:
             with self.subTest(control=control):
                 self.assertIsNotNone(rect, f'the highlight must survive {control}')
-                self.assertTrue(rect['top'] >= 0 and rect['bottom'] <= rect['vh'], f'after {control} the highlight must stay in view: {rect}')
-            with self.subTest('BUG frontend client/reader.tsx: follow-along centring ignores the docked player', control=control):
-                # reader.tsx (~:839) only scrolls when the sentence leaves [0, innerHeight]; the persistent player
-                # docked at the bottom (and the toolbar at the top) can cover a sentence that is "in view".
-                self.assertTrue(rect['top'] >= rect['toolbarBottom'] and (rect['playerTop'] is None or rect['bottom'] <= rect['playerTop']),
-                                f'after {control} the highlighted sentence must not sit under the toolbar or the docked player: {rect}')
+                self.assertTrue(rect['top'] >= 0 and rect['bottom'] <= rect['vh'], f'after {control} the highlight must stay in the viewport: {rect}')
+        final = rects[-1][1]
+        with self.subTest('BUG frontend client/reader.tsx: follow-along centring ignores the docked player'):
+            # spec §10: the follow-along highlight must stay visible. reader.tsx (~:839) only scrolls when the sentence leaves [0, innerHeight], so the docked
+            # player (or the toolbar) can cover it. Checked once, after all the setting changes.
+            self.assertTrue(final['top'] >= final['toolbarBottom'] and (final['playerTop'] is None or final['bottom'] <= final['playerTop']),
+                            f'spec §10: the follow-along highlight must stay visible: after all the comfort changes it must not sit under the toolbar or the docked player: {final}')
 
     def test_follow_along_sentence_is_not_left_under_the_docked_player(self):
         page = self.context(1280, 900)
@@ -697,4 +723,4 @@ class ReadListenBrowserTests(StaticLiveServerTestCase):
         print('\nFOLLOW UNDER PLAYER ' + json.dumps(rect))
         with self.subTest('BUG frontend client/reader.tsx: follow-along centring ignores the docked player'):
             self.assertTrue(rect['bottom'] <= rect['playerTop'],
-                            f'the narrated sentence must be scrolled clear of the docked player, not left under it: {rect}')
+                            f'spec §10: the follow-along highlight must stay visible; the narrated sentence must be scrolled clear of the docked player, not left under it: {rect}')
