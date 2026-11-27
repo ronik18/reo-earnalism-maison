@@ -765,10 +765,15 @@
     "job_id": "narration-5ea27171",
     "title": "kshudhita-pashan",
     "month": "2026-11",
-    "units": 1.861893444444444,
+    "units": 0.0,
     "state": "reserved",
     "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
-    "root": "kshudhita-pashan"
+    "root": "kshudhita-pashan",
+    "reserved_units": 1.861893444444444,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-27T20:07:04+00:00",
+    "modal_runs_issued": 1
   },
   {
     "modal_spend": "2026-11",
@@ -1111,6 +1116,14 @@
         "usd": 0.92574,
         "seconds": 0.0,
         "at": "2026-11-27T19:02:39+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-5ea27171#1",
+        "job_id": "narration-5ea27171",
+        "usd": 1.2085125,
+        "seconds": 0.0,
+        "at": "2026-11-27T20:07:04+00:00",
         "status": "pending"
       }
     ]
