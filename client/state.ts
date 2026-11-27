@@ -395,3 +395,75 @@ export function createDebouncedSaver<T>(
     pending: () => has,
   };
 }
+
+/** Line spacing: 0.05 steps, from the locale floor (1.5, or 1.8 for Bengali) to the stored maximum 2.4. */
+export function leadingFloor(locale: string): number {
+  return locale === "bn" ? 1.8 : 1.5;
+}
+export function stepLeading(current: number, delta: number, locale: string): number {
+  const floor = leadingFloor(locale);
+  const from = Number.isFinite(current) ? current : 1.65;
+  const next = Math.round((from + (delta > 0 ? 0.05 : delta < 0 ? -0.05 : 0)) * 100) / 100;
+  return Math.min(2.4, Math.max(floor, next));
+}
+
+/** Roving-tabindex radio group: the index a key moves to (wrapping), or undefined when the key is not ours. */
+export function radioKeyTarget(key: string, index: number, count: number): number | undefined {
+  if (count <= 0) return undefined;
+  switch (key) {
+    case "ArrowRight":
+    case "ArrowDown":
+      return (index + 1) % count;
+    case "ArrowLeft":
+    case "ArrowUp":
+      return (index - 1 + count) % count;
+    case "Home":
+      return 0;
+    case "End":
+      return count - 1;
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * One save in flight at a time. Values pushed meanwhile coalesce into a single follow-up send of the latest value.
+ * A conflict refreshes the version and retries once with the latest value; any other failure goes to onError.
+ */
+export function createSaveQueue<T>(options: {
+  send: (value: T) => Promise<void>;
+  isConflict: (error: unknown) => boolean;
+  refresh: () => Promise<void>;
+  onSaved?: () => void;
+  onError?: (error: unknown) => void;
+}) {
+  let pending: { value: T } | undefined;
+  let running: Promise<void> | undefined;
+  async function drain() {
+    while (pending) {
+      const { value } = pending;
+      pending = undefined;
+      try {
+        try {
+          await options.send(value);
+        } catch (error) {
+          if (!options.isConflict(error)) throw error;
+          await options.refresh();
+          await options.send(pending ? (pending as { value: T }).value : value);
+          pending = undefined;
+        }
+        options.onSaved?.();
+      } catch (error) {
+        options.onError?.(error);
+      }
+    }
+  }
+  return {
+    push(value: T): Promise<void> {
+      pending = { value };
+      running ??= drain().finally(() => { running = undefined; });
+      return running;
+    },
+    inFlight: () => running !== undefined,
+  };
+}

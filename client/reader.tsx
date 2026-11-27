@@ -8,6 +8,7 @@ import {
   useState,
   type CSSProperties,
   type FormEvent,
+  type ReactNode,
 } from "react";
 import { mountIsland } from "./lifecycle";
 import { clearFollow, drawFollow } from "./follow-dom";
@@ -53,6 +54,10 @@ import {
   widthMeasure,
   PREFERENCE_SAVE_MS,
   createDebouncedSaver,
+  createSaveQueue,
+  radioKeyTarget,
+  stepLeading,
+  leadingFloor,
 } from "./state";
 interface Boot {
   edition_id: string;
@@ -116,6 +121,41 @@ const defaultPreferences = {
   reader_typeface: "serif",
   reader_layout: "scroll",
 };
+function RadioGroup({ labelledBy, className, value, options, onSelect }: {
+  labelledBy: string;
+  className: string;
+  value: string;
+  options: Array<{ value: string; className: string; content: ReactNode }>;
+  onSelect: (value: string) => void;
+}) {
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  const checked = Math.max(options.findIndex((o) => o.value === value), 0);
+  return (
+    <div className={className} role="radiogroup" aria-labelledby={labelledBy}>
+      {options.map((o, i) => (
+        <button
+          key={o.value}
+          ref={(el) => { refs.current[i] = el; }}
+          type="button"
+          role="radio"
+          aria-checked={i === checked}
+          tabIndex={i === checked ? 0 : -1}
+          className={o.className}
+          onClick={() => onSelect(o.value)}
+          onKeyDown={(e) => {
+            const to = radioKeyTarget(e.key, i, options.length);
+            if (to === undefined) return;
+            e.preventDefault();
+            onSelect(options[to].value);
+            refs.current[to]?.focus();
+          }}
+        >
+          {o.content}
+        </button>
+      ))}
+    </div>
+  );
+}
 function Reader({ boot }: { boot: Boot }) {
   const fullReader = boot.authenticated && !boot.preview;
   const reading = document.getElementById("reading-text")!;
@@ -796,7 +836,7 @@ function Reader({ boot }: { boot: Boot }) {
         behavior: "instant",
       });
     }
-  }, [follow, notes, preferences.reader_font_size, preferences.reader_margins, preferences.reader_layout]);
+  }, [follow, notes, preferences.reader_font_size, preferences.reader_margins, preferences.reader_layout, preferences.reader_typeface, preferences.reader_alignment, preferences.reader_line_height]);
   function selectParagraph(anchor: string) {
     const p =
       paragraphs.current.find((p) => p.anchor === anchor) ||
@@ -877,31 +917,41 @@ function Reader({ boot }: { boot: Boot }) {
   }
   const latestPreferences = useRef(preferences);
   latestPreferences.current = preferences;
-  async function persistPreferences(next: Partial<Preferences>) {
-    try {
-      if (fullReader) {
-        const currentVersion =
+  const queue = useRef<ReturnType<typeof createSaveQueue<Partial<Preferences>>>>(undefined);
+  if (!queue.current)
+    queue.current = createSaveQueue<Partial<Preferences>>({
+      send: async (next) => {
+        if (!fullReader) {
+          localStorage.setItem("maison.reader.preferences", JSON.stringify(next));
+          return;
+        }
+        const version =
           preferenceVersion.current ??
           (await api<Preferences>("/me/preferences")).version;
         const p = await api<Preferences>("/me/preferences", {
           method: "PATCH",
-          version: currentVersion,
+          version,
           body: Object.fromEntries(
-            Object.entries(next).filter(([key]) => key.startsWith("reader_")),
+            Object.entries(latestPreferences.current).filter(([key]) =>
+              key.startsWith("reader_"),
+            ),
           ),
           key: crypto.randomUUID(),
         });
-        preferenceVersion.current = p.version;
-      } else
-        localStorage.setItem("maison.reader.preferences", JSON.stringify(next));
-      setSettingsStatus("");
-    } catch (e) {
-      // the live change stays on screen; the next change retries with a fresh version
-      preferenceVersion.current = undefined;
-      setSettingsStatus(
-        fullReader ? t("comfort_not_saved") : errorText(e),
-      );
-    }
+        preferenceVersion.current = p.version; // only the version; the screen keeps the reader's own values
+      },
+      isConflict: (e) => e instanceof ApiError && (e.status === 409 || e.status === 412),
+      refresh: async () => {
+        preferenceVersion.current = (await api<Preferences>("/me/preferences")).version;
+      },
+      onSaved: () => setSettingsStatus(""),
+      onError: (e) => {
+        preferenceVersion.current = undefined;
+        setSettingsStatus(fullReader ? t("comfort_not_saved") : errorText(e));
+      },
+    });
+  function persistPreferences(next: Partial<Preferences>) {
+    return queue.current!.push(next);
   }
   const saver = useRef<ReturnType<typeof createDebouncedSaver<Partial<Preferences>>>>(undefined);
   if (!saver.current)
@@ -915,6 +965,7 @@ function Reader({ boot }: { boot: Boot }) {
     saver.current?.cancel();
   }, []);
   function pref<K extends keyof Preferences>(key: K, value: Preferences[K]) {
+    if (latestPreferences.current[key] === value) return; // a step against an end stop changes nothing
     const next = { ...latestPreferences.current, [key]: value };
     latestPreferences.current = next;
     setPreferences(next);
@@ -1248,7 +1299,7 @@ function Reader({ boot }: { boot: Boot }) {
                 type="button"
                 className="comfort-step"
                 aria-label={t("smaller_text")}
-                disabled={Number(preferences.reader_font_size) <= READER_FONT_SIZES[0]}
+                aria-disabled={Number(preferences.reader_font_size) <= READER_FONT_SIZES[0]}
                 onClick={() => pref("reader_font_size", stepFont(Number(preferences.reader_font_size), -1))}
               >
                 <span aria-hidden="true">A−</span>
@@ -1258,104 +1309,106 @@ function Reader({ boot }: { boot: Boot }) {
                 type="button"
                 className="comfort-step"
                 aria-label={t("larger_text")}
-                disabled={Number(preferences.reader_font_size) >= READER_FONT_SIZES[READER_FONT_SIZES.length - 1]}
+                aria-disabled={Number(preferences.reader_font_size) >= READER_FONT_SIZES[READER_FONT_SIZES.length - 1]}
                 onClick={() => pref("reader_font_size", stepFont(Number(preferences.reader_font_size), 1))}
               >
                 <span aria-hidden="true">A+</span>
               </button>
             </div>
           </div>
+          <div className="comfort-row" role="group" aria-labelledby="comfort-leading">
+            <span id="comfort-leading" className="comfort-label">{t("leading")}</span>
+            <div className="comfort-stepper">
+              <button
+                type="button"
+                className="comfort-step"
+                aria-label={t("less_line_spacing")}
+                aria-disabled={Number(preferences.reader_line_height) <= leadingFloor(boot.content_locale)}
+                onClick={() => pref("reader_line_height", stepLeading(Number(preferences.reader_line_height), -1, boot.content_locale))}
+              >
+                <span aria-hidden="true">−</span>
+              </button>
+              <output className="comfort-value">{Math.max(Number(preferences.reader_line_height) || 1.65, leadingFloor(boot.content_locale)).toFixed(2)}</output>
+              <button
+                type="button"
+                className="comfort-step"
+                aria-label={t("more_line_spacing")}
+                aria-disabled={Number(preferences.reader_line_height) >= 2.4}
+                onClick={() => pref("reader_line_height", stepLeading(Number(preferences.reader_line_height), 1, boot.content_locale))}
+              >
+                <span aria-hidden="true">+</span>
+              </button>
+            </div>
+          </div>
           <div className="comfort-row">
             <span id="comfort-theme" className="comfort-label">{t("theme")}</span>
-            <div className="comfort-swatches" role="radiogroup" aria-labelledby="comfort-theme">
-              {(["system", "light", "sepia", "dark", "true_black"] as const).map((value) => {
-                const selected = (preferences.reader_theme || "system") === value;
-                const shown = value === "system" ? "match_device" : value === "true_black" ? "black" : value;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    className={`comfort-swatch comfort-swatch-${value}`}
-                    onClick={() => pref("reader_theme", value)}
-                  >
+            <RadioGroup
+              labelledBy="comfort-theme"
+              className="comfort-swatches"
+              value={preferences.reader_theme || "system"}
+              onSelect={(v) => pref("reader_theme", v)}
+              options={(["system", "light", "sepia", "dark", "true_black"] as const).map((value) => ({
+                value,
+                className: `comfort-swatch comfort-swatch-${value}`,
+                content: (
+                  <>
                     <span className="comfort-chip" aria-hidden="true">Aa</span>
-                    <span>{t(shown)}</span>
-                  </button>
-                );
-              })}
-            </div>
+                    <span>{t(value === "system" ? "match_device" : value === "true_black" ? "black" : value)}</span>
+                  </>
+                ),
+              }))}
+            />
           </div>
           <div className="comfort-row">
             <span id="comfort-width" className="comfort-label">{t("margins")}</span>
-            <div className="comfort-segments" role="radiogroup" aria-labelledby="comfort-width">
-              {READER_WIDTHS.map((w) => (
-                <button
-                  key={w.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={(preferences.reader_margins || "comfortable") === w.value}
-                  className="comfort-segment"
-                  onClick={() => pref("reader_margins", w.value)}
-                >
-                  {t(w.label)}
-                </button>
-              ))}
-            </div>
+            <RadioGroup
+              labelledBy="comfort-width"
+              className="comfort-segments"
+              value={preferences.reader_margins || "comfortable"}
+              onSelect={(v) => pref("reader_margins", v)}
+              options={READER_WIDTHS.map((w) => ({ value: w.value, className: "comfort-segment", content: t(w.label) }))}
+            />
           </div>
           <div className="comfort-row">
             <span id="comfort-align" className="comfort-label">{t("alignment")}</span>
-            <div className="comfort-segments" role="radiogroup" aria-labelledby="comfort-align">
-              {alignmentOptions(boot.content_locale).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  role="radio"
-                  aria-checked={effectiveAlignment(preferences.reader_alignment, boot.content_locale) === value}
-                  className="comfort-segment"
-                  onClick={() => pref("reader_alignment", value)}
-                >
-                  {t(value === "start" ? "align_start" : "align_justify")}
-                </button>
-              ))}
-            </div>
+            <RadioGroup
+              labelledBy="comfort-align"
+              className="comfort-segments"
+              value={effectiveAlignment(preferences.reader_alignment, boot.content_locale)}
+              onSelect={(v) => pref("reader_alignment", v)}
+              options={alignmentOptions(boot.content_locale).map((value) => ({
+                value,
+                className: "comfort-segment",
+                content: t(value === "start" ? "align_start" : "align_justify"),
+              }))}
+            />
           </div>
           <div className="comfort-row">
             <span id="comfort-face" className="comfort-label">{t("typeface")}</span>
-            <div className="comfort-segments" role="radiogroup" aria-labelledby="comfort-face">
-              {(["serif", "sans"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  role="radio"
-                  aria-checked={(preferences.reader_typeface || "serif") === value}
-                  className="comfort-segment"
-                  onClick={() => pref("reader_typeface", value)}
-                >
-                  {value === "serif"
+            <RadioGroup
+              labelledBy="comfort-face"
+              className="comfort-segments"
+              value={preferences.reader_typeface || "serif"}
+              onSelect={(v) => pref("reader_typeface", v)}
+              options={(["serif", "sans"] as const).map((value) => ({
+                value,
+                className: "comfort-segment",
+                content:
+                  value === "serif"
                     ? boot.content_locale === "bn" ? "Noto Serif Bengali" : "Source Serif 4"
-                    : boot.content_locale === "bn" ? "Noto Sans Bengali" : "DM Sans"}
-                </button>
-              ))}
-            </div>
+                    : boot.content_locale === "bn" ? "Noto Sans Bengali" : "DM Sans",
+              }))}
+            />
           </div>
           <div className="comfort-row">
             <span id="comfort-layout" className="comfort-label">{t("layout")}</span>
-            <div className="comfort-segments" role="radiogroup" aria-labelledby="comfort-layout">
-              {(["scroll", "paginated"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  role="radio"
-                  aria-checked={(preferences.reader_layout || "scroll") === value}
-                  className="comfort-segment"
-                  onClick={() => pref("reader_layout", value)}
-                >
-                  {t(value)}
-                </button>
-              ))}
-            </div>
+            <RadioGroup
+              labelledBy="comfort-layout"
+              className="comfort-segments"
+              value={preferences.reader_layout || "scroll"}
+              onSelect={(v) => pref("reader_layout", v)}
+              options={(["scroll", "paginated"] as const).map((value) => ({ value, className: "comfort-segment", content: t(value) }))}
+            />
           </div>
           <p className="fine" id="preference-ownership">
             {t(fullReader ? "preferences_account" : "local_settings")}

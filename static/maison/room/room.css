@@ -410,7 +410,7 @@ body.reduced-motion .reader-toolbar{transition:none}
 .comfort-label{font:600 .875rem/1.2 var(--ui);color:var(--muted)}
 .comfort-stepper{display:flex;align-items:center;gap:12px}
 .comfort-step{min-width:64px;min-height:44px;border-radius:4px;font:600 1.125rem/1 var(--ui);background:var(--surface);border:1px solid var(--line);color:var(--ink);cursor:pointer}
-.comfort-step:disabled{opacity:.5;cursor:not-allowed}
+.comfort-step[aria-disabled=true]{opacity:.5;cursor:not-allowed}
 .comfort-value{min-width:3ch;text-align:center;font:600 1rem/1 var(--ui);color:var(--ink)}
 .comfort-swatches{display:flex;flex-wrap:wrap;gap:8px}
 .comfort-swatch,.comfort-segment{min-height:44px;min-width:44px;border-radius:4px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 .875rem/1.2 var(--ui);cursor:pointer}

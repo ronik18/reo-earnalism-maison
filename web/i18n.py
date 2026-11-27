@@ -492,3 +492,7 @@ STRINGS.update({
     "wide": ("Wide", "Wide"),
     "comfort_not_saved": ("Not saved to your account yet. Your change still applies here.", "Not saved to your account yet. Your change still applies here."),
 })
+STRINGS.update({
+    "less_line_spacing": ("Less line spacing", "Less line spacing"),
+    "more_line_spacing": ("More line spacing", "More line spacing"),
+})

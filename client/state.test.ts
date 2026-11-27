@@ -29,6 +29,9 @@ import {
   widthMeasure,
   PREFERENCE_SAVE_MS,
   createDebouncedSaver,
+  stepLeading,
+  radioKeyTarget,
+  createSaveQueue,
 } from "./state.ts";
 import { readFileSync } from "node:fs";
 import { wrapTextSpan } from "./follow-dom.ts";
@@ -1302,4 +1305,72 @@ test("reading comfort sheet has live controls and no Save button", () => {
   const css = readFileSync("static/maison/room/room.css", "utf8");
   assert.match(css, /\.media-sheet--bottom[^{]*\{[^}]*\}/);
   assert.match(css, /max-width:640px\)\s*\{[^@]*\.media-sheet--bottom\{[^}]*margin:auto 0 0/);
+});
+
+test("stepLeading moves in 0.05 steps within the locale floor and 2.4", () => {
+  assert.equal(stepLeading(1.65, 1, "en"), 1.7);
+  assert.equal(stepLeading(1.5, -1, "en"), 1.5);
+  assert.equal(stepLeading(1.8, -1, "bn"), 1.8);
+  assert.equal(stepLeading(1.5, 1, "bn"), 1.8); // below the Bengali floor snaps up
+  assert.equal(stepLeading(2.4, 1, "en"), 2.4);
+  assert.equal(stepLeading(1.7, -1, "en"), 1.65);
+});
+
+test("radio keys move and wrap, Home and End jump, other keys are ignored", () => {
+  assert.equal(radioKeyTarget("ArrowRight", 4, 5), 0);
+  assert.equal(radioKeyTarget("ArrowDown", 1, 5), 2);
+  assert.equal(radioKeyTarget("ArrowLeft", 0, 5), 4);
+  assert.equal(radioKeyTarget("ArrowUp", 3, 5), 2);
+  assert.equal(radioKeyTarget("Home", 3, 5), 0);
+  assert.equal(radioKeyTarget("End", 1, 5), 4);
+  assert.equal(radioKeyTarget("Tab", 1, 5), undefined);
+  assert.equal(radioKeyTarget("ArrowRight", 0, 0), undefined);
+});
+
+test("save queue: one in flight, later values coalesce, conflict refetches and retries once", async () => {
+  const sent: number[] = [];
+  const release: Array<() => void> = [];
+  let active = 0;
+  let maxActive = 0;
+  const queue = createSaveQueue<number>({
+    send: (v) => new Promise<void>((resolve) => {
+      active++; maxActive = Math.max(maxActive, active); sent.push(v);
+      release.push(() => { active--; resolve(); });
+    }),
+    isConflict: () => false,
+    refresh: async () => {},
+  });
+  const done = queue.push(1);
+  queue.push(2); queue.push(3);
+  assert.deepEqual(sent, [1]);
+  assert.equal(queue.inFlight(), true);
+  release.shift()!();
+  await new Promise((r) => setImmediate(r));
+  assert.deepEqual(sent, [1, 3]); // 2 was coalesced away
+  release.shift()!();
+  await done;
+  assert.equal(maxActive, 1);
+  assert.equal(queue.inFlight(), false);
+
+  const log: string[] = [];
+  let calls = 0;
+  const errors: unknown[] = [];
+  const retrying = createSaveQueue<number>({
+    send: async (v) => { log.push("send" + v); if (calls++ === 0) throw "conflict"; },
+    isConflict: (e) => e === "conflict",
+    refresh: async () => { log.push("refresh"); },
+    onError: (e) => errors.push(e),
+  });
+  await retrying.push(7);
+  assert.deepEqual(log, ["send7", "refresh", "send7"]);
+  assert.deepEqual(errors, []);
+
+  const failing = createSaveQueue<number>({
+    send: async () => { throw "conflict"; },
+    isConflict: () => true,
+    refresh: async () => {},
+    onError: (e) => errors.push(e),
+  });
+  await failing.push(1); // the retry fails too: reported once, not looped
+  assert.deepEqual(errors, ["conflict"]);
 });
