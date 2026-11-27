@@ -12011,6 +12011,104 @@
       },
       "path": "maison/audiovisual-clearance-evidence.draft.json",
       "sha256": "6dca6e2dddebd39aa58eb12a9f985627e45e3b5e437b9b891c834911866ee776"
+    },
+    {
+      "bytes": 507,
+      "kind": "social_kit",
+      "meta": {
+        "chapters": 0,
+        "target": "film-01"
+      },
+      "path": "social/youtube-film-01.txt",
+      "sha256": "77dbe65b45f6d88cac4f4b4ae9e3e93a4570fdba1125be9bd5351da4cb6c8738"
+    },
+    {
+      "bytes": 530400,
+      "kind": "social_kit",
+      "meta": {
+        "font_size": 64,
+        "lines": 3,
+        "size": [
+          1080,
+          1080
+        ],
+        "target": "quote-1"
+      },
+      "path": "social/quote-1.png",
+      "sha256": "1cc26e3b13e208b30e8744b66800397338dce36db2e89d1f46f26a1d58728b28"
+    },
+    {
+      "bytes": 529589,
+      "kind": "social_kit",
+      "meta": {
+        "font_size": 64,
+        "lines": 3,
+        "size": [
+          1080,
+          1080
+        ],
+        "target": "quote-2"
+      },
+      "path": "social/quote-2.png",
+      "sha256": "ccee9358ca21305a38209c76fbc9266d263e15ca92c5140f5f35e9392f474a90"
+    },
+    {
+      "bytes": 485,
+      "kind": "social_kit",
+      "meta": {
+        "count": 3
+      },
+      "path": "social/links.json",
+      "sha256": "497aa0460621035e6ff46d046dcaa405bdd90cec838a8c071736a679c568ed1b"
+    },
+    {
+      "bytes": 507,
+      "kind": "social_kit",
+      "meta": {
+        "chapters": 0,
+        "target": "film-01"
+      },
+      "path": "social/youtube-film-01.txt",
+      "sha256": "77dbe65b45f6d88cac4f4b4ae9e3e93a4570fdba1125be9bd5351da4cb6c8738"
+    },
+    {
+      "bytes": 530178,
+      "kind": "social_kit",
+      "meta": {
+        "font_size": 64,
+        "lines": 3,
+        "size": [
+          1080,
+          1080
+        ],
+        "target": "quote-1"
+      },
+      "path": "social/quote-1.png",
+      "sha256": "d9f6f4ce8ae526c973c380da89129731ae08d85286e1b27326698c21645db293"
+    },
+    {
+      "bytes": 529589,
+      "kind": "social_kit",
+      "meta": {
+        "font_size": 64,
+        "lines": 3,
+        "size": [
+          1080,
+          1080
+        ],
+        "target": "quote-2"
+      },
+      "path": "social/quote-2.png",
+      "sha256": "ccee9358ca21305a38209c76fbc9266d263e15ca92c5140f5f35e9392f474a90"
+    },
+    {
+      "bytes": 485,
+      "kind": "social_kit",
+      "meta": {
+        "count": 3
+      },
+      "path": "social/links.json",
+      "sha256": "497aa0460621035e6ff46d046dcaa405bdd90cec838a8c071736a679c568ed1b"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -14487,6 +14585,24 @@
       },
       "result": "cut",
       "stage": "preview"
+    },
+    {
+      "at": "2026-11-27T20:30:38.408622+00:00",
+      "detail": {
+        "files": 4,
+        "site": "https://theearnalism.com"
+      },
+      "result": "kit_written",
+      "stage": "social"
+    },
+    {
+      "at": "2026-11-27T20:32:08.805388+00:00",
+      "detail": {
+        "files": 4,
+        "site": "https://theearnalism.com"
+      },
+      "result": "kit_written",
+      "stage": "social"
     }
   ],
   "ledger": "../allowance-ledger.json",

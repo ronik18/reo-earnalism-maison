@@ -146,3 +146,14 @@ class SocialCommandTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class QuoteCardFallbackTests(unittest.TestCase):
+    def test_punctuation_missing_from_the_bengali_subset_uses_the_latin_font(self):
+        from PIL import ImageFont
+        from eav import cli as eav_cli
+        bn = ImageFont.truetype(str(eav_cli.FONTS["bn"]), 64, layout_engine=ImageFont.Layout.RAQM)
+        en = ImageFont.truetype(str(eav_cli.FONTS["en"]), 64, layout_engine=ImageFont.Layout.RAQM)
+        runs = social._runs("পারে না!", bn, en)
+        self.assertEqual(runs[-1], ("!", en))
+        self.assertTrue(all(f is bn for r, f in runs[:-1]))
