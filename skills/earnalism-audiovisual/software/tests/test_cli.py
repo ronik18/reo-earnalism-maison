@@ -1191,6 +1191,32 @@ class CliTests(RoundTwo, unittest.TestCase):
             self.assertEqual(row["score_sha256"], hashlib.sha256(
                 (self.d / "scores" / f"{unit_id}.wav").read_bytes()).hexdigest())
 
+    def test_beds_only_at_book_intro_outro_and_flagged_parts(self):
+        args = mock.Mock(frame_dir=self.d / "f")
+        bed = self.d / "bed.wav"
+        chapter = {"unit_id": "u", "title": "প্রথম পরিচ্ছেদ", "paragraphs": []}
+        self.assertEqual(sorted(cli._audiobook_cues(args, bed, 1, 3, chapter)), ["intro", "opening"])
+        self.assertEqual(cli._audiobook_cues(args, bed, 2, 3, chapter), {})  # a chapter: no bed
+        self.assertEqual(sorted(cli._audiobook_cues(args, bed, 3, 3, chapter)), ["closing", "outro"])
+        flagged = {**chapter, "part": True}
+        self.assertEqual(sorted(cli._audiobook_cues(args, bed, 2, 3, flagged)), ["part"])
+        titled = {**chapter, "title": "দ্বিতীয় খণ্ড"}
+        self.assertEqual(sorted(cli._audiobook_cues(args, bed, 2, 3, titled)), ["part"])
+        self.assertEqual(sorted(cli._audiobook_cues(args, bed, 2, 3, {**chapter, "title": "তৃতীয় ভাগ"})), ["part"])
+
+    def test_sentence_mapping_is_recorded_per_paragraph(self):
+        code, out, bundle = self.audiobook("--dry")
+        self.assertEqual(code, 0, out)
+        prov = json.loads((bundle / "timing.json").read_text())["provenance"]["units"]
+        self.assertEqual(prov["u-1"]["sentence_mapping"], {"a1": "single", "a2": "longest"})
+        self.assertEqual(prov["u-2"]["sentence_mapping"], {"a3": "longest"})
+
+    def test_next_action_says_staging_needs_the_film_profile(self):
+        import inspect
+        self.assertIn("--profile film", cli.STAGING_NOTE)
+        self.assertIn("interface-notes/2026-11-27-audio-bundle-sentences-chapters.md", cli.STAGING_NOTE)
+        self.assertEqual(inspect.getsource(cli.next_action).count("STAGING_NOTE"), 2)  # both bundle steps
+
     def test_film_profile_is_still_selectable_and_unchanged(self):
         self.reviewed()
         bundle = self.d / "bundle"

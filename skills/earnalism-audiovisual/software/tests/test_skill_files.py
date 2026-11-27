@@ -91,6 +91,11 @@ class SkillFileTests(unittest.TestCase):
         doc = (REPO / "docs" / "EARNALISM_AUDIOVISUAL_PIPELINE.md").read_text(encoding="utf-8")
         self.assertIn("`earnalism-audiovisual`", doc)
 
+    def test_publishing_says_staging_needs_the_film_profile_for_now(self):
+        text = " ".join((SKILL / "references" / "publishing.md").read_text(encoding="utf-8").split())
+        self.assertIn("attach_audiovisual_audio", text)
+        self.assertRegex(text, r"--profile film[^.]*until[^.]*interface note")
+
 
 if __name__ == "__main__":
     unittest.main()

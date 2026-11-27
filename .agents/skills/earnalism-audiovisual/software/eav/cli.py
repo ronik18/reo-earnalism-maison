@@ -128,6 +128,8 @@ EVIDENCE_DRAFT = "audiovisual-clearance-evidence.draft.json"
 SLUG = re.compile(r"[a-z0-9][a-z0-9-]*")
 SHA = re.compile(r"[0-9a-f]{64}")
 FILM_LUFS, REEL_LUFS, LUFS_TOL, TP_MAX = -16.0, -14.0, 1.0, -1.0
+STAGING_NOTE = ("Staging with attach_audiovisual_audio currently needs --profile film until the importer change in "
+                "docs/interface-notes/2026-11-27-audio-bundle-sentences-chapters.md lands.")
 FRAME_UNITS = ("title", "author", "closing")  # the audiobook's spoken opening and closing word
 LOOP_MIN = 0.8
 HOOK_ONSET_MAX_S = 0.2
@@ -646,12 +648,12 @@ def next_action(root) -> str:
                 f"is the listening assessment. Then for Maison audio: {PROG} bundle-audio {r} --out "
                 f"{root / 'maison' / 'bundle'} --frame-dir <title.wav, author.wav, closing.wav> "
                 "--score-dir <one score bed per chapter> --score-route "
-                f"vcsl|ace-step:<music job_id>. For Maison video (full films, private R2): {PROG} bundle-film. "
+                f"vcsl|ace-step:<music job_id>. {STAGING_NOTE} For Maison video (full films, private R2): {PROG} bundle-film. "
                 "Social posting only to destinations the owner names (references/publishing.md).")
     return (f"Owner completes (territories, term_per_territory for every territory, text_source_licence, "
             f"cover_provenance) and approves {root / 'maison' / EVIDENCE_DRAFT}, saves it under docs/evidence/, "
             "then on the server: python manage.py attach_audiovisual_audio stage <slug> --publisher "
-            "<public_id> --bundle <bundle dir> --evidence docs/evidence/<file>.json (references/publishing.md)")
+            f"<public_id> --bundle <bundle dir> --evidence docs/evidence/<file>.json (references/publishing.md). {STAGING_NOTE}")
 
 
 # ---------------------------------------------------------------- commands
@@ -2058,9 +2060,20 @@ def cmd_bundle_audio(args):
         raise
 
 
-def _audiobook_cues(args, bed, n: int, count: int) -> dict:
-    """Title and author open the first part, the closing word ends the last; a score bed (when given)
-    plays only there and at part changes (the start of every later part)."""
+_PART_HEADING = re.compile(r"খণ্ড|ভাগ")
+
+
+def _is_part(unit: dict) -> bool:
+    """A unit is a part (not a chapter) when the plan flags it `part: true` or its title or a heading
+    paragraph names it a খণ্ড or ভাগ."""
+    heads = [p["text"] for p in unit["paragraphs"] if retime._HEADING_LINE.match(p["text"])]
+    return bool(unit.get("part")) or any(_PART_HEADING.search(t) for t in [unit.get("title", ""), *heads])
+
+
+def _audiobook_cues(args, bed, n: int, count: int, unit: dict) -> dict:
+    """Title and author open the first unit, the closing word ends the last; a score bed (when given)
+    plays only at the book's intro and outro, and at the start of a unit that is a part (units are
+    chapters: they get no bed)."""
     frame = {k: Path(args.frame_dir) / f"{k}.wav" for k in FRAME_UNITS}
     cues = {}
     if n == 1:
@@ -2070,7 +2083,7 @@ def _audiobook_cues(args, bed, n: int, count: int) -> dict:
     if bed:
         if n == 1:
             cues["intro"] = bed
-        else:
+        elif _is_part(unit):
             cues["part"] = bed
         if n == count:
             cues["outro"] = bed
@@ -2149,7 +2162,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                     bed = None if args.dry else Path(args.score_dir) / f"{unit['unit_id']}.wav"
                     score_sha = sha256_file(bed) if bed else None
                     master_info = mix.master_audiobook(chapter, _audiobook_cues(
-                        args, bed, n, len(src["units"])), td / f"unit-{n:03d}.mp3")
+                        args, bed, n, len(src["units"]), unit), td / f"unit-{n:03d}.mp3")
                     offset = master_info["voice_offset_s"]
                     pauses = retime.detect_pauses(chapter)
                     mastered = "eav.mix.master_audiobook"
@@ -2173,7 +2186,7 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
             else:
                 _ff("-i", master, "-ar", 48000, "-ac", 2, "-c:a", "libmp3lame", "-b:a", "96k", mp3)
             dur_ms = round(film._duration(mp3) * 1000)
-            segs, sents, unmeasured = [], [], []
+            segs, sents, unmeasured, mapping = [], [], [], {}
             for p in unit["paragraphs"]:
                 times = [t for t, a in zip(timing, tags) if a == p["anchor_id"]]
                 start, end = round((times[0]["start"] + offset) * 1000), round((times[-1]["end"] + offset) * 1000)
@@ -2184,10 +2197,11 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                 segs.append({"anchor_id": p["anchor_id"], "start_offset_chars": 0,
                              "end_offset_chars": len(p["text"]), "start_ms": start, "end_ms": end})
                 if audiobook:
-                    spans = retime.sentence_spans(p["text"], times[0]["start"], times[-1]["end"], pauses)
-                    if spans is None:  # never estimated: the paragraph keeps paragraph-level timing
+                    got = retime.sentence_spans(p["text"], times[0]["start"], times[-1]["end"], pauses)
+                    if got is None:  # too few pauses: the paragraph keeps paragraph-level timing
                         unmeasured.append(p["anchor_id"])
                         continue
+                    spans, mapping[p["anchor_id"]] = got
                     ms = [(round((a + offset) * 1000), round((b + offset) * 1000)) for a, b in spans]
                     ms[0], ms[-1] = (start, ms[0][1]), (ms[-1][0], end)
                     sents += [{"anchor_id": p["anchor_id"], "sentence_index": i, "start_ms": a, "end_ms": b}
@@ -2208,7 +2222,8 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                     lufs=master_info["lufs"], true_peak_dbtp=master_info["true_peak"],
                     lra_lu=master_info["lra"], bed_under_voice_lu=master_info["bed_under_voice_lu"],
                     duck_db=master_info["duck_db"], release_s=master_info["release_s"],
-                    voice_offset_ms=round(offset * 1000), sentences_unmeasured=unmeasured)
+                    voice_offset_ms=round(offset * 1000), sentences_unmeasured=unmeasured,
+                    sentence_mapping=mapping)
     ids = sorted(job_ids)
     provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
                   "narration_job_id": ids[0] if len(ids) == 1 else ids, "units": prov_units}

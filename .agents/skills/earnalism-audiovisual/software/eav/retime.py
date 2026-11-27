@@ -90,26 +90,27 @@ def plan_pauses(text: str, pauses: list[tuple[float, float]], rng_seed: int) -> 
 
 
 def sentence_spans(text: str, start: float, end: float, pauses: list[tuple[float, float]],
-                   tol: float = 0.02) -> list[tuple[float, float]] | None:
+                   tol: float = 0.02) -> tuple[list[tuple[float, float]], str] | None:
     """(start, end) seconds of each sentence of `text` (eav.text.sentences) inside a passage that runs
     start..end, cut at the measured pauses: a sentence ends where its pause begins and the next starts where
     it ends. Pauses map in order to the text's punctuation (as plan_pauses does), keeping the ones at a
     sentence end; when a comma pause was not detected, the n-1 longest pauses inside the passage are the
-    sentence ends. None when the passage holds fewer pauses than sentence ends: it is never estimated."""
+    sentence ends (a heuristic choice among measured pauses). Returns (spans, mapping) with mapping
+    "single" | "punctuation" | "longest", or None when the passage holds fewer pauses than sentence ends."""
     n = len(sentences(text))
     if n <= 1:
-        return [(start, end)]
+        return [(start, end)], "single"
     inner = [(s, e) for s, e in pauses if s >= start - tol and e <= end + tol]
     kinds = _kinds(text)
     ends = [i for i, k in enumerate(kinds[:-1]) if k in ("sentence", "turn")]
     if len(inner) == len(kinds) - 1 and len(ends) == n - 1:
-        cuts = [inner[i] for i in ends]
+        cuts, mapping = [inner[i] for i in ends], "punctuation"
     elif len(inner) >= n - 1:
-        cuts = sorted(sorted(inner, key=lambda p: p[0] - p[1])[:n - 1])
+        cuts, mapping = sorted(sorted(inner, key=lambda p: p[0] - p[1])[:n - 1]), "longest"
     else:
         return None
     marks = [start] + [t for c in cuts for t in c] + [end]
-    return [(marks[i], marks[i + 1]) for i in range(0, len(marks), 2)]
+    return [(marks[i], marks[i + 1]) for i in range(0, len(marks), 2)], mapping
 
 
 def detect_pauses(path: Path, threshold_db: float = -38, min_s: float = 0.18) -> list[tuple[float, float]]:

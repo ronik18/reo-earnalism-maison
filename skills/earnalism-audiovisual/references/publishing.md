@@ -28,6 +28,8 @@ Root/Integration owns provider mutations; this skill prepares and stages.
    closing, 24 LU under the voice). `--frame-dir` holds `title.wav`, `author.wav` and `closing.wav` (the spoken
    title and author that open part 1, the closing word after which 3 s of room tone end the last part).
    `timing.json` rows then also carry `chapters` and `sentences` (docs/interface-notes/2026-11-27-audio-bundle-sentences-chapters.md).
+   Staging with `attach_audiovisual_audio` currently needs `--profile film` until the importer change in the interface note lands
+   (the stage command refuses the extra row keys and 64 kbps).
    `--profile film` keeps the film-level master below (96 kbps stereo, −16 LUFS, no chapters or sentences).
    The film-level master writes one 96 kbps MP3 per Maison unit: the narration with its best-fit background
    score (`<unit_id>.wav` per chapter from `earnalism-audiobook-score`), ducked under

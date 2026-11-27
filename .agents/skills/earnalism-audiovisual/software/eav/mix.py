@@ -219,17 +219,18 @@ AUDIOBOOK_PRE_TP = -3.0         # loudnorm ceiling before the lossy encode (mp3 
 LRA_LU = (4.0, 8.0)             # loudness range gate on the encoded file
 AUDIOBOOK_KBPS = 64             # mono, encoded once from PCM
 BED_UNDER_VOICE_LU = 24.0       # an unducked bed sits at least this far under the voice
-BED_DUCK_DB, BED_ATTACK_S, BED_HOLD_S, BED_RELEASE_S = 6.0, 0.05, 0.5, 1.5
+BED_DUCK_DB, BED_ATTACK_S, BED_HOLD_S, BED_RELEASE_S = 6.0, 0.05, 2.0, 1.5
 BED_FADE_IN_S = 0.5
 BED_ACTIVE_DB = -50.0           # voice frames above this duck the bed (room tone is far below)
 OPEN_LEAD_S, OPEN_GAP_S, BODY_LEAD_S = 1.0, 0.8, 1.5   # room tone before/between title+author, before the body
-CLOSE_GAP_S, TAIL_S, PART_TAIL_S = 2.0, 3.0, 0.5       # before the closing word, after it (book end), after a part
+CLOSE_GAP_S, TAIL_S, PART_TAIL_S = 3.0, 1.5, 0.5       # room tone before the closing word, after it (book end), after a part
 INTRO_BED_AFTER_S, PART_BED_AFTER_S, OUTRO_BED_BEFORE_S = 4.0, 6.0, 2.0
 
 
 def _bed_gain_db(active: np.ndarray, frame_s: float = 0.01) -> np.ndarray:
     """Per-frame bed gain: ducks BED_DUCK_DB within BED_ATTACK_S of speech, holds BED_HOLD_S after it, then
-    recovers linearly over BED_RELEASE_S. A pause of up to ~1.25 s therefore moves the bed by under 3 dB."""
+    recovers linearly over BED_RELEASE_S. The hold bridges every pause up to 2.0 s (the longest sentence,
+    turn and heading-after pauses), so the bed does not move at all in them."""
     attack = BED_DUCK_DB / (BED_ATTACK_S / frame_s)
     release = BED_DUCK_DB / (BED_RELEASE_S / frame_s)
     hold, g, quiet = int(BED_HOLD_S / frame_s), 0.0, 10 ** 9
@@ -264,86 +265,164 @@ def _lufs(y: np.ndarray, td: Path, name: str) -> float:
     return measure(path)["lufs"]
 
 
+def _mono_writer(path):
+    return subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "f32le", "-ar", str(RATE), "-ac", "1",
+                             "-i", "-", str(path)], stdin=subprocess.PIPE)
+
+
+MASTER_CHUNK = 10 * RATE  # samples per step of the audiobook master (a multiple of the 10 ms frame)
+
+
+def _mono_chunks(path):
+    for c in _stream(path, MASTER_CHUNK):
+        yield np.ascontiguousarray(c[:, 0])
+
+
+def _quiet_seed(path) -> np.ndarray:
+    """The take's quietest 0.25 s (on a 50 ms grid), found chunk by chunk, level-matched as room_tone does."""
+    hop, k = int(0.05 * RATE), 5
+    best, best_e = None, None
+    for c in _mono_chunks(path):
+        if len(c) < hop * k:
+            c = np.pad(c, (0, hop * k - len(c)))
+        nb = len(c) // hop
+        blocks = np.square(c[:nb * hop].reshape(nb, hop), dtype=np.float32).sum(axis=1, dtype=np.float64)
+        win = np.convolve(blocks, np.ones(k), mode="valid")
+        i = int(np.argmin(win))
+        if best_e is None or win[i] < best_e:
+            best_e, best = win[i], c[i * hop:i * hop + hop * k].copy()
+    return retime._tone_seed(best if best is not None else np.zeros(hop * k, np.float32))
+
+
+class _Chain:
+    """Writes pieces one after another to a mono sink with 40 ms equal-power joins, holding back only
+    the last join-length of samples; add() returns where the piece starts."""
+
+    def __init__(self, writer):
+        self.w, self.xf, self.tail, self.written = writer, int(retime.XF_S * RATE), None, 0
+
+    def _emit(self, a):
+        self.w.stdin.write(np.ascontiguousarray(a, dtype=np.float32).tobytes())
+        self.written += len(a)
+
+    def add(self, chunks) -> int:
+        start, cur, pending = self.written, np.zeros(0, np.float32), self.tail is not None
+        for c in chunks:
+            cur = np.concatenate([cur, np.asarray(c, np.float32)])
+            if pending and len(cur) >= self.xf:
+                cur = np.concatenate([retime._crossfade(self.tail, cur[:self.xf], self.xf), cur[self.xf:]])
+                pending = False
+            if not pending and len(cur) > self.xf:
+                self._emit(cur[:-self.xf])
+                cur = cur[-self.xf:]
+        if pending:
+            cur = retime._crossfade(self.tail, cur, self.xf)
+        self.tail = cur
+        return start
+
+    def finish(self) -> int:
+        if self.tail is not None and len(self.tail):
+            self._emit(self.tail)
+        self.tail = None
+        return self.written
+
+
 def master_audiobook(narration: Path, cues: dict, out: Path) -> dict:
     """The audiobook master of one part: mono 64 kbps MP3 encoded once from PCM at -18 LUFS +-1, true peak
     <= -2 dBTP and LRA 4-8 LU, all measured on the encoded file (ValueError when a gate is missed).
 
     narration is the part's narration track (mono WAV). cues, all optional:
       opening   [title.wav, author.wav]  spoken before the body (room tone between)
-      closing   the closing word's WAV, after CLOSE_GAP_S of room tone, then TAIL_S of room tone (book end)
-      intro / part / outro   score bed WAVs: the only places music plays (opening, part change, closing)
+      closing   the closing word's WAV: CLOSE_GAP_S of room tone, the word, then TAIL_S of room tone
+      intro / part / outro   score bed WAVs: the only places music plays (opening, part start, closing)
     Beds are loudness-matched BED_UNDER_VOICE_LU under the voice, ducked BED_DUCK_DB under speech with a
-    BED_RELEASE_S release. Returns the measured numbers, where the narration starts in the master
-    (voice_offset_s, to be added to every narration timestamp) and the bed stem (<out>.bed.wav)."""
+    BED_RELEASE_S release. Everything runs in 10 s chunks, so memory does not grow with the part's length.
+    Returns the measured numbers, where the narration starts in the master (voice_offset_s, to be added to
+    every narration timestamp) and the bed stem (<out>.bed.wav)."""
     narration, out, cues = Path(narration), Path(out), dict(cues or {})
-    x = retime.read(narration)
-    tone = lambda seconds: retime.room_tone(x, int(round(seconds * RATE)))
-    xf = int(retime.XF_S * RATE)
-    acc = np.zeros(0, np.float32)
+    seed = _quiet_seed(narration)
+    tone = lambda seconds: _loop_tone(seed, seconds)
     opening = [Path(p) for p in cues.get("opening") or []]
-
-    def add(piece):  # 40 ms equal-power joins: no click, no digital zero; returns where the piece starts
-        nonlocal acc
-        start = max(len(acc) - xf, 0)
-        acc = retime._crossfade(acc, piece, xf) if len(acc) else piece.copy()
-        return start
-
-    if opening:
-        add(tone(OPEN_LEAD_S))
-        for p in opening:
-            add(retime.read(p))
-            add(tone(OPEN_GAP_S))
-        add(tone(BODY_LEAD_S - OPEN_GAP_S))
-    elif cues.get("part") or cues.get("intro"):
-        add(tone(BODY_LEAD_S))
-    voice_start = add(x)
-    voice_end = len(acc)
-    closing_start = None
-    if cues.get("closing"):
-        add(tone(CLOSE_GAP_S))
-        closing_start = add(retime.read(Path(cues["closing"])))
-        add(tone(TAIL_S))
-    else:
-        add(tone(PART_TAIL_S))
-    total = len(acc)
     with tempfile.TemporaryDirectory() as td:
         td = Path(td)
         pre, voice = td / "pre.wav", td / "voice.wav"
-        retime.write(pre, acc)
+        w = _mono_writer(pre)
+        try:
+            chain = _Chain(w)
+            if opening:
+                chain.add([tone(OPEN_LEAD_S)])
+                for p in opening:
+                    chain.add([retime.read(p)])
+                    chain.add([tone(OPEN_GAP_S)])
+                chain.add([tone(BODY_LEAD_S - OPEN_GAP_S)])
+            elif cues.get("part") or cues.get("intro"):
+                chain.add([tone(BODY_LEAD_S)])
+            voice_start = chain.add(_mono_chunks(narration))
+            voice_end = chain.written + (len(chain.tail) if chain.tail is not None else 0)
+            closing_start = None
+            if cues.get("closing"):
+                chain.add([tone(CLOSE_GAP_S)])
+                closing_start = chain.add([retime.read(Path(cues["closing"]))])
+                chain.add([tone(TAIL_S)])
+            else:
+                chain.add([tone(PART_TAIL_S)])
+            total = chain.finish()
+        finally:
+            _close(w)
         _loudnorm_gated(pre, voice, AUDIOBOOK_LUFS, tp=AUDIOBOOK_PRE_TP, tp_max=AUDIOBOOK_TP_MAX, channels=1)
-        v = retime.read(voice)
-        n = min(len(v), total)
-        v = v[:n]
         voice_lufs = measure(voice)["lufs"]
-        # bed windows: the opening (intro) or a part change (part) at the start, the closing (outro) at the end
-        windows = []
-        head = cues.get("intro") or cues.get("part")
-        if head:
-            windows.append((head, 0, voice_start + int((INTRO_BED_AFTER_S if cues.get("intro") else PART_BED_AFTER_S) * RATE)))
-        if cues.get("outro") and closing_start is not None:
-            windows.append((cues["outro"], max(closing_start - int(OUTRO_BED_BEFORE_S * RATE), voice_end), n))
         frame = RATE // 100
-        frames = n // frame
-        rms = np.sqrt((v[:frames * frame].reshape(frames, frame) ** 2).mean(axis=1)) if frames else np.zeros(0)
-        duck = _gain_for(0, n, _bed_gain_db(rms > 10 ** (BED_ACTIVE_DB / 20)))
-        bed, nominal = np.zeros(n, np.float32), []
-        for path, a, b in windows:
+        levels = []
+        for c in _mono_chunks(voice):
+            k = len(c) // frame
+            levels.append(np.sqrt((c[:k * frame].reshape(k, frame) ** 2).mean(axis=1)) if k else np.zeros(0))
+        rms = np.concatenate(levels) if levels else np.zeros(0)
+        frame_db = _bed_gain_db(rms > 10 ** (BED_ACTIVE_DB / 20))
+        n = total
+        windows = []  # (start sample, bed samples): only short head and tail windows are ever held in memory
+        head = cues.get("intro") or cues.get("part")
+        spans = []
+        if head:
+            spans.append((head, 0, voice_start + int((INTRO_BED_AFTER_S if cues.get("intro") else PART_BED_AFTER_S) * RATE)))
+        if cues.get("outro") and closing_start is not None:
+            spans.append((cues["outro"], max(closing_start - int(OUTRO_BED_BEFORE_S * RATE), voice_end), n))
+        nominal = []
+        for path, a, b in spans:
             b = min(b, n)
             if b - a < 3 * RATE:
                 continue
-            w = _bed_window(path, b - a, BED_RELEASE_S)
-            w *= np.float32(10 ** ((voice_lufs - BED_UNDER_VOICE_LU - _lufs(w, td, "bed.wav")) / 20))
-            nominal.append(_lufs(w, td, "bednom.wav"))
-            bed[a:b] += w
-        bed *= duck
+            win = _bed_window(path, b - a, BED_RELEASE_S)
+            win *= np.float32(10 ** ((voice_lufs - BED_UNDER_VOICE_LU - _lufs(win, td, "bed.wav")) / 20))
+            nominal.append(_lufs(win, td, "bednom.wav"))
+            windows.append((a, win))
         bed_under = round(voice_lufs - max(nominal), 2) if nominal else None
-        if nominal and bed_under < BED_UNDER_VOICE_LU - 0.1:
+        if nominal and bed_under < BED_UNDER_VOICE_LU - 0.05:
             raise ValueError(f"master misses gate: bed only {bed_under} LU under the voice")
-        gain_db, res = 0.0, {}
-        for _ in range(4):  # a lossy encode can overshoot: trim the level and re-encode from the PCM
+
+        def mix_pass(gain_db, mixed, stem):
             g = np.float32(10 ** (gain_db / 20))
+            wm, ws, pos = _mono_writer(mixed), _mono_writer(stem), 0
+            try:
+                for c in _mono_chunks(voice):
+                    c = c[:max(0, n - pos)]
+                    b = np.zeros(len(c), np.float32)
+                    for a0, win in windows:
+                        lo, hi = max(a0, pos), min(a0 + len(win), pos + len(c))
+                        if hi > lo:
+                            b[lo - pos:hi - pos] += win[lo - a0:hi - a0]
+                    b *= _gain_for(pos, len(c), frame_db)
+                    wm.stdin.write(np.clip((c + b) * g, -1.0, 1.0).astype(np.float32).tobytes())
+                    ws.stdin.write((b * g).astype(np.float32).tobytes())
+                    pos += len(c)
+            finally:
+                _close(wm)
+                _close(ws)
+
+        gain_db, res = 0.0, {}
+        stem = out.with_name(out.stem + ".bed.wav")
+        for _ in range(4):  # a lossy encode can overshoot: trim the level and re-encode from the PCM
             mixed = td / "mixed.wav"
-            retime.write(mixed, np.clip((v + bed) * g, -1.0, 1.0))
+            mix_pass(gain_db, mixed, stem)
             _run(["-i", str(mixed), "-ac", "1", "-ar", str(RATE), "-c:a", "libmp3lame",
                   "-b:a", f"{AUDIOBOOK_KBPS}k", str(out)])
             res = measure(out)
@@ -357,11 +436,13 @@ def master_audiobook(narration: Path, cues: dict, out: Path) -> dict:
             raise ValueError(f"master misses gate: {res} (target {AUDIOBOOK_LUFS} LUFS, TP <= {AUDIOBOOK_TP_MAX})")
         if res["lra"] is None or not LRA_LU[0] <= res["lra"] <= LRA_LU[1]:
             raise ValueError(f"master misses gate: LRA {res['lra']} LU outside {LRA_LU[0]}-{LRA_LU[1]} LU")
-        stem = out.with_name(out.stem + ".bed.wav")
-        retime.write(stem, bed * g)
     res.update({"voice_lufs": round(voice_lufs + gain_db, 2), "bed_under_voice_lu": bed_under,
                 "duck_db": BED_DUCK_DB, "release_s": BED_RELEASE_S, "bed_stem": str(stem),
                 "voice_offset_s": round(voice_start / RATE, 3),
                 "closing_start_s": None if closing_start is None else round(closing_start / RATE, 3),
                 "duration_s": round(total / RATE, 3), "encoder": f"libmp3lame {AUDIOBOOK_KBPS} kbps CBR mono"})
     return res
+
+
+def _loop_tone(seed: np.ndarray, seconds: float) -> np.ndarray:
+    return retime._loop(seed, int(round(seconds * RATE)))

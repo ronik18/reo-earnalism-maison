@@ -164,11 +164,15 @@ class AudiobookMasterTests(unittest.TestCase):
         narr_s = len(m.samples(self.narr)) / 48000
         lead = 1.0 + 1.2 + 0.8 + 0.9 + 1.5  # lead-in, title, gap, author, gap before the body
         self.assertAlmostEqual(info["voice_offset_s"], lead, delta=0.3)  # minus the 40 ms joins
-        self.assertAlmostEqual(info["closing_start_s"], info["voice_offset_s"] + narr_s + 2.0, delta=0.1)
-        self.assertAlmostEqual(info["duration_s"], info["closing_start_s"] + 0.8 + 3.0, delta=0.15)
+        # spec order: narration, 3 s of room tone, the closing word, then room tone (>= 1 s)
+        self.assertAlmostEqual(info["closing_start_s"], info["voice_offset_s"] + narr_s + 3.0, delta=0.1)
+        self.assertGreaterEqual(info["duration_s"], info["closing_start_s"] + 0.8 + 1.0)
         x = m.samples(out)
         self.assertGreater(m.rms_db(x[int(1.2 * 48000):int(2.0 * 48000)]), -35)  # the title is spoken
-        tail = x[-int(2.5 * 48000):]
+        gap = x[int((info["closing_start_s"] - 2.5) * 48000):int((info["closing_start_s"] - 0.3) * 48000)]
+        self.assertLess(m.rms_db(gap), -45)        # 3 s of room tone before the closing word
+        self.assertGreater(m.rms_db(gap), -90)
+        tail = x[-int(0.8 * 48000):]
         self.assertLess(m.rms_db(tail), -45)       # room tone, not speech or a bed
         self.assertGreater(m.rms_db(tail), -90)    # and never digital zero
 
@@ -194,6 +198,30 @@ class AudiobookMasterTests(unittest.TestCase):
         open_bed = m.rms_db(x[int(0.7 * 48000):int(1.3 * 48000)])    # before the voice enters (1.5 s)
         under = m.rms_db(x[int(2.0 * 48000):int(2.8 * 48000)])
         self.assertAlmostEqual(open_bed - under, 6.0, delta=1.0)
+
+    def test_no_pumping_in_a_longer_heading_pause(self):
+        long_pause = self.d / "long.wav"
+        retime.write(long_pause, np.concatenate([_tone(1.5), _gap(1.6), _tone(1.5), _gap(1.6), _tone(2.0)] * 3))
+        with mock.patch.object(mix, "LRA_LU", (0.0, 20.0)):
+            info = mix.master_audiobook(long_pause, {"part": self.bed}, self.d / "lp.mp3")
+        x = m.samples(Path(info["bed_stem"]))
+        lvl = lambda a, b: m.rms_db(x[int(a * 48000):int(b * 48000)])
+        # voice 1.5-3.0 s, 1.6 s pause 3.0-4.6 s, voice 4.6-6.1 s
+        for a, b in ((3.2, 3.8), (3.8, 4.5)):
+            self.assertLess(abs(lvl(a, b) - lvl(2.0, 2.8)), 3.0)
+
+    def test_memory_is_chunked_on_a_ten_minute_part(self):
+        long_s = self.d / "ten.wav"
+        m.speech_gap_wav(long_s, 600, 3, 590)
+        whole = 600 * 48000 * 4  # one whole-part float32 array
+        with mock.patch.object(mix, "LRA_LU", (0.0, 20.0)):
+            tracemalloc.start()
+            try:
+                mix.master_audiobook(long_s, {"part": self.bed}, self.d / "ten.mp3")
+                peak = tracemalloc.get_traced_memory()[1]
+            finally:
+                tracemalloc.stop()
+        self.assertLess(peak, whole // 3)
 
     def test_no_score_pumping_in_pauses(self):
         info, _ = self.master_part()
