@@ -12,6 +12,7 @@ publish (mark-ready then publish). Output is JSON on stdout; no secrets are prin
 """
 import hashlib
 import json
+import os
 import uuid
 from datetime import timedelta
 from pathlib import Path
@@ -262,6 +263,79 @@ def draft_for(packet):
     return edition.revisions.order_by("-created_at").first()
 
 
+def correction_record(packet):
+    """The approved clearance record's source_correction block for this packet, or None for a first publication."""
+    if packet.get("legacy") or not packet.get("clearance_path"):
+        return None
+    doc, _ = clearance_document(packet)
+    book = (doc.get("books") or {}).get(packet.get("book_key", packet["slug"])) or {}
+    correction = book.get("source_correction")
+    return correction if isinstance(correction, dict) else None
+
+
+def revise_revision_id(packet):
+    """The deterministic ID of the revision the revise stage builds from this packet's approved source."""
+    return stable_id(packet["slug"], "revise", sha256((Path(packet["folder"]) / "source.json").read_bytes()), "revision")
+
+
+def _single_insertion(old, new, inserted):
+    """True when `new` is `old` with `inserted` added once at one position."""
+    if not inserted or len(new) != len(old) + len(inserted):
+        return False
+    start = len(os.path.commonprefix([old, new]))  # the insertion point is at most len(inserted) before this
+    return any(old[:i] + inserted + old[i:] == new for i in range(max(0, start - len(inserted)), start + 1))
+
+
+def check_approved_correction(packet, live, derived, live_units, changed, source_sha):
+    """revise publishes only the correction the owner approved: the clearance record's source_correction names the
+    source the live revision was built from and every changed paragraph; the changes derived from the approved
+    source (bound by its sha256) must be exactly those, each with its recorded printed and transcription text."""
+    slug = packet["slug"]
+    record = correction_record(packet)
+    if record is None:
+        raise CommandError(f"{slug}: REVISE_CORRECTION_RECORD_REQUIRED: the approved clearance record has no source_correction.")
+    doc, _ = clearance_document(packet)
+    book = doc["books"][packet.get("book_key", slug)]
+    if book.get("source_sha256") != source_sha:
+        raise CommandError(f"{slug}: SOURCE_HASH_MISMATCH: source.json differs from the approved clearance record.")
+    revises = record.get("revises") or {}
+    live_sources = sorted(live.assets.filter(kind="reader_source").values_list("sha256", flat=True))
+    if not revises.get("source_sha256") or live_sources != [revises["source_sha256"]]:
+        raise CommandError(f"{slug}: REVISE_LIVE_SOURCE_MISMATCH: the live revision was built from {live_sources or 'no recorded source'}, "
+                           f"not the source the approved correction revises ({revises.get('source_sha256')}).")
+    changes = record.get("changes") or []
+    approved = {(c.get("unit_key"), c.get("paragraph_ordinal")) for c in changes}
+    found = {(key, n) for key, ordinals in changed.items() for n in ordinals}
+    if len(approved) != len(changes) or approved != found:
+        raise CommandError(f"{slug}: REVISE_CHANGES_DIFFER_FROM_APPROVED: the approved correction names "
+                           f"{sorted(approved, key=str)}, but the source changes {sorted(found)}.")
+    units = {row["key"]: (row, unit) for row, unit in zip(derived["units"], live_units)}
+    for change in changes:
+        row, unit = units[change["unit_key"]]
+        n = change["paragraph_ordinal"]
+        new, old = row["paragraphs"][n - 1]["text"], list(unit.paragraphs.all())[n - 1].text
+        printed = str(change.get("printed", "")).strip("…")
+        had = str(change.get("transcription_had", "")).strip("…")
+        inserted = change.get("inserted")
+        if (not printed or printed not in new or not had or had not in old
+                or (inserted is not None and not _single_insertion(old, new, inserted))):
+            raise CommandError(f"{slug}: REVISE_CHANGES_DIFFER_FROM_APPROVED: {change['unit_key']} paragraph {n} does not "
+                               "carry exactly the approved correction.")
+
+
+def target_revision(packet):
+    """The revision evidence and publish act on. For a correction packet this is exactly the revise stage's
+    revision for the approved source sha; a different newest revision (another draft) is refused."""
+    revision = draft_for(packet)
+    if correction_record(packet) is None:
+        return revision
+    expected = revise_revision_id(packet)
+    if revision is None or revision.id != expected:
+        raise CommandError(f"{packet['slug']}: REVISE_TARGET_MISMATCH: the approved correction is revision {expected}, "
+                           f"but the newest revision is {revision.id if revision else 'none'}; run revise or reconcile the other revision.")
+    return revision
+
+
 def read_translation(folder, intake=None):
     """Validated translation labels from a packet's translation.json, or None for a plain packet."""
     path = Path(folder) / "translation.json"
@@ -443,6 +517,7 @@ class Command(BaseCommand):
         changed = {key: ordinals for key, ordinals in changed.items() if ordinals}
         if not changed:
             raise CommandError(f"{slug}: NOTHING_TO_REVISE: the source text equals the live revision.")
+        check_approved_correction(packet, live, derived, live_units, changed, source_sha)
         revision = Revision(id=revision_id, edition=edition, title=live.title, description=live.description,
             anchor_revision=live.anchor_revision + 1, access_policy=dict(DENIED), download_policy=dict(NO_DOWNLOADS), preview=[])
         units, paragraphs, groups = [], [], []
@@ -538,7 +613,7 @@ class Command(BaseCommand):
     def record_evidence(self, actor, packet, report_path):
         slug = packet["slug"]
         require_translation_labels(packet)
-        revision = draft_for(packet)
+        revision = target_revision(packet)
         if revision is None or revision.state != "draft":
             raise CommandError(f"{slug}: a draft revision is required.")
         doc, doc_sha = clearance_document(packet)
@@ -584,7 +659,7 @@ class Command(BaseCommand):
     def publish(self, actor, packet):
         reverify_approval(packet)
         require_translation_labels(packet)
-        revision = draft_for(packet)
+        revision = target_revision(packet)
         if revision is None:
             raise CommandError(f"{packet['slug']}: no revision.")
         reason = reason_for(packet)

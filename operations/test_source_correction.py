@@ -279,6 +279,82 @@ class ReviseStageTests(TestCase):
         self.assertEqual(set(Revision.objects.get(pk=revised["revision_id"]).assets.values_list("kind", flat=True)),
                          set(command.REVISE_REBUILT_KINDS))
 
+    def edit_draft(self, change):
+        path = self.root / CORRECTED_CLEARANCE
+        record = load(path)
+        change(record["books"][SLUG])
+        path.write_text(json.dumps(record, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+
+    def set_source(self, raw):
+        (self.intake / SLUG / "source.json").write_bytes(raw)
+        path = self.intake / SLUG / "manifest.json"
+        manifest = load(path)
+        manifest["source"].update(sha256=command.sha256(raw), bytes=len(raw))
+        path.write_text(json.dumps(manifest, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        self.edit_draft(lambda book: book.update(source_sha256=command.sha256(raw), source_bytes=len(raw)))
+
+    def assert_revise_refused(self, code):
+        from library.models import Edition
+        self.approve(("clearance", CORRECTED_CLEARANCE, SLUG), ("cover", COVER, SLUG))
+        with self.assertRaises(CommandError) as raised:
+            self.run_command("revise", SLUG)
+        self.assertIn(code, str(raised.exception))
+        self.assertEqual(Edition.objects.get(slug=SLUG).revisions.count(), 1)
+
+    def test_revise_refuses_a_change_the_approved_record_does_not_name(self):
+        self.publish_first()
+        self.apply_correction()
+        raw = (self.intake / SLUG / "source.json").read_bytes()
+        self.set_source(raw.replace("আমি এবং আমার আত্মীয়".encode(), "আমি ও আমার আত্মীয়".encode(), 1))  # an unapproved ¶1 edit
+        self.assert_revise_refused("REVISE_CHANGES_DIFFER_FROM_APPROVED")
+
+    def test_revise_refuses_when_the_record_names_fewer_changes_than_the_source_makes(self):
+        self.publish_first()
+        self.apply_correction()
+        self.edit_draft(lambda book: book["source_correction"].update(changes=book["source_correction"]["changes"][:1]))
+        self.assert_revise_refused("REVISE_CHANGES_DIFFER_FROM_APPROVED")
+
+    def test_revise_refuses_when_a_change_text_differs_from_the_record(self):
+        self.publish_first()
+        self.apply_correction()
+        self.edit_draft(lambda book: book["source_correction"]["changes"][1].update(inserted=" নাই"))
+        self.assert_revise_refused("REVISE_CHANGES_DIFFER_FROM_APPROVED")
+
+    def test_revise_refuses_when_the_live_text_is_not_the_source_the_correction_revises(self):
+        self.publish_first()
+        self.apply_correction()
+        self.edit_draft(lambda book: book["source_correction"]["revises"].update(source_sha256="0" * 64))
+        self.assert_revise_refused("REVISE_LIVE_SOURCE_MISMATCH")
+
+    def test_revise_requires_a_source_correction_record(self):
+        self.publish_first()
+        self.apply_correction()
+        self.edit_draft(lambda book: book.pop("source_correction"))
+        self.assert_revise_refused("REVISE_CORRECTION_RECORD_REQUIRED")
+
+    def test_evidence_and_publish_target_only_the_revise_revision(self):
+        from library.models import Edition, Revision
+        first = self.publish_first()
+        self.apply_correction()
+        self.approve(("clearance", CORRECTED_CLEARANCE, SLUG), ("cover", COVER, SLUG))
+        expected = str(command.revise_revision_id(command.approved_packets(check={SLUG})[SLUG]))
+        for stage in ("evidence", "publish"):  # before revise, the newest revision is the old live one
+            with self.assertRaises(CommandError) as raised:
+                self.run_command(stage, SLUG)
+            self.assertIn("REVISE_TARGET_MISMATCH", str(raised.exception))
+        revised = self.run_command("revise", SLUG)[SLUG]
+        self.assertEqual(revised["revision_id"], expected)
+        edition = Edition.objects.get(slug=SLUG)
+        other = Revision.objects.create(edition=edition, title="Another draft", content_sha256="")  # e.g. a later clone
+        for stage, extra in (("evidence", self.browser({SLUG: revised["sha256"]})), ("publish", ())):
+            with self.assertRaises(CommandError) as raised:
+                self.run_command(stage, SLUG, extra=extra)
+            self.assertIn("REVISE_TARGET_MISMATCH", str(raised.exception))
+            self.assertIn(str(other.id), str(raised.exception))
+        edition.refresh_from_db()
+        self.assertEqual(str(edition.live_revision_id), first["revision_id"])
+        self.assertNotIn("publication_clearance", Revision.objects.get(pk=expected).validation_evidence)
+
     def test_revise_refuses_a_structural_change(self):
         self.publish_first()
         self.apply_correction()
