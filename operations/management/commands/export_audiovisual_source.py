@@ -62,7 +62,7 @@ def preferred_maps(revision):
     """One measured map per audio asset: sentence precision if stored, else paragraph, else word."""
     rank = {"sentence": 0, "paragraph": 1, "word": 2}
     best = {}
-    for m in revision.timing_maps.filter(measured=True).order_by("asset__unit__ordinal", "asset_id", "id"):
+    for m in revision.timing_maps.filter(measured=True, asset__kind="audio_chapter").order_by("asset__unit__ordinal", "asset_id", "id"):
         if m.asset_id not in best or rank.get(m.precision, 3) < rank.get(best[m.asset_id].precision, 3):
             best[m.asset_id] = m
     return list(best.values())

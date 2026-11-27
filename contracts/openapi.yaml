@@ -4373,7 +4373,7 @@
     "/content/switch-position": {
       "post": {
         "operationId": "switchPosition",
-        "summary": "Map current Reader/audio position",
+        "summary": "Map current Reader/audio/video position",
         "tags": [
           "Content"
         ],
@@ -4383,7 +4383,7 @@
             "csrfToken": []
           }
         ],
-        "description": "Read-only computation over authorized map. No playback/progress mutation implied. Unmapped/unreleased/feature_disabled returns200 explicitoutcome, null target; caller offers chapter selection. Video switching and word-level read-along are P1.",
+        "description": "Read-only computation over authorized measured maps. No playback/progress mutation implied. Reader<->audio, reader<->video and audio<->video (through the text anchor) are mapped from exact measured maps; a film map is a TimingMap on the film asset with times on the film timeline, bound to the film sha256, and it is never listed by getMappings. Video switching requires the video feature, access to both formats in the request territory and the live revision (a draft film is never served: unreleased). A film position between narrated passages (scene lead-in or tail, credits) maps to the passage narrated last before it; the title card, before the first narrated passage, is unmapped, and so is a film with no map (reason_code choose_chapter_or_start; the caller keeps its part-start link). Unmapped/unreleased/feature_disabled returns 200 with an explicit outcome and null target; caller offers chapter selection. Word-level read-along is P1.",
         "x-phase": "P0",
         "x-cache-policy": "private_no_store",
         "x-rate-limit": {
@@ -20086,7 +20086,7 @@
           "segments",
           "next_cursor"
         ],
-        "description": "P0 audio/text requires a validated measured map. Word read-along and video switching remain P1; no estimated positions."
+        "description": "Audio maps listed by getMappings require a validated measured map; film maps are never listed here and are served only through switchPosition. Word read-along remains P1; no estimated positions."
       },
       "MappingAvailability": {
         "type": "object",

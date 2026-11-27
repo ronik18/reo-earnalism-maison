@@ -572,7 +572,7 @@ class FilmCommandTests(AudiovisualFixture):
     """attach_audiovisual_film: a faststart H.264/AAC film plus captions on private R2, same gates as audio."""
 
     def film_bundle(self, unit_id, *, faststart=True, video_codec="libx264", vtt=b"WEBVTT\n\n00:00.000 --> 00:01.000\nHello\n",
-                    folder_name="film-bundle", **override):
+                    folder_name="film-bundle", timing=None, **override):
         folder = self.tmp / folder_name
         if folder.exists():
             shutil.rmtree(folder)
@@ -586,9 +586,29 @@ class FilmCommandTests(AudiovisualFixture):
                 "mp4_sha256": hashlib.sha256(mp4.read_bytes()).hexdigest(),
                 "vtt_sha256": hashlib.sha256(vtt).hexdigest(),
                 "duration_ms": 987654, "bytes": mp4.stat().st_size}  # a wrong duration claim: the command measures
+        if timing is not None:
+            raw = timing if isinstance(timing, bytes) else json.dumps({**timing, "mp4_sha256": unit["mp4_sha256"]}).encode()
+            (folder / "film.timing.json").write_bytes(raw)
+            unit.update({"timing": "film.timing.json", "timing_sha256": hashlib.sha256(raw).hexdigest()})
         unit.update(override)
         (folder / "film.json").write_text(json.dumps({"schema": "earnalism.audiovisual-film-bundle.v1", "units": [unit]}))
         return folder, unit
+
+    REF = "eav film --shots test-film: synthetic scene-timing, title card 10 ms (test fixture, not a measured film)"
+
+    @classmethod
+    def timing_doc(cls, source, **override):
+        """A film timing map for the whole unit inside the 1 s test film: one segment per paragraph, plus a sentence map
+        whose anchors are whole paragraphs (the other accepted shape)."""
+        unit = source["units"][0]
+        step = 900 // len(unit["paragraphs"])
+        segments = [{"anchor_id": p["anchor_id"], "start_offset_chars": 0, "end_offset_chars": len(p["text"]),
+                     "start_ms": 10 + i * step, "end_ms": 10 + (i + 1) * step - 1} for i, p in enumerate(unit["paragraphs"])]
+        doc = {"schema": "earnalism.audiovisual-film-timing.v1", "unit_id": unit["unit_id"], "mp4_sha256": "0" * 64,
+               "text_sha256": source["content_sha256"], "measurement_evidence_ref": cls.REF,
+               "maps": [{"precision": "paragraph", "segments": segments}, {"precision": "sentence", "segments": segments}]}
+        doc.update(override)
+        return doc
 
     def film_evidence(self, source, video_shas, tag="film", **override):
         return self.evidence(source, None, tag=tag, **{"formats": ["reader", "video"], "video_sha256": list(video_shas),
@@ -644,6 +664,95 @@ class FilmCommandTests(AudiovisualFixture):
         self.assertEqual({k for k, v in checks.items() if v == "fail"}, {"browser"}, checks)
         self.assertTrue(AuditEvent.objects.filter(actor=self.publisher, action="asset.complete", entity_id=str(video.id),
                                                   detail__channel="server_job").exists())
+
+    # --- film timing map (docs/interface-notes/2026-11-27-film-timing-map.md) -------------------------
+    def stage_with_timing(self, tag="timing", **override):
+        source = self.export()
+        folder, unit = self.film_bundle(source["units"][0]["unit_id"], timing=self.timing_doc(source, **override))
+        return source, folder, unit, self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag=tag))
+
+    def test_stage_stores_a_valid_film_timing_map(self):
+        old = self.publish_bicharak()
+        source, folder, unit, staged = self.stage_with_timing()
+        draft = Revision.objects.get(pk=staged["revision_id"])
+        video = Asset.objects.get(revision=draft, kind="video")
+        maps = list(TimingMap.objects.filter(revision=draft).order_by("precision"))
+        self.assertEqual([(m.asset_id, m.precision, m.measured, m.text_sha256, m.asset_sha256) for m in maps],
+                         [(video.id, p, True, draft.content_sha256, video.sha256) for p in ("paragraph", "sentence")])
+        draft_anchors = [str(a) for a in Paragraph.objects.filter(unit=video.unit).order_by("ordinal").values_list("anchor_id", flat=True)]
+        self.assertEqual([seg["anchor_id"] for seg in maps[0].segments], draft_anchors)  # re-anchored to the clone
+        self.assertNotEqual(draft_anchors, [p["anchor_id"] for p in source["units"][0]["paragraphs"]])
+        self.assertEqual([(m["precision"], m["asset_id"]) for m in staged["timing_maps"]], [("paragraph", str(video.id)), ("sentence", str(video.id))])
+        self.assertEqual({m["map_id"] for m in staged["timing_maps"]}, {str(m.id) for m in maps})
+        for m in maps:
+            audit = AuditEvent.objects.get(actor=self.publisher, action="timing_map.create", entity_id=str(m.id))
+            self.assertEqual(audit.detail, {"asset_id": str(video.id), "asset_sha256": video.sha256, "precision": m.precision,
+                                            "measurement_evidence_ref": self.REF, "channel": "server_job"})
+        proof = draft.validation_evidence["media_assets"][str(video.id)]
+        self.assertEqual((proof["measurement_evidence_ref"], proof["timing_sha256"], sorted(proof["timing_map_ids"])),
+                         (self.REF, hashlib.sha256((folder / "film.timing.json").read_bytes()).hexdigest(), sorted(str(m.id) for m in maps)))
+        self.assertIn("ffprobe:", proof["measurement_evidence"])
+        checks = {c["code"]: c["status"] for c in validate_revision(draft, prepared=prepare_revision_validation(draft.id))["checks"]}
+        self.assertEqual({k for k, v in checks.items() if v == "fail"}, {"browser"}, checks)
+        again = self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag="timing"))
+        self.assertEqual((again["revision_id"], again["timing_maps"]), (staged["revision_id"], staged["timing_maps"]))
+        self.assertEqual(TimingMap.objects.filter(revision=draft).count(), 2)
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, old.id)
+
+    def test_audiovisual_source_export_lists_only_audio_maps(self):
+        self.publish_bicharak()
+        _, _, _, staged = self.stage_with_timing(tag="export")
+        out = self.tmp / "draft-source.json"
+        call_command("export_audiovisual_source", "bicharak", "--revision", staged["revision_id"], "--out", str(out), stdout=io.StringIO())
+        self.assertEqual(json.loads(out.read_text())["timing_maps"], [])
+        self.assertEqual(TimingMap.objects.filter(revision_id=staged["revision_id"], asset__kind="video").count(), 2)
+
+    def test_stage_refuses_an_invalid_film_timing_map_and_writes_nothing(self):
+        from unittest.mock import patch
+        live = self.publish_bicharak()
+        source = self.export()
+        unit_id = source["units"][0]["unit_id"]
+        doc = self.timing_doc(source)
+        late = json.loads(json.dumps(doc))
+        late["maps"][0]["segments"][-1]["end_ms"] = 5000  # past the 1 s film: only the savepoint dry run can see it
+        split = json.loads(json.dumps(doc))
+        split["maps"][0]["segments"][0]["end_offset_chars"] -= 1
+        cases = [("badtext", self.timing_doc(source, text_sha256="f" * 64), "text_sha256"),
+                 ("badunit", self.timing_doc(source, unit_id="not-the-unit"), "unit_id"),
+                 ("noref", self.timing_doc(source, measurement_evidence_ref="  "), "measurement_evidence_ref"),
+                 ("split", split, "whole-paragraph"),
+                 ("late", late, "film map")]
+        for tag, timing, message in cases:
+            folder, unit = self.film_bundle(unit_id, timing=timing)
+            with self.subTest(tag), patch("library.storage.put_private_file") as upload, self.assertRaisesMessage(CommandError, message):
+                self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag=tag))
+            self.assertNotIn("video/mp4", [call.args[2] for call in upload.call_args_list])  # refused before the film uploads
+            self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
+            self.assertFalse(Asset.objects.filter(kind__in=["video", "video_captions"]).exists())
+            self.assertFalse(TimingMap.objects.exists())
+            self.assertFalse(AuditEvent.objects.filter(action__in=["timing_map.create", "asset.complete"], detail__kind="video").exists())
+            self.assertEqual({r.state for r in Revision.objects.filter(edition=live.edition).exclude(pk=live.pk)} - {"draft"}, set())
+        folder, unit = self.film_bundle(unit_id, timing=doc, timing_sha256="a" * 64)
+        with self.subTest("hash"), self.assertRaisesMessage(CommandError, "timing_sha256"):
+            self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag="hash"))
+        folder, unit = self.film_bundle(unit_id, timing=b"{not json")
+        with self.subTest("notjson"), self.assertRaisesMessage(CommandError, "not JSON"):
+            self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag="notjson"))
+        self.assertFalse(Asset.objects.filter(kind__in=["video", "video_captions"]).exists())
+        folder, unit = self.film_bundle(unit_id, timing=doc)
+        staged = self.stage_film(folder, self.film_evidence(source, [unit["mp4_sha256"]], tag="retry"))  # a valid map still stages
+        self.assertEqual(len(staged["timing_maps"]), 2)
+
+    def test_stage_without_a_timing_map_keeps_today_behaviour(self):
+        _, source, folder, unit, _, staged = self.staged_film()
+        self.assertEqual(staged["timing_maps"], [])
+        self.assertFalse(TimingMap.objects.exists())
+        draft = Revision.objects.get(pk=staged["revision_id"])
+        proof = draft.validation_evidence["media_assets"][str(Asset.objects.get(revision=draft, kind="video").id)]
+        self.assertNotIn("measurement_evidence_ref", proof)
+        self.assertNotIn("timing_map_ids", proof)
+        self.assertEqual(set(json.loads((folder / "film.json").read_text())["units"][0]), {"unit_id", "mp4", "vtt", "mp4_sha256",
+                                                                                              "vtt_sha256", "duration_ms", "bytes"})
 
     def test_film_upload_budget_scales_with_size(self):
         from operations.management.commands.attach_audiovisual_film import film_upload_seconds

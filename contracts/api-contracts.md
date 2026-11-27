@@ -82,7 +82,7 @@ Player bootstrap identity (Media Session and the player header): besides `editio
 
 `GET /content/mappings/{edition_revision_id}` takes optional `unit_id` and optional `asset_id` query parameters. Without `asset_id` it returns, per unit, the map of the rendition the player bootstrap chose for the listener. With `asset_id` (a listener's quality override) it returns the map of that ready audio rendition of the revision instead; an id that is not one of the revision's ready renditions is ignored (the chosen rendition's map is returned), and a malformed id is `422 validation_error`. The player and the reader's follow-along pass the `asset_id` they are actually playing.
 
-Measured timing maps bind exact text and audio/video hashes. P0 Reader/audio switching returns mapped location only when an approved measured map exists. Unmapped/unreleased/disabled outcomes return a null target and UI offers a chapter choice. There is no estimated synchronization fallback. The map/segment API does not imply word-level highlighting or video Trinity is already P0.
+Measured timing maps bind exact text and audio/video hashes. Reader/audio and Reader/video switching (and audio/video through the text anchor) return a mapped location only when an approved measured map exists for the target or source. A film map is a timing map on the film asset with times on the film timeline, bound to the film sha256; getMappings never lists it and a draft's film map is never served. Video switching needs the video feature, access to both formats in the request territory (the same rules as audio) and the live revision. A film position between narrated passages (scene lead-in/tail, credits) maps to the passage narrated last before it; the title card (before the first narrated passage) is `unmapped`, as is a film with no map, and the client keeps its part-start link. Unmapped/unreleased/disabled outcomes return a null target and UI offers a chapter choice. There is no estimated synchronization fallback. The map/segment API does not imply word-level highlighting or video Trinity is already P0.
 
 `POST /me/downloads` creates a device/member/revision-bound offline license and authorizes only rights-permitted Reader/audio. `valid_until` is the minimum of issuance+24h, entitlement end and rights end. No full-video download is offered. License URLs still expire within120 seconds, so `/refresh` can reauthorize transfer URLs online without extending the license. `/renew` performs a fresh online rights/access check before issuing a new bounded lease. An expired/revoked license never silently renews offline.
 
@@ -153,10 +153,10 @@ Operation IDs below are exact keys from OpenAPI; SSR composition is separate. A 
 | S09 Reader preview end | getPreview, listOffers, getSession, createOrder | P0 overlay, no dedicated page API |
 | S10 Audio | grantMedia, listUnits, getProgress, setProgress, getMappings, switchPosition, createDownloadLicense | P0 released audio only |
 | S11 Audio preview end | getPreview, listOffers, createOrder | P0 bounded-preview overlay |
-| S12 Video | grantMedia, getProgress, setProgress | P0 released video; offline/video switch later |
+| S12 Video | grantMedia, getProgress, setProgress, switchPosition | P0 released video; switch via measured film map; offline later |
 | S13 Series | getCollection, getEdition, saveEdition | P0 collection kind=series |
 | S14 Clips | none | P1, no endpoint/active launch control |
-| S15 Switch sheet | getMappings, switchPosition | P0 Reader/audio; unmapped explicit, video later |
+| S15 Switch sheet | getMappings, switchPosition | P0 Reader/audio/video; unmapped explicit |
 | S16 Learn/track | listTracks, getTrack, getLesson, listEntitlements | P0 |
 | S17 Lesson/quiz/result | getLesson, completeLesson, getQuiz, startQuizAttempt, getQuizAttempt, submitQuizAttempt | P0 server grading/snapshot |
 | S18 Interview track | listTracks, getTrack, listInterviewQuestions | P0 SDE bank, plans, Company Packs |

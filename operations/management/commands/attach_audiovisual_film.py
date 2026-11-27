@@ -14,11 +14,21 @@ Bundle layout (--bundle <dir>, written by `eav bundle-film`), nothing else is ac
 
   <dir>/film.json  {"schema": "earnalism.audiovisual-film-bundle.v1",
                     "units": [{"unit_id": "<live unit id>", "mp4": "film.mp4", "vtt": "film.vtt",
-                               "mp4_sha256": <hex>, "vtt_sha256": <hex>, "duration_ms": <int>, "bytes": <int>}]}
+                               "mp4_sha256": <hex>, "vtt_sha256": <hex>, "duration_ms": <int>, "bytes": <int>,
+                               "timing": "film.timing.json", "timing_sha256": <hex>}]}   (last two optional, together)
   <dir>/<mp4>      per unit: a faststart MP4 (top-level moov before mdat) of exactly one H.264 video stream and
                    one AAC audio stream, at most 1 073 741 824 bytes; the ffprobe-measured duration is stored,
                    the bundle's duration_ms claim is not.
   <dir>/<vtt>      per unit: WebVTT captions (starts with WEBVTT), at most 1 048 576 bytes.
+
+  <dir>/<timing>   per unit, optional: film.timing.json (earnalism.audiovisual-film-timing.v1, at most 1 048 576
+                   bytes), the measured film timing map that lets Watch open at the reader's place
+                   (docs/interface-notes/2026-11-27-film-timing-map.md). It is parsed and checked by
+                   library.film_timing, bound to the unit, the film's sha256 and the live text hash, then stored as
+                   ordinary TimingMap rows on the film asset with a timing_map.create audit row that carries its
+                   measurement_evidence_ref (also recorded in the film's media_assets evidence). A film without the file
+                   stages exactly as before, without a map (Watch then falls back to the part start); an invalid map
+                   refuses the whole film before any upload or write.
 
 Every hash and size is recomputed here; any mismatch refuses before mutation.
 
@@ -53,6 +63,7 @@ from django.utils import timezone
 from core.api import DomainError
 from core.services import audit
 from library import storage
+from library.film_timing import FilmTimingError, anchor_map_by_ordinal, film_timing_maps, read_film_timing, MAX_BYTES as MAX_TIMING_BYTES
 from library.models import Asset, Revision
 from library.services import canonical_bytes, digest
 from operations.management.commands import attach_audiovisual_audio as audio
@@ -61,6 +72,7 @@ from operations.management.commands.publish_cleared_editions import sha256, stab
 
 BUNDLE_SCHEMA = "earnalism.audiovisual-film-bundle.v1"
 UNIT_KEYS = {"unit_id", "mp4", "vtt", "mp4_sha256", "vtt_sha256", "duration_ms", "bytes"}
+TIMING_KEYS = {"timing", "timing_sha256"}  # optional, together: transition until every film is re-bundled with a map
 MAX_FILM_BYTES = 1_073_741_824
 MAX_VTT_BYTES = 1_048_576
 MAX_MANIFEST_BYTES = 1_048_576
@@ -139,14 +151,17 @@ def read_film_bundle(folder):
         if set(manifest) != {"schema", "units"} or manifest["schema"] != BUNDLE_SCHEMA or not isinstance(rows, list) or not rows:
             raise ValueError
         for row in rows:
-            if (not isinstance(row, dict) or set(row) != UNIT_KEYS or not isinstance(row["unit_id"], str)
+            if (not isinstance(row, dict) or set(row) not in (UNIT_KEYS, UNIT_KEYS | TIMING_KEYS) or not isinstance(row["unit_id"], str)
                     or not _plain_name(row["mp4"], ".mp4") or not _plain_name(row["vtt"], ".vtt")
+                    or ("timing" in row and (not _plain_name(row["timing"], ".json") or row["timing"] == "film.json"
+                                             or not isinstance(row["timing_sha256"], str) or not HEX64.fullmatch(row["timing_sha256"])))
                     or not all(isinstance(row[k], str) and HEX64.fullmatch(row[k]) for k in ("mp4_sha256", "vtt_sha256"))
                     or not all(type(row[k]) is int for k in ("duration_ms", "bytes"))):
                 raise ValueError
     except (ValueError, KeyError, TypeError, UnicodeDecodeError):
-        raise CommandError(f'film.json must be {{"schema": "{BUNDLE_SCHEMA}", "units": [{{{", ".join(sorted(UNIT_KEYS))}}}]}}.') from None
-    names = [row["mp4"] for row in rows] + [row["vtt"] for row in rows]
+        raise CommandError(f'film.json must be {{"schema": "{BUNDLE_SCHEMA}", "units": [{{{", ".join(sorted(UNIT_KEYS))}}}]}} '
+                           f'(plus {" and ".join(sorted(TIMING_KEYS))} together, optionally).') from None
+    names = [row["mp4"] for row in rows] + [row["vtt"] for row in rows] + [row["timing"] for row in rows if "timing" in row]
     if len(set(names)) != len(names) or len({row["unit_id"] for row in rows}) != len(rows):
         raise CommandError("film.json must name distinct files, one film per distinct unit.")
     for entry in sorted(folder.iterdir()):
@@ -182,12 +197,26 @@ def read_film_bundle(folder):
             vtt_raw.decode("utf-8")
         except UnicodeDecodeError:
             raise CommandError(f"{row['vtt']} is not UTF-8.") from None
-        units.append({"unit_id": row["unit_id"],
+        timing = None
+        if "timing" in row:
+            path = folder / row["timing"]
+            if not path.is_file():
+                raise CommandError(f"Bundle lacks {row['timing']}.")
+            timing_bytes = path.stat().st_size
+            if not 1 <= timing_bytes <= MAX_TIMING_BYTES:
+                raise CommandError(f"{row['timing']} is {timing_bytes} bytes; film timing must be 1..{MAX_TIMING_BYTES} bytes.")
+            timing_raw = path.read_bytes()
+            if sha256(timing_raw) != row["timing_sha256"]:
+                raise CommandError(f"film.json timing_sha256 differs from {row['timing']}.")
+            timing = {"path": path, "sha256": row["timing_sha256"], "raw": timing_raw}
+        units.append({"unit_id": row["unit_id"], "timing": timing,
                       "mp4": {"path": mp4, "sha256": mp4_sha, "bytes": size, **measured},
                       "vtt": {"path": vtt, "sha256": row["vtt_sha256"], "bytes": vtt_bytes}})
-    bundle_sha = digest(canonical_bytes({"film_json_sha256": sha256(raw),
-                                         "mp4": {u["unit_id"]: u["mp4"]["sha256"] for u in units},
-                                         "vtt": {u["unit_id"]: u["vtt"]["sha256"] for u in units}}))
+    fold = {"film_json_sha256": sha256(raw), "mp4": {u["unit_id"]: u["mp4"]["sha256"] for u in units},
+            "vtt": {u["unit_id"]: u["vtt"]["sha256"] for u in units}}
+    if any(u["timing"] for u in units):  # absent for a film without a map, so those bundles keep their old hash
+        fold["timing"] = {u["unit_id"]: u["timing"]["sha256"] for u in units if u["timing"]}
+    bundle_sha = digest(canonical_bytes(fold))
     return {"units": units, "bundle_sha256": bundle_sha}
 
 
@@ -201,6 +230,10 @@ def check_film_evidence(doc, slug, live, bundle):
     if not isinstance(video, list) or sorted(map(str, video)) != sorted(u["mp4"]["sha256"] for u in bundle["units"]):
         raise CommandError("Clearance evidence video_sha256 differs from the bundle mp4_sha256 values.")
     audio.check_record_complete(doc)
+
+
+class _DryRun(Exception):
+    """Ends the savepoint that proves a film's maps before any upload; always rolled back."""
 
 
 class Command(audio.Command):
@@ -235,6 +268,9 @@ class Command(audio.Command):
             "content_sha256": draft.content_sha256, "source_revision_id": str(live.id), "bundle_sha256": bundle["bundle_sha256"],
             "evidence_ref": evidence_ref,
             "asset_sha256": {str(a.id): a.sha256 for a in draft.assets.filter(state="ready")},
+            "timing_maps": [{"unit_id": str(m.asset.unit_id), "map_id": str(m.id), "asset_id": str(m.asset_id), "precision": m.precision}
+                            for m in draft.timing_maps.filter(asset__kind="video").select_related("asset")
+                                          .order_by("asset__unit__ordinal", "precision")],
             "film": [{"unit_id": str(a.unit_id), "asset_id": str(a.id), "sha256": a.sha256, "duration_ms": a.duration_ms}
                      for a in draft.assets.filter(kind="video").order_by("unit__ordinal")]})
 
@@ -244,17 +280,52 @@ class Command(audio.Command):
         for item in bundle["units"]:
             if item["unit_id"] not in units:
                 raise CommandError(f"film.json unit {item['unit_id']} is not a unit of the live revision.")
-            plan.append({**item, "unit_ordinal": units[item["unit_id"]]})
+            parsed = None
+            if item["timing"]:
+                try:
+                    parsed = read_film_timing(item["timing"]["raw"], unit_id=item["unit_id"], mp4_sha256=item["mp4"]["sha256"],
+                                              text_sha256=live.content_sha256)
+                except FilmTimingError as exc:
+                    raise CommandError(f"unit {units[item['unit_id']]} film timing refused: {exc}") from None
+            plan.append({**item, "unit_ordinal": units[item["unit_id"]], "timing_parsed": parsed})
         return plan
+
+    @staticmethod
+    def timing_rows(revision, live_unit, draft_unit, video, parsed):
+        """Unsaved, fully checked TimingMap rows for one film (the film asset must already be saved)."""
+        try:
+            return film_timing_maps(revision, video, parsed, anchor_map_by_ordinal(live_unit, draft_unit))
+        except FilmTimingError as exc:
+            raise CommandError(f"unit {draft_unit.ordinal} film timing refused: {exc}") from None
 
     def attach(self, actor, live, draft, bundle, plan, evidence_ref):
         units = {u.ordinal: u for u in draft.units.all()}
+        live_units = {u.ordinal: u for u in live.units.all()}
         prepared = []
         for item in plan:
             unit, mp4, vtt = units[item["unit_ordinal"]], item["mp4"], item["vtt"]
             video_id = stable_id(draft.id, "video", unit.ordinal, mp4["sha256"])
             captions_id = stable_id(draft.id, "video_captions", unit.ordinal, vtt["sha256"])
             video_key, captions_key = f"revisions/{draft.id}/{video_id}.mp4", f"revisions/{draft.id}/{captions_id}.vtt"
+            video = Asset(id=video_id, revision=draft, unit=unit, kind="video", state="ready", provider="r2",
+                          storage_key=video_key, sha256=mp4["sha256"], bytes=mp4["bytes"], content_type="video/mp4",
+                          duration_ms=mp4["duration_ms"])
+            captions = Asset(id=captions_id, revision=draft, unit=unit, kind="video_captions", state="ready", provider="r2",
+                             storage_key=captions_key, sha256=vtt["sha256"], bytes=vtt["bytes"], content_type="text/vtt")
+            if item["timing_parsed"]:
+                # Prove the map against the draft in a savepoint that is always rolled back (the live revision is
+                # frozen, so this needs the clone): a map that fails the geometry checks refuses the film before a
+                # single byte is uploaded. Only the empty clone remains, as after any refusal past the clone.
+                try:
+                    with transaction.atomic():
+                        video.save()
+                        self.timing_rows(draft, live_units[unit.ordinal], unit, video, item["timing_parsed"])
+                        raise _DryRun
+                except _DryRun:
+                    pass
+            prepared.append((item, unit, video, captions, video_key, captions_key))
+        for item, unit, video, captions, video_key, captions_key in prepared:
+            mp4, vtt = item["mp4"], item["vtt"]
             try:
                 budget, megabytes, started = film_upload_seconds(mp4["bytes"]), mp4["bytes"] / 1_000_000, time.monotonic()
                 self.stdout.write(f"film upload start: unit {unit.ordinal}, {megabytes:.1f} MB, budget {budget} s")
@@ -263,12 +334,6 @@ class Command(audio.Command):
                 storage.put_private_file(captions_key, vtt["path"], "text/vtt", vtt["bytes"], vtt["sha256"])
             except DomainError as exc:
                 raise CommandError(f"{exc.code}: {exc.message}") from None
-            video = Asset(id=video_id, revision=draft, unit=unit, kind="video", state="ready", provider="r2",
-                          storage_key=video_key, sha256=mp4["sha256"], bytes=mp4["bytes"], content_type="video/mp4",
-                          duration_ms=mp4["duration_ms"])
-            captions = Asset(id=captions_id, revision=draft, unit=unit, kind="video_captions", state="ready", provider="r2",
-                             storage_key=captions_key, sha256=vtt["sha256"], bytes=vtt["bytes"], content_type="text/vtt")
-            prepared.append((item, unit, video, captions))
         now = timezone.now()
         with transaction.atomic():
             current = Revision.objects.select_for_update().get(pk=draft.pk)
@@ -276,7 +341,7 @@ class Command(audio.Command):
                 raise CommandError("Clone changed while attaching the film; review the current draft.")
             evidence = dict(current.validation_evidence)
             media = dict(evidence.get("media_assets", {}))
-            for item, unit, video, captions in prepared:
+            for item, unit, video, captions, _, _ in prepared:
                 for asset in (video, captions):
                     asset.revision = current
                     asset.save()
@@ -289,6 +354,17 @@ class Command(audio.Command):
                     "actual_viewing": False}
                 media[str(captions.id)] = {"sha256": captions.sha256, "unit_id": str(unit.id), "video_asset_id": str(video.id),
                     "format": "webvtt", "prepared": True}
+                if item["timing_parsed"]:
+                    parsed = item["timing_parsed"]
+                    maps = self.timing_rows(current, live_units[unit.ordinal], unit, video, parsed)
+                    for mapping in maps:
+                        mapping.save()
+                        audit(actor, "timing_map.create", mapping, {"asset_id": str(video.id), "asset_sha256": video.sha256,
+                              "precision": mapping.precision, "measurement_evidence_ref": parsed["measurement_evidence_ref"],
+                              "channel": "server_job"})
+                    media[str(video.id)].update({"timing_sha256": item["timing"]["sha256"],
+                        "measurement_evidence_ref": parsed["measurement_evidence_ref"],
+                        "timing_map_ids": [str(m.id) for m in maps]})
             evidence["media_assets"] = media
             current.validation_evidence = evidence
             current.access_policy = {**current.access_policy, "video": "free"}
