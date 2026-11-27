@@ -335,7 +335,8 @@ body.room.theme-true_black{--surface:#121012;--raised:#1E1A1E;background:#000}
 .room-back{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px 0 6px;border-radius:999px;color:var(--night-ink);text-decoration:none;font-weight:600}
 .room-back:hover{background:rgba(255,255,255,.08)}
 .room-evening-title{flex:1;min-width:0;text-align:center;font:500 1.15rem/1.2 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.room-logo-mini{--s:.12;border-radius:6px;background:var(--ivory);padding:0;outline:4px solid var(--ivory)}
+/* The ivory plate is a border, not an outline: a border is part of the link's hit area (44 px tall) and sits outside the crop box, so no extra logo pixels show and the image is untouched. */
+.room-logo-mini{--s:.12;box-sizing:content-box;border-radius:6px;background:var(--ivory);padding:0;border:solid var(--ivory);border-width:6px 4px}
 body.room-focused{background:var(--paper),#1A0E12;--surface:#2A1820;--raised:#352831;--ink:#F6EEDF;--muted:#CDBDB4;--gold:#E6C987;--line:#4A3038}
 .room-focused .room-page{max-width:980px;padding-top:28px}
 .room-focused .room-page a{color:var(--gold)}
@@ -410,8 +411,8 @@ a.format-row-item{text-decoration:underline;text-underline-offset:4px}
 body.reader-theme-light .reader-tool:hover,body.reader-theme-sepia .reader-tool:hover{background:rgba(36,22,26,.08)}
 .reader-chapter-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .reader-chapter-list button{width:100%;min-height:44px;text-align:start;justify-content:flex-start}
-@media (max-width:767px){.reader-toolbar .room-wrap{flex-wrap:wrap;row-gap:4px;padding-top:6px;padding-bottom:6px}.reader-toolbar .room-evening-title{min-width:0}.reader-toolbar .room-logo-mini{order:2}.reader-tools{order:3;flex:1 1 100%;flex-wrap:nowrap;justify-content:flex-end;min-width:0}.reader-tool{padding:0 10px}}
-/* Narrow phones: the tools keep one row (two toolbar rows in all) by letting two-word labels break inside their 44 px pills. */
+@media (max-width:767px){.reader-toolbar .room-wrap{flex-wrap:wrap;row-gap:4px;padding-top:6px;padding-bottom:6px}.reader-toolbar .room-evening-title{min-width:0}.reader-toolbar .room-logo-mini{order:2}.reader-tools{order:3;flex:1 1 100%;flex-wrap:wrap;row-gap:4px;justify-content:flex-end;min-width:0}.reader-tool{padding:0 10px}}
+/* Narrow phones: compact pills (two-word labels break inside their 44 px pills) keep the tools on one row, so two toolbar rows in all; only when they still do not fit (Watch in the switch, or 320 px) the tools wrap to a third row instead of running off screen. */
 @media (max-width:479px){.reader-tools{gap:6px}.format-switch{gap:4px}.reader-minutes{white-space:normal;width:min-content;flex:none;line-height:1.15;text-align:end}.reader-tools .reader-tool,.reader-tools .format-switch-item{padding:0 8px;font-size:.8125rem;line-height:1.1}.reader-tools .reader-tool{width:min-content;white-space:normal}}
 body.reader-theme-light .reader-progress,body.reader-theme-sepia .reader-progress{--hairline:var(--gold-text)}
 body.reader-theme-dark .reader-progress,body.reader-theme-true_black .reader-progress{--hairline:var(--gold-on-dark)}

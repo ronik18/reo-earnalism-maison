@@ -304,11 +304,17 @@ class ExperienceTests(TestCase):
         mobile = re.search(r"@media \(max-width:767px\)\{(\.reader-toolbar[^@]*)\}\s*(?:@|body|/\*|$)", css)
         self.assertIsNotNone(mobile)
         mobile = mobile.group(1)
-        # Two toolbar rows in all: the tools keep one row (integration_tests/test_read_listen.py measures it at 360 px).
-        self.assertRegex(mobile, r"\.reader-tools\{[^}]*order:3[^}]*flex:1 1 100%[^}]*flex-wrap:nowrap")
-        narrow = re.search(r"@media \(max-width:479px\)\{(\.reader-tools[^@]*)\}", css)
-        self.assertIsNotNone(narrow)
-        self.assertRegex(narrow.group(1), r"\.reader-tools \.reader-tool\{[^}]*white-space:normal")
+        # The tools get a row of their own under Back/title/logo. How many rows they need is measured in the browser
+        # (integration_tests/test_read_listen.py); here only the safety rules are pinned, not one layout recipe:
+        self.assertRegex(mobile, r"\.reader-tools\{[^}]*order:3[^}]*flex:1 1 100%")
+        tools_rules = " ".join(re.findall(r"\.reader-tools\{([^}]*)\}", css))
+        # when the controls do not fit (Watch in the switch, a 320 px screen) they must wrap, never run off screen or clip
+        self.assertNotIn("flex-wrap:nowrap", tools_rules)
+        self.assertNotRegex(tools_rules, r"overflow(-x)?:(hidden|clip)")
+        # and no rule may shrink a toolbar target below the 44 px minimum
+        for rule in re.findall(r"\.(?:reader-tool|format-switch-item)\{([^}]*)\}", css):
+            for value in re.findall(r"(?<![-\w])(?:min-)?height:(\d+)px", rule):
+                self.assertGreaterEqual(int(value), 44, rule)
         self.assertRegex(mobile, r"\.room-evening-title\{[^}]*min-width:0")
         self.assertRegex(mobile, r"\.room-logo-mini\{[^}]*order:2")
 
