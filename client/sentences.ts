@@ -69,6 +69,21 @@ export function highlightSpan(text: string, range: [number, number] | null): [nu
   return start < end ? [start, end] : [0, text.length];
 }
 
+const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown", "Home", "End", " "]);
+/** The reader's own scrolling raises `scroll` events for this long (ms) after it scrolls. */
+export const OWN_SCROLL_MS = 400;
+/**
+ * Is this event the reader scrolling by hand? Wheel, touch, scroll keys and the page-turn buttons are; a `scroll`
+ * event is too (scrollbar drag, keyboard, find-in-page) unless it falls inside the window after the reader's own
+ * scroll (`ownScrollUntil`, a timestamp). Other keys and events are not.
+ */
+export function isUserScroll(type: string, key: string | undefined, now: number, ownScrollUntil: number): boolean {
+  if (type === "wheel" || type === "touchmove" || type === "page-button") return true;
+  if (type === "keydown") return key !== undefined && SCROLL_KEYS.has(key);
+  if (type === "scroll") return now > ownScrollUntil;
+  return false;
+}
+
 export const AUTOSCROLL_PAUSE_MS = 5000;
 /** Follow with scrolling only when the reader has not scrolled by hand in the last 5 seconds. */
 export function autoscrollAllowed(now: number, lastUserScrollAt: number | undefined): boolean {

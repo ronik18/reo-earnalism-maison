@@ -237,7 +237,11 @@ def mappings(request,revision_id):
     if unit_id:
         from core.api import public_uuid
         unit_id=public_uuid(unit_id,'unit_id')
-    return api_response(mapping_bundle(request.user,revision_id,territory,unit_id))
+    asset_id=request.GET.get('asset_id')
+    if asset_id:
+        from core.api import public_uuid
+        asset_id=public_uuid(asset_id,'asset_id')
+    return api_response(mapping_bundle(request.user,revision_id,territory,unit_id,asset_id))
 
 @json_endpoint(methods=('POST',))
 def switch(request):

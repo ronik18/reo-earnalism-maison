@@ -5,6 +5,30 @@ const PARAGRAPH = "follow-paragraph";
 type Registry = { set(name: string, value: unknown): void; delete(name: string): void };
 const registry = (): Registry | undefined => (globalThis as { CSS?: { highlights?: Registry } }).CSS?.highlights;
 
+/** The few Text members the fallback needs; the pure function below is tested against a fake. */
+export interface TextPiece<T> { data: string; splitText(offset: number): T }
+/**
+ * Split the text pieces (in document order) so that exactly the characters [start,end) sit in their own pieces,
+ * and call `wrap` on each of those. Pieces are only split, never edited: their concatenated data is unchanged.
+ * Returns how many pieces were wrapped.
+ */
+export function wrapTextSpan<T extends TextPiece<T>>(pieces: T[], start: number, end: number, wrap: (piece: T) => void): number {
+  let seen = 0;
+  let wrapped = 0;
+  for (const piece of pieces) {
+    const length = piece.data.length;
+    const from = Math.max(start - seen, 0);
+    const to = Math.min(end - seen, length);
+    seen += length;
+    if (to <= from) continue;
+    const middle = from > 0 ? piece.splitText(from) : piece;
+    if (to - from < middle.data.length) middle.splitText(to - from);
+    wrap(middle);
+    wrapped++;
+  }
+  return wrapped;
+}
+
 function textNodes(el: Element): Text[] {
   const nodes: Text[] = [];
   const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
@@ -49,21 +73,13 @@ export function drawFollow(el: HTMLElement, range: [number, number] | null): (()
     reg.set(kind, new HighlightCtor(dom));
     return () => dom.getBoundingClientRect();
   }
-  let seen = 0;
   const marks: HTMLElement[] = [];
-  for (const node of nodes) {
-    const length = node.data.length;
-    const from = Math.max(start - seen, 0);
-    const to = Math.min(end - seen, length);
-    seen += length;
-    if (to <= from) continue;
-    const middle = from > 0 ? node.splitText(from) : node;
-    if (to - from < middle.data.length) middle.splitText(to - from);
+  wrapTextSpan(nodes, start, end, (middle) => {
     const mark = document.createElement("mark");
     mark.className = kind;
     middle.replaceWith(mark);
     mark.append(middle);
     marks.push(mark);
-  }
+  });
   return marks.length ? () => marks[0].getBoundingClientRect() : undefined;
 }

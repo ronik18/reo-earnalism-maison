@@ -222,6 +222,16 @@ class ServingRenditionsTests(TestCase):
         result=mappings(self.user,self.revision.id)
         self.assertEqual([m['asset_id'] for m in result['maps']],[str(high.id)])
 
+    def test_mappings_asset_id_returns_that_renditions_map(self):
+        high=self.two_renditions(96)
+        low=mappings(self.user,self.revision.id,asset_id=self.asset.id)
+        self.assertEqual([m['asset_id'] for m in low['maps']],[str(self.asset.id)])
+        both=mappings(self.user,self.revision.id,asset_id=high.id)
+        self.assertEqual([m['asset_id'] for m in both['maps']],[str(high.id)])
+        import uuid
+        unknown=mappings(self.user,self.revision.id,asset_id=uuid.uuid4())
+        self.assertEqual([m['asset_id'] for m in unknown['maps']],[str(high.id)])  # unknown asset: the chosen rendition, as before
+
     def test_unexpected_preference_error_propagates(self):
         from unittest.mock import PropertyMock
         self.live()

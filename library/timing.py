@@ -42,7 +42,7 @@ def _precision_rank():
     return Case(When(precision='sentence',then=Value(0)),When(precision='paragraph',then=Value(1)),When(precision='word',then=Value(2)),default=Value(3),output_field=IntegerField())
 
 
-def mappings(user,revision_id,territory='IN',unit_id=None):
+def mappings(user,revision_id,territory='IN',unit_id=None,asset_id=None):
     from .services import authorize_revision
     revision=authorize_revision(user,revision_id,territory=territory)
     if not settings.FEATURES.get('audio'):return {'edition_revision_id':str(revision.id),'status':'feature_disabled','maps':[]}
@@ -51,7 +51,11 @@ def mappings(user,revision_id,territory='IN',unit_id=None):
     rows=revision.timing_maps.filter(asset__state='ready',asset__kind='audio_chapter').select_related('revision','asset','asset__unit','asset__revision').annotate(_rank=_precision_rank()).order_by('asset__unit__ordinal','asset_id','_rank','id')
     if unit_id:rows=rows.filter(asset__unit_id=unit_id)
     from .services import chosen_audio
-    chosen_ids=[asset.id for asset,_ in chosen_audio(user,revision)[0]]
+    chosen,by_unit=chosen_audio(user,revision)
+    chosen_ids=[asset.id for asset,_ in chosen]
+    if asset_id:  # a listener's quality override: that rendition's own map, when it is one of this revision's ready renditions
+        wanted=str(asset_id)
+        if any(str(asset.id)==wanted for options in by_unit.values() for _,(asset,_data) in options):chosen_ids=[a.id for a in [x for options in by_unit.values() for _,(x,_d) in options] if str(a.id)==wanted]
     rows=rows.filter(asset_id__in=chosen_ids)  # the rendition the player bootstrap lists for each unit
     maps=[]
     done=set()  # one map per unit (best precision that validates); the cap counts units

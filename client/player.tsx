@@ -560,14 +560,18 @@ function Player({ boot }: { boot: Boot }) {
     if (boot.preview || boot.authenticated === false || boot.reader_available === false || !chapter) return;
     let cancelled = false;
     setTimings(undefined);
-    api<{ maps: (FollowMap & { asset_id: string })[] }>(`/content/mappings/${boot.edition_revision_id}?unit_id=${chapter.unit_id}`)
+    api<{ maps: (FollowMap & { asset_id: string })[] }>(`/content/mappings/${boot.edition_revision_id}?unit_id=${chapter.unit_id}&asset_id=${chapter.asset_id}`)
       .then((r) => { if (!cancelled) setTimings({ unit_id: chapter.unit_id, maps: r.maps }); })
       .catch(() => {}); // no timing, no Follow in text link
     return () => { cancelled = true; };
-  }, [chapter?.unit_id]);
-  const followAt = timings?.unit_id === chapter?.unit_id
-    ? currentHighlight(timings!.maps.filter((m) => m.asset_id === chapter.asset_id), null, position * 1000)
+  }, [chapter?.unit_id, chapter?.asset_id]);
+  const lastFollow = useRef<{ unit_id: string; anchorId: string; start: number } | undefined>(undefined);
+  const now = timings?.unit_id === chapter?.unit_id
+    ? currentHighlight(timings!.maps.filter((m) => m.asset_id === chapter.asset_id), lastFollow.current?.anchorId ?? null, position * 1000)
     : undefined;
+  if (now?.anchorId) lastFollow.current = { unit_id: chapter.unit_id, anchorId: now.anchorId, start: now.range?.[0] ?? 0 };
+  // a silent gap keeps the last anchor, so the link (and its focus) stays; another chapter drops it
+  const followAt = lastFollow.current?.unit_id === chapter?.unit_id && timings?.unit_id === chapter?.unit_id ? lastFollow.current : undefined;
   const playingMarker = activeMarkerIndex(chapter?.markers, position * 1000);
   if (!chapter) return <p className="notice">{t("not_available")}</p>;
   return (
@@ -602,7 +606,7 @@ function Player({ boot }: { boot: Boot }) {
         onSeeked={() => announce()}
         onPlay={() => { announce(); setPlaying(true); if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing"; }}
         onRateChange={syncPositionState}
-        onLoadedMetadata={syncPositionState}
+        onLoadedMetadata={() => { syncPositionState(); announce(); }}
         onWaiting={() => setBuffering(true)}
         onCanPlay={() => setBuffering(false)}
         onPlaying={() => setBuffering(false)}
@@ -712,8 +716,8 @@ function Player({ boot }: { boot: Boot }) {
         <a href={validReturnPath(boot.reader_url + chapter.unit_id + "/")}>
           {t("read_from_chapter")}
         </a>
-        {followAt?.anchorId ? (
-          <a href={validReturnPath(`${boot.reader_url}${chapter.unit_id}/?anchor=${encodeURIComponent(followAt.anchorId)}&offset=${followAt.range?.[0] ?? 0}`)}>
+        {followAt ? (
+          <a href={validReturnPath(`${boot.reader_url}${chapter.unit_id}/?anchor=${encodeURIComponent(followAt.anchorId)}&offset=${followAt.start}`)}>
             {t("follow_in_text")}
           </a>
         ) : null}</> : null}

@@ -17,7 +17,8 @@ import {
   validReturnPath,
 } from "./state.ts";
 import { readFileSync } from "node:fs";
-import { splitSentences, currentHighlight, autoscrollAllowed, highlightSpan, utf16Index, type FollowMap } from "./sentences.ts";
+import { wrapTextSpan } from "./follow-dom.ts";
+import { splitSentences, currentHighlight, autoscrollAllowed, isUserScroll, highlightSpan, utf16Index, type FollowMap } from "./sentences.ts";
 test("Unicode selection offsets use code points, including Bengali and astral characters", () => {
   assert.equal(codePointOffset("আ🌸লো", 3), 2);
   assert.equal(codePointOffset("A🌸B", 3), 2);
@@ -661,4 +662,77 @@ test("test_no_autoscroll_within_5s_of_user_scroll", () => {
   assert.equal(autoscrollAllowed(10_000, 6_000), false);
   assert.equal(autoscrollAllowed(10_000, 5_001), false);
   assert.equal(autoscrollAllowed(10_000, 5_000), true);
+});
+
+test("test_user_scroll_classification: page turns, horizontal keys and foreign scroll events count; the reader's own do not", () => {
+  const now = 10_000;
+  for (const type of ["wheel", "touchmove", "page-button"]) assert.equal(isUserScroll(type, undefined, now, 0), true, type);
+  for (const key of ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown", "Home", "End", " "]) assert.equal(isUserScroll("keydown", key, now, 0), true, key);
+  assert.equal(isUserScroll("keydown", "a", now, 0), false);
+  assert.equal(isUserScroll("keydown", undefined, now, 0), false);
+  assert.equal(isUserScroll("scroll", undefined, now, 0), true); // scrollbar drag
+  assert.equal(isUserScroll("scroll", undefined, now, now + 100), false); // caused by the reader's own scrollTo
+  assert.equal(isUserScroll("click", undefined, now, 0), false);
+});
+function luminance(hex: string) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+const contrast = (a: string, b: string) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+test("follow highlight uses a token, is not a note colour, and keeps 4.5:1 text contrast on every reader theme", () => {
+  const css = readFileSync("static/maison/app.css", "utf8");
+  const rule = css.slice(css.indexOf("::highlight(follow-sentence)"));
+  assert.ok(!/#[0-9a-f]{3,6}/i.test(rule), "no raw hex in the follow rules");
+  assert.match(rule, /background:var\(--follow-bg\)/);
+  const notes = ["gold", "mint", "rose", "lavender"].map((n) => new RegExp(`mark\\.${n}\\{background:(#[0-9a-f]{6})`).exec(css)![1]);
+  for (const theme of ["paper", "light", "sepia", "ink", "dark", "true_black"]) {
+    const bg = new RegExp(`\\.reader-${theme}[^{]*\\{[^}]*--follow-bg:(#[0-9a-f]{6})`).exec(css)?.[1];
+    const surface = new RegExp(`\\.reader-${theme}[^{]*\\{background:(#[0-9a-f]{3,6});color:(#[0-9a-f]{6})`).exec(css);
+    assert.ok(bg && surface, theme);
+    assert.ok(contrast(surface![2], bg!) >= 4.5, `${theme} text on follow tint`);
+    assert.ok(!notes.includes(bg!), `${theme} differs from the note colours`);
+  }
+});
+// A tiny fake of the text pieces the fallback splits: a parent holds an ordered list of text pieces and mark wrappers.
+class FakeText {
+  constructor(public data: string, public parent: { kids: (FakeText | FakeMark)[] }) {}
+  splitText(offset: number): FakeText {
+    const rest = new FakeText(this.data.slice(offset), this.parent);
+    this.data = this.data.slice(0, offset);
+    this.parent.kids.splice(this.parent.kids.indexOf(this) + 1, 0, rest);
+    return rest;
+  }
+}
+class FakeMark { constructor(public kind: string, public kids: FakeText[]) {} }
+const flat = (kids: (FakeText | FakeMark)[]): string => kids.map((k) => (k instanceof FakeText ? k.data : flat(k.kids))).join("");
+test("fallback drawing across an annotation mark keeps the text; clearing restores the original structure", () => {
+  // "alpha " + <mark gold>beta gamma</mark> + " delta."  (the paragraph after the annotation effect)
+  const root: { kids: (FakeText | FakeMark)[] } = { kids: [] };
+  const note = new FakeMark("gold", []);
+  const inner = new FakeText("beta gamma", note as unknown as { kids: (FakeText | FakeMark)[] });
+  note.kids.push(inner);
+  root.kids.push(new FakeText("alpha ", root), note, new FakeText(" delta.", root));
+  const text = flat(root.kids);
+  const pieces = [root.kids[0] as FakeText, inner, root.kids[2] as FakeText];
+  const wrapped: FakeText[] = [];
+  const count = wrapTextSpan(pieces, 3, 20, (piece) => {
+    const mark = new FakeMark("follow-sentence", [piece]);
+    const holder = piece.parent;
+    holder.kids.splice(holder.kids.indexOf(piece), 1, mark as unknown as FakeText);
+    piece.parent = mark as unknown as { kids: (FakeText | FakeMark)[] };
+    wrapped.push(piece);
+  });
+  assert.equal(count, 3);
+  assert.equal(flat(root.kids), text);
+  assert.equal(wrapped.map((p) => p.data).join(""), text.slice(3, 20));
+  // clear: unwrap every follow mark, then merge adjacent text pieces (what Node.normalize does)
+  const unwrap = (kids: (FakeText | FakeMark)[]): (FakeText | FakeMark)[] => kids.flatMap((k) => (k instanceof FakeMark ? (k.kind.startsWith("follow") ? unwrap(k.kids) : [Object.assign(k, { kids: unwrap(k.kids) as FakeText[] })]) : [k]));
+  const merge = (kids: (FakeText | FakeMark)[]) => kids.reduce<(FakeText | FakeMark)[]>((out, k) => {
+    const last = out[out.length - 1];
+    if (k instanceof FakeText && last instanceof FakeText) last.data += k.data; else out.push(k instanceof FakeMark ? Object.assign(k, { kids: merge(k.kids) as FakeText[] }) : k);
+    return out;
+  }, []);
+  const cleared = merge(unwrap(root.kids));
+  assert.equal(flat(cleared), text);
+  assert.deepEqual(cleared.map((k) => (k instanceof FakeText ? k.data : `${k.kind}:${flat(k.kids)}`)), ["alpha ", "gold:beta gamma", " delta."]);
 });

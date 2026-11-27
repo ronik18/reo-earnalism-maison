@@ -14,6 +14,8 @@ import { clearFollow, drawFollow } from "./follow-dom";
 import {
   autoscrollAllowed,
   currentHighlight,
+  isUserScroll,
+  OWN_SCROLL_MS,
   PLAYBACK_EVENT,
   PLAYBACK_REQUEST_EVENT,
   type FollowMap,
@@ -541,8 +543,15 @@ function Reader({ boot }: { boot: Boot }) {
   /** Follow-along: the sentence (or paragraph) the persistent player is narrating, drawn without changing the text. */
   const [follow, setFollow] = useState<{ anchor: string; range: [number, number] | null; playing: boolean }>();
   const followNow = useRef(follow);
-  const followMaps = useRef<FollowMap[]>([]);
+  /** Maps by the asset actually playing; null once the server said that rendition has none. */
+  const followMaps = useRef<Map<string, FollowMap[] | null | "loading">>(new Map());
+  const [followUnavailable, setFollowUnavailable] = useState(false);
   const lastUserScroll = useRef<number | undefined>(undefined);
+  const ownScrollUntil = useRef(0);
+  const noteUserScroll = (type: string, key?: string) => {
+    if (isUserScroll(type, key, Date.now(), ownScrollUntil.current)) lastUserScroll.current = Date.now();
+  };
+  const ownScroll = () => { ownScrollUntil.current = Date.now() + OWN_SCROLL_MS; };
   useEffect(() => {
     if (!fullReader || !boot.player_url) return;
     let cancelled = false;
@@ -551,33 +560,45 @@ function Reader({ boot }: { boot: Boot }) {
       if (!d || d.closed || d.edition_id !== boot.edition_id || d.unit_id !== boot.unit_id) {
         followNow.current = undefined;
         setFollow(undefined);
+        setFollowUnavailable(false);
         return;
       }
-      const maps = followMaps.current.filter((m) => m.asset_id === d.asset_id);
+      const known = followMaps.current.get(d.asset_id);
+      if (known === undefined) {
+        followMaps.current.set(d.asset_id, "loading");
+        api<{ maps: (FollowMap & { asset_id: string })[] }>(`/content/mappings/${boot.edition_revision_id}?unit_id=${boot.unit_id}&asset_id=${d.asset_id}`)
+          .then((r) => {
+            const mine = r.maps.filter((m) => m.asset_id === d.asset_id);
+            followMaps.current.set(d.asset_id, mine.length ? mine : null);
+          })
+          .catch(() => followMaps.current.delete(d.asset_id)) // retried on the next event
+          .finally(() => { if (!cancelled) window.dispatchEvent(new Event(PLAYBACK_REQUEST_EVENT)); });
+        return;
+      }
+      if (known === "loading") return;
+      setFollowUnavailable(known === null);
+      if (known === null) {
+        followNow.current = undefined;
+        setFollow(undefined);
+        return;
+      }
       const before = followNow.current;
-      const now = currentHighlight(maps, before?.anchor ?? null, d.ms);
+      const now = currentHighlight(known, before?.anchor ?? null, d.ms);
       if (!now.anchorId) return; // before the first segment or in a silent gap: keep what is shown
       if (before && before.anchor === now.anchorId && before.playing === d.playing && before.range?.[0] === now.range?.[0] && before.range?.[1] === now.range?.[1]) return;
       followNow.current = { anchor: now.anchorId, range: now.range, playing: d.playing };
       setFollow(followNow.current);
     };
-    const byHand = (event: Event) => {
-      if (event.type === "keydown" && !["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes((event as KeyboardEvent).key)) return;
-      lastUserScroll.current = Date.now();
-    };
+    const byHand = (event: Event) => noteUserScroll(event.type, (event as KeyboardEvent).key);
     window.addEventListener(PLAYBACK_EVENT, heard);
     for (const type of ["wheel", "touchmove", "keydown"]) window.addEventListener(type, byHand, { passive: true });
-    api<{ maps: FollowMap[] }>(`/content/mappings/${boot.edition_revision_id}?unit_id=${boot.unit_id}`)
-      .then((r) => {
-        if (cancelled) return;
-        followMaps.current = r.maps;
-        window.dispatchEvent(new Event(PLAYBACK_REQUEST_EVENT));
-      })
-      .catch(() => {}); // no timing: the reader simply does not follow
+    window.addEventListener("scroll", byHand, { passive: true, capture: true });
+    window.dispatchEvent(new Event(PLAYBACK_REQUEST_EVENT));
     return () => {
       cancelled = true;
       window.removeEventListener(PLAYBACK_EVENT, heard);
       for (const type of ["wheel", "touchmove", "keydown"]) window.removeEventListener(type, byHand);
+      window.removeEventListener("scroll", byHand, { capture: true });
       clearFollow(reading);
     };
   }, []);
@@ -591,8 +612,9 @@ function Reader({ boot }: { boot: Boot }) {
     if (preferences.reader_layout === "paginated") {
       const page = reading.clientWidth + 50;
       const left = Math.floor((box.left - reading.getBoundingClientRect().left + reading.scrollLeft) / page) * page;
-      if (Math.abs(left - reading.scrollLeft) > 1) reading.scrollTo({ left, behavior: "instant" });
+      if (Math.abs(left - reading.scrollLeft) > 1) { ownScroll(); reading.scrollTo({ left, behavior: "instant" }); }
     } else if (box.top < 0 || box.bottom > window.innerHeight) {
+      ownScroll();
       window.scrollBy({ top: box.top - window.innerHeight * 0.3, behavior: "instant" });
     }
   }, [follow, notes]);
@@ -768,12 +790,13 @@ function Reader({ boot }: { boot: Boot }) {
         <button
           id="previous-reading-page"
           disabled={pages.current <= 1}
-          onClick={() =>
+          onClick={() => {
+            noteUserScroll("page-button");
             reading.scrollBy({
               left: -(reading.clientWidth + 50),
               behavior: "instant",
-            })
-          }
+            });
+          }}
         >
           {t("back")}
         </button>
@@ -783,12 +806,13 @@ function Reader({ boot }: { boot: Boot }) {
         <button
           id="next-reading-page"
           disabled={pages.current >= pages.total}
-          onClick={() =>
+          onClick={() => {
+            noteUserScroll("page-button");
             reading.scrollBy({
               left: reading.clientWidth + 50,
               behavior: "instant",
-            })
-          }
+            });
+          }}
         >
           {t("continue")}
         </button>
@@ -861,6 +885,7 @@ function Reader({ boot }: { boot: Boot }) {
               </span>
             ))}
           </p>
+          {followUnavailable ? <p className="notice" role="status">{t("follow_unavailable")}</p> : null}
           {boot.member_id ? <QueueRecovery member={boot.member_id} /> : null}
           <div id="progress-conflict" className="notice" hidden={!conflict}>
             <p>{t("conflict")}</p>
