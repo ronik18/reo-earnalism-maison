@@ -4356,6 +4356,16 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "asset_id",
+            "in": "query",
+            "required": false,
+            "description": "A listener's quality override: return the map of this ready audio rendition of the revision instead of the rendition chosen by preference. An id that is not one of the revision's ready renditions is ignored (the chosen rendition's map is returned); a malformed id is 422 validation_error.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ]
       }
