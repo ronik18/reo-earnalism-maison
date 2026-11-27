@@ -1,6 +1,6 @@
 {
  "spine": "Hem, sleepless in a shut carriage, realises that morning will bring shame to her home.",
- "fidelity": "Reviewed against scenes 13-15: the carriage stays shut (slats, no open window) and is moving away fast ('দ্রুতবেগে') by this paragraph; Calcutta is flat (no hills or towers); night ambience only on night pictures, morning crows/birds on the morning pictures 9-10; Hem is a 14-year-old widow in plain white, shown only in close-up, with no mole (owner decision 27 Nov 2026); the daughters of good families wear coloured, bordered saris, never widow's white; the morning material is Hem's imagined future, bracketed by her face; scene 15's first shot must be Hem's present close-up, closing the bracket of shots 9-12 across the scene boundary; the mother is the same veiled woman throughout (white sari, red border, head covered); neighbours: women in front, men at the gate; period-correct, nothing modern. Owner waiver 27 Nov 2026: the 4 s shot minimum (spec section 8) is waived for shots 5, 6 and 7; at these measured cuts shots 2 (2.84 s), 3 (3.95 s) and 8 (3.77 s) are also under 4 s and are NOT covered by that waiver.",
+ "fidelity": "Reviewed against scenes 13-15: the carriage stays shut (slats, no open window) and is moving away fast ('দ্রুতবেগে') by this paragraph; Calcutta is flat (no hills or towers); night ambience only on night pictures, morning crows/birds on the morning pictures 9-10; Hem is a 14-year-old widow in plain white, shown only in close-up, with no mole (owner decision 27 Nov 2026); the daughters of good families wear coloured, bordered saris, never widow's white; the morning material is Hem's imagined future, bracketed by her face; scene 15's first shot must be Hem's present close-up, closing the bracket of shots 9-12 across the scene boundary; the mother is the same veiled woman throughout (white sari, red border, head covered); neighbours: women in front, men at the gate; period-correct, nothing modern. Owner waiver 27 Nov 2026: the 4 s shot minimum (spec section 8) is waived for shots 2, 3, 5, 6, 7 and 8 (first for 5, 6 and 7; extended to 2 (2.84 s), 3 (3.95 s) and 8 (3.77 s) by the owner on 27 Nov 2026).",
  "motifs": [
   "the empty bed (Hem's, now empty; planted in shot 3, paid off at the peak in the same room)",
   "the birdcage (in the barred window at sunrise, shot 9)",
@@ -28,16 +28,20 @@
   },
   "owner_waivers": {
    "4s_minimum": [
+    2,
+    3,
     5,
     6,
-    7
+    7,
+    8
    ]
   },
-  "not_waived_under_4s": {
-   "2": 2.84,
-   "3": 3.945,
-   "8": 3.772
-  }
+  "owner_decisions_27_nov_2026_finish": [
+   "the 4 s minimum is waived for shots 2, 3, 5, 6, 7 and 8",
+   "no mole on Hem: f01s014-5 is the retouched 7-c1 (touchup-f01s014-7-nomole); gate override reason 'owner: no mole; retouched 7-c1 so shots 4 and 5 match (27 Nov)'",
+   "accepted flaws for frame review: shot 3's Western cot and round doorknob; shot 8's horizontal slats, with shot 9 opening on a plain dissolve",
+   "keep the broom sound on shot 10, because the mother now really sweeps (door beat 13s->13t)"
+  ]
  },
  "timing_source": "clause bounds: eav scene-timing on the --no-retime import (-38 dBFS, 0.3 s; 8 clauses, the 1.6 s pause after 'নাই!' intact); in-clause breaths measured on the same scene wav with eav.retime.detect_pauses: -38 dBFS/0.15 s for 16.26-16.56, 30.98-31.20, 35.03-35.35, 44.36-45.07, 46.46-46.64; -34 dBFS for 12.29-12.46 (0.18 s; 0.12 s at -38); the inhale after 'কুলকন্যারা' 5.37-5.80 s is speech-free at -30 dBFS (fragments at -34). The word gap before 'সমস্ত' (4.40-4.46 s, 0.04-0.06 s at every threshold) is under the 0.15 s breath minimum, so the 1->2 cut is at the inhale after 'কুলকন্যারা'.",
  "timing": [
