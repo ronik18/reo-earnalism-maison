@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 3455,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/kshudhita-pashan/narration-5ea27171",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "2213a35f210d6273bc60230cf9e090a60355436e028a859760b863fe8f321d66",
+  "job_id": "narration-5ea27171",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "b7f93f8bc830b0226c50ce3f2e3c4a7f1f9353487d3fd32f8f5ab2d21493c13c",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "kshudhita-pashan"
+}

@@ -287,8 +287,8 @@
     "job_id": "narration-9187e43e-r2",
     "title": "kshudhita-pashan",
     "month": "2026-11",
-    "units": 1.861893444444444,
-    "state": "reserved",
+    "units": 0,
+    "state": "settled",
     "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
     "root": "kshudhita-pashan"
   },
@@ -760,6 +760,15 @@
     "modal_runs_issued": 1,
     "usd": 1.071583,
     "cu_equivalent": 10.72
+  },
+  {
+    "job_id": "narration-5ea27171",
+    "title": "kshudhita-pashan",
+    "month": "2026-11",
+    "units": 1.861893444444444,
+    "state": "reserved",
+    "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
+    "root": "kshudhita-pashan"
   },
   {
     "modal_spend": "2026-11",

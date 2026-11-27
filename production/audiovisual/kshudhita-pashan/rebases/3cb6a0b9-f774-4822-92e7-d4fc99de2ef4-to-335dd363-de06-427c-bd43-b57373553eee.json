@@ -1,0 +1,407 @@
+{
+  "anchor_mapping": [
+    {
+      "new_unit_id": "93806bd8-1e50-44ed-a751-2e139b48fe0b",
+      "old_unit_id": "1ad8449e-12ac-4f9c-9ae7-992b432610de",
+      "paragraphs": [
+        {
+          "new_anchor_id": "5423e72f-4016-4ea7-8214-dc2ee09dae50",
+          "old_anchor_id": "c394533c-0161-4396-a5e6-1550352042f5",
+          "ordinal": 1,
+          "position": 1
+        },
+        {
+          "new_anchor_id": "ff85fd28-269f-48b8-9ec9-fd12ebdd3116",
+          "old_anchor_id": "2b7a6e51-ff5b-44e3-ad2a-c070a0c0d34d",
+          "ordinal": 2,
+          "position": 2
+        },
+        {
+          "new_anchor_id": "aa5f30bf-7143-4a6a-8f1d-7c6eb03319b8",
+          "old_anchor_id": "45e470d7-74dc-44ee-9ee1-cc113a5129a6",
+          "ordinal": 3,
+          "position": 3
+        },
+        {
+          "new_anchor_id": "a695e145-1b0b-4781-b94c-b293e3458922",
+          "old_anchor_id": "f731b391-10dc-415e-a67e-656afd229f8d",
+          "ordinal": 4,
+          "position": 4
+        },
+        {
+          "new_anchor_id": "de21a184-a895-4ace-a12e-2a26b69ddb26",
+          "old_anchor_id": "3feb84d7-0900-4a0e-9448-9fcc1b306ecf",
+          "ordinal": 5,
+          "position": 5
+        },
+        {
+          "new_anchor_id": "9fc001d4-ff6d-45a1-8c3a-45c360074800",
+          "old_anchor_id": "e71f4a5e-9834-49c0-b55d-223507e545d7",
+          "ordinal": 6,
+          "position": 6
+        },
+        {
+          "new_anchor_id": "457d7762-fc2c-4d13-a02f-cb64407af6ad",
+          "old_anchor_id": "3e82f165-cf5a-4626-b551-3f16e87c1672",
+          "ordinal": 7,
+          "position": 7
+        },
+        {
+          "new_anchor_id": "7b352211-fd64-4ba4-9851-e87cfdff5bf6",
+          "old_anchor_id": "ce672fc5-b8a9-4049-8641-36912df322cd",
+          "ordinal": 8,
+          "position": 8
+        },
+        {
+          "new_anchor_id": "06c0455e-3bba-465e-9242-1ebc819e8c12",
+          "old_anchor_id": "dccba4b2-f827-4b79-8493-cb187aac761f",
+          "ordinal": 9,
+          "position": 9
+        },
+        {
+          "new_anchor_id": "52389565-1a59-458c-85fe-143e7e1e8337",
+          "old_anchor_id": "e9b0a5cf-ee40-4d80-a123-537e5d3f14f5",
+          "ordinal": 10,
+          "position": 10
+        },
+        {
+          "new_anchor_id": "132f46e5-1587-45be-bfd6-c83cb13e1632",
+          "old_anchor_id": "e33f0457-123b-440a-802e-11aa5e35fb14",
+          "ordinal": 11,
+          "position": 11
+        },
+        {
+          "new_anchor_id": "a8d6e621-539d-461e-889e-7ccc7227a033",
+          "old_anchor_id": "4c5c626f-d55e-46d3-9e25-635e18571af0",
+          "ordinal": 12,
+          "position": 12
+        },
+        {
+          "new_anchor_id": "b7d7edc9-447d-4761-bda7-4cbbee5dec54",
+          "old_anchor_id": "0098bcfe-6e98-4c46-ba7c-f6499b4d2a38",
+          "ordinal": 13,
+          "position": 13
+        },
+        {
+          "new_anchor_id": "18560f8e-8fef-4adb-9a8a-26a9a3251172",
+          "old_anchor_id": "ef1fa965-b843-449c-a0d8-9b8fc3550d26",
+          "ordinal": 14,
+          "position": 14
+        },
+        {
+          "new_anchor_id": "dd157a6b-97c3-41c0-b500-0f900bbee14d",
+          "old_anchor_id": "0003cff9-9bed-4d9b-9e50-149db3801b69",
+          "ordinal": 15,
+          "position": 15
+        },
+        {
+          "new_anchor_id": "1ad3bb0f-7d48-4640-acd8-08d9ea142caa",
+          "old_anchor_id": "ef6d1614-8b55-401b-8ea7-05428b6f7cd1",
+          "ordinal": 16,
+          "position": 16
+        },
+        {
+          "new_anchor_id": "56cb9298-78f4-469c-9881-f62abe556825",
+          "old_anchor_id": "f977d58a-820b-4766-a3f0-a1762d3db36b",
+          "ordinal": 17,
+          "position": 17
+        },
+        {
+          "new_anchor_id": "25b16c5e-dbb3-499a-9ecb-bd8c1f996cdc",
+          "old_anchor_id": "c196f37e-5ad4-40a3-921e-f6bbaab109aa",
+          "ordinal": 18,
+          "position": 18
+        },
+        {
+          "new_anchor_id": "48022786-68a0-4c76-bb03-d69142aec345",
+          "old_anchor_id": "8b6a8794-49b7-4b00-95b7-c4328380caa5",
+          "ordinal": 19,
+          "position": 19
+        },
+        {
+          "new_anchor_id": "355b85a7-99b9-46e4-a300-6e3309c1809b",
+          "old_anchor_id": "e91802ae-6594-4af9-8c91-123dd7e05787",
+          "ordinal": 20,
+          "position": 20
+        },
+        {
+          "new_anchor_id": "4f6c1ba6-95de-418c-8416-f09767cd4846",
+          "old_anchor_id": "841d4288-cd27-4b38-9ed7-6f1dcf726662",
+          "ordinal": 21,
+          "position": 21
+        },
+        {
+          "new_anchor_id": "2d2407c8-7c0c-448f-95bd-709f84b06575",
+          "old_anchor_id": "43d4628a-6575-4f32-8de3-02d7f4975938",
+          "ordinal": 22,
+          "position": 22
+        },
+        {
+          "new_anchor_id": "d7ab2d2b-4d53-4bb4-a22f-2671568debb7",
+          "old_anchor_id": "77b4f0b0-6703-4107-892d-63a4bc94fd03",
+          "ordinal": 23,
+          "position": 23
+        },
+        {
+          "new_anchor_id": "1df54fab-2515-44e8-a103-7c9b0c250198",
+          "old_anchor_id": "a5d0fe96-583d-4a39-a678-aeb86b56ebec",
+          "ordinal": 24,
+          "position": 24
+        },
+        {
+          "new_anchor_id": "aeee9b3e-9a65-4c52-aa56-68f32365df28",
+          "old_anchor_id": "a1bbb866-e930-4e61-b475-73e07e5e8a96",
+          "ordinal": 25,
+          "position": 25
+        },
+        {
+          "new_anchor_id": "b7942aca-c7fe-4472-8388-a2e6b9d7c214",
+          "old_anchor_id": "81b1d338-bbbf-4f7e-b189-302520241f7d",
+          "ordinal": 26,
+          "position": 26
+        },
+        {
+          "new_anchor_id": "84a783c0-b77e-4d34-b2de-0c013b13d05c",
+          "old_anchor_id": "a43e96e8-0775-4372-8867-0fdc3f4d4ee4",
+          "ordinal": 27,
+          "position": 27
+        },
+        {
+          "new_anchor_id": "854dca5a-bde2-4729-9973-1e6aa1977f47",
+          "old_anchor_id": "9d2b1a89-855e-4997-8706-4bd345124252",
+          "ordinal": 28,
+          "position": 28
+        },
+        {
+          "new_anchor_id": "2b3075cd-34a6-4640-9cd7-b964b0c1cec5",
+          "old_anchor_id": "256d8a48-4336-4b93-aa77-940055834a1d",
+          "ordinal": 29,
+          "position": 29
+        },
+        {
+          "new_anchor_id": "66e0a380-c3d9-4aca-bc47-19f9b9938424",
+          "old_anchor_id": "ec8d417a-2510-479e-86fa-d7f62b7119ff",
+          "ordinal": 30,
+          "position": 30
+        },
+        {
+          "new_anchor_id": "f4d25c44-3f41-404e-99c7-f3864fe156db",
+          "old_anchor_id": "04ed8ef9-cc17-4bfd-bd46-52853a496cf2",
+          "ordinal": 31,
+          "position": 31
+        },
+        {
+          "new_anchor_id": "3b792e95-c066-4625-b7e4-f0f1bc6610e4",
+          "old_anchor_id": "4003c62f-8c09-410f-a5fc-ed1b1b7d9b18",
+          "ordinal": 32,
+          "position": 32
+        },
+        {
+          "new_anchor_id": "5c520b54-c764-495a-ad36-1f945fe3a39b",
+          "old_anchor_id": "4e177472-fe8f-41e7-9797-c9533e309fe2",
+          "ordinal": 33,
+          "position": 33
+        },
+        {
+          "new_anchor_id": "e37ab853-1b7c-4a7d-b6f0-cd90054a515d",
+          "old_anchor_id": "f9fad3cd-2331-4c95-9510-93952114feea",
+          "ordinal": 34,
+          "position": 34
+        },
+        {
+          "new_anchor_id": "76245c6e-2029-4b17-81a3-e817e0d23a98",
+          "old_anchor_id": "0817400f-abb6-4f67-b10f-13ebf44ce057",
+          "ordinal": 35,
+          "position": 35
+        },
+        {
+          "new_anchor_id": "36c4efcf-e285-4afa-9bfe-f5e9081ea284",
+          "old_anchor_id": "cef2eb18-1661-4737-ba26-8dd2f40a44d7",
+          "ordinal": 36,
+          "position": 36
+        },
+        {
+          "new_anchor_id": "3d58d618-acfb-4c53-852d-04be2cc3adf9",
+          "old_anchor_id": "bd6aebdf-a0d9-479b-a136-56c8e5cb78c3",
+          "ordinal": 37,
+          "position": 37
+        },
+        {
+          "new_anchor_id": "fe963407-9ee2-4215-83a0-5713bbd2c101",
+          "old_anchor_id": "8ec25a4d-f25e-43d2-a1a7-cb0efb48adbd",
+          "ordinal": 38,
+          "position": 38
+        },
+        {
+          "new_anchor_id": "723cd582-5b43-4593-8aaa-3bb7e3a052f2",
+          "old_anchor_id": "a854adec-48c3-4b65-b017-f976954e110a",
+          "ordinal": 39,
+          "position": 39
+        },
+        {
+          "new_anchor_id": "a43bca56-320a-4c7b-aec1-005b3aefc575",
+          "old_anchor_id": "61fc7ac3-4627-449b-b9ea-cf31e6cf7bf2",
+          "ordinal": 40,
+          "position": 40
+        },
+        {
+          "new_anchor_id": "25d000ff-9873-47bd-a84d-7a749cc9fd58",
+          "old_anchor_id": "a43a9792-3969-4ff8-a9a0-ffcb6559e43e",
+          "ordinal": 41,
+          "position": 41
+        },
+        {
+          "new_anchor_id": "58ab59c0-a498-4a61-85c8-2ab820847cc6",
+          "old_anchor_id": "41e9e7a9-07d1-470d-876d-ac77acaf7bd2",
+          "ordinal": 42,
+          "position": 42
+        },
+        {
+          "new_anchor_id": "0c7a3fb5-fa1e-4556-912c-b788be03c5e6",
+          "old_anchor_id": "a5a6803e-ec07-48bb-aff1-4783e6e7ab2e",
+          "ordinal": 43,
+          "position": 43
+        },
+        {
+          "new_anchor_id": "c5b39a2a-c6b1-401d-9790-7a51be3dfd1e",
+          "old_anchor_id": "b1bd6f9a-a320-4d44-a2dc-b69ff31c3a1a",
+          "ordinal": 44,
+          "position": 44
+        },
+        {
+          "new_anchor_id": "fae17e53-b5bb-4aaf-aadf-250b8d9581ef",
+          "old_anchor_id": "5e3a57d2-ae08-4841-a336-c48aa0b2f7f5",
+          "ordinal": 45,
+          "position": 45
+        },
+        {
+          "new_anchor_id": "03de67c5-d358-4cfe-99c6-06e81786e41d",
+          "old_anchor_id": "8e8d8de4-4f26-417b-843a-4ef4f4fdf791",
+          "ordinal": 46,
+          "position": 46
+        },
+        {
+          "new_anchor_id": "611f7996-e1d0-49a2-bc01-f0777c8ff567",
+          "old_anchor_id": "0a9ea646-8de5-4369-9ec5-eb71dcf8449f",
+          "ordinal": 47,
+          "position": 47
+        },
+        {
+          "new_anchor_id": "3b44134e-003d-45fc-816f-bbbed8dc64be",
+          "old_anchor_id": "efb9be27-9857-49f7-8c99-95d5496ae524",
+          "ordinal": 48,
+          "position": 48
+        },
+        {
+          "new_anchor_id": "6b5c205d-db46-42cd-99f9-3edf26544758",
+          "old_anchor_id": "b392fe58-433b-4304-b984-c02794e54a2d",
+          "ordinal": 49,
+          "position": 49
+        },
+        {
+          "new_anchor_id": "cfec4fbf-0c2b-4bbc-b1c6-5598ca2d5a2c",
+          "old_anchor_id": "4ce5a596-cd26-47e2-a83b-4258d3f60c3c",
+          "ordinal": 50,
+          "position": 50
+        },
+        {
+          "new_anchor_id": "4de040ec-c5b4-4c76-9134-ed7f8db0ce78",
+          "old_anchor_id": "92ef06a2-a1e7-4378-a3bb-5350b2d88232",
+          "ordinal": 51,
+          "position": 51
+        },
+        {
+          "new_anchor_id": "c34c0259-d5f5-43e9-84c2-cb2ff908900e",
+          "old_anchor_id": "cffdf531-992e-4c0f-9642-79f052f0c60d",
+          "ordinal": 52,
+          "position": 52
+        },
+        {
+          "new_anchor_id": "4303c930-60f2-4d3d-b931-3da36dec34d2",
+          "old_anchor_id": "b8e47c85-513a-4542-9719-66bab9e1f8d0",
+          "ordinal": 53,
+          "position": 53
+        },
+        {
+          "new_anchor_id": "ccf6d0cd-fbf5-4c17-8cfb-ae891bde7a39",
+          "old_anchor_id": "caafed59-dd45-4f3e-8616-d78837f43e27",
+          "ordinal": 54,
+          "position": 54
+        },
+        {
+          "new_anchor_id": "c57dfd7a-0bcc-4a8c-859c-9a33588cd47a",
+          "old_anchor_id": "eb2290b4-c38f-48e6-8eb9-4e691669e7dd",
+          "ordinal": 55,
+          "position": 55
+        },
+        {
+          "new_anchor_id": "6cd96097-54af-4e7f-b90e-961396154187",
+          "old_anchor_id": "3e69ad69-dc0e-46c2-9ec5-73866b7832bb",
+          "ordinal": 56,
+          "position": 56
+        },
+        {
+          "new_anchor_id": "982ac489-9649-4c42-956a-3f25800b8735",
+          "old_anchor_id": "555c93f1-2140-4b7d-b217-b333355c744e",
+          "ordinal": 57,
+          "position": 57
+        },
+        {
+          "new_anchor_id": "e5d9fe1b-148a-40f9-8495-6a24f7c6dc1f",
+          "old_anchor_id": "a7e00317-0235-43f4-9b32-80226130153e",
+          "ordinal": 58,
+          "position": 58
+        },
+        {
+          "new_anchor_id": "75bd9ab4-634e-49c9-b9bb-4338aeb1c824",
+          "old_anchor_id": "a4122685-ca81-45f3-be74-3fe1a789633b",
+          "ordinal": 59,
+          "position": 59
+        }
+      ],
+      "unit": 1
+    }
+  ],
+  "changed_paragraphs": [
+    {
+      "new_anchor_id": "9fc001d4-ff6d-45a1-8c3a-45c360074800",
+      "new_text": "এখন আর সে ফোয়ারা খেলে না, সে গান নাই শাদা পাথরের উপর শুভ্র চরণের সুন্দর আঘাত পড়ে না—এখন ইহা আমাদের মত নির্জ্জনবাসপীড়িত সঙ্গিনীহীন মাশুল-কালেক্টরের অতি বৃহৎ এবং অতি শূন্য বাসস্থান। কিন্তু আপিসের বৃদ্ধকেরাণী করিম খাঁ আমাকে এই প্রাসাদে বাস করিতে বারম্বার নিষেধ করিয়াছিল। বলিয়াছিল, ইচ্ছা হয়, দিনের বেলা থাকিবেন কিন্তু কখনো এখানে রাত্রিযাপন করিবেন না। আমি হাসিয়া উড়াইয়া দিলাম। ভৃত্যেরা বলিল, তাহারা সন্ধ্যা পর্য্যন্ত কাজ করিবে কিন্তু রাত্রে এখানে থাকিবে না। আমি বলিলাম, তথাস্তু। এ বাড়ির এমন বদ্‌নাম ছিল যে, রাত্রে চোরও এখানে আসিতে সাহস করিত না।",
+      "old_anchor_id": "e71f4a5e-9834-49c0-b55d-223507e545d7",
+      "old_text": "এখন আর সে ফোয়ারা খেলে না, সে গান নাই শাদা পাথরের উপর শুভ্র চরণের সুন্দর আঘাত পড়ে না—এখন ইহা আমাদের মত নির্জ্জনবাসপীড়িত সঙ্গিনীহীন মাশুল-কালেক্টরের অতি বৃহৎ এবং অতি শূন্য বাসস্থান। কিন্তু আপিসের বৃদ্ধকেরাণী করিম খাঁ আমাকে এই প্রাসাদে বাস করিতে বারম্বার নিষেধ করিয়াছিল। বলিয়াছিল, ইচ্ছা হয়, দিনের বেলা থাকিবেন কিন্তু কখনো এখানে রাত্রিযাপন করিবেন। আমি হাসিয়া উড়াইয়া দিলাম। ভৃত্যেরা বলিল, তাহারা সন্ধ্যা পর্য্যন্ত কাজ করিবে কিন্তু রাত্রে এখানে থাকিবে না। আমি বলিলাম, তথাস্তু। এ বাড়ির এমন বদ্‌নাম ছিল যে, রাত্রে চোরও এখানে আসিতে সাহস করিত না।",
+      "ordinal": 6,
+      "position": 6,
+      "unit": 1
+    },
+    {
+      "new_anchor_id": "3d58d618-acfb-4c53-852d-04be2cc3adf9",
+      "new_text": "একদিন অপরাহ্নে আমি ঘোড়ায় চড়িয়া বাহির হইব সংকল্প করিলাম—কে আমাকে নিষেধ করিতে লাগিল জানি না কিন্তু সে দিন নিষেধ মানিলাম না। একটা কাষ্ঠদণ্ডে আমার সাহেবী হ্যাট্‌ এবং খাটো কোর্ত্তা দুলিতেছিল, পাড়িয়া লইয়া পরিবার উপক্রম করিতেছি এমন সময় শুস্তানদীর বালী এবং অরালী পর্ব্বতের শুষ্ক পল্লবরাশির ধ্বজা তুলিয়া হঠাৎ একটা প্রবল ঘূর্ণাবাতাস আমার সেই কোর্ত্তা এবং টুপি ঘুরাইতে ঘুরাইতে লইয়া চলিল এবং একটা অত্যন্ত সুমিষ্ট কলহাস্য সেই হাওয়ার সঙ্গে ঘুরিতে ঘুরিতে কৌতুকের সমস্ত পর্দ্দায় পর্দ্দায় আঘাত করিতে করিতে উচ্চ হইতে উচ্চতর সপ্তকে উঠিয়া সূর্য্যাস্তলোকের কাছে গিয়া মিলাইয়া গেল।",
+      "old_anchor_id": "bd6aebdf-a0d9-479b-a136-56c8e5cb78c3",
+      "old_text": "একদিন অপরাহ্নে আমি ঘোড়ায় চড়িয়া বাহির হইব সংকল্প করিলাম—কে আমাকে নিষেধ করিতে লাগিল জানি কিন্তু সে দিন নিষেধ মানিলাম না। একটা কাষ্ঠদণ্ডে আমার সাহেবী হ্যাট্‌ এবং খাটো কোর্ত্তা দুলিতেছিল, পাড়িয়া লইয়া পরিবার উপক্রম করিতেছি এমন সময় শুস্তানদীর বালী এবং অরালী পর্ব্বতের শুষ্ক পল্লবরাশির ধ্বজা তুলিয়া হঠাৎ একটা প্রবল ঘূর্ণাবাতাস আমার সেই কোর্ত্তা এবং টুপি ঘুরাইতে ঘুরাইতে লইয়া চলিল এবং একটা অত্যন্ত সুমিষ্ট কলহাস্য সেই হাওয়ার সঙ্গে ঘুরিতে ঘুরিতে কৌতুকের সমস্ত পর্দ্দায় পর্দ্দায় আঘাত করিতে করিতে উচ্চ হইতে উচ্চতর সপ্তকে উঠিয়া সূর্য্যাস্তলোকের কাছে গিয়া মিলাইয়া গেল।",
+      "ordinal": 37,
+      "position": 37,
+      "unit": 1
+    }
+  ],
+  "kept": "stills and music (text-independent: scene ids and still keys unchanged)",
+  "narration_stale": true,
+  "new_content_sha256": "7514f67a84623d233ac24c58a41a237f91ff160e8aa0d37c96cbcaa94464ce86",
+  "new_export_sha256": "b4033c118fa8317efb16f3ec9e3b104472e241dfc252219977b83d03a8c5ca76",
+  "new_revision_id": "335dd363-de06-427c-bd43-b57373553eee",
+  "old_content_sha256": "5fe217851a7caa946d7e03890f03083d17377e62d94145873e6c38113db2949e",
+  "old_export_sha256": "3b9dcf64ea107c4e000e2a71c1a2499c1fe2a00700f44ef7a2836b081f3c69d0",
+  "old_revision_id": "3cb6a0b9-f774-4822-92e7-d4fc99de2ef4",
+  "plan_changed_scenes": [
+    "f01s005",
+    "f01s025"
+  ],
+  "plan_changed_voice_units": [
+    "f01s005-003",
+    "f01s025-002"
+  ],
+  "reason": "owner-approved scan correction (না restored in ¶6 and ¶37), live 27 Nov 2026",
+  "schema": "earnalism.audiovisual-source-rebase.v1",
+  "stale_narration_jobs": [],
+  "superseded_narration_jobs": [
+    "narration-9187e43e-r2"
+  ]
+}
