@@ -36,6 +36,9 @@
   python3 -m eav.cli glide <image> <depth.png|depth.npy|-> <out.mp4> --seconds S [--zoom 0.12 --pan-x 0 --pan-y 0
                          --ease both|in|out|none --flat --sweep down-left|down-right --drain]
                          (no --root: a layered 2.5D camera glide of one still, 1920x1080 at 24 fps; "-" = flat)
+  python3 -m eav.cli retime <take.mp3|wav> <out.wav> --text <script text file> [--seed 0 --cuts 1.2,3.4]
+                         (no --root: pauses detected, re-timed by punctuation, filled with the take's room tone;
+                         prints JSON with the cut times mapped into the new timeline and the new duration)
   python3 -m eav.cli pick --root <dir> --job <stills|retouch|touchup|edit job id> --choices <{"<key>": N} json file>
                          (after review: one candidate per <key>--cN still; film uses only picks)
   python3 -m eav.cli hold --root <dir> --film N --keys k1,k2,... [--clear]
@@ -75,7 +78,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
-from . import glide, touchup
+from . import glide, retime, touchup
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, unit_anchors, voice_units
@@ -2053,9 +2056,21 @@ def cmd_glide(args):
     print(f"Glide {args.out}: {res['frames']} frames at 24 fps, overscan {res['base_overscan']:.3f}.")
 
 
+def cmd_retime(args):
+    src, text = Path(args.src), Path(args.text)
+    for path in (src, text):
+        if not path.is_file():
+            raise Stop(f"{path} does not exist", "Fix the path and rerun")
+    pauses = retime.detect_pauses(src)
+    plan = retime.plan_pauses(text.read_text(encoding="utf-8"), pauses, args.seed)
+    cuts = [float(c) for c in args.cuts.split(",") if c.strip()] if args.cuts else []
+    res = retime.retime(src, Path(args.dst), plan, cuts)
+    print(json.dumps({"pauses": len(pauses), **res}))
+
+
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take,
-            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide,
+            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide, "retime": cmd_retime,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio,
@@ -2147,6 +2162,12 @@ def _parser():
     s.add_argument("--flat", action="store_true", help="single layer, no depth split (faces, close-ups)")
     s.add_argument("--sweep", choices=glide.SWEEPS)
     s.add_argument("--drain", action="store_true")
+    s = sub.add_parser("retime", help="re-time narration pauses by punctuation with room tone (standalone: no record)")
+    s.add_argument("src")
+    s.add_argument("dst")
+    s.add_argument("--text", required=True, help="the narrated script text (UTF-8)")
+    s.add_argument("--seed", type=int, default=0)
+    s.add_argument("--cuts", help="comma-separated cut times in the old timeline to map into the new one")
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)
