@@ -11987,6 +11987,18 @@
       },
       "path": "qc/report.json",
       "sha256": "11688252b48e2d9de60ac5b1ffcdc34fb682ef5d7a51dd252184cba5fc605ccf"
+    },
+    {
+      "bytes": 2075,
+      "kind": "evidence_draft",
+      "meta": {
+        "audio_sha256": [
+          "af296d06c86fe2b5f49c2d80447b797af528e860fa1ecc4712d2a60129de77a0"
+        ],
+        "bundle": "/tmp/claude-0/-home-user-reo-earnalism-maison/003be0f2-5053-5579-8db4-26cf3d2f164a/scratchpad/bicharak-bundle"
+      },
+      "path": "maison/audiovisual-clearance-evidence.draft.json",
+      "sha256": "a398a1f7431b9da0a2cde5ea90f70a4a9cd9027c6635d4004f1fe0bd18090449"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -14391,6 +14403,42 @@
       },
       "result": "pass",
       "stage": "qc"
+    },
+    {
+      "at": "2026-11-27T20:21:46.031790+00:00",
+      "detail": {
+        "audio_sha256": [
+          "af296d06c86fe2b5f49c2d80447b797af528e860fa1ecc4712d2a60129de77a0"
+        ],
+        "bundle": "/tmp/claude-0/-home-user-reo-earnalism-maison/003be0f2-5053-5579-8db4-26cf3d2f164a/scratchpad/bicharak-bundle",
+        "qc_accepted": [
+          "f01s007-007"
+        ],
+        "suspect_truncated": [
+          {
+            "chars": 133,
+            "chars_per_s": 18.78,
+            "reasons": [
+              "18.8 chars/s > 1.6 x job median 11.2"
+            ],
+            "seconds": 7.082,
+            "unit_key": "f01s007-007"
+          }
+        ],
+        "timing_json_sha256": "ec52773dc0aedf44f898ccff299ff63331a00f4adaeaee5f7946e578d7134d77"
+      },
+      "result": "drafted",
+      "stage": "bundle_audio"
+    },
+    {
+      "at": "2026-11-27T20:22:48.923965+00:00",
+      "detail": {
+        "duration_ms": 24048,
+        "narration_job_id": "narration-film-01-r4",
+        "sha256": "4ff911e7c7bc0fab2b27f2cba3f5024cf03617afb98e0acd12c13f66d3d1e35b"
+      },
+      "result": "cut",
+      "stage": "preview"
     }
   ],
   "ledger": "../allowance-ledger.json",

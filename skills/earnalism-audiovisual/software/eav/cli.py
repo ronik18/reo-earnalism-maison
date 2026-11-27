@@ -2704,7 +2704,10 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                 "chapter_wav_sha256": prov["track_sha256"], "mastered_with": mastered,
                 "score_sha256": score_sha,
                 "mp3_sha256": sha256_file(mp3), "mp3_duration_ms": dur_ms,
-                "encoder": "ffmpeg libmp3lame 96 kbps CBR stereo 48 kHz"}
+                "encoder": "ffmpeg libmp3lame 96 kbps CBR stereo 48 kHz",
+                # gaps between consecutive voice units, [end_ms, next_start_ms]: where the preview may end
+                "voice_unit_pauses_ms": [[round(a["end"] * 1000), round(b["start"] * 1000)]
+                                         for a, b in zip(timing, timing[1:]) if b["start"] > a["end"]]}
             if "narration_chunk_job_ids" in prov:
                 prov_units[unit["unit_id"]]["narration_chunk_job_ids"] = prov["narration_chunk_job_ids"]
     ids = sorted(job_ids)
@@ -2774,7 +2777,15 @@ def cmd_preview(args):
         raise Stop(f"{out} is not empty", "Pass a new --out directory")
     out.mkdir(parents=True, exist_ok=True)
     try:
-        record = preview.cut_preview(chapter, out / "preview.mp3", unit_id)
+        bundle_timing = _json(Path(args.bundle) / "timing.json")
+        pauses = (((bundle_timing.get("provenance") or {}).get("units") or {}).get(unit_id) or {}).get(
+            "voice_unit_pauses_ms")
+        segments = ([{"start_ms": 0, "end_ms": pauses[0][0]}]
+                    + [{"start_ms": a[1], "end_ms": b[0]} for a, b in zip(pauses, pauses[1:])]
+                    + [{"start_ms": pauses[-1][1], "end_ms": pauses[-1][1] + 1}] if pauses else
+                    next((u.get("segments") for u in bundle_timing.get("units") or []
+                          if u.get("unit_id") == unit_id), None))
+        record = preview.cut_preview(chapter, out / "preview.mp3", unit_id, segments)
     except ValueError as e:
         shutil.rmtree(out, ignore_errors=True)
         raise Stop(f"preview: {e}", "Give chapter 1 narration a pause within its first two minutes",

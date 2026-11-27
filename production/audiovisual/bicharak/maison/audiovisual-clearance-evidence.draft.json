@@ -1,0 +1,56 @@
+{
+  "audio_sha256": [
+    "af296d06c86fe2b5f49c2d80447b797af528e860fa1ecc4712d2a60129de77a0"
+  ],
+  "cover_provenance": null,
+  "dry_narration": false,
+  "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+  "edition_slug": "bicharak",
+  "formats": [
+    "reader",
+    "audio"
+  ],
+  "generators": [
+    {
+      "job_ids": [
+        "narration-film-01-r4"
+      ],
+      "licence": "Apache-2.0",
+      "model": "ai4bharat/indic-parler-tts",
+      "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca",
+      "voice": "bn_arnav::story"
+    }
+  ],
+  "music": {
+    "licence": "Apache-2.0",
+    "mix": "per-chapter score bed, ducked under speech (eav.mix.duck_and_master, -16 LUFS)",
+    "music_job_id": "music-film-01-r4",
+    "route": "ace-step:music-film-01-r4",
+    "score_sha256": {
+      "2285d936-802f-49d8-8034-18a0e3393929": "a18fcde1ae80129577f622d1dcfc397749201a0bf77da57aebf6a7c89161c7a3"
+    },
+    "source_and_licence": "ACE-Step ACE-Step/ACE-Step-v1-3.5B, Apache-2.0, instrumental cues from imported music job music-film-01-r4 (revision, seeds and hashes in its manifest)"
+  },
+  "owner_approval": null,
+  "owner_approval_required": {
+    "at": "<ISO 8601 time>",
+    "by": "<who approved>"
+  },
+  "owner_must_complete": [
+    "territories",
+    "term_per_territory",
+    "text_source_licence",
+    "cover_provenance",
+    "status",
+    "owner_approval"
+  ],
+  "schema": "earnalism.audiovisual-clearance-evidence.v1",
+  "source_content_sha256": "400c8b98521511a8a50de510b346b7f4c2f9422be333518fa98d6fe6e440e74d",
+  "source_revision_id": "5206c8ca-c195-44fa-aa37-711c764bb400",
+  "status": "DRAFT_NOT_APPROVED: complete territories, term per territory, text-source licence and cover provenance, then obtain the owner's approval; this CLI never marks clearance",
+  "term_per_territory": {},
+  "territories": [],
+  "territories_note": "must equal the active whitelist (contracts/publication-policy.json / MAISON_PUBLICATION_TERRITORIES)",
+  "text_source_licence": null,
+  "timing_json_sha256": "ec52773dc0aedf44f898ccff299ff63331a00f4adaeaee5f7946e578d7134d77"
+}
