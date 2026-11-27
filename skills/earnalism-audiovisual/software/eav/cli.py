@@ -33,6 +33,9 @@
   python3 -m eav.cli touchup --root <dir> --film N --spec <touchup.json> --job-id <id>
                          (local OpenCV repaint of hand-placed boxes of imported stills: inpaint,
                          recolor, fill, clone; one <key>--c1 candidate + <key>--mask per item)
+  python3 -m eav.cli glide <image> <depth.png|depth.npy|-> <out.mp4> --seconds S [--zoom 0.12 --pan-x 0 --pan-y 0
+                         --ease both|in|out|none --flat --sweep down-left|down-right --drain]
+                         (no --root: a layered 2.5D camera glide of one still, 1920x1080 at 24 fps; "-" = flat)
   python3 -m eav.cli pick --root <dir> --job <stills|retouch|touchup|edit job id> --choices <{"<key>": N} json file>
                          (after review: one candidate per <key>--cN still; film uses only picks)
   python3 -m eav.cli hold --root <dir> --film N --keys k1,k2,... [--clear]
@@ -72,7 +75,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
-from . import touchup
+from . import glide, touchup
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, unit_anchors, voice_units
@@ -2039,9 +2042,20 @@ def cmd_bundle_film(args):
           f"Stage it with attach_audiovisual_film.")
 
 
+def cmd_glide(args):
+    flat = args.flat or args.depth == "-"
+    depth = None if args.depth == "-" else Path(args.depth)
+    for label, path in (("image", Path(args.image)), ("depth map", depth)):
+        if path is not None and not path.is_file():
+            raise Stop(f"{label} {path} does not exist", "Fix the path and rerun")
+    res = glide.render(Path(args.image), depth, Path(args.out), args.seconds, zoom=args.zoom, pan_x=args.pan_x,
+                       pan_y=args.pan_y, ease=args.ease, flat=flat, sweep=args.sweep, drain=args.drain)
+    print(f"Glide {args.out}: {res['frames']} frames at 24 fps, overscan {res['base_overscan']:.3f}.")
+
+
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take,
-            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup,
+            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
             "bundle-audio": cmd_bundle_audio,
@@ -2121,6 +2135,18 @@ def _parser():
     s.add_argument("--film", type=int, required=True)
     s.add_argument("--spec", required=True, help='{"items": [{"key", "source": {"job", "file"}, "ops"}]}')
     s.add_argument("--job-id", required=True)
+    s = sub.add_parser("glide", help="layered depth camera glide of one still (standalone: no record)")
+    s.add_argument("image")
+    s.add_argument("depth", help="16-bit PNG or .npy depth map, or - for flat")
+    s.add_argument("out")
+    s.add_argument("--seconds", type=float, required=True)
+    s.add_argument("--zoom", type=float, default=0.12)
+    s.add_argument("--pan-x", type=float, default=0.0)
+    s.add_argument("--pan-y", type=float, default=0.0)
+    s.add_argument("--ease", default="both", choices=glide.EASES)
+    s.add_argument("--flat", action="store_true", help="single layer, no depth split (faces, close-ups)")
+    s.add_argument("--sweep", choices=glide.SWEEPS)
+    s.add_argument("--drain", action="store_true")
     s = add("film")
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--logo", required=True)
@@ -2164,9 +2190,11 @@ def main(argv=None) -> int:
         return 2
     except ValueError as e:  # a helper refused its input: report it, never a traceback
         print(f"STOP: {e}")
-        print(f"Next: fix the input it names, then rerun; {PROG} status --root {args.root}")
+        print(f"Next: fix the input it names, then rerun; {PROG} status --root {args.root}"
+              if hasattr(args, "root") else "Next: fix the input it names, then rerun")
         return 2
-    print(f"Next: {next_action(args.root)}")
+    if hasattr(args, "root"):
+        print(f"Next: {next_action(args.root)}")
     return 0
 
 
