@@ -35,7 +35,7 @@ def forecast_seconds(job: dict, rates: dict) -> float:
     if job["kind"] == "film_clips":  # measured seconds per finished clip by resolution and GPU, margin on the clips
         hd = rate["clip_s_hd_a100"] if job["gpu"] == "a100" else rate["clip_s_hd"]
         return ((job["hd"] * hd + job["sd"] * rate["clip_s_sd"]) * job["takes"] * MARGIN
-                + job["decode_s"] + job["export_s"] + job.get("sfx_s", 0))
+                + job["decode_s"] + job["export_s"] + job.get("sfx_s", 0) + job.get("depth_s", 0))
     return ((job["steps"] * rate["s_per_step"] * job["items"] * job["takes"]
              + job["decode_s"] + job["export_s"]) * MARGIN + job.get("gate_s", 0))
 
@@ -128,7 +128,9 @@ class Ledger:
                 if e.get("edition_id") == edition_id and e.get("root") is not None}
 
     def reserve(self, title, month: str, units: float, job_id: str, edition_id=None,
-                root=None) -> None:
+                root=None, resume_of=None) -> None:
+        """Reserve `units` for job_id within the title (lifetime) and month caps. `resume_of` links a resumed
+        session's reservation to its job: settling that job settles the link too (see settle)."""
         _check_units(units)
         entries = self._load()
         if any(e["job_id"] == job_id for e in entries):
@@ -148,18 +150,38 @@ class Ledger:
                  "state": "reserved"}
         if edition_id is not None:
             entry.update(edition_id=edition_id, root=root)
+        if resume_of is not None:
+            entry["resume_of"] = resume_of
         entries.append(entry)
         self._save(entries)
 
     def settle(self, job_id: str, actual_units: float) -> None:
+        """Settle a reservation at the actual units. Its open resume reservations (resume_of = job_id) settle at 0
+        with it, so the job's actual units (all its sessions) count once. Refused (BudgetExceeded, nothing saved)
+        when the actual units are more than was reserved and would take the title past its lifetime cap or the
+        month past its cap: the owner holds the job, never a silent overrun (final review I5)."""
         _check_units(actual_units)
         entries = self._load()
-        for e in entries:
-            if e["job_id"] == job_id:
-                if e["state"] == "settled":
-                    raise ValueError(f"job already settled: {job_id!r}")
-                e["units"] = actual_units
-                e["state"] = "settled"
-                self._save(entries)
-                return
-        raise KeyError(job_id)
+        entry = next((e for e in entries if e["job_id"] == job_id), None)
+        if entry is None:
+            raise KeyError(job_id)
+        if entry["state"] == "settled":
+            raise ValueError(f"job already settled: {job_id!r}")
+        linked = [e for e in entries if e.get("resume_of") == job_id and e["state"] == "reserved"]
+        held = entry["units"] + sum(e["units"] for e in linked)
+        if actual_units > held + 1e-9:
+            after = [e for e in entries if e is not entry and e not in linked]
+            edition = entry.get("edition_id")
+            title_now = self._sum(after, entry["title"], None, edition) + actual_units
+            month_now = self._sum(after, None, entry["month"]) + actual_units
+            cap = title_cap(self.path, entry["title"])
+            if title_now > cap + 1e-9:
+                raise BudgetExceeded(f"settling {job_id} at {actual_units:g} units would take {entry['title']!r} to "
+                                     f"{title_now:.2f} units, past its lifetime cap {cap:g}")
+            if month_now > MONTH_CAP + 1e-9:
+                raise BudgetExceeded(f"settling {job_id} at {actual_units:g} units would take {entry['month']} to "
+                                     f"{month_now:.2f} units, past the month cap {MONTH_CAP:g}")
+        for e in linked:
+            e["units"], e["state"] = 0, "settled"
+        entry["units"], entry["state"] = actual_units, "settled"
+        self._save(entries)

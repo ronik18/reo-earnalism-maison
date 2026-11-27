@@ -369,6 +369,22 @@ class ShotFilmTests(unittest.TestCase):
         self.assertAlmostEqual(float(probe(out, "v:0", "duration")), info["duration"], delta=0.1)
         self.assertEqual(probe(out, "s:0", "codec_name"), "mov_text")
 
+    def test_card_fades_advance_every_frame_through_the_hitch_detector(self):
+        """I1/F12: the skill's own title and credits cards (the dark Maison canvas) fade evenly in and out, so qc's
+        hitch gate passes on them; before, the 8-bit fade (and qc's fast-path scaler) stepped every other frame."""
+        from eav import qc
+        card = film.cards("বিচারক", "রবীন্দ্রনাথ ঠাকুর", "Subhajit", self.d / "cards")
+        clips, audio = self._clips(1, 3), self.d / "a.wav"
+        m.sine_wav(audio, 3.0)
+        out = self.d / "cards.mp4"
+        film.assemble_shots(clips, [3.0], [], audio, out, title_card=Path(card["cards"]["title"]),
+                            credits_card=Path(card["cards"]["credits"]), title_s=4.0, credits_s=5.0, fade_out_s=1.0)
+        self.assertEqual(qc.frame_hitches(out), [])
+        import numpy as np
+        luma, _ = qc._luma_series(out)
+        ramp = np.diff(luma[:12])                        # the title fade-in: every frame moves up
+        self.assertTrue((ramp > 0.3).all(), ramp)
+
     def test_assemble_shots_fades_out_at_the_end_of_the_picture(self):
         clips, audio = self._clips(2, 2), self.d / "a.wav"
         m.sine_wav(audio, 4.0, amp=0.5)
@@ -555,6 +571,10 @@ class ShotFilmTests(unittest.TestCase):
                                {"clips": [a, b]}, self.d / "cache")
         self.assertEqual(frame_count(wan), 42)
         self.assertEqual((probe(wan, "v:0", "width"), probe(wan, "v:0", "height")), (1920, 1080))
+        with self.assertRaisesRegex(ValueError, "continuation"):   # I3: a chain shorter than the shot never freezes
+            film.render_shot({"n": 3, "scene_id": "s", "motion": "wan", "wan_res": "1280x704", "seconds": 1.5,
+                              "camera": {"move": "none", "zoom": 0.0, "pan_x": 0.0, "ease": "none"}},
+                             {"clips": [a]}, self.d / "cache")
         with self.assertRaises(ValueError):   # a wan shot with no clip never falls back to a still
             film.render_shot({"n": 2, "scene_id": "s", "motion": "wan", "seconds": 1.0, "camera": {}},
                              {"clips": []}, self.d / "cache")

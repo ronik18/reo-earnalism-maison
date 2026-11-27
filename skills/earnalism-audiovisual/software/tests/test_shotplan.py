@@ -1,11 +1,12 @@
 import copy
+import zipfile
 import json
 import math
 from pathlib import Path
 
 import pytest
 
-from eav import cli, shotplan
+from eav import cli, colab_jobs, shotplan
 
 FIX = json.loads((Path(__file__).parent / "fixtures" / "scene14.json").read_text(encoding="utf-8"))
 
@@ -75,7 +76,7 @@ def test_shot_count_at_least_seconds_over_6():
     for a, b in zip(p["shots"], p["shots"][1:]):
         assert a["end"] == b["start"]
     assert shotplan.validate(p) == []
-    assert p["compute"]["stills"] == 11 and p["compute"]["wan_clips"] == 2 and p["compute"]["cu"] > 0
+    assert p["compute"]["stills"] == 11 and p["compute"]["wan_clips"] == 4 and p["compute"]["cu"] > 0  # 2 chains of 2
     assert p["shots"][8]["sound"]["vo"] == FIX["timing"][9]["text"]
 
 
@@ -97,8 +98,33 @@ def test_plan_does_not_invent_content():
 def test_validate_flags_r1_gap():
     p = _hand([_shot(1, 0.0, 7.0)] + [_shot(i, 7.0 + (i - 2) * 5.0, 12.0 + (i - 2) * 5.0) for i in range(2, 4)], None, 17.0)
     assert "R1" in shotplan.validate(p)
-    wan = _hand([_shot(1, 0.0, 7.0, "wan")], None, 7.0)
+    wan = _hand([_shot(1, 0.0, 7.0, "wan", actions=["she turns", "she blinks"])], None, 7.0)
     assert "R1" not in shotplan.validate(wan)
+
+
+def test_a_long_wan_shot_needs_one_action_per_6_s():
+    """I3/F8: plan-shots no longer counts a Wan shot as new information whatever its length; qc new_info fails a
+    9.5 s take whose frame stays the same, so the plan asks for a second action (a continuation) past 6 s."""
+    one = _hand([_shot(1, 0.0, 7.0, "wan")], None, 7.0)
+    found = shotplan.check(one)
+    assert any(c == "R1" and "declared action" in m for c, m in found)
+    two = _hand([_shot(1, 0.0, 9.5, "wan", actions=["sweeps", "turns to the door"])], None, 9.5)
+    assert not [c for c, _ in shotplan.check(two) if c == "R1"]
+    short = _hand([_shot(1, 0.0, 5.5, "wan")], None, 5.5)
+    assert not [c for c, _ in shotplan.check(short) if c == "R1"]
+
+
+def test_planning_compute_counts_the_continuations_a_wan_shot_needs():
+    """F15/M4: a 9.5 s Wan shot renders more than one 5.04 s clip, so its chain is two clips (or more)."""
+    assert shotplan.chain_frames(1) == 121 and shotplan.chain_frames(2) == 241
+    assert shotplan.clips_for(121) == 1 and shotplan.clips_for(122) == 2
+    p = _plan()
+    need = shotplan.wan_clips_needed(p)
+    assert need == {3: 2, 9: 2}
+    assert p["compute"]["wan_clips"] == 4
+    from eav import colab_jobs, film
+    assert (shotplan.CLIP_FRAMES, shotplan.FPS) == (colab_jobs.FILM_FRAMES, colab_jobs.FILM_FPS)
+    assert shotplan.DISSOLVE_S == film.DISSOLVE_S
 
 
 def test_validate_flags_r2():
@@ -304,6 +330,11 @@ def _wan_item(key, shot, w=1280, h=704):
             "prompt": "A girl turns her face, static locked-off camera.", "continue_from": None}
 
 
+def _chain(key, shot, w=1280, h=704):
+    """A take and its continuation: the fixture's Wan shots (8 s and 9.5 s) need two chained clips (I3)."""
+    return [_wan_item(key, shot, w, h), {**_wan_item(key + "-x", shot, w, h), "image": None, "continue_from": key}]
+
+
 def test_film_clips_job_with_scene_key_needs_approval_but_a_pilot_spec_does_not(tmp_path):
     root, run = _title(tmp_path)
     art = tmp_path / "art"
@@ -313,7 +344,7 @@ def test_film_clips_job_with_scene_key_needs_approval_but_a_pilot_spec_does_not(
     rates.write_text(json.dumps({"film_clips": {"clip_s_hd": 900, "clip_s_hd_a100": 215, "clip_s_sd": 435,
                                                 "units_per_hour_l4": 2.4, "units_per_hour_a100": 4.5,
                                                 "decode_s": 900, "export_s": 120}}), encoding="utf-8")
-    items = [_wan_item("f01s014-03", 3), _wan_item("f01s014-09", 9)]
+    items = _chain("f01s014-03", 3) + _chain("f01s014-09", 9)
     spec = tmp_path / "clips.json"
     spec.write_text(json.dumps({"scene": "f01s014", "art_dir": str(art), "items": items}), encoding="utf-8")
     args = ("job", "film_clips", "--root", root, "--film", 1, "--rates", rates, "--spec", spec)
@@ -349,17 +380,27 @@ def test_film_clips_job_is_bound_to_the_approved_wan_shots(tmp_path):
         spec.write_text(json.dumps({"scene": "f01s014", "art_dir": str(art), "items": items}), encoding="utf-8")
         return run("job", "film_clips", "--root", root, "--film", 1, "--rates", rates, "--spec", spec, *extra)
 
-    code, out = attempt([_wan_item("a", 3), _wan_item("b", 4)])           # shot 4 is a glide shot
+    code, out = attempt(_chain("a", 3) + [_wan_item("b", 4)])              # shot 4 is a glide shot
     assert code == 2 and "shot 4" in out and "wan" in out
-    code, out = attempt([_wan_item("a", 3), _wan_item("b", 9, 896, 512)])  # wrong resolution
+    code, out = attempt(_chain("a", 3) + _chain("b", 9, 896, 512))         # wrong resolution
     assert code == 2 and "1280x704" in out
-    code, out = attempt([_wan_item("a", 3)])                               # wan shot 9 has no item
+    code, out = attempt(_chain("a", 3))                                    # wan shot 9 has no item
     assert code == 2 and "shot 9" in out
-    code, out = attempt([{k: v for k, v in _wan_item("a", 3).items() if k != "shot"}, _wan_item("b", 9)])
+    code, out = attempt([{k: v for k, v in _wan_item("a", 3).items() if k != "shot"}] + _chain("b", 9))
     assert code == 2 and "shot" in out
+    code, out = attempt([_wan_item("a", 3)] + _chain("b", 9))              # I3: one 5.04 s clip for an 8 s shot
+    assert code == 2 and "continuation" in out and "shot 3" in out
     assert not (root / "jobs").exists() or not list((root / "jobs").iterdir())
-    code, out = attempt([_wan_item("a", 3), _wan_item("a2", 3), _wan_item("b", 9)])  # two takes of shot 3
+    code, out = attempt(_chain("a", 3) + _chain("a2", 3) + _chain("b", 9))  # two takes of shot 3
     assert code == 0 and "Built film_clips job" in out, out
+    assert "Split into 3 film_clips jobs" in out                           # I5: one Colab session each
+    jobs = [j for j in cli._jobs(cli.Record.load(root)) if j["kind"] == "film_clips"]
+    for j in jobs:
+        with zipfile.ZipFile(j["inputs_zip"]) as z:
+            job = json.loads(z.read("job.json"))
+        keys = [i["key"] for i in job["items"]]
+        assert all((k + "-x" in keys) == (k in keys) for k in ("a", "a2", "b"))   # a chain stays in one job
+        assert json.loads(j["manifest"].read_text())["deadline_seconds"] <= colab_jobs.FILM_SESSION_S
 
 
 def test_camera_carries_glide_extras_type_checked():

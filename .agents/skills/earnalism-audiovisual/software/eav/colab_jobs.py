@@ -104,6 +104,15 @@ FILM_DIFFUSERS = "diffusers==0.37.0"
 FILM_MIN_VRAM_GIB = 21  # an L4 (22 GB) or larger; the GPU cell stops before any download on less
 FILM_A100_FROM_GIB = 24  # a job needing more than this runs on an A100 (rates units_per_hour_a100)
 FILM_RES = {(1280, 704): "hd", (896, 512): "sd"}  # the shot plan's wan_res values
+# One film_clips job fits one Colab session: the notebook's own hard stop is its forecast, at most 70 minutes
+# (spec builder-check "Film animation jobs"). A longer request is split into several jobs (split_film_spec).
+FILM_SESSION_S = 4200
+# Depth Anything V2 Small in the same run (ESTIMATE until measured; rates.json film_clips may restate them as
+# depth_setup_s and depth_s_per_image): model load once, then per image (every item image, every clip's last
+# frame and every depth-only still).
+DEPTH_SETUP_S = 90
+DEPTH_S_PER_IMAGE = 4
+_DEPTH_STILL = re.compile(r"[a-z0-9][a-z0-9-]*-[1-9][0-9]*\.png")
 FILM_NEGATIVE = ("photorealistic, 3D render, CGI, text, logo, watermark, extra fingers, fused hands, "
                  "duplicate people, face morphing, detached hand, disembodied hand, floating hand, extra "
                  "hand, extra arm, missing arm, floating object, objects flying, blink, closed eyes, "
@@ -619,9 +628,13 @@ def derive_compute(kind: str, spec: dict, rates: dict, items: int) -> dict:
         compute["gate_s"] = (rate.get("gate_setup_s", GATE_SETUP_S) + rate.get("gate_s_per_still", GATE_PER_STILL_S)
                              * items)
     if kind == "film_clips":  # clips by resolution and the GPU the job needs: both set the forecast
-        shapes = [FILM_RES[(c["width"], c["height"])] for c in _film_items(spec)]
+        items_ = _film_items(spec)
+        shapes = [FILM_RES[(c["width"], c["height"])] for c in items_]
         compute.update(hd=shapes.count("hd"), sd=shapes.count("sd"),
                        gpu="a100" if film_min_vram(spec) > FILM_A100_FROM_GIB else "l4")
+        images = len({i["image"] for i in items_ if i["image"]} | set(film_depth_stills(spec))) + len(items_)
+        compute["depth_s"] = (rate.get("depth_setup_s", DEPTH_SETUP_S)    # C1: the depth maps are work too
+                              + rate.get("depth_s_per_image", DEPTH_S_PER_IMAGE) * images)
         if _film_sfx(spec):  # the sound stage runs before the clips, inside the forecast the clock enforces
             compute["sfx_s"] = SFX_BUDGET_S
     declared = spec.get("compute")
@@ -698,6 +711,8 @@ def job_items(kind: str, spec: dict) -> int:
         return sum(_candidates(s) for s in spec.get("items") or [])
     if kind in ("retouch", "edit"):
         return sum(_candidates(s, kind) for s in spec.get("items") or [])
+    if kind == "film_clips":   # every clip and every depth-only still is generated work
+        return len(spec.get("items") or []) + len(spec.get("depth_stills") or [])
     return len(spec.get("shots" if kind == "reel_clips" else "items") or [])
 
 
@@ -925,11 +940,41 @@ def film_min_vram(spec: dict) -> int:
     return max(min_vram_gib(spec), FILM_MIN_VRAM_GIB)
 
 
+def film_depth_stills(spec: dict) -> dict:
+    """The job's depth-only stills, {name: {"path", "sha256"?}}: the picked stills of a scene's glide shots, named
+    <scene>-<n>.png, whose depth maps the glide needs (C1). The spec lists them as names inside art_dir, or (as
+    `job film_clips` fills them in from the scene's picks) as {name: {"path", "sha256"}}."""
+    raw = spec.get("depth_stills")
+    if raw is None:
+        return {}
+    if isinstance(raw, list):
+        art = spec.get("art_dir")
+        if raw and not art:
+            raise ValueError("film_clips depth_stills named by file need art_dir (the folder holding them)")
+        raw = {n: {"path": str(Path(art) / n)} if isinstance(n, str) else n for n in raw}
+    if not isinstance(raw, dict):
+        raise ValueError("film_clips depth_stills must be a list of <scene>-<n>.png names inside art_dir")
+    out = {}
+    for name, row in raw.items():
+        if not isinstance(name, str) or not _DEPTH_STILL.fullmatch(name) or not isinstance(row, dict):
+            raise ValueError(f"film_clips depth still {name!r} must be named <scene>-<n>.png (the glide shot's key)")
+        path = Path(row.get("path", ""))
+        if not path.is_file():
+            raise ValueError(f"film_clips depth still {name!r} is not a file: {path}")
+        sha = row.get("sha256")
+        if sha is not None and hashlib.sha256(path.read_bytes()).hexdigest() != sha:
+            raise ValueError(f"film_clips depth still {name!r} ({path}) changed since it was picked")
+        out[name] = {"path": str(path), **({"sha256": sha} if sha else {})}
+    return out
+
+
 def _film_items(spec: dict) -> list:
     """Validate and normalise a film_clips spec's items (the shot plan's Wan beats)."""
     items = spec.get("items")
-    if not isinstance(items, list) or not items:
-        raise ValueError("a film_clips job needs at least one item")
+    if items is None and spec.get("depth_stills"):
+        items = []   # a depth-only job: the glide stills of a scene with no Wan shot left to make
+    if not isinstance(items, list) or (not items and not spec.get("depth_stills")):
+        raise ValueError("a film_clips job needs at least one item (or depth_stills only)")
     out, seen = [], set()
     for n, s in enumerate(items):
         if not isinstance(s, dict):
@@ -991,13 +1036,39 @@ def _film_sfx(spec: dict) -> dict:
     return out
 
 
-def check_film_plan(spec: dict, plan: dict) -> None:
+def _chains(items: list) -> list:
+    """The items grouped into continue_from chains, each in order (the take first)."""
+    by_key = {i["key"]: i for i in items}
+    kids = {}
+    for i in items:
+        if i.get("continue_from"):
+            kids.setdefault(i["continue_from"], []).append(i["key"])
+    out = []
+
+    def walk(key, chain):
+        chain = chain + [by_key[key]]
+        if key not in kids:
+            out.append(chain)
+        for k in kids.get(key, []):
+            walk(k, chain)
+    for i in items:
+        if not i.get("continue_from"):
+            walk(i["key"], [])
+    return out
+
+
+def check_film_plan(spec: dict, plan: dict, covered=()) -> None:
     """A spec that declares "scene" is bound to that scene's approved shot plan: every item names (shot)
-    a motion == "wan" shot at that shot's wan_res, and every wan shot has at least one item (several
-    takes of a shot are allowed). Raises ValueError otherwise."""
+    a motion == "wan" shot at that shot's wan_res, every take's continue_from chain covers the shot's render
+    length (its span plus its transition halves, shotplan.render_frames; I3: never a frozen last frame), and every
+    wan shot has at least one item here or in another active film_clips job of the scene (`covered`: their shot
+    numbers; several takes of a shot are allowed). Raises ValueError otherwise."""
+    from . import shotplan
     wan = {s["n"]: s for s in plan["shots"] if s["motion"] == "wan"}
+    need = shotplan.render_frames(plan["shots"])
     taken = set()
-    for item in _film_items(spec):
+    items = _film_items(spec)
+    for item in items:
         n = item.get("shot")
         if n is None:
             raise ValueError(f"film_clips item {item['key']!r} needs \"shot\": the number of a wan shot of "
@@ -1011,7 +1082,17 @@ def check_film_plan(spec: dict, plan: dict) -> None:
             raise ValueError(f"film_clips item {item['key']!r} is {item['width']}x{item['height']} but "
                              f"shot {n} of the approved plan is {want}")
         taken.add(n)
-    missing = sorted(set(wan) - taken)
+    for chain in _chains(items):
+        n = chain[0].get("shot")
+        if any(c.get("shot") != n for c in chain):
+            raise ValueError(f"film_clips chain of {chain[0]['key']!r} mixes shots: a continuation continues its shot")
+        have = shotplan.chain_frames(len(chain))
+        if have < need[n]:
+            raise ValueError(f"shot {n} of scene {plan['scene_id']} renders {need[n]} frames ({need[n] / FILM_FPS:.2f} s "
+                             f"with its transition halves) but the take ending {chain[-1]['key']!r} chains "
+                             f"{len(chain)} clip(s) = {have} frames: add continuation item(s) (continue_from) up to "
+                             f"{shotplan.clips_for(need[n])} clips, each with its own action")
+    missing = sorted(set(wan) - taken - set(covered))
     if missing:
         raise ValueError(f"the approved plan of scene {plan['scene_id']} has wan shot(s) with no "
                          f"film_clips item: shot {', '.join(map(str, missing))}")
@@ -1036,7 +1117,61 @@ def _film_files(spec: dict, items: list) -> dict:
         if not path.is_file():
             raise ValueError(f"film_clips image {name!r} is not in art_dir {art}")
         files[name] = path.read_bytes()
+    for name, row in film_depth_stills(spec).items():
+        data = Path(row["path"]).read_bytes()
+        if name in files and files[name] != data:
+            raise ValueError(f"film_clips depth still {name!r} has the name of a different item image")
+        files[name] = data
     return files
+
+
+def _film_seconds(compute: dict, rates: dict) -> float:
+    return forecast_seconds(compute, rates)
+
+
+def split_film_spec(spec: dict, rates: dict) -> list:
+    """The spec as one or more film_clips specs, each forecast within one Colab session (FILM_SESSION_S): items
+    stay with their continue_from chain, packed in order; the depth stills and the sound fetch ride in the first
+    job. Raises ValueError when one chain alone does not fit a session."""
+    items = _film_items(spec)
+    chains = _chains(items)
+    depth = film_depth_stills(spec)
+
+    def part(chs, first):
+        sub = {k: v for k, v in spec.items() if k not in ("items", "depth_stills", "sfx", "job_id", "compute")}
+        sub["items"] = [dict(i, **({} if i.get("continue_from") else {"continue_from": None})) for c in chs for i in c]
+        seen, uniq = set(), []
+        for i in sub["items"]:      # a chain shared by two takes lists its head once
+            if i["key"] not in seen:
+                seen.add(i["key"])
+                uniq.append(i)
+        sub["items"] = uniq
+        if first:
+            if depth:
+                sub["depth_stills"] = depth
+            if spec.get("sfx"):
+                sub["sfx"] = spec["sfx"]
+        return sub
+
+    def secs(sub):
+        return _film_seconds(derive_compute("film_clips", sub, rates, job_items("film_clips", sub)), rates)
+    if not chains:
+        return [part([], True)]
+    families = {}
+    for ch in chains:    # takes that share a head stay in one job (a continuation needs its head's last frame)
+        families.setdefault(ch[0]["key"], []).append(ch)
+    out, cur = [], []
+    for fam in families.values():
+        ch = [i for c in fam for i in c]
+        if secs(part([ch], not out and not cur)) > FILM_SESSION_S:
+            raise ValueError(f"the take(s) from {ch[0]['key']!r} ({len(ch)} clip(s)) alone need more than one "
+                             f"Colab session ({FILM_SESSION_S} s): use the A100 (min_vram_gib 30) or 896x512")
+        if cur and secs(part(cur + [ch], not out)) > FILM_SESSION_S:
+            out.append(part(cur, not out))
+            cur = []
+        cur.append(ch)
+    out.append(part(cur, not out))
+    return out
 
 
 def _stills_anchor(spec: dict, item: dict, files: dict):
@@ -1128,12 +1263,18 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
                 "revision": "resolved-at-run-time", "steps": STILLS_STEPS, "compute": compute}
     if kind == "music":
         _check_model(kind, spec, MUSIC_REPO)
+        for t in spec["items"]:
+            if t.get("role") not in (None, "drone", "solo", "phrase"):
+                raise ValueError(f"music item {t.get('key')!r} role must be drone, solo or phrase (the cue's stem "
+                                 f"families), not {t.get('role')!r}")
         items = [{"key": t["key"], "prompt": t["prompt"], "seed": int(t["seed"]),
                   "duration_s": float(t["duration_s"]),
-                  "lyrics": t.get("lyrics", "[instrumental]")} for t in spec["items"]]
+                  "lyrics": t.get("lyrics", "[instrumental]"), **({"role": t["role"]} if t.get("role") else {})}
+                 for t in spec["items"]]
         if not items:
             raise ValueError("no tracks requested")
-        return {"payload": {"items": items}, "repo": MUSIC_REPO,
+        return {"payload": {"items": items, **({"scene": spec["scene"]} if spec.get("scene") else {})},
+                "repo": MUSIC_REPO,
                 "revision": "resolved-at-run-time", "steps": MUSIC_STEPS, "compute": compute}
     if kind == "retouch":
         _check_model(kind, spec, RETOUCH_REPO)
@@ -1149,10 +1290,14 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
         _check_depth_model(spec)
         items = _film_items(spec)
         sfx = _film_sfx(spec)
+        files = _film_files(spec, items)
+        depth = {n: hashlib.sha256(files[n]).hexdigest() for n in film_depth_stills(spec)}
         return {"payload": {"items": items, "negative_prompt": FILM_NEGATIVE, "steps": FILM_STEPS,
                             "guidance": FILM_GUIDANCE, "frames": FILM_FRAMES, "fps": FILM_FPS,
-                            "depth_model": FILM_DEPTH_REPO, **({"sfx": sfx} if sfx else {})},
-                "files": _film_files(spec, items), "repo": FILM_REPO, "revision": "resolved-at-run-time",
+                            "depth_model": FILM_DEPTH_REPO, **({"sfx": sfx} if sfx else {}),
+                            **({"depth_stills": depth} if depth else {}),
+                            **({"scene": spec["scene"]} if spec.get("scene") else {})},
+                "files": files, "repo": FILM_REPO, "revision": "resolved-at-run-time",
                 "steps": FILM_STEPS, "compute": compute, "diffusers": FILM_DIFFUSERS,
                 "clip_s": {"hd": rates[kind]["clip_s_hd_a100" if compute["gpu"] == "a100" else "clip_s_hd"],
                            "sd": rates[kind]["clip_s_sd"]},
@@ -1248,6 +1393,10 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
         job = _reel_job(spec, job_id, forecast_seconds(plan["compute"], rates), rates[kind])
     else:
         plan = _plan(kind, record, spec, rates)
+    if kind == "film_clips" and forecast_seconds(plan["compute"], rates) > FILM_SESSION_S:
+        raise ValueError(f"this film_clips job needs about {forecast_seconds(plan['compute'], rates):.0f} s, over one "
+                         f"Colab session ({FILM_SESSION_S} s, the notebook's hard stop): split it "
+                         "(split_film_spec; `job film_clips` splits a scene's spec itself)")
     units = forecast(plan["compute"], rates)
 
     edition_id = (record.data.get("source") or {}).get("edition_id")
@@ -1279,6 +1428,27 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
     return {"job_id": job_id, "notebook": result["notebook"],
             "inputs_zip": result["inputs_zip"], "manifest": result["manifest"],
             "forecast_units": units}
+
+
+def resume_notebook(notebook: Path, out: Path, deadline_s: float, resume_id: str, keys: list) -> Path:
+    """A copy of a film_clips notebook for a resumed session of the SAME job (same job id, inputs.zip and Drive
+    folder, so done.json skips the finished clips): only its hard stop is re-armed, at `deadline_s`, the seconds the
+    resume ledger entry `resume_id` reserved for the remaining `keys`."""
+    nb = json.loads(Path(notebook).read_text(encoding="utf-8"))
+    hit = 0
+    for cell in nb["cells"]:
+        src = "".join(cell["source"]) if isinstance(cell["source"], list) else cell["source"]
+        new = re.sub(r"^DEADLINE_SECONDS = \d+$", f"DEADLINE_SECONDS = {int(deadline_s)}", src, flags=re.M)
+        if cell["cell_type"] == "markdown" and "**Hard stop:**" in new:
+            new = re.sub(r"\*\*Hard stop:\*\* \d+ s", f"**Hard stop:** {int(deadline_s)} s", new)
+            new += (f"\n**Resumed session `{resume_id}`:** run this notebook only after the first session stopped; the "
+                    f"Drive folder's done.json skips every finished clip. It may make: {', '.join(keys)}.\n")
+        hit += new != src
+        cell["source"] = new.splitlines(keepends=True)
+    if not hit:
+        raise ValueError(f"{notebook} has no DEADLINE_SECONDS to re-arm")
+    Path(out).write_text(json.dumps(nb, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    return Path(out)
 
 
 def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s: float,

@@ -195,7 +195,11 @@
      "music": null
     },
     "camera": null,
-    "wan_res": "1280x704"
+    "wan_res": "1280x704",
+    "actions": [
+     "Hem turns her face into the slat of moonlight",
+     "one slow blink"
+    ]
    },
    {
     "beats": [
@@ -336,6 +340,10 @@
     "wan_res": "1280x704",
     "plants": [
      8
+    ],
+    "actions": [
+     "the mother sweeps the courtyard in morning light",
+     "she stops and turns toward Hem's door"
     ]
    },
    {

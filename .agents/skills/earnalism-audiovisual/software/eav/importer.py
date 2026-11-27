@@ -111,6 +111,14 @@ def _job_keys(inputs_zip, kind) -> list:
     return keys
 
 
+def _depth_names(inputs_zip) -> list:
+    try:
+        with zipfile.ZipFile(inputs_zip) as z:
+            return sorted((json.loads(z.read("job.json")).get("depth_stills") or {}))
+    except (OSError, KeyError, ValueError, zipfile.BadZipFile) as e:
+        raise ImportHeld(f"cannot read the built job.json: {e}") from None
+
+
 _SFX = re.compile(r"sfx-([a-z0-9][a-z0-9-]*-[0-9]+\.(?:ogg|oga|opus|wav|flac|mp3)|licences\.json)")
 
 
@@ -181,6 +189,9 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
             _film_sub(name)
     missing = [k for k in _job_keys(job["inputs_zip"], kind)
                if not any(Path(name).stem == k for name in outputs)]
+    if film:   # every depth-only still of the job needs its depth map (C1)
+        missing += [n for n in _depth_names(job["inputs_zip"])
+                    if n.rsplit(".", 1)[0] + ".depth.png" not in outputs]
     if missing:
         raise ImportHeld(f"outputs miss job item(s): {', '.join(missing)}")
     staging = Path(tempfile.mkdtemp(dir=record.root, prefix=".import-"))
@@ -194,7 +205,7 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
             sub_name, dest_name = _film_place(name) if film else (None, name)
             if sha256_file((staging / sub_name if film else staging) / dest_name) != digest:
                 raise ImportHeld(f"copy sha256 mismatch: {name}")
-        if film:  # motion gate: <key>.motion.json and a contact sheet beside each take (advisory until calibrated)
+        if film:  # motion gate: <key>.motion.json and a contact sheet beside each take (a clear fail blocks film)
             for clip in sorted((staging / "clips").glob("*.mp4")):
                 motiongate.gate_clip(clip)
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -213,6 +224,9 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     artifacts = [record.add_artifact("retouch_mask" if kind == "retouch" and name.endswith("--mask.png")
                                      else kind, placed(name), meta)
                  for name in sorted(outputs)]
+    if film:   # the motion gate's verdicts are recorded (hashed), so a deleted or edited one is noticed (I12)
+        for mj in sorted((dest / "clips").glob("*.motion.json")):
+            record.add_artifact("motion_gate", mj, {"job_id": job_id, "job_kind": kind, "clip": mj.name[:-12] + ".mp4"})
     return artifacts, {"model": model, "packages": packages, "input_zip_sha256": zip_sha}
 
 

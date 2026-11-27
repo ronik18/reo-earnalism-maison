@@ -1,7 +1,8 @@
 # Film clips: Wan 2.2 TI2V-5B image-to-video (Apache-2.0), one ~5 s clip (121 frames, 24 fps) per item,
 # plus Depth Anything V2 Small (Apache-2.0) depth maps for the camera glide: of every input still and of
 # every clip's last frame. Per item: <key>.mp4 (near-lossless), <key>.last.png, <key>.last-depth.png.
-# Per still: <image-stem>.depth.png (16-bit, 65535 = nearest). done.json in the Drive folder is the resume
+# Per still (every item image and every depth-only still of JOB["depth_stills"]: the picked stills of the
+# scene's glide shots): <image-stem>.depth.png (16-bit, 65535 = nearest). done.json in the Drive folder is the resume
 # journal: a rerun skips every key whose mp4 sha256 is recorded there and still matches the file.
 if RUN is not True:
     raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
@@ -58,7 +59,7 @@ import torch
 from PIL import Image
 
 ITEMS = JOB["items"]
-IMAGES = sorted({i["image"] for i in ITEMS if i.get("image")})
+IMAGES = sorted({i["image"] for i in ITEMS if i.get("image")} | set(JOB.get("depth_stills") or {}))
 EXPECTED = ([k + suffix for k in (i["key"] for i in ITEMS) for suffix in (".mp4", ".last.png", ".last-depth.png")]
             + [n.rsplit(".", 1)[0] + ".depth.png" for n in IMAGES])
 SECONDS = {}

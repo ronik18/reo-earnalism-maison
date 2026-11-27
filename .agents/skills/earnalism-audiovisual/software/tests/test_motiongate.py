@@ -181,6 +181,31 @@ class MotionGateTests(unittest.TestCase):
         got = cli._shot_assets(SimpleNamespace(root=root), "film-01", "s1", {"n": 1, "motion": "wan"}, items, {}, root)
         self.assertEqual(got["clips"], [mp4])
 
+    def test_film_lists_needs_review_takes_and_gates_a_missing_verdict_on_demand(self):
+        """I12: a borderline take reaches the operator (returned for film --shots and qc); a take whose motion.json
+        is missing or corrupt never passes silently: it is gated again, and a clear fail is refused."""
+        root = self.d / "rec"
+        clips = root / "film_clips" / "job1" / "clips"
+        clips.mkdir(parents=True)
+        ok = write_clip(clips / "s1-1a.mp4", range(N))
+        (clips / "s1-1a.motion.json").write_text(json.dumps({"pass": True, "needs_review": True, "notes": ["borderline"]}))
+        review = {}
+        items = {"s1-1a": {"job_id": "job1", "item": {"key": "s1-1a", "shot": 1}}}
+        cli._shot_assets(SimpleNamespace(root=root), "film-01", "s1", {"n": 1, "motion": "wan"}, items, {}, root,
+                         review=review)
+        self.assertEqual(review["s1-1a"]["notes"], "borderline")
+        self.assertEqual((review["s1-1a"]["scene"], review["s1-1a"]["shot"]), ("s1", 1))
+        bad = write_clip(clips / "s1-2a.mp4", [i - (i % 4 == 3) for i in range(N)])   # a stutter, never gated
+        items = {"s1-2a": {"job_id": "job1", "item": {"key": "s1-2a", "shot": 2}}}
+        with self.assertRaises(cli.Stop) as cm:
+            cli._shot_assets(SimpleNamespace(root=root), "film-01", "s1", {"n": 2, "motion": "wan"}, items, {}, root)
+        self.assertIn("motion gate", str(cm.exception))
+        self.assertTrue((clips / "s1-2a.motion.json").is_file())      # gated on demand
+        (clips / "s1-2a.motion.json").write_text("{ corrupt")
+        with self.assertRaises(cli.Stop):
+            cli._shot_assets(SimpleNamespace(root=root), "film-01", "s1", {"n": 2, "motion": "wan"}, items, {}, root)
+        self.assertTrue(ok.is_file() and bad.is_file())
+
 
 if __name__ == "__main__":
     unittest.main()

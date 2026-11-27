@@ -138,3 +138,23 @@ class BudgetTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_settle_refuses_an_overrun_past_the_caps_and_settles_resumes_with_their_job(tmp_path):
+    """I5: actual units over the reservation may not take the title or month past its cap (the owner holds);
+    a resume's linked reservation settles at 0 with its job, so all sessions count once, at the actual CU."""
+    import pytest
+    from eav.budget import BudgetExceeded, Ledger
+    led = Ledger(tmp_path / "ledger.json")
+    led.reserve("t", "2026-12", 55.0, "other")
+    led.reserve("t", "2026-12", 3.0, "job")
+    with pytest.raises(BudgetExceeded):
+        led.settle("job", 6.0)                       # 55 + 6 > 60 lifetime
+    assert next(e for e in led._load() if e["job_id"] == "job")["state"] == "reserved"
+    led.settle("job", 2.0)                           # under the reservation: always fine
+    led.reserve("t", "2026-12", 1.0, "job2")
+    led.reserve("t", "2026-12", 1.5, "job2-resume-1", resume_of="job2")
+    led.settle("job2", 2.4)                          # within job2 + its resume: allowed
+    rows = {e["job_id"]: e for e in led._load()}
+    assert (rows["job2"]["units"], rows["job2-resume-1"]["units"], rows["job2-resume-1"]["state"]) == (2.4, 0, "settled")
+    assert led.spent("t", None) == 55.0 + 2.0 + 2.4

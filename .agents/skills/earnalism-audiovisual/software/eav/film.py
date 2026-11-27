@@ -317,7 +317,7 @@ def _body_ceiling_for_true_peak(mixed_audio, end_video, total, end_s, tries=4, s
 
 # ====================================================================== shot-based film (24 fps)
 SHOT_FPS = 24
-CODE_VERSION = "film-shots-1"   # part of every render_shot cache key: bump it when rendering changes
+CODE_VERSION = "film-shots-2"   # part of every render_shot cache key: bump it when rendering changes
 FADE_OUT_S = 1.6                # the film's last picture and sound fade (pilot spike); scene mixes have none
 DISSOLVE_S = 0.8                # a "dissolve" transition_in; "cut" and "match" are hard cuts
 TITLE_S, CREDITS_S = 4.0, 5.0
@@ -325,6 +325,9 @@ FRAME = (1920, 1080)
 GLIDE_KEYS = ("zoom", "pan_x", "pan_y", "ease", "near_gain", "zoom0", "flat", "sweep", "drain")
 NEAR_GAIN = 1.2                 # glide.render's default near-layer parallax gain
 ENCODE_PRESET = "medium"        # libx264 preset of the finished film (tests lower it for speed)
+# The finished film keeps every small residual: with the default deadzones x264 drops the 1-2 level per-frame change
+# of a fade on the dark Maison canvas in some frames and doubles it in the next (a visible stepped fade, qc hitches).
+FADE_X264 = "deadzone-inter=0:deadzone-intra=0"
 
 
 def _sha256(path) -> str:
@@ -381,8 +384,8 @@ def _encode_still(image: Path, n: int, out: Path, fps: int):
 
 def _encode_wan(clips, n: int, out: Path, fps: int):
     """Native 24 fps Wan footage (no interpolation), black edge rows cropped away by a slight overscale, clips
-    joined end to end (a continuation starts on the previous clip's last frame, so its first frame is dropped);
-    a rare action shorter than the shot holds its last frame."""
+    joined end to end (a continuation starts on the previous clip's last frame, so its first frame is dropped).
+    The chain must cover the shot: render_shot refuses a shorter one, so a take never freezes on its last frame."""
     W, H = FRAME
     args, chain = [], []
     for k, c in enumerate(clips):
@@ -391,7 +394,7 @@ def _encode_wan(clips, n: int, out: Path, fps: int):
         chain.append(f"[{k}:v]{trim}setpts=PTS-STARTPTS,scale=2016:-2:flags=lanczos,crop={W}:{H},"
                      f"fps={fps},setsar=1,format=yuv420p[c{k}]")
     chain.append("".join(f"[c{k}]" for k in range(len(clips))) + f"concat=n={len(clips)}:v=1:a=0[cat]")
-    chain.append(f"[cat]tpad=stop_mode=clone:stop_duration=4,trim=end_frame={n},setpts=PTS-STARTPTS[v]")
+    chain.append(f"[cat]trim=end_frame={n},setpts=PTS-STARTPTS[v]")
     with tempfile.TemporaryDirectory() as td:
         script = Path(td) / "graph.txt"
         script.write_text(";".join(chain))
@@ -428,6 +431,11 @@ def render_shot(shot: dict, assets: dict, cache_dir: Path, fps: int = SHOT_FPS) 
     elif motion == "wan":
         if not assets.get("clips"):
             raise ValueError(f"wan shot {shot.get('n')} has no imported clip; never replaced by a still")
+        have = sum(_probe_video(c)["frames"] for c in assets["clips"]) - (len(assets["clips"]) - 1)
+        if have < n:   # I3: never a frozen last frame (an R1 static hold the plan did not approve)
+            raise ValueError(f"wan shot {shot.get('n')} renders {n} frames but its clip chain ({len(assets['clips'])} "
+                             f"clip(s)) plays only {have}: add a continuation item (continue_from) to the shot's "
+                             "film_clips chain, or re-plan the shot shorter; a take never freezes on its last frame")
     else:
         raise ValueError(f"shot {shot.get('n')} motion must be wan, glide or static, not {motion!r}")
     cache_dir = Path(cache_dir)
@@ -633,12 +641,15 @@ def assemble_shots(shot_clips: list, lens: list, transitions: list, audio: Path,
                      f":y={mg + lh // 2 - glow.height // 2}:format=auto:shortest=1[lit]")
         graph.append(f"[lit][lg]overlay=x=W-w-{mg}:y={mg}:format=auto,format=yuv420p[lgo]")
         cur, nxt = "lgo", nxt + 2
-    if fade_f:
-        graph.append(f"[{cur}]fade=t=out:s={pic_frames - fade_f}:n={fade_f}[pf]")
+    if fade_f:   # faded at 16 bits and rounded once (see card()), so every frame of the fade moves evenly
+        graph.append(f"[{cur}]format=yuv444p16le,fade=t=out:s={pic_frames - fade_f}:n={fade_f},format=yuv420p[pf]")
         cur = "pf"
     parts, lead, tail = [], 0.0, 0.0
 
     def card(path, seconds, idx, name, fade_in, fade_out):
+        """A held card with its fades. The fade runs at 16 bits per sample and is rounded to 8 bits once: the
+        8-bit fade filter's own rounding on the dark Maison canvas (Y 16..34 over 12 frames) gave uneven 1-3 level
+        steps that qc's hitch gate (rightly) reads as a stepped fade."""
         frames = _frames(seconds, fps)
         fx = ""
         edge = min(_frames(0.5, fps), frames // 2)
@@ -647,8 +658,8 @@ def assemble_shots(shot_clips: list, lens: list, transitions: list, audio: Path,
         if fade_out:
             fx += f",fade=t=out:s={frames - edge}:n={edge}"
         graph.append(f"[{idx}:v]scale={W}:{H}:force_original_aspect_ratio=decrease,"
-                     f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2,fps={fps},format=yuv420p,setsar=1,trim=end_frame={frames}"
-                     f",setpts=PTS-STARTPTS{fx}[{name}]")
+                     f"pad={W}:{H}:(ow-iw)/2:(oh-ih)/2,fps={fps},format=yuv444p16le,setsar=1,trim=end_frame={frames}"
+                     f",setpts=PTS-STARTPTS{fx},format=yuv420p[{name}]")
         return frames / fps
 
     if title_card is not None:
@@ -714,7 +725,8 @@ def assemble_shots(shot_clips: list, lens: list, transitions: list, audio: Path,
         script = Path(td) / "graph.txt"
         script.write_text(";".join(graph))
         _ffmpeg([*args, "-filter_complex_script", str(script), *maps, "-c:v", "libx264", "-preset", ENCODE_PRESET,
-                 "-crf", "16", "-pix_fmt", "yuv420p", "-r", str(fps), "-c:a", "aac", "-b:a", "192k",
+                 "-crf", "16", "-x264-params", FADE_X264, "-pix_fmt", "yuv420p", "-r", str(fps), "-c:a", "aac",
+                 "-b:a", "192k",
                  "-t", f"{full:.4f}", "-movflags", "+faststart", str(out)])
     shutil.rmtree(work, ignore_errors=True)
     if logo is not None:

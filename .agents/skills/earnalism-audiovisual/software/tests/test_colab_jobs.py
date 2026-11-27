@@ -878,11 +878,16 @@ class FilmClipsTests(unittest.TestCase):
         self.assertEqual(job["frames"], 121)
         self.assertEqual(job["fps"], 24)
 
+    @staticmethod
+    def depth_s(items, images=1):
+        """C1: the depth maps are forecast too: model load, then each item image, last frame and depth still."""
+        return colab_jobs.DEPTH_SETUP_S + colab_jobs.DEPTH_S_PER_IMAGE * (images + items)
+
     def test_film_clips_forecast_uses_measured_rates(self):
-        r = self.build("film_clips", self.spec(4))
+        r = self.build("film_clips", self.spec(2))
         rate = RATES["film_clips"]
         setup = rate["decode_s"] + rate["export_s"]
-        self.assertAlmostEqual(r["forecast_units"], (4 * 900 * 1.15 + setup) / 3600 * 2.4)
+        self.assertAlmostEqual(r["forecast_units"], (2 * 900 * 1.15 + setup + self.depth_s(2)) / 3600 * 2.4)
 
     def test_film_clips_forecast_sd_and_a100(self):
         spec = self.spec(2)
@@ -890,10 +895,10 @@ class FilmClipsTests(unittest.TestCase):
             i["width"], i["height"] = 896, 512
         sd = self.build("film_clips", spec)
         setup = 900 + 120
-        self.assertAlmostEqual(sd["forecast_units"], (2 * 435 * 1.15 + setup) / 3600 * 2.4)
+        self.assertAlmostEqual(sd["forecast_units"], (2 * 435 * 1.15 + setup + self.depth_s(2)) / 3600 * 2.4)
         big = self.spec(2, min_vram_gib=30, job_id="film-a100")
         a100 = self.build("film_clips", big)
-        self.assertAlmostEqual(a100["forecast_units"], (2 * 215 * 1.15 + setup) / 3600 * 4.5)
+        self.assertAlmostEqual(a100["forecast_units"], (2 * 215 * 1.15 + setup + self.depth_s(2)) / 3600 * 4.5)
         nb = self.nb(a100)
         self.assertEqual(nb["metadata"]["colab"]["gpuType"], "A100")
         self.assertIn("MIN_VRAM_GIB = 30", "\n".join(self.cells(a100)))
@@ -901,8 +906,70 @@ class FilmClipsTests(unittest.TestCase):
     def test_film_clips_forecast_rides_the_ledger(self):
         r = self.build("film_clips", self.spec(2))
         self.assertAlmostEqual(self.ledger.spent("garden-book", "2026-11"), r["forecast_units"])
+        self.ledger.reserve("garden-book", "2026-11", 59.5 - r["forecast_units"], "earlier-work")
         with self.assertRaises(BudgetExceeded):
-            self.build("film_clips", self.spec(120, job_id="film-big"))
+            self.build("film_clips", self.spec(2, job_id="film-big"))
+
+    def test_film_clips_job_is_capped_to_one_session_and_split_keeps_chains(self):
+        """I5: one job per Colab session (FILM_SESSION_S); a longer spec splits, a chain never splits."""
+        with self.assertRaisesRegex(ValueError, "one Colab session"):
+            self.build("film_clips", self.spec(5, job_id="film-long"))
+        self.assertFalse((self.out / "film-long").exists())
+        self.assertEqual(self.ledger.spent("garden-book", "2026-11"), 0)
+        spec = self.spec(6)
+        for a, b in ((0, 1), (2, 3)):
+            spec["items"][b].update(continue_from=spec["items"][a]["key"], image=None)
+        spec["sfx"] = {"crows": "crows cawing"}
+        parts = colab_jobs.split_film_spec(spec, RATES)
+        self.assertGreater(len(parts), 1)
+        self.assertEqual([i["key"] for p in parts for i in p["items"]], [i["key"] for i in spec["items"]])
+        for p in parts:
+            keys = [i["key"] for i in p["items"]]
+            for i in p["items"]:
+                self.assertTrue(i["continue_from"] is None or i["continue_from"] in keys)
+            c = colab_jobs.derive_compute("film_clips", p, RATES, colab_jobs.job_items("film_clips", p))
+            self.assertLessEqual(colab_jobs.forecast_seconds(c, RATES), colab_jobs.FILM_SESSION_S)
+        self.assertIn("sfx", parts[0])
+        self.assertFalse(any("sfx" in p for p in parts[1:]))
+
+    def test_film_clips_depth_stills_ride_in_the_zip_job_and_forecast(self):
+        """C1: a glide still's depth map comes from a job: depth_stills are in inputs.zip, in job.json with their
+        sha256, in the template's IMAGES/EXPECTED, and in the forecast; a depth-only job is allowed."""
+        art = self.root / "art"
+        art.mkdir(exist_ok=True)
+        (art / "f01s014-4.png").write_bytes(b"glide-still")
+        spec = self.spec(1, depth_stills=["f01s014-4.png"])
+        r = self.build("film_clips", spec)
+        with zipfile.ZipFile(r["inputs_zip"]) as z:
+            job = json.loads(z.read("job.json"))
+            self.assertEqual(z.read("f01s014-4.png"), b"glide-still")
+        self.assertEqual(job["depth_stills"], {"f01s014-4.png": hashlib.sha256(b"glide-still").hexdigest()})
+        rate = RATES["film_clips"]
+        self.assertAlmostEqual(r["forecast_units"], (900 * 1.15 + rate["decode_s"] + rate["export_s"]
+                                                     + self.depth_s(1, images=2)) / 3600 * 2.4)
+        t = self.template()
+        g = {"JOB": job, "ITEMS": job["items"]}
+        exec(t[t.index("IMAGES = "):t.index("SECONDS = {}")], g)     # the template's own output list
+        self.assertIn("f01s014-4.depth.png", g["EXPECTED"])
+        self.assertIn("f01s014-12.depth.png", g["EXPECTED"])
+        only = self.build("film_clips", {"art_dir": str(art), "depth_stills": ["f01s014-4.png"], "job_id": "film-depth"})
+        with zipfile.ZipFile(only["inputs_zip"]) as z:
+            self.assertEqual(json.loads(z.read("job.json"))["items"], [])
+        with self.assertRaisesRegex(ValueError, "scene"):
+            self.build("film_clips", {"art_dir": str(art), "depth_stills": ["glide.png"], "job_id": "film-bad"})
+
+    def test_resume_notebook_rearms_only_the_hard_stop(self):
+        r = self.build("film_clips", self.spec(2))
+        out = Path(r["notebook"]).with_name("film_clips.resume-1.ipynb")
+        colab_jobs.resume_notebook(Path(r["notebook"]), out, 1234, "x-resume-1", ["f01s014-01"])
+        old, new = self.nb(r), json.loads(out.read_text())
+        src_old = "".join("".join(c["source"]) for c in old["cells"])
+        src_new = "".join("".join(c["source"]) for c in new["cells"])
+        self.assertIn("DEADLINE_SECONDS = 1234", src_new)
+        self.assertNotIn("DEADLINE_SECONDS = 1234", src_old)
+        sha = hashlib.sha256(Path(r["inputs_zip"]).read_bytes()).hexdigest()
+        self.assertIn(sha, src_new)                       # the same inputs, the same job and Drive folder
+        self.assertIn(r["job_id"], src_new)
 
     def test_film_clips_resume_skips_finished_keys(self):
         t = self.template()

@@ -13,6 +13,10 @@ Input (`scene` dict, merged with the plan.json scene fields `scene_id` and `text
              bible_refs, camera: {move, zoom, pan_x, ease} (required for glide), wan_res (required for
              wan), sound: {sfx, music}, plants: [earlier shot numbers] (the peak shot)}]
   peak     {shot, at}: the shot that carries the peak and the second it lands on
+  length_s optional: the scene's length when it runs past its last word (the R4 tail that `scene-timing` measures);
+           the last shot ends there, captions still end with the words
+  shots[].actions  optional, wan shots only: one performed action text per clip of the shot's chain (the take and
+           each continuation). R1 holds a wan shot to one action per 6 s, as qc's new_info measures it.
 `timing` is the measured narration, one entry per clause: [{start, end, text}] in seconds of the
 re-timed narration. `beats` are the 0-based indexes into the beats derived from it (`beats()`: a boundary after
 punctuation is a cut point; an unpunctuated one only when its pause is at least 0.15 s, else the entries merge). Approval records the sha256 of the input file and `require_approved` refuses when the input or the stored plan changed.
@@ -44,6 +48,10 @@ PEAK_LO, PEAK_HI, PEAK_MIN_S = 0.70, 0.85, 4.0
 # pixel count for 896x512). The job's own forecast is still derived from the measured rates.json at build.
 WAN_CU_1280 = 0.6
 _PIXELS = {"1280x704": 1280 * 704, "896x512": 896 * 512}
+# A Wan clip is 121 frames at 24 fps (colab_jobs.FILM_FRAMES / FILM_FPS); a continuation starts on the previous
+# clip's last frame, which assembly drops, so a chain of k clips plays 120 k + 1 frames. A shot's render length is
+# its span plus the halves of its transitions (film.edit_lengths; a dissolve is film.DISSOLVE_S, a cut one frame).
+CLIP_FRAMES, FPS, DISSOLVE_S = 121, 24, 0.8
 _WORDS = re.compile(r"\s+")
 _MARKS = (",", ".", ";", ":", "!", "?", "\u0964", "\u0965", "\u2014", "\u2013", "\u2026")  # , . ; : ! ? । ॥ — – …
 _CLOSERS = " \"'\u201c\u201d\u2018\u2019)]"
@@ -137,6 +145,42 @@ def _camera(shot: dict, n: int) -> dict:
     return {**base, **{k: cam[k] for k in base if k in cam}} if isinstance(cam, dict) else base
 
 
+def chain_frames(clips: int) -> int:
+    """Frames a chain of `clips` Wan clips plays (each continuation drops its first frame)."""
+    return CLIP_FRAMES * clips - max(0, clips - 1)
+
+
+def clips_for(frames: int) -> int:
+    """The fewest chained clips that cover `frames`."""
+    k = 1
+    while chain_frames(k) < frames:
+        k += 1
+    return k
+
+
+def _f(seconds: float) -> int:
+    return int(round(seconds * FPS))
+
+
+def render_frames(shots: list) -> dict:
+    """{shot n: frames it renders}: its span plus half of each neighbouring transition, as film.edit_lengths lays
+    them out (a dissolve DISSOLVE_S, a cut a 1-frame xfade). The scene's own edges count its first shot's
+    transition_in and, for the last shot, a dissolve into the next scene (the worst case; that is unknown here)."""
+    shots = sorted(shots, key=lambda s: s["start"])
+    over = [(_f(DISSOLVE_S) if s.get("transition_in") == "dissolve" else 1) for s in shots] + [_f(DISSOLVE_S)]
+    out = {}
+    for i, s in enumerate(shots):
+        span = _f(s["end"]) - _f(s["start"])
+        out[s["n"]] = span + (over[i] - over[i] // 2) + over[i + 1] // 2
+    return out
+
+
+def wan_clips_needed(sp: dict) -> dict:
+    """{wan shot n: chained clips its render length needs}."""
+    need = render_frames(sp.get("shots") or [])
+    return {s["n"]: clips_for(need[s["n"]]) for s in sp.get("shots") or [] if s["motion"] == "wan"}
+
+
 def plan(scene: dict, timing: list, bible: dict) -> dict:
     """Lay the planner input out on the measured timing. Raises ValueError for input the layout cannot honour."""
     bt = beats(scene["text"], timing)
@@ -178,15 +222,33 @@ def plan(scene: dict, timing: list, bible: dict) -> dict:
                 "layer": si["layer"], "transition_in": si["transition_in"]}
         if si.get("plants"):
             shot["plants"] = list(si["plants"])
+        acts = si.get("actions")
+        if acts is not None:
+            if motion != "wan" or not isinstance(acts, list) or not all(isinstance(a, str) and a.strip() for a in acts):
+                raise ValueError(f"shot {i} actions must be a list of action texts, and only on a wan shot (one "
+                                 "performed action per clip of its chain: the take and each continuation)")
+            shot["actions"] = [a.strip() for a in acts]
         shots.append(shot)
     if nxt != len(bt):
         raise ValueError(f"shots end at beat {nxt - 1} but the narration has beats up to {len(bt) - 1}: beats must be covered")
+    seconds = bt[-1]["end"]
+    total = scene.get("length_s")
+    if total is not None:   # the scene runs past its last word: the R4 tail of room tone (scene-timing)
+        if not _num(total) or total < seconds - 1e-9:
+            raise ValueError(f"scene length_s {total!r} must be a number at least the last clause's end {seconds:g}")
+        seconds = float(total)
+        shots[-1]["end"] = seconds
     wan = [s for s in shots if s["motion"] == "wan"]
-    return {"scene_id": scene["scene_id"], "spine": scene.get("spine") or "",
-            "seconds": bt[-1]["end"], "shots": shots, "peak": scene.get("peak"),
-            "motifs": list(scene.get("motifs") or []), "fidelity": scene.get("fidelity") or "",
-            "compute": {"stills": len(shots), "wan_clips": len(wan),
-                        "cu": round(sum(WAN_CU_1280 * _PIXELS[s["wan_res"]] / _PIXELS["1280x704"] for s in wan), 3)}}
+    sp = {"scene_id": scene["scene_id"], "spine": scene.get("spine") or "",
+          "seconds": seconds, "shots": shots, "peak": scene.get("peak"),
+          "motifs": list(scene.get("motifs") or []), "fidelity": scene.get("fidelity") or ""}
+    if total is not None:
+        sp["speech_end"] = bt[-1]["end"]
+    clips = wan_clips_needed(sp)   # continuations count (F15): each clip of a chain is generated
+    sp["compute"] = {"stills": len(shots), "wan_shots": len(wan), "wan_clips": sum(clips.values()),
+                     "cu": round(sum(clips[s["n"]] * WAN_CU_1280 * _PIXELS[s["wan_res"]] / _PIXELS["1280x704"]
+                                     for s in wan), 3)}
+    return sp
 
 
 def check(sp: dict, for_job: bool = False) -> list:
@@ -198,8 +260,16 @@ def check(sp: dict, for_job: bool = False) -> list:
     for s in shots:
         if s["start"] - prev > GAP_S + 1e-9:
             out.append(("R1", f"{prev:.1f}-{s['start']:.1f} s has no shot"))
-        if s["motion"] != "wan" and s["end"] - s["start"] > GAP_S + 1e-9:
-            out.append(("R1", f"shot {s['n']} holds {s['end'] - s['start']:.1f} s without a new shot or a Wan beat"))
+        d = s["end"] - s["start"]
+        if s["motion"] != "wan" and d > GAP_S + 1e-9:
+            out.append(("R1", f"shot {s['n']} holds {d:.1f} s without a new shot or a Wan beat"))
+        elif s["motion"] == "wan" and d > GAP_S + 1e-9:   # one performed action per 6 s, as qc new_info measures it
+            need = math.ceil(round(d, 6) / GAP_S)
+            have = len(s.get("actions") or [])
+            if have < need:
+                out.append(("R1", f"wan shot {s['n']} runs {d:.1f} s with {have} declared action(s); over {GAP_S:g} s it "
+                                  f"needs {need} (a continuation with its own action text in \"actions\"), else "
+                                  "the frame stays the same picture and qc new_info fails it"))
         prev = s["end"]
     if secs - prev > GAP_S + 1e-9:
         out.append(("R1", f"{prev:.1f}-{secs:.1f} s has no shot"))
@@ -257,7 +327,8 @@ def input_sha256(path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def approve(sp: dict, by: str, reviewer: str, at: str = None, input_sha256: str = None) -> dict:
+def approve(sp: dict, by: str, reviewer: str, at: str = None, input_sha256: str = None,
+            timing_sha256: str = None) -> dict:
     """A copy of the plan carrying {approved: {by, at, reviewer, input_sha256}}. Refused when the two are the same
     person (owner decision 3: Claude plus an independent reviewer) or when a hard rule is violated."""
     if not by.strip() or not reviewer.strip() or by.strip().lower() == reviewer.strip().lower():
@@ -266,7 +337,8 @@ def approve(sp: dict, by: str, reviewer: str, at: str = None, input_sha256: str 
     if hard:
         raise ValueError("the plan violates " + "; ".join(hard))
     return {**sp, "approved": {"by": by.strip(), "at": at or datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                               "reviewer": reviewer.strip(), **({"input_sha256": input_sha256} if input_sha256 else {})}}
+                               "reviewer": reviewer.strip(), **({"input_sha256": input_sha256} if input_sha256 else {}),
+                               **({"timing_sha256": timing_sha256} if timing_sha256 else {})}}
 
 
 def _cell(text: str) -> str:
@@ -328,6 +400,10 @@ def require_approved(film_dir, scene_id: str) -> dict:
     if not want or not inp.is_file() or input_sha256(inp) != want:
         raise NotApproved(f"the planner input of scene {scene_id} changed since approval (or the approval records no "
                           f"input hash); re-approve: {hint}")
+    tsha = sp["approved"].get("timing_sha256")
+    tf = Path(film_dir) / "shots" / f"{scene_id}.timing.json"
+    if tsha and (not tf.is_file() or input_sha256(tf) != tsha):
+        raise NotApproved(f"the measured timing of scene {scene_id} ({tf.name}) changed since approval; re-approve: {hint}")
     hard = [f"{c}: {m}" for c, m in check(sp) if not c.endswith("?")]
     if hard:
         raise NotApproved(f"the approved shot plan of scene {scene_id} now violates " + "; ".join(hard) + f"; re-approve: {hint}")
