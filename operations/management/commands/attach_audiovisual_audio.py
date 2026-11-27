@@ -90,6 +90,7 @@ from core.services import audit
 from library import storage
 from library.models import Asset, Paragraph, Revision, Rights, TimingMap
 from library.production_handoff import HandoffError, measure_mp3
+from library.audio_chapters import validate_chapters
 from library.sentences import split_sentences
 from library.services import (FORMATS, canonical_bytes, clone_revision, digest, prepare_revision_validation,
                               transition_revision, validate_revision)
@@ -169,6 +170,18 @@ def _is_int(value):
     return isinstance(value, int) and not isinstance(value, bool)
 
 
+def unmeasured_value(provenance, unit):
+    """provenance.units[unit].sentences_unmeasured as written, or None when absent or the provenance is malformed."""
+    units = provenance.get("units") if isinstance(provenance, dict) else None
+    row = units.get(unit) if isinstance(units, dict) else None
+    return row.get("sentences_unmeasured") if isinstance(row, dict) else None
+
+
+def unmeasured_anchors(provenance, unit):
+    value = unmeasured_value(provenance, unit)
+    return {a for a in value if isinstance(a, str)} if isinstance(value, list) else set()
+
+
 def check_chapters_and_sentences(row, duration_ms, provenance):
     """Refuse the whole bundle on any invalid optional chapters/sentences key (nothing is written yet)."""
     unit = row["unit_id"]
@@ -177,25 +190,15 @@ def check_chapters_and_sentences(row, duration_ms, provenance):
         raise CommandError(f"timing.json unit {unit}: {reason}")
 
     if "chapters" in row:
-        chapters = row["chapters"]
-        if not isinstance(chapters, list) or not chapters:
-            refuse("chapters must not be empty (a list of {title, start_ms}).")
-        previous = -1
-        for i, chapter in enumerate(chapters):
-            if (not isinstance(chapter, dict) or set(chapter) != {"title", "start_ms"} or not isinstance(chapter["title"], str)
-                    or not chapter["title"].strip() or not _is_int(chapter["start_ms"]) or chapter["start_ms"] < 0):
-                refuse(f"chapters[{i}] must be {{title: non-blank text, start_ms: integer >= 0}}.")
-            if chapter["start_ms"] <= previous:
-                refuse(f"chapters[{i}].start_ms {chapter['start_ms']} is not after the previous marker ({previous}).")
-            if chapter["start_ms"] >= duration_ms:
-                refuse(f"chapters[{i}].start_ms {chapter['start_ms']} is not inside the measured duration {duration_ms} ms.")
-            previous = chapter["start_ms"]
-    units = provenance.get("units")
-    flagged = units.get(unit, {}).get("sentences_unmeasured") if isinstance(units, dict) and isinstance(units.get(unit), dict) else None
-    if flagged is not None and (not isinstance(flagged, list) or not all(isinstance(a, str) for a in flagged)):
-        refuse("provenance sentences_unmeasured must be a list of anchor ids.")
+        errors = validate_chapters(row["chapters"], duration_ms)
+        if errors:
+            refuse(errors[0])
     if "sentences" not in row:
         return
+    flagged = unmeasured_value(provenance, unit)
+    if flagged is not None and (not isinstance(flagged, list) or not all(isinstance(a, str) for a in flagged)):
+        refuse("provenance sentences_unmeasured must be a list of anchor ids.")
+    listed = set(flagged or [])
     sentences = row["sentences"]
     if not isinstance(sentences, list):
         refuse("sentences must be a list of {anchor_id, sentence_index, start_ms, end_ms}.")
@@ -210,6 +213,8 @@ def check_chapters_and_sentences(row, duration_ms, provenance):
                 or not isinstance(sentence["anchor_id"], str) or not all(_is_int(sentence[k]) for k in ("sentence_index", "start_ms", "end_ms"))):
             refuse(f"sentences[{i}] must be {{anchor_id, sentence_index, start_ms, end_ms}} with integer numbers.")
         anchor = sentence["anchor_id"]
+        if anchor in listed:
+            refuse(f"sentences[{i}] gives rows for anchor {anchor}, which provenance lists in sentences_unmeasured.")
         if anchor not in spans:
             refuse(f"sentences[{i}] anchor {anchor} is not an anchor of this unit's segments.")
         if sentence["sentence_index"] != seen.get(anchor, 0):
@@ -496,8 +501,7 @@ class Command(BaseCommand):
                     raise CommandError(f"timing.json unit {unit.ordinal}: segment anchor is not in this live unit.")
             measured = bundle["files"][row["mp3"]]
             in_memory_check(live, unit, row["segments"], measured, measured["sha256"], {})
-            unit_provenance = bundle["provenance"].get("units", {}).get(row["unit_id"])
-            unmeasured = set(unit_provenance.get("sentences_unmeasured", [])) if isinstance(unit_provenance, dict) else set()
+            unmeasured = unmeasured_anchors(bundle["provenance"], row["unit_id"])
             sentences = sentence_segments(row, texts, unmeasured)
             if sentences is not None:
                 in_memory_check(live, unit, sentences, measured, measured["sha256"], {}, precision="sentence")

@@ -400,16 +400,6 @@ def measure_mp3(path, *, timeout_seconds=20):
             "method": "ffprobe exact retained MP3; container metadata only, not listening QA"}
 
 
-def _valid_chapter(chapter):
-    from core.api import DomainError
-    from .validation import validate_schema
-    try:
-        validate_schema(chapter, "AudioChapter")
-    except DomainError:
-        return False
-    return bool(chapter["title"].strip())
-
-
 def attach_private(manifest, asset_root, staged, actor, expected_etag, operation_id, *, execute=False, measure=measure_mp3):
     """Server-side attachment using existing models/receipts, always draft.
 
@@ -429,6 +419,7 @@ def _attach_verified(manifest, asset_root, staged, actor, expected_etag, operati
     from .models import Asset, Edition, Revision, TimingMap
     from .services import prepared_audio
     from .timing import validated_segments
+    from .audio_chapters import validate_chapters
     from .intake_api import staff_permission
     staff_permission(actor)
     if not actor.is_verified:
@@ -521,7 +512,7 @@ def _attach_verified(manifest, asset_root, staged, actor, expected_etag, operati
             asset.revision = revision
             asset.state = "ready"  # In-memory geometry validation only; never saved as ready.
             chapters = row.get("chapters", [])
-            if not isinstance(chapters, list) or any(not _valid_chapter(c) for c in chapters):
+            if not isinstance(chapters, list) or (chapters and validate_chapters(chapters, measurements[row["audio_asset_id"]]["duration_ms"])):
                 raise HandoffError("MEASURED_MAP_CHAPTERS_INVALID")
             mapping = TimingMap(revision=revision, asset=asset, text_sha256=revision.content_sha256,
                 asset_sha256=asset.sha256, precision=row["precision"], measured=True, segments=row["segments"], chapters=chapters)

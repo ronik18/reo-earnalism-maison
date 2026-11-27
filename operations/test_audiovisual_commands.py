@@ -13,7 +13,7 @@ from django.contrib.auth.models import Permission
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
-from operations.management.commands.attach_audiovisual_audio import read_bundle
+from operations.management.commands.attach_audiovisual_audio import Command, read_bundle
 
 from core.models import AuditEvent
 from library.sentences import split_sentences
@@ -370,6 +370,8 @@ class AudiobookBundleTests(AudiovisualFixture):
             segments.append({"anchor_id": p["anchor_id"], "start_offset_chars": 0, "end_offset_chars": len(p["text"]),
                              "start_ms": start, "end_ms": end})
             spans = split_sentences(p["text"])
+            if p["anchor_id"] in unmeasured:
+                continue  # like eav: an unmeasured paragraph has no sentence rows
             part = (end - start) // len(spans)
             rows += [{"anchor_id": p["anchor_id"], "sentence_index": n, "start_ms": start + n * part,
                       "end_ms": end if n == len(spans) - 1 else start + (n + 1) * part} for n in range(len(spans))]
@@ -424,9 +426,7 @@ class AudiobookBundleTests(AudiovisualFixture):
             counts = {}
             for r in row["sentences"]:
                 counts[r["anchor_id"]] = counts.get(r["anchor_id"], 0) + 1
-            anchor = next((k for k, v in counts.items() if v > 1), None)
-            if anchor is None:
-                self.skipTest("no multi-sentence paragraph")
+            anchor = next(k for k, v in counts.items() if v > 1)
             [r for r in row["sentences"] if r["anchor_id"] == anchor][1]["sentence_index"] = 5
         self.assert_refused(source, "sentence_index", mutate=gap)
 
@@ -446,6 +446,31 @@ class AudiobookBundleTests(AudiovisualFixture):
         def short_segment(row, timing):
             row["segments"][-1]["end_ms"] -= 1
         self.assert_refused(source, "outside the segment", mutate=short_segment)
+
+    def test_bicharak_has_a_multi_sentence_paragraph(self):
+        source = self.read_source()
+        self.assertTrue(any(len(split_sentences(p["text"])) > 1 for p in source["units"][0]["paragraphs"]))
+
+    def test_read_bundle_refuses_sentence_rows_for_an_unmeasured_anchor(self):
+        source = self.read_source()
+        anchor = source["units"][0]["paragraphs"][0]["anchor_id"]
+        self.assert_refused(source, "sentences_unmeasured",
+                            mutate=lambda row, timing: timing.update(provenance={"units": {row["unit_id"]: {"sentences_unmeasured": [anchor]}}}))
+
+    def test_old_bundle_with_malformed_provenance_imports_as_before(self):
+        live = self.publish_bicharak()
+        source = self.export()
+        unit = source["units"][0]["unit_id"]
+        for bad in ([], None, "text", {"units": []}, {"units": None}, {"units": {unit: []}},
+                    {"units": {unit: {"sentences_unmeasured": None}}}, {"units": {unit: {"sentences_unmeasured": "x"}}}):
+            with self.subTest(provenance=bad):
+                folder, _ = self.bundle(source)
+                timing = json.loads((folder / "timing.json").read_text())
+                timing["provenance"] = bad
+                (folder / "timing.json").write_text(json.dumps(timing))
+                plan = Command().preflight(live, read_bundle(folder))
+                self.assertEqual(len(plan), 1)
+                self.assertIsNone(plan[0]["sentences"])
 
     def test_read_bundle_refuses_unknown_row_keys(self):
         source = self.read_source()
@@ -518,9 +543,7 @@ class AudiobookBundleTests(AudiovisualFixture):
             counts = {}
             for r in row["sentences"]:
                 counts[r["anchor_id"]] = counts.get(r["anchor_id"], 0) + 1
-            anchor = next((k for k, v in counts.items() if v > 1), None)
-            if anchor is None:
-                self.skipTest("no multi-sentence paragraph")
+            anchor = next(k for k, v in counts.items() if v > 1)
             last = max(i for i, r in enumerate(row["sentences"]) if r["anchor_id"] == anchor)
             del row["sentences"][last]
         folder, audio_sha = self.audiobook_bundle(source, mutate=drop)

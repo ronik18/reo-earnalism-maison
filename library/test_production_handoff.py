@@ -319,7 +319,9 @@ except ImportError:
     TestCase = None
 
 MAP_CHAPTERS = {"test_map_chapters_are_stored": [{"title": "One", "start_ms": 0}, {"title": "Two", "start_ms": 600}],
-    "test_map_with_invalid_chapters_attaches_nothing": [{"title": " ", "start_ms": 0}]}
+    "test_map_with_invalid_chapters_attaches_nothing": [{"title": " ", "start_ms": 0}],
+    "test_map_with_out_of_order_chapters_attaches_nothing": [{"title": "B", "start_ms": 600}, {"title": "A", "start_ms": 100}],
+    "test_map_with_chapter_past_duration_attaches_nothing": [{"title": "A", "start_ms": 0}, {"title": "Z", "start_ms": 1000}]}
 
 
 if TestCase is not None:
@@ -383,11 +385,20 @@ if TestCase is not None:
             self.attach(execute=True)
             self.assertEqual(TimingMap.objects.get().chapters, MAP_CHAPTERS["test_map_chapters_are_stored"])
 
-        def test_map_with_invalid_chapters_attaches_nothing(self):
+        def refused_chapters(self):
             from library.models import TimingMap
             with self.assertRaisesRegex(h.HandoffError, "MEASURED_MAP_CHAPTERS_INVALID"):
                 self.attach(execute=True)
             self.assertEqual(TimingMap.objects.count(), 0)
+
+        def test_map_with_invalid_chapters_attaches_nothing(self):
+            self.refused_chapters()
+
+        def test_map_with_out_of_order_chapters_attaches_nothing(self):
+            self.refused_chapters()
+
+        def test_map_with_chapter_past_duration_attaches_nothing(self):
+            self.refused_chapters()
 
         def test_stale_etag_rolls_back_all_attachment_mutations(self):
             from core.api import DomainError
