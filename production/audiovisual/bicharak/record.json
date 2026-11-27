@@ -6655,6 +6655,212 @@
       },
       "path": "jobs/stills-film-01-r5-sample8/stills.ipynb",
       "sha256": "ae6209e0a268598480f2cf4464f89bc9173e647e50e9e1315fc1fdaadecc30b2"
+    },
+    {
+      "bytes": 1338940,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "094189b3d23e077bd42408f2b56eb90826fcde097625a18572d058bf488ecc84",
+        "job_id": "stills-film-01-r5-sample8",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.16.0",
+          "diffusers": "0.43.0",
+          "protobuf": "7.36.2",
+          "sentencepiece": "0.2.3",
+          "torch": "2.15.0",
+          "transformers": "5.24.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5-sample8/f01s001-1.png",
+      "sha256": "3e1061c3a54ae3f21de8b9191198de9c1de0787135a90510afcc8b3397d5c42a"
+    },
+    {
+      "bytes": 1401782,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "094189b3d23e077bd42408f2b56eb90826fcde097625a18572d058bf488ecc84",
+        "job_id": "stills-film-01-r5-sample8",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.16.0",
+          "diffusers": "0.43.0",
+          "protobuf": "7.36.2",
+          "sentencepiece": "0.2.3",
+          "torch": "2.15.0",
+          "transformers": "5.24.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5-sample8/f01s002-2.png",
+      "sha256": "709f2152e8418f4ba3c6775dca476b3602212445419a10ecccd7d24a6bc1d858"
+    },
+    {
+      "bytes": 1439705,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "094189b3d23e077bd42408f2b56eb90826fcde097625a18572d058bf488ecc84",
+        "job_id": "stills-film-01-r5-sample8",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.16.0",
+          "diffusers": "0.43.0",
+          "protobuf": "7.36.2",
+          "sentencepiece": "0.2.3",
+          "torch": "2.15.0",
+          "transformers": "5.24.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5-sample8/f01s005-2.png",
+      "sha256": "adf654808fc11ce5dffb532ba5e61595a90190a58442af41cb82af3d073caa5c"
+    },
+    {
+      "bytes": 1519714,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "094189b3d23e077bd42408f2b56eb90826fcde097625a18572d058bf488ecc84",
+        "job_id": "stills-film-01-r5-sample8",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.16.0",
+          "diffusers": "0.43.0",
+          "protobuf": "7.36.2",
+          "sentencepiece": "0.2.3",
+          "torch": "2.15.0",
+          "transformers": "5.24.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5-sample8/f01s006-3.png",
+      "sha256": "254c359556423d6bdbadb942d98f4e2987cf1c68f28646e9cd89c3c04daa4fcb"
+    },
+    {
+      "bytes": 1413774,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "094189b3d23e077bd42408f2b56eb90826fcde097625a18572d058bf488ecc84",
+        "job_id": "stills-film-01-r5-sample8",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.16.0",
+          "diffusers": "0.43.0",
+          "protobuf": "7.36.2",
+          "sentencepiece": "0.2.3",
+          "torch": "2.15.0",
+          "transformers": "5.24.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5-sample8/f01s007-2.png",
+      "sha256": "83265d2e90fb269db79452c04dced86e580d0bf18b6428755d3b4eb13da070da"
+    },
+    {
+      "bytes": 1294631,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "094189b3d23e077bd42408f2b56eb90826fcde097625a18572d058bf488ecc84",
+        "job_id": "stills-film-01-r5-sample8",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.16.0",
+          "diffusers": "0.43.0",
+          "protobuf": "7.36.2",
+          "sentencepiece": "0.2.3",
+          "torch": "2.15.0",
+          "transformers": "5.24.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5-sample8/f01s007-5.png",
+      "sha256": "b85d9e59018be914120db9d47d7677f65d5d4aa38366cc7dcce8cb3abae4ac6b"
+    },
+    {
+      "bytes": 1339061,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "094189b3d23e077bd42408f2b56eb90826fcde097625a18572d058bf488ecc84",
+        "job_id": "stills-film-01-r5-sample8",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.16.0",
+          "diffusers": "0.43.0",
+          "protobuf": "7.36.2",
+          "sentencepiece": "0.2.3",
+          "torch": "2.15.0",
+          "transformers": "5.24.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5-sample8/f01s008-3.png",
+      "sha256": "f885898e369e68c69e5cfcd7cde1919503a52e95fcbc314c9da517c5ca61b533"
+    },
+    {
+      "bytes": 1625724,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "094189b3d23e077bd42408f2b56eb90826fcde097625a18572d058bf488ecc84",
+        "job_id": "stills-film-01-r5-sample8",
+        "job_kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.16.0",
+          "diffusers": "0.43.0",
+          "protobuf": "7.36.2",
+          "sentencepiece": "0.2.3",
+          "torch": "2.15.0",
+          "transformers": "5.24.1"
+        }
+      },
+      "path": "stills/stills-film-01-r5-sample8/f01s009-3.png",
+      "sha256": "066031d2b6c6691537d51af3d63406709d884640ff7f23d67fd337897ee4e368"
+    },
+    {
+      "bytes": 15181,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.20474,
+        "inputs_zip": "jobs/stills-film-01-r6/inputs.zip",
+        "job_id": "stills-film-01-r6",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-film-01-r6/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-film-01-r6/stills.ipynb",
+      "sha256": "93c4dd4cc703f7ea1321e1883740fd9776b695850f31643290154205af0af5e3"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -7775,6 +7981,60 @@
       "at": "2026-11-27T07:05:24.625055+00:00",
       "detail": {
         "job_id": "stills-film-01-r5-sample8",
+        "kind": "stills",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T07:10:46.669297+00:00",
+      "detail": {
+        "actual_units": 0.0,
+        "files": [
+          "stills/stills-film-01-r5-sample8/f01s001-1.png",
+          "stills/stills-film-01-r5-sample8/f01s002-2.png",
+          "stills/stills-film-01-r5-sample8/f01s005-2.png",
+          "stills/stills-film-01-r5-sample8/f01s006-3.png",
+          "stills/stills-film-01-r5-sample8/f01s007-2.png",
+          "stills/stills-film-01-r5-sample8/f01s007-5.png",
+          "stills/stills-film-01-r5-sample8/f01s008-3.png",
+          "stills/stills-film-01-r5-sample8/f01s009-3.png"
+        ],
+        "input_zip_sha256": "094189b3d23e077bd42408f2b56eb90826fcde097625a18572d058bf488ecc84",
+        "job_id": "stills-film-01-r5-sample8",
+        "kind": "stills",
+        "model": {
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4
+        },
+        "packages": {
+          "accelerate": "1.16.0",
+          "diffusers": "0.43.0",
+          "protobuf": "7.36.2",
+          "sentencepiece": "0.2.3",
+          "torch": "2.15.0",
+          "transformers": "5.24.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-27T07:10:46.856109+00:00",
+      "detail": {
+        "forecast_units": 1.20474,
+        "job_id": "stills-film-01-r6",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T07:10:46.863355+00:00",
+      "detail": {
+        "job_id": "stills-film-01-r6",
         "kind": "stills",
         "target": "film-01"
       },
