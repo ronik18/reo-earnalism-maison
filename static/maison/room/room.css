@@ -404,3 +404,25 @@ body.reader-theme-light .reader-progress,body.reader-theme-sepia .reader-progres
 body.reader-theme-dark .reader-progress,body.reader-theme-true_black .reader-progress{--hairline:var(--gold-on-dark)}
 @media (prefers-reduced-motion:reduce){.reader-toolbar{transition:none}}
 body.reduced-motion .reader-toolbar{transition:none}
+.media-sheet--bottom::backdrop{background:rgba(9,5,11,.28)}
+.comfort{display:grid;gap:16px}
+.comfort-row{display:grid;gap:8px}
+.comfort-label{font:600 .875rem/1.2 var(--ui);color:var(--muted)}
+.comfort-stepper{display:flex;align-items:center;gap:12px}
+.comfort-step{min-width:64px;min-height:44px;border-radius:4px;font:600 1.125rem/1 var(--ui);background:var(--surface);border:1px solid var(--line);color:var(--ink);cursor:pointer}
+.comfort-step:disabled{opacity:.5;cursor:not-allowed}
+.comfort-value{min-width:3ch;text-align:center;font:600 1rem/1 var(--ui);color:var(--ink)}
+.comfort-swatches{display:flex;flex-wrap:wrap;gap:8px}
+.comfort-swatch,.comfort-segment{min-height:44px;min-width:44px;border-radius:4px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:500 .875rem/1.2 var(--ui);cursor:pointer}
+.comfort-swatch{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px}
+.comfort-chip{display:grid;place-items:center;width:36px;height:36px;border-radius:3px;border:1px solid var(--line);font:600 1rem/1 var(--read,serif)}
+.comfort-swatch-system .comfort-chip,.comfort-swatch-light .comfort-chip{background:#f5eddf;color:#2b1c1b}
+.comfort-swatch-system .comfort-chip{background:linear-gradient(90deg,#f5eddf 50%,#21181a 50%);color:#7d2b40}
+.comfort-swatch-sepia .comfort-chip{background:#e3cfaa;color:#33261f}
+.comfort-swatch-dark .comfort-chip{background:#21181a;color:#f1e7d8}
+.comfort-swatch-true_black .comfort-chip{background:#000;color:#f4ede0}
+.comfort-segments{display:flex;gap:8px;flex-wrap:wrap}
+.comfort-segment{flex:1 1 0;padding:0 12px}
+.comfort [aria-checked=true]{border-color:var(--gold);box-shadow:inset 0 0 0 2px var(--gold)}
+.comfort button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+@media (max-width:640px){.media-sheet--bottom{margin:auto 0 0;width:100vw;max-width:none;max-height:min(60dvh,520px);border-radius:10px 10px 0 0;border-width:2px 0 0;padding-bottom:max(18px,env(safe-area-inset-bottom))}}

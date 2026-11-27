@@ -339,3 +339,59 @@ export function toolbarHidden(
 export function toolbarPinned(focusInside: boolean, focusVisible: boolean): boolean {
   return focusInside && focusVisible;
 }
+
+/** The reading sizes the server accepts (accounts/models.py reader_font_size constraint). */
+export const READER_FONT_SIZES = [16, 20, 23, 26, 30] as const;
+export type ReaderFontSize = (typeof READER_FONT_SIZES)[number];
+/** One step up (+1) or down (-1) the allowed sizes, clamped at both ends; an off-list size snaps to the nearest first. */
+export function stepFont(current: number, delta: number): ReaderFontSize {
+  const sizes = READER_FONT_SIZES;
+  const from = Number.isFinite(current) ? current : 20;
+  const last = sizes.length - 1;
+  let index: number;
+  if (delta > 0) index = sizes.findIndex((size) => size > from);
+  else index = sizes.length - 1 - [...sizes].reverse().findIndex((size) => size < from);
+  if (delta > 0 && index < 0) index = last;
+  if (delta < 0 && index > last) index = 0;
+  if (delta === 0) index = sizes.indexOf(from as ReaderFontSize);
+  return sizes[Math.min(Math.max(index, 0), last)];
+}
+
+/** Justified Bengali breaks conjuncts badly, so the choice is not offered for it. */
+export function alignmentOptions(locale: string): Array<"start" | "justify"> {
+  return locale === "bn" ? ["start"] : ["start", "justify"];
+}
+export function effectiveAlignment(value: string | undefined, locale: string): string {
+  return value === "justify" && locale === "bn" ? "start" : value || "start";
+}
+
+/** Narrow / Medium / Wide are the stored compact / comfortable / wide values. */
+export const READER_WIDTHS = [
+  { value: "compact", label: "narrow", measure: "55ch" },
+  { value: "comfortable", label: "medium", measure: "65ch" },
+  { value: "wide", label: "wide", measure: "72ch" },
+] as const;
+export function widthMeasure(value: string | undefined): string {
+  return READER_WIDTHS.find((w) => w.value === value)?.measure ?? "65ch";
+}
+
+export const PREFERENCE_SAVE_MS = 500;
+/** Trailing-edge debounce that remembers only the latest value. Timer functions are injected so it can be tested. */
+export function createDebouncedSaver<T>(
+  save: (value: T) => void,
+  ms: number,
+  setTimer: (fn: () => void, ms: number) => unknown = (fn, wait) => setTimeout(fn, wait),
+  clearTimer: (id: unknown) => void = (id) => clearTimeout(id as ReturnType<typeof setTimeout>),
+) {
+  let timer: unknown;
+  let has = false;
+  return {
+    schedule(value: T) {
+      if (has) clearTimer(timer);
+      has = true;
+      timer = setTimer(() => { has = false; save(value); }, ms);
+    },
+    cancel() { if (has) clearTimer(timer); has = false; },
+    pending: () => has,
+  };
+}

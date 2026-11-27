@@ -484,3 +484,11 @@ STRINGS.update({
     "min_left": ("min left", "min left"),
     "reading_progress": ("Reading progress", "Reading progress"),
 })
+STRINGS.update({
+    "smaller_text": ("Smaller text", "Smaller text"),
+    "larger_text": ("Larger text", "Larger text"),
+    "narrow": ("Narrow", "Narrow"),
+    "medium": ("Medium", "Medium"),
+    "wide": ("Wide", "Wide"),
+    "comfort_not_saved": ("Not saved to your account yet. Your change still applies here.", "Not saved to your account yet. Your change still applies here."),
+})

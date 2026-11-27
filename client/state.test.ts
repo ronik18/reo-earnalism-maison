@@ -21,6 +21,14 @@ import {
   headingsFor,
   toolbarHidden,
   toolbarPinned,
+  READER_FONT_SIZES,
+  stepFont,
+  alignmentOptions,
+  effectiveAlignment,
+  READER_WIDTHS,
+  widthMeasure,
+  PREFERENCE_SAVE_MS,
+  createDebouncedSaver,
 } from "./state.ts";
 import { readFileSync } from "node:fs";
 import { wrapTextSpan } from "./follow-dom.ts";
@@ -1229,4 +1237,69 @@ test("the toolbar is pinned only by keyboard focus, not by a tap's leftover focu
   assert.equal(toolbarPinned(false, true), false);
   assert.equal(toolbarHidden(false, 100, 300, toolbarPinned(true, false)), true);
   assert.equal(toolbarHidden(false, 100, 300, toolbarPinned(true, true)), false);
+});
+
+test("test_font_stepper_walks_allowed_sizes_and_clamps", () => {
+  assert.deepEqual([...READER_FONT_SIZES], [16, 20, 23, 26, 30]);
+  assert.equal(stepFont(20, 1), 23);
+  assert.equal(stepFont(23, 1), 26);
+  assert.equal(stepFont(20, -1), 16);
+  assert.equal(stepFont(30, 1), 30);
+  assert.equal(stepFont(16, -1), 16);
+  assert.equal(stepFont(21, 1), 23); // an off-list size snaps to the nearest allowed size first
+  assert.equal(stepFont(Number.NaN, 1), 23); // unusable input starts from the 20 default
+});
+
+test("test_justify_hidden_for_bengali", () => {
+  assert.deepEqual(alignmentOptions("en"), ["start", "justify"]);
+  assert.deepEqual(alignmentOptions("bn"), ["start"]);
+  assert.equal(effectiveAlignment("justify", "bn"), "start");
+  assert.equal(effectiveAlignment("justify", "en"), "justify");
+});
+
+test("test_width_narrow_medium_wide_map_to_55_65_72ch", () => {
+  assert.deepEqual(READER_WIDTHS.map((w) => [w.value, w.label, w.measure]), [
+    ["compact", "narrow", "55ch"],
+    ["comfortable", "medium", "65ch"],
+    ["wide", "wide", "72ch"],
+  ]);
+  assert.equal(widthMeasure("compact"), "55ch");
+  assert.equal(widthMeasure("nonsense"), "65ch");
+});
+
+test("test_changes_apply_live_and_save_debounced_500ms", () => {
+  assert.equal(PREFERENCE_SAVE_MS, 500);
+  const timers = new Map<number, { fn: () => void; ms: number }>();
+  let next = 1;
+  const saved: unknown[] = [];
+  const saver = createDebouncedSaver<{ n: number }>(
+    (v) => saved.push(v),
+    PREFERENCE_SAVE_MS,
+    (fn, ms) => { timers.set(next, { fn, ms }); return next++; },
+    (id) => { timers.delete(id as number); },
+  );
+  saver.schedule({ n: 1 });
+  saver.schedule({ n: 2 });
+  saver.schedule({ n: 3 });
+  assert.equal(timers.size, 1); // rapid steps collapse into one pending save
+  assert.equal([...timers.values()][0].ms, 500);
+  assert.deepEqual(saved, []); // nothing sent before the pause
+  const [firedId, fired] = [...timers.entries()][0];
+  timers.delete(firedId);
+  fired.fn();
+  assert.deepEqual(saved, [{ n: 3 }]); // only the latest value is sent
+  saver.schedule({ n: 4 });
+  saver.cancel();
+  assert.equal(timers.size, 0);
+});
+
+test("reading comfort sheet has live controls and no Save button", () => {
+  const source = readFileSync("client/reader.tsx", "utf8");
+  assert.match(source, /className="media-sheet--bottom"|media-sheet--bottom/);
+  assert.match(source, /role="radiogroup"/);
+  assert.doesNotMatch(source, /keep_settings/);
+  assert.doesNotMatch(source, /saveSettings/);
+  const css = readFileSync("static/maison/room/room.css", "utf8");
+  assert.match(css, /\.media-sheet--bottom[^{]*\{[^}]*\}/);
+  assert.match(css, /max-width:640px\)\s*\{[^@]*\.media-sheet--bottom\{[^}]*margin:auto 0 0/);
 });

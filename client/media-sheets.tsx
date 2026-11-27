@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { api, errorText, t } from "./api";
 import { validReturnPath } from "./state";
 
-export function MediaSheet({ open, title, onClose, children }: { open: boolean; title: string; onClose: () => void; children: ReactNode }) {
+export function MediaSheet({ open, title, onClose, children, className = "" }: { open: boolean; title: string; onClose: () => void; children: ReactNode; className?: string }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const previousFocus = useRef<HTMLElement | null>(null);
@@ -27,7 +27,7 @@ export function MediaSheet({ open, title, onClose, children }: { open: boolean; 
     window.addEventListener("maison:before-navigate", closeForNavigation);
     return () => { window.removeEventListener("maison:before-navigate", closeForNavigation); restoreFocus(); };
   }, []);
-  return <dialog ref={dialog} className="maison-dialog media-sheet" aria-labelledby={titleId} onClose={() => { restoreFocus(); if (open) onClose(); }}>
+  return <dialog ref={dialog} className={`maison-dialog media-sheet${className ? " " + className : ""}`} aria-labelledby={titleId} onClose={() => { restoreFocus(); if (open) onClose(); }}>
     <div className="dialog-heading"><h2 id={titleId}>{title}</h2><button type="button" onClick={() => dialog.current?.close()}>{t("close")}</button></div>
     {children}
   </dialog>;
