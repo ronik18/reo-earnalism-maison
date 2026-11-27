@@ -102,6 +102,502 @@
       },
       "path": "jobs/music-kshudhita-film-01-r2/music.ipynb",
       "sha256": "09a68564d600b9ec12085769e284bee8ed3411812fde89c6d5a0029b4b028f9e"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-1-journey-and-palace.wav",
+      "sha256": "d2776094e48fa03b7c2700f648bff566841a90ad9ea56e39ec0b72fa0018ac66"
+    },
+    {
+      "bytes": 1496,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-1-journey-and-palace_input_params.json",
+      "sha256": "7f5b8d99882f724f7d7716e64628095d57975901bc2854e5deb59e1730eb0c0c"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-2-river-at-dusk.wav",
+      "sha256": "e0f11f9ded3acedb9e1e37c20cecdc93aa222ee1b2a627bf9990fcbab227f43a"
+    },
+    {
+      "bytes": 1502,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-2-river-at-dusk_input_params.json",
+      "sha256": "6596e75d93bb610ea503ab04c5cbfc6ce78dbaf0f5469072c4e9cad071ab91ed"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-3-the-great-hall.wav",
+      "sha256": "429532543e13211e70df061c18614ea009ef966dd93051f59bd7faf8378d710e"
+    },
+    {
+      "bytes": 1511,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-3-the-great-hall_input_params.json",
+      "sha256": "d758541b5c29428317bbb21ba202247a1a4c2ee0056f340a39ce5638c0cd8415"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-4-the-night-summons.wav",
+      "sha256": "07813455d03191880066ab479667bd32eac962fc9c43f40137e8e9b671e3f3b1"
+    },
+    {
+      "bytes": 1513,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-4-the-night-summons_input_params.json",
+      "sha256": "24e5e7f808f721111b8ba2ae9e90e41e62bd55cd41da82e0ce42e3461a5f536c"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-5-persian-chamber.wav",
+      "sha256": "7c625be7b64c6eca6a217010480aa2693297d5a3801b6b54ef90bd30c223a2da"
+    },
+    {
+      "bytes": 1501,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-5-persian-chamber_input_params.json",
+      "sha256": "d44bc0366dd6aa637852a193fd161fa7b0c8db181df31968e3667f0d1ba3d74f"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-6-mirror-and-lament.wav",
+      "sha256": "c310fd6501024158312df6382114003afce559de1e951044bd3c11a31e6e02f5"
+    },
+    {
+      "bytes": 1496,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-6-mirror-and-lament_input_params.json",
+      "sha256": "5be599fd2b53fe3971c17a02a09c47e3915a260fc911384fc0470dfbbd746c40"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-7-remorse.wav",
+      "sha256": "cd9eb4201d58ac9161fd7b88d995c0a1891c9102f94f51d48fd5bbaefad401d2"
+    },
+    {
+      "bytes": 1484,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-7-remorse_input_params.json",
+      "sha256": "32f895d6e3cf8ccb5dc516754e51c327f57817b60245bf73d04542842998c60b"
+    },
+    {
+      "bytes": 46062522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-8-storm-and-warning.wav",
+      "sha256": "2ad1ca67a1364b50b6946499b57db596e9d123fe40d7157d25ec21072e8786d4"
+    },
+    {
+      "bytes": 1522,
+      "kind": "music",
+      "meta": {
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "job_kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "path": "music/music-kshudhita-film-01-r2/cue-8-storm-and-warning_input_params.json",
+      "sha256": "bf0fb2712bb481e6d596f8c1e581027506c3d9c500b09cc5736ebc1dc09c5c7b"
     }
   ],
   "created_at": "2026-11-25T11:16:00.930973+00:00",
@@ -301,6 +797,55 @@
       },
       "result": "job_target",
       "stage": "cli"
+    },
+    {
+      "at": "2026-11-27T11:47:45.794209+00:00",
+      "detail": {
+        "actual_units": 0.0,
+        "files": [
+          "music/music-kshudhita-film-01-r2/cue-1-journey-and-palace.wav",
+          "music/music-kshudhita-film-01-r2/cue-1-journey-and-palace_input_params.json",
+          "music/music-kshudhita-film-01-r2/cue-2-river-at-dusk.wav",
+          "music/music-kshudhita-film-01-r2/cue-2-river-at-dusk_input_params.json",
+          "music/music-kshudhita-film-01-r2/cue-3-the-great-hall.wav",
+          "music/music-kshudhita-film-01-r2/cue-3-the-great-hall_input_params.json",
+          "music/music-kshudhita-film-01-r2/cue-4-the-night-summons.wav",
+          "music/music-kshudhita-film-01-r2/cue-4-the-night-summons_input_params.json",
+          "music/music-kshudhita-film-01-r2/cue-5-persian-chamber.wav",
+          "music/music-kshudhita-film-01-r2/cue-5-persian-chamber_input_params.json",
+          "music/music-kshudhita-film-01-r2/cue-6-mirror-and-lament.wav",
+          "music/music-kshudhita-film-01-r2/cue-6-mirror-and-lament_input_params.json",
+          "music/music-kshudhita-film-01-r2/cue-7-remorse.wav",
+          "music/music-kshudhita-film-01-r2/cue-7-remorse_input_params.json",
+          "music/music-kshudhita-film-01-r2/cue-8-storm-and-warning.wav",
+          "music/music-kshudhita-film-01-r2/cue-8-storm-and-warning_input_params.json"
+        ],
+        "input_zip_sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6",
+        "job_id": "music-kshudhita-film-01-r2",
+        "kind": "music",
+        "model": {
+          "repo": "ACE-Step/ACE-Step-v1-3.5B",
+          "revision": "82cd0d7b6322bd28cd4e830fe675ddb6180ce36c",
+          "weight_sha256": {
+            "ace_step_transformer/diffusion_pytorch_model.safetensors": "e810f16728d8a2e0d1b9c3a907aac8c9a427ce38edbd890cb3dce5ff92da5aad",
+            "music_dcae_f8c8/diffusion_pytorch_model.safetensors": "2b0cb469307ac50659d1880db2a99bae47d0df335cbb36853964662d4b80e8ee",
+            "music_vocoder/diffusion_pytorch_model.safetensors": "c92c9b46e28ab7b37b777780cf4308ad7ddac869636bb77aa61599358c4bc1c0",
+            "umt5-base/model.safetensors": "779cec0d210b2123e21d0a9cd8128f02b4d412627355028965a8be0b241cc3b6"
+          }
+        },
+        "packages": {
+          "ace-step": "0.2.0 @ 1bee4c9f5b43e30995f8d4d33b3919197ce1bd68",
+          "acestep": null,
+          "diffusers": "0.39.0",
+          "huggingface_hub": "0.36.2",
+          "torch": "2.15.0",
+          "torchaudio": "2.11.1",
+          "torchcodec": "0.17.0",
+          "transformers": "4.50.0"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
     }
   ],
   "ledger": "../allowance-ledger.json",
