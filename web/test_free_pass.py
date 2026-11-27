@@ -3,7 +3,7 @@ import json
 import uuid
 from datetime import timedelta
 from types import SimpleNamespace
-from urllib.parse import urlencode, quote
+from urllib.parse import urlencode, quote, parse_qs, urlsplit
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.http import Http404
@@ -67,3 +67,95 @@ class HistoricalCheckoutFreePresentationTests(TestCase):
         other=get_user_model().objects.create_user('free-checkout-other@example.test','Local-Free-Pass-2026',is_verified=True)
         request.user=other
         with self.assertRaises(Http404):checkout(request,locale='en',order_id=order.id)
+
+
+import io
+import tempfile
+from unittest.mock import patch
+from django.conf import settings
+from django.core.management import call_command
+from django.urls import reverse
+from library import services as library_services
+
+
+@override_settings(FREE_ACCESS_ENABLED=True,MAISON_LOCAL_FIXTURES=True)
+class PreviewEndingTests(TestCase):
+    """The signed-out preview ends with a free sign-in that keeps the reader's place."""
+    edition='20000000-0000-4000-8000-000000000001'
+    unit='40000000-0000-4000-8000-000000000001'
+    @classmethod
+    def setUpClass(cls):
+        cls.media=tempfile.TemporaryDirectory(prefix='maison-preview-end-')
+        cls.media_override=override_settings(MEDIA_ROOT=cls.media.name,MAISON_LOCAL_FIXTURES=True);cls.media_override.enable()
+        super().setUpClass()
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass();cls.media_override.disable();cls.media.cleanup()
+    @classmethod
+    def setUpTestData(cls):
+        call_command('seed_local_pilot',stdout=io.StringIO())
+    def page(self,formats=None,features=None):
+        real=library_services.edition_detail
+        def detail(*args,**kwargs):
+            data=real(*args,**kwargs)
+            if formats is not None: data={**data,'formats':list(formats)}
+            return data
+        with patch('library.services.edition_detail',detail),override_settings(FEATURES={**settings.FEATURES,**(features or {'audio':True,'video':True})}):
+            return self.client.get(f'/en/read/{self.edition}/{self.unit}/')
+    def boot(self,response):
+        html=response.content.decode()
+        return json.loads(html.split('id="reader-bootstrap" type="application/json">',1)[1].split('</script>',1)[0])
+    def test_preview_end_copy_exact(self):
+        response=self.page()
+        boot=self.boot(response)
+        title=boot['edition_title']
+        self.assertEqual(title,'The River Notebook')
+        html=response.content.decode()
+        fallback=html.split('data-preview-fallback',1)[1].split('</section>',1)[0].split('</article>',1)[0]
+        self.assertIn(f'Sign in free to finish <span lang="{boot["content_locale"]}">{title}</span> — your place is kept',fallback)
+        self.assertIn('Sign in free',fallback)
+        self.assertNotRegex(fallback.lower(),r'price|trial|pay|₹')
+    def test_preview_end_shows_remaining_minutes(self):
+        from library.models import Paragraph
+        boot=self.boot(self.page())
+        total=sum(len(p.text) for p in Paragraph.objects.filter(unit__revision_id=boot['edition_revision_id']))
+        self.assertIsInstance(boot['remaining_minutes'],int)
+        self.assertGreaterEqual(boot['remaining_minutes'],1)
+        self.assertLessEqual(boot['remaining_minutes']*900,total+900)
+        self.assertIn(f'{boot["remaining_minutes"]} minutes left to read',self.page().content.decode().split('data-preview-fallback',1)[1].split('</section>',1)[0])
+    def test_preview_end_omits_minutes_without_an_estimate(self):
+        with patch('web.views.remaining_read_minutes',return_value=None):
+            response=self.page()
+        self.assertIsNone(self.boot(response)['remaining_minutes'])
+        self.assertNotIn('minutes left to read',response.content.decode().split('data-preview-fallback',1)[1].split('</section>',1)[0])
+    def test_preview_end_offers_listen_and_watch_when_available(self):
+        both=self.page(formats=['reader','audio','video'])
+        boot=self.boot(both);html=both.content.decode().split('data-preview-fallback',1)[1].split('</section>',1)[0]
+        self.assertEqual(boot['formats'],{'listen':True,'watch':True})
+        self.assertIn('Sign in free to listen',html);self.assertIn('Sign in free to watch',html)
+        self.assertIn(quote(reverse('web:player',args=['en',self.edition]),safe=''),html)
+        self.assertIn(quote(reverse('web:video',args=['en',self.edition]),safe=''),html)
+        only=self.page(formats=['reader'])
+        self.assertEqual(self.boot(only)['formats'],{'listen':False,'watch':False})
+        self.assertNotIn('to listen',only.content.decode().split('data-preview-fallback',1)[1].split('</section>',1)[0])
+        flagged=self.page(formats=['reader','audio','video'],features={'audio':False,'video':False})
+        self.assertEqual(self.boot(flagged)['formats'],{'listen':False,'watch':False})
+    def test_sign_in_returns_to_boundary_anchor(self):
+        boot=self.boot(self.page(formats=['reader','audio','video']))
+        query=parse_qs(urlsplit(boot['sign_in_url']).query)
+        self.assertEqual(urlsplit(boot['sign_in_url']).path,'/en/sign-in/')
+        target=urlsplit(query['return_to'][0])
+        self.assertEqual(target.path,f'/en/read/{self.edition}/{self.unit}/')
+        self.assertIn('anchor',parse_qs(target.query));self.assertIn('offset',parse_qs(target.query))
+        sign_in=self.client.get(boot['sign_in_url']).content.decode()
+        self.assertIn('"return_path": "'+query['return_to'][0].replace('&','\\u0026')+'"',sign_in)
+        sign_up=self.client.get('/en/sign-up/?'+urlencode({'return_to':query['return_to'][0]})).content.decode()
+        self.assertIn('"return_path": "'+query['return_to'][0].replace('&','\\u0026')+'"',sign_up)
+        for field in ('listen_sign_in_url','watch_sign_in_url'):
+            self.assertIn('return_to',boot[field])
+    def test_external_return_to_is_still_rejected(self):
+        from .views import safe_return
+        for hostile in ('https://evil.invalid/x','//evil.invalid/x','/\\evil.invalid','/en/sign-in/?return_to=/en/','javascript:alert(1)'):
+            self.assertEqual(safe_return(hostile,'en'),'/en/')
+        page=self.client.get('/en/sign-in/?return_to='+quote('https://evil.invalid/x',safe='')).content.decode()
+        self.assertNotIn('evil.invalid',page)

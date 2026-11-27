@@ -1,4 +1,4 @@
-import { PreviewBoundary, FormatSwitch, MediaSheet } from "./media-sheets";
+import { PreviewBoundary, PreviewEnding, FormatSwitch, MediaSheet } from "./media-sheets";
 import { QueueRecovery } from "./recovery";
 import { enqueue, queued, discardQueuedProgress } from "./queue";
 import { setIdentity } from "./offline";
@@ -77,6 +77,11 @@ interface Boot {
   title_url?: string;
   sign_in_url?: string;
   pass_url?: string;
+  edition_title?: string;
+  remaining_minutes?: number | null;
+  formats?: { listen?: boolean; watch?: boolean };
+  listen_sign_in_url?: string;
+  watch_sign_in_url?: string;
 }
 interface Progress {
   version: number;
@@ -1233,9 +1238,24 @@ function Reader({ boot }: { boot: Boot }) {
       {boot.preview ? (
         <section className="preview-boundary" aria-label={t("preview_end")}>
           <p>{t("preview_end")}</p>
-          <button onClick={() => setBoundaryOpen(true)}>
-            {t("continue_beyond_preview")}
-          </button>
+          {!boot.authenticated ? (
+            <PreviewEnding
+              title={boot.edition_title || ""}
+              lang={boot.content_locale}
+              minutes={boot.remaining_minutes}
+              formats={boot.formats}
+              signInUrl={
+                boot.sign_in_url ||
+                `/${document.documentElement.dataset.uiLocale || "en"}/sign-in/?return_to=${encodeURIComponent(location.pathname + location.search)}`
+              }
+              listenUrl={boot.listen_sign_in_url}
+              watchUrl={boot.watch_sign_in_url}
+            />
+          ) : (
+            <button onClick={() => setBoundaryOpen(true)}>
+              {t("continue_beyond_preview")}
+            </button>
+          )}
           <PreviewBoundary
             editionId={boot.edition_id}
             format="reader"

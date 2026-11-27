@@ -15,6 +15,7 @@ import {
   placeTitle,
   measuredSeek,
   validReturnPath,
+  splitTitleSlot,
   initialReaderTheme,
   progressFraction,
   minutesRemaining,
@@ -1373,4 +1374,12 @@ test("save queue: one in flight, later values coalesce, conflict refetches and r
   });
   await failing.push(1); // the retry fails too: reported once, not looped
   assert.deepEqual(errors, ["conflict"]);
+});
+
+test("splitTitleSlot leaves the title slot between the two halves", () => {
+  assert.deepEqual(
+    splitTitleSlot("Sign in free to finish {title} \u2014 your place is kept"),
+    ["Sign in free to finish ", " \u2014 your place is kept"],
+  );
+  assert.deepEqual(splitTitleSlot("No slot"), ["No slot", ""]);
 });

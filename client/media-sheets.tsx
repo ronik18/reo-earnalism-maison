@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { api, errorText, t } from "./api";
-import { validReturnPath } from "./state";
+import { validReturnPath, splitTitleSlot } from "./state";
 
 export function MediaSheet({ open, title, onClose, children, className = "" }: { open: boolean; title: string; onClose: () => void; children: ReactNode; className?: string }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -82,4 +82,20 @@ export function FormatSwitch({open, onClose, busy, status, onExact, chapterUrl, 
     <p>{t("switch_chapter_choice")}</p><div className="actions"><a className="button secondary" href={validReturnPath(chapterUrl)}>{t(target === "reader" ? "read_from_chapter" : "listen_from_start")}</a>
     <button onClick={onClose}>{t("cancel")}</button></div>
   </MediaSheet>;
+}
+
+/** The signed-out preview ending: free sign-in that keeps the place, time left, and the other formats that exist. */
+export function PreviewEnding({ title, lang, minutes, formats, signInUrl, listenUrl, watchUrl }: {
+  title: string; lang: string; minutes?: number | null; formats?: { listen?: boolean; watch?: boolean }; signInUrl: string; listenUrl?: string; watchUrl?: string;
+}) {
+  const [before, after] = splitTitleSlot(t("preview_signin_finish"));
+  return <>
+    <p className="preview-ending-copy">{before}<span lang={lang}>{title}</span>{after}</p>
+    {minutes && minutes > 0 ? <p className="fine">{minutes} {t("preview_minutes_left")}</p> : null}
+    <p className="actions">
+      <a className="button" href={validReturnPath(signInUrl)}>{t("sign_in_free")}</a>
+      {formats?.listen && listenUrl ? <a className="button secondary" href={validReturnPath(listenUrl)}>{t("preview_listen_free")}</a> : null}
+      {formats?.watch && watchUrl ? <a className="button secondary" href={validReturnPath(watchUrl)}>{t("preview_watch_free")}</a> : null}
+    </p>
+  </>;
 }

@@ -292,6 +292,12 @@ export function minutesRemaining(
   return Math.ceil(charsLeft / charsPerMinute);
 }
 
+/** Splits a catalogue line around its "{title}" slot so the book title can sit in its own lang element. */
+export function splitTitleSlot(template: string): [string, string] {
+  const at = template.indexOf("{title}");
+  return at < 0 ? [template, ""] : [template.slice(0, at), template.slice(at + 7)];
+}
+
 const ENTITIES: Record<string, string> = {
   amp: "&",
   lt: "<",
