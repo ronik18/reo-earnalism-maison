@@ -1,7 +1,8 @@
 """Compute-unit forecast and the standing Colab Pro allowance ledger.
 
-Allowance: 60 units per title over the title's whole life (all months) and 100
-units per calendar month across titles. Reservations count as spent until
+Allowance: 60 units per title over the title's whole life (all months) unless the
+owner raised it in title-caps.json next to the ledger, and 100 units per calendar
+month across titles. Reservations count as spent until
 settled with the actual units.
 The ledger assumes one writer process at a time.
 """
@@ -51,6 +52,21 @@ def fit_reel_job(job: dict, rates: dict, remaining_units: float):
             fitted["items"] -= 1
         else:
             return None
+
+
+def title_cap(ledger_path, title) -> float:
+    """Lifetime cap for one title: its title-caps.json entry next to the ledger, else TITLE_CAP."""
+    path = Path(ledger_path).parent / "title-caps.json"
+    if not path.exists():
+        return TITLE_CAP
+    caps = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(caps, dict):
+        raise ValueError(f"{path.name} must be a JSON object of title -> units")
+    for slug, cap in caps.items():
+        if isinstance(cap, bool) or not isinstance(cap, (int, float)) \
+                or not math.isfinite(cap) or cap <= 0:
+            raise ValueError(f"{path.name}: cap for {slug!r} must be a finite number > 0, got {cap!r}")
+    return float(caps.get(title, TITLE_CAP))
 
 
 def _check_units(units) -> float:
@@ -117,8 +133,9 @@ class Ledger:
             if others:
                 raise ValueError(f"edition {edition_id} already has a title root on this ledger "
                                  f"({', '.join(sorted(others))}); one root per edition")
-        if self._sum(entries, title, None, edition_id) + units > TITLE_CAP:  # lifetime, all months
-            raise BudgetExceeded(f"title cap {TITLE_CAP:g} units exceeded for {title!r}")
+        cap = title_cap(self.path, title)
+        if self._sum(entries, title, None, edition_id) + units > cap:  # lifetime, all months
+            raise BudgetExceeded(f"title cap {cap:g} units exceeded for {title!r}")
         if self._sum(entries, None, month) + units > MONTH_CAP:
             raise BudgetExceeded(f"month cap {MONTH_CAP:g} units exceeded for {month}")
         entry = {"job_id": job_id, "title": title, "month": month, "units": units,

@@ -436,7 +436,8 @@ def _title_spent(ledger, rec) -> float:
 
 
 def _remaining(ledger, rec, month) -> float:
-    return min(budget.TITLE_CAP - _title_spent(ledger, rec),  # title cap: lifetime
+    cap = budget.title_cap(ledger.path, rec.data["title_slug"])
+    return min(cap - _title_spent(ledger, rec),  # title cap: lifetime
                budget.MONTH_CAP - ledger.spent(None, month))
 
 
@@ -784,7 +785,7 @@ def cmd_job(args):
                         "the Wan contract). The reel needs every planned shot, so the rest wait for "
                         "allowance; or hold for the owner.")
         raise Stop(f"Budget exceeded: forecast {units:.2f} CU > remaining {remaining:.2f} CU "
-                   f"(caps {budget.TITLE_CAP:g}/title, {budget.MONTH_CAP:g}/month, {month}). "
+                   f"(caps {budget.title_cap(ledger.path, rec.data['title_slug']):g}/title, {budget.MONTH_CAP:g}/month, {month}). "
                    "Nothing was reserved or written.", hint, code=3)
     try:
         result = colab_jobs.build_job(kind, rec, spec, ledger, rates, rec.root / "jobs", month=month)
@@ -1988,7 +1989,7 @@ def cmd_status(args):
         ledger = _ledger(rec, args)
         print(f"{title}: revision {s['revision_id']} ({s['language']}), "
               f"{_title_spent(ledger, rec):.2f} CU spent/reserved for this title (lifetime cap "
-              f"{budget.TITLE_CAP:g}), {ledger.spent(None, month):.2f} CU this month (all titles), "
+              f"{budget.title_cap(ledger.path, title):g}), {ledger.spent(None, month):.2f} CU this month (all titles), "
               f"{_remaining(ledger, rec, month):.2f} CU remaining ({month}).")
         for j in _jobs(rec):
             closed = next((e["detail"]["units"] for e in rec.data["events"] if e["result"] == "closed"

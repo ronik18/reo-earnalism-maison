@@ -1,8 +1,9 @@
+import json
 import tempfile
 import unittest
 from pathlib import Path
 
-from eav.budget import BudgetExceeded, Ledger, fit_reel_job, forecast, forecast_seconds
+from eav.budget import BudgetExceeded, Ledger, title_cap, fit_reel_job, forecast, forecast_seconds
 
 RATES = {"reel": {"s_per_step": 1.0, "units_per_hour": 10.0}}
 
@@ -29,6 +30,31 @@ class BudgetTests(unittest.TestCase):
         with self.assertRaises(BudgetExceeded):
             self.ledger.reserve("a", "2026-11", 61, "j1")
         self.ledger.reserve("a", "2026-11", 60, "j2")
+
+    def _caps(self, content):
+        (Path(self.tmp.name) / "title-caps.json").write_text(
+            content if isinstance(content, str) else json.dumps(content), encoding="utf-8")
+
+    def test_title_cap_override_allows_up_to_100(self):
+        self._caps({"bicharak": 100})
+        self.assertEqual(title_cap(self.ledger.path, "bicharak"), 100.0)
+        self.ledger.reserve("bicharak", "2026-11", 95, "j1")
+        with self.assertRaises(BudgetExceeded):
+            self.ledger.reserve("bicharak", "2026-12", 101, "j2")
+
+    def test_title_cap_default_60_without_file(self):
+        self.assertEqual(title_cap(self.ledger.path, "bicharak"), 60.0)
+        with self.assertRaises(BudgetExceeded):
+            self.ledger.reserve("bicharak", "2026-11", 61, "j1")
+
+    def test_title_caps_file_rejects_non_numbers(self):
+        for bad in ({"bicharak": "100"}, {"bicharak": True}, {"bicharak": -1}):
+            self._caps(bad)
+            with self.assertRaises(ValueError):
+                title_cap(self.ledger.path, "bicharak")
+        self._caps({"bicharak": "100"})
+        with self.assertRaises(ValueError):
+            self.ledger.reserve("bicharak", "2026-11", 1, "j1")
 
     def test_title_cap_is_lifetime_across_months(self):
         """R11: 60 CU per title over its whole life; only the 100 CU cap resets monthly."""
