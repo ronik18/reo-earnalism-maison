@@ -14,7 +14,9 @@ Input (`scene` dict, merged with the plan.json scene fields `scene_id` and `text
              wan), sound: {sfx, music}, plants: [earlier shot numbers] (the peak shot)}]
   peak     {shot, at}: the shot that carries the peak and the second it lands on
 `timing` is the measured narration, one entry per clause: [{start, end, text}] in seconds of the
-re-timed narration. `beats` are the 0-based indexes into it. Shots tile the beats in order; a cut
+re-timed narration. `beats` are the 0-based indexes into the beats derived from it (`beats()`: a boundary after
+punctuation is a cut point; an unpunctuated one only when its pause is at least 0.15 s, else the entries merge). Approval records the sha256 of the input file and `require_approved` refuses when the input or the stored plan changed.
+Shots tile the beats in order; a cut
 falls in the middle of the pause between two beats, the first shot starts at 0 and the last ends
 where the narration ends.
 
@@ -23,6 +25,7 @@ soft: they are returned as "R7?" / "R8?" (a trailing question mark means "the re
 this", never a refusal): R7? when the scene input has no `fidelity` note (the reviewer's statement that
 no frame contradicts this or the neighbouring scenes' text), R8? when it declares no `motifs`.
 """
+import hashlib
 import json
 import math
 import re
@@ -42,6 +45,9 @@ PEAK_LO, PEAK_HI, PEAK_MIN_S = 0.70, 0.85, 4.0
 WAN_CU_1280 = 0.6
 _PIXELS = {"1280x704": 1280 * 704, "896x512": 896 * 512}
 _WORDS = re.compile(r"\s+")
+_MARKS = (",", ".", ";", ":", "!", "?", "\u0964", "\u0965", "\u2014", "\u2013", "\u2026")  # , . ; : ! ? । ॥ — – …
+_CLOSERS = " \"'\u201c\u201d\u2018\u2019)]"
+BREATH_MIN_S = 0.15  # an unpunctuated pause shorter than this is not a legal cut
 
 
 class NotApproved(ValueError):
@@ -52,9 +58,17 @@ def _words(text: str) -> str:
     return _WORDS.sub("", text)
 
 
+def _ends_punct(text: str) -> bool:
+    return text.rstrip().rstrip(_CLOSERS).endswith(_MARKS)
+
+
 def beats(scene_text: str, timing: list) -> list:
-    """The narration clauses with their measured times: [{n, start, end, text, pause_after}].
-    `timing` must spell exactly the scene text (spacing aside); the pauses between clauses are where a cut may fall."""
+    """The narration beats with their measured times: [{n, start, end, text, pause_after, kind}].
+    `timing` must spell exactly the scene text (spacing aside). Each boundary between two timing entries is
+    "punct" when the text before it ends with sentence or clause punctuation, otherwise "breath". A "punct"
+    boundary is always a legal cut point; a "breath" boundary only when its measured pause is at least
+    BREATH_MIN_S, otherwise the two entries are merged into one beat. `kind` is the kind of the boundary that
+    ends the beat ("end" for the last beat); `pause_after` is the measured pause that follows it."""
     if not timing:
         raise ValueError("timing is empty: import the narration first")
     out, prev_end = [], None
@@ -65,8 +79,18 @@ def beats(scene_text: str, timing: list) -> list:
         if e <= s or (prev_end is not None and s < prev_end):
             raise ValueError(f"timing entry {i} is not in order ({s}-{e})")
         if out:
-            out[-1]["pause_after"] = round(s - prev_end, 3)
-        out.append({"n": i, "start": float(s), "end": float(e), "text": txt.strip(), "pause_after": 0.0})
+            gap = round(s - prev_end, 3)
+            if _ends_punct(out[-1]["text"]):
+                out[-1].update(kind="punct", pause_after=gap)
+            elif gap >= BREATH_MIN_S - 1e-9:
+                out[-1].update(kind="breath", pause_after=gap)
+            else:  # an unpunctuated gap too short to cut on: one beat
+                out[-1].update(end=float(e), text=out[-1]["text"] + " " + txt.strip())
+                prev_end = e
+                continue
+            out.append({"n": len(out), "start": float(s), "end": float(e), "text": txt.strip(), "pause_after": 0.0, "kind": "end"})
+        else:
+            out.append({"n": 0, "start": float(s), "end": float(e), "text": txt.strip(), "pause_after": 0.0, "kind": "end"})
         prev_end = e
     if _words("".join(b["text"] for b in out)) != _words(scene_text):
         raise ValueError("timing words do not match the scene text: the shot plan never changes the book's words")
@@ -206,8 +230,12 @@ def _approved(sp: dict) -> bool:
             and a["by"].strip().lower() != a["reviewer"].strip().lower())
 
 
-def approve(sp: dict, by: str, reviewer: str, at: str = None) -> dict:
-    """A copy of the plan carrying {approved: {by, at, reviewer}}. Refused when the two are the same
+def input_sha256(path) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def approve(sp: dict, by: str, reviewer: str, at: str = None, input_sha256: str = None) -> dict:
+    """A copy of the plan carrying {approved: {by, at, reviewer, input_sha256}}. Refused when the two are the same
     person (owner decision 3: Claude plus an independent reviewer) or when a hard rule is violated."""
     if not by.strip() or not reviewer.strip() or by.strip().lower() == reviewer.strip().lower():
         raise ValueError("approval needs two names: --by and an independent --reviewer who is not the same")
@@ -215,7 +243,7 @@ def approve(sp: dict, by: str, reviewer: str, at: str = None) -> dict:
     if hard:
         raise ValueError("the plan violates " + "; ".join(hard))
     return {**sp, "approved": {"by": by.strip(), "at": at or datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                               "reviewer": reviewer.strip()}}
+                               "reviewer": reviewer.strip(), **({"input_sha256": input_sha256} if input_sha256 else {})}}
 
 
 def _cell(text: str) -> str:
@@ -272,4 +300,12 @@ def require_approved(film_dir, scene_id: str) -> dict:
     if not _approved(sp):
         raise NotApproved(f"the shot plan of scene {scene_id} is not approved (needs approved: by, at and an independent "
                           f"reviewer); no job is built before the paper edit is approved. {hint}")
+    inp = paths(film_dir, scene_id)["input"]
+    want = sp["approved"].get("input_sha256")
+    if not want or not inp.is_file() or input_sha256(inp) != want:
+        raise NotApproved(f"the planner input of scene {scene_id} changed since approval (or the approval records no "
+                          f"input hash); re-approve: {hint}")
+    hard = [f"{c}: {m}" for c, m in check(sp) if not c.endswith("?")]
+    if hard:
+        raise NotApproved(f"the approved shot plan of scene {scene_id} now violates " + "; ".join(hard) + f"; re-approve: {hint}")
     return sp

@@ -2155,7 +2155,7 @@ def cmd_plan_shots(args):
     sp = shotplan.plan({**inp, "scene_id": args.scene, "text": scene["text"]}, inp.get("timing") or [], _json(bible))
     if args.approve:
         try:
-            sp = shotplan.approve(sp, args.by, args.reviewer)
+            sp = shotplan.approve(sp, args.by, args.reviewer, input_sha256=shotplan.input_sha256(paths["input"]))
         except ValueError as e:
             raise Stop(f"not approved: {e}", f"Fix {paths['input']} and rerun plan-shots without --approve")
     shotplan.write(film_dir, sp)

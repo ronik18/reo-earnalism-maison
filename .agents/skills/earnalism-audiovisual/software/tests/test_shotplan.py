@@ -36,6 +36,30 @@ def test_beats_follow_measured_timing():
     assert b[1]["pause_after"] == pytest.approx(1.0)
 
 
+def _t(*rows):
+    return [{"start": a, "end": b, "text": t} for a, b, t in rows]
+
+
+def test_beats_kinds_punct_and_breath():
+    timing = _t((0.0, 1.0, "মনে হইতে লাগিল,"), (1.5, 2.5, "ঘরে ঘরে"), (2.9, 4.0, "সবাই ঘুমে।"))
+    b = shotplan.beats("মনে হইতে লাগিল, ঘরে ঘরে সবাই ঘুমে।", timing)
+    assert [x["kind"] for x in b] == ["punct", "breath", "end"]  # 0.4 s unpunctuated gap is a legal breath cut
+    assert len(b) == 3
+
+
+def test_beats_merge_an_unpunctuated_gap_under_015s():
+    timing = _t((0.0, 1.0, "মনে হইতে লাগিল,"), (1.5, 2.5, "ঘরে ঘরে"), (2.6, 4.0, "সবাই ঘুমে।"))
+    b = shotplan.beats("মনে হইতে লাগিল, ঘরে ঘরে সবাই ঘুমে।", timing)
+    assert [x["kind"] for x in b] == ["punct", "end"]
+    assert b[1]["text"] == "ঘরে ঘরে সবাই ঘুমে।" and (b[1]["start"], b[1]["end"]) == (1.5, 4.0)
+    assert [x["n"] for x in b] == [0, 1]
+
+
+def test_beats_punctuated_gap_is_punct_even_when_tiny():
+    b = shotplan.beats("এক, দুই।", _t((0.0, 1.0, "এক,"), (1.05, 2.0, "দুই।")))
+    assert [x["kind"] for x in b] == ["punct", "end"] and len(b) == 2
+
+
 def test_beats_refuse_timing_that_changes_the_words():
     bad = copy.deepcopy(FIX["timing"])
     bad[3]["text"] += " extra"
@@ -140,6 +164,16 @@ def test_approve_needs_two_distinct_people_and_a_valid_plan():
     assert "approved" not in p  # the input plan is not mutated
 
 
+def _approved_film(tmp_path):
+    film = tmp_path / "film-01"
+    inp = shotplan.paths(film, "f01s014")["input"]
+    inp.parent.mkdir(parents=True)
+    inp.write_text(json.dumps({**FIX["input"], "timing": FIX["timing"]}), encoding="utf-8")
+    sha = shotplan.input_sha256(inp)
+    shotplan.write(film, shotplan.approve(_plan(), "claude", "reviewer", input_sha256=sha))
+    return film, inp
+
+
 def test_job_refuses_unapproved_scene(tmp_path):
     film = tmp_path / "film-01"
     with pytest.raises(shotplan.NotApproved, match="plan-shots"):
@@ -147,9 +181,50 @@ def test_job_refuses_unapproved_scene(tmp_path):
     shotplan.write(film, _plan())
     with pytest.raises(shotplan.NotApproved, match="approved"):
         shotplan.require_approved(film, "f01s014")
-    shotplan.write(film, shotplan.approve(_plan(), "claude", "reviewer"))
-    shotplan.require_approved(film, "f01s014")  # no raise
-    assert (film / "shots" / "f01s014.av.md").is_file()
+    film2, _ = _approved_film(tmp_path / "ok")
+    shotplan.require_approved(film2, "f01s014")  # no raise
+    assert (film2 / "shots" / "f01s014.av.md").is_file()
+
+
+def test_approval_binds_to_the_input_content(tmp_path):
+    film, inp = _approved_film(tmp_path)
+    assert shotplan.require_approved(film, "f01s014")["approved"]["input_sha256"]
+    inp.write_text(inp.read_text(encoding="utf-8") + " ", encoding="utf-8")  # input edited after approval
+    with pytest.raises(shotplan.NotApproved, match="changed since approval"):
+        shotplan.require_approved(film, "f01s014")
+
+
+def test_approval_without_hash_or_input_is_refused(tmp_path):
+    film = tmp_path / "film-01"
+    shotplan.write(film, shotplan.approve(_plan(), "claude", "reviewer"))  # no hash
+    with pytest.raises(shotplan.NotApproved, match="re-approve"):
+        shotplan.require_approved(film, "f01s014")
+
+
+def test_approved_plan_that_was_hand_edited_to_break_a_rule_is_refused(tmp_path):
+    film, _ = _approved_film(tmp_path)
+    f = shotplan.paths(film, "f01s014")["plan"]
+    sp = json.loads(f.read_text(encoding="utf-8"))
+    sp["shots"] = sp["shots"][:3]  # fewer shots than ceil(seconds / 6)
+    f.write_text(json.dumps(sp), encoding="utf-8")
+    with pytest.raises(shotplan.NotApproved, match="R2"):
+        shotplan.require_approved(film, "f01s014")
+
+
+def test_stills_job_refused_after_input_edit(tmp_path):
+    root, run = _title(tmp_path)
+    for extra in ([], ["--approve", "--by", "claude", "--reviewer", "rev"]):
+        assert run("plan-shots", "--root", root, "--film", 1, "--scene", "f01s014", *extra)[0] == 0
+    inp = root / "film" / "film-01" / "shots" / "f01s014.input.json"
+    d = json.loads(inp.read_text(encoding="utf-8"))
+    d["spine"] += " Changed."
+    inp.write_text(json.dumps(d), encoding="utf-8")
+    spec = tmp_path / "stills.json"
+    spec.write_text(json.dumps({"scene": "f01s014", "items": [{"key": "a", "prompt": "a lamp", "seed": 1}]}), encoding="utf-8")
+    rates = tmp_path / "r.json"
+    rates.write_text(json.dumps({"stills": {"s_per_step": 10.0, "units_per_hour": 5.0, "steps": 4, "decode_s": 10, "export_s": 10}}))
+    code, out = run("job", "stills", "--root", root, "--film", 1, "--rates", rates, "--spec", spec)
+    assert code == 2 and "changed since approval" in out
 
 
 # ----------------------------------------------------------------------------- CLI
