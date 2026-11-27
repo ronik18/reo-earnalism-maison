@@ -122,6 +122,19 @@ class EditGateTests(unittest.TestCase):
         _luma(dark, "8", 2)
         self.assertEqual(qc.black_bars(dark), [])
 
+    def test_dark_painted_edge_is_not_a_bar(self):
+        """I2/F11: a night painting whose wall runs dark (luma 12-16, textured) into the left edge is no bar: it is
+        not flat and nothing steps up at the band's inner boundary. A true letterbox beside it still is."""
+        wall = self.td / "wall.mp4"
+        _luma(wall, "if(lt(X,W*0.15),27+5*random(1),150+40*sin(X/9+Y/7))", 2)
+        self.assertEqual(qc.black_bars(wall), [])
+        boxed = self.td / "boxed.mp4"
+        _luma(boxed, "if(lt(X,W*0.05),16,if(lt(X,W*0.15),27+5*random(1),150+40*sin(X/9+Y/7)))", 2)
+        self.assertEqual(qc.black_bars(boxed), [])  # black beside a dark wall: no step either (a painted shadow)
+        pillar = self.td / "pillar.mp4"
+        _luma(pillar, "if(lt(X,W*0.05),16,150+40*sin(X/9+Y/7))", 2)
+        self.assertGreaterEqual(len(qc.black_bars(pillar)), 2)
+
     def test_flash_over_3_per_s_flagged(self):
         fast, slow = self.td / "fast.mp4", self.td / "slow.mp4"
         _luma(fast, "if(mod(floor(N/2),2),235,16)", 3)    # 6 flashes a second

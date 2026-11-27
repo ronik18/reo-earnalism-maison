@@ -66,6 +66,9 @@ HITCH_RATIO = 2.0        # a luma step more than 2x both neighbours inside a dis
 HITCH_MIN_STEP = 0.3     # luma levels (0-255) a step must move to belong to a dissolve
 BAR_FRAC = 0.02          # a black band of at least 2% of the frame height/width from an edge
 BAR_BLACK, BAR_INTERIOR = 24, 40
+BAR_FLAT = 4             # a bar is flat: max - min of its pixels at most this (painted night walls vary, F11)
+BAR_STEP, BAR_STEP_FRAC = 20.0, 0.6   # ... and the picture inside it is >= 20 levels brighter along >= 60% of the edge
+BAR_PERSIST = 2          # ... on at least this many consecutive samples
 MARGIN_RANGE = (16.0, 18.0)    # voice over music, dB in speech (cue.MARGIN_RANGE)
 RESIDUAL_MARGIN_MIN = 15.0     # voice over everything that is not voice (music + ambience + foley), per scene
 PEAK_SILENCE_DB = -80.0        # spec 7: the music-only bus over the dramatic peak is below this (dBFS)
@@ -83,9 +86,11 @@ def _fps(video) -> float:
 
 
 def _gray_frames(video, w, h, fps=None):
-    """Yield (index, uint8 (h, w) frame) decoded by ffmpeg, at `fps` (or the native rate); streamed."""
+    """Yield (index, uint8 (h, w) frame) decoded by ffmpeg, at `fps` (or the native rate); streamed. The scaler
+    rounds accurately (accurate_rnd): its fast path quantises a dark frame's luma to ~4-level steps, which turned
+    the cards' smooth per-frame fade (1-2 levels a frame on the Maison canvas) into a false stepped "hitch"."""
     import numpy as np
-    vf = (f"fps={fps}," if fps else "") + f"scale={w}:{h}:flags=area,format=gray"
+    vf = (f"fps={fps}," if fps else "") + f"scale={w}:{h}:flags=area+accurate_rnd,format=gray"
     p = subprocess.Popen(["ffmpeg", "-v", "error", "-i", str(video), "-vf", vf, "-f", "rawvideo", "-"],
                          stdout=subprocess.PIPE)
     try:
@@ -194,15 +199,47 @@ def hold_hashes(shot_plan_dir: Path, stills_dir: Path = None, scenes: list = Non
     return held
 
 
+def _bar(rows, k) -> bool:
+    """`rows` is the frame turned so the edge under test is row 0. A real bar: at least `k` rows (BAR_FRAC) from the
+    edge are black and flat together (every pixel at most BAR_BLACK, max - min at most BAR_FLAT), and the picture
+    steps up at the band's inner boundary: the k rows just inside it are at least BAR_STEP brighter, column by
+    column, along at least BAR_STEP_FRAC of the edge. A dark painted wall (luma 12-16, F11) is textured, or
+    continues into the picture with no step."""
+    import numpy as np
+    lo = hi = None
+    depth = 0
+    limit = rows.shape[0] // 4
+    while depth < limit:
+        r = rows[depth]
+        nlo, nhi = (int(r.min()), int(r.max())) if lo is None else (min(lo, int(r.min())), max(hi, int(r.max())))
+        if nhi > BAR_BLACK or nhi - nlo > BAR_FLAT:
+            break
+        lo, hi, depth = nlo, nhi, depth + 1
+    if depth < k:
+        return False
+    band = rows[:depth].astype(np.float32).mean(axis=0)
+    inner = rows[depth:depth + k].astype(np.float32).mean(axis=0)
+    return float(np.mean(inner - band >= BAR_STEP)) >= BAR_STEP_FRAC
+
+
 def black_bars(video: Path, fps: float = 2.0) -> list:
-    """Seconds (sampled at `fps`) of frames with a black band (every pixel of the outer BAR_FRAC of the height
-    or width at most luma 24) while the picture inside is visible (mean luma above 40, so a fade is no bar)."""
-    out = []
+    """Seconds (sampled at `fps`) of frames with a black band: an outer BAR_FRAC of the height or width that is
+    black and flat with a step up into the picture at its inner edge (`_bar`), while the picture inside is visible
+    (mean luma above 40, so a fade is no bar), on at least BAR_PERSIST consecutive samples (a bar holds)."""
+    hits = []
     for i, f in _gray_frames(video, 320, 180, fps):
         kh, kw = max(2, math.ceil(BAR_FRAC * f.shape[0])), max(2, math.ceil(BAR_FRAC * f.shape[1]))
-        bands = (f[:kh], f[-kh:], f[:, :kw], f[:, -kw:])
-        if any(b.max() <= BAR_BLACK for b in bands) and float(f[kh:-kh, kw:-kw].mean()) > BAR_INTERIOR:
-            out.append(round(i / fps, 3))
+        edges = ((f, kh), (f[::-1], kh), (f.T, kw), (f.T[::-1], kw))
+        if any(_bar(rows, k) for rows, k in edges) and float(f[kh:-kh, kw:-kw].mean()) > BAR_INTERIOR:
+            hits.append(i)
+    out, run = [], []
+    for i in hits + [None]:
+        if run and (i is None or i != run[-1] + 1):
+            if len(run) >= BAR_PERSIST:
+                out += [round(k / fps, 3) for k in run]
+            run = []
+        if i is not None:
+            run.append(i)
     return out
 
 
@@ -435,7 +472,8 @@ def film_gates(video: Path, film_dir: Path, scene_ids: list, lang: str) -> tuple
         not_run["captions"] = f"{vtt.name} is not on disk"
     per, absent = {}, []
     for sid in scene_ids:
-        mx, vo = film_dir / "audio" / f"{sid}.mix.wav", film_dir / "voice" / f"{sid}.wav"
+        mx = film_dir / "audio" / f"{sid}.mix.wav"
+        vo = Path(infos[sid]["voice"]) if infos.get(sid, {}).get("voice") else film_dir / "voice" / f"{sid}.wav"
         rec_db = infos.get(sid, {}).get("voice_over_music_db")
         if not (mx.is_file() and vo.is_file() and rec_db is not None):
             absent.append(sid)
