@@ -479,3 +479,8 @@ STRINGS.update({
     "follow_unavailable": ("Text follow isn't available for this audio quality", "Text follow isn't available for this audio quality"),
     "match_device": ("Match device", "Match device"),
 })
+STRINGS.update({
+    "chapters": ("Chapters", "Chapters"),
+    "min_left": ("min left", "min left"),
+    "reading_progress": ("Reading progress", "Reading progress"),
+})

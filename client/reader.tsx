@@ -1,4 +1,4 @@
-import { PreviewBoundary, FormatSwitch } from "./media-sheets";
+import { PreviewBoundary, FormatSwitch, MediaSheet } from "./media-sheets";
 import { QueueRecovery } from "./recovery";
 import { enqueue, queued, discardQueuedProgress } from "./queue";
 import { setIdentity } from "./offline";
@@ -40,6 +40,10 @@ import {
   pageCount,
   type Position,
   initialReaderTheme,
+  progressFraction,
+  minutesRemaining,
+  headingsFor,
+  toolbarHidden,
 } from "./state";
 interface Boot {
   edition_id: string;
@@ -661,6 +665,78 @@ function Reader({ boot }: { boot: Boot }) {
       clearFollow(reading);
     };
   }, []);
+  // Immersive toolbar: hides on a scroll down by hand, returns on scroll up, tap or focus. The reader's own
+  // follow-along autoscroll (ownScroll, then the scroll event it causes) neither hides nor shows it, so it never
+  // fights the audio; only isUserScroll() events count. Focus inside it keeps it shown (CSS :focus-within too).
+  const headings = useRef(headingsFor(reading.innerHTML));
+  const [chaptersOpen, setChaptersOpen] = useState(false);
+  useEffect(() => {
+    const bar = document.querySelector<HTMLElement>(".reader-toolbar");
+    const hairline = document.getElementById("reader-progress");
+    const fill = hairline?.firstElementChild as HTMLElement | null;
+    const minutes = document.getElementById("reader-minutes");
+    const chapters = document.getElementById("reader-chapters-trigger");
+    const chars = paragraphs.current.reduce((n, p) => n + p.text.length, 0);
+    let lastTop = window.scrollY;
+    const measureProgress = () => {
+      const paged = reader.dataset.layout === "paginated";
+      const fraction = paged
+        ? progressFraction(
+            reading.scrollLeft,
+            reading.scrollWidth,
+            reading.clientWidth,
+          )
+        : progressFraction(
+            Math.max(0, window.scrollY - reading.offsetTop),
+            reading.offsetHeight,
+            window.innerHeight,
+          );
+      if (fill) fill.style.transform = `scaleX(${fraction})`;
+      hairline?.setAttribute("aria-valuenow", String(Math.round(fraction * 100)));
+      const left = minutesRemaining(Math.round(chars * (1 - fraction)));
+      if (minutes) minutes.textContent = left ? `${left} ${t("min_left")}` : "";
+    };
+    const pinned = () => !!bar?.matches(":focus-within");
+    const place = (hidden: boolean) => bar?.classList.toggle("is-hidden", hidden);
+    const onScroll = () => {
+      measureProgress();
+      const top = window.scrollY;
+      const mine = !isUserScroll("scroll", undefined, Date.now(), ownScrollUntil.current);
+      if (!mine && bar)
+        place(
+          toolbarHidden(bar.classList.contains("is-hidden"), lastTop, top, pinned()),
+        );
+      lastTop = top;
+    };
+    const onTap = () => {
+      if (bar?.classList.contains("is-hidden")) place(false);
+    };
+    const onFocus = () => place(false);
+    const openChapters = () => setChaptersOpen(true);
+    if (chapters) chapters.hidden = headings.current.length === 0;
+    measureProgress();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measureProgress);
+    reading.addEventListener("scroll", measureProgress, { passive: true });
+    reader.addEventListener("click", onTap);
+    bar?.addEventListener("focusin", onFocus);
+    chapters?.addEventListener("click", openChapters);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measureProgress);
+      reading.removeEventListener("scroll", measureProgress);
+      reader.removeEventListener("click", onTap);
+      bar?.removeEventListener("focusin", onFocus);
+      chapters?.removeEventListener("click", openChapters);
+    };
+  }, []);
+  function jumpToChapter(id: string) {
+    noteUserScroll("page-button"); // a chapter jump is the reader's own choice: follow-along pauses 5 s
+    setChaptersOpen(false);
+    document
+      .getElementById(id)
+      ?.scrollIntoView({ behavior: "instant", block: "start", inline: "start" });
+  }
   useEffect(() => {
     if (!follow) return clearFollow(reading);
     const p = paragraphs.current.find((item) => item.anchor === follow.anchor);
@@ -1093,6 +1169,21 @@ function Reader({ boot }: { boot: Boot }) {
           />
         </section>
       ) : null}
+      <MediaSheet
+        open={chaptersOpen}
+        title={t("chapters")}
+        onClose={() => setChaptersOpen(false)}
+      >
+        <ol className="reader-chapter-list" lang={boot.content_locale}>
+          {headings.current.map((h) => (
+            <li key={h.id}>
+              <button type="button" onClick={() => jumpToChapter(h.id)}>
+                {h.text}
+              </button>
+            </li>
+          ))}
+        </ol>
+      </MediaSheet>
       {fullReader && boot.player_url ? (
         <FormatSwitch
           open={switchOpen}

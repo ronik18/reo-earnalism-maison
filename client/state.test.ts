@@ -16,6 +16,10 @@ import {
   measuredSeek,
   validReturnPath,
   initialReaderTheme,
+  progressFraction,
+  minutesRemaining,
+  headingsFor,
+  toolbarHidden,
 } from "./state.ts";
 import { readFileSync } from "node:fs";
 import { wrapTextSpan } from "./follow-dom.ts";
@@ -1167,4 +1171,53 @@ test("with nothing saved the system dark setting picks dark, otherwise light", (
 test("the account value system is not a saved choice", () => {
   assert.equal(initialReaderTheme("system", true), "dark");
   assert.equal(initialReaderTheme("system", false), "light");
+});
+
+test("progressFraction is the scrolled share, clamped, 0 when nothing scrolls", () => {
+  assert.equal(progressFraction(0, 2000, 1000), 0);
+  assert.equal(progressFraction(500, 2000, 1000), 0.5);
+  assert.equal(progressFraction(1000, 2000, 1000), 1);
+  assert.equal(progressFraction(1400, 2000, 1000), 1);
+  assert.equal(progressFraction(-20, 2000, 1000), 0);
+  assert.equal(progressFraction(0, 800, 1000), 0);
+});
+
+test("minutesRemaining rounds up at 900 characters a minute", () => {
+  assert.equal(minutesRemaining(0), 0);
+  assert.equal(minutesRemaining(1), 1);
+  assert.equal(minutesRemaining(900), 1);
+  assert.equal(minutesRemaining(901), 2);
+  assert.equal(minutesRemaining(1800, 600), 3);
+  assert.equal(minutesRemaining(-5), 0);
+});
+
+test("headingsFor lists the rendered h2 chapter headings with their anchor ids", () => {
+  const html =
+    '<p id="anchor-a">x</p><h2 id="anchor-b" data-anchor="b">প্রথম <em>পরিচ্ছেদ</em></h2><h2 id="anchor-c" data-anchor="c">Two &amp; three</h2><h3 id="z">no</h3>';
+  assert.deepEqual(headingsFor(html), [
+    { id: "anchor-b", text: "প্রথম পরিচ্ছেদ" },
+    { id: "anchor-c", text: "Two & three" },
+  ]);
+  assert.deepEqual(headingsFor("<p>none</p>"), []);
+});
+
+test("toolbarHidden hides on scroll down, returns on scroll up, never while focused or near the top", () => {
+  assert.equal(toolbarHidden(false, 100, 300, false), true);
+  assert.equal(toolbarHidden(true, 300, 280, false), false);
+  assert.equal(toolbarHidden(false, 100, 300, true), false);
+  assert.equal(toolbarHidden(true, 300, 310, true), false);
+  assert.equal(toolbarHidden(false, 0, 40, false), false);
+  assert.equal(toolbarHidden(true, 300, 301, false), true); // a 1 px jitter changes nothing
+  assert.equal(toolbarHidden(false, 300, 302, false), false);
+  assert.equal(toolbarHidden(true, 300, 40, false), false); // back at the top
+});
+
+test("reader toolbar CSS: 2px gold hairline, transform, no transition under reduced motion", () => {
+  const css = readFileSync("static/maison/room/room.css", "utf8");
+  assert.match(css, /\.reader-progress[^{]*\{[^}]*height:2px/);
+  assert.match(css, /\.reader-progress[^{]*\{[^}]*var\(--gold/);
+  assert.match(css, /\.reader-toolbar\.is-hidden[^{]*\{[^}]*transform:translateY\(-100%\)/);
+  assert.match(css, /\.reader-toolbar:focus-within[^{]*\{[^}]*transform:none/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce\)\s*\{[^@]*\.reader-toolbar\{[^}]*transition:none/);
+  assert.match(css, /body\.reduced-motion \.reader-toolbar[^{]*\{[^}]*transition:none/);
 });

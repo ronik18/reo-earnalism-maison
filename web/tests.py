@@ -244,6 +244,62 @@ class ExperienceTests(TestCase):
         self.assertNotIn("reader-theme.js", html)
         self.assertIsNone(re.search(r"<script(?![^>]*\bsrc=)[^>]*>\s*\S", html.split("<main", 1)[0], re.I))
 
+    def _reader_html(self):
+        self.login()
+        return self.client.get(f"/en/read/{self.edition}/{self.unit}/").content.decode()
+
+    def test_reader_has_single_back_and_title(self):
+        html = self._reader_html()
+        body = html.split("<main", 1)[0] + html.split("<main", 1)[1]
+        self.assertEqual(len(re.findall(r'class="room-back"', html)), 1)
+        self.assertNotIn("focus-toolbar", html)
+        self.assertEqual(len(re.findall(r'class="room-evening-title"', html)), 1)
+        self.assertNotIn('class="reader-meta"', html)
+        title = html.split('class="room-evening-title">', 1)[1].split("</span>", 1)[0]
+        self.assertEqual(html.count(f">{title}<"), 1)
+        self.assertEqual(len(re.findall(r">\s*Back\s*<", body.split("<main", 1)[0])), 1)
+        self.assertIn("maison/logo.png", html)
+        self.assertIn("room-logo-mini", html.split("<header", 1)[1].split("</header>", 1)[0])
+
+    def test_toolbar_hides_on_scroll_down_shows_on_up_or_tap(self):
+        html = self._reader_html()
+        header = html.split("<header", 1)[1].split("</header>", 1)[0]
+        self.assertIn("reader-toolbar", header.split(">", 1)[0])
+        root = Path(settings.BASE_DIR)
+        css = (root / "static/maison/room/room.css").read_text()
+        self.assertRegex(css, r"\.reader-toolbar\.is-hidden[^{]*\{[^}]*transform:translateY\(-100%\)")
+        source = (root / "client/reader.tsx").read_text()
+        for needle in ("toolbarHidden(", "is-hidden", 'addEventListener("click"'):
+            self.assertIn(needle, source)
+        self.assertIn("isUserScroll", source)  # the reader's own autoscroll never hides it
+        self.assertRegex(source, r"ownScrollUntil\.current")
+
+    def test_toolbar_shows_on_focus_within(self):
+        css = (Path(settings.BASE_DIR) / "static/maison/room/room.css").read_text()
+        self.assertRegex(css, r"\.reader-toolbar:focus-within[^{]*\{[^}]*transform:none")
+        self.assertRegex(css, r"prefers-reduced-motion:\s*reduce\)\s*\{[^@]*\.reader-toolbar\{[^}]*transition:none")
+        self.assertRegex(css, r"body\.reduced-motion \.reader-toolbar[^{]*\{[^}]*transition:none")
+        self.assertIn(":focus-within", (Path(settings.BASE_DIR) / "client/reader.tsx").read_text())
+
+    def test_progress_hairline_2px_gold_and_minutes_remaining(self):
+        html = self._reader_html()
+        self.assertRegex(html, r'class="reader-progress"[^>]*role="progressbar"')
+        self.assertIn('id="reader-minutes"', html)
+        css = (Path(settings.BASE_DIR) / "static/maison/room/room.css").read_text()
+        rule = re.search(r"\.reader-progress[^{]*\{([^}]*)\}", css).group(1)
+        self.assertIn("height:2px", rule)
+        self.assertIn("var(--gold", rule)
+        self.assertNotRegex(rule, r"#[0-9A-Fa-f]{3,6}\b")
+
+    def test_chapter_drawer_lists_headings_and_jumps(self):
+        html = self._reader_html()
+        self.assertIn('id="reader-chapters-trigger"', html)
+        self.assertIn("Chapters", html)
+        self.assertIn('id="reader-format-slot"', html)  # Task 11's Read/Listen/Watch switch goes here
+        source = (Path(settings.BASE_DIR) / "client/reader.tsx").read_text()
+        for needle in ("headingsFor(", "MediaSheet", 't("chapters")', "scrollIntoView", 'noteUserScroll("page-button")'):
+            self.assertIn(needle, source)
+
     def test_signed_in_default_follows_the_device_and_a_saved_light_stays_light(self):
         from accounts.models import Preferences
         self.login()

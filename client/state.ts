@@ -271,3 +271,66 @@ export function initialReaderTheme(
   if (saved && READER_THEMES.includes(saved)) return saved as ReaderTheme;
   return prefersDark ? "dark" : "light";
 }
+
+/** Share of the page scrolled, 0..1; 0 when the page does not scroll. */
+export function progressFraction(
+  scrollTop: number,
+  scrollHeight: number,
+  viewport: number,
+): number {
+  const range = scrollHeight - viewport;
+  if (!(range > 0)) return 0;
+  return Math.min(1, Math.max(0, scrollTop / range));
+}
+
+/** Whole minutes left to read, rounded up (900 characters a minute unless told otherwise). */
+export function minutesRemaining(
+  charsLeft: number,
+  charsPerMinute = 900,
+): number {
+  if (!(charsLeft > 0) || !(charsPerMinute > 0)) return 0;
+  return Math.ceil(charsLeft / charsPerMinute);
+}
+
+const ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  "#39": "'",
+  "#x27": "'",
+  nbsp: " ",
+};
+/** The rendered `<h2>` chapter (পরিচ্ছেদ) headings of a unit, in order, with the element id a jump targets. */
+export function headingsFor(unitHtml: string): Array<{ id: string; text: string }> {
+  const found: Array<{ id: string; text: string }> = [];
+  for (const m of unitHtml.matchAll(/<h2\b([^>]*)>([\s\S]*?)<\/h2>/gi)) {
+    const id = /\bid="([^"]*)"/.exec(m[1])?.[1];
+    const text = m[2]
+      .replace(/<[^>]*>/g, "")
+      .replace(/&(#?\w+);/g, (all, name: string) => ENTITIES[name] ?? all)
+      .replace(/\s+/g, " ")
+      .trim();
+    if (id && text) found.push({ id, text });
+  }
+  return found;
+}
+
+export const TOOLBAR_TOP_PX = 80;
+export const TOOLBAR_JITTER_PX = 4;
+/**
+ * Should the reader toolbar be hidden after the page moved from `from` to `to`? Down past the top band hides it, up
+ * shows it, a tiny move changes nothing, and it is never hidden while focus or a screen reader is inside (`pinned`).
+ */
+export function toolbarHidden(
+  hidden: boolean,
+  from: number,
+  to: number,
+  pinned: boolean,
+): boolean {
+  if (pinned || to <= TOOLBAR_TOP_PX) return false;
+  const delta = to - from;
+  if (delta > TOOLBAR_JITTER_PX) return true;
+  if (delta < -TOOLBAR_JITTER_PX) return false;
+  return hidden;
+}

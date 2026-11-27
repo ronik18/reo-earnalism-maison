@@ -28,11 +28,12 @@
   <symbol id="i-tri" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z" fill="currentColor"/></symbol>
 </svg>
 <a class="skip-link" href="#main">{% ui 'skip_content' %}</a>
-{% if focused %}<header class="room-top room-evening"><div class="room-wrap">
+{% if focused %}<header class="room-top room-evening{% block header_class %}{% endblock %}"><div class="room-wrap">
   <a class="room-back" href="{% if edition.edition_id %}{% url 'web:title' ui_locale edition.edition_id %}{% else %}{% url 'web:home' ui_locale %}{% endif %}"><svg aria-hidden="true"><use href="#i-back"/></svg><span>{% ui 'back' %}</span></a>
   <span class="room-evening-title">{{ edition.title|default:ui.site_name }}</span>
+  {% block header_tools %}{% endblock %}
   <a class="room-logo room-logo-mini" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="" width="1400" height="500"></a>
-</div></header>{% else %}<header class="room-top"><div class="room-wrap">
+</div></header>{% block header_after %}{% endblock %}{% else %}<header class="room-top"><div class="room-wrap">
   <a class="room-logo" href="{% url 'web:home' ui_locale %}" aria-label="Earnalism home"><img src="{% static 'maison/logo.png' %}" alt="Earnalism — Where Learning Becomes Earning — A Reo Enterprise venture" width="1400" height="500"></a>
   <nav class="room-nav" aria-label="Main">
     <a href="{% url 'web:home' ui_locale %}"{% if request.resolver_match.url_name == 'home' %} aria-current="page"{% endif %}>Home</a><a href="{% url 'web:explore' ui_locale %}"{% if active_nav == 'explore' %} aria-current="page"{% endif %}>Explore</a><a href="{% url 'web:learn' ui_locale %}"{% if active_nav == 'learn' %} aria-current="page"{% endif %}>Learn</a><a href="{% url 'web:series' ui_locale %}"{% if active_nav == 'series' %} aria-current="page"{% endif %}>Series</a><a href="{% url 'web:vault' ui_locale %}"{% if active_nav == 'vault' %} aria-current="page"{% endif %}>Vault</a>
