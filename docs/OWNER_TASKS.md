@@ -34,7 +34,7 @@ Last updated: 27 Nov 2026.
 
 ## Decisions
 - [x] **Site quality decisions (26 Nov 2026):** cache public covers and serve small sizes; darken gold text only (before/after screenshots first); longer free preview (first chapter, up to ~1,500 words); one Back link in the reader.
-- [ ] **Listen to বিচারক narration** (sent 26 Nov; 20.7 min; check 07:31) and say "Voice approved", "Approved, but redo 07:31", or what to change. The other 13 narrations are built and run on Modal only after this.
+- [ ] **Listen to বিচারক narration** (sent 26 Nov; 20.7 min). At 07:31 (unit f01s007-007), check that every word of this line is spoken: "সে জানিত না এই জগৎযন্ত্রটার কলকারখানা অত্যন্ত জটিল এবং লৌহকঠিন,— সুখে দুঃখে সম্পদে বিপদে, সংশয়ে সঙ্কটে ও নৈরাশ্যে পরিতাপে বিমিশ্রিত।" It runs about 1.7 times faster than the rest, so words may be missing. The film assembly waits for your answer. Say "Voice approved" (the line is complete), "Approved, but redo 07:31", or what to change. The other 13 narrations run only after this.
 - [ ] **Import further approved titles as unpublished drafts** (nothing visible to readers) for their narration jobs: say so per title after you approve it on the Monday page.
 - [ ] **Founding member trigger for US/UK accounts** (Phase 9): the number of paying Indian Pass members that starts it (proposed 300).
 - [ ] **Standing permission start date** (`MAISON_REVIEW_STANDING_FROM`): about two months after the first Monday batch.
