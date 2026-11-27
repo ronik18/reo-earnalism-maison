@@ -36,6 +36,46 @@ export function fadeGain(remainingMs: number): number {
   if (Number.isNaN(remainingMs)) return 1;
   return Math.min(1, Math.max(0, remainingMs / FADE_MS));
 }
+export interface SleepTickInput {
+  paused: boolean;
+  ended: boolean;
+  elapsedMs: number;
+  playedMs: number;
+  timer: { setAt: number; ms: number } | undefined;
+  endOfPart: boolean;
+  unitMs: number;
+  currentMs: number;
+  rate: number;
+}
+/** Longest gap one tick may add, so a system sleep or frozen tab cannot use up the timer at once. */
+export const MAX_TICK_MS = 2000;
+/**
+ * One sleep-timer tick: listening time counts only while playing (capped per tick); a minutes timer runs on
+ * that time, "end of part" on the real time left in the part (media ms / rate). "stop" returns gain 1 so the
+ * caller pauses and restores the listener's volume.
+ */
+export function sleepTick(i: SleepTickInput): { playedMs: number; action: "none" | "fade" | "stop"; gain: number } {
+  const playing = !i.paused && !i.ended;
+  const playedMs = i.playedMs + (playing ? Math.min(Math.max(i.elapsedMs, 0), MAX_TICK_MS) : 0);
+  if (!i.endOfPart && !i.timer) return { playedMs, action: "none", gain: 1 };
+  const rate = Number.isFinite(i.rate) && i.rate > 0 ? i.rate : 1;
+  const left = i.endOfPart ? (i.unitMs - i.currentMs) / rate : sleepRemaining(playedMs, i.timer!.setAt, i.timer!.ms);
+  if (playing && left <= 0) return { playedMs, action: "stop", gain: 1 };
+  const gain = fadeGain(left);
+  return { playedMs, action: gain < 1 ? "fade" : "none", gain };
+}
+/** Index of the marker playing at `positionMs` (the last one starting at or before it), or -1. */
+export function activeMarkerIndex(markers: { start_ms: number }[] | undefined, positionMs: number): number {
+  let found = -1;
+  markers?.forEach((m, k) => { if (m.start_ms <= positionMs) found = k; });
+  return found;
+}
+/** Where the listener is, by name: the playing marker's title when the part has markers, else the part's title. */
+export function placeTitle(unit: { title: string; markers?: { title: string; start_ms: number }[] } | undefined, positionMs: number): string {
+  if (!unit) return "";
+  const k = activeMarkerIndex(unit.markers, positionMs);
+  return k >= 0 ? unit.markers![k].title : unit.title;
+}
 /** What playback does when a part ends: "end of part" and the last part both stop; nothing jumps to another title. */
 export function afterPartEnds(index: number, count: number, endOfPart: boolean): "stop" | "advance" {
   return !endOfPart && index + 1 < count ? "advance" : "stop";

@@ -10,6 +10,9 @@ import {
   afterPartEnds,
   clockLabel,
   positionLabel,
+  sleepTick,
+  activeMarkerIndex,
+  placeTitle,
   measuredSeek,
   validReturnPath,
 } from "./state.ts";
@@ -57,7 +60,7 @@ test("test_end_of_part_on_last_part_stops", () => {
   assert.equal(afterPartEnds(0, 3, false), "advance");
   assert.equal(afterPartEnds(0, 1, false), "stop");
 });
-test("test_conflict_prompt_shows_both_positions", () => {
+test("clock and position labels are mm:ss after the title", () => {
   assert.equal(clockLabel(0), "00:00");
   assert.equal(clockLabel(65432), "01:05");
   assert.equal(clockLabel(3725000), "62:05");
@@ -558,4 +561,56 @@ test("test_seek_back_15_forward_30_clamp_to_bounds", () => {
   assert.equal(seekTarget(590, 30, 600), 600);
   assert.equal(seekTarget(5, 30, NaN), 35);
   assert.equal(seekTarget(5, -15, Infinity), 0);
+});
+
+const base = { paused: false, ended: false, elapsedMs: 250, playedMs: 0, timer: undefined, endOfPart: false, unitMs: 600000, currentMs: 0, rate: 1 };
+test("sleepTick does not count paused or ended time", () => {
+  const timer = { setAt: 0, ms: 60000 };
+  assert.equal(sleepTick({ ...base, timer, paused: true, elapsedMs: 1000 }).playedMs, 0);
+  assert.equal(sleepTick({ ...base, timer, ended: true, elapsedMs: 1000 }).playedMs, 0);
+  assert.equal(sleepTick({ ...base, timer, paused: true, elapsedMs: 1000 }).action, "none");
+  assert.equal(sleepTick({ ...base, timer, elapsedMs: 250 }).playedMs, 250);
+});
+test("sleepTick caps one tick at 2000 ms so a long system sleep cannot stop the timer at once", () => {
+  const timer = { setAt: 0, ms: 60000 };
+  const r = sleepTick({ ...base, timer, elapsedMs: 3600000, playedMs: 10000 });
+  assert.equal(r.playedMs, 12000);
+  assert.equal(r.action, "none");
+});
+test("sleepTick: a minutes timer fades over the last 15 s and stops at 0", () => {
+  const timer = { setAt: 0, ms: 60000 };
+  assert.deepEqual(sleepTick({ ...base, timer, playedMs: 30000 }), { playedMs: 30250, action: "none", gain: 1 });
+  const mid = sleepTick({ ...base, timer, playedMs: 52250 });
+  assert.equal(mid.action, "fade");
+  assert.equal(mid.gain, 0.5);
+  const last = sleepTick({ ...base, timer, playedMs: 59750 });
+  assert.equal(last.action, "stop");
+  assert.equal(last.gain, 1);
+  assert.equal(fadeGain(0), 0);
+});
+test("sleepTick: end of part fades in real time and stops at the end", () => {
+  const eop = { ...base, endOfPart: true, unitMs: 100000, rate: 2 };
+  assert.equal(sleepTick({ ...eop, currentMs: 50000 }).action, "none");
+  // 15 s of media left at 2x is 7.5 s of real time: half of the fade remains.
+  const mid = sleepTick({ ...eop, currentMs: 85000 });
+  assert.equal(mid.action, "fade");
+  assert.equal(mid.gain, 0.5);
+  const end = sleepTick({ ...eop, currentMs: 100000 });
+  assert.equal(end.action, "stop");
+  assert.equal(end.gain, 1);
+});
+test("sleepTick with no timer or after cancel leaves the volume alone", () => {
+  assert.deepEqual(sleepTick({ ...base, currentMs: 599000 }), { playedMs: 250, action: "none", gain: 1 });
+});
+test("active marker and place titles", () => {
+  const markers = [{ title: "One", start_ms: 0 }, { title: "Two", start_ms: 60000 }];
+  assert.equal(activeMarkerIndex(markers, 59999), 0);
+  assert.equal(activeMarkerIndex(markers, 60000), 1);
+  assert.equal(activeMarkerIndex(undefined, 5), -1);
+  assert.equal(activeMarkerIndex([{ title: "Late", start_ms: 10 }], 5), -1);
+  assert.equal(placeTitle({ title: "Part", markers }, 61000), "Two");
+  assert.equal(placeTitle({ title: "Part", markers }, 0), "One");
+  assert.equal(placeTitle({ title: "Part" }, 61000), "Part");
+  assert.equal(placeTitle(undefined, 5), "");
+  assert.equal(positionLabel(placeTitle({ title: "Part", markers }, 61000), 61000), "Two, 01:01");
 });

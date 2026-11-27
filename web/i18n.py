@@ -472,4 +472,5 @@ STRINGS.update({
     "chapters_in_part": ("Chapters in this part", "Chapters in this part"),
     "position_saved": ("Saved to your account", "Saved to your account"),
     "position_device": ("On this device", "On this device"),
+    "position_unavailable": ("Unavailable", "Unavailable"),
 })

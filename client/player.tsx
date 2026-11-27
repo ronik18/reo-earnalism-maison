@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { mountIsland, closePlayer } from "./lifecycle";
 import { api, ApiError, errorText, readBootstrap, session, t } from "./api";
 import { IconButton } from "./icon-button";
-import { mediaMetadataFor, recallSpeed, rememberSpeed, afterPartEnds, clockLabel, fadeGain, positionLabel, seekTarget, sleepRemaining, validReturnPath, withRendition } from "./state";
+import { mediaMetadataFor, recallSpeed, rememberSpeed, activeMarkerIndex, afterPartEnds, clockLabel, placeTitle, positionLabel, seekTarget, sleepTick, validReturnPath, withRendition } from "./state";
 interface Rendition {
   asset_id: string;
   quality_kbps: number;
@@ -133,13 +133,14 @@ function Player({ boot }: { boot: Boot }) {
   /** Name where the server and this device each are, so the listener can choose knowingly. */
   async function describePositions() {
     const el = audio.current;
-    const titleOf = (unitId?: string) => boot.chapters.find((c) => c.unit_id === unitId)?.title ?? "";
-    const device = positionLabel(unitAt(activeChapter.current)?.title ?? "", Math.round((el?.currentTime || 0) * 1000));
-    setPositions({ device });
+    const titleOf = (unitId: string | undefined, ms: number) => placeTitle(boot.chapters.find((c) => c.unit_id === unitId), ms);
+    const deviceMs = Math.round((el?.currentTime || 0) * 1000);
+    const device = positionLabel(titleOf(unitAt(activeChapter.current)?.unit_id, deviceMs), deviceMs);
+    setPositions({ device, server: "" });
     try {
       const latest = await api<Progress>(path);
-      if (latest.location) setPositions({ device, server: positionLabel(titleOf(latest.location.unit_id), latest.location.position_ms) });
-    } catch { /* the prompt still names this device's position */ }
+      if (latest.location) setPositions({ device, server: positionLabel(titleOf(latest.location.unit_id, latest.location.position_ms), latest.location.position_ms) });
+    } catch { /* the prompt says the saved position is unavailable */ }
   }
   async function persist(keepalive = false) {
     const element = audio.current,
@@ -312,20 +313,24 @@ function Player({ boot }: { boot: Boot }) {
       const elapsed = now - lastTick;
       lastTick = now;
       if (!el) return;
-      if (!el.paused && !el.ended) {
-        played.current += elapsed;
-        const unit = unitAt(activeChapter.current);
-        const left = endPart.current
-          ? (unit ? unit.duration_ms : Infinity) - el.currentTime * 1000
-          : sleepTimer.current
-            ? sleepRemaining(played.current, sleepTimer.current.setAt, sleepTimer.current.ms)
-            : Infinity;
-        if (left <= 0 && (endPart.current || sleepTimer.current)) {
-          el.pause();
-          stopTimer();
-          setStatus(t("sleep_finished"));
-        } else applyFade(fadeGain(left));
-      }
+      const unit = unitAt(activeChapter.current);
+      const tick = sleepTick({
+        paused: el.paused,
+        ended: el.ended,
+        elapsedMs: elapsed,
+        playedMs: played.current,
+        timer: sleepTimer.current,
+        endOfPart: endPart.current,
+        unitMs: Number.isFinite(el.duration) && el.duration > 0 ? el.duration * 1000 : unit?.duration_ms ?? Infinity,
+        currentMs: el.currentTime * 1000,
+        rate: el.playbackRate,
+      });
+      played.current = tick.playedMs;
+      if (tick.action === "stop") {
+        el.pause();
+        stopTimer();
+        setStatus(t("sleep_finished"));
+      } else applyFade(tick.gain);
       if (!el.paused && now - lastSaved.current >= 15000)
         void persist().catch((e) => setStatus(errorText(e)));
     }, 250);
@@ -431,12 +436,6 @@ function Player({ boot }: { boot: Boot }) {
       setStatus(errorText(error));
     }
   }
-  /** Index of the marker playing now in the current unit (the last one at or before the position). */
-  function activeMarker(markers: { start_ms: number }[]): number {
-    let found = -1;
-    markers.forEach((m, k) => { if (m.start_ms <= position * 1000) found = k; });
-    return found;
-  }
   /** Play part `i` from `at` ms: a seek inside the current part, otherwise load that part there. */
   async function openPart(i: number, at: number) {
     if (busy) return;
@@ -529,6 +528,7 @@ function Player({ boot }: { boot: Boot }) {
       setStatus(errorText(e));
     } finally { setBusy(false); }
   }
+  const playingMarker = activeMarkerIndex(chapter?.markers, position * 1000);
   if (!chapter) return <p className="notice">{t("not_available")}</p>;
   return (
     <section
@@ -613,7 +613,7 @@ function Player({ boot }: { boot: Boot }) {
         <div className="notice">
           <p>{t("conflict")}</p>
           <dl className="conflict-positions">
-            {positions?.server ? <><dt>{t("position_saved")}</dt><dd lang={boot.locale}>{positions.server}</dd></> : null}
+            {positions ? <><dt>{t("position_saved")}</dt>{positions.server ? <dd lang={boot.locale}>{positions.server}</dd> : <dd>{t("position_unavailable")}</dd>}</> : null}
             {positions ? <><dt>{t("position_device")}</dt><dd lang={boot.locale}>{positions.device}</dd></> : null}
           </dl>
           <button disabled={busy} onClick={() => void resolveProgress(false)}>
@@ -690,7 +690,7 @@ function Player({ boot }: { boot: Boot }) {
                     <button
                       lang={boot.locale}
                       disabled={busy || (!!boot.preview && (i !== 0 || m.start_ms >= boot.preview.duration_ms))}
-                      aria-current={i === index && k === activeMarker(c.markers!) ? "true" : undefined}
+                      aria-current={i === index && k === playingMarker ? "true" : undefined}
                       onClick={() => void openPart(i, m.start_ms)}
                     >
                       {m.title}
