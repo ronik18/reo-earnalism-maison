@@ -46,5 +46,33 @@ Job endings are events too: `import/accepted`, `job/superseded` (never ran, 0 CU
 `<chunk id>-r<k>` with its own `job/built` event; the closed chunk stays in the record. Reel planning adds `reel/scripted`,
 `reel/narration_misfit` and `reel/shots_planned`.
 
+## Correcting a published text
+
+An owner-approved correction of the edition's text is a new revision of the same edition, so it
+stays on this root (one record per edition; `init` refuses a second one):
+`rebase-source <corrected export.json> --root <dir> --reason "<owner approval>"`.
+
+- It validates the export as `init` does and refuses (start a new root instead) a different
+  edition, language, unit count or paragraph count per unit, or a paragraph that changed kind.
+  It also refuses while film narration built from the old text ran on Modal without being
+  imported (import or `close` it first), and a correction that changes the sentence count of a
+  paragraph split across scenes.
+- `source.json` becomes the new export; the old one stays as `source-<old revision id>.json`
+  (artifact `source_previous`). The record's source fields take the new revision, content sha,
+  state, rights and export sha.
+- `plan.json`: every anchor and unit id is mapped by position (unit, paragraph); block, scene
+  and voice text is refreshed from the new source. Scene ids, structure, keyframes and flags
+  stay, so still keys, imported stills, retouches and music stay valid.
+- `rebases/<old revision>-to-<new revision>.json` (artifact `source_rebase`) and the
+  `rebase_source/ok` event hold the old and new revision ids and content shas, the changed
+  paragraphs (ordinal, unit, position, old and new anchor and text), the full anchor mapping by
+  unit and paragraph position, the scenes and voice units whose text changed, and the narration
+  jobs superseded or made stale.
+- Film narration built before a text-changing rebase is stale: a never-run job is superseded
+  (`source rebased to <new revision>`, 0 CU), an imported one is never current again (`film`,
+  `bundle-audio` and `preview` refuse it; `status` marks it STALE), and a stale chunk group is
+  never `--replace-chunk`ed. Reel narration speaks the reel script and is unaffected.
+- `status` and `Next:` then point to `job narration`, built as usual from the refreshed plan.
+
 Events are append-only. Failed and held attempts stay in the record; never delete or
 rewrite them to make the history look clean.

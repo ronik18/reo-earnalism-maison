@@ -27,7 +27,7 @@ cd skills/earnalism-audiovisual/software
 python3 -m eav.cli status --root <title root>      # prints the next owner action
 ```
 
-Commands: `init`, `plan`, `job` (`--replace-chunk`), `modal-run`, `modal-request`, `modal-fetch`, `modal-settle`, `import`, `supersede` (never ran; a chunk only with `--group`), `close` (ran, not
+Commands: `init`, `plan`, `rebase-source` (a corrected revision of the same edition), `job` (`--replace-chunk`), `modal-run`, `modal-request`, `modal-fetch`, `modal-settle`, `import`, `supersede` (never ran; a chunk only with `--group`), `close` (ran, not
 imported: settles the actual CU), `retire` (a job or chunk group a newer build replaced: kept on record, never used as current), `film`, `reel`, `qc`, `status`, `bundle-audio`, `preview` (public ≤120 s preview clip of chapter 1),
 `social` (posting kit; see [publishing](references/publishing.md)) (usage in `eav/cli.py`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
@@ -52,6 +52,17 @@ Recipes: [film](references/film-recipe.md), [reels](references/reel-recipe.md),
 [budget](references/compute-budget.md), [record](references/production-record.md),
 [publishing](references/publishing.md). Pressure scenarios this skill must pass:
 [references/pressure-tests.md](references/pressure-tests.md).
+
+## Correcting a published text
+
+When the owner approves a correction of the edition's text (a new live revision of the **same**
+edition), never `init` a second root: re-export it and run
+`rebase-source <corrected export.json> --root <dir> --reason "<owner approval>"`. It requires the
+same edition, language, unit count and paragraph count per unit (otherwise it refuses: a new root),
+maps every plan anchor and unit id by position, refreshes the plan's text, keeps scene ids and
+still keys, keeps the old export as `source-<old revision>.json`, supersedes never-run film
+narration built from the old text and marks imported film narration stale (`film` refuses it).
+Stills and music are kept. Then `job narration` as usual ([record](references/production-record.md)).
 
 ## Stop conditions (exact behaviour)
 
