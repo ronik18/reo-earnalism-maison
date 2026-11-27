@@ -1,12 +1,126 @@
 {
   "colab_units": 0.0,
+  "error": null,
+  "files": [
+    {
+      "bytes": 46062522,
+      "path": "cue-1-journey-and-palace.wav",
+      "sha256": "d2776094e48fa03b7c2700f648bff566841a90ad9ea56e39ec0b72fa0018ac66"
+    },
+    {
+      "bytes": 1496,
+      "path": "cue-1-journey-and-palace_input_params.json",
+      "sha256": "7f5b8d99882f724f7d7716e64628095d57975901bc2854e5deb59e1730eb0c0c"
+    },
+    {
+      "bytes": 46062522,
+      "path": "cue-2-river-at-dusk.wav",
+      "sha256": "e0f11f9ded3acedb9e1e37c20cecdc93aa222ee1b2a627bf9990fcbab227f43a"
+    },
+    {
+      "bytes": 1502,
+      "path": "cue-2-river-at-dusk_input_params.json",
+      "sha256": "6596e75d93bb610ea503ab04c5cbfc6ce78dbaf0f5469072c4e9cad071ab91ed"
+    },
+    {
+      "bytes": 46062522,
+      "path": "cue-3-the-great-hall.wav",
+      "sha256": "429532543e13211e70df061c18614ea009ef966dd93051f59bd7faf8378d710e"
+    },
+    {
+      "bytes": 1511,
+      "path": "cue-3-the-great-hall_input_params.json",
+      "sha256": "d758541b5c29428317bbb21ba202247a1a4c2ee0056f340a39ce5638c0cd8415"
+    },
+    {
+      "bytes": 46062522,
+      "path": "cue-4-the-night-summons.wav",
+      "sha256": "07813455d03191880066ab479667bd32eac962fc9c43f40137e8e9b671e3f3b1"
+    },
+    {
+      "bytes": 1513,
+      "path": "cue-4-the-night-summons_input_params.json",
+      "sha256": "24e5e7f808f721111b8ba2ae9e90e41e62bd55cd41da82e0ce42e3461a5f536c"
+    },
+    {
+      "bytes": 46062522,
+      "path": "cue-5-persian-chamber.wav",
+      "sha256": "7c625be7b64c6eca6a217010480aa2693297d5a3801b6b54ef90bd30c223a2da"
+    },
+    {
+      "bytes": 1501,
+      "path": "cue-5-persian-chamber_input_params.json",
+      "sha256": "d44bc0366dd6aa637852a193fd161fa7b0c8db181df31968e3667f0d1ba3d74f"
+    },
+    {
+      "bytes": 46062522,
+      "path": "cue-6-mirror-and-lament.wav",
+      "sha256": "c310fd6501024158312df6382114003afce559de1e951044bd3c11a31e6e02f5"
+    },
+    {
+      "bytes": 1496,
+      "path": "cue-6-mirror-and-lament_input_params.json",
+      "sha256": "5be599fd2b53fe3971c17a02a09c47e3915a260fc911384fc0470dfbbd746c40"
+    },
+    {
+      "bytes": 46062522,
+      "path": "cue-7-remorse.wav",
+      "sha256": "cd9eb4201d58ac9161fd7b88d995c0a1891c9102f94f51d48fd5bbaefad401d2"
+    },
+    {
+      "bytes": 1484,
+      "path": "cue-7-remorse_input_params.json",
+      "sha256": "32f895d6e3cf8ccb5dc516754e51c327f57817b60245bf73d04542842998c60b"
+    },
+    {
+      "bytes": 46062522,
+      "path": "cue-8-storm-and-warning.wav",
+      "sha256": "2ad1ca67a1364b50b6946499b57db596e9d123fe40d7157d25ec21072e8786d4"
+    },
+    {
+      "bytes": 1522,
+      "path": "cue-8-storm-and-warning_input_params.json",
+      "sha256": "bf0fb2712bb481e6d596f8c1e581027506c3d9c500b09cc5736ebc1dc09c5c7b"
+    },
+    {
+      "bytes": 3728,
+      "path": "inputs.zip",
+      "sha256": "eb671b0c7baa076571fd58553652d8f24fd7f0d447140768e96423b5710a8db6"
+    },
+    {
+      "bytes": 2993,
+      "path": "manifest.json",
+      "sha256": "b95a9034a68217523a6f38a0e73b06a1b07f9ecd3d4b9bcb21ba82e681b1a6a0"
+    },
+    {
+      "bytes": 1908,
+      "path": "progress.jsonl",
+      "sha256": "8f9608030aadcfefe322dc7bd6e25b92400cffef191782385798f4c8d895275a"
+    },
+    {
+      "bytes": 1944,
+      "path": "sessions.jsonl",
+      "sha256": "7e5b06d85a40364f18a2077becce42b3772430081c24cad39c7ee057063a0cff"
+    }
+  ],
+  "finished_at": "2026-11-27T11:46:14+00:00",
   "gpu": "L4",
   "job_id": "music-kshudhita-film-01-r2",
+  "modal_contacted_at": "2026-11-27T11:35:00+00:00",
   "pending_run_id": "music-kshudhita-film-01-r2#1",
   "r2_prefix": "gpu-jobs/kshudhita-pashan/music-kshudhita-film-01-r2/run-1/",
   "requested_at": "2026-11-27T11:33:42+00:00",
+  "run": {
+    "error": null,
+    "run_id": "music-kshudhita-film-01-r2#1",
+    "seconds": 598.37133305,
+    "status": "ok",
+    "usd": 0.16604804492137498
+  },
   "schema": "earnalism.modal-request.v1",
-  "status": "requested",
+  "seconds": 598.37133305,
+  "status": "done",
   "title_root": "production/audiovisual/kshudhita-pashan",
+  "usd": 0.16604804492137498,
   "worst_case_usd": 1.01565
 }

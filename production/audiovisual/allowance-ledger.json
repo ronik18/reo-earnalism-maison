@@ -822,10 +822,10 @@
       {
         "run_id": "music-kshudhita-film-01-r2#1",
         "job_id": "music-kshudhita-film-01-r2",
-        "usd": 1.01565,
-        "seconds": 0.0,
+        "usd": 0.16604804492137498,
+        "seconds": 598.37133305,
         "at": "2026-11-27T11:33:42+00:00",
-        "status": "pending"
+        "status": "ok"
       }
     ]
   }
