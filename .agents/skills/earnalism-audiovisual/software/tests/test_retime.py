@@ -35,14 +35,15 @@ def test_room_tone_never_digital_zero(tmp_path):
     assert -68.5 <= rms_db(tone) <= -61.5
 
 
-def _placed(text, gaps, rate=0.2, breaths=()):
+def _placed(text, gaps, rate=0.2, breaths=(), rates=None):
     """Pauses of a synthetic take of `text` spoken at `rate` s per character: gaps[i] seconds after clause i (an
-    interior boundary), and each breath (clause index, fraction of that clause, seconds) inside its clause.
+    interior boundary), and each breath (clause index, fraction of that clause, seconds) inside its clause; `rates`
+    gives each clause its own pace (uneven speech).
     Returns (pauses, bounds)."""
     cl = retime.clauses(text)
     t, out = 0.0, []
     for i, (c, _) in enumerate(cl):
-        n = retime._spoken_len(c)
+        n = retime._spoken_len(c) * ((rates[i] / rate) if rates else 1)
         inside = sorted((f, g) for k, f, g in breaths if k == i)
         done = 0.0
         for f, g in inside:
@@ -86,6 +87,31 @@ def test_breath_before_a_mark_never_takes_its_pause():
     plan = retime.plan_pauses(text, pauses, 1, bounds=bounds)
     assert abs(plan[0][2] - 0.3) < 1e-3                        # the breath stays a 0.3 s breath
     assert 1.19 <= plan[1][2] <= 1.84                          # the ! keeps its turn pause
+
+
+def test_a_comma_without_a_pause_never_takes_a_breath_1_2_s_later():
+    """I1: the comma has no pause and a breath sits 1.2 s after it; the comma stays unmatched (reported) and the
+    breath keeps its 0.35 s, never stretched into a comma pause."""
+    text = "এক দুই তিন চার পাঁচ ছয় সাত, আট নয় দশ এগারো বারো তেরো চোদ্দ পনেরো। ষোলো সতেরো আঠারো উনিশ কুড়ি একুশ বাইশ।"
+    n1 = retime._spoken_len(retime.clauses(text)[1][0])
+    pauses, bounds = _placed(text, [0.0, 0.9], rate=0.12, breaths=[(1, 1.2 / (n1 * 0.12), 0.35)])
+    pauses = [p for p in pauses if p[1] > p[0]]                      # the comma's zero-length gap is no pause
+    rows = retime.match_pauses(text, pauses, bounds)
+    assert [(r["kind"], r["pause"]) for r in rows] == [("comma", None), ("sentence", 1)]
+    assert rows[0]["tol_s"] < 1.0
+    plan = retime.plan_pauses(text, pauses, 3, bounds=bounds)
+    assert abs(plan[0][2] - 0.35) < 1e-3
+
+
+def test_uneven_pace_pairs_every_mark_with_its_own_pause():
+    """I1: a fast clause next to a slow one (0.08 and 0.11 s per character, a sharper contrast than any two
+    neighbouring clauses of the real scene-14 take) with short pauses: every mark still pairs with its own pause
+    inside its local window. A far sharper contrast is reported as an unmatched mark, never mispaired."""
+    text = "এক দুই তিন চার পাঁচ ছয় সাত, আট নয় দশ এগারো বারো তেরো চোদ্দ পনেরো, ষোলো সতেরো আঠারো উনিশ কুড়ি।"
+    pauses, bounds = _placed(text, [0.25, 0.25], rate=0.1, rates=[0.08, 0.11, 0.09])
+    rows = retime.match_pauses(text, pauses, bounds)
+    assert [r["pause"] for r in rows] == [0, 1]
+    assert all(abs(r["error_s"]) <= r["tol_s"] < 1.0 for r in rows)
 
 
 def test_cut_mapping_moves_with_inserted_time(tmp_path):

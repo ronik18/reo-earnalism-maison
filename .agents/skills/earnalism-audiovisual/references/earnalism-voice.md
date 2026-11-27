@@ -94,10 +94,12 @@ python3 -m eav.cli retime <take.wav> <out.wav> --text <script.txt> [--seed N] [-
 ```
 
 Finds the take's own pauses (silencedetect) and matches them **by position, never by order alone**, to
-the punctuation of the script text (`eav.retime.match_pauses`: each mark's place is estimated from its
-character offset over the take's speech time; a monotonic alignment pairs marks with the nearest pauses, a
-long pause being likelier punctuation than a breath; audio tags are ignored; a run of marks counts once, as
-its strongest). A pause no mark explains is an **unpunctuated breath: it keeps its place and length** (in-order
+the punctuation of the script text (`eav.retime.match_pauses`: a monotonic alignment proposes pairs from each
+mark's character offset over the take's speech time, a long pause being likelier punctuation than a breath; each
+pair is then accepted only within 10 characters at the local speaking rate between its neighbours, 0.3–0.6 s, or
+1.5× that for a pause already as long as its punctuation pause; a mark with no pause in its window stays unmatched
+and is reported, never filled from a breath; audio tags are ignored; a run of marks counts once, as its
+strongest). A pause no mark explains is an **unpunctuated breath: it keeps its place and length** (in-order
 mapping once gave the breath after "তাহা" the 1.6 s pause of "নাই!" in scene 14). Each matched pause is set to
 a seeded target: comma `,` `;` `—` 0.40–0.55 s; `।` or `?` 0.8–1.0 s; an emotional `!` before a turn
 1.4–1.6 s; scene break 2.0 s; a পরিচ্ছেদ heading 2.5–3.0 s before and 1.5 s after. Each length is

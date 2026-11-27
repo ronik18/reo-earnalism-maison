@@ -129,13 +129,21 @@ def clauses(text: str) -> list[tuple[str, str | None]]:
     return [tuple(c) for c in out]
 
 
-# Pause mapping (G3): a pause is matched to a punctuation mark by POSITION, never by order alone. Each mark's place
-# in the take is estimated from its character offset in the text, spread over the take's speech time (its pauses
-# excluded); each pause sits at the speech time spoken before it. A monotonic alignment then pairs marks with pauses
-# at the least total cost: |estimated - measured| seconds for a pair, POS_SKIP_PER_S per second of a pause left
-# unmatched (a long pause is more likely punctuation than a breath), and a mark left unmatched costs more than any
-# pair inside the tolerance. An unmatched pause is a breath and keeps its place and length.
-POS_TOL_S, POS_TOL_FRAC = 2.5, 0.12   # a mark pairs only with a pause within max(2.5 s, 12 % of the speech time)
+# Pause mapping (G3, I1): a pause is matched to a punctuation mark by POSITION, never by order alone.
+# 1. Proposal: each mark's place is estimated from its character offset over the take's speech time (pauses
+#    excluded) and a monotonic alignment proposes pairs within a wide window (POS_PROPOSE_*): |estimated - measured|
+#    seconds per pair, POS_SKIP_PER_S per second of a pause left unmatched (a long pause is likelier punctuation than
+#    a breath), more than any pair for a mark left unmatched.
+# 2. Acceptance: every proposed pair is re-checked against its LOCAL estimate, interpolated by characters between
+#    the neighbouring accepted pairs (the local speaking rate), within a tight window: POS_TOL_CHARS characters at
+#    that local rate, clamped to POS_TOL_MIN_S..POS_TOL_MAX_S (about 1.5 Bengali words). A pause that is already
+#    as long as its mark's own shortest target (TARGETS low end less the jitter: a held "!" of 1.6 s, say) is
+#    stronger evidence and gets POS_TOL_LONG times that window (at most 0.9 s); a breath never does unless it is that
+#    long. The worst pair outside its window is dropped and the rest re-checked until none is. A mark left without a
+#    pause stays unmatched and is reported; a breath is never stretched into its pause.
+# An unmatched pause is a breath and keeps its place and length.
+POS_PROPOSE_S, POS_PROPOSE_FRAC = 2.5, 0.12
+POS_TOL_CHARS, POS_TOL_MIN_S, POS_TOL_MAX_S, POS_TOL_LONG = 10, 0.3, 0.6, 1.5
 POS_SKIP_PER_S = 2.0
 _SPOKEN = re.compile(r"[\s\"'“”‘’()…]")
 
@@ -148,8 +156,9 @@ def match_pauses(text: str, pauses: list[tuple[float, float]], bounds: tuple[flo
     """The text's interior pause marks (`clauses`, every clause boundary in order) matched to the measured pauses by
     position. `bounds` is the take's speech (first, last) in seconds; without it the speech is taken to run from 0
     to the last pause's end. Returns one row per boundary: {"clause": index of the clause the mark ends, "kind",
-    "pause": index into `pauses` or None, "expected_s": the mark's estimated time in the take, "error_s": measured
-    pause start minus expected (None when unmatched)}. The final clause's own closing mark is not a boundary: the
+    "pause": index into `pauses` or None (no pause inside its window: reported, never stretched), "expected_s": the
+    mark's local estimate in the take, "error_s": measured pause start minus expected (None when unmatched),
+    "tol_s": its acceptance window, "local_s_per_char": the local speaking rate it was scaled by}. The final clause's own closing mark is not a boundary: the
     trailing silence of a take is never a pause."""
     cl = clauses(text)
     marks = cl[:-1]
@@ -169,7 +178,7 @@ def match_pauses(text: str, pauses: list[tuple[float, float]], bounds: tuple[flo
         spoken += max(0.0, s - prev)
         at.append(spoken)
         prev = max(prev, e)
-    tol = max(POS_TOL_S, POS_TOL_FRAC * speech)
+    tol = max(POS_PROPOSE_S, POS_PROPOSE_FRAC * speech)   # proposal only; acceptance is local and tight
     miss = tol + 1.0
     k_n, p_n = len(marks), len(inner)
     inf = float("inf")
@@ -205,6 +214,36 @@ def match_pauses(text: str, pauses: list[tuple[float, float]], bounds: tuple[flo
         else:
             k -= 1
 
+    cum = []
+    c = 0
+    for txt, _ in marks:
+        c += _spoken_len(txt)
+        cum.append(c)
+
+    def local(k):   # (estimate in speech time, s per char) of mark k between its accepted neighbours
+        a = next(((at[pair[i]], cum[i]) for i in range(k - 1, -1, -1) if pair[i] is not None), (0.0, 0))
+        b = next(((at[pair[i]], cum[i]) for i in range(k + 1, k_n) if pair[i] is not None), (speech, total))
+        rate = (b[0] - a[0]) / max(b[1] - a[1], 1)
+        return a[0] + (cum[k] - a[1]) * rate, rate
+
+    def window(rate, k=None, j=None):
+        w = min(max(POS_TOL_CHARS * rate, POS_TOL_MIN_S), POS_TOL_MAX_S)
+        if j is not None and inner[j][1] - inner[j][0] >= TARGETS[marks[k][1]][0] * (1 - JITTER):
+            w *= POS_TOL_LONG   # a pause already as long as its mark's punctuation pause
+        return w
+    for _ in range(k_n + 1):   # drop the worst pair outside its local window until every pair is inside
+        worst, worst_by = None, 0.0
+        for k in range(k_n):
+            if pair[k] is None:
+                continue
+            est, rate = local(k)
+            over = abs(at[pair[k]] - est) - window(rate, k, pair[k])
+            if over > worst_by:
+                worst, worst_by = k, over
+        if worst is None:
+            break
+        pair[worst] = None
+
     def timeline(sp):   # a speech time back on the take's timeline (the pauses before it added back)
         t, before = t0 + sp, 0.0
         for (s, e), a in zip(inner, at):
@@ -214,9 +253,12 @@ def match_pauses(text: str, pauses: list[tuple[float, float]], bounds: tuple[flo
     rows = []
     for k, (c, kind) in enumerate(marks):
         j = pair[k]
-        exp_t = timeline(expected[k])
+        est, rate = local(k)
+        err = None if j is None else at[j] - est          # in speech time: the pauses between are not speech
+        exp_t = timeline(est) if j is None else inner[j][0] - err
         rows.append({"clause": k, "kind": kind, "pause": j, "expected_s": round(exp_t, 3),
-                     "error_s": None if j is None else round(inner[j][0] - exp_t, 3)})
+                     "error_s": None if err is None else round(err, 3),
+                     "tol_s": round(window(rate, k, j), 3), "local_s_per_char": round(rate, 4)})
     return rows
 
 
