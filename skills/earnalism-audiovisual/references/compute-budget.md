@@ -80,6 +80,11 @@ the owner if they are right).
   all chunks' outputs in chunk order; provenance names the group (`narration_job_id`) and its
   chunks (`narration_chunk_job_ids`). `status` lists every chunk (`chunk i/n of <group>`) and one
   line per group: `k of n chunks imported (complete|incomplete|dead ...)`.
+  Stills are used per key instead (references/film-recipe.md): each key's still comes from the
+  most recently imported, non-retired stills job or chunk that provides it, and `film` refuses
+  while any key of an imported or live job, or of any chunk of a group with an imported chunk,
+  has no imported still. A closed stills chunk whose keys a newer job holds no longer asks for
+  `--replace-chunk`. `status` prints which job supplies each key.
 - One chunk is never superseded alone: `supersede <chunk or group id> --group --reason "..."`
   supersedes every chunk of the group that is neither imported nor ended (the group is given up).
 - A chunk that ran but cannot be imported is `close`d on its own (actual units). Only that chunk is

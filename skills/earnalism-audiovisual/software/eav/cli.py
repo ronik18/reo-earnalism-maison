@@ -309,6 +309,81 @@ def _latest_job(rec, kind, target, imported=True, after=-1):
     return found[-1] if found else None
 
 
+def _item_keys(job, rec=None) -> list:
+    """The item keys a stills job (or one chunk) was built with, in build order; for an imported
+    job without a readable job.json, the stills its verified output folder holds."""
+    try:
+        with zipfile.ZipFile(job["inputs_zip"]) as z:
+            return [it["key"] for it in json.loads(z.read("job.json"))["items"]]
+    except (OSError, KeyError, TypeError, ValueError, zipfile.BadZipFile):
+        folder = rec.root / "stills" / job["job_id"] if rec is not None and job["imported"] else None
+        if folder is None or not folder.is_dir():
+            return []
+        return sorted(p.stem for p in folder.iterdir() if p.suffix.lower() in film.STILL_EXTS)
+
+
+def _still_file(folder: Path, key: str):
+    """<key>.<png|jpg|jpeg|webp> in an imported stills folder, or None."""
+    found = [folder / f"{key}{ext}" for ext in film.STILL_EXTS if (folder / f"{key}{ext}").is_file()]
+    return found[0] if found else None
+
+
+def _stills_by_key(rec, target, after=-1) -> dict:
+    """Per-key replacement rule for stills: key -> {job_id, path}, each key's still taken from the
+    most recently IMPORTED, non-retired stills job (a plain job or one chunk) for the target that
+    provides it. A newer small job therefore replaces only the keys it holds; every other key keeps
+    its earlier still. Superseded, closed and retired jobs never supply a key; a retired group or
+    job is never used again."""
+    imports = {}
+    for i, e in enumerate(rec.data["events"]):
+        if e["stage"] == "import" and e["result"] == "accepted":
+            imports[e["detail"]["job_id"]] = i
+    jobs = [j for j in _jobs(rec) if j["kind"] == "stills" and j["target"] == target
+            and j["imported"] and not j["retired"] and j["order"] > after]
+    out = {}
+    for j in sorted(jobs, key=lambda j: imports.get(j["job_id"], -1)):  # later import wins
+        folder = rec.root / "stills" / j["job_id"]
+        for key in _item_keys(j, rec):
+            path = _still_file(folder, key)
+            if path is not None:
+                out[key] = {"job_id": j["job_id"], "path": path}
+    return out
+
+
+def _stills_expected(rec, target, after=-1) -> list:
+    """Keys a consumer must have before it uses the stills of a target: those of every imported or
+    live stills job, and of every chunk of a group that has an imported chunk (a closed or
+    superseded chunk there leaves its keys to be supplied by a newer job). Dead groups, plain
+    superseded/closed jobs and retired jobs add none."""
+    jobs = [j for j in _jobs(rec) if j["kind"] == "stills" and j["target"] == target
+            and not j["retired"] and j["order"] > after]
+    used_groups = {j["chunk"]["group"] for j in jobs if j["chunk"] and j["imported"]}
+    keys = []
+    for j in jobs:
+        if j["imported"] or not _ended(j) or (j["chunk"] and j["chunk"]["group"] in used_groups):
+            keys += [k for k in _item_keys(j, rec) if k not in keys]
+    return keys
+
+
+def _stills_view(rec, target, after=-1):
+    """(key -> {job_id, path}, missing keys) for a target under the per-key rule."""
+    have = _stills_by_key(rec, target, after)
+    return have, [k for k in _stills_expected(rec, target, after) if k not in have]
+
+
+def _stills_sources(have: dict) -> dict:
+    """job_id -> its keys, in the order the jobs first supply a key."""
+    out = {}
+    for key, v in have.items():
+        out.setdefault(v["job_id"], []).append(key)
+    return out
+
+
+def _live_stills_keys(rec, target, after=-1) -> set:
+    return {k for j in _jobs(rec) if j["kind"] == "stills" and j["target"] == target
+            and not _ended(j) and not j["imported"] and j["order"] > after for k in _item_keys(j)}
+
+
 def _last_event(rec, stage, result, target) -> int:
     """Index of the last stage/result event for target, or -1."""
     return max((i for i, e in enumerate(rec.data["events"]) if e["stage"] == stage
@@ -596,10 +671,17 @@ def next_action(root) -> str:
         # superseded or retired: the group was given up (or replaced) and is never rebuilt
         if "of" in g and g["closed"] and not g["superseded"] and not g["retired"]:
             i, c = next((i, c) for i, c in sorted(g["missing"].items()) if c["closed"])
+            if g["kind"] == "stills":  # per-key rule: newer stills jobs may already hold its keys
+                have = set(_stills_by_key(rec, g["target"])) | _live_stills_keys(rec, g["target"])
+                if all(k in have for m in g["missing"].values() for k in _item_keys(m, rec)):
+                    continue
             return (f"Chunk {i} of {g['of']} of group {g['job_id']} ({c['job_id']}) ran but was closed; "
                     f"rebuild only that chunk's items: {PROG} job {g['kind']} --root {root} --rates "
                     f"<rates.json> --replace-chunk {c['job_id']} (the group's other chunks are kept). "
-                    f"To give the whole group up instead: {PROG} supersede {c['job_id']} --root {root} "
+                    + ("Or build a new stills job (job stills --spec) holding those keys with new "
+                       "prompts: the film uses, per key, the most recently imported still. "
+                       if g["kind"] == "stills" else "")
+                    + f"To give the whole group up instead: {PROG} supersede {c['job_id']} --root {root} "
                     "--group --reason \"<why>\"")
     pending = [j for j in jobs if not j["imported"] and not _ended(j)]
     if pending:
@@ -611,7 +693,13 @@ def next_action(root) -> str:
         if not _latest_job(rec, "narration", t):
             return (f"{PROG} job narration {r} --film {i} --rates <rates.json with measured "
                     f"s_per_step, units_per_hour, steps, decode_s, export_s>")
-        if not _latest_job(rec, "stills", t):
+        have, missing = _stills_view(rec, t)
+        if have and missing:
+            return (f"{t} has no imported still for key(s) {', '.join(missing)}: write prompts for "
+                    f"exactly those keys (references/film-recipe.md) into a stills spec, then: {PROG} "
+                    f"job stills {r} --film {i} --rates <rates.json> --spec <that spec> (the film uses, "
+                    "per key, the most recently imported still)")
+        if not have:
             return (f"Write the world bible and one FLUX prompt per keyframe (keys <scene_id>-<k>, "
                     f"references/film-recipe.md) into stills.json, then: {PROG} job stills {r} "
                     f"--film {i} --rates <rates.json> --spec stills.json")
@@ -640,20 +728,32 @@ def next_action(root) -> str:
         shots, planned = _planned_shots(rec, n)
         if shots is None:
             return f"{PROG} reel {n} {r} --plan-shots"
-        stills = _latest_job(rec, "stills", t, after=planned)
-        if not stills:
+        have, missing = _stills_view(rec, t, after=planned)
+        missing += [sh["id"] for sh in shots if sh["id"] not in have and sh["id"] not in missing]
+        if not have:
             return (f"Write one keyframe prompt per shot of {folder / 'shots.json'} into stills.json "
                     f"(key = the shot id, e.g. shot-01; references/reel-recipe.md), then: {PROG} job "
                     f"stills {r} --reel {n} --rates <rates.json> --spec stills.json")
+        if missing:
+            return (f"{t} has no imported still for shot key(s) {', '.join(missing)}: write prompts "
+                    f"for exactly those keys into a stills spec, then: {PROG} job stills {r} --reel {n} "
+                    "--rates <rates.json> --spec <that spec> (per key, the most recently imported "
+                    "still is used)")
         covered = _covered(rec, n, planned)
         todo = [sh["id"] for sh in shots if sh["id"] not in covered]
         if todo:
             batch = todo[:colab_jobs.MAX_CLIPS_PER_BATCH]
-            dirs = [str(d) for d in _dirs(rec, stills)]
+            dirs = list(dict.fromkeys(str(v["path"].parent) for v in have.values()))
+            names = [v["path"].name for v in have.values()]
+            clash = any(sum((Path(d) / nm).is_file() for d in dirs) > 1 for nm in names)
+            art = ({v["path"].name: str(v["path"]) for v in have.values()} if clash else
+                   dirs if len(dirs) > 1 else dirs[0])
             return (f"Write clips.json per references/reel-recipe.md (Clips spec): art_dir = "
-                    + (json.dumps(dirs, ensure_ascii=False) + " (the stills' chunk folders; each "
-                       "shot's image is taken from the one that holds it)" if len(dirs) > 1
-                       else dirs[0]) + ", "
+                    + (json.dumps(art, ensure_ascii=False) + (
+                        " (image name -> the still the per-key rule uses: a newer stills job "
+                        "replaced some keys)" if clash else " (the stills' folders; each shot's image "
+                        "is taken from the one that holds it)")
+                       if not isinstance(art, str) else art) + ", "
                     f"prior_attempt_evidence = the retained Wan "
                     f"l4-balanced-v2 provenance (prior run ids, observed s/step, completed clips), "
                     f"shots = one {{id, image, seed, prompt}} for each of the next shots "
@@ -800,7 +900,9 @@ def _job_spec(rec, args, kind, target):
             art = spec.get("art_dir", ".")
             resolve = lambda d: d if not isinstance(d, str) or Path(d).is_absolute() else str(
                 (Path(args.spec).parent / d).resolve())
-            spec["art_dir"] = [resolve(d) for d in art] if isinstance(art, list) else resolve(art)
+            spec["art_dir"] = ([resolve(d) for d in art] if isinstance(art, list) else
+                               {k: resolve(v) for k, v in art.items()} if isinstance(art, dict)
+                               else resolve(art))
             _check_clip_batch(rec, args.reel, spec)
     if args.job_id:
         taken = {j["job_id"] for j in _jobs(rec)} | {j["chunk"]["group"] for j in _jobs(rec)
@@ -1835,11 +1937,13 @@ def cmd_film(args):
     if not 1 <= args.film <= len(films):
         raise Stop(f"film {args.film} is not in the plan", f"{PROG} status --root {rec.root}")
     narr = _latest_job(rec, "narration", t)
-    stills = _latest_job(rec, "stills", t)
-    if not narr or not stills:
+    have, missing = _stills_view(rec, t)  # per key: the most recently imported still
+    if not narr or not have or missing:
         raise Stop(f"{t} needs imported narration and stills jobs"
-                   + _incomplete(rec, "narration", t) + _incomplete(rec, "stills", t),
+                   + _incomplete(rec, "narration", t) + _incomplete(rec, "stills", t)
+                   + (f" (no imported still for key(s) {', '.join(missing)})" if have and missing else ""),
                    next_action(rec.root))
+    sources = _stills_sources(have)
     lang = plan["language"]
     scs = films[args.film - 1]["scenes"]
     units = [u for sc in scs for u in voice_units(sc, {"description": ""}, None, lang)]
@@ -1879,7 +1983,7 @@ def cmd_film(args):
         m = mix.duck_and_master(out / "narration.wav", score, out / "mix.wav", FILM_LUFS)
     except ValueError as e:
         raise Stop(f"QC failure: {e}", "Re-balance the score bed and rerun film", code=5)
-    info = film.assemble(plan["plan"], timing, _one_dir(rec, stills), out / "mix.wav",
+    info = film.assemble(plan["plan"], timing, {k: v["path"] for k, v in have.items()}, out / "mix.wav",
                          Path(args.logo), Path(args.end_card), out / f"{t}.mp4",
                          film=args.film - 1, language=lang)
     for kind, p in (("timing", out / "timing.json"), ("subtitles", out / f"{t}.srt"),
@@ -1888,12 +1992,16 @@ def cmd_film(args):
     rec.add_artifact("film", out / f"{t}.mp4", {"target": t, "lufs": m["lufs"],
                                                 "true_peak": m["true_peak"], "score": score_info,
                                                 "narration_job_id": narr["job_id"],
+                                                "stills_job_ids": list(sources),
+                                                "stills_by_key": {k: v["job_id"] for k, v in have.items()},
                                                 "suspect_truncated": suspects,
                                                 "qc_accepted": sorted(accepted), **info})
     rec.event("film", "assembled", {"target": t, "duration": info["duration"]})
     print(f"Assembled {out / (t + '.mp4')}: {info['duration']:.1f} s, {m['lufs']:.1f} LUFS, "
-          f"TP {m['true_peak']:.1f} dBTP, from narration job {_used(narr)} and stills job "
-          f"{_used(stills)}. Maison video stays held (Stream cost not approved).")
+          f"TP {m['true_peak']:.1f} dBTP, from narration job {_used(narr)} and stills job"
+          f"{'s' if len(sources) > 1 else ''} "
+          + ", ".join(f"{j} ({len(k)} keys)" for j, k in sources.items())
+          + ". Maison video stays held (Stream cost not approved).")
 
 
 def _line_ends(script, units, timing) -> list:
@@ -2366,6 +2474,15 @@ def cmd_status(args):
                          else "incomplete")
                 print(f"  group {g['job_id']} {g['kind']} {g['target']}: {done} of {g['of']} chunks "
                       f"imported ({state})")
+        targets = list(dict.fromkeys(j["target"] for j in _jobs(rec) if j["kind"] == "stills"))
+        for t in targets:  # per-key rule: which imported job supplies each still
+            have, missing = _stills_view(rec, t)
+            if not have and not missing:
+                continue
+            print(f"  stills {t}: {len(have)} key(s) supplied (per key, the most recently imported "
+                  "non-retired job)" + (f"; no imported still yet for {', '.join(missing)}" if missing else ""))
+            for job_id, keys in _stills_sources(have).items():
+                print(f"    {job_id}: {', '.join(keys)}")
 
 
 REPO = Path(__file__).resolve().parents[4]

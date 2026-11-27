@@ -126,11 +126,16 @@ def _check_timing(scenes: list, timing: list, language: str):
 
 
 def _stills(stills_dir, scene_id: str) -> list:
-    """The scene's stills in name order, from one folder or across a chunk group's folders."""
+    """The scene's stills in name order, from one folder, across a chunk group's folders, or from a
+    map key -> file (the per-key rule: each key's still from the newest imported job holding it)."""
+    mine = lambda stem: stem == scene_id or stem.startswith(scene_id + "-") or stem.startswith(scene_id + "_")
+    if isinstance(stills_dir, dict):
+        found = sorted((Path(p) for k, p in stills_dir.items() if mine(k)), key=lambda p: p.stem)
+        if not found:
+            raise ValueError(f"no still for scene {scene_id!r} in the stills map")
+        return found
     found = sorted((p for d in _dirs(stills_dir) for p in d.iterdir()
-                    if p.suffix.lower() in STILL_EXTS
-                    and (p.stem == scene_id or p.stem.startswith(scene_id + "-")
-                         or p.stem.startswith(scene_id + "_"))), key=lambda p: p.name)
+                    if p.suffix.lower() in STILL_EXTS and mine(p.stem)), key=lambda p: p.name)
     if len({p.name for p in found}) != len(found):
         raise ValueError(f"a still of scene {scene_id!r} is in more than one chunk")
     if not found:
