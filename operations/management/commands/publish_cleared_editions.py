@@ -673,14 +673,15 @@ class Command(BaseCommand):
             revision.refresh_from_db()
             if (action == "mark-ready" and revision.state != "draft") or (action == "publish" and revision.state != "ready"):
                 continue
-            state = transition_revision(actor, revision.id, action, revision.version, revision.content_sha256, reason)
-            audit(actor, "revision." + action, revision, {"reason": reason, "channel": "server_job"})
+            with transaction.atomic():  # the server-job audit commits with the transition (on-commit pass runs after)
+                state = transition_revision(actor, revision.id, action, revision.version, revision.content_sha256, reason)
+                audit(actor, "revision." + action, revision, {"reason": reason, "channel": "server_job"})
             step = {"action": action, "state": state["state"], "version": state["version"]}
-            # transition_revision moves readers' state for a revise revision (library.services.move_reader_state).
-            moved = AuditEvent.objects.filter(action="revision.reader_state_moved", entity_id=str(revision.id),
-                                              detail__pass="publish").order_by("-created_at").first()
-            if action == "publish" and moved:
-                step["reader_state_moved"] = {k: moved.detail[k] for k in ("progress", "annotations", "left_unmapped")}
+            if action == "publish":  # transition_revision moved readers' state for a revise revision (move_reader_state)
+                moved = AuditEvent.objects.filter(action="revision.reader_state_moved", entity_id=str(revision.id),
+                                                  detail__pass="publish").order_by("-created_at").first()
+                if moved:
+                    step["reader_state_moved"] = {k: moved.detail[k] for k in ("progress", "annotations", "left_unmapped")}
             steps.append(step)
         return {"steps": steps}
 

@@ -30,6 +30,8 @@ EN_PACKET = REPO / "library" / "intake" / "kshudhita-pashan-en"
 COVER = f"library/intake/{SLUG}/cover_provenance.json"
 EN_CLEARANCE = "docs/evidence/publication-clearance-kshudhita-pashan-en-draft.json"
 EN_COVER = "library/intake/kshudhita-pashan-en/cover_provenance.json"
+# Queries of one ordinary (no anchor map) Reader publish through transition_revision with prepared validation.
+ORDINARY_PUBLISH_QUERIES = 69
 
 
 def load(path):
@@ -499,6 +501,115 @@ class ReviseStageTests(TestCase):
         self.assertIsNone(services.move_reader_state(self.publisher, old.id, Revision(validation_evidence={})))
         self.assertIsNone(services.move_reader_state(self.publisher, None, new))
         self.assertEqual(Progress.objects.get(pk=saved.pk).revision_id, old.id)
+
+    def flaky_after_commit(self):
+        """remap_reader_state that works in the publish transaction and raises in the after-commit pass."""
+        from django.db import OperationalError
+        from operations import revision_remap
+        real, calls = revision_remap.remap_reader_state, []
+
+        def remap(*args):
+            calls.append(args)
+            if len(calls) > 1:
+                raise OperationalError("synthetic lock timeout")
+            return real(*args)
+        return mock.patch.object(revision_remap, "remap_reader_state", side_effect=remap), calls
+
+    def failure_audits(self):
+        from core.models import AuditEvent
+        return list(AuditEvent.objects.filter(action="revision.reader_state_move_failed").values_list("detail", flat=True))
+
+    def test_a_raising_after_commit_pass_leaves_the_transition_result_unchanged(self):
+        from library import services
+        old, new, paragraph = self.prepare_correction()
+        self.reader_progress(old, paragraph, "robust@example.test")
+        new.refresh_from_db()
+        state = services.transition_revision(self.publisher, new.id, "mark-ready", new.version, new.content_sha256, "Staff UI (test)")
+        patcher, calls = self.flaky_after_commit()
+        with patcher, self.captureOnCommitCallbacks(execute=True):
+            result = services.transition_revision(self.publisher, new.id, "publish", state["version"], new.content_sha256, "Staff UI (test)")
+        self.assertEqual((result["state"], result["edition_revision_id"]), ("live", str(new.id)))
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(self.failure_audits(), [{"replaced_revision_id": str(old.id), "pass": "after_commit", "error": "OperationalError"}])
+
+    def test_a_raising_after_commit_pass_does_not_fail_the_scheduled_job(self):
+        from datetime import timedelta
+        from core.models import OutboxJob
+        from library import services
+        from operations.publication import process_scheduled_publication
+        old, new, paragraph = self.prepare_correction()
+        new.refresh_from_db()
+        state = services.transition_revision(self.publisher, new.id, "mark-ready", new.version, new.content_sha256, "Scheduled (test)")
+        due = timezone.now() + timedelta(minutes=1)
+        services.transition_revision(self.publisher, new.id, "schedule", state["version"], new.content_sha256, "Scheduled (test)", due)
+        new.refresh_from_db()
+        job = OutboxJob.objects.get(dedupe_key=f"scheduled-publication:{new.id}:{new.version}")
+        patcher, _ = self.flaky_after_commit()
+        with patcher, mock.patch("operations.publication.timezone.now", return_value=due + timedelta(seconds=1)), \
+                self.captureOnCommitCallbacks(execute=True):
+            result = process_scheduled_publication(job)
+        self.assertEqual(result["status"], "published")
+        self.assertEqual(len(self.failure_audits()), 1)
+
+    def test_a_raising_after_commit_pass_keeps_the_server_job_publish_audit(self):
+        from core.models import AuditEvent
+        old, new, paragraph = self.prepare_correction()
+        patcher, _ = self.flaky_after_commit()
+        with patcher, self.captureOnCommitCallbacks(execute=True):
+            published = self.run_command("publish", SLUG)[SLUG]
+        self.assertEqual(published["state"], "live")
+        self.assertEqual(published["steps"][-1]["reader_state_moved"], {"progress": 0, "annotations": 0, "left_unmapped": 0})
+        self.assertEqual(AuditEvent.objects.filter(action="revision.publish", entity_id=str(new.id)).count(), 1)
+        self.assertEqual(len(self.failure_audits()), 1)
+
+    def test_a_failing_in_transaction_move_rolls_the_whole_publish_back(self):
+        from core.models import AuditEvent
+        from library.models import Edition
+        from operations import revision_remap
+        old, new, paragraph = self.prepare_correction()
+        saved = self.reader_progress(old, paragraph, "rollback@example.test")
+        edition_before = Edition.objects.values_list("version", "live_revision_id").get(pk=old.edition_id)
+        with mock.patch.object(revision_remap, "remap_reader_state", side_effect=RuntimeError("synthetic")), \
+                self.captureOnCommitCallbacks(execute=True) as callbacks, self.assertRaises(RuntimeError):
+            self.run_command("publish", SLUG)
+        self.assertEqual(callbacks, [])
+        old.refresh_from_db(); new.refresh_from_db(); saved.refresh_from_db()
+        self.assertEqual((old.state, new.state), ("live", "ready"))  # mark-ready committed on its own; publish did not
+        self.assertEqual(Edition.objects.values_list("version", "live_revision_id").get(pk=old.edition_id), edition_before)
+        self.assertEqual((saved.revision_id, saved.version), (old.id, 1))
+        self.assertFalse(AuditEvent.objects.filter(action__in=["revision.reader_state_moved", "revision.publish"], entity_id=str(new.id)).exists())
+
+    def test_an_anchor_map_for_a_different_revision_moves_nothing(self):
+        import uuid
+        from library import services
+        from library.models import Revision
+        old, new, paragraph = self.prepare_correction()
+        saved = self.reader_progress(old, paragraph, "mismatch@example.test")
+        evidence = new.validation_evidence
+        evidence["source_revision"]["replaces_revision_id"] = str(uuid.uuid4())  # a map for some other revision
+        Revision.objects.filter(pk=new.pk).update(validation_evidence=evidence)
+        new.refresh_from_db()
+        for action in ("mark-ready", "publish"):
+            new.refresh_from_db()
+            services.transition_revision(self.publisher, new.id, action, new.version, new.content_sha256, "Staff UI (test)")
+        saved.refresh_from_db()
+        self.assertEqual((saved.revision_id, saved.version), (old.id, 1))
+        self.assertIsNone(services.move_reader_state(self.publisher, old.id, new))
+
+    def test_an_ordinary_publish_pays_nothing_for_the_reader_state_move(self):
+        from library import services
+        from library.models import Revision
+        imported = self.run_command("import", SLUG)[SLUG]
+        self.run_command("evidence", SLUG, extra=self.browser({SLUG: imported["sha256"]}))
+        draft = Revision.objects.get(pk=imported["revision_id"])
+        state = services.transition_revision(self.publisher, draft.id, "mark-ready", draft.version, draft.content_sha256, "First publish (test)")
+        prepared = services.prepare_revision_validation(draft.id)
+        with self.assertNumQueries(0):  # no anchor map: two dict lookups, no query, no lock, no callback
+            self.assertIsNone(services.move_reader_state(self.publisher, draft.id, draft))
+        with self.assertNumQueries(ORDINARY_PUBLISH_QUERIES), self.captureOnCommitCallbacks() as callbacks:
+            services.transition_revision(self.publisher, draft.id, "publish", state["version"], draft.content_sha256,
+                                         "First publish (test)", prepared=prepared)
+        self.assertFalse(any(getattr(c, "__name__", "") == "after_commit" for c in callbacks))
 
     def test_map_offset_follows_an_insertion_and_clamps(self):
         from operations.revision_remap import map_offset
