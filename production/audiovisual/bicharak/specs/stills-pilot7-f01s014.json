@@ -1,0 +1,33 @@
+{
+ "note": "PILOT v7 (spike) stills for scene f01s014 after the v4 review: Hem's eye close-up with brown eyes (eye-colour continuity), and the veiled mother (hem_mother, anchored to the pilot-6 pick) at the paan mat and at Hem's empty cot holding the pot (one mother throughout). Character lines first; anchors for the gate.",
+ "art_dir": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v6/art",
+ "items": [
+  {
+   "key": "f01s014-7",
+   "anchor": "anchor-hem.png",
+   "prompt": "Extreme close-up at deep night: one large brown eye of a 14-year-old Bengali girl, wet and open, seen through a narrow gap between dark wooden shutter slats, a thin bar of pale moonlight across the eye, a small dark mole below the eye, strands of black hair. Bengal, 1880s. Indigo night, silver moonlight.",
+   "seed": 17000,
+   "width": 1344,
+   "height": 768,
+   "candidates": 4
+  },
+  {
+   "key": "f01s014-14",
+   "anchor": "anchor-mother.png",
+   "prompt": "A grave, careworn 40-year-old Bengali mother, unsmiling, red bindi, small gold earrings, ivory-white cotton sari with a thin red border, its red-bordered end drawn over her head covering her hair, red blouse. Medium shot, warm early morning inside a simple room: she sits alone on a straw mat folding green betel leaves, beside her an empty place with an untouched small brass plate of leaves, eyes lowered. Bengal, 1880s. Ivory, old gold, soft indigo shadow.",
+   "seed": 17001,
+   "width": 1344,
+   "height": 768,
+   "candidates": 4
+  },
+  {
+   "key": "f01s014-9",
+   "anchor": "anchor-mother.png",
+   "prompt": "A grave, careworn 40-year-old Bengali mother, unsmiling, red bindi, small gold earrings, ivory-white cotton sari with a thin red border, its red-bordered end drawn over her head covering her hair, red blouse. Medium-wide shot, morning sunlight through a barred window: she stands in the doorway of a small bare room holding a brass water pot at her waist, staring at an empty wooden cot with a smoothed white sheet. Bengal, 1880s. Pale gold, ivory.",
+   "seed": 17002,
+   "width": 1344,
+   "height": 768,
+   "candidates": 4
+  }
+ ]
+}

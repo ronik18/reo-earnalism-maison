@@ -461,5 +461,14 @@
     "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
+  },
+  {
+    "job_id": "stills-pilot7-f01s014",
+    "title": "bicharak",
+    "month": "2026-11",
+    "units": 1.13005,
+    "state": "reserved",
+    "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+    "root": "bicharak"
   }
 ]
