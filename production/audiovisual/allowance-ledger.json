@@ -1019,10 +1019,10 @@
       {
         "run_id": "narration-91c7abe1-r2-c1of2#1",
         "job_id": "narration-91c7abe1-r2-c1of2",
-        "usd": 0.9204675,
-        "seconds": 0.0,
+        "usd": 0.19790403453222,
+        "seconds": 713.167692008,
         "at": "2026-11-27T19:02:36+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-91c7abe1-r2-c2of2#1",
