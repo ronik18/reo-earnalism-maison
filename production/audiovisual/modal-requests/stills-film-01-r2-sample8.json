@@ -6,7 +6,7 @@
   "r2_prefix": "gpu-jobs/kshudhita-pashan/stills-film-01-r2-sample8/run-1/",
   "requested_at": "2026-11-27T11:33:34+00:00",
   "schema": "earnalism.modal-request.v1",
-  "status": "requested",
+  "status": "running",
   "title_root": "production/audiovisual/kshudhita-pashan",
   "worst_case_usd": 1.478982
 }
