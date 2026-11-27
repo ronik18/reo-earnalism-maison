@@ -848,10 +848,10 @@
       {
         "run_id": "stills-kshudhita-film-01-r2#1",
         "job_id": "stills-kshudhita-film-01-r2",
-        "usd": 2.6944174999999997,
-        "seconds": 0.0,
+        "usd": 1.07158254880719,
+        "seconds": 1581.671658756,
         "at": "2026-11-27T11:52:21+00:00",
-        "status": "pending"
+        "status": "ok"
       }
     ]
   }
