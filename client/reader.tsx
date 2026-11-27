@@ -996,9 +996,26 @@ function Reader({ boot }: { boot: Boot }) {
           boot.player_url +
             `?unit_id=${result.to_location.unit_id}&position_ms=${result.to_location.position_ms}`,
         );
-      else setStatus(t("switch_unmapped_audio"));
+      else {
+        setStatus(t("switch_unmapped_audio"));
+        setSwitchOpen(true); // no exact spot: the sheet offers the chapter start instead
+      }
     });
   }
+  // The toolbar's Listen link is a real link; with scripts on it carries the reader's position first.
+  const toolbarListen = useRef(switchToListen);
+  toolbarListen.current = switchToListen;
+  useEffect(() => {
+    const link = document.querySelector<HTMLAnchorElement>('[data-format-switch="audio"], [data-format-switch="listen"]');
+    if (!link) return;
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      void toolbarListen.current().catch(() => {});
+    };
+    link.addEventListener("click", onClick);
+    return () => link.removeEventListener("click", onClick);
+  }, []);
   const paginated = preferences.reader_layout === "paginated";
   return (
     <>

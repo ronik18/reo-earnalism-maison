@@ -220,27 +220,46 @@ def title(request, locale, identifier):
         if pair.get('back'):back_cover='/api/v1/staff/draft-covers/'+pair['back']['asset_id']
     download_bootstrap = {"edition_revision_id":edition["edition_revision_id"],"unit_ids":[u["unit_id"] for u in units],"units":[{"unit_id":u["unit_id"],"title":u["title"]} for u in units],"formats":edition["downloadable_formats"],"title":edition["title"],"locale":edition["locale"]} if django_settings.FEATURES.get("offline_text_audio") and edition["published_at"] and request.user.is_authenticated else None
     sample = public_preview_data(request, edition) if django_settings.FEATURES.get("audio") else {}
-    return page(request, locale, "web/title.html", edition=edition, units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=django_settings.FEATURES.get("audio") and "audio" in edition["formats"], video_available=django_settings.FEATURES.get("video") and "video" in edition["formats"], audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
+    listen_ready, watch_ready = media_formats_ready(edition)
+    reader_ready = bool(units) and "reader" in edition["formats"] and (reader_access or edition["preview_available"])
+    title_formats = [
+        {"kind": "read", "available": reader_ready, "url": reverse("web:reader", args=[locale, edition["edition_id"], units[0]["unit_id"]]) if reader_ready else None},
+        {"kind": "listen", "available": listen_ready, "url": reverse("web:player", args=[locale, edition["edition_id"]]) if listen_ready else None},
+        {"kind": "film", "available": watch_ready, "url": reverse("web:video", args=[locale, edition["edition_id"]]) if watch_ready else None},
+    ]
+    length = {"minutes": read_minutes(total_read_chars(edition["edition_revision_id"])), "parts": len(units)}
+    return page(request, locale, "web/title.html", formats=title_formats, length=length, edition=edition, units=units, reader_access=reader_access, reader_action_available=reader_access or edition["preview_available"], paired_editions=paired, back_cover=back_cover, active_nav="explore", download_bootstrap=download_bootstrap, audio_available=listen_ready, video_available=watch_ready, audio_sample=sample.get("audio"), allow_index=not django_settings.LOCAL and bool(edition["published_at"]))
 
 
-READ_CHARS_PER_MINUTE = 900  # Same estimate the reader toolbar uses (client/state.ts minutesRemaining).
+READ_CHARS_PER_MINUTE = 900  # The one Python estimate: title length, preview ending. The reader toolbar's own copy is client/state.ts minutesRemaining.
+
+
+def media_formats_ready(edition):
+    """(listen, watch): the format is switched on and the edition really offers it. One rule for the title page, the player link and the preview ending."""
+    formats = edition.get("formats", [])
+    return bool(django_settings.FEATURES.get("audio")) and "audio" in formats, bool(django_settings.FEATURES.get("video")) and "video" in formats
+
+
+def total_read_chars(revision_id):
+    from django.db.models import Sum
+    from django.db.models.functions import Length
+    from library.models import Paragraph
+    return Paragraph.objects.filter(unit__revision_id=revision_id).aggregate(n=Sum(Length("text")))["n"] or 0
+
+
+def read_minutes(chars):
+    """Whole minutes to read this many characters, rounded up; 0 when there is nothing."""
+    return -(-chars // READ_CHARS_PER_MINUTE) if chars > 0 else 0
 
 
 def remaining_read_minutes(revision_id, shown_chars):
     """Whole minutes left after the preview, from the stored text; None when there is nothing to estimate."""
-    from django.db.models import Sum
-    from django.db.models.functions import Length
-    from library.models import Paragraph
-    total = Paragraph.objects.filter(unit__revision_id=revision_id).aggregate(n=Sum(Length("text")))["n"] or 0
-    left = total - shown_chars
-    return -(-left // READ_CHARS_PER_MINUTE) if left > 0 else None
+    return read_minutes(total_read_chars(revision_id) - shown_chars) or None
 
 
 def preview_ending(request, locale, edition_id, edition, document, destination):
     """Fields for the signed-out preview ending: title, minutes left, and the other formats that really exist."""
-    formats = edition.get("formats", [])
-    listen = bool(django_settings.FEATURES.get("audio")) and "audio" in formats
-    watch = bool(django_settings.FEATURES.get("video")) and "video" in formats
+    listen, watch = media_formats_ready(edition)
     fields = {"edition_title": edition.get("title", ""), "formats": {"listen": listen, "watch": watch},
               "remaining_minutes": remaining_read_minutes(edition["edition_revision_id"], sum(len(p["text"]) for p in document.get("paragraphs", [])))}
     for flag, name, url_name in ((listen, "listen", "web:player"), (watch, "watch", "web:video")):
@@ -276,6 +295,13 @@ def reader(request, locale, edition_id, unit_id=None):
     bootstrap["previous_unit_url"]=reverse("web:reader",args=[locale,edition_id,units[index-1]["unit_id"]]) if index>0 else None
     bootstrap["next_unit_url"]=reverse("web:reader",args=[locale,edition_id,units[index+1]["unit_id"]]) if index+1<len(units) else None
     bootstrap["player_url"]=reverse("web:player",args=[locale,edition_id]) if request.user.is_authenticated and django_settings.FEATURES.get("audio") and "audio" in edition["formats"] else None
+    format_switch = []
+    if request.user.is_authenticated and not document.get("preview"):
+        listen_ready, watch_ready = media_formats_ready(edition)
+        if listen_ready:
+            format_switch.append({"kind": "listen", "url": reverse("web:player", args=[locale, edition_id]) + "?" + urlencode({"unit_id": unit_id})})
+        if watch_ready:
+            format_switch.append({"kind": "watch", "url": reverse("web:video", args=[locale, edition_id]) + "?" + urlencode({"unit_id": unit_id})})
     destination = request.get_full_path()
     if document.get("preview") and document.get("boundary"):
         boundary = document["boundary"]
@@ -298,7 +324,7 @@ def reader(request, locale, edition_id, unit_id=None):
         from .i18n import text as ui_text
         before, _, after = ui_text("preview_signin_finish").partition("{title}")
         preview_copy = {"before": before, "after": after, "minutes": bootstrap.get("remaining_minutes")}
-    return page(request, locale, "web/reader.html", document=document, preview_copy=preview_copy, preview_bootstrap=bootstrap, edition=edition, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination, reader_theme=saved_theme, has_chapters=any(p.get("kind") == "heading" for p in document.get("paragraphs", [])))
+    return page(request, locale, "web/reader.html", document=document, preview_copy=preview_copy, preview_bootstrap=bootstrap, format_switch=format_switch, edition=edition, bootstrap=bootstrap, focused=True, active_nav="explore", return_to=destination, reader_theme=saved_theme, has_chapters=any(p.get("kind") == "heading" for p in document.get("paragraphs", [])))
 
 
 class EmailForm(forms.Form):

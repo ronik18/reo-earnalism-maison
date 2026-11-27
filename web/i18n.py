@@ -503,3 +503,12 @@ STRINGS.update({
     "preview_listen_free": ("Sign in free to listen", "Sign in free to listen"),
     "preview_watch_free": ("Sign in free to watch", "Sign in free to watch"),
 })
+STRINGS.update({
+    "film": ("Film", "Film"),
+    "coming_soon": ("Coming soon", "Coming soon"),
+    "length_minutes": ("min", "min"),
+    "length_part": ("part", "part"),
+    "length_parts": ("parts", "parts"),
+    "format_row": ("Ways to enjoy this title", "Ways to enjoy this title"),
+    "format_switch": ("Switch format", "Switch format"),
+})

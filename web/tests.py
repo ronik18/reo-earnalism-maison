@@ -1,5 +1,6 @@
 """Browser-facing integration checks against the isolated PostgreSQL fixture build."""
 import io
+from unittest import mock
 import re
 from types import SimpleNamespace
 import json
@@ -542,3 +543,84 @@ class SupportAvailabilityAndAdminChangeTests(TestCase):
         self.assertRedirects(response, '/admin/password_change/done/')
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password('Changed-Frontend-Password-2026'))
+
+
+class TitleFormatRowTests(TestCase):
+    """Task 11: the title page format row, Read first, length, and the reader's format switch."""
+    @classmethod
+    def setUpClass(cls):
+        cls.media = TemporaryDirectory(prefix="maison-web-test-")
+        cls.override = override_settings(MEDIA_ROOT=cls.media.name, MAISON_LOCAL_FIXTURES=True)
+        cls.override.enable()
+        super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        cls.override.disable()
+        cls.media.cleanup()
+
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_local_pilot", stdout=io.StringIO())
+        cls.user = get_user_model().objects.create_user("web-fixture@example.test", "A-strong-local-password-47", is_verified=True)
+        cls.edition = "20000000-0000-4000-8000-000000000001"
+        cls.unit = "40000000-0000-4000-8000-000000000001"
+
+    login = ExperienceTests.login
+
+    def _title(self):
+        return self.client.get(f"/en/titles/{self.edition}/").content.decode()
+
+    def test_title_shows_read_listen_film_row_with_coming_soon(self):
+        with override_settings(FEATURES={**settings.FEATURES, "audio": False, "video": False}):
+            html = self._title()
+        row = html.split('class="format-row"', 1)[1].split("</ul>", 1)[0]
+        self.assertRegex(row, r"Read.*Listen.*Film")
+        self.assertEqual(row.count("Coming soon"), 2)
+        self.assertEqual(row.count("<a "), 1)  # only Read links; the missing formats are plain text
+        soon = re.findall(r'<span class="format-row-item format-row-soon">.*?</span></span>', row)
+        self.assertEqual(len(soon), 2)
+        self.assertTrue(all("href" not in item for item in soon))
+
+    def test_title_row_links_formats_that_exist(self):
+        with override_settings(FEATURES={**settings.FEATURES, "audio": True, "video": True}), \
+                mock.patch("web.views.media_formats_ready", return_value=(True, False)):
+            html = self._title()
+        row = html.split('class="format-row"', 1)[1].split("</ul>", 1)[0]
+        self.assertIn(f"/en/listen/{self.edition}/", row)
+        self.assertEqual(row.count("Coming soon"), 1)
+
+    def test_read_is_first_action_in_dom_order(self):
+        with mock.patch("web.views.media_formats_ready", return_value=(True, True)):
+            html = self._title()
+        actions = html.split('<div class="actions">', 1)[1].split("</div>", 1)[0]
+        hrefs = re.findall(r'<a [^>]*href="([^"]+)"', actions)
+        self.assertIn("/read/", hrefs[0])
+        self.assertLess(actions.index("/read/"), actions.index("/listen/"))
+        self.assertLess(actions.index("/listen/"), actions.index("/watch/"))
+
+    def test_title_shows_length_and_parts(self):
+        from library.models import Paragraph
+        from web.views import READ_CHARS_PER_MINUTE
+        html = self._title()
+        chars = sum(len(t) for t in Paragraph.objects.filter(unit__revision__edition_id=self.edition).values_list("text", flat=True))
+        minutes = max(1, -(-chars // READ_CHARS_PER_MINUTE))
+        parts = len(re.findall(r'<li><a href="/en/read/[^"]+" lang=', html)) or len(re.findall(r"<li>", html.split('class="unit-list"', 1)[1].split("</ol>", 1)[0]))
+        self.assertRegex(html, rf'class="fine title-length">{minutes} min · {parts} parts?<')
+
+    def test_reader_player_switch_keeps_position(self):
+        self.login()
+        with mock.patch("web.views.media_formats_ready", return_value=(True, True)):
+            html = self.client.get(f"/en/read/{self.edition}/{self.unit}/").content.decode()
+        switch = html.split('id="reader-format-slot">', 1)[1].split("</span>", 1)[0]
+        self.assertRegex(switch, r'<a [^>]*href="[^"]*"[^>]*aria-current="page">Read</a>')
+        self.assertEqual(switch.count('aria-current'), 1)
+        self.assertIn('data-format-switch="listen"', switch)
+        self.assertIn('data-format-switch="watch"', switch)
+        source = (Path(settings.BASE_DIR) / "client/reader.tsx").read_text()
+        self.assertIn('"/content/switch-position"', source)
+        self.assertIn("data-format-switch", source)  # the Listen link carries the saved position before navigating
+        with mock.patch("web.views.media_formats_ready", return_value=(False, False)):
+            html = self.client.get(f"/en/read/{self.edition}/{self.unit}/").content.decode()
+        self.assertNotIn("format-switch-item", html)  # only formats that exist are offered
