@@ -1027,10 +1027,10 @@
       {
         "run_id": "narration-91c7abe1-r2-c2of2#1",
         "job_id": "narration-91c7abe1-r2-c2of2",
-        "usd": 0.9179700000000001,
-        "seconds": 0.0,
+        "usd": 0.21900962320294504,
+        "seconds": 789.223867398,
         "at": "2026-11-27T19:02:37+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-bbf45e84-r2#1",
