@@ -695,10 +695,10 @@
       {
         "run_id": "stills-film-01-r6#1",
         "job_id": "stills-film-01-r6",
-        "usd": 2.1239624999999998,
-        "seconds": 0.0,
+        "usd": 0.6103422427407924,
+        "seconds": 900.874159027,
         "at": "2026-11-27T07:10:56+00:00",
-        "status": "pending"
+        "status": "ok"
       }
     ]
   }
