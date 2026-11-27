@@ -1,0 +1,13 @@
+{
+ "note": "PILOT v6 (spike): mother still redo after v5 — v5's T5 encoder truncated the prompt tail where the character lines sat, so the sari, veil and age were lost. Character first, whole prompt short. Four candidates.",
+ "items": [
+  {
+   "key": "f01s014-13",
+   "prompt": "A grave, sorrowful 40-year-old Bengali mother, careworn round face, unsmiling, red bindi, small gold earrings, ivory-white cotton sari with a thin red border, its red-bordered end drawn over her head covering her hair, red blouse. Wide shot, first light, small beaten-earth courtyard: she stands on the right, holding a long straw broom low, paused mid-stroke, looking toward a closed weathered wooden door on the left. Tulsi plant, brass water pot, low whitewashed mud wall, thatch, open dawn sky. Bengal, 1880s. Pale gold, ivory, soft indigo.",
+   "seed": 16313,
+   "width": 1344,
+   "height": 768,
+   "candidates": 4
+  }
+ ]
+}

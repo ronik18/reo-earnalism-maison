@@ -1,0 +1,16 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 1357,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/stills-pilot6-f01s014",
+  "inputs_sha256": "196bde553c0f9da8429338eaf49b05504e9de4f418b7d74db4b6d6b5f17e5f31",
+  "job_id": "stills-pilot6-f01s014",
+  "kind": "stills",
+  "min_vram_gib": 0,
+  "model": {
+    "repo": "black-forest-labs/FLUX.1-schnell",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "24804bce4dcdb3a47c43189873c61290e13d17790401f6912d33c91d2edf5ff0",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}
