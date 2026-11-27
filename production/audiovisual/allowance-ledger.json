@@ -603,10 +603,10 @@
       {
         "run_id": "music-film-01-r3#1",
         "job_id": "music-film-01-r3",
-        "usd": 0.7856025,
-        "seconds": 0.0,
+        "usd": 0.050882180194747495,
+        "seconds": 183.35920790899996,
         "at": "2026-11-27T05:50:24+00:00",
-        "status": "pending"
+        "status": "failed"
       }
     ]
   }

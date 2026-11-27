@@ -1,11 +1,35 @@
 {
   "colab_units": 0.0,
+  "error": "RuntimeError: Failed to import transformers.models.clip.modeling_clip because of the following error (look up to see its traceback):\nFailed to import transformers.generation.utils because of the following error (look up to see its traceback):\ngoogle.colab.__spec__ is None",
+  "files": [
+    {
+      "bytes": 1837,
+      "path": "inputs.zip",
+      "sha256": "bfc00f89fbf9db0623ef5a408167444c95a8b7514b6607de6050f8b58d5e6be8"
+    },
+    {
+      "bytes": 444,
+      "path": "sessions.jsonl",
+      "sha256": "8e9623df683df8534fa6550a2cd23d5bb7c6d928f8db38b535016ebf6f8cdd80"
+    }
+  ],
+  "finished_at": "2026-11-27T05:54:25+00:00",
   "job_id": "music-film-01-r3",
+  "modal_contacted_at": "2026-11-27T05:51:16+00:00",
   "pending_run_id": "music-film-01-r3#1",
   "r2_prefix": "gpu-jobs/bicharak/music-film-01-r3/run-1/",
   "requested_at": "2026-11-27T05:50:24+00:00",
+  "run": {
+    "error": "RuntimeError: Failed to import transformers.models.clip.modeling_clip because of the following error (look up to see its traceback):\nFailed to import transformers.generation.utils because of the following error (look up to see its traceback):\ngoogle.colab.__spec__ is None",
+    "run_id": "music-film-01-r3#1",
+    "seconds": 183.35920790899996,
+    "status": "failed",
+    "usd": 0.050882180194747495
+  },
   "schema": "earnalism.modal-request.v1",
-  "status": "running",
+  "seconds": 183.35920790899996,
+  "status": "failed",
   "title_root": "production/audiovisual/bicharak",
+  "usd": 0.050882180194747495,
   "worst_case_usd": 0.785602
 }
