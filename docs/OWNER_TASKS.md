@@ -17,10 +17,7 @@ Last updated: 26 Nov 2026.
 - [ ] **Five held stories (সুভা, স্ত্রীর পত্র, হৈমন্তী, একরাত্রি, খাতা; also পোস্টমাস্টার, কাবুলিওয়ালা, ছুটি re-checked):** the early-edition survey (`docs/evidence/early-edition-survey-20261125.json`) found no eligible printing. Pick a route: (1) validate the সুভা 1894 scan pp. 61–72 on Wikisource; (2) transcribe the 1914 সবুজ পত্র pages for স্ত্রীর পত্র and হৈমন্তী and decide whether a magazine issue counts as an eligible printing; (3) change the rule.
 
 ## Production runs
-- [ ] **বিচারক Colab jobs** (narration, stills, music): follow `production/audiovisual/bicharak/RUN_SHEET.md`, then tell Claude the job names and compute units used. This unlocks the first film, the first audio, podcast preview episodes and the founding Pass count.
-- [ ] **ক্ষুধিত পাষাণ narration Colab job** (`narration-9187e43e`, forecast 4.24 CU): follow `production/audiovisual/kshudhita-pashan/RUN_SHEET.md`; can run alongside বিচারক's.
-- [ ] **Colab: ক্ষুধিত পাষাণ stills and music jobs** (next to its narration job): same run sheet, `production/audiovisual/kshudhita-pashan/RUN_SHEET.md`; tell Claude the job names and compute units used.
-- [ ] **Narration Colab jobs for the 12 pipeline titles** (64.70 CU): `production/audiovisual/RUN_SHEET-pipeline-narration.md`.
+- [x] **Colab jobs replaced by Modal (26 Nov 2026):** Claude runs every narration/stills/music job on Modal through GitHub Actions within the $30/month and $6/title caps; no Colab runs are needed from you. বিচারক narration is done (r4); the other 13 narrations wait only for your voice approval.
 
 ## Accounts and keys
 - [ ] **Rotate the Gmail SMTP app password** (`EMAIL_HOST_PASSWORD` on Render): on 26 Nov Claude's settings check printed it into the session log by mistake (nowhere else). Create a new app password for sales@ in Google Account → Security → App passwords, put it in Render, then revoke the old one.
