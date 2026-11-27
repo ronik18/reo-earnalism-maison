@@ -816,10 +816,10 @@
       {
         "run_id": "stills-film-01-r2-sample8#1",
         "job_id": "stills-film-01-r2-sample8",
-        "usd": 1.4789824999999999,
-        "seconds": 0.0,
+        "usd": 0.1161043955602875,
+        "seconds": 171.371801565,
         "at": "2026-11-27T11:33:34+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "music-kshudhita-film-01-r2#1",

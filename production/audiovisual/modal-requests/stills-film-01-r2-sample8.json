@@ -1,12 +1,86 @@
 {
   "colab_units": 0.0,
+  "error": null,
+  "files": [
+    {
+      "bytes": 1526837,
+      "path": "f01s001-1.png",
+      "sha256": "f2cef95e86d43f57ada37b4ff666f9cb8ba5f4ca09f58d01b09b6080c73bbf33"
+    },
+    {
+      "bytes": 1235876,
+      "path": "f01s001-2.png",
+      "sha256": "4506af91b419b236e1ffaedccfaab8c3ef6f147ec02ff01688cb9046e71dacbe"
+    },
+    {
+      "bytes": 1661059,
+      "path": "f01s001-6.png",
+      "sha256": "64f9f8dc85b86d0f8a8a2f35aafc542a8b7d793b34be0fa3c79e673318baf76e"
+    },
+    {
+      "bytes": 1290877,
+      "path": "f01s003-3.png",
+      "sha256": "c8a9fb678fdca3e774c19eb3735136b6082605b4d39e7f3660436c5dd0404d1a"
+    },
+    {
+      "bytes": 1717152,
+      "path": "f01s004-2.png",
+      "sha256": "3c382fcb06289613fc39bf0a0d217ed713e4867da16d9ba854aee1160f8f6b77"
+    },
+    {
+      "bytes": 1734359,
+      "path": "f01s004-4.png",
+      "sha256": "a25c5e04f03a5d34c78b2d4c75bd75f45a8fa0f1c5177f1764d48e13ef834213"
+    },
+    {
+      "bytes": 1371071,
+      "path": "f01s021-2.png",
+      "sha256": "44cfa901761759761b79be37294d36e109e9fc90ecc0a84bedba84c0a5efda55"
+    },
+    {
+      "bytes": 1573893,
+      "path": "f01s023-1.png",
+      "sha256": "1203c768a350199c8fb2f14db9396998d8c5fec8a485fd30caf78a5dd605a065"
+    },
+    {
+      "bytes": 7909,
+      "path": "inputs.zip",
+      "sha256": "6ef484b65024ec98fca9752bc2c8771f901f939b9bc29241a329cd8f1056341f"
+    },
+    {
+      "bytes": 1386,
+      "path": "manifest.json",
+      "sha256": "9ed88f329e524e02bc115b7c4eb9670706a05227ba52c0fc91997dbf854a3263"
+    },
+    {
+      "bytes": 1720,
+      "path": "progress.jsonl",
+      "sha256": "893a762eb69cc3535b19a416bf0be5f069cbe828710b1b9d57c5399cbb8efa5f"
+    },
+    {
+      "bytes": 873,
+      "path": "sessions.jsonl",
+      "sha256": "f3131c6d47ff97248373b6cf6e58419a63f155b1ede86c63a0ed881e67745274"
+    }
+  ],
+  "finished_at": "2026-11-27T11:50:01+00:00",
   "gpu": "L40S",
   "job_id": "stills-film-01-r2-sample8",
+  "modal_contacted_at": "2026-11-27T11:46:44+00:00",
   "pending_run_id": "stills-film-01-r2-sample8#1",
   "r2_prefix": "gpu-jobs/kshudhita-pashan/stills-film-01-r2-sample8/run-1/",
   "requested_at": "2026-11-27T11:33:34+00:00",
+  "run": {
+    "error": null,
+    "run_id": "stills-film-01-r2-sample8#1",
+    "seconds": 171.371801565,
+    "status": "ok",
+    "usd": 0.1161043955602875
+  },
   "schema": "earnalism.modal-request.v1",
-  "status": "running",
+  "seconds": 171.371801565,
+  "status": "done",
   "title_root": "production/audiovisual/kshudhita-pashan",
+  "usd": 0.1161043955602875,
   "worst_case_usd": 1.478982
 }
