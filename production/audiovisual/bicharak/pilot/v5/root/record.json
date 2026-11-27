@@ -3249,6 +3249,20 @@
       },
       "path": "jobs/clips-f01s014-door-r2/film_clips.ipynb",
       "sha256": "20315df93e71ac8b4cc54a195f88ace228f13ffc6c9f1a51ca573699a4a68577"
+    },
+    {
+      "bytes": 27613,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 2.1413333333333333,
+        "inputs_zip": "jobs/clips-f01s014-door-r3/inputs.zip",
+        "job_id": "clips-f01s014-door-r3",
+        "job_kind": "film_clips",
+        "manifest": "jobs/clips-f01s014-door-r3/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/clips-f01s014-door-r3/film_clips.ipynb",
+      "sha256": "58c9a644a037cf4703756141ce34e612c3fba55c51c80e5be0488ba7dffc8a26"
     }
   ],
   "created_at": "2026-11-27T17:58:04.798975+00:00",
@@ -3775,6 +3789,46 @@
       },
       "result": "exchange_staged",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-27T20:17:01.756478+00:00",
+      "detail": {
+        "job_id": "clips-f01s014-door-r2",
+        "reason": "no A100 available; Colab gave an L4 that failed the 30 GiB VRAM preflight before download; nothing ran, 0 CU used; rebuilt for L4 as clips-f01s014-door-r3",
+        "units": 0
+      },
+      "result": "superseding",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T20:17:01.761247+00:00",
+      "detail": {
+        "job_id": "clips-f01s014-door-r2",
+        "reason": "no A100 available; Colab gave an L4 that failed the 30 GiB VRAM preflight before download; nothing ran, 0 CU used; rebuilt for L4 as clips-f01s014-door-r3"
+      },
+      "result": "superseded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T20:17:12.676017+00:00",
+      "detail": {
+        "forecast_units": 2.1413333333333333,
+        "job_id": "clips-f01s014-door-r3",
+        "kind": "film_clips"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-27T20:17:12.680764+00:00",
+      "detail": {
+        "job_id": "clips-f01s014-door-r3",
+        "kind": "film_clips",
+        "scene": "f01s014",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
     }
   ],
   "ledger": "../allowance-ledger.json",

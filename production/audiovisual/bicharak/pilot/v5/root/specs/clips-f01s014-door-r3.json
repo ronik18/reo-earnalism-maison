@@ -1,0 +1,26 @@
+{
+ "scene": "f01s014",
+ "note": "Owner decisions 27 Nov 2026: re-take the door beat (shot 10, 9.52 s) with the mother actually sweeping, from the same owner-picked door still pilot/v6/art/f01s014-13.png (stills-pilot6 c2, wall lettering painted out by hand). Rebuilt as clips-f01s014-door-r3 for an L4 (22.5 GiB; min_vram_gib 22, about 2.2 CU accepted by the owner) after clips-f01s014-door-r2 (A100, min_vram_gib 30) never ran: Colab had no A100 and the L4 it gave failed the 30 GiB preflight before any download (0 CU used, r2 superseded). Items are unchanged from r2: the sweep 13s and its continuation 13t (chain of 2 clips, 241 frames for 229 render frames plus the 1-frame margin), at 1280x704 as the L4 pilots motion-pilot4/5/6 ran them; job film_clips fills depth_stills in from the picks (shots 1, 2, 3, 6, 12) and skips stills whose map is already adopted.",
+ "art_dir": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v6/art",
+ "min_vram_gib": 22,
+ "items": [
+  {
+   "key": "f01s014-13s",
+   "shot": 10,
+   "image": "f01s014-13.png",
+   "seed": 62013,
+   "prompt": "A careworn Bengali mother with her white red-bordered sari drawn over her head sweeps the dusty sunlit courtyard with her long broom, a few slow strokes across the ground, then stops and stands still holding the broom pole, her hands whole on the pole, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  },
+  {
+   "key": "f01s014-13t",
+   "shot": 10,
+   "continue_from": "f01s014-13s",
+   "seed": 62113,
+   "prompt": "A careworn Bengali mother with her white red-bordered sari drawn over her head stands still holding her long broom pole, then slowly turns her head toward the closed wooden door on the left and looks at it, the edge of her veil stirs in a light breeze, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  }
+ ]
+}
