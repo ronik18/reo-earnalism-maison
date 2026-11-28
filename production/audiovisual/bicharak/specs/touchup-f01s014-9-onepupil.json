@@ -1,0 +1,21 @@
+{
+  "items": [
+    {
+      "key": "f01s014-9",
+      "ops": [
+        {
+          "box": [582, 215, 599, 243],
+          "feather": 1,
+          "mask": "ellipse",
+          "op": "fill",
+          "sample": [580, 232]
+        }
+      ],
+      "source": {
+        "file": "f01s014-9--c4.png",
+        "job": "stills-pilot7-f01s014"
+      }
+    }
+  ],
+  "note": "Owner report 28 Nov 2026 (shot 11, 0:51 of scene 14 v7): the mother's left eye (right of picture) has two pupils, each with its own highlight, in the start still f01s014-9 (stills-pilot7-f01s014 f01s014-9--c4). Found by eav facegate. Fills the second, right-hand pupil with the eye-white; the left pupil (looking down and to the left of picture, one highlight) stays, lid line, lashes and the other eye untouched."
+}

@@ -36024,6 +36024,79 @@
       },
       "path": "touchup/touchup-f01s014-7-nomole/f01s014-7--mask.png",
       "sha256": "5bfea88d0daf839925e5b1a43a27131bbb8070c7619d6703a0a77cfbd9fef533"
+    },
+    {
+      "bytes": 1245,
+      "kind": "touchup_job",
+      "meta": {
+        "engine": "opencv",
+        "forecast_units": 0.0,
+        "job_id": "touchup-f01s014-9-onepupil",
+        "job_kind": "touchup",
+        "manifest": "jobs/touchup-f01s014-9-onepupil/touchup-manifest.json",
+        "opencv": "5.1.0"
+      },
+      "path": "jobs/touchup-f01s014-9-onepupil/touchup-manifest.json",
+      "sha256": "b0d481c9e5f301d6fcf429d3cc621ea966f71291b2afc03530ff7719f10a7e9f"
+    },
+    {
+      "bytes": 875,
+      "kind": "touchup_spec",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-f01s014-9-onepupil",
+        "job_kind": "touchup",
+        "opencv": "5.1.0"
+      },
+      "path": "jobs/touchup-f01s014-9-onepupil/touchup.json",
+      "sha256": "b12381e47d3359882e43a738de7fc789ea83b0988b208eb0b0fc1c0f59691442"
+    },
+    {
+      "bytes": 825615,
+      "kind": "touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-f01s014-9-onepupil",
+        "job_kind": "touchup",
+        "key": "f01s014-9",
+        "opencv": "5.1.0",
+        "ops": [
+          {
+            "box": [
+              582,
+              215,
+              599,
+              243
+            ],
+            "feather": 1,
+            "mask": "ellipse",
+            "op": "fill",
+            "sample": [
+              580,
+              232
+            ]
+          }
+        ],
+        "source": "stills/stills-pilot7-f01s014/f01s014-9--c4.png",
+        "source_sha256": "89d3ee4f8c871a20f01ad9b0bf7787dfd8c26544da3de7f544590bf93a48d7fe"
+      },
+      "path": "touchup/touchup-f01s014-9-onepupil/f01s014-9--c1.png",
+      "sha256": "233caf0947c7b6c11c9821a76b3c4603f548943c5b6a042cbdd5defe5fcf0f66"
+    },
+    {
+      "bytes": 1212,
+      "kind": "touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "touchup-f01s014-9-onepupil",
+        "job_kind": "touchup",
+        "key": "f01s014-9",
+        "opencv": "5.1.0",
+        "source": "stills/stills-pilot7-f01s014/f01s014-9--c4.png",
+        "source_sha256": "89d3ee4f8c871a20f01ad9b0bf7787dfd8c26544da3de7f544590bf93a48d7fe"
+      },
+      "path": "touchup/touchup-f01s014-9-onepupil/f01s014-9--mask.png",
+      "sha256": "1c1de4c87791fdebff128394c1c80ef73c3731c7d114747f44242cba261dc535"
     }
   ],
   "created_at": "2026-11-23T09:57:44.658578+00:00",
@@ -40461,6 +40534,34 @@
         "job_id": "touchup-f01s014-7-nomole",
         "kind": "touchup",
         "manifest_sha256": "3611e8f83b68982f88a61e4746609f60553d7447fddea1bb7577c90812cd9554",
+        "opencv": "5.1.0"
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-28T12:45:56.406790+00:00",
+      "detail": {
+        "engine": "opencv",
+        "job_id": "touchup-f01s014-9-onepupil",
+        "kind": "touchup",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-28T12:45:56.538390+00:00",
+      "detail": {
+        "actual_units": 0,
+        "engine": "opencv",
+        "files": [
+          "touchup/touchup-f01s014-9-onepupil/f01s014-9--c1.png",
+          "touchup/touchup-f01s014-9-onepupil/f01s014-9--mask.png"
+        ],
+        "job_id": "touchup-f01s014-9-onepupil",
+        "kind": "touchup",
+        "manifest_sha256": "b0d481c9e5f301d6fcf429d3cc621ea966f71291b2afc03530ff7719f10a7e9f",
         "opencv": "5.1.0"
       },
       "result": "accepted",
