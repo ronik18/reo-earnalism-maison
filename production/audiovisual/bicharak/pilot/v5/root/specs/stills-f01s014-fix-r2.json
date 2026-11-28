@@ -1,0 +1,24 @@
+{
+ "scene": "f01s014",
+ "note": "Owner review of v7, 28 Nov 2026 (fix r2). Shot 1 (stills-f01s014-fix-r1 c3): the horse stood on the wrong side of the carriage (its rump toward camera, reading as behind the carriage), background houses had pitched red-tile roofs and chimneys, and a house number was visible; so a new still with the carriage seen from behind going away and one horse ahead of it, further from camera and partly hidden by the carriage body, pulling it down the lane; every roof flat with a parapet; plain blank walls and pillars (positive-only wording for no numbers, signs or writing); one moon, a clear sky, kerosene lanterns on wall brackets, muted ochre and brown louvred shutters, arched doorways, balconies, a flat horizon, indigo night. Shot 7 (take f01s014-14x from fix-r1 c2): the mother was drawn far younger, almost childlike (big cartoon eyes, smooth face, small body), so a new start still matched to her look in 13s (shot 10) and 9p (shot 11) and the mother anchor: a careworn woman of about 45, round full face, faint forehead lines, slight eye bags, eyes of normal size, a heavier build; white sari with a red border over her head, red bindi, small gold earrings, eyes open looking down at her hands, folding betel leaves on a straw mat, an empty brass tray beside her. The stills route has no reference-weight or face-reference input (FLUX.1-schnell text-to-image; the anchor is the gate's similarity check), so the anchor is kept for the gate. New seeds (fix-r1 used 18101 and 18107). Positive-only; T5 estimates with the house style 175 and 177 (limit 180).",
+ "art_dir": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v6/art",
+ "items": [
+  {
+   "key": "f01s014-1",
+   "prompt": "One horse pulls a closed black carriage away down a narrow North Calcutta lane at night, seen from behind: the carriage's back nearest us, the horse ahead of it, half hidden by the carriage. Bengal, 1880s: lime-plastered two- and three-storey houses, every roof flat with a parapet, plain blank walls and pillars, arched doorways, wooden balconies, closed louvred shutters in muted ochre and brown, kerosene lanterns on wall brackets. Flat low horizon, one full moon, clear indigo sky. Indigo night, silver moonlight, lamp amber.",
+   "seed": 18201,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-7",
+   "anchor": "anchor-mother.png",
+   "prompt": "Hemshashi's mother, a careworn 45-year-old Bengali woman, round full face, faint forehead lines, slight bags under her eyes, normal-sized dark eyes open, looking down at her hands, heavy-set build, red bindi, small gold earrings, an ivory-white cotton sari with a thin red border draped over her head, red blouse. Morning: she sits cross-legged on a straw mat at the right of a plain cream-walled room, folding green betel leaves; an empty brass tray on the mat beside her. Bengal, 1880s. Ivory, faded vermilion, pale gold.",
+   "seed": 18207,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  }
+ ]
+}
