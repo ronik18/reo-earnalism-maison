@@ -978,14 +978,16 @@
     "title": "manbhanjan",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "906f2df9-a6bf-4676-a8d5-dafe055a8b7b",
     "root": "manbhanjan",
     "reserved_units": 1.770422444444444,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-28T12:40:29+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.580861,
+    "cu_equivalent": 5.81
   },
   {
     "job_id": "narration-d0eb4dd7-c1of3",
