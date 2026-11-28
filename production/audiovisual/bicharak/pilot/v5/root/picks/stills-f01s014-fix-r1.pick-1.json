@@ -1,0 +1,41 @@
+{
+  "advisories": {
+    "f01s014-1": {
+      "candidate": 3,
+      "why": "gate needs review: possible anachronism: modern high-rise building, spotlight"
+    }
+  },
+  "choices": {
+    "f01s014-1": {
+      "candidate": 3,
+      "file": "stills/stills-f01s014-fix-r1/f01s014-1--c3.png",
+      "sha256": "7ad9cfe055ee33e945310101c95e5e5804694ef1b9c0bde4afca0909689ee38f"
+    },
+    "f01s014-7": {
+      "candidate": 2,
+      "file": "stills/stills-f01s014-fix-r1/f01s014-7--c2.png",
+      "sha256": "daf44486cc6a22ba084de74872c08ef8f42d75f402b41a849465960ad92520d9"
+    }
+  },
+  "job_id": "stills-f01s014-fix-r1",
+  "overrides": {
+    "f01s014-7": {
+      "candidate": 2,
+      "gate": {
+        "anachronisms": [],
+        "anchor_similarity": 0.7086,
+        "eyes": 2,
+        "hands_detached": true,
+        "needs_review": false,
+        "notes": [
+          "a hand with no body or arm near its wrist",
+          "no person box: similarity used the whole frame"
+        ],
+        "pass": false
+      },
+      "level": "fail",
+      "reason": "Owner pick 28 Nov 2026 (stills-f01s014-fix-r1 c2): false positive, her hands fold the betel leaves in her lap; the still gate is advisory until calibrated",
+      "why": "gate failed: a hand with no body or arm near its wrist; no person box: similarity used the whole frame"
+    }
+  }
+}

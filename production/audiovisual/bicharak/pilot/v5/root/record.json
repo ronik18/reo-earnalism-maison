@@ -5429,6 +5429,68 @@
       },
       "path": "stills/stills-f01s014-fix-r1/f01s014-7--c3.png",
       "sha256": "fc7f55593690804beee548b69df89e66d6c3978fe338a834244d9833e1a2e613"
+    },
+    {
+      "bytes": 1334,
+      "kind": "stills_pick",
+      "meta": {
+        "advisories": {
+          "f01s014-1": {
+            "candidate": 3,
+            "why": "gate needs review: possible anachronism: modern high-rise building, spotlight"
+          }
+        },
+        "choices": {
+          "f01s014-1": {
+            "candidate": 3,
+            "file": "stills/stills-f01s014-fix-r1/f01s014-1--c3.png",
+            "sha256": "7ad9cfe055ee33e945310101c95e5e5804694ef1b9c0bde4afca0909689ee38f"
+          },
+          "f01s014-7": {
+            "candidate": 2,
+            "file": "stills/stills-f01s014-fix-r1/f01s014-7--c2.png",
+            "sha256": "daf44486cc6a22ba084de74872c08ef8f42d75f402b41a849465960ad92520d9"
+          }
+        },
+        "job_id": "stills-f01s014-fix-r1",
+        "overrides": {
+          "f01s014-7": {
+            "candidate": 2,
+            "gate": {
+              "anachronisms": [],
+              "anchor_similarity": 0.7086,
+              "eyes": 2,
+              "hands_detached": true,
+              "needs_review": false,
+              "notes": [
+                "a hand with no body or arm near its wrist",
+                "no person box: similarity used the whole frame"
+              ],
+              "pass": false
+            },
+            "level": "fail",
+            "reason": "Owner pick 28 Nov 2026 (stills-f01s014-fix-r1 c2): false positive, her hands fold the betel leaves in her lap; the still gate is advisory until calibrated",
+            "why": "gate failed: a hand with no body or arm near its wrist; no person box: similarity used the whole frame"
+          }
+        },
+        "version": 1
+      },
+      "path": "picks/stills-f01s014-fix-r1.pick-1.json",
+      "sha256": "10f178b0f2ef785b7f58f807241410f3480f64b9816dee0a8ab9997a69bdb67a"
+    },
+    {
+      "bytes": 27608,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.438,
+        "inputs_zip": "jobs/clips-f01s014-fix-r1/inputs.zip",
+        "job_id": "clips-f01s014-fix-r1",
+        "job_kind": "film_clips",
+        "manifest": "jobs/clips-f01s014-fix-r1/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/clips-f01s014-fix-r1/film_clips.ipynb",
+      "sha256": "38cc83ac939b20a53f222925bb6dc9d38cda5a93a94f60be2db0ed59991cdfae"
     }
   ],
   "created_at": "2026-11-27T17:58:04.798975+00:00",
@@ -6430,6 +6492,46 @@
       },
       "result": "exchange_collected",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-28T10:11:23.026664+00:00",
+      "detail": {
+        "advisories": {
+          "f01s014-1": "gate needs review: possible anachronism: modern high-rise building, spotlight"
+        },
+        "choices": {
+          "f01s014-1": 3,
+          "f01s014-7": 2
+        },
+        "job_id": "stills-f01s014-fix-r1",
+        "overrides": {
+          "f01s014-7": "Owner pick 28 Nov 2026 (stills-f01s014-fix-r1 c2): false positive, her hands fold the betel leaves in her lap; the still gate is advisory until calibrated"
+        },
+        "version": 1
+      },
+      "result": "recorded",
+      "stage": "pick"
+    },
+    {
+      "at": "2026-11-28T10:11:56.544371+00:00",
+      "detail": {
+        "forecast_units": 1.438,
+        "job_id": "clips-f01s014-fix-r1",
+        "kind": "film_clips"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-28T10:11:56.553266+00:00",
+      "detail": {
+        "job_id": "clips-f01s014-fix-r1",
+        "kind": "film_clips",
+        "scene": "f01s014",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
     }
   ],
   "ledger": "../allowance-ledger.json",

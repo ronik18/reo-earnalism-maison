@@ -1,0 +1,17 @@
+{
+ "scene": "f01s014",
+ "note": "Owner decisions 28 Nov 2026: shot 7 gets a new start still (stills-f01s014-fix-r1 c2, the veiled mother with the round face, eyes open) and so a new Wan clip, f01s014-14x, from that still copied by hand to pilot/v6/art/f01s014-14x.png, at 1280x704 as the L4 pilots and clips-f01s014-door-r3 ran it (one 121-frame clip for the 3.39 s shot plus the 1-frame margin). The job also carries the depth map of the new shot 1 pick (stills-f01s014-fix-r1 c3): job film_clips fills depth_stills in from the picks and skips stills whose map is already adopted. L4 (min_vram_gib 22), same model and settings as clips-f01s014-door-r3. After import, bind the clip with film/film-01/clip-picks.json {\"f01s014/7\": \"f01s014-14x\"}.",
+ "art_dir": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v6/art",
+ "min_vram_gib": 22,
+ "items": [
+  {
+   "key": "f01s014-14x",
+   "shot": 7,
+   "image": "f01s014-14x.png",
+   "seed": 62714,
+   "prompt": "A veiled Bengali mother with her white red-bordered sari drawn over her head sits cross-legged on a straw mat and folds green betel leaves on a brass tray, her hands moving slowly and naturally, her eyes open, looking down at her hands, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  }
+ ]
+}

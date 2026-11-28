@@ -1,0 +1,26 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 2157,
+  "diffusers": "diffusers==0.37.0",
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/bicharak/clips-f01s014-fix-r1",
+  "inputs_sha256": "e21dba5f9cabd3abf3d62a4d761a898f76a2274e79a7db160e22f66baefaaa4f",
+  "job_id": "clips-f01s014-fix-r1",
+  "kind": "film_clips",
+  "licences": {
+    "allowlist": [
+      "apache-2.0"
+    ],
+    "recorded": {
+      "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+      "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+    }
+  },
+  "min_vram_gib": 22,
+  "model": {
+    "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+    "revision": "resolved-at-run-time"
+  },
+  "notebook_sha256": "38cc83ac939b20a53f222925bb6dc9d38cda5a93a94f60be2db0ed59991cdfae",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "bicharak"
+}
