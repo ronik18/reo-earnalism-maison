@@ -520,8 +520,8 @@
     "job_id": "clips-f01s014-fix-r1",
     "title": "bicharak",
     "month": "2026-11",
-    "units": 1.44,
-    "state": "reserved",
+    "units": 0.4,
+    "state": "settled",
     "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
     "root": "bicharak"
   }

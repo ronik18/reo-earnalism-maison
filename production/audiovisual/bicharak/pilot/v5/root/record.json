@@ -5491,6 +5491,207 @@
       },
       "path": "jobs/clips-f01s014-fix-r1/film_clips.ipynb",
       "sha256": "38cc83ac939b20a53f222925bb6dc9d38cda5a93a94f60be2db0ed59991cdfae"
+    },
+    {
+      "bytes": 692034,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "e21dba5f9cabd3abf3d62a4d761a898f76a2274e79a7db160e22f66baefaaa4f",
+        "job_id": "clips-f01s014-fix-r1",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-14x": 246.1
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-fix-r1/depth/f01s014-1.depth.png",
+      "sha256": "dc908c8b7946da9229f2f1a6f3cfb57a0b3b28c17659b49889b5834806401fca"
+    },
+    {
+      "bytes": 755618,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "e21dba5f9cabd3abf3d62a4d761a898f76a2274e79a7db160e22f66baefaaa4f",
+        "job_id": "clips-f01s014-fix-r1",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-14x": 246.1
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-fix-r1/depth/f01s014-14x.depth.png",
+      "sha256": "ddf0b597545dbea3d87fcc80a1419b77a47eb93f00736f334e51861977b14952"
+    },
+    {
+      "bytes": 660146,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "e21dba5f9cabd3abf3d62a4d761a898f76a2274e79a7db160e22f66baefaaa4f",
+        "job_id": "clips-f01s014-fix-r1",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-14x": 246.1
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-fix-r1/clips/f01s014-14x.last-depth.png",
+      "sha256": "9ef5a8fc8e3dff79777b1d8d3c2106d6908b0ae1492212a357f7c2a5e8d64bd5"
+    },
+    {
+      "bytes": 881975,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "e21dba5f9cabd3abf3d62a4d761a898f76a2274e79a7db160e22f66baefaaa4f",
+        "job_id": "clips-f01s014-fix-r1",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-14x": 246.1
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-fix-r1/clips/f01s014-14x.last.png",
+      "sha256": "e0c1fb13c240154726d8ef5d34f524586867251c037807f71f5384024a2067b6"
+    },
+    {
+      "bytes": 22634058,
+      "kind": "film_clips",
+      "meta": {
+        "input_zip_sha256": "e21dba5f9cabd3abf3d62a4d761a898f76a2274e79a7db160e22f66baefaaa4f",
+        "job_id": "clips-f01s014-fix-r1",
+        "job_kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-14x": 246.1
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "film_clips/clips-f01s014-fix-r1/clips/f01s014-14x.mp4",
+      "sha256": "367cdb0e4c75570076e7278f89e6a459f4b17a6b1e9509ac2f5672640f83aaee"
+    },
+    {
+      "bytes": 775,
+      "kind": "motion_gate",
+      "meta": {
+        "clip": "f01s014-14x.mp4",
+        "job_id": "clips-f01s014-fix-r1",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/clips-f01s014-fix-r1/clips/f01s014-14x.motion.json",
+      "sha256": "4a81eda1b1fe4f80394c77070f396c17237a8caaa516f030a9c5a16a23f08d90"
     }
   ],
   "created_at": "2026-11-27T17:58:04.798975+00:00",
@@ -6554,6 +6755,69 @@
         "outputs_key": "exports/colab-exchange/bicharak/clips-f01s014-fix-r1/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-28T10:34:06.984704+00:00",
+      "detail": {
+        "actual_units": 0.4,
+        "files": [
+          "film_clips/clips-f01s014-fix-r1/depth/f01s014-1.depth.png",
+          "film_clips/clips-f01s014-fix-r1/depth/f01s014-14x.depth.png",
+          "film_clips/clips-f01s014-fix-r1/clips/f01s014-14x.last-depth.png",
+          "film_clips/clips-f01s014-fix-r1/clips/f01s014-14x.last.png",
+          "film_clips/clips-f01s014-fix-r1/clips/f01s014-14x.mp4"
+        ],
+        "input_zip_sha256": "e21dba5f9cabd3abf3d62a4d761a898f76a2274e79a7db160e22f66baefaaa4f",
+        "job_id": "clips-f01s014-fix-r1",
+        "kind": "film_clips",
+        "model": {
+          "depth_repo": "depth-anything/Depth-Anything-V2-Small-hf",
+          "fps": 24,
+          "frames": 121,
+          "gpu": "NVIDIA A100-SXM4-40GB",
+          "guidance": 5.0,
+          "licences": {
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers": "apache-2.0",
+            "depth-anything/Depth-Anything-V2-Small-hf": "apache-2.0"
+          },
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+          "revision": "b8fff7315c768468a5333511427288870b2e9635",
+          "seconds_per_clip": {
+            "f01s014-14x": 246.1
+          },
+          "steps": 24
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "diffusers": "0.37.0",
+          "ftfy": "6.3.1",
+          "huggingface_hub": "1.33.0",
+          "imageio": "2.38.1",
+          "safetensors": "0.8.0",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-28T10:34:07.000296+00:00",
+      "detail": {
+        "job_id": "clips-f01s014-fix-r1",
+        "members": [
+          "f01s014-1.depth.png",
+          "f01s014-14x.depth.png",
+          "f01s014-14x.last-depth.png",
+          "f01s014-14x.last.png",
+          "f01s014-14x.mp4",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/clips-f01s014-fix-r1/outputs.tar",
+        "outputs_tar_sha256": "b86586b955103c4b0dfb12792ee8d9389059147d7e3d0040d41baf7f7b7cfff8"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],
