@@ -152,14 +152,21 @@ class CastTests(unittest.TestCase):
     def test_voice_template_is_the_approved_arnav_description(self):
         v = json.loads(cast.VOICES.read_text()) if cast.VOICES.exists() else None
         real = cast.load_voices(Path(cast.__file__).resolve().parents[2] / "references" / "voices.json")
-        self.assertEqual(real["status"], "audition_pending")  # the owner has not picked yet
-        self.assertIsNone(real["male"])
+        # The owner picked from audition-15a5c974 (28 Nov 2026): Arnav, Arjun; Aditi, Riya.
+        self.assertEqual(real["status"], "chosen")
+        self.assertEqual(real["audition_job_id"], "audition-15a5c974")
+        self.assertEqual([v["speaker"] for v in real["male"]], ["Arnav", "Arjun"])
+        self.assertEqual([v["speaker"] for v in real["female"]], ["Aditi", "Riya"])
+        for v in real["male"] + real["female"]:
+            self.assertEqual(v["description"], real["description_template"].format(speaker=v["speaker"]))
         roster = json.loads(ROSTER.read_text())["profiles"]["bn_arnav"]["presets"]["story"]
         self.assertEqual(real["description_template"].format(speaker="Arnav"), roster["description"])
         self.assertEqual(real["speakers"], {"male": list(cast.SPEAKERS["male"]),
                                             "female": list(cast.SPEAKERS["female"])})
+        pending = {**real, "status": "audition_pending", "male": None, "female": None,
+                   "chosen_by": None, "chosen_at": None, "audition_job_id": None}
         with self.assertRaises(cast.VoicesNotChosen):
-            cast.chosen(real)
+            cast.chosen(pending)
         self.assertIsNotNone(v)
 
     def test_choice_rules(self):
@@ -261,8 +268,10 @@ class CastTests(unittest.TestCase):
     def test_voices_not_chosen_refuses_cast_jobs(self):
         units = self.init_and_plan()
         self.write_cast(self.cast_doc(units))
-        self.voices.write_text(json.dumps(cast.load_voices(
-            Path(cast.__file__).resolve().parents[2] / "references" / "voices.json")))
+        real = cast.load_voices(Path(cast.__file__).resolve().parents[2] / "references" / "voices.json")
+        self.voices.write_text(json.dumps({**real, "status": "audition_pending", "male": None,
+                                           "female": None, "chosen_by": None, "chosen_at": None,
+                                           "audition_job_id": None}))
         code, out = self.job()
         self.assertEqual(code, 2, out)
         self.assertIn("voices not chosen yet — run the audition", out)
