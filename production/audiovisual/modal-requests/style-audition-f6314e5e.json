@@ -6,7 +6,7 @@
   "r2_prefix": "gpu-jobs/samapti/style-audition-f6314e5e/run-1/",
   "requested_at": "2026-11-28T10:46:17+00:00",
   "schema": "earnalism.modal-request.v1",
-  "status": "requested",
+  "status": "running",
   "title_root": "production/audiovisual/samapti",
   "worst_case_usd": 0.585525
 }
