@@ -1,0 +1,16 @@
+{
+  "advisories": {
+    "f01s014-7": {
+      "candidate": 3,
+      "why": "gate needs review: a character is expected but no face was detected; a hand could not be judged attached or detached; no person box: similarity used the whole frame"
+    }
+  },
+  "choices": {
+    "f01s014-7": {
+      "candidate": 3,
+      "file": "stills/stills-f01s014-fix-r2/f01s014-7--c3.png",
+      "sha256": "22cb2914140caee91781ec40eadc012d90b63916736bccca55214bf061ea00b5"
+    }
+  },
+  "job_id": "stills-f01s014-fix-r2"
+}

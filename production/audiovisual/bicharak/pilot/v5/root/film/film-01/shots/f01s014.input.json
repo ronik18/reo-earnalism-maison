@@ -49,7 +49,9 @@
   "owner_decisions_28_nov_2026_fix": [
    "shot 1: the new North Calcutta night-lane still, stills-f01s014-fix-r1 c3 (depth map from clips-f01s014-fix-r1)",
    "shot 7: the new paan take f01s014-14x (clips-f01s014-fix-r1, from the round-faced mother still stills-f01s014-fix-r1 c2; motion gate pass), bound in clip-picks.json",
-   "the world bible describes North Calcutta lanes"
+   "the world bible describes North Calcutta lanes",
+   "shot 7: the new start still is stills-f01s014-fix-r2 c3 (the careworn mother, eyes down, folding leaves); a new Wan take replaces 14x in the follow-up clips job; picked and the gate override recorded in picks/",
+   "shot 1 becomes an empty lane: no vehicle, wheel ruts leading away; the hooves and wheels SFX stay on shot 1 and fade away on the soundtrack as if the carriage has just turned out of sight; new still stills-f01s014-fix-r3 (one item, 3 candidates)"
   ]
  },
  "timing_source": "clause bounds: eav scene-timing on the --no-retime import (-38 dBFS, 0.3 s; 8 clauses, the 1.6 s pause after 'নাই!' intact); in-clause breaths measured on the same scene wav with eav.retime.detect_pauses: -38 dBFS/0.15 s for 16.26-16.56, 30.98-31.20, 35.03-35.35, 44.36-45.07, 46.46-46.64; -34 dBFS for 12.29-12.46 (0.18 s; 0.12 s at -38); the inhale after 'কুলকন্যারা' 5.37-5.80 s is speech-free at -30 dBFS (fragments at -34). The word gap before 'সমস্ত' (4.40-4.46 s, 0.04-0.06 s at every threshold) is under the 0.15 s breath minimum, so the 1->2 cut is at the inhale after 'কুলকন্যারা'.",
@@ -137,7 +139,7 @@
     0,
     1
    ],
-   "subject": "Hem's own shut carriage seen from behind, moving away down the night lane between two rows of shut houses (the shut houses carry 'পৃথিবীতে ঘরে ঘরে'); the lane runs to a flat Calcutta horizon under the moon (new still, stills job)",
+   "subject": "an empty narrow North Calcutta lane at deep night, moonlit, no vehicle, no people, no animals: wheel ruts in the dust lead away between two rows of shut houses (the shut houses carry 'পৃথিবীতে ঘরে ঘরে'); the lane runs to a flat Calcutta horizon under the moon; the hooves and wheels fade away on the soundtrack, as if Hem's carriage has just turned out of sight (new still, stills-f01s014-fix-r3)",
    "framing": "establishing wide",
    "motion": "glide",
    "camera": {
@@ -155,7 +157,7 @@
      "wheels",
      "hooves"
     ],
-    "music": "drone fades up"
+    "music": "drone fades up (the hooves and wheels SFX fade away over the shot)"
    }
   },
   {
