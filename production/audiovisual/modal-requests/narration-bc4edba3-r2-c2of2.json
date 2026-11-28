@@ -6,7 +6,7 @@
   "r2_prefix": "gpu-jobs/prayashchitta/narration-bc4edba3-r2-c2of2/run-1/",
   "requested_at": "2026-11-27T19:02:38+00:00",
   "schema": "earnalism.modal-request.v1",
-  "status": "requested",
+  "status": "running",
   "title_root": "production/audiovisual/prayashchitta",
   "worst_case_usd": 0.920467
 }
