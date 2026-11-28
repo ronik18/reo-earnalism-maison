@@ -1,342 +1,420 @@
 {
- "schema": "eav.cast/1",
- "title": "prayashchitta",
- "source_revision": "b3657c17-7c4d-4f4a-b524-c7b1291835f4",
- "source_sha256": "265a285b59289966c2875b57cf5d4d11b04eb2f8a569ccad3e1e18cd1f784a2b",
- "narrator": {
-  "gender": "female",
-  "rationale": "Third-person story centred on Bindhyabasini: her devotion to the worthless Anathbandhu, her self-sacrificing confession of the theft and her final public humiliation; a female narrator follows her perspective."
- },
- "characters": {
-  "বিন্ধ্যবাসিনী": {
-   "gender": "female",
-   "note": "Bindhyabasini (Bindi), Anathbandhu's devoted wife"
+  "schema": "eav.cast/1",
+  "title": "prayashchitta",
+  "source_revision": "b3657c17-7c4d-4f4a-b524-c7b1291835f4",
+  "source_sha256": "265a285b59289966c2875b57cf5d4d11b04eb2f8a569ccad3e1e18cd1f784a2b",
+  "narrator": {
+    "gender": "female",
+    "rationale": "Third-person story centred on Bindhyabasini: her devotion to the worthless Anathbandhu, her self-sacrificing confession of the theft and her final public humiliation; a female narrator follows her perspective."
   },
-  "অনাথবন্ধু": {
-   "gender": "male",
-   "note": "Anathbandhu, the vain would-be genius husband"
+  "characters": {
+    "বিন্ধ্যবাসিনী": {
+      "gender": "female",
+      "note": "Bindhyabasini (Bindi), Anathbandhu's devoted wife"
+    },
+    "অনাথবন্ধু": {
+      "gender": "male",
+      "note": "Anathbandhu, the vain would-be genius husband"
+    },
+    "কমলা": {
+      "gender": "female",
+      "note": "Kamala, neighbour and childhood friend of Bindhya, sister of Ramesh"
+    },
+    "রাজকুমার বাবু": {
+      "gender": "male",
+      "note": "Rajkumar Babu, Bindhya's wealthy father"
+    },
+    "শ্যামাশঙ্করী": {
+      "gender": "female",
+      "note": "Shyamashankari, wife of Anathbandhu's elder brother"
+    },
+    "বড় ভাই": {
+      "gender": "male",
+      "note": "Anathbandhu's elder brother (দাদা) who works away from home"
+    },
+    "বিন্ধ্যর মা": {
+      "gender": "female",
+      "note": "Bindhya's mother, Rajkumar Babu's wife"
+    },
+    "কমল ও ভুবন": {
+      "gender": "female",
+      "note": "Bindhya's two friends Kamal and Bhuban calling at her door"
+    },
+    "দ্বারবান": {
+      "gender": "male",
+      "note": "the doorkeeper announcing the English lady"
+    }
   },
-  "কমলা": {
-   "gender": "female",
-   "note": "Kamala, neighbour and childhood friend of Bindhya, sister of Ramesh"
+  "units": {
+    "f01s005-004": [
+      {
+        "text": "রাত্রে মৃদুস্বরে অনাথবন্ধুকে বলিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“পরীক্ষাটা দিলেই ভাল হ’ত!”",
+        "role": "character",
+        "speaker": "বিন্ধ্যবাসিনী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s005-005": [
+      {
+        "text": "অনাথবন্ধু অবজ্ঞাভরে হাসিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“পরীক্ষা দিলেই কি চতুর্ভুজ হয় না কি?",
+        "role": "character",
+        "speaker": "অনাথবন্ধু",
+        "emotion": "disgust"
+      }
+    ],
+    "f01s005-006": [
+      {
+        "text": "আমাদের কেদারও ত পরীক্ষায় পাস্‌ হইয়াছে।”",
+        "role": "character",
+        "speaker": "অনাথবন্ধু",
+        "emotion": "disgust"
+      }
+    ],
+    "f01s007-003": [
+      {
+        "text": "সে বলিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমরা ত ভাই বিলাতেও যাই নাই, সাহেব স্বামীকেও বিবাহ করি নাই অত খবর কোথায় পাইব!",
+        "role": "character",
+        "speaker": "কমলা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s007-004": [
+      {
+        "text": "মূর্খ মেয়েমানুষ, মোটামুটি এই বুঝি যে, বাঙ্গালীর ছেলেকে কালেজে এল্‌, এ, দিতে হয়;— তাও ত ভাই সকলে পারে না।",
+        "role": "character",
+        "speaker": "কমলা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s009-003": [
+      {
+        "text": "সেই দিন হইতে প্রতিদিন সে তাহার স্বামীকে বলিতে লাগিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমাকে তোমাদের ঘরে লইয়া চল; আমি আর এখানে থাকিব না।",
+        "role": "character",
+        "speaker": "বিন্ধ্যবাসিনী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s009-006": [
+      {
+        "text": "তখন তাঁহার স্ত্রী কিছু দৃঢ়তা প্রকাশ করিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তুমি যদি না যাও ত আমি একলাই যাইব।",
+        "role": "character",
+        "speaker": "বিন্ধ্যবাসিনী",
+        "emotion": "command"
+      }
+    ],
+    "f01s010-004": [
+      {
+        "text": "রাজকুমার বাবু ব্যথিতচিত্তে তাহাকে জিজ্ঞাসা করিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "মা, আমাদের কোন অজ্ঞানকৃত আচরণে তোমার মনে কি ব্যথা লাগিয়াছে?",
+        "role": "character",
+        "speaker": "রাজকুমার বাবু",
+        "emotion": "sad"
+      }
+    ],
+    "f01s011-001": [
+      {
+        "text": "বিন্ধ্যবাসিনী তাহার পিতার মুখের দিকে করুণ দৃষ্টিক্ষেপ করিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "এক মুহূর্ত্তের জন্যও নহে।",
+        "role": "character",
+        "speaker": "বিন্ধ্যবাসিনী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s011-002": [
+      {
+        "text": "তোমাদের এখানে বড় সুখে বড় আদরে আমার দিন গিয়াছে!",
+        "role": "character",
+        "speaker": "বিন্ধ্যবাসিনী",
+        "emotion": "sad"
+      },
+      {
+        "text": "—বলিয়া সে কাঁদিতে লাগিল!",
+        "role": "narrator"
+      }
+    ],
+    "f01s017-002": [
+      {
+        "text": "গর্ব্বভরে নিজেদের দারিদ্র্য আস্ফালন করিয়া বলিতে লাগিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমরা গরীব মানুষ, বড়মানুষের মেয়ে এবং বড়মানুষের জামাইকে পোষণ করিব কেমন করিয়া?",
+        "role": "character",
+        "speaker": "শ্যামাশঙ্করী",
+        "emotion": "disgust"
+      }
+    ],
+    "f01s017-003": [
+      {
+        "text": "সেখানে ত বেশ ছিলেন কোন দুঃখ ছিল না—এখানে ডালভাত খাইয়া এত কষ্ট কি সহ্য হইবে?",
+        "role": "character",
+        "speaker": "শ্যামাশঙ্করী",
+        "emotion": "disgust"
+      }
+    ],
+    "f01s018-003": [
+      {
+        "text": "তোমার একটা চাক্‌রির চেষ্টা দেখা উচিত, কেবল আমি একলা সংসার চালাইব কি করিয়া?",
+        "role": "character",
+        "speaker": "বড় ভাই",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s018-004": [
+      {
+        "text": "অনাথবন্ধু পদাহত সর্পের ন্যায় গর্জ্জন করিয়া বলিয়া উঠিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "দুই বেলা দুই মুষ্টি অত্যন্ত অখাদ্য মোটা ভাতের পর এত খোঁটা সহ্য হয় না।",
+        "role": "character",
+        "speaker": "অনাথবন্ধু",
+        "emotion": "anger"
+      }
+    ],
+    "f01s020-004": [
+      {
+        "text": "অনাথবন্ধু বিন্ধ্যবাসিনীকে আসিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আজকাল বিলাতে না গেলে কোন ভদ্র চাকরী পাওয়া যায় না।",
+        "role": "character",
+        "speaker": "অনাথবন্ধু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s020-005": [
+      {
+        "text": "আমি বিলাতে যাইতে মনস্থ করিতেছি, তুমি তোমার বাবার কাছ হইতে কোন ছুতায় কিছু অর্থ সংগ্রহ কর।",
+        "role": "character",
+        "speaker": "অনাথবন্ধু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s027-003": [
+      {
+        "text": "তাহাতেও কোন সাড়া না পাইয়া কিঞ্চিৎ ভীত হইয়া উর্দ্ধকঠে ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বিন্দী” “বিন্দী”",
+        "role": "character",
+        "speaker": "কমল ও ভুবন",
+        "emotion": "fear"
+      },
+      {
+        "text": " করিয়া ডাকিতে লাগিল।",
+        "role": "narrator"
+      }
+    ],
+    "f01s027-004": [
+      {
+        "text": "বিন্ধ্যবাসিনী ভগ্নরুদ্ধ কণ্ঠে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“যাচ্চি; তোরা এখন যা!”",
+        "role": "character",
+        "speaker": "বিন্ধ্যবাসিনী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s027-006": [
+      {
+        "text": "মা আসিয়া কহিলেন,",
+        "role": "narrator"
+      },
+      {
+        "text": "—“বিন্দু, কি হয়েছে মা- এখনো দ্বার বন্ধ কেন!”",
+        "role": "character",
+        "speaker": "বিন্ধ্যর মা",
+        "emotion": "fear"
+      }
+    ],
+    "f01s028-001": [
+      {
+        "text": "বিন্ধ্য উচ্ছ্বসিত অশ্রু সম্বরণ করিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“একবার বাবাকে সঙ্গে করে নিয়ে এস!”",
+        "role": "character",
+        "speaker": "বিন্ধ্যবাসিনী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s028-004": [
+      {
+        "text": "তখন বিন্ধ্য ভূমিতে পড়িয়া তাহার বাপের পা ধরিয়া বক্ষ শতধা বিদীর্ণ করিয়া কঁদিয়া উঠিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বাবা!",
+        "role": "character",
+        "speaker": "বিন্ধ্যবাসিনী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s028-005": [
+      {
+        "text": "আমাকে মাপ কর, আমি তোমার সিন্ধুক হইতে টাকা চুরি করিয়াছি।”",
+        "role": "character",
+        "speaker": "বিন্ধ্যবাসিনী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s029-001": [
+      {
+        "text": "তাহার বাপ জিজ্ঞাসা করিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“আমাদের কাছে চাহিস্‌ নাই কেন?”",
+        "role": "character",
+        "speaker": "রাজকুমার বাবু",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s029-002": [
+      {
+        "text": "বিন্ধ্যবাসিনী কহিল,",
+        "role": "narrator"
+      },
+      {
+        "text": "“পাছে বিলাত যাইতে তোমরা বাধা দেও!”",
+        "role": "character",
+        "speaker": "বিন্ধ্যবাসিনী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s036-001": [
+      {
+        "text": "নিদারুণ শোকের কথঞ্চিৎ উপশম হইলে পর রাজকুমার বাবু অনাথবন্ধুকে গিয়া অনুনয় করিয়া কহিলেন— ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বাবা, তোমাকে প্রায়শ্চিত্ত করিয়া জাতে উঠিতে হইবে।",
+        "role": "character",
+        "speaker": "রাজকুমার বাবু",
+        "emotion": "sad"
+      }
+    ],
+    "f01s036-002": [
+      {
+        "text": "তোমরা ব্যতীত আমার আর কেহ নাই!”",
+        "role": "character",
+        "speaker": "রাজকুমার বাবু",
+        "emotion": "sad"
+      }
+    ],
+    "f01s037-004": [
+      {
+        "text": "প্রিয় বন্ধুদের নিকট কহিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—সমাজ যখন স্বেচ্ছাপূর্ব্বক মিথ্যা কথা শুনিতে চাহে তথন একটা মুখের কথায় তাহাকে বাধিত করিতে দোষ দেখি না।",
+        "role": "character",
+        "speaker": "অনাথবন্ধু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s037-005": [
+      {
+        "text": "যে রসনা গোরু খাইয়াছে, সে রসনাকে গোময় এবং মিথ্যা কথা নামক দুটো কদর্য্য পদার্থ দ্বারা বিশুদ্ধ করিয়া লওয়া আমাদের আধুনিক সমাজের নিয়ম; আমি সে নিয়ম লঙ্ঘন করিতে চাহি না।",
+        "role": "character",
+        "speaker": "অনাথবন্ধু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s040-007": [
+      {
+        "text": "কর্ত্তা রাজকুমার বাবু ক্ষণকাল বিশ্রামউপলক্ষে সেই কোলাহলাকুল পণ্ডিতসভায় বসিয়া স্মৃতির তর্ক শুনিতেছেন এমন সময় দ্বারবান গৃহস্বামীর হস্তে এক কার্ড দিয়া খবর দিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“এক সাহেবলোগ্‌কা মেম আয়া।”",
+        "role": "character",
+        "speaker": "দ্বারবান",
+        "emotion": "conversation"
+      }
+    ]
   },
-  "রাজকুমার বাবু": {
-   "gender": "male",
-   "note": "Rajkumar Babu, Bindhya's wealthy father"
+  "notes": "f01s006-003/004 (Bindhya's retort to Kamala introduced by 'শুনাইয়া দিল, যে,' and immediately labelled as her husband's arguments) treated as indirect report, narrator. f01s016-006, f01s028-007, f01s037-002 are indirect speech (third-person pronouns), narrator. Thoughts 'মনে মনে কহিল/কহিলেন' (f01s011-004, f01s034-005/006, f01s038-005/006) and the silent refusal in f01s010-002 stay narrator. f01s027-003: the shouted “বিন্দী” “বিন্দী” given to Kamal and Bhuban together as one female voice. f01s041-002 (text of the visiting card) is narration.",
+  "tone": {
+    "pace": "moderate",
+    "expressivity": "slightly expressive",
+    "atmosphere": "satirical with bitter pathos",
+    "rationale": "Tagore satirises the vain, idle Anathbandhu in a dry ironic voice while following his devoted wife Bindhyabasini's humiliation and sacrifice, ending in the comic-cruel reveal of his English wife."
   },
-  "শ্যামাশঙ্করী": {
-   "gender": "female",
-   "note": "Shyamashankari, wife of Anathbandhu's elder brother"
-  },
-  "বড় ভাই": {
-   "gender": "male",
-   "note": "Anathbandhu's elder brother (দাদা) who works away from home"
-  },
-  "বিন্ধ্যর মা": {
-   "gender": "female",
-   "note": "Bindhya's mother, Rajkumar Babu's wife"
-  },
-  "কমল ও ভুবন": {
-   "gender": "female",
-   "note": "Bindhya's two friends Kamal and Bhuban calling at her door"
-  },
-  "দ্বারবান": {
-   "gender": "male",
-   "note": "the doorkeeper announcing the English lady"
+  "narration_moods": {
+    "f01s004-005": "sad",
+    "f01s007-006": "sad",
+    "f01s008-010": "sad",
+    "f01s011-004": "sad",
+    "f01s011-005": "sad",
+    "f01s021-001": "surprise",
+    "f01s021-003": "sad",
+    "f01s022-001": "sad",
+    "f01s022-006": "happy",
+    "f01s023-003": "happy",
+    "f01s023-004": "happy",
+    "f01s025-003": "fear",
+    "f01s025-004": "fear",
+    "f01s026-005": "fear",
+    "f01s026-006": "fear",
+    "f01s026-007": "fear",
+    "f01s028-004": "sad",
+    "f01s028-006": "surprise",
+    "f01s029-003": "anger",
+    "f01s029-004": "sad",
+    "f01s029-005": "sad",
+    "f01s029-006": "sad",
+    "f01s030-001": "sad",
+    "f01s030-002": "sad",
+    "f01s030-003": "sad",
+    "f01s030-008": "sad",
+    "f01s030-009": "sad",
+    "f01s030-010": "sad",
+    "f01s032-005": "sad",
+    "f01s032-006": "sad",
+    "f01s035-005": "sad",
+    "f01s035-006": "sad",
+    "f01s036-001": "sad",
+    "f01s038-004": "happy",
+    "f01s039-006": "happy",
+    "f01s039-011": "happy",
+    "f01s039-012": "happy",
+    "f01s039-013": "happy",
+    "f01s041-001": "surprise",
+    "f01s041-007": "surprise",
+    "f01s041-009": "surprise"
   }
- },
- "units": {
-  "f01s005-004": [
-   {
-    "text": "রাত্রে মৃদুস্বরে অনাথবন্ধুকে বলিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“পরীক্ষাটা দিলেই ভাল হ’ত!”",
-    "role": "character",
-    "speaker": "বিন্ধ্যবাসিনী"
-   }
-  ],
-  "f01s005-005": [
-   {
-    "text": "অনাথবন্ধু অবজ্ঞাভরে হাসিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“পরীক্ষা দিলেই কি চতুর্ভুজ হয় না কি?",
-    "role": "character",
-    "speaker": "অনাথবন্ধু"
-   }
-  ],
-  "f01s005-006": [
-   {
-    "text": "আমাদের কেদারও ত পরীক্ষায় পাস্‌ হইয়াছে।”",
-    "role": "character",
-    "speaker": "অনাথবন্ধু"
-   }
-  ],
-  "f01s007-003": [
-   {
-    "text": "সে বলিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমরা ত ভাই বিলাতেও যাই নাই, সাহেব স্বামীকেও বিবাহ করি নাই অত খবর কোথায় পাইব!",
-    "role": "character",
-    "speaker": "কমলা"
-   }
-  ],
-  "f01s007-004": [
-   {
-    "text": "মূর্খ মেয়েমানুষ, মোটামুটি এই বুঝি যে, বাঙ্গালীর ছেলেকে কালেজে এল্‌, এ, দিতে হয়;— তাও ত ভাই সকলে পারে না।",
-    "role": "character",
-    "speaker": "কমলা"
-   }
-  ],
-  "f01s009-003": [
-   {
-    "text": "সেই দিন হইতে প্রতিদিন সে তাহার স্বামীকে বলিতে লাগিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমাকে তোমাদের ঘরে লইয়া চল; আমি আর এখানে থাকিব না।",
-    "role": "character",
-    "speaker": "বিন্ধ্যবাসিনী"
-   }
-  ],
-  "f01s009-006": [
-   {
-    "text": "তখন তাঁহার স্ত্রী কিছু দৃঢ়তা প্রকাশ করিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তুমি যদি না যাও ত আমি একলাই যাইব।",
-    "role": "character",
-    "speaker": "বিন্ধ্যবাসিনী"
-   }
-  ],
-  "f01s010-004": [
-   {
-    "text": "রাজকুমার বাবু ব্যথিতচিত্তে তাহাকে জিজ্ঞাসা করিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "মা, আমাদের কোন অজ্ঞানকৃত আচরণে তোমার মনে কি ব্যথা লাগিয়াছে?",
-    "role": "character",
-    "speaker": "রাজকুমার বাবু"
-   }
-  ],
-  "f01s011-001": [
-   {
-    "text": "বিন্ধ্যবাসিনী তাহার পিতার মুখের দিকে করুণ দৃষ্টিক্ষেপ করিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "এক মুহূর্ত্তের জন্যও নহে।",
-    "role": "character",
-    "speaker": "বিন্ধ্যবাসিনী"
-   }
-  ],
-  "f01s011-002": [
-   {
-    "text": "তোমাদের এখানে বড় সুখে বড় আদরে আমার দিন গিয়াছে!",
-    "role": "character",
-    "speaker": "বিন্ধ্যবাসিনী"
-   },
-   {
-    "text": "—বলিয়া সে কাঁদিতে লাগিল!",
-    "role": "narrator"
-   }
-  ],
-  "f01s017-002": [
-   {
-    "text": "গর্ব্বভরে নিজেদের দারিদ্র্য আস্ফালন করিয়া বলিতে লাগিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমরা গরীব মানুষ, বড়মানুষের মেয়ে এবং বড়মানুষের জামাইকে পোষণ করিব কেমন করিয়া?",
-    "role": "character",
-    "speaker": "শ্যামাশঙ্করী"
-   }
-  ],
-  "f01s017-003": [
-   {
-    "text": "সেখানে ত বেশ ছিলেন কোন দুঃখ ছিল না—এখানে ডালভাত খাইয়া এত কষ্ট কি সহ্য হইবে?",
-    "role": "character",
-    "speaker": "শ্যামাশঙ্করী"
-   }
-  ],
-  "f01s018-003": [
-   {
-    "text": "তোমার একটা চাক্‌রির চেষ্টা দেখা উচিত, কেবল আমি একলা সংসার চালাইব কি করিয়া?",
-    "role": "character",
-    "speaker": "বড় ভাই"
-   }
-  ],
-  "f01s018-004": [
-   {
-    "text": "অনাথবন্ধু পদাহত সর্পের ন্যায় গর্জ্জন করিয়া বলিয়া উঠিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "দুই বেলা দুই মুষ্টি অত্যন্ত অখাদ্য মোটা ভাতের পর এত খোঁটা সহ্য হয় না।",
-    "role": "character",
-    "speaker": "অনাথবন্ধু"
-   }
-  ],
-  "f01s020-004": [
-   {
-    "text": "অনাথবন্ধু বিন্ধ্যবাসিনীকে আসিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আজকাল বিলাতে না গেলে কোন ভদ্র চাকরী পাওয়া যায় না।",
-    "role": "character",
-    "speaker": "অনাথবন্ধু"
-   }
-  ],
-  "f01s020-005": [
-   {
-    "text": "আমি বিলাতে যাইতে মনস্থ করিতেছি, তুমি তোমার বাবার কাছ হইতে কোন ছুতায় কিছু অর্থ সংগ্রহ কর।",
-    "role": "character",
-    "speaker": "অনাথবন্ধু"
-   }
-  ],
-  "f01s027-003": [
-   {
-    "text": "তাহাতেও কোন সাড়া না পাইয়া কিঞ্চিৎ ভীত হইয়া উর্দ্ধকঠে ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বিন্দী” “বিন্দী”",
-    "role": "character",
-    "speaker": "কমল ও ভুবন"
-   },
-   {
-    "text": " করিয়া ডাকিতে লাগিল।",
-    "role": "narrator"
-   }
-  ],
-  "f01s027-004": [
-   {
-    "text": "বিন্ধ্যবাসিনী ভগ্নরুদ্ধ কণ্ঠে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“যাচ্চি; তোরা এখন যা!”",
-    "role": "character",
-    "speaker": "বিন্ধ্যবাসিনী"
-   }
-  ],
-  "f01s027-006": [
-   {
-    "text": "মা আসিয়া কহিলেন,",
-    "role": "narrator"
-   },
-   {
-    "text": "—“বিন্দু, কি হয়েছে মা- এখনো দ্বার বন্ধ কেন!”",
-    "role": "character",
-    "speaker": "বিন্ধ্যর মা"
-   }
-  ],
-  "f01s028-001": [
-   {
-    "text": "বিন্ধ্য উচ্ছ্বসিত অশ্রু সম্বরণ করিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“একবার বাবাকে সঙ্গে করে নিয়ে এস!”",
-    "role": "character",
-    "speaker": "বিন্ধ্যবাসিনী"
-   }
-  ],
-  "f01s028-004": [
-   {
-    "text": "তখন বিন্ধ্য ভূমিতে পড়িয়া তাহার বাপের পা ধরিয়া বক্ষ শতধা বিদীর্ণ করিয়া কঁদিয়া উঠিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বাবা!",
-    "role": "character",
-    "speaker": "বিন্ধ্যবাসিনী"
-   }
-  ],
-  "f01s028-005": [
-   {
-    "text": "আমাকে মাপ কর, আমি তোমার সিন্ধুক হইতে টাকা চুরি করিয়াছি।”",
-    "role": "character",
-    "speaker": "বিন্ধ্যবাসিনী"
-   }
-  ],
-  "f01s029-001": [
-   {
-    "text": "তাহার বাপ জিজ্ঞাসা করিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“আমাদের কাছে চাহিস্‌ নাই কেন?”",
-    "role": "character",
-    "speaker": "রাজকুমার বাবু"
-   }
-  ],
-  "f01s029-002": [
-   {
-    "text": "বিন্ধ্যবাসিনী কহিল,",
-    "role": "narrator"
-   },
-   {
-    "text": "“পাছে বিলাত যাইতে তোমরা বাধা দেও!”",
-    "role": "character",
-    "speaker": "বিন্ধ্যবাসিনী"
-   }
-  ],
-  "f01s036-001": [
-   {
-    "text": "নিদারুণ শোকের কথঞ্চিৎ উপশম হইলে পর রাজকুমার বাবু অনাথবন্ধুকে গিয়া অনুনয় করিয়া কহিলেন— ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বাবা, তোমাকে প্রায়শ্চিত্ত করিয়া জাতে উঠিতে হইবে।",
-    "role": "character",
-    "speaker": "রাজকুমার বাবু"
-   }
-  ],
-  "f01s036-002": [
-   {
-    "text": "তোমরা ব্যতীত আমার আর কেহ নাই!”",
-    "role": "character",
-    "speaker": "রাজকুমার বাবু"
-   }
-  ],
-  "f01s037-004": [
-   {
-    "text": "প্রিয় বন্ধুদের নিকট কহিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—সমাজ যখন স্বেচ্ছাপূর্ব্বক মিথ্যা কথা শুনিতে চাহে তথন একটা মুখের কথায় তাহাকে বাধিত করিতে দোষ দেখি না।",
-    "role": "character",
-    "speaker": "অনাথবন্ধু"
-   }
-  ],
-  "f01s037-005": [
-   {
-    "text": "যে রসনা গোরু খাইয়াছে, সে রসনাকে গোময় এবং মিথ্যা কথা নামক দুটো কদর্য্য পদার্থ দ্বারা বিশুদ্ধ করিয়া লওয়া আমাদের আধুনিক সমাজের নিয়ম; আমি সে নিয়ম লঙ্ঘন করিতে চাহি না।",
-    "role": "character",
-    "speaker": "অনাথবন্ধু"
-   }
-  ],
-  "f01s040-007": [
-   {
-    "text": "কর্ত্তা রাজকুমার বাবু ক্ষণকাল বিশ্রামউপলক্ষে সেই কোলাহলাকুল পণ্ডিতসভায় বসিয়া স্মৃতির তর্ক শুনিতেছেন এমন সময় দ্বারবান গৃহস্বামীর হস্তে এক কার্ড দিয়া খবর দিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“এক সাহেবলোগ্‌কা মেম আয়া।”",
-    "role": "character",
-    "speaker": "দ্বারবান"
-   }
-  ]
- },
- "notes": "f01s006-003/004 (Bindhya's retort to Kamala introduced by 'শুনাইয়া দিল, যে,' and immediately labelled as her husband's arguments) treated as indirect report, narrator. f01s016-006, f01s028-007, f01s037-002 are indirect speech (third-person pronouns), narrator. Thoughts 'মনে মনে কহিল/কহিলেন' (f01s011-004, f01s034-005/006, f01s038-005/006) and the silent refusal in f01s010-002 stay narrator. f01s027-003: the shouted “বিন্দী” “বিন্দী” given to Kamal and Bhuban together as one female voice. f01s041-002 (text of the visiting card) is narration."
 }

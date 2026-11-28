@@ -1,0 +1,12 @@
+{
+  "colab_units": 0.0,
+  "gpu": "L4",
+  "job_id": "style-audition-f0a29a8b",
+  "pending_run_id": "style-audition-f0a29a8b#1",
+  "r2_prefix": "gpu-jobs/nishithe/style-audition-f0a29a8b/run-1/",
+  "requested_at": "2026-11-28T10:46:17+00:00",
+  "schema": "earnalism.modal-request.v1",
+  "status": "requested",
+  "title_root": "production/audiovisual/nishithe",
+  "worst_case_usd": 0.585525
+}

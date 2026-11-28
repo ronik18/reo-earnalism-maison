@@ -12531,6 +12531,20 @@
       },
       "path": "narration/audition-15a5c974/tapan-narration.wav",
       "sha256": "221316fcf6bbc3732ff4df5135e44dbf03603b74aa03acf5d77a76824e451c99"
+    },
+    {
+      "bytes": 26506,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.6524435555555554,
+        "inputs_zip": "jobs/style-audition-f6314e5e/inputs.zip",
+        "job_id": "style-audition-f6314e5e",
+        "job_kind": "narration",
+        "manifest": "jobs/style-audition-f6314e5e/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/style-audition-f6314e5e/narration.ipynb",
+      "sha256": "8a656c02bbc4021417b1cfcd9d9d1af6922692d93b6760e19d5aa712e43b573d"
     }
   ],
   "created_at": "2026-11-26T03:54:10.892127+00:00",
@@ -13339,6 +13353,26 @@
       },
       "result": "imported",
       "stage": "audition"
+    },
+    {
+      "at": "2026-11-28T10:46:07.084293+00:00",
+      "detail": {
+        "forecast_units": 0.6524435555555554,
+        "job_id": "style-audition-f6314e5e",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-28T10:46:07.103020+00:00",
+      "detail": {
+        "job_id": "style-audition-f6314e5e",
+        "kind": "narration",
+        "target": "audition"
+      },
+      "result": "job_target",
+      "stage": "cli"
     }
   ],
   "ledger": "../allowance-ledger.json",

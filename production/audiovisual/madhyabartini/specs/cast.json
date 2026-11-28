@@ -30,7 +30,8 @@
    {
     "text": "“কেমন আছ”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "conversation"
    },
    {
     "text": " তখন তাহার চোখে যেন জল উছলিয়া উঠিত।",
@@ -45,7 +46,8 @@
    {
     "text": "“আমাদের ত ছেলেপুলে কিছুই হইল না, তুমি আর একটি বিবাহ কর!”",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "conversation"
    }
   ],
   "f01s011-001": [
@@ -56,7 +58,8 @@
    {
     "text": "“বুড়া-বয়সে একটি কচি খুকিকে বিবাহ করিয়া আমি মানুষ করিতে পারিব না!”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "conversation"
    }
   ],
   "f01s011-002": [
@@ -67,14 +70,16 @@
    {
     "text": "“সে জন্য তোমাকে ভাবিতে হইবে না।",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "conversation"
    }
   ],
   "f01s011-003": [
    {
     "text": "মানুষ করিবার ভার আমার উপর রহিল।”",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "conversation"
    }
   ],
   "f01s011-005": [
@@ -85,7 +90,8 @@
    {
     "text": "“আমার আপিস আছে, কাজ আছে, তুমি আছ, কচি মেয়ের আবদার শুনিবার অবসর আমি পাইব না।”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "conversation"
    }
   ],
   "f01s012-001": [
@@ -96,7 +102,8 @@
    {
     "text": "—“আচ্ছা গো, তখন দেখিব কোথায় বা তোমার কাজ থাকে, কোথায় বা আমি থাকি, আর কোথায় বা তুমি থাক!”",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "happy"
    }
   ],
   "f01s013-005": [
@@ -107,14 +114,16 @@
    {
     "text": "“আহা, পালাও কোথায়!",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "happy"
    }
   ],
   "f01s013-006": [
    {
     "text": "ঐটুকু মেয়ে, ওত আর তোমাকে খাইয়া ফেলিবে না।”—",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "happy"
    }
   ],
   "f01s014-001": [
@@ -125,7 +134,8 @@
    {
     "text": "“আরে রোস রোস, আমার একটু বিশেষ কাজ আছে।”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "conversation"
    },
    {
     "text": "—বলিয়া যেন পালাইবার পথ পাইত না।",
@@ -140,7 +150,8 @@
    {
     "text": "আজ ফাঁকি দিতে পারিবে না।",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "happy"
    }
   ],
   "f01s014-004": [
@@ -151,7 +162,8 @@
    {
     "text": "“আহা, পরের মেয়েকে ঘরে আনিয়া আমন হতশ্রদ্ধা করিতে নাই।”",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "happy"
    }
   ],
   "f01s014-005": [
@@ -162,7 +174,8 @@
    {
     "text": "“আহা কেমন চাঁদের মত মুখখানি দেখ দেখি!”—",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "happy"
    }
   ],
   "f01s019-003": [
@@ -173,7 +186,8 @@
    {
     "text": "“ছেলেমানুষ, উহাকে তুমি বড় বেশি পরিশ্রম করাইতেছ, উহার শরীর তেমন সবল নহে।”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "conversation"
    }
   ],
   "f01s029-001": [
@@ -184,14 +198,16 @@
    {
     "text": "—গোটাকতক গহনার আবশ্যক হইয়াছে।",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "fear"
    }
   ],
   "f01s029-002": [
    {
     "text": "জান ত অনেকগুলো দেনা হইয়া পড়িয়াছে, দেন্‌দার বড়ই অপমান করিতেছে—কিছু বন্ধক রাখিতে হইবে—শীঘ্রই ছাড়াইয়া লইতে পারিব।",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "fear"
    }
   ],
   "f01s029-004": [
@@ -202,7 +218,8 @@
    {
     "text": "তবে আজ কি হইবে না?—",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "conversation"
    }
   ],
   "f01s029-005": [
@@ -213,7 +230,8 @@
    {
     "text": "—“না।”",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "neutral"
    }
   ],
   "f01s029-007": [
@@ -224,7 +242,8 @@
    {
     "text": "“তবে অন্যত্র চেষ্টা দেখিগে যাই”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "conversation"
    },
    {
     "text": "—বলিয়া প্রস্থান করিল।",
@@ -239,7 +258,8 @@
    {
     "text": "“দিদির সিন্ধুকভরা গহনা, আর আমি বুঝি একখানি পরিতে পাই না?”",
     "role": "character",
-    "speaker": "শৈলবালা"
+    "speaker": "শৈলবালা",
+    "emotion": "anger"
    }
   ],
   "f01s033-004": [
@@ -250,7 +270,8 @@
    {
     "text": "“সর্ব্বনাশ হইয়াছে!”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "fear"
    }
   ],
   "f01s033-006": [
@@ -261,7 +282,8 @@
    {
     "text": "“শীঘ্র গহনাগুলা বাহির কর।”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "command"
    }
   ],
   "f01s033-007": [
@@ -272,7 +294,8 @@
    {
     "text": "“সে ত আমি সমস্তই ছোটবৌকে দিয়াছি!”",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "conversation"
    }
   ],
   "f01s034-001": [
@@ -283,21 +306,24 @@
    {
     "text": "“কেন দিলে ছোটবোঁকে?",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "anger"
    }
   ],
   "f01s034-002": [
    {
     "text": "কেন দিলে?",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "anger"
    }
   ],
   "f01s034-003": [
    {
     "text": "কে তোমাকে দিতে বলিল?”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "anger"
    }
   ],
   "f01s034-004": [
@@ -308,14 +334,16 @@
    {
     "text": "“তাহাতে ক্ষতি কি হইয়াছে?",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "conversation"
    }
   ],
   "f01s034-005": [
    {
     "text": "সে ত আর জলে পড়ে নাই?”",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "conversation"
    }
   ],
   "f01s034-006": [
@@ -326,14 +354,16 @@
    {
     "text": "“তবে যদি তুমি কোন ছুতা করিয়া তাহার কাছ হইতে বাহির করিতে পার!",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "fear"
    }
   ],
   "f01s034-007": [
    {
     "text": "কিন্তু আমার মাথা খাও বলিয়ো না যে, আমি চাহিতেছি, কিম্বা কি জন্য চাহিতেছি!”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "fear"
    }
   ],
   "f01s035-001": [
@@ -344,14 +374,16 @@
    {
     "text": "“এই কি তোমার ছল ছুতা করিবার সোহাগ দেখাইবার সময়!",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "disgust"
    }
   ],
   "f01s035-002": [
    {
     "text": "চল!”",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "command"
    }
   ],
   "f01s035-005": [
@@ -362,7 +394,8 @@
    {
     "text": "“সে আমি কি জানি!”",
     "role": "character",
-    "speaker": "শৈলবালা"
+    "speaker": "শৈলবালা",
+    "emotion": "conversation"
    }
   ],
   "f01s036-002": [
@@ -373,14 +406,16 @@
    {
     "text": "“সে আমি জানি না।",
     "role": "character",
-    "speaker": "শৈলবালা"
+    "speaker": "শৈলবালা",
+    "emotion": "anger"
    }
   ],
   "f01s036-003": [
    {
     "text": "আমার জিনিষ আমি কেন দিব?”",
     "role": "character",
-    "speaker": "শৈলবালা"
+    "speaker": "শৈলবালা",
+    "emotion": "anger"
    }
   ],
   "f01s036-008": [
@@ -391,7 +426,8 @@
    {
     "text": "“তালা ভাঙ্গিয়া ফেল না!”",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "command"
    }
   ],
   "f01s037-001": [
@@ -402,7 +438,8 @@
    {
     "text": "“তাহা হইলে আমি গলায় দড়ি দিয়া মরিব!”—",
     "role": "character",
-    "speaker": "শৈলবালা"
+    "speaker": "শৈলবালা",
+    "emotion": "neutral"
    }
   ],
   "f01s037-002": [
@@ -413,7 +450,8 @@
    {
     "text": "আমি আর একটা চেষ্টা দেখিতেছি,",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "conversation"
    },
    {
     "text": " বলিয়া এলো-থেলো বেশে বাহির হইয়া গেল।",
@@ -424,7 +462,8 @@
    {
     "text": "“ক্ষমতা নাই যদি ত বিবাহ করিলে কেন?”",
     "role": "character",
-    "speaker": "শৈলবালা"
+    "speaker": "শৈলবালা",
+    "emotion": "anger"
    }
   ],
   "f01s038-008": [
@@ -435,7 +474,8 @@
    {
     "text": "“আমি দিনরাত্রি শোবার ঘরে কাটাইতে পারি না।”",
     "role": "character",
-    "speaker": "শৈলবালা"
+    "speaker": "শৈলবালা",
+    "emotion": "conversation"
    }
   ],
   "f01s038-009": [
@@ -446,7 +486,8 @@
    {
     "text": "“আমি আর একটা ভাল বাড়ির সন্ধানে আছি, শীঘ্র বাড়ি বদল করিব।”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "conversation"
    }
   ],
   "f01s039-001": [
@@ -457,7 +498,8 @@
    {
     "text": "“কেন, ঐ ত পাশে আর একটা ঘর আছে!”",
     "role": "character",
-    "speaker": "শৈলবালা"
+    "speaker": "শৈলবালা",
+    "emotion": "conversation"
    }
   ],
   "f01s040-001": [
@@ -468,7 +510,8 @@
    {
     "text": "“তুমি শৈলকে বাঁচাও।”",
     "role": "character",
-    "speaker": "নিবারণ"
+    "speaker": "নিবারণ",
+    "emotion": "fear"
    }
   ],
   "f01s040-005": [
@@ -479,7 +522,8 @@
    {
     "text": "“লক্ষ্মী আমার”, “বোন আমার”, “দিদি আমার”",
     "role": "character",
-    "speaker": "হরসুন্দরী"
+    "speaker": "হরসুন্দরী",
+    "emotion": "conversation"
    },
    {
     "text": " বলিয়া শিশুর মত ভুলাইতে চেষ্টা করিত।",
@@ -487,5 +531,48 @@
    }
   ]
  },
- "notes": "Unquoted direct speech voiced: f01s014-002 (Harasundari), f01s029-001/002/004 and f01s037-002 (Nibaran). f01s038-004 is Shailabala's complaint in quotes. f01s030-002 is Shailabala's remark as reconstructed by Harasundari, voiced as Shailabala. Kept with narrator: inner speech (মনে মনে কহিল, f01s019-001, f01s030-007..009), f01s020-007 (her silent attitude, preceded by নীরবে), f01s022-004 (metaphorical inner claimants), the one-word call সই! (f01s024-002) and the body's metaphorical “আছি” (f01s004-005)."
+ "notes": "Unquoted direct speech voiced: f01s014-002 (Harasundari), f01s029-001/002/004 and f01s037-002 (Nibaran). f01s038-004 is Shailabala's complaint in quotes. f01s030-002 is Shailabala's remark as reconstructed by Harasundari, voiced as Shailabala. Kept with narrator: inner speech (মনে মনে কহিল, f01s019-001, f01s030-007..009), f01s020-007 (her silent attitude, preceded by নীরবে), f01s022-004 (metaphorical inner claimants), the one-word call সই! (f01s024-002) and the body's metaphorical “আছি” (f01s004-005).",
+ "tone": {
+  "pace": "moderate",
+  "expressivity": "slightly expressive",
+  "atmosphere": "wry and quietly sorrowful",
+  "rationale": "Tagore tells an ordinary clerk's household undone by a wife's generous offer of a second marriage with gentle irony that darkens into humiliation, ruin and a dead girl lying between husband and wife, so the voice stays dry and measured with an undertow of grief."
+ },
+ "narration_moods": {
+  "f01s006-001": "happy",
+  "f01s006-005": "happy",
+  "f01s007-001": "happy",
+  "f01s007-002": "happy",
+  "f01s007-003": "happy",
+  "f01s008-005": "happy",
+  "f01s009-006": "happy",
+  "f01s013-004": "happy",
+  "f01s018-006": "anger",
+  "f01s018-007": "anger",
+  "f01s019-001": "sad",
+  "f01s023-001": "sad",
+  "f01s023-002": "sad",
+  "f01s023-003": "sad",
+  "f01s025-002": "sad",
+  "f01s026-001": "sad",
+  "f01s026-002": "sad",
+  "f01s026-003": "sad",
+  "f01s026-004": "sad",
+  "f01s030-006": "sad",
+  "f01s030-007": "sad",
+  "f01s030-008": "sad",
+  "f01s030-009": "sad",
+  "f01s033-004": "fear",
+  "f01s033-005": "fear",
+  "f01s034-006": "fear",
+  "f01s035-001": "disgust",
+  "f01s036-005": "disgust",
+  "f01s036-007": "surprise",
+  "f01s039-004": "anger",
+  "f01s041-001": "sad",
+  "f01s041-002": "sad",
+  "f01s042-002": "sad",
+  "f01s042-003": "sad",
+  "f01s042-008": "sad"
+ }
 }

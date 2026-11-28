@@ -830,6 +830,34 @@
     "cu_equivalent": 1.06
   },
   {
+    "job_id": "style-audition-f0a29a8b",
+    "title": "nishithe",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "e9734480-f2c3-4680-9619-78f6b5850d10",
+    "root": "nishithe",
+    "reserved_units": 0.6524435555555554,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T10:46:17+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "style-audition-f6314e5e",
+    "title": "samapti",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "2be3bc99-f143-4aa4-b080-ade26f7e381a",
+    "root": "samapti",
+    "reserved_units": 0.6524435555555554,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T10:46:17+00:00",
+    "modal_runs_issued": 1
+  },
+  {
     "modal_spend": "2026-11",
     "rows": [
       {
@@ -1187,6 +1215,22 @@
         "seconds": 381.42586199100003,
         "at": "2026-11-28T10:04:28+00:00",
         "status": "ok"
+      },
+      {
+        "run_id": "style-audition-f0a29a8b#1",
+        "job_id": "style-audition-f0a29a8b",
+        "usd": 0.585525,
+        "seconds": 0.0,
+        "at": "2026-11-28T10:46:17+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "style-audition-f6314e5e#1",
+        "job_id": "style-audition-f6314e5e",
+        "usd": 0.585525,
+        "seconds": 0.0,
+        "at": "2026-11-28T10:46:17+00:00",
+        "status": "pending"
       }
     ]
   }

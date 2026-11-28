@@ -38,7 +38,8 @@
    {
     "text": "There happen more things in heaven and earth, Horatio, than are reported in your newspapers.",
     "role": "character",
-    "speaker": "বাবু"
+    "speaker": "বাবু",
+    "emotion": "conversation"
    }
   ],
   "f01s005-003": [
@@ -49,7 +50,8 @@
    {
     "text": "ইচ্ছা হয়, দিনের বেলা থাকিবেন কিন্তু কখনো এখানে রাত্রিযাপন করিবেন না।",
     "role": "character",
-    "speaker": "করিম খাঁ"
+    "speaker": "করিম খাঁ",
+    "emotion": "command"
    }
   ],
   "f01s020-003": [
@@ -60,7 +62,8 @@
    {
     "text": "“তফাৎ যাও” “তফাৎ যাও”",
     "role": "character",
-    "speaker": "মেহের আলি"
+    "speaker": "মেহের আলি",
+    "emotion": "command"
    },
    {
     "text": " করিয়া চীৎকার করিতে করিতে চলিয়াছে।",
@@ -71,21 +74,24 @@
    {
     "text": "তুমি আমাকে উদ্ধার করিয়া লইয়া যাও—কঠিন মায়া, গভীর নিদ্রা নিষ্ফল স্বপ্নের সমস্ত দ্বার ভাঙ্গিয়া ফেলিয়া তুমি আমাকে ঘোড়ায় তুলিয়া তোমার বুকের কাছে চাপিয়া ধরিয়া,",
     "role": "character",
-    "speaker": "ইরাণী রমণী"
+    "speaker": "ইরাণী রমণী",
+    "emotion": "sad"
    }
   ],
   "f01s026-005": [
    {
     "text": "বনের ভিতর দিয়া পাহাড়ের উপর দিয়া নদী পার হইয়া তোমাদের সূর্য্যালোকিত ঘরের মধ্যে আমাকে লইয়া যাও!",
     "role": "character",
-    "speaker": "ইরাণী রমণী"
+    "speaker": "ইরাণী রমণী",
+    "emotion": "sad"
    }
   ],
   "f01s026-006": [
    {
     "text": "আমাকে উদ্ধার কর!",
     "role": "character",
-    "speaker": "ইরাণী রমণী"
+    "speaker": "ইরাণী রমণী",
+    "emotion": "sad"
    }
   ],
   "f01s028-001": [
@@ -96,14 +102,16 @@
    {
     "text": "—“তফাৎ যাও, তফাৎ যাও!",
     "role": "character",
-    "speaker": "মেহের আলি"
+    "speaker": "মেহের আলি",
+    "emotion": "command"
    }
   ],
   "f01s028-002": [
    {
     "text": "সব ঝুঁট্‌ হ্যায় সব ঝুঁট্‌ হায়!”",
     "role": "character",
-    "speaker": "মেহের আলি"
+    "speaker": "মেহের আলি",
+    "emotion": "command"
    }
   ],
   "f01s028-004": [
@@ -114,7 +122,8 @@
    {
     "text": "না, আর এ বাড়িতে থাকা হয় না।",
     "role": "character",
-    "speaker": "বাবু"
+    "speaker": "বাবু",
+    "emotion": "fear"
    }
   ],
   "f01s033-006": [
@@ -125,14 +134,16 @@
    {
     "text": "“তফাৎ যাও, তফাৎ যাও।",
     "role": "character",
-    "speaker": "মেহের আলি"
+    "speaker": "মেহের আলি",
+    "emotion": "command"
    }
   ],
   "f01s033-007": [
    {
     "text": "সব ঝুঁট্‌ হ্যায়, সব ঝুঁট্‌ হ্যায়!”",
     "role": "character",
-    "speaker": "মেহের আলি"
+    "speaker": "মেহের আলি",
+    "emotion": "command"
    }
   ],
   "f01s034-001": [
@@ -143,7 +154,8 @@
    {
     "text": "“মেহেরআলি,ক্যা ঝুঁট্‌ হ্যায়রে?”",
     "role": "character",
-    "speaker": "বাবু"
+    "speaker": "বাবু",
+    "emotion": "fear"
    }
   ],
   "f01s034-003": [
@@ -154,7 +166,8 @@
    {
     "text": "—“তফাৎ যাও, তফাৎ যাও, সব ঝুঁট্‌ হ্যায়, সব ঝুঁট্‌ হ্যায়!”",
     "role": "character",
-    "speaker": "মেহের আলি"
+    "speaker": "মেহের আলি",
+    "emotion": "fear"
    }
   ],
   "f01s034-004": [
@@ -165,7 +178,8 @@
    {
     "text": "ইহার অর্থ কি আমায় খুলিয়া বল।",
     "role": "character",
-    "speaker": "বাবু"
+    "speaker": "বাবু",
+    "emotion": "fear"
    }
   ],
   "f01s036-001": [
@@ -176,7 +190,8 @@
    {
     "text": "আমার উদ্ধারের কি কোন পথ নাই?",
     "role": "character",
-    "speaker": "বাবু"
+    "speaker": "বাবু",
+    "emotion": "fear"
    }
   ],
   "f01s036-002": [
@@ -187,21 +202,24 @@
    {
     "text": "একটি মাত্র উপায় আছে তাহা অত্যন্ত দুরূহ।",
     "role": "character",
-    "speaker": "করিম খাঁ"
+    "speaker": "করিম খাঁ",
+    "emotion": "conversation"
    }
   ],
   "f01s036-003": [
    {
     "text": "তাহ তোমাকে বলিতেছি—কিন্তু তৎপূর্ব্বে ঐ গুল্‌বাগের একটি ইরাণী ক্রীতদাসীর পুরাতন ইতিহাস বলা আবশ্যক।",
     "role": "character",
-    "speaker": "করিম খাঁ"
+    "speaker": "করিম খাঁ",
+    "emotion": "conversation"
    }
   ],
   "f01s036-004": [
    {
     "text": "তেমন আশ্চর্য্য এবং তেমন হৃদয়বিদারণ ঘটনা সংসারে আর কখন ঘটে নাই।",
     "role": "character",
-    "speaker": "করিম খাঁ"
+    "speaker": "করিম খাঁ",
+    "emotion": "sad"
    }
   ],
   "f01s036-005": [
@@ -212,9 +230,53 @@
    {
     "text": "—গাড়ি আসিতেছে।",
     "role": "character",
-    "speaker": "কুলিরা"
+    "speaker": "কুলিরা",
+    "emotion": "conversation"
    }
   ]
  },
- "notes": "Frame story: narrator voice = the frame 'আমি' and the Babu's embedded narration (rule 5); the Babu's own spoken lines, in the frame (f01s001-007) and inside his tale (f01s028-004, f01s034-001, f01s034-004, f01s036-001), are voiced as character বাবু to separate dialogue from telling. The frame narrator's own remark f01s036-012 and exclamation f01s036-006 stay narrator. Unquoted direct speech voiced: f01s005-003 and f01s036-002..004 (Karim Khan), f01s036-005 (porters). The ghost's plea f01s026-004..006 is heard speech, voiced as ইরাণী রমণী (doubtful: it is a perceived voice). Kept narrator: one-word lines তথাস্তু (f01s005-006) and “হ্যালো” (f01s036-009); reported speech of servants (f01s005-005), cook (f01s028-003) and Karim's summarised account (f01s035-*); imagined speech/apostrophe (f01s027-*, f01s030-005..007)."
+ "notes": "Frame story: narrator voice = the frame 'আমি' and the Babu's embedded narration (rule 5); the Babu's own spoken lines, in the frame (f01s001-007) and inside his tale (f01s028-004, f01s034-001, f01s034-004, f01s036-001), are voiced as character বাবু to separate dialogue from telling. The frame narrator's own remark f01s036-012 and exclamation f01s036-006 stay narrator. Unquoted direct speech voiced: f01s005-003 and f01s036-002..004 (Karim Khan), f01s036-005 (porters). The ghost's plea f01s026-004..006 is heard speech, voiced as ইরাণী রমণী (doubtful: it is a perceived voice). Kept narrator: one-word lines তথাস্তু (f01s005-006) and “হ্যালো” (f01s036-009); reported speech of servants (f01s005-005), cook (f01s028-003) and Karim's summarised account (f01s035-*); imagined speech/apostrophe (f01s027-*, f01s030-005..007).",
+ "tone": {
+  "pace": "moderate",
+  "expressivity": "expressive",
+  "atmosphere": "hushed and eerie",
+  "rationale": "A railway-waiting-room tale of a haunted marble palace whose phantom bathers, dream courtesan and storm of weeping seduce and terrify the narrator calls for a hushed, uncanny voice, framed by lighter wry bookends."
+ },
+ "narration_moods": {
+  "f01s008-005": "fear",
+  "f01s008-006": "fear",
+  "f01s009-006": "fear",
+  "f01s012-005": "surprise",
+  "f01s012-006": "surprise",
+  "f01s012-007": "surprise",
+  "f01s015-006": "fear",
+  "f01s016-001": "fear",
+  "f01s016-004": "fear",
+  "f01s018-004": "fear",
+  "f01s018-005": "fear",
+  "f01s020-001": "fear",
+  "f01s020-002": "surprise",
+  "f01s026-002": "sad",
+  "f01s026-003": "sad",
+  "f01s027-001": "sad",
+  "f01s027-002": "sad",
+  "f01s027-003": "sad",
+  "f01s030-002": "sad",
+  "f01s030-003": "sad",
+  "f01s030-004": "sad",
+  "f01s031-001": "surprise",
+  "f01s031-003": "fear",
+  "f01s031-004": "fear",
+  "f01s031-005": "sad",
+  "f01s032-003": "sad",
+  "f01s032-004": "sad",
+  "f01s032-005": "sad",
+  "f01s033-001": "sad",
+  "f01s033-002": "sad",
+  "f01s034-002": "fear",
+  "f01s034-004": "fear",
+  "f01s035-002": "fear",
+  "f01s035-003": "fear",
+  "f01s036-006": "surprise"
+ }
 }
