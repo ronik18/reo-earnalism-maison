@@ -340,3 +340,154 @@ class AudiovisualCommandTests(TestCase):
             self.stage(folder, "docs/evidence/audiovisual-clearance-missing-test-only.json")
         self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
         self.assertEqual(Revision.objects.filter(edition=live.edition).count(), 1)
+
+
+class AudiovisualPreviewCommandTests(TestCase):
+    """stage-preview: one owner-approved bounded sample on a clone of the live chapter-audio revision."""
+    # The chapter-audio helpers, without re-running that class's tests.
+    A = AudiovisualCommandTests
+    setUp, APPROVAL, complete_record = A.setUp, A.APPROVAL, staticmethod(A.complete_record)
+    publish_stage, publish_bicharak, export, bundle = A.publish_stage, A.publish_bicharak, A.export, A.bundle
+    evidence, attach, stage, browser, publish = A.evidence, A.attach, A.stage, A.browser, A.publish
+    del A
+
+    def live_with_audio(self):
+        self.publish_bicharak()
+        source = self.export()
+        folder, audio_sha = self.bundle(source)
+        staged = self.stage(folder, self.evidence(source, audio_sha, tag="chapters"))
+        self.publish(self.browser(staged["content_sha256"], tag="chapters"))
+        return Edition.objects.get(slug="bicharak").live_revision, source, audio_sha
+
+    def clip(self, audio_sha, seconds=2, kbps=96, tag="clip", **override):
+        from library.production_handoff import HandoffError, measure_mp3
+        folder = self.tmp / f"preview-{tag}"
+        folder.mkdir()
+        mp3 = folder / "preview.mp3"
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", f"sine=frequency=330:duration={seconds}", "-ac", "1",
+                        "-ar", "44100", "-c:a", "libmp3lame", "-b:a", f"{kbps}k", str(mp3)], check=True)
+        try:
+            measured = measure_mp3(mp3)["duration_ms"]
+        except HandoffError:
+            measured = seconds * 1000
+        sha = hashlib.sha256(mp3.read_bytes()).hexdigest()
+        stated = {"sha256": sha, "bytes": mp3.stat().st_size, "duration_ms": measured, "quality_kbps": kbps,
+                  "content_type": "audio/mpeg", "prepared": True, "source_mp3_sha256": audio_sha, "unit_id": "stale-source-unit",
+                  "measurement_evidence": "synthetic test only: ffmpeg sine, libmp3lame"}
+        stated.update(override)
+        (folder / "preview.json").write_text(json.dumps(stated))
+        return mp3, folder / "preview.json", sha
+
+    def stage_preview(self, mp3, preview_json, evidence):
+        return self.attach("stage-preview", "bicharak", "--publisher", str(self.publisher.public_id), "--clip", str(mp3),
+                           "--preview-json", str(preview_json), "--evidence", evidence)
+
+    def preview_staged(self):
+        live, source, audio_sha = self.live_with_audio()
+        mp3, preview_json, sha = self.clip(audio_sha)
+        args = (mp3, preview_json, self.evidence(source, audio_sha, tag="preview", preview_sha256=sha))
+        return live, audio_sha, sha, args, self.stage_preview(*args)
+
+    def assert_no_clone(self, live):
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
+        self.assertFalse(Asset.objects.filter(kind="preview_audio").exists())
+        self.assertFalse(Revision.objects.filter(edition=live.edition, state="draft").exists())
+
+    def test_stage_preview_keeps_chapter_audio_and_stays_draft(self):
+        live, audio_sha, sha, args, staged = self.preview_staged()
+        self.assertEqual(staged["status"], "staged")
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, live.id)
+        draft = Revision.objects.get(pk=staged["revision_id"])
+        self.assertEqual((draft.state, staged["content_sha256"]), ("draft", draft.content_sha256))
+        self.assertNotIn("browser", draft.validation_evidence)
+        sample = Asset.objects.get(revision=draft, kind="preview_audio")
+        self.assertEqual((sample.sha256, sample.provider, sample.state, sample.unit.ordinal, sample.content_type),
+                         (sha, "r2", "ready", 1, "audio/mpeg"))
+        proof = draft.validation_evidence["audio_preview"]
+        self.assertEqual((proof["asset_id"], proof["unit_id"], proof["sha256"], proof["duration_ms"], proof["quality_kbps"],
+                          proof["re_encoded"]), (str(sample.id), str(sample.unit_id), sha, sample.duration_ms, 96, False))
+        chapter = Asset.objects.get(revision=draft, kind="audio_chapter")
+        self.assertEqual(chapter.sha256, audio_sha)
+        self.assertTrue(TimingMap.objects.filter(revision=draft, asset=chapter, measured=True, text_sha256=draft.content_sha256).exists())
+        self.assertIn(str(chapter.id), draft.validation_evidence["offline_piece_manifests"])
+        self.assertEqual(draft.validation_evidence["publication_clearance"]["asset_sha256"], staged["asset_sha256"])
+        self.assertTrue(draft.rights.filter(format="audio", action="preview", approved=True, test_only=False).exists())
+        checks = {c["code"]: c["status"] for c in validate_revision(draft, prepared=prepare_revision_validation(draft.id))["checks"]}
+        self.assertEqual({k for k, v in checks.items() if v == "fail"}, {"browser"}, checks)
+        self.assertEqual(checks["audio_preview"], "pass")
+        revisions, assets = Revision.objects.count(), Asset.objects.count()
+        again = self.stage_preview(*args)
+        self.assertEqual((again["status"], again["revision_id"], again["asset_sha256"]),
+                         ("staged", staged["revision_id"], staged["asset_sha256"]))
+        self.assertEqual((Revision.objects.count(), Asset.objects.count()), (revisions, assets))
+
+    def test_stage_preview_refuses_without_exact_owner_approval(self):
+        live, source, audio_sha = self.live_with_audio()
+        mp3, preview_json, sha = self.clip(audio_sha)
+        review_only = {"owner_reviews": {"preview": "\"Preview approved\" (synthetic test only)"}}
+        cases = [("none", review_only, "preview_sha256"), ("other", {"preview_sha256": "0" * 64}, "preview_sha256"),
+                 ("draft", {"preview_sha256": sha, "status": "DRAFT_NOT_APPROVED"}, "draft"),
+                 ("noowner", {"preview_sha256": sha, "owner_approval": None}, "owner_approval")]
+        for tag, override, message in cases:
+            with self.subTest(tag), self.assertRaisesMessage(CommandError, message):
+                self.stage_preview(mp3, preview_json, self.evidence(source, audio_sha, tag=f"preview-{tag}", **override))
+        self.assert_no_clone(live)
+
+    def test_stage_preview_refuses_overlong_oversize_and_misstated_clips(self):
+        from unittest.mock import patch
+        import operations.management.commands.attach_audiovisual_audio as command
+        live, source, audio_sha = self.live_with_audio()
+        mp3, preview_json, sha = self.clip(audio_sha, seconds=121, kbps=48, tag="long")
+        with self.assertRaisesMessage(CommandError, "120000 ms"):
+            self.stage_preview(mp3, preview_json, self.evidence(source, audio_sha, tag="long", preview_sha256=sha))
+        mp3, preview_json, sha = self.clip(audio_sha, tag="big")
+        evidence = self.evidence(source, audio_sha, tag="big", preview_sha256=sha)
+        with patch.object(command, "MAX_PREVIEW_BYTES", 1024), self.assertRaisesMessage(CommandError, "1024 bytes"):
+            self.stage_preview(mp3, preview_json, evidence)
+        mp3, preview_json, sha = self.clip(audio_sha, tag="kbps", kbps=64)
+        with self.assertRaisesMessage(CommandError, "EXACT_MEASURED_48_OR_96_KBPS_MP3_REQUIRED"):
+            self.stage_preview(mp3, preview_json, self.evidence(source, audio_sha, tag="kbps", preview_sha256=sha))
+        mp3, preview_json, sha = self.clip(audio_sha, tag="misstated", duration_ms=1)
+        with self.assertRaisesMessage(CommandError, "preview.json differs"):
+            self.stage_preview(mp3, preview_json, self.evidence(source, audio_sha, tag="misstated", preview_sha256=sha))
+        mp3, preview_json, sha = self.clip(audio_sha, tag="unsourced", source_mp3_sha256="c" * 64)
+        with self.assertRaisesMessage(CommandError, "source_mp3_sha256"):
+            self.stage_preview(mp3, preview_json, self.evidence(source, audio_sha, tag="unsourced", preview_sha256=sha))
+        self.assert_no_clone(live)
+
+    def test_stage_preview_requires_live_chapter_audio(self):
+        live = self.publish_bicharak()
+        source = self.export()
+        mp3, preview_json, sha = self.clip("a" * 64)
+        with self.assertRaisesMessage(CommandError, "chapter audio"):
+            self.stage_preview(mp3, preview_json, self.evidence(source, "a" * 64, preview_sha256=sha))
+        self.assert_no_clone(live)
+
+    def test_publish_preview_after_browser_report_serves_the_sample_page(self):
+        old, audio_sha, sha, args, staged = self.preview_staged()
+        with self.assertRaisesMessage(CommandError, "audio_preview"):
+            self.publish(self.browser(staged["content_sha256"], tag="noscope"))
+        self.assertEqual(Edition.objects.get(slug="bicharak").live_revision_id, old.id)
+        result = self.publish(self.browser(staged["content_sha256"], checks={"audio_playback": True, "audio_preview": True}, tag="preview"))
+        live = Edition.objects.get(slug="bicharak").live_revision
+        self.assertEqual((result["status"], str(live.id), live.state), ("published", staged["revision_id"], "live"))
+        self.assertEqual(Revision.objects.get(pk=old.id).state, "retired")
+        report = validate_revision(live, prepared=prepare_revision_validation(live.id))
+        checks = {c["code"]: c["status"] for c in report["checks"]}
+        self.assertEqual(report["status"], "pass", checks)
+        self.assertEqual((checks["audio_preview"], checks["timing_map"], checks["publication_regions"]), ("pass", "pass", "pass"))
+        chapter = Asset.objects.get(revision=live, kind="audio_chapter")
+        self.assertEqual(chapter.sha256, audio_sha)
+        self.assertTrue(TimingMap.objects.filter(revision=live, asset=chapter).exists())
+        sample = Asset.objects.get(revision=live, kind="preview_audio")
+        with override_settings(FEATURES={**settings.FEATURES, "audio": True}):
+            response = self.client.get(f"/en/listen/{live.edition_id}/preview/")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.context["bootstrap"]["preview"]["asset_id"], str(sample.id))
+            self.assertEqual(response.context["bootstrap"]["preview"]["sha256"], sha)
+            self.assertNotContains(response, chapter.storage_key)
+        # Reruns report the live sample and create nothing new.
+        revisions, assets = Revision.objects.count(), Asset.objects.count()
+        self.assertEqual(self.stage_preview(*args)["status"], "already_live")
+        self.assertEqual(self.publish(self.browser(staged["content_sha256"], tag="again"))["status"], "already_live")
+        self.assertEqual((Revision.objects.count(), Asset.objects.count()), (revisions, assets))

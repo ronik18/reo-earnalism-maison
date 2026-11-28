@@ -1,630 +1,788 @@
 {
- "schema": "eav.cast/1",
- "title": "megh-o-roudra",
- "source_revision": "3dac775e-d883-4c85-ae88-2275fcbfd19e",
- "source_sha256": "49d3c6c63ce74f120acc77b3ae17c774ebbfa85d38b119dce0fd93618c5ae805",
- "narrator": {
-  "gender": "male",
-  "rationale": "Third-person authorial narration (the teller speaks as 'আমরা'); the plot follows Shashibhushan throughout, from the village to the courts, jail and the final reunion, so a male narrator suits the centre of the story."
- },
- "characters": {
-  "শশিভূষণ": {
-   "gender": "male",
-   "note": "young M.A., B.L., Giribala's tutor and neighbour; protagonist"
+  "schema": "eav.cast/1",
+  "title": "megh-o-roudra",
+  "source_revision": "3dac775e-d883-4c85-ae88-2275fcbfd19e",
+  "source_sha256": "49d3c6c63ce74f120acc77b3ae17c774ebbfa85d38b119dce0fd93618c5ae805",
+  "narrator": {
+    "gender": "male",
+    "rationale": "Third-person authorial narration (the teller speaks as 'আমরা'); the plot follows Shashibhushan throughout, from the village to the courts, jail and the final reunion, so a male narrator suits the centre of the story."
   },
-  "গিরিবালা": {
-   "gender": "female",
-   "note": "Harakumar's young daughter, Shashibhushan's pupil; later a widow"
+  "characters": {
+    "শশিভূষণ": {
+      "gender": "male",
+      "note": "young M.A., B.L., Giribala's tutor and neighbour; protagonist"
+    },
+    "গিরিবালা": {
+      "gender": "female",
+      "note": "Harakumar's young daughter, Shashibhushan's pupil; later a widow"
+    },
+    "গিরিবালার ভাইরা": {
+      "gender": "male",
+      "note": "Giribala's schoolboy brothers"
+    },
+    "হরকুমার": {
+      "gender": "male",
+      "note": "Giribala's father, the zamindar's naib"
+    },
+    "জয়েণ্ট সাহেব": {
+      "gender": "male",
+      "note": "the English joint magistrate who humiliates Harakumar"
+    },
+    "ম্যাজিষ্ট্রেট সাহেব": {
+      "gender": "male",
+      "note": "the English district magistrate who hears the suit"
+    },
+    "জমিদার": {
+      "gender": "male",
+      "note": "Harakumar's absentee landlord"
+    },
+    "মাঝি": {
+      "gender": "male",
+      "note": "boatman of the sunk cargo boat"
+    },
+    "গ্রামের যাত্রীরা": {
+      "gender": "male",
+      "note": "Shashibhushan's fellow villagers who were on the steamer"
+    },
+    "ম্যানেজার সাহেব": {
+      "gender": "male",
+      "note": "young English steamer manager who fired on the boat"
+    },
+    "জেলেরা": {
+      "gender": "male",
+      "note": "fishermen whose net the police superintendent destroyed"
+    },
+    "পুলিস সাহেব": {
+      "gender": "male",
+      "note": "English district police superintendent"
+    },
+    "ভৃত্য": {
+      "gender": "male",
+      "note": "servant sent with the carriage at the jail gate"
+    },
+    "বৈষ্ণব ভিক্ষুকেরা": {
+      "gender": "male",
+      "note": "band of Vaishnava mendicants singing kirtan"
+    }
   },
-  "গিরিবালার ভাইরা": {
-   "gender": "male",
-   "note": "Giribala's schoolboy brothers"
+  "units": {
+    "f01s004-006": [
+      {
+        "text": "পুরুষটি ভ্রূকুঞ্চিত করিয়া বিশেষ চেষ্টাসহকারে নিরীক্ষণপূর্ব্বক বালিকাকে চিনিতে পারিল এবং বই রাখিয়া জানলার কাছে উঠিয়া দাঁড়াইয়া হাস্যমুখে ডাকিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—গিরিবালা!",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "happy"
+      }
+    ],
+    "f01s005-003": [
+      {
+        "text": "তাড়াতাড়ি বাহিরে আসিয়া কহিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—“কই, আজ আমাকে জাম দিলে না?”",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s014-006": [
+      {
+        "text": "সূর্য্য পৃথিবী অপেক্ষা বৃহৎ এ মতটা যদি গিরিবালার নিকট প্রমাণাভাবে অসিদ্ধ বলিয়া বোধ হইত এবং সেই সন্দেহ যদি সে সাহস করিয়া প্রকাশ করিত, তবে তাহার ভাইরা তাহাকে দ্বিগুণ উপেক্ষাভরে কহিত ",
+        "role": "narrator"
+      },
+      {
+        "text": "“ইস্!",
+        "role": "character",
+        "speaker": "গিরিবালার ভাইরা",
+        "emotion": "disgust"
+      }
+    ],
+    "f01s014-007": [
+      {
+        "text": "আমাদের বইয়ে লেখা আছে আর তুই—”",
+        "role": "character",
+        "speaker": "গিরিবালার ভাইরা",
+        "emotion": "disgust"
+      }
+    ],
+    "f01s017-002": [
+      {
+        "text": "শশিভূষণ একদিন একটা ঝকঝকে বাঁধানো বই খুলিয়া বলিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—গিরিবালা ছবি দেখবি আয়।",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s023-005": [
+      {
+        "text": "তৎক্ষণাৎ চাপ্‌রাসিকে আদেশ করিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—বোলাও নায়েবকো।",
+        "role": "character",
+        "speaker": "জয়েণ্ট সাহেব",
+        "emotion": "command"
+      }
+    ],
+    "f01s024-002": [
+      {
+        "text": "সাহেব তাম্বু হইতে মচ্‌মচ্‌ শব্দে বাহির হইয়া আসিয়া নায়েবকে উচ্চ কণ্ঠে বিজাতীয় উচ্চারণে জিজ্ঞাসা করিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—টুমি কি কারণবশটো আমার মেঠরকে ডূর করিয়াছে?",
+        "role": "character",
+        "speaker": "জয়েণ্ট সাহেব",
+        "emotion": "anger"
+      }
+    ],
+    "f01s025-006": [
+      {
+        "text": "তখন জয়েণ্ট সাহেব ক্রোধে গর্জ্জন করিয়া মেথরকে ডাকিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "এই শ্যালকের কর্ণ ধরিয়া তাম্বুর চারিধারে ঘোড়দৌড় করাও।",
+        "role": "character",
+        "speaker": "জয়েণ্ট সাহেব",
+        "emotion": "anger"
+      }
+    ],
+    "f01s027-002": [
+      {
+        "text": "শশিভূষণ কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "সাহেবের নামে মানহানির মকদ্দমা আনিতে হইবে, আমি তোমার উকীল হইয়া লড়িব।",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s027-006": [
+      {
+        "text": "শশিভূষণের শরণাপন্ন হইলেন—কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "বাপু শুনিলাম তুমি অকারণে কলিকাতায় যাইবার আয়োজন করিতেছ সে ত কিছুতেই হইতে পারিবে না।",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s027-007": [
+      {
+        "text": "তোমার মত একজন লোক গ্রামে থাকিলে আমাদের সাহস কত থাকে।",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s027-008": [
+      {
+        "text": "যাহা হউক আমাকে এই ঘোর অপমান হইতে উদ্ধার করিতে হইবে।",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "sad"
+      }
+    ],
+    "f01s028-003": [
+      {
+        "text": "ম্যাজিষ্ট্রেট্‌ তাঁহার নালিশ শুনিয়া তাঁহাকে প্রাইভেট্‌ কাম্‌রার মধ্যে ডাকিয়া লইয়া অত্যন্ত খাতির করিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "শশিবাবু, এ মকদ্দমাটা গোপনে মিট্‌মাট্‌ করিয়া ফেলিলে ভাল হয় নাকি!",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s028-004": [
+      {
+        "text": "শশিবাবু টেবিলের উপরিস্থিত একখানি আইন গ্রন্থের মলাটের উপর তাঁহার কুঞ্চিতভ্রূ ক্ষীণদৃষ্টি অত্যন্ত নিবিষ্টভাবে রক্ষা করিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমার মক্কেলকে আমি এরূপ পরামর্শ দিতে পারি না।",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s028-005": [
+      {
+        "text": "তিনি প্রকাশ্যভাবে অপমানিত হইয়াছেন, গোপনে ইহার মিট্‌মাট্‌ হইবে কি করিয়া।",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s029-001": [
+      {
+        "text": "সাহেব দুইচারি কথা কহিয়া বুঝিলেন এই স্বল্পভাষী স্বল্পদৃষ্টি লোকটিকে সহজে বিচলিত করা সম্ভব নহে, কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "অল্‌রাইট্‌ বাবু, দেখা যাউক কতদূর কি হয়!",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s029-003": [
+      {
+        "text": "এদিকে জয়েণ্ট সাহেব জমিদারকে’পত্র লিখিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তোমার নায়েব আমার ভৃত্যদিগকে অপমান করিয়া আমার প্রতি অবজ্ঞা প্রকাশ করে, আশা করি তুমি ইহার সমুচিত প্রতিকার করিবে।",
+        "role": "character",
+        "speaker": "জয়েণ্ট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s029-006": [
+      {
+        "text": "জমিদার অত্যন্ত বিরক্ত হইয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "সাহেবের মেথর যখন চারিসের ঘি চাহিল তুমি বিনা বাক্যব্যয়ে তৎক্ষণাৎ কেন দিলে না?",
+        "role": "character",
+        "speaker": "জমিদার",
+        "emotion": "anger"
+      }
+    ],
+    "f01s029-007": [
+      {
+        "text": "তোমার কি বাপের কড়ি লাগিত?",
+        "role": "character",
+        "speaker": "জমিদার",
+        "emotion": "anger"
+      }
+    ],
+    "f01s030-002": [
+      {
+        "text": "অপরাধ স্বীকার করিয়া কছিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমার গ্রহ মন্দ তাই এমন দুর্ব্বুদ্ধি ঘটিয়াছিল।",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "sad"
+      }
+    ],
+    "f01s030-003": [
+      {
+        "text": "জমিদার কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তাহার পর আবার সাহেবের নামে নালিশ করিতে তোমাকে কে বলিল?",
+        "role": "character",
+        "speaker": "জমিদার",
+        "emotion": "anger"
+      }
+    ],
+    "f01s030-004": [
+      {
+        "text": "হরকুমার কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "ধর্ম্মাবতার, নালিশ করিবার ইচ্ছা আমার ছিল না; ঐ আমাদের গ্রামের শশি, তাহার কোথাও কোন মকদ্দমা জোটে না,",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s030-005": [
+      {
+        "text": "সে ছোঁড়া নিতান্ত জোর করিয়া প্রায় আমার সম্মতি না লইয়াই এই হেঙ্গামা বাধাইয়া বসিয়াছে।",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s032-001": [
+      {
+        "text": "নায়েব কছিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "মা বাপ কখনো বা রাগ করিয়া শাস্তি ও দিয়া থাকেন কখনও বা আদর করিয়া কোলেও টানিয়া লন, ইহাতে সন্তানের বা মা বাপের দুঃখের কোন কারণ নাই।",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s032-003": [
+      {
+        "text": "ম্যাজিষ্ট্রেট তাহার মুখে শশিভূষণের স্পর্দ্ধার কথা শুনিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমিও আশ্চর্য্য হইতেছিলাম যে, নায়েব বাবুকে বরাবর ভাল লোক বলিয়া জানিতাম,",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s032-004": [
+      {
+        "text": "তিনি যে সর্ব্বাগ্রে আমাকে জানাইয়া গোপনে মিট্‌মাট্‌ না করিয়া হঠাৎ মকদ্দমা আনিবেন একি অসম্ভব ব্যাপার!",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s032-005": [
+      {
+        "text": "এখন সমস্ত বুঝিতে পারিতেছি।",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s038-003": [
+      {
+        "text": "এমন কি, শশিভূষণ যদি কোন দিন নিরীহভাবে জিজ্ঞাসা করিত, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“গিরি, আজ জাম নেই,”",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "conversation"
+      },
+      {
+        "text": " সে সেটাকে গূঢ় উপহাস জ্ঞান করিয়া সক্ষোভে ",
+        "role": "narrator"
+      },
+      {
+        "text": "“যাঃ ও”",
+        "role": "character",
+        "speaker": "গিরিবালা",
+        "emotion": "anger"
+      },
+      {
+        "text": " বলিয়া তর্জ্জন করিয়া পলায়নের উপক্রম করিত।",
+        "role": "narrator"
+      }
+    ],
+    "f01s038-005": [
+      {
+        "text": "সহসা দূরের দিকে দৃষ্টিক্ষেপ করিয়া বালিকা উচ্চৈঃস্বরে বলিয়া উঠিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—“স্বর্ণ, ভাই, তুই যাস্‌নে, আমি এখনি যাচ্চি।”",
+        "role": "character",
+        "speaker": "গিরিবালা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s044-009": [
+      {
+        "text": "গিরিকে জিজ্ঞাসা করিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "কোথায় যাচ্চিস্?",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s044-010": [
+      {
+        "text": "গিরি কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“শশি দাদার বাড়ি!”",
+        "role": "character",
+        "speaker": "গিরিবালা",
+        "emotion": "happy"
+      }
+    ],
+    "f01s044-011": [
+      {
+        "text": "হরকুমার ধমক দিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“শশি দাদার বাড়ি যেতে হবে না, ঘরে যা!”",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "anger"
+      }
+    ],
+    "f01s051-004": [
+      {
+        "text": "সে বলিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "নৌকা ত মজিয়াছে এক্ষণে নিজেকে মজাইতে পারিব না।",
+        "role": "character",
+        "speaker": "মাঝি",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s051-005": [
+      {
+        "text": "প্রথমতঃ পুলিসকে্‌ দর্শনি দিতে হইবে, তাহার পর কাজকর্ম্ম আহার নিদ্রা ত্যাগ করিয়া আদালতে আদালতে ঘুরিতে হইবে, তাহার পর সাহেবের নামে নালিশ করিয়া কি বিপাকে পড়িতে হইবে ও কি ফল লাভ হইবে তাহা ভগবান জানেন।",
+        "role": "character",
+        "speaker": "মাঝি",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s051-008": [
+      {
+        "text": "তাহার শশিভূষণকে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "মহাশয়, আমরা কিছুই দেখি নাই; আমরা জাহাজের পশ্চাৎ ভাগে ছিলাম, কলের ঘট্‌ঘট্‌ এবং জলের কল্‌ কল্‌ শব্দে সেখান হইতে বন্দুকের আওয়াজ শুনিবারও কোন সম্ভাবনা ছিল না।",
+        "role": "character",
+        "speaker": "গ্রামের যাত্রীরা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s052-004": [
+      {
+        "text": "কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আকাশে এক ঝাঁক বক উড়িতেছিল তাহাদেরই প্রতি লক্ষ্য করা হইয়াছিল।",
+        "role": "character",
+        "speaker": "ম্যানেজার সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s058-010": [
+      {
+        "text": "কম্পিতস্বরে কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“সার্‌, জেলের জাল ছিঁড়িবার এবং এই চারিজন লোককে উৎপীড়ন করিবার তোমার কোন অধিকার নাই।”",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "anger"
+      }
+    ],
+    "f01s060-012": [
+      {
+        "text": "সকলে বলিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“ঠাকুর তুমি ত আমাদিগকে বিষম ফেলাদে ফেলিলে!”",
+        "role": "character",
+        "speaker": "জেলেরা",
+        "emotion": "fear"
+      }
+    ],
+    "f01s061-002": [
+      {
+        "text": "ইতিমধ্যে হরকুমার যে দিন বেঞ্চের কর্ম্মোপলক্ষে জেলার সাহেবদিগকে সেলাম করিতে গেলেন পুলিস সাহেব হাসিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "নায়েব বাবু শুনিতেছি তোমার প্রজারা পুলিসের বিরুদ্ধে মিথ্যা সাক্ষ্য দিতে প্রস্তুত হইয়াছে।",
+        "role": "character",
+        "speaker": "পুলিস সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s061-003": [
+      {
+        "text": "নায়েব সচকিত হইয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "হাঁ!",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s061-004": [
+      {
+        "text": "এও কি কখনো সম্ভব হয়?",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s061-005": [
+      {
+        "text": "অপবিত্র জন্তুজাত পুত্রদিগের অস্থিতে এত ক্ষমতা!",
+        "role": "character",
+        "speaker": "হরকুমার",
+        "emotion": "disgust"
+      }
+    ],
+    "f01s063-005": [
+      {
+        "text": "তাঁহার বাপ আপিল করিতে উদ্যত হইল, তাঁহাকে শশিভূষণ বারম্বার নিষেধ করিলেন—কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "জেল ভাল!",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s063-006": [
+      {
+        "text": "লোহার বেড়ি মিথ্যা কথা বলে না, কিন্তু জেলের বাহিরে যে স্বাধীনতা আছে সে আমাদিগকে প্রতারণা করিয়া বিপদে ফেলে।",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s063-007": [
+      {
+        "text": "আর যদি সৎসঙ্গের কথা বল, ত, জেলের মধ্যে মিথ্যাবাদী কৃতঘ্ন কাপুরুষের সংখ্যা অল্প, কারণ স্থান পরিমিত—বাহিরে অনেক বেশি!",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s065-005": [
+      {
+        "text": "এক জন ভৃত্য নামিয়া আসিয়া জিজ্ঞাসা করিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আপনার নাম শশিভূষণ বাবু?—",
+        "role": "character",
+        "speaker": "ভৃত্য",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s066-003": [
+      {
+        "text": "তিনি আশ্চর্য্য হইয়া জিজ্ঞাসা করিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—আমাকে কোথায় যাইতে হইবে?—",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s066-004": [
+      {
+        "text": "সে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমার প্রভু আপনাকে ডাকিয়াছেন।",
+        "role": "character",
+        "speaker": "ভৃত্য",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s067-004": [
+      {
+        "text": "এস এস ফিরে এস—নাথ হে ফিরে এস!",
+        "role": "character",
+        "speaker": "বৈষ্ণব ভিক্ষুকেরা",
+        "emotion": "sad"
+      }
+    ],
+    "f01s067-005": [
+      {
+        "text": "আমার ক্ষুধিত তৃষিত তাপিত চিত, বঁধুহে ফিরে এস!",
+        "role": "character",
+        "speaker": "বৈষ্ণব ভিক্ষুকেরা",
+        "emotion": "sad"
+      }
+    ],
+    "f01s068-001": [
+      {
+        "text": "ওগো নিষ্ঠুর ফিরে এস হে আমার করুণ কোমল এস!",
+        "role": "character",
+        "speaker": "বৈষ্ণব ভিক্ষুকেরা",
+        "emotion": "sad"
+      }
+    ],
+    "f01s068-002": [
+      {
+        "text": "ও গো সজল জলদ স্নিগ্ধকান্ত সুন্দর ফিরে এস!",
+        "role": "character",
+        "speaker": "বৈষ্ণব ভিক্ষুকেরা",
+        "emotion": "sad"
+      }
+    ],
+    "f01s068-005": [
+      {
+        "text": "আমার নিতিমুখ ফিরে এস, আমার চিরদুখ ফিরে এস, আমার সব সুখ-দুখ মন্থন ধন অন্তরে ফিরে এস!",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "sad"
+      }
+    ],
+    "f01s068-006": [
+      {
+        "text": "আমার চিরবাঞ্ছিত এস, আমার চিতসঞ্চিত এস, ওহে চঞ্চল, হে চিরন্তন, ভুজবন্ধনে ফিরে এস!",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "sad"
+      }
+    ],
+    "f01s068-007": [
+      {
+        "text": "আমার বক্ষে ফিরিয়া এস, আমার চক্ষে ফিরিয়া এস, আমার শয়নে স্বপনে বসনে ভূষণে নিখিল ভুবনে এস!",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "sad"
+      }
+    ],
+    "f01s068-008": [
+      {
+        "text": "আমার মুখের হাসিতে এস হে আমার চোখের সলিলে এস, আমার আদরে আমার ছলনে আমার অভিমানে ফিরে এস!",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "sad"
+      }
+    ],
+    "f01s068-009": [
+      {
+        "text": "আমার সর্ব্বস্মরণে এস আমার সর্ব্বভরমে এস— আমার ধরম করম সোহাগ সরম জনম মরণে এস!",
+        "role": "character",
+        "speaker": "শশিভূষণ",
+        "emotion": "sad"
+      }
+    ],
+    "f01s072-008": [
+      {
+        "text": "এস এস হে!",
+        "role": "character",
+        "speaker": "বৈষ্ণব ভিক্ষুকেরা",
+        "emotion": "sad"
+      }
+    ]
   },
-  "হরকুমার": {
-   "gender": "male",
-   "note": "Giribala's father, the zamindar's naib"
+  "notes": "Much dialogue is unmarked direct speech after 'কহিলেন,'; treated as speech when first/second person or vocatives show it is direct. Indirect/reported speech (Harakumar to the sahib f01s024-003/004, the sweeper f01s023-001..003, the sahib's 'ডণ্ড বিঢান' f01s031-006, one-word 'হাঁ' replies f01s033-002 and f01s066-001, fishermen f01s062-001) left to the narrator. The imagined cry '“শশিদাদা!”' (f01s054-006) is heard only in Shashibhushan's mind, so narrator. Kirtan lines are sung by the Vaishnava beggars; the verses Shashibhushan hums to himself (f01s068-005..009) are given to him. Doubtful: f01s051-005 (taken as the boatman continuing his refusal) and f01s052-004 (the manager's defence, passive phrasing, taken as direct). The joint magistrate and the district magistrate are kept as separate voices.",
+  "tone": {
+    "pace": "moderate",
+    "expressivity": "expressive",
+    "atmosphere": "tender, indignant and mournful",
+    "rationale": "Playful village scenes of a girl's sulks with her bookish tutor give way to colonial injustice, his imprisonment and their sorrowful reunion as she stands before him a widow."
   },
-  "জয়েণ্ট সাহেব": {
-   "gender": "male",
-   "note": "the English joint magistrate who humiliates Harakumar"
-  },
-  "ম্যাজিষ্ট্রেট সাহেব": {
-   "gender": "male",
-   "note": "the English district magistrate who hears the suit"
-  },
-  "জমিদার": {
-   "gender": "male",
-   "note": "Harakumar's absentee landlord"
-  },
-  "মাঝি": {
-   "gender": "male",
-   "note": "boatman of the sunk cargo boat"
-  },
-  "গ্রামের যাত্রীরা": {
-   "gender": "male",
-   "note": "Shashibhushan's fellow villagers who were on the steamer"
-  },
-  "ম্যানেজার সাহেব": {
-   "gender": "male",
-   "note": "young English steamer manager who fired on the boat"
-  },
-  "জেলেরা": {
-   "gender": "male",
-   "note": "fishermen whose net the police superintendent destroyed"
-  },
-  "পুলিস সাহেব": {
-   "gender": "male",
-   "note": "English district police superintendent"
-  },
-  "ভৃত্য": {
-   "gender": "male",
-   "note": "servant sent with the carriage at the jail gate"
-  },
-  "বৈষ্ণব ভিক্ষুকেরা": {
-   "gender": "male",
-   "note": "band of Vaishnava mendicants singing kirtan"
+  "narration_moods": {
+    "f01s006-006": "sad",
+    "f01s009-003": "happy",
+    "f01s009-004": "happy",
+    "f01s021-003": "fear",
+    "f01s023-004": "anger",
+    "f01s024-001": "fear",
+    "f01s025-006": "anger",
+    "f01s026-003": "sad",
+    "f01s026-004": "anger",
+    "f01s026-005": "anger",
+    "f01s027-001": "sad",
+    "f01s036-003": "anger",
+    "f01s036-004": "anger",
+    "f01s036-005": "anger",
+    "f01s037-001": "sad",
+    "f01s040-007": "sad",
+    "f01s040-008": "anger",
+    "f01s041-001": "anger",
+    "f01s041-002": "anger",
+    "f01s041-003": "anger",
+    "f01s041-004": "sad",
+    "f01s041-005": "sad",
+    "f01s041-006": "sad",
+    "f01s041-008": "sad",
+    "f01s042-007": "sad",
+    "f01s043-005": "sad",
+    "f01s043-006": "sad",
+    "f01s043-007": "sad",
+    "f01s043-012": "sad",
+    "f01s043-013": "sad",
+    "f01s044-013": "sad",
+    "f01s044-014": "sad",
+    "f01s044-015": "sad",
+    "f01s044-016": "sad",
+    "f01s045-001": "sad",
+    "f01s045-003": "sad",
+    "f01s045-008": "anger",
+    "f01s045-009": "anger",
+    "f01s046-004": "sad",
+    "f01s046-005": "sad",
+    "f01s046-006": "sad",
+    "f01s046-007": "sad",
+    "f01s048-008": "surprise",
+    "f01s048-009": "surprise",
+    "f01s049-004": "disgust",
+    "f01s049-005": "disgust",
+    "f01s049-006": "disgust",
+    "f01s050-004": "sad",
+    "f01s050-006": "anger",
+    "f01s050-008": "anger",
+    "f01s050-009": "anger",
+    "f01s050-010": "anger",
+    "f01s053-001": "disgust",
+    "f01s053-002": "sad",
+    "f01s053-006": "sad",
+    "f01s053-007": "sad",
+    "f01s053-008": "sad",
+    "f01s054-001": "sad",
+    "f01s054-004": "sad",
+    "f01s054-005": "sad",
+    "f01s054-006": "sad",
+    "f01s054-007": "sad",
+    "f01s054-008": "sad",
+    "f01s058-001": "anger",
+    "f01s058-002": "fear",
+    "f01s058-007": "fear",
+    "f01s059-001": "anger",
+    "f01s059-002": "anger",
+    "f01s060-008": "fear",
+    "f01s060-009": "fear",
+    "f01s060-010": "fear",
+    "f01s060-011": "fear",
+    "f01s064-002": "sad",
+    "f01s064-003": "sad",
+    "f01s064-006": "sad",
+    "f01s065-001": "sad",
+    "f01s065-002": "sad",
+    "f01s065-003": "sad",
+    "f01s066-003": "surprise",
+    "f01s069-004": "happy",
+    "f01s069-005": "happy",
+    "f01s070-005": "surprise",
+    "f01s070-006": "surprise",
+    "f01s071-007": "sad",
+    "f01s071-008": "sad",
+    "f01s071-009": "sad",
+    "f01s071-010": "sad",
+    "f01s072-003": "sad",
+    "f01s072-004": "sad",
+    "f01s072-005": "sad",
+    "f01s072-006": "sad"
   }
- },
- "units": {
-  "f01s004-006": [
-   {
-    "text": "পুরুষটি ভ্রূকুঞ্চিত করিয়া বিশেষ চেষ্টাসহকারে নিরীক্ষণপূর্ব্বক বালিকাকে চিনিতে পারিল এবং বই রাখিয়া জানলার কাছে উঠিয়া দাঁড়াইয়া হাস্যমুখে ডাকিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—গিরিবালা!",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s005-003": [
-   {
-    "text": "তাড়াতাড়ি বাহিরে আসিয়া কহিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—“কই, আজ আমাকে জাম দিলে না?”",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s014-006": [
-   {
-    "text": "সূর্য্য পৃথিবী অপেক্ষা বৃহৎ এ মতটা যদি গিরিবালার নিকট প্রমাণাভাবে অসিদ্ধ বলিয়া বোধ হইত এবং সেই সন্দেহ যদি সে সাহস করিয়া প্রকাশ করিত, তবে তাহার ভাইরা তাহাকে দ্বিগুণ উপেক্ষাভরে কহিত ",
-    "role": "narrator"
-   },
-   {
-    "text": "“ইস্!",
-    "role": "character",
-    "speaker": "গিরিবালার ভাইরা"
-   }
-  ],
-  "f01s014-007": [
-   {
-    "text": "আমাদের বইয়ে লেখা আছে আর তুই—”",
-    "role": "character",
-    "speaker": "গিরিবালার ভাইরা"
-   }
-  ],
-  "f01s017-002": [
-   {
-    "text": "শশিভূষণ একদিন একটা ঝকঝকে বাঁধানো বই খুলিয়া বলিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—গিরিবালা ছবি দেখবি আয়।",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s023-005": [
-   {
-    "text": "তৎক্ষণাৎ চাপ্‌রাসিকে আদেশ করিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—বোলাও নায়েবকো।",
-    "role": "character",
-    "speaker": "জয়েণ্ট সাহেব"
-   }
-  ],
-  "f01s024-002": [
-   {
-    "text": "সাহেব তাম্বু হইতে মচ্‌মচ্‌ শব্দে বাহির হইয়া আসিয়া নায়েবকে উচ্চ কণ্ঠে বিজাতীয় উচ্চারণে জিজ্ঞাসা করিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—টুমি কি কারণবশটো আমার মেঠরকে ডূর করিয়াছে?",
-    "role": "character",
-    "speaker": "জয়েণ্ট সাহেব"
-   }
-  ],
-  "f01s025-006": [
-   {
-    "text": "তখন জয়েণ্ট সাহেব ক্রোধে গর্জ্জন করিয়া মেথরকে ডাকিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "এই শ্যালকের কর্ণ ধরিয়া তাম্বুর চারিধারে ঘোড়দৌড় করাও।",
-    "role": "character",
-    "speaker": "জয়েণ্ট সাহেব"
-   }
-  ],
-  "f01s027-002": [
-   {
-    "text": "শশিভূষণ কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "সাহেবের নামে মানহানির মকদ্দমা আনিতে হইবে, আমি তোমার উকীল হইয়া লড়িব।",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s027-006": [
-   {
-    "text": "শশিভূষণের শরণাপন্ন হইলেন—কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "বাপু শুনিলাম তুমি অকারণে কলিকাতায় যাইবার আয়োজন করিতেছ সে ত কিছুতেই হইতে পারিবে না।",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s027-007": [
-   {
-    "text": "তোমার মত একজন লোক গ্রামে থাকিলে আমাদের সাহস কত থাকে।",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s027-008": [
-   {
-    "text": "যাহা হউক আমাকে এই ঘোর অপমান হইতে উদ্ধার করিতে হইবে।",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s028-003": [
-   {
-    "text": "ম্যাজিষ্ট্রেট্‌ তাঁহার নালিশ শুনিয়া তাঁহাকে প্রাইভেট্‌ কাম্‌রার মধ্যে ডাকিয়া লইয়া অত্যন্ত খাতির করিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "শশিবাবু, এ মকদ্দমাটা গোপনে মিট্‌মাট্‌ করিয়া ফেলিলে ভাল হয় নাকি!",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s028-004": [
-   {
-    "text": "শশিবাবু টেবিলের উপরিস্থিত একখানি আইন গ্রন্থের মলাটের উপর তাঁহার কুঞ্চিতভ্রূ ক্ষীণদৃষ্টি অত্যন্ত নিবিষ্টভাবে রক্ষা করিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমার মক্কেলকে আমি এরূপ পরামর্শ দিতে পারি না।",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s028-005": [
-   {
-    "text": "তিনি প্রকাশ্যভাবে অপমানিত হইয়াছেন, গোপনে ইহার মিট্‌মাট্‌ হইবে কি করিয়া।",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s029-001": [
-   {
-    "text": "সাহেব দুইচারি কথা কহিয়া বুঝিলেন এই স্বল্পভাষী স্বল্পদৃষ্টি লোকটিকে সহজে বিচলিত করা সম্ভব নহে, কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "অল্‌রাইট্‌ বাবু, দেখা যাউক কতদূর কি হয়!",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s029-003": [
-   {
-    "text": "এদিকে জয়েণ্ট সাহেব জমিদারকে’পত্র লিখিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তোমার নায়েব আমার ভৃত্যদিগকে অপমান করিয়া আমার প্রতি অবজ্ঞা প্রকাশ করে, আশা করি তুমি ইহার সমুচিত প্রতিকার করিবে।",
-    "role": "character",
-    "speaker": "জয়েণ্ট সাহেব"
-   }
-  ],
-  "f01s029-006": [
-   {
-    "text": "জমিদার অত্যন্ত বিরক্ত হইয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "সাহেবের মেথর যখন চারিসের ঘি চাহিল তুমি বিনা বাক্যব্যয়ে তৎক্ষণাৎ কেন দিলে না?",
-    "role": "character",
-    "speaker": "জমিদার"
-   }
-  ],
-  "f01s029-007": [
-   {
-    "text": "তোমার কি বাপের কড়ি লাগিত?",
-    "role": "character",
-    "speaker": "জমিদার"
-   }
-  ],
-  "f01s030-002": [
-   {
-    "text": "অপরাধ স্বীকার করিয়া কছিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমার গ্রহ মন্দ তাই এমন দুর্ব্বুদ্ধি ঘটিয়াছিল।",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s030-003": [
-   {
-    "text": "জমিদার কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তাহার পর আবার সাহেবের নামে নালিশ করিতে তোমাকে কে বলিল?",
-    "role": "character",
-    "speaker": "জমিদার"
-   }
-  ],
-  "f01s030-004": [
-   {
-    "text": "হরকুমার কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "ধর্ম্মাবতার, নালিশ করিবার ইচ্ছা আমার ছিল না; ঐ আমাদের গ্রামের শশি, তাহার কোথাও কোন মকদ্দমা জোটে না,",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s030-005": [
-   {
-    "text": "সে ছোঁড়া নিতান্ত জোর করিয়া প্রায় আমার সম্মতি না লইয়াই এই হেঙ্গামা বাধাইয়া বসিয়াছে।",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s032-001": [
-   {
-    "text": "নায়েব কছিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "মা বাপ কখনো বা রাগ করিয়া শাস্তি ও দিয়া থাকেন কখনও বা আদর করিয়া কোলেও টানিয়া লন, ইহাতে সন্তানের বা মা বাপের দুঃখের কোন কারণ নাই।",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s032-003": [
-   {
-    "text": "ম্যাজিষ্ট্রেট তাহার মুখে শশিভূষণের স্পর্দ্ধার কথা শুনিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমিও আশ্চর্য্য হইতেছিলাম যে, নায়েব বাবুকে বরাবর ভাল লোক বলিয়া জানিতাম,",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s032-004": [
-   {
-    "text": "তিনি যে সর্ব্বাগ্রে আমাকে জানাইয়া গোপনে মিট্‌মাট্‌ না করিয়া হঠাৎ মকদ্দমা আনিবেন একি অসম্ভব ব্যাপার!",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s032-005": [
-   {
-    "text": "এখন সমস্ত বুঝিতে পারিতেছি।",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s038-003": [
-   {
-    "text": "এমন কি, শশিভূষণ যদি কোন দিন নিরীহভাবে জিজ্ঞাসা করিত, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“গিরি, আজ জাম নেই,”",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   },
-   {
-    "text": " সে সেটাকে গূঢ় উপহাস জ্ঞান করিয়া সক্ষোভে ",
-    "role": "narrator"
-   },
-   {
-    "text": "“যাঃ ও”",
-    "role": "character",
-    "speaker": "গিরিবালা"
-   },
-   {
-    "text": " বলিয়া তর্জ্জন করিয়া পলায়নের উপক্রম করিত।",
-    "role": "narrator"
-   }
-  ],
-  "f01s038-005": [
-   {
-    "text": "সহসা দূরের দিকে দৃষ্টিক্ষেপ করিয়া বালিকা উচ্চৈঃস্বরে বলিয়া উঠিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—“স্বর্ণ, ভাই, তুই যাস্‌নে, আমি এখনি যাচ্চি।”",
-    "role": "character",
-    "speaker": "গিরিবালা"
-   }
-  ],
-  "f01s044-009": [
-   {
-    "text": "গিরিকে জিজ্ঞাসা করিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "কোথায় যাচ্চিস্?",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s044-010": [
-   {
-    "text": "গিরি কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“শশি দাদার বাড়ি!”",
-    "role": "character",
-    "speaker": "গিরিবালা"
-   }
-  ],
-  "f01s044-011": [
-   {
-    "text": "হরকুমার ধমক দিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“শশি দাদার বাড়ি যেতে হবে না, ঘরে যা!”",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s051-004": [
-   {
-    "text": "সে বলিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "নৌকা ত মজিয়াছে এক্ষণে নিজেকে মজাইতে পারিব না।",
-    "role": "character",
-    "speaker": "মাঝি"
-   }
-  ],
-  "f01s051-005": [
-   {
-    "text": "প্রথমতঃ পুলিসকে্‌ দর্শনি দিতে হইবে, তাহার পর কাজকর্ম্ম আহার নিদ্রা ত্যাগ করিয়া আদালতে আদালতে ঘুরিতে হইবে, তাহার পর সাহেবের নামে নালিশ করিয়া কি বিপাকে পড়িতে হইবে ও কি ফল লাভ হইবে তাহা ভগবান জানেন।",
-    "role": "character",
-    "speaker": "মাঝি"
-   }
-  ],
-  "f01s051-008": [
-   {
-    "text": "তাহার শশিভূষণকে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "মহাশয়, আমরা কিছুই দেখি নাই; আমরা জাহাজের পশ্চাৎ ভাগে ছিলাম, কলের ঘট্‌ঘট্‌ এবং জলের কল্‌ কল্‌ শব্দে সেখান হইতে বন্দুকের আওয়াজ শুনিবারও কোন সম্ভাবনা ছিল না।",
-    "role": "character",
-    "speaker": "গ্রামের যাত্রীরা"
-   }
-  ],
-  "f01s052-004": [
-   {
-    "text": "কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আকাশে এক ঝাঁক বক উড়িতেছিল তাহাদেরই প্রতি লক্ষ্য করা হইয়াছিল।",
-    "role": "character",
-    "speaker": "ম্যানেজার সাহেব"
-   }
-  ],
-  "f01s058-010": [
-   {
-    "text": "কম্পিতস্বরে কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“সার্‌, জেলের জাল ছিঁড়িবার এবং এই চারিজন লোককে উৎপীড়ন করিবার তোমার কোন অধিকার নাই।”",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s060-012": [
-   {
-    "text": "সকলে বলিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“ঠাকুর তুমি ত আমাদিগকে বিষম ফেলাদে ফেলিলে!”",
-    "role": "character",
-    "speaker": "জেলেরা"
-   }
-  ],
-  "f01s061-002": [
-   {
-    "text": "ইতিমধ্যে হরকুমার যে দিন বেঞ্চের কর্ম্মোপলক্ষে জেলার সাহেবদিগকে সেলাম করিতে গেলেন পুলিস সাহেব হাসিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "নায়েব বাবু শুনিতেছি তোমার প্রজারা পুলিসের বিরুদ্ধে মিথ্যা সাক্ষ্য দিতে প্রস্তুত হইয়াছে।",
-    "role": "character",
-    "speaker": "পুলিস সাহেব"
-   }
-  ],
-  "f01s061-003": [
-   {
-    "text": "নায়েব সচকিত হইয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "হাঁ!",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s061-004": [
-   {
-    "text": "এও কি কখনো সম্ভব হয়?",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s061-005": [
-   {
-    "text": "অপবিত্র জন্তুজাত পুত্রদিগের অস্থিতে এত ক্ষমতা!",
-    "role": "character",
-    "speaker": "হরকুমার"
-   }
-  ],
-  "f01s063-005": [
-   {
-    "text": "তাঁহার বাপ আপিল করিতে উদ্যত হইল, তাঁহাকে শশিভূষণ বারম্বার নিষেধ করিলেন—কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "জেল ভাল!",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s063-006": [
-   {
-    "text": "লোহার বেড়ি মিথ্যা কথা বলে না, কিন্তু জেলের বাহিরে যে স্বাধীনতা আছে সে আমাদিগকে প্রতারণা করিয়া বিপদে ফেলে।",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s063-007": [
-   {
-    "text": "আর যদি সৎসঙ্গের কথা বল, ত, জেলের মধ্যে মিথ্যাবাদী কৃতঘ্ন কাপুরুষের সংখ্যা অল্প, কারণ স্থান পরিমিত—বাহিরে অনেক বেশি!",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s065-005": [
-   {
-    "text": "এক জন ভৃত্য নামিয়া আসিয়া জিজ্ঞাসা করিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আপনার নাম শশিভূষণ বাবু?—",
-    "role": "character",
-    "speaker": "ভৃত্য"
-   }
-  ],
-  "f01s066-003": [
-   {
-    "text": "তিনি আশ্চর্য্য হইয়া জিজ্ঞাসা করিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—আমাকে কোথায় যাইতে হইবে?—",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s066-004": [
-   {
-    "text": "সে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমার প্রভু আপনাকে ডাকিয়াছেন।",
-    "role": "character",
-    "speaker": "ভৃত্য"
-   }
-  ],
-  "f01s067-004": [
-   {
-    "text": "এস এস ফিরে এস—নাথ হে ফিরে এস!",
-    "role": "character",
-    "speaker": "বৈষ্ণব ভিক্ষুকেরা"
-   }
-  ],
-  "f01s067-005": [
-   {
-    "text": "আমার ক্ষুধিত তৃষিত তাপিত চিত, বঁধুহে ফিরে এস!",
-    "role": "character",
-    "speaker": "বৈষ্ণব ভিক্ষুকেরা"
-   }
-  ],
-  "f01s068-001": [
-   {
-    "text": "ওগো নিষ্ঠুর ফিরে এস হে আমার করুণ কোমল এস!",
-    "role": "character",
-    "speaker": "বৈষ্ণব ভিক্ষুকেরা"
-   }
-  ],
-  "f01s068-002": [
-   {
-    "text": "ও গো সজল জলদ স্নিগ্ধকান্ত সুন্দর ফিরে এস!",
-    "role": "character",
-    "speaker": "বৈষ্ণব ভিক্ষুকেরা"
-   }
-  ],
-  "f01s068-005": [
-   {
-    "text": "আমার নিতিমুখ ফিরে এস, আমার চিরদুখ ফিরে এস, আমার সব সুখ-দুখ মন্থন ধন অন্তরে ফিরে এস!",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s068-006": [
-   {
-    "text": "আমার চিরবাঞ্ছিত এস, আমার চিতসঞ্চিত এস, ওহে চঞ্চল, হে চিরন্তন, ভুজবন্ধনে ফিরে এস!",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s068-007": [
-   {
-    "text": "আমার বক্ষে ফিরিয়া এস, আমার চক্ষে ফিরিয়া এস, আমার শয়নে স্বপনে বসনে ভূষণে নিখিল ভুবনে এস!",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s068-008": [
-   {
-    "text": "আমার মুখের হাসিতে এস হে আমার চোখের সলিলে এস, আমার আদরে আমার ছলনে আমার অভিমানে ফিরে এস!",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s068-009": [
-   {
-    "text": "আমার সর্ব্বস্মরণে এস আমার সর্ব্বভরমে এস— আমার ধরম করম সোহাগ সরম জনম মরণে এস!",
-    "role": "character",
-    "speaker": "শশিভূষণ"
-   }
-  ],
-  "f01s072-008": [
-   {
-    "text": "এস এস হে!",
-    "role": "character",
-    "speaker": "বৈষ্ণব ভিক্ষুকেরা"
-   }
-  ]
- },
- "notes": "Much dialogue is unmarked direct speech after 'কহিলেন,'; treated as speech when first/second person or vocatives show it is direct. Indirect/reported speech (Harakumar to the sahib f01s024-003/004, the sweeper f01s023-001..003, the sahib's 'ডণ্ড বিঢান' f01s031-006, one-word 'হাঁ' replies f01s033-002 and f01s066-001, fishermen f01s062-001) left to the narrator. The imagined cry '“শশিদাদা!”' (f01s054-006) is heard only in Shashibhushan's mind, so narrator. Kirtan lines are sung by the Vaishnava beggars; the verses Shashibhushan hums to himself (f01s068-005..009) are given to him. Doubtful: f01s051-005 (taken as the boatman continuing his refusal) and f01s052-004 (the manager's defence, passive phrasing, taken as direct). The joint magistrate and the district magistrate are kept as separate voices."
 }

@@ -1,0 +1,82 @@
+{
+  "choose": "listen to the expressive layer (/home/user/reo-earnalism-maison/skills/earnalism-audiovisual/references/expressive.json); approve it or adjust the phrase, pause and room-tone table before the full narration run",
+  "from": "nishithe",
+  "job_id": "style-audition-f0a29a8b",
+  "passages": [
+    {
+      "description": "Arnav narrates a hushed, haunted and remorseful story in fluent, natural standard Bengali, in a warm, clear voice with a moderate pitch and expressive intonation, with calm, gently expressive storytelling, at a slow pace. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "mood": "calm",
+      "passage": "style-calm",
+      "role": "narrator",
+      "text": "ধড়ফড় করিয়া উঠিয়া পিঠভাঙ্গা চৌকিটা টানিয়া আনিয়া তাঁহাকে বসিতে দিলাম এবং উদ্বিগ্নভাবে তাঁহার মুখের দিকে চাহিলাম।",
+      "unit_key": "f01s001-006",
+      "voice": "Arnav"
+    },
+    {
+      "description": "Arnav narrates a hushed, haunted and remorseful story in fluent, natural standard Bengali, in a warm, clear voice with a moderate pitch and expressive intonation, with a gentle, sad tone, at a slow pace. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "mood": "sad",
+      "passage": "style-sad",
+      "role": "narrator",
+      "text": "যম তখন পরাহত ব্যাঘ্রের ন্যায় আমাকে তাঁহার কবল হইতে ফেলিয়া দিয়া চলিয়া গেলেন, কিন্তু যাইবার সময় আমার স্ত্রীকে একটা প্রবল থাবা মারিয়া গেলেন।",
+      "unit_key": "f01s005-001",
+      "voice": "Arnav"
+    },
+    {
+      "description": "Arjun speaks in fluent, natural standard Bengali in a fearful, anxious conversational tone, with a moderate pitch and expressive intonation, at a slow pace. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "emotion": "fear",
+      "passage": "style-line-fear",
+      "role": "character",
+      "speaker": "দক্ষিণাচরণ",
+      "text": "আজ রাত্রে আবার সেইরূপ উপদ্রব আরম্ভ হইয়াছে,— তোমার ঔষধ কোন কাজে লাগিল না।",
+      "unit_key": "f01s001-008",
+      "voice": "Arjun"
+    },
+    {
+      "description": "Arjun speaks in fluent, natural standard Bengali in a angry, sharp conversational tone, with a moderate pitch and expressive intonation, at a slow pace. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "emotion": "anger",
+      "passage": "style-line-anger",
+      "role": "character",
+      "speaker": "দক্ষিণাচরণ",
+      "text": "—ওটা তোমার ভারি ভ্রম।",
+      "unit_key": "f01s002-001",
+      "voice": "Arjun"
+    }
+  ],
+  "speakers": {
+    "female": [],
+    "male": [
+      "Arjun",
+      "Arnav"
+    ]
+  },
+  "stats": {
+    "Arjun": {
+      "median_chars_per_s": 11.09,
+      "suspect": [],
+      "takes": {
+        "style-line-anger": {
+          "chars_per_s": 7.47,
+          "seconds": 2.81
+        },
+        "style-line-fear": {
+          "chars_per_s": 11.09,
+          "seconds": 6.583
+        }
+      }
+    },
+    "Arnav": {
+      "median_chars_per_s": 12.05,
+      "suspect": [],
+      "takes": {
+        "style-calm": {
+          "chars_per_s": 12.05,
+          "seconds": 9.625
+        },
+        "style-sad": {
+          "chars_per_s": 12.04,
+          "seconds": 11.877
+        }
+      }
+    }
+  }
+}

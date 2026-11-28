@@ -34,7 +34,8 @@
    {
     "text": "বৌঠাক্‌রুণ, এই বেলা বাড়ি ফিরিয়া চল; দাদাবাবু জানিতে পারিলে রক্ষা থাকিবে না।",
     "role": "character",
-    "speaker": "সুধো"
+    "speaker": "সুধো",
+    "emotion": "fear"
    }
   ],
   "f01s015-005": [
@@ -45,7 +46,8 @@
    {
     "text": "বৌঠাকুণ, কর কি, ওঠ, এখনি সমস্ত আলো নিবাইয়া দিবে।",
     "role": "character",
-    "speaker": "সুধো"
+    "speaker": "সুধো",
+    "emotion": "conversation"
    }
   ],
   "f01s019-009": [
@@ -56,7 +58,8 @@
    {
     "text": "আহা বৌঠাক্‌রুণ আমি যদি পুরুষ মানুষ হইতাম তাহা হইলে এই পা দুখানি বুকে লইয়া মরিতাম।",
     "role": "character",
-    "speaker": "সুধো"
+    "speaker": "সুধো",
+    "emotion": "happy"
    }
   ],
   "f01s019-010": [
@@ -67,21 +70,24 @@
    {
     "text": "বোধ করি বুকে না লইয়াই মরিতে হইত—তখন কি আর এমন করিয়া পা ছড়াইয়া দিতাম?",
     "role": "character",
-    "speaker": "গিরিবালা"
+    "speaker": "গিরিবালা",
+    "emotion": "happy"
    }
   ],
   "f01s019-011": [
    {
     "text": "আর বকিস্‌নে; তুই সেই গানটা গা!",
     "role": "character",
-    "speaker": "গিরিবালা"
+    "speaker": "গিরিবালা",
+    "emotion": "happy"
    }
   ],
   "f01s020-002": [
    {
     "text": "দাসখৎ দিলেম লিখে শ্রীচরণে, সকলে সাক্ষী থাকুক্‌ বৃন্দাবনে।",
     "role": "character",
-    "speaker": "সুধো"
+    "speaker": "সুধো",
+    "emotion": "happy"
    }
   ],
   "f01s021-002": [
@@ -92,7 +98,8 @@
    {
     "text": "—একবার চাবিটা দাও দেখি!",
     "role": "character",
-    "speaker": "গোপীনাথ"
+    "speaker": "গোপীনাথ",
+    "emotion": "neutral"
    }
   ],
   "f01s022-004": [
@@ -103,7 +110,8 @@
    {
     "text": "চাবী দিব এখন তুমি ঘরে চল।",
     "role": "character",
-    "speaker": "গিরিবালা"
+    "speaker": "গিরিবালা",
+    "emotion": "conversation"
    }
   ],
   "f01s023-001": [
@@ -114,7 +122,8 @@
    {
     "text": "আমি বেশি দেরী করিতে পারিব না —তুমি চাবি দাও।",
     "role": "character",
-    "speaker": "গোপীনাথ"
+    "speaker": "গোপীনাথ",
+    "emotion": "conversation"
    }
   ],
   "f01s023-002": [
@@ -125,7 +134,8 @@
    {
     "text": "—আমি চাবি দিব এবং চাবির মধ্যে যাহা কিছু আছে সমস্ত দিব—কিন্তু আজ রাত্রে তুমি কোথাও যাইতে পারিবে না।",
     "role": "character",
-    "speaker": "গিরিবালা"
+    "speaker": "গিরিবালা",
+    "emotion": "conversation"
    }
   ],
   "f01s023-003": [
@@ -136,14 +146,16 @@
    {
     "text": "—সে হইবে না।",
     "role": "character",
-    "speaker": "গোপীনাথ"
+    "speaker": "গোপীনাথ",
+    "emotion": "conversation"
    }
   ],
   "f01s023-004": [
    {
     "text": "আমার বিশেষ দরকার আছে।",
     "role": "character",
-    "speaker": "গোপীনাথ"
+    "speaker": "গোপীনাথ",
+    "emotion": "conversation"
    }
   ],
   "f01s023-005": [
@@ -154,7 +166,8 @@
    {
     "text": "—তবে আমি চাবি দিব না!",
     "role": "character",
-    "speaker": "গিরিবালা"
+    "speaker": "গিরিবালা",
+    "emotion": "anger"
    }
   ],
   "f01s023-006": [
@@ -165,14 +178,16 @@
    {
     "text": "দিবে না বৈ কি?",
     "role": "character",
-    "speaker": "গোপীনাথ"
+    "speaker": "গোপীনাথ",
+    "emotion": "anger"
    }
   ],
   "f01s023-007": [
    {
     "text": "কেমন না দাও দেখিব!",
     "role": "character",
-    "speaker": "গোপীনাথ"
+    "speaker": "গোপীনাথ",
+    "emotion": "anger"
    }
   ],
   "f01s024-002": [
@@ -183,7 +198,8 @@
    {
     "text": "—চাবি দাও বলিতেছি নহিলে ভাল হইবে না।",
     "role": "character",
-    "speaker": "গোপীনাথ"
+    "speaker": "গোপীনাথ",
+    "emotion": "anger"
    }
   ],
   "f01s026-001": [
@@ -194,7 +210,8 @@
    {
     "text": "আমি বাপের বাড়ি চলিলাম।—",
     "role": "character",
-    "speaker": "গিরিবালা"
+    "speaker": "গিরিবালা",
+    "emotion": "sad"
    },
    {
     "text": "তাহার বাপের বাড়ি কলিকাতা হইতে দূরে।",
@@ -209,7 +226,8 @@
    {
     "text": "গিরিবালা গিরিবালা",
     "role": "character",
-    "speaker": "গোপীনাথ"
+    "speaker": "গোপীনাথ",
+    "emotion": "surprise"
    },
    {
     "text": " করিয়া চীৎকার করিয়া উঠিল।",
@@ -224,7 +242,8 @@
    {
     "text": "দূর করে দাও, বের করে দাও,",
     "role": "character",
-    "speaker": "দর্শকগণ"
+    "speaker": "দর্শকগণ",
+    "emotion": "anger"
    },
    {
     "text": " বলিয়া চীৎকার করিতে লাগিল।",
@@ -239,9 +258,43 @@
    {
     "text": "আমি ওকে খুন করব, ওকে খুন করব!",
     "role": "character",
-    "speaker": "গোপীনাথ"
+    "speaker": "গোপীনাথ",
+    "emotion": "anger"
    }
   ]
  },
- "notes": "Most dialogue is unquoted (after বলিল/কহিল or a dash) and is voiced. f01s020-002 is the song Sudho sings aloud, voiced as Sudho. Kept narrator: habitual or quoted-in-description phrases (f01s007-003 the gang's boast, f01s009-001 song title, f01s009-004 Labanga's “প্রাণনাথ প্রাণেশ্বর”, f01s009-005 audience “এক্সেলেণ্ট্‌”), reported speech f01s011-005, the song line nobody sang f01s021-001, and the narrator's ironic restatement f01s021-006 (doubtful: it echoes Gopinath's words). Gopinath's cry গিরিবালা গিরিবালা in f01s030-007 is voiced as Gopinath."
+ "notes": "Most dialogue is unquoted (after বলিল/কহিল or a dash) and is voiced. f01s020-002 is the song Sudho sings aloud, voiced as Sudho. Kept narrator: habitual or quoted-in-description phrases (f01s007-003 the gang's boast, f01s009-001 song title, f01s009-004 Labanga's “প্রাণনাথ প্রাণেশ্বর”, f01s009-005 audience “এক্সেলেণ্ট্‌”), reported speech f01s011-005, the song line nobody sang f01s021-001, and the narrator's ironic restatement f01s021-006 (doubtful: it echoes Gopinath's words). Gopinath's cry গিরিবালা গিরিবালা in f01s030-007 is voiced as Gopinath.",
+ "tone": {
+  "pace": "moderate",
+  "expressivity": "slightly expressive",
+  "atmosphere": "sensuous and bittersweet",
+  "rationale": "Lush, ironic description of a neglected young wife's beauty and her intoxication with the theatre turns to quiet humiliation and then to a reversal on stage, so the narration should be warm and lyrical with a bitter undertone."
+ },
+ "narration_moods": {
+  "f01s012-003": "happy",
+  "f01s012-004": "happy",
+  "f01s012-005": "happy",
+  "f01s013-004": "happy",
+  "f01s013-005": "happy",
+  "f01s013-006": "happy",
+  "f01s014-006": "happy",
+  "f01s014-007": "happy",
+  "f01s016-002": "sad",
+  "f01s016-003": "sad",
+  "f01s016-004": "sad",
+  "f01s021-003": "sad",
+  "f01s024-004": "anger",
+  "f01s024-005": "sad",
+  "f01s024-006": "sad",
+  "f01s024-007": "sad",
+  "f01s025-002": "sad",
+  "f01s025-003": "sad",
+  "f01s025-004": "sad",
+  "f01s025-005": "sad",
+  "f01s027-002": "anger",
+  "f01s030-007": "surprise",
+  "f01s030-008": "surprise",
+  "f01s030-009": "anger",
+  "f01s030-010": "anger"
+ }
 }

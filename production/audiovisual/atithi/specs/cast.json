@@ -1,534 +1,637 @@
 {
- "schema": "eav.cast/1",
- "title": "atithi",
- "source_revision": "de617d98-b3ed-49a3-94c5-29ade1ccbd62",
- "source_sha256": "5c08b67509d8a02f2b659dac81583f8b41ab2bd101d54571ca97944d7f874746",
- "narrator": {
-  "gender": "male",
-  "rationale": "Third-person telling centred throughout on the boy Tarapada, his wanderings and his final flight; the narrative follows his consciousness, so a male narrator voice."
- },
- "characters": {
-  "তারাপদ": {
-   "gender": "male",
-   "note": "the fifteen-year-old Brahmin runaway boy, the 'guest'"
+  "schema": "eav.cast/1",
+  "title": "atithi",
+  "source_revision": "de617d98-b3ed-49a3-94c5-29ade1ccbd62",
+  "source_sha256": "5c08b67509d8a02f2b659dac81583f8b41ab2bd101d54571ca97944d7f874746",
+  "narrator": {
+    "gender": "male",
+    "rationale": "Third-person telling centred throughout on the boy Tarapada, his wanderings and his final flight; the narrative follows his consciousness, so a male narrator voice."
   },
-  "মতিবাবু": {
-   "gender": "male",
-   "note": "মতিলাল বাবু, zamindar of Kanthalia who takes Tarapada in"
+  "characters": {
+    "তারাপদ": {
+      "gender": "male",
+      "note": "the fifteen-year-old Brahmin runaway boy, the 'guest'"
+    },
+    "মতিবাবু": {
+      "gender": "male",
+      "note": "মতিলাল বাবু, zamindar of Kanthalia who takes Tarapada in"
+    },
+    "অন্নপূর্ণা": {
+      "gender": "female",
+      "note": "Motibabu's wife"
+    },
+    "চারু": {
+      "gender": "female",
+      "note": "চারুশশি, their wilful only daughter"
+    },
+    "সোনামণি": {
+      "gender": "female",
+      "note": "Charu's friend, the child-widow daughter of বামুন ঠাক্‌রুণ"
+    },
+    "ময়রা": {
+      "gender": "male",
+      "note": "village sweet-seller"
+    }
   },
-  "অন্নপূর্ণা": {
-   "gender": "female",
-   "note": "Motibabu's wife"
+  "tone": {
+    "pace": "moderate",
+    "expressivity": "slightly expressive",
+    "atmosphere": "lyrical, airy and wistful",
+    "rationale": "A river-borne idyll of a free-spirited runaway boy, full of landscape, song and Charu's comic jealousy, closing on his quiet flight from every bond on a monsoon night."
   },
-  "চারু": {
-   "gender": "female",
-   "note": "চারুশশি, their wilful only daughter"
+  "narration_moods": {
+    "f01s007-002": "sad",
+    "f01s011-007": "happy",
+    "f01s011-008": "happy",
+    "f01s012-005": "happy",
+    "f01s012-006": "happy",
+    "f01s012-007": "happy",
+    "f01s012-008": "happy",
+    "f01s017-002": "happy",
+    "f01s017-003": "happy",
+    "f01s017-004": "happy",
+    "f01s017-005": "sad",
+    "f01s018-003": "anger",
+    "f01s019-001": "anger",
+    "f01s019-003": "anger",
+    "f01s019-004": "anger",
+    "f01s020-004": "anger",
+    "f01s026-005": "anger",
+    "f01s026-008": "anger",
+    "f01s026-009": "anger",
+    "f01s026-010": "anger",
+    "f01s026-011": "anger",
+    "f01s027-004": "anger",
+    "f01s027-005": "anger",
+    "f01s027-006": "surprise",
+    "f01s027-008": "anger",
+    "f01s027-010": "happy",
+    "f01s032-009": "sad",
+    "f01s032-012": "happy",
+    "f01s032-013": "anger",
+    "f01s033-001": "anger",
+    "f01s034-004": "fear",
+    "f01s034-009": "fear",
+    "f01s034-011": "anger",
+    "f01s035-005": "sad",
+    "f01s035-007": "sad",
+    "f01s039-001": "surprise",
+    "f01s040-006": "happy",
+    "f01s042-005": "happy",
+    "f01s042-006": "happy",
+    "f01s042-007": "happy",
+    "f01s044-003": "happy",
+    "f01s044-004": "happy",
+    "f01s044-005": "happy",
+    "f01s045-005": "sad",
+    "f01s045-006": "sad",
+    "f01s045-007": "sad"
   },
-  "সোনামণি": {
-   "gender": "female",
-   "note": "Charu's friend, the child-widow daughter of বামুন ঠাক্‌রুণ"
+  "units": {
+    "f01s001-003": [
+      {
+        "text": "পথের মধ্যে মধ্যাহ্নে নদীতীরের এক গঞ্জের নিকট নৌকা বাঁধিয়া পাকের আয়োজন করিতেছেন এমন সময় এক ব্রাহ্মণ বালক আসিয়া জিজ্ঞাসা করিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "বাবু তোমরা যাচ্চ কোথায়?",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      },
+      {
+        "text": "—প্রশ্নকর্ত্তার বয়স ১৫।১৬র অধিক হইবে না।",
+        "role": "narrator"
+      }
+    ],
+    "f01s001-004": [
+      {
+        "text": "মতিবাবু উত্তর করিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "কাঁঠালে।",
+        "role": "character",
+        "speaker": "মতিবাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s001-005": [
+      {
+        "text": "ব্রাহ্মণবালক কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমাকে পথের মধ্যে নন্দীগাঁয়ে নাবিয়ে দিতে পার?",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s001-006": [
+      {
+        "text": "বাবু সন্মতি প্রকাশ করিয়া জিজ্ঞাসা করিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তোমার নাম কি?",
+        "role": "character",
+        "speaker": "মতিবাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s002-001": [
+      {
+        "text": "ব্রাহ্মণ বালক কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "‘আমার নাম তারাপদ।’",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s003-001": [
+      {
+        "text": "মতিলাল বাবু তাহাকে পরম স্নেহভরে কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "বাবা তুমি স্নান করে এস, এইখানেই আহারাদি হবে।",
+        "role": "character",
+        "speaker": "মতিবাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s003-002": [
+      {
+        "text": "তারাপদ বলিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "রসুন্।",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s005-004": [
+      {
+        "text": "অন্নপূর্ণা প্রশ্ন করিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তোমার মা নাই?",
+        "role": "character",
+        "speaker": "অন্নপূর্ণা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s005-005": [
+      {
+        "text": "তারাপদ কহিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—আছেন।",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s005-006": [
+      {
+        "text": "অন্নপূর্ণা জিজ্ঞাসা করিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তিনি তোমাকে ভালবাসেন না?",
+        "role": "character",
+        "speaker": "অন্নপূর্ণা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s005-007": [
+      {
+        "text": "তারাপদ এই প্রশ্ন অত্যন্ত অদ্ভূত জ্ঞান করিয়া হাসিয়া উঠিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "কেন ভালবাসবেন না?",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "happy"
+      }
+    ],
+    "f01s006-001": [
+      {
+        "text": "অন্নপূর্ণা প্রশ্ন করিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তবে তুমি তাকে ছেড়ে এলে যে?",
+        "role": "character",
+        "speaker": "অন্নপূর্ণা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s006-002": [
+      {
+        "text": "তারাপদ কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তাঁর আরও চারটি ছেলে এবং তিনটি মেয়ে আছে।",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s006-003": [
+      {
+        "text": "অন্নপূর্ণা বালকের এই অদ্ভুত উত্তরে ব্যথিত হইয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "ওমা, সে কি কথা!",
+        "role": "character",
+        "speaker": "অন্নপূর্ণা",
+        "emotion": "sad"
+      }
+    ],
+    "f01s006-004": [
+      {
+        "text": "পাঁচটি আঙ্গুল আছে বলে কি একটি আঙ্গুল ত্যাগ করা যায়।",
+        "role": "character",
+        "speaker": "অন্নপূর্ণা",
+        "emotion": "sad"
+      }
+    ],
+    "f01s013-004": [
+      {
+        "text": "সন্ধ্যার প্রাক্কালে অন্নপূর্ণা তারাপদকে ডাকিয়া জিজ্ঞাসা করিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "রাত্রে তুমি কি খাও!",
+        "role": "character",
+        "speaker": "অন্নপূর্ণা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s013-005": [
+      {
+        "text": "তারাপদ কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "যা’ পাই তাই খাই; সকল দিন, খাইও না।",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s014-006": [
+      {
+        "text": "মৌনস্বভাব মতিলাল বাবুও তাহাকে দুধ খাইবার জন্য অনুরোধ করিলেন; সে সংক্ষেপে বলিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমার ভাল লাগে না।",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s016-005": [
+      {
+        "text": "এমন সময় তারাপদ উৎসাহ সম্বরণ করিতে না পারিয়া নৌকার ছাদের উপর হইতে নামিয়া আসিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "বই রাখুন!",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "happy"
+      }
+    ],
+    "f01s016-006": [
+      {
+        "text": "আমি কুশ লবের গান করি, আপনারা শুনে যান্‌।",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "happy"
+      }
+    ],
+    "f01s019-006": [
+      {
+        "text": "তারাপদ যে দিন কুশলবের গান করিল, সে দিন অন্নপূর্ণা মনে করিলেন, সঙ্গীতে বনের পশু বশ হয়, আজ বোধ হয় আমার মেয়ের মন গলিয়াছে;—তাহাকে জিজ্ঞাসা করিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—চারু, কেমন লাগল?",
+        "role": "character",
+        "speaker": "অন্নপূর্ণা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s020-005": [
+      {
+        "text": "মা তোমরা কি গোল করচ আমার ঘুম হচ্চে না।",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "anger"
+      }
+    ],
+    "f01s024-005": [
+      {
+        "text": "ময়রার দোকানে গল্প করিতে করিতে ময়রা বলে ",
+        "role": "narrator"
+      },
+      {
+        "text": "দাদাঠাকুর একটু বস ত ভাই আমি আস্‌চি",
+        "role": "character",
+        "speaker": "ময়রা",
+        "emotion": "conversation"
+      },
+      {
+        "text": "-তারাপদ অম্লানবদনে দোকানে বসিয়া একখানা শালপাতা লইয়া সন্দেশের মাছি তাড়াইতে প্রবৃত্ত হয়।",
+        "role": "narrator"
+      }
+    ],
+    "f01s027-007": [
+      {
+        "text": "কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“চারু, আমার বাঁশিটা ভাঙ্গ্‌চ কেন?”",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s027-008": [
+      {
+        "text": "চারু রক্তনেত্রে রক্তিমমুখে ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বেশ কর্‌চি, খুব কর্‌চি”",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "anger"
+      },
+      {
+        "text": " বলিয়া আরও বার দুই চার বিদীর্ণ বাঁশির উপর অনাবশ্যক পদাঘাত করিয়া উচ্ছ্বসিত কণ্ঠে কাঁদিয়া ঘর হইতে বাহির হইয়া গেল।",
+        "role": "narrator"
+      }
+    ],
+    "f01s028-004": [
+      {
+        "text": "ছবির বহির প্রতি তারাপদের এই আগ্রহ দেখিয়া এক দিন মতিলাল বাবু বলিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“ইংরিজি শিখ্‌বে?",
+        "role": "character",
+        "speaker": "মতিবাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s028-005": [
+      {
+        "text": "তা হলে এ সমস্ত ছবির মানে বুঝ্‌তে পারবে।”",
+        "role": "character",
+        "speaker": "মতিবাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s028-006": [
+      {
+        "text": "তারাপদ তৎক্ষণাৎ বলিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“শিখ্‌বে।”",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "happy"
+      }
+    ],
+    "f01s030-005": [
+      {
+        "text": "এমন সময়, চারুও হঠাৎ জেদ্‌ করিয়া বসিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমিও ইংরাজি শিখিব।",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "command"
+      }
+    ],
+    "f01s032-010": [
+      {
+        "text": "অবশেষে কোন উপায় না দেখিয়া ছিন্ন খাতার এক টুকরা লইয়া তারাপদর নিকটে বসিয়া খুব বড় বড় করিয়া লিখিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমি আর কখন খাতায় কালি মাখাব না।",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "sad"
+      }
+    ],
+    "f01s033-005": [
+      {
+        "text": "তারাপদ বই হইতে মুখ তুলিয়া সস্নেহে বলিত, ",
+        "role": "narrator"
+      },
+      {
+        "text": "কি সোনা!",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s033-006": [
+      {
+        "text": "খবর কি?",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s033-007": [
+      {
+        "text": "মাসী কেমন আছে?",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s034-001": [
+      {
+        "text": "সোনামণি কহিত, ",
+        "role": "narrator"
+      },
+      {
+        "text": "অনেকদিন যাওনি, মা তোমাকে একবার যেতে বলেছে।",
+        "role": "character",
+        "speaker": "সোনামণি",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s034-002": [
+      {
+        "text": "মা’র কোমরে ব্যথা বলে দেখ্‌তে আস্‌তে পারে না।",
+        "role": "character",
+        "speaker": "সোনামণি",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s034-006": [
+      {
+        "text": "চারু কণ্ঠস্বর সপ্তমে চড়াইয়া চোখ মুখ ঘুরাইয়া বলিত, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“অ্যাঁ সোনা!",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "anger"
+      }
+    ],
+    "f01s034-007": [
+      {
+        "text": "তুই পড়ার সময় গোল করতে এসেছিস্‌, আমি এখনি বাবাকে গিয়ে বলে দেব!”",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "anger"
+      },
+      {
+        "text": "—যেন তিনি নিজে তারাপদর একটি প্রবীণা অভিভাবিকা; তাহার পড়াশুনায় লেশমাত্র ব্যাঘাত না ঘটে রাত্রিদিন ইহার প্রতিই তাহার একমাত্র দৃষ্টি।",
+        "role": "narrator"
+      }
+    ],
+    "f01s034-010": [
+      {
+        "text": "দয়ার্দ্র তারাপদ তাহাকে ডাকিয়া বলিত, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“সোনা, আজ সন্ধ্যাবেলায় আমি তোদের বাড়ি যাব এখন!”",
+        "role": "character",
+        "speaker": "তারাপদ",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s034-011": [
+      {
+        "text": "চারু সর্পিণীর মত ফোঁস করিয়া উঠিয়া বলিত",
+        "role": "narrator"
+      },
+      {
+        "text": "—“যাবে বৈ কি!",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "anger"
+      }
+    ],
+    "f01s034-012": [
+      {
+        "text": "তোমার পড়া করতে হবে না?",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "anger"
+      }
+    ],
+    "f01s034-013": [
+      {
+        "text": "আমি মাষ্টার মশায়কে বলে দেব না?”",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "anger"
+      }
+    ],
+    "f01s035-005": [
+      {
+        "text": "তখন অনুতপ্ত ব্যাকুল বালিকা করযোড়ে সানুনয়ে বারম্বার বলিতে লাগিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“তোমার দুটি পায়ে পড়ি আর আমি এমন করব না!",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "sad"
+      }
+    ],
+    "f01s035-006": [
+      {
+        "text": "তোমার দুটি পায়ে পড়ি তুমি খেয়ে যাও!”",
+        "role": "character",
+        "speaker": "চারু",
+        "emotion": "sad"
+      }
+    ],
+    "f01s038-004": [
+      {
+        "text": "তখন একদিন অন্নপূর্ণা মতিবাবুকে ডাকিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“পাত্রের জন্যে তুমি অত খোঁজ করে বেড়াচ্ছ কেন?",
+        "role": "character",
+        "speaker": "অন্নপূর্ণা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s038-005": [
+      {
+        "text": "তারাপদ ছেলেটি ত বেশ।",
+        "role": "character",
+        "speaker": "অন্নপূর্ণা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s038-006": [
+      {
+        "text": "আর তোমার মেয়েরও ওকে পছন্দ হয়েছে।”",
+        "role": "character",
+        "speaker": "অন্নপূর্ণা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s039-002": [
+      {
+        "text": "কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“সেও কি কখনো হয়?",
+        "role": "character",
+        "speaker": "মতিবাবু",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s039-003": [
+      {
+        "text": "তারাপদর কুলশীল কিছুই জানা নেই।",
+        "role": "character",
+        "speaker": "মতিবাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s039-004": [
+      {
+        "text": "আমার একটিমাত্র মেয়ে আমি ভাল ঘরে দিতে চাই।”",
+        "role": "character",
+        "speaker": "মতিবাবু",
+        "emotion": "conversation"
+      }
+    ]
   },
-  "ময়রা": {
-   "gender": "male",
-   "note": "village sweet-seller"
-  }
- },
- "units": {
-  "f01s001-003": [
-   {
-    "text": "পথের মধ্যে মধ্যাহ্নে নদীতীরের এক গঞ্জের নিকট নৌকা বাঁধিয়া পাকের আয়োজন করিতেছেন এমন সময় এক ব্রাহ্মণ বালক আসিয়া জিজ্ঞাসা করিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "বাবু তোমরা যাচ্চ কোথায়?",
-    "role": "character",
-    "speaker": "তারাপদ"
-   },
-   {
-    "text": "—প্রশ্নকর্ত্তার বয়স ১৫।১৬র অধিক হইবে না।",
-    "role": "narrator"
-   }
-  ],
-  "f01s001-004": [
-   {
-    "text": "মতিবাবু উত্তর করিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "কাঁঠালে।",
-    "role": "character",
-    "speaker": "মতিবাবু"
-   }
-  ],
-  "f01s001-005": [
-   {
-    "text": "ব্রাহ্মণবালক কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমাকে পথের মধ্যে নন্দীগাঁয়ে নাবিয়ে দিতে পার?",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s001-006": [
-   {
-    "text": "বাবু সন্মতি প্রকাশ করিয়া জিজ্ঞাসা করিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তোমার নাম কি?",
-    "role": "character",
-    "speaker": "মতিবাবু"
-   }
-  ],
-  "f01s002-001": [
-   {
-    "text": "ব্রাহ্মণ বালক কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "‘আমার নাম তারাপদ।’",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s003-001": [
-   {
-    "text": "মতিলাল বাবু তাহাকে পরম স্নেহভরে কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "বাবা তুমি স্নান করে এস, এইখানেই আহারাদি হবে।",
-    "role": "character",
-    "speaker": "মতিবাবু"
-   }
-  ],
-  "f01s003-002": [
-   {
-    "text": "তারাপদ বলিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "রসুন্।",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s005-004": [
-   {
-    "text": "অন্নপূর্ণা প্রশ্ন করিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তোমার মা নাই?",
-    "role": "character",
-    "speaker": "অন্নপূর্ণা"
-   }
-  ],
-  "f01s005-005": [
-   {
-    "text": "তারাপদ কহিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—আছেন।",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s005-006": [
-   {
-    "text": "অন্নপূর্ণা জিজ্ঞাসা করিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তিনি তোমাকে ভালবাসেন না?",
-    "role": "character",
-    "speaker": "অন্নপূর্ণা"
-   }
-  ],
-  "f01s005-007": [
-   {
-    "text": "তারাপদ এই প্রশ্ন অত্যন্ত অদ্ভূত জ্ঞান করিয়া হাসিয়া উঠিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "কেন ভালবাসবেন না?",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s006-001": [
-   {
-    "text": "অন্নপূর্ণা প্রশ্ন করিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তবে তুমি তাকে ছেড়ে এলে যে?",
-    "role": "character",
-    "speaker": "অন্নপূর্ণা"
-   }
-  ],
-  "f01s006-002": [
-   {
-    "text": "তারাপদ কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তাঁর আরও চারটি ছেলে এবং তিনটি মেয়ে আছে।",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s006-003": [
-   {
-    "text": "অন্নপূর্ণা বালকের এই অদ্ভুত উত্তরে ব্যথিত হইয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "ওমা, সে কি কথা!",
-    "role": "character",
-    "speaker": "অন্নপূর্ণা"
-   }
-  ],
-  "f01s006-004": [
-   {
-    "text": "পাঁচটি আঙ্গুল আছে বলে কি একটি আঙ্গুল ত্যাগ করা যায়।",
-    "role": "character",
-    "speaker": "অন্নপূর্ণা"
-   }
-  ],
-  "f01s013-004": [
-   {
-    "text": "সন্ধ্যার প্রাক্কালে অন্নপূর্ণা তারাপদকে ডাকিয়া জিজ্ঞাসা করিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "রাত্রে তুমি কি খাও!",
-    "role": "character",
-    "speaker": "অন্নপূর্ণা"
-   }
-  ],
-  "f01s013-005": [
-   {
-    "text": "তারাপদ কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "যা’ পাই তাই খাই; সকল দিন, খাইও না।",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s014-006": [
-   {
-    "text": "মৌনস্বভাব মতিলাল বাবুও তাহাকে দুধ খাইবার জন্য অনুরোধ করিলেন; সে সংক্ষেপে বলিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমার ভাল লাগে না।",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s016-005": [
-   {
-    "text": "এমন সময় তারাপদ উৎসাহ সম্বরণ করিতে না পারিয়া নৌকার ছাদের উপর হইতে নামিয়া আসিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "বই রাখুন!",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s016-006": [
-   {
-    "text": "আমি কুশ লবের গান করি, আপনারা শুনে যান্‌।",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s019-006": [
-   {
-    "text": "তারাপদ যে দিন কুশলবের গান করিল, সে দিন অন্নপূর্ণা মনে করিলেন, সঙ্গীতে বনের পশু বশ হয়, আজ বোধ হয় আমার মেয়ের মন গলিয়াছে;—তাহাকে জিজ্ঞাসা করিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—চারু, কেমন লাগল?",
-    "role": "character",
-    "speaker": "অন্নপূর্ণা"
-   }
-  ],
-  "f01s020-005": [
-   {
-    "text": "মা তোমরা কি গোল করচ আমার ঘুম হচ্চে না।",
-    "role": "character",
-    "speaker": "চারু"
-   }
-  ],
-  "f01s024-005": [
-   {
-    "text": "ময়রার দোকানে গল্প করিতে করিতে ময়রা বলে ",
-    "role": "narrator"
-   },
-   {
-    "text": "দাদাঠাকুর একটু বস ত ভাই আমি আস্‌চি",
-    "role": "character",
-    "speaker": "ময়রা"
-   },
-   {
-    "text": "-তারাপদ অম্লানবদনে দোকানে বসিয়া একখানা শালপাতা লইয়া সন্দেশের মাছি তাড়াইতে প্রবৃত্ত হয়।",
-    "role": "narrator"
-   }
-  ],
-  "f01s027-007": [
-   {
-    "text": "কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“চারু, আমার বাঁশিটা ভাঙ্গ্‌চ কেন?”",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s027-008": [
-   {
-    "text": "চারু রক্তনেত্রে রক্তিমমুখে ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বেশ কর্‌চি, খুব কর্‌চি”",
-    "role": "character",
-    "speaker": "চারু"
-   },
-   {
-    "text": " বলিয়া আরও বার দুই চার বিদীর্ণ বাঁশির উপর অনাবশ্যক পদাঘাত করিয়া উচ্ছ্বসিত কণ্ঠে কাঁদিয়া ঘর হইতে বাহির হইয়া গেল।",
-    "role": "narrator"
-   }
-  ],
-  "f01s028-004": [
-   {
-    "text": "ছবির বহির প্রতি তারাপদের এই আগ্রহ দেখিয়া এক দিন মতিলাল বাবু বলিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“ইংরিজি শিখ্‌বে?",
-    "role": "character",
-    "speaker": "মতিবাবু"
-   }
-  ],
-  "f01s028-005": [
-   {
-    "text": "তা হলে এ সমস্ত ছবির মানে বুঝ্‌তে পারবে।”",
-    "role": "character",
-    "speaker": "মতিবাবু"
-   }
-  ],
-  "f01s028-006": [
-   {
-    "text": "তারাপদ তৎক্ষণাৎ বলিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“শিখ্‌বে।”",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s030-005": [
-   {
-    "text": "এমন সময়, চারুও হঠাৎ জেদ্‌ করিয়া বসিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমিও ইংরাজি শিখিব।",
-    "role": "character",
-    "speaker": "চারু"
-   }
-  ],
-  "f01s032-010": [
-   {
-    "text": "অবশেষে কোন উপায় না দেখিয়া ছিন্ন খাতার এক টুকরা লইয়া তারাপদর নিকটে বসিয়া খুব বড় বড় করিয়া লিখিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমি আর কখন খাতায় কালি মাখাব না।",
-    "role": "character",
-    "speaker": "চারু"
-   }
-  ],
-  "f01s033-005": [
-   {
-    "text": "তারাপদ বই হইতে মুখ তুলিয়া সস্নেহে বলিত, ",
-    "role": "narrator"
-   },
-   {
-    "text": "কি সোনা!",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s033-006": [
-   {
-    "text": "খবর কি?",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s033-007": [
-   {
-    "text": "মাসী কেমন আছে?",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s034-001": [
-   {
-    "text": "সোনামণি কহিত, ",
-    "role": "narrator"
-   },
-   {
-    "text": "অনেকদিন যাওনি, মা তোমাকে একবার যেতে বলেছে।",
-    "role": "character",
-    "speaker": "সোনামণি"
-   }
-  ],
-  "f01s034-002": [
-   {
-    "text": "মা’র কোমরে ব্যথা বলে দেখ্‌তে আস্‌তে পারে না।",
-    "role": "character",
-    "speaker": "সোনামণি"
-   }
-  ],
-  "f01s034-006": [
-   {
-    "text": "চারু কণ্ঠস্বর সপ্তমে চড়াইয়া চোখ মুখ ঘুরাইয়া বলিত, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“অ্যাঁ সোনা!",
-    "role": "character",
-    "speaker": "চারু"
-   }
-  ],
-  "f01s034-007": [
-   {
-    "text": "তুই পড়ার সময় গোল করতে এসেছিস্‌, আমি এখনি বাবাকে গিয়ে বলে দেব!”",
-    "role": "character",
-    "speaker": "চারু"
-   },
-   {
-    "text": "—যেন তিনি নিজে তারাপদর একটি প্রবীণা অভিভাবিকা; তাহার পড়াশুনায় লেশমাত্র ব্যাঘাত না ঘটে রাত্রিদিন ইহার প্রতিই তাহার একমাত্র দৃষ্টি।",
-    "role": "narrator"
-   }
-  ],
-  "f01s034-010": [
-   {
-    "text": "দয়ার্দ্র তারাপদ তাহাকে ডাকিয়া বলিত, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“সোনা, আজ সন্ধ্যাবেলায় আমি তোদের বাড়ি যাব এখন!”",
-    "role": "character",
-    "speaker": "তারাপদ"
-   }
-  ],
-  "f01s034-011": [
-   {
-    "text": "চারু সর্পিণীর মত ফোঁস করিয়া উঠিয়া বলিত",
-    "role": "narrator"
-   },
-   {
-    "text": "—“যাবে বৈ কি!",
-    "role": "character",
-    "speaker": "চারু"
-   }
-  ],
-  "f01s034-012": [
-   {
-    "text": "তোমার পড়া করতে হবে না?",
-    "role": "character",
-    "speaker": "চারু"
-   }
-  ],
-  "f01s034-013": [
-   {
-    "text": "আমি মাষ্টার মশায়কে বলে দেব না?”",
-    "role": "character",
-    "speaker": "চারু"
-   }
-  ],
-  "f01s035-005": [
-   {
-    "text": "তখন অনুতপ্ত ব্যাকুল বালিকা করযোড়ে সানুনয়ে বারম্বার বলিতে লাগিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“তোমার দুটি পায়ে পড়ি আর আমি এমন করব না!",
-    "role": "character",
-    "speaker": "চারু"
-   }
-  ],
-  "f01s035-006": [
-   {
-    "text": "তোমার দুটি পায়ে পড়ি তুমি খেয়ে যাও!”",
-    "role": "character",
-    "speaker": "চারু"
-   }
-  ],
-  "f01s038-004": [
-   {
-    "text": "তখন একদিন অন্নপূর্ণা মতিবাবুকে ডাকিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“পাত্রের জন্যে তুমি অত খোঁজ করে বেড়াচ্ছ কেন?",
-    "role": "character",
-    "speaker": "অন্নপূর্ণা"
-   }
-  ],
-  "f01s038-005": [
-   {
-    "text": "তারাপদ ছেলেটি ত বেশ।",
-    "role": "character",
-    "speaker": "অন্নপূর্ণা"
-   }
-  ],
-  "f01s038-006": [
-   {
-    "text": "আর তোমার মেয়েরও ওকে পছন্দ হয়েছে।”",
-    "role": "character",
-    "speaker": "অন্নপূর্ণা"
-   }
-  ],
-  "f01s039-002": [
-   {
-    "text": "কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“সেও কি কখনো হয়?",
-    "role": "character",
-    "speaker": "মতিবাবু"
-   }
-  ],
-  "f01s039-003": [
-   {
-    "text": "তারাপদর কুলশীল কিছুই জানা নেই।",
-    "role": "character",
-    "speaker": "মতিবাবু"
-   }
-  ],
-  "f01s039-004": [
-   {
-    "text": "আমার একটিমাত্র মেয়ে আমি ভাল ঘরে দিতে চাই।”",
-    "role": "character",
-    "speaker": "মতিবাবু"
-   }
-  ]
- },
- "notes": "Unmarked replies in chapters 1-2 (f01s001-*, f01s005-*, f01s006-*, f01s013-*) treated as direct speech. Kept with narrator: Annapurna's unspoken thoughts (f01s004-003, f01s019-006 first half), Charu's free-indirect jealousy (f01s026-008..011), Motibabu's thoughts (f01s018-002, f01s040-001), the gesture 'translation' f01s019-008, the single word 'মিথ্যাবাদী' (f01s034-009), and the reported excuse to the Raydanga party (f01s039-009). Charu's written note (f01s032-010) voiced as Charu. f01s028-006 reads 'শিখ্‌বে' as printed (Tarapada's reply)."
+  "notes": "Unmarked replies in chapters 1-2 (f01s001-*, f01s005-*, f01s006-*, f01s013-*) treated as direct speech. Kept with narrator: Annapurna's unspoken thoughts (f01s004-003, f01s019-006 first half), Charu's free-indirect jealousy (f01s026-008..011), Motibabu's thoughts (f01s018-002, f01s040-001), the gesture 'translation' f01s019-008, the single word 'মিথ্যাবাদী' (f01s034-009), and the reported excuse to the Raydanga party (f01s039-009). Charu's written note (f01s032-010) voiced as Charu. f01s028-006 reads 'শিখ্‌বে' as printed (Tarapada's reply)."
 }

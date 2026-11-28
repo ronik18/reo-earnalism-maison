@@ -1,255 +1,312 @@
 {
- "schema": "eav.cast/1",
- "title": "thakurda",
- "source_revision": "bde56df5-4291-4a5d-820b-1816ff01d7f2",
- "source_sha256": "0da978c62a9775c659d34b72f77155eb4fead4166592dd257c5be2c66b7c32c4",
- "narrator": {
-  "gender": "male",
-  "rationale": "Told in the first person by the young man next door, a rich self-made man's only son with an M.A., who plays the hoax on Kailas babu and finally asks to marry his granddaughter; so the narrator is male."
- },
- "characters": {
-  "কৈলাস বাবু": {
-   "gender": "male",
-   "note": "Kailaschandra Roy Chowdhury, the impoverished old Nayanjor babu, called ঠাকুর্দ্দা by the neighbourhood"
+  "schema": "eav.cast/1",
+  "title": "thakurda",
+  "source_revision": "bde56df5-4291-4a5d-820b-1816ff01d7f2",
+  "source_sha256": "0da978c62a9775c659d34b72f77155eb4fead4166592dd257c5be2c66b7c32c4",
+  "narrator": {
+    "gender": "male",
+    "rationale": "Told in the first person by the young man next door, a rich self-made man's only son with an M.A., who plays the hoax on Kailas babu and finally asks to marry his granddaughter; so the narrator is male."
   },
-  "পাড়ার লোকেরা": {
-   "gender": "male",
-   "note": "the neighbours who humour the old man"
+  "characters": {
+    "কৈলাস বাবু": {
+      "gender": "male",
+      "note": "Kailaschandra Roy Chowdhury, the impoverished old Nayanjor babu, called ঠাকুর্দ্দা by the neighbourhood"
+    },
+    "পাড়ার লোকেরা": {
+      "gender": "male",
+      "note": "the neighbours who humour the old man"
+    },
+    "ডেপুটি বাবু": {
+      "gender": "male",
+      "note": "a pensioned deputy magistrate of the neighbourhood"
+    },
+    "চাপ্‌রাসি": {
+      "gender": "male",
+      "note": "liveried peon in the fake Lieutenant-Governor's retinue"
+    },
+    "কুসুম": {
+      "gender": "female",
+      "note": "Kusummani, Kailas babu's granddaughter"
+    }
   },
-  "ডেপুটি বাবু": {
-   "gender": "male",
-   "note": "a pensioned deputy magistrate of the neighbourhood"
+  "units": {
+    "f01s005-008": [
+      {
+        "text": "এই জন্য কাহারও সহিত তাঁহার দেখা হইলে একটা সুদীর্ঘ প্রশ্নোত্তরমালার সৃষ্টি হইত; ",
+        "role": "narrator"
+      },
+      {
+        "text": "ভাল ত?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s005-009": [
+      {
+        "text": "শশি ভাল আছে?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s005-010": [
+      {
+        "text": "আমাদের বড় বাবু ভাল আছেন?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s005-011": [
+      {
+        "text": "মধুর ছেলেটির জ্বর হয়েছিল শুনে ছিলুম সে এখন ভাল আছে ত?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s005-012": [
+      {
+        "text": "হরিচরণ বাবুকে অনেককাল দেখিনি তাঁর অসুখ বিসুখ কিছু হয় নি?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s005-013": [
+      {
+        "text": "তোমাদের রাখালের খবর কি?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s005-014": [
+      {
+        "text": "বাড়ির এঁয়ারা সকলে ভাল আছেন?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s008-004": [
+      {
+        "text": "ঠাকুর্দ্দামশায় একবার পরীক্ষা করিয়া দেখ দেখি, ভাল গয়ার তামাক পাওয়া গেছে।",
+        "role": "character",
+        "speaker": "পাড়ার লোকেরা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s009-001": [
+      {
+        "text": "ঠাকুর্দ্দামশায় দুই এক টান টানিয়া বলিতেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "বেশ ভাই, বেশ তামাক।",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s009-005": [
+      {
+        "text": "এই জন্য সকলেই একবাক্যে বলিত, ",
+        "role": "narrator"
+      },
+      {
+        "text": "ঠাকুর্দ্দামশায় কাজ নেই, সে তামাক আমাদের সহ্য হবে না, আমাদের এই ভাল।",
+        "role": "character",
+        "speaker": "পাড়ার লোকেরা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s010-002": [
+      {
+        "text": "সকলে বিদায় লইবার কালে বৃদ্ধ হঠাৎ বলিয়া উঠিতেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "সে যেন হল, তোমরা কবে আমার এখানে খাবে বলদেখি ভাই?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s010-003": [
+      {
+        "text": "অমনি সকলে বলিত, ",
+        "role": "narrator"
+      },
+      {
+        "text": "সে একটা দিন ঠিক করে দেখা যাবে।",
+        "role": "character",
+        "speaker": "পাড়ার লোকেরা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s010-004": [
+      {
+        "text": "ঠাকুর্দ্দা মহাশয় বলিতেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "সেই ভাল, একটু বৃষ্টি পড়ুক, ঠাণ্ডা হোক্‌, নইলে এ গরমে গুরু ভোজনটা কিছু নয়।",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s010-005": [
+      {
+        "text": "যখন বৃষ্টি পড়িত তখন ঠাকুর্দ্দাকে কেহ তাঁহার প্রতিজ্ঞা স্মরণ করাইয়া দিত না—বরঞ্চ কথা উঠিলে সকলে বলিত, ",
+        "role": "narrator"
+      },
+      {
+        "text": "এই বৃষ্টি বাদলটা না ছাড়লে সুবিধে হচ্ছে না।",
+        "role": "character",
+        "speaker": "পাড়ার লোকেরা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s010-009": [
+      {
+        "text": "“তা হোক্‌ ভাই, তোমাদের কাছাকাছি আছি এই আমার সুখ, নয়নজোড়ে বড় বাড়ি ত পড়েই আছে কিন্তু সেখানে কি মন টেঁকে?”",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s018-002": [
+      {
+        "text": "পাড়ার একজন পেন্সনভোগী ডেপুটি ম্যাজিষ্ট্রেট্‌ প্রায় বলিতেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "ঠাকুর্দ্দা, ছোটলাটের সঙ্গে যখনি দেখা হয় তিনি নয়নজোড়ের বাবুদের খবর না নিয়ে ছাড়েন না—",
+        "role": "character",
+        "speaker": "ডেপুটি বাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s018-003": [
+      {
+        "text": "সাহেব বলেন, বাঙ্গলাদেশে, বর্দ্ধমানের রাজা এবং নয়নজোড়ের বাবু, এই দুটি মাত্র যথার্থ বনেদী বংশ আছে।",
+        "role": "character",
+        "speaker": "ডেপুটি বাবু",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s018-004": [
+      {
+        "text": "ঠাকুর্দ্দা ভারি খুসি হইতেন—এবং ভূতপূর্ব্ব ডেপুটি বাবুর সহিত সাক্ষাৎ হইলে অন্যান্য কুশলসংবাদের সহিত জিজ্ঞাসা করিতেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—ছোটলাট সাহেব ভাল আছেন?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s018-005": [
+      {
+        "text": "তাঁর মেমসাহেব ভাল আছেন?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s018-006": [
+      {
+        "text": "তাঁর পুত্রকন্যারা সকলেই ভাল আছেন?",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ],
+    "f01s020-003": [
+      {
+        "text": "তক্‌মা-পরা চাপ্‌রাসি তাঁহাকে খবর দিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "ছোটলাট সাহেব আয়া!",
+        "role": "character",
+        "speaker": "চাপ্‌রাসি",
+        "emotion": "command"
+      }
+    ],
+    "f01s023-004": [
+      {
+        "text": "“আমার দাদামশায় তোমাদের কি করেছেন—কেন তোমরা তাঁকে ঠকাতে এসেচ—কেন এসেচ তোমরা”",
+        "role": "character",
+        "speaker": "কুসুম",
+        "emotion": "anger"
+      },
+      {
+        "text": "—অবশেষে আর কোন কথা জুটিল না—বাক্‌রুদ্ধ হইয়া মুখে কাপড় দিয়া কঁদিয়া উঠিল।",
+        "role": "narrator"
+      }
+    ],
+    "f01s026-004": [
+      {
+        "text": "বালিকা সুমিষ্ট সস্নেহ স্বরে জিজ্ঞাসা করিতেছিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "দাদা মশায়, কাল লাট সাহেব তোমাকে কি বল্লেন?",
+        "role": "character",
+        "speaker": "কুসুম",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s028-003": [
+      {
+        "text": "প্রস্তাবটা শেষ হইবামাত্র বৃদ্ধ আমাকে বক্ষে আলিঙ্গন করিয়া ধরিলেন, এবং আনন্দবেগে বলিয়া উঠিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—আমি গরীব—আমার যে এমন সৌভাগ্য হবে তা আমি জানতুম ভাই—আমার কুসুম অনেক পুণ্য করেছে তাই তুমি আজ ধরা দিলে!",
+        "role": "character",
+        "speaker": "কৈলাস বাবু",
+        "emotion": "happy"
+      }
+    ]
   },
-  "চাপ্‌রাসি": {
-   "gender": "male",
-   "note": "liveried peon in the fake Lieutenant-Governor's retinue"
+  "notes": "First-person story: the teller's own spoken lines (the hoax announcement f01s019-001..003 and his proposal f01s028-002) are left in the narrator voice, since he is that speaker. Kailas babu's habitual string of greetings (f01s005-008..014) is voiced as him; 'ইত্যাদি।' stays narrator. Hearsay and indirect reports left to the narrator: Kailas babu's remark to a friend (f01s016-006/007), his offer of rare tobacco (f01s009-002), his Urdu speech and apologies to the fake Lat (f01s021-001, f01s021-004/005). The deputy's 'সাহেব বলেন, ...' (f01s018-003) is part of the deputy's own speech. f01s008-004 is spoken by one or another neighbour, voiced as পাড়ার লোকেরা.",
+  "tone": {
+    "pace": "moderate",
+    "expressivity": "slightly expressive",
+    "atmosphere": "wry, remorseful and tender",
+    "rationale": "A first-person satire of a proud ruined zamindar and the narrator's cruel prank that turns, through the granddaughter's tears, into remorse, respect and a tender marriage proposal."
   },
-  "কুসুম": {
-   "gender": "female",
-   "note": "Kusummani, Kailas babu's granddaughter"
+  "narration_moods": {
+    "f01s004-003": "anger",
+    "f01s004-004": "anger",
+    "f01s004-005": "anger",
+    "f01s004-006": "anger",
+    "f01s004-007": "anger",
+    "f01s011-003": "anger",
+    "f01s017-001": "anger",
+    "f01s017-002": "anger",
+    "f01s019-005": "happy",
+    "f01s020-005": "happy",
+    "f01s022-006": "happy",
+    "f01s023-001": "happy",
+    "f01s023-002": "surprise",
+    "f01s023-003": "anger",
+    "f01s023-004": "sad",
+    "f01s024-001": "sad",
+    "f01s024-002": "sad",
+    "f01s024-003": "sad",
+    "f01s024-004": "sad",
+    "f01s024-005": "sad",
+    "f01s024-006": "sad",
+    "f01s027-001": "sad",
+    "f01s027-002": "sad",
+    "f01s028-003": "happy",
+    "f01s028-004": "happy"
   }
- },
- "units": {
-  "f01s005-008": [
-   {
-    "text": "এই জন্য কাহারও সহিত তাঁহার দেখা হইলে একটা সুদীর্ঘ প্রশ্নোত্তরমালার সৃষ্টি হইত; ",
-    "role": "narrator"
-   },
-   {
-    "text": "ভাল ত?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s005-009": [
-   {
-    "text": "শশি ভাল আছে?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s005-010": [
-   {
-    "text": "আমাদের বড় বাবু ভাল আছেন?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s005-011": [
-   {
-    "text": "মধুর ছেলেটির জ্বর হয়েছিল শুনে ছিলুম সে এখন ভাল আছে ত?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s005-012": [
-   {
-    "text": "হরিচরণ বাবুকে অনেককাল দেখিনি তাঁর অসুখ বিসুখ কিছু হয় নি?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s005-013": [
-   {
-    "text": "তোমাদের রাখালের খবর কি?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s005-014": [
-   {
-    "text": "বাড়ির এঁয়ারা সকলে ভাল আছেন?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s008-004": [
-   {
-    "text": "ঠাকুর্দ্দামশায় একবার পরীক্ষা করিয়া দেখ দেখি, ভাল গয়ার তামাক পাওয়া গেছে।",
-    "role": "character",
-    "speaker": "পাড়ার লোকেরা"
-   }
-  ],
-  "f01s009-001": [
-   {
-    "text": "ঠাকুর্দ্দামশায় দুই এক টান টানিয়া বলিতেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "বেশ ভাই, বেশ তামাক।",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s009-005": [
-   {
-    "text": "এই জন্য সকলেই একবাক্যে বলিত, ",
-    "role": "narrator"
-   },
-   {
-    "text": "ঠাকুর্দ্দামশায় কাজ নেই, সে তামাক আমাদের সহ্য হবে না, আমাদের এই ভাল।",
-    "role": "character",
-    "speaker": "পাড়ার লোকেরা"
-   }
-  ],
-  "f01s010-002": [
-   {
-    "text": "সকলে বিদায় লইবার কালে বৃদ্ধ হঠাৎ বলিয়া উঠিতেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "সে যেন হল, তোমরা কবে আমার এখানে খাবে বলদেখি ভাই?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s010-003": [
-   {
-    "text": "অমনি সকলে বলিত, ",
-    "role": "narrator"
-   },
-   {
-    "text": "সে একটা দিন ঠিক করে দেখা যাবে।",
-    "role": "character",
-    "speaker": "পাড়ার লোকেরা"
-   }
-  ],
-  "f01s010-004": [
-   {
-    "text": "ঠাকুর্দ্দা মহাশয় বলিতেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "সেই ভাল, একটু বৃষ্টি পড়ুক, ঠাণ্ডা হোক্‌, নইলে এ গরমে গুরু ভোজনটা কিছু নয়।",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s010-005": [
-   {
-    "text": "যখন বৃষ্টি পড়িত তখন ঠাকুর্দ্দাকে কেহ তাঁহার প্রতিজ্ঞা স্মরণ করাইয়া দিত না—বরঞ্চ কথা উঠিলে সকলে বলিত, ",
-    "role": "narrator"
-   },
-   {
-    "text": "এই বৃষ্টি বাদলটা না ছাড়লে সুবিধে হচ্ছে না।",
-    "role": "character",
-    "speaker": "পাড়ার লোকেরা"
-   }
-  ],
-  "f01s010-009": [
-   {
-    "text": "“তা হোক্‌ ভাই, তোমাদের কাছাকাছি আছি এই আমার সুখ, নয়নজোড়ে বড় বাড়ি ত পড়েই আছে কিন্তু সেখানে কি মন টেঁকে?”",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s018-002": [
-   {
-    "text": "পাড়ার একজন পেন্সনভোগী ডেপুটি ম্যাজিষ্ট্রেট্‌ প্রায় বলিতেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "ঠাকুর্দ্দা, ছোটলাটের সঙ্গে যখনি দেখা হয় তিনি নয়নজোড়ের বাবুদের খবর না নিয়ে ছাড়েন না—",
-    "role": "character",
-    "speaker": "ডেপুটি বাবু"
-   }
-  ],
-  "f01s018-003": [
-   {
-    "text": "সাহেব বলেন, বাঙ্গলাদেশে, বর্দ্ধমানের রাজা এবং নয়নজোড়ের বাবু, এই দুটি মাত্র যথার্থ বনেদী বংশ আছে।",
-    "role": "character",
-    "speaker": "ডেপুটি বাবু"
-   }
-  ],
-  "f01s018-004": [
-   {
-    "text": "ঠাকুর্দ্দা ভারি খুসি হইতেন—এবং ভূতপূর্ব্ব ডেপুটি বাবুর সহিত সাক্ষাৎ হইলে অন্যান্য কুশলসংবাদের সহিত জিজ্ঞাসা করিতেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—ছোটলাট সাহেব ভাল আছেন?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s018-005": [
-   {
-    "text": "তাঁর মেমসাহেব ভাল আছেন?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s018-006": [
-   {
-    "text": "তাঁর পুত্রকন্যারা সকলেই ভাল আছেন?",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ],
-  "f01s020-003": [
-   {
-    "text": "তক্‌মা-পরা চাপ্‌রাসি তাঁহাকে খবর দিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "ছোটলাট সাহেব আয়া!",
-    "role": "character",
-    "speaker": "চাপ্‌রাসি"
-   }
-  ],
-  "f01s023-004": [
-   {
-    "text": "“আমার দাদামশায় তোমাদের কি করেছেন—কেন তোমরা তাঁকে ঠকাতে এসেচ—কেন এসেচ তোমরা”",
-    "role": "character",
-    "speaker": "কুসুম"
-   },
-   {
-    "text": "—অবশেষে আর কোন কথা জুটিল না—বাক্‌রুদ্ধ হইয়া মুখে কাপড় দিয়া কঁদিয়া উঠিল।",
-    "role": "narrator"
-   }
-  ],
-  "f01s026-004": [
-   {
-    "text": "বালিকা সুমিষ্ট সস্নেহ স্বরে জিজ্ঞাসা করিতেছিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "দাদা মশায়, কাল লাট সাহেব তোমাকে কি বল্লেন?",
-    "role": "character",
-    "speaker": "কুসুম"
-   }
-  ],
-  "f01s028-003": [
-   {
-    "text": "প্রস্তাবটা শেষ হইবামাত্র বৃদ্ধ আমাকে বক্ষে আলিঙ্গন করিয়া ধরিলেন, এবং আনন্দবেগে বলিয়া উঠিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—আমি গরীব—আমার যে এমন সৌভাগ্য হবে তা আমি জানতুম ভাই—আমার কুসুম অনেক পুণ্য করেছে তাই তুমি আজ ধরা দিলে!",
-    "role": "character",
-    "speaker": "কৈলাস বাবু"
-   }
-  ]
- },
- "notes": "First-person story: the teller's own spoken lines (the hoax announcement f01s019-001..003 and his proposal f01s028-002) are left in the narrator voice, since he is that speaker. Kailas babu's habitual string of greetings (f01s005-008..014) is voiced as him; 'ইত্যাদি।' stays narrator. Hearsay and indirect reports left to the narrator: Kailas babu's remark to a friend (f01s016-006/007), his offer of rare tobacco (f01s009-002), his Urdu speech and apologies to the fake Lat (f01s021-001, f01s021-004/005). The deputy's 'সাহেব বলেন, ...' (f01s018-003) is part of the deputy's own speech. f01s008-004 is spoken by one or another neighbour, voiced as পাড়ার লোকেরা."
 }

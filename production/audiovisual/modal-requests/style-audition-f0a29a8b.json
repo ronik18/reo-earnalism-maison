@@ -1,0 +1,66 @@
+{
+  "colab_units": 0.0,
+  "error": null,
+  "files": [
+    {
+      "bytes": 247852,
+      "path": "arjun-style-line-anger.wav",
+      "sha256": "0216ee3aafbd6f451edcbbc154bb334d8dd7134f862761a2cc3969be326c2572"
+    },
+    {
+      "bytes": 580652,
+      "path": "arjun-style-line-fear.wav",
+      "sha256": "275556f21f988772ba2f09e2d31b17bc23080d992be532221923a1ce55d63b9f"
+    },
+    {
+      "bytes": 848940,
+      "path": "arnav-style-calm.wav",
+      "sha256": "48cc433a7924566a1cd9cd8eee25bee6b673e5eaae819929f64ae0d3b6299547"
+    },
+    {
+      "bytes": 1047596,
+      "path": "arnav-style-sad.wav",
+      "sha256": "90c0580fc736b71c4d40ad0c1a500a8e06a7fdcb62908cc45bcd173e20d02ccd"
+    },
+    {
+      "bytes": 8651,
+      "path": "inputs.zip",
+      "sha256": "7ab2313085fdc271c75d8987dd9a2f36064b5b201477d5794fb1962db8f44f44"
+    },
+    {
+      "bytes": 1147,
+      "path": "manifest.json",
+      "sha256": "754cb4a7e81f1bacc38910d87fe36c72fc2492a1d9617e28ba55a24561e554aa"
+    },
+    {
+      "bytes": 936,
+      "path": "progress.jsonl",
+      "sha256": "9d6a4b3e250141fd50673355f54cfe1a12c0a5ea575dbd570213cb788ac06d6e"
+    },
+    {
+      "bytes": 582,
+      "path": "sessions.jsonl",
+      "sha256": "27392dbaf2c6c920d43cb206c13952f00581ddebacb6e9bcaf0ca131d259a774"
+    }
+  ],
+  "finished_at": "2026-11-28T10:55:10+00:00",
+  "gpu": "L4",
+  "job_id": "style-audition-f0a29a8b",
+  "modal_contacted_at": "2026-11-28T10:49:47+00:00",
+  "pending_run_id": "style-audition-f0a29a8b#1",
+  "r2_prefix": "gpu-jobs/nishithe/style-audition-f0a29a8b/run-1/",
+  "requested_at": "2026-11-28T10:46:17+00:00",
+  "run": {
+    "error": null,
+    "run_id": "style-audition-f0a29a8b#1",
+    "seconds": 305.400573234,
+    "status": "ok",
+    "usd": 0.08474865907243499
+  },
+  "schema": "earnalism.modal-request.v1",
+  "seconds": 305.400573234,
+  "status": "done",
+  "title_root": "production/audiovisual/nishithe",
+  "usd": 0.08474865907243499,
+  "worst_case_usd": 0.585525
+}

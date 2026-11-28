@@ -1,0 +1,44 @@
+{
+  "schema": "eav.voices/1",
+  "model": "ai4bharat/indic-parler-tts",
+  "language": "bn",
+  "status": "chosen",
+  "note": "Owner decision 28 Nov 2026: the owner picks 2 male + 2 female Bengali speakers of Indic Parler-TTS from the audition (eav.cli audition). Until then male and female are null and `job narration` refuses every title that has specs/cast.json. To record the choice: set status to \"chosen\", chosen_by, chosen_at and audition_job_id, and male / female to [primary, secondary], each {\"speaker\": <name from speakers>, \"description\": description_template with that name}. Titles without a cast file never read this file.",
+  "speakers": {
+    "male": [
+      "Arjun",
+      "Tapan",
+      "Arnav"
+    ],
+    "female": [
+      "Aditi",
+      "Rashmi",
+      "Riya"
+    ]
+  },
+  "description_template": "{speaker} speaks in fluent, natural standard Bengali in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+  "description_template_source": "earnalism-audiobook-go-live/references/final-voice-roster.json bn_arnav::story description with the speaker name substituted (it names no pronoun)",
+  "chosen_by": "owner (Claude session, 28 Nov 2026 IST: \"I would like to go with your suggestion\")",
+  "chosen_at": "2026-11-28T10:25:00Z",
+  "audition_job_id": "audition-15a5c974",
+  "male": [
+    {
+      "speaker": "Arnav",
+      "description": "Arnav speaks in fluent, natural standard Bengali in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise."
+    },
+    {
+      "speaker": "Arjun",
+      "description": "Arjun speaks in fluent, natural standard Bengali in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise."
+    }
+  ],
+  "female": [
+    {
+      "speaker": "Aditi",
+      "description": "Aditi speaks in fluent, natural standard Bengali in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise."
+    },
+    {
+      "speaker": "Riya",
+      "description": "Riya speaks in fluent, natural standard Bengali in a warm, mellow voice, with a moderate pitch and slightly expressive intonation, in a relaxed, even manner, at a moderate pace, with calm, gently expressive storytelling. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise."
+    }
+  ]
+}

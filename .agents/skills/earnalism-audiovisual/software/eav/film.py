@@ -65,9 +65,48 @@ def unit_wav(wav_dir, key: str) -> Path:
     return found[0]
 
 
-def narration_track(units: list, wav_dir, out: Path) -> list:
+def _decode_mono(path, n: int):
+    """The WAV as RATE mono float32 samples, padded or trimmed to exactly n samples."""
+    import numpy as np
+    r = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-f", "f32le", "-ac", "1",
+                        "-ar", str(RATE), "-"], check=True, capture_output=True)
+    a = np.frombuffer(r.stdout, dtype=np.float32)
+    return np.pad(a, (0, max(0, n - len(a))))[:n]
+
+
+def _room_track(units, paths, out: Path, room: dict) -> list:
+    """narration_track for an expressive title: every pause is room tone (eav.narration_join.
+    room_tone, seeded per gap by eav.expressive.gap_seed) instead of digital silence. Streams unit
+    by unit into one mono 16-bit WAV; timing is computed exactly as the silence path does."""
+    from .expressive import gap_seed
+    from .narration_join import room_tone
+    w = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "f32le", "-ar", str(RATE), "-ac", "1",
+                          "-i", "-", "-ar", str(RATE), "-c:a", "pcm_s16le", str(out)],
+                         stdin=subprocess.PIPE)
+    timing, t = [], 0.0
+    try:
+        for i, u in enumerate(units):
+            dur = _duration(paths[u["unit_key"]])
+            timing.append({"unit_key": u["unit_key"], "start": round(t, 3), "end": round(t + dur, 3)})
+            pause = 0.0 if i == len(units) - 1 else u.get("pause_after_ms", 0) / 1000
+            w.stdin.write(_decode_mono(paths[u["unit_key"]], int(round(dur * RATE))).tobytes())
+            if pause > 0:
+                w.stdin.write(room_tone(int(round(pause * RATE)), RATE, room["dbfs"],
+                                        gap_seed(u["unit_key"]), room["fade_ms"],
+                                        room["smooth_ms"]).tobytes())
+            t += dur + pause
+    finally:
+        w.stdin.close()
+        if w.wait() != 0:
+            raise RuntimeError("ffmpeg failed writing the narration track")
+    return timing
+
+
+def narration_track(units: list, wav_dir, out: Path, room=None) -> list:
     """Concatenate <unit_key>.wav files with each unit's pause; no pause after the last.
-    wav_dir is a folder or the list of a chunk group's folders.
+    wav_dir is a folder or the list of a chunk group's folders. room: room-tone settings
+    {"dbfs", "fade_ms", "smooth_ms"} of an expressive title (eav.expressive): the pauses are then
+    soft room tone instead of digital silence; None (every other title): silence, as always.
 
     Returns [{"unit_key", "start", "end"}] measured from the real WAV durations.
     """
@@ -80,6 +119,8 @@ def narration_track(units: list, wav_dir, out: Path) -> list:
         paths[k] = unit_wav(wav_dir, k)
     if not units:
         raise ValueError("no units")
+    if room:
+        return _room_track(units, paths, out, room)
     timing, t = [], 0.0
     parts, args = [], []
     for i, u in enumerate(units):

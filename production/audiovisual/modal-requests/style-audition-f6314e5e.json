@@ -1,0 +1,66 @@
+{
+  "colab_units": 0.0,
+  "error": null,
+  "files": [
+    {
+      "bytes": 527404,
+      "path": "aditi-style-calm.wav",
+      "sha256": "59cc22a7e6b52202a002522ee3c9bb706e035a08e08e6cfcf3f8d0da0f0588bf"
+    },
+    {
+      "bytes": 493612,
+      "path": "aditi-style-sad.wav",
+      "sha256": "dc7996d971f1a84832935d43eec624d87680ca84f47719750ed9988b11f63fd4"
+    },
+    {
+      "bytes": 376876,
+      "path": "arnav-style-line-conversation.wav",
+      "sha256": "884c20b7975b010474453f1d9ac755e31f5873ad1c1c225106534b5c1446b502"
+    },
+    {
+      "bytes": 7657,
+      "path": "inputs.zip",
+      "sha256": "9ac01f8a196fe66a6ecb64293e7a1794058ba65dc03ac1156b5a8a0c2ec4d17e"
+    },
+    {
+      "bytes": 1152,
+      "path": "manifest.json",
+      "sha256": "8f149085f7f401bfa6901ab2fa4ab5105b05d271eba767f97e113ce08a6383d6"
+    },
+    {
+      "bytes": 948,
+      "path": "progress.jsonl",
+      "sha256": "d8100cbe525d1af3567780f57db93409855107eb0dd7c85e93f3289f82ed3dab"
+    },
+    {
+      "bytes": 576556,
+      "path": "riya-style-line-fear.wav",
+      "sha256": "1701022f885d9a3568d8199fa599481baaf7d872f2564b4fe9b284a407a2276c"
+    },
+    {
+      "bytes": 544,
+      "path": "sessions.jsonl",
+      "sha256": "d2f1f97617c7e42340e065195b10a2146265e687d807d697be392fe219daf5d7"
+    }
+  ],
+  "finished_at": "2026-11-28T11:00:26+00:00",
+  "gpu": "L4",
+  "job_id": "style-audition-f6314e5e",
+  "modal_contacted_at": "2026-11-28T10:56:35+00:00",
+  "pending_run_id": "style-audition-f6314e5e#1",
+  "r2_prefix": "gpu-jobs/samapti/style-audition-f6314e5e/run-1/",
+  "requested_at": "2026-11-28T10:46:17+00:00",
+  "run": {
+    "error": null,
+    "run_id": "style-audition-f6314e5e#1",
+    "seconds": 216.05997250299998,
+    "status": "ok",
+    "usd": 0.059956642369582494
+  },
+  "schema": "earnalism.modal-request.v1",
+  "seconds": 216.05997250299998,
+  "status": "done",
+  "title_root": "production/audiovisual/samapti",
+  "usd": 0.059956642369582494,
+  "worst_case_usd": 0.585525
+}

@@ -58,7 +58,8 @@
    {
     "text": "“ঐ রে বাধিয়া গিয়াছে,”",
     "role": "character",
-    "speaker": "পাড়ার লোকেরা"
+    "speaker": "পাড়ার লোকেরা",
+    "emotion": "conversation"
    },
    {
     "text": " অর্থাৎ যেমনটি আশা করা যায় ঠিক তেম্‌নিটি ঘটিয়াছে, আজও স্বভাবের নিয়মের কোনরূপ ব্যত্যয় হয় নাই।",
@@ -73,7 +74,8 @@
    {
     "text": "“ভাত দে।”",
     "role": "character",
-    "speaker": "দুখিরাম"
+    "speaker": "দুখিরাম",
+    "emotion": "command"
    }
   ],
   "f01s006-002": [
@@ -84,21 +86,24 @@
    {
     "text": "“ভাত কোথায় যে ভাত দিব?",
     "role": "character",
-    "speaker": "রাধা"
+    "speaker": "রাধা",
+    "emotion": "anger"
    }
   ],
   "f01s006-003": [
    {
     "text": "তুই কি চাল দিয়া গিয়াছিলি?",
     "role": "character",
-    "speaker": "রাধা"
+    "speaker": "রাধা",
+    "emotion": "anger"
    }
   ],
   "f01s006-004": [
    {
     "text": "আমি কি নিজে রোজগার করিয়া আনিব?”",
     "role": "character",
-    "speaker": "রাধা"
+    "speaker": "রাধা",
+    "emotion": "anger"
    }
   ],
   "f01s007-001": [
@@ -109,7 +114,8 @@
    {
     "text": "“কি বল্লি!”",
     "role": "character",
-    "speaker": "দুখিরাম"
+    "speaker": "দুখিরাম",
+    "emotion": "anger"
    }
   ],
   "f01s007-004": [
@@ -120,7 +126,8 @@
    {
     "text": "“কি হল গো”",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "fear"
    },
    {
     "text": " বলিয়া চীৎকার করিয়া উঠিল।",
@@ -135,7 +142,8 @@
    {
     "text": "“দুখি, আছিস্‌ না কি!”",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "fear"
    }
   ],
   "f01s010-002": [
@@ -146,14 +154,16 @@
    {
     "text": "“মাগীরা বুঝি ঝগড়া করিয়া বসিয়া আছে?",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    }
   ],
   "f01s010-003": [
    {
     "text": "আজ ত সমস্ত দিনই চীৎকার শুনিয়াছি।”",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    }
   ],
   "f01s010-009": [
@@ -164,7 +174,8 @@
    {
     "text": "“হাঁ, আজ খুব ঝগড়া হইয়া গিয়াছে।”",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "fear"
    }
   ],
   "f01s011-001": [
@@ -175,7 +186,8 @@
    {
     "text": "“কিন্তু সে জন্য দুখি কাঁদে কেন রে।”",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    }
   ],
   "f01s011-002": [
@@ -186,7 +198,8 @@
    {
     "text": "“ঝগড়া করিয়া ছোট বৌ বড় বৌয়ের মাথায় এক দায়ের কোপ বসাইয়া দিয়াছে।”",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "fear"
    }
   ],
   "f01s012-001": [
@@ -197,21 +210,24 @@
    {
     "text": "“অ্যাঁ!",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "surprise"
    }
   ],
   "f01s012-002": [
    {
     "text": "বলিস্‌ কি!",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "surprise"
    }
   ],
   "f01s012-003": [
    {
     "text": "মরে নাই ত!”",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "fear"
    }
   ],
   "f01s012-004": [
@@ -222,7 +238,8 @@
    {
     "text": "“মরিয়াছে!”",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "sad"
    }
   ],
   "f01s012-009": [
@@ -233,7 +250,8 @@
    {
     "text": "“দাদা ঠাকুর, এখন, আমার বৌকে বাঁচাইবার কি উপায় করি!”",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "fear"
    }
   ],
   "f01s012-011": [
@@ -244,21 +262,24 @@
    {
     "text": "দেখ্‌, ইহার এক উপায় আছে।",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    }
   ],
   "f01s012-012": [
    {
     "text": "তুই এখনি থানায় ছুটয়া যা— বল্‌গে, তোর বড় ভাই দুখি সন্ধ্যাবেলায় ঘরে আসিয়া ভাত চাহিয়াছিল; ভাত প্রস্তুত ছিল না বলিয়া স্ত্রীর মাথায় দা বসাইয়া দিয়াছে।",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "command"
    }
   ],
   "f01s012-013": [
    {
     "text": "আমি নিশ্চয় বলিতেছি এ কথা বলিলে ছুঁড়িটা বাঁচিয়া যাইবে।",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    }
   ],
   "f01s013-001": [
@@ -269,7 +290,8 @@
    {
     "text": "ঠাকুর, বৌ গেলে বৌ পাইব, কিন্তু আমার ভাই ফাঁসি গেলে আর ত ভাই পাইব না।",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "sad"
    }
   ],
   "f01s013-004": [
@@ -280,7 +302,8 @@
    {
     "text": "তবে যেমনটি ঘটিয়াছে তাই বলিস্‌ সকল দিক্ রক্ষা করা অসম্ভব।",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    }
   ],
   "f01s015-003": [
@@ -291,7 +314,8 @@
    {
     "text": "যাহা বলিতেছি তাই কর, তোর কোন ভয় নাই, আমরা তোকে বাঁচাইয়া দিব।—",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "conversation"
    },
    {
     "text": "আশ্বাস দিল বটে কিন্তু গলা শুকাইল, মুখ পাংশুবর্ণ হইয়া গেল।",
@@ -306,14 +330,16 @@
    {
     "text": "—ও মেয়ে ঝড়ের আগে ছোটে উহাকে আমি সামলাইব!",
     "role": "character",
-    "speaker": "রাধা"
+    "speaker": "রাধা",
+    "emotion": "anger"
    }
   ],
   "f01s020-005": [
    {
     "text": "আমি জানি ও কোন দিন কি সর্ব্বনাশ করিয়া বসিবে!",
     "role": "character",
-    "speaker": "রাধা"
+    "speaker": "রাধা",
+    "emotion": "anger"
    }
   ],
   "f01s020-006": [
@@ -324,7 +350,8 @@
    {
     "text": "“কেন দিদি তোমার এত ভয় কিসের!”",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "conversation"
    }
   ],
   "f01s021-001": [
@@ -335,7 +362,8 @@
    {
     "text": "এবার যদি কখনও শুনি তুই একলা ঘাটে গিয়াছিস্ তোর হাড় গুঁড়াইয়া দিব।",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "anger"
    }
   ],
   "f01s021-002": [
@@ -346,7 +374,8 @@
    {
     "text": "—তাহা হইলে ত হাড় যুড়ায়!—",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "anger"
    },
    {
     "text": "বলিয়া তৎক্ষণাৎ বাহিরে চলিয়া যাইবার উপক্রম করিল।",
@@ -361,7 +390,8 @@
    {
     "text": "তোমার কিছু ভয় নাই।—",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "conversation"
    },
    {
     "text": "বলিয়া পুলিসের কাছে ম্যাজিষ্ট্রেটের কাছে কি বলিতে হইবে বারবার শিখাইয়া দিল।",
@@ -376,7 +406,8 @@
    {
     "text": "তাহা হইলে বৌমার কি হইবে।",
     "role": "character",
-    "speaker": "দুখিরাম"
+    "speaker": "দুখিরাম",
+    "emotion": "conversation"
    }
   ],
   "f01s024-003": [
@@ -387,7 +418,8 @@
    {
     "text": "উহাকে আমি বাঁচাইয়া দিব।",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "conversation"
    }
   ],
   "f01s024-006": [
@@ -398,7 +430,8 @@
    {
     "text": "তুই বলিস বড় যা আমাকে বটি লইয়া মারিতে আসিয়াছিল, আমি তাহাকে দা লইয়া ঠেকাইতে গিয়া হঠাৎ কেমন করিয়া লাগিয়া গিয়াছে।",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "conversation"
    }
   ],
   "f01s025-004": [
@@ -409,63 +442,72 @@
    {
     "text": "হাঁ, আমি খুন করিয়াছি।",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "neutral"
    }
   ],
   "f01s025-005": [
    {
     "text": "কেন খুন করিয়াছ?",
     "role": "character",
-    "speaker": "পুলিস"
+    "speaker": "পুলিস",
+    "emotion": "conversation"
    }
   ],
   "f01s025-006": [
    {
     "text": "আমি তাহাকে দেখিতে পারিতাম না।",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "neutral"
    }
   ],
   "f01s025-007": [
    {
     "text": "কোন বচসা হইয়াছিল?",
     "role": "character",
-    "speaker": "পুলিস"
+    "speaker": "পুলিস",
+    "emotion": "conversation"
    }
   ],
   "f01s025-008": [
    {
     "text": "না।",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "neutral"
    }
   ],
   "f01s025-009": [
    {
     "text": "সে তোমাকে প্রথমে মারিতে আসিয়াছিল?",
     "role": "character",
-    "speaker": "পুলিস"
+    "speaker": "পুলিস",
+    "emotion": "conversation"
    }
   ],
   "f01s025-010": [
    {
     "text": "না।",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "neutral"
    }
   ],
   "f01s025-011": [
    {
     "text": "তোমার প্রতি কোন অত্যাচার করিয়াছিল?",
     "role": "character",
-    "speaker": "পুলিস"
+    "speaker": "পুলিস",
+    "emotion": "conversation"
    }
   ],
   "f01s026-001": [
    {
     "text": "না।",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "neutral"
    }
   ],
   "f01s026-004": [
@@ -476,14 +518,16 @@
    {
     "text": "উনি ঠিক কথা বলিতেছেন না।",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "fear"
    }
   ],
   "f01s026-005": [
    {
     "text": "বড় বৌ প্রথমে—",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "fear"
    }
   ],
   "f01s028-003": [
@@ -494,7 +538,8 @@
    {
     "text": "দোহাই হজুর আমার স্ত্রীর কোন দোষ নাই।",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "sad"
    }
   ],
   "f01s029-002": [
@@ -505,35 +550,40 @@
    {
     "text": "খুনের অনতিবিলম্বেই আমি ঘটনাস্থলে উপস্থিত হইয়াছিলাম।",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    }
   ],
   "f01s029-003": [
    {
     "text": "সাক্ষী ছিদাম আমার নিকট সমস্ত স্বীকার করিয়া আমার পা জড়াইয়া ধরিয়া কহিল, বৌকে কি করিয়া উদ্ধার করিব আমাকে যুক্তি দিন।",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    }
   ],
   "f01s029-004": [
    {
     "text": "আমি ভাল মন্দ কিছুই বলিলাম না।",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    }
   ],
   "f01s029-005": [
    {
     "text": "সাক্ষী আমাকে বলিল, আমি যদি বলি আমার বড় ভাই ভাত চাহিয়া ভাত পায় নাই বলিয়া রাগের মাথায় স্ত্রীকে মারিয়াছে, তাহা হইলে কি সে রক্ষা পাইবে?",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    }
   ],
   "f01s029-006": [
    {
     "text": "আমি কহিলাম, খবরদার হারামজাদা, আদালতে এক বর্ণ মিথ্যা বলিস্ না—এতবড় মহাপাপ আর নাই—",
     "role": "character",
-    "speaker": "রামলোচন"
+    "speaker": "রামলোচন",
+    "emotion": "conversation"
    },
    {
     "text": "ইত্যাদি।",
@@ -548,7 +598,8 @@
    {
     "text": "ওগো সাহেব, এক কথা আর বারবার কতবার করিয়া বলিব!",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "anger"
    }
   ],
   "f01s032-002": [
@@ -559,7 +610,8 @@
    {
     "text": "তুমি যে অপরাধ স্বীকার করিতেছ তাহার শাস্তি কি জান?",
     "role": "character",
-    "speaker": "জজসাহেব"
+    "speaker": "জজসাহেব",
+    "emotion": "conversation"
    }
   ],
   "f01s032-003": [
@@ -570,7 +622,8 @@
    {
     "text": "না।",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "neutral"
    }
   ],
   "f01s032-004": [
@@ -581,7 +634,8 @@
    {
     "text": "—তাহার শাস্তি ফাঁসি।",
     "role": "character",
-    "speaker": "জজসাহেব"
+    "speaker": "জজসাহেব",
+    "emotion": "conversation"
    }
   ],
   "f01s032-005": [
@@ -592,14 +646,16 @@
    {
     "text": "—ওগো তোমার পায়ে পড়ি, তাই দাও না সাহেব!",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "sad"
    }
   ],
   "f01s032-006": [
    {
     "text": "তোমাদের যাহা খুসি কর—আমার ত আর সহ্য হয় না!।",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "sad"
    }
   ],
   "f01s032-008": [
@@ -610,7 +666,8 @@
    {
     "text": "—সাক্ষীর দিকে চাহিয়া বল এ তোমার কে হয়।",
     "role": "character",
-    "speaker": "জজসাহেব"
+    "speaker": "জজসাহেব",
+    "emotion": "command"
    }
   ],
   "f01s033-001": [
@@ -621,7 +678,8 @@
    {
     "text": "ও আমার স্বামী হয়।",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "sad"
    }
   ],
   "f01s033-002": [
@@ -632,7 +690,8 @@
    {
     "text": "ও তোমাকে ভালবাসে না?",
     "role": "character",
-    "speaker": "জজসাহেব"
+    "speaker": "জজসাহেব",
+    "emotion": "conversation"
    }
   ],
   "f01s033-003": [
@@ -643,28 +702,32 @@
    {
     "text": "উঃ!",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "disgust"
    }
   ],
   "f01s033-004": [
    {
     "text": "ভারি ভালবাসে।",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "conversation"
    }
   ],
   "f01s033-006": [
    {
     "text": "তুমি উহাকে ভালবাস না?",
     "role": "character",
-    "speaker": "জজসাহেব"
+    "speaker": "জজসাহেব",
+    "emotion": "conversation"
    }
   ],
   "f01s033-008": [
    {
     "text": "খুব ভালবাসি!",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "conversation"
    }
   ],
   "f01s033-009": [
@@ -675,21 +738,24 @@
    {
     "text": "আমি খুন করিয়াছি।",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "sad"
    }
   ],
   "f01s033-011": [
    {
     "text": "কেন?",
     "role": "character",
-    "speaker": "জজসাহেব"
+    "speaker": "জজসাহেব",
+    "emotion": "conversation"
    }
   ],
   "f01s033-013": [
    {
     "text": "ভাত চাহিয়াছিলাম বড় বৌ ভাত দেয় নাই।",
     "role": "character",
-    "speaker": "ছিদাম"
+    "speaker": "ছিদাম",
+    "emotion": "sad"
    }
   ],
   "f01s033-015": [
@@ -700,21 +766,24 @@
    {
     "text": "—সাহেব খুন আমি করিয়াছি।",
     "role": "character",
-    "speaker": "দুখিরাম"
+    "speaker": "দুখিরাম",
+    "emotion": "sad"
    }
   ],
   "f01s033-016": [
    {
     "text": "কেন?",
     "role": "character",
-    "speaker": "জজসাহেব"
+    "speaker": "জজসাহেব",
+    "emotion": "conversation"
    }
   ],
   "f01s034-001": [
    {
     "text": "ভাত চাহিয়াছিলাম ভাত দেয় নাই।",
     "role": "character",
-    "speaker": "দুখিরাম"
+    "speaker": "দুখিরাম",
+    "emotion": "sad"
    }
   ],
   "f01s035-002": [
@@ -725,7 +794,8 @@
    {
     "text": "বাহা হউক আমার মেয়েটির একটি সদ্‌গতি করিয়া গেলাম।",
     "role": "character",
-    "speaker": "চন্দরার বাপ"
+    "speaker": "চন্দরার বাপ",
+    "emotion": "happy"
    }
   ],
   "f01s035-003": [
@@ -736,7 +806,8 @@
    {
     "text": "কাহাকেও দেখিতে ইচ্ছা কর?",
     "role": "character",
-    "speaker": "সিভিল সার্জ্জন"
+    "speaker": "সিভিল সার্জ্জন",
+    "emotion": "conversation"
    }
   ],
   "f01s035-004": [
@@ -747,7 +818,8 @@
    {
     "text": "একবার আমার মাকে দেখিতে চাই।",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "sad"
    }
   ],
   "f01s035-005": [
@@ -758,7 +830,8 @@
    {
     "text": "—তোমার স্বামী তোমাকে দেখিতে চায়, তাহাকে কি ডাকিয়া আনিব?",
     "role": "character",
-    "speaker": "সিভিল সার্জ্জন"
+    "speaker": "সিভিল সার্জ্জন",
+    "emotion": "conversation"
    }
   ],
   "f01s035-006": [
@@ -769,9 +842,54 @@
    {
     "text": "—মরণ!—",
     "role": "character",
-    "speaker": "চন্দরা"
+    "speaker": "চন্দরা",
+    "emotion": "disgust"
    }
   ]
  },
- "notes": "Much dialogue is unquoted (after কহিল, or a dash) and is voiced. Court Q&A: the unlabelled questions f01s025-005/007/009/011 are the police (পুলিস); f01s033-002/006/011/016 are the court's questions, voiced as জজসাহেব; the bare labels প্রশ্ন।/উত্তর।/ছিদাম। units are omitted (narrator). Ramlochan's testimony f01s029-002..006 is voiced as Ramlochan, including the words he quotes from Chhidam; trailing ইত্যাদি। stays narrator. Doubtful: f01s024-006 (Chhidam's coaching introduced by শিখাইয়া দিয়াছিল যে, voiced as Chhidam) and f01s035-002 (father's dying words, voiced as চন্দরার বাপ). Thoughts kept narrator: f01s012-007, f01s018-004/005, f01s022-005, f01s026-010, f01s030-001/002."
+ "notes": "Much dialogue is unquoted (after কহিল, or a dash) and is voiced. Court Q&A: the unlabelled questions f01s025-005/007/009/011 are the police (পুলিস); f01s033-002/006/011/016 are the court's questions, voiced as জজসাহেব; the bare labels প্রশ্ন।/উত্তর।/ছিদাম। units are omitted (narrator). Ramlochan's testimony f01s029-002..006 is voiced as Ramlochan, including the words he quotes from Chhidam; trailing ইত্যাদি। stays narrator. Doubtful: f01s024-006 (Chhidam's coaching introduced by শিখাইয়া দিয়াছিল যে, voiced as Chhidam) and f01s035-002 (father's dying words, voiced as চন্দরার বাপ). Thoughts kept narrator: f01s012-007, f01s018-004/005, f01s022-005, f01s026-010, f01s030-001/002.",
+ "tone": {
+  "pace": "moderate",
+  "expressivity": "expressive",
+  "atmosphere": "grave and tense",
+  "rationale": "A sudden domestic killing, a husband's panicked lie and a young wife's proud, silent march to the gallows give the story a grave, tightening tension relieved only by Tagore's dry irony."
+ },
+ "narration_moods": {
+  "f01s006-002": "anger",
+  "f01s006-005": "anger",
+  "f01s007-001": "anger",
+  "f01s007-002": "fear",
+  "f01s007-003": "sad",
+  "f01s007-004": "fear",
+  "f01s007-005": "fear",
+  "f01s007-006": "sad",
+  "f01s007-007": "fear",
+  "f01s009-001": "fear",
+  "f01s009-002": "fear",
+  "f01s009-003": "fear",
+  "f01s009-004": "fear",
+  "f01s009-005": "fear",
+  "f01s009-006": "sad",
+  "f01s012-001": "surprise",
+  "f01s012-006": "fear",
+  "f01s012-007": "fear",
+  "f01s012-008": "fear",
+  "f01s015-002": "surprise",
+  "f01s015-003": "fear",
+  "f01s021-003": "anger",
+  "f01s023-003": "anger",
+  "f01s023-004": "anger",
+  "f01s023-005": "anger",
+  "f01s026-002": "surprise",
+  "f01s026-010": "sad",
+  "f01s027-001": "sad",
+  "f01s027-002": "sad",
+  "f01s027-003": "sad",
+  "f01s027-004": "sad",
+  "f01s028-003": "sad",
+  "f01s033-014": "sad",
+  "f01s035-001": "sad",
+  "f01s035-002": "sad",
+  "f01s035-003": "sad"
+ }
 }

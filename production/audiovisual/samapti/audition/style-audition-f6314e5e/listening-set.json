@@ -1,0 +1,90 @@
+{
+  "choose": "listen to the expressive layer (/home/user/reo-earnalism-maison/skills/earnalism-audiovisual/references/expressive.json); approve it or adjust the phrase, pause and room-tone table before the full narration run",
+  "from": "samapti",
+  "job_id": "style-audition-f6314e5e",
+  "passages": [
+    {
+      "description": "Aditi narrates a playful, tender and luminous story in fluent, natural standard Bengali, in a warm, clear voice with a moderate pitch and expressive intonation, with calm, gently expressive storytelling, at a moderate pace. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "mood": "calm",
+      "passage": "style-calm",
+      "role": "narrator",
+      "text": "অপূর্ব্বকৃষ্ণ বি, এ পাস্‌ করিয়া কলিকাতা হইতে দেশে ফিরিয়া আসিতেছেন।",
+      "unit_key": "f01s001-002",
+      "voice": "Aditi"
+    },
+    {
+      "description": "Aditi narrates a playful, tender and luminous story in fluent, natural standard Bengali, in a warm, clear voice with a moderate pitch and expressive intonation, with a gentle, sad tone, at a moderate pace. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "mood": "sad",
+      "passage": "style-sad",
+      "role": "narrator",
+      "text": "তাহার মৃন্ময়ীর বিবাহ প্রস্তাবে দুই চক্ষু বহিয়া জল পড়িতে লাগিল।",
+      "unit_key": "f01s018-005",
+      "voice": "Aditi"
+    },
+    {
+      "description": "Riya speaks in fluent, natural standard Bengali in a fearful, anxious conversational tone, with a moderate pitch and expressive intonation, at a moderate pace. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "emotion": "fear",
+      "passage": "style-line-fear",
+      "role": "character",
+      "speaker": "কনে",
+      "text": "চারুপাঠ দ্বিতীয় ভাগ, ব্যাকরণসার প্রথম ভাগ, ভূগোলবিবরণ, পাটিগণিত, ভারতবর্ষের ইতিহাস।",
+      "unit_key": "f01s010-012",
+      "voice": "Riya"
+    },
+    {
+      "description": "Arnav speaks in fluent, natural standard Bengali in a natural, warm conversational tone, with a moderate pitch and expressive intonation, at a moderate pace. The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+      "emotion": "conversation",
+      "passage": "style-line-conversation",
+      "role": "character",
+      "speaker": "অপূর্ব্ব",
+      "text": "আগে পাত্রী দেখা হউক তাহার পর স্থির হইবে।",
+      "unit_key": "f01s008-009",
+      "voice": "Arnav"
+    }
+  ],
+  "speakers": {
+    "female": [
+      "Aditi",
+      "Riya"
+    ],
+    "male": [
+      "Arnav"
+    ]
+  },
+  "stats": {
+    "Aditi": {
+      "median_chars_per_s": 11.62,
+      "suspect": [],
+      "takes": {
+        "style-calm": {
+          "chars_per_s": 11.37,
+          "seconds": 5.979
+        },
+        "style-sad": {
+          "chars_per_s": 11.62,
+          "seconds": 5.596
+        }
+      }
+    },
+    "Arnav": {
+      "median_chars_per_s": 9.36,
+      "suspect": [],
+      "takes": {
+        "style-line-conversation": {
+          "chars_per_s": 9.36,
+          "seconds": 4.272
+        }
+      }
+    },
+    "Riya": {
+      "median_chars_per_s": 12.85,
+      "suspect": [],
+      "takes": {
+        "style-line-fear": {
+          "chars_per_s": 12.85,
+          "seconds": 6.536
+        }
+      }
+    }
+  }
+}

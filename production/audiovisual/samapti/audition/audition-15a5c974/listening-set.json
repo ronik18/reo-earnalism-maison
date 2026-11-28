@@ -1,0 +1,146 @@
+{
+  "choose": "2 male + 2 female, [primary, secondary], in /home/user/reo-earnalism-maison/skills/earnalism-audiovisual/references/voices.json",
+  "from": "samapti",
+  "job_id": "audition-15a5c974",
+  "passages": [
+    {
+      "passage": "narration",
+      "text": "অপূর্ব্বকৃষ্ণ বি, এ পাস্‌ করিয়া কলিকাতা হইতে দেশে ফিরিয়া আসিতেছেন।",
+      "unit_key": "f01s001-002"
+    },
+    {
+      "passage": "male-line",
+      "speaker": "অপূর্ব্ব",
+      "text": "আগে পাত্রী দেখা হউক তাহার পর স্থির হইবে।",
+      "unit_key": "f01s008-009"
+    },
+    {
+      "passage": "female-line",
+      "speaker": "অপূর্ব্বর মা",
+      "text": "পাত্রী দেখা হইয়াছে, সে জন্য তোকে ভাবিতে হইবে না।",
+      "unit_key": "f01s008-010"
+    }
+  ],
+  "speakers": {
+    "female": [
+      "Aditi",
+      "Rashmi",
+      "Riya"
+    ],
+    "male": [
+      "Arjun",
+      "Tapan",
+      "Arnav"
+    ]
+  },
+  "stats": {
+    "Aditi": {
+      "median_chars_per_s": 11.63,
+      "suspect": [],
+      "takes": {
+        "female-line": {
+          "chars_per_s": 11.63,
+          "seconds": 4.214
+        },
+        "male-line": {
+          "chars_per_s": 11.3,
+          "seconds": 3.541
+        },
+        "narration": {
+          "chars_per_s": 12.82,
+          "seconds": 5.306
+        }
+      }
+    },
+    "Arjun": {
+      "median_chars_per_s": 11.79,
+      "suspect": [],
+      "takes": {
+        "female-line": {
+          "chars_per_s": 11.79,
+          "seconds": 4.156
+        },
+        "male-line": {
+          "chars_per_s": 11.6,
+          "seconds": 3.448
+        },
+        "narration": {
+          "chars_per_s": 12.54,
+          "seconds": 5.422
+        }
+      }
+    },
+    "Arnav": {
+      "median_chars_per_s": 12.2,
+      "suspect": [],
+      "takes": {
+        "female-line": {
+          "chars_per_s": 11.19,
+          "seconds": 4.377
+        },
+        "male-line": {
+          "chars_per_s": 12.48,
+          "seconds": 3.204
+        },
+        "narration": {
+          "chars_per_s": 12.2,
+          "seconds": 5.573
+        }
+      }
+    },
+    "Rashmi": {
+      "median_chars_per_s": 8.9,
+      "suspect": [],
+      "takes": {
+        "female-line": {
+          "chars_per_s": 8.9,
+          "seconds": 5.503
+        },
+        "male-line": {
+          "chars_per_s": 8.16,
+          "seconds": 4.899
+        },
+        "narration": {
+          "chars_per_s": 10.93,
+          "seconds": 6.223
+        }
+      }
+    },
+    "Riya": {
+      "median_chars_per_s": 13.15,
+      "suspect": [],
+      "takes": {
+        "female-line": {
+          "chars_per_s": 11.99,
+          "seconds": 4.087
+        },
+        "male-line": {
+          "chars_per_s": 13.15,
+          "seconds": 3.042
+        },
+        "narration": {
+          "chars_per_s": 13.68,
+          "seconds": 4.969
+        }
+      }
+    },
+    "Tapan": {
+      "median_chars_per_s": 11.17,
+      "suspect": [],
+      "takes": {
+        "female-line": {
+          "chars_per_s": 11.17,
+          "seconds": 4.389
+        },
+        "male-line": {
+          "chars_per_s": 10.87,
+          "seconds": 3.68
+        },
+        "narration": {
+          "chars_per_s": 12.23,
+          "seconds": 5.561
+        }
+      }
+    }
+  }
+}

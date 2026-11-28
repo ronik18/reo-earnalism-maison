@@ -1,443 +1,524 @@
 {
- "schema": "eav.cast/1",
- "title": "didi",
- "source_revision": "dcd1d8cc-35d8-4fc2-a638-07ef5f44cecf",
- "source_sha256": "50a9dfffce662f0eab5e9f946f6b5d1d001560c6801a0cbbd0ab1e062195c05d",
- "narrator": {
-  "gender": "female",
-  "rationale": "Third-person story centred on Shashi (the 'didi' of the title): her love for her husband, her protection of her orphaned brother and her death; the telling follows her feelings, so a female narrator voice."
- },
- "characters": {
-  "শশি": {
-   "gender": "female",
-   "note": "শশিকলা, the 'didi', Jaygopal's wife and elder sister/guardian of Nilmoni"
+  "schema": "eav.cast/1",
+  "title": "didi",
+  "source_revision": "dcd1d8cc-35d8-4fc2-a638-07ef5f44cecf",
+  "source_sha256": "50a9dfffce662f0eab5e9f946f6b5d1d001560c6801a0cbbd0ab1e062195c05d",
+  "narrator": {
+    "gender": "female",
+    "rationale": "Third-person story centred on Shashi (the 'didi' of the title): her love for her husband, her protection of her orphaned brother and her death; the telling follows her feelings, so a female narrator voice."
   },
-  "তারা": {
-   "gender": "female",
-   "note": "the outspoken neighbour woman"
+  "characters": {
+    "শশি": {
+      "gender": "female",
+      "note": "শশিকলা, the 'didi', Jaygopal's wife and elder sister/guardian of Nilmoni"
+    },
+    "তারা": {
+      "gender": "female",
+      "note": "the outspoken neighbour woman"
+    },
+    "জয়গোপাল": {
+      "gender": "male",
+      "note": "Shashi's husband, who usurps Nilmoni's property"
+    },
+    "নীলমণি": {
+      "gender": "male",
+      "note": "Shashi's orphaned little brother (about six)"
+    },
+    "ম্যাজিষ্ট্রেট সাহেব": {
+      "gender": "male",
+      "note": "the English district magistrate on tour"
+    }
   },
-  "জয়গোপাল": {
-   "gender": "male",
-   "note": "Shashi's husband, who usurps Nilmoni's property"
+  "tone": {
+    "pace": "moderate",
+    "expressivity": "expressive",
+    "atmosphere": "tender, wry and grave",
+    "rationale": "Tagore tells Shashi's devotion to husband and orphaned brother with gentle irony, rising to anguish in the property betrayal, the parting before the magistrate and her silenced death."
   },
-  "নীলমণি": {
-   "gender": "male",
-   "note": "Shashi's orphaned little brother (about six)"
+  "narration_moods": {
+    "f01s002-005": "sad",
+    "f01s007-001": "anger",
+    "f01s008-002": "happy",
+    "f01s008-003": "happy",
+    "f01s008-004": "happy",
+    "f01s014-008": "fear",
+    "f01s015-005": "sad",
+    "f01s019-001": "surprise",
+    "f01s019-003": "anger",
+    "f01s020-005": "disgust",
+    "f01s020-006": "disgust",
+    "f01s020-007": "fear",
+    "f01s020-008": "fear",
+    "f01s021-001": "fear",
+    "f01s023-001": "fear",
+    "f01s023-006": "anger",
+    "f01s024-003": "anger",
+    "f01s024-004": "anger",
+    "f01s026-001": "sad",
+    "f01s026-004": "sad",
+    "f01s026-005": "sad",
+    "f01s026-006": "sad",
+    "f01s027-007": "happy",
+    "f01s027-008": "sad",
+    "f01s031-002": "anger",
+    "f01s033-004": "sad",
+    "f01s033-006": "sad",
+    "f01s034-001": "sad",
+    "f01s034-002": "sad",
+    "f01s035-001": "sad",
+    "f01s035-002": "sad",
+    "f01s035-003": "sad",
+    "f01s035-005": "sad"
   },
-  "ম্যাজিষ্ট্রেট সাহেব": {
-   "gender": "male",
-   "note": "the English district magistrate on tour"
-  }
- },
- "units": {
-  "f01s001-002": [
-   {
-    "text": "পল্লীবাসিনী কোন এক হতভাগিনীর অন্যায়কারী অত্যাচারী স্বামীর দুস্কৃতি সকল সবিস্তারে বর্ণন পূর্ব্বক প্রতিবেশিনী তারা অত্যন্ত সংক্ষেপে নিজের রায় প্রকাশ করিয়া কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "এমন স্বামীর মুখে আগুন।",
-    "role": "character",
-    "speaker": "তারা"
-   }
-  ],
-  "f01s001-004": [
-   {
-    "text": "অতএব এ সম্বন্ধে তিনি কিঞ্চিৎ সঙ্কোচ প্রকাশ করাতে কঠিন-হৃদয় তারা দ্বিগুণ উৎসাহের সহিত কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "এমন স্বামী থাকার চেয়ে সাতজন্ম বিধবা হওয়া ভাল।",
-    "role": "character",
-    "speaker": "তারা"
-   }
-  ],
-  "f01s014-009": [
-   {
-    "text": "তৎক্ষণাৎ তাহাকে কোলে করিয়া দূরে লইয়া গিয়া একান্ত সানুনয় স্নেহের স্বরে ",
-    "role": "narrator"
-   },
-   {
-    "text": "সোনা আমার, ধন আমায়, মাণিক আমার",
-    "role": "character",
-    "speaker": "শশি"
-   },
-   {
-    "text": " বলিয়া ঘুম পাড়াইতে থাকিত।",
-    "role": "narrator"
-   }
-  ],
-  "f01s018-004": [
-   {
-    "text": "সে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "গোপনে ভাইয়ের সর্ব্বনাশ করিয়া ঘটা করিয়া ভাইয়ের কপালে ফোঁটা দিবার কোন ফল নাই।",
-    "role": "character",
-    "speaker": "তারা"
-   }
-  ],
-  "f01s019-003": [
-   {
-    "text": "শুনিয়া শশি অভিশাপ দিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "যাহারা এতবড় মিথ্যা কথা রটনা করিতে পারে তাহাদের মুখে কুষ্ঠ হউক্‌।",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s019-005": [
-   {
-    "text": "জয়গোপাল কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "আজকালকার দিনে কাহাকেও বিশ্বাস করিবার যো নাই।",
-    "role": "character",
-    "speaker": "জয়গোপাল"
-   }
-  ],
-  "f01s019-006": [
-   {
-    "text": "উপেন আমার আপন পিস্‌তুতো ভাই, তাহার উপরে বিষয়ের ভার দিয়া আমি সম্পূর্ণ নিশ্চিত ছিলাম —সে কখন্‌ গোপনে খাজনা বাকি ফেলিয়া মহল হাসিল্‌পুর নিজে কিনিয়া লইয়াছে আমি জানিতেও পারি নাই।",
-    "role": "character",
-    "speaker": "জয়গোপাল"
-   }
-  ],
-  "f01s020-001": [
-   {
-    "text": "শশি আশ্চর্য্য হইয়া জিজ্ঞাসা করিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "নালিশ করিবে না?",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s020-002": [
-   {
-    "text": "জয়গোপাল কহিল,",
-    "role": "narrator"
-   },
-   {
-    "text": "ভাইয়ের নামে নালিশ করি কি করিয়া?",
-    "role": "character",
-    "speaker": "জয়গোপাল"
-   }
-  ],
-  "f01s020-003": [
-   {
-    "text": "এবং নালিশ করিয়াও ত কোন ফল নাই, কেবল অর্থ নষ্ট।",
-    "role": "character",
-    "speaker": "জয়গোপাল"
-   }
-  ],
-  "f01s021-003": [
-   {
-    "text": "শশি ভাল ডাক্তারের জন্য অনুরোধ করাতে জয়গোপাল বলিল,",
-    "role": "narrator"
-   },
-   {
-    "text": "কেন মতিলাল মন্দ ডাক্তার কি!",
-    "role": "character",
-    "speaker": "জয়গোপাল"
-   }
-  ],
-  "f01s021-004": [
-   {
-    "text": "শশি তখন তাঁহার পায়ে পড়িল, মাথার দিব্য দিল; জয় গোপাল বলিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আচ্ছা সহর হইতে ডাক্তার ডাকিতে পাঠাইতেছি।",
-    "role": "character",
-    "speaker": "জয়গোপাল"
-   }
-  ],
-  "f01s022-004": [
-   {
-    "text": "সমস্ত দিন এমনি ভাবে কাটলে সন্ধ্যার পর জয়গোপাল আসিয়া বলিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—সহরে ডাক্তার বাবুকে পাওয়া গেল না, তিনি দূরে কোথায় রোগী দেখিতে গিয়াছেন।",
-    "role": "character",
-    "speaker": "জয়গোপাল"
-   }
-  ],
-  "f01s022-005": [
-   {
-    "text": "ইহাও বলিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "মকদ্দমা উপলক্ষে আমাকে আজই অন্যত্র যাইতে হইতেছে; আমি মতিলালকে বলিয়া গেলাম সে নিয়মিত আসিয়া রোগী দেখিয়া যাইবে।",
-    "role": "character",
-    "speaker": "জয়গোপাল"
-   }
-  ],
-  "f01s024-001": [
-   {
-    "text": "স্ত্রী কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমাকে যদি কাটিয়া ফেল তবু আমি এখন ফিরিব না।",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s024-002": [
-   {
-    "text": "তোমরা আমার নীলমণিকে মারিয়া ফেলিতে চাও—উহায় মা নাই, বাপ নাই, আমি ছাড়া উহার আর কেহ নাই—আমি উহাকে রক্ষা করিব।",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s024-003": [
-   {
-    "text": "জয়গোপাল রাগিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তবে এই খানেই থাক, তুমি আর আমার ঘরে ফিরিয়ো না।",
-    "role": "character",
-    "speaker": "জয়গোপাল"
-   }
-  ],
-  "f01s024-004": [
-   {
-    "text": "শশি তখন প্রদীপ্ত হইয়া উঠিয়া কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "ঘর তোমার কি?",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s024-005": [
-   {
-    "text": "আমার ভাইয়েরই ত ঘর!",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s024-006": [
-   {
-    "text": "জয়গোপাল কহিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—আচ্ছা সে দেখা যাইবে!",
-    "role": "character",
-    "speaker": "জয়গোপাল"
-   }
-  ],
-  "f01s025-002": [
-   {
-    "text": "প্রতিবেশিনী তারা কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "স্বামীর সঙ্গে ঝগড়া করিতে হয় ঘরে বসিয়া কর না বাপু।",
-    "role": "character",
-    "speaker": "তারা"
-   }
-  ],
-  "f01s025-003": [
-   {
-    "text": "ঘর ছাড়িয়া যাইবার আবশ্যক কি!",
-    "role": "character",
-    "speaker": "তারা"
-   }
-  ],
-  "f01s025-004": [
-   {
-    "text": "হাজার হৌক্‌ স্বামী ত বটে।",
-    "role": "character",
-    "speaker": "তারা"
-   }
-  ],
-  "f01s026-001": [
-   {
-    "text": "ব্যামো হইতে সারিয়া উঠিয়া নীলমণি, করুণস্বরে বলিতে লাগিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "দিদি, বাড়ি চল।",
-    "role": "character",
-    "speaker": "নীলমণি"
-   }
-  ],
-  "f01s026-003": [
-   {
-    "text": "তাই বারম্বার বলিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "দিদি আমাদের সেই ঘরে চল না, দিদি!",
-    "role": "character",
-    "speaker": "নীলমণি"
-   }
-  ],
-  "f01s028-006": [
-   {
-    "text": "সাহেব সকৌতুকে কাছে আসিয়া তাহাকে জিজ্ঞাসা করিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—তুমি পাঠশালায় পড়?—",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s029-002": [
-   {
-    "text": "সাহেব জিজ্ঞাসা করিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—তুমি কোন পুস্তক পড়িয়া থাক?—",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s030-002": [
-   {
-    "text": "কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "সাহেব, তোমার হাতে আমার এই অনাথ ভাইটিকে সমর্পণ করিলাম, তুমি ইহাকে রক্ষা কর!",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s030-003": [
-   {
-    "text": "সাহেব তাহার সেই পূর্ব্বপরিচিত বৃহৎমস্তক গম্ভীর প্রকৃতি বালকটিকে দেখিয়া এবং স্ত্রীলোকটিকে ভদ্রস্ত্রীলোক বলিয়া অনুমান করিয়া তৎক্ষণাৎ উঠিয়া দাঁড়াইলেন—কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আপনি তাঁবুতে প্রবেশ করুন।",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s030-004": [
-   {
-    "text": "স্ত্রীলোকটি কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমার যাহা বলিবার আছে আমি এইখানেই বলিব।",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s031-002": [
-   {
-    "text": "জয়গোপাল মধ্যে মধ্যে বাধা দিবার উপক্রম করাতে ম্যাজিষ্ট্রেট্‌ রক্তবর্ণ মুখে গর্জ্জন করিয়া বলিয়া উঠিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "—চুপ্‌ রও!",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s032-001": [
-   {
-    "text": "শশির কথা শেষ হইলে ম্যাজিষ্ট্রেট্‌ জয়গোপালকে গুটিকতক প্রশ্ন করিলেন এবং তাহার উত্তর শুনিয়া অনেকক্ষণ চুপ করিয়া থাকিয়া শশিকে সম্বোধনপূর্ব্বক কহিলেন",
-    "role": "narrator"
-   },
-   {
-    "text": "-বাছা,",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s032-002": [
-   {
-    "text": "এ মকদ্দমা যদিও আমার কাছে উঠিতে পারে না তথাপি তুমি নিশ্চিন্ত থাক—এ সম্বন্ধে যাহা কর্ত্তব্য আমি করিব।",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s032-003": [
-   {
-    "text": "তুমি তোমার ভাইটিকে লইয়া নির্ভয়ে বাড়ি ফিরিয়া যাইতে পার!",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s032-004": [
-   {
-    "text": "শশি কহিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—সাহেব, যতদিন নিজের বাড়ি ও না ফিরিয়া পায় ততদিন আমার ভাইকে বাড়ি লইয়া যাইতে আমি সাহস করি না।",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s032-005": [
-   {
-    "text": "এখন নীলমণিকে তুমি নিজের কাছে না রাখিলে ইহাকে কেহ রক্ষা করিতে পারিবে না।",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s033-001": [
-   {
-    "text": "সাহেব কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তুমি কোথায় যাইবে।",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s033-002": [
-   {
-    "text": "শশি কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমি আমার স্বামীর ঘরে ফিরিয়া যাইব, আমার কোন ভাবনা নাই।",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ],
-  "f01s033-005": [
-   {
-    "text": "সাহেব কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "বাবা তোমার কোন ভয় নেই—এস!",
-    "role": "character",
-    "speaker": "ম্যাজিষ্ট্রেট সাহেব"
-   }
-  ],
-  "f01s033-006": [
-   {
-    "text": "ঘোম্‌টার মধ্য হইতে অবিরল অশ্রু মোচন করিতে করিতে শশি কহিল",
-    "role": "narrator"
-   },
-   {
-    "text": "-লক্ষ্মী ভাই, যা ভাই—আবার তোর দিদির সঙ্গে দেখা হবে!",
-    "role": "character",
-    "speaker": "শশি"
-   }
-  ]
- },
- "notes": "Tagore marks almost all dialogue here with no quotes ('কহিল, ...') or a leading dash; these were identified from direct-speech forms. Kept with narrator: Shashi's unspoken thoughts/vows (f01s002-001, f01s004-004..006, f01s010-007, f01s026-005 'আমাদের ঘর আর কোথায়!' read as free-indirect), Jaygopal's thought (f01s029-008), the reported rumour (f01s019-002), Nilmoni's wordless nod (f01s029-001), his cry 'দিদিগো দিদি' (f01s034-002, short fragment), and the recalled promise f01s035-005. f01s032-001 ends with the magistrate's opening word '-বাছা,' which is voiced as him to lead into f01s032-002/003."
+  "units": {
+    "f01s001-002": [
+      {
+        "text": "পল্লীবাসিনী কোন এক হতভাগিনীর অন্যায়কারী অত্যাচারী স্বামীর দুস্কৃতি সকল সবিস্তারে বর্ণন পূর্ব্বক প্রতিবেশিনী তারা অত্যন্ত সংক্ষেপে নিজের রায় প্রকাশ করিয়া কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "এমন স্বামীর মুখে আগুন।",
+        "role": "character",
+        "speaker": "তারা",
+        "emotion": "anger"
+      }
+    ],
+    "f01s001-004": [
+      {
+        "text": "অতএব এ সম্বন্ধে তিনি কিঞ্চিৎ সঙ্কোচ প্রকাশ করাতে কঠিন-হৃদয় তারা দ্বিগুণ উৎসাহের সহিত কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "এমন স্বামী থাকার চেয়ে সাতজন্ম বিধবা হওয়া ভাল।",
+        "role": "character",
+        "speaker": "তারা",
+        "emotion": "anger"
+      }
+    ],
+    "f01s014-009": [
+      {
+        "text": "তৎক্ষণাৎ তাহাকে কোলে করিয়া দূরে লইয়া গিয়া একান্ত সানুনয় স্নেহের স্বরে ",
+        "role": "narrator"
+      },
+      {
+        "text": "সোনা আমার, ধন আমায়, মাণিক আমার",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "conversation"
+      },
+      {
+        "text": " বলিয়া ঘুম পাড়াইতে থাকিত।",
+        "role": "narrator"
+      }
+    ],
+    "f01s018-004": [
+      {
+        "text": "সে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "গোপনে ভাইয়ের সর্ব্বনাশ করিয়া ঘটা করিয়া ভাইয়ের কপালে ফোঁটা দিবার কোন ফল নাই।",
+        "role": "character",
+        "speaker": "তারা",
+        "emotion": "anger"
+      }
+    ],
+    "f01s019-003": [
+      {
+        "text": "শুনিয়া শশি অভিশাপ দিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "যাহারা এতবড় মিথ্যা কথা রটনা করিতে পারে তাহাদের মুখে কুষ্ঠ হউক্‌।",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "anger"
+      }
+    ],
+    "f01s019-005": [
+      {
+        "text": "জয়গোপাল কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "আজকালকার দিনে কাহাকেও বিশ্বাস করিবার যো নাই।",
+        "role": "character",
+        "speaker": "জয়গোপাল",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s019-006": [
+      {
+        "text": "উপেন আমার আপন পিস্‌তুতো ভাই, তাহার উপরে বিষয়ের ভার দিয়া আমি সম্পূর্ণ নিশ্চিত ছিলাম —সে কখন্‌ গোপনে খাজনা বাকি ফেলিয়া মহল হাসিল্‌পুর নিজে কিনিয়া লইয়াছে আমি জানিতেও পারি নাই।",
+        "role": "character",
+        "speaker": "জয়গোপাল",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s020-001": [
+      {
+        "text": "শশি আশ্চর্য্য হইয়া জিজ্ঞাসা করিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "নালিশ করিবে না?",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s020-002": [
+      {
+        "text": "জয়গোপাল কহিল,",
+        "role": "narrator"
+      },
+      {
+        "text": "ভাইয়ের নামে নালিশ করি কি করিয়া?",
+        "role": "character",
+        "speaker": "জয়গোপাল",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s020-003": [
+      {
+        "text": "এবং নালিশ করিয়াও ত কোন ফল নাই, কেবল অর্থ নষ্ট।",
+        "role": "character",
+        "speaker": "জয়গোপাল",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s021-003": [
+      {
+        "text": "শশি ভাল ডাক্তারের জন্য অনুরোধ করাতে জয়গোপাল বলিল,",
+        "role": "narrator"
+      },
+      {
+        "text": "কেন মতিলাল মন্দ ডাক্তার কি!",
+        "role": "character",
+        "speaker": "জয়গোপাল",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s021-004": [
+      {
+        "text": "শশি তখন তাঁহার পায়ে পড়িল, মাথার দিব্য দিল; জয় গোপাল বলিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আচ্ছা সহর হইতে ডাক্তার ডাকিতে পাঠাইতেছি।",
+        "role": "character",
+        "speaker": "জয়গোপাল",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s022-004": [
+      {
+        "text": "সমস্ত দিন এমনি ভাবে কাটলে সন্ধ্যার পর জয়গোপাল আসিয়া বলিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—সহরে ডাক্তার বাবুকে পাওয়া গেল না, তিনি দূরে কোথায় রোগী দেখিতে গিয়াছেন।",
+        "role": "character",
+        "speaker": "জয়গোপাল",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s022-005": [
+      {
+        "text": "ইহাও বলিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "মকদ্দমা উপলক্ষে আমাকে আজই অন্যত্র যাইতে হইতেছে; আমি মতিলালকে বলিয়া গেলাম সে নিয়মিত আসিয়া রোগী দেখিয়া যাইবে।",
+        "role": "character",
+        "speaker": "জয়গোপাল",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s024-001": [
+      {
+        "text": "স্ত্রী কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমাকে যদি কাটিয়া ফেল তবু আমি এখন ফিরিব না।",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "anger"
+      }
+    ],
+    "f01s024-002": [
+      {
+        "text": "তোমরা আমার নীলমণিকে মারিয়া ফেলিতে চাও—উহায় মা নাই, বাপ নাই, আমি ছাড়া উহার আর কেহ নাই—আমি উহাকে রক্ষা করিব।",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "anger"
+      }
+    ],
+    "f01s024-003": [
+      {
+        "text": "জয়গোপাল রাগিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তবে এই খানেই থাক, তুমি আর আমার ঘরে ফিরিয়ো না।",
+        "role": "character",
+        "speaker": "জয়গোপাল",
+        "emotion": "anger"
+      }
+    ],
+    "f01s024-004": [
+      {
+        "text": "শশি তখন প্রদীপ্ত হইয়া উঠিয়া কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "ঘর তোমার কি?",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "anger"
+      }
+    ],
+    "f01s024-005": [
+      {
+        "text": "আমার ভাইয়েরই ত ঘর!",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "anger"
+      }
+    ],
+    "f01s024-006": [
+      {
+        "text": "জয়গোপাল কহিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—আচ্ছা সে দেখা যাইবে!",
+        "role": "character",
+        "speaker": "জয়গোপাল",
+        "emotion": "anger"
+      }
+    ],
+    "f01s025-002": [
+      {
+        "text": "প্রতিবেশিনী তারা কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "স্বামীর সঙ্গে ঝগড়া করিতে হয় ঘরে বসিয়া কর না বাপু।",
+        "role": "character",
+        "speaker": "তারা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s025-003": [
+      {
+        "text": "ঘর ছাড়িয়া যাইবার আবশ্যক কি!",
+        "role": "character",
+        "speaker": "তারা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s025-004": [
+      {
+        "text": "হাজার হৌক্‌ স্বামী ত বটে।",
+        "role": "character",
+        "speaker": "তারা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s026-001": [
+      {
+        "text": "ব্যামো হইতে সারিয়া উঠিয়া নীলমণি, করুণস্বরে বলিতে লাগিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "দিদি, বাড়ি চল।",
+        "role": "character",
+        "speaker": "নীলমণি",
+        "emotion": "sad"
+      }
+    ],
+    "f01s026-003": [
+      {
+        "text": "তাই বারম্বার বলিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "দিদি আমাদের সেই ঘরে চল না, দিদি!",
+        "role": "character",
+        "speaker": "নীলমণি",
+        "emotion": "sad"
+      }
+    ],
+    "f01s028-006": [
+      {
+        "text": "সাহেব সকৌতুকে কাছে আসিয়া তাহাকে জিজ্ঞাসা করিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—তুমি পাঠশালায় পড়?—",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s029-002": [
+      {
+        "text": "সাহেব জিজ্ঞাসা করিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—তুমি কোন পুস্তক পড়িয়া থাক?—",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s030-002": [
+      {
+        "text": "কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "সাহেব, তোমার হাতে আমার এই অনাথ ভাইটিকে সমর্পণ করিলাম, তুমি ইহাকে রক্ষা কর!",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "sad"
+      }
+    ],
+    "f01s030-003": [
+      {
+        "text": "সাহেব তাহার সেই পূর্ব্বপরিচিত বৃহৎমস্তক গম্ভীর প্রকৃতি বালকটিকে দেখিয়া এবং স্ত্রীলোকটিকে ভদ্রস্ত্রীলোক বলিয়া অনুমান করিয়া তৎক্ষণাৎ উঠিয়া দাঁড়াইলেন—কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আপনি তাঁবুতে প্রবেশ করুন।",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s030-004": [
+      {
+        "text": "স্ত্রীলোকটি কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমার যাহা বলিবার আছে আমি এইখানেই বলিব।",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "command"
+      }
+    ],
+    "f01s031-002": [
+      {
+        "text": "জয়গোপাল মধ্যে মধ্যে বাধা দিবার উপক্রম করাতে ম্যাজিষ্ট্রেট্‌ রক্তবর্ণ মুখে গর্জ্জন করিয়া বলিয়া উঠিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "—চুপ্‌ রও!",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "anger"
+      }
+    ],
+    "f01s032-001": [
+      {
+        "text": "শশির কথা শেষ হইলে ম্যাজিষ্ট্রেট্‌ জয়গোপালকে গুটিকতক প্রশ্ন করিলেন এবং তাহার উত্তর শুনিয়া অনেকক্ষণ চুপ করিয়া থাকিয়া শশিকে সম্বোধনপূর্ব্বক কহিলেন",
+        "role": "narrator"
+      },
+      {
+        "text": "-বাছা,",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s032-002": [
+      {
+        "text": "এ মকদ্দমা যদিও আমার কাছে উঠিতে পারে না তথাপি তুমি নিশ্চিন্ত থাক—এ সম্বন্ধে যাহা কর্ত্তব্য আমি করিব।",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s032-003": [
+      {
+        "text": "তুমি তোমার ভাইটিকে লইয়া নির্ভয়ে বাড়ি ফিরিয়া যাইতে পার!",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s032-004": [
+      {
+        "text": "শশি কহিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—সাহেব, যতদিন নিজের বাড়ি ও না ফিরিয়া পায় ততদিন আমার ভাইকে বাড়ি লইয়া যাইতে আমি সাহস করি না।",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "fear"
+      }
+    ],
+    "f01s032-005": [
+      {
+        "text": "এখন নীলমণিকে তুমি নিজের কাছে না রাখিলে ইহাকে কেহ রক্ষা করিতে পারিবে না।",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "fear"
+      }
+    ],
+    "f01s033-001": [
+      {
+        "text": "সাহেব কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তুমি কোথায় যাইবে।",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s033-002": [
+      {
+        "text": "শশি কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমি আমার স্বামীর ঘরে ফিরিয়া যাইব, আমার কোন ভাবনা নাই।",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s033-005": [
+      {
+        "text": "সাহেব কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "বাবা তোমার কোন ভয় নেই—এস!",
+        "role": "character",
+        "speaker": "ম্যাজিষ্ট্রেট সাহেব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s033-006": [
+      {
+        "text": "ঘোম্‌টার মধ্য হইতে অবিরল অশ্রু মোচন করিতে করিতে শশি কহিল",
+        "role": "narrator"
+      },
+      {
+        "text": "-লক্ষ্মী ভাই, যা ভাই—আবার তোর দিদির সঙ্গে দেখা হবে!",
+        "role": "character",
+        "speaker": "শশি",
+        "emotion": "sad"
+      }
+    ]
+  },
+  "notes": "Tagore marks almost all dialogue here with no quotes ('কহিল, ...') or a leading dash; these were identified from direct-speech forms. Kept with narrator: Shashi's unspoken thoughts/vows (f01s002-001, f01s004-004..006, f01s010-007, f01s026-005 'আমাদের ঘর আর কোথায়!' read as free-indirect), Jaygopal's thought (f01s029-008), the reported rumour (f01s019-002), Nilmoni's wordless nod (f01s029-001), his cry 'দিদিগো দিদি' (f01s034-002, short fragment), and the recalled promise f01s035-005. f01s032-001 ends with the magistrate's opening word '-বাছা,' which is voiced as him to lead into f01s032-002/003."
 }

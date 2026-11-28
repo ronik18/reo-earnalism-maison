@@ -1,0 +1,60 @@
+{
+  "schema": "eav.expressive/1",
+  "model": "ai4bharat/indic-parler-tts",
+  "language": "bn",
+  "note": "Owner request 28 Nov 2026: clarity, expressive texture, emotion-aware narration themed to the content, with natural pauses and breathing. Applies only to a title whose specs/cast.json has `tone` (eav.cast/1 optional fields tone, narration_moods, per character segment emotion); every other title, cast or not, is narrated exactly as before. eav.expressive composes every Parler description from this table: only the pace, expressivity, atmosphere and mood/emotion phrases vary, the quality clause is the approved bn_arnav::story wording unchanged. Edit phrases here (reviewable data), never in code; a change alters the composed descriptions and so the job identity of new jobs only.",
+  "quality_clause": "The recording is of very high quality, with very clear audio and the speaker's voice sounding very close up, with no background noise.",
+  "narrator_template": "{speaker} narrates a {atmosphere} story in fluent, natural standard Bengali, in a warm, clear voice with a moderate pitch and {expressivity} intonation, {mood}, at a {pace} pace. {quality}",
+  "character_template": "{speaker} speaks in fluent, natural standard Bengali in a {emotion} conversational tone, with a moderate pitch and {expressivity} intonation, at a {pace} pace. {quality}",
+  "tone_values": {
+    "pace": ["slow", "moderate"],
+    "expressivity": ["slightly expressive", "expressive"]
+  },
+  "narration_moods": {
+    "calm": {"phrase": "with calm, gently expressive storytelling"},
+    "happy": {"phrase": "with a bright, happy tone"},
+    "sad": {"phrase": "with a gentle, sad tone", "expressivity": "expressive"},
+    "anger": {"phrase": "with a tense, angry edge", "expressivity": "expressive"},
+    "fear": {"phrase": "with a hushed, fearful tone", "expressivity": "expressive"},
+    "surprise": {"phrase": "with a tone of quiet surprise"},
+    "disgust": {"phrase": "with a tone of cold disgust"}
+  },
+  "speech_emotions": {
+    "conversation": {"phrase": "natural, warm"},
+    "neutral": {"phrase": "calm, neutral"},
+    "happy": {"phrase": "happy, cheerful", "expressivity": "expressive"},
+    "sad": {"phrase": "sad, sorrowful", "expressivity": "expressive", "pace": "slow"},
+    "anger": {"phrase": "angry, sharp", "expressivity": "expressive"},
+    "fear": {"phrase": "fearful, anxious", "expressivity": "expressive"},
+    "surprise": {"phrase": "surprised, astonished", "expressivity": "expressive"},
+    "disgust": {"phrase": "disgusted, scornful", "expressivity": "expressive"},
+    "command": {"phrase": "firm, commanding", "expressivity": "expressive"}
+  },
+  "pauses": {
+    "note": "Silence (room tone) after each voice unit, in ms, by the unit's end. A unit takes the largest structural rule that applies (heading > scene > paragraph > sentence end > clause split); a sentence end is classed by its last mark after closing quotes/brackets are set aside. +dialogue_extra_ms where the voice changes across the unit boundary (into, out of or between speech). Then a deterministic jitter of +/- jitter_fraction seeded by the unit key (sha256), so the rhythm is not mechanical. No pause follows the last unit of a track.",
+    "clause_ms": 150,
+    "sentence_ms": 450,
+    "question_exclaim_ms": 550,
+    "trailing_ms": 650,
+    "paragraph_ms": 900,
+    "scene_ms": 1300,
+    "heading_ms": 1400,
+    "dialogue_extra_ms": 150,
+    "jitter_fraction": 0.08,
+    "question_exclaim_marks": "?!",
+    "trailing_marks": ["...", "…", "—", "–"],
+    "closers": "\"'”’)]»"
+  },
+  "segment_gaps": {
+    "note": "Inside a joined unit, the room tone between two segments (narrator and character, or two speakers): punctuated_ms when the left segment ends or the right one starts with punctuation, else unpunctuated_ms.",
+    "punctuated_ms": 220,
+    "unpunctuated_ms": 120
+  },
+  "room_tone": {
+    "note": "Every pause of an expressive title (between units in film and bundle-audio chapter assembly, between segments in narration_join) is a soft room-tone bed instead of digital silence: deterministic noise (splitmix64 of the sample index, seeded per gap from the unit key), smoothed with a Hann kernel of smooth_ms, scaled to dbfs RMS, with fade_ms raised-cosine fades in and out.",
+    "method": "eav.narration_join.room_tone",
+    "dbfs": -62.0,
+    "fade_ms": 10,
+    "smooth_ms": 0.5
+  }
+}

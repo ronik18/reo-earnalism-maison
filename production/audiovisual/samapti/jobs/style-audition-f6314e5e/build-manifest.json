@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 1210,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/samapti/style-audition-f6314e5e",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "9ac01f8a196fe66a6ecb64293e7a1794058ba65dc03ac1156b5a8a0c2ec4d17e",
+  "job_id": "style-audition-f6314e5e",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "8a656c02bbc4021417b1cfcd9d9d1af6922692d93b6760e19d5aa712e43b573d",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "samapti"
+}

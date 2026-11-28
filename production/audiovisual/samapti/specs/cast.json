@@ -1,1039 +1,1245 @@
 {
- "schema": "eav.cast/1",
- "title": "samapti",
- "source_revision": "4fc616f0-bcb1-4fbb-b05d-904b33df49de",
- "source_sha256": "56ae47a79cdaa005540dea9b48f4c346cb85286183b9be2e2db139a29050ccd1",
- "narrator": {
-  "gender": "female",
-  "rationale": "Third-person omniscient telling; though it opens on Apurba, the story's arc and title (Samapti, 'completion') centre on Mrinmoyee's passage from wild girlhood to womanhood, which the last chapters render from inside her, so a female narrator voice."
- },
- "characters": {
-  "অপূর্ব্ব": {
-   "gender": "male",
-   "note": "অপূর্ব্বকৃষ্ণ রায়, B.A.; the young husband"
+  "schema": "eav.cast/1",
+  "title": "samapti",
+  "source_revision": "4fc616f0-bcb1-4fbb-b05d-904b33df49de",
+  "source_sha256": "56ae47a79cdaa005540dea9b48f4c346cb85286183b9be2e2db139a29050ccd1",
+  "narrator": {
+    "gender": "female",
+    "rationale": "Third-person omniscient telling; though it opens on Apurba, the story's arc and title (Samapti, 'completion') centre on Mrinmoyee's passage from wild girlhood to womanhood, which the last chapters render from inside her, so a female narrator voice."
   },
-  "মৃন্ময়ী": {
-   "gender": "female",
-   "note": "the wild village girl (মিনু/মীনু) who becomes Apurba's wife"
+  "characters": {
+    "অপূর্ব্ব": {
+      "gender": "male",
+      "note": "অপূর্ব্বকৃষ্ণ রায়, B.A.; the young husband"
+    },
+    "মৃন্ময়ী": {
+      "gender": "female",
+      "note": "the wild village girl (মিনু/মীনু) who becomes Apurba's wife"
+    },
+    "অপূর্ব্বর মা": {
+      "gender": "female",
+      "note": "Apurba's widowed mother, Mrinmoyee's mother-in-law (শাশুড়ি)"
+    },
+    "ঈশান": {
+      "gender": "male",
+      "note": "ঈশান মজুমদার, Mrinmoyee's father, steamer-station clerk at Kushiganj"
+    },
+    "বনমালী": {
+      "gender": "male",
+      "note": "boatman from their village"
+    },
+    "ডাকের রানার": {
+      "gender": "male",
+      "note": "the mail runner Mrinmoyee asks for help"
+    },
+    "দাসী": {
+      "gender": "female",
+      "note": "trusted maid who posted Mrinmoyee's letter"
+    },
+    "কনে": {
+      "gender": "female",
+      "note": "the girl first shown to Apurba as prospective bride (Rakhal's sister)"
+    },
+    "ভগ্নী": {
+      "gender": "female",
+      "note": "Apurba's sister in Calcutta"
+    },
+    "ভগ্নীপতি": {
+      "gender": "male",
+      "note": "Apurba's brother-in-law"
+    }
   },
-  "অপূর্ব্বর মা": {
-   "gender": "female",
-   "note": "Apurba's widowed mother, Mrinmoyee's mother-in-law (শাশুড়ি)"
+  "tone": {
+    "pace": "moderate",
+    "expressivity": "expressive",
+    "atmosphere": "playful, tender and luminous",
+    "rationale": "A comic, sunlit courtship of a laughing wild girl turns through captivity, longing and remorse into her awakening as a woman, ending in a tearful reconciling kiss."
   },
-  "ঈশান": {
-   "gender": "male",
-   "note": "ঈশান মজুমদার, Mrinmoyee's father, steamer-station clerk at Kushiganj"
+  "narration_moods": {
+    "f01s001-007": "happy",
+    "f01s002-004": "happy",
+    "f01s002-006": "happy",
+    "f01s003-002": "happy",
+    "f01s008-003": "happy",
+    "f01s008-004": "happy",
+    "f01s011-001": "surprise",
+    "f01s011-006": "happy",
+    "f01s011-007": "happy",
+    "f01s012-001": "anger",
+    "f01s013-001": "anger",
+    "f01s013-003": "happy",
+    "f01s013-004": "happy",
+    "f01s014-004": "happy",
+    "f01s015-001": "happy",
+    "f01s016-004": "surprise",
+    "f01s016-005": "surprise",
+    "f01s018-005": "sad",
+    "f01s019-004": "sad",
+    "f01s020-003": "fear",
+    "f01s022-004": "anger",
+    "f01s022-006": "anger",
+    "f01s023-006": "fear",
+    "f01s023-007": "sad",
+    "f01s024-006": "sad",
+    "f01s024-014": "sad",
+    "f01s025-004": "anger",
+    "f01s025-008": "sad",
+    "f01s026-011": "sad",
+    "f01s027-006": "happy",
+    "f01s028-005": "surprise",
+    "f01s028-007": "anger",
+    "f01s029-002": "anger",
+    "f01s030-002": "surprise",
+    "f01s030-005": "happy",
+    "f01s031-001": "happy",
+    "f01s031-002": "happy",
+    "f01s031-004": "happy",
+    "f01s031-005": "happy",
+    "f01s031-006": "happy",
+    "f01s031-007": "happy",
+    "f01s032-005": "happy",
+    "f01s032-006": "happy",
+    "f01s033-005": "happy",
+    "f01s034-002": "happy",
+    "f01s034-004": "happy",
+    "f01s035-002": "sad",
+    "f01s035-004": "sad",
+    "f01s035-006": "sad",
+    "f01s035-007": "sad",
+    "f01s036-004": "sad",
+    "f01s037-006": "sad",
+    "f01s037-008": "sad",
+    "f01s037-009": "sad",
+    "f01s037-010": "sad",
+    "f01s039-003": "sad",
+    "f01s039-006": "sad",
+    "f01s039-007": "sad",
+    "f01s041-005": "happy",
+    "f01s041-006": "happy",
+    "f01s042-005": "sad",
+    "f01s043-001": "sad",
+    "f01s043-003": "sad",
+    "f01s043-004": "sad",
+    "f01s043-005": "sad",
+    "f01s043-006": "sad",
+    "f01s043-007": "sad",
+    "f01s043-008": "sad",
+    "f01s044-003": "sad",
+    "f01s045-001": "sad",
+    "f01s045-002": "sad",
+    "f01s045-003": "sad",
+    "f01s045-004": "sad",
+    "f01s046-002": "sad",
+    "f01s046-005": "happy",
+    "f01s046-006": "happy",
+    "f01s046-007": "surprise",
+    "f01s047-004": "sad",
+    "f01s047-005": "sad",
+    "f01s047-006": "sad",
+    "f01s047-007": "sad",
+    "f01s047-008": "sad",
+    "f01s047-009": "sad",
+    "f01s047-010": "sad",
+    "f01s048-005": "sad",
+    "f01s048-006": "sad",
+    "f01s049-002": "sad",
+    "f01s051-003": "sad",
+    "f01s052-002": "sad",
+    "f01s052-004": "sad",
+    "f01s053-003": "happy",
+    "f01s053-004": "sad",
+    "f01s054-007": "fear",
+    "f01s056-003": "sad",
+    "f01s056-007": "sad",
+    "f01s058-007": "surprise",
+    "f01s058-008": "happy",
+    "f01s058-009": "happy"
   },
-  "বনমালী": {
-   "gender": "male",
-   "note": "boatman from their village"
+  "units": {
+    "f01s008-009": [
+      {
+        "text": "অপূর্ব্ব কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আগে পাত্রী দেখা হউক তাহার পর স্থির হইবে।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s008-010": [
+      {
+        "text": "মা কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "পাত্রী দেখা হইয়াছে, সে জন্য তোকে ভাবিতে হইবে না।",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s010-009": [
+      {
+        "text": "অপূর্ব্ব কিয়ৎকাল গোঁফে তা দিয়া দিয়া অবশেষে গম্ভীরভাবে জিজ্ঞাসা করিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তুমি কি পড়?",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s010-012": [
+      {
+        "text": "চারুপাঠ দ্বিতীয় ভাগ, ব্যাকরণসার প্রথম ভাগ, ভূগোলবিবরণ, পাটিগণিত, ভারতবর্ষের ইতিহাস।",
+        "role": "character",
+        "speaker": "কনে",
+        "emotion": "fear"
+      }
+    ],
+    "f01s016-001": [
+      {
+        "text": "সন্ধ্যার সময়ে অন্তঃপুরে প্রবেশ করিলে মা তাহাকে জিজ্ঞাসা করিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "কেমন রে অপু, মেয়ে কেমন দেখ্‌লি?",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s016-002": [
+      {
+        "text": "পছন্দ হয় ত?",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s016-003": [
+      {
+        "text": "অপূর্ব্ব কিঞ্চিৎ অপ্রতিভভাবে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "মেয়ে দেখেছি মা, ওর মধ্যে একটিকে আমার পছন্দ হয়েচে।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s016-004": [
+      {
+        "text": "মা আশ্চর্য্য হইয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "তুই আবার ক’টি মেয়ে দেখ্‌লি?",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s017-002": [
+      {
+        "text": "সে রোখের মাথায় বলিয়া বসিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "মৃন্ময়ীকে ছাড়া আর কাহাকেও বিবাহ করিব না।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "command"
+      }
+    ],
+    "f01s019-003": [
+      {
+        "text": "তখন, পূজার সময় একসপ্তাহ ছুটি পাইবার সম্ভাবনা জানাইয়া সে পর্য্যন্ত বিবাহ স্থগিত রাখিবার জন্য দেশে চিঠি লিখিয়া দিল, কিন্তু অপূর্ব্বর মা কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "এই মাসে দিন ভাল আছে আর বিলম্ব করিতে পারিব না।",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s020-004": [
+      {
+        "text": "সে দুষ্ট পোনি ঘোড়ার মত ঘাড় বাঁকাইয়া পিছু হটিয়া বলিয়া বসিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "আমি বিবাহ করিব না।",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "anger"
+      }
+    ],
+    "f01s021-006": [
+      {
+        "text": "অত্যন্ত কঠিন মুখ করিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "দেখ বাছা, তুমি কিছু আর কচি খুঁকি নও, আমাদের ঘরে অমন বেহায়াপনা করিলে চলিবে না।",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "command"
+      }
+    ],
+    "f01s022-003": [
+      {
+        "text": "অপূর্ব্বকৃষ্ণ বিছানার মধ্যে অতি ধীরে ধীরে মৃন্ময়ীর নিকট ঈষৎ অগ্রসর হইয়া তাহার কানে কানে মৃদুস্বরে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“মৃন্ময়ী তুমি আমাকে ভালবাস না?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s022-004": [
+      {
+        "text": "মৃন্ময়ী সতেজে বলিয়া উঠিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“না!",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "anger"
+      }
+    ],
+    "f01s022-005": [
+      {
+        "text": "আমি তোমাকে কখ্‌খনই ভাল বাসব না।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "anger"
+      }
+    ],
+    "f01s023-001": [
+      {
+        "text": "অপূর্ব্ব ক্ষুণ্ণ হইয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“কেন আমি তোমার কাছে কি দোষ করেছি?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "sad"
+      }
+    ],
+    "f01s023-002": [
+      {
+        "text": "মৃন্ময়ী কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“তুমি আমাকে বিয়ে করলে কেন?”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "anger"
+      }
+    ],
+    "f01s024-004": [
+      {
+        "text": "অপূর্ব্ব কানের কাছে মুখ নত করিয়া মৃদুস্বরে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“আমি নুকিয়ে দরজা খুলে দিয়েছি।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s024-005": [
+      {
+        "text": "এস আমরা খিড়কির বাগানে পালিয়ে যাই।”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s024-006": [
+      {
+        "text": "মৃন্ময়ী প্রবলবেগে মাথা নাড়িয়া সতেজে সরোদনে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“না।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s024-007": [
+      {
+        "text": "অপূর্ব্ব তাহার চিবুক ধরিয়া মুখ তুলিয়া দিবার চেষ্টা করিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“একবার দেখ কে এসেছে!”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s024-010": [
+      {
+        "text": "অপূর্ব্ব কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“রাখাল তোমার সঙ্গে খেলা করতে এসেচে, খেলতে যাবে?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s024-011": [
+      {
+        "text": "সে বিরক্তি-উচ্ছ্বসিত স্বরে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“না।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "anger"
+      }
+    ],
+    "f01s025-003": [
+      {
+        "text": "মৃন্ময়ী শাশুড়িকে গিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“আমি বাবার কাছে যাব।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s025-005": [
+      {
+        "text": "“কোথায় ওর বাপ থাকে তার ঠিকানা নেই, বলে বাপের কাছে যাব!",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "anger"
+      }
+    ],
+    "f01s025-006": [
+      {
+        "text": "অনাসৃষ্টি আবদার!”",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "anger"
+      }
+    ],
+    "f01s025-008": [
+      {
+        "text": "আপনার ঘরে গিয়া দ্বার রুদ্ধ করিয়া নিতান্ত হতশ্বাস ব্যক্তি যেমন করিয়া দেবতার কাছে প্রার্থনা করে তেমনি করিয়া বলিতে লাগিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বাবা, আমাকে তুমি নিয়ে যাও!",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s025-009": [
+      {
+        "text": "এখানে আমার কেউ নেই!",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s025-010": [
+      {
+        "text": "এখানে থাক্‌লে আমি বাঁচব না।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s026-011": [
+      {
+        "text": "মৃন্ময়ী তাড়াতাড়ি তাহার কাছে গিয়া কাতর শ্রান্তস্বরে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“কুশীগঞ্জে আমি বাবার কাছে যাব, আমাকে তুমি সঙ্গে নিয়ে চল না!”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "sad"
+      }
+    ],
+    "f01s026-012": [
+      {
+        "text": "সে কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“কুশীগঞ্জ কোথায় আমি জানিনে।”",
+        "role": "character",
+        "speaker": "ডাকের রানার",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s027-003": [
+      {
+        "text": "মৃন্ময়ী ঘাটে নামিয়া একজন মাঝিকে ডাকিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“মাঝি, আমাকে কুশীগঞ্জে নিয়ে যাবে?”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s027-004": [
+      {
+        "text": "মাঝি তাহার উত্তর দিবার পূর্ব্বেই পাশের নৌকা হইতে একজন বলিয়া উঠিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“আরে কেও?",
+        "role": "character",
+        "speaker": "বনমালী",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s027-005": [
+      {
+        "text": "মিনু মা তুমি এখানে কোথা থেকে?”",
+        "role": "character",
+        "speaker": "বনমালী",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s027-006": [
+      {
+        "text": "মৃন্ময়ী উচ্ছ্বসিত ব্যগ্রতার সহিত বলিয়া উঠিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বনমালি, আমি কুশীগঞ্জে বাবার কাছে যাব, আমাকে তোর নৌকায় নিয়ে চল্‌।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "happy"
+      }
+    ],
+    "f01s027-007": [
+      {
+        "text": "বনমালী তাহাদের গ্রামের মাঝি; সে এই উচ্ছৃঙ্খল-প্রকৃতি বালিকাটিকে বিলক্ষণ চিনিত, সে কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বাবার কাছে যাবে?",
+        "role": "character",
+        "speaker": "বনমালী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s027-008": [
+      {
+        "text": "সেত বেশ কথা!",
+        "role": "character",
+        "speaker": "বনমালী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s027-009": [
+      {
+        "text": "চল আমি তোমাকে নিয়ে যাচ্চি।”",
+        "role": "character",
+        "speaker": "বনমালী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s029-001": [
+      {
+        "text": "অপূর্ব্ব লজ্জার মাথা খাইয়া মাকে আসিয়া বলিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“মা বৌকে দুই একদিনের জন্যে একবার বাপের বাড়ি পাঠিয়ে দিতে দোষ কি?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s030-001": [
+      {
+        "text": "তাহার পরদিন গভীর রাত্রে অপূর্ব্ব মৃন্ময়ীকে ধীরে ধীরে জাগ্রত করিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“মৃন্ময়ী, তোমার বাবার কাছে যাবে?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s030-002": [
+      {
+        "text": "মৃন্ময়ী সবেগে অপূর্ব্বর হাত চাপিয়া ধরিয়া সচকিত হইয়া কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“যাব।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "happy"
+      }
+    ],
+    "f01s030-003": [
+      {
+        "text": "অপূর্ব্ব চুপিচুপি কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“তবে এস আমরা দুজনে আস্তে আস্তে পালিয়ে যাই।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s030-004": [
+      {
+        "text": "আমি ঘাটে নৌকা ঠিক করে’ রেখেছি।”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s032-004": [
+      {
+        "text": "মৃন্ময়ী ডাকিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বাবা!”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "happy"
+      }
+    ],
+    "f01s033-003": [
+      {
+        "text": "মৃন্ময়ী কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বাবা আজ আমরা সকলে মিলিয়া রাঁধিব।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "happy"
+      }
+    ],
+    "f01s035-004": [
+      {
+        "text": "বিদায়ের দিন কন্যাকে বুকের কাছে টানিয়া তাহার মাথায় হাত রাখিয়া অশ্রুগদগদকণ্ঠে ঈশান কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“মা, তুমি শ্বশুরঘর উজ্জ্বল করিয়া লক্ষ্মী হইয়া থাকিয়ো।",
+        "role": "character",
+        "speaker": "ঈশান",
+        "emotion": "sad"
+      }
+    ],
+    "f01s035-005": [
+      {
+        "text": "কেহ যেন আমার মীনুর কোন দোষ না ধরিতে পারে!”",
+        "role": "character",
+        "speaker": "ঈশান",
+        "emotion": "sad"
+      }
+    ],
+    "f01s036-005": [
+      {
+        "text": "অবশেষে অসহ্য হইয়া উঠিলে অপূর্ব্ব আসিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“মা, কালেজ খুলেচে এখন আমাকে আইন পড়তে যেতে হবে।”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s037-001": [
+      {
+        "text": "মা উদাসীন ভাবে কহিলেন ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বৌয়ের কি করবে?”",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "neutral"
+      }
+    ],
+    "f01s037-002": [
+      {
+        "text": "অপূর্ব্ব কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বৌ এখানেই থাক্‌!”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s037-003": [
+      {
+        "text": "মা কহিলেন ",
+        "role": "narrator"
+      },
+      {
+        "text": "“না বাপু, কাজ নাই!",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "neutral"
+      }
+    ],
+    "f01s037-004": [
+      {
+        "text": "তুমি তাকে তোমার সঙ্গেই নিয়ে যাও।”",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "neutral"
+      }
+    ],
+    "f01s037-006": [
+      {
+        "text": "অপূর্ব্ব অভিমানক্ষুঃস্বরে কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“আচ্ছা!”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "sad"
+      }
+    ],
+    "f01s037-010": [
+      {
+        "text": "বিষন্ন কণ্ঠে কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“মৃন্ময়ী, আমার সঙ্গে কলকাতায় যেতে তোমার ইচ্ছে করচে না?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "sad"
+      }
+    ],
+    "f01s038-001": [
+      {
+        "text": "মৃন্ময়ী কহিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—“না।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s038-002": [
+      {
+        "text": "অপূর্ব্ব জিজ্ঞাসা করিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“তুমি আমাকে ভালবাস না?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "sad"
+      }
+    ],
+    "f01s038-005": [
+      {
+        "text": "অপূর্ব্ব প্রশ্ন করিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“রাখালকে ছেড়ে যেতে তোমার মন কেমন করচে?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s038-006": [
+      {
+        "text": "মৃন্ময়ী অনায়াসে উত্তর করিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“হাঁ।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s038-008": [
+      {
+        "text": "কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“আমি অনেক কাল আর বাড়ি আসতে পাব না।”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "sad"
+      }
+    ],
+    "f01s038-010": [
+      {
+        "text": "“বোধ হয় দু-বৎসর কিম্বা তারো বেশি হতে পারে।”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "sad"
+      }
+    ],
+    "f01s038-011": [
+      {
+        "text": "মৃন্ময়ী আদেশ করিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“তুমি ফিরে আস্‌বার সময় রাখালের জন্যে একটা তিনমুখো রাজাসের ছুরি কিনে নিয়ে এসো।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "command"
+      }
+    ],
+    "f01s039-001": [
+      {
+        "text": "অপূর্ব্ব শয়ান অবস্থা হইতে ঈষৎ উত্থিত হইয়া কছিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“তুমি তা হলে এইখানেই থাকবে?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s039-002": [
+      {
+        "text": "মৃন্ময়ী কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“হাঁ, আমি মায়ের কাছে গিয়ে থাক্‌ব!”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s039-003": [
+      {
+        "text": "অপূর্ব্ব নিশ্বাস ফেলিয়া কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“আচ্ছা, তাই থেকো!",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "sad"
+      }
+    ],
+    "f01s039-004": [
+      {
+        "text": "যতদিন না তুমি আমাকে আসবার জন্যে চিঠি লিখ্‌বে, আমি আস্‌ব না।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "sad"
+      }
+    ],
+    "f01s039-005": [
+      {
+        "text": "খুব খুসি হলে?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "sad"
+      }
+    ],
+    "f01s040-006": [
+      {
+        "text": "ভোরের বেলায় অপূর্ব্ব মৃন্ময়ীকে জাগাইয়া দিল— কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“মৃন্ময়ী আমার যাইবার সময় হইয়াছে।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s040-007": [
+      {
+        "text": "চল তোমাকে তোমার মার বাড়ি রাখিয়া আসি।”—",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s041-001": [
+      {
+        "text": "মৃন্ময়ী শয্যাত্যাগ করিয়া উঠিয়া দাঁড়াইলে অপূর্ব্ব তাহার দুই হাত ধরিয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“এখন আমার একটি প্রার্থনা আছে।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s041-002": [
+      {
+        "text": "আমি অনেক সময় তোমার অনেক সাহায্য করিয়াছি আজ যাইবার সময় তাহার একটি পুরস্কার দিবে?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s041-003": [
+      {
+        "text": "মৃন্ময়ী বিস্মিত হইয়া কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“কি?”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "surprise"
+      }
+    ],
+    "f01s041-004": [
+      {
+        "text": "অপূর্ব্ব কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“তুমি ইচ্ছা করিয়া ভালবাসিয়া আমাকে একটি চুম্বন দাও।”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s042-007": [
+      {
+        "text": "“ভাবিয়া দেখিলাম, বৌকে আমার সঙ্গে কলিকাতায় লইয়া গেলে আমার পড়াশুনার ব্যাঘাত হইবে, সেখানে উহারও কেহ সঙ্গিনী নাই।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s042-008": [
+      {
+        "text": "তুমি ত তাহাকে এ বাড়িতে রাখিতে চাও না আমি তাই তাহার মার বাড়িতেই রাখিয়া আসিলাম।”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s046-001": [
+      {
+        "text": "মৃন্ময়ী মাকে বলিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“মা আমাকে শ্বশুর-বাড়ি রেখে আয়।”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s050-004": [
+      {
+        "text": "খুব যত্ন করিয়া ধরিয়া লাইন বাঁঁকা করিয়া অঙ্গুলিতে কালি মাখিয়া অক্ষর ছোট বড় করিয়া উপরে কোন সম্বোধন না করিয়া একেবারে লিখিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—তুমি আমাকে চিঠি লেখ না কেন।",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s050-005": [
+      {
+        "text": "তুমি কেমন আছ আর তুমি বাড়ি এস।",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s050-008": [
+      {
+        "text": "মৃন্ময়ীও তাহা বুঝিল; এই জন্য আরো অনেকক্ষণ ভাবিয়া ভাবিয়া আর কয়েকটি নূতন কথা যোগ করিয়া দিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—এইবার তুমি আমাকে চিঠি লিখো,",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s050-009": [
+      {
+        "text": "আর কেমন আছ লিখো, আর বাড়ি এস, মা ভাল আছেন বিশু পুঁটি ভাল আছে, কাল আমাদের কালোগরুর বাছুর হয়েছে।",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s052-005": [
+      {
+        "text": "দাসীকে বারবার করিয়া জিজ্ঞাস করিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“সে চিঠিখান তুই কি ডাকে দিয়ে এসেছিস্‌?”",
+        "role": "character",
+        "speaker": "মৃন্ময়ী",
+        "emotion": "fear"
+      }
+    ],
+    "f01s052-006": [
+      {
+        "text": "দাসী তাহাকে সহস্রবার আশ্বাস দিয়া কহিল ",
+        "role": "narrator"
+      },
+      {
+        "text": "“হাঁগো, আমি নিজের হাতে বাক্সের মধ্যে ফেলে দিয়েছি।",
+        "role": "character",
+        "speaker": "দাসী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s052-007": [
+      {
+        "text": "বাবু সে এত দিনে কোন্‌ কালে পেয়েছে।”",
+        "role": "character",
+        "speaker": "দাসী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s053-001": [
+      {
+        "text": "অবশেষে অপূর্ব্বর মা একদিন মৃণ্ময়ীকে ডাকিয়া কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“বৌমা, অপূ অনেক দিন ত বাড়ি এল না, তাই মনে করচি একবার কলকাতায় গিয়ে তাকে দেখে’ আসি গে।",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s053-002": [
+      {
+        "text": "তুমি সঙ্গে যাবে?”",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s055-001": [
+      {
+        "text": "সাক্ষাৎমাত্রই মাকে জিজ্ঞাসা করিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“মা, সব ভাল ত?”",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "fear"
+      }
+    ],
+    "f01s055-002": [
+      {
+        "text": "মা কহিলেন, ",
+        "role": "narrator"
+      },
+      {
+        "text": "“সব ভাল।",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s055-003": [
+      {
+        "text": "তুই ছুটিতে বাড়ি গেলি না, তাই আমি তোকে নিতে এসেচি।”",
+        "role": "character",
+        "speaker": "অপূর্ব্বর মা",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s055-005": [
+      {
+        "text": "আহারের সময় ভগ্নী জিজ্ঞাসা করিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "দাদা এবার বৌকে তোমার সঙ্গে আনলে না কেন?",
+        "role": "character",
+        "speaker": "ভগ্নী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s055-006": [
+      {
+        "text": "দাদা গম্ভীরভাবে কহিতে লাগিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—আইনের পড়াশুনা ইত্যাদি।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s055-007": [
+      {
+        "text": "ভগ্নীপতি হাসিয়া কহিল",
+        "role": "narrator"
+      },
+      {
+        "text": "—ও সমস্ত মিথ্যা ওজর!",
+        "role": "character",
+        "speaker": "ভগ্নীপতি",
+        "emotion": "happy"
+      }
+    ],
+    "f01s055-008": [
+      {
+        "text": "আমাদের ভয়ে আন্‌তে সাহস হয় না!",
+        "role": "character",
+        "speaker": "ভগ্নীপতি",
+        "emotion": "happy"
+      }
+    ],
+    "f01s056-001": [
+      {
+        "text": "ভগ্নী কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "ভয়ঙ্কর লোকটাই বটে!",
+        "role": "character",
+        "speaker": "ভগ্নী",
+        "emotion": "happy"
+      }
+    ],
+    "f01s056-002": [
+      {
+        "text": "ছেলেমানুষ হঠাৎ দেখ্‌লে আচম্কা আঁৎকে উঠ্‌তে পারে!",
+        "role": "character",
+        "speaker": "ভগ্নী",
+        "emotion": "happy"
+      }
+    ],
+    "f01s057-002": [
+      {
+        "text": "ভগ্নী কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "দাদা, আজ আমাদের এখানেই থেকে যাও।",
+        "role": "character",
+        "speaker": "ভগ্নী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s057-003": [
+      {
+        "text": "দাদা কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "না বাড়ি যেতে হবে; কাজ আছে।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s057-004": [
+      {
+        "text": "ভগ্নীপতি কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "রাত্রে তোমার আবার এত কাজ কিসের?",
+        "role": "character",
+        "speaker": "ভগ্নীপতি",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s057-005": [
+      {
+        "text": "এখানে একরাত্রি থেকে গেলে তোমার ত কারো কাছে জবাবদিহি করতে হবে না, তোমার ভাবনা কি?",
+        "role": "character",
+        "speaker": "ভগ্নীপতি",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s057-007": [
+      {
+        "text": "ভগ্নী কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "দাদা তোমাকে শ্রান্ত দেখাচ্চে, তুমি আর দেরি কোরো না, চল শুতে চল।",
+        "role": "character",
+        "speaker": "ভগ্নী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s058-004": [
+      {
+        "text": "ভগ্নী কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "বাতাসে আলো নিবে গেছে দেখ্‌চি, তা আলো এনে দেব কি দাদা?",
+        "role": "character",
+        "speaker": "ভগ্নী",
+        "emotion": "conversation"
+      }
+    ],
+    "f01s058-005": [
+      {
+        "text": "অপূর্ব্ব কহিল, ",
+        "role": "narrator"
+      },
+      {
+        "text": "না দরকার নেই, আমি রাত্রে আলো রাখিনে।",
+        "role": "character",
+        "speaker": "অপূর্ব্ব",
+        "emotion": "conversation"
+      }
+    ]
   },
-  "ডাকের রানার": {
-   "gender": "male",
-   "note": "the mail runner Mrinmoyee asks for help"
-  },
-  "দাসী": {
-   "gender": "female",
-   "note": "trusted maid who posted Mrinmoyee's letter"
-  },
-  "কনে": {
-   "gender": "female",
-   "note": "the girl first shown to Apurba as prospective bride (Rakhal's sister)"
-  },
-  "ভগ্নী": {
-   "gender": "female",
-   "note": "Apurba's sister in Calcutta"
-  },
-  "ভগ্নীপতি": {
-   "gender": "male",
-   "note": "Apurba's brother-in-law"
-  }
- },
- "units": {
-  "f01s008-009": [
-   {
-    "text": "অপূর্ব্ব কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আগে পাত্রী দেখা হউক তাহার পর স্থির হইবে।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s008-010": [
-   {
-    "text": "মা কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "পাত্রী দেখা হইয়াছে, সে জন্য তোকে ভাবিতে হইবে না।",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s010-009": [
-   {
-    "text": "অপূর্ব্ব কিয়ৎকাল গোঁফে তা দিয়া দিয়া অবশেষে গম্ভীরভাবে জিজ্ঞাসা করিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তুমি কি পড়?",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s010-012": [
-   {
-    "text": "চারুপাঠ দ্বিতীয় ভাগ, ব্যাকরণসার প্রথম ভাগ, ভূগোলবিবরণ, পাটিগণিত, ভারতবর্ষের ইতিহাস।",
-    "role": "character",
-    "speaker": "কনে"
-   }
-  ],
-  "f01s016-001": [
-   {
-    "text": "সন্ধ্যার সময়ে অন্তঃপুরে প্রবেশ করিলে মা তাহাকে জিজ্ঞাসা করিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "কেমন রে অপু, মেয়ে কেমন দেখ্‌লি?",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s016-002": [
-   {
-    "text": "পছন্দ হয় ত?",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s016-003": [
-   {
-    "text": "অপূর্ব্ব কিঞ্চিৎ অপ্রতিভভাবে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "মেয়ে দেখেছি মা, ওর মধ্যে একটিকে আমার পছন্দ হয়েচে।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s016-004": [
-   {
-    "text": "মা আশ্চর্য্য হইয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "তুই আবার ক’টি মেয়ে দেখ্‌লি?",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s017-002": [
-   {
-    "text": "সে রোখের মাথায় বলিয়া বসিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "মৃন্ময়ীকে ছাড়া আর কাহাকেও বিবাহ করিব না।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s019-003": [
-   {
-    "text": "তখন, পূজার সময় একসপ্তাহ ছুটি পাইবার সম্ভাবনা জানাইয়া সে পর্য্যন্ত বিবাহ স্থগিত রাখিবার জন্য দেশে চিঠি লিখিয়া দিল, কিন্তু অপূর্ব্বর মা কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "এই মাসে দিন ভাল আছে আর বিলম্ব করিতে পারিব না।",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s020-004": [
-   {
-    "text": "সে দুষ্ট পোনি ঘোড়ার মত ঘাড় বাঁকাইয়া পিছু হটিয়া বলিয়া বসিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "আমি বিবাহ করিব না।",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s021-006": [
-   {
-    "text": "অত্যন্ত কঠিন মুখ করিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "দেখ বাছা, তুমি কিছু আর কচি খুঁকি নও, আমাদের ঘরে অমন বেহায়াপনা করিলে চলিবে না।",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s022-003": [
-   {
-    "text": "অপূর্ব্বকৃষ্ণ বিছানার মধ্যে অতি ধীরে ধীরে মৃন্ময়ীর নিকট ঈষৎ অগ্রসর হইয়া তাহার কানে কানে মৃদুস্বরে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“মৃন্ময়ী তুমি আমাকে ভালবাস না?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s022-004": [
-   {
-    "text": "মৃন্ময়ী সতেজে বলিয়া উঠিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“না!",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s022-005": [
-   {
-    "text": "আমি তোমাকে কখ্‌খনই ভাল বাসব না।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s023-001": [
-   {
-    "text": "অপূর্ব্ব ক্ষুণ্ণ হইয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“কেন আমি তোমার কাছে কি দোষ করেছি?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s023-002": [
-   {
-    "text": "মৃন্ময়ী কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“তুমি আমাকে বিয়ে করলে কেন?”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s024-004": [
-   {
-    "text": "অপূর্ব্ব কানের কাছে মুখ নত করিয়া মৃদুস্বরে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“আমি নুকিয়ে দরজা খুলে দিয়েছি।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s024-005": [
-   {
-    "text": "এস আমরা খিড়কির বাগানে পালিয়ে যাই।”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s024-006": [
-   {
-    "text": "মৃন্ময়ী প্রবলবেগে মাথা নাড়িয়া সতেজে সরোদনে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“না।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s024-007": [
-   {
-    "text": "অপূর্ব্ব তাহার চিবুক ধরিয়া মুখ তুলিয়া দিবার চেষ্টা করিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“একবার দেখ কে এসেছে!”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s024-010": [
-   {
-    "text": "অপূর্ব্ব কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“রাখাল তোমার সঙ্গে খেলা করতে এসেচে, খেলতে যাবে?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s024-011": [
-   {
-    "text": "সে বিরক্তি-উচ্ছ্বসিত স্বরে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“না।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s025-003": [
-   {
-    "text": "মৃন্ময়ী শাশুড়িকে গিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“আমি বাবার কাছে যাব।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s025-005": [
-   {
-    "text": "“কোথায় ওর বাপ থাকে তার ঠিকানা নেই, বলে বাপের কাছে যাব!",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s025-006": [
-   {
-    "text": "অনাসৃষ্টি আবদার!”",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s025-008": [
-   {
-    "text": "আপনার ঘরে গিয়া দ্বার রুদ্ধ করিয়া নিতান্ত হতশ্বাস ব্যক্তি যেমন করিয়া দেবতার কাছে প্রার্থনা করে তেমনি করিয়া বলিতে লাগিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বাবা, আমাকে তুমি নিয়ে যাও!",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s025-009": [
-   {
-    "text": "এখানে আমার কেউ নেই!",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s025-010": [
-   {
-    "text": "এখানে থাক্‌লে আমি বাঁচব না।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s026-011": [
-   {
-    "text": "মৃন্ময়ী তাড়াতাড়ি তাহার কাছে গিয়া কাতর শ্রান্তস্বরে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“কুশীগঞ্জে আমি বাবার কাছে যাব, আমাকে তুমি সঙ্গে নিয়ে চল না!”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s026-012": [
-   {
-    "text": "সে কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“কুশীগঞ্জ কোথায় আমি জানিনে।”",
-    "role": "character",
-    "speaker": "ডাকের রানার"
-   }
-  ],
-  "f01s027-003": [
-   {
-    "text": "মৃন্ময়ী ঘাটে নামিয়া একজন মাঝিকে ডাকিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“মাঝি, আমাকে কুশীগঞ্জে নিয়ে যাবে?”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s027-004": [
-   {
-    "text": "মাঝি তাহার উত্তর দিবার পূর্ব্বেই পাশের নৌকা হইতে একজন বলিয়া উঠিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“আরে কেও?",
-    "role": "character",
-    "speaker": "বনমালী"
-   }
-  ],
-  "f01s027-005": [
-   {
-    "text": "মিনু মা তুমি এখানে কোথা থেকে?”",
-    "role": "character",
-    "speaker": "বনমালী"
-   }
-  ],
-  "f01s027-006": [
-   {
-    "text": "মৃন্ময়ী উচ্ছ্বসিত ব্যগ্রতার সহিত বলিয়া উঠিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বনমালি, আমি কুশীগঞ্জে বাবার কাছে যাব, আমাকে তোর নৌকায় নিয়ে চল্‌।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s027-007": [
-   {
-    "text": "বনমালী তাহাদের গ্রামের মাঝি; সে এই উচ্ছৃঙ্খল-প্রকৃতি বালিকাটিকে বিলক্ষণ চিনিত, সে কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বাবার কাছে যাবে?",
-    "role": "character",
-    "speaker": "বনমালী"
-   }
-  ],
-  "f01s027-008": [
-   {
-    "text": "সেত বেশ কথা!",
-    "role": "character",
-    "speaker": "বনমালী"
-   }
-  ],
-  "f01s027-009": [
-   {
-    "text": "চল আমি তোমাকে নিয়ে যাচ্চি।”",
-    "role": "character",
-    "speaker": "বনমালী"
-   }
-  ],
-  "f01s029-001": [
-   {
-    "text": "অপূর্ব্ব লজ্জার মাথা খাইয়া মাকে আসিয়া বলিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“মা বৌকে দুই একদিনের জন্যে একবার বাপের বাড়ি পাঠিয়ে দিতে দোষ কি?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s030-001": [
-   {
-    "text": "তাহার পরদিন গভীর রাত্রে অপূর্ব্ব মৃন্ময়ীকে ধীরে ধীরে জাগ্রত করিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“মৃন্ময়ী, তোমার বাবার কাছে যাবে?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s030-002": [
-   {
-    "text": "মৃন্ময়ী সবেগে অপূর্ব্বর হাত চাপিয়া ধরিয়া সচকিত হইয়া কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“যাব।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s030-003": [
-   {
-    "text": "অপূর্ব্ব চুপিচুপি কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“তবে এস আমরা দুজনে আস্তে আস্তে পালিয়ে যাই।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s030-004": [
-   {
-    "text": "আমি ঘাটে নৌকা ঠিক করে’ রেখেছি।”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s032-004": [
-   {
-    "text": "মৃন্ময়ী ডাকিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বাবা!”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s033-003": [
-   {
-    "text": "মৃন্ময়ী কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বাবা আজ আমরা সকলে মিলিয়া রাঁধিব।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s035-004": [
-   {
-    "text": "বিদায়ের দিন কন্যাকে বুকের কাছে টানিয়া তাহার মাথায় হাত রাখিয়া অশ্রুগদগদকণ্ঠে ঈশান কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“মা, তুমি শ্বশুরঘর উজ্জ্বল করিয়া লক্ষ্মী হইয়া থাকিয়ো।",
-    "role": "character",
-    "speaker": "ঈশান"
-   }
-  ],
-  "f01s035-005": [
-   {
-    "text": "কেহ যেন আমার মীনুর কোন দোষ না ধরিতে পারে!”",
-    "role": "character",
-    "speaker": "ঈশান"
-   }
-  ],
-  "f01s036-005": [
-   {
-    "text": "অবশেষে অসহ্য হইয়া উঠিলে অপূর্ব্ব আসিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“মা, কালেজ খুলেচে এখন আমাকে আইন পড়তে যেতে হবে।”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s037-001": [
-   {
-    "text": "মা উদাসীন ভাবে কহিলেন ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বৌয়ের কি করবে?”",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s037-002": [
-   {
-    "text": "অপূর্ব্ব কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বৌ এখানেই থাক্‌!”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s037-003": [
-   {
-    "text": "মা কহিলেন ",
-    "role": "narrator"
-   },
-   {
-    "text": "“না বাপু, কাজ নাই!",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s037-004": [
-   {
-    "text": "তুমি তাকে তোমার সঙ্গেই নিয়ে যাও।”",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s037-006": [
-   {
-    "text": "অপূর্ব্ব অভিমানক্ষুঃস্বরে কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“আচ্ছা!”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s037-010": [
-   {
-    "text": "বিষন্ন কণ্ঠে কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“মৃন্ময়ী, আমার সঙ্গে কলকাতায় যেতে তোমার ইচ্ছে করচে না?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s038-001": [
-   {
-    "text": "মৃন্ময়ী কহিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—“না।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s038-002": [
-   {
-    "text": "অপূর্ব্ব জিজ্ঞাসা করিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“তুমি আমাকে ভালবাস না?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s038-005": [
-   {
-    "text": "অপূর্ব্ব প্রশ্ন করিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“রাখালকে ছেড়ে যেতে তোমার মন কেমন করচে?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s038-006": [
-   {
-    "text": "মৃন্ময়ী অনায়াসে উত্তর করিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“হাঁ।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s038-008": [
-   {
-    "text": "কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“আমি অনেক কাল আর বাড়ি আসতে পাব না।”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s038-010": [
-   {
-    "text": "“বোধ হয় দু-বৎসর কিম্বা তারো বেশি হতে পারে।”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s038-011": [
-   {
-    "text": "মৃন্ময়ী আদেশ করিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“তুমি ফিরে আস্‌বার সময় রাখালের জন্যে একটা তিনমুখো রাজাসের ছুরি কিনে নিয়ে এসো।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s039-001": [
-   {
-    "text": "অপূর্ব্ব শয়ান অবস্থা হইতে ঈষৎ উত্থিত হইয়া কছিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“তুমি তা হলে এইখানেই থাকবে?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s039-002": [
-   {
-    "text": "মৃন্ময়ী কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“হাঁ, আমি মায়ের কাছে গিয়ে থাক্‌ব!”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s039-003": [
-   {
-    "text": "অপূর্ব্ব নিশ্বাস ফেলিয়া কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“আচ্ছা, তাই থেকো!",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s039-004": [
-   {
-    "text": "যতদিন না তুমি আমাকে আসবার জন্যে চিঠি লিখ্‌বে, আমি আস্‌ব না।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s039-005": [
-   {
-    "text": "খুব খুসি হলে?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s040-006": [
-   {
-    "text": "ভোরের বেলায় অপূর্ব্ব মৃন্ময়ীকে জাগাইয়া দিল— কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“মৃন্ময়ী আমার যাইবার সময় হইয়াছে।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s040-007": [
-   {
-    "text": "চল তোমাকে তোমার মার বাড়ি রাখিয়া আসি।”—",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s041-001": [
-   {
-    "text": "মৃন্ময়ী শয্যাত্যাগ করিয়া উঠিয়া দাঁড়াইলে অপূর্ব্ব তাহার দুই হাত ধরিয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“এখন আমার একটি প্রার্থনা আছে।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s041-002": [
-   {
-    "text": "আমি অনেক সময় তোমার অনেক সাহায্য করিয়াছি আজ যাইবার সময় তাহার একটি পুরস্কার দিবে?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s041-003": [
-   {
-    "text": "মৃন্ময়ী বিস্মিত হইয়া কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“কি?”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s041-004": [
-   {
-    "text": "অপূর্ব্ব কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“তুমি ইচ্ছা করিয়া ভালবাসিয়া আমাকে একটি চুম্বন দাও।”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s042-007": [
-   {
-    "text": "“ভাবিয়া দেখিলাম, বৌকে আমার সঙ্গে কলিকাতায় লইয়া গেলে আমার পড়াশুনার ব্যাঘাত হইবে, সেখানে উহারও কেহ সঙ্গিনী নাই।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s042-008": [
-   {
-    "text": "তুমি ত তাহাকে এ বাড়িতে রাখিতে চাও না আমি তাই তাহার মার বাড়িতেই রাখিয়া আসিলাম।”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s046-001": [
-   {
-    "text": "মৃন্ময়ী মাকে বলিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“মা আমাকে শ্বশুর-বাড়ি রেখে আয়।”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s050-004": [
-   {
-    "text": "খুব যত্ন করিয়া ধরিয়া লাইন বাঁঁকা করিয়া অঙ্গুলিতে কালি মাখিয়া অক্ষর ছোট বড় করিয়া উপরে কোন সম্বোধন না করিয়া একেবারে লিখিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—তুমি আমাকে চিঠি লেখ না কেন।",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s050-005": [
-   {
-    "text": "তুমি কেমন আছ আর তুমি বাড়ি এস।",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s050-008": [
-   {
-    "text": "মৃন্ময়ীও তাহা বুঝিল; এই জন্য আরো অনেকক্ষণ ভাবিয়া ভাবিয়া আর কয়েকটি নূতন কথা যোগ করিয়া দিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—এইবার তুমি আমাকে চিঠি লিখো,",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s050-009": [
-   {
-    "text": "আর কেমন আছ লিখো, আর বাড়ি এস, মা ভাল আছেন বিশু পুঁটি ভাল আছে, কাল আমাদের কালোগরুর বাছুর হয়েছে।",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s052-005": [
-   {
-    "text": "দাসীকে বারবার করিয়া জিজ্ঞাস করিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“সে চিঠিখান তুই কি ডাকে দিয়ে এসেছিস্‌?”",
-    "role": "character",
-    "speaker": "মৃন্ময়ী"
-   }
-  ],
-  "f01s052-006": [
-   {
-    "text": "দাসী তাহাকে সহস্রবার আশ্বাস দিয়া কহিল ",
-    "role": "narrator"
-   },
-   {
-    "text": "“হাঁগো, আমি নিজের হাতে বাক্সের মধ্যে ফেলে দিয়েছি।",
-    "role": "character",
-    "speaker": "দাসী"
-   }
-  ],
-  "f01s052-007": [
-   {
-    "text": "বাবু সে এত দিনে কোন্‌ কালে পেয়েছে।”",
-    "role": "character",
-    "speaker": "দাসী"
-   }
-  ],
-  "f01s053-001": [
-   {
-    "text": "অবশেষে অপূর্ব্বর মা একদিন মৃণ্ময়ীকে ডাকিয়া কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“বৌমা, অপূ অনেক দিন ত বাড়ি এল না, তাই মনে করচি একবার কলকাতায় গিয়ে তাকে দেখে’ আসি গে।",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s053-002": [
-   {
-    "text": "তুমি সঙ্গে যাবে?”",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s055-001": [
-   {
-    "text": "সাক্ষাৎমাত্রই মাকে জিজ্ঞাসা করিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“মা, সব ভাল ত?”",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s055-002": [
-   {
-    "text": "মা কহিলেন, ",
-    "role": "narrator"
-   },
-   {
-    "text": "“সব ভাল।",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s055-003": [
-   {
-    "text": "তুই ছুটিতে বাড়ি গেলি না, তাই আমি তোকে নিতে এসেচি।”",
-    "role": "character",
-    "speaker": "অপূর্ব্বর মা"
-   }
-  ],
-  "f01s055-005": [
-   {
-    "text": "আহারের সময় ভগ্নী জিজ্ঞাসা করিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "দাদা এবার বৌকে তোমার সঙ্গে আনলে না কেন?",
-    "role": "character",
-    "speaker": "ভগ্নী"
-   }
-  ],
-  "f01s055-006": [
-   {
-    "text": "দাদা গম্ভীরভাবে কহিতে লাগিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—আইনের পড়াশুনা ইত্যাদি।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s055-007": [
-   {
-    "text": "ভগ্নীপতি হাসিয়া কহিল",
-    "role": "narrator"
-   },
-   {
-    "text": "—ও সমস্ত মিথ্যা ওজর!",
-    "role": "character",
-    "speaker": "ভগ্নীপতি"
-   }
-  ],
-  "f01s055-008": [
-   {
-    "text": "আমাদের ভয়ে আন্‌তে সাহস হয় না!",
-    "role": "character",
-    "speaker": "ভগ্নীপতি"
-   }
-  ],
-  "f01s056-001": [
-   {
-    "text": "ভগ্নী কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "ভয়ঙ্কর লোকটাই বটে!",
-    "role": "character",
-    "speaker": "ভগ্নী"
-   }
-  ],
-  "f01s056-002": [
-   {
-    "text": "ছেলেমানুষ হঠাৎ দেখ্‌লে আচম্কা আঁৎকে উঠ্‌তে পারে!",
-    "role": "character",
-    "speaker": "ভগ্নী"
-   }
-  ],
-  "f01s057-002": [
-   {
-    "text": "ভগ্নী কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "দাদা, আজ আমাদের এখানেই থেকে যাও।",
-    "role": "character",
-    "speaker": "ভগ্নী"
-   }
-  ],
-  "f01s057-003": [
-   {
-    "text": "দাদা কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "না বাড়ি যেতে হবে; কাজ আছে।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ],
-  "f01s057-004": [
-   {
-    "text": "ভগ্নীপতি কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "রাত্রে তোমার আবার এত কাজ কিসের?",
-    "role": "character",
-    "speaker": "ভগ্নীপতি"
-   }
-  ],
-  "f01s057-005": [
-   {
-    "text": "এখানে একরাত্রি থেকে গেলে তোমার ত কারো কাছে জবাবদিহি করতে হবে না, তোমার ভাবনা কি?",
-    "role": "character",
-    "speaker": "ভগ্নীপতি"
-   }
-  ],
-  "f01s057-007": [
-   {
-    "text": "ভগ্নী কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "দাদা তোমাকে শ্রান্ত দেখাচ্চে, তুমি আর দেরি কোরো না, চল শুতে চল।",
-    "role": "character",
-    "speaker": "ভগ্নী"
-   }
-  ],
-  "f01s058-004": [
-   {
-    "text": "ভগ্নী কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "বাতাসে আলো নিবে গেছে দেখ্‌চি, তা আলো এনে দেব কি দাদা?",
-    "role": "character",
-    "speaker": "ভগ্নী"
-   }
-  ],
-  "f01s058-005": [
-   {
-    "text": "অপূর্ব্ব কহিল, ",
-    "role": "narrator"
-   },
-   {
-    "text": "না দরকার নেই, আমি রাত্রে আলো রাখিনে।",
-    "role": "character",
-    "speaker": "অপূর্ব্ব"
-   }
-  ]
- },
- "notes": "Unmarked sadhu-bhasha replies (e.g. f01s008-009/010, f01s016-*, f01s019-003, f01s055-005..f01s058-005) treated as direct speech since they use direct forms (তোকে, দাদা, আমাদের). Indirect/reported lines kept with narrator: f01s008-007, f01s008-011, f01s035-003 ('ঈশান কহিল কাজ নাই'), f01s050-001 (recalled promise), f01s054-006, f01s055-004. Thoughts kept with narrator: f01s009-004/005, f01s023-004, f01s047-006..010, f01s048-006, f01s049-001. Mrinmoyee's letter (f01s050-004/005/008/009) voiced as her. f01s025-008..010 is her spoken prayer to her absent father (বলিতে লাগিল), voiced as her. The one who calls from the next boat (f01s027-004/005) is Banamali, identified in f01s027-007."
+  "notes": "Unmarked sadhu-bhasha replies (e.g. f01s008-009/010, f01s016-*, f01s019-003, f01s055-005..f01s058-005) treated as direct speech since they use direct forms (তোকে, দাদা, আমাদের). Indirect/reported lines kept with narrator: f01s008-007, f01s008-011, f01s035-003 ('ঈশান কহিল কাজ নাই'), f01s050-001 (recalled promise), f01s054-006, f01s055-004. Thoughts kept with narrator: f01s009-004/005, f01s023-004, f01s047-006..010, f01s048-006, f01s049-001. Mrinmoyee's letter (f01s050-004/005/008/009) voiced as her. f01s025-008..010 is her spoken prayer to her absent father (বলিতে লাগিল), voiced as her. The one who calls from the next boat (f01s027-004/005) is Banamali, identified in f01s027-007."
 }

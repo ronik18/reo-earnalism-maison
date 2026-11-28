@@ -156,3 +156,15 @@
   4. `evidence` (`job-dc4tlc7f3r2c73cnd1vg`) recorded it, then `publish` (`job-dc4tlmjl550s73ami9c0`) ran.
   5. `335dd363` went live at 19:33:12Z. `3cb6a0b9` is retired, and reader state moves with the switch.
   6. Live check: the reader shows "রাত্রিযাপন করিবেন না।" in ¶6, and the old wording is gone.
+
+## #80 deploy and বিচারক Maison audio published (28 Nov 2026)
+
+- **Merge:** ronik18/reo-earnalism-maison#80, squash commit `5476fcc`, merged after CI passed on head `69d5e4a`. It carries local audio-chapter streaming with byte ranges (parity with R2), the বিচারক audio browser report, the pipeline narration imports, the 13 casting files and the per-unit narration redo.
+- **Deploy:** `dep-dc562kvf3r2c73dlsaeg` is live. No migrations. No static-release change.
+- **Publish:** owner "Audio approved" (Claude session, 2026-11-27T20:53:37Z) → `attach_audiovisual_audio publish bicharak --publisher 649b8725-… --browser-report docs/evidence/publication-browser-20261128-bicharak-audio.json` (`job-dc566a8u01pc738rej20`, succeeded).
+  - Edition `9481e1ad-dc15-4b8a-a81c-8752daebec61` (slug `bicharak`) now has live revision `67ad5cee-8afd-445d-8c32-b1bd3c8e0fae`; `5206c8ca-c195-44fa-aa37-711c764bb400` is retired.
+- **Live checks:**
+  - Read-only production job `job-dc5adk6c6qcc738b9gsg` (succeeded): the live revision's audio asset `39b42989…` is ready with prepared-audio evidence (1,252,560 ms); a 120 s presigned R2 GET returns 206 `audio/mpeg` for bytes 0–1023 and 7,000,000–7,000,999; the full 15,031,053 bytes match sha256 `af296d06…`.
+  - Signed out: `/en/titles/bicharak/` returns 200; `/en/listen/<edition>/` redirects to sign-in with `return_to`; no page errors.
+  - Not certified here: signed-in playback in a real browser on production (no test account is created on production); the replica browser report covers it.
+- **Gap found:** `/en/listen/<edition>/preview/` returns 404. The owner-approved 1:53 public preview (`deliverables/bicharak/2026-11-27/preview.mp3`) is not attached to the revision as a `preview_audio` asset, and the release has no command that attaches one. Follow-up.

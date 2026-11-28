@@ -1,0 +1,14 @@
+{
+  "bytes": 1364877,
+  "content_type": "audio/mpeg",
+  "cut_at_ms": 113669,
+  "cut_method": "pause",
+  "duration_ms": 113712,
+  "measurement_evidence": "ffprobe duration 113712 ms, 1364877 bytes; ended at a narration pause from the bundle's measured timing, 0.8 s fade-out; ffmpeg libmp3lame 96 kbps",
+  "narration_job_id": "narration-film-01-r4",
+  "prepared": true,
+  "quality_kbps": 96,
+  "sha256": "979938aa56657186a1a62922f01d800469d00ed1786b9ede24a0fe78153bbb32",
+  "source_mp3_sha256": "af296d06c86fe2b5f49c2d80447b797af528e860fa1ecc4712d2a60129de77a0",
+  "unit_id": "2285d936-802f-49d8-8034-18a0e3393929"
+}

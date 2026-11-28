@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 1210,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/nishithe/style-audition-f0a29a8b",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "7ab2313085fdc271c75d8987dd9a2f36064b5b201477d5794fb1962db8f44f44",
+  "job_id": "style-audition-f0a29a8b",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "d0d1db5eac212567a8aa6381aba459600fa78f8a27a9d7dae8de466612b9e5ce",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "nishithe"
+}

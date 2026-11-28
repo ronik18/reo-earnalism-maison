@@ -83,7 +83,10 @@ Stills and music are kept. Then `job narration` as usual ([record](references/pr
   condense, but every claim is true to the book; prefer the book's own sentences.
 - **Voice.** `en_tisha::story` for English, `bn_arnav::story` for Bengali, description
   byte-for-byte from the roster plus at most one clause of ≤ 12 words. No new voice
-  search, no impersonation, no spoken stage directions.
+  search, no impersonation, no spoken stage directions. A Bengali title with
+  `specs/cast.json` is multi-voice (owner decision 28 Nov 2026: narrator + character
+  voices from the owner's audition pick in `references/voices.json`; `eav audition`);
+  see references/earnalism-voice.md.
 - **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x, ACE-Step (Apache-2.0) and
   VCSL samples (CC0), the same pinned models, voices and licences on either runner.
   MusicGen (CC-BY-NC weights) and FLUX.1-dev (non-commercial) are
