@@ -45,6 +45,11 @@
   "owner_decisions_28_nov_2026_review": [
    "shot 11 (the peak): the captions sit at the top of the frame while the shot is on screen, so no caption crosses the falling brass pot (its measured path stays in the lower 22 % of the frame); caption text unchanged",
    "shot 4: the touched take f01s014-12a (clip-touchup-f01s014-12a-noled: the LED-like cyan rectangle between the slats removed); burned captions with a soft dark halo and band for the pale shots 7, 10 and 11"
+  ],
+  "owner_decisions_28_nov_2026_fix": [
+   "shot 1: the new North Calcutta night-lane still, stills-f01s014-fix-r1 c3 (depth map from clips-f01s014-fix-r1)",
+   "shot 7: the new paan take f01s014-14x (clips-f01s014-fix-r1, from the round-faced mother still stills-f01s014-fix-r1 c2; motion gate pass), bound in clip-picks.json",
+   "the world bible describes North Calcutta lanes"
   ]
  },
  "timing_source": "clause bounds: eav scene-timing on the --no-retime import (-38 dBFS, 0.3 s; 8 clauses, the 1.6 s pause after 'নাই!' intact); in-clause breaths measured on the same scene wav with eav.retime.detect_pauses: -38 dBFS/0.15 s for 16.26-16.56, 30.98-31.20, 35.03-35.35, 44.36-45.07, 46.46-46.64; -34 dBFS for 12.29-12.46 (0.18 s; 0.12 s at -38); the inhale after 'কুলকন্যারা' 5.37-5.80 s is speech-free at -30 dBFS (fragments at -34). The word gap before 'সমস্ত' (4.40-4.46 s, 0.04-0.06 s at every threshold) is under the 0.15 s breath minimum, so the 1->2 cut is at the inhale after 'কুলকন্যারা'.",
@@ -278,7 +283,7 @@
     7,
     7
    ],
-   "subject": "the paan-making place from scene 13: the veiled mother (white sari, red border, head covered) at the daily task; Hem's place on the mat is only empty space beside her (take f01s014-14w)",
+   "subject": "the paan-making place from scene 13: the veiled mother (white sari, red border, head covered) at the daily task; Hem's place on the mat is only empty space beside her (take f01s014-14x)",
    "framing": "medium wide",
    "motion": "wan",
    "wan_res": "1280x704",

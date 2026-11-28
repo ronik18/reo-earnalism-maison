@@ -5692,6 +5692,243 @@
       },
       "path": "film_clips/clips-f01s014-fix-r1/clips/f01s014-14x.motion.json",
       "sha256": "4a81eda1b1fe4f80394c77070f396c17237a8caaa516f030a9c5a16a23f08d90"
+    },
+    {
+      "bytes": 39536220,
+      "kind": "scene_film",
+      "meta": {
+        "body_ceiling_db": -2.0,
+        "body_gain_db": 0.0,
+        "body_gain_fallback": false,
+        "burned": false,
+        "caption_top": [
+          [
+            48.715,
+            52.859
+          ]
+        ],
+        "captions": true,
+        "captions_sha256": "0af16485a1563785b1b423eae75ec48c392c350210952b22f0b02493e9d268f3",
+        "cards_sha256": "27cf0a9b2e984492283b0d78e0e1317003ff254d5846d91debbdb0fce5a7916e",
+        "duration": 66.58333333333334,
+        "fps": 24,
+        "frames": 1310,
+        "lead_s": 4.0,
+        "lufs": -16.1,
+        "mode": "shots",
+        "motion_review": {
+          "f01s014-12a": {
+            "contact_sheet": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-12a.contact.png",
+            "notes": "difference spike at frame 21 looks like motion, not an outlier: 5.1x the median; difference spike at frame 28 looks like motion, not an outlier: 8.2x the median; difference spike at frame 31 looks like motion, not an outlier: 4.1x the median; difference spike at frame 63 looks like motion, not an outlier: 6.9x the median; difference spike at frame 65 looks like motion, not an outlier: 13.7x the median; difference spike at frame 68 looks like motion, not an outlier: 13.2x the median; difference spike at frame 71 looks like motion, not an outlier: 8.6x the median; difference spike at frame 80 looks like motion, not an outlier: 4.3x the median",
+            "scene": "f01s014",
+            "shot": 4
+          },
+          "f01s014-9p": {
+            "contact_sheet": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-9p.contact.png",
+            "notes": "difference spike at frame 10 looks like motion, not an outlier: 9.0x the median; difference spike at frame 15 looks like motion, not an outlier: 4.1x the median; difference spike at frame 17 looks like motion, not an outlier: 7.4x the median; difference spike at frame 50 looks like motion, not an outlier: 4.1x the median; difference spike at frame 111 looks like motion, not an outlier: 6.8x the median; difference spike at frame 113 looks like motion, not an outlier: 10.3x the median",
+            "scene": "f01s014",
+            "shot": 11
+          }
+        },
+        "overlap_frames": [
+          19,
+          1,
+          19,
+          1,
+          19,
+          1,
+          19,
+          19,
+          1,
+          1,
+          1
+        ],
+        "path": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v5/root/film/film-01/film-01-f01s014.mp4",
+        "picture_s": 54.583333333333336,
+        "scene": "f01s014",
+        "scenes": [
+          "f01s014"
+        ],
+        "shots": 12,
+        "size": [
+          1920,
+          1080
+        ],
+        "stills": {
+          "gate_overrides": {
+            "f01s014-5": "owner: no mole; retouched 7-c1 so shots 4 and 5 match (27 Nov)"
+          },
+          "picks": {
+            "f01s014-1": {
+              "candidate": 3,
+              "job_id": "stills-f01s014-fix-r1",
+              "sha256": "7ad9cfe055ee33e945310101c95e5e5804694ef1b9c0bde4afca0909689ee38f"
+            },
+            "f01s014-12": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "7de73c294ab4b50e1b0702996d2e989cfa4516fe64a76708c0c41b49ee9d5147"
+            },
+            "f01s014-2": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "1b790dc1c0aa7a9bf2139c05e9b75c62c92b5a9cb6c8cac2eded49075d1335c9"
+            },
+            "f01s014-3": {
+              "candidate": 2,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "b8f950d6dfb59866c263d827b82c5300f2fbdae2388c571589ae2f562f3b8f91"
+            },
+            "f01s014-5": {
+              "candidate": 1,
+              "job_id": "adopt-f01s014-stills-84844ba15d",
+              "sha256": "2f68eda3fba9530f00c8560aaba388c2bd61d5aecf60bbc97269f16bbe5dee2f"
+            },
+            "f01s014-6": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "14ac93ddaaf05986fd7bdb09cb69f8aa192414baaa1279e7fa5ba1e0c60990a1"
+            },
+            "f01s014-8": {
+              "candidate": 2,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "f0d71d6eb47c5c5cd5644d66d8f9185d9fd6b30e668dff7f572d38f95cb4da9b"
+            },
+            "f01s014-9": {
+              "candidate": 1,
+              "job_id": "adopt-f01s014-stills-84844ba15d",
+              "sha256": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4"
+            }
+          }
+        },
+        "target": "film-01",
+        "true_peak": -3.8
+      },
+      "path": "film/film-01/film-01-f01s014.mp4",
+      "sha256": "9a4b90ede7af7bd6b565dbce647e70e5bf21bf29ef6db644dca7b239ac502f08"
+    },
+    {
+      "bytes": 39536220,
+      "kind": "scene_film",
+      "meta": {
+        "body_ceiling_db": -2.0,
+        "body_gain_db": 0.0,
+        "body_gain_fallback": false,
+        "burned": false,
+        "caption_top": [
+          [
+            48.715,
+            52.859
+          ]
+        ],
+        "captions": true,
+        "captions_sha256": "0af16485a1563785b1b423eae75ec48c392c350210952b22f0b02493e9d268f3",
+        "cards_sha256": "27cf0a9b2e984492283b0d78e0e1317003ff254d5846d91debbdb0fce5a7916e",
+        "duration": 66.58333333333334,
+        "fps": 24,
+        "frames": 1310,
+        "lead_s": 4.0,
+        "lufs": -16.1,
+        "mode": "shots",
+        "motion_review": {
+          "f01s014-12a": {
+            "contact_sheet": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-12a.contact.png",
+            "notes": "difference spike at frame 21 looks like motion, not an outlier: 5.1x the median; difference spike at frame 28 looks like motion, not an outlier: 8.2x the median; difference spike at frame 31 looks like motion, not an outlier: 4.1x the median; difference spike at frame 63 looks like motion, not an outlier: 6.9x the median; difference spike at frame 65 looks like motion, not an outlier: 13.7x the median; difference spike at frame 68 looks like motion, not an outlier: 13.2x the median; difference spike at frame 71 looks like motion, not an outlier: 8.6x the median; difference spike at frame 80 looks like motion, not an outlier: 4.3x the median",
+            "scene": "f01s014",
+            "shot": 4
+          },
+          "f01s014-9p": {
+            "contact_sheet": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-9p.contact.png",
+            "notes": "difference spike at frame 10 looks like motion, not an outlier: 9.0x the median; difference spike at frame 15 looks like motion, not an outlier: 4.1x the median; difference spike at frame 17 looks like motion, not an outlier: 7.4x the median; difference spike at frame 50 looks like motion, not an outlier: 4.1x the median; difference spike at frame 111 looks like motion, not an outlier: 6.8x the median; difference spike at frame 113 looks like motion, not an outlier: 10.3x the median",
+            "scene": "f01s014",
+            "shot": 11
+          }
+        },
+        "overlap_frames": [
+          19,
+          1,
+          19,
+          1,
+          19,
+          1,
+          19,
+          19,
+          1,
+          1,
+          1
+        ],
+        "path": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v5/root/film/film-01/film-01-f01s014.mp4",
+        "picture_s": 54.583333333333336,
+        "scene": "f01s014",
+        "scenes": [
+          "f01s014"
+        ],
+        "shots": 12,
+        "size": [
+          1920,
+          1080
+        ],
+        "stills": {
+          "gate_overrides": {
+            "f01s014-5": "owner: no mole; retouched 7-c1 so shots 4 and 5 match (27 Nov)"
+          },
+          "picks": {
+            "f01s014-1": {
+              "candidate": 3,
+              "job_id": "stills-f01s014-fix-r1",
+              "sha256": "7ad9cfe055ee33e945310101c95e5e5804694ef1b9c0bde4afca0909689ee38f"
+            },
+            "f01s014-12": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "7de73c294ab4b50e1b0702996d2e989cfa4516fe64a76708c0c41b49ee9d5147"
+            },
+            "f01s014-2": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "1b790dc1c0aa7a9bf2139c05e9b75c62c92b5a9cb6c8cac2eded49075d1335c9"
+            },
+            "f01s014-3": {
+              "candidate": 2,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "b8f950d6dfb59866c263d827b82c5300f2fbdae2388c571589ae2f562f3b8f91"
+            },
+            "f01s014-5": {
+              "candidate": 1,
+              "job_id": "adopt-f01s014-stills-84844ba15d",
+              "sha256": "2f68eda3fba9530f00c8560aaba388c2bd61d5aecf60bbc97269f16bbe5dee2f"
+            },
+            "f01s014-6": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "14ac93ddaaf05986fd7bdb09cb69f8aa192414baaa1279e7fa5ba1e0c60990a1"
+            },
+            "f01s014-8": {
+              "candidate": 2,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "f0d71d6eb47c5c5cd5644d66d8f9185d9fd6b30e668dff7f572d38f95cb4da9b"
+            },
+            "f01s014-9": {
+              "candidate": 1,
+              "job_id": "adopt-f01s014-stills-84844ba15d",
+              "sha256": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4"
+            }
+          }
+        },
+        "target": "film-01",
+        "true_peak": -3.8
+      },
+      "path": "film/film-01/film-01-f01s014.mp4",
+      "sha256": "9a4b90ede7af7bd6b565dbce647e70e5bf21bf29ef6db644dca7b239ac502f08"
+    },
+    {
+      "bytes": 4598,
+      "kind": "qc_report",
+      "meta": {
+        "failed": []
+      },
+      "path": "qc/report.json",
+      "sha256": "70005f7450b4f9a2cf443bb6f4e22fbb5bb359c23f69faa105820cfdfb02ada0"
     }
   ],
   "created_at": "2026-11-27T17:58:04.798975+00:00",
@@ -6819,6 +7056,26 @@
       },
       "result": "exchange_collected",
       "stage": "job"
+    },
+    {
+      "at": "2026-11-28T10:39:55.234536+00:00",
+      "detail": {
+        "burned": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v5/root/film/film-01/film-01-f01s014.burned.mp4",
+        "duration": 66.58333333333334,
+        "mode": "shots",
+        "scene": "f01s014",
+        "target": "film-01"
+      },
+      "result": "scene_assembled",
+      "stage": "film"
+    },
+    {
+      "at": "2026-11-28T10:40:31.724450+00:00",
+      "detail": {
+        "failed": []
+      },
+      "result": "pass",
+      "stage": "qc"
     }
   ],
   "ledger": "../allowance-ledger.json",

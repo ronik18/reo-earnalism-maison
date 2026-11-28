@@ -1,3 +1,95 @@
+# বিচারক scene 14 v7 (28 Nov 2026: new shot 1 night-lane still and new shot 7 paan take bound, scene cut rebuilt and checked)
+
+Operator run, `eav` commands only. The code ran from a clean worktree of HEAD `3576cd1` (`claude/great-gates-tpoz8n`,
+scratchpad `wt-v7`) against the working root `R` = `V/root` in the main checkout. `B` = `production/audiovisual/bicharak`,
+`V` = `B/pilot/v5`. Nothing was spent: no GPU, no Colab, no ElevenLabs. The source transcript (`source.json`,
+`12fc3cb0…`), the source media, the official logo file (`951d21e8…`, overlaid by eav, no pixel edited) and the END
+(`landscape.mp4`, `443be73b…`) are unchanged (sha256 checked before and after). No signed URL or `exchange.json` is in
+any tracked file.
+
+**Status: DONE. `qc` passes every gate, with no override. The v7 cut exists.**
+- Outputs: `B/pilot/v7/scene14-v7.mp4` (sha256 `9a4b90ed…`) and `B/pilot/v7/scene14-v7.burned.mp4` (`4d70595b…`),
+  gitignored byte copies of `R/film/film-01/film-01-f01s014{,.burned}.mp4`.
+- Duration: 66.583 s (as v6) = 4 s title card + the 54.59 s scene + 5 s credits + 3 s END. −16.1 LUFS, −3.8 dBTP.
+- Caption text unchanged: the soft track of v7 is byte-identical to v6's (extracted SRT compared with `cmp`).
+- The owner's review (listening and viewing) is still open; the frame notes below are Claude's.
+
+## What changed from v6 (owner, 28 Nov)
+
+1. **Shot 1:** the still is the owner's pick `stills-f01s014-fix-r1` c3 (`R/film/film-01/stills/f01s014-1.png`,
+   sha256 `7ad9cfe0…`, picked and recorded earlier in `picks/`); its depth map is the one made in
+   `clips-f01s014-fix-r1`. No new binding was needed: `film --shots` takes the scene's pick and the map of exactly that
+   still.
+2. **Shot 7:** take `f01s014-14x` (`clips-f01s014-fix-r1`, start image the round-faced mother still c2; motion gate
+   pass, no review notes) bound with `R/film/film-01/clip-picks.json` `{"f01s014/7": "f01s014-14x"}` (force-added).
+3. **Plan:** shot 7's subject now ends "(take f01s014-14x)" instead of 14w, and
+   `approval_record.owner_decisions_28_nov_2026_fix` records the three changes (shot 1 still, shot 7 take, the world
+   bible's North Calcutta lanes). `plan-shots --root R --film 1 --scene f01s014 --bible B/specs/world-bible.json`:
+   exit 0, "12 shots, 54.6 s, 5 Wan clip(s); rules R1-R3 pass". Re-approved with `--approve --by Claude --reviewer
+   "<the v6 approval text, unchanged>; plus the owner fixes of 28 Nov 2026: shot 1 the new North Calcutta night-lane
+   still (stills-f01s014-fix-r1 c3), shot 7 the new paan take f01s014-14x (round-faced mother, from
+   stills-f01s014-fix-r1 c2), the world bible describes North Calcutta lanes"`: exit 0, new input sha256
+   `62fa11c4…`. The plan's shots differ from v6 only in shot 7's subject text.
+
+Everything else is as in v6: the shot 4 LED touch-up (12a touched), shot 11 captions at the top, the readable burned
+caption style, sounds, music, waivers and overrides.
+
+## Rebuild
+
+- `film --root R --film 1 --shots --scene f01s014 --logo skills/earnalism-video/software/assets/standard-intro/v1/production-lockup.png --end-card skills/earnalism-video/software/assets/standard-intro/v1/landscape.mp4 --title বিচারক --author "রবীন্দ্রনাথ ঠাকুর" --narrator "Subhajit – Grounded Bengali Storyteller" --burn`:
+  exit 0 (about 4 min CPU), "66.6 s, 12 shots at 24 fps, −16.1 LUFS, TP −3.8 dBTP"; motion-review notes for 12a
+  (shot 4) and 9p (shot 11), as in v6. None for 14x.
+- `qc --root R`: exit 0, **every gate passes** (below).
+- Copied to `B/pilot/v7/`. Frames of the burned cut at every shot boundary, through shots 1 and 7, and of shots 10 and
+  11 for the mother's face (scratchpad `v7/fr`).
+
+## QC (`qc --root R`, `R/qc/report.json`, result `pass`, `failed` empty)
+
+| Gate | Result | Measured |
+|---|---|---|
+| loudness | pass | −16.1 LUFS integrated, LRA 4.9 LU |
+| true_peak | pass | −3.8 dBTP |
+| new_info (R1) | pass | no gaps |
+| holds | pass | none |
+| black_bars | pass | none |
+| hitches | pass | none |
+| flashes (R10) | pass | max 1/s; one jump at 63.583 s (into the END card), planned |
+| sound_on_picture (R4) | pass | every listed sound placed over its shot |
+| captions (R5) | pass | no problems |
+| margin | pass | voice over music 17.0 dB; voice over everything else 15.7 dB |
+| peak_silence | pass | music bus −200 dB on the peak window |
+| digital_zero | pass | none |
+
+Overrides: none. Advisories as v6: motion review of 12a and 9p (G13), word check not run for `f01s014-p01`.
+
+## Frame review (Claude, v7 burned cut)
+
+- **Shot 1 (film 4.0–9.6 s):** a moonlit lane with lit wall-bracket lanterns, louvred shutters, wooden/iron
+  balconies and arched doorways; **one moon**; **no wires or cables**; the closed black carriage is seen from behind.
+  Problems:
+  - **The horse is on the wrong side of the carriage.** Its rump and tail are nearest the camera, overlapping the
+    carriage's back, with its head peeking out at the carriage's left side: it reads as a horse behind (pushing) the
+    carriage, not one pulling it away.
+  - **Not fully North Calcutta.** The near houses are plausible, but the background houses have pitched red-tile
+    roofs and chimneys (a European look; the prompt asked for flat roofs with parapets). A house number ("12") is on
+    the right pillar.
+  - The shot is a depth glide (a push-in), so the carriage itself does not move; "moving away" is only implied.
+- **Shot 1→2 (dissolve, about 9.2–10.0 s):** during the dissolve the lane's moon and the bedroom window's moon are
+  both on screen, offset, so for under a second the frame shows **two moons**. Shot 2 alone has one. Not new: v6's
+  1→2 dissolve shows two moons the same way.
+- **Shot 7 (film 27.9–31.3 s):** the mother now has a **round face**, full cheeks, big open eyes, head covered, white
+  sari with a red border, red bindi, small gold earrings; she folds betel leaves; an empty brass tray on the mat
+  beside her keeps Hem's place empty. The face shape now agrees with shots 10 and 11 (round, broad jaw). But she is
+  drawn much **younger and more childlike** than in 10 and 11: large chibi eyes, smooth unlined face, small body,
+  where 10 and 11 show a careworn woman with forehead lines and eye bags. Costume and veil are consistent. Motion is
+  gentle hand work, no warping seen. She sits centre-left rather than at the right of the room.
+- **Shot 6→7 (hard cut, 27.924 s):** clean, no stray frame. **Shot 7→8 (dissolve, about 31.0–31.7 s):** the mother
+  fades under Hem in the carriage as planned; no artefact. Captions in shot 7 bottom centre, legible on the pale
+  wall and sari.
+- Other boundaries, shot 4 (no LED), shot 11 (top captions clear of the pot), cards, END and logo: as in v6.
+
+---
+
 # বিচারক scene 14 v6 fixes (28 Nov 2026: owner review of v5, three picture fixes, scene cut rebuilt and checked)
 
 Operator run, `eav` commands only, in the main checkout. `B` = `production/audiovisual/bicharak`, `V` = `B/pilot/v5`,

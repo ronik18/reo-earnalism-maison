@@ -173,7 +173,7 @@
       },
       "motion": "wan",
       "wan_res": "1280x704",
-      "subject": "the paan-making place from scene 13: the veiled mother (white sari, red border, head covered) at the daily task; Hem's place on the mat is only empty space beside her (take f01s014-14w)",
+      "subject": "the paan-making place from scene 13: the veiled mother (white sari, red border, head covered) at the daily task; Hem's place on the mat is only empty space beside her (take f01s014-14x)",
       "bible_refs": [
         "hem_mother"
       ],
@@ -358,8 +358,8 @@
   },
   "approved": {
     "by": "Claude",
-    "at": "2026-11-28T04:22:01+00:00",
-    "reviewer": "independent reviewer (paper-edit-f01s014-review.md): APPROVE WITH CHANGES, 27 Nov 2026; the reviewer's 10 changes applied and the new cut times re-checked by Claude on the --no-retime voice; plus the owner decisions of 27 Nov 2026 (adopt 12a, 7-c1 without the mole, 14w, 9p; re-take the door beat with real sweeping; stills run for shots 1, 2, 3, 6, 8, 12; eleven_v4); plus the owner change of 27 Nov 2026 after the stills pick: shot 9 transition match -> dissolve (shot 8's picked c2 has horizontal slats; the owner accepted a plain dissolve), the door re-take approved at about 2.0 CU on A100; plus the owner decisions of 27 Nov 2026 at the finish: the 4 s minimum waived for shots 2, 3, 5, 6, 7 and 8; f01s014-5 is the retouched 7-c1 (no mole); shot 3 cot/doorknob and shot 8 horizontal slats accepted for frame review; broom kept on shot 10; plus the owner review of 28 Nov 2026: shot 11's captions at the top (clear of the falling pot), shot 4 the touched 12a (LED-like rectangle removed), stronger caption contrast",
-    "input_sha256": "8469814bb7b78f780bacb16421b769cb47fb20c969d71734c66719a3575db24d"
+    "at": "2026-11-28T10:35:46+00:00",
+    "reviewer": "independent reviewer (paper-edit-f01s014-review.md): APPROVE WITH CHANGES, 27 Nov 2026; the reviewer's 10 changes applied and the new cut times re-checked by Claude on the --no-retime voice; plus the owner decisions of 27 Nov 2026 (adopt 12a, 7-c1 without the mole, 14w, 9p; re-take the door beat with real sweeping; stills run for shots 1, 2, 3, 6, 8, 12; eleven_v4); plus the owner change of 27 Nov 2026 after the stills pick: shot 9 transition match -> dissolve (shot 8's picked c2 has horizontal slats; the owner accepted a plain dissolve), the door re-take approved at about 2.0 CU on A100; plus the owner decisions of 27 Nov 2026 at the finish: the 4 s minimum waived for shots 2, 3, 5, 6, 7 and 8; f01s014-5 is the retouched 7-c1 (no mole); shot 3 cot/doorknob and shot 8 horizontal slats accepted for frame review; broom kept on shot 10; plus the owner review of 28 Nov 2026: shot 11's captions at the top (clear of the falling pot), shot 4 the touched 12a (LED-like rectangle removed), stronger caption contrast; plus the owner fixes of 28 Nov 2026: shot 1 the new North Calcutta night-lane still (stills-f01s014-fix-r1 c3), shot 7 the new paan take f01s014-14x (round-faced mother, from stills-f01s014-fix-r1 c2), the world bible describes North Calcutta lanes",
+    "input_sha256": "62fa11c466cab6a6df77d40a549dcee8ed8b38bebc4d1d1f5017abacca200211"
   }
 }
