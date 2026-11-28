@@ -862,6 +862,279 @@
     "cu_equivalent": 0.6
   },
   {
+    "job_id": "narration-90d5e987",
+    "title": "thakurda",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "96b09e3c-11ee-41d0-bcfa-44c8a4549b73",
+    "root": "thakurda",
+    "reserved_units": 1.602725611111111,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:28+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-35c43644",
+    "title": "apad",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "439e8f15-d679-4137-a2c0-9af5e1eccc5f",
+    "root": "apad",
+    "reserved_units": 1.7348503888888887,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:29+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-8ce6fba8-c1of2",
+    "title": "atithi",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "cf7ae583-f5ff-4f18-9852-27ce39e7f0c6",
+    "root": "atithi",
+    "reserved_units": 1.9381192777777771,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:30+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-8ce6fba8-c2of2",
+    "title": "atithi",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "cf7ae583-f5ff-4f18-9852-27ce39e7f0c6",
+    "root": "atithi",
+    "reserved_units": 1.2673319444444444,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:30+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-953c72e0",
+    "title": "didi",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "93565d7b-e24b-4775-a84e-99417f0e403e",
+    "root": "didi",
+    "reserved_units": 1.8568117222222218,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:29+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-f3c9b58d",
+    "title": "kshudhita-pashan",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "54f37caa-050b-47c3-95c2-3cbc214d6485",
+    "root": "kshudhita-pashan",
+    "reserved_units": 1.927955833333333,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:29+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-f382d0a6-c1of2",
+    "title": "madhyabartini",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "f415e7a7-1a83-4f43-ac23-56bd605c5a2e",
+    "root": "madhyabartini",
+    "reserved_units": 1.9381192777777771,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:30+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-f382d0a6-c2of2",
+    "title": "madhyabartini",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "f415e7a7-1a83-4f43-ac23-56bd605c5a2e",
+    "root": "madhyabartini",
+    "reserved_units": 0.8607941666666666,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:30+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-23e7ceb3",
+    "title": "manbhanjan",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "906f2df9-a6bf-4676-a8d5-dafe055a8b7b",
+    "root": "manbhanjan",
+    "reserved_units": 1.770422444444444,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:29+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-d0eb4dd7-c1of3",
+    "title": "megh-o-roudra",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "899f8c17-dd85-4b19-82a0-a03f4d8d40ff",
+    "root": "megh-o-roudra",
+    "reserved_units": 1.9381192777777771,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:31+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-d0eb4dd7-c2of3",
+    "title": "megh-o-roudra",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "899f8c17-dd85-4b19-82a0-a03f4d8d40ff",
+    "root": "megh-o-roudra",
+    "reserved_units": 1.9381192777777771,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:31+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-d0eb4dd7-c3of3",
+    "title": "megh-o-roudra",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "899f8c17-dd85-4b19-82a0-a03f4d8d40ff",
+    "root": "megh-o-roudra",
+    "reserved_units": 0.7896500555555556,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:31+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-0df5c98d-c1of2",
+    "title": "nishithe",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "e9734480-f2c3-4680-9619-78f6b5850d10",
+    "root": "nishithe",
+    "reserved_units": 1.9381192777777771,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:31+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-0df5c98d-c2of2",
+    "title": "nishithe",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "e9734480-f2c3-4680-9619-78f6b5850d10",
+    "root": "nishithe",
+    "reserved_units": 1.0284909999999998,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:31+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-6bbdcca8-c1of2",
+    "title": "pratihingsa",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "89d6ff7e-42c5-491c-8c05-0a08bc8827d6",
+    "root": "pratihingsa",
+    "reserved_units": 1.9381192777777771,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T12:40:32+00:00",
+    "modal_runs_issued": 1
+  },
+  {
+    "job_id": "narration-6bbdcca8-c2of2",
+    "title": "pratihingsa",
+    "month": "2026-11",
+    "units": 0.8811210555555553,
+    "state": "reserved",
+    "edition_id": "89d6ff7e-42c5-491c-8c05-0a08bc8827d6",
+    "root": "pratihingsa"
+  },
+  {
+    "job_id": "narration-0ef4dd52-c1of2",
+    "title": "prayashchitta",
+    "month": "2026-11",
+    "units": 1.9381192777777771,
+    "state": "reserved",
+    "edition_id": "82a2e6d1-e279-4179-85a0-d9d52361af05",
+    "root": "prayashchitta"
+  },
+  {
+    "job_id": "narration-0ef4dd52-c2of2",
+    "title": "prayashchitta",
+    "month": "2026-11",
+    "units": 0.779486611111111,
+    "state": "reserved",
+    "edition_id": "82a2e6d1-e279-4179-85a0-d9d52361af05",
+    "root": "prayashchitta"
+  },
+  {
+    "job_id": "narration-4d5c214c-c1of2",
+    "title": "samapti",
+    "month": "2026-11",
+    "units": 1.9381192777777771,
+    "state": "reserved",
+    "edition_id": "2be3bc99-f143-4aa4-b080-ade26f7e381a",
+    "root": "samapti"
+  },
+  {
+    "job_id": "narration-4d5c214c-c2of2",
+    "title": "samapti",
+    "month": "2026-11",
+    "units": 1.9381192777777771,
+    "state": "reserved",
+    "edition_id": "2be3bc99-f143-4aa4-b080-ade26f7e381a",
+    "root": "samapti"
+  },
+  {
+    "job_id": "narration-7e6b3c2c-c1of2",
+    "title": "shasti",
+    "month": "2026-11",
+    "units": 1.9381192777777771,
+    "state": "reserved",
+    "edition_id": "7c832e44-2019-4415-9213-4170b41123a3",
+    "root": "shasti"
+  },
+  {
+    "job_id": "narration-7e6b3c2c-c2of2",
+    "title": "shasti",
+    "month": "2026-11",
+    "units": 0.7845683333333333,
+    "state": "reserved",
+    "edition_id": "7c832e44-2019-4415-9213-4170b41123a3",
+    "root": "shasti"
+  },
+  {
     "modal_spend": "2026-11",
     "rows": [
       {
@@ -1235,6 +1508,126 @@
         "seconds": 216.05997250299998,
         "at": "2026-11-28T10:46:17+00:00",
         "status": "ok"
+      },
+      {
+        "run_id": "narration-90d5e987#1",
+        "job_id": "narration-90d5e987",
+        "usd": 1.075035,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:28+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-35c43644#1",
+        "job_id": "narration-35c43644",
+        "usd": 1.1430225,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:29+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-953c72e0#1",
+        "job_id": "narration-953c72e0",
+        "usd": 1.2057375000000001,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:29+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-f3c9b58d#1",
+        "job_id": "narration-f3c9b58d",
+        "usd": 1.2423675,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:29+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-23e7ceb3#1",
+        "job_id": "narration-23e7ceb3",
+        "usd": 1.1613375000000001,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:29+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-8ce6fba8-c1of2#1",
+        "job_id": "narration-8ce6fba8-c1of2",
+        "usd": 1.24764,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:30+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-8ce6fba8-c2of2#1",
+        "job_id": "narration-8ce6fba8-c2of2",
+        "usd": 0.9021524999999999,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:30+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-f382d0a6-c1of2#1",
+        "job_id": "narration-f382d0a6-c1of2",
+        "usd": 1.24764,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:30+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-f382d0a6-c2of2#1",
+        "job_id": "narration-f382d0a6-c2of2",
+        "usd": 0.6929175,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:30+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-d0eb4dd7-c1of3#1",
+        "job_id": "narration-d0eb4dd7-c1of3",
+        "usd": 1.24764,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:31+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-d0eb4dd7-c2of3#1",
+        "job_id": "narration-d0eb4dd7-c2of3",
+        "usd": 1.24764,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:31+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-d0eb4dd7-c3of3#1",
+        "job_id": "narration-d0eb4dd7-c3of3",
+        "usd": 0.6562875,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:31+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-0df5c98d-c1of2#1",
+        "job_id": "narration-0df5c98d-c1of2",
+        "usd": 1.24764,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:31+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-0df5c98d-c2of2#1",
+        "job_id": "narration-0df5c98d-c2of2",
+        "usd": 0.77922,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:31+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-6bbdcca8-c1of2#1",
+        "job_id": "narration-6bbdcca8-c1of2",
+        "usd": 1.24764,
+        "seconds": 0.0,
+        "at": "2026-11-28T12:40:32+00:00",
+        "status": "pending"
       }
     ]
   }

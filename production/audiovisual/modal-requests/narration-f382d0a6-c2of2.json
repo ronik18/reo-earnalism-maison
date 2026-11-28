@@ -1,0 +1,12 @@
+{
+  "colab_units": 0.0,
+  "gpu": "L4",
+  "job_id": "narration-f382d0a6-c2of2",
+  "pending_run_id": "narration-f382d0a6-c2of2#1",
+  "r2_prefix": "gpu-jobs/madhyabartini/narration-f382d0a6-c2of2/run-1/",
+  "requested_at": "2026-11-28T12:40:30+00:00",
+  "schema": "earnalism.modal-request.v1",
+  "status": "requested",
+  "title_root": "production/audiovisual/madhyabartini",
+  "worst_case_usd": 0.692917
+}

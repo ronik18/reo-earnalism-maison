@@ -1,0 +1,12 @@
+{
+  "colab_units": 0.0,
+  "gpu": "L4",
+  "job_id": "narration-23e7ceb3",
+  "pending_run_id": "narration-23e7ceb3#1",
+  "r2_prefix": "gpu-jobs/manbhanjan/narration-23e7ceb3/run-1/",
+  "requested_at": "2026-11-28T12:40:29+00:00",
+  "schema": "earnalism.modal-request.v1",
+  "status": "requested",
+  "title_root": "production/audiovisual/manbhanjan",
+  "worst_case_usd": 1.161338
+}

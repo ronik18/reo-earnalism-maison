@@ -1,0 +1,381 @@
+{
+ "schema": "earnalism.publication-browser-acceptance.v1",
+ "recorded_on": "2026-11-28",
+ "sha256": "733e0aa448f6834353afed99b732e3f8059ad4ee2725b6339ce1b933849ad28a",
+ "status": "pass",
+ "scope": "production staged audio-sample draft 59c213f9 (bicharak reader+audio+public audio sample), reviewed on an exact local replica: same revision, unit, 39 paragraph/anchor, asset (incl. preview_audio) and timing-map IDs and the same content_sha256",
+ "revision_id": "59c213f9-3c6d-4af2-84de-477a7ebf5608",
+ "edition_id": "9481e1ad-dc15-4b8a-a81c-8752daebec61",
+ "unit_id": "d1364ac1-93cf-4cde-967b-78de1f59c4f9",
+ "source_revision_id": "67ad5cee-8afd-445d-8c32-b1bd3c8e0fae",
+ "source_content_sha256": "41a30de38213df3cb9214055af054995cf26d4049fd8348dcfa63f1d2f2b07cd",
+ "audio": {
+  "asset_id": "b14d6bd6-78f3-4b35-848a-8b119ce546ac",
+  "sha256": "af296d06c86fe2b5f49c2d80447b797af528e860fa1ecc4712d2a60129de77a0",
+  "bytes": 15031053,
+  "duration_ms": 1252560,
+  "quality_kbps": 96
+ },
+ "audio_preview": {
+  "asset_id": "01c1522f-74df-4e34-9dd0-e528a5822cc5",
+  "sha256": "979938aa56657186a1a62922f01d800469d00ed1786b9ede24a0fe78153bbb32",
+  "bytes": 1364877,
+  "duration_ms": 113712,
+  "quality_kbps": 96,
+  "url": "/en/listen/9481e1ad-dc15-4b8a-a81c-8752daebec61/preview/",
+  "clip": "production/audiovisual/bicharak/maison/preview/preview.mp3"
+ },
+ "timing_map_id": "86d109a4-ba53-4192-92b2-acb9cc8d4bd2",
+ "replica": {
+  "ids_file": "production/audiovisual/bicharak/maison/staged-59c213f9-ids.json",
+  "recomputed_revision_hash": "733e0aa448f6834353afed99b732e3f8059ad4ee2725b6339ce1b933849ad28a",
+  "stored_content_sha256": "733e0aa448f6834353afed99b732e3f8059ad4ee2725b6339ce1b933849ad28a",
+  "hash_matches_production": true,
+  "unit_ids_titles_ordinals": true,
+  "anchor_revision_3": true,
+  "paragraph_ids_anchor_ids_ordinals_kinds_text_sha256": true,
+  "texts_equal_live_67ad5cee": true,
+  "audio_chapter_id_sha_bytes": true,
+  "preview_audio_id_sha_bytes_duration_storage_key": true,
+  "reader_package_id_and_sha256_f53d8255": true,
+  "reader_source_and_covers_ids_sha256": true,
+  "timing_map_id_and_segments_md5": true,
+  "rights_rows": true,
+  "validation_evidence_keys": true,
+  "audio_preview_evidence_ids": true,
+  "publication_clearance_asset_sha256": true,
+  "revision_preview_anchor": true,
+  "access_policy": true
+ },
+ "checks": {
+  "audio_playback": true,
+  "audio_preview": true,
+  "reader_paragraphs_exact": true,
+  "audio_player_present": true,
+  "chapter_mp3_loads_200_206_audio_mpeg": true,
+  "playback_advances_3s": true,
+  "seek_0731": true,
+  "switch_to_read_lands_on_timing_json_paragraph_0731": true,
+  "preview_page_200_signed_out": true,
+  "preview_mp3_loads_200_206_audio_mpeg": true,
+  "preview_playback_advances_3s": true,
+  "preview_duration_113_7s": true,
+  "preview_sha256_979938aa": true,
+  "no_horizontal_overflow": true,
+  "no_page_or_console_errors": true,
+  "timing_follows_playback": "not_applicable: the release player has no timing highlight; the TimingMap drives Switch to Read, checked above"
+ },
+ "criteria": [
+  "every paragraph rendered in order with its exact anchor and text",
+  "the audio player is present and loads the chapter MP3 (HTTP 200/206, audio/mpeg)",
+  "playback advances at least 3 s after pressing play",
+  "seeking to about 07:31 works and playback continues",
+  "Switch to Read at about 07:31 lands on the paragraph timing.json maps to 07:31",
+  "signed out, /en/listen/<edition>/preview/ returns 200 and its player loads only the sample MP3 (HTTP 200/206, audio/mpeg)",
+  "the sample plays and advances at least 3 s; its duration is about 113.7 s",
+  "the bytes the sample URL serves have sha256 979938aa... (the owner-approved clip)",
+  "no horizontal overflow",
+  "no page or console errors"
+ ],
+ "seek_target": {
+  "at": "07:31",
+  "ms": 451000,
+  "paragraph_ordinal": 14,
+  "staged_anchor_id": "c98621a0-b81b-430d-9c98-c998f569218c",
+  "timing_json_live_anchor_id": "6ce2fdf2-9fa5-4726-a367-ac5a4c7d778b",
+  "segment_ms": [
+   427902,
+   510422
+  ]
+ },
+ "viewports": {
+  "desktop": {
+   "viewport": "1440x900",
+   "signed_in_as": {
+    "as": "reader-desktop@replica.test",
+    "verified_reader": true,
+    "staff": false
+   },
+   "reader": {
+    "paragraphs_rendered": 39,
+    "paragraphs_expected": 39,
+    "text_and_anchor_order_exact": true,
+    "horizontal_overflow": false,
+    "first": "প্রথম পরিচ্ছেদ।",
+    "last": "জ্বল প্রভায় স্বর্ণময়ী দেবীপ্রতিমার মত উদ্ভাসিত হইয়া উঠিল।"
+   },
+   "player": {
+    "present": true,
+    "chapter_buttons": 1,
+    "audio_after_load": {
+     "paused": true,
+     "currentTime": 0,
+     "duration": 1252.535313,
+     "readyState": 4,
+     "error": null,
+     "src_is_local_asset": true
+    },
+    "horizontal_overflow": false
+   },
+   "media": {
+    "grant": {
+     "url": "/api/v1/media/grants",
+     "status": 200,
+     "content_type": "application/json",
+     "note": "local_signed"
+    },
+    "mp3_responses": [
+     {
+      "status": 206,
+      "content_type": "audio/mpeg",
+      "range": "bytes=0-",
+      "content_range": "bytes 0-15031052/15031053",
+      "content_length": "15031053"
+     },
+     {
+      "status": 206,
+      "content_type": "audio/mpeg",
+      "range": "bytes=360448-",
+      "content_range": "bytes 360448-15031052/15031053",
+      "content_length": "14670605"
+     },
+     {
+      "status": 206,
+      "content_type": "audio/mpeg",
+      "range": "bytes=5406720-",
+      "content_range": "bytes 5406720-15031052/15031053",
+      "content_length": "9624333"
+     }
+    ],
+    "all_mp3_responses_200_or_206_audio_mpeg": true
+   },
+   "playback": {
+    "method": "clicked native play control",
+    "start_s": 0.22,
+    "after_4s": 4.23,
+    "advanced_s": 4,
+    "paused": false,
+    "duration_s": 1252.535313
+   },
+   "seek_0731": {
+    "target_s": 451,
+    "landed_s": 451,
+    "after_3s": 453.94,
+    "advanced_after_s": 2.94,
+    "paused": false
+   },
+   "switch_to_read": {
+    "audio_position_s": 454.05,
+    "landed_path": "/en/read/9481e1ad-dc15-4b8a-a81c-8752daebec61/d1364ac1-93cf-4cde-967b-78de1f59c4f9/",
+    "anchor": "c98621a0-b81b-430d-9c98-c998f569218c",
+    "offset": "0",
+    "paragraph_ordinal": 14,
+    "paragraph_in_viewport": true,
+    "matches_timing_json": true,
+    "horizontal_overflow": false,
+    "sheet_horizontal_overflow": false
+   },
+   "page_errors": [],
+   "preview_signed_out": {
+    "signed_out": true,
+    "page": {
+     "path": "/en/listen/9481e1ad-dc15-4b8a-a81c-8752daebec61/preview/",
+     "status": 200
+    },
+    "player": {
+     "present": true,
+     "after_load": {
+      "paused": true,
+      "currentTime": 0,
+      "duration": 113.669,
+      "readyState": 4,
+      "error": null,
+      "src_path": "/api/v1/content/audio-previews/01c1522f-74df-4e34-9dd0-e528a5822cc5"
+     },
+     "status_messages": [],
+     "horizontal_overflow": false
+    },
+    "sample_responses": [
+     {
+      "status": 206,
+      "content_type": "audio/mpeg",
+      "range": "bytes=0-",
+      "content_range": "bytes 0-1364876/1364877",
+      "content_length": "1364877"
+     },
+     {
+      "status": 206,
+      "content_type": "audio/mpeg",
+      "range": "bytes=393216-",
+      "content_range": "bytes 393216-1364876/1364877",
+      "content_length": "971661"
+     }
+    ],
+    "all_sample_responses_200_or_206_audio_mpeg": true,
+    "other_api_requests": [],
+    "playback": {
+     "method": "clicked native play control",
+     "start_s": 0.42,
+     "after_4s": 4.42,
+     "advanced_s": 4.01,
+     "paused": false,
+     "duration_s": 113.669
+    },
+    "sample_bytes": {
+     "src_path": "/api/v1/content/audio-previews/01c1522f-74df-4e34-9dd0-e528a5822cc5",
+     "status": 200,
+     "content_type": "audio/mpeg",
+     "bytes": 1364877,
+     "sha256": "979938aa56657186a1a62922f01d800469d00ed1786b9ede24a0fe78153bbb32",
+     "matches": true
+    },
+    "page_errors": []
+   }
+  },
+  "mobile": {
+   "viewport": "390x844",
+   "signed_in_as": {
+    "as": "reader-mobile@replica.test",
+    "verified_reader": true,
+    "staff": false
+   },
+   "reader": {
+    "paragraphs_rendered": 39,
+    "paragraphs_expected": 39,
+    "text_and_anchor_order_exact": true,
+    "horizontal_overflow": false,
+    "first": "প্রথম পরিচ্ছেদ।",
+    "last": "জ্বল প্রভায় স্বর্ণময়ী দেবীপ্রতিমার মত উদ্ভাসিত হইয়া উঠিল।"
+   },
+   "player": {
+    "present": true,
+    "chapter_buttons": 1,
+    "audio_after_load": {
+     "paused": true,
+     "currentTime": 0,
+     "duration": 1252.535313,
+     "readyState": 4,
+     "error": null,
+     "src_is_local_asset": true
+    },
+    "horizontal_overflow": false
+   },
+   "media": {
+    "grant": {
+     "url": "/api/v1/media/grants",
+     "status": 200,
+     "content_type": "application/json",
+     "note": "local_signed"
+    },
+    "mp3_responses": [
+     {
+      "status": 206,
+      "content_type": "audio/mpeg",
+      "range": "bytes=0-",
+      "content_range": "bytes 0-15031052/15031053",
+      "content_length": "15031053"
+     },
+     {
+      "status": 206,
+      "content_type": "audio/mpeg",
+      "range": "bytes=262144-",
+      "content_range": "bytes 262144-15031052/15031053",
+      "content_length": "14768909"
+     },
+     {
+      "status": 206,
+      "content_type": "audio/mpeg",
+      "range": "bytes=5406720-",
+      "content_range": "bytes 5406720-15031052/15031053",
+      "content_length": "9624333"
+     }
+    ],
+    "all_mp3_responses_200_or_206_audio_mpeg": true
+   },
+   "playback": {
+    "method": "clicked native play control",
+    "start_s": 0.46,
+    "after_4s": 4.46,
+    "advanced_s": 4,
+    "paused": false,
+    "duration_s": 1252.535313
+   },
+   "seek_0731": {
+    "target_s": 451,
+    "landed_s": 451,
+    "after_3s": 453.93,
+    "advanced_after_s": 2.93,
+    "paused": false
+   },
+   "switch_to_read": {
+    "audio_position_s": 453.98,
+    "landed_path": "/en/read/9481e1ad-dc15-4b8a-a81c-8752daebec61/d1364ac1-93cf-4cde-967b-78de1f59c4f9/",
+    "anchor": "c98621a0-b81b-430d-9c98-c998f569218c",
+    "offset": "0",
+    "paragraph_ordinal": 14,
+    "paragraph_in_viewport": true,
+    "matches_timing_json": true,
+    "horizontal_overflow": false,
+    "sheet_horizontal_overflow": false
+   },
+   "page_errors": [],
+   "preview_signed_out": {
+    "signed_out": true,
+    "page": {
+     "path": "/en/listen/9481e1ad-dc15-4b8a-a81c-8752daebec61/preview/",
+     "status": 200
+    },
+    "player": {
+     "present": true,
+     "after_load": {
+      "paused": true,
+      "currentTime": 0,
+      "duration": 113.669,
+      "readyState": 4,
+      "error": null,
+      "src_path": "/api/v1/content/audio-previews/01c1522f-74df-4e34-9dd0-e528a5822cc5"
+     },
+     "status_messages": [],
+     "horizontal_overflow": false
+    },
+    "sample_responses": [
+     {
+      "status": 206,
+      "content_type": "audio/mpeg",
+      "range": "bytes=0-",
+      "content_range": "bytes 0-1364876/1364877",
+      "content_length": "1364877"
+     },
+     {
+      "status": 206,
+      "content_type": "audio/mpeg",
+      "range": "bytes=1048576-",
+      "content_range": "bytes 1048576-1364876/1364877",
+      "content_length": "316301"
+     }
+    ],
+    "all_sample_responses_200_or_206_audio_mpeg": true,
+    "other_api_requests": [],
+    "playback": {
+     "method": "clicked native play control",
+     "start_s": 0.42,
+     "after_4s": 4.42,
+     "advanced_s": 4,
+     "paused": false,
+     "duration_s": 113.669
+    },
+    "sample_bytes": {
+     "src_path": "/api/v1/content/audio-previews/01c1522f-74df-4e34-9dd0-e528a5822cc5",
+     "status": 200,
+     "content_type": "audio/mpeg",
+     "bytes": 1364877,
+     "sha256": "979938aa56657186a1a62922f01d800469d00ed1786b9ede24a0fe78153bbb32",
+     "matches": true
+    },
+    "page_errors": []
+   }
+  }
+ },
+ "method": "Chromium 158.0.8127.36 (Playwright, headless) against this commit's release code (no code change), serving a local PostgreSQL 16 replica on 127.0.0.1 with MAISON_AUDIO and MAISON_FREE_ACCESS on and local private storage; the server listened on 127.0.0.1:8008, the local PUBLIC_BASE_URL, because the release player accepts a sample URL only on the page's own origin (as production's public origin is). No production, Render, Neon write, R2 or Cloudflare call; Neon was read with SELECTs only, to export staged-59c213f9-ids.json. Replica: a verified staff publisher with public_id 649b8725-9f77-4dfd-bad9-74eacd7a973c; publish_cleared_editions import / evidence (docs/evidence/publication-browser-20261123.json) / publish reproduced edition 9481e1ad... and revision 5206c8ca... (400c8b98...); the exact 67ad5cee draft was staged as in docs/evidence/publication-browser-20261128-bicharak-audio.json (staged-67ad5cee-ids.json; recomputed hash 41a30de3..., TimingMap 83fb3f56... whose segments md5 equals production's) and published with `attach_audiovisual_audio publish bicharak --browser-report docs/evidence/publication-browser-20261128-bicharak-audio.json`, so 67ad5cee is live as in production. Exact sample draft: the real `attach_audiovisual_audio stage-preview bicharak --publisher 649b8725-9f77-4dfd-bad9-74eacd7a973c --clip production/audiovisual/bicharak/maison/preview/preview.mp3 --preview-json production/audiovisual/bicharak/maison/preview/preview.json --evidence docs/evidence/audiovisual-clearance-bicharak-20261128.json` ran with clone_revision's uuid4 calls answered, in clone_revision's own order (revision, unit, paragraph id + anchor id per paragraph, reader package, then each copied source asset matched by kind and sha256: reader_source, two covers, audio_chapter), by the IDs in staged-59c213f9-ids.json, after each live text's sha256, kind and ordinal was checked against that file. The preview_audio asset id 01c1522f... is stage-preview's own stable_id of the draft id and matched without intervention; the only post-stage change was the TimingMap row id (a model default uuid4) set to 86d109a4... in one transaction. The recomputed revision_hash of the draft equals production's 733e0aa4..., the rebuilt reader package's sha256 equals production's f53d8255... (an independent check of every ID it embeds), and the copied TimingMap's segments md5 (1a7f7302...), rights rows, validation_evidence keys and publication_clearance asset map equal production's. Draft media is not served by the release code, so the pages were reached on a disposable copy of the replica where the staged draft was published through the release code's own transitions (attach_audiovisual_audio publish -> transition_revision mark-ready and publish, full validate_revision: all checks pass, audio_preview included) with a copy-only bootstrap report that was deleted and never committed; the revision, its IDs and its hash are unchanged by publishing. On that copy, a fresh verified non-staff reader per viewport signed in through the sign-in form at 1440x900 and 390x844 (mobile emulation with touch): the reader page's 39 paragraphs were compared with export_audiovisual_source --revision of the staged draft; the listen page's media grant and every chapter MP3 response were recorded; the native play control was clicked and currentTime measured 4 s later; currentTime was set to 451 s and measured 3 s later; then the player's and the sheet's Switch to Read buttons were pressed and the landing anchor compared with the paragraph timing.json maps to 451000 ms (timing.json names 5206c8ca anchors; matched to the staged anchor by paragraph ordinal). Then, in a new signed-out context per viewport (no session cookie), /en/listen/9481e1ad-dc15-4b8a-a81c-8752daebec61/preview/ was opened: its status, the player's audio src and every API response were recorded, the native play control was clicked and currentTime measured 4 s later, the element's duration read, and the audio src fetched signed out in the same context and hashed. Horizontal overflow was checked on the reader, the player, the open switch sheet, the landing reader and the sample player; page and console errors were collected throughout. Publish check: `attach_audiovisual_audio publish bicharak --browser-report docs/evidence/publication-browser-20261128-bicharak-preview.json` was run on a fresh restore of the exact replica (draft 59c213f9 still a draft) and accepted this report.",
+ "not_certified": "R2/CDN delivery of the chapter and the sample, real devices, listening quality and production release."
+}

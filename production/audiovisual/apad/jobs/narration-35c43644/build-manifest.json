@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 3219,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/apad/narration-35c43644",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "d9a128f45483860ab1ba9e54a80040a1d5b836282ac7d242a7440610e4751f52",
+  "job_id": "narration-35c43644",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "a3911945f1499cd5d4abdce9a0747aaf5aa7f4917e8b139a10b5da1d686b4233",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "apad"
+}
