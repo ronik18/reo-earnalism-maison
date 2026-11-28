@@ -168,3 +168,23 @@
   - Signed out: `/en/titles/bicharak/` returns 200; `/en/listen/<edition>/` redirects to sign-in with `return_to`; no page errors.
   - Not certified here: signed-in playback in a real browser on production (no test account is created on production); the replica browser report covers it.
 - **Gap found:** `/en/listen/<edition>/preview/` returns 404. The owner-approved 1:53 public preview (`deliverables/bicharak/2026-11-27/preview.mp3`) is not attached to the revision as a `preview_audio` asset, and the release has no command that attaches one. Follow-up.
+
+## #81/#82 deploys, বিচারক public sample published, audio switched on (28 Nov 2026)
+
+- **Merges:**
+  - ronik18/reo-earnalism-maison#81 (`71f1059`) carries `stage-preview`, the owner's voice pick, multi-voice casting and the expressive narration layer. Deployed as `dep-dc5bi80u01pc7385gd2g`.
+  - ronik18/reo-earnalism-maison#82 (`d61b158`) carries the browser acceptance report for draft `59c213f9`. Deployed as `dep-dc5cvemi0phs73da5j9g`.
+- **Sample:**
+  - `stage-preview bicharak` (`job-dc5bllm1egvs73bbkc90`) staged draft `59c213f9-3c6d-4af2-84de-477a7ebf5608` (content_sha256 `733e0aa4…`) with preview_audio asset `01c1522f…`.
+  - The browser report `docs/evidence/publication-browser-20261128-bicharak-preview.json` passed on an exact replica.
+  - `publish` (`job-dc5d30ui0phs73dai4n0`) made `59c213f9` live; `67ad5cee` is retired.
+- **Gap found and fixed:**
+  - Production had `MAISON_AUDIO` unset, so the audio feature was off. Both the released chapter audio (since #80) and the sample answered "Audio samples are unavailable".
+  - The earlier #80 live check verified the R2 object directly and missed this.
+  - With the owner's yes (28 Nov), `MAISON_AUDIO=true` was set on Render and the service redeployed as `dep-dc5efvei0phs73dfe950` (same commit `d61b158`).
+- **Live checks after the switch:**
+  - `/en/listen/9481e1ad-…/preview/` returns 200 at 1440 and 390 px, signed out, with no overflow and no console errors.
+  - The sample request returns 307 to a presigned R2 URL, then 206 audio/mpeg.
+  - Duration is 113.669 s, and playback advanced 4.7 s.
+  - The served bytes match sha256 `979938aa…`, the owner-approved clip.
+  - Signed-in chapter playback on production is still not certified here, because no production test account exists.
