@@ -434,6 +434,54 @@ class ShotFilmTests(unittest.TestCase):
         self.assertGreater(float(np.abs(np.asarray(Image.open(a)).astype(int)
                                         - np.asarray(Image.open(b)).astype(int)).mean()), 0.05)
 
+    # ---------------------------------------------------------------- burned caption look and position
+    def test_caption_position_follows_the_shots_that_ask_for_top(self):
+        spans = [(48.715, 52.859)]
+        self.assertEqual(film.caption_position(49.065, 50.46, spans), "top")
+        self.assertEqual(film.caption_position(47.0, 49.0, spans), "top")       # on screen into the shot: top
+        self.assertEqual(film.caption_position(45.74, 48.364, spans), "bottom")
+        self.assertEqual(film.caption_position(53.209, 56.592, spans), "bottom")
+        self.assertEqual(film.caption_position(1.0, 2.0), "bottom")
+
+    def test_top_captions_sit_at_the_top_and_clear_the_logo(self):
+        px = round(1080 * 0.045)
+        bottom = film.caption_baselines(["a", "b"], (1920, 1080), px, "bottom", 600)
+        self.assertEqual(bottom[-1], 1080 - round(1080 * film.CAP_EDGE_FRAC))       # the house placement
+        top = film.caption_baselines(["a"], (1920, 1080), px, "top", 700)
+        self.assertLess(top[0], 1080 * 0.2)
+        lw, mg = int(1920 * film.LOGO_WIDTH_FRAC), int(1920 * film.LOGO_MARGIN_FRAC)
+        self.assertLessEqual(960 + 700 / 2, 1920 - mg - lw)                        # beside the logo, not under it
+        wide = film.caption_baselines(["a"], (1920, 1080), px, "top", 1500)        # too wide: under the logo
+        self.assertGreater(wide[0] - px, mg + int(lw * film.LOGO_ASPECT))
+        with self.assertRaises(ValueError):
+            film.caption_baselines(["a"], (1920, 1080), px, "middle")
+
+    def test_burned_caption_holds_4_5_to_1_on_white_and_pale_pictures(self):
+        import numpy as np
+        import cv2
+        if not film._shaping_available():
+            self.skipTest("Pillow without raqm")
+        fonts, px = film._caption_fonts(film._default_fonts_dir(), 1080)
+
+        def lum(rgb):
+            c = rgb.astype(np.float64) / 255
+            c = np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
+            return 0.2126 * c[..., 0] + 0.7152 * c[..., 1] + 0.0722 * c[..., 2]
+        for pos, lines in (("top", ["কি লজ্জা প্রকাশিত হইয়া পড়িবে,"]),
+                           ("bottom", ["তাহাদের সেই গলির ধারের ছোটখাট ঘরকন্নাটির", "উপর যখন সকালবেলাকার চিরপরিচিত শান্তিময়"])):
+            cap = film.caption_image(lines, (1920, 1080), fonts, px, pos)
+            a = np.asarray(cap)
+            for bg in ((255, 255, 255), (250, 236, 200), (0, 0, 0)):
+                out = np.asarray(Image.alpha_composite(Image.new("RGBA", (1920, 1080), bg + (255,)), cap).convert("RGB"))
+                ink = (np.abs(out.astype(int) - np.array(film.CARD_INK)).max(axis=2) < 12) & (a[..., 3] == 255)
+                near = cv2.dilate(ink.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+                ring = cv2.dilate(ink.astype(np.uint8), np.ones((25, 25), np.uint8)).astype(bool) & ~near
+                ratio = (lum(out)[ink].mean() + 0.05) / (lum(out)[ring].mean() + 0.05)
+                self.assertGreaterEqual(ratio, 4.5, f"{pos} on {bg}: {ratio:.2f}:1")
+            ys = np.nonzero(a[..., 3])[0]
+            self.assertTrue(ys.max() < 1080 * 0.25 if pos == "top" else ys.min() > 1080 * 0.7)
+            self.assertLess(float(a[..., 3].mean()) / 255, 0.06)    # a band behind the lines, not a box over the frame
+
     # ---------------------------------------------------------------- captions
     def _cues(self, **kw):
         timing = kw.pop("timing", BN_CAP_TIMING)

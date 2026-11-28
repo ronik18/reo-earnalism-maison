@@ -32,7 +32,7 @@ Commands: `init`, `plan`, `scene-timing`, `plan-shots`, `job` (kinds incl. `stil
 already-retimed take), `split-passages`, `pick`, `adopt` (already-imported media bound to a scene's approved shots,
 verified by sha256, 0 CU), `supersede` (never ran), `close` (ran, not imported: settles the actual CU), `glide`, `retime`, `voicecheck`,
 `motiongate`, `cue`, `film`, `reel`, `qc`, `status` (`--scene <ID>`: one scene's route; `film --shots --scene`),
-`bundle-audio` (`--profile audiobook|film`), `bundle-film`, plus the older `hold`, `touchup`
+`bundle-audio` (`--profile audiobook|film`), `bundle-film`, plus the older `hold`, `touchup`, `clip-touchup`
 (usage in `eav/cli.py`; `--help`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
 inputs to get past it.
@@ -75,6 +75,12 @@ Touch-up (small, local defects a mask query keeps missing): `touchup --film N --
 --job-id ID` repaints hand-placed boxes locally with OpenCV (inpaint, recolor, fill, clone; no
 model, no Colab) → `<key>--c1.png` + `<key>--mask.png` → open both at full size → `pick --job ID`
 → `film` patches the pick (visual style, Touch-up).
+
+Clip touch-up (a small fixed defect in an imported Wan take, e.g. an LED-like glow between slats):
+`clip-touchup --film N --spec clip-touchup.json --job-id ID` repaints one recorded mask in every frame
+with OpenCV (fill along a direction, or inpaint; no model, 0 CU) into a NEW clip; the record keeps the
+reason and the sha256 of source and output, and the motion gate runs on the touched clip → look at
+`<key>.before/after/mask.png` → `adopt` with `"clips": {"<n>": {"job": "<ID>", "takes": ["<key>"]}}`.
 
 Edit (a held shot drawn wrong in a way a mask cannot fix: a child widow given a bindi or looking
 too young, a bearded judge, the Giant at the wrong scale, snow indoors, out-of-season fruit):

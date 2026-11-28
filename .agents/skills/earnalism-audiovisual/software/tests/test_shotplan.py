@@ -95,6 +95,20 @@ def test_plan_does_not_invent_content():
         shotplan.plan(s, FIX["timing"], FIX["bible"])
 
 
+def test_a_shot_may_ask_for_top_captions_and_nothing_else():
+    s = _scene()
+    s["shots"][-1]["caption"] = "top"
+    s["shots"][0]["caption"] = "bottom"      # the default is not stored
+    sp = shotplan.plan(s, FIX["timing"], FIX["bible"])
+    assert sp["shots"][-1]["caption"] == "top"
+    assert "caption" not in sp["shots"][0]
+    assert "Captions: top" in shotplan.av_markdown(sp)
+    assert [x["sound"]["vo"] for x in sp["shots"]] == [x["sound"]["vo"] for x in _plan()["shots"]]   # text untouched
+    s["shots"][0]["caption"] = "middle"
+    with pytest.raises(ValueError, match="caption"):
+        shotplan.plan(s, FIX["timing"], FIX["bible"])
+
+
 def test_validate_flags_r1_gap():
     p = _hand([_shot(1, 0.0, 7.0)] + [_shot(i, 7.0 + (i - 2) * 5.0, 12.0 + (i - 2) * 5.0) for i in range(2, 4)], None, 17.0)
     assert "R1" in shotplan.validate(p)

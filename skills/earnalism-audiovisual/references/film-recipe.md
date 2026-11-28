@@ -271,7 +271,10 @@ unless a pick/override records a reason.
 one-frame xfade); frame-aligned scene mixes; the title card (with room tone under it, never digital
 zero), the credits card (author, narration voice, AI disclosure, Maison fonts) and the approved END
 last; the logo top-right; captions as WebVTT (`mov_text`) **and** SRT (`--burn` also writes
-`<film>.burned.mp4`). Captions follow R5: a cue over 15 cps may start up to 0.3 s early and end up
+`<film>.burned.mp4`: ivory text with a thin dark outline, a soft dark halo and a subtle translucent band, so
+each line holds at least 4.5:1 against its surround on any picture; at the bottom, or at the top while a shot
+whose plan says `"caption": "top"` is on screen, e.g. a falling object in the lower frame; the text never
+changes). Captions follow R5: a cue over 15 cps may start up to 0.3 s early and end up
 to 1.0 s late, then merge with a neighbour if still too fast; **no merge crosses a chapter heading**
 (a fast unit before a heading may extend up to 1.5 s into the chapter-break pause). Master −16 LUFS,
 true peak ≤ **−1.5 dBTP**, 1.6 s end-of-picture fade.

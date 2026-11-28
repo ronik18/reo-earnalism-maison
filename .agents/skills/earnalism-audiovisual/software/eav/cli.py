@@ -51,6 +51,10 @@
   python3 -m eav.cli touchup --root <dir> --film N --spec <touchup.json> --job-id <id>
                          (local OpenCV repaint of hand-placed boxes of imported stills: inpaint,
                          recolor, fill, clone; one <key>--c1 candidate + <key>--mask per item)
+  python3 -m eav.cli clip-touchup --root <dir> --film N --spec <clip-touchup.json> --job-id <id>
+                         (local OpenCV repaint of one recorded mask in every frame of imported Wan clips into
+                         NEW clips: fill along a direction or inpaint; sha256 of source and output, motion gate;
+                         then adopt binds the touched clip to its shot)
   python3 -m eav.cli glide <image> <depth.png|depth.npy|-> <out.mp4> --seconds S [--zoom 0.12 --pan-x 0 --pan-y 0
                          --ease both|in|out|none --flat --sweep down-left|down-right --drain]
                          (no --root: a layered 2.5D camera glide of one still, 1920x1080 at 24 fps; "-" = flat)
@@ -149,7 +153,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
-from . import adopt, cue, glide, motiongate, passages, retime, shotplan, touchup, voicecheck
+from . import adopt, cliptouch, cue, glide, motiongate, passages, retime, shotplan, touchup, voicecheck
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, _segments, _style, unit_anchors, voice_units
@@ -991,6 +995,11 @@ def _job_json(job) -> dict:
     if job.get("adoption"):
         try:
             return _json(job["adoption"]).get("job") or {}
+        except (OSError, ValueError):
+            return {}
+    if job.get("kind") == "clip_touchup":   # a clip touch-up's items (the source items, key unchanged)
+        try:
+            return _json(job["manifest"]).get("job") or {}
         except (OSError, ValueError):
             return {}
     try:
@@ -2200,6 +2209,7 @@ def _film_shots(args, rec, plan, t, scs):
     stills_dir, stills_info = _cinematic_stills(rec, t, scenes, film_dir)
     depth_maps, review = _depth_maps(rec, t), {}
     shots, assets, units, timing, mixes, at = [], [], [], [], [], 0.0
+    caption_top = []   # film-timeline spans of shots whose burned captions sit at the top (shot plan "caption")
     starts = [sum(scene_fr[:k]) / film.SHOT_FPS for k in range(len(scenes))]   # frame-aligned scene starts
     for (sid, sp, scene_mix), at in zip(scenes, starts):
         for i, c in enumerate(_scene_clauses(film_dir, sid), 1):
@@ -2208,6 +2218,8 @@ def _film_shots(args, rec, plan, t, scs):
             timing.append({"unit_key": key, "start": round(at + c["start"], 3), "end": round(at + c["end"], 3)})
         for shot in sp["shots"]:
             shots.append({**shot, "scene_id": sid})
+            if shot.get("caption") == "top":
+                caption_top.append((round(film.TITLE_S + at + shot["start"], 3), round(film.TITLE_S + at + shot["end"], 3)))
             assets.append(_shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir, depth_maps, review))
         mixes.append(scene_mix)
     durations = [s["end"] - s["start"] for s in shots]
@@ -2232,7 +2244,8 @@ def _film_shots(args, rec, plan, t, scs):
     fonts = Path(args.fonts) if args.fonts else None
     card = film.cards(args.title, args.author, args.narrator, film_dir / "cards", fonts)
     common = dict(logo=Path(args.logo), end_card=Path(args.end_card), title_card=Path(card["cards"]["title"]),
-                  credits_card=Path(card["cards"]["credits"]), captions_vtt=vtt, fonts_dir=fonts)
+                  credits_card=Path(card["cards"]["credits"]), captions_vtt=vtt, fonts_dir=fonts,
+                  caption_top=caption_top)
     out = film_dir / f"{stem}.mp4"
     info = film.assemble_shots(clips, lens, overlaps, mixed, out, **common)
     burned = None
@@ -2247,7 +2260,7 @@ def _film_shots(args, rec, plan, t, scs):
     meta = {"target": t, "mode": "shots", "lufs": m["lufs"], "true_peak": m["true_peak"], "stills": stills_info,
             "motion_review": review,
             "scenes": [s for s, _, _ in scenes], "shots": len(shots), "cards_sha256": sha256_file(film_dir / "cards" / "cards.json"),
-            "captions_sha256": sha256_file(vtt), **info}
+            "captions_sha256": sha256_file(vtt), **({"caption_top": caption_top} if caption_top else {}), **info}
     if only:   # a scene's own cut: its own artifact kinds, so the whole film's record (and bundle-film) never sees it
         scene_meta = {"target": t, "scene": only}
         rec.add_artifact("scene_mix", mixed, scene_meta)
@@ -2645,6 +2658,166 @@ def cmd_touchup(args):
     print(f"Touched up {len(rows)} still(s) of {t} as job {job_id} (OpenCV {version}, 0 CU): "
           + ", ".join(r["key"] for r in rows) + ". Open every <key>--c1.png and <key>--mask.png at "
           f"full size, then {PROG} pick --root {rec.root} --job {job_id} --choices <json>.")
+
+
+CLIP_TOUCHUP_SCHEMA = cliptouch.SCHEMA
+
+
+def _clip_touchup_source(rec, key, src):
+    """(job row, artifact, path, licence) of the clip an item touches up: a recorded Wan clip of this record (a
+    film_clips job, an adoption, or an earlier clip touch-up), verified against the sha256 recorded with it."""
+    if not isinstance(src, dict) or not src.get("job") or not src.get("file"):
+        raise Stop(f"clip-touchup {key!r}: source needs {{\"job\", \"file\"}}", "Fix the spec")
+    row = next((j for j in _jobs(rec) if j["job_id"] == src["job"]), None)
+    if row is None or not row["imported"] or _ended(row) or row["kind"] not in ("film_clips", "clip_touchup"):
+        raise Stop(f"clip-touchup {key!r}: {src['job']} is not an imported film_clips or clip_touchup job of this "
+                   "record", "Fix the spec")
+    art = next((a for a in rec.data["artifacts"] if a["kind"] in ("film_clips", "clip_touchup")
+                and a["meta"].get("job_id") == src["job"] and Path(a["path"]).name == src["file"]), None)
+    if art is None or src["file"] != f"{key}.mp4":
+        raise Stop(f"clip-touchup {key!r}: {src['file']} is not the recorded clip {key}.mp4 of {src['job']}",
+                   "Fix the spec")
+    path = rec.root / art["path"]
+    if not path.is_file() or sha256_file(path) != art["sha256"]:
+        raise Stop(f"clip-touchup {key!r}: {art['path']} is missing or differs from its recorded sha256",
+                   f"{PROG} status --root {rec.root}")
+    lic = None
+    if row["adopted"]:
+        for b in ((_json(row["adoption"]).get("binding") or {}).get("clips") or {}).values():
+            if any(tk.get("key") == key for tk in b.get("takes") or []):
+                lic = b.get("licence")
+    elif row["kind"] == "clip_touchup":
+        lic = next((it.get("licence") for it in _json(row["manifest"]).get("items") or [] if it.get("key") == key), None)
+    else:
+        repo = ((art["meta"].get("model") or {}).get("repo"))
+        if repo in adopt.MODEL_LICENCES:
+            lic = {"model": repo, "licence": adopt.MODEL_LICENCES[repo]}
+    if not lic or lic.get("model") not in adopt.MODEL_LICENCES:
+        raise Stop(f"clip-touchup {key!r}: the model licence of {src['job']}/{src['file']} is not on record",
+                   "Touch up only a clip whose model licence is recorded")
+    item = next((it for it in _job_json(row).get("items") or [] if it.get("key") == key), None)
+    return row, art, path, lic, item
+
+
+def cmd_clip_touchup(args):
+    """V1: remove a small fixed defect from imported Wan clips (OpenCV, local, no model, 0 CU) into NEW clip files,
+    filed as an imported clip_touchup job (sha256 of source and output, the mask, the fill, the reason and the motion
+    gate of the touched clip). `adopt` then binds the touched clip to its shot ("clips": {"<n>": {"job": <this job>,
+    "takes": [<key>]}}), as a touched still is adopted."""
+    rec = _record(args.root)
+    t = _film_target(args.film)
+    spec = _json(args.spec)
+    job_id = args.job_id
+    if not SLUG.fullmatch(job_id or "") or any(j["job_id"] == job_id for j in _jobs(rec)):
+        raise Stop(f"job id {job_id!r} is not new or not lowercase letters, digits and hyphens", "Pass a new --job-id")
+    items = spec.get("items") if isinstance(spec, dict) else None
+    if not isinstance(items, list) or not items:
+        raise Stop("the clip-touchup spec needs items: [{key, reason, source: {job, file}, mask, fill, mode}]",
+                   "Fix the spec")
+    sid = spec.get("scene")
+    dest, job_dest = rec.root / "clip_touchup" / job_id, rec.root / "jobs" / job_id
+    if dest.exists() or job_dest.exists():
+        raise Stop(f"{dest} or {job_dest} already exists", "Pass a new --job-id")
+    try:
+        version = cliptouch.opencv_version()
+    except ValueError as e:
+        raise Stop(str(e), "pip install -r skills/earnalism-audiovisual/software/requirements-touchup.txt")
+    seen, rows, sources = set(), [], []
+    for it in items:
+        key = it.get("key") if isinstance(it, dict) else None
+        if not isinstance(key, str) or not SLUG.fullmatch(key) or key in seen:
+            raise Stop(f"clip-touchup key {key!r} is not a clip key, or appears twice", "Fix the spec")
+        if sid and not key.startswith(sid + "-"):
+            raise Stop(f"clip-touchup key {key!r} is not a key of scene {sid}", "Fix the spec")
+        if not str(it.get("reason") or "").strip():
+            raise Stop(f"clip-touchup {key!r} needs the operator's \"reason\"", "Fix the spec")
+        seen.add(key)
+        sources.append((it, *_clip_touchup_source(rec, key, it.get("source"))))
+    stage = Path(tempfile.mkdtemp(dir=rec.root, prefix=".cliptouch-"))
+    try:
+        (stage / "out").mkdir()
+        (stage / "job").mkdir()
+        for it, row, art, path, lic, item in sources:
+            key = it["key"]
+            src_sha = sha256_file(path)
+            try:
+                meas = cliptouch.apply_clip(path, {k: it[k] for k in ("mask", "fill", "mode") if k in it},
+                                            stage / "out" / f"{key}.mp4", stage / "out")
+            except (ValueError, subprocess.CalledProcessError) as e:
+                raise Stop(f"clip-touchup {key!r}: {e}", "Fix the item's mask, fill or mode") from None
+            if sha256_file(path) != src_sha:
+                raise Stop(f"clip-touchup {key!r}: the source clip changed while it was read", "Rerun")
+            gate = motiongate.gate_clip(stage / "out" / f"{key}.mp4")
+            out_sha = sha256_file(stage / "out" / f"{key}.mp4")
+            rows.append({"key": key, "reason": it["reason"].strip(), "source_job": row["job_id"],
+                         "source": art["path"], "source_sha256": src_sha, "licence": lic,
+                         "mask": it["mask"], "fill": it["fill"], "mode": it.get("mode", "plate"),
+                         "output": f"clip_touchup/{job_id}/{key}.mp4", "output_sha256": out_sha,
+                         "mask_png": f"clip_touchup/{job_id}/{key}.mask.png",
+                         "mask_png_sha256": sha256_file(stage / "out" / f"{key}.mask.png"),
+                         "measured": meas,
+                         "motion_gate": {x: gate.get(x) for x in ("pass", "needs_review", "notes")},
+                         "item": {**{k: v for k, v in (item or {"key": key}).items()
+                                     if k not in ("prompt", "negative_prompt")}, "key": key}})
+        _write_json(stage / "job" / "clip-touchup.json", spec)
+        manifest = {"schema": CLIP_TOUCHUP_SCHEMA, "job_id": job_id, "target": t, "kind": "clip_touchup",
+                    **({"scene": sid} if sid else {}), "engine": "opencv", "opencv": version,
+                    "method": "eav.cliptouch.apply_clip", "spent_cu": 0,
+                    "spec_sha256": sha256_file(stage / "job" / "clip-touchup.json"), "items": rows,
+                    "job": {"items": [r["item"] for r in rows]}}
+        _write_json(stage / "job" / "clip-touchup-manifest.json", manifest)
+    except BaseException:
+        shutil.rmtree(stage, ignore_errors=True)
+        raise
+    snapshot = (list(rec.data["artifacts"]), list(rec.data["events"]))
+    parents = {p: p.exists() for p in (dest.parent, job_dest.parent)}
+    try:  # all or nothing: files and record rows
+        for p in parents:
+            p.mkdir(parents=True, exist_ok=True)
+        (stage / "out").rename(dest)
+        (stage / "job").rename(job_dest)
+        meta = {"job_id": job_id, "job_kind": "clip_touchup", "engine": "opencv", "opencv": version}
+        rec.add_artifact(TOUCHUP_JOB, job_dest / "clip-touchup-manifest.json",
+                         {**meta, "forecast_units": 0.0, "manifest": f"jobs/{job_id}/clip-touchup-manifest.json"})
+        rec.add_artifact("clip_touchup_spec", job_dest / "clip-touchup.json", meta)
+        rec.event("cli", "job_target", {"job_id": job_id, "target": t, "kind": "clip_touchup", "engine": "opencv",
+                                        **({"scene": sid} if sid else {})})
+        arts = []
+        for r in rows:
+            src = {"key": r["key"], "source": r["source"], "source_sha256": r["source_sha256"],
+                   "model": {"repo": r["licence"]["model"]}}
+            arts.append(rec.add_artifact("clip_touchup", rec.root / r["output"], {**meta, **src}))
+            if arts[-1]["sha256"] != r["output_sha256"]:
+                raise Stop(f"{r['output']} changed while filing", "Rerun clip-touchup with a new --job-id")
+            rec.add_artifact("clip_touchup_mask", rec.root / r["mask_png"], {**meta, "key": r["key"]})
+            rec.add_artifact("motion_gate", dest / f"{r['key']}.motion.json", {**meta, "clip": f"{r['key']}.mp4"})
+        rec.event("import", "accepted", {"job_id": job_id, "kind": "clip_touchup", "actual_units": 0,
+                                         "engine": "opencv", "opencv": version,
+                                         "manifest_sha256": sha256_file(job_dest / "clip-touchup-manifest.json"),
+                                         "files": [a["path"] for a in arts]})
+    except BaseException:
+        try:
+            rec.rollback(snapshot)
+        finally:
+            for p in (dest, job_dest, stage):
+                shutil.rmtree(p, ignore_errors=True)
+            for p, existed in parents.items():
+                if not existed:
+                    try:
+                        p.rmdir()
+                    except OSError:
+                        pass
+        raise
+    shutil.rmtree(stage, ignore_errors=True)
+    for r in rows:
+        g, m_ = r["motion_gate"], r["measured"]
+        print(f"Touched up clip {r['key']} as job {job_id} (OpenCV {version}, 0 CU): mask {m_['mask_pixels']} px in "
+              f"{m_['mask_bbox']}, outside the mask PSNR {m_['outside_mask']['psnr_db']} dB, motion gate "
+              f"{'pass' if g['pass'] else 'FAIL'}{' (needs review)' if g['needs_review'] else ''}. Source "
+              f"{r['source']} unchanged (sha256 {r['source_sha256'][:12]}...), output sha256 {r['output_sha256'][:12]}...")
+    print(f"Look at clip_touchup/{job_id}/<key>.before.png, .after.png and .mask.png at full size; then adopt the "
+          f"touched clip: \"clips\": {{\"<shot>\": {{\"job\": \"{job_id}\", \"takes\": [\"<key>\"]}}}}.")
+    return 0
 
 
 def _refuse_gate_fails(rec, files, jobs, base):
@@ -4012,8 +4185,9 @@ def _adopt_clips(rec, spec, base, sid, sp, shots, load):
         if not entry.get("job") or not isinstance(takes, list) or not takes:
             raise adopt.Refused(f"clips entry {n}: needs \"job\" and \"takes\" (the take and its continuations, in order)")
         src = load(entry["job"])
-        if src.kind != "film_clips":
-            raise adopt.Refused(f"shot {n}: {entry['job']} is a {src.kind} job, not a film_clips (Wan) job")
+        if src.kind not in ("film_clips", "clip_touchup"):
+            raise adopt.Refused(f"shot {n}: {entry['job']} is a {src.kind} job, not a film_clips (Wan) job or a "
+                                "clip touch-up of one")
         lic = src.licence("clip")
         chain, prev, frames = [], None, 0
         for k, key in enumerate(takes):
@@ -4309,7 +4483,7 @@ def cmd_adopt(args):
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take, "split-passages": cmd_split_passages,
-            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "glide": cmd_glide, "retime": cmd_retime, "voicecheck": cmd_voicecheck, "motiongate": cmd_motiongate,
+            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "clip-touchup": cmd_clip_touchup, "glide": cmd_glide, "retime": cmd_retime, "voicecheck": cmd_voicecheck, "motiongate": cmd_motiongate,
             "cue": cmd_cue, "plan-shots": cmd_plan_shots, "scene-timing": cmd_scene_timing,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
@@ -4420,6 +4594,11 @@ def _parser():
     s.add_argument("--film", type=int, default=1)
     s.add_argument("--keys", help="comma-separated held still keys, e.g. f01s007-4,f01s007-5")
     s.add_argument("--clear", action="store_true", help="remove all holds of the film")
+    s = add("clip-touchup", help="remove a small fixed defect from imported Wan clips into new clips (local)")
+    s.add_argument("--film", type=int, required=True)
+    s.add_argument("--spec", required=True, help='{"scene", "items": [{"key", "reason", "source": {"job", "file"}, '
+                                                 '"mask", "fill", "mode"}]} (eav/cliptouch.py)')
+    s.add_argument("--job-id", required=True)
     s = add("touchup", help="repaint small defects in hand-placed boxes of imported stills (local)")
     s.add_argument("--film", type=int, required=True)
     s.add_argument("--spec", required=True, help='{"items": [{"key", "source": {"job", "file"}, "ops"}]}')

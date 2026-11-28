@@ -15,6 +15,9 @@ Input (`scene` dict, merged with the plan.json scene fields `scene_id` and `text
   peak     {shot, at}: the shot that carries the peak and the second it lands on
   length_s optional: the scene's length when it runs past its last word (the R4 tail that `scene-timing` measures);
            the last shot ends there, captions still end with the words
+  shots[].caption  optional: "top" or "bottom" (the default), where the burned-in captions sit while the shot is on
+           screen; "top" for a shot whose action fills the bottom of the frame (a falling object), so no caption
+           crosses it. Only the position changes: the caption text is the narration's, word for word.
   shots[].actions  optional, wan shots only: one performed action text per clip of the shot's chain (the take and
            each continuation). R1 holds a wan shot to one action per 6 s, as qc's new_info measures it.
 `timing` is the measured narration, one entry per clause: [{start, end, text}] in seconds of the
@@ -40,6 +43,7 @@ MOTIONS = ("wan", "glide", "static")
 WAN_RES = ("1280x704", "896x512")
 LAYERS = ("present", "memory", "imagined")
 TRANSITIONS = ("cut", "dissolve", "match")
+CAPTION_POSITIONS = ("bottom", "top")   # film.CAP_POSITIONS: where a shot's burned-in captions sit
 GAP_S = 6.0          # R1/R2: never more than 6 s of narration per shot-or-beat
 SHOT_MAX_S = 8.0     # R2: longest shot without a Wan beat
 SHOT_HARD_S = 12.0   # R2: longest shot at all
@@ -230,6 +234,12 @@ def plan(scene: dict, timing: list, bible: dict) -> dict:
                 "layer": si["layer"], "transition_in": si["transition_in"]}
         if si.get("plants"):
             shot["plants"] = list(si["plants"])
+        cap = si.get("caption")
+        if cap is not None:
+            if cap not in CAPTION_POSITIONS:
+                raise ValueError(f"shot {i} caption must be {' or '.join(CAPTION_POSITIONS)}")
+            if cap != "bottom":
+                shot["caption"] = cap
         acts = si.get("actions")
         if acts is not None:
             if motion != "wan" or not isinstance(acts, list) or not all(isinstance(a, str) and a.strip() for a in acts):
@@ -372,6 +382,8 @@ def av_markdown(shotplan: dict) -> str:
         vis = [f"{s['subject']} ({s['framing']})", f"{look}; {s['layer']}; in: {s['transition_in']}"]
         if s.get("bible_refs"):
             vis.append("Bible: " + ", ".join(s["bible_refs"]))
+        if s.get("caption") == "top":
+            vis.append("Captions: top (the action fills the bottom of the frame)")
         if pk.get("shot") == s["n"]:
             vis.append(f"PEAK at {pk['at']:g} s" + (f"; plants shot {', '.join(map(str, s['plants']))}" if s.get("plants") else ""))
         lines.append(f"| {s['n']} {s['start']:.2f}-{s['end']:.2f} | {_cell('<br>'.join(audio))} | {_cell('<br>'.join(vis))} |")

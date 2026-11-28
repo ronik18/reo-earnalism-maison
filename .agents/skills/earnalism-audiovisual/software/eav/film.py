@@ -530,18 +530,94 @@ def _probe_video(path) -> dict:
     return {"width": int(st["width"]), "height": int(st["height"]), "frames": int(st["nb_read_packets"])}
 
 
-def _burn_track(vtt: Path, size: tuple, fonts_dir: Path, work: Path) -> Path:
-    """The captions as a transparent picture sequence (concat list) drawn with the cards' raqm Bengali shaping:
-    libass in the stock ffmpeg does not reorder Bengali clusters, so burned-in text is never left to it."""
-    import re
-    from PIL import Image, ImageDraw, ImageFont
-    if not _shaping_available():
-        raise ValueError("burned-in Bengali captions need Pillow with libraqm")
-    W, H = size
-    fonts_dir = Path(fonts_dir)
+# Burned-in caption look (owner review 28 Nov 2026: weak on pale backgrounds): ivory Maison ink with a thin dark
+# outline, a soft dark halo hugging the glyphs and a subtle translucent dark band behind each line, all in the Maison
+# canvas colour, so the text holds >= 4.5:1 against its immediate surround on any picture, white included.
+CAP_BAND_ALPHA = 0.6      # the band behind a line (feathered; no hard box)
+CAP_HALO_ALPHA = 0.92     # the soft halo at the glyph edge, fading out over a few pixels
+CAP_POSITIONS = ("bottom", "top")
+CAP_EDGE_FRAC = 0.07      # baseline distance of the outermost line from the bottom (or its top from the top) edge
+
+
+def _caption_fonts(fonts_dir: Path, H: int) -> tuple:
+    from PIL import ImageFont
     px = max(14, round(H * 0.045))
     fonts = {"latin": ImageFont.truetype(str(fonts_dir / FONT_FILES["latin_text"]), px, layout_engine=ImageFont.Layout.RAQM),
              "bn": ImageFont.truetype(str(fonts_dir / FONT_FILES["bengali_text"]), px, layout_engine=ImageFont.Layout.RAQM)}
+    return fonts, px
+
+
+def _line_width(text, fonts) -> float:
+    return sum(fonts["bn" if b else "latin"].getlength(t) for b, t in _runs(text))
+
+
+def caption_baselines(lines: list, size: tuple, px: int, position: str = "bottom", widest: float = 0.0) -> list:
+    """The baseline y of each caption line. "bottom": the last line sits CAP_EDGE_FRAC of the height above the bottom
+    edge (the house placement). "top": the first line's top sits CAP_EDGE_FRAC below the top edge, unless the widest
+    line would reach the logo lockup's column (top-right, LOGO_* of assemble); then the lines start below the logo."""
+    W, H = size
+    step = round(px * 1.5)
+    if position not in CAP_POSITIONS:
+        raise ValueError(f"caption position must be one of {', '.join(CAP_POSITIONS)}")
+    if position == "bottom":
+        y0 = H - round(H * CAP_EDGE_FRAC) - (len(lines) - 1) * step
+        return [y0 + n * step for n in range(len(lines))]
+    lw, mg = int(W * LOGO_WIDTH_FRAC), int(W * LOGO_MARGIN_FRAC)
+    clear = W / 2 - (mg + lw) - px            # half-width a centred line may use beside the logo
+    top = round(H * CAP_EDGE_FRAC)
+    if widest / 2 + px * 0.6 > clear:        # too wide for the space beside the logo: start under it
+        top = max(top, mg + int(lw * LOGO_ASPECT) + px // 2)
+    first = top + px
+    return [first + n * step for n in range(len(lines))]
+
+
+def caption_image(lines: list, size: tuple, fonts: dict, px: int, position: str = "bottom"):
+    """One cue as a transparent RGBA picture: the band, the halo, the outline and the ivory text."""
+    import numpy as np
+    from PIL import Image, ImageDraw, ImageFilter
+    W, H = size
+    widths = [_line_width(ln, fonts) for ln in lines]
+    ys = caption_baselines(lines, size, px, position, max(widths, default=0.0))
+    glyph = Image.new("L", (W, H), 0)
+    gd = ImageDraw.Draw(glyph)
+    band = Image.new("L", (W, H), 0)
+    bd = ImageDraw.Draw(band)
+    pad_x, asc, desc = round(px * 0.55), round(px * 1.0), round(px * 0.42)
+    for ln, y, w in zip(lines, ys, widths):
+        _draw_line(gd, ln, y, fonts, 255, W)
+        x0 = (W - w) / 2
+        bd.rounded_rectangle([x0 - pad_x, y - asc, x0 + w + pad_x, y + desc], radius=round(px * 0.45),
+                             fill=round(255 * CAP_BAND_ALPHA))
+    band = band.filter(ImageFilter.GaussianBlur(px * 0.18))            # soft edges, no hard box
+    grow = max(3, px // 6) | 1
+    halo = glyph.filter(ImageFilter.MaxFilter(grow)).filter(ImageFilter.GaussianBlur(max(2.0, px / 9)))
+    b = np.asarray(band, np.float32) / 255
+    h = np.asarray(halo, np.float32) / 255 * CAP_HALO_ALPHA
+    shade = 1 - (1 - b) * (1 - h)
+    img = Image.new("RGBA", (W, H), CARD_BG + (0,))
+    img.putalpha(Image.fromarray(np.rint(shade * 255).astype(np.uint8), "L"))
+    d = ImageDraw.Draw(img)
+    for ln, y in zip(lines, ys):
+        _draw_line(d, ln, y, fonts, CARD_INK + (255,), W, stroke=max(1, px // 24))
+    return img
+
+
+def caption_position(start: float, end: float, top_spans=()) -> str:
+    """"top" when the cue is on screen during any span that asks for top captions (a shot whose action fills the
+    bottom of the frame), else "bottom"."""
+    return "top" if any(start < b - 1e-6 and end > a + 1e-6 for a, b in top_spans or ()) else "bottom"
+
+
+def _burn_track(vtt: Path, size: tuple, fonts_dir: Path, work: Path, top_spans=()) -> Path:
+    """The captions as a transparent picture sequence (concat list) drawn with the cards' raqm Bengali shaping:
+    libass in the stock ffmpeg does not reorder Bengali clusters, so burned-in text is never left to it.
+    top_spans: [(start, end)] seconds of the film timeline whose cues are drawn at the top of the frame."""
+    import re
+    from PIL import Image
+    if not _shaping_available():
+        raise ValueError("burned-in Bengali captions need Pillow with libraqm")
+    W, H = size
+    fonts, px = _caption_fonts(Path(fonts_dir), H)
     cues = []
     for block in Path(vtt).read_text(encoding="utf-8").split("\n\n")[1:]:
         lines = block.strip("\n").split("\n")
@@ -557,11 +633,7 @@ def _burn_track(vtt: Path, size: tuple, fonts_dir: Path, work: Path) -> Path:
     for k, (a, b, lines) in enumerate(cues):
         if a > t + 1e-6:
             rows.append((blank, a - t))
-        img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        d = ImageDraw.Draw(img)
-        y0 = H - round(H * 0.07) - (len(lines) - 1) * round(px * 1.5)
-        for n, ln in enumerate(lines):
-            _draw_line(d, ln, y0 + n * round(px * 1.5), fonts, CARD_INK + (255,), W, stroke=max(2, px // 14))
+        img = caption_image(lines, (W, H), fonts, px, caption_position(a, b, top_spans))
         png = work / f"cue{k:04d}.png"
         img.save(png)
         rows.append((png, b - a))
@@ -578,7 +650,7 @@ def assemble_shots(shot_clips: list, lens: list, transitions: list, audio: Path,
                    fps: int = SHOT_FPS, *, logo: Path = None, end_card: Path = None, title_card: Path = None,
                    credits_card: Path = None, title_s: float = TITLE_S, credits_s: float = CREDITS_S,
                    captions_vtt: Path = None, burn: bool = False, fade_out_s: float = FADE_OUT_S,
-                   fonts_dir: Path = None, caption_lang: str = "ben") -> dict:
+                   fonts_dir: Path = None, caption_lang: str = "ben", caption_top: list = None) -> dict:
     """Join rendered shots into the film at `fps`: one xfade per transition (a 1-frame xfade is a hard cut), so
     the picture has sum(frames of lens) - sum(overlap frames) frames exactly (edit_lengths builds both lists).
 
@@ -588,7 +660,9 @@ def assemble_shots(shot_clips: list, lens: list, transitions: list, audio: Path,
     logo / end_card   the approved lockup (overlay only, top-right, the same placement and glow as `assemble`)
                 and the approved END; title_card / credits_card (see cards()) are held title_s / credits_s
     captions_vtt  on the film's timeline (captions(..., offset=title_s)); muxed as a mov_text track, or burned in
-                with burn=True (no soft track)."""
+                with burn=True (no soft track)
+    caption_top   [(start, end)] seconds of the film timeline whose burned cues sit at the top of the frame (shots
+                with "caption": "top" in their plan); the soft track carries no position."""
     n = len(shot_clips)
     if n < 1 or len(lens) != n or len(transitions) != n - 1:
         raise ValueError("assemble_shots needs one length per clip and one transition between each pair")
@@ -616,7 +690,7 @@ def assemble_shots(shot_clips: list, lens: list, transitions: list, audio: Path,
     work = Path(tempfile.mkdtemp())
     if burn:
         cap_list = _burn_track(Path(captions_vtt), (W, H), Path(fonts_dir) if fonts_dir else _default_fonts_dir(),
-                               work / "captions")
+                               work / "captions", caption_top or ())
 
     args, graph = [], []
     for k, c in enumerate(shot_clips):
