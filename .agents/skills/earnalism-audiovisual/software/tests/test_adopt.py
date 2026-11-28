@@ -310,6 +310,90 @@ class AdoptTests(unittest.TestCase):
         self.assertEqual(code, 2, out)
         self.assertIn("plan-shots", out)
 
+    # ------------------------------------------------------------------ still touch-ups bound to a shot
+    def dotted_job(self, model):
+        """An imported stills job whose shot-1 candidate has a red dot a touch-up can paint out."""
+        img = np.zeros((180, 320, 3), np.uint8)
+        img[:] = (10, 120, 200)
+        img[50:56, 100:106] = (220, 20, 30)
+        buf = io.BytesIO()
+        Image.fromarray(img).save(buf, format="PNG")
+        return self.imported("stills", {f"{self.sid}-1--c1.png": buf.getvalue()}, {"items": []}, model=model)
+
+    def touch(self, job, job_id="touchup-shot1", scene=None):
+        spec = self.d / f"{job_id}.json"
+        spec.write_text(json.dumps({**({"scene": scene} if scene else {}), "items": [
+            {"key": f"{self.sid}-1", "source": {"job": job, "file": f"{self.sid}-1--c1.png"},
+             "ops": [{"op": "inpaint", "box": [95, 45, 111, 61], "radius": 5}]}]}), encoding="utf-8")
+        return run("touchup", "--root", self.root, "--film", 1, "--spec", spec, "--job-id", job_id)
+
+    def test_scene_bound_touchup_pick_binds_the_shot_with_the_inherited_licence(self):
+        s, job = self.sid, self.dotted_job({"repo": FLUX})
+        code, out = self.touch(job, scene=s)
+        self.assertEqual(code, 0, out)
+        self.assertIn(f"inherited from stills/{job}/{s}-1--c1.png (verified)", out)
+        rec = Record.load(self.root)
+        row = next(j for j in cli._jobs(rec) if j["job_id"] == "touchup-shot1")
+        self.assertEqual(row["scene"], s)
+        self.assertEqual(cli._job_json(row), {})                       # a local job: no inputs.zip, no crash
+        man = json.loads((self.root / "jobs" / "touchup-shot1" / "touchup-manifest.json").read_text())
+        self.assertEqual((man["scene"], man["items"][0]["licence"]), (s, {"model": FLUX, "licence": "Apache-2.0"}))
+        self.assertFalse(cli._job_gated(rec, "touchup-shot1"))          # provenance, never a gate verdict
+        choices = self.d / "choices.json"
+        choices.write_text(json.dumps({f"{s}-1": 1}))
+        code, out = run("pick", "--root", self.root, "--job", "touchup-shot1", "--choices", choices)
+        self.assertEqual(code, 0, out)
+        picks = cli._scene_picks(Record.load(self.root), "film-01", s)  # where film --shots reads stills
+        self.assertEqual(picks[f"{s}-1"]["job_id"], "touchup-shot1")
+        self.assertEqual(picks[f"{s}-1"]["sha256"], sha(self.root / "touchup" / "touchup-shot1" / f"{s}-1--c1.png"))
+
+    def test_scene_bound_touchup_needs_a_key_of_the_scene_and_the_approved_plan(self):
+        job = self.dotted_job({"repo": FLUX})
+        before = (self.root / "record.json").read_bytes()
+        code, out = self.touch(job, scene="f01s999")
+        self.assertEqual(code, 2, out)
+        self.assertEqual((self.root / "record.json").read_bytes(), before)
+        self.assertFalse((self.root / "touchup").exists())
+
+    def test_touchup_output_is_adopted_by_hand_copy_with_the_source_licence(self):
+        """The 7-c1 route inside one root: a touch-up's output traced to its job, no crash on the job's missing
+        inputs.zip, the licence inherited from the verified source still, no gate verdict of its own."""
+        s, job = self.sid, self.dotted_job({"repo": FLUX})
+        self.assertEqual(self.touch(job)[0], 0)
+        (self.d / "art" / "touched.png").write_bytes(
+            (self.root / "touchup" / "touchup-shot1" / f"{s}-1--c1.png").read_bytes())
+        self.write_spec(stills={f"{s}-1": {"file": "art/touched.png", "reason": "dot painted out (touch-up)",
+                                           "from": {"job": job, "file": f"{s}-1--c1.png"}}})
+        code, out = self.adopt()
+        self.assertEqual(code, 0, out)
+        self.assertIn("inherited from touchup-shot1", out)
+        b = json.loads(self.adopted_jobs()[0]["adoption"].read_text())["binding"]["stills"][f"{s}-1"]
+        self.assertEqual(b["licence"], {"model": FLUX, "licence": "Apache-2.0"})
+        self.assertEqual(b["hand_copied"]["traced"][0]["job_id"], "touchup-shot1")
+        self.assertTrue(cli._ungated_copy(b))                         # film --shots needs a recorded reason
+        self.assertEqual(cli._release_blockers(Record.load(self.root)), [])
+        self.assertEqual(cli._scene_picks(Record.load(self.root), "film-01", s)[f"{s}-1"]["sha256"],
+                         sha(self.d / "art" / "touched.png"))
+
+    def test_touchup_of_an_unverified_source_is_refused(self):
+        s, job = self.sid, self.dotted_job({})                       # no model licence on record
+        before = (self.root / "record.json").read_bytes()
+        code, out = self.touch(job, scene=s)                         # bound to a scene: refused, nothing written
+        self.assertEqual(code, 2, out)
+        self.assertIn("unverified source", out)
+        self.assertEqual((self.root / "record.json").read_bytes(), before)
+        code, out = self.touch(job)                                  # unbound: made, with a warning
+        self.assertEqual(code, 0, out)
+        self.assertIn("cannot be bound to a scene or adopted", out)
+        (self.d / "art" / "touched.png").write_bytes(
+            (self.root / "touchup" / "touchup-shot1" / f"{s}-1--c1.png").read_bytes())
+        self.write_spec(stills={f"{s}-1": {"file": "art/touched.png", "reason": "dot painted out (touch-up)"}})
+        before = (self.root / "record.json").read_bytes()
+        code, out = self.adopt()
+        self.assertEqual(code, 2, out)
+        self.assertIn("unverified source", out)
+        self.assertEqual((self.root / "record.json").read_bytes(), before)
+
 
 if __name__ == "__main__":
     unittest.main()

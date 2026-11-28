@@ -118,6 +118,12 @@ Colab, no randomness. Install with `pip install -r software/requirements-touchup
   and the sha256 of every source and output. Open both at full size: the defect must be gone,
   the repair invisible (no smear, seam or colour patch) and faces intact. Then `pick --job <ID>`;
   `film` patches only the pick; masks never enter the film.
+- Cinematic scenes: add `"scene": "<scene id>"` to the spec (keys of that scene, approved paper
+  edit) and `pick --job <ID>` makes the touched still that shot's still. A touch-up inherits the
+  source still's model licence only when the source's licence is on record (I2, printed as a
+  warning); a scene-bound touch-up of an unverified source is refused. It has no gate verdict of
+  its own: quote the source's gate and record why it stands in `picks/gate-overrides.json`. Its
+  output can also be adopted as a hand copy (`adopt`, traced to the touch-up, same licence rule).
 - Not for composition, scale, time of day, wrong characters or anatomy: regenerate those.
   Child characters: only restore the story's described dress and bare skin (model-licences.md).
 

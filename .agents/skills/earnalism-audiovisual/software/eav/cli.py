@@ -1011,6 +1011,8 @@ def _job_json(job) -> dict:
             return _json(job["manifest"]).get("job") or {}
         except (OSError, ValueError):
             return {}
+    if not job.get("inputs_zip"):   # a local job (touch-up, take) has no notebook inputs: nothing was built
+        return {}
     try:
         with zipfile.ZipFile(job["inputs_zip"]) as z:
             return json.loads(z.read("job.json"))
@@ -2760,11 +2762,15 @@ def cmd_pick(args):
 
 
 def _touchup_items(rec, t, spec) -> list:
-    """Validate a touchup spec against the record: [(key, job, kind, name, path, sha256, ops)]."""
+    """Validate a touchup spec against the record: [(key, job, kind, name, path, sha256, ops, licence)]; the
+    licence is the source still's verified model licence (I2: a derivation inherits only from a verified source),
+    else None."""
     sources = {j["job_id"]: j["kind"] for j in _jobs(rec) if j["kind"] in ("stills", "retouch")
                and j["target"] == t and j["imported"] and not _ended(j)}
     recorded = {a["path"]: a["sha256"] for a in rec.data["artifacts"]
                 if a["kind"] in ("stills", "retouch") and a["meta"].get("job_id") in sources}
+    repos = {a["path"]: (a["meta"].get("model") or {}).get("repo") for a in rec.data["artifacts"]
+             if a["kind"] in ("stills", "retouch") and a["meta"].get("job_id") in sources}
     film_keys = {colab_jobs.CANDIDATE_SUFFIX.sub("", Path(a["path"]).stem)
                  for a in rec.data["artifacts"] if a["kind"] == "stills"
                  and sources.get(a["meta"].get("job_id")) == "stills"}
@@ -2802,7 +2808,9 @@ def _touchup_items(rec, t, spec) -> list:
         if digest != recorded[rel]:
             raise Stop(f"touchup {key!r}: {rel} sha256 {str(digest)[:12]} differs from the record's "
                        f"{recorded[rel][:12]}; the still changed since import", "Restore the imported file")
-        out.append((key, job, kind, name, path, digest, s.get("ops")))
+        repo = repos.get(rel)
+        lic = {"model": repo, "licence": adopt.MODEL_LICENCES[repo]} if repo in adopt.MODEL_LICENCES else None
+        out.append((key, job, kind, name, path, digest, s.get("ops"), lic))
     return out
 
 
@@ -2821,6 +2829,22 @@ def cmd_touchup(args):
         raise Stop(f"job id {job_id!r} is not new or not lowercase letters, digits and hyphens",
                    "Pass a new --job-id")
     items = _touchup_items(rec, t, spec)
+    sid = spec.get("scene")   # a scene-bound touch-up: its pick is the shot's still (as a clip-touchup is adopted)
+    if sid is not None:
+        if not isinstance(sid, str) or not sid:
+            raise Stop("touchup \"scene\" must be a scene id", "Fix the spec")
+        try:   # R11: a scene-bound still enters only the approved paper edit
+            shotplan.require_approved(rec.root / "film" / t, sid)
+        except shotplan.NotApproved as e:
+            raise Stop(f"touchup not made: {e}",
+                       f"{PROG} plan-shots --root {rec.root} --film {int(t[5:])} --scene {sid} (approve it)")
+        for key, job, kind, name, *_, lic in items:
+            if not key.startswith(sid + "-"):
+                raise Stop(f"touchup key {key!r} is not a key of scene {sid}", "Fix the spec")
+            if lic is None:   # I2: a derivation inherits a licence only from a verified source
+                raise Stop(f"touchup {key!r}: the model licence of {kind}/{job}/{name} is not on record (an unverified "
+                           f"source), so its touch-up cannot be bound to scene {sid}",
+                           "Touch up a still whose model licence is recorded (an imported stills or retouch job)")
     dest, job_dest = rec.root / "touchup" / job_id, rec.root / "jobs" / job_id
     if dest.exists() or job_dest.exists():
         raise Stop(f"{dest} or {job_dest} already exists", "Pass a new --job-id")
@@ -2833,7 +2857,7 @@ def cmd_touchup(args):
         (stage / "out").mkdir()
         (stage / "job").mkdir()
         rows = []
-        for key, job, kind, name, path, digest, ops in items:
+        for key, job, kind, name, path, digest, ops, lic in items:
             with Image.open(path) as im:
                 img = np.asarray(im.convert("RGB"))
             try:
@@ -2844,12 +2868,13 @@ def cmd_touchup(args):
             Image.fromarray(mask, "L").save(stage / "out" / f"{key}--mask.png")
             rows.append({"key": key, "source_job": job, "source_kind": kind, "source_file": name,
                          "source": f"{kind}/{job}/{name}", "source_sha256": digest, "ops": ops,
-                         "candidate": f"touchup/{job_id}/{key}--c1.png",
+                         "licence": lic, "candidate": f"touchup/{job_id}/{key}--c1.png",
                          "candidate_sha256": sha256_file(stage / "out" / f"{key}--c1.png"),
                          "mask": f"touchup/{job_id}/{key}--mask.png",
                          "mask_sha256": sha256_file(stage / "out" / f"{key}--mask.png")})
         _write_json(stage / "job" / "touchup.json", spec)
         manifest = {"schema": TOUCHUP_SCHEMA, "job_id": job_id, "target": t, "kind": "touchup",
+                    **({"scene": sid} if sid else {}),
                     "engine": "opencv", "opencv": version, "method": "eav.touchup.apply",
                     "spec_sha256": sha256_file(stage / "job" / "touchup.json"), "items": rows}
         _write_json(stage / "job" / "touchup-manifest.json", manifest)
@@ -2869,12 +2894,14 @@ def cmd_touchup(args):
                           "manifest": f"jobs/{job_id}/touchup-manifest.json"})
         rec.add_artifact("touchup_spec", job_dest / "touchup.json", meta)
         rec.event("cli", "job_target", {"job_id": job_id, "target": t, "kind": "touchup",
-                                        "engine": "opencv"})
+                                        "engine": "opencv", **({"scene": sid} if sid else {})})
         arts = []
         for r in rows:
             src = {"key": r["key"], "source": r["source"], "source_sha256": r["source_sha256"]}
+            # model provenance of the verified source still (I2); no "gate": a touch-up has no gate verdict of its own
+            prov = {"model": {"repo": r["licence"]["model"]}} if r["licence"] else {}
             arts.append(rec.add_artifact("touchup", rec.root / r["candidate"],
-                                         {**meta, **src, "ops": r["ops"]}))
+                                         {**meta, **src, **prov, "ops": r["ops"]}))
             arts.append(rec.add_artifact("touchup_mask", rec.root / r["mask"], {**meta, **src}))
         for a, want in zip(arts, [h for r in rows for h in (r["candidate_sha256"], r["mask_sha256"])]):
             if a["sha256"] != want:
@@ -2899,7 +2926,16 @@ def cmd_touchup(args):
     shutil.rmtree(stage, ignore_errors=True)
     print(f"Touched up {len(rows)} still(s) of {t} as job {job_id} (OpenCV {version}, 0 CU): "
           + ", ".join(r["key"] for r in rows) + ". Open every <key>--c1.png and <key>--mask.png at "
-          f"full size, then {PROG} pick --root {rec.root} --job {job_id} --choices <json>.")
+          f"full size, then {PROG} pick --root {rec.root} --job {job_id} --choices <json>"
+          + (f" (bound to scene {sid}: the pick is that shot's still)." if sid else "."))
+    for r in rows:
+        if r["licence"]:
+            print(f"WARNING {r['key']}: licence {r['licence']['licence']} ({r['licence']['model']}) inherited from "
+                  f"{r['source']} (verified) by this touch-up (OpenCV, no model); it has no gate verdict of its own: "
+                  "look at it at full size and record why it stands in picks/gate-overrides.json.")
+        else:
+            print(f"WARNING {r['key']}: the model licence of {r['source']} is not on record (an unverified source): "
+                  "this touch-up cannot be bound to a scene or adopted.")
 
 
 CLIP_TOUCHUP_SCHEMA = cliptouch.SCHEMA
@@ -4430,6 +4466,17 @@ def _adopt_stills(rec, spec, base, sid, shots, load, everything, advisories):
             lic, gate, src = None, None, None
             for t_ in traced:
                 s_ = load(t_["job_id"])
+                if t_["relation"].startswith("identical to the job's output") and s_.kind == "touchup":
+                    # I2: a touch-up (OpenCV, no model) inherits the licence of its source still only when that source
+                    # was verified at touch-up time (recorded as the output's model); it has no gate verdict of its own
+                    if s_.model_repo() not in adopt.MODEL_LICENCES:
+                        raise adopt.Refused(f"{key}: {path.name} is the output of touch-up {s_.job_id}, whose source "
+                                            "still's model licence is not on record (an unverified source)")
+                    lic, src = s_.licence("image"), s_
+                    advisories[key] = (f"licence {lic['licence']} inherited from {s_.job_id}/{t_['file']}, a touch-up of "
+                                       "a verified source still; no gate verdict of its own: film --shots needs a "
+                                       "reason in picks/gate-overrides.json")
+                    break
                 if t_["relation"].startswith("identical to the job's output") and s_.kind in PICK_KINDS:
                     lic, src = s_.licence("image"), s_
                     gate = _adopt_gate(rec, key, s_, t_["file"], s_.file(t_["file"])[0], entry, advisories)
