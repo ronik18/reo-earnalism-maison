@@ -12045,6 +12045,492 @@
       },
       "path": "jobs/audition-15a5c974/narration.ipynb",
       "sha256": "13e2d4600f188b3300092ebe72b8d2e06d30e96ae4ee4db8f34f249d27cfcb29"
+    },
+    {
+      "bytes": 371756,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/aditi-female-line.wav",
+      "sha256": "eef0926aa34c90ba0c8ba2e391ead23c8a97a5265a0c67a8afc643727ebf891a"
+    },
+    {
+      "bytes": 312364,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/aditi-male-line.wav",
+      "sha256": "79ea3a0865142f2971bba9c6be8a29e762873e4a1c372385665ce700b41a3b5a"
+    },
+    {
+      "bytes": 468012,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/aditi-narration.wav",
+      "sha256": "9abaf2f6afd008e8b74aeee5460cdc9d1b0701a243c0e8ef012e70060ec40316"
+    },
+    {
+      "bytes": 366636,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/arjun-female-line.wav",
+      "sha256": "7004bec30fa493073f73ca168166a25d5250ed8e332053550b16e9ab38884b7a"
+    },
+    {
+      "bytes": 304172,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/arjun-male-line.wav",
+      "sha256": "48b11c111d78eaeb844fbc8e4fa5bc49641c62f81cb15c880768117c24b77c00"
+    },
+    {
+      "bytes": 478252,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/arjun-narration.wav",
+      "sha256": "bfd5fd08a4e69c36028d87b4152c6e400c62b1824b1d1bd920e40664fbfc111c"
+    },
+    {
+      "bytes": 386092,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/arnav-female-line.wav",
+      "sha256": "58cbf3b9479506fb2725369a04a47d69cd629db9f98d6dce2cd8d0f7e9844b0f"
+    },
+    {
+      "bytes": 282668,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/arnav-male-line.wav",
+      "sha256": "063396d7e8297af319203ae85e9fe4811c7ac60443b4f74f4984360f3e164609"
+    },
+    {
+      "bytes": 491564,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/arnav-narration.wav",
+      "sha256": "15fe85b389bf471162da4807ba6afc8a3f5bb7eb08b212e609bb69264971481e"
+    },
+    {
+      "bytes": 485420,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/rashmi-female-line.wav",
+      "sha256": "69acb38a0d2d4094d8cc0741f775a1c943716fb1fcec7862b9989657972f1eec"
+    },
+    {
+      "bytes": 432172,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/rashmi-male-line.wav",
+      "sha256": "dbe4aa2de7362859c83e7319190895cb07dd8e2ca1c303b9156f0c22de7c3d3a"
+    },
+    {
+      "bytes": 548908,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/rashmi-narration.wav",
+      "sha256": "a5755edc28fb30304767b6e435e8a02c30230c6b0ac47311dc8760ae4a5352bc"
+    },
+    {
+      "bytes": 360492,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/riya-female-line.wav",
+      "sha256": "dcdad5c7cf482c450073d542988175249053bc0dbee30b469e38447117f4c4db"
+    },
+    {
+      "bytes": 268332,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/riya-male-line.wav",
+      "sha256": "7b32981a9e901952f6f6a688e880037918e425ca14e8c27406fc825f896eae98"
+    },
+    {
+      "bytes": 438316,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/riya-narration.wav",
+      "sha256": "0ca6cf21d76544e82042f03772eb95d1414735794cdd0a3f1b83d16c5afb72f6"
+    },
+    {
+      "bytes": 387116,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/tapan-female-line.wav",
+      "sha256": "64c3b760130d13de5e66c9da0b84975911144f2b47601df2f4b4d65531889b64"
+    },
+    {
+      "bytes": 324652,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/tapan-male-line.wav",
+      "sha256": "14fd21c7128bea21db8fd8ede9110f39d76255bcc9df69650fc6ac72c9cc8274"
+    },
+    {
+      "bytes": 490540,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/audition-15a5c974/tapan-narration.wav",
+      "sha256": "221316fcf6bbc3732ff4df5135e44dbf03603b74aa03acf5d77a76824e451c99"
     }
   ],
   "created_at": "2026-11-26T03:54:10.892127+00:00",
@@ -12687,6 +13173,172 @@
       },
       "result": "job_target",
       "stage": "cli"
+    },
+    {
+      "at": "2026-11-28T10:16:16.151481+00:00",
+      "detail": {
+        "actual_units": 0.0,
+        "files": [
+          "narration/audition-15a5c974/aditi-female-line.wav",
+          "narration/audition-15a5c974/aditi-male-line.wav",
+          "narration/audition-15a5c974/aditi-narration.wav",
+          "narration/audition-15a5c974/arjun-female-line.wav",
+          "narration/audition-15a5c974/arjun-male-line.wav",
+          "narration/audition-15a5c974/arjun-narration.wav",
+          "narration/audition-15a5c974/arnav-female-line.wav",
+          "narration/audition-15a5c974/arnav-male-line.wav",
+          "narration/audition-15a5c974/arnav-narration.wav",
+          "narration/audition-15a5c974/rashmi-female-line.wav",
+          "narration/audition-15a5c974/rashmi-male-line.wav",
+          "narration/audition-15a5c974/rashmi-narration.wav",
+          "narration/audition-15a5c974/riya-female-line.wav",
+          "narration/audition-15a5c974/riya-male-line.wav",
+          "narration/audition-15a5c974/riya-narration.wav",
+          "narration/audition-15a5c974/tapan-female-line.wav",
+          "narration/audition-15a5c974/tapan-male-line.wav",
+          "narration/audition-15a5c974/tapan-narration.wav"
+        ],
+        "input_zip_sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18",
+        "job_id": "audition-15a5c974",
+        "kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-28T10:16:17.219569+00:00",
+      "detail": {
+        "folder": "audition/audition-15a5c974",
+        "job_id": "audition-15a5c974",
+        "stats": {
+          "Aditi": {
+            "median_chars_per_s": 11.63,
+            "suspect": [],
+            "takes": {
+              "female-line": {
+                "chars_per_s": 11.63,
+                "seconds": 4.214
+              },
+              "male-line": {
+                "chars_per_s": 11.3,
+                "seconds": 3.541
+              },
+              "narration": {
+                "chars_per_s": 12.82,
+                "seconds": 5.306
+              }
+            }
+          },
+          "Arjun": {
+            "median_chars_per_s": 11.79,
+            "suspect": [],
+            "takes": {
+              "female-line": {
+                "chars_per_s": 11.79,
+                "seconds": 4.156
+              },
+              "male-line": {
+                "chars_per_s": 11.6,
+                "seconds": 3.448
+              },
+              "narration": {
+                "chars_per_s": 12.54,
+                "seconds": 5.422
+              }
+            }
+          },
+          "Arnav": {
+            "median_chars_per_s": 12.2,
+            "suspect": [],
+            "takes": {
+              "female-line": {
+                "chars_per_s": 11.19,
+                "seconds": 4.377
+              },
+              "male-line": {
+                "chars_per_s": 12.48,
+                "seconds": 3.204
+              },
+              "narration": {
+                "chars_per_s": 12.2,
+                "seconds": 5.573
+              }
+            }
+          },
+          "Rashmi": {
+            "median_chars_per_s": 8.9,
+            "suspect": [],
+            "takes": {
+              "female-line": {
+                "chars_per_s": 8.9,
+                "seconds": 5.503
+              },
+              "male-line": {
+                "chars_per_s": 8.16,
+                "seconds": 4.899
+              },
+              "narration": {
+                "chars_per_s": 10.93,
+                "seconds": 6.223
+              }
+            }
+          },
+          "Riya": {
+            "median_chars_per_s": 13.15,
+            "suspect": [],
+            "takes": {
+              "female-line": {
+                "chars_per_s": 11.99,
+                "seconds": 4.087
+              },
+              "male-line": {
+                "chars_per_s": 13.15,
+                "seconds": 3.042
+              },
+              "narration": {
+                "chars_per_s": 13.68,
+                "seconds": 4.969
+              }
+            }
+          },
+          "Tapan": {
+            "median_chars_per_s": 11.17,
+            "suspect": [],
+            "takes": {
+              "female-line": {
+                "chars_per_s": 11.17,
+                "seconds": 4.389
+              },
+              "male-line": {
+                "chars_per_s": 10.87,
+                "seconds": 3.68
+              },
+              "narration": {
+                "chars_per_s": 12.23,
+                "seconds": 5.561
+              }
+            }
+          }
+        }
+      },
+      "result": "imported",
+      "stage": "audition"
     }
   ],
   "ledger": "../allowance-ledger.json",
