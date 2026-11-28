@@ -1,12 +1,136 @@
 {
   "colab_units": 0.0,
+  "error": null,
+  "files": [
+    {
+      "bytes": 371756,
+      "path": "aditi-female-line.wav",
+      "sha256": "eef0926aa34c90ba0c8ba2e391ead23c8a97a5265a0c67a8afc643727ebf891a"
+    },
+    {
+      "bytes": 312364,
+      "path": "aditi-male-line.wav",
+      "sha256": "79ea3a0865142f2971bba9c6be8a29e762873e4a1c372385665ce700b41a3b5a"
+    },
+    {
+      "bytes": 468012,
+      "path": "aditi-narration.wav",
+      "sha256": "9abaf2f6afd008e8b74aeee5460cdc9d1b0701a243c0e8ef012e70060ec40316"
+    },
+    {
+      "bytes": 366636,
+      "path": "arjun-female-line.wav",
+      "sha256": "7004bec30fa493073f73ca168166a25d5250ed8e332053550b16e9ab38884b7a"
+    },
+    {
+      "bytes": 304172,
+      "path": "arjun-male-line.wav",
+      "sha256": "48b11c111d78eaeb844fbc8e4fa5bc49641c62f81cb15c880768117c24b77c00"
+    },
+    {
+      "bytes": 478252,
+      "path": "arjun-narration.wav",
+      "sha256": "bfd5fd08a4e69c36028d87b4152c6e400c62b1824b1d1bd920e40664fbfc111c"
+    },
+    {
+      "bytes": 386092,
+      "path": "arnav-female-line.wav",
+      "sha256": "58cbf3b9479506fb2725369a04a47d69cd629db9f98d6dce2cd8d0f7e9844b0f"
+    },
+    {
+      "bytes": 282668,
+      "path": "arnav-male-line.wav",
+      "sha256": "063396d7e8297af319203ae85e9fe4811c7ac60443b4f74f4984360f3e164609"
+    },
+    {
+      "bytes": 491564,
+      "path": "arnav-narration.wav",
+      "sha256": "15fe85b389bf471162da4807ba6afc8a3f5bb7eb08b212e609bb69264971481e"
+    },
+    {
+      "bytes": 15937,
+      "path": "inputs.zip",
+      "sha256": "cf76e0b803ca35fd77a7579dd27effa9347165c05b5d651835f488606a14fe18"
+    },
+    {
+      "bytes": 2468,
+      "path": "manifest.json",
+      "sha256": "258389762e756d594b7c97cd8a60949a42f7f8dc9c673a4c70fd31f2edcbe4be"
+    },
+    {
+      "bytes": 4108,
+      "path": "progress.jsonl",
+      "sha256": "ccf9cdec80854ebab5e85da4b4e553774e6ec1b639309af221de81b6e2b78468"
+    },
+    {
+      "bytes": 485420,
+      "path": "rashmi-female-line.wav",
+      "sha256": "69acb38a0d2d4094d8cc0741f775a1c943716fb1fcec7862b9989657972f1eec"
+    },
+    {
+      "bytes": 432172,
+      "path": "rashmi-male-line.wav",
+      "sha256": "dbe4aa2de7362859c83e7319190895cb07dd8e2ca1c303b9156f0c22de7c3d3a"
+    },
+    {
+      "bytes": 548908,
+      "path": "rashmi-narration.wav",
+      "sha256": "a5755edc28fb30304767b6e435e8a02c30230c6b0ac47311dc8760ae4a5352bc"
+    },
+    {
+      "bytes": 360492,
+      "path": "riya-female-line.wav",
+      "sha256": "dcdad5c7cf482c450073d542988175249053bc0dbee30b469e38447117f4c4db"
+    },
+    {
+      "bytes": 268332,
+      "path": "riya-male-line.wav",
+      "sha256": "7b32981a9e901952f6f6a688e880037918e425ca14e8c27406fc825f896eae98"
+    },
+    {
+      "bytes": 438316,
+      "path": "riya-narration.wav",
+      "sha256": "0ca6cf21d76544e82042f03772eb95d1414735794cdd0a3f1b83d16c5afb72f6"
+    },
+    {
+      "bytes": 1268,
+      "path": "sessions.jsonl",
+      "sha256": "3ae67e2386794699757d375fc3260dce0f0d49d75f913f2a52e1782dc7e6e176"
+    },
+    {
+      "bytes": 387116,
+      "path": "tapan-female-line.wav",
+      "sha256": "64c3b760130d13de5e66c9da0b84975911144f2b47601df2f4b4d65531889b64"
+    },
+    {
+      "bytes": 324652,
+      "path": "tapan-male-line.wav",
+      "sha256": "14fd21c7128bea21db8fd8ede9110f39d76255bcc9df69650fc6ac72c9cc8274"
+    },
+    {
+      "bytes": 490540,
+      "path": "tapan-narration.wav",
+      "sha256": "221316fcf6bbc3732ff4df5135e44dbf03603b74aa03acf5d77a76824e451c99"
+    }
+  ],
+  "finished_at": "2026-11-28T10:15:26+00:00",
   "gpu": "L4",
   "job_id": "audition-15a5c974",
+  "modal_contacted_at": "2026-11-28T10:08:20+00:00",
   "pending_run_id": "audition-15a5c974#1",
   "r2_prefix": "gpu-jobs/samapti/audition-15a5c974/run-1/",
   "requested_at": "2026-11-28T10:04:28+00:00",
+  "run": {
+    "error": null,
+    "run_id": "audition-15a5c974#1",
+    "seconds": 381.42586199100003,
+    "status": "ok",
+    "usd": 0.1058456767025025
+  },
   "schema": "earnalism.modal-request.v1",
-  "status": "running",
+  "seconds": 381.42586199100003,
+  "status": "done",
   "title_root": "production/audiovisual/samapti",
+  "usd": 0.1058456767025025,
   "worst_case_usd": 0.622155
 }

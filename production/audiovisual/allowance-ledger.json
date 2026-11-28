@@ -1181,10 +1181,10 @@
       {
         "run_id": "audition-15a5c974#1",
         "job_id": "audition-15a5c974",
-        "usd": 0.622155,
-        "seconds": 0.0,
+        "usd": 0.1058456767025025,
+        "seconds": 381.42586199100003,
         "at": "2026-11-28T10:04:28+00:00",
-        "status": "pending"
+        "status": "ok"
       }
     ]
   }
