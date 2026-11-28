@@ -184,6 +184,9 @@ The style does not fix content. Check every imported still at full size for:
 - **Anatomy and physics**: hands and fingers, people sitting on something, feet on the ground.
 - **Stray lettering or watermarks**, even small ones in a corner.
 - **Identity drift** between shots of the same character.
+- **Minute anomalies** (the SKILL.md checklist): eye count and pupils, fingers, moles and marks, jewellery,
+  background glows. `facegate <still>` flags double or missing pupils and LED-like glows and draws the face
+  close-up sheet `<key>.faces.png`; look at it at full size before picking.
 
 Regenerate only the failing stills as a small patch job with candidates, then pick (`film`
 applies a later partial stills job, or a candidates job's picks, over the full set).

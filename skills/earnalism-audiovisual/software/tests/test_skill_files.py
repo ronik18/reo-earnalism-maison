@@ -204,6 +204,24 @@ class SkillFileTests(unittest.TestCase):
         self.assertIn("earnalism-video", row4)
         self.assertRegex(self._ref("model-licences.md"), r"MediaPipe.{0,80}declared")
 
+    def test_minute_anomaly_checklist_and_face_gate_documented(self):
+        """Owner request 28 Nov 2026: the operator goes through a minute anomaly checklist before sending any cut,
+        on the face close-up sheet the face gate draws."""
+        sec = " ".join(self.text[self.text.index("## Minute anomaly review"):self.text.index("## Stop conditions")].split())
+        for item in ("**Eyes**", "**Hands**", "**Faces**", "**Jewellery and costume**", "**Background**",
+                     "**Objects**"):
+            self.assertIn(f"- [ ] {item}", sec, item)
+        for phrase in ("pupil", "fingers", "moles", "age", "glows", "LEDs", "text", "numbers", "wires",
+                       "modern objects", "duplicated", "melting", "qc/<scene>-faces.jpg", "`film --shots`",
+                       "faces:<key>", "facegate <clip|still|folder>", "unassessed"):
+            self.assertIn(phrase, sec, phrase)
+        self.assertIn("`facegate`", self.text)
+        recipe = self._ref("film-recipe.md")
+        for phrase in ("eav/facegate.py", "double pupil", "missing pupil", "not_run:faces", "faces:<key>",
+                       "Identity and age drift is not measured", "f01s014-9p"):
+            self.assertIn(phrase, recipe, phrase)
+        self.assertRegex(self._ref("model-licences.md"), r"face and eye gate.{0,120}\*\*no model\*\*")
+
 
 if __name__ == "__main__":
     unittest.main()

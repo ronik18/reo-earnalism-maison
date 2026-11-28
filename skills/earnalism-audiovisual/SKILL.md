@@ -31,7 +31,7 @@ Commands: `init`, `plan`, `scene-timing`, `plan-shots`, `job` (kinds incl. `stil
 `music`), `exchange-stage`, `exchange-collect`, `import`, `import-take` (`--accept PID=reason`, `--no-retime` for an
 already-retimed take), `split-passages`, `pick`, `adopt` (already-imported media bound to a scene's approved shots,
 verified by sha256, 0 CU), `supersede` (never ran), `close` (ran, not imported: settles the actual CU), `glide`, `retime`, `voicecheck`,
-`motiongate`, `cue`, `film`, `reel`, `qc`, `status` (`--scene <ID>`: one scene's route; `film --shots --scene`),
+`motiongate`, `facegate`, `cue`, `film`, `reel`, `qc`, `status` (`--scene <ID>`: one scene's route; `film --shots --scene`),
 `bundle-audio` (`--profile audiobook|film`), `bundle-film`, plus the older `hold`, `touchup`, `clip-touchup`
 (usage in `eav/cli.py`; `--help`). Exit codes: 0 ok, 2 stop, 3 budget exceeded, 4 import held,
 5 QC failure. A non-zero exit is a decision, not a glitch: never re-run it with edited
@@ -55,7 +55,7 @@ The table below lists the stages by who owns them.
 | 5 | Score: one ACE-Step cue per scene (film); VCSL editorial bed for the older route | `job music` (spec `"scene"`, stem `"role"`) → Colab → `import` → `cue --scene --pick` (within each stem family), `cue --scene --fx` (every sound with its licence record) | `earnalism-audiobook-score` |
 | 6 | Film assembly (24 fps, measured timing, scene mixes, glides and clips, captions, logo, END) | `film --shots` (picked stills only; prints and records every Wan take the motion gate wants reviewed); `film` only for older films without shot plans | `earnalism-video` |
 | 7 | Reels: script, narration (measured), shot plan, keyframes, Wan clips in batches of ≤ 5, assembly | `reel N --script`, `job narration --reel N`, `reel N --plan-shots`, `job stills --reel N`, `job reel_clips --reel N` per batch, `reel N` | `earnalism-video` (Wan22 route) |
-| 8 | Review: automated checks, contact sheets, owner review | `qc`; owner watches the first package | `earnalism-book-audiovisual` |
+| 8 | Review: automated checks, contact sheets, face close-up sheets, the minute anomaly review (below), owner review | `qc` (incl. the `faces` gate, `qc/<scene>-faces.jpg`); owner watches the first package | `earnalism-book-audiovisual` |
 | 9 | Publish, only when told and only where told | `bundle-audio` → Maison `attach_audiovisual_audio stage|publish`; social private staging | `earnalism-book-audiovisual`, `earnalism-book-production` |
 
 Redone stills: prompts are positive-only (the builder refuses `no`, `not`, `without`, …;
@@ -95,6 +95,29 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
 [publishing](references/publishing.md), [Colab R2 exchange](references/colab-exchange.md). Pressure scenarios this skill must pass:
 [references/pressure-tests.md](references/pressure-tests.md).
 
+## Minute anomaly review (before any cut is sent)
+
+The owner found two pupils in one eye at 0:51 of scene 14 v7 (take f01s014-9p, and already in its start still);
+earlier, a mole that came and went on Hem, the mother's face gaunt in one take and childlike in another, and a cyan
+LED-like glow. Gates catch some of these; a person looking catches the rest. Before sending any cut to the owner,
+run `qc` and go through every item below on the face sheet `qc/<scene>-faces.jpg` (face crops ×3, red = flagged;
+`film --shots` prints its path), the `qc/` contact sheet and the cut itself at full size, paused, shot by shot:
+
+- [ ] **Eyes**: two per face, one round pupil each, none missing, no extra eyeball; left and right match in size
+  and shape; no eye off the face or melting between frames. `faces` fails a double or missing pupil.
+- [ ] **Hands**: five fingers, attached to an arm, nothing fused or floating (the still gate checks attachment only).
+- [ ] **Faces**: the same person in every shot at the bible's age (not gaunt here and childlike there); moles and
+  marks exactly as the bible says (Hem has none); no face change inside a take. Identity is not measured: look.
+- [ ] **Jewellery and costume**: earrings, bangles, bindi or bare forehead, sari border colour as the bible says, the
+  same in every shot.
+- [ ] **Background**: no glows or LEDs (`faces` lists cyan glows), no text, numbers or letters, no wires, no modern
+  objects.
+- [ ] **Objects**: nothing duplicated (two pots, a second hand), nothing melting or morphing.
+
+Fix the cause (redo the still or take, `touchup`, `clip-touchup`, `edit`); a fail stands only with the owner's
+reason in `picks/gate-overrides.json` as `"faces:<key>"`. Say in the hand-off which items you checked; anything
+not checked is `unassessed`. `facegate <clip|still|folder>` runs the gate on any media without a record.
+
 ## Stop conditions (exact behaviour)
 
 | Condition | What you do | What you never do |
@@ -120,7 +143,7 @@ Recipes: [film](references/film-recipe.md), [house visual style](references/visu
   kept). Candidates never voice production. No impersonation, no spoken stage directions.
   ElevenLabs route: the owner-picked voice of the title, Eleven v4 passage takes (`split-passages`, `import-take`; model id in `voice.json`) or one tagged-script `eleven_v3` take per scene,
   `import-take` (refuses any script whose words differ from the book).
-- **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x (film: 2.2 TI2V-5B), ACE-Step (Apache-2.0), Depth Anything V2 **Small**, the gate models MediaPipe, OWLv2 and DINOv2-small (Apache-2.0), SDXL inpainting 0.1 + CLIPSeg (retouch), Qwen-Image-Edit-2511 (edit, Apache-2.0), OpenCV (touch-up), Whisper (MIT) and
+- **Models.** Only Indic Parler-TTS, FLUX.1-schnell, Wan 2.x (film: 2.2 TI2V-5B), ACE-Step (Apache-2.0), Depth Anything V2 **Small**, the gate models MediaPipe, OWLv2 and DINOv2-small (Apache-2.0), SDXL inpainting 0.1 + CLIPSeg (retouch), Qwen-Image-Edit-2511 (edit, Apache-2.0), OpenCV (touch-up and the face gate, no model), Whisper (MIT) and
   VCSL samples (CC0). MusicGen (CC-BY-NC weights), FLUX.1-dev (non-commercial), Depth Anything V2 Base and Large (non-commercial) and CLIP (card puts deployed use out of scope) are
   forbidden even if the owner names them; offer the licensed equivalent instead.
   No paid generator or credit-spending connector (Kling, Suno, Runway, Adobe/Canva

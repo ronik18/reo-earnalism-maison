@@ -121,6 +121,11 @@
   python3 -m eav.cli reel <n> --root <dir> --plan-shots           (after reel narration import)
   python3 -m eav.cli reel <n> --root <dir> [--score <wav> --score-route ...]
   python3 -m eav.cli qc --root <dir>
+                         (cinematic films also run the face gate per scene: qc/<scene>-faces.jpg, qc/faces/<scene>/;
+                         a double or missing pupil fails unless picks/gate-overrides.json has "faces:<key>": reason)
+  python3 -m eav.cli facegate <clip|still|folder> ... [--out <dir>] [--fresh]
+                         (no --root: double/missing pupils, eye asymmetry, eyes off the face, morphing eyes, LED-like
+                         glows; <key>.face.json and the face close-up sheet <key>.faces.png; media untouched)
   python3 -m eav.cli status --root <dir> [--scene ID]   (--scene: that one scene's route, not the film's first scene)
   python3 -m eav.cli bundle-audio --root <dir> --out <bundle dir> [--profile audiobook|film]
                          [--frame-dir <dir of title.wav, author.wav, closing.wav>]
@@ -153,7 +158,7 @@ from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 
 from . import budget, colab_jobs, exchange, film, film_bundle, importer, mix, qc, reel, scenes, take
-from . import adopt, cliptouch, cue, glide, motiongate, passages, retime, shotplan, touchup, voicecheck
+from . import adopt, cliptouch, cue, facegate, glide, motiongate, passages, retime, shotplan, touchup, voicecheck
 from .record import Record, sha256_file
 from .text import sentences
 from .voice import CONTINUOUS, EXPRESSIVE, _segments, _style, unit_anchors, voice_units
@@ -2046,6 +2051,147 @@ def _motion_verdicts(rec, files, sid, n) -> dict:
     return review
 
 
+# ---------------------------------------------------------------- face and eye gate (owner request 28 Nov 2026)
+FACE_OVERRIDE_PREFIX = "faces:"   # picks/gate-overrides.json {"faces:<key>": "<reason>"}: a face fail stands
+
+
+def _face_overrides(rec) -> dict:
+    path = rec.root / "picks" / "gate-overrides.json"
+    if not path.is_file():
+        return {}
+    return {k[len(FACE_OVERRIDE_PREFIX):]: v for k, v in _json(path).items()
+            if k.startswith(FACE_OVERRIDE_PREFIX) and isinstance(v, str) and v.strip()}
+
+
+def _scene_face_inputs(rec, t, sid) -> tuple:
+    """([(shot n, "clip"|"still", path)], [why a shot's media could not be found]) of one scene's latest cut: the
+    Wan takes the film uses (its picked chain) and the picked stills linked into film/<t>/stills."""
+    film_dir = rec.root / "film" / t
+    plan = film_dir / "shots" / f"{sid}.json"
+    if not plan.is_file():
+        return [], [f"scene {sid} has no shot plan {plan.name}"]
+    sp = _json(plan)
+    picks_path = film_dir / "clip-picks.json"
+    picks = _json(picks_path) if picks_path.is_file() else {}
+    clip_items = None
+    found, missing = [], []
+    try:   # the operator's recorded picks are what film --shots links in; the stills folder is the fallback
+        picked = _scene_picks(rec, t, sid)
+    except Stop as e:
+        picked = {}
+        missing.append(str(e))
+    for shot in sp.get("shots") or []:
+        n = shot.get("n")
+        if shot.get("motion") == "wan":
+            if clip_items is None:
+                clip_items = _film_clip_items(rec, t)
+            try:
+                keys = film.pick_wan_clips([c["item"] for c in clip_items.values()], sid, n, picks)
+            except ValueError as e:
+                missing.append(f"shot {n}: {e}")
+                continue
+            for k in keys:
+                f = rec.root / "film_clips" / clip_items[k]["job_id"] / "clips" / f"{k}.mp4"
+                (found.append((n, "clip", f)) if f.is_file() else missing.append(f"shot {n}: clip {f} is missing"))
+        elif shot.get("motion") in ("glide", "static"):
+            stem = f"{sid}-{n}"
+            if stem in picked:
+                found.append((n, "still", picked[stem]["path"]))
+                continue
+            still = next((p for p in sorted((film_dir / "stills").glob(f"{stem}.*"))
+                          if p.suffix.lower() in film.STILL_EXTS), None) if (film_dir / "stills").is_dir() else None
+            (found.append((n, "still", still)) if still else
+             missing.append(f"shot {n}: no picked still {stem} in {film_dir / 'stills'} (assemble with film --shots)"))
+    return found, missing
+
+
+def _scene_faces(rec, t, sid) -> dict:
+    """Run the face gate over a scene's clips and stills into qc/faces/<scene>/ (cached by sha256) and draw the
+    scene's face close-up sheet qc/<scene>-faces.jpg. Returns {"sheet", "items", "flagged", "fails", "missing",
+    "error"}; a fail is a double or missing pupil without a recorded "faces:<key>" override."""
+    out = rec.root / "qc" / "faces" / sid
+    inputs, missing = _scene_face_inputs(rec, t, sid)
+    overrides = _face_overrides(rec)
+    items, flagged, fails, sections, faceless = {}, [], [], [], []
+    if not facegate.available():
+        return {"sheet": None, "items": {}, "flagged": [], "fails": [], "missing": missing,
+                "error": "OpenCV is not importable: the face gate cannot run"}
+    for n, kind, path in inputs:
+        try:   # a still is named by its shot key (<scene>-<n>), a take by its own key
+            r = facegate.gate(path, out, key=f"{sid}-{n}" if kind == "still" else None)
+        except facegate.Unavailable as e:
+            missing.append(f"shot {n}: {e}")
+            continue
+        key = r["key"]
+        verdict = "fail" if not r["pass"] else ("review" if r["needs_review"] else "pass")
+        items[key] = {"shot": n, "kind": kind, "verdict": verdict, "sha256": r["sha256"],
+                      "face_json": (out / f"{key}.face.json").relative_to(rec.root).as_posix(),
+                      "sheet": (out / r["sheet"]).relative_to(rec.root).as_posix() if r.get("sheet") else None,
+                      **({"override": overrides[key]} if key in overrides else {})}
+        for f in r["findings"]:
+            flagged.append({"scene": sid, "shot": n, "key": key, "kind": f["kind"], "severity": f["severity"],
+                            "frames": f["frames"], "times": f["times"], "detail": f["detail"],
+                            **({"override": overrides[key]} if key in overrides and f["severity"] == "fail" else {})})
+        if not r["pass"] and key not in overrides:
+            fails.append(key)
+        if r.get("sheet"):
+            sections.append((f"{sid} shot {n} {key} ({kind}): {verdict.upper()}"
+                             + (f" - override: {overrides[key]}" if key in overrides and verdict == "fail" else ""),
+                             out / r["sheet"]))
+        else:
+            faceless.append(f"shot {n} {key}")
+    sheet = facegate.scene_sheet(sections, rec.root / "qc" / f"{sid}-faces.jpg") if sections else None
+    return {"sheet": sheet.relative_to(rec.root).as_posix() if sheet else None, "items": items, "flagged": flagged,
+            "fails": fails, "missing": missing, "faceless": faceless, "error": None}
+
+
+def _face_lines(sid, res) -> list:
+    lines = []
+    for f in res["flagged"]:
+        where = (f"frames {f['frames'][0]}-{f['frames'][-1]} ({f['times'][0]:.2f}-{f['times'][-1]:.2f} s of the take)"
+                 if f["times"] else "still")
+        lines.append(f"FACE {f['severity'].upper()} {sid} shot {f['shot']} {f['key']}: {f['kind'].replace('_', ' ')}, "
+                     f"{where}; {f['detail']}" + (f" (override: {f['override']})" if f.get("override") else ""))
+    return lines
+
+
+def cmd_facegate(args):
+    if not facegate.available():
+        raise Stop("OpenCV (opencv-python-headless) is not importable: the face gate cannot run, so nothing passed",
+                   "pip install -r skills/earnalism-audiovisual/software/requirements-touchup.txt and rerun")
+    media = []
+    for a in args.media:
+        p = Path(a)
+        if p.is_dir():
+            media += sorted(x for x in p.iterdir() if x.suffix.lower() in facegate.CLIP_EXTS | facegate.IMAGE_EXTS
+                            and not x.name.endswith((".faces.png", ".contact.png", ".mask.png", ".before.png",
+                                                     ".after.png", "-depth.png", ".depth.png")))
+        elif p.is_file():
+            media.append(p)
+        else:
+            raise Stop(f"{p} does not exist", "Fix the path and rerun")
+    if not media:
+        raise Stop("no clips or stills given", "Pass clip or still files, or a folder of them")
+    out = Path(args.out) if args.out else None
+    failed = 0
+    for m in media:
+        try:
+            r = facegate.gate(m, out, reuse=not args.fresh)
+        except facegate.Unavailable as e:
+            failed += 1
+            print(f"NOT RUN {m.name}: {e} (counts as a failure)")
+            continue
+        failed += not r["pass"]
+        print(facegate.summary_line(r) + (f" Sheet: {r['sheet']}" if r.get("sheet") else ""))
+    print(f"{len(media)} file(s) gated, {failed} failed. Written beside each file (or in --out): <key>.face.json and "
+          "<key>.faces.png; the media are untouched. Thresholds are uncalibrated beyond scene 14. Identity and age "
+          "are not measured: look at every sheet.")
+    if failed:
+        raise Stop(f"{failed} file(s) failed the face gate (or could not be gated)",
+                   "Look at each sheet at full size; regenerate the still or take, or record why it stands in "
+                   "picks/gate-overrides.json as {\"faces:<key>\": \"<reason>\"}", code=5)
+
+
 def _shot_assets(rec, t, sid, shot, clip_items, picks, stills_dir, depth_maps=None, review=None) -> dict:
     """Inputs of one shot: its imported Wan clip(s), or its picked still (C2: the scene's picks only, linked into
     stills_dir as <scene>-<n>) and, for a layered glide, the depth map made of exactly that still (C1)."""
@@ -2282,6 +2428,16 @@ def _film_shots(args, rec, plan, t, scs):
         print(f"MOTION REVIEW {r['scene']} shot {r['shot']} take {key}: {r['notes']}"
               + (f" (passed on the recorded override: {r['override']})" if r.get("override") else "")
               + f"; look at {r['contact_sheet']} before the owner sees the cut.")
+    for sid, _, _ in scenes:   # the minute anomaly review: the scene's face close-up sheet, qc enforces the gate
+        faces = _scene_faces(rec, t, sid)
+        for line in _face_lines(sid, faces):
+            print(line)
+        if faces["error"] or faces["missing"]:
+            print(f"FACE GATE NOT RUN for part of scene {sid}: " + "; ".join(([faces["error"]] if faces["error"] else [])
+                                                                       + faces["missing"]))
+        print(f"FACE SHEET {sid}: " + (f"{rec.root / faces['sheet']}" if faces["sheet"] else "no face found in any shot")
+              + " (face crops x3, flagged frames in red). Go through the minute anomaly checklist (SKILL.md) on it "
+              "before the owner sees the cut; qc fails a double or missing pupil.")
 
 
 def cmd_film(args):
@@ -3170,6 +3326,24 @@ def cmd_qc(args):
                 item["words_not_run"] = words
                 report["advisory_only"].append(f"{target}: word check NOT RUN for {len(words)} passage(s): "
                                                + ", ".join(words))
+            face_items, face_flagged, face_sheets, face_fails, face_missing = {}, [], {}, [], []
+            for sid in a["meta"]["scenes"]:
+                fres = _scene_faces(rec, a["meta"]["target"], sid)
+                face_items.update(fres["items"])
+                face_flagged += fres["flagged"]
+                face_sheets[sid] = fres["sheet"]
+                face_fails += fres["fails"]
+                face_missing += ([fres["error"]] if fres["error"] else []) + fres["missing"]
+                report["advisory_only"] += [f"{target} " + ln for ln in _face_lines(sid, fres)
+                                            if " REVIEW " in ln or "(override:" in ln]
+            item["faces"] = {"sheets": face_sheets, "items": face_items, "flagged": face_flagged,
+                             "identity": facegate.IDENTITY}
+            if face_missing:
+                not_run["faces"] = "; ".join(face_missing)
+            else:
+                gate_checks["faces"] = not face_fails
+            if face_fails:
+                item["faces"]["fails"] = face_fails
             checks.update(gate_checks)
             item["gates"] = detail
             item["not_run"] = not_run          # a gate that cannot run fails the QC, it never passes
@@ -3193,6 +3367,13 @@ def cmd_qc(args):
     for target, item in report["items"].items():
         print(f"{target}: " + ", ".join(f"{k} {v}" for k, v in item["checks"].items())
               + f"; contact sheet qc/{item['contact_sheet']} (look at it)")
+        faces = item.get("faces") or {}
+        for f in faces.get("flagged") or []:
+            where = (f"frames {f['frames'][0]}-{f['frames'][-1]}" if f["times"] else "still")
+            print(f"  FACE {f['severity'].upper()} {f['scene']} shot {f['shot']} {f['key']}: {f['kind']} {where}"
+                  + (f" (override: {f['override']})" if f.get("override") else ""))
+        for sid, sheet in (faces.get("sheets") or {}).items():
+            print(f"  face sheet {sid}: {sheet or 'no face found'} (minute anomaly review: look at every tile)")
     if failed:
         raise Stop("QC failure: " + ", ".join(failed), next_action(rec.root), code=5)
 
@@ -4483,7 +4664,7 @@ def cmd_adopt(args):
 
 COMMANDS = {"init": cmd_init, "plan": cmd_plan, "job": cmd_job, "import": cmd_import,
             "import-take": cmd_import_take, "split-passages": cmd_split_passages,
-            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "clip-touchup": cmd_clip_touchup, "glide": cmd_glide, "retime": cmd_retime, "voicecheck": cmd_voicecheck, "motiongate": cmd_motiongate,
+            "supersede": cmd_supersede, "close": cmd_close, "pick": cmd_pick, "hold": cmd_hold, "touchup": cmd_touchup, "clip-touchup": cmd_clip_touchup, "glide": cmd_glide, "retime": cmd_retime, "voicecheck": cmd_voicecheck, "motiongate": cmd_motiongate, "facegate": cmd_facegate,
             "cue": cmd_cue, "plan-shots": cmd_plan_shots, "scene-timing": cmd_scene_timing,
             "exchange-stage": cmd_exchange_stage, "exchange-collect": cmd_exchange_collect,
             "film": cmd_film, "reel": cmd_reel, "qc": cmd_qc, "status": cmd_status,
@@ -4624,6 +4805,12 @@ def _parser():
     s = sub.add_parser("motiongate", help="motion gate for Wan takes: stutter, jumps, contact sheet (standalone: no record; clips untouched)")
     s.add_argument("clips", nargs="+", help="clip .mp4 files or folders of them")
     s.add_argument("--out", help="folder for <key>.motion.json and <key>.contact.png (default: beside each clip)")
+    s = sub.add_parser("facegate", help="face/eye anomaly gate for clips and stills: double or missing pupils, "
+                       "asymmetry, eyes off the face, morphing, LED-like glows; face close-up sheet (standalone: no "
+                       "record; media untouched)")
+    s.add_argument("media", nargs="+", help="clip or still files, or folders of them")
+    s.add_argument("--out", help="folder for <key>.face.json and <key>.faces.png (default: beside each file)")
+    s.add_argument("--fresh", action="store_true", help="re-measure even when a matching face.json exists")
     s = sub.add_parser("voicecheck", help="narration redo gate: flag robotic/monotone/flawed takes (standalone: no record)")
     s.add_argument("takes", nargs="+")
     s.add_argument("--expected", required=True, help="expected duration in seconds: one value, or one per take (comma-separated)")

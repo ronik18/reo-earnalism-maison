@@ -746,6 +746,8 @@ class RoundTwo:
         if unpicked:
             return code, out
         self.assertEqual(code, 0, out)
+        for sc in scenes:    # the minute anomaly review: film --shots prints each scene's face close-up sheet
+            self.assertIn(f"FACE SHEET {sc['scene_id']}:", out)
         art = [a for a in Record.load(self.root).data["artifacts"] if a["kind"] == "film"][-1]
         mp4 = self.root / art["path"]
         self.assertEqual(art["meta"]["mode"], "shots")

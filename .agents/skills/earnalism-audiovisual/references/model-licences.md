@@ -77,6 +77,12 @@ patent-free. Touch-up follows the same child-depiction rule as retouch: only res
 described dress or bare skin (a plain white sari edge, a bare forehead, earlobes or wrists), never
 alter a child's body, and never in a way that sexualises, demeans or endangers a child.
 
+The face and eye gate (`eav facegate`, `qc` faces, 28 Nov 2026) uses the same OpenCV library and **no model**:
+classical sclera and pupil geometry, nothing downloaded, nothing published (its sheets are review files). MediaPipe
+Face Landmarker was not used locally: it needs a downloaded `.task` model and is built for photographs, and its
+eye-openness check had already missed the scene 14 double pupil. If the OpenCV import fails the gate does not run
+and `qc` records `not_run:faces`, a failure (fail closed).
+
 ## Cinematic film models (27 November 2026)
 
 Determined from each card's `license` field as the notebooks re-read it at run time (the check
