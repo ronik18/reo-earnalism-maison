@@ -17,6 +17,7 @@ REPO = next(p for p in Path(__file__).resolve().parents if (p / "AGENTS.md").is_
 EVIDENCE = REPO / "production" / "audiovisual" / "bicharak"
 TAKE_9P = EVIDENCE / "film_clips" / "motion-pilot6-f01s014" / "clips" / "f01s014-9p.mp4"
 STILL_9 = EVIDENCE / "pilot" / "v6" / "art" / "f01s014-9.png"
+STILL_9_FIXED = EVIDENCE / "pilot" / "v6" / "art" / "f01s014-9-onepupil.png"   # touch-up r2, fb63974
 TAKE_14X = EVIDENCE / "pilot" / "v5" / "root" / "film_clips" / "clips-f01s014-fix-r1" / "clips" / "f01s014-14x.mp4"
 SHA_9P = "2a13b6d59363b4fe19a6212d8132d07b5af1efec2fba8386afb78c6ee106ea63"
 
@@ -81,11 +82,58 @@ class FaceGateStillTests(unittest.TestCase):
         self.assertEqual([(f["kind"], f["severity"]) for f in r["findings"]], [("double_pupil", "fail")])
         self.assertIn("two pupils in one eye", r["notes"][0])
 
-    def test_missing_pupil_in_an_open_eye_needs_review_on_a_still(self):
+    def test_missing_pupil_in_an_open_eye_fails_a_still(self):
         r = facegate.check(self.still("none.png", face(left="none")))
+        self.assertFalse(r["pass"])
+        self.assertEqual([(f["kind"], f["severity"]) for f in r["findings"]], [("missing_pupil", "fail")])
+
+    def test_double_pupil_fails_under_fair_skin_night_and_moonlight(self):
+        """I1: the gate must not go blind outside the warm daylight palette."""
+        global SKIN
+        saved = SKIN
+        try:
+            for skin in ((236, 200, 178), (250, 215, 190), (176, 112, 70), (120, 75, 45)):
+                SKIN = skin
+                for name, gain in (("day", (1, 1, 1)), ("night", (0.45, 0.45, 0.45)),
+                                   ("moon", (0.36, 0.44, 0.68))):
+                    lit = lambda im: Image.fromarray(np.clip(np.asarray(im, np.float32) * gain, 0, 255).astype(np.uint8))
+                    bad = facegate.check(self.still("bad.png", lit(face(right="two"))))
+                    self.assertEqual([(f["kind"], f["severity"]) for f in bad["findings"]], [("double_pupil", "fail")],
+                                     (skin, name))
+                    ok = facegate.check(self.still("ok.png", lit(face())))
+                    self.assertTrue(ok["pass"] and not ok["needs_review"] and ok["face_frames"] == 1, (skin, name))
+        finally:
+            SKIN = saved
+
+    def test_an_extreme_close_up_eye_is_judged_on_its_own(self):
+        """I1: one eye filling the frame (scene 14 shot 5) is judged, not dropped as too big."""
+        def eye(kind):
+            im = Image.new("RGB", (640, 360), SKIN)
+            d = ImageDraw.Draw(im)
+            d.ellipse([170, 90, 470, 270], fill=WHITE, outline=OUTLINE, width=6)
+            if kind == "one":
+                d.ellipse([280, 140, 360, 220], fill=PUPIL)
+                d.ellipse([300, 155, 315, 170], fill=WHITE)
+            elif kind == "two":
+                for cx in (250, 390):
+                    d.ellipse([cx - 32, 148, cx + 32, 212], fill=PUPIL)
+                    d.ellipse([cx - 14, 158, cx - 4, 168], fill=WHITE)
+            return im
+        ok = facegate.check(self.still("eye.png", eye("one")), key="eye")
+        self.assertEqual(ok["face_frames"], 1, ok["notes"])
+        self.assertTrue(ok["pass"] and not ok["needs_review"], ok["notes"])
+        self.assertIn("double_pupil", [f["kind"] for f in facegate.check(self.still("e2.png", eye("two")))["findings"]])
+        self.assertEqual([f["kind"] for f in facegate.check(self.still("e0.png", eye("none")))["findings"]],
+                         ["missing_pupil"])
+
+    def test_no_face_with_a_character_expected_is_not_judged_review(self):
+        wall = self.still("wall.png", Image.new("RGB", (320, 180), WALL))
+        r = facegate.check(wall, expect_face=True)
         self.assertTrue(r["pass"])
         self.assertTrue(r["needs_review"])
-        self.assertIn("missing_pupil", [f["kind"] for f in r["findings"]])
+        self.assertTrue(r["not_judged"])
+        self.assertEqual([f["kind"] for f in r["findings"]], ["not_judged"])
+        self.assertFalse(facegate.check(wall)["needs_review"])           # nothing expected: noted, not a finding
 
     def test_pupil_pressed_into_the_corner_is_not_missing(self):
         r = facegate.check(self.still("side.png", face(dx=-20)))       # both pupils look hard left
@@ -101,7 +149,8 @@ class FaceGateStillTests(unittest.TestCase):
         r = facegate.check(self.still("wall.png", Image.new("RGB", (320, 180), WALL)))
         self.assertTrue(r["pass"])
         self.assertEqual(r["face_frames"], 0)
-        self.assertIn("not judged", " ".join(r["notes"]))
+        self.assertTrue(r["not_judged"])
+        self.assertIn("NOT JUDGED", " ".join(r["notes"]))
 
     def test_gate_writes_json_and_sheet_and_never_touches_the_source(self):
         src = self.still("two.png", face(right="two"))
@@ -168,6 +217,21 @@ class FaceGateClipTests(unittest.TestCase):
         self.assertEqual(r["sampled"], 8)                                  # every 2nd frame
         self.assertTrue((self.d / "out" / "ok.faces.png").is_file())
 
+    def test_persistent_missing_pupil_fails_a_clip(self):
+        frames = [face() for _ in range(4)] + [face(left="none") for _ in range(12)]
+        r = facegate.check(write_clip(self.d / "m.mp4", frames))
+        self.assertFalse(r["pass"])
+        miss = [f for f in r["findings"] if f["kind"] == "missing_pupil"]
+        self.assertEqual([f["severity"] for f in miss], ["fail"])
+        self.assertGreaterEqual(len(miss[0]["frames"]), facegate.THRESHOLDS["missing_persist"])
+
+    def test_a_clip_without_a_face_where_one_is_expected_is_not_judged(self):
+        frames = [Image.new("RGB", (320, 180), WALL) for _ in range(8)]
+        r = facegate.check(write_clip(self.d / "w.mp4", frames), expect_face=True)
+        self.assertTrue(r["needs_review"])
+        nj = [f for f in r["findings"] if f["kind"] == "not_judged"]
+        self.assertEqual(nj[0]["frames"], [0, 2, 4, 6])
+
     def test_sudden_eye_change_is_review(self):
         frames = [face(w=960, h=540) for _ in range(6)] + [face(w=960, h=540, eye_w=100, eye_h=70) for _ in range(6)]
         r = facegate.check(write_clip(self.d / "m.mp4", frames), {"step": 1})
@@ -204,8 +268,24 @@ class FaceGateCliTests(unittest.TestCase):
         code, out = self.run_cli("facegate", folder / "ok.png", "--out", self.d / "out")
         self.assertEqual(code, 0, out)
 
+    def test_facegate_command_expect_face_and_fails_closed(self):
+        wall = self.d / "wall.png"
+        Image.new("RGB", (320, 180), WALL).save(wall)
+        code, out = self.run_cli("facegate", wall, "--out", self.d / "o1", "--expect-face")
+        self.assertEqual(code, 0, out)
+        self.assertIn("REVIEW wall.png", out)
+        self.assertIn("not judged", out)
+        saved = facegate.cv2
+        facegate.cv2 = None
+        try:
+            code, out = self.run_cli("facegate", wall, "--out", self.d / "o2")
+        finally:
+            facegate.cv2 = saved
+        self.assertEqual(code, 2, out)
+        self.assertIn("cannot run", out)
 
-def _shots_film(test, still_im, override=None):
+
+def _shots_film(test, still_im, override=None, shot_extra=None, face_media=None):
     """A minimal shots film with one glide shot whose picked still is `still_im`, ready for qc."""
     test.init_and_plan()
     fd = test.root / "film" / "film-01"
@@ -217,11 +297,12 @@ def _shots_film(test, still_im, override=None):
                     "-f", "lavfi", "-i", "sine=f=220:d=4:r=48000", "-shortest", "-pix_fmt", "yuv420p",
                     str(video)], check=True)
     (fd / "shots" / "s1.json").write_text(json.dumps({"scene_id": "s1", "seconds": 4.0, "shots": [
-        {"n": 1, "motion": "glide", "start": 0.0, "end": 4.0, "sound": {"sfx": []}}]}))
+        {"n": 1, "motion": "glide", "start": 0.0, "end": 4.0, "sound": {"sfx": []}, **(shot_extra or {})}]}))
     if override:
         (test.root / "picks").mkdir(exist_ok=True)
         (test.root / "picks" / "gate-overrides.json").write_text(json.dumps(override))
-    Record.load(test.root).add_artifact("film", video, {"target": "film-01", "mode": "shots", "scenes": ["s1"]})
+    Record.load(test.root).add_artifact("film", video, {"target": "film-01", "mode": "shots", "scenes": ["s1"],
+                                                        **({"face_media": face_media} if face_media is not None else {})})
 
 
 try:
@@ -269,12 +350,55 @@ class FaceGateQcTests(unittest.TestCase):
         self.assertEqual(item["faces"]["flagged"][0]["override"], "owner: a reflection on her eye, not a pupil")
         self.assertTrue(any("override" in a for a in report["advisory_only"]))
 
-    def test_qc_faces_review_is_advisory(self):
+    def test_qc_fails_a_missing_pupil_on_a_still(self):
         _shots_film(self, face(left="none"))
+        code, _ = _run("qc", "--root", self.root)
+        report = json.loads((self.root / "qc" / "report.json").read_text())
+        self.assertEqual(code, 5)
+        self.assertEqual(report["items"]["film-01"]["checks"]["faces"], "fail")
+        self.assertEqual([(f["kind"], f["severity"]) for f in report["items"]["film-01"]["faces"]["flagged"]],
+                         [("missing_pupil", "fail")])
+
+    def test_qc_faces_review_is_advisory(self):
+        _shots_film(self, face(glow=True))
         _run("qc", "--root", self.root)
         report = json.loads((self.root / "qc" / "report.json").read_text())
         self.assertEqual(report["items"]["film-01"]["checks"]["faces"], "pass")
-        self.assertTrue(any("FACE REVIEW" in a and "missing pupil" in a for a in report["advisory_only"]))
+        self.assertTrue(any("FACE REVIEW" in a and "glow" in a for a in report["advisory_only"]))
+
+    def test_qc_lists_a_shot_with_a_character_but_no_face_judged(self):
+        """I1: the shot plan names a character, the still shows none the gate can judge: not a silent pass."""
+        _shots_film(self, Image.new("RGB", (320, 180), WALL), shot_extra={"bible_refs": ["hemshashi"],
+                                                                            "framing": "close-up"})
+        code, out = _run("qc", "--root", self.root)
+        report = json.loads((self.root / "qc" / "report.json").read_text())
+        faces = report["items"]["film-01"]["faces"]
+        self.assertEqual(faces["items"]["s1-1"]["verdict"], "review")
+        self.assertEqual(faces["not_judged"], ["s1 shot 1 s1-1"])
+        self.assertTrue(any("NOT JUDGED" in a for a in report["advisory_only"]))
+        self.assertIn("FACE NOT JUDGED s1 shot 1 s1-1", out)
+
+    def test_qc_judges_the_media_recorded_in_the_cut_and_fails_a_stale_cut(self):
+        """I3: the cut was assembled with a double-pupil still; the pick was then replaced by a clean one without
+        rebuilding. qc judges the recorded still (it fails) and reports the stale cut."""
+        cut = self.d / "cut-still.png"
+        face(right="two").save(cut)
+        rel = Path("stills") / "old" / "s1-1--c1.png"
+        _shots_film(self, face(), face_media=[{"scene": "s1", "shot": 1, "kind": "still", "key": "s1-1",
+                                               "path": rel.as_posix(), "sha256": facegate.sha256_file(cut),
+                                               "expect_face": False}])
+        (self.root / rel).parent.mkdir(parents=True)
+        (self.root / rel).write_bytes(cut.read_bytes())
+        code, out = _run("qc", "--root", self.root)
+        self.assertEqual(code, 5, out)
+        faces = json.loads((self.root / "qc" / "report.json").read_text())["items"]["film-01"]["faces"]
+        self.assertEqual([f["kind"] for f in faces["flagged"]], ["double_pupil"])     # the cut's still, not the pick
+        self.assertEqual(len(faces["stale"]), 1)
+        self.assertIn("FACE STALE s1 shot 1", out)
+        (self.root / rel).write_bytes(b"changed")                                   # the recorded media is gone
+        _run("qc", "--root", self.root)
+        report = json.loads((self.root / "qc" / "report.json").read_text())
+        self.assertIn("changed since the cut was assembled", report["items"]["film-01"]["not_run"]["faces"])
 
     def test_qc_faces_not_run_when_a_shot_has_no_media(self):
         _shots_film(self, face())
@@ -304,6 +428,12 @@ class SceneFourteenEvidenceTests(unittest.TestCase):
     def test_start_still_carries_the_same_double_pupil(self):
         r = facegate.check(STILL_9)
         self.assertEqual([(f["kind"], f["severity"]) for f in r["findings"]], [("double_pupil", "fail")])
+
+    @unittest.skipUnless(STILL_9_FIXED.is_file(), "the retouched start still is local production media")
+    def test_retouched_start_still_passes(self):
+        r = facegate.check(STILL_9_FIXED, expect_face=True)
+        self.assertTrue(r["pass"] and not r["needs_review"], r["notes"])
+        self.assertEqual(r["face_frames"], 1)
 
     @unittest.skipUnless(TAKE_14X.is_file(), "take 14x is local production media")
     def test_take_14x_of_the_same_mother_passes(self):

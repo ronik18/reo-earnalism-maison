@@ -104,7 +104,8 @@ run `qc` and go through every item below on the face sheet `qc/<scene>-faces.jpg
 `film --shots` prints its path), the `qc/` contact sheet and the cut itself at full size, paused, shot by shot:
 
 - [ ] **Eyes**: two per face, one round pupil each, none missing, no extra eyeball; left and right match in size
-  and shape; no eye off the face or melting between frames. `faces` fails a double or missing pupil.
+  and shape; no eye off the face or melting between frames. `faces` fails a double or missing pupil (on a still,
+  or held over a take); a shot with a character where no face was judged is listed NOT JUDGED: look at it yourself.
 - [ ] **Hands**: five fingers, attached to an arm, nothing fused or floating (the still gate checks attachment only).
 - [ ] **Faces**: the same person in every shot at the bible's age (not gaunt here and childlike there); moles and
   marks exactly as the bible says (Hem has none); no face change inside a take. Identity is not measured: look.

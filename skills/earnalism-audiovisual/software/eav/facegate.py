@@ -42,7 +42,8 @@ try:  # fail closed: without OpenCV the gate cannot run, and the caller records 
 except ImportError:  # pragma: no cover - the container ships opencv-python-headless
     cv2 = None
 
-VERSION = 1
+VERSION = 2
+CODE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()   # a cached verdict is re-measured on any change
 METHOD = ("classical OpenCV (sclera/pupil geometry on flat 2-D art), no model, no download; OpenCV is Apache-2.0 "
           "(references/model-licences.md)")
 IDENTITY = ("not measured: the DINOv2 anchor similarity needs torch, which this container lacks; identity, age, "
@@ -61,8 +62,13 @@ THRESHOLDS = {
     "sclera_local_contrast": 18,  # ... and how much brighter than the local mean ...
     "local_win_frac": 0.03,       # ... over a window this fraction of the frame diagonal (or the large one)
     "local_win_frac_large": 0.10,
+    "local_win_frac_huge": 0.30,  # (an extreme close-up eye's white is wider than the large window)
     "eye_min_area": 60,           # sclera pixels: smaller eyes (crowd faces) are not judged
-    "eye_max_frac": 0.02,         # sclera area at most this fraction of the frame (larger: a wall, a sheet)
+    "eye_max_frac": 0.02,         # sclera area up to this fraction of the frame: an ordinary eye; above it a
+    "closeup_max_frac": 0.25,     # close-up eye up to this (Hem's eye, scene 14 shot 5: 2.2%); larger: a wall
+    "closeup_min_aspect": 0.9,    # a close-up eye's white is 0.9-4x as wide as tall
+    "closeup_max_aspect": 4.0,
+    "single_min_frac": 0.006,     # a lone, unpaired eye this large is judged for a missing pupil on its own
     "eye_min_aspect": 0.2,        # sclera box width / height
     "eye_max_aspect": 5.0,
     "ring_dark_min": 0.35,        # the band just outside the sclera hull is at least this dark (eye outline)
@@ -71,7 +77,10 @@ THRESHOLDS = {
     "skin_hue_hi": 22,
     "skin_min_sat": 90,           # ... of moderate saturation (a red border or blouse is more saturated)
     "skin_max_sat": 215,
-    "skin_min": 0.6,              # skin fraction round an eye that counts as on a face
+    "fair_hue_hi": 16,            # fair skin: the same warm hues, paler (a cream wall is hue 20-25) ...
+    "fair_min_sat": 40,
+    "fair_min_v": 140,
+    "skin_min": 0.45,             # skin fraction round an eye on a face (0.6 judged 55% of the r9 stills, 0.45: 71%)
     "off_face_skin_max": 0.3,     # an eye with a pupil, less skin than this round it and outside the face of a
     "off_face_ring_dark": 0.5,    # detected eye pair (a full dark outline): eye off the face
     "pupil_min_r_px": 3.0,        # pupil radius at least this (px) ...
@@ -86,7 +95,8 @@ THRESHOLDS = {
     "missing_persist": 4,         # clip: a missing pupil at one place in >= this many sampled frames fails
     "missing_min_side": 18,       # missing pupil is judged only on eyes at least this many px on their short side
     "missing_dark_rel": 0.8,      # missing: no dark mass thicker than this x the minimum pupil radius in the eye
-    "open_min_ratio": 0.35,       # an eye is open when its sclera hull is at least this tall for its width
+    "open_min_ratio": 0.35,
+    "judged_min_frac": 0.5,       # with a character expected, fewer judged samples than this: not_judged review       # an eye is open when its sclera hull is at least this tall for its width
     "pair_min_sep": 1.0,          # two eyes are a pair: centres 1-5 eye widths apart ...
     "pair_max_sep": 5.0,
     "pair_max_dy": 1.2,           # ... at most this many eye heights apart vertically
@@ -231,28 +241,69 @@ def _doubles(M, pupils, t):
     return out
 
 
+def _judged(res, t) -> bool:
+    """A face eye was judged: an eye white on skin with an iris or pupil in it."""
+    return any(e["skin"] >= t["skin_min"] and e["iris"] for e in res["eyes"])
+
+
+HOUSE_BALANCE = (1.0, 0.85, 0.65)   # mean R:G:B of the warm house daylight palette (scene 14 stills, rounded)
+
+
+def normalise_light(rgb, rebalance: bool = False):
+    """Night- and moonlit frames read like the house daylight palette: optionally re-balance the channel means to
+    HOUSE_BALANCE (gains capped at 4x: moonlight blue back to warm), then stretch so the 99.5th percentile of the
+    brightest channel sits at 245."""
+    f = rgb.astype(np.float32)
+    if rebalance:
+        means = f.reshape(-1, 3).mean(0) + 1e-3
+        target = np.array(HOUSE_BALANCE, np.float32) * means.max()
+        f *= np.clip(target / means, 0.25, 4.0)
+    top = float(np.percentile(f.max(axis=2), 99.5)) + 1e-3
+    return np.clip(f * (245.0 / top), 0, 255).astype(np.uint8)
+
+
 def analyse_image(rgb, thresholds: dict = None) -> dict:
-    """One frame or still (H x W x 3 RGB uint8): {"eyes": [...], "findings": [...], "glows": [...]}.
-    Eye and pupil coordinates are in image pixels."""
+    """One frame or still (H x W x 3 RGB uint8): {"eyes": [...], "findings": [...], "glows": [...], "lighting"}.
+    Eye and pupil coordinates are in image pixels. When no face eye is judged in the frame as it is, the frame is
+    judged again light-normalised (night, moonlight); glows always come from the frame as it is."""
     _require()
     t = {**THRESHOLDS, **(thresholds or {})}
+    res = _analyse(rgb, t)
+    res["lighting"] = "as is"
+    for rebalance in (False, True):   # dark first (night), then colour-cast (moonlight)
+        if _judged(res, t):
+            break
+        alt = _analyse(normalise_light(rgb, rebalance), t, glows=False)
+        if _judged(alt, t):
+            keep = [f for f in res["findings"] if f["kind"] == "glow"]
+            res = {**alt, "findings": alt["findings"] + keep, "glows": res["glows"],
+                   "lighting": "re-balanced and stretched" if rebalance else "stretched"}
+    return res
+
+
+def _analyse(rgb, t, glows=True) -> dict:
     bgr = cv2.cvtColor(np.ascontiguousarray(rgb), cv2.COLOR_RGB2BGR)
     hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
     Hh, S, V = hsv[..., 0], hsv[..., 1].astype(np.int16), hsv[..., 2].astype(np.int16)
     h, w = V.shape
     lift = np.zeros(V.shape, bool)
-    for frac in (t["local_win_frac"], t["local_win_frac_large"]):   # small eyes and close-up eyes alike
+    for frac in (t["local_win_frac"], t["local_win_frac_large"], t["local_win_frac_huge"]):   # small to close-up eyes
         win = int(math.hypot(h, w) * frac) | 1
         lift |= V - cv2.blur(V.astype(np.float32), (win, win)) > t["sclera_local_contrast"]
     sclera = ((S < t["sclera_max_sat"]) & (V > t["sclera_min_v"]) & lift).astype(np.uint8)
-    skin_all = ((Hh >= t["skin_hue_lo"]) & (Hh <= t["skin_hue_hi"]) & (S >= t["skin_min_sat"])
-                & (S <= t["skin_max_sat"]) & (V >= 50)).astype(np.uint8)
+    skin_all = (((Hh >= t["skin_hue_lo"]) & (Hh <= t["skin_hue_hi"]) & (S >= t["skin_min_sat"])
+                 & (S <= t["skin_max_sat"]) & (V >= 50))
+                | ((Hh >= t["skin_hue_lo"]) & (Hh <= t["fair_hue_hi"]) & (S >= t["fair_min_sat"])
+                   & (S < t["skin_min_sat"]) & (V >= t["fair_min_v"]))).astype(np.uint8)
     n, lab, st, _ = cv2.connectedComponentsWithStats(sclera, connectivity=8)
     eyes = []
     for i in range(1, n):
         x, y, ww, hh, area = (int(v) for v in st[i])
-        if area < t["eye_min_area"] or area > t["eye_max_frac"] * h * w:
+        if area < t["eye_min_area"] or area > t["closeup_max_frac"] * h * w:
             continue
+        closeup = area > t["eye_max_frac"] * h * w   # one eye filling the frame: judged on its own
+        if closeup and not t["closeup_min_aspect"] <= ww / hh <= t["closeup_max_aspect"]:
+            continue                                  # a close-up eye is wider than tall (a sky strip is not)
         if not t["eye_min_aspect"] < ww / hh < t["eye_max_aspect"]:
             continue
         size = max(ww, hh)
@@ -266,7 +317,8 @@ def analyse_image(rgb, thresholds: dict = None) -> dict:
         Vc = V[y0:y1, x0:x1]
         sv = float(np.median(Vc[M > 0]))
         k = max(2, int(0.12 * size))
-        ring = cv2.dilate(HM, np.ones((k, k), np.uint8)) - HM
+        kr = max(2, min(k, 6 + int(0.03 * size)))   # an outline does not thicken with a close-up eye's size
+        ring = cv2.dilate(HM, np.ones((kr, kr), np.uint8)) - HM
         dark = (Vc < t["dark_rel"] * sv).astype(np.uint8)
         ring_dark = float(dark[ring > 0].mean()) if ring.any() else 0.0
         if ring_dark < t["ring_dark_min"]:
@@ -281,7 +333,7 @@ def analyse_image(rgb, thresholds: dict = None) -> dict:
         thick = float(dt[near > 0].max()) if near.any() else 0.0
         hx, hy, hw, hhh = cv2.boundingRect(hull)
         eye = {"box": [x, y, ww, hh], "sclera_area": area, "sclera_v": round(sv, 1), "ring_dark": round(ring_dark, 2),
-               "skin": round(skin, 2), "open": round(hhh / max(hw, 1), 2),
+               "skin": round(skin, 2), "open": round(hhh / max(hw, 1), 2), "closeup": closeup,
                "dark_r": round(thick, 1), "pupil_r_min": round(max(t["pupil_min_r_px"], t["pupil_min_r_rel"] * min(ww, hh)), 1),
                "iris": bool(pupils) or thick >= max(t["pupil_min_r_px"], t["pupil_min_r_rel"] * min(ww, hh)),
                "pupils": [{**p, "x": p["x"] + x0, "y": p["y"] + y0} for p in pupils]}
@@ -327,12 +379,22 @@ def analyse_image(rgb, thresholds: dict = None) -> dict:
         if ar > t["asym_area_ratio"]:
             findings.append({"kind": "asymmetry", "box": _union(a["box"], b["box"]),
                              "detail": f"eye whites differ {ar:.1f}x in area"})
-        if a["pupils"] and b["pupils"]:
-            ra, rb = max(p["r"] for p in a["pupils"]), max(p["r"] for p in b["pupils"])
+        clear = lambda e: [p for p in e["pupils"] if p["cov"] >= t["strict_pupil_cov"]]   # both pupils measured whole
+        if clear(a) and clear(b):
+            ra, rb = max(p["r"] for p in clear(a)), max(p["r"] for p in clear(b))
             pr = max(ra, rb) / max(0.1, min(ra, rb))
             if pr > t["asym_pupil_ratio"]:
                 findings.append({"kind": "asymmetry", "box": _union(a["box"], b["box"]),
                                  "detail": f"pupils differ {pr:.1f}x in radius"})
+    paired = {id(e) for ab in pairs for e in ab}
+    for e in face_eyes:   # a lone close-up eye (extreme close-up) is judged on its own
+        if (id(e) not in paired and e["sclera_area"] >= t["single_min_frac"] * h * w and e["open"] >= t["open_min_ratio"]
+                and t["closeup_min_aspect"] <= e["box"][2] / e["box"][3] <= t["closeup_max_aspect"]
+                and e["ring_dark"] >= t["strict_ring_dark"] and not e["pupils"]
+                and e["dark_r"] < t["missing_dark_rel"] * e["pupil_r_min"]):
+            findings.append({"kind": "missing_pupil", "box": e["box"],
+                             "detail": f"close-up eye ({e['sclera_area']} px of white) with no pupil and no thick dark "
+                                       f"mass (radius {e['dark_r']} px)"})
     faces = [_face_box(a["box"], b["box"]) for a, b in pairs]
     for e in eyes:
         if (faces and e["pupils"] and e["skin"] < t["off_face_skin_max"] and e["ring_dark"] >= t["off_face_ring_dark"]
@@ -341,7 +403,7 @@ def analyse_image(rgb, thresholds: dict = None) -> dict:
             findings.append({"kind": "eye_off_face", "box": e["box"],
                              "detail": f"an eye with a pupil outside the face of the eye pair, {e['skin']:.0%} skin "
                                        "round it"})
-    glows = _glows(hsv, t, face_eyes)
+    glows = _glows(hsv, t, face_eyes) if glows else []
     for g in glows:
         findings.append({"kind": "glow", "box": g["box"],
                          "detail": f"small cyan/blue-green light, {g['area']} px (hue {g['hue']}, LED-like?)"})
@@ -440,22 +502,31 @@ def _probe(path):
 
 
 def _clip_frames(path, step):
-    """Yield (frame index, RGB array) for every `step`-th frame, decoded by ffmpeg at native size."""
+    """Yield (frame index, RGB array) for every `step`-th frame, decoded by ffmpeg at native size. ffmpeg's errors go
+    to a temporary file (never an undrained pipe); a decode that fails part-way raises Unavailable."""
+    import tempfile
     w, h, _ = _probe(path)
-    p = subprocess.Popen(["ffmpeg", "-v", "error", "-i", str(path), "-vf", f"select='not(mod(n\\,{step}))'",
-                          "-vsync", "0", "-pix_fmt", "rgb24", "-f", "rawvideo", "-"],
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-        k = 0
-        while True:
-            buf = p.stdout.read(w * h * 3)
-            if len(buf) < w * h * 3:
-                break
-            yield k * step, np.frombuffer(buf, np.uint8).reshape(h, w, 3)
-            k += 1
-    finally:
-        p.stdout.close()
-        p.wait()
+    with tempfile.TemporaryFile() as err:
+        p = subprocess.Popen(["ffmpeg", "-v", "error", "-i", str(path), "-vf", f"select='not(mod(n\\,{step}))'",
+                              "-vsync", "0", "-pix_fmt", "rgb24", "-f", "rawvideo", "-"],
+                             stdout=subprocess.PIPE, stderr=err)
+        complete = False
+        try:
+            k = 0
+            while True:
+                buf = p.stdout.read(w * h * 3)
+                if len(buf) < w * h * 3:
+                    break
+                yield k * step, np.frombuffer(buf, np.uint8).reshape(h, w, 3)
+                k += 1
+            complete = True
+        finally:
+            p.stdout.close()
+            p.wait()
+        if complete and p.returncode != 0:
+            err.seek(0)
+            raise Unavailable(f"{Path(path).name}: ffmpeg could not decode it to the end: "
+                              f"{err.read().decode('utf-8', 'replace').strip()[:200]}")
 
 
 def _read_still(path):
@@ -521,8 +592,10 @@ def _morph_events(frames, t):
     return out
 
 
-def judge(frames, kind, thresholds: dict = None, fps: float = 24.0) -> dict:
-    """Aggregate per-frame findings into {"findings", "pass", "needs_review", "notes", "flagged_frames"}."""
+def judge(frames, kind, thresholds: dict = None, fps: float = 24.0, expect_face: bool = False) -> dict:
+    """Aggregate per-frame findings into {"findings", "pass", "needs_review", "notes", "flagged_frames", ...}.
+    `expect_face`: the shot plan names a character here; a still, or a clip with fewer than judged_min_frac of its
+    samples judged, is then a "not_judged" review finding, never a silent pass."""
     t = {**THRESHOLDS, **(thresholds or {})}
     step = t["step"] if kind == "clip" else 1
     by_kind = {}
@@ -541,7 +614,7 @@ def judge(frames, kind, thresholds: dict = None, fps: float = 24.0) -> dict:
             n = len(fr_list)
             if k in ("double_pupil", "missing_pupil"):
                 if kind == "still":
-                    sev = "fail" if k == "double_pupil" else "review"
+                    sev = "fail"    # a still is held for the whole shot: one detection is the defect
                 else:
                     sev = "fail" if n >= persist[k] else "review"
             elif k in ("glow", "eye_off_face"):
@@ -555,6 +628,14 @@ def judge(frames, kind, thresholds: dict = None, fps: float = 24.0) -> dict:
                              "times": [round(f / fps, 3) for f in fr_list] if kind == "clip" else [],
                              "box": list(mid[1]), "boxes": [list(b) for _, b in tr],
                              "detail": details[(mid[0], mid[1])], "samples": n})
+    judged = [fr["frame"] for fr in frames if _judged(fr, t)]
+    unjudged = [fr["frame"] for fr in frames if fr["frame"] not in set(judged)]
+    if expect_face and frames and len(judged) < t["judged_min_frac"] * len(frames):
+        findings.append({"kind": "not_judged", "severity": "review", "frames": unjudged,
+                         "times": [round(f / fps, 3) for f in unjudged] if kind == "clip" else [],
+                         "box": None, "boxes": [None] * len(unjudged), "samples": len(unjudged),
+                         "detail": (f"a character is expected (shot plan) but no eye on a face was judged in "
+                                    f"{len(unjudged)} of {len(frames)} sampled frame(s): look at them on the sheet")})
     order = {"fail": 0, "review": 1}
     findings.sort(key=lambda f: (order[f["severity"]], f["frames"][0]))
     fails = [f for f in findings if f["severity"] == "fail"]
@@ -563,15 +644,18 @@ def judge(frames, kind, thresholds: dict = None, fps: float = 24.0) -> dict:
     for f in fails + reviews:
         where = (f"frames {f['frames'][0]}-{f['frames'][-1]} ({f['samples']} samples)" if kind == "clip" else "still")
         notes.append(f"{f['severity'].upper()} {f['kind'].replace('_', ' ')}: {where}; {f['detail']}")
-    face_frames = sum(1 for fr in frames if any(e["skin"] >= t["skin_min"] and e["iris"] for e in fr["eyes"]))
-    if not face_frames:
-        notes.append("no eyes on a face detected: not judged (look at the sheet or contact sheet)")
+    face_frames = len(judged)
+    if not face_frames and not expect_face:
+        notes.append("NOT JUDGED: no eye on a face found (look at the sheet; with a character expected this is a "
+                     "review finding)")
     flagged = sorted({f for x in findings for f in x["frames"]})
     return {"findings": findings, "pass": not fails, "needs_review": bool(reviews) and not fails,
-            "notes": notes, "flagged_frames": flagged, "face_frames": face_frames}
+            "notes": notes, "flagged_frames": flagged, "face_frames": face_frames,
+            "judged_fraction": round(face_frames / max(1, len(frames)), 3), "not_judged": not face_frames,
+            "unjudged_frames": unjudged, "expect_face": bool(expect_face)}
 
 
-def check(path, thresholds: dict = None, key: str = None) -> dict:
+def check(path, thresholds: dict = None, key: str = None, expect_face: bool = False) -> dict:
     """Run the gate on one clip or still; nothing is written. `key` names it (default: the file stem)."""
     _require()
     path = Path(path)
@@ -587,10 +671,10 @@ def check(path, thresholds: dict = None, key: str = None) -> dict:
     else:
         fps = 0.0
         frames.append({"frame": 0, **analyse_image(_read_still(path), t)})
-    res = judge(frames, kind, t, fps or 24.0)
+    res = judge(frames, kind, t, fps or 24.0, expect_face)
     return {"key": key or path.stem, "file": path.name, "kind": kind, "sha256": sha256_file(path),
             "fps": round(fps, 3) if fps else None, "sampled": len(frames), "frames": frames, **res,
-            "identity": IDENTITY, "method": METHOD, "version": VERSION,
+            "identity": IDENTITY, "method": METHOD, "version": VERSION, "code_sha256": CODE_SHA256,
             "thresholds": dict(t), "thresholds_calibrated": False, "calibration": CALIBRATION}
 
 
@@ -679,6 +763,8 @@ def _tiles(path, res, t):
             d = ImageDraw.Draw(tile)
             bad = flagged.get(f, [])
             for fd in bad:
+                if not fd["box"]:     # not judged: the whole tile is the finding
+                    continue
                 bx, by, bw, bh = fd["box"]
                 rx0, ry0 = ox + (bx - x0) * k, oy + (by - y0) * k
                 d.rectangle([rx0 - 3, ry0 - 3, rx0 + bw * k + 3, ry0 + bh * k + 3],
@@ -752,7 +838,8 @@ def scene_sheet(sections, out_path, cols: int = 8, max_h: int = 60000):
 
 
 # ------------------------------------------------------------------------------------------------ gate
-def gate(path, out_dir=None, thresholds: dict = None, reuse: bool = True, key: str = None) -> dict:
+def gate(path, out_dir=None, thresholds: dict = None, reuse: bool = True, key: str = None,
+         expect_face: bool = False) -> dict:
     """check() plus <key>.face.json and <key>.faces.png in out_dir (default: beside the source). A face.json made
     from the same source sha256, gate version and thresholds is reused (the sheet is redrawn if it is missing)."""
     path = Path(path)
@@ -766,12 +853,13 @@ def gate(path, out_dir=None, thresholds: dict = None, reuse: bool = True, key: s
         try:
             old = json.loads(out_json.read_text(encoding="utf-8"))
             if (old.get("sha256") == sha256_file(path) and old.get("version") == VERSION and old.get("key") == key
+                    and old.get("code_sha256") == CODE_SHA256 and old.get("expect_face") == bool(expect_face)
                     and old.get("thresholds") == json.loads(json.dumps(t))):
                 res = old
         except (OSError, ValueError):
             res = None
     if res is None:
-        res = check(path, t, key)
+        res = check(path, t, key, expect_face)
     sheet = out_dir / f"{key}.faces.png"
     if not sheet.is_file() or res.get("sheet") != sheet.name:
         made = write_sheet(path, res, sheet, t)

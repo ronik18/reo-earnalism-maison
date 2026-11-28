@@ -311,27 +311,43 @@ for calibration). The standalone `motiongate <clips>` gates any folder without a
 very cautiously").** Scene 14 v7 shot 11 (take f01s014-9p, about 0:51 of the cut) showed the veiled mother with two
 pupils in one eye and nothing caught it: MediaPipe's eye-openness check and the motion gate cannot see a malformed
 eye. The face gate is classical OpenCV on the flat house style (no model, no download, runs on CPU here): per still
-and every 2nd frame of a take it finds eye whites ringed by dark outline with skin round them, the round near-black
-pupils inside, and flags **double pupil** (two pupils in one eye, sclera between them: an extra eyeball), **missing
-pupil** (an open eye of a pair with no dark iris mass), **asymmetry** (the pair's whites or pupils differ strongly),
-**eye off the face**, **morph** (a tracked eye's white jumps in size between samples, blinks excluded) and **glow**
-(a small pale cyan light, LED-like, in a warm palette). `<key>.face.json` keeps every measurement and the
-thresholds (uncalibrated beyond the scene 14 evidence). A double or missing pupil that persists over 3 (missing: 4)
-sampled frames of a take, or a double pupil on a still, is a **fail**; everything else is needs_review.
-**Identity and age drift is not measured** (the DINOv2 anchor similarity needs torch, absent here): it is judged
-on the sheet.
+and every 2nd frame of a take it finds eye whites ringed by dark outline with skin round them (the warm house browns
+and fair skin: hue 5–22, or 5–16 when pale), the round near-black pupils inside, and flags **double pupil** (two
+pupils in one eye, sclera between them: an extra eyeball), **missing pupil** (an open eye of a convincing pair, or a
+lone close-up eye, with no dark iris mass), **asymmetry** (the pair's whites or clearly measured pupils differ
+strongly), **eye off the face** (takes only, held over 3 samples), **morph** (a tracked eye's white jumps in size
+between samples, blinks excluded) and **glow** (a small pale cyan light, LED-like, in a warm palette). A frame where
+no face eye is found is judged again light-normalised (stretched for night, re-balanced to the house palette for
+moonlight); `face.json` records which. One eye filling the frame (an extreme close-up, up to 25% of it) is judged on
+its own. `<key>.face.json` keeps every measurement and the thresholds (uncalibrated beyond the evidence below).
+A double or missing pupil on a still (held for the whole shot), or held over 3 (missing: 4) sampled frames of a take,
+is a **fail**; everything else is needs_review. Sampling every 2nd frame means a defect shorter than about 6 frames
+(0.25 s) is at most a review, and a one-frame defect on an odd frame is not seen. **Identity and age drift is not
+measured** (the DINOv2 anchor similarity needs torch, absent here): it is judged on the sheet.
 
-`qc` runs it on every take and picked still of each scene of a `--shots` cut (cached by sha256 in
-`qc/faces/<scene>/`) and draws the **face close-up sheet** `qc/<scene>-faces.jpg`: face crops enlarged about 3×,
-every 4th frame of each take plus every flagged frame, flagged frames boxed in red (fail) or orange (review); a
-take or still with no face found shows whole frames instead. `film --shots` draws the same sheet and prints its
-path and every finding. A fail fails `qc` (`faces`) unless `picks/gate-overrides.json` records
-`{"faces:<key>": "<reason>"}` (`<key>` is the take's key, or a still's shot key `<scene>-<n>`; the owner's word,
-after looking); a shot whose media cannot be found is
-`not_run:faces`, a failure. Calibration (28 Nov): 9p is flagged as a fail in 53 of 61 sampled frames (0–106,
-covering the 0:51 frame); its start still `pilot/v6/art/f01s014-9.png` carries the **same** double pupil (FLUX drew
-it, Wan kept it) and is flagged; takes 12a, 13s, 13t, 14x and the scene's other picked stills raise nothing; the
-pale cyan LED in the original take 12a and in `anchor-hem.png` is listed as a glow.
+**Not judged is never a pass.** Where no eye on a face is found (eyes under about 60 px of white, closed eyes,
+backs and profiles, lighting the normalisation cannot recover) the gate says so: `not_judged` in `face.json`. When
+the shot plan names a character there (`bible_refs`, or a close-up or medium framing) a still with no judged face,
+or a take judged in under half its samples, is a review finding `not_judged`, listed by `qc` (`faces.not_judged`,
+`advisory_only`, `FACE NOT JUDGED`) and on the sheet. Look at those shots yourself.
+
+`qc` judges **the media in the cut**: `film --shots` records each shot's take or still (path and sha256) in the
+cut's meta (`face_media`), and `qc` runs the gate on exactly those files (cached by sha256 in `qc/faces/<scene>/`).
+A pick changed after assembly is reported (`faces.stale`, `FACE STALE`) and fails `faces` until `film --shots`
+rebuilds the cut; a recorded file that changed or vanished is `not_run:faces`. A cut assembled before the record
+existed is judged on the current picks, with an advisory saying so. `qc` draws the **face close-up sheet**
+`qc/<scene>-faces.jpg`: face crops enlarged about 3×, every 4th frame of each take plus every flagged frame,
+flagged frames boxed in red (fail) or orange (review); a take or still with no face found shows whole frames
+instead. `film --shots` draws the same sheet and prints its path and every finding. A fail fails `qc` (`faces`)
+unless `picks/gate-overrides.json` records `{"faces:<key>": "<reason>"}` or, tied to the very file the owner looked
+at, `{"faces:<key>": {"reason": "...", "sha256": "..."}}` (`<key>` is the take's key, or a still's shot key
+`<scene>-<n>`; the owner's word, after looking); a shot whose media cannot be found is `not_run:faces`, a failure.
+Calibration (28 Nov): 9p is flagged as a fail in 53 of 61 sampled frames (0–106, covering the 0:51 frame); its
+start still `pilot/v6/art/f01s014-9.png` carries the **same** double pupil (FLUX drew it, Wan kept it) and is
+flagged, while its touch-up `f01s014-9-onepupil.png` passes; takes 12a, 13s, 13t, 14x and the scene's other picked
+stills raise nothing; the pale cyan LED in the original take 12a and in `anchor-hem.png` is listed as a glow.
+Fix round 1 (28 Nov): a face eye is judged in 71% of the r9 still candidates of both titles (55% before), and in
+every scene 14 shot whose plan names a character (shots 4, 5, 7, 8, 10, 11, 12).
 
 **How each gate treats "not run", "unclear" and a fail:**
 
@@ -339,7 +355,7 @@ pale cyan LED in the original take 12a and in `anchor-hem.png` is listed as a gl
 |---|---|---|---|---|
 | Still gate (Colab) | needs_review | needs_review: advisory until `gate-calibration.json`, then `--override` | blocks unless `--override-fail` / `gate-overrides.json` | presence of `gate-calibration.json` |
 | Motion gate (import) | gated on demand by `film --shots` | needs_review: printed, recorded, listed by `qc` | blocks unless `gate-overrides.json` | uncalibrated |
-| Face gate (`qc`, `film --shots`) | `not_run:faces` = fail | needs_review: on the sheet, listed by `qc` | fails `qc` unless `gate-overrides.json` has `faces:<key>` | uncalibrated beyond scene 14 |
+| Face gate (`qc`, `film --shots`) | `not_run:faces` = fail; a stale cut fails | needs_review, and not judged where a character is planned: on the sheet, listed by `qc` | fails `qc` unless `gate-overrides.json` has `faces:<key>` | uncalibrated beyond scene 14 |
 | Voicecheck words | `pass: None`, joins, NOT RUN listed by `qc` | provisional ceiling: warning | redo | median of accepted takes |
 | Voicecheck absolute limits | n/a | warning with the measured value | warning until calibrated (`calibrated_limits`), then redo; 3 takes, then the owner | owner-calibrated |
 | Voicecheck relative and signal checks | n/a | n/a | redo; 3 takes, then the owner; `--accept PID=reason` | profile of the book |
