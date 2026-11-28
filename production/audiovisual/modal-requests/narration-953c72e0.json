@@ -1,0 +1,12 @@
+{
+  "colab_units": 0.0,
+  "gpu": "L4",
+  "job_id": "narration-953c72e0",
+  "pending_run_id": "narration-953c72e0#1",
+  "r2_prefix": "gpu-jobs/didi/narration-953c72e0/run-1/",
+  "requested_at": "2026-11-28T12:40:29+00:00",
+  "schema": "earnalism.modal-request.v1",
+  "status": "requested",
+  "title_root": "production/audiovisual/didi",
+  "worst_case_usd": 1.205738
+}

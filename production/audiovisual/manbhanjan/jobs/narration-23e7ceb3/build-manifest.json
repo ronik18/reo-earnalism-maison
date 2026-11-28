@@ -1,0 +1,18 @@
+{
+  "authority_created": false,
+  "deadline_seconds": 3285,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/manbhanjan/narration-23e7ceb3",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "6c3e091966620ed18446df08399b30b63ce89b9a52370011df5c82c81ecd418a",
+  "job_id": "narration-23e7ceb3",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "e8d61cca693f54d000c69ee5991dffa89c1dc722f32ce5adaf93731c5ca3953c",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "manbhanjan"
+}

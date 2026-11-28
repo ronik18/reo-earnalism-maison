@@ -1,0 +1,12 @@
+{
+  "colab_units": 0.0,
+  "gpu": "L4",
+  "job_id": "narration-f3c9b58d",
+  "pending_run_id": "narration-f3c9b58d#1",
+  "r2_prefix": "gpu-jobs/kshudhita-pashan/narration-f3c9b58d/run-1/",
+  "requested_at": "2026-11-28T12:40:29+00:00",
+  "schema": "earnalism.modal-request.v1",
+  "status": "requested",
+  "title_root": "production/audiovisual/kshudhita-pashan",
+  "worst_case_usd": 1.242368
+}

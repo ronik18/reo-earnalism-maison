@@ -1,0 +1,23 @@
+{
+  "authority_created": false,
+  "chunk": {
+    "group": "narration-d0eb4dd7",
+    "index": 3,
+    "of": 3
+  },
+  "deadline_seconds": 1465,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/megh-o-roudra/narration-d0eb4dd7-c3of3",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "c1d07215932b811a303fc1f7b5a172354f55924813a239d0bbf4c37ef8ee7470",
+  "job_id": "narration-d0eb4dd7-c3of3",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "dc040d36969225bc848044a61193e032e25cff71e04eb4b325851c648b0865e4",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "megh-o-roudra"
+}

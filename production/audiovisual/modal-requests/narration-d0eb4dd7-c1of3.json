@@ -1,0 +1,12 @@
+{
+  "colab_units": 0.0,
+  "gpu": "L4",
+  "job_id": "narration-d0eb4dd7-c1of3",
+  "pending_run_id": "narration-d0eb4dd7-c1of3#1",
+  "r2_prefix": "gpu-jobs/megh-o-roudra/narration-d0eb4dd7-c1of3/run-1/",
+  "requested_at": "2026-11-28T12:40:31+00:00",
+  "schema": "earnalism.modal-request.v1",
+  "status": "requested",
+  "title_root": "production/audiovisual/megh-o-roudra",
+  "worst_case_usd": 1.24764
+}

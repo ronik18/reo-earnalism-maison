@@ -1,0 +1,23 @@
+{
+  "authority_created": false,
+  "chunk": {
+    "group": "narration-7e6b3c2c",
+    "index": 1,
+    "of": 2
+  },
+  "deadline_seconds": 3596,
+  "drive_dir": "/content/drive/MyDrive/earnalism-audiovisual/shasti/narration-7e6b3c2c-c1of2",
+  "generation": {
+    "temperature": 0.91
+  },
+  "inputs_sha256": "3f0cefaff6275c5a65267fe825e9009bfee9dcfd050e9074ac71b14346bbb657",
+  "job_id": "narration-7e6b3c2c-c1of2",
+  "kind": "narration",
+  "model": {
+    "repo": "ai4bharat/indic-parler-tts",
+    "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+  },
+  "notebook_sha256": "4968017d122e0f9a9b1db09000ce28fbcf555040374a58c8f4df7d2ef9c074ea",
+  "schema": "earnalism.audiovisual-build.v1",
+  "title": "shasti"
+}

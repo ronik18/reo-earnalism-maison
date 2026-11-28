@@ -4852,6 +4852,20 @@
       },
       "path": "narration/narration-775c2abc-r2/f01s028-006.wav",
       "sha256": "d885c4b353b03460e5b2ebbfbff18a385f7bd17c8fd555a0d29578d1f67f5aa9"
+    },
+    {
+      "bytes": 26484,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 1.602725611111111,
+        "inputs_zip": "jobs/narration-90d5e987/inputs.zip",
+        "job_id": "narration-90d5e987",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-90d5e987/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-90d5e987/narration.ipynb",
+      "sha256": "0f080085af7f8a176e0e6aa74252ccb2ab84cd334018882a41c7a3f7405279a0"
     }
   ],
   "created_at": "2026-11-26T03:54:12.797956+00:00",
@@ -5140,6 +5154,26 @@
       },
       "result": "accepted",
       "stage": "import"
+    },
+    {
+      "at": "2026-11-28T12:40:06.305430+00:00",
+      "detail": {
+        "forecast_units": 1.602725611111111,
+        "job_id": "narration-90d5e987",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-28T12:40:06.312716+00:00",
+      "detail": {
+        "job_id": "narration-90d5e987",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
     }
   ],
   "ledger": "../allowance-ledger.json",

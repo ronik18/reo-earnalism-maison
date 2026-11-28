@@ -7198,6 +7198,44 @@
       },
       "path": "narration/narration-bc4edba3-r2-c2of2/f01s041-010.wav",
       "sha256": "a0bc101f8bf01405ac6c650ebec35804be0e622601f7e6ab16a31efa83874d37"
+    },
+    {
+      "bytes": 26529,
+      "kind": "colab_job",
+      "meta": {
+        "chunk": {
+          "group": "narration-0ef4dd52",
+          "index": 1,
+          "of": 2
+        },
+        "forecast_units": 1.9381192777777771,
+        "inputs_zip": "jobs/narration-0ef4dd52-c1of2/inputs.zip",
+        "job_id": "narration-0ef4dd52-c1of2",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-0ef4dd52-c1of2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-0ef4dd52-c1of2/narration.ipynb",
+      "sha256": "1fecbf0cbac3252d66401fcf8dedea92e021bb55aec86f546de3bc14399ff411"
+    },
+    {
+      "bytes": 26529,
+      "kind": "colab_job",
+      "meta": {
+        "chunk": {
+          "group": "narration-0ef4dd52",
+          "index": 2,
+          "of": 2
+        },
+        "forecast_units": 0.779486611111111,
+        "inputs_zip": "jobs/narration-0ef4dd52-c2of2/inputs.zip",
+        "job_id": "narration-0ef4dd52-c2of2",
+        "job_kind": "narration",
+        "manifest": "jobs/narration-0ef4dd52-c2of2/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/narration-0ef4dd52-c2of2/narration.ipynb",
+      "sha256": "d85a4a4ab37e6a3e841fc83aa9ce24b2e7cbbabb4c8c9cebd75225dbc5191c81"
     }
   ],
   "created_at": "2026-11-26T03:54:11.757546+00:00",
@@ -7641,6 +7679,66 @@
       },
       "result": "accepted",
       "stage": "import"
+    },
+    {
+      "at": "2026-11-28T12:40:17.904305+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-0ef4dd52",
+          "index": 1,
+          "of": 2
+        },
+        "forecast_units": 1.9381192777777771,
+        "job_id": "narration-0ef4dd52-c1of2",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-28T12:40:17.914171+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-0ef4dd52",
+          "index": 1,
+          "of": 2
+        },
+        "job_id": "narration-0ef4dd52-c1of2",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-28T12:40:17.954199+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-0ef4dd52",
+          "index": 2,
+          "of": 2
+        },
+        "forecast_units": 0.779486611111111,
+        "job_id": "narration-0ef4dd52-c2of2",
+        "kind": "narration"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-28T12:40:17.966560+00:00",
+      "detail": {
+        "chunk": {
+          "group": "narration-0ef4dd52",
+          "index": 2,
+          "of": 2
+        },
+        "job_id": "narration-0ef4dd52-c2of2",
+        "kind": "narration",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
     }
   ],
   "ledger": "../allowance-ledger.json",
