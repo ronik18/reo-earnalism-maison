@@ -441,3 +441,75 @@ fix-r1 c3 already has one, and a later depth-only job would cost another session
 command is: `job film_clips --root V/root --film 1 --spec R/specs/clips-f01s014-fix-r2.json --job-id
 clips-f01s014-fix-r2 --rates production/audiovisual/rates.json`. The expected forecast is 2.13 CU (3200 s); stop if
 it is over 2.4. `V/allowance-ledger.json` in the main checkout has no `clips-f01s014-fix-r2` entry (checked).
+
+## Fix r4b (controller ruling of 28 Nov): skill fix, glow painted out, shot 1 picked, clip job built
+
+Under the controller's ruling I edited the skill and mirrored it into `.agents/`. All `eav` runs used a clean worktree
+of HEAD `5344b81` (scratchpad `wt-fix7`) against `R` in the main checkout. Nothing was staged, presigned, uploaded or
+run; no Colab or GPU call; nothing spent beyond the scratch-ledger reservation. `source.json` and all source media are
+unchanged; no signed URL or `exchange.json` is in any tracked file.
+
+**Status: READY FOR THE CONTROLLER TO STAGE `clips-f01s014-fix-r2`.**
+
+### Skill fix: commit `5344b81` (skills/ and .agents/ byte-identical)
+
+- `touchup` records `"scene"` (job target event and manifest), as `clip-touchup` does. A scene-bound spec needs the
+  approved paper edit and keys of that scene. `pick --job <touchup>` then makes the touched still that shot's still
+  (`_scene_picks`).
+- `_job_json` returns `{}` for a job with no `inputs_zip`. This was the `adopt` hand-copy crash.
+- A touch-up inherits its source still's licence and model provenance only when that licence is on record (I2). The
+  licence goes into the manifest item and the output gets `model.repo`, with no gate. The CLI prints a warning.
+  - A scene-bound touch-up of an unverified source is refused, and nothing is written.
+  - `adopt` refuses a hand copy traced to such a touch-up.
+  - A hand copy traced to a verified touch-up is adopted with the inherited licence and no gate verdict of its own, so
+    film needs a reason.
+- SKILL.md and visual-style.md (Touch-up) document it.
+- Four new tests in `test_adopt.py`:
+  - scene-bound pick binds the shot;
+  - wrong scene refused;
+  - hand-copy adopt with inherited licence, no crash;
+  - unverified source refused.
+- Results:
+  - test_cli, test_adopt, test_touchup: 177 passed.
+  - test_skill_files: 18 OK. The first run failed only on a `.pytest_cache` that my pytest run had created; I removed
+    it.
+  - Full suite (`unittest discover`): 636 tests OK.
+
+### Glow painted out: `touchup-f01s014-1-nocable-r2` (exit 0, OpenCV 5.1.0, 0 CU)
+
+`touchup` takes only stills or retouch jobs as sources, so the route is an extended job. It works from fix-r3 c2
+with the same 38 ops plus one clone and is bound to `"scene": "f01s014"`. The clone covers box [772, 456, 780, 472]
+and copies the hazy facade from 9 px to its right. Spec: `R/specs/touchup-f01s014-1-nocable-r2.json`.
+
+- Before: a small bright cyan rectangle with a dark rim stands just right of the left house's edge at the lane end.
+  After: the dusky blue facade texture continues, and the house edge (x 770–771) is untouched. The 4x crop is
+  `fix6/final_4x_glow.png`.
+- 4,262 px changed vs c2, **0 outside the mask**. Against the r1 output only 127 px differ, all inside x 772–779,
+  y 456–471.
+- `facegate` gave `pass`, NOT JUDGED: no face, as expected for the empty lane. No glow is listed.
+- **Final shot 1 still:** `R/touchup/touchup-f01s014-1-nocable-r2/f01s014-1--c1.png`, sha256
+  `fd1d5fe919c93d8e2ae445323b59f3348d721fa02bfe0be0a743e7bd33e21f56`. The licence Apache-2.0 (FLUX.1-schnell) is
+  inherited from the verified c2.
+
+### Shot 1 pick
+
+- `pick --job touchup-f01s014-1-nocable-r2 --choices {"f01s014-1": 1}`: exit 0, giving
+  `picks/touchup-f01s014-1-nocable-r2.pick-1.json`.
+- `_scene_picks` now gives `f01s014-1`, which is this job's c1 (`fd1d5fe9…`).
+- `picks/gate-overrides.json` `f01s014-1` holds the owner reason quoting the c2 gate (certain fail, "electric
+  cable"; "possible anachronism: modern high-rise building, spotlight, utility pole"). It replaces the fix-r1 c3 text.
+
+### Job `clips-f01s014-fix-r2`
+
+`job film_clips --root R --film 1 --spec R/specs/clips-f01s014-fix-r2.json --job-id clips-f01s014-fix-r2 --rates production/audiovisual/rates.json`: exit 0.
+
+| | |
+|---|---|
+| **Forecast** | **2.13 CU** (2.1333), reserved on the v5 scratch ledger (94.65 CU left under the caps) |
+| **GPU** | **L4**, `min_vram_gib` 22; deadline 3200 s |
+| Items | `f01s014-14y` (shot 7, fix-r2 c3 `22cb2914…`, seed 62717); `f01s014-9r` (shot 11, `f01s014-9-onepupil.png` `b3c78316…`, seed 62911); depth of `f01s014-1.png` (`fd1d5fe9…`, the touched pick) |
+| Settings | Wan2.2-TI2V-5B, Depth-Anything-V2-Small, 121 frames, 24 fps, 24 steps, guidance 5.0, the same negative prompt: all identical to fix-r1 |
+| Inputs | `inputs.zip` `2c485b92…`; notebook `c0b6c381…` |
+
+After import, bind with `film/film-01/clip-picks.json` `{"f01s014/7": "f01s014-14y", "f01s014/11": "f01s014-9r"}`.
+The main checkout's `V/allowance-ledger.json` holds `clips-f01s014-fix-r2`, 2.1333 CU, `reserved` (checked).

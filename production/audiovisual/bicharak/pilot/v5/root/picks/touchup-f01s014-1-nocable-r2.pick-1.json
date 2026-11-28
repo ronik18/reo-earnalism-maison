@@ -1,0 +1,10 @@
+{
+  "choices": {
+    "f01s014-1": {
+      "candidate": 1,
+      "file": "touchup/touchup-f01s014-1-nocable-r2/f01s014-1--c1.png",
+      "sha256": "fd1d5fe919c93d8e2ae445323b59f3348d721fa02bfe0be0a743e7bd33e21f56"
+    }
+  },
+  "job_id": "touchup-f01s014-1-nocable-r2"
+}
