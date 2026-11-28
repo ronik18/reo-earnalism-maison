@@ -7968,6 +7968,114 @@
       },
       "path": "jobs/style-audition-f0a29a8b/narration.ipynb",
       "sha256": "d0d1db5eac212567a8aa6381aba459600fa78f8a27a9d7dae8de466612b9e5ce"
+    },
+    {
+      "bytes": 247852,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "7ab2313085fdc271c75d8987dd9a2f36064b5b201477d5794fb1962db8f44f44",
+        "job_id": "style-audition-f0a29a8b",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/style-audition-f0a29a8b/arjun-style-line-anger.wav",
+      "sha256": "0216ee3aafbd6f451edcbbc154bb334d8dd7134f862761a2cc3969be326c2572"
+    },
+    {
+      "bytes": 580652,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "7ab2313085fdc271c75d8987dd9a2f36064b5b201477d5794fb1962db8f44f44",
+        "job_id": "style-audition-f0a29a8b",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/style-audition-f0a29a8b/arjun-style-line-fear.wav",
+      "sha256": "275556f21f988772ba2f09e2d31b17bc23080d992be532221923a1ce55d63b9f"
+    },
+    {
+      "bytes": 848940,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "7ab2313085fdc271c75d8987dd9a2f36064b5b201477d5794fb1962db8f44f44",
+        "job_id": "style-audition-f0a29a8b",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/style-audition-f0a29a8b/arnav-style-calm.wav",
+      "sha256": "48cc433a7924566a1cd9cd8eee25bee6b673e5eaae819929f64ae0d3b6299547"
+    },
+    {
+      "bytes": 1047596,
+      "kind": "narration",
+      "meta": {
+        "input_zip_sha256": "7ab2313085fdc271c75d8987dd9a2f36064b5b201477d5794fb1962db8f44f44",
+        "job_id": "style-audition-f0a29a8b",
+        "job_kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "path": "narration/style-audition-f0a29a8b/arnav-style-sad.wav",
+      "sha256": "90c0580fc736b71c4d40ad0c1a500a8e06a7fdcb62908cc45bcd173e20d02ccd"
     }
   ],
   "created_at": "2026-11-26T03:54:08.199673+00:00",
@@ -8459,6 +8567,78 @@
       },
       "result": "job_target",
       "stage": "cli"
+    },
+    {
+      "at": "2026-11-28T10:55:22.899711+00:00",
+      "detail": {
+        "actual_units": 0.0,
+        "files": [
+          "narration/style-audition-f0a29a8b/arjun-style-line-anger.wav",
+          "narration/style-audition-f0a29a8b/arjun-style-line-fear.wav",
+          "narration/style-audition-f0a29a8b/arnav-style-calm.wav",
+          "narration/style-audition-f0a29a8b/arnav-style-sad.wav"
+        ],
+        "input_zip_sha256": "7ab2313085fdc271c75d8987dd9a2f36064b5b201477d5794fb1962db8f44f44",
+        "job_id": "style-audition-f0a29a8b",
+        "kind": "narration",
+        "model": {
+          "attention": "default",
+          "batch": 8,
+          "generation": {
+            "do_sample": true,
+            "temperature": 0.91
+          },
+          "repo": "ai4bharat/indic-parler-tts",
+          "revision": "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
+        },
+        "packages": {
+          "parler_tts": "0.2.2 @ d108732cd57788ec86bc857d99a6cabd66663d68",
+          "soundfile": "0.14.0",
+          "torch": "2.15.0",
+          "transformers": "4.46.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-28T10:55:23.636803+00:00",
+      "detail": {
+        "folder": "audition/style-audition-f0a29a8b",
+        "job_id": "style-audition-f0a29a8b",
+        "stats": {
+          "Arjun": {
+            "median_chars_per_s": 11.09,
+            "suspect": [],
+            "takes": {
+              "style-line-anger": {
+                "chars_per_s": 7.47,
+                "seconds": 2.81
+              },
+              "style-line-fear": {
+                "chars_per_s": 11.09,
+                "seconds": 6.583
+              }
+            }
+          },
+          "Arnav": {
+            "median_chars_per_s": 12.05,
+            "suspect": [],
+            "takes": {
+              "style-calm": {
+                "chars_per_s": 12.05,
+                "seconds": 9.625
+              },
+              "style-sad": {
+                "chars_per_s": 12.04,
+                "seconds": 11.877
+              }
+            }
+          }
+        }
+      },
+      "result": "imported",
+      "stage": "audition"
     }
   ],
   "ledger": "../allowance-ledger.json",
