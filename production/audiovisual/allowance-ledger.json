@@ -489,14 +489,16 @@
     "title": "megh-o-roudra",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "899f8c17-dd85-4b19-82a0-a03f4d8d40ff",
     "root": "megh-o-roudra",
     "reserved_units": 1.9177923888888886,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-27T19:02:38+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.356854,
+    "cu_equivalent": 3.57
   },
   {
     "job_id": "narration-bc4edba3-r2-c1of2",
