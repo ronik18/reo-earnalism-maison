@@ -1219,10 +1219,10 @@
       {
         "run_id": "style-audition-f0a29a8b#1",
         "job_id": "style-audition-f0a29a8b",
-        "usd": 0.585525,
-        "seconds": 0.0,
+        "usd": 0.08474865907243499,
+        "seconds": 305.400573234,
         "at": "2026-11-28T10:46:17+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "style-audition-f6314e5e#1",
