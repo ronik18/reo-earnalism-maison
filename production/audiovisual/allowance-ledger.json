@@ -1628,10 +1628,10 @@
       {
         "run_id": "narration-0df5c98d-c2of2#1",
         "job_id": "narration-0df5c98d-c2of2",
-        "usd": 0.77922,
-        "seconds": 0.0,
+        "usd": 0.21407709037740752,
+        "seconds": 771.448974333,
         "at": "2026-11-28T12:40:31+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-6bbdcca8-c1of2#1",
