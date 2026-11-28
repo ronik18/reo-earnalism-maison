@@ -1563,10 +1563,10 @@
       {
         "run_id": "narration-23e7ceb3#1",
         "job_id": "narration-23e7ceb3",
-        "usd": 1.1613375000000001,
-        "seconds": 0.0,
+        "usd": 0.5808610774131224,
+        "seconds": 2093.193071759,
         "at": "2026-11-28T12:40:29+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-8ce6fba8-c1of2#1",
