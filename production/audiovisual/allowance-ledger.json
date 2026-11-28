@@ -1227,10 +1227,10 @@
       {
         "run_id": "style-audition-f6314e5e#1",
         "job_id": "style-audition-f6314e5e",
-        "usd": 0.585525,
-        "seconds": 0.0,
+        "usd": 0.059956642369582494,
+        "seconds": 216.05997250299998,
         "at": "2026-11-28T10:46:17+00:00",
-        "status": "pending"
+        "status": "ok"
       }
     ]
   }
