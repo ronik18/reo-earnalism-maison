@@ -1541,10 +1541,10 @@
       {
         "run_id": "narration-35c43644#1",
         "job_id": "narration-35c43644",
-        "usd": 1.1430225,
-        "seconds": 0.0,
+        "usd": 0.6275836103436674,
+        "seconds": 2261.5625597969997,
         "at": "2026-11-28T12:40:29+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-953c72e0#1",
