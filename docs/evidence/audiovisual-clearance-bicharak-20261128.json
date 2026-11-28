@@ -128,11 +128,12 @@
   "text_clearance": "docs/evidence/publication-clearance-20261123.json (books.bicharak, owner-approved 23 Nov 2026)"
  },
  "timing_json_sha256": "a3cd1dc6c30de16276619736e0bb1c4c95a276b0b6143ae2955eacc084284560",
+ "preview_sha256": "979938aa56657186a1a62922f01d800469d00ed1786b9ede24a0fe78153bbb32",
  "owner_reviews": {
   "voice": "\"Voice approved\" (owner, 28 Nov 2026 IST; covers line f01s007-007 at 07:31)",
   "music": "\"Music approved\" (owner, 28 Nov 2026 IST)",
   "film": "\"Film approved\" (owner, 28 Nov 2026 IST)",
-  "preview": "\"Preview approved\" (owner, 28 Nov 2026 IST)"
+  "preview": "\"Preview approved\" (owner, 28 Nov 2026 IST) for the 1:53 public sample deliverables/bicharak/2026-11-27/preview.mp3 (113,712 ms, 1,364,877 bytes, 96 kbps)"
  },
  "labels": {
   "narration": "AI narration (Earnalism Voice, ai4bharat/indic-parler-tts, Apache-2.0)",
