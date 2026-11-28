@@ -6,7 +6,7 @@
   "r2_prefix": "gpu-jobs/nishithe/narration-c7d371b4-r2-c2of2/run-1/",
   "requested_at": "2026-11-27T19:02:35+00:00",
   "schema": "earnalism.modal-request.v1",
-  "status": "requested",
+  "status": "running",
   "title_root": "production/audiovisual/nishithe",
   "worst_case_usd": 0.957097
 }
