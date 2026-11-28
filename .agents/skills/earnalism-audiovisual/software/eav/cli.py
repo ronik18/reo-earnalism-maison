@@ -23,13 +23,17 @@
                           old take stays on disk; `retire <redo job>` reverts it); a take still suspect is
                           recorded (unit_redo_suspect) and the unit keeps its take and its flag)
   python3 -m eav.cli audition --root <dir> --rates <rates.json> [--from <title slug | cast.json>] [--job-id <id>]
+                         [--style-audition]
                          (Bengali multi-voice casting: each of the 6 Indic Parler-TTS Bengali speakers reads
                           the same 3 short passages of a real story (one narration sentence, one male and one
                           female line of dialogue, from that title's specs/cast.json) as narration job
                           audition-<hash> under target `audition`; forecast, caps, ledger and modal-request like
                           any job; never any title's narration. After import: audition/<job_id>/<Speaker>/ and
                           per-speaker truncation/rate stats. The owner then records 2 male + 2 female voices in
-                          references/voices.json)
+                          references/voices.json. With --style-audition: the expressive layer of a cast with
+                          `tone` instead (calm narration, a sad/fear narration line, two character lines with
+                          different emotions, in the chosen voices with their composed descriptions), as job
+                          style-audition-<hash>; same forecast, caps, ledger and modal-request flow)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> [--units <CU>]
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli retouch <key> --root <dir> (--target film-NN|reel-N | --film N | --reel N)
@@ -109,8 +113,8 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path, PureWindowsPath
 
-from . import (budget, cast, colab_jobs, film, importer, mix, modal_requests, modal_run, preview,
-               qc, reel, scenes, social)
+from . import (budget, cast, colab_jobs, expressive, film, importer, mix, modal_requests, modal_run,
+               preview, qc, reel, scenes, social)
 from .record import Record, sha256_file
 from .text import estimate_seconds, sentences
 from .voice import block_parts, voice_units
@@ -397,7 +401,9 @@ def _voices(rec, job) -> dict:
     for k, d in _replacements(rec, job).items():  # a redone take: its own job's report
         seconds[k] = _segment_report(rec, d["job_id"]).get(k)
     return {k: {"voice": r.get("voice"), "segments": r.get("segments"),
-                "segment_seconds": seconds.get(k)} for k, r in rows.items()}
+                "segment_seconds": seconds.get(k),
+                **({"segment_gaps_ms": r["segment_gaps_ms"]} if r.get("segment_gaps_ms") else {})}
+            for k, r in rows.items()}
 
 
 def _check_takes(rec, replaced: dict) -> None:
@@ -741,7 +747,18 @@ def _measured_track(rec, units, job, out: Path):
     """film.narration_track over the imported WAVs of a narration job (or every chunk of its
     group, in order), plus provenance of what was measured."""
     wav_dir = _one_dir(rec, job)
-    timing = film.narration_track(units, wav_dir, out)
+    rows, summary = _job_units(rec, job)
+    room = None
+    if summary and summary.get("expressive"):
+        # an expressive title (cast.json with tone): each unit's pause is the one its job row
+        # recorded at build (eav.expressive rule table), and pauses are room tone
+        missing = [u["unit_key"] for u in units if "pause_rule" not in rows.get(u["unit_key"], {})]
+        if missing:
+            raise Stop(f"narration job {job['job_id']} is expressive but has no pause rule for "
+                       f"unit(s) {', '.join(missing[:8])}", "Report as a bug")
+        units = [dict(u, pause_after_ms=rows[u["unit_key"]]["pause_after_ms"]) for u in units]
+        room = summary["expressive"]["room_tone"]
+    timing = film.narration_track(units, wav_dir, out, room=room)
     provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
                   "narration_job_id": job["job_id"],
                   "wav_sha256": {u["unit_key"]: sha256_file(film.unit_wav(wav_dir, u["unit_key"]))
@@ -755,7 +772,6 @@ def _measured_track(rec, units, job, out: Path):
                 for k, d in _replacements(rec, job).items() if k in keys}
     if replaced:  # job narration --redo-units: these units come from their redone take
         provenance["replaced_units"] = replaced
-    rows, summary = _job_units(rec, job)
     if summary:  # multi-voice (specs/cast.json): who voiced each unit, segment by segment
         provenance["cast"] = summary
         provenance["unit_voices"] = {
@@ -764,6 +780,25 @@ def _measured_track(rec, units, job, out: Path):
             if rows.get(u["unit_key"], {}).get("segments") else
             [{"voice": rows.get(u["unit_key"], {}).get("voice"), "role": "narrator", "speaker": None}]
             for u in units}
+    if room:  # the expressive layer: what each voice was asked for, each pause and the room tone
+        for u in units:
+            row = rows[u["unit_key"]]
+            segs = row.get("segments") or [dict(row, role="narrator")]
+            for v, s in zip(provenance["unit_voices"][u["unit_key"]], segs):
+                v.update({k: s[k] for k in ("mood", "emotion") if k in s},
+                         description=s["description"])
+        provenance["expressive"] = {
+            "table_sha256": summary["expressive"]["table_sha256"],
+            "tone": summary["expressive"]["tone"],
+            "room_tone": {**room, "between_units_seed": "eav.expressive.gap_seed(unit_key)",
+                          "between_segments_seed": "the unit row's room_tone.seed + gap index"},
+            "unit_pauses": {u["unit_key"]: {"ms": rows[u["unit_key"]]["pause_after_ms"],
+                                            **{k: v for k, v in rows[u["unit_key"]]["pause_rule"].items()
+                                               if k != "ms"},
+                                            **({"segment_gaps_ms": rows[u["unit_key"]]["segment_gaps_ms"]}
+                                               if rows[u["unit_key"]].get("segment_gaps_ms") else {})}
+                            for u in units}}
+        provenance["expressive"]["unit_pauses"][units[-1]["unit_key"]]["applied"] = False  # track end
     return timing, provenance
 
 
@@ -1655,16 +1690,29 @@ def cmd_audition(args):
     if plan["language"] != "bn":
         raise Stop("the audition is for the Bengali multi-voice cast", "Run it in a Bengali title root")
     data, path, src, units = _audition_cast(rec, args.source)
+    style = bool(getattr(args, "style_audition", False))
     try:
         voices = cast.load_voices()
-        passages = cast.audition_passages(data, units)
-        rows = cast.audition_units(voices, passages)
+        if style:  # the expressive layer in the owner's chosen voices, on the story's own lines
+            passages, rows = cast.style_audition(data, units, voices)
+            speakers = {g: [n for n in voices["speakers"][g] if n in {p["voice"] for p in passages}]
+                        for g in cast.GENDERS}
+        else:
+            passages = cast.audition_passages(data, units)
+            rows = cast.audition_units(voices, passages)
+            speakers = voices["speakers"]
+    except cast.VoicesNotChosen:
+        raise Stop(f"the style audition plays the chosen voices, but {cast.NOT_CHOSEN}",
+                   f"{PROG} audition --root {rec.root} --rates <rates.json> first; the owner records "
+                   f"the voices in {cast.VOICES}") from None
     except (KeyError, ValueError) as e:
-        raise Stop(f"audition not built: {e}", "Choose another --from title")
+        raise Stop(f"audition not built: {e}", "Choose another --from title"
+                   + (" with an expressive cast (tone, narration_moods, character emotions)"
+                      if style else ""))
     preset = {k: v for k, v in plan["voice"].items() if k in colab_jobs.GENERATION_KEYS}
     digest = hashlib.sha256(json.dumps({"units": rows, "generation": preset}, sort_keys=True,
                                        ensure_ascii=False).encode("utf-8")).hexdigest()
-    job_id = args.job_id or f"audition-{digest[:8]}"
+    job_id = args.job_id or f"{'style-audition' if style else 'audition'}-{digest[:8]}"
     taken = {j["job_id"] for j in _jobs(rec)} | {j["chunk"]["group"] for j in _jobs(rec) if j["chunk"]}
     if job_id in taken:
         raise Stop(f"audition job {job_id} (these passages and voices) is already built",
@@ -1673,7 +1721,9 @@ def cmd_audition(args):
     spec = {"units": rows, "preset": {"description": "", **preset}, "job_id": job_id,
             "audition": {"from": src.data["title_slug"], "cast_sha256": sha256_file(path),
                          "source_revision": src.data["source"]["revision_id"],
-                         "passages": passages, "speakers": voices["speakers"]}}
+                         "passages": passages, "speakers": speakers,
+                         **({"style": True, "expressive_sha256": expressive.table_sha256()}
+                            if style else {})}}
     rates = _json(args.rates)
     try:
         compute = colab_jobs.derive_compute("narration", spec, rates,
@@ -1700,11 +1750,19 @@ def cmd_audition(args):
         raise Stop(f"audition not built: {e}", "Fix the input it names and rerun")
     rec.event("cli", "job_target", {"job_id": result["job_id"], "target": AUDITION_TARGET,
                                     "kind": "narration"})
-    print(f"Built audition job {result['job_id']}: {len(rows)} takes ("
-          + ", ".join(voices["speakers"]["male"] + voices["speakers"]["female"])
-          + f" x {len(passages)} passages from {src.data['title_slug']}: "
-          + "; ".join(f"{p['passage']} {p['unit_key']} \"{p['text']}\"" for p in passages)
-          + f"), forecast {units_cu:.2f} CU reserved ({remaining - units_cu:.2f} CU left under the "
+    if style:
+        what = (f"{len(rows)} takes of the expressive layer in the chosen voices, from "
+                f"{src.data['title_slug']} (tone {data['tone']['pace']}/{data['tone']['expressivity']}"
+                f"/'{data['tone']['atmosphere']}'): "
+                + "; ".join(f"{p['passage']} {p['voice']} {p['unit_key']} \"{p['text']}\""
+                            for p in passages))
+    else:
+        what = (f"{len(rows)} takes ("
+                + ", ".join(voices["speakers"]["male"] + voices["speakers"]["female"])
+                + f" x {len(passages)} passages from {src.data['title_slug']}: "
+                + "; ".join(f"{p['passage']} {p['unit_key']} \"{p['text']}\"" for p in passages)
+                + ")")
+    print(f"Built audition job {result['job_id']}: {what}, forecast {units_cu:.2f} CU reserved ({remaining - units_cu:.2f} CU left under the "
           "title and month caps). It narrates no title. Inert until the owner enables it (Colab, or "
           f"{PROG} modal-request {result['job_id']} --root {rec.root} --colab-units 0).")
 
@@ -1743,7 +1801,11 @@ def _audition_report(rec, job):
     _write_json(out / "listening-set.json", {
         "job_id": job["job_id"], "from": data["audition"]["from"],
         "passages": data["audition"]["passages"], "speakers": data["audition"]["speakers"],
-        "stats": stats, "choose": f"2 male + 2 female, [primary, secondary], in {cast.VOICES}"})
+        "stats": stats, "choose": (
+            f"listen to the expressive layer ({expressive.TABLE}); approve it or adjust the phrase, "
+            "pause and room-tone table before the full narration run"
+            if data["audition"].get("style") else
+            f"2 male + 2 female, [primary, secondary], in {cast.VOICES}")})
     rec.event("audition", "imported", {"job_id": job["job_id"], "folder": _rel(rec, out),
                                        "stats": stats})
     print(f"Audition listening set: {out} (one folder per speaker, one WAV per passage).")
@@ -1756,8 +1818,12 @@ def _audition_report(rec, job):
                 + (f"; SUSPECT_TRUNCATED: " + "; ".join(
                     f"{x['passage']} ({', '.join(x['reasons'])})" for x in st["suspect"])
                    if st["suspect"] else "; no truncation suspect"))
-    print(f"The owner listens and records 2 male + 2 female voices ([primary, secondary]) in "
-          f"{cast.VOICES}; no title's narration changed.")
+    if data["audition"].get("style"):
+        print(f"The owner listens to the expressive layer and approves it (or the table "
+              f"{expressive.TABLE} is adjusted) before the full run; no title's narration changed.")
+    else:
+        print(f"The owner listens and records 2 male + 2 female voices ([primary, secondary]) in "
+              f"{cast.VOICES}; no title's narration changed.")
 
 
 def cmd_job(args):
@@ -1827,6 +1893,12 @@ def cmd_job(args):
               + ", ".join(f"{n} {v['speaker']}" for n, v in sorted(c["characters"].items()))
               + f"; {sum(1 for u in colab_jobs.narration_units(spec) if u.get('segments'))} unit(s) "
               f"in segments ({items} Parler generations).")
+        if c.get("expressive"):
+            ex = c["expressive"]
+            print(f"Expressive layer ({expressive.TABLE}): tone {ex['tone']['pace']}/"
+                  f"{ex['tone']['expressivity']}/'{ex['tone']['atmosphere']}', "
+                  f"{len(ex['narration_moods'])} narration mood(s); composed descriptions, "
+                  "punctuation-aware pauses and room tone are recorded per unit in job.json.")
     if len(results) == 1:
         print(f"Built {kind} job {results[0]['job_id']} for {target}: forecast {spent:.2f} CU "
               f"reserved ({remaining - spent:.2f} CU left under the title and month caps). "
@@ -2891,6 +2963,9 @@ def cmd_film(args):
                                                     prov.get("replaced_units", {}).items()},
                                                 "qc_accepted": sorted(accepted),
                                                 **({"cast": prov["cast"]} if "cast" in prov else {}),
+                                                **({"expressive": {k: prov["expressive"][k] for k in
+                                                                   ("table_sha256", "tone", "room_tone")}}
+                                                   if "expressive" in prov else {}),
                                                 **info})
     rec.event("film", "assembled", {"target": t, "duration": info["duration"]})
     print(f"Assembled {out / (t + '.mp4')}: {info['duration']:.1f} s, {m['lufs']:.1f} LUFS, "
@@ -3254,7 +3329,8 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                                          for a, b in zip(timing, timing[1:]) if b["start"] > a["end"]]}
             if "narration_chunk_job_ids" in prov:
                 prov_units[unit["unit_id"]]["narration_chunk_job_ids"] = prov["narration_chunk_job_ids"]
-            for k in ("cast", "unit_voices"):  # multi-voice narration: who voiced each unit
+            # multi-voice narration: who voiced each unit; expressive: pauses and room tone
+            for k in ("cast", "unit_voices", "expressive"):
                 if k in prov:
                     prov_units[unit["unit_id"]][k] = prov[k]
             if "replaced_units" in prov:  # units voiced by their redone take (--redo-units)
@@ -3741,6 +3817,11 @@ def _parser():
     s.add_argument("--from", dest="source", help="the title (a sibling title root's slug) or the "
                    "cast.json whose story supplies the 3 passages (default: this root's own cast)")
     s.add_argument("--job-id", help="a fresh take of the same passages (default audition-<hash>)")
+    s.add_argument("--style-audition", action="store_true",
+                   help="the expressive layer instead: 4 of the cast story's own lines (calm "
+                   "narration, a sad/fear narration line, two character lines with different "
+                   "emotions) in the chosen voices with their composed descriptions, as job "
+                   "style-audition-<hash>")
     s = add("import")
     s.add_argument("job_id")
     s.add_argument("--from", dest="source", required=True)

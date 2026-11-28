@@ -1,7 +1,8 @@
 # Narration: one DRY WAV per voice unit with Indic Parler-TTS (revision pinned at build time).
 # No pause between units is written here: eav.film.narration_track inserts every pause exactly
 # once (R8). A multi-voice unit (cast.json) has segments: each is generated on its own with its own
-# voice description and they are joined into the one <unit_key>.wav (join_segments, below).
+# voice description and they are joined into the one <unit_key>.wav (join_segments, below); an
+# expressive title's unit row also carries its segment gaps and room-tone settings.
 if RUN is not True:
     raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
 import subprocess, sys
@@ -94,7 +95,10 @@ for i in range(0, len(PIECES), BATCH):
         got = pending.setdefault(key, {})
         got[n] = wav
         if len(got) == len(unit["segments"]):
-            joined, seconds = join_segments([got[k] for k in range(len(got))], rate)
+            # expressive titles: the unit's own gaps and room tone (eav.expressive); else 150 ms silence
+            joined, seconds = join_segments([got[k] for k in range(len(got))], rate,
+                                            gaps_ms=unit.get("segment_gaps_ms"),
+                                            room=unit.get("room_tone"))
             sf.write(str(OUT_DIR / (key + ".wav")), joined, rate)
             record_item(key, key + ".wav", item_s=batch_s, segments_s=seconds)
             del pending[key]

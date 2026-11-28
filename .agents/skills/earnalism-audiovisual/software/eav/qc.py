@@ -85,7 +85,8 @@ def narration_rows(units, wav_dir, voices=None) -> list:
         info = (voices or {}).get(k) or {}
         segs, seg_s = info.get("segments"), info.get("segment_seconds")
         if segs and seg_s and len(seg_s) == len(segs) \
-                and abs(joined_seconds(seg_s) - seconds) <= SEGMENT_SLACK_S:
+                and abs(joined_seconds(seg_s, gaps_ms=info.get("segment_gaps_ms")) - seconds) \
+                <= SEGMENT_SLACK_S:
             rows += [{"unit_key": k, "segment": i, "voice": s.get("voice"), "chars": len(s["text"]),
                       "seconds": float(x)} for i, (s, x) in enumerate(zip(segs, seg_s), 1)]
             continue

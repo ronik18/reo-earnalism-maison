@@ -70,6 +70,53 @@ single-voice exactly as above: its `job.json` is byte-for-byte what it was, and
   `audition/<job_id>/<Speaker>/<passage>.wav` with `listening-set.json`, and per-speaker
   seconds, rates and truncation suspects are printed. The owner listens and records the choice.
 
+## Expressive layer (owner request, 28 Nov 2026)
+
+"Special attention to the pause and punctuation and overall breathing and naturalness ... clarity,
+expressive texture, emotion-aware and intelligently themed as per the content." It applies only to
+a title whose `specs/cast.json` carries the optional `tone`; a cast without it, and every title
+without a cast (e.g. বিচারক), is narrated exactly as above (job.json byte for byte). The schema
+stays `eav.cast/1`. All wording and numbers are data in `references/expressive.json`
+(`eav.expressive`), reviewable and deterministic.
+
+- **cast.json fields.** `tone: {pace: slow|moderate, expressivity: "slightly expressive" |
+  "expressive", atmosphere: 2-6 English words, rationale}`; `narration_moods: {unit_key: happy |
+  sad | anger | fear | surprise | disgust}` for narration lines that clearly depart from calm (at
+  most 40% of the lines; calm is the default and never listed); `emotion` on every character
+  segment: conversation | happy | sad | anger | fear | surprise | disgust | command | neutral (the
+  model's Bengali emotion prompts plus `conversation`). Narrator segments take their unit's mood,
+  never an `emotion`. Moods or emotions without `tone` are refused, like any stale cast.
+- **Descriptions.** Composed per line from the voice, the tone, the role and the mood/emotion:
+  narrator `"{speaker} narrates a {atmosphere} story in fluent, natural standard Bengali, in a warm,
+  clear voice with a moderate pitch and {expressivity} intonation, {mood phrase}, at a {pace} pace."`;
+  character `"{speaker} speaks in fluent, natural standard Bengali in a {emotion phrase}
+  conversational tone, with a moderate pitch and {expressivity} intonation, at a {pace} pace."`;
+  both end with the approved quality clause unchanged ("very clear audio", "very close up", "no
+  background noise"). A mood or emotion entry may raise expressivity or set the pace (e.g. sad
+  speech is slow). Every job row records its description and its `mood` / `emotion`.
+- **Pauses.** Each unit's pause is chosen at job build and recorded in its row (`pause_after_ms`,
+  `pause_rule`): clause split 150 ms; sentence end `।`/`.` 450, `?`/`!` 550, a trailing `—` `–` `…`
+  `...` 650 (closing quotes set aside); paragraph end 900; scene end 1300; heading 1400 (the
+  largest that applies); +150 ms where the voice changes across the unit boundary (into, out of or
+  between speech); then a deterministic ±8% jitter seeded by the unit key. Inside a joined unit the
+  gap between segments is 220 ms, or 120 ms when neither side of the boundary is punctuation
+  (`segment_gaps_ms`). Film and bundle-audio take the pauses from the job rows, so the edit and the
+  record agree.
+- **Room tone.** Every pause of such a title is a soft room-tone bed instead of digital silence:
+  deterministic splitmix64 noise smoothed by a 0.5 ms Hann kernel, -62 dBFS RMS, 10 ms raised-cosine
+  fades (`eav.narration_join.room_tone`), seeded per gap from the unit key: between segments in the
+  runner, between units in `film.narration_track` (film and bundle-audio chapters). Loudness and
+  true-peak gates (`eav.mix`) and preview cut points (`voice_unit_pauses_ms`, measured timing) are
+  unchanged; silencedetect still finds the pauses (room tone is far below -35 dB).
+- **Provenance.** `job.json` `cast.expressive` (table sha256, tone, mood count, room-tone settings);
+  film and bundle `timing.json` `expressive` (tone, room tone, per-unit pause rule and segment gaps)
+  and `unit_voices` with each segment's description and mood/emotion.
+- **Style audition.** `audition --style-audition [--from <title>]` renders four of the story's own
+  lines in the chosen voices with their composed descriptions (calm narration, a sad/fear
+  narration line, two character lines with different emotions) as job `style-audition-<hash>`
+  (target `audition`, same forecast, caps, ledger and modal-request flow), so the owner hears the
+  layer before the full run.
+
 ## The performance we want
 
 Warm, intimate storyteller. Unhurried (about 115–130 wpm). Quiet wonder. Drops pitch and

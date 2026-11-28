@@ -123,3 +123,27 @@ def voice_units(scene: dict, preset: dict, clause=None, language: str = "en") ->
                 "pause_after_ms": pause,
             })
     return units
+
+
+def unit_boundaries(scene: dict, language: str = "en") -> list:
+    """What ends each voice unit of the scene, in voice_units order (the same rules that choose
+    its pause_after_ms): "clause" (a part of a split sentence), "sentence" (a sentence inside its
+    block), "heading", "line" (a reel line) or "paragraph" (the end of any other block). The
+    expressive layer (eav.expressive) reads it; voice_units itself is unchanged."""
+    blocks = scene.get("blocks")
+    if not blocks:
+        blocks = [{"kind": "paragraph", "text": t}
+                  for t in scene["text"].split("\n\n")]
+    out = []
+    for block in blocks:
+        parts = block_parts(block["text"], language)
+        for i, (_, sentence_end, _) in enumerate(parts):
+            if not sentence_end:
+                out.append("clause")
+            elif i < len(parts) - 1:
+                out.append("sentence")
+            elif block.get("kind") in ("heading", "line"):
+                out.append(block["kind"])
+            else:
+                out.append("paragraph")
+    return out

@@ -20,7 +20,7 @@ from pathlib import Path
 
 from . import cast as cast_mod
 from .budget import BudgetExceeded, forecast, forecast_seconds
-from .voice import voice_units
+from .voice import unit_boundaries, voice_units
 
 NARRATION_REPO = "ai4bharat/indic-parler-tts"
 NARRATION_REVISION = "7b527af5ee8ed1f9a28d80b19703ed9bb8ba10ca"
@@ -462,11 +462,13 @@ def derive_compute(kind: str, spec: dict, rates: dict, items: int) -> dict:
 def narration_units(spec: dict) -> list:
     """The job's voice unit rows; with spec["cast"] (eav.cast.job_cast) every unit carries the
     narrator's voice and a cast unit its segments (each synthesized on its own, then joined)."""
-    units = []
+    units, bounds = [], []
     for scene in spec["scenes"]:
         units += voice_units(scene, spec["preset"], spec.get("clause"), spec.get("language", "en"))
-    if spec.get("cast"):
-        units = cast_mod.apply(units, spec["cast"], spec.get("clause"))
+        kinds = unit_boundaries(scene, spec.get("language", "en"))
+        bounds += [(k, i == len(kinds) - 1) for i, k in enumerate(kinds)]  # (boundary, scene end)
+    if spec.get("cast"):  # with the expressive layer also each unit's pause rule and room tone
+        units = cast_mod.apply(units, spec["cast"], spec.get("clause"), bounds)
     return units
 
 
