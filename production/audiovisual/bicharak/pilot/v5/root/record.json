@@ -4503,6 +4503,20 @@
       },
       "path": "qc/report.json",
       "sha256": "9c73c20845327ac41e63339b9ba262df2a0d3bb45100a8a4a1844d28f5378069"
+    },
+    {
+      "bytes": 47118,
+      "kind": "colab_job",
+      "meta": {
+        "forecast_units": 0.9619166666666666,
+        "inputs_zip": "jobs/stills-f01s014-fix-r1/inputs.zip",
+        "job_id": "stills-f01s014-fix-r1",
+        "job_kind": "stills",
+        "manifest": "jobs/stills-f01s014-fix-r1/build-manifest.json",
+        "month": "2026-11"
+      },
+      "path": "jobs/stills-f01s014-fix-r1/stills.ipynb",
+      "sha256": "b68a038a1f9ec9540648d53e3dc89e19fc2113f7838b98d2ec880e23b7df4caa"
     }
   ],
   "created_at": "2026-11-27T17:58:04.798975+00:00",
@@ -5345,6 +5359,27 @@
       },
       "result": "pass",
       "stage": "qc"
+    },
+    {
+      "at": "2026-11-28T04:50:38.735699+00:00",
+      "detail": {
+        "forecast_units": 0.9619166666666666,
+        "job_id": "stills-f01s014-fix-r1",
+        "kind": "stills"
+      },
+      "result": "built",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-28T04:50:38.745229+00:00",
+      "detail": {
+        "job_id": "stills-f01s014-fix-r1",
+        "kind": "stills",
+        "scene": "f01s014",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
     }
   ],
   "ledger": "../allowance-ledger.json",

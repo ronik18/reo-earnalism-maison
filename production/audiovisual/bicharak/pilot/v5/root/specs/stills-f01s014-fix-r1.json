@@ -1,0 +1,24 @@
+{
+ "scene": "f01s014",
+ "note": "Owner review of v6, 28 Nov 2026. Shot 1: the night lane read European (green shutters, a European street; stills-f01s014-scene-r1 c1), so a new still of an 1880s North Calcutta lane: lime-plastered two- and three-storey houses with flat roofs and parapets, arched doorways, wooden balconies with cast-iron railings, louvred shutters in muted ochre and brown, a kerosene lamp on a wall bracket, an earthen drain, a flat horizon; the owner's earlier rulings kept (Hem's shut carriage moving away with one horse, one moon, a flat horizon; the optional temple spire left out so nothing reads as a tower). Shot 7 (Wan take f01s014-14w): the veiled mother's face is narrower and gaunter than in 13s/13t (shot 10) and 9p (shot 11), so a new start still of her at the paan mat, matched to the mother anchor (anchor-mother.png = the door still f01s014-13) and her round face in 13s/9p, eyes open; after the owner picks, a film_clips job re-takes shot 7 from it (one 1280x704 clip) with the depth map of the new shot 1 pick. Character and setting lines first; positive-only; T5 estimates with the house style 174 and 170 (limit 180). The mother's line is the world bible's appearance line verbatim.",
+ "art_dir": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v6/art",
+ "items": [
+  {
+   "key": "f01s014-1",
+   "prompt": "A closed black horse carriage with shuttered windows, seen from behind, rolls away down a narrow North Calcutta lane at deep night, one horse mid-stride. Bengal, 1880s: two- and three-storey lime-plastered houses with flat roofs and parapets, arched ground-floor doorways, wooden balconies with cast-iron railings, closed louvred wooden shutters in muted ochre and brown, a kerosene lamp on a wall bracket, an earthen drain channel. A flat low horizon, one full moon, wide indigo sky. Indigo night, silver moonlight, lamp amber.",
+   "seed": 18101,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  },
+  {
+   "key": "f01s014-7",
+   "anchor": "anchor-mother.png",
+   "prompt": "Hemshashi's mother, a 40-year-old Bengali woman, kind careworn round face, red bindi, small gold earrings, an ivory-white cotton sari with a thin red border draped over her head, red blouse. Full soft cheeks, large round dark eyes open, looking down at her hands. Medium wide, morning: she sits cross-legged on a straw mat at the right of a plain cream-walled room, folding green betel leaves on a brass tray; the mat beside her lies empty. Bengal, 1880s. Ivory, faded vermilion, pale gold.",
+   "seed": 18107,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  }
+ ]
+}
