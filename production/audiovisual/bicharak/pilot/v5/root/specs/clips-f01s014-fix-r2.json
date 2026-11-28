@@ -1,0 +1,26 @@
+{
+ "scene": "f01s014",
+ "note": "Owner decisions 28 Nov 2026 (approved run, about 2.13 CU on L4). PREPARED, NOT BUILT: build only after the shot 1 pick (touchup-f01s014-1-nocable, the touched fix-r3 c2) is bound to the scene, because job film_clips fills depth_stills in from the scene's picks; built now it would carry no depth item (fix-r1 c3 already has its map). Items: shot 7 new Wan clip f01s014-14y from the picked stills-f01s014-fix-r2 c3 (sha256 22cb2914...), hand-copied byte-identical to pilot/v6/art/f01s014-14y.png; shot 11 re-take f01s014-9r from the CORRECTED still pilot/v6/art/f01s014-9-onepupil.png (sha256 b3c78316..., eav facegate pass 28 Nov 2026), not the original f01s014-9.png. Each is one 121-frame clip at 1280x704 (the shot plus the 1-frame margin). L4 (min_vram_gib 22), same model and settings as clips-f01s014-fix-r1. After import, bind with film/film-01/clip-picks.json {\"f01s014/7\": \"f01s014-14y\", \"f01s014/11\": \"f01s014-9r\"}.",
+ "art_dir": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v6/art",
+ "min_vram_gib": 22,
+ "items": [
+  {
+   "key": "f01s014-14y",
+   "shot": 7,
+   "image": "f01s014-14y.png",
+   "seed": 62717,
+   "prompt": "A careworn veiled Bengali mother of about 45 with her white red-bordered sari drawn over her head sits cross-legged on a straw mat and folds green betel leaves, her hands moving slowly and naturally, her eyes open, looking down at her hands, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  },
+  {
+   "key": "f01s014-9r",
+   "shot": 11,
+   "image": "f01s014-9-onepupil.png",
+   "seed": 62911,
+   "prompt": "A careworn veiled Bengali mother with her white red-bordered sari drawn over her head stands at the empty cot holding a brass water pot; the pot slips from her hands and falls to the floor, she freezes in shock and slowly raises one hand to her lips, two normal eyes with natural eyelids, one consistent face throughout, her hands and arms stay whole and attached, static locked-off camera.",
+   "width": 1280,
+   "height": 704
+  }
+ ]
+}

@@ -334,3 +334,110 @@ Holds the new shot 7 Wan clip from the fix-r2 c3 still, the shot 11 re-take `f01
 shot 1 fix-r3 pick. L4 (`min_vram_gib` 22), the same settings as fix-r1 (hd 2, depth_s 110): (2 x 900) x 1.15 + 900 +
 120 + 110 = 3200 s, **2.13 CU** (inside one 4200 s session). Total with the stills job: about 3.01 CU, expected to
 settle far lower (fix-r1 0.40 CU each, fix-r2 0.23 CU).
+
+## Fix r4 (owner decisions of 28 Nov on fix-r3): shot 1 touched up; pick and clip job BLOCKED by an eav gap
+
+Operator run, `eav` commands only (`python3 -m eav.cli`), code from a clean worktree of HEAD `6649ae9`
+(`claude/great-gates-tpoz8n`, scratchpad `wt-fix6`) against the working root `R` in the main checkout. Nothing was
+staged, presigned, uploaded or run; no Colab or GPU call; nothing spent; nothing reserved. `source.json` is unchanged
+(`12fc3cb0…`), no source media was modified, and no signed URL or `exchange.json` is in any tracked file.
+
+**Status: BLOCKED after the touch-up.** The touched still exists and is verified, but eav cannot bind it to scene
+f01s014 by any route, and the approved clip job needs that binding for its depth item. So the clip job was prepared,
+not built, and nothing was reserved.
+
+### Shot 1: what the "electric cable" was (fix-r3 c2, sha256 `846d9989…`, 1344x768)
+
+The gate said `pass false, needs_review false` (a certain fail), with the notes "anachronism: electric cable" and
+"possible anachronism: modern high-rise building, spotlight, utility pole". At full size and at 4x to 7x:
+- **Top right (the line the owner saw):** five thin dark overhead wires, not one, in the sky at x 1002–1095, y 0–73.
+  Two run in from the top edge (at x 1002 and x 1031) and cross at about (1053, 31). From there, three wires and two
+  near-horizontal strands (y 30–34) end on the outline of the right-hand house at x 1096.
+- **Far end of the lane:** two utility poles stand against the hazy distant building: pole 1 at x 840, y 386–534, with
+  a crossarm at y 391–394; pole 2 at x 796–799, y 415–534, with a small top and a crossarm at y 427. Their wires run
+  to the yellow house's eave and across the facade. These are faint, but they are real poles and cables.
+- Kept as architecture: the left house's drainpipe with its brackets (x ≈ 265), building edges and the roofline.
+  **Not touched, but flagged for the owner:** a small cyan glowing rectangle at about x 771–777, y 457–470, behind
+  the left yellow house at the lane end. It is the same class as the earlier LED glow, though it is not a cable.
+
+### Touch-up `touchup-f01s014-1-nocable` (exit 0, OpenCV 5.1.0, 0 CU)
+
+`touchup --root R --film 1 --spec R/specs/touchup-f01s014-1-nocable.json --job-id touchup-f01s014-1-nocable`.
+**It ran in R, not in the title root.** The title root has no record of `stills-f01s014-fix-r3`, and `touchup`
+accepts only a stills job imported into the same root.
+
+The spec has 38 ops, all with line or box masks and feather 1:
+- **Sky wires:** 15 `fill` ops, one per straight stretch, each sampled from the clean sky gradient a few px beside
+  that stretch.
+- **Distant poles:**
+  - the pole tops, the crossarm and the wires against the sky are `fill`s sampled from the sky;
+  - the stretches over the facade are `inpaint` (Telea, radius 3–4);
+  - where pole 1 crossed a chimney, the chimney's own face and top edge are cloned in from 6 px to the right.
+- **New file:** `R/touchup/touchup-f01s014-1-nocable/f01s014-1--c1.png`, sha256
+  `f3f7ba36a5937bb23128820d23e08834d12ef4f717b522d71af6b315a433ba8b`. Its mask is `…--mask.png`, sha256 `9456e056…`.
+  The original fix-r3 c2 is unchanged (`846d9989…`).
+
+**Verified independently:**
+- 4,135 px changed, all inside x 793–1095, y 0–536; **0 px changed outside the mask** (4,162 mask px).
+- The wire contrast in the top-right sky fell from a maximum of 37, with 407 px above 10, to a maximum of 13, with
+  1 px above 10. That is the sky's own noise.
+- The moon, rooftops, chimneys, eaves, lanterns, balconies, drainpipe and lane are intact.
+
+**Before and after crops at 4x** (scratchpad `fix6/`):
+- `final_4x_topright.png`: before, three dark arcs cross and run to the house wall. After, there is plain indigo sky
+  with an unbroken gradient.
+- `final_4x_lane_end.png`: before, two poles with crossarms and a web of sagging wires stand against the hazy
+  building. After, the building stands clear with its windows and chimneys, and the sky above it is empty.
+
+### Pick: blocked (eav gap, confirmed by running it)
+
+- **`pick --job touchup-f01s014-1-nocable` would not reach the film.** `touchup` records no `scene` for its job, and
+  `film --shots` uses only `_scene_picks`, which keeps the picks of jobs bound to the scene.
+- **The 7-c1 route (`adopt`, a hand copy with a reason and `from`) crashes.**
+  - Spec: `V/adopt-f01s014-1-nocable.json`.
+  - `adopt --root R --spec V/adopt-f01s014-1-nocable.json --scene f01s014` exits 1 with
+    `AttributeError: 'NoneType' object has no attribute 'seek'`. The cause: tracing a hand copy loads every job in
+    this record, and `_job_json` opens a touchup job's `inputs_zip`, which is None.
+  - It crashed before writing; `record.json` is unchanged (compared byte for byte).
+  - The 7-c1 adoption worked only because its touch-up lived in the title root, outside R's record.
+- **Even with that crash fixed, the trace finds the file identical to the touchup output.** `Source.licence` then
+  refuses it, because a touchup records no model.
+- **Side effect to know:** while this touchup job is in R's record, re-running `adopt` on `V/adopt-f01s014.json`
+  (its hand-copied `f01s014-5`) hits the same crash.
+- **Needed in eav (root or controller, under skills/):** either
+  - let `touchup` take `"scene"` and record it, as `clip-touchup` does, so `pick` binds the patch; or
+  - make `_job_json` return `{}` for a job with no `inputs_zip`, and give a touchup output the licence of its
+    recorded source still.
+
+  After either fix:
+  1. `pick --root R --job touchup-f01s014-1-nocable --choices '{"f01s014-1": 1}'`, or
+     `adopt --root R --spec V/adopt-f01s014-1-nocable.json --scene f01s014`;
+  2. set `picks/gate-overrides.json` `"f01s014-1"` to the owner reason below.
+- **Owner reason, held (not yet written, because fix-r1 c3 is still the active pick):** "Owner pick 28 Nov 2026
+  (stills-f01s014-fix-r3 c2, the empty moonlit lane, touched up by touchup-f01s014-1-nocable). Gate result quoted:
+  pass false, needs_review false (certain fail), anachronisms \"electric cable\", notes \"anachronism: electric
+  cable\"; \"possible anachronism: modern high-rise building, spotlight, utility pole\". Owner: the cable and the
+  distant utility poles are real and were painted out (five sky wires, two poles with their wires); no high-rise
+  building or spotlight is in the picture, it is a period lane."
+
+### Facegate on the shot 11 start still
+
+The start still is `pilot/v6/art/f01s014-9-onepupil.png`; its sha256 is `b3c78316…6798` before and after the gate.
+`facegate <still> --out <scratchpad>/fix6/facegate --expect-face --fresh` printed
+**`pass f01s014-9-onepupil.png: eyes look normal`** (exit 0). It found two eyes with one pupil each, at (509, 226)
+r 7.8 and (595, 222) r 5.0.
+
+### Clip job `clips-f01s014-fix-r2`: prepared, not built, not reserved
+
+The spec is `R/specs/clips-f01s014-fix-r2.json`. It runs on L4 (`min_vram_gib` 22) with the fix-r1 model and settings,
+one 121-frame clip per item at 1280x704:
+- `f01s014-14y`: shot 7, seed 62717, from the picked fix-r2 c3. It is hand-copied byte-identical to
+  `pilot/v6/art/f01s014-14y.png` (`22cb2914…`). The prompt is the careworn mother, eyes open and looking down,
+  folding betel leaves with slow natural hand motion.
+- `f01s014-9r`: shot 11, seed 62911, from `f01s014-9-onepupil.png`, with the Fix r2 prompt.
+
+`job film_clips` fills the depth item in from the scene's picks. Built now, it would make no depth map, because
+fix-r1 c3 already has one, and a later depth-only job would cost another session. Once the shot 1 pick is bound, the
+command is: `job film_clips --root V/root --film 1 --spec R/specs/clips-f01s014-fix-r2.json --job-id
+clips-f01s014-fix-r2 --rates production/audiovisual/rates.json`. The expected forecast is 2.13 CU (3200 s); stop if
+it is over 2.4. `V/allowance-ledger.json` in the main checkout has no `clips-f01s014-fix-r2` entry (checked).

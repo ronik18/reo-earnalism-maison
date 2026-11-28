@@ -1,0 +1,818 @@
+{
+  "items": [
+    {
+      "key": "f01s014-1",
+      "source": {
+        "job": "stills-f01s014-fix-r3",
+        "file": "f01s014-1--c2.png"
+      },
+      "ops": [
+        {
+          "op": "fill",
+          "box": [
+            997,
+            0,
+            1020,
+            16
+          ],
+          "mask": "line",
+          "line": [
+            1002,
+            0,
+            1014,
+            10
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 1 (sky, top right)",
+          "sample": [
+            1016,
+            2
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1009,
+            5,
+            1033,
+            26
+          ],
+          "mask": "line",
+          "line": [
+            1014,
+            10,
+            1027,
+            20
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 1 (sky, top right)",
+          "sample": [
+            1030,
+            12
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1022,
+            15,
+            1046,
+            32
+          ],
+          "mask": "line",
+          "line": [
+            1027,
+            20,
+            1040,
+            26
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 1 (sky, top right)",
+          "sample": [
+            1033,
+            31
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1035,
+            21,
+            1062,
+            37
+          ],
+          "mask": "line",
+          "line": [
+            1040,
+            26,
+            1056,
+            31
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 1 (sky, top right)",
+          "sample": [
+            1058,
+            24
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1026,
+            0,
+            1048,
+            21
+          ],
+          "mask": "line",
+          "line": [
+            1031,
+            0,
+            1042,
+            15
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 2 (sky, top right)",
+          "sample": [
+            1044,
+            4
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1037,
+            10,
+            1058,
+            35
+          ],
+          "mask": "line",
+          "line": [
+            1042,
+            15,
+            1052,
+            29
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 2 (sky, top right)",
+          "sample": [
+            1055,
+            18
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1047,
+            24,
+            1067,
+            49
+          ],
+          "mask": "line",
+          "line": [
+            1052,
+            29,
+            1061,
+            43
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 2 (sky, top right)",
+          "sample": [
+            1049,
+            40
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1056,
+            38,
+            1081,
+            63
+          ],
+          "mask": "line",
+          "line": [
+            1061,
+            43,
+            1075,
+            57
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 2 (sky, top right)",
+          "sample": [
+            1062,
+            54
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1070,
+            52,
+            1094,
+            74
+          ],
+          "mask": "line",
+          "line": [
+            1075,
+            57,
+            1088,
+            68
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 2 (sky, top right)",
+          "sample": [
+            1075,
+            66
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1083,
+            63,
+            1096,
+            78
+          ],
+          "mask": "line",
+          "line": [
+            1088,
+            68,
+            1095,
+            72
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 2 (sky, top right)",
+          "sample": [
+            1086,
+            76
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1053,
+            29,
+            1072,
+            46
+          ],
+          "mask": "line",
+          "line": [
+            1058,
+            34,
+            1066,
+            40
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 3 (sky, top right)",
+          "sample": [
+            1072,
+            38
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1061,
+            35,
+            1083,
+            52
+          ],
+          "mask": "line",
+          "line": [
+            1066,
+            40,
+            1077,
+            46
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 3 (sky, top right)",
+          "sample": [
+            1082,
+            42
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1072,
+            41,
+            1094,
+            56
+          ],
+          "mask": "line",
+          "line": [
+            1077,
+            46,
+            1088,
+            50
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 3 (sky, top right)",
+          "sample": [
+            1090,
+            44
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1083,
+            45,
+            1096,
+            58
+          ],
+          "mask": "line",
+          "line": [
+            1088,
+            50,
+            1095,
+            52
+          ],
+          "width": 5,
+          "feather": 1,
+          "note": "overhead wire 3 (sky, top right)",
+          "sample": [
+            1090,
+            58
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            1056,
+            28,
+            1096,
+            37
+          ],
+          "mask": "box",
+          "feather": 1,
+          "sample": [
+            1075,
+            26
+          ],
+          "note": "overhead wires 4 and 5 (two near-horizontal strands at y 30-34, sky, top right)"
+        },
+        {
+          "op": "fill",
+          "box": [
+            850,
+            397,
+            859,
+            410
+          ],
+          "mask": "line",
+          "line": [
+            855,
+            400,
+            853,
+            406
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "pole 1 diagonal wire from the eave (sky)",
+          "sample": [
+            859,
+            404
+          ]
+        },
+        {
+          "op": "fill",
+          "box": [
+            846,
+            403,
+            857,
+            418
+          ],
+          "mask": "line",
+          "line": [
+            853,
+            406,
+            849,
+            414
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "pole 1 diagonal wire from the eave (sky)",
+          "sample": [
+            860,
+            410
+          ]
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            841,
+            412,
+            852,
+            420
+          ],
+          "mask": "line",
+          "line": [
+            849,
+            414,
+            843,
+            417
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "pole 1 diagonal wire, last stretch at the chimney",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "fill",
+          "box": [
+            844,
+            391,
+            854,
+            397
+          ],
+          "mask": "line",
+          "line": [
+            846,
+            393,
+            851,
+            394
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "pole 1 wire to the right-hand eave (sky)",
+          "sample": [
+            848,
+            400
+          ]
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            847,
+            416,
+            860,
+            426
+          ],
+          "mask": "line",
+          "line": [
+            850,
+            419,
+            856,
+            422
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "pole 1 wire right (middle)",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            853,
+            419,
+            868,
+            429
+          ],
+          "mask": "line",
+          "line": [
+            856,
+            422,
+            864,
+            425
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "pole 1 wire right (middle)",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            840,
+            416,
+            851,
+            429
+          ],
+          "mask": "line",
+          "line": [
+            843,
+            419,
+            847,
+            425
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "pole 1 wire right (sag)",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            844,
+            422,
+            856,
+            433
+          ],
+          "mask": "line",
+          "line": [
+            847,
+            425,
+            852,
+            429
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "pole 1 wire right (sag)",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            839,
+            426,
+            856,
+            434
+          ],
+          "mask": "line",
+          "line": [
+            842,
+            429,
+            852,
+            430
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "pole 1 wire right (lower)",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            849,
+            427,
+            869,
+            436
+          ],
+          "mask": "line",
+          "line": [
+            852,
+            430,
+            865,
+            432
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "pole 1 wire right (lower)",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            815,
+            416,
+            842,
+            447
+          ],
+          "mask": "line",
+          "line": [
+            838,
+            419,
+            818,
+            443
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "wire from pole 1 down-left to pole 2",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            803,
+            440,
+            822,
+            459
+          ],
+          "mask": "line",
+          "line": [
+            818,
+            443,
+            806,
+            455
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "wire from pole 1 down-left to pole 2",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            794,
+            452,
+            810,
+            462
+          ],
+          "mask": "line",
+          "line": [
+            806,
+            455,
+            797,
+            458
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "wire from pole 1 down-left to pole 2",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            820,
+            423,
+            842,
+            446
+          ],
+          "mask": "line",
+          "line": [
+            838,
+            426,
+            823,
+            442
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "second wire from pole 1 down-left",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            811,
+            439,
+            827,
+            452
+          ],
+          "mask": "line",
+          "line": [
+            823,
+            442,
+            814,
+            448
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "second wire from pole 1 down-left",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            794,
+            439,
+            821,
+            449
+          ],
+          "mask": "line",
+          "line": [
+            797,
+            442,
+            817,
+            445
+          ],
+          "width": 3,
+          "feather": 1,
+          "note": "sagging wire at pole 2",
+          "radius": 3,
+          "method": "telea"
+        },
+        {
+          "op": "fill",
+          "box": [
+            834,
+            389,
+            848,
+            396
+          ],
+          "mask": "box",
+          "sample": [
+            830,
+            393
+          ],
+          "feather": 1,
+          "note": "pole 1 crossarm (sky)"
+        },
+        {
+          "op": "fill",
+          "box": [
+            836,
+            385,
+            845,
+            406
+          ],
+          "mask": "line",
+          "line": [
+            840,
+            386,
+            840,
+            405
+          ],
+          "width": 6,
+          "sample": [
+            830,
+            400
+          ],
+          "feather": 1,
+          "note": "distant utility pole 1, above the chimney (sky)"
+        },
+        {
+          "op": "clone",
+          "box": [
+            837,
+            405,
+            843,
+            417
+          ],
+          "from": [
+            6,
+            0
+          ],
+          "feather": 1,
+          "note": "pole 1 where it crosses the chimney: the chimney's own face and top edge from 6 px right"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            836,
+            416,
+            845,
+            535
+          ],
+          "mask": "line",
+          "line": [
+            840,
+            417,
+            840,
+            534
+          ],
+          "width": 6,
+          "radius": 4,
+          "method": "telea",
+          "feather": 1,
+          "note": "distant utility pole 1, below the roofline (hazy facade)"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            792,
+            411,
+            804,
+            539
+          ],
+          "mask": "line",
+          "line": [
+            799,
+            415,
+            796,
+            534
+          ],
+          "width": 4,
+          "feather": 1,
+          "note": "distant utility pole 2 (x 796-799)",
+          "radius": 4,
+          "method": "telea"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            794,
+            414,
+            803,
+            419
+          ],
+          "mask": "box",
+          "radius": 3,
+          "method": "telea",
+          "feather": 1,
+          "note": "pole 2 top"
+        },
+        {
+          "op": "inpaint",
+          "box": [
+            793,
+            425,
+            804,
+            430
+          ],
+          "mask": "box",
+          "radius": 3,
+          "method": "telea",
+          "feather": 1,
+          "note": "pole 2 crossarm"
+        }
+      ]
+    }
+  ],
+  "note": "Owner decision 28 Nov 2026 (shot 1 pick f01s014-1 = stills-f01s014-fix-r3 c2): the still gate flagged 'anachronism: electric cable' (and 'possible ... utility pole'). Overhead wires found and removed: five thin dark wire strands in the top-right sky (x 1002-1095, y 0-73, running from the top edge and from a crossing at about (1053, 31) to the right-hand house's outline), filled with colours sampled from the adjacent sky gradient stretch by stretch; and, at the far end of the lane, two utility poles with crossarms (x 840 and x 796-799, y 386-534) and their wires across the hazy distant facade, sky stretches filled from the sky, facade stretches inpainted (OpenCV Telea) and the chimney the pole crossed restored by a 6 px clone of its own face. Moon, rooftops, lanterns, the drainpipe of the left house and every other pixel outside the boxes untouched; the original fix-r3 file is unchanged."
+}

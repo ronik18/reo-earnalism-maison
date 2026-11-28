@@ -1,0 +1,9 @@
+{
+  "scene": "f01s014",
+  "note": "Owner decision 28 Nov 2026: shot 1 is stills-f01s014-fix-r3 c2 with its overhead wires and the two distant utility poles painted out (eav touchup job touchup-f01s014-1-nocable in this root, OpenCV, 0 CU); adopted as a hand copy with its reason, the same route as the retouched 7-c1 (shot 5).",
+  "stills": {
+    "f01s014-1": {"file": "root/touchup/touchup-f01s014-1-nocable/f01s014-1--c1.png",
+                  "reason": "owner-picked shot 1 still (stills-f01s014-fix-r3 c2, the empty moonlit lane) with five overhead wire strands in the top-right sky and two distant utility poles with crossarms and their wires removed (owner decision 28 Nov 2026: no wires or poles in the 1880s lane); made by eav touchup job touchup-f01s014-1-nocable (OpenCV fill sampled from the sky, inpaint on the distant facade, one chimney clone), original fix-r3 file unchanged",
+                  "from": {"job": "stills-f01s014-fix-r3", "file": "f01s014-1--c2.png"}}
+  }
+}
