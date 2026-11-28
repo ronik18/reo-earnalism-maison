@@ -1,6 +1,6 @@
 {
  "title": "বিচারক (Rabindranath Tagore), Maison revision 5206c8ca-c195-44fa-aa37-711c764bb400",
- "period_and_place": "Bengal, 1880s: colonial Calcutta lanes, lime-plastered brick houses, green wooden shutters, iron-barred windows, oil lamps, horse-drawn carriages; a colonial sessions court and a whitewashed jail with a vegetable garden",
+ "period_and_place": "Bengal, 1880s: North Calcutta lanes of two- and three-storey lime-plastered houses with flat roofs and parapets, arched doorways, wooden balconies, louvred wooden shutters in muted ochre and brown, iron-barred windows, oil lamps, horse-drawn carriages; a colonial sessions court and a whitewashed jail with a vegetable garden",
  "palette_and_light": "indigo night, lamp amber, faded vermilion, ivory white, old gold; one light family: warm low oil-lamp light against deep blue dusk",
  "lens_and_look": "Earnalism house style (references/visual-style.md): 2D animated feature-film illustration, appended by the job builder",
  "characters": {
@@ -61,6 +61,6 @@
  "judge_attire": "dark buttoned chapkan coat over a white dhoti in every scene, the court included, the same one consistent period-accurate outfit for a Bengali official of the 1880s",
  "prompt_order": "subject and character appearance lines first, then the period setting and the shot's own light, then the palette; the house style is appended by the job builder; every prompt describes what is present",
  "revision_note": "2026-11-24 owner: house style 2D animated; character lines corrected (see stills-film-01-r8-house.json note). Round 9: positive-only wording and verbatim per-character appearance lines (see stills-film-01-r9.json note)",
- "clean_frame": "a clean picture surface with plain unlettered walls and clean corners, five natural fingers per hand, period objects of the 1880s oil-lamp era: bullock carts, horse carriages, palanquins, gas lamps on wooden posts, kerosene and clay oil lamps, brick lanes, bare wrists or period bangles",
+ "clean_frame": "a clean picture surface with plain unlettered walls and clean corners, five natural fingers per hand, period objects of the 1880s oil-lamp era: bullock carts, horse carriages, palanquins, kerosene lamps on wall brackets, clay oil lamps, brick lanes, bare wrists or period bangles",
  "light_by_time": "night and dusk shots use warm oil-lamp light against deep blue dusk; day shots state their own light (bright midday daylight with blue sky, warm early morning sunlight, pale grey-gold dawn light, golden afternoon sunlight)"
 }
