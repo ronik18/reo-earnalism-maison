@@ -1,0 +1,15 @@
+{
+ "scene": "f01s014",
+ "note": "Owner decision on the fix-r2 review, 28 Nov 2026 (fix r3). Shot 1 becomes an empty lane: the moonlit North Calcutta lane has no vehicle at all; the hooves and wheels fade away on the soundtrack, as if the carriage has just turned out of sight. One item, 3 candidates, new seed (fix-r1 18101, fix-r2 18201). Wheel ruts in the dust lead away. Flat roofs with parapets, arched doorways, wooden balconies, closed louvred shutters in muted ochre and brown, kerosene lanterns on wall brackets, an earthen drain channel, flat low horizon, one full moon, clear indigo sky, nothing else in the lane. The builder refuses the word 'no' (FLUX.1-schnell draws what it names), so the owner's exclusions (no people, animals, vehicles, wires, poles, writing or numbers) are written as 'empty, deserted ... only still houses and moonlit dust', 'plain blank walls and pillars' and 'clear indigo sky'.",
+ "art_dir": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/v6/art",
+ "items": [
+  {
+   "key": "f01s014-1",
+   "prompt": "An empty, deserted narrow North Calcutta lane at deep night, Bengal, 1880s, only still houses and moonlit dust: lime-plastered two- and three-storey houses, every roof flat with a parapet, plain blank walls and pillars, arched doorways, wooden balconies, closed louvred shutters in muted ochre and brown, kerosene lanterns on wall brackets, an earthen drain channel, wheel ruts in the dust leading away. Flat low horizon, one full moon, clear indigo sky. Indigo night, silver moonlight, lamp amber.",
+   "seed": 18301,
+   "width": 1344,
+   "height": 768,
+   "candidates": 3
+  }
+ ]
+}
