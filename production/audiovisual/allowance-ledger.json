@@ -1608,10 +1608,10 @@
       {
         "run_id": "narration-0df5c98d-c1of2#1",
         "job_id": "narration-0df5c98d-c1of2",
-        "usd": 1.24764,
-        "seconds": 0.0,
+        "usd": 0.37020572989324496,
+        "seconds": 1334.074702318,
         "at": "2026-11-28T12:40:31+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-0df5c98d-c2of2#1",
