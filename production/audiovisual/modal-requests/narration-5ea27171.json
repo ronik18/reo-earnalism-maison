@@ -6,7 +6,7 @@
   "r2_prefix": "gpu-jobs/kshudhita-pashan/narration-5ea27171/run-1/",
   "requested_at": "2026-11-27T20:07:04+00:00",
   "schema": "earnalism.modal-request.v1",
-  "status": "requested",
+  "status": "running",
   "title_root": "production/audiovisual/kshudhita-pashan",
   "worst_case_usd": 1.208513
 }
