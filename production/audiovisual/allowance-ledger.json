@@ -1100,10 +1100,15 @@
     "job_id": "narration-0ef4dd52-c2of2",
     "title": "prayashchitta",
     "month": "2026-11",
-    "units": 0.779486611111111,
+    "units": 0.0,
     "state": "reserved",
     "edition_id": "82a2e6d1-e279-4179-85a0-d9d52361af05",
-    "root": "prayashchitta"
+    "root": "prayashchitta",
+    "reserved_units": 0.779486611111111,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T13:21:14+00:00",
+    "modal_runs_issued": 1
   },
   {
     "job_id": "narration-4d5c214c-c1of2",
@@ -1642,6 +1647,14 @@
         "usd": 0.7034625,
         "seconds": 0.0,
         "at": "2026-11-28T13:21:12+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-0ef4dd52-c2of2#1",
+        "job_id": "narration-0ef4dd52-c2of2",
+        "usd": 0.6510150000000001,
+        "seconds": 0.0,
+        "at": "2026-11-28T13:21:14+00:00",
         "status": "pending"
       }
     ]
