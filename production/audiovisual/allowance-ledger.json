@@ -1035,10 +1035,10 @@
       {
         "run_id": "narration-bbf45e84-r2#1",
         "job_id": "narration-bbf45e84-r2",
-        "usd": 1.192695,
-        "seconds": 0.0,
+        "usd": 0.2755223246486175,
+        "seconds": 992.873241977,
         "at": "2026-11-27T19:02:37+00:00",
-        "status": "pending"
+        "status": "ok"
       },
       {
         "run_id": "narration-b2d6c2d9-r2-c1of2#1",
