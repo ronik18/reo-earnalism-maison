@@ -6532,6 +6532,29 @@
       },
       "result": "job_target",
       "stage": "cli"
+    },
+    {
+      "at": "2026-11-28T10:12:51.196934+00:00",
+      "detail": {
+        "bytes": 1984393,
+        "job_id": "clips-f01s014-fix-r1",
+        "key": "exports/colab-exchange/bicharak/clips-f01s014-fix-r1/inputs.zip",
+        "sha256": "e21dba5f9cabd3abf3d62a4d761a898f76a2274e79a7db160e22f66baefaaa4f"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-28T10:14:58.867347+00:00",
+      "detail": {
+        "expires_at": "2026-11-29T10:13:52+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/clips-f01s014-fix-r1/inputs.zip",
+        "inputs_sha256": "e21dba5f9cabd3abf3d62a4d761a898f76a2274e79a7db160e22f66baefaaa4f",
+        "job_id": "clips-f01s014-fix-r1",
+        "outputs_key": "exports/colab-exchange/bicharak/clips-f01s014-fix-r1/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
