@@ -850,14 +850,16 @@
     "title": "samapti",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "2be3bc99-f143-4aa4-b080-ade26f7e381a",
     "root": "samapti",
     "reserved_units": 0.6524435555555554,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-28T10:46:17+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.059957,
+    "cu_equivalent": 0.6
   },
   {
     "modal_spend": "2026-11",
