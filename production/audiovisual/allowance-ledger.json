@@ -1050,14 +1050,16 @@
     "title": "nishithe",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "e9734480-f2c3-4680-9619-78f6b5850d10",
     "root": "nishithe",
     "reserved_units": 1.0284909999999998,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-28T12:40:31+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.214077,
+    "cu_equivalent": 2.14
   },
   {
     "job_id": "narration-6bbdcca8-c1of2",
