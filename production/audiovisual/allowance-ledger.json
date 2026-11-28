@@ -814,6 +814,20 @@
     "cu_equivalent": 3.21
   },
   {
+    "job_id": "audition-15a5c974",
+    "title": "samapti",
+    "month": "2026-11",
+    "units": 0.0,
+    "state": "reserved",
+    "edition_id": "2be3bc99-f143-4aa4-b080-ade26f7e381a",
+    "root": "samapti",
+    "reserved_units": 0.7235876666666665,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T10:04:28+00:00",
+    "modal_runs_issued": 1
+  },
+  {
     "modal_spend": "2026-11",
     "rows": [
       {
@@ -1163,6 +1177,14 @@
         "seconds": 1158.138800555,
         "at": "2026-11-27T20:07:04+00:00",
         "status": "ok"
+      },
+      {
+        "run_id": "audition-15a5c974#1",
+        "job_id": "audition-15a5c974",
+        "usd": 0.622155,
+        "seconds": 0.0,
+        "at": "2026-11-28T10:04:28+00:00",
+        "status": "pending"
       }
     ]
   }
