@@ -630,8 +630,44 @@ def _replacement_plan(kind: str, old: dict, build: dict, rates: dict) -> dict:
             "chunk": {k: old["chunk"][k] for k in ("index", "of", "group")}}
 
 
+def redo_job_id(source_job_id: str, k: int) -> str:
+    """The k-th per-unit narration redo (1, 2, ...) of one job or chunk: <source job id>-u<k>."""
+    return f"{source_job_id}-u{k}"
+
+
+def _redo_plan(old: dict, build: dict, unit_keys: list, rates: dict) -> dict:
+    """Only the named units of a narration job (or chunk) again, in the source job's order, with
+    its exact unit rows (text, voice description, pause), generation settings, batch, model and
+    revision, read from its own job.json and build manifest; the forecast is derived afresh for
+    those units from the measured rates. The job carries redo = {source_job_id, unit_keys} and no
+    chunk block: it is a plain job."""
+    if old.get("kind") != "narration":
+        raise ValueError("only narration units are redone")
+    model = build.get("model") or {}
+    if old.get("model") != NARRATION_REPO or model.get("repo") != NARRATION_REPO \
+            or not model.get("revision"):
+        raise ValueError(f"the source job was built with {old.get('model')!r}, not {NARRATION_REPO!r}")
+    if build.get("generation", old.get("generation")) != old.get("generation"):
+        raise ValueError("the source job's build manifest and job.json disagree on generation")
+    wanted = list(dict.fromkeys(unit_keys))
+    if not wanted or len(wanted) != len(unit_keys):
+        raise ValueError("name each unit to redo once")
+    rows = [u for u in old.get("units") or [] if u.get("unit_key") in wanted]
+    missing = [k for k in wanted if k not in {u["unit_key"] for u in rows}]
+    if missing:
+        raise ValueError(f"unit(s) {', '.join(missing)} are not in job {old.get('job_id')}")
+    payload = {k: v for k, v in old.items()
+               if k not in ("schema", "kind", "job_id", "title", "model", "chunk", "redo", "units")}
+    payload["units"] = [dict(u) for u in rows]
+    return {"payload": payload, "repo": NARRATION_REPO, "revision": model["revision"],
+            "steps": pinned_steps("narration"),
+            "compute": derive_compute("narration", {}, rates, len(rows)),
+            "redo": {"source_job_id": old["job_id"], "unit_keys": [u["unit_key"] for u in rows]}}
+
+
 def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
-              month: str = None, chunk: dict = None, replace: dict = None) -> dict:
+              month: str = None, chunk: dict = None, replace: dict = None,
+              redo: dict = None) -> dict:
     """Build an inert bundle under out/<job_id>/.
 
     The forecast is reserved on the ledger before anything is written. If the
@@ -644,13 +680,19 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
     its job.json and build manifest carry chunk = {"index", "of", "group"}.
     replace = {"job_json", "build", "k"} rebuilds a closed/superseded chunk's exact slice as
     replacement_job_id(group, index, of, k), with the same chunk block.
+    redo = {"job_json", "build", "unit_keys", "k"} builds only those units of a narration job (or
+    chunk) as redo_job_id(source, k) (_redo_plan); its job.json and manifest carry redo.
     """
     if kind not in KINDS:
         raise ValueError(f"unknown job kind: {kind!r}")
     if (chunk is not None or replace is not None) and kind not in CHUNKED_KINDS:
         raise ValueError(f"{kind} jobs are never chunked")
     title = record.data["title_slug"]
-    if replace is not None:
+    if redo is not None and (kind != "narration" or chunk is not None or replace is not None):
+        raise ValueError("a redo is a plain narration job")
+    if redo is not None:
+        job_id = redo_job_id(redo["job_json"]["job_id"], redo["k"])
+    elif replace is not None:
         chunk = replace["job_json"]["chunk"]
         job_id = replacement_job_id(chunk["group"], chunk["index"], chunk["of"], replace["k"])
     elif chunk is not None:
@@ -676,6 +718,8 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
         job = _reel_job(spec, job_id, forecast_seconds(plan["compute"], rates), rates[kind])
     elif replace is not None:
         plan = _replacement_plan(kind, replace["job_json"], replace["build"], rates)
+    elif redo is not None:
+        plan = _redo_plan(redo["job_json"], redo["build"], redo["unit_keys"], rates)
     else:
         plan = _plan(kind, record, spec, rates)
         if chunk is not None:
@@ -687,7 +731,7 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
     # BudgetExceeded: nothing written; the title cap is keyed by edition_id (R26)
     ledger.reserve(title, month, units, job_id, edition_id=edition_id,
                    root=root if edition_id else None)
-    extra = {"chunk": plan["chunk"]} if "chunk" in plan else {}
+    extra = {k: plan[k] for k in ("chunk", "redo") if k in plan}
     artifacts = list(record.data["artifacts"])
     try:  # the bundle and its record artifact are written together, or neither stays
         if kind == "reel_clips":
@@ -724,8 +768,9 @@ def build_job(kind: str, record, spec: dict, ledger, rates: dict, out: Path,
 def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s: float) -> dict:
     job_json = {"schema": JOB_SCHEMA, "kind": kind, "job_id": job_id, "title": title,
                 "model": plan["repo"], **plan["payload"]}
-    if "chunk" in plan:
-        job_json["chunk"] = plan["chunk"]
+    for k in ("chunk", "redo"):
+        if k in plan:
+            job_json[k] = plan[k]
     archive = _zip_bytes({"job.json": (json.dumps(job_json, indent=2, sort_keys=True)
                                        + "\n").encode("utf-8")})
     zip_sha = hashlib.sha256(archive).hexdigest()
@@ -739,8 +784,9 @@ def _write_notebook_bundle(kind, plan, job_id, title, job_dir: Path, deadline_s:
                 "deadline_seconds": int(deadline_s), "authority_created": False}
     if "generation" in plan["payload"]:
         manifest["generation"] = plan["payload"]["generation"]
-    if "chunk" in plan:
-        manifest["chunk"] = plan["chunk"]
+    for k in ("chunk", "redo"):
+        if k in plan:
+            manifest[k] = plan[k]
     job_dir.mkdir(parents=True)
     paths = {"notebook": job_dir / f"{kind}.ipynb", "inputs_zip": job_dir / "inputs.zip",
              "manifest": job_dir / "build-manifest.json"}

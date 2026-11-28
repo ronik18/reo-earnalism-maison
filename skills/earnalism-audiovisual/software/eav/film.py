@@ -38,8 +38,25 @@ def _dirs(dirs) -> list:
     return [Path(d) for d in dirs] if isinstance(dirs, (list, tuple)) else [Path(dirs)]
 
 
+class Takes:
+    """A narration job's folders (one, or a chunk group's) plus the units whose redone take
+    (job narration --redo-units, accepted at import) replaces the job's own: unit_key -> WAV."""
+
+    def __init__(self, dirs, replaced: dict):
+        self.dirs = _dirs(dirs)
+        self.replaced = {k: Path(p) for k, p in replaced.items()}
+
+
 def unit_wav(wav_dir, key: str) -> Path:
-    """<key>.wav in the one folder (of a chunk group) that holds it; never in two."""
+    """<key>.wav in the one folder (of a chunk group) that holds it; never in two. With Takes, a
+    replaced unit's redone take instead."""
+    if isinstance(wav_dir, Takes):
+        if key in wav_dir.replaced:
+            if not wav_dir.replaced[key].is_file():
+                raise ValueError(f"missing redone narration WAV for unit {key!r}: "
+                                 f"{wav_dir.replaced[key]}")
+            return wav_dir.replaced[key]
+        wav_dir = wav_dir.dirs
     found = [d / f"{key}.wav" for d in _dirs(wav_dir) if (d / f"{key}.wav").is_file()]
     if not found:
         raise ValueError(f"missing narration WAV for unit {key!r}")
