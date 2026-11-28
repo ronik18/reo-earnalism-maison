@@ -1,0 +1,220 @@
+{
+ "schema": "eav.cast/1",
+ "title": "kshudhita-pashan",
+ "source_revision": "335dd363-de06-427c-bd43-b57373553eee",
+ "source_sha256": "7514f67a84623d233ac24c58a41a237f91ff160e8aa0d37c96cbcaa94464ce86",
+ "narrator": {
+  "gender": "male",
+  "rationale": "First-person frame told by a young man returning to Calcutta; most of the story is the embedded first-person tale of the male fellow passenger (the Babu, a former cotton-duty collector), so per the frame-story rule the narrator voice reads both the frame and the Babu's long telling. Both tellers are male."
+ },
+ "characters": {
+  "বাবু": {
+   "gender": "male",
+   "note": "the fellow passenger who tells the tale; former tax collector at Barich, voiced only for his spoken lines"
+  },
+  "করিম খাঁ": {
+   "gender": "male",
+   "note": "old office clerk at Barich"
+  },
+  "মেহের আলি": {
+   "gender": "male",
+   "note": "the madman who cries 'তফাৎ যাও'"
+  },
+  "ইরাণী রমণী": {
+   "gender": "female",
+   "note": "the ghostly Persian slave-girl whose weeping voice begs to be rescued"
+  },
+  "কুলিরা": {
+   "gender": "male",
+   "note": "station porters"
+  }
+ },
+ "units": {
+  "f01s001-007": [
+   {
+    "text": "আমাদের নবপরিচিত আলাপীটি ঈষৎ হাসিয়া কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "There happen more things in heaven and earth, Horatio, than are reported in your newspapers.",
+    "role": "character",
+    "speaker": "বাবু"
+   }
+  ],
+  "f01s005-003": [
+   {
+    "text": "বলিয়াছিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "ইচ্ছা হয়, দিনের বেলা থাকিবেন কিন্তু কখনো এখানে রাত্রিযাপন করিবেন না।",
+    "role": "character",
+    "speaker": "করিম খাঁ"
+   }
+  ],
+  "f01s020-003": [
+   {
+    "text": "এবং আমাদের পাগ্‌লা মেহের আলি তাহার প্রাত্যহিক প্রথা অনুসারে প্রত্যূষের জনশূন্য পথে ",
+    "role": "narrator"
+   },
+   {
+    "text": "“তফাৎ যাও” “তফাৎ যাও”",
+    "role": "character",
+    "speaker": "মেহের আলি"
+   },
+   {
+    "text": " করিয়া চীৎকার করিতে করিতে চলিয়াছে।",
+    "role": "narrator"
+   }
+  ],
+  "f01s026-004": [
+   {
+    "text": "তুমি আমাকে উদ্ধার করিয়া লইয়া যাও—কঠিন মায়া, গভীর নিদ্রা নিষ্ফল স্বপ্নের সমস্ত দ্বার ভাঙ্গিয়া ফেলিয়া তুমি আমাকে ঘোড়ায় তুলিয়া তোমার বুকের কাছে চাপিয়া ধরিয়া,",
+    "role": "character",
+    "speaker": "ইরাণী রমণী"
+   }
+  ],
+  "f01s026-005": [
+   {
+    "text": "বনের ভিতর দিয়া পাহাড়ের উপর দিয়া নদী পার হইয়া তোমাদের সূর্য্যালোকিত ঘরের মধ্যে আমাকে লইয়া যাও!",
+    "role": "character",
+    "speaker": "ইরাণী রমণী"
+   }
+  ],
+  "f01s026-006": [
+   {
+    "text": "আমাকে উদ্ধার কর!",
+    "role": "character",
+    "speaker": "ইরাণী রমণী"
+   }
+  ],
+  "f01s028-001": [
+   {
+    "text": "এমন সময় হঠাৎ সেই পাগ্‌লা মেহের আলি চীৎকার করিয়া উঠিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—“তফাৎ যাও, তফাৎ যাও!",
+    "role": "character",
+    "speaker": "মেহের আলি"
+   }
+  ],
+  "f01s028-002": [
+   {
+    "text": "সব ঝুঁট্‌ হ্যায় সব ঝুঁট্‌ হায়!”",
+    "role": "character",
+    "speaker": "মেহের আলি"
+   }
+  ],
+  "f01s028-004": [
+   {
+    "text": "আমি কহিলাম, ",
+    "role": "narrator"
+   },
+   {
+    "text": "না, আর এ বাড়িতে থাকা হয় না।",
+    "role": "character",
+    "speaker": "বাবু"
+   }
+  ],
+  "f01s033-006": [
+   {
+    "text": "পাগল চীৎকার করিয়া উঠিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "“তফাৎ যাও, তফাৎ যাও।",
+    "role": "character",
+    "speaker": "মেহের আলি"
+   }
+  ],
+  "f01s033-007": [
+   {
+    "text": "সব ঝুঁট্‌ হ্যায়, সব ঝুঁট্‌ হ্যায়!”",
+    "role": "character",
+    "speaker": "মেহের আলি"
+   }
+  ],
+  "f01s034-001": [
+   {
+    "text": "আমি তৎক্ষণাৎ সেই বৃষ্টিতে পাগ্‌লার নিকট ছুটিয়া গিয়া তাহাকে জিজ্ঞাসা করিলাম, ",
+    "role": "narrator"
+   },
+   {
+    "text": "“মেহেরআলি,ক্যা ঝুঁট্‌ হ্যায়রে?”",
+    "role": "character",
+    "speaker": "বাবু"
+   }
+  ],
+  "f01s034-003": [
+   {
+    "text": "কেবল প্রাণপণে নিজেকে সতর্ক করিবার জন্য বারম্বার বলিতে লাগিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—“তফাৎ যাও, তফাৎ যাও, সব ঝুঁট্‌ হ্যায়, সব ঝুঁট্‌ হ্যায়!”",
+    "role": "character",
+    "speaker": "মেহের আলি"
+   }
+  ],
+  "f01s034-004": [
+   {
+    "text": "আমি সেই জলঝড়ের মধ্যে পাগলের মত আপিসে গিয়া করীম্‌খাঁকে ডাকিয়া বলিলাম, ",
+    "role": "narrator"
+   },
+   {
+    "text": "ইহার অর্থ কি আমায় খুলিয়া বল।",
+    "role": "character",
+    "speaker": "বাবু"
+   }
+  ],
+  "f01s036-001": [
+   {
+    "text": "আমি জিজ্ঞাসা করিলাম, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আমার উদ্ধারের কি কোন পথ নাই?",
+    "role": "character",
+    "speaker": "বাবু"
+   }
+  ],
+  "f01s036-002": [
+   {
+    "text": "বৃদ্ধ কহিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "একটি মাত্র উপায় আছে তাহা অত্যন্ত দুরূহ।",
+    "role": "character",
+    "speaker": "করিম খাঁ"
+   }
+  ],
+  "f01s036-003": [
+   {
+    "text": "তাহ তোমাকে বলিতেছি—কিন্তু তৎপূর্ব্বে ঐ গুল্‌বাগের একটি ইরাণী ক্রীতদাসীর পুরাতন ইতিহাস বলা আবশ্যক।",
+    "role": "character",
+    "speaker": "করিম খাঁ"
+   }
+  ],
+  "f01s036-004": [
+   {
+    "text": "তেমন আশ্চর্য্য এবং তেমন হৃদয়বিদারণ ঘটনা সংসারে আর কখন ঘটে নাই।",
+    "role": "character",
+    "speaker": "করিম খাঁ"
+   }
+  ],
+  "f01s036-005": [
+   {
+    "text": "এমন সময় কুলিরা আসিয়া খবর দিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—গাড়ি আসিতেছে।",
+    "role": "character",
+    "speaker": "কুলিরা"
+   }
+  ]
+ },
+ "notes": "Frame story: narrator voice = the frame 'আমি' and the Babu's embedded narration (rule 5); the Babu's own spoken lines, in the frame (f01s001-007) and inside his tale (f01s028-004, f01s034-001, f01s034-004, f01s036-001), are voiced as character বাবু to separate dialogue from telling. The frame narrator's own remark f01s036-012 and exclamation f01s036-006 stay narrator. Unquoted direct speech voiced: f01s005-003 and f01s036-002..004 (Karim Khan), f01s036-005 (porters). The ghost's plea f01s026-004..006 is heard speech, voiced as ইরাণী রমণী (doubtful: it is a perceived voice). Kept narrator: one-word lines তথাস্তু (f01s005-006) and “হ্যালো” (f01s036-009); reported speech of servants (f01s005-005), cook (f01s028-003) and Karim's summarised account (f01s035-*); imagined speech/apostrophe (f01s027-*, f01s030-005..007)."
+}

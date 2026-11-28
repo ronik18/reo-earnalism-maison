@@ -1,0 +1,648 @@
+{
+ "schema": "eav.cast/1",
+ "title": "nishithe",
+ "source_revision": "c8fac00e-2fef-42b9-a724-d7d275544823",
+ "source_sha256": "4679bc61283c39c891b108604c37ef13d1240b9dbecff17915bd19a45943677d",
+ "narrator": {
+  "gender": "male",
+  "rationale": "First-person frame told by the village doctor (a man) whom the zamindar Dakshinacharan visits at night; Dakshinacharan's long embedded confession is also a man's first-person telling, so a male narrator carries both layers."
+ },
+ "characters": {
+  "দক্ষিণাচরণ": {
+   "gender": "male",
+   "note": "zamindar Dakshinacharan Babu; speaks in the frame to the doctor and as his younger self in his own tale"
+  },
+  "প্রথম স্ত্রী": {
+   "gender": "female",
+   "note": "Dakshinacharan's first wife, chronically ill, dies of the poison"
+  },
+  "হারাণ ডাক্তার": {
+   "gender": "male",
+   "note": "Haran Doctor of Allahabad, Monorama's father"
+  },
+  "মনোরমা": {
+   "gender": "female",
+   "note": "Haran's daughter, later Dakshinacharan's second wife"
+  },
+  "ডাক্তার": {
+   "gender": "male",
+   "note": "unnamed physician who advises a change of air before Allahabad"
+  },
+  "অশরীরী কণ্ঠ": {
+   "gender": "female",
+   "note": "the disembodied voice asking 'ও কে?' (the dead first wife's question returning; once rationalised as a water-bird call)"
+  }
+ },
+ "units": {
+  "f01s001-001": [
+   {
+    "text": "“ডাক্তার!",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s001-002": [
+   {
+    "text": "ডাক্তার!”",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s001-008": [
+   {
+    "text": "দক্ষিণাচরণ বাবু বিবর্ণমুখে বিস্ফারিত নেত্রে কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আজ রাত্রে আবার সেইরূপ উপদ্রব আরম্ভ হইয়াছে,— তোমার ঔষধ কোন কাজে লাগিল না।",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s002-001": [
+   {
+    "text": "দক্ষিণা বাবু অত্যন্ত বিরক্ত হইয়া কহিলেন,",
+    "role": "narrator"
+   },
+   {
+    "text": "—ওটা তোমার ভারি ভ্রম।",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s002-002": [
+   {
+    "text": "মদ নহে;—আদ্যোপান্ত বিবরণ না শুনিলে তুমি আসল কারণটা অনুমান করিতে পারিবে না।",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s005-006": [
+   {
+    "text": "বলিতে লাগিলেন",
+    "role": "narrator"
+   },
+   {
+    "text": "—আঃ, কর কি!",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s005-007": [
+   {
+    "text": "লোকে বলিবে কি!",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s005-008": [
+   {
+    "text": "অমন করিয়া দিন রাত্রি তুমি আমার ঘরে যাতায়াত করিয়ো না!",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s006-004": [
+   {
+    "text": "তিনি বলিতেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "পুরুষ মানুষের অতটা বাড়াবাড়ি ভাল নয়।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s008-001": [
+   {
+    "text": "অনেকদিন শয্যাগত থাকিয়া একদিন চৈত্রের শুক্লপক্ষ সন্ধ্যায় তিনি কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "ঘরে বদ্ধ থাকিয়া আমার প্রাণ কেমন করিতেছে; আজ একবার আমার সেই বাগানে গিয়া বসিব।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s009-005": [
+   {
+    "text": "কিছুক্ষণ এইরূপ চুপ করিয়া বসিয়া থাকিয়া আমার হৃদয় কেমন উদ্বেলিত হইয়া উঠিল, আমি বলিয়া উঠিলাম",
+    "role": "narrator"
+   },
+   {
+    "text": "—তোমার ভালবাসা আমি কোন কালে ভুলিব না!",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s011-005": [
+   {
+    "text": "ডাক্তার বলিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "একবার বায়ু পরিবর্ত্তন করিয়া দেখিলে ভাল হয়।",
+    "role": "character",
+    "speaker": "ডাক্তার"
+   }
+  ],
+  "f01s013-001": [
+   {
+    "text": "তখন, একদিন আমার স্ত্রী আমাকে বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "যখন ব্যামোও সারিবে না এবং শীঘ্র আমার মরিবার আশাও নাই, তখন আর কতদিন এই জীবন্মৃত লইয়া কাটাইবে?",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s013-002": [
+   {
+    "text": "তুমি আর একটা বিবাহ কর।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s013-006": [
+   {
+    "text": "আমি উপন্যাসের প্রধান নায়কের ন্যায় গম্ভীর সমুচ্চভাবে বলিতে লাগিলাম- ",
+    "role": "narrator"
+   },
+   {
+    "text": "যতদিন এই দেহে জীবন আছে—",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s014-001": [
+   {
+    "text": "তিনি বাধা দিয়া কহিলেন",
+    "role": "narrator"
+   },
+   {
+    "text": "—নাও!",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s014-002": [
+   {
+    "text": "নাও!",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s014-003": [
+   {
+    "text": "আর বলিতে হইবে না।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s014-004": [
+   {
+    "text": "তোমার কথা শুনিয়া আমি আর বাঁচি না!",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s014-005": [
+   {
+    "text": "আমি পরাজয় স্বীকার না করিয়া বলিলাম",
+    "role": "narrator"
+   },
+   {
+    "text": "—এ জীবনে আর কাহাকেও ভালবাসিতে পারিব না!",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s017-006": [
+   {
+    "text": "হারাণ ডাক্তার আমাকে প্রায় মাঝে মাঝে বলিতেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "যাহাদের রোগ আরোগ্য হইবার কোন সম্ভাবনা নাই, তাহাদের পক্ষে মৃত্যুই ভাল।",
+    "role": "character",
+    "speaker": "হারাণ ডাক্তার"
+   }
+  ],
+  "f01s017-007": [
+   {
+    "text": "কারণ, বাঁচিয়া তাহাদের নিজেরও সুখ নাই, অন্যেরও অসুখ।",
+    "role": "character",
+    "speaker": "হারাণ ডাক্তার"
+   }
+  ],
+  "f01s018-001": [
+   {
+    "text": "হঠাৎ একদিন পাশের ঘর হইতে শুনিতে পাইলাম, আমার স্ত্রী হারাণ বাবুকে বলিতেছেন,",
+    "role": "narrator"
+   },
+   {
+    "text": "“ডাক্তার, কতকগুলা মিথ্যা ওষুধ গিলাইয়া ডাক্তারখানার দেনা বাড়াইতেছ কেন?",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s018-002": [
+   {
+    "text": "আমার প্রাণটাই যখন একটা ব্যামো, তখন এমন একটা ওষুধ দাও যাহাতে শীঘ্র এই প্রাণটা যায়।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s018-003": [
+   {
+    "text": "ডাক্তার বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "ছি, এমন কথা বলিবেন না।",
+    "role": "character",
+    "speaker": "হারাণ ডাক্তার"
+   }
+  ],
+  "f01s018-006": [
+   {
+    "text": "তিনি কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "এ ঘর বড় গরম—তুমি বাহিরে যাও।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s018-007": [
+   {
+    "text": "তোমার বেড়াইতে যাইবার সময় হইয়াছে।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s018-008": [
+   {
+    "text": "খানিকটা না বেড়াইয়া আসিলে আবার রাত্রে তোমার ক্ষুধা হইবে না।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s019-006": [
+   {
+    "text": "অবশেষে কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আমাকে একগ্লাস জল আনিয়া দাও।",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s021-004": [
+   {
+    "text": "আমার স্ত্রী চমকিয়া আমার হাত ধরিয়া জিজ্ঞাসা করিলেন",
+    "role": "narrator"
+   },
+   {
+    "text": "—ও কে?",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   },
+   {
+    "text": "—তাঁহার সেই দুর্ব্বল অবস্থায় হঠাৎ অচেনা লোক দেখিয়া ভয় পাইয়া আমাকে দুই তিন বার অস্ফুটস্বরে প্রশ্ন করিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "ও কে?",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s021-005": [
+   {
+    "text": "ও কে গো?",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s022-001": [
+   {
+    "text": "আমার কেমন দুর্ব্বুদ্ধি হইল আমি প্রথমেই বলিয়া গেলিলাম, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আমি চিনি না!",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s022-003": [
+   {
+    "text": "পরের মুহূর্তেই বলিলাম",
+    "role": "narrator"
+   },
+   {
+    "text": "—ওঃ, আমাদের ডাক্তার বাবুর কন্যা!",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s022-005": [
+   {
+    "text": "পরক্ষণেই তিনি ক্ষীণস্বরে অভ্যাগতকে বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আপনি আসুন।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   },
+   {
+    "text": "—আমাকে বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আলোটা ধর।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s023-002": [
+   {
+    "text": "সেই দুটি শিশি বাহির করিয়া আমার স্ত্রীকে বলিলেন",
+    "role": "narrator"
+   },
+   {
+    "text": "—এই নীল শিশিটা মালিশ করিবার, আর এইটি খাইবার।",
+    "role": "character",
+    "speaker": "হারাণ ডাক্তার"
+   }
+  ],
+  "f01s023-003": [
+   {
+    "text": "দেখিবেন, দুইটাতে মিলাইবেন না; এ ওষুধটা ভারি বিষ।",
+    "role": "character",
+    "speaker": "হারাণ ডাক্তার"
+   }
+  ],
+  "f01s023-006": [
+   {
+    "text": "মনোরমা কহিলেন",
+    "role": "narrator"
+   },
+   {
+    "text": "—বাবা, আমি থাকি না কেন।",
+    "role": "character",
+    "speaker": "মনোরমা"
+   }
+  ],
+  "f01s023-007": [
+   {
+    "text": "সঙ্গে স্ত্রীলোক কেহ নাই, ইহাকে সেবা করিবে কে?",
+    "role": "character",
+    "speaker": "মনোরমা"
+   }
+  ],
+  "f01s024-001": [
+   {
+    "text": "আমার স্ত্রী ব্যস্ত হইয়া উঠিলেন, বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "না,না, আপনি কষ্ট করিবেন না।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s024-002": [
+   {
+    "text": "পু্রাণো ঝি আছে সে আমাকে মায়ের মত যত্ন করে।",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s024-003": [
+   {
+    "text": "ডাক্তার হাসিয়া বলিলেন",
+    "role": "narrator"
+   },
+   {
+    "text": "—উনি মা’লক্ষ্মী, চিরকাল পরের সেবা করিয়া আসিয়াছেন, অন্যের সেবা সহিতে পারেন না।",
+    "role": "character",
+    "speaker": "হারাণ ডাক্তার"
+   }
+  ],
+  "f01s024-004": [
+   {
+    "text": "কন্যাকে লইয়া ডাক্তার গমনের উদ্যোগ করিতেছেন এমন সময় আমার স্ত্রী বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "ডাক্তার বাবু, ইনি বদ্ধঘরে অনেকক্ষণ বসিয়া আছেন, ইহাকে একবার বাহিরে বেড়াইয়া লইয়া আসিতে পারেন?",
+    "role": "character",
+    "speaker": "প্রথম স্ত্রী"
+   }
+  ],
+  "f01s024-005": [
+   {
+    "text": "ডাক্তার বাবু আমাকে কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আসুন না, আপনাকে নদীর ধার হইয়া একবার বেড়াইয়া আনি।–",
+    "role": "character",
+    "speaker": "হারাণ ডাক্তার"
+   }
+  ],
+  "f01s025-006": [
+   {
+    "text": "অনুতাপে বিদ্ধ হইয়া জিজ্ঞাসা করিলাম ",
+    "role": "narrator"
+   },
+   {
+    "text": "তোমার কি ব্যথা বাড়িয়াছে?",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s026-003": [
+   {
+    "text": "অবশেষে জিজ্ঞাসা করিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "সেই ব্যথাটা কি বাড়িয়া উঠিয়াছে?",
+    "role": "character",
+    "speaker": "হারাণ ডাক্তার"
+   }
+  ],
+  "f01s026-004": [
+   {
+    "text": "ঔষধটা একবার মালিশ করিলে হয় না?",
+    "role": "character",
+    "speaker": "হারাণ ডাক্তার"
+   }
+  ],
+  "f01s026-006": [
+   {
+    "text": "আমার স্ত্রীকে জিজ্ঞাসা করিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আপনি কি ভুল করিয়া এই ওষুধটা খাইয়াছেন?",
+    "role": "character",
+    "speaker": "হারাণ ডাক্তার"
+   },
+   {
+    "text": "—আমার স্ত্রী ঘাড় নাড়িয়া নীরবে জানাইলেন—হাঁ।",
+    "role": "narrator"
+   }
+  ],
+  "f01s028-001": [
+   {
+    "text": "—দক্ষিণাচরণ আর একবার জল খাইয়া বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "উঃ বড় গরম!",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s031-004": [
+   {
+    "text": "কাছে আসিয়া দুই হাতে তাহার হাতটি তুলিয়া ধরিয়া কহিলাম, ",
+    "role": "narrator"
+   },
+   {
+    "text": "মনোরমা, তুমি আমাকে বিশ্বাস কর না, কিন্তু্‌ তোমাকে আমি ভালবাসি তোমাকে আমি কোনকালে ভুলিতে পারিব না।",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s033-002": [
+   {
+    "text": "স্ত্রী জিজ্ঞাসা করিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "তোমার হঠাৎ এমন হইল কেন?",
+    "role": "character",
+    "speaker": "মনোরমা"
+   },
+   {
+    "text": "— আমি কাঁপিয়া উঠিয়া বলিলাম, ",
+    "role": "narrator"
+   },
+   {
+    "text": "শুনিতে পাও নাই সমস্ত আকাশ ভরিয়া হাহা করিয়া একটা হাসি বহিয়া গেল?",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s033-003": [
+   {
+    "text": "স্ত্রী হাসিয়া কহিলেন",
+    "role": "narrator"
+   },
+   {
+    "text": "—সে বুঝি হাসি?",
+    "role": "character",
+    "speaker": "মনোরমা"
+   }
+  ],
+  "f01s033-004": [
+   {
+    "text": "সার বাঁধিয়া দীর্ঘ এক ঝাঁক পাখী উড়িয়া গেল তাহাদেরই পাখার শব্দ শুনিয়াছিলাম।",
+    "role": "character",
+    "speaker": "মনোরমা"
+   }
+  ],
+  "f01s033-005": [
+   {
+    "text": "তুমি এত অল্পেই ভয় পাও?—",
+    "role": "character",
+    "speaker": "মনোরমা"
+   }
+  ],
+  "f01s037-001": [
+   {
+    "text": "এমন সময় সেই জনমানবশূন্য নিঃশব্দ মরুভূমির মধ্যে গম্ভীরস্বরে কে তিনবার বলিয়া উঠিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—ও কে?",
+    "role": "character",
+    "speaker": "অশরীরী কণ্ঠ"
+   }
+  ],
+  "f01s037-002": [
+   {
+    "text": "ও কে?",
+    "role": "character",
+    "speaker": "অশরীরী কণ্ঠ"
+   }
+  ],
+  "f01s037-003": [
+   {
+    "text": "ও কে?",
+    "role": "character",
+    "speaker": "অশরীরী কণ্ঠ"
+   }
+  ],
+  "f01s038-003": [
+   {
+    "text": "ও কে?",
+    "role": "character",
+    "speaker": "অশরীরী কণ্ঠ"
+   }
+  ],
+  "f01s038-004": [
+   {
+    "text": "ও কে?",
+    "role": "character",
+    "speaker": "অশরীরী কণ্ঠ"
+   }
+  ],
+  "f01s038-005": [
+   {
+    "text": "ও কে গো?—",
+    "role": "character",
+    "speaker": "অশরীরী কণ্ঠ"
+   }
+  ],
+  "f01s039-001": [
+   {
+    "text": "যেমন আলো নিবাইয়া শুইলাম, অমনি আমার মশারির পাশে, আমার কানের কাছে অন্ধকারে আবার সেই অবরুদ্ধ স্বর বলিয়া উঠিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—ও কে, ও কে, ও কে গো।",
+    "role": "character",
+    "speaker": "অশরীরী কণ্ঠ"
+   }
+  ],
+  "f01s040-012": [
+   {
+    "text": "সেই দিনই অর্দ্ধরাত্রে আবার আমার গায়ে আসিয়া ঘা পড়িল",
+    "role": "narrator"
+   },
+   {
+    "text": "—ডাক্তার!",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ],
+  "f01s040-013": [
+   {
+    "text": "ডাক্তার!",
+    "role": "character",
+    "speaker": "দক্ষিণাচরণ"
+   }
+  ]
+ },
+ "notes": "Rule 5 applied: Dakshinacharan's confession (f01s002-006 to f01s039-005, resumed after frame breaks) is a whole-story monologue, so it is read by the narrator voice as narration; only the speech quoted inside it, and Dakshinacharan's own remarks to the doctor in the frame, are character segments. The frame teller (the doctor, first person) keeps his own two short spoken lines (f01s001-009, f01s040-002) in the narrator voice. f01s003-001 (Kalidasa's verse recalled in mind), f01s010-004 and f01s027-002 (messages conveyed by a laugh/touch, not spoken) stay narrator. f01s039-002..005 (the 'ও কে' throbbing with the heartbeat and 'spoken' by the clock) are left to the narrator as hallucinated sound; f01s037/f01s038-003..005/f01s039-001 are given to the disembodied voice. f01s033-004 read as part of Monorama's explanation despite the verb form শুনিয়াছিলাম."
+}
