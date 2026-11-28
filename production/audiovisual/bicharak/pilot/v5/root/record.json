@@ -5943,6 +5943,918 @@
       },
       "path": "jobs/stills-f01s014-fix-r2/stills.ipynb",
       "sha256": "6d34a643491a1024032944dc3ccdddd16f3e8ad77bab88b46bfb3566fe436e46"
+    },
+    {
+      "bytes": 224,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-1--c1.gate.json",
+      "sha256": "7d62dd330cc9978a6ce44b0c7a8ac71018783a33deff4220a4538ee469d171b4"
+    },
+    {
+      "bytes": 970839,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-1--c1.png",
+      "sha256": "c89dc71a01aa8edb912a903725421800539fdce73843b33c50baf06481492b4d"
+    },
+    {
+      "bytes": 294,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-1--c2.gate.json",
+      "sha256": "252ac79ae4cc98ce2e0729b971f84b8c28abfde6638bb5f80968a2b1a58e72ff"
+    },
+    {
+      "bytes": 1057348,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-1--c2.png",
+      "sha256": "914aa3edb45d00be1faac8b35761f1fc926e74d394cc875fc09d6bf20ade428b"
+    },
+    {
+      "bytes": 197,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-1--c3.gate.json",
+      "sha256": "37bc27732865fbdde735add7826b898c6ee838a18775b8ee36ad55b68e366500"
+    },
+    {
+      "bytes": 1076070,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-1--c3.png",
+      "sha256": "4f9be3f025c60de8106dc5b9b7f9ad65dc63b4151b14f12f138fef78d100f9cc"
+    },
+    {
+      "bytes": 308,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-7--c1.gate.json",
+      "sha256": "f25c3adcde0db8b3eafdb667066390173c167ea8dfb63e9515227566157814ec"
+    },
+    {
+      "bytes": 945088,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-7--c1.png",
+      "sha256": "25c72b84e9a88b78e94d6cf94a86f9d860aa5a4262452235b692e7829440e47a"
+    },
+    {
+      "bytes": 305,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-7--c2.gate.json",
+      "sha256": "7aa6d3644033da227c8cbe7b79c6fda699f5a8afeabb7a2af19f0ce01308e488"
+    },
+    {
+      "bytes": 1005304,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-7--c2.png",
+      "sha256": "64a67887f9a7647955d088635e398628e916afd417b2ddfa001bdfa0c93f42d8"
+    },
+    {
+      "bytes": 305,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-7--c3.gate.json",
+      "sha256": "2456dd487e290fdaddf348b27cd0b5054d44a8924829c003d312abc6fd069d06"
+    },
+    {
+      "bytes": 858376,
+      "kind": "stills",
+      "meta": {
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "job_kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "path": "stills/stills-f01s014-fix-r2/f01s014-7--c3.png",
+      "sha256": "22cb2914140caee91781ec40eadc012d90b63916736bccca55214bf061ea00b5"
     }
   ],
   "created_at": "2026-11-27T17:58:04.798975+00:00",
@@ -7133,6 +8045,121 @@
         "outputs_key": "exports/colab-exchange/bicharak/stills-f01s014-fix-r2/outputs.tar"
       },
       "result": "exchange_staged",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-28T12:32:16.798349+00:00",
+      "detail": {
+        "actual_units": 0.23,
+        "files": [
+          "stills/stills-f01s014-fix-r2/f01s014-1--c1.gate.json",
+          "stills/stills-f01s014-fix-r2/f01s014-1--c1.png",
+          "stills/stills-f01s014-fix-r2/f01s014-1--c2.gate.json",
+          "stills/stills-f01s014-fix-r2/f01s014-1--c2.png",
+          "stills/stills-f01s014-fix-r2/f01s014-1--c3.gate.json",
+          "stills/stills-f01s014-fix-r2/f01s014-1--c3.png",
+          "stills/stills-f01s014-fix-r2/f01s014-7--c1.gate.json",
+          "stills/stills-f01s014-fix-r2/f01s014-7--c1.png",
+          "stills/stills-f01s014-fix-r2/f01s014-7--c2.gate.json",
+          "stills/stills-f01s014-fix-r2/f01s014-7--c2.png",
+          "stills/stills-f01s014-fix-r2/f01s014-7--c3.gate.json",
+          "stills/stills-f01s014-fix-r2/f01s014-7--c3.png"
+        ],
+        "input_zip_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "kind": "stills",
+        "model": {
+          "gate": {
+            "error": null,
+            "intended": true,
+            "models": {
+              "dinov2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "ed25f3a31f01632728cabb09d1542f84ab7b0056"
+              },
+              "face_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+              },
+              "hand_landmarker": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": null,
+                "sha256": "fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1"
+              },
+              "owlv2": {
+                "declared_licence": "apache-2.0",
+                "licence": "apache-2.0",
+                "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d"
+              }
+            },
+            "ran": true,
+            "refused": [],
+            "seconds": 30.3,
+            "skipped": null,
+            "thresholds": {
+              "anchor_pass": 0.55,
+              "eye_open_ear": 0.15,
+              "frontal": [
+                0.38,
+                0.62
+              ],
+              "owl_fail": 0.3,
+              "owl_possible": 0.15,
+              "per_still_s": 6,
+              "person_score": 0.2,
+              "setup_s": 300
+            },
+            "ungated": []
+          },
+          "gpu": "NVIDIA L4",
+          "prompt_order": "house style first",
+          "repo": "black-forest-labs/FLUX.1-schnell",
+          "revision": "169573f54945f633efbe126a40a5676b4228363c",
+          "steps": 4,
+          "t5_truncated": [],
+          "transformer_precision": "int8"
+        },
+        "packages": {
+          "accelerate": "1.15.0",
+          "bitsandbytes": "0.50.2",
+          "diffusers": "0.42.1",
+          "mediapipe": "1.2.3",
+          "protobuf": "6.33.6",
+          "sentencepiece": "0.2.2",
+          "torch": "2.14.1+cu130",
+          "transformers": "5.22.1"
+        }
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-28T12:32:16.818258+00:00",
+      "detail": {
+        "job_id": "stills-f01s014-fix-r2",
+        "members": [
+          "f01s014-1--c1.gate.json",
+          "f01s014-1--c1.png",
+          "f01s014-1--c2.gate.json",
+          "f01s014-1--c2.png",
+          "f01s014-1--c3.gate.json",
+          "f01s014-1--c3.png",
+          "f01s014-7--c1.gate.json",
+          "f01s014-7--c1.png",
+          "f01s014-7--c2.gate.json",
+          "f01s014-7--c2.png",
+          "f01s014-7--c3.gate.json",
+          "f01s014-7--c3.png",
+          "manifest.json"
+        ],
+        "outputs_key": "exports/colab-exchange/bicharak/stills-f01s014-fix-r2/outputs.tar",
+        "outputs_tar_sha256": "3f563a1f0d1c182e545c31faa02dabe8ea9404d6805453bd4df94c2b22e7623a"
+      },
+      "result": "exchange_collected",
       "stage": "job"
     }
   ],
