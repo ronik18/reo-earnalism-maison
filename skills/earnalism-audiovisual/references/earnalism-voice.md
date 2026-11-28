@@ -18,6 +18,58 @@ settings (e.g. `temperature: 0.91` for both story presets), which reach Parler's
 `generate` call and are recorded in the job's build manifest and output model info. Explicit owner routes
 (e.g. `en_raghav` for an English male narrator) still apply; ask, never substitute.
 
+## Multi-voice casting (owner decision, 28 Nov 2026)
+
+A title with `specs/cast.json` (schema `eav.cast/1`: narrator gender and rationale, the
+characters and their genders, and for every unit with speech its text cut into narrator /
+character segments) is narrated by several voices. A title without one (e.g. বিচারক) is
+single-voice exactly as above: its `job.json` is byte-for-byte what it was, and
+`references/voices.json` is never read.
+
+- **Model.** Still `ai4bharat/indic-parler-tts` at the pinned revision, with the plan preset's
+  generation settings for every voice. Its Bengali speakers: male Arjun, Tapan, Arnav; female
+  Aditi, Rashmi, Riya.
+- **Voices.** `references/voices.json` names the owner's pick, `male` / `female` =
+  `[primary, secondary]`, each with its full description: the `bn_arnav::story` wording with the
+  speaker's name substituted (`description_template`). Until the owner picks it holds the
+  placeholder, and `job narration` refuses every cast title: "voices not chosen yet — run the
+  audition".
+- **Rules.** The narrator takes its gender's primary (`narrator_voice: "secondary"` in
+  cast.json makes a story use the other one, so stories can alternate). A character never shares
+  the narrator's voice: a character of the narrator's gender takes the other voice of that
+  gender; a character of the opposite gender takes that gender's primary.
+- **Stale casts are refused.** At job build the cast is checked against the CURRENT source and
+  voice units: title, `source_revision` and `source_sha256` of the current source, every unit key
+  a current unit, segments joined equal to the unit text exactly, known speakers, no empty or
+  letterless segment, no adjacent segments of one voice, no narrator-only unit. After a
+  rebase-source the cast is re-annotated before any multi-voice job is built.
+- **Job rows.** Every unit carries the narrator's description and `voice`; a cast unit also
+  carries `segments: [{text, description, role, speaker, voice}]` and `job.json` a `cast`
+  summary (cast sha256, narrator voice, character -> voice). The forecast counts one item per
+  Parler generation (one per segment), and chunks end on unit boundaries.
+- **Runner.** The narration cell generates each segment separately with its own description
+  (segments are batched like units) and joins a unit's segments into the one `<unit_key>.wav`
+  with `eav.narration_join.join_segments` (embedded in the notebook): 150 ms of silence between
+  segments and 5 ms fades on the touching edges only (no click); the unit's own start and end
+  stay dry. So unit keys, measured timing and the Maison reader sync are unchanged. Each joined
+  unit's per-segment seconds go to `progress.jsonl` and the output `manifest.json`
+  (`segment_seconds`), which `import` checks and records.
+- **QC.** The truncation check measures a joined unit per segment (from that report, when it
+  matches the WAV's length within 0.25 s), each against its voice's median (the job median for
+  a voice heard in fewer than 5 rows), so a segment cut off inside a joined unit is caught; the
+  owner accepts or redoes the unit (`--accept-qc` / `--redo-units` name the unit once).
+  `--redo-units` copies the rows, segments and descriptions unchanged.
+- **Provenance.** Film `timing.json`, the film artifact and bundle-audio `timing.json` record
+  the cast and, per unit, the voice of every segment (`unit_voices`). `status` shows the cast in
+  use: narrator voice, character voice map, segmented units.
+- **Audition.** `audition --root <dir> --rates <rates.json> [--from <title>]` builds narration
+  job `audition-<hash>` (target `audition`; forecast, caps, ledger and modal-request like any
+  job) in which all six speakers read the same three short passages of that title's story: its
+  first narration-only sentence of 60-160 characters and its first male and female line of
+  dialogue of 20-160 characters. It never narrates a title. After import the takes are copied to
+  `audition/<job_id>/<Speaker>/<passage>.wav` with `listening-set.json`, and per-speaker
+  seconds, rates and truncation suspects are printed. The owner listens and records the choice.
+
 ## The performance we want
 
 Warm, intimate storyteller. Unhurried (about 115–130 wpm). Quiet wonder. Drops pitch and
@@ -43,7 +95,7 @@ shifts of pace and intensity, never by character impersonation.
    characters, and the parts with their original separators (a space, or nothing after
    unspaced punctuation) rebuild the sentence byte for byte. Unit keys stay
    `<scene_id>-NNN` in order.
-3. **Pauses in the edit, once.** Colab writes dry per-unit WAVs with no added silence;
+3. **Pauses in the edit, once.** Colab writes dry per-unit WAVs with no added silence (inside a multi-voice unit only the fixed 150 ms between its segments, below);
    `eav.film.narration_track` is the only place pauses are inserted, so measured unit ends
    are speech ends. 150 ms after each part of a split sentence (`CLAUSE_PAUSE_MS`; its
    last part keeps the sentence's own pause), 400 ms between sentences, 800 ms at a
@@ -58,7 +110,8 @@ shifts of pace and intensity, never by character impersonation.
 ## Never
 
 - Add, drop, repeat or reorder words. Stage directions are never spoken.
-- Re-audition, clone or retrain voices; reopen speaker search.
+- Re-audition, clone or retrain voices; reopen speaker search (the one exception: the
+  owner-ordered multi-voice audition above, among the model's own named speakers).
 - Claim a listening result from a waveform, ASR score or a successful run. Owner review
   of the first package is the title's listening assessment; other dimensions stay
   `unassessed`.

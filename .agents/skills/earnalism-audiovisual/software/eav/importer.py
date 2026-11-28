@@ -156,6 +156,7 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
                if not any(Path(name).stem == k for name in outputs)]
     if missing:
         raise ImportHeld(f"outputs miss job item(s): {', '.join(missing)}")
+    segments = _segment_seconds(job["inputs_zip"], manifest) if kind == "narration" else None
     staging = Path(tempfile.mkdtemp(dir=record.root, prefix=".import-"))
     try:
         for name in outputs:
@@ -171,7 +172,42 @@ def _import_notebook(record, job, job_id, kind, build, folder: Path, dest: Path)
     meta = {"job_id": job_id, "job_kind": kind, "model": model, "packages": packages,
             "input_zip_sha256": zip_sha}
     artifacts = [record.add_artifact(kind, dest / name, meta) for name in sorted(outputs)]
-    return artifacts, {"model": model, "packages": packages, "input_zip_sha256": zip_sha}
+    detail = {"model": model, "packages": packages, "input_zip_sha256": zip_sha}
+    if segments:  # multi-voice units: per-segment seconds for the truncation check (eav.qc)
+        detail["segment_seconds"] = segments
+    return artifacts, detail
+
+
+def segment_seconds_of(units: list, manifest: dict):
+    """The manifest's segment_seconds checked against the job's units: unit_key -> [seconds], one
+    per segment of every multi-voice unit; None when the runner reported none (the truncation check
+    then measures those units whole). Raises ValueError for a malformed or partial report."""
+    given = manifest.get("segment_seconds")
+    segmented = {u["unit_key"]: len(u["segments"]) for u in units if u.get("segments")}
+    if given is None:
+        return None
+    if not isinstance(given, dict):
+        raise ValueError("manifest.json segment_seconds is not an object")
+    if set(given) != set(segmented):
+        raise ValueError("manifest.json segment_seconds does not cover exactly the job's multi-voice "
+                         f"units (missing {sorted(set(segmented) - set(given))}, extra "
+                         f"{sorted(set(given) - set(segmented))})")
+    for k, v in given.items():
+        if not isinstance(v, list) or len(v) != segmented[k] or not all(
+                isinstance(x, (int, float)) and not isinstance(x, bool) and x >= 0 for x in v):
+            raise ValueError(f"manifest.json segment_seconds of {k} is not one number >= 0 per segment")
+    return {k: [float(x) for x in v] for k, v in given.items()}
+
+
+def _segment_seconds(inputs_zip, manifest):
+    try:
+        with zipfile.ZipFile(inputs_zip) as z:
+            units = json.loads(z.read("job.json")).get("units") or []
+        return segment_seconds_of(units, manifest)
+    except ValueError as e:
+        raise ImportHeld(str(e)) from None
+    except (OSError, KeyError, zipfile.BadZipFile) as e:
+        raise ImportHeld(f"cannot read the built job.json: {e}") from None
 
 
 def _import_reel(record, job, job_id, dest: Path, archive, archive_sha256):

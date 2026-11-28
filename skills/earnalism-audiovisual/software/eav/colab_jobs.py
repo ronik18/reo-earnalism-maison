@@ -18,6 +18,7 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from . import cast as cast_mod
 from .budget import BudgetExceeded, forecast, forecast_seconds
 from .voice import voice_units
 
@@ -43,6 +44,9 @@ MAX_CHUNK_SECONDS = 3600
 CHUNKED_KINDS = ("narration", "stills")
 JOB_SCHEMA = "earnalism.audiovisual-job.v1"
 _TEMPLATES = Path(__file__).with_name("templates")
+# The segment join the narration cell runs (multi-voice units), embedded verbatim at build time.
+_JOIN_SOURCE = Path(__file__).with_name("narration_join.py")
+_JOIN_MARK = "# @@eav.narration_join@@\n"
 _WAN_DIR = Path(__file__).resolve().parents[3] / "earnalism-video" / "software" / "wan22"
 _SAFE = re.compile(r"[a-z0-9][a-z0-9-]*")
 _FORBIDDEN = ("musicgen", "flux.1-dev")
@@ -182,12 +186,15 @@ def resume_done(names):
     return done
 
 
-def record_item(key, name, item_s=None):
-    # item_s: the seconds this item (or its batch) took; a resumed session starts from it
+def record_item(key, name, item_s=None, segments_s=None):
+    # item_s: the seconds this item (or its batch) took; a resumed session starts from it.
+    # segments_s: a joined multi-voice unit's seconds per segment (the manifest reports them)
     digest = hashlib.sha256((OUT_DIR / name).read_bytes()).hexdigest()
     row = {"key": key, "file": name, "sha256": digest, "zip": INPUT_ZIP_SHA256}
     if isinstance(item_s, (int, float)) and not isinstance(item_s, bool) and item_s >= 0:
         row["item_s"] = round(item_s, 1)
+    if segments_s is not None:
+        row["segments_s"] = [round(float(x), 3) for x in segments_s]
     _append("progress.jsonl", row)
     note_session()
 
@@ -295,6 +302,15 @@ manifest = {"schema": "earnalism.audiovisual-outputs.v1", "job_id": JOB_ID, "tit
             "deadline_seconds": DEADLINE_SECONDS,
             "elapsed_seconds": round(sum(_sessions.values()), 1), "sessions": len(_sessions),
             "packages": packages, "outputs": outputs}
+# a joined multi-voice narration unit: its seconds per segment, from the latest progress line of
+# each output of these inputs (per-segment truncation QC); absent for single-voice jobs
+_segments = {}
+for _row in _rows("progress.jsonl"):
+    if _row.get("zip") == INPUT_ZIP_SHA256 and _row.get("file") in outputs \\
+            and isinstance(_row.get("segments_s"), list):
+        _segments[_row["key"]] = _row["segments_s"]
+if _segments:
+    manifest["segment_seconds"] = _segments
 (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\\n")
 print("manifest.json written:", manifest["status"], len(outputs), "files")
 if not complete:
@@ -306,6 +322,13 @@ PACKAGES = {"narration": ("parler_tts", "transformers", "torch", "soundfile"),
             "stills": ("diffusers", "transformers", "accelerate", "sentencepiece", "protobuf", "torch"),
             "music": ("ace-step", "acestep", "torch", "transformers", "diffusers", "huggingface_hub", "torchcodec", "torchaudio")}
 MANIFEST_RESERVE_S = 60
+
+
+def _cell_source(template: Path) -> str:
+    text = template.read_text(encoding="utf-8")
+    if _JOIN_MARK in text:
+        text = text.replace(_JOIN_MARK, _JOIN_SOURCE.read_text(encoding="utf-8") + "\n")
+    return text
 
 
 def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, deadline_s) -> bytes:
@@ -328,7 +351,7 @@ def _notebook(kind, job_id, title, zip_sha, repo, revision, steps, template, dea
              f"within the same reserved time (`sessions.jsonl` counts what earlier runs used).\n")
     # The clock arms the stop first; the verify cell sets JOB/OUT_DIR and attaches the session.
     parts = [("markdown", intro), ("code", "RUN = False"), ("code", config), ("code", _CLOCK),
-             ("code", _VERIFY), ("code", template.read_text(encoding="utf-8")),
+             ("code", _VERIFY), ("code", _cell_source(template)),
              ("code", _MANIFEST)]
     nb = {"nbformat": 4, "nbformat_minor": 5,
           "metadata": {"kernelspec": {"name": "python3", "display_name": "Python 3"},
@@ -436,12 +459,54 @@ def derive_compute(kind: str, spec: dict, rates: dict, items: int) -> dict:
     return compute
 
 
+def narration_units(spec: dict) -> list:
+    """The job's voice unit rows; with spec["cast"] (eav.cast.job_cast) every unit carries the
+    narrator's voice and a cast unit its segments (each synthesized on its own, then joined)."""
+    units = []
+    for scene in spec["scenes"]:
+        units += voice_units(scene, spec["preset"], spec.get("clause"), spec.get("language", "en"))
+    if spec.get("cast"):
+        units = cast_mod.apply(units, spec["cast"], spec.get("clause"))
+    return units
+
+
 def job_items(kind: str, spec: dict) -> int:
-    """How many items the job really generates (voice units, stills, cues or shots)."""
+    """How many items the job really generates (Parler generations: one per voice unit, or one per
+    segment of a multi-voice unit; stills, cues or shots)."""
     if kind == "narration":
-        return sum(len(voice_units(scene, spec["preset"], spec.get("clause"),
-                                   spec.get("language", "en"))) for scene in spec["scenes"])
+        if spec.get("units") is not None:  # prepared rows (the audition)
+            return cast_mod.pieces(spec["units"])
+        return cast_mod.pieces(narration_units(spec))
     return len(spec.get("shots" if kind == "reel_clips" else "items") or [])
+
+
+def narration_chunks(units: list, compute: dict, rates: dict) -> list:
+    """(units, items) of each chunk of a narration job. Chunks always end on a unit boundary: with
+    one item per unit this is chunk_sizes exactly; a multi-voice job (several generations in some
+    units) packs whole units, in order, up to the most items one chunk can hold."""
+    counts = [len(u.get("segments") or [None]) for u in units]
+    if all(c == 1 for c in counts):
+        return [(k, k) for k in chunk_sizes(compute, rates)]
+    if forecast_seconds(compute, rates) <= MAX_CHUNK_SECONDS:
+        return [(len(units), sum(counts))]
+
+    def fits(k):
+        return forecast_seconds({**compute, "items": k}, rates) <= MAX_CHUNK_SECONDS
+
+    per = 0
+    while per < compute["items"] and fits(per + 1):
+        per += 1
+    out, n, items = [], 0, 0
+    for c in counts:
+        if c > per:
+            raise ValueError(f"one narration unit of {c} segments alone is forecast over "
+                             f"{MAX_CHUNK_SECONDS} s; it cannot be cut into session-length chunks")
+        if items + c > per:
+            out.append((n, items))
+            n, items = 0, 0
+        n, items = n + 1, items + c
+    out.append((n, items))
+    return out
 
 
 def chunk_sizes(compute: dict, rates: dict) -> list:
@@ -476,14 +541,17 @@ def _plan(kind: str, record, spec: dict, rates: dict) -> dict:
     compute = derive_compute(kind, spec, rates, job_items(kind, spec))
     if kind == "narration":
         _check_model(kind, spec, NARRATION_REPO)
-        units = []
-        for scene in spec["scenes"]:
-            units += voice_units(scene, spec["preset"], spec.get("clause"),
-                                 spec.get("language", "en"))
+        # prepared rows (the audition), else the scenes' voice units (with the cast, if any)
+        units = [dict(u) for u in spec["units"]] if spec.get("units") is not None \
+            else narration_units(spec)
         if not units:
             raise ValueError("no voice units")
-        return {"payload": {"units": units, "generation": _generation(spec["preset"]),
-                            "batch": _batch(spec)},
+        payload = {"units": units, "generation": _generation(spec["preset"]), "batch": _batch(spec)}
+        if spec.get("cast"):  # multi-voice: who voices the story (single-voice jobs are unchanged)
+            payload["cast"] = cast_mod.summary(spec["cast"])
+        if spec.get("audition"):
+            payload["audition"] = spec["audition"]
+        return {"payload": payload,
                 "repo": NARRATION_REPO,
                 "revision": NARRATION_REVISION, "steps": 1, "compute": compute}
     if kind == "stills":
@@ -583,6 +651,11 @@ def _reel_job(spec: dict, job_id: str, seconds: float, rate: dict) -> dict:
     return job
 
 
+def _items(kind: str, rows: list) -> int:
+    """Forecast items of a slice of a job's rows (narration: its Parler generations)."""
+    return cast_mod.pieces(rows) if kind == "narration" else len(rows)
+
+
 def _chunk_plan(kind: str, plan: dict, spec: dict, rates: dict, chunk: dict) -> dict:
     """The validated full job's plan cut to items [start, stop); compute derived for that slice."""
     key = "units" if kind == "narration" else "items"
@@ -591,7 +664,7 @@ def _chunk_plan(kind: str, plan: dict, spec: dict, rates: dict, chunk: dict) -> 
         raise ValueError(f"chunk {chunk['index']} of {chunk['of']} is outside the job's items")
     bare = {k: v for k, v in spec.items() if k != "compute"}  # the full job's block was checked
     return {**plan, "payload": {**plan["payload"], key: rows},
-            "compute": derive_compute(kind, bare, rates, len(rows)),
+            "compute": derive_compute(kind, bare, rates, _items(kind, rows)),
             "chunk": {"index": chunk["index"], "of": chunk["of"], "group": chunk["group"]}}
 
 
@@ -626,7 +699,7 @@ def _replacement_plan(kind: str, old: dict, build: dict, rates: dict) -> dict:
         raise ValueError("the chunk's job.json holds no items")
     return {"payload": payload, "repo": repo, "revision": model["revision"],
             "steps": pinned_steps(kind),
-            "compute": derive_compute(kind, {}, rates, len(payload[key])),
+            "compute": derive_compute(kind, {}, rates, _items(kind, payload[key])),
             "chunk": {k: old["chunk"][k] for k in ("index", "of", "group")}}
 
 
@@ -661,7 +734,7 @@ def _redo_plan(old: dict, build: dict, unit_keys: list, rates: dict) -> dict:
     payload["units"] = [dict(u) for u in rows]
     return {"payload": payload, "repo": NARRATION_REPO, "revision": model["revision"],
             "steps": pinned_steps("narration"),
-            "compute": derive_compute("narration", {}, rates, len(rows)),
+            "compute": derive_compute("narration", {}, rates, cast_mod.pieces(rows)),
             "redo": {"source_job_id": old["job_id"], "unit_keys": [u["unit_key"] for u in rows]}}
 
 

@@ -21,16 +21,29 @@ CPS_RATIO = 1.6
 # ratio test never flags it (the job median, over every unit, is robust to a few of them); the
 # duration test still applies, and a unit with no audio at all is always suspect.
 MIN_RATIO_CHARS = 40
+# A voice needs this many measured rows (units or segments) for its own rate median.
+MIN_VOICE_ROWS = 5
 
 
 def truncation_suspects(rows) -> list:
-    """rows: [{"unit_key", "chars", "seconds"}] of one narration job. Returns the suspect_truncated
-    ones, each with its measurements and reasons (duration at the cap, no audio, or speech too
-    fast for a unit of at least MIN_RATIO_CHARS characters)."""
-    rates = [r["chars"] / r["seconds"] for r in rows if r["seconds"] > 0]
-    median = statistics.median(rates) if rates else 0.0
+    """rows: [{"unit_key", "chars", "seconds"}] of one narration job (a multi-voice unit gives one
+    row per segment, with "segment" (1-based) and "voice"). Returns the suspect_truncated ones,
+    each with its measurements and reasons (duration at the cap, no audio, or speech too fast for a
+    row of at least MIN_RATIO_CHARS characters). The rate median is taken per voice (rows with no
+    voice share one median: a single-voice job is measured exactly as before)."""
+    by_voice = {}
+    for r in rows:
+        if r["seconds"] > 0:
+            by_voice.setdefault(r.get("voice"), []).append(r["chars"] / r["seconds"])
+    every = [x for xs in by_voice.values() for x in xs]
+    overall = statistics.median(every) if every else 0.0
+    # a voice heard in only a few rows (a minor character) is measured against the job median: its
+    # own median would be the suspect row itself
+    medians = {v: statistics.median(x) if v is None or len(x) >= MIN_VOICE_ROWS else overall
+               for v, x in by_voice.items()}
     out = []
     for r in rows:
+        median = medians.get(r.get("voice"), 0.0)
         cps = r["chars"] / r["seconds"] if r["seconds"] > 0 else float("inf")
         reasons = []
         if r["seconds"] >= TRUNCATION_CAP_S:
@@ -38,20 +51,53 @@ def truncation_suspects(rows) -> list:
         if r["seconds"] <= 0:
             reasons.append("no audio (0 s)")
         elif median and r["chars"] >= MIN_RATIO_CHARS and cps > CPS_RATIO * median:
-            reasons.append(f"{cps:.1f} chars/s > {CPS_RATIO} x job median {median:.1f}")
+            own = r.get("voice") is not None and len(by_voice[r["voice"]]) >= MIN_VOICE_ROWS
+            what = f"{r['voice']} median" if own else "job median"
+            reasons.append(f"{cps:.1f} chars/s > {CPS_RATIO} x {what} {median:.1f}")
         if reasons:
-            out.append({"unit_key": r["unit_key"], "chars": r["chars"],
-                        "seconds": round(r["seconds"], 3), "chars_per_s": round(cps, 2),
-                        "reasons": reasons})
+            row = {"unit_key": r["unit_key"], "chars": r["chars"],
+                   "seconds": round(r["seconds"], 3), "chars_per_s": round(cps, 2),
+                   "reasons": reasons}
+            for k in ("segment", "voice"):
+                if r.get(k) is not None:
+                    row[k] = r[k]
+            out.append(row)
     return out
 
 
-def narration_suspects(units, wav_dir) -> list:
-    """truncation_suspects over a job's units and WAVs (one folder or a chunk group's folders)."""
+# A joined unit whose length differs from its reported segments (+ gaps) by more than this is
+# measured whole instead (the report does not describe the file).
+SEGMENT_SLACK_S = 0.25
+
+
+def narration_rows(units, wav_dir, voices=None) -> list:
+    """The rows truncation_suspects measures. voices (from the job's own job.json rows): unit_key ->
+    {"voice": the unit's (narrator's) voice, "segments": [{"text", "voice"}], "segment_seconds":
+    [seconds] or None}. A multi-voice unit with reported segment seconds that match its WAV gives
+    one row per segment, so a segment cut off inside a joined unit is still caught; otherwise a
+    unit is one row (with its voice, if known). Without voices: one row per unit, as always."""
     from .film import unit_wav
-    return truncation_suspects([{"unit_key": u["unit_key"], "chars": len(u["text"]),
-                                 "seconds": _duration(unit_wav(wav_dir, u["unit_key"]))}
-                                for u in units])
+    from .narration_join import joined_seconds
+    rows = []
+    for u in units:
+        k = u["unit_key"]
+        seconds = _duration(unit_wav(wav_dir, k))
+        info = (voices or {}).get(k) or {}
+        segs, seg_s = info.get("segments"), info.get("segment_seconds")
+        if segs and seg_s and len(seg_s) == len(segs) \
+                and abs(joined_seconds(seg_s) - seconds) <= SEGMENT_SLACK_S:
+            rows += [{"unit_key": k, "segment": i, "voice": s.get("voice"), "chars": len(s["text"]),
+                      "seconds": float(x)} for i, (s, x) in enumerate(zip(segs, seg_s), 1)]
+            continue
+        rows.append({"unit_key": k, "voice": info.get("voice"), "chars": len(u["text"]),
+                     "seconds": seconds})
+    return rows
+
+
+def narration_suspects(units, wav_dir, voices=None) -> list:
+    """truncation_suspects over a job's units and WAVs (one folder or a chunk group's folders);
+    voices: see narration_rows (multi-voice jobs)."""
+    return truncation_suspects(narration_rows(units, wav_dir, voices))
 
 
 def speech_onset(audio, threshold_db=-40.0, rate=16000):

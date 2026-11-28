@@ -22,6 +22,14 @@
                           film/bundle-audio/preview in place of the old one (narration/unit_replaced event; the
                           old take stays on disk; `retire <redo job>` reverts it); a take still suspect is
                           recorded (unit_redo_suspect) and the unit keeps its take and its flag)
+  python3 -m eav.cli audition --root <dir> --rates <rates.json> [--from <title slug | cast.json>] [--job-id <id>]
+                         (Bengali multi-voice casting: each of the 6 Indic Parler-TTS Bengali speakers reads
+                          the same 3 short passages of a real story (one narration sentence, one male and one
+                          female line of dialogue, from that title's specs/cast.json) as narration job
+                          audition-<hash> under target `audition`; forecast, caps, ledger and modal-request like
+                          any job; never any title's narration. After import: audition/<job_id>/<Speaker>/ and
+                          per-speaker truncation/rate stats. The owner then records 2 male + 2 female voices in
+                          references/voices.json)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> [--units <CU>]
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli retouch <key> --root <dir> (--target film-NN|reel-N | --film N | --reel N)
@@ -89,6 +97,7 @@ The 60 CU title cap is lifetime; the 100 CU cap is per calendar month; both are 
 Modal: 30 USD per UTC month and 6 USD per title (lifetime), in dollars only.
 """
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -100,7 +109,7 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path, PureWindowsPath
 
-from . import (budget, colab_jobs, film, importer, mix, modal_requests, modal_run, preview,
+from . import (budget, cast, colab_jobs, film, importer, mix, modal_requests, modal_run, preview,
                qc, reel, scenes, social)
 from .record import Record, sha256_file
 from .text import estimate_seconds, sentences
@@ -348,6 +357,47 @@ def _replacements(rec, job) -> dict:
                 and d.get("source_job_id") in members and d.get("job_id") in live:
             out[d["unit_key"]] = d
     return out
+
+
+def _job_units(rec, job):
+    """(unit_key -> the job's own unit row, the job's cast summary or None) of a narration job or
+    chunk group, from each chunk's job.json; ({}, None) when they cannot be read."""
+    rows, summary = {}, None
+    for c in job.get("chunks") or [job]:
+        try:
+            with zipfile.ZipFile(c["inputs_zip"]) as z:
+                data = json.loads(z.read("job.json"))
+        except (OSError, KeyError, ValueError, zipfile.BadZipFile):
+            continue
+        for u in data.get("units") or []:
+            rows[u["unit_key"]] = u
+        summary = summary or data.get("cast")
+    return rows, summary
+
+
+def _segment_report(rec, job_id) -> dict:
+    """unit_key -> seconds per segment that the import of job_id recorded (multi-voice units)."""
+    for e in rec.data["events"]:
+        if e["stage"] == "import" and e["result"] == "accepted" and e["detail"].get("job_id") == job_id:
+            return dict(e["detail"].get("segment_seconds") or {})
+    return {}
+
+
+def _voices(rec, job) -> dict:
+    """The per-voice view qc.narration_suspects measures a multi-voice job with (eav.qc
+    narration_rows); {} for a single-voice job, which is measured exactly as before."""
+    if job is None:
+        return {}
+    rows, _ = _job_units(rec, job)
+    if not any(r.get("voice") for r in rows.values()):
+        return {}
+    seconds = {}
+    for c in job.get("chunks") or [job]:
+        seconds.update(_segment_report(rec, c["job_id"]))
+    for k, d in _replacements(rec, job).items():  # a redone take: its own job's report
+        seconds[k] = _segment_report(rec, d["job_id"]).get(k)
+    return {k: {"voice": r.get("voice"), "segments": r.get("segments"),
+                "segment_seconds": seconds.get(k)} for k, r in rows.items()}
 
 
 def _check_takes(rec, replaced: dict) -> None:
@@ -705,13 +755,24 @@ def _measured_track(rec, units, job, out: Path):
                 for k, d in _replacements(rec, job).items() if k in keys}
     if replaced:  # job narration --redo-units: these units come from their redone take
         provenance["replaced_units"] = replaced
+    rows, summary = _job_units(rec, job)
+    if summary:  # multi-voice (specs/cast.json): who voiced each unit, segment by segment
+        provenance["cast"] = summary
+        provenance["unit_voices"] = {
+            u["unit_key"]: [{"voice": s["voice"], "role": s["role"], "speaker": s["speaker"]}
+                            for s in rows[u["unit_key"]]["segments"]]
+            if rows.get(u["unit_key"], {}).get("segments") else
+            [{"voice": rows.get(u["unit_key"], {}).get("voice"), "role": "narrator", "speaker": None}]
+            for u in units}
     return timing, provenance
 
 
 def _print_suspects(suspects, where: str):
     print(f"{where}: {len(suspects)} narration unit(s) suspect_truncated (listen to each):")
     for s in suspects:
-        print(f"  {s['unit_key']}: {s['chars']} chars, {s['seconds']:.2f} s, "
+        where = (f" segment {s['segment']} ({s['voice']})" if "segment" in s
+                 else f" ({s['voice']})" if s.get("voice") else "")
+        print(f"  {s['unit_key']}{where}: {s['chars']} chars, {s['seconds']:.2f} s, "
               f"{s['chars_per_s']:.1f} chars/s ({'; '.join(s['reasons'])})")
 
 
@@ -730,7 +791,7 @@ def _truncation_gate(rec, groups, accepted: set, cmd: str) -> list:
     groups: [(narration job, every unit of that job)]; the median is per job."""
     suspects, holder = [], {}
     for job, units in groups:
-        found = qc.narration_suspects(units, _one_dir(rec, job))
+        found = qc.narration_suspects(units, _one_dir(rec, job), _voices(rec, job))
         suspects += found
         for s_ in found:  # the job or chunk whose take it is: what --redo-units names
             holder[s_["unit_key"]] = next(
@@ -744,7 +805,8 @@ def _truncation_gate(rec, groups, accepted: set, cmd: str) -> list:
         raise Stop(f"--accept-qc names unit(s) that are not suspect_truncated now: {', '.join(stale)}",
                    "Pass only the unit_key values the current suspect_truncated list prints "
                    "(after listening to each)")
-    open_ = [s["unit_key"] for s in suspects if s["unit_key"] not in accepted]
+    # a multi-voice unit can have several suspect segments: the unit is accepted or redone once
+    open_ = list(dict.fromkeys(s["unit_key"] for s in suspects if s["unit_key"] not in accepted))
     if open_:
         film_only = all(str(job["target"] or "").startswith("film-") for job, _ in groups)
         redo = ("voice just those units again: " + "; ".join(
@@ -1305,6 +1367,10 @@ def _job_spec(rec, args, kind, target):
                   if k == "description" or k in colab_jobs.GENERATION_KEYS}
         spec = {"scenes": todo, "preset": preset,
                 "language": lang, "clause": args.clause}
+        if not args.reel:  # film narration of a cast title is multi-voice; without cast.json: as before
+            voices = _cast_spec(rec, plan)
+            if voices is not None:
+                spec["cast"] = voices
     else:
         if not args.spec:
             raise Stop(f"a {kind} job needs --spec (prompts, seeds{', shots' if kind == 'reel_clips' else ''})",
@@ -1329,6 +1395,51 @@ def _job_spec(rec, args, kind, target):
                        "Pass another --job-id (or none: a fresh id is made)")
         spec["job_id"] = args.job_id
     return spec, colab_jobs.job_items(kind, spec)
+
+
+def _plan_units(plan) -> list:
+    """Every voice unit of every film of the plan, as job narration builds them now."""
+    return [u for f in plan["plan"]["films"] for sc in f["scenes"]
+            for u in voice_units(sc, {"description": ""}, None, plan["language"])]
+
+
+def _current_cast(rec, plan, path=None):
+    """(cast.json data, path) checked against the CURRENT source and voice units; a stale or
+    invalid cast is refused with the next action."""
+    path = Path(path) if path else cast.cast_path(rec.root)
+    data = _json(path)
+    s = rec.data["source"]
+    errors = cast.validate(data, rec.data["title_slug"], s["revision_id"], s["content_sha256"],
+                           _plan_units(plan))
+    if errors:
+        more = f" (+{len(errors) - 8} more)" if len(errors) > 8 else ""
+        raise Stop(f"{path} does not fit the current source of {rec.data['title_slug']} (revision "
+                   f"{s['revision_id']}): {'; '.join(errors[:8])}{more}. Nothing was reserved or written.",
+                   f"Re-annotate {path} against the current narration units (title, source_revision and "
+                   "source_sha256 of the current source; every unit's segments joined must equal its text "
+                   "exactly), check it, then rerun. To narrate the title single-voice instead, the owner "
+                   "removes the cast file.")
+    return data, path
+
+
+def _cast_spec(rec, plan):
+    """spec["cast"] for film narration of a title with specs/cast.json (eav.cast.job_cast), or None
+    for a title without one (single voice, exactly as before)."""
+    if not cast.cast_path(rec.root).is_file():
+        return None
+    data, path = _current_cast(rec, plan)
+    try:
+        return cast.job_cast(data, cast.load_voices(), sha256_file(path))
+    except cast.VoicesNotChosen:
+        raise Stop(f"{rec.data['title_slug']} has a cast ({path}) but {cast.NOT_CHOSEN} "
+                   f"({cast.VOICES} holds the placeholder). Nothing was reserved or written.",
+                   f"{PROG} audition --root {rec.root} --rates <rates.json>; after its import the owner "
+                   f"listens and records 2 male + 2 female voices ([primary, secondary]) in {cast.VOICES}; "
+                   "then rerun this job") from None
+    except (KeyError, ValueError) as e:
+        raise Stop(f"the owner's voice choice in {cast.VOICES} is not usable: {e}",
+                   f"Correct {cast.VOICES} (two different speakers per gender, each with its "
+                   "description), then rerun") from None
 
 
 def _replace_chunk(rec, args):
@@ -1517,6 +1628,138 @@ def _redo_units(rec, args):
           "(the original stays on disk and on record). Inert until the owner enables it.")
 
 
+AUDITION_TARGET = "audition"
+
+
+def _audition_cast(rec, given):
+    """(cast data, title slug) for the audition passages: --from a title slug (a sibling title
+    root), a cast.json path, or this root's own cast; checked against that title's current source."""
+    if given and Path(given).suffix == ".json":
+        path = Path(given)
+        src_root = path.resolve().parent.parent  # <title root>/specs/cast.json
+    else:
+        src_root = rec.root if not given else rec.root.parent / given
+        path = cast.cast_path(src_root)
+    if not path.is_file():
+        raise Stop(f"no cast file {path}", "Pass --from <title slug> of a title with specs/cast.json")
+    src = rec if src_root.resolve() == rec.root.resolve() else _record(src_root)
+    data, _ = _current_cast(src, _plan(src), path)
+    return data, path, src, _plan_units(_plan(src))
+
+
+def cmd_audition(args):
+    """Each of the six Bengali Parler speakers reads the same three short passages of a real story
+    (narration, a male line, a female line) as one narration job under target `audition`."""
+    rec = _record(args.root)
+    plan = _plan(rec)
+    if plan["language"] != "bn":
+        raise Stop("the audition is for the Bengali multi-voice cast", "Run it in a Bengali title root")
+    data, path, src, units = _audition_cast(rec, args.source)
+    try:
+        voices = cast.load_voices()
+        passages = cast.audition_passages(data, units)
+        rows = cast.audition_units(voices, passages)
+    except (KeyError, ValueError) as e:
+        raise Stop(f"audition not built: {e}", "Choose another --from title")
+    preset = {k: v for k, v in plan["voice"].items() if k in colab_jobs.GENERATION_KEYS}
+    digest = hashlib.sha256(json.dumps({"units": rows, "generation": preset}, sort_keys=True,
+                                       ensure_ascii=False).encode("utf-8")).hexdigest()
+    job_id = args.job_id or f"audition-{digest[:8]}"
+    taken = {j["job_id"] for j in _jobs(rec)} | {j["chunk"]["group"] for j in _jobs(rec) if j["chunk"]}
+    if job_id in taken:
+        raise Stop(f"audition job {job_id} (these passages and voices) is already built",
+                   f"{PROG} status --root {rec.root} (run and import it; or --job-id <new id> for a "
+                   "fresh take of the same passages)")
+    spec = {"units": rows, "preset": {"description": "", **preset}, "job_id": job_id,
+            "audition": {"from": src.data["title_slug"], "cast_sha256": sha256_file(path),
+                         "source_revision": src.data["source"]["revision_id"],
+                         "passages": passages, "speakers": voices["speakers"]}}
+    rates = _json(args.rates)
+    try:
+        compute = colab_jobs.derive_compute("narration", spec, rates,
+                                            colab_jobs.job_items("narration", spec))
+    except ValueError as e:
+        raise Stop(f"audition not built: {e}", "Use the measured rates.json (references/compute-budget.md)")
+    if budget.forecast_seconds(compute, rates) > colab_jobs.MAX_CHUNK_SECONDS:
+        raise Stop("the audition is forecast over one session", "Hold for the owner: check the rates")
+    ledger, month = _ledger(rec, args), _month()
+    units_cu = budget.forecast(compute, rates)
+    remaining = _remaining(ledger, rec, month)
+    if units_cu > remaining:
+        raise Stop(f"Budget exceeded: forecast {units_cu:.2f} CU > remaining {remaining:.2f} CU "
+                   f"(caps {budget.TITLE_CAP:g}/title, {budget.MONTH_CAP:g}/month, {month}). "
+                   "Nothing was reserved or written.",
+                   "Hold the job and ask the owner; never retry past a cap.", code=3)
+    try:
+        result = colab_jobs.build_job("narration", rec, spec, ledger, rates, rec.root / "jobs",
+                                      month=month)
+    except budget.BudgetExceeded as e:
+        raise Stop(f"Budget exceeded: {e}. Nothing was written.",
+                   "Hold the job and ask the owner; never retry past a cap.", code=3)
+    except (ValueError, FileExistsError, KeyError) as e:
+        raise Stop(f"audition not built: {e}", "Fix the input it names and rerun")
+    rec.event("cli", "job_target", {"job_id": result["job_id"], "target": AUDITION_TARGET,
+                                    "kind": "narration"})
+    print(f"Built audition job {result['job_id']}: {len(rows)} takes ("
+          + ", ".join(voices["speakers"]["male"] + voices["speakers"]["female"])
+          + f" x {len(passages)} passages from {src.data['title_slug']}: "
+          + "; ".join(f"{p['passage']} {p['unit_key']} \"{p['text']}\"" for p in passages)
+          + f"), forecast {units_cu:.2f} CU reserved ({remaining - units_cu:.2f} CU left under the "
+          "title and month caps). It narrates no title. Inert until the owner enables it (Colab, or "
+          f"{PROG} modal-request {result['job_id']} --root {rec.root} --colab-units 0).")
+
+
+def _audition_report(rec, job):
+    """After an audition import: the listening set per speaker and each speaker's rates."""
+    with zipfile.ZipFile(job["inputs_zip"]) as z:
+        data = json.loads(z.read("job.json"))
+    folder = rec.root / "narration" / job["job_id"]
+    out = rec.root / AUDITION_TARGET / job["job_id"]
+    rows = []
+    for u in data["units"]:
+        wav = folder / f"{u['unit_key']}.wav"
+        seconds = qc._duration(wav)
+        rows.append({"unit_key": u["unit_key"], "voice": u["voice"], "chars": len(u["text"]),
+                     "seconds": seconds})
+        passage = u["unit_key"][len(u["voice"]) + 1:]
+        dest = out / u["voice"] / f"{passage}.wav"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(wav, dest)
+    # the rate check across all six voices (each passage is the same text for every speaker)
+    suspects = {s_["unit_key"]: s_ for s_ in qc.truncation_suspects(
+        [{k: r[k] for k in ("unit_key", "chars", "seconds")} for r in rows])}
+    stats = {}
+    for r in rows:
+        st = stats.setdefault(r["voice"], {"takes": {}, "suspect": []})
+        st["takes"][r["unit_key"][len(r["voice"]) + 1:]] = {
+            "seconds": round(r["seconds"], 3),
+            "chars_per_s": round(r["chars"] / r["seconds"], 2) if r["seconds"] > 0 else None}
+        if r["unit_key"] in suspects:
+            st["suspect"].append({"passage": r["unit_key"][len(r["voice"]) + 1:],
+                                  "reasons": suspects[r["unit_key"]]["reasons"]})
+    for st in stats.values():
+        rates_ = [t["chars_per_s"] for t in st["takes"].values() if t["chars_per_s"]]
+        st["median_chars_per_s"] = round(sorted(rates_)[len(rates_) // 2], 2) if rates_ else None
+    _write_json(out / "listening-set.json", {
+        "job_id": job["job_id"], "from": data["audition"]["from"],
+        "passages": data["audition"]["passages"], "speakers": data["audition"]["speakers"],
+        "stats": stats, "choose": f"2 male + 2 female, [primary, secondary], in {cast.VOICES}"})
+    rec.event("audition", "imported", {"job_id": job["job_id"], "folder": _rel(rec, out),
+                                       "stats": stats})
+    print(f"Audition listening set: {out} (one folder per speaker, one WAV per passage).")
+    for g, names in data["audition"]["speakers"].items():
+        for name in names:
+            st = stats[name]
+            print(f"  {name} ({g}): " + ", ".join(
+                f"{p} {t['seconds']:.2f} s / {t['chars_per_s']} chars/s" for p, t in st["takes"].items())
+                + f"; median {st['median_chars_per_s']} chars/s"
+                + (f"; SUSPECT_TRUNCATED: " + "; ".join(
+                    f"{x['passage']} ({', '.join(x['reasons'])})" for x in st["suspect"])
+                   if st["suspect"] else "; no truncation suspect"))
+    print(f"The owner listens and records 2 male + 2 female voices ([primary, secondary]) in "
+          f"{cast.VOICES}; no title's narration changed.")
+
+
 def cmd_job(args):
     rec = _record(args.root)
     kind = args.kind
@@ -1534,10 +1777,14 @@ def cmd_job(args):
     except ValueError as e:
         raise Stop(f"job not built: {e}", "Use the values measured on the last Colab run "
                    "(references/compute-budget.md) and never a compute block that differs from the job")
-    try:
-        sizes, unchunkable = colab_jobs.chunk_sizes(compute, rates), None  # [items] if <= 3600 s
+    try:  # [(units, items)]: one chunk if <= 3600 s; chunks end on a unit boundary
+        pairs = (colab_jobs.narration_chunks(colab_jobs.narration_units(spec), compute, rates)
+                 if kind == "narration" else
+                 [(k, k) for k in colab_jobs.chunk_sizes(compute, rates)])
+        unchunkable = None
     except ValueError as e:
-        sizes, unchunkable = [items], e
+        pairs, unchunkable = [(items, items)], e
+    sizes = [k for _, k in pairs]  # forecast items per chunk
     ledger, month = _ledger(rec, args), _month()
     # the caps see the whole job: the sum of every chunk's forecast, checked once
     units = sum(budget.forecast({**compute, "items": k}, rates) for k in sizes)
@@ -1565,13 +1812,21 @@ def cmd_job(args):
             rec.event("cli", "job_target", {"job_id": results[0]["job_id"], "target": target,
                                             "kind": kind})
         else:
-            results = _build_chunks(rec, kind, spec, ledger, rates, month, sizes, target)
+            results = _build_chunks(rec, kind, spec, ledger, rates, month,
+                                    [n for n, _ in pairs], target)
     except budget.BudgetExceeded as e:
         raise Stop(f"Budget exceeded: {e}. Nothing was written.",
                    "Hold the job and ask the owner; never retry past a cap.", code=3)
     except (ValueError, FileExistsError, KeyError) as e:
         raise Stop(f"job not built: {e}", "Fix the spec and rerun")
     spent = sum(r["forecast_units"] for r in results)
+    if spec.get("cast"):
+        c = spec["cast"]
+        print(f"Multi-voice ({cast.cast_path(rec.root)}): narrator {c['narrator']['speaker']} "
+              f"({c['narrator']['gender']}, {c['narrator']['slot']}); "
+              + ", ".join(f"{n} {v['speaker']}" for n, v in sorted(c["characters"].items()))
+              + f"; {sum(1 for u in colab_jobs.narration_units(spec) if u.get('segments'))} unit(s) "
+              f"in segments ({items} Parler generations).")
     if len(results) == 1:
         print(f"Built {kind} job {results[0]['job_id']} for {target}: forecast {spent:.2f} CU "
               f"reserved ({remaining - spent:.2f} CU left under the title and month caps). "
@@ -1680,6 +1935,8 @@ def cmd_import(args):
           f"{_settled_as(ledger, args.job_id, units)}.")
     if job["redo"]:
         _record_redo(rec, job, review)
+    elif job["kind"] == "narration" and job["target"] == AUDITION_TARGET:
+        _audition_report(rec, job)
     elif job["kind"] == "narration":
         _import_advisory(rec, job)
 
@@ -1707,8 +1964,21 @@ def _redo_review(rec, job, folder: Path) -> dict:
                 units += json.loads(z.read("job.json"))["units"]
         dirs = [rec.root / "narration" / m["job_id"] for m in members]
         takes = {k: rec.root / d["path"] for k, d in _replacements(rec, logical).items()}
-        suspects = {s["unit_key"]: s for s in qc.narration_suspects(
-            units, film.Takes(dirs if len(dirs) > 1 else dirs[0], {**takes, **new}))}
+        voices = _voices(rec, logical)
+        if voices:  # the new takes' own segment report (in the downloaded manifest)
+            with zipfile.ZipFile(job["inputs_zip"]) as z:
+                rows = json.loads(z.read("job.json"))["units"]
+            try:
+                report = importer.segment_seconds_of(rows, _json(folder / "manifest.json")) or {}
+            except (OSError, ValueError):
+                report = {}  # the import itself holds a malformed report
+            for k in new:
+                if k in voices:
+                    voices[k] = {**voices[k], "segment_seconds": report.get(k)}
+        suspects = {}
+        for s_ in qc.narration_suspects(units, film.Takes(dirs if len(dirs) > 1 else dirs[0],
+                                                          {**takes, **new}), voices):
+            suspects.setdefault(s_["unit_key"], s_)
         seconds = {k: qc._duration(p) for k, p in new.items()}
     except (OSError, KeyError, ValueError, zipfile.BadZipFile, subprocess.CalledProcessError) as e:
         raise Stop(f"Import held: the truncation check of redo job {job['job_id']} could not run ({e}); "
@@ -1758,7 +2028,8 @@ def _import_advisory(rec, job):
     try:
         with zipfile.ZipFile(job["inputs_zip"]) as z:
             units = json.loads(z.read("job.json"))["units"]
-        suspects = qc.narration_suspects(units, rec.root / "narration" / job["job_id"])
+        suspects = qc.narration_suspects(units, rec.root / "narration" / job["job_id"],
+                                         _voices(rec, job))
     except (OSError, KeyError, ValueError, zipfile.BadZipFile, subprocess.CalledProcessError) as e:
         print(f"Truncation check not run for {job['job_id']} ({e}); eav qc, film and bundle-audio run it.")
         return
@@ -2618,7 +2889,9 @@ def cmd_film(args):
                                                 "narration_replaced_units": {
                                                     k: v["sha256"] for k, v in
                                                     prov.get("replaced_units", {}).items()},
-                                                "qc_accepted": sorted(accepted), **info})
+                                                "qc_accepted": sorted(accepted),
+                                                **({"cast": prov["cast"]} if "cast" in prov else {}),
+                                                **info})
     rec.event("film", "assembled", {"target": t, "duration": info["duration"]})
     print(f"Assembled {out / (t + '.mp4')}: {info['duration']:.1f} s, {m['lufs']:.1f} LUFS, "
           f"TP {m['true_peak']:.1f} dBTP, from narration job {_used(narr)}"
@@ -2819,7 +3092,8 @@ def cmd_qc(args):
         narration = _assembled_narration(rec, target, a)
         if narration is not None:  # advisory: film/bundle-audio refuse unaccepted ones themselves
             item["suspect_truncated"] = qc.narration_suspects(narration[1],
-                                                              _one_dir(rec, narration[0]))
+                                                              _one_dir(rec, narration[0]),
+                                                              _voices(rec, narration[0]))
             item["qc_accepted"] = a["meta"].get("qc_accepted", [])
         item["checks"] = {k: "pass" if v else "fail" for k, v in checks.items()}
         failed += [f"{target}:{k}" for k, v in checks.items() if not v]
@@ -2980,6 +3254,9 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                                          for a, b in zip(timing, timing[1:]) if b["start"] > a["end"]]}
             if "narration_chunk_job_ids" in prov:
                 prov_units[unit["unit_id"]]["narration_chunk_job_ids"] = prov["narration_chunk_job_ids"]
+            for k in ("cast", "unit_voices"):  # multi-voice narration: who voiced each unit
+                if k in prov:
+                    prov_units[unit["unit_id"]][k] = prov[k]
             if "replaced_units" in prov:  # units voiced by their redone take (--redo-units)
                 prov_units[unit["unit_id"]]["replaced_units"] = prov["replaced_units"]
                 run_ids += [v["job_id"] for v in prov["replaced_units"].values()
@@ -3134,6 +3411,7 @@ def cmd_status(args):
                 print(f"  group {g['job_id']} {g['kind']} {g['target']}: {done} of {g['of']} chunks "
                       f"imported ({state})")
         _status_redos(rec)
+        _status_cast(rec)
         rebases = [e["detail"] for e in rec.data["events"] if e["stage"] == "rebase_source"
                    and e["result"] == "ok"]
         if rebases:
@@ -3165,6 +3443,50 @@ def cmd_status(args):
                 print(f"    stale retouch {m['key']}: {a['path']} was made from {m['source_job_id']}, "
                       "which a newer stills import replaced for that key (not used; retouch the new "
                       "still if it still needs it)")
+
+
+def _status_cast(rec):
+    """The cast in use: from the latest film narration built with one, else what job narration
+    would use now (or why it cannot)."""
+    path = cast.cast_path(rec.root)
+    built = None
+    for j in sorted((j for j in _logical(rec) if j["kind"] == "narration" and not j.get("redo")
+                     and str(j["target"] or "").startswith("film-") and not j["retired"]),
+                    key=lambda j: j["order"]):
+        rows, summary = _job_units(rec, j)
+        if summary:
+            built = (j, rows, summary)
+    if built:
+        j, rows, c = built
+        n = sum(1 for r in rows.values() if r.get("segments"))
+        print(f"  cast {_used(j)} {j['target']}: narrator {c['narrator']['speaker']} "
+              f"({c['narrator']['gender']}, {c['narrator']['slot']}); characters "
+              + (", ".join(f"{k} {v}" for k, v in c["characters"].items()) or "none")
+              + f"; {n} segmented unit(s) of {len(rows)}")
+    if not path.is_file():
+        if not built:
+            print("  cast: none (single-voice narration with the plan voice)")
+        return
+    if not (rec.root / "plan.json").is_file():
+        print(f"  cast file {path}: checked against the source once the title is planned")
+        return
+    try:
+        data, _ = _current_cast(rec, _plan(rec))
+    except Stop as e:
+        print(f"  cast file {path}: STALE or invalid, refused by job narration ({str(e)[:240]})")
+        return
+    try:
+        c = cast.job_cast(data, cast.load_voices(), sha256_file(path))
+    except (KeyError, ValueError) as e:  # VoicesNotChosen is a ValueError
+        print(f"  cast file {path}: narrator {data['narrator']['gender']}, "
+              f"{len(data['characters'])} character(s), {len(data['units'])} segmented unit(s); "
+              f"{e}")
+        return
+    if not built or built[2]["cast_sha256"] != c["cast_sha256"]:
+        print(f"  cast file {path} (next film narration): narrator {c['narrator']['speaker']} "
+              f"({c['narrator']['gender']}, {c['narrator']['slot']}); characters "
+              + ", ".join(f"{k} {v['speaker']}" for k, v in c["characters"].items())
+              + f"; {len(c['segments'])} segmented unit(s)")
 
 
 def _status_redos(rec):
@@ -3373,7 +3695,7 @@ def cmd_retouch_undo(args):
           f"supplied by {_rel(rec, now['path'])}.")
 
 
-COMMANDS = {"init": cmd_init, "plan": cmd_plan, "rebase-source": cmd_rebase_source, "job": cmd_job, "import": cmd_import,
+COMMANDS = {"init": cmd_init, "plan": cmd_plan, "rebase-source": cmd_rebase_source, "job": cmd_job, "audition": cmd_audition, "import": cmd_import,
             "retouch": cmd_retouch, "retouch-undo": cmd_retouch_undo,
             "supersede": cmd_supersede, "close": cmd_close, "retire": cmd_retire,
             "modal-run": cmd_modal_run, "modal-settle": cmd_modal_settle,
@@ -3414,6 +3736,11 @@ def _parser():
                         "import each take that passes the truncation check replaces the unit's take")
     s.add_argument("--replace-chunk", help="a closed or superseded chunk id: rebuild only its items "
                    "as <chunk id>-r<k>; the group's other chunks are kept")
+    s = add("audition")
+    s.add_argument("--rates", required=True)
+    s.add_argument("--from", dest="source", help="the title (a sibling title root's slug) or the "
+                   "cast.json whose story supplies the 3 passages (default: this root's own cast)")
+    s.add_argument("--job-id", help="a fresh take of the same passages (default audition-<hash>)")
     s = add("import")
     s.add_argument("job_id")
     s.add_argument("--from", dest="source", required=True)

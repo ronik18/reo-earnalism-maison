@@ -1,5 +1,7 @@
 # Narration: one DRY WAV per voice unit with Indic Parler-TTS (revision pinned at build time).
-# No pause is written here: eav.film.narration_track inserts every pause exactly once (R8).
+# No pause between units is written here: eav.film.narration_track inserts every pause exactly
+# once (R8). A multi-voice unit (cast.json) has segments: each is generated on its own with its own
+# voice description and they are joined into the one <unit_key>.wav (join_segments, below).
 if RUN is not True:
     raise RuntimeError("RUN is False; set RUN = True in the first cell to run this job")
 import subprocess, sys
@@ -43,35 +45,59 @@ MODEL_INFO = {"repo": MODEL_REPO, "revision": MODEL_REVISION, "generation": GENE
               "batch": BATCH, "attention": ATTENTION}
 
 import numpy as np
+# @@eav.narration_join@@
 rate = model.config.sampling_rate
 EXPECTED = [unit["unit_key"] + ".wav" for unit in JOB["units"]]
 DONE = resume_done(EXPECTED)  # finished in an earlier session: file present and sha256 logged
 todo = [u for u in JOB["units"] if u["unit_key"] + ".wav" not in DONE]
-print(len(DONE), "units already done;", len(todo), "to generate in batches of", BATCH)
+# One generation per piece: a single-voice unit is one piece (as it always was); a multi-voice
+# unit is one piece per segment, each with that segment's voice description.
+PIECES = []
+for u in todo:
+    if u.get("segments"):
+        PIECES += [(u, n, s["text"], s["description"]) for n, s in enumerate(u["segments"])]
+    else:
+        PIECES.append((u, None, u["text"], u["description"]))
+print(len(DONE), "units already done;", len(todo), "to generate (", len(PIECES),
+      "generations) in batches of", BATCH)
+pending = {}  # unit_key -> {segment index: samples}, until every segment of the unit is generated
 # seconds the previous batch took (from progress.jsonl in a resumed session); the next starts
 # only if it fits (R25)
 last = last_item_seconds()
-for i in range(0, len(todo), BATCH):
+for i in range(0, len(PIECES), BATCH):
     if not may_start(last):
-        break
-    chunk = todo[i:i + BATCH]
+        break  # a unit with segments still missing is not written; a resumed session redoes it
+    chunk = PIECES[i:i + BATCH]
     started = time.time()
-    d = desc_tokenizer([u["description"] for u in chunk], return_tensors="pt",
+    d = desc_tokenizer([c[3] for c in chunk], return_tensors="pt",
                        padding=True).to(device)
-    p = tokenizer([u["text"] for u in chunk], return_tensors="pt", padding=True).to(device)
+    p = tokenizer([c[2] for c in chunk], return_tensors="pt", padding=True).to(device)
     out = model.generate(input_ids=d.input_ids, attention_mask=d.attention_mask,
                          prompt_input_ids=p.input_ids,
                          prompt_attention_mask=p.attention_mask,
                          return_dict_in_generate=True, **GENERATION)
     lengths = getattr(out, "audios_length", None)
     batch_s = time.time() - started
-    for j, unit in enumerate(chunk):
+    wrote = []
+    for j, (unit, n, _, _) in enumerate(chunk):
         wav = out.sequences[j].cpu().float().numpy().reshape(-1)
         if lengths is not None:
             wav = wav[:int(lengths[j])]
         else:  # no lengths reported: drop only the padding zeros at the end
             wav = np.trim_zeros(wav, "b")
-        sf.write(str(OUT_DIR / (unit["unit_key"] + ".wav")), wav.astype("float32"), rate)
-        record_item(unit["unit_key"], unit["unit_key"] + ".wav", item_s=batch_s)
+        key = unit["unit_key"]
+        if n is None:
+            sf.write(str(OUT_DIR / (key + ".wav")), wav.astype("float32"), rate)
+            record_item(key, key + ".wav", item_s=batch_s)
+            wrote.append(key)
+            continue
+        got = pending.setdefault(key, {})
+        got[n] = wav
+        if len(got) == len(unit["segments"]):
+            joined, seconds = join_segments([got[k] for k in range(len(got))], rate)
+            sf.write(str(OUT_DIR / (key + ".wav")), joined, rate)
+            record_item(key, key + ".wav", item_s=batch_s, segments_s=seconds)
+            del pending[key]
+            wrote.append(key)
     last = time.time() - started
-    print("wrote", [u["unit_key"] for u in chunk], "in %.1f s" % last)
+    print("wrote", wrote, "in %.1f s" % last)
