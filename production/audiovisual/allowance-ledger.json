@@ -1143,10 +1143,15 @@
     "job_id": "narration-7e6b3c2c-c2of2",
     "title": "shasti",
     "month": "2026-11",
-    "units": 0.7845683333333333,
+    "units": 0.0,
     "state": "reserved",
     "edition_id": "7c832e44-2019-4415-9213-4170b41123a3",
-    "root": "shasti"
+    "root": "shasti",
+    "reserved_units": 0.7845683333333333,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T13:34:08+00:00",
+    "modal_runs_issued": 1
   },
   {
     "modal_spend": "2026-11",
@@ -1657,6 +1662,14 @@
         "usd": 0.6510150000000001,
         "seconds": 0.0,
         "at": "2026-11-28T13:21:14+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-7e6b3c2c-c2of2#1",
+        "job_id": "narration-7e6b3c2c-c2of2",
+        "usd": 0.6535124999999999,
+        "seconds": 0.0,
+        "at": "2026-11-28T13:34:08+00:00",
         "status": "pending"
       }
     ]
