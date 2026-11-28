@@ -1,0 +1,16 @@
+{
+  "adopted": true,
+  "choices": {
+    "f01s014-5": {
+      "candidate": 1,
+      "file": "stills/adopt-f01s014-stills-84844ba15d/f01s014-5--c1.png",
+      "sha256": "2f68eda3fba9530f00c8560aaba388c2bd61d5aecf60bbc97269f16bbe5dee2f"
+    },
+    "f01s014-9": {
+      "candidate": 1,
+      "file": "stills/adopt-f01s014-stills-84844ba15d/f01s014-9--c1.png",
+      "sha256": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4"
+    }
+  },
+  "job_id": "adopt-f01s014-stills-84844ba15d"
+}

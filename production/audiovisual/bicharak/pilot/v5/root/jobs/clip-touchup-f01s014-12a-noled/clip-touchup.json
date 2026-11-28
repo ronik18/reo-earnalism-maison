@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "fill": {
+        "angle": 17.2,
+        "method": "along"
+      },
+      "key": "f01s014-12a",
+      "mask": {
+        "box": [
+          192,
+          194,
+          300,
+          246
+        ],
+        "feather": 2,
+        "grow": 3,
+        "select": [
+          {
+            "hue": [
+              150,
+              270
+            ],
+            "light_min": 0.2
+          }
+        ]
+      },
+      "mode": "plate",
+      "reason": "owner 28 Nov 2026: the cyan rectangle between the slats reads like an LED; remove it, keep the slats",
+      "source": {
+        "file": "f01s014-12a.mp4",
+        "job": "adopt-f01s014-clips-13281dc747"
+      }
+    }
+  ],
+  "note": "Owner review 28 Nov 2026 (V1): a small glowing cyan rectangle between the slats of shot 4 (take f01s014-12a) reads like an LED. Measured on all 121 frames: fixed at x 200-241, y 214-237 (42x24 px of 1280x704), with a pale glow above it to about x 280; it never moves (the slat background deviates at most 2.8 levels from its median). Repainted locally (OpenCV, 0 CU) into a new clip; the source take is unchanged.",
+  "scene": "f01s014"
+}

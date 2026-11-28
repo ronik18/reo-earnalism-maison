@@ -1,3 +1,159 @@
+# বিচারক scene 14 v6 fixes (28 Nov 2026: owner review of v5, three picture fixes, scene cut rebuilt and checked)
+
+Operator run, `eav` commands only, in the main checkout. `B` = `production/audiovisual/bicharak`, `V` = `B/pilot/v5`,
+`R` = `V/root`. Nothing was spent: no GPU, no Colab, no ElevenLabs. The source transcript (`source.json`), the source
+media (the adopted 12a take included), the official logo file (sha256 `951d21e8…`, overlaid by eav, no pixel edited)
+and the END (`landscape.mp4`, `443be73b…`) are unchanged. No signed URL or `exchange.json` is in any tracked file.
+
+**Status: DONE. `qc` passes every gate, with no override. The v6 cut exists.**
+- Outputs: `B/pilot/v6/scene14-v6.mp4` (sha256 `a3eef13a…`) and `B/pilot/v6/scene14-v6.burned.mp4` (`3f37439d…`),
+  gitignored byte copies of `R/film/film-01/film-01-f01s014{,.burned}.mp4`.
+- Duration: 66.583 s (as v5) = 4 s title card + the 54.59 s scene + 5 s credits + 3 s END. −16.1 LUFS, −3.8 dBTP.
+- The caption **text** is the book's, unchanged: the soft track (`mov_text`, `ben`) of v6 is byte-identical to v5's
+  (extracted SRT compared with `cmp`), and `R/film/film-01/film-01-f01s014.vtt` has the same cues. Only the burned
+  captions' position (shot 11) and look changed.
+- The owner's review (listening and viewing) is still open; the frame notes below are Claude's.
+
+## Fix 1 (V1): the LED-like cyan rectangle in shot 4 (take f01s014-12a)
+
+**Measured** on all 121 frames of the 12a take (1280×704, sha256 `aee267a8…`):
+- A cyan rectangle (G and B over R by > 40) at **x 200–241, y 214–237** (42 × 24 px), the same bounding box in every
+  frame (centroid 219.4–220.3, 225.6–225.9): it never moves. A pale glow spreads above it to about x 280, y 200.
+- It sits in the dark gap between two slats, just above the lit tan edge of the lower slat; the slat edges run down
+  to the right at a slope of 0.31 (17.2°), measured on the edge at x 164–298.
+- The background round it is static: every frame is within 2.8 levels (mean) of the per-pixel temporal median.
+- In the v5 cut it showed through the whole of shot 4 (film 16.38–20.41 s).
+
+**New eav feature: `clip-touchup`** (`eav/cliptouch.py`, `cmd_clip_touchup` in `eav/cli.py`; the skill's `touchup`
+covers stills only). It repaints one recorded mask in every frame of an imported Wan clip into a **new** clip:
+- mask: a box narrowed by hue/saturation/lightness rules, computed once on the clip's temporal median, grown and
+  feathered, recorded as a PNG; fill: `along` (each pixel from the nearest unmasked pixels on both sides along a
+  direction, blended by distance, so edges running that way survive) or OpenCV `telea`/`ns` inpaint;
+  mode `plate` (the fill is made once on the median and composited into every frame; refused if the ring round the
+  mask moves more than 4 levels) or `each`.
+- filed as an imported `clip_touchup` job (0 CU): manifest with the reason, source path and sha256, output sha256,
+  mask, fill, measurements and the motion gate verdict of the touched clip; `adopt` accepts it as a clip source.
+- Tests: `tests/test_cliptouch.py` (fill rebuilds slat edges better than inpaint, the source is never written, the
+  rectangle is gone from every frame, no flicker, plate mode refuses a moving background, record + adoption).
+
+**Commands** (from `skills/earnalism-audiovisual/software`, `python3 -m eav.cli …`):
+1. `clip-touchup --root R --film 1 --spec V/clip-touchup-f01s014-12a.json --job-id clip-touchup-f01s014-12a-noled`:
+   exit 0. Mask box [192, 194, 300, 246], select hue 150–270° with lightness ≥ 0.2 (the cyan rectangle and its
+   bluish-white glow; the tan slat edge is excluded by hue), grow 3, feather 2; fill `along` 17.2°; mode `plate`.
+   - Mask: 3289 px in [192, 194, 300, 243]. Output `R/clip_touchup/clip-touchup-f01s014-12a-noled/f01s014-12a.mp4`,
+     sha256 `10b422b2…`, 121 frames, libx264 crf 12. Source unchanged (`aee267a8…` before and after).
+   - Outside the mask: PSNR 44.1 dB against the source, mean abs difference 1.23 levels (re-encode only).
+   - Flicker: inside the mask the per-frame mean varies by 0.03 levels (std over time) after, 0.5 before; the
+     frame-to-frame difference inside the mask is at most 0.11 levels. No cyan pixel is left in the box.
+   - **Motion gate on the touched clip: pass, needs review**: the same blink-and-turn spikes as the original
+     (frames 21, 28, 31, 63, 65, 68, 71, 80; the original also had 23), so the touch-up adds no motion.
+2. `V/adopt-f01s014.json`: shot 4 now names `{"job": "clip-touchup-f01s014-12a-noled", "takes": ["f01s014-12a"]}`
+   (the 7-c1 still pattern: touch up, then adopt). `adopt --root R --spec V/adopt-f01s014.json`: exit 0.
+   - New clips job `adopt-f01s014-clips-6e17b18a0a` (12a touched, 14w and 9p as before, the shot 9 depth map).
+   - Because the plan had been re-approved after the 27 Nov adoption, the adoption id (which hashes the plan) also
+     re-bound the same stills and music as `adopt-f01s014-stills-84844ba15d` and `adopt-f01s014-music-9794ac599f`:
+     the same files and sha256, 0 CU; the older adoptions stay on record. The scene mix was not re-made.
+
+**Before/after (full size, frames 0, 60, 120 of the take and the cut at 18.0 s):** before, a bright cyan bar with a
+white halo in the slat gap; after, the dark teal gap runs on unbroken between the slats, the lit tan slat edge and
+its ink line are straight and continuous under where the bar was, the slat above has no glow. No smear, no seam at
+the feather, no flicker; the rest of the frame (her face, hair and eyes, the other slats) is untouched.
+Review crops: `R/clip_touchup/clip-touchup-f01s014-12a-noled/f01s014-12a.{before,after,mask}.png`.
+
+## Fix 2 (V4): the shot 11 caption crossed the falling brass pot
+
+**Measured** on every frame of shot 11 in the v5 cut (film 48.715–52.859 s; brass = HSV hue 18–32, S and V > 150,
+right of x 700 so the earring is excluded): the pot is in her hands at y 881–964 and falls to the floor at
+x 1189–1436, y 972–1080. **Its whole path: x 832–1448, y 840–1080**, the lower 22 % of the frame. v5's bottom
+captions sit at y 960–1016 (one line) and crossed it for both cues of the shot ("তখন সেখানে সহসা", 49.065–50.460;
+"কি লজ্জা প্রকাশিত হইয়া পড়িবে,", 50.640–52.508).
+
+**New eav feature: a per-shot caption position in the shot plan.** `shots[].caption`: `"top"` or `"bottom"`
+(default), validated by `shotplan.plan` and shown in the AV script. `film --shots` turns the top shots into
+film-time spans; a burned cue that is on screen during such a span is drawn at the top (`film.caption_position`):
+its first line's top 7 % of the height from the top edge, centred, clear of the logo's column (a line too wide for
+the space beside the logo starts under it, `film.caption_baselines`). The soft track has no position and is
+unchanged. Tests in `test_shotplan.py` and `test_film.py`.
+1. `R/film/film-01/shots/f01s014.input.json`: shot 11 `"caption": "top"` and
+   `approval_record.owner_decisions_28_nov_2026_review` (before-copy in the scratchpad).
+2. `plan-shots --root R --film 1 --scene f01s014 --bible B/specs/world-bible.json`: exit 0, "12 shots, 54.6 s,
+   5 Wan clip(s); rules R1-R3 pass". The same with `--approve --by "Claude" --reviewer "<the 27 Nov approval text>;
+   plus the owner review of 28 Nov 2026: …"`: exit 0, new input sha256 `8469814b…`. The plan changed only in
+   shot 11's `caption` and the approval.
+
+**After:** in v6 the burned caption footprint (text, halo and band) during shot 11 is **x 615–1310, y 62–160**,
+680 px above the pot's highest point; the pot falls and lands uncovered. R5 is untouched (same cues: ≤ 2 lines,
+≤ 42 characters per line, 1–7 s, ≤ 15 cps; `qc captions` pass). Shots 10 and 12 keep bottom captions; the cue
+before shot 11 ends at 48.364 s, before the cut, so no cue jumps position mid-cue.
+
+## Fix 3: captions weak on the pale backgrounds of shots 7, 10 and 11
+
+**New burned caption look** (`film.caption_image`): the same ivory Maison ink (250, 242, 228) and font size, a thin
+dark outline, a **soft dark halo** hugging the glyphs (grown by px/6, blurred by px/9, 92 % at the glyph edge) and a
+**subtle translucent band** behind each line (Maison canvas colour (25, 18, 22) at 60 %, rounded, blurred edges, no
+hard box; it covers under 6 % of the frame). Test: `test_burned_caption_holds_4_5_to_1_on_white_and_pale_pictures`
+(≥ 4.5:1 on white, pale cream and black, top and bottom).
+
+**Measured** (WCAG luminance contrast, ink pixels of the burned frame against the ring 3–12 px outside the glyphs,
+which takes in the outline, halo and band and the picture right behind them; "plain bg" = the picture behind the
+text with no caption):
+
+| Shot (time) | plain bg L | v5 ring mean | v5 ring p90 | v6 ring mean | v6 ring p90 |
+|---|---|---|---|---|---|
+| 7 (29.5 s) | 0.19 | 3.37:1 | 1.43:1 | **8.83:1** | 5.73:1 |
+| 7 (30.6 s) | 0.19 | 3.39:1 | — | **8.78:1** | 5.64:1 |
+| 10 (40.5 s) | 0.15 | 4.09:1 | 2.09:1 | **9.77:1** | 7.19:1 |
+| 10 (44.0 s) | 0.14 | 4.28:1 | 2.24:1 | **10.01:1** | 7.30:1 |
+| 10 (47.0 s) | 0.18 | 3.66:1 | 1.78:1 | **9.14:1** | 6.51:1 |
+| 11 (49.8 s) | 0.38 → 0.42 (top) | 1.94:1 | 0.87:1 | **7.34:1** | 4.11:1 |
+| 11 (51.5 s) | 0.51 → 0.54 (top) | 1.94:1 | 0.87:1 | **5.95:1** | 3.48:1 |
+
+Every shot is now at or above 4.5:1 on average (the p90 column is the brightest tenth of the ring, the worst case;
+in v5 it fell below 1:1 in shot 11, i.e. the picture next to the letters was brighter than the letters).
+Script: `<scratchpad>/v6/contrast.py` (frames from the plain and burned cuts at the same time).
+
+## Rebuild
+
+3. `film --root R --film 1 --shots --scene f01s014 --logo skills/earnalism-video/software/assets/standard-intro/v1/production-lockup.png --end-card skills/earnalism-video/software/assets/standard-intro/v1/landscape.mp4 --title বিচারক --author "রবীন্দ্রনাথ ঠাকুর" --narrator "Subhajit – Grounded Bengali Storyteller" --burn`:
+   exit 0 (3.4 min CPU), "66.6 s, 12 shots at 24 fps, −16.1 LUFS, TP −3.8 dBTP"; motion-review notes for 12a
+   (shot 4, the touched take) and 9p (shot 11), as G13.
+4. `qc --root R`: exit 0, **every gate passes** (below).
+5. Copied to `B/pilot/v6/scene14-v6.mp4` and `scene14-v6.burned.mp4`.
+6. Frames of the burned cut at every shot boundary, the peak (49.1 s), shots 4, 7, 10 and 11 (full size) and the
+   cards; contact sheet in the scratchpad.
+
+## QC (`qc --root R`, `R/qc/report.json`, result `pass`, `failed` empty)
+
+| Gate | Result | Measured |
+|---|---|---|
+| loudness | pass | −16.1 LUFS integrated, LRA 4.9 LU |
+| true_peak | pass | −3.8 dBTP |
+| new_info (R1) | pass | no gaps |
+| holds | pass | none |
+| black_bars | pass | none |
+| hitches | pass | none |
+| flashes (R10) | pass | max 1/s; one jump at 63.583 s (into the END card), planned |
+| sound_on_picture (R4) | pass | every listed sound placed over its shot |
+| captions (R5) | pass | no problems |
+| margin | pass | voice over music 17.0 dB; voice over everything else 15.7 dB |
+| peak_silence | pass | music bus −200 dB on the peak window |
+| digital_zero | pass | none |
+
+Overrides: none. Advisories as v5: motion review of 12a and 9p (G13), word check not run for `f01s014-p01`.
+
+## Frame review (Claude, v6 burned cut)
+
+- Shot 4: the slats are clean through the whole shot; Hem's face, eyes (brown) and hair are as in v5; no mole.
+- Shot 11: both cues at the top centre, over the plain wall and the top of her veil, never over her face, hands or
+  the pot; the pot's fall and landing are uncovered. The logo (top right) is clear of the caption band.
+- Shots 7, 10, 12 and the rest: captions bottom centre, ivory on the soft dark band, clearly legible on the pale
+  wall, sari and floor; on the dark night shots (1–5) the band is barely visible.
+- Joins, cards, END and logo as in v5.
+- New, for the owner: the burned captions jump from the bottom (shot 10) to the top (shot 11) at the hard cut into
+  the peak and back down at shot 12. This is intended (the pot), but the owner may want to judge the jump.
+
+---
+
 # বিচারক scene 14 v5: finish run (28 Nov 2026, sounds synthesized, scene cut built and checked)
 
 Operator run, `eav` commands only, in the main checkout (`claude/great-gates-tpoz8n`). `B` = `production/audiovisual/bicharak`,

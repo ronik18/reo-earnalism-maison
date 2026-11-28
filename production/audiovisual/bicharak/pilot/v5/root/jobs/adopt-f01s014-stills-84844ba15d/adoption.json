@@ -1,0 +1,80 @@
+{
+  "binding": {
+    "stills": {
+      "f01s014-5": {
+        "gate": {
+          "level": null,
+          "why": "hand-copied file with no gate result of its own"
+        },
+        "hand_copied": {
+          "declared_from": {
+            "file": "f01s014-7--c1.png",
+            "job_id": "stills-pilot7-f01s014",
+            "relation": "derived by hand, as the operator declares (not byte-identical; not verified)",
+            "sha256": "63e90e7a0dbcfdbc5dffe6256539ba20e6e1474d314ab55b503c67b56b6babf3"
+          },
+          "file": "../../../touchup/touchup-f01s014-7-nomole/f01s014-7--c1.png",
+          "reason": "owner-picked Hem eye still 7-c1 with the mole under her eye removed (owner decision 27 Nov 2026: no mole on Hem, matching take 12a); made by eav touchup job touchup-f01s014-7-nomole (OpenCV inpaint, two ellipse boxes) in the title root, original stills-pilot7 file unchanged",
+          "sha256": "2f68eda3fba9530f00c8560aaba388c2bd61d5aecf60bbc97269f16bbe5dee2f",
+          "traced": []
+        },
+        "licence": {
+          "licence": "Apache-2.0",
+          "model": "black-forest-labs/FLUX.1-schnell"
+        }
+      },
+      "f01s014-9": {
+        "gate": {
+          "gate": null,
+          "level": null,
+          "why": null
+        },
+        "licence": {
+          "licence": "Apache-2.0",
+          "model": "black-forest-labs/FLUX.1-schnell"
+        },
+        "source": {
+          "file": "f01s014-8--c2.png",
+          "input_zip_sha256": "af8f0941ac0e2c4dffcb502b48cbf263efd46b8f085fa245b5cc66cbe789746f",
+          "job_id": "stills-pilot2-f01s014",
+          "kind": "stills",
+          "origin": "record",
+          "record": "../../..",
+          "sha256": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4",
+          "verified_against": "the output sha256 recorded when eav imported the job"
+        }
+      }
+    }
+  },
+  "files": {
+    "f01s014-5--c1.png": "2f68eda3fba9530f00c8560aaba388c2bd61d5aecf60bbc97269f16bbe5dee2f",
+    "f01s014-9--c1.png": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4"
+  },
+  "job": {
+    "items": [
+      {
+        "base": "f01s014-5",
+        "candidate": 1,
+        "key": "f01s014-5--c1"
+      },
+      {
+        "base": "f01s014-9",
+        "candidate": 1,
+        "key": "f01s014-9--c1"
+      }
+    ],
+    "scene": "f01s014"
+  },
+  "job_id": "adopt-f01s014-stills-84844ba15d",
+  "kind": "stills",
+  "motion_gates": {},
+  "plan_sha256": "9afec57c0f8a9bdd40844117ac8e94e2c95f4c9584d57bf6bc45c6ad76d41453",
+  "scene": "f01s014",
+  "schema": "earnalism.audiovisual-adoption.v1",
+  "spec": {
+    "path": "../adopt-f01s014.json",
+    "sha256": "dfb3a03bd6f5edaa5adcc8e86ad949b8ffdd5322d755acaf805a60bebad2dc96"
+  },
+  "spent_cu": 0,
+  "target": "film-01"
+}

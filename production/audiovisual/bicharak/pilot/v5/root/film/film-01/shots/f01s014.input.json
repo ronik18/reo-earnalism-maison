@@ -41,6 +41,10 @@
    "no mole on Hem: f01s014-5 is the retouched 7-c1 (touchup-f01s014-7-nomole); gate override reason 'owner: no mole; retouched 7-c1 so shots 4 and 5 match (27 Nov)'",
    "accepted flaws for frame review: shot 3's Western cot and round doorknob; shot 8's horizontal slats, with shot 9 opening on a plain dissolve",
    "keep the broom sound on shot 10, because the mother now really sweeps (door beat 13s->13t)"
+  ],
+  "owner_decisions_28_nov_2026_review": [
+   "shot 11 (the peak): the captions sit at the top of the frame while the shot is on screen, so no caption crosses the falling brass pot (its measured path stays in the lower 22 % of the frame); caption text unchanged",
+   "shot 4: the touched take f01s014-12a (clip-touchup-f01s014-12a-noled: the LED-like cyan rectangle between the slats removed); burned captions with a soft dark halo and band for the pale shots 7, 10 and 11"
   ]
  },
  "timing_source": "clause bounds: eav scene-timing on the --no-retime import (-38 dBFS, 0.3 s; 8 clauses, the 1.6 s pause after 'নাই!' intact); in-clause breaths measured on the same scene wav with eav.retime.detect_pauses: -38 dBFS/0.15 s for 16.26-16.56, 30.98-31.20, 35.03-35.35, 44.36-45.07, 46.46-46.64; -34 dBFS for 12.29-12.46 (0.18 s; 0.12 s at -38); the inhale after 'কুলকন্যারা' 5.37-5.80 s is speech-free at -30 dBFS (fragments at -34). The word gap before 'সমস্ত' (4.40-4.46 s, 0.04-0.06 s at every threshold) is under the 0.15 s breath minimum, so the 1->2 cut is at the inhale after 'কুলকন্যারা'.",
@@ -384,6 +388,7 @@
    "bible_refs": [
     "hem_mother"
    ],
+   "caption": "top",
    "plants": [
     3,
     10

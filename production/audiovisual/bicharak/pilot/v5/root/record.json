@@ -3900,6 +3900,609 @@
       },
       "path": "qc/report.json",
       "sha256": "f9656b7152c53bbbbb55ae991c9393a6592d98d1d34303b7b9d6f82653b4d775"
+    },
+    {
+      "bytes": 3745,
+      "kind": "touchup_job",
+      "meta": {
+        "engine": "opencv",
+        "forecast_units": 0.0,
+        "job_id": "clip-touchup-f01s014-12a-noled",
+        "job_kind": "clip_touchup",
+        "manifest": "jobs/clip-touchup-f01s014-12a-noled/clip-touchup-manifest.json",
+        "opencv": "5.1.0"
+      },
+      "path": "jobs/clip-touchup-f01s014-12a-noled/clip-touchup-manifest.json",
+      "sha256": "952c91008da52bd1b431c6b600e2a475dff37352fc4ff7bcf424184b79dc5c67"
+    },
+    {
+      "bytes": 1145,
+      "kind": "clip_touchup_spec",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "clip-touchup-f01s014-12a-noled",
+        "job_kind": "clip_touchup",
+        "opencv": "5.1.0"
+      },
+      "path": "jobs/clip-touchup-f01s014-12a-noled/clip-touchup.json",
+      "sha256": "7475b984d81492308cea1bb9e6ff1dc5127c7158be6df1cc9ae49c2b7a8a6468"
+    },
+    {
+      "bytes": 2544284,
+      "kind": "clip_touchup",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "clip-touchup-f01s014-12a-noled",
+        "job_kind": "clip_touchup",
+        "key": "f01s014-12a",
+        "model": {
+          "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers"
+        },
+        "opencv": "5.1.0",
+        "source": "film_clips/adopt-f01s014-clips-13281dc747/clips/f01s014-12a.mp4",
+        "source_sha256": "aee267a868043fc03fc1cafcaa72eb44559358b012a025fcec788d7744fb724b"
+      },
+      "path": "clip_touchup/clip-touchup-f01s014-12a-noled/f01s014-12a.mp4",
+      "sha256": "10b422b2994f0ca4089491297f7f90aaf989a0da6fd5877c26fde9bcb78e093a"
+    },
+    {
+      "bytes": 2576,
+      "kind": "clip_touchup_mask",
+      "meta": {
+        "engine": "opencv",
+        "job_id": "clip-touchup-f01s014-12a-noled",
+        "job_kind": "clip_touchup",
+        "key": "f01s014-12a",
+        "opencv": "5.1.0"
+      },
+      "path": "clip_touchup/clip-touchup-f01s014-12a-noled/f01s014-12a.mask.png",
+      "sha256": "ade5148aa7bef915b2e56b6ab1cb9620f6e80f263ac0d729392e2efa1970a9d3"
+    },
+    {
+      "bytes": 2831,
+      "kind": "motion_gate",
+      "meta": {
+        "clip": "f01s014-12a.mp4",
+        "engine": "opencv",
+        "job_id": "clip-touchup-f01s014-12a-noled",
+        "job_kind": "clip_touchup",
+        "opencv": "5.1.0"
+      },
+      "path": "clip_touchup/clip-touchup-f01s014-12a-noled/f01s014-12a.motion.json",
+      "sha256": "17ec56fc9499619491c70a5ea783c8e14c77e8ae50cb3d28fca9f7e43ee4fd45"
+    },
+    {
+      "bytes": 2775,
+      "kind": "adopted_job",
+      "meta": {
+        "adopted": true,
+        "forecast_units": 0.0,
+        "job_id": "adopt-f01s014-stills-84844ba15d",
+        "job_kind": "stills",
+        "manifest": "jobs/adopt-f01s014-stills-84844ba15d/adoption.json",
+        "scene": "f01s014"
+      },
+      "path": "jobs/adopt-f01s014-stills-84844ba15d/adoption.json",
+      "sha256": "0cd9ad4466c7c7c4560f5bc1d512292f23dd9a98cc17d8b18143aa7b039653a1"
+    },
+    {
+      "bytes": 595923,
+      "kind": "stills",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/touchup/touchup-f01s014-7-nomole/f01s014-7--c1.png",
+        "job_id": "adopt-f01s014-stills-84844ba15d",
+        "job_kind": "stills",
+        "key": "f01s014-5"
+      },
+      "path": "stills/adopt-f01s014-stills-84844ba15d/f01s014-5--c1.png",
+      "sha256": "2f68eda3fba9530f00c8560aaba388c2bd61d5aecf60bbc97269f16bbe5dee2f"
+    },
+    {
+      "bytes": 1107097,
+      "kind": "stills",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/stills/stills-pilot2-f01s014/f01s014-8--c2.png",
+        "job_id": "adopt-f01s014-stills-84844ba15d",
+        "job_kind": "stills",
+        "key": "f01s014-9"
+      },
+      "path": "stills/adopt-f01s014-stills-84844ba15d/f01s014-9--c1.png",
+      "sha256": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4"
+    },
+    {
+      "bytes": 498,
+      "kind": "stills_pick",
+      "meta": {
+        "adopted": true,
+        "choices": {
+          "f01s014-5": {
+            "candidate": 1,
+            "file": "stills/adopt-f01s014-stills-84844ba15d/f01s014-5--c1.png",
+            "sha256": "2f68eda3fba9530f00c8560aaba388c2bd61d5aecf60bbc97269f16bbe5dee2f"
+          },
+          "f01s014-9": {
+            "candidate": 1,
+            "file": "stills/adopt-f01s014-stills-84844ba15d/f01s014-9--c1.png",
+            "sha256": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4"
+          }
+        },
+        "job_id": "adopt-f01s014-stills-84844ba15d",
+        "version": 1
+      },
+      "path": "picks/adopt-f01s014-stills-84844ba15d.pick-1.json",
+      "sha256": "47bdffa2ee59c32199c094f515cd8329907dcb7bd33138d0563c9571151ed8e9"
+    },
+    {
+      "bytes": 7469,
+      "kind": "adopted_job",
+      "meta": {
+        "adopted": true,
+        "forecast_units": 0.0,
+        "job_id": "adopt-f01s014-clips-6e17b18a0a",
+        "job_kind": "film_clips",
+        "manifest": "jobs/adopt-f01s014-clips-6e17b18a0a/adoption.json",
+        "scene": "f01s014"
+      },
+      "path": "jobs/adopt-f01s014-clips-6e17b18a0a/adoption.json",
+      "sha256": "75daf37060a797c8ef9630033ebdcdbd0e21d7868007c566bbc47fbc743a4d9e"
+    },
+    {
+      "bytes": 2544284,
+      "kind": "film_clips",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "../../../production/audiovisual/bicharak/pilot/v5/root/clip_touchup/clip-touchup-f01s014-12a-noled/f01s014-12a.mp4",
+        "job_id": "adopt-f01s014-clips-6e17b18a0a",
+        "job_kind": "film_clips",
+        "key": "f01s014-12a"
+      },
+      "path": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-12a.mp4",
+      "sha256": "10b422b2994f0ca4089491297f7f90aaf989a0da6fd5877c26fde9bcb78e093a"
+    },
+    {
+      "bytes": 19087326,
+      "kind": "film_clips",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/film_clips/motion-pilot6-f01s014/clips/f01s014-14w.mp4",
+        "job_id": "adopt-f01s014-clips-6e17b18a0a",
+        "job_kind": "film_clips",
+        "key": "f01s014-14w"
+      },
+      "path": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-14w.mp4",
+      "sha256": "7b6c43f832f25c458617cb483e644e7dc5144740a8c4a3bdee6d39cfade2633b"
+    },
+    {
+      "bytes": 21267362,
+      "kind": "film_clips",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/film_clips/motion-pilot6-f01s014/clips/f01s014-9p.mp4",
+        "job_id": "adopt-f01s014-clips-6e17b18a0a",
+        "job_kind": "film_clips",
+        "key": "f01s014-9p"
+      },
+      "path": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-9p.mp4",
+      "sha256": "2a13b6d59363b4fe19a6212d8132d07b5af1efec2fba8386afb78c6ee106ea63"
+    },
+    {
+      "bytes": 695593,
+      "kind": "film_clips",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/pilot/motion-pilot2-f01s014/out/f01s014-8.depth.png",
+        "job_id": "adopt-f01s014-clips-6e17b18a0a",
+        "job_kind": "film_clips",
+        "key": "f01s014-9"
+      },
+      "path": "film_clips/adopt-f01s014-clips-6e17b18a0a/depth/f01s014-9.depth.png",
+      "sha256": "70659620d8cffdb209f63564e897481988ba8330317fdcfd4d26fe30490b4ed6"
+    },
+    {
+      "bytes": 2831,
+      "kind": "motion_gate",
+      "meta": {
+        "adopted": true,
+        "clip": "f01s014-12a.mp4",
+        "job_id": "adopt-f01s014-clips-6e17b18a0a",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-12a.motion.json",
+      "sha256": "17ec56fc9499619491c70a5ea783c8e14c77e8ae50cb3d28fca9f7e43ee4fd45"
+    },
+    {
+      "bytes": 774,
+      "kind": "motion_gate",
+      "meta": {
+        "adopted": true,
+        "clip": "f01s014-14w.mp4",
+        "job_id": "adopt-f01s014-clips-6e17b18a0a",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-14w.motion.json",
+      "sha256": "c3057f2c1d3b87b62a6c028212c0b09b1b93b441d3d9987ad4863d67821df163"
+    },
+    {
+      "bytes": 2325,
+      "kind": "motion_gate",
+      "meta": {
+        "adopted": true,
+        "clip": "f01s014-9p.mp4",
+        "job_id": "adopt-f01s014-clips-6e17b18a0a",
+        "job_kind": "film_clips"
+      },
+      "path": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-9p.motion.json",
+      "sha256": "9150f93e3e174fb1b7c1b488498fde7f233ec0fdc1a5cbe9b5102678fe388c5d"
+    },
+    {
+      "bytes": 7271,
+      "kind": "adopted_job",
+      "meta": {
+        "adopted": true,
+        "forecast_units": 0.0,
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "job_kind": "music",
+        "manifest": "jobs/adopt-f01s014-music-9794ac599f/adoption.json",
+        "scene": "f01s014"
+      },
+      "path": "jobs/adopt-f01s014-music-9794ac599f/adoption.json",
+      "sha256": "a8ada94ce63cfb89acdb25b7f5254d51530ef55f300eca059c4cf51950605ec8"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/music/music-pilot3b-f01s014/p3-drone-1.wav",
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "job_kind": "music",
+        "key": "p3-drone-1"
+      },
+      "path": "music/adopt-f01s014-music-9794ac599f/p3-drone-1.wav",
+      "sha256": "5e55f443ee07c735735ea0ca4d7a4fd873ea8b6cd4d741ce221c82de84e9330f"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/music/music-pilot3b-f01s014/p3-drone-2.wav",
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "job_kind": "music",
+        "key": "p3-drone-2"
+      },
+      "path": "music/adopt-f01s014-music-9794ac599f/p3-drone-2.wav",
+      "sha256": "9c7faca57283b658f56acfa3f534288f7fdeab54e47bb351eb5b64ac1bd6f8a5"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/music/music-pilot3b-f01s014/p3-esraj-1.wav",
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "job_kind": "music",
+        "key": "p3-esraj-1"
+      },
+      "path": "music/adopt-f01s014-music-9794ac599f/p3-esraj-1.wav",
+      "sha256": "fe4b486afe1dc25232979473720cd25eb46cb7b243876c029fe122029a2d0626"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/music/music-pilot3b-f01s014/p3-esraj-2.wav",
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "job_kind": "music",
+        "key": "p3-esraj-2"
+      },
+      "path": "music/adopt-f01s014-music-9794ac599f/p3-esraj-2.wav",
+      "sha256": "0a0c69b2fadace4ebb25684b946e279374c54e473c58f8350889d741404e4fe3"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/music/music-pilot3b-f01s014/p3-esraj-3.wav",
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "job_kind": "music",
+        "key": "p3-esraj-3"
+      },
+      "path": "music/adopt-f01s014-music-9794ac599f/p3-esraj-3.wav",
+      "sha256": "204d24ebb140e2c63f63eb9dffcd54553715c5195b982c953e2ecdb94318f1ac"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/music/music-pilot3b-f01s014/p3-esraj-4.wav",
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "job_kind": "music",
+        "key": "p3-esraj-4"
+      },
+      "path": "music/adopt-f01s014-music-9794ac599f/p3-esraj-4.wav",
+      "sha256": "1851f3440534535549dd6d3672fd4f8ac03083175d1b09241d342b87c956716a"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/music/music-pilot3b-f01s014/p3-sunrise-1.wav",
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "job_kind": "music",
+        "key": "p3-sunrise-1"
+      },
+      "path": "music/adopt-f01s014-music-9794ac599f/p3-sunrise-1.wav",
+      "sha256": "3701a91f86bb097582ae8e309c1db53ccd9ff77beadf47c89bc12131bfe3bc94"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/music/music-pilot3b-f01s014/p3-sunrise-2.wav",
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "job_kind": "music",
+        "key": "p3-sunrise-2"
+      },
+      "path": "music/adopt-f01s014-music-9794ac599f/p3-sunrise-2.wav",
+      "sha256": "f81835e8b09dd64111f88b31e8e8a7cdd487cf3a07e2672a785fb8a3c336253f"
+    },
+    {
+      "bytes": 11502318,
+      "kind": "music",
+      "meta": {
+        "adopted": true,
+        "adopted_from": "/home/user/reo-earnalism-maison/production/audiovisual/bicharak/music/music-pilot3b-f01s014/p3-sunrise-3.wav",
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "job_kind": "music",
+        "key": "p3-sunrise-3"
+      },
+      "path": "music/adopt-f01s014-music-9794ac599f/p3-sunrise-3.wav",
+      "sha256": "79ac103671dcfd3fcf2103af08429f7ea00aaac4808354a3077677eb1f91883d"
+    },
+    {
+      "bytes": 39709311,
+      "kind": "scene_film",
+      "meta": {
+        "body_ceiling_db": -2.0,
+        "body_gain_db": 0.0,
+        "body_gain_fallback": false,
+        "burned": false,
+        "caption_top": [
+          [
+            48.715,
+            52.859
+          ]
+        ],
+        "captions": true,
+        "captions_sha256": "0af16485a1563785b1b423eae75ec48c392c350210952b22f0b02493e9d268f3",
+        "cards_sha256": "1aa917e0f467769695d89cb398ad0b431b5e690650c9a8e07f1bb3e6d16bb2fa",
+        "duration": 66.58333333333334,
+        "fps": 24,
+        "frames": 1310,
+        "lead_s": 4.0,
+        "lufs": -16.1,
+        "mode": "shots",
+        "motion_review": {
+          "f01s014-12a": {
+            "contact_sheet": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-12a.contact.png",
+            "notes": "difference spike at frame 21 looks like motion, not an outlier: 5.1x the median; difference spike at frame 28 looks like motion, not an outlier: 8.2x the median; difference spike at frame 31 looks like motion, not an outlier: 4.1x the median; difference spike at frame 63 looks like motion, not an outlier: 6.9x the median; difference spike at frame 65 looks like motion, not an outlier: 13.7x the median; difference spike at frame 68 looks like motion, not an outlier: 13.2x the median; difference spike at frame 71 looks like motion, not an outlier: 8.6x the median; difference spike at frame 80 looks like motion, not an outlier: 4.3x the median",
+            "scene": "f01s014",
+            "shot": 4
+          },
+          "f01s014-9p": {
+            "contact_sheet": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-9p.contact.png",
+            "notes": "difference spike at frame 10 looks like motion, not an outlier: 9.0x the median; difference spike at frame 15 looks like motion, not an outlier: 4.1x the median; difference spike at frame 17 looks like motion, not an outlier: 7.4x the median; difference spike at frame 50 looks like motion, not an outlier: 4.1x the median; difference spike at frame 111 looks like motion, not an outlier: 6.8x the median; difference spike at frame 113 looks like motion, not an outlier: 10.3x the median",
+            "scene": "f01s014",
+            "shot": 11
+          }
+        },
+        "overlap_frames": [
+          19,
+          1,
+          19,
+          1,
+          19,
+          1,
+          19,
+          19,
+          1,
+          1,
+          1
+        ],
+        "path": "../../../production/audiovisual/bicharak/pilot/v5/root/film/film-01/film-01-f01s014.mp4",
+        "picture_s": 54.583333333333336,
+        "scene": "f01s014",
+        "scenes": [
+          "f01s014"
+        ],
+        "shots": 12,
+        "size": [
+          1920,
+          1080
+        ],
+        "stills": {
+          "gate_overrides": {
+            "f01s014-5": "owner: no mole; retouched 7-c1 so shots 4 and 5 match (27 Nov)"
+          },
+          "picks": {
+            "f01s014-1": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "04426c19d83dcd6ca50b7a827ad1b7aa1c9c7df2d607429c5c82247d700366e7"
+            },
+            "f01s014-12": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "7de73c294ab4b50e1b0702996d2e989cfa4516fe64a76708c0c41b49ee9d5147"
+            },
+            "f01s014-2": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "1b790dc1c0aa7a9bf2139c05e9b75c62c92b5a9cb6c8cac2eded49075d1335c9"
+            },
+            "f01s014-3": {
+              "candidate": 2,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "b8f950d6dfb59866c263d827b82c5300f2fbdae2388c571589ae2f562f3b8f91"
+            },
+            "f01s014-5": {
+              "candidate": 1,
+              "job_id": "adopt-f01s014-stills-84844ba15d",
+              "sha256": "2f68eda3fba9530f00c8560aaba388c2bd61d5aecf60bbc97269f16bbe5dee2f"
+            },
+            "f01s014-6": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "14ac93ddaaf05986fd7bdb09cb69f8aa192414baaa1279e7fa5ba1e0c60990a1"
+            },
+            "f01s014-8": {
+              "candidate": 2,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "f0d71d6eb47c5c5cd5644d66d8f9185d9fd6b30e668dff7f572d38f95cb4da9b"
+            },
+            "f01s014-9": {
+              "candidate": 1,
+              "job_id": "adopt-f01s014-stills-84844ba15d",
+              "sha256": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4"
+            }
+          }
+        },
+        "target": "film-01",
+        "true_peak": -3.8
+      },
+      "path": "film/film-01/film-01-f01s014.mp4",
+      "sha256": "a3eef13a2f3955384f386ac5f319c299b59998a43c742fe980ec667e7cc4dff4"
+    },
+    {
+      "bytes": 39709311,
+      "kind": "scene_film",
+      "meta": {
+        "body_ceiling_db": -2.0,
+        "body_gain_db": 0.0,
+        "body_gain_fallback": false,
+        "burned": false,
+        "caption_top": [
+          [
+            48.715,
+            52.859
+          ]
+        ],
+        "captions": true,
+        "captions_sha256": "0af16485a1563785b1b423eae75ec48c392c350210952b22f0b02493e9d268f3",
+        "cards_sha256": "1aa917e0f467769695d89cb398ad0b431b5e690650c9a8e07f1bb3e6d16bb2fa",
+        "duration": 66.58333333333334,
+        "fps": 24,
+        "frames": 1310,
+        "lead_s": 4.0,
+        "lufs": -16.1,
+        "mode": "shots",
+        "motion_review": {
+          "f01s014-12a": {
+            "contact_sheet": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-12a.contact.png",
+            "notes": "difference spike at frame 21 looks like motion, not an outlier: 5.1x the median; difference spike at frame 28 looks like motion, not an outlier: 8.2x the median; difference spike at frame 31 looks like motion, not an outlier: 4.1x the median; difference spike at frame 63 looks like motion, not an outlier: 6.9x the median; difference spike at frame 65 looks like motion, not an outlier: 13.7x the median; difference spike at frame 68 looks like motion, not an outlier: 13.2x the median; difference spike at frame 71 looks like motion, not an outlier: 8.6x the median; difference spike at frame 80 looks like motion, not an outlier: 4.3x the median",
+            "scene": "f01s014",
+            "shot": 4
+          },
+          "f01s014-9p": {
+            "contact_sheet": "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-9p.contact.png",
+            "notes": "difference spike at frame 10 looks like motion, not an outlier: 9.0x the median; difference spike at frame 15 looks like motion, not an outlier: 4.1x the median; difference spike at frame 17 looks like motion, not an outlier: 7.4x the median; difference spike at frame 50 looks like motion, not an outlier: 4.1x the median; difference spike at frame 111 looks like motion, not an outlier: 6.8x the median; difference spike at frame 113 looks like motion, not an outlier: 10.3x the median",
+            "scene": "f01s014",
+            "shot": 11
+          }
+        },
+        "overlap_frames": [
+          19,
+          1,
+          19,
+          1,
+          19,
+          1,
+          19,
+          19,
+          1,
+          1,
+          1
+        ],
+        "path": "../../../production/audiovisual/bicharak/pilot/v5/root/film/film-01/film-01-f01s014.mp4",
+        "picture_s": 54.583333333333336,
+        "scene": "f01s014",
+        "scenes": [
+          "f01s014"
+        ],
+        "shots": 12,
+        "size": [
+          1920,
+          1080
+        ],
+        "stills": {
+          "gate_overrides": {
+            "f01s014-5": "owner: no mole; retouched 7-c1 so shots 4 and 5 match (27 Nov)"
+          },
+          "picks": {
+            "f01s014-1": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "04426c19d83dcd6ca50b7a827ad1b7aa1c9c7df2d607429c5c82247d700366e7"
+            },
+            "f01s014-12": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "7de73c294ab4b50e1b0702996d2e989cfa4516fe64a76708c0c41b49ee9d5147"
+            },
+            "f01s014-2": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "1b790dc1c0aa7a9bf2139c05e9b75c62c92b5a9cb6c8cac2eded49075d1335c9"
+            },
+            "f01s014-3": {
+              "candidate": 2,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "b8f950d6dfb59866c263d827b82c5300f2fbdae2388c571589ae2f562f3b8f91"
+            },
+            "f01s014-5": {
+              "candidate": 1,
+              "job_id": "adopt-f01s014-stills-84844ba15d",
+              "sha256": "2f68eda3fba9530f00c8560aaba388c2bd61d5aecf60bbc97269f16bbe5dee2f"
+            },
+            "f01s014-6": {
+              "candidate": 1,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "14ac93ddaaf05986fd7bdb09cb69f8aa192414baaa1279e7fa5ba1e0c60990a1"
+            },
+            "f01s014-8": {
+              "candidate": 2,
+              "job_id": "stills-f01s014-scene-r1",
+              "sha256": "f0d71d6eb47c5c5cd5644d66d8f9185d9fd6b30e668dff7f572d38f95cb4da9b"
+            },
+            "f01s014-9": {
+              "candidate": 1,
+              "job_id": "adopt-f01s014-stills-84844ba15d",
+              "sha256": "6918730aa2bb1e030a666610a8ca7a2bb3607b39cb4c76bd16fae4d67b179cb4"
+            }
+          }
+        },
+        "target": "film-01",
+        "true_peak": -3.8
+      },
+      "path": "film/film-01/film-01-f01s014.mp4",
+      "sha256": "a3eef13a2f3955384f386ac5f319c299b59998a43c742fe980ec667e7cc4dff4"
+    },
+    {
+      "bytes": 4598,
+      "kind": "qc_report",
+      "meta": {
+        "failed": []
+      },
+      "path": "qc/report.json",
+      "sha256": "9c73c20845327ac41e63339b9ba262df2a0d3bb45100a8a4a1844d28f5378069"
     }
   ],
   "created_at": "2026-11-27T17:58:04.798975+00:00",
@@ -4582,6 +5185,161 @@
     },
     {
       "at": "2026-11-28T03:45:48.322728+00:00",
+      "detail": {
+        "failed": []
+      },
+      "result": "pass",
+      "stage": "qc"
+    },
+    {
+      "at": "2026-11-28T04:20:49.731117+00:00",
+      "detail": {
+        "engine": "opencv",
+        "job_id": "clip-touchup-f01s014-12a-noled",
+        "kind": "clip_touchup",
+        "scene": "f01s014",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-28T04:20:49.760448+00:00",
+      "detail": {
+        "actual_units": 0,
+        "engine": "opencv",
+        "files": [
+          "clip_touchup/clip-touchup-f01s014-12a-noled/f01s014-12a.mp4"
+        ],
+        "job_id": "clip-touchup-f01s014-12a-noled",
+        "kind": "clip_touchup",
+        "manifest_sha256": "952c91008da52bd1b431c6b600e2a475dff37352fc4ff7bcf424184b79dc5c67",
+        "opencv": "5.1.0"
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-28T04:21:23.571929+00:00",
+      "detail": {
+        "adopted": true,
+        "job_id": "adopt-f01s014-stills-84844ba15d",
+        "kind": "stills",
+        "scene": "f01s014",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-28T04:21:23.593387+00:00",
+      "detail": {
+        "actual_units": 0,
+        "adopted": true,
+        "adoption_sha256": "0cd9ad4466c7c7c4560f5bc1d512292f23dd9a98cc17d8b18143aa7b039653a1",
+        "files": [
+          "stills/adopt-f01s014-stills-84844ba15d/f01s014-5--c1.png",
+          "stills/adopt-f01s014-stills-84844ba15d/f01s014-9--c1.png"
+        ],
+        "job_id": "adopt-f01s014-stills-84844ba15d",
+        "kind": "stills"
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-28T04:21:23.605818+00:00",
+      "detail": {
+        "adopted": true,
+        "choices": {
+          "f01s014-5": 1,
+          "f01s014-9": 1
+        },
+        "job_id": "adopt-f01s014-stills-84844ba15d",
+        "version": 1
+      },
+      "result": "recorded",
+      "stage": "pick"
+    },
+    {
+      "at": "2026-11-28T04:21:24.081435+00:00",
+      "detail": {
+        "adopted": true,
+        "job_id": "adopt-f01s014-clips-6e17b18a0a",
+        "kind": "film_clips",
+        "scene": "f01s014",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-28T04:21:24.172596+00:00",
+      "detail": {
+        "actual_units": 0,
+        "adopted": true,
+        "adoption_sha256": "75daf37060a797c8ef9630033ebdcdbd0e21d7868007c566bbc47fbc743a4d9e",
+        "files": [
+          "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-12a.mp4",
+          "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-14w.mp4",
+          "film_clips/adopt-f01s014-clips-6e17b18a0a/clips/f01s014-9p.mp4",
+          "film_clips/adopt-f01s014-clips-6e17b18a0a/depth/f01s014-9.depth.png"
+        ],
+        "job_id": "adopt-f01s014-clips-6e17b18a0a",
+        "kind": "film_clips"
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-28T04:21:24.268672+00:00",
+      "detail": {
+        "adopted": true,
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "kind": "music",
+        "scene": "f01s014",
+        "target": "film-01"
+      },
+      "result": "job_target",
+      "stage": "cli"
+    },
+    {
+      "at": "2026-11-28T04:21:24.416485+00:00",
+      "detail": {
+        "actual_units": 0,
+        "adopted": true,
+        "adoption_sha256": "a8ada94ce63cfb89acdb25b7f5254d51530ef55f300eca059c4cf51950605ec8",
+        "files": [
+          "music/adopt-f01s014-music-9794ac599f/p3-drone-1.wav",
+          "music/adopt-f01s014-music-9794ac599f/p3-drone-2.wav",
+          "music/adopt-f01s014-music-9794ac599f/p3-esraj-1.wav",
+          "music/adopt-f01s014-music-9794ac599f/p3-esraj-2.wav",
+          "music/adopt-f01s014-music-9794ac599f/p3-esraj-3.wav",
+          "music/adopt-f01s014-music-9794ac599f/p3-esraj-4.wav",
+          "music/adopt-f01s014-music-9794ac599f/p3-sunrise-1.wav",
+          "music/adopt-f01s014-music-9794ac599f/p3-sunrise-2.wav",
+          "music/adopt-f01s014-music-9794ac599f/p3-sunrise-3.wav"
+        ],
+        "job_id": "adopt-f01s014-music-9794ac599f",
+        "kind": "music"
+      },
+      "result": "accepted",
+      "stage": "import"
+    },
+    {
+      "at": "2026-11-28T04:25:30.251058+00:00",
+      "detail": {
+        "burned": "../../../production/audiovisual/bicharak/pilot/v5/root/film/film-01/film-01-f01s014.burned.mp4",
+        "duration": 66.58333333333334,
+        "mode": "shots",
+        "scene": "f01s014",
+        "target": "film-01"
+      },
+      "result": "scene_assembled",
+      "stage": "film"
+    },
+    {
+      "at": "2026-11-28T04:27:10.965534+00:00",
       "detail": {
         "failed": []
       },

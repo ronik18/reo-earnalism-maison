@@ -1,6 +1,6 @@
 {
   "scene": "f01s014",
-  "note": "Owner decisions 27 Nov 2026: adopt the picked media, no regeneration. Shot numbers are the approved v5 paper edit's (approved 27 Nov): 4 = Hem close-up 12a, 5 = Hem eye 7-c1 with the mole removed (eav touchup job touchup-f01s014-7-nomole in the title root), 7 = paan 14w, 9 = sunrise wall (uncropped stills-pilot2 f01s014-8 c2 with its motion-pilot2 depth map, per the paper-edit review), 11 = pot 9p. The door beat (shot 10) is re-taken (owner decision), so 13q/13r are not adopted. Shots 1, 2, 3, 6, 8 and 12 come from the scene-bound stills job.",
+  "note": "Owner decisions 27 Nov 2026: adopt the picked media, no regeneration. Shot numbers are the approved v5 paper edit's (approved 27 Nov): 4 = Hem close-up 12a, 5 = Hem eye 7-c1 with the mole removed (eav touchup job touchup-f01s014-7-nomole in the title root), 7 = paan 14w, 9 = sunrise wall (uncropped stills-pilot2 f01s014-8 c2 with its motion-pilot2 depth map, per the paper-edit review), 11 = pot 9p. The door beat (shot 10) is re-taken (owner decision), so 13q/13r are not adopted. Shots 1, 2, 3, 6, 8 and 12 come from the scene-bound stills job. v6 (owner review 28 Nov 2026, V1): shot 4 is the 12a take with the LED-like cyan rectangle between the slats removed, made by eav clip-touchup job clip-touchup-f01s014-12a-noled in this root (OpenCV, 0 CU) from the adopted 12a (motion-pilot4-f01s014, sha256 aee267a8...), which is unchanged.",
   "sources": {
     "motion-pilot4-f01s014": {"folder": "../motion-pilot4-f01s014"},
     "motion-pilot2-f01s014": {"folder": "../motion-pilot2-f01s014"},
@@ -19,7 +19,7 @@
     "f01s014-9": {"job": "motion-pilot2-f01s014", "file": "f01s014-8.depth.png"}
   },
   "clips": {
-    "4":  {"job": "motion-pilot4-f01s014", "takes": ["f01s014-12a"]},
+    "4":  {"job": "clip-touchup-f01s014-12a-noled", "takes": ["f01s014-12a"]},
     "7":  {"job": "motion-pilot6-f01s014", "takes": ["f01s014-14w"],
            "art": {"file": "../v6/art/f01s014-14.png", "reason": "owner-picked paan still, hand-copied to pilot/v6/art"}},
     "11": {"job": "motion-pilot6-f01s014", "takes": ["f01s014-9p"],
