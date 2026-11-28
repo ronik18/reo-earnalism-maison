@@ -75,7 +75,7 @@ Touch-up (small, local defects a mask query keeps missing): `touchup --film N --
 --job-id ID` repaints hand-placed boxes locally with OpenCV (inpaint, recolor, fill, clone; no
 model, no Colab) → `<key>--c1.png` + `<key>--mask.png` → open both at full size → `pick --job ID`
 → `film` patches the pick; with spec `"scene"` the pick is that scene's shot still (licence inherited only from a
-verified source; visual style, Touch-up).
+verified source; `film --shots` needs its reason in `picks/gate-overrides.json` and face-gates it; visual style, Touch-up).
 
 Clip touch-up (a small fixed defect in an imported Wan take, e.g. an LED-like glow between slats):
 `clip-touchup --film N --spec clip-touchup.json --job-id ID` repaints one recorded mask in every frame

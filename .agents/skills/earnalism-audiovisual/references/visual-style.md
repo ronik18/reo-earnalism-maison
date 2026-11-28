@@ -121,9 +121,12 @@ Colab, no randomness. Install with `pip install -r software/requirements-touchup
 - Cinematic scenes: add `"scene": "<scene id>"` to the spec (keys of that scene, approved paper
   edit) and `pick --job <ID>` makes the touched still that shot's still. A touch-up inherits the
   source still's model licence only when the source's licence is on record (I2, printed as a
-  warning); a scene-bound touch-up of an unverified source is refused. It has no gate verdict of
-  its own: quote the source's gate and record why it stands in `picks/gate-overrides.json`. Its
-  output can also be adopted as a hand copy (`adopt`, traced to the touch-up, same licence rule).
+  warning); a scene-bound touch-up of an unverified source is refused. It has no still-gate
+  verdict of its own: `film --shots` refuses a picked touch-up until `picks/gate-overrides.json`
+  holds a reason for its key (`"<scene>-<n>"`; quote the source's gate), and face-gates the
+  touched file itself (`qc/faces/<scene>/<key>.face.json`, recorded with the film's stills); a
+  face fail stands only on a `"faces:<key>"` reason, as in `qc`. Its output can also be adopted as
+  a hand copy (`adopt`, traced to the touch-up, same licence rule and the same reason).
 - Not for composition, scale, time of day, wrong characters or anatomy: regenerate those.
   Child characters: only restore the story's described dress and bare skin (model-licences.md).
 

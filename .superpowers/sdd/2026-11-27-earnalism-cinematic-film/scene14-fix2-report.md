@@ -513,3 +513,30 @@ and copies the hazy facade from 9 px to its right. Spec: `R/specs/touchup-f01s01
 
 After import, bind with `film/film-01/clip-picks.json` `{"f01s014/7": "f01s014-14y", "f01s014/11": "f01s014-9r"}`.
 The main checkout's `V/allowance-ledger.json` holds `clips-f01s014-fix-r2`, 2.1333 CU, `reserved` (checked).
+
+## Fix r4b round 1 (review `touchup-bind-review.md` of 5344b81)
+
+**Status: both Important findings fixed. skills/ and .agents/ are byte-identical.**
+
+- **Important 1:** `_cinematic_stills` (used by `film --shots`) now treats a picked touch-up like an adopted hand copy
+  with no gate verdict.
+  - It is refused unless `picks/gate-overrides.json` holds a reason for its key (`<scene>-<n>`, unchanged). The reason
+    lands in the film's `gate_overrides`.
+  - The local face gate runs on the touched file itself and writes `qc/faces/<scene>/<key>.face.json`, as `qc` does.
+    The verdict, sha256 and expect_face are recorded with the film's stills (`picks.<key>.faces`).
+  - A face fail refuses the film unless there is a `"faces:<key>"` reason, the same override as `qc`. If OpenCV
+    cannot be imported, the film is refused; nothing passes silently.
+  - The CLI warning, SKILL.md and visual-style.md now describe exactly this.
+- **Important 2:** new tests in `test_adopt.py`:
+  - a touch-up pick with no reason is refused, and passes with a reason, its face verdict recorded;
+  - a touched still with a double pupil fails `film --shots` and qc's `_scene_faces`, which judges the touched file
+    the cut records (path and sha256);
+  - a `"faces:"` reason lets it stand.
+- **Minor findings:**
+  - The scene-key check now uses `_scene_picks`' own rule (`key.rpartition("-")[0] == sid`).
+  - The scene test is split: an unknown scene, an existing unapproved scene, and a foreign key (`<scene>-extra-1`)
+    on the approved scene are each refused, and nothing is written.
+- **Tests:** test_adopt, test_cli, test_qc, test_facegate, test_skill_files and test_touchup: 237 tests OK.
+- **Scene 14 shot 1:** `_cinematic_stills` for f01s014 shot 1 passes on the existing `f01s014-1` reason; the key
+  format did not change. The face gate on `fd1d5fe9…` gives "not judged", with no face expected for the empty lane,
+  and records `qc/faces/f01s014/f01s014-1.face.json`.

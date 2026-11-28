@@ -2342,7 +2342,8 @@ def _cinematic_stills(rec, t, scenes, out) -> tuple:
     """C2: the stills of the cinematic film: for every glide or static shot, the operator's recorded pick of the
     scene's own stills jobs, linked into <film>/stills as <scene>-<n>. A shot with no pick stops the film; nothing
     falls back to an older film's still with the same key."""
-    files, info, missing = {}, {}, []
+    files, info, missing, touched = {}, {}, [], {}
+    kinds = {j["job_id"]: j["kind"] for j in _jobs(rec)}
     for sid, sp, _ in scenes:
         picks = _scene_picks(rec, t, sid)
         for shot in _still_shots(sp):
@@ -2353,6 +2354,8 @@ def _cinematic_stills(rec, t, scenes, out) -> tuple:
             files[key] = picks[key]["path"]
             info[key] = {"job_id": picks[key]["job_id"], "candidate": picks[key]["candidate"],
                          "sha256": picks[key]["sha256"]}
+            if kinds.get(picks[key]["job_id"]) == "touchup":   # a repaint has no still-gate verdict of its own
+                touched[key] = (sid, _expects_face(shot))
     if missing:
         raise Stop(f"shot(s) {', '.join(missing)} have no picked still of their scene's stills jobs; the film never "
                    "falls back to an older still with the same key",
@@ -2374,11 +2377,41 @@ def _cinematic_stills(rec, t, scenes, out) -> tuple:
         blk = _release_blocker(inf["job_id"], key, b)
         if blk:
             blockers.append(blk)
+    for key in touched:   # a picked touch-up stands only on a recorded reason, as an adopted hand copy does
+        if key in allowed:
+            overridden[key] = allowed[key]
+        else:
+            ungated.append(key)
     if ungated:
-        raise Stop(f"still(s) {', '.join(ungated)} are hand copies with no gate verdict of their own (untraced, or a "
-                   "declared derivation): they never enter the film ungated",
-                   f"Look at each at full size and record why it stands: a reason in {path} "
-                   + "{" + ", ".join(f'"{k}": "<reason>"' for k in ungated) + "}, or adopt a gated job's candidate")
+        raise Stop(f"still(s) {', '.join(ungated)} are hand copies or touch-ups with no still-gate verdict of their own "
+                   "(untraced, a declared derivation, or a local repaint): they never enter the film ungated",
+                   f"Look at each at full size and record why it stands (quote the source's gate): a reason in {path} "
+                   + "{" + ", ".join(f'"{k}": "<reason>"' for k in ungated) + "}, or pick a gated job's candidate")
+    face_fails = []
+    if touched:   # the face and eye gate judges the touched file itself, now; a fail stands only on a "faces:" reason
+        if not facegate.available():
+            raise Stop(f"touched still(s) {', '.join(touched)} cannot be face-gated: OpenCV is not importable",
+                       "pip install -r skills/earnalism-audiovisual/software/requirements-touchup.txt and rerun")
+        face_over = _face_overrides(rec)
+        for key, (sid, expect) in touched.items():
+            fdir = rec.root / "qc" / "faces" / sid
+            try:
+                r = facegate.gate(files[key], fdir, key=key, expect_face=expect)
+            except facegate.Unavailable as e:
+                raise Stop(f"touched still {key} could not be face-gated: {e}", "Fix the file and rerun") from None
+            reason = _override_for(face_over, key, r["sha256"])
+            info[key]["faces"] = {"verdict": ("fail" if not r["pass"] else "review" if r["needs_review"] else
+                                              "not judged" if r.get("not_judged") else "pass"),
+                                  "sha256": r["sha256"], "expect_face": bool(expect),
+                                  "face_json": (fdir / f"{key}.face.json").relative_to(rec.root).as_posix(),
+                                  **({"override": reason} if reason else {})}
+            if not r["pass"] and not reason:
+                why = "; ".join(str(f["detail"]) for f in r["findings"] if f["severity"] == "fail")
+                face_fails.append(f"{key} ({why or 'face gate failed'})")
+    if face_fails:
+        raise Stop("touched still(s) fail the face and eye gate: " + " | ".join(face_fails),
+                   f"Look at qc/faces/<scene>/<key>.faces.png at full size; redo the touch-up, or record why it stands "
+                   f"in {path} as {{\"faces:<key>\": \"<reason>\"}}")
     merged = out / "stills"
     if merged.exists():
         shutil.rmtree(merged)
@@ -2839,7 +2872,7 @@ def cmd_touchup(args):
             raise Stop(f"touchup not made: {e}",
                        f"{PROG} plan-shots --root {rec.root} --film {int(t[5:])} --scene {sid} (approve it)")
         for key, job, kind, name, *_, lic in items:
-            if not key.startswith(sid + "-"):
+            if key.rpartition("-")[0] != sid:   # the rule _scene_picks binds by
                 raise Stop(f"touchup key {key!r} is not a key of scene {sid}", "Fix the spec")
             if lic is None:   # I2: a derivation inherits a licence only from a verified source
                 raise Stop(f"touchup {key!r}: the model licence of {kind}/{job}/{name} is not on record (an unverified "
@@ -2931,8 +2964,9 @@ def cmd_touchup(args):
     for r in rows:
         if r["licence"]:
             print(f"WARNING {r['key']}: licence {r['licence']['licence']} ({r['licence']['model']}) inherited from "
-                  f"{r['source']} (verified) by this touch-up (OpenCV, no model); it has no gate verdict of its own: "
-                  "look at it at full size and record why it stands in picks/gate-overrides.json.")
+                  f"{r['source']} (verified) by this touch-up (OpenCV, no model); it has no still-gate verdict of its "
+                  "own: film --shots refuses it until picks/gate-overrides.json holds a reason for its key (quote the "
+                  "source's gate), and face-gates the touched file (a fail needs a \"faces:<key>\" reason).")
         else:
             print(f"WARNING {r['key']}: the model licence of {r['source']} is not on record (an unverified source): "
                   "this touch-up cannot be bound to a scene or adopted.")

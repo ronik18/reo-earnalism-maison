@@ -350,8 +350,25 @@ class AdoptTests(unittest.TestCase):
     def test_scene_bound_touchup_needs_a_key_of_the_scene_and_the_approved_plan(self):
         job = self.dotted_job({"repo": FLUX})
         before = (self.root / "record.json").read_bytes()
-        code, out = self.touch(job, scene="f01s999")
+        scenes = json.loads((self.root / "plan.json").read_text())["plan"]["films"][0]["scenes"]
+        other = scenes[1]["scene_id"]                                # a real scene of the plan, not approved
+        for scene, words in (("f01s999", "not made"), (other, "not made")):
+            code, out = self.touch(job, scene=scene)
+            self.assertEqual(code, 2, out)
+            self.assertIn(words, out)
+        # the approved scene, but a key _scene_picks would never bind to it (<scene>-extra-1)
+        spec = self.d / "foreign.json"
+        spec.write_text(json.dumps({"scene": self.sid, "items": [
+            {"key": f"{self.sid}-1", "source": {"job": job, "file": f"{self.sid}-1--c1.png"},
+             "ops": [{"op": "inpaint", "box": [95, 45, 111, 61], "radius": 5}]}]}), encoding="utf-8")
+        real = cli._touchup_items
+        cli._touchup_items = lambda rec, t, spec: [(f"{self.sid}-extra-1", *x[1:]) for x in real(rec, t, spec)]
+        try:
+            code, out = run("touchup", "--root", self.root, "--film", 1, "--spec", spec, "--job-id", "touchup-foreign")
+        finally:
+            cli._touchup_items = real
         self.assertEqual(code, 2, out)
+        self.assertIn("is not a key of scene", out)
         self.assertEqual((self.root / "record.json").read_bytes(), before)
         self.assertFalse((self.root / "touchup").exists())
 
@@ -393,6 +410,66 @@ class AdoptTests(unittest.TestCase):
         self.assertEqual(code, 2, out)
         self.assertIn("unverified source", out)
         self.assertEqual((self.root / "record.json").read_bytes(), before)
+
+    # ------------------------------------------------------------------ a touch-up pick is gated in the cut
+    def picked_face_touchup(self, right):
+        """A scene-bound touch-up of a verified face still (a wall corner repainted, the eyes untouched), picked."""
+        from tests.test_facegate import face
+        buf = io.BytesIO()
+        face(right=right).save(buf, format="PNG")
+        job = self.imported("stills", {f"{self.sid}-1--c1.png": buf.getvalue()}, {"items": []}, model={"repo": FLUX})
+        spec = self.d / "face-touch.json"
+        spec.write_text(json.dumps({"scene": self.sid, "items": [
+            {"key": f"{self.sid}-1", "source": {"job": job, "file": f"{self.sid}-1--c1.png"},
+             "ops": [{"op": "fill", "box": [0, 0, 12, 12], "sample": [30, 30]}]}]}), encoding="utf-8")
+        code, out = run("touchup", "--root", self.root, "--film", 1, "--spec", spec, "--job-id", "touchup-face")
+        self.assertEqual(code, 0, out)
+        self.assertIn("film --shots refuses it until picks/gate-overrides.json holds a reason", out)
+        choices = self.d / "choices.json"
+        choices.write_text(json.dumps({f"{self.sid}-1": 1}))
+        self.assertEqual(run("pick", "--root", self.root, "--job", "touchup-face", "--choices", choices)[0], 0)
+        return self.root / "touchup" / "touchup-face" / f"{self.sid}-1--c1.png"
+
+    def overrides(self, **entries):
+        (self.root / "picks").mkdir(exist_ok=True)
+        (self.root / "picks" / "gate-overrides.json").write_text(json.dumps(entries), encoding="utf-8")
+
+    def test_touchup_pick_needs_a_reason_at_film_shots_and_is_face_gated(self):
+        s = self.sid
+        touched = self.picked_face_touchup("one")
+        stills = self.stills_of_shot_1()
+        with self.assertRaises(cli.Stop) as stop:                    # no reason: never enters the film ungated
+            stills()
+        self.assertIn("touch-ups with no still-gate verdict", str(stop.exception))
+        self.overrides(**{f"{s}-1": "owner viewed the touch-up at full size; source gate quoted"})
+        _, info = stills()
+        self.assertEqual(info["gate_overrides"], {f"{s}-1": "owner viewed the touch-up at full size; source gate quoted"})
+        faces = info["picks"][f"{s}-1"]["faces"]
+        self.assertEqual((faces["verdict"], faces["sha256"]), ("pass", sha(touched)))
+        self.assertTrue((self.root / faces["face_json"]).is_file())  # the verdict is recorded beside qc's
+
+    def test_touchup_pick_with_a_double_pupil_fails_film_and_qc_unless_a_faces_reason(self):
+        s = self.sid
+        touched = self.picked_face_touchup("two")
+        self.overrides(**{f"{s}-1": "owner viewed the touch-up at full size"})
+        stills = self.stills_of_shot_1()
+        with self.assertRaises(cli.Stop) as stop:
+            stills()
+        self.assertIn("fail the face and eye gate", str(stop.exception))
+        rec = Record.load(self.root)
+        media, _ = cli._scene_face_media(rec, "film-01", s)          # qc judges the touched file the cut records
+        still = next(m for m in media if m["key"] == f"{s}-1")
+        self.assertEqual((still["path"], still["sha256"]),
+                         (touched.relative_to(self.root).as_posix(), sha(touched)))
+        res = cli._scene_faces(rec, "film-01", s, [still])
+        self.assertEqual(res["fails"], [f"{s}-1"])
+        self.assertIn("double_pupil", [f["kind"] for f in res["flagged"]])
+        self.overrides(**{f"{s}-1": "owner viewed the touch-up at full size",
+                          f"faces:{s}-1": "owner: the second pupil is a reflection, kept"})
+        _, info = stills()
+        self.assertEqual(info["picks"][f"{s}-1"]["faces"]["verdict"], "fail")
+        self.assertIn("reflection", info["picks"][f"{s}-1"]["faces"]["override"])
+        self.assertEqual(cli._scene_faces(Record.load(self.root), "film-01", s, [still])["fails"], [])
 
 
 if __name__ == "__main__":
