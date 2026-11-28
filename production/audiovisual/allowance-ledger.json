@@ -880,14 +880,16 @@
     "title": "apad",
     "month": "2026-11",
     "units": 0.0,
-    "state": "reserved",
+    "state": "settled",
     "edition_id": "439e8f15-d679-4137-a2c0-9af5e1eccc5f",
     "root": "apad",
     "reserved_units": 1.7348503888888887,
     "colab_units": 0.0,
     "runner": "modal",
     "moved_to_modal_at": "2026-11-28T12:40:29+00:00",
-    "modal_runs_issued": 1
+    "modal_runs_issued": 1,
+    "usd": 0.627584,
+    "cu_equivalent": 6.28
   },
   {
     "job_id": "narration-8ce6fba8-c1of2",
