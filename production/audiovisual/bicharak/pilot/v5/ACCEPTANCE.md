@@ -1,4 +1,186 @@
-# বিচারক scene 14 v5: finish run (27 Nov 2026, after the door re-take)
+# বিচারক scene 14 v5: finish run (28 Nov 2026, sounds synthesized, scene cut built and checked)
+
+Operator run, `eav` commands only, in the main checkout (`claude/great-gates-tpoz8n`). `B` = `production/audiovisual/bicharak`,
+`V` = `B/pilot/v5`, `R` = `V/root`. Nothing was spent: no GPU, no Colab, no ElevenLabs. The source transcript
+(`source.json`), the source media, the official logo file and the earlier sound files are unchanged. No signed URL
+or `exchange.json` is in any tracked file.
+
+**Status: DONE. `qc` passes every gate, with no override. The scene cut exists.**
+- Outputs: `V/scene14-v5.mp4` and `V/scene14-v5.burned.mp4` (gitignored byte copies of
+  `R/film/film-01/film-01-f01s014{,.burned}.mp4`).
+- Duration: 66.583 s = 4 s title card + the 54.59 s scene + 5 s credits + 3 s END.
+- The owner's review (listening and viewing) is still open. Everything below that is not a measurement is Claude's
+  frame review, not the owner's.
+
+## Owner decision applied (28 Nov 2026)
+
+"Synthesize CC0 hooves (shot 1) and morning birds/crows (shots 9–10) ourselves, the same way the wheels, breeze and
+broom were made; drop a sound that still sounds fake after a fair attempt; never use a third-party clip without a
+verified CC0 record."
+
+- **Hooves and morning birds: both kept.** Neither was dropped, so the plan's SFX lists are unchanged: no
+  `plan-shots` re-run and no re-approval was needed. The approval of 27 Nov stands.
+- Both were judged by measurement and by spectrogram only. **No human has listened to them yet**: their realism is
+  an owner-review item (below).
+
+## Sounds made (S1 and S3 resolved)
+
+Generator: `B/pilot/v4/tools/synth_sfx_v5.py` (sha256 `569b8977…`).
+- A sibling of `synth_sfx.py` (`18d2e096…`), reusing its filter, envelope and writer helpers and its `broom()`.
+- Numpy plus OpenCV. No input recording. Deterministic: a re-run gives byte-identical files.
+- Command: `python3 pilot/v4/tools/synth_sfx_v5.py pilot/v5/sfx --sweep
+  pilot/v5/root/film_clips/clips-f01s014-door-r3/clips/f01s014-13s.mp4`.
+
+Each new file has a `V/sfx/licences.json` entry: `CC0-1.0`, `basis.rule` `cc0-synthesis`, script and helper
+sha256, seed, command, and output sha256. `cue --fx` accepted all 13 placements as `cc0-synthesis`.
+
+| File | Length | Peak | RMS | Measured | sha256 |
+|---|---|---|---|---|---|
+| `hooves.wav` (shot 1) | 6.400 s, 48 kHz stereo, 24-bit | −3.0 dBFS | −23.0 dBFS | 18 beats; inter-onset 0.354 s ± 0.011 s (CV 3.1 %, 2.83 beats/s, a trot); a second hoof 13–45 ms after each beat (a clear re-attack ≥ 6 dB on 14 of 18); beat levels alternate strong and weak; spectral centroid 480–1200 Hz per 250 ms | `1ec043af…` |
+| `crows.wav` (shots 9–10) | 14.500 s, 48 kHz stereo, 24-bit | −3.0 dBFS | −25.7 dBFS | 9 caws in 4 series (spans in `crows.caws.json`); caw centroids 973–1294 Hz, with **98–100 % of caw energy in 500–2500 Hz**; chirps of 2.6–4.2 kHz about 20 dB under the caws; an open-air bed about 30 dB under the caws keeps the gaps out of digital silence (centroid 650–900 Hz, about −58 dBFS) | `b7d8064e…` |
+| `broom-13s.wav` (shot 10) | 9.600 s, 48 kHz stereo, 24-bit | −2.6 dBFS | −26.3 dBFS | 6 strokes, timed to the 13s sweep (below); centroid about 6 kHz in each stroke, silent after 5.1 s (13t has no strokes) | `1ba9e6c9…` |
+
+- **Hooves:** one horse at a trot.
+  - Each beat is a diagonal pair of hooves, a "clip-clop" flam of 18–42 ms.
+  - Each hit is a shoe click, a hard knock with 3 random brick/hoof modes, and a small body thump.
+  - Timing jitters by ±2.5 % and level by ±1.2 dB.
+  - The lane is modelled as wall reflections at 11–67 ms plus a 0.45 s tail. A light room tone sits 24 dB under
+    the trot. The level swells by 5 dB as the carriage draws near.
+- **Birds:** each caw is a harmonic source falling about 16 % in pitch, with 5 % pitch jitter, shimmer, a weak
+  subharmonic and a strong breathy noise component.
+  - It passes through three formants (about 0.9, 1.5 and 2.2 kHz) and is band-limited to 450–2600 Hz, so nothing is
+    harsh. The far crow is low-passed at 1.8 kHz.
+  - The first series is placed in the narration's pause after "প্রভাত হইবে," (scene 32.69–33.34 s).
+  - A first version had cleaner harmonics and read more like a horn than a crow, so the noise and jitter were
+    raised. Its sha256 was never recorded.
+- **Broom re-timed (S3).** Stroke peaks were taken from the 13s take itself (sha256 `d32cb44f…`).
+  - Method: the per-frame mean absolute difference in the lowest 29 % of the frame (where only the broom pole
+    swings), a 5-frame median (the take's 20-frame keyframe blips are single frames), a 3-frame mean, and maxima at
+    least 10 frames apart above the median.
+  - Peaks at 0.458, 1.375, 2.000, 2.917, 3.500 and 4.833 s of the clip. Each stroke sound starts 0.18 s before its
+    peak.
+  - These match the pole's swing in the contact sheet and the raw difference curve (frames 11, 33, 47, 69, 84 and
+    113–115).
+  - Recorded in `V/sfx/broom-13s.times.json`. The old `broom.wav` (v2 timing) is kept on file and not placed.
+
+## Commands, in order
+
+All from `skills/earnalism-audiovisual/software` as `python3 -m eav.cli …`.
+
+1. `python3 B/pilot/v4/tools/synth_sfx_v5.py V/sfx --sweep R/film_clips/clips-f01s014-door-r3/clips/f01s014-13s.mp4`
+   (above). Then `V/sfx/licences.json`, `README.md` and `fx-f01s014.json` were written.
+   - In `fx-f01s014.json`, the broom starts on shot 10's first frame (35.20 s).
+   - The pot is placed at 45.17 s: in 9p the pot leaves her hands at frames 10–11 and is on the floor by frame 12,
+     so the impact falls inside the music's 0.4 s silence from 45.065 s.
+   - Hooves and wheels (−44) play under shot 1, and the crows run from 30.69 s (the dissolve into shot 9) to the
+     hard cut into shot 11.
+2. `status --root R --scene f01s014`: exit 0, `Next:` = `cue --pick`.
+3. `cue --root R --film 1 --scene f01s014 --stems adopt-f01s014-music-f5b90329a1 --pick --tonic D`: exit 0, picked
+   drone `p3-drone-2`, solo `p3-esraj-4`, phrase `p3-sunrise-3`.
+4. `cue --root R --film 1 --scene f01s014 --stems adopt-f01s014-music-f5b90329a1 --fx V/sfx/fx-f01s014.json`:
+   exit 0, −15.9 LUFS, −3.9 dBTP, voice 17.0 dB over the music.
+5. `film --root R --film 1 --shots --scene f01s014 --logo skills/earnalism-video/software/assets/standard-intro/v1/production-lockup.png --end-card skills/earnalism-video/software/assets/standard-intro/v1/landscape.mp4 --title বিচারক --author "রবীন্দ্রনাথ ঠাকুর" --narrator "Subhajit – Grounded Bengali Storyteller" --burn`:
+   exit 0 (6 min CPU), "66.6 s, 12 shots at 24 fps, −16.1 LUFS, TP −3.8 dBTP".
+   - The logo and END are the ones v4 used (v4 ACCEPTANCE §11). The logo file is unchanged (sha256 `951d21e8…`); eav
+     overlays it, and no pixel of it was edited.
+   - It printed motion-review notes for 12a (shot 4) and 9p (shot 11), the known G13 items.
+6. `qc --root R`: exit 0, **every gate passes** (table below).
+7. Frame extraction (`ffmpeg -ss`) of the burned cut at the start and end of every shot, the peak, mid and late
+   shot 10, title, credits and END, followed by the frame review and listening measurements below.
+8. Copied to `V/scene14-v5.mp4` (sha256 `2e026f92…`, the qc'd cut) and `V/scene14-v5.burned.mp4` (`6b66f6e2…`).
+
+## QC (`qc --root R`, `R/qc/report.json`, result `pass`, `not_run` empty, `failed` empty)
+
+| Gate | Result | Measured |
+|---|---|---|
+| loudness | pass | −16.1 LUFS integrated, LRA 4.9 LU |
+| true_peak | pass | −3.8 dBTP |
+| new_info (R1) | pass | no gaps |
+| holds | pass | none |
+| black_bars | pass | none |
+| hitches | pass | none |
+| flashes (R10) | pass | max 1/s; one jump at 63.583 s (into the END card), planned |
+| sound_on_picture (R4) | pass | every listed sound placed over its shot, hooves (1) and crows (9, 10) included |
+| captions (R5) | pass | no problems |
+| margin | pass | voice over music 17.0 dB (16–18 dB); voice over everything else 15.7 dB (≥ 15) |
+| peak_silence | pass | music bus −200 dB on [45.065, 45.465] |
+| digital_zero | pass | none |
+
+- **Overrides: none.** No gate failed, so none of the owner's accepted items had to be cited. Those items are shot
+  3's Western cot and doorknob, shot 8's slats and its plain dissolve, the 4 s waivers and no mole.
+- Advisories: the motion review of 12a (shot 4) and 9p (shot 11), as G13; the word check was not run for passage
+  `f01s014-p01` (no transcript); contact sheet `R/qc/film-01--f01s014-contact.jpg`.
+
+## Listening (measured; not an owner listening)
+
+- **Delivered film:** −16.1 LUFS integrated, LRA 4.9 LU, sample peak −3.8 dBFS, astats flat factor 0, so **no
+  clipping**. The burned rendition measures the same.
+- **Scene mix:** −15.9 LUFS, −3.9 dBTP, flat factor 0.
+- **Narration clarity:** the voice was fitted into the scene mix, and the margin is voice over everything else in
+  speech.
+  - Per shot: 1 15.9, 2 15.7, 3 19.2, 4 17.7, 5 17.1, 6 19.7, 7 19.6, 8 17.4, 9 17.4, **10 13.4, 11 13.0**,
+    12 14.3 dB.
+  - The narration stays on top everywhere.
+  - Closest under speech: the broom in shot 10 (−33 dB placement), the pot drop at the peak (−24 dB, as in v4) and
+    the murmur in shot 12.
+  - The one 1 s window at 7.4 dB (18.25 s) is the narration fading at the end of "নাই!" over a steady −34.6 dB
+    background, not masking.
+- **Not assessed by ear:** whether the synthetic hooves, caws and broom sound real.
+
+## Frame review (Claude, burned cut, at the start and end of every shot, the peak, title, credits and END)
+
+- **Veiled mother: consistent.** In shots 7 (paan), 10 (door beat), 11 (peak) and 12 (neighbours) she wears a white
+  sari with a red border, her head covered by the sari, a red blouse and a bindi.
+  - Her face is drawn more gaunt in shot 7 (14w) than in shots 10 and 11. It is the same costume, so the owner may
+    want to compare the faces.
+- **Hem: no mole** in shots 4 (12a), 5 (the retouched eye still) and 8 (slats). Brown eyes throughout.
+- **Anachronisms:** there are no modern objects. Shot 1 shows a horse carriage, cobbles and a lamp post; shot 9 a
+  birdcage; shot 11 a brass pot.
+  - Shot 3: the Western cot and round doorknob are accepted. The rectangle on the wall beside the door is the cot's
+    shadow, not a switch plate.
+  - Shot 8: the horizontal slats are accepted.
+  - **Finding V1: shot 4 (12a) shows a small cyan glowing rectangle between the slats** (left, upper third, visible
+    through the whole shot). It is probably meant as moonlight, but its colour and shape read like an LED. It was
+    not hand-patched.
+- **Captions:** readable throughout: white Bengali with a dark stroke at the bottom centre, one or two lines,
+  correct conjuncts.
+  - On the pale backgrounds of shots 7, 10 and 11 they are weaker but still legible.
+  - At the peak, the shot 11 caption ("তখন সেখানে সহসা") crosses the falling brass pot.
+- **Joins:** dissolves 1→2, 3→4, 5→6, 7→8 and 8→9 blend cleanly, as does the plain dissolve 8→9. Cuts land on
+  their shots. Shot 12 drains and fades into the credits card.
+  - Title card "বিচারক — রবীন্দ্রনাথ ঠাকুর"; credits with the author, the narration voice and the AI disclosure
+    in both languages; then the approved END lockup. The logo is top-right throughout the scene.
+- **Shot 10:** the mother really sweeps for the first 5 s, then stands and turns her head to the door. The broom's
+  strokes follow the pole's swings.
+
+## Findings
+
+- S1 resolved: hooves and crows synthesized (CC0, recorded). S3 resolved: broom re-timed to 13s. S2 (the
+  motion-pilot4 Commons records) still stands as a record. S4 (`night2.wav` and `pot-drop.wav` rest on the
+  `pilot/sfx/README.md` declaration, and no generator script is on file) still stands.
+- **V1 (picture, new): the cyan glowing patch in shot 4's slats** (12a). The owner decides whether to accept it or
+  fix it through an eav route (`touchup` on the take is not available for a clip; a re-take would cost CU).
+- **V2 (sound): realism unassessed by ear.** The hooves, caws and broom pass every measurement, but they are
+  synthetic. The caws are the riskiest, because a formant-synthesized crow can sound like a toy.
+- **V3 (mix): the broom (shot 10) and pot (shot 11) sit about 13 dB under the narration,** above the scene's 15 dB
+  gate overall but closer than in the other shots. Lowering them is an fx gain change and a `cue --fx` re-run if the
+  owner wants it.
+- **V4 (caption placement):** the peak caption crosses the falling pot (shot 11).
+
+## Remaining owner-review items
+
+1. Listen to the cut. In particular: are the hooves (shot 1), crows (shots 9–10) and broom (shot 10) convincing? If
+   one is not, drop it through `plan-shots` and re-approve, as the 28 Nov rule says.
+2. Shot 4's cyan patch (V1).
+3. The broom and pot levels against the narration (V3); the peak caption over the pot (V4).
+4. The mother's face in shot 7 against shots 10 and 11 (same costume, more gaunt face).
+5. The motion-review advisories for 12a and 9p (G13), and the word check that was not run (no transcript).
+6. Owner approval of the finished reference scene (owner decision 3, 27 Nov).
+
+---
+
+# Earlier record: 27 Nov 2026 finish run (stopped at sound effects; superseded by the run above)
+
 
 Operator run, `eav` commands only, from a clean worktree of HEAD `e3e19c2` (`claude/great-gates-tpoz8n`), at
 `<scratchpad>/wt-s14e`. `B` = `production/audiovisual/bicharak`, `V` = `B/pilot/v5`, `R` = `V/root`. Nothing was

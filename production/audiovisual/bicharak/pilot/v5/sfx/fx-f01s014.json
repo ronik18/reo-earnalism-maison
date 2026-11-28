@@ -1,0 +1,19 @@
+{
+ "ambience": [
+  {"sfx": "night", "path": "night2.wav", "at": 0.0, "start": 0.0, "dur": 12.775, "gain_db": -36, "fin": 2.0, "fout": 1.0},
+  {"sfx": "hooves", "path": "hooves.wav", "at": 0.0, "start": 0.0, "dur": 5.988, "gain_db": -38, "fin": 0.5, "fout": 0.8},
+  {"sfx": "wheels", "path": "wheels.wav", "at": 0.0, "start": 5.0, "dur": 5.988, "gain_db": -44, "fin": 1.0, "fout": 0.8},
+  {"sfx": "wheels", "path": "wheels.wav", "at": 11.975, "start": 0.0, "dur": 8.052, "gain_db": -40, "fin": 0.8, "fout": 0.9},
+  {"sfx": "breeze", "path": "breeze.wav", "at": 19.227, "start": 0.0, "dur": 8.491, "gain_db": -42, "fin": 1.0, "fout": 0.8},
+  {"sfx": "wheels", "path": "wheels.wav", "at": 26.918, "start": 20.0, "dur": 4.572, "gain_db": -40, "fin": 0.8, "fout": 0.6},
+  {"sfx": "night", "path": "night2.wav", "at": 26.918, "start": 30.0, "dur": 4.572, "gain_db": -44, "fin": 0.8, "fout": 0.6},
+  {"sfx": "breeze", "path": "breeze.wav", "at": 30.69, "start": 12.0, "dur": 14.025, "gain_db": -42, "fin": 0.8, "fout": 0.03},
+  {"sfx": "crows", "path": "crows.wav", "at": 30.69, "start": 0.0, "dur": 14.025, "gain_db": -42, "fin": 0.8, "fout": 0.05},
+  {"sfx": "murmur", "path": "murmur.wav", "at": 48.6, "start": 0.0, "dur": 5.992, "gain_db": -36, "fin": 1.6, "fout": 0.0},
+  {"sfx": "wheels", "path": "wheels.wav", "at": 51.0, "start": 40.0, "dur": 3.592, "gain_db": -38, "fin": 2.2, "fout": 0.0}
+ ],
+ "foley": [
+  {"sfx": "broom", "path": "broom-13s.wav", "at": 35.2, "start": 0.0, "dur": 9.515, "gain_db": -33, "fin": 0.0, "fout": 0.03},
+  {"sfx": "pot", "path": "pot-drop.wav", "at": 45.17, "start": 0.0, "gain_db": -24, "fin": 0.0, "fout": 0.6}
+ ]
+}

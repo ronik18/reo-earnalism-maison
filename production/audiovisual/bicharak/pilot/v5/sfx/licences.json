@@ -64,5 +64,58 @@
    "declared_in": "pilot/sfx/README.md: original synthesized sound, no third-party recording, CC0 1.0",
    "sha256": "7cacc2129901eab2759e8dc7b150de7382b07d8bce6525c273030a68fd773bad"
   }
+ },
+ "hooves.wav": {
+  "title": "one horse trotting on a brick lane at night (original synthesis)",
+  "licence": "CC0-1.0",
+  "author": "Earnalism project (original synthesis)",
+  "basis": {
+   "rule": "cc0-synthesis",
+   "script": "pilot/v4/tools/synth_sfx_v5.py",
+   "script_sha256": "569b89777513e1cfc3fcc76840da0abc82107994690df15f89ac78a8d08580a3",
+   "helpers": "pilot/v4/tools/synth_sfx.py",
+   "helpers_sha256": "18d2e09693e9b1ff7de192fbf194c01deed01b1bf08832690933b9e70a1a0c88",
+   "command": "python3 pilot/v4/tools/synth_sfx_v5.py pilot/v5/sfx --sweep pilot/v5/root/film_clips/clips-f01s014-door-r3/clips/f01s014-13s.mp4",
+   "seed": 2814,
+   "declared_in": "pilot/v5/sfx/README.md; numpy noise, damped modes and a synthetic room, no input recording (owner decision 28 Nov 2026)",
+   "sha256": "1ec043af711a384f0da3324bdb85a2db9bc4318583c32ae9ddec7f5b20d13611"
+  }
+ },
+ "crows.wav": {
+  "title": "sparse morning chorus: house-crow caws and small chirps (original synthesis)",
+  "licence": "CC0-1.0",
+  "author": "Earnalism project (original synthesis)",
+  "basis": {
+   "rule": "cc0-synthesis",
+   "script": "pilot/v4/tools/synth_sfx_v5.py",
+   "script_sha256": "569b89777513e1cfc3fcc76840da0abc82107994690df15f89ac78a8d08580a3",
+   "helpers": "pilot/v4/tools/synth_sfx.py",
+   "helpers_sha256": "18d2e09693e9b1ff7de192fbf194c01deed01b1bf08832690933b9e70a1a0c88",
+   "command": "python3 pilot/v4/tools/synth_sfx_v5.py pilot/v5/sfx --sweep pilot/v5/root/film_clips/clips-f01s014-door-r3/clips/f01s014-13s.mp4",
+   "seed": 914,
+   "declared_in": "pilot/v5/sfx/README.md; formant-filtered harmonic+noise caws and FM chirps, no input recording (owner decision 28 Nov 2026)",
+   "sha256": "b7d8064e41a252ba21b2e57fe9c7d3efcbe1ae2c5bf38ce2666408c93064455e"
+  }
+ },
+ "broom-13s.wav": {
+  "title": "straw-broom strokes on packed earth, timed to the 13s sweep (original synthesis)",
+  "licence": "CC0-1.0",
+  "author": "Earnalism project (original synthesis)",
+  "basis": {
+   "rule": "cc0-synthesis",
+   "script": "pilot/v4/tools/synth_sfx_v5.py",
+   "script_sha256": "569b89777513e1cfc3fcc76840da0abc82107994690df15f89ac78a8d08580a3",
+   "helpers": "pilot/v4/tools/synth_sfx.py",
+   "helpers_sha256": "18d2e09693e9b1ff7de192fbf194c01deed01b1bf08832690933b9e70a1a0c88",
+   "command": "python3 pilot/v4/tools/synth_sfx_v5.py pilot/v5/sfx --sweep pilot/v5/root/film_clips/clips-f01s014-door-r3/clips/f01s014-13s.mp4",
+   "seed": 1314,
+   "declared_in": "pilot/v5/sfx/README.md; synth_sfx.py broom() strokes re-timed to the 13s sweeping take; no input recording",
+   "sha256": "1ba9e6c97ef88e6c607228ab00d887cc17276d50a4348e1409b720010677b795",
+   "stroke_times": "pilot/v5/sfx/broom-13s.times.json",
+   "timed_to": {
+    "clip": "pilot/v5/root/film_clips/clips-f01s014-door-r3/clips/f01s014-13s.mp4",
+    "clip_sha256": "d32cb44fc93899b0403b9816c745d93f0f93831b8c3a1fdc3b69ea24e189639d"
+   }
+  }
  }
 }
