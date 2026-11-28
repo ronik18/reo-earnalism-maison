@@ -1077,10 +1077,15 @@
     "job_id": "narration-6bbdcca8-c2of2",
     "title": "pratihingsa",
     "month": "2026-11",
-    "units": 0.8811210555555553,
+    "units": 0.0,
     "state": "reserved",
     "edition_id": "89d6ff7e-42c5-491c-8c05-0a08bc8827d6",
-    "root": "pratihingsa"
+    "root": "pratihingsa",
+    "reserved_units": 0.8811210555555553,
+    "colab_units": 0.0,
+    "runner": "modal",
+    "moved_to_modal_at": "2026-11-28T13:21:12+00:00",
+    "modal_runs_issued": 1
   },
   {
     "job_id": "narration-0ef4dd52-c1of2",
@@ -1629,6 +1634,14 @@
         "usd": 1.24764,
         "seconds": 0.0,
         "at": "2026-11-28T12:40:32+00:00",
+        "status": "pending"
+      },
+      {
+        "run_id": "narration-6bbdcca8-c2of2#1",
+        "job_id": "narration-6bbdcca8-c2of2",
+        "usd": 0.7034625,
+        "seconds": 0.0,
+        "at": "2026-11-28T13:21:12+00:00",
         "status": "pending"
       }
     ]
