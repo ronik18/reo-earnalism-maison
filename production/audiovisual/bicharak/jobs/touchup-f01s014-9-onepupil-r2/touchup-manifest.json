@@ -1,0 +1,41 @@
+{
+  "engine": "opencv",
+  "items": [
+    {
+      "candidate": "touchup/touchup-f01s014-9-onepupil-r2/f01s014-9--c1.png",
+      "candidate_sha256": "b3c78316751758ef39d3395005061cb72ed7401ae65f6af9f4ad958290ab6798",
+      "key": "f01s014-9",
+      "mask": "touchup/touchup-f01s014-9-onepupil-r2/f01s014-9--mask.png",
+      "mask_sha256": "bda50304707fb5b3d313851d46be8332a3c8d5a7014e049886f1e4c653980440",
+      "ops": [
+        {
+          "box": [
+            561,
+            224,
+            577,
+            244
+          ],
+          "feather": 1,
+          "mask": "ellipse",
+          "op": "fill",
+          "sample": [
+            580,
+            232
+          ]
+        }
+      ],
+      "source": "stills/stills-pilot7-f01s014/f01s014-9--c4.png",
+      "source_file": "f01s014-9--c4.png",
+      "source_job": "stills-pilot7-f01s014",
+      "source_kind": "stills",
+      "source_sha256": "89d3ee4f8c871a20f01ad9b0bf7787dfd8c26544da3de7f544590bf93a48d7fe"
+    }
+  ],
+  "job_id": "touchup-f01s014-9-onepupil-r2",
+  "kind": "touchup",
+  "method": "eav.touchup.apply",
+  "opencv": "5.1.0",
+  "schema": "earnalism.audiovisual-touchup.v1",
+  "spec_sha256": "7c42be61467a5050e3cafed21c55867b18809b7ae0a16d3d6dc44341ab85cdbf",
+  "target": "film-01"
+}
