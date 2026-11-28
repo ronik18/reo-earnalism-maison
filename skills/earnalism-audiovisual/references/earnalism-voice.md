@@ -80,4 +80,15 @@ suspect. `import` lists them (advisory: the import stands), `qc` lists them in
 from narration holding one until the owner has listened and names it with
 `--accept-qc <unit_key,...>` (recorded with the film / bundle / reel). Only keys on the current
 suspect list are accepted, so an acceptance never covers a later regeneration. Otherwise
-regenerate that narration; never accept unheard.
+voice just those units again, never accept unheard:
+`job narration --root <dir> --rates <rates.json> --redo-units <job_id>:<unit_key>[,<unit_key>...]`
+(`<job_id>` is the imported film narration job, or the chunk that holds the units; the refusal
+prints the exact command). It builds `<job_id>-u<k>` with only those units and the source job's
+own text, voice description, generation settings, batch and model, forecast, cap-checked and
+reserved like any job (Colab, or `modal-request <id> --colab-units 0`). Its `import` measures each
+new take against the source job's median: a take that passes supplies that unit to film,
+bundle-audio and preview in place of the old one (record event `narration/unit_replaced`; the
+source job stays the current narration, the old take stays on disk, and films or bundles built
+before are no longer current); a take still suspect is recorded (`narration/unit_redo_suspect`)
+and the unit keeps its take and its flag. `status` lists both. `retire <redo job>` reverts the
+unit to the take used before it.

@@ -14,6 +14,14 @@
                           its own job of <= 3600 s; the caps are checked once for the sum)
   python3 -m eav.cli job <narration|stills> --root <dir> --rates <rates.json> --replace-chunk <closed chunk id>
                          (rebuilds only that chunk's items as <chunk id>-r<k>; the group keeps its other chunks)
+  python3 -m eav.cli job narration --root <dir> --rates <rates.json> --redo-units <job_id>:<unit_key>[,<unit_key>...]
+                         (a suspect_truncated unit voiced again: only those units of an imported film narration
+                          job or chunk, same text/voice/generation/model, as <job_id>-u<k>; forecast, caps,
+                          ledger and modal-request like any job (--colab-units 0 on Modal). Its import checks each
+                          new take against the source job's median: a take that passes supplies the unit to
+                          film/bundle-audio/preview in place of the old one (narration/unit_replaced event; the
+                          old take stays on disk; `retire <redo job>` reverts it); a take still suspect is
+                          recorded (unit_redo_suspect) and the unit keeps its take and its flag)
   python3 -m eav.cli import <job_id> --root <dir> --from <folder|archive> [--units <CU>]
                          [--archive-sha256 <sha>]           (reel_clips)
   python3 -m eav.cli retouch <key> --root <dir> (--target film-NN|reel-N | --film N | --reel N)
@@ -240,6 +248,8 @@ def _jobs(rec) -> list:
         jid = m["job_id"]
         out.append({"job_id": jid, "kind": m["job_kind"], "target": targets.get(jid),
                     "order": order.get(jid, -1), "chunk": m.get("chunk"),
+                    # job narration --redo-units: {source_job_id, unit_keys}; never a current job
+                    "redo": m.get("redo"),
                     "notebook": rec.root / a["path"], "inputs_zip": rec.root / m["inputs_zip"],
                     "manifest": rec.root / m["manifest"], "forecast_units": m["forecast_units"],
                     "imported": jid in done["accepted"],
@@ -309,8 +319,46 @@ def _dirs(rec, job) -> list:
 
 
 def _one_dir(rec, job):
+    """The WAV source of a narration job (or chunk group) as film, reels, qc and bundle-audio
+    read it: its folder(s), and with film.Takes the units whose redone take replaced the job's."""
     dirs = _dirs(rec, job)
-    return dirs[0] if len(dirs) == 1 else dirs
+    one = dirs[0] if len(dirs) == 1 else dirs
+    if job["kind"] == "narration":
+        replaced = _replacements(rec, job)
+        if replaced:
+            _check_takes(rec, replaced)
+            return film.Takes(one, {k: rec.root / d["path"] for k, d in replaced.items()})
+    return one
+
+
+def _replacements(rec, job) -> dict:
+    """unit_key -> the unit_replaced event detail of a narration job (or chunk group): the redone
+    take that supplies the unit in place of the job's own (job narration --redo-units, passed the
+    truncation check at import). The latest replacement of a unit wins; a retired redo job supplies
+    nothing, so `retire <redo job>` reverts the unit to the take used before it. The job's own
+    takes stay on disk and on record."""
+    if job is None or job.get("kind") != "narration" or job.get("redo"):
+        return {}
+    members = {c["job_id"] for c in job.get("chunks") or [job]}
+    live = {j["job_id"] for j in _jobs(rec) if j["redo"] and j["imported"] and not j["retired"]}
+    out = {}
+    for e in rec.data["events"]:
+        d = e["detail"]
+        if e["stage"] == "narration" and e["result"] == "unit_replaced" \
+                and d.get("source_job_id") in members and d.get("job_id") in live:
+            out[d["unit_key"]] = d
+    return out
+
+
+def _check_takes(rec, replaced: dict) -> None:
+    bad = [d["path"] for d in replaced.values() if not (rec.root / d["path"]).is_file()
+           or sha256_file(rec.root / d["path"]) != d["sha256"]]
+    if bad:
+        jobs = sorted({d["job_id"] for d in replaced.values() if d["path"] in bad})
+        raise Stop(f"redone narration take(s) {', '.join(bad)} are missing or no longer match their "
+                   "recorded sha256", f"Restore them (they were verified at import), or revert the "
+                   f"unit(s) to the take used before: {PROG} retire {' / '.join(jobs)} --root "
+                   f"{rec.root} --reason \"<why>\"")
 
 
 def _chunk_ids(job) -> list:
@@ -323,7 +371,8 @@ def _latest_job(rec, kind, target, imported=True, after=-1):
     if kind == "narration" and str(target).startswith("film-"):
         after = max(after, _rebase_index(rec))
     found = [j for j in _logical(rec) if j["kind"] == kind and j["target"] == target
-             and not _ended(j) and j["order"] > after and (j["imported"] or not imported)]
+             and not _ended(j) and j["order"] > after and (j["imported"] or not imported)
+             and not j.get("redo")]  # a per-unit redo only supplies units to its source job
     found.sort(key=lambda j: j["order"])  # the newest by build order (never a retired one)
     return found[-1] if found else None
 
@@ -344,14 +393,23 @@ def _text_stale(rec, job) -> bool:
 def _stale_narration(rec, target=None) -> list:
     """Imported film narration made from the text before the last text-changing rebase."""
     return [j for j in _logical(rec) if j["imported"] and not j["retired"] and _text_stale(rec, j)
-            and (target is None or j["target"] == target)]
+            and (target is None or j["target"] == target) and not j.get("redo")]
 
 
 def _current_films(rec, target) -> list:
     """Assembled films of target whose narration is not stale."""
     stale = {j["job_id"] for j in _stale_narration(rec, target)}
-    return [a for a in _artifacts(rec, "film", target=target)
-            if a["meta"].get("narration_job_id") not in stale]
+    out = []
+    for a in _artifacts(rec, "film", target=target):
+        if a["meta"].get("narration_job_id") in stale:
+            continue
+        # assembled before (or after the retirement of) a unit's redone take: not current
+        job = _find(rec, a["meta"].get("narration_job_id"))
+        now = {k: d["sha256"] for k, d in _replacements(rec, job).items()}
+        if (a["meta"].get("narration_replaced_units") or {}) != now:
+            continue
+        out.append(a)
+    return out
 
 
 def _item_keys(job, rec=None) -> list:
@@ -641,6 +699,12 @@ def _measured_track(rec, units, job, out: Path):
                   "track_sha256": sha256_file(out)}
     if "of" in job:  # a chunk group
         provenance["narration_chunk_job_ids"] = _chunk_ids(job)
+    keys = {u["unit_key"] for u in units}
+    replaced = {k: {"job_id": d["job_id"], "path": d["path"], "sha256": d["sha256"],
+                    "replaces_path": d["original_path"], "replaces_sha256": d["original_sha256"]}
+                for k, d in _replacements(rec, job).items() if k in keys}
+    if replaced:  # job narration --redo-units: these units come from their redone take
+        provenance["replaced_units"] = replaced
     return timing, provenance
 
 
@@ -664,9 +728,15 @@ def _accept_qc(args, units) -> set:
 def _truncation_gate(rec, groups, accepted: set, cmd: str) -> list:
     """Refuse to build from narration with a suspect_truncated unit the owner has not accepted.
     groups: [(narration job, every unit of that job)]; the median is per job."""
-    suspects = []
+    suspects, holder = [], {}
     for job, units in groups:
-        suspects += qc.narration_suspects(units, _one_dir(rec, job))
+        found = qc.narration_suspects(units, _one_dir(rec, job))
+        suspects += found
+        for s_ in found:  # the job or chunk whose take it is: what --redo-units names
+            holder[s_["unit_key"]] = next(
+                (c["job_id"] for c in job["chunks"]
+                 if (rec.root / "narration" / c["job_id"] / f"{s_['unit_key']}.wav").is_file()),
+                job["job_id"])
     if suspects:
         _print_suspects(suspects, cmd)
     stale = sorted(accepted - {s["unit_key"] for s in suspects})
@@ -676,11 +746,17 @@ def _truncation_gate(rec, groups, accepted: set, cmd: str) -> list:
                    "(after listening to each)")
     open_ = [s["unit_key"] for s in suspects if s["unit_key"] not in accepted]
     if open_:
+        film_only = all(str(job["target"] or "").startswith("film-") for job, _ in groups)
+        redo = ("voice just those units again: " + "; ".join(
+            f"{PROG} job narration --root {rec.root} --rates <rates.json> --redo-units "
+            f"{jid}:{','.join(k for k in open_ if holder[k] == jid)}"
+            for jid in dict.fromkeys(holder[k] for k in open_))
+            + " (import it; a take that passes replaces the unit)") if film_only else (
+            "regenerate that narration (supersede/close the job and build a new one)")
         raise Stop(f"QC failure: suspect_truncated narration unit(s) {', '.join(open_)} (Parler cuts "
                    "output at ~30 s; text may be lost)",
                    "Listen to each. If it is complete, rerun with --accept-qc "
-                   f"{','.join(open_)} (the owner's listening decision); otherwise regenerate that "
-                   "narration (supersede/close the job and build a new one)", code=5)
+                   f"{','.join(open_)} (the owner's listening decision); otherwise {redo}", code=5)
     return suspects
 
 
@@ -1328,9 +1404,124 @@ def _replace_chunk(rec, args):
           "left under the title and month caps). Inert until the owner enables it.")
 
 
+def _source_logical(rec, src):
+    """The logical job (plain job or chunk group) a narration job or chunk belongs to."""
+    return _find(rec, src["chunk"]["group"] if src["chunk"] else src["job_id"])
+
+
+def _redo_units(rec, args):
+    """job narration --redo-units <job_id>:<unit_key>[,...]: only those units of an imported film
+    narration job (or chunk) again, as <job_id>-u<k>, with the source job's own unit rows, voice
+    description, generation settings, batch, model and revision; forecast, cap-checked and reserved
+    like every job (and run on Colab or with modal-request). Its import checks the new takes for
+    truncation against the source job and records each one that passes as the unit's take
+    (narration/unit_replaced); the source job stays the current narration and keeps its own takes."""
+    if args.kind != "narration":
+        raise Stop("--redo-units redoes narration units only", f"{PROG} job narration --root "
+                   f"{rec.root} --rates <rates.json> --redo-units <job_id>:<unit_key>[,<unit_key>...]")
+    if args.replace_chunk or args.spec or args.job_id or args.clause or args.reel:
+        raise Stop("--redo-units takes the source job's own units and settings; --replace-chunk, "
+                   "--spec, --job-id, --clause and --reel do not apply", "Drop them and rerun")
+    src_id, _, rest = (args.redo_units or "").partition(":")
+    keys = [k.strip() for k in rest.split(",") if k.strip()]
+    if not src_id.strip() or not keys:
+        raise Stop(f"--redo-units {args.redo_units!r} is not <job_id>:<unit_key>[,<unit_key>...]",
+                   "Name the imported narration job (a chunk id for a chunked job) and its unit keys, "
+                   "e.g. --redo-units narration-ab12cd34-c1of2:f01s019-011")
+    src_id = src_id.strip()
+    if len(set(keys)) != len(keys):
+        raise Stop(f"--redo-units names a unit twice: {', '.join(keys)}", "Name each unit once")
+    src = next((j for j in _jobs(rec) if j["job_id"] == src_id), None)
+    if src is None:
+        group = _find(rec, src_id)
+        if group is not None and "of" in group:
+            raise Stop(f"{src_id} is a chunk group; a redo names the chunk that holds the units",
+                       f"Use one of {', '.join(_chunk_ids(group))} ({PROG} status --root {rec.root})")
+        raise Stop(f"unknown narration job {src_id}", f"{PROG} status --root {rec.root}")
+    if src["kind"] != "narration":
+        raise Stop(f"{src_id} is a {src['kind']} job; --redo-units redoes narration units",
+                   f"{PROG} status --root {rec.root}")
+    if src["redo"]:
+        raise Stop(f"{src_id} is itself a redo of {src['redo']['source_job_id']}; name the source "
+                   "job again (each redo of it is numbered -u<k>)",
+                   f"--redo-units {src['redo']['source_job_id']}:{','.join(keys)}")
+    if not str(src["target"] or "").startswith("film-"):
+        raise Stop(f"{src_id} is {src['target']} narration; a reel's shot plan is bound to its "
+                   "measured narration, so a reel is re-voiced as a whole (references/reel-recipe.md)",
+                   next_action(rec.root))
+    if not src["imported"] or src["retired"]:
+        raise Stop(f"{src_id} is {'retired' if src['retired'] else 'not imported'}; only units of an "
+                   "imported, current narration job are redone", next_action(rec.root))
+    logical = _source_logical(rec, src)
+    if logical is None or logical["retired"] or _text_stale(rec, logical):
+        raise Stop(f"{src_id} belongs to narration that is retired or made from the text before the "
+                   "last rebase-source; its units are never redone", next_action(rec.root))
+    try:
+        with zipfile.ZipFile(src["inputs_zip"]) as z:
+            job_json = json.loads(z.read("job.json"))
+        build = _json(src["manifest"])
+        if sha256_file(src["inputs_zip"]) != build.get("inputs_sha256"):
+            raise ValueError(f"inputs.zip of {src_id} does not match its build manifest")
+    except (OSError, KeyError, ValueError, zipfile.BadZipFile) as e:
+        raise Stop(f"units of {src_id} cannot be redone: {e}", f"Check {src['inputs_zip'].parent}")
+    have = {u.get("unit_key") for u in job_json.get("units") or []}
+    unknown = [k for k in keys if k not in have]
+    if unknown:
+        raise Stop(f"unit(s) {', '.join(unknown)} are not in narration job {src_id} "
+                   f"({len(have)} units); nothing was reserved or written",
+                   "Pass the unit_key values exactly as the suspect_truncated list prints them, with "
+                   "the job (chunk) that holds them")
+    redos = [j for j in _jobs(rec) if j["redo"] and j["redo"]["source_job_id"] == src_id]
+    busy = [f"{k} ({j['job_id']})" for j in redos if not j["imported"] and not _ended(j)
+            for k in keys if k in j["redo"]["unit_keys"]]
+    if busy:
+        raise Stop(f"unit(s) {', '.join(busy)} already have a live redo job (built, not imported)",
+                   "Run and import it, or supersede (never ran) / close (ran) it first: "
+                   + next_action(rec.root))
+    taken = {j["job_id"] for j in _jobs(rec)} | {j["chunk"]["group"] for j in _jobs(rec) if j["chunk"]}
+    k = len(redos) + 1
+    while colab_jobs.redo_job_id(src_id, k) in taken:
+        k += 1
+    rates = _json(args.rates)
+    try:
+        compute = colab_jobs._redo_plan(job_json, build, keys, rates)["compute"]
+    except (KeyError, ValueError) as e:
+        raise Stop(f"units of {src_id} cannot be redone: {e}",
+                   "Check the measured rates.json (references/compute-budget.md)")
+    ledger, month = _ledger(rec, args), _month()
+    units = budget.forecast(compute, rates)
+    remaining = _remaining(ledger, rec, month)
+    if units > remaining:
+        raise Stop(f"Budget exceeded: forecast {units:.2f} CU > remaining {remaining:.2f} CU "
+                   f"(caps {budget.TITLE_CAP:g}/title, {budget.MONTH_CAP:g}/month, {month}). "
+                   "Nothing was reserved or written.",
+                   "Hold the job and ask the owner; never retry past a cap.", code=3)
+    try:
+        result = colab_jobs.build_job("narration", rec, {}, ledger, rates, rec.root / "jobs",
+                                      month=month, redo={"job_json": job_json, "build": build,
+                                                         "unit_keys": keys, "k": k})
+    except budget.BudgetExceeded as e:
+        raise Stop(f"Budget exceeded: {e}. Nothing was written.",
+                   "Hold the job and ask the owner; never retry past a cap.", code=3)
+    except (ValueError, FileExistsError, KeyError) as e:
+        raise Stop(f"job not built: {e}", "Fix the input it names and rerun")
+    order = [u["unit_key"] for u in job_json["units"] if u["unit_key"] in keys]
+    rec.event("cli", "job_target", {"job_id": result["job_id"], "target": src["target"],
+                                    "kind": "narration",
+                                    "redo": {"source_job_id": src_id, "unit_keys": order}})
+    print(f"Built narration redo job {result['job_id']} for {src['target']}: unit(s) "
+          f"{', '.join(order)} of {src_id} again (the same text, voice description, generation "
+          f"settings and model), forecast {units:.2f} CU reserved ({remaining - units:.2f} CU left "
+          f"under the title and month caps). {_used(logical)} stays the current narration; on "
+          "import each new take that passes the truncation check replaces that unit's take "
+          "(the original stays on disk and on record). Inert until the owner enables it.")
+
+
 def cmd_job(args):
     rec = _record(args.root)
     kind = args.kind
+    if args.redo_units:
+        return _redo_units(rec, args)
     if args.replace_chunk:
         return _replace_chunk(rec, args)
     if kind == "reel_clips" and not args.reel:
@@ -1475,6 +1666,7 @@ def cmd_import(args):
     ledger = _ledger(rec, args)
     _no_pending_modal(rec, ledger, args.job_id, "imported")
     units = _modal_units(ledger, args.job_id, args.units)
+    review = _redo_review(rec, job, Path(args.source)) if job["redo"] else None
     try:
         arts = importer.import_job(rec, {k: job[k] for k in ("job_id", "kind", "notebook",
                                                              "inputs_zip", "manifest")},
@@ -1486,8 +1678,79 @@ def cmd_import(args):
                    code=4)
     print(f"Imported {len(arts)} verified file(s) from {job['kind']} job {args.job_id}; "
           f"{_settled_as(ledger, args.job_id, units)}.")
-    if job["kind"] == "narration":
+    if job["redo"]:
+        _record_redo(rec, job, review)
+    elif job["kind"] == "narration":
         _import_advisory(rec, job)
+
+
+def _redo_review(rec, job, folder: Path) -> dict:
+    """Before a redo job is imported: the truncation check of each new take in its source job's
+    context (the median of every unit of the source job or chunk group, with the takes in use now
+    and this job's new ones). unit_key -> {seconds, suspect (the suspect row or None)}. A missing
+    new take is left to the import (which holds); a missing source take stops here, so nothing is
+    imported without the check."""
+    redo = job["redo"]
+    src = next((j for j in _jobs(rec) if j["job_id"] == redo["source_job_id"]), None)
+    logical = _source_logical(rec, src) if src is not None else None
+    if logical is None:
+        raise Stop(f"redo job {job['job_id']}: its source job {redo['source_job_id']} is not on record",
+                   f"{PROG} status --root {rec.root}")
+    members = logical["chunks"] if src["job_id"] in _chunk_ids(logical) else [src]
+    new = {k: folder / f"{k}.wav" for k in redo["unit_keys"]}
+    if not all(p.is_file() for p in new.values()):
+        return None  # the import holds: the outputs miss a job item
+    try:
+        units = []
+        for m in members:
+            with zipfile.ZipFile(m["inputs_zip"]) as z:
+                units += json.loads(z.read("job.json"))["units"]
+        dirs = [rec.root / "narration" / m["job_id"] for m in members]
+        takes = {k: rec.root / d["path"] for k, d in _replacements(rec, logical).items()}
+        suspects = {s["unit_key"]: s for s in qc.narration_suspects(
+            units, film.Takes(dirs if len(dirs) > 1 else dirs[0], {**takes, **new}))}
+        seconds = {k: qc._duration(p) for k, p in new.items()}
+    except (OSError, KeyError, ValueError, zipfile.BadZipFile, subprocess.CalledProcessError) as e:
+        raise Stop(f"Import held: the truncation check of redo job {job['job_id']} could not run ({e}); "
+                   "it needs the source job's imported takes. Nothing was imported; the reservation "
+                   "stays open.", f"Restore the imported narration of {redo['source_job_id']} under "
+                   f"{rec.root / 'narration'}, then rerun {PROG} import {job['job_id']} ...", code=4)
+    return {k: {"seconds": round(seconds[k], 3), "suspect": suspects.get(k)} for k in new}
+
+
+def _record_redo(rec, job, review):
+    """After a redo job's import: record each new take that passed as its unit's take
+    (narration/unit_replaced), and each that is still suspect (narration/unit_redo_suspect; the
+    unit keeps the take it had and stays flagged until the owner accepts it or redoes it again)."""
+    redo = job["redo"]
+    if review is None:
+        review = _redo_review(rec, job, rec.root / "narration" / job["job_id"])
+    src = next(j for j in _jobs(rec) if j["job_id"] == redo["source_job_id"])
+    logical = _source_logical(rec, src)
+    before = _replacements(rec, logical)
+    for k in redo["unit_keys"]:
+        path = rec.root / "narration" / job["job_id"] / f"{k}.wav"
+        original = rec.root / "narration" / src["job_id"] / f"{k}.wav"
+        prev = rec.root / before[k]["path"] if k in before else original
+        detail = {"job_id": job["job_id"], "source_job_id": src["job_id"], "unit_key": k,
+                  "path": _rel(rec, path), "sha256": sha256_file(path),
+                  "seconds": review[k]["seconds"],
+                  "original_path": _rel(rec, original),
+                  "original_sha256": sha256_file(original) if original.is_file() else None,
+                  "previous_path": _rel(rec, prev)}
+        if review[k]["suspect"] is None:
+            rec.event("narration", "unit_replaced", detail)
+            print(f"Unit {k}: the redone take ({review[k]['seconds']:.2f} s) passed the truncation "
+                  f"check and now supplies {k} to {_used(logical)} in film, bundle-audio and "
+                  f"preview (in place of {detail['previous_path']}, kept on disk; revert: {PROG} "
+                  f"retire {job['job_id']} --root {rec.root} --reason \"<why>\").")
+        else:
+            rec.event("narration", "unit_redo_suspect", {**detail, "suspect": review[k]["suspect"]})
+            _print_suspects([review[k]["suspect"]], f"Unit {k}: the redone take is itself suspect")
+            print(f"  {k} keeps {detail['previous_path']} and stays flagged: listen, then "
+                  f"--accept-qc {k} or redo it again (--redo-units {src['job_id']}:{k}).")
+    if any(review[k]["suspect"] is None for k in redo["unit_keys"]):
+        print(f"Films assembled before this are no longer current: re-assemble, qc, then bundle-audio.")
 
 
 def _import_advisory(rec, job):
@@ -2351,10 +2614,17 @@ def cmd_film(args):
                                                 "retouched_keys": sorted(k for k, v in have.items()
                                                                          if "retouch" in v),
                                                 "suspect_truncated": suspects,
+                                                # unit -> sha256 of the redone take used for it
+                                                "narration_replaced_units": {
+                                                    k: v["sha256"] for k, v in
+                                                    prov.get("replaced_units", {}).items()},
                                                 "qc_accepted": sorted(accepted), **info})
     rec.event("film", "assembled", {"target": t, "duration": info["duration"]})
     print(f"Assembled {out / (t + '.mp4')}: {info['duration']:.1f} s, {m['lufs']:.1f} LUFS, "
-          f"TP {m['true_peak']:.1f} dBTP, from narration job {_used(narr)} and stills job"
+          f"TP {m['true_peak']:.1f} dBTP, from narration job {_used(narr)}"
+          + "".join(f" (unit {k} from redo {v['job_id']})"
+                    for k, v in prov.get("replaced_units", {}).items())
+          + " and stills job"
           f"{'s' if len(sources) > 1 else ''} "
           + ", ".join(f"{j} ({len(k)} keys)" for j, k in sources.items())
           + "".join(f"; retouched: {k} ({v['retouch']['path']})" for k, v in have.items()
@@ -2710,6 +2980,10 @@ def _write_audio_bundle(rec, plan, src, lang, bundle, scene_film, args):
                                          for a, b in zip(timing, timing[1:]) if b["start"] > a["end"]]}
             if "narration_chunk_job_ids" in prov:
                 prov_units[unit["unit_id"]]["narration_chunk_job_ids"] = prov["narration_chunk_job_ids"]
+            if "replaced_units" in prov:  # units voiced by their redone take (--redo-units)
+                prov_units[unit["unit_id"]]["replaced_units"] = prov["replaced_units"]
+                run_ids += [v["job_id"] for v in prov["replaced_units"].values()
+                            if v["job_id"] not in run_ids]
     ids = sorted(job_ids)
     provenance = {"method": "eav.film.narration_track", "measured_with": "ffprobe",
                   "narration_job_id": ids[0] if len(ids) == 1 else ids, "units": prov_units}
@@ -2772,6 +3046,16 @@ def cmd_preview(args):
                    f"current narration ({current['job_id'] if current else 'none'}; a retired or "
                    "replaced job is never used)",
                    f"{PROG} bundle-audio --root {rec.root} --out <new bundle dir>, then preview it")
+    chapter_prov = _json(Path(args.bundle) / "timing.json")["provenance"]["units"][unit_id]
+    keys = set(chapter_prov.get("wav_sha256") or {})
+    built = {k: v["sha256"] for k, v in (chapter_prov.get("replaced_units") or {}).items()}
+    now = {k: d["sha256"] for k, d in _replacements(rec, current).items() if k in keys}
+    if built != now:
+        raise Stop(f"the bundle's chapter 1 was built with redone narration take(s) "
+                   f"{', '.join(f'{k} ({v[:12]})' for k, v in sorted(built.items())) or 'none'}, but "
+                   f"the current ones are {', '.join(f'{k} ({v[:12]})' for k, v in sorted(now.items())) or 'none'}",
+                   f"Re-assemble the film and rerun qc, then {PROG} bundle-audio --root {rec.root} "
+                   "--out <new bundle dir>, then preview it")
     out = Path(args.out)
     if out.exists() and any(out.iterdir()):
         raise Stop(f"{out} is not empty", "Pass a new --out directory")
@@ -2833,6 +3117,9 @@ def cmd_status(args):
                          f"{s['revision_id']}; film, bundle-audio and preview never use it")
             c = j["chunk"]
             part = f" chunk {c['index']}/{c['of']} of {c['group']}" if c else ""
+            if j["redo"]:
+                part = (f" redo of {j['redo']['source_job_id']} unit(s) "
+                        f"{', '.join(j['redo']['unit_keys'])}")
             print(f"  {j['job_id']} {j['kind']} {j['target']}{part}: {state} "
                   f"(forecast {j['forecast_units']:.2f} CU)")
         for g in _logical(rec):
@@ -2846,6 +3133,7 @@ def cmd_status(args):
                          else "incomplete")
                 print(f"  group {g['job_id']} {g['kind']} {g['target']}: {done} of {g['of']} chunks "
                       f"imported ({state})")
+        _status_redos(rec)
         rebases = [e["detail"] for e in rec.data["events"] if e["stage"] == "rebase_source"
                    and e["result"] == "ok"]
         if rebases:
@@ -2877,6 +3165,38 @@ def cmd_status(args):
                 print(f"    stale retouch {m['key']}: {a['path']} was made from {m['source_job_id']}, "
                       "which a newer stills import replaced for that key (not used; retouch the new "
                       "still if it still needs it)")
+
+
+def _status_redos(rec):
+    """Per narration job: which units a redone take supplies, and redone takes still suspect."""
+    jobs = {j["job_id"]: j for j in _jobs(rec)}
+    for g in _logical(rec):
+        if g["kind"] != "narration" or g.get("redo") or g["retired"]:
+            continue
+        members = set(_chunk_ids(g))
+        replaced = _replacements(rec, g)
+        flagged = {}
+        for e in rec.data["events"]:
+            d = e["detail"]
+            if e["stage"] == "narration" and e["result"] in ("unit_replaced", "unit_redo_suspect") \
+                    and d.get("source_job_id") in members:
+                flagged[d["unit_key"]] = (e["result"], d)  # the latest redo of each unit
+        if not replaced and not flagged:
+            continue
+        print(f"  narration {g['job_id']} {g['target']}: per-unit redo takes (originals kept on disk)")
+        for k, d in sorted(replaced.items()):
+            print(f"    {k}: uses {d['path']} ({d['seconds']:.2f} s, from {d['job_id']}) in place of "
+                  f"{d['original_path']}")
+        for k, (result, d) in sorted(flagged.items()):
+            redo = jobs.get(d["job_id"]) or {}
+            if result == "unit_redo_suspect" and not redo.get("retired"):
+                use = replaced[k]["path"] if k in replaced else d["original_path"]
+                print(f"    {k}: redone take {d['path']} ({d['seconds']:.2f} s, {d['job_id']}) is still "
+                      f"suspect_truncated ({'; '.join(d['suspect']['reasons'])}); {use} stays in use "
+                      "and flagged")
+            elif result == "unit_replaced" and k not in replaced:
+                print(f"    {k}: redo {d['job_id']} retired; back to "
+                      f"{_replacements(rec, g).get(k, {}).get('path', d['original_path'])}")
 
 
 REPO = Path(__file__).resolve().parents[4]
@@ -3088,6 +3408,10 @@ def _parser():
     s.add_argument("--reel", type=int)
     s.add_argument("--clause", help="optional appended voice clause, <= 12 words")
     s.add_argument("--job-id")
+    s.add_argument("--redo-units", metavar="JOB_ID:UNIT_KEY[,UNIT_KEY...]",
+                   help="narration only: redo just those units of an imported film narration job "
+                        "(a chunk id for a chunked job) as <job_id>-u<k>, with its own settings; on "
+                        "import each take that passes the truncation check replaces the unit's take")
     s.add_argument("--replace-chunk", help="a closed or superseded chunk id: rebuild only its items "
                    "as <chunk id>-r<k>; the group's other chunks are kept")
     s = add("import")

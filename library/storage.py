@@ -121,6 +121,27 @@ def verify_private(key,expected_bytes,expected_sha256,content_type=None,max_seco
     return b''.join(chunks) if return_bytes else {'bytes':total,'sha256':hasher.hexdigest()}
 
 
+def open_verified_local(asset,max_seconds=60):
+    """Local storage only: stream-hash the whole object, then return the same open handle at
+    offset 0 so a caller can serve byte ranges from disk, as an R2 presigned URL streams."""
+    if is_r2():raise DomainError('provider_not_configured','Streamed local delivery is for local storage only.',503)
+    if type(asset.bytes)!=int or asset.bytes<1 or not re.fullmatch('[a-f0-9]{64}',asset.sha256 or ''):
+        raise DomainError('invalid_asset','Expected object size/hash are invalid.',422)
+    started=time.monotonic();handle,size,_=_open(asset.storage_key);hasher=hashlib.sha256();total=0
+    try:
+        if size!=asset.bytes:raise DomainError('asset_integrity_failed','Private object size/type differs from its intent.',422)
+        while block:=handle.read(CHUNK_BYTES):
+            if time.monotonic()-started>max_seconds:raise DomainError('asset_verification_timeout','Object verification exceeded its budget.',503)
+            total+=len(block);hasher.update(block)
+            if total>asset.bytes:break
+        if total!=asset.bytes or hasher.hexdigest()!=asset.sha256:
+            raise DomainError('asset_integrity_failed','Private object bytes fail their SHA256 verification.',422)
+        handle.seek(0)
+    except BaseException:
+        handle.close();raise
+    return handle
+
+
 def read_verified(asset):
     return verify_private(asset.storage_key,asset.bytes,asset.sha256,asset.content_type,return_bytes=True)
 

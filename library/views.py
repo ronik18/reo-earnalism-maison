@@ -233,6 +233,7 @@ def media(request):
 def local_asset(request,asset_id):
     if not getattr(settings,'LOCAL',False): raise DomainError('feature_disabled','Local storage is unavailable.',404)
     asset,raw=svc.resolve_signed_asset(request.user,asset_id,request.GET.get('token',''))
+    if asset.kind=='audio_chapter': return _local_audio_stream(request,asset,raw)
     status=200;headers={}
     if request.headers.get('Range'):
         if asset.kind!='audio_chapter': raise DomainError('range_not_supported','This asset does not support ranges.',416)
@@ -246,6 +247,33 @@ def local_asset(request,asset_id):
     response['Content-Length']=str(len(raw));response['Content-Disposition']='inline'
     if asset.kind=='audio_chapter': response['Accept-Ranges']='bytes'
     for key,value in headers.items(): response[key]=value
+    return response
+
+def _local_audio_stream(request,asset,handle):
+    """Serve a verified local chapter from disk with byte ranges, like an R2 presigned GET."""
+    from django.http import StreamingHttpResponse
+    total=asset.bytes;start,end,status=0,total-1,200
+    try:
+        if request.headers.get('Range'):
+            match=re.fullmatch(r'bytes=(\d+)-(\d*)',request.headers['Range'])
+            if not match: raise DomainError('invalid_range','Use one bounded bytes range.',416)
+            start=int(match[1]);end=int(match[2]) if match[2] else total-1
+            if start>end or start>=total or end>=total: raise DomainError('invalid_range','Range lies outside the asset.',416)
+            status=206
+        handle.seek(start)
+    except BaseException:
+        handle.close();raise
+    def body(remaining=end-start+1):
+        try:
+            while remaining>0:
+                block=handle.read(min(1024*1024,remaining))
+                if not block: break
+                remaining-=len(block);yield block
+        finally: handle.close()
+    response=StreamingHttpResponse(body(),status=status,content_type=asset.content_type)
+    response['Cache-Control']='private, no-store';response['X-Content-Type-Options']='nosniff'
+    response['Content-Length']=str(end-start+1);response['Content-Disposition']='inline';response['Accept-Ranges']='bytes'
+    if status==206: response['Content-Range']=f'bytes {start}-{end}/{total}'
     return response
 
 @json_endpoint()

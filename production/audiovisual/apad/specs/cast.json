@@ -1,0 +1,325 @@
+{
+ "schema": "eav.cast/1",
+ "title": "apad",
+ "source_revision": "9c0978d5-f98e-4308-914c-bc7d7d33d667",
+ "source_sha256": "97ca7a18f11d6f1f1cf5bb32abf0386a660011da91b798c87ebac002701f6c5f",
+ "narrator": {
+  "gender": "male",
+  "rationale": "Third-person authorial narration (with the author's own asides: 'রিপোর্ট্‌ করিলাম', 'অনুমান করি'); its inward focus is the adolescent jatra boy Nilkanta, his growing up, jealousy and the theft, so a male narrator suits it, leaving Kiran's many lines to the female character voice."
+ },
+ "characters": {
+  "শরৎ": {
+   "gender": "male",
+   "note": "Sharat babu, Kiran's husband"
+  },
+  "কিরণ": {
+   "gender": "female",
+   "note": "Kiranmayi, Sharat's convalescent wife who shelters Nilkanta"
+  },
+  "নীলকান্ত": {
+   "gender": "male",
+   "note": "Brahmin boy of a jatra troupe, rescued from a boat wreck"
+  },
+  "সতীশ": {
+   "gender": "male",
+   "note": "Sharat's younger brother, a Calcutta college student"
+  }
+ },
+ "units": {
+  "f01s002-001": [
+   {
+    "text": "শরৎ বাবু বলিতেছিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আর কিছু দিন থাকিলেই তোমার শরীর সম্পূর্ণ সারিয়া উঠিবে, তখন আমরা দেশে ফিরিতে পারি।",
+    "role": "character",
+    "speaker": "শরৎ"
+   }
+  ],
+  "f01s002-002": [
+   {
+    "text": "কিরণময়ী বলিতেছিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আমার শরীর সম্পূর্ণ সারিয়া উঠিয়াছে, এখন দেশে ফিরিলে কোন ক্ষতি হইবে না।",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s003-001": [
+   {
+    "text": "শরৎ কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "ডাক্তার বলিতেছে আর কিছুদিন থাকিয়া গেলে ভাল হয়।",
+    "role": "character",
+    "speaker": "শরৎ"
+   }
+  ],
+  "f01s003-002": [
+   {
+    "text": "কিরণ কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "তোমার ডাক্তার ত সব জানে!",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s003-003": [
+   {
+    "text": "শরৎ কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "জান ত, এই সময়ে মেশে নানাপ্রকার ব্যামোর প্রাদুর্ভাব হয়, অতএব আর মাস দুয়েক কাটাইয়া গেলেই ভাল হয়।",
+    "role": "character",
+    "speaker": "শরৎ"
+   }
+  ],
+  "f01s003-004": [
+   {
+    "text": "কিরণ কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "এখানে এখন বুঝি কোথাও কাহারো কোন ব্যামো হয় না!",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s014-003": [
+   {
+    "text": "ওরে মাংস, জন্মি দ্বিজবংশে, এমন নৃশংস কেন হলি রে,– বল্‌ কি জন্যে, এ অরণ্যে, রাজকন্যার প্রাণসংশয় করিলি রে,–",
+    "role": "character",
+    "speaker": "নীলকান্ত"
+   }
+  ],
+  "f01s018-006": [
+   {
+    "text": "কিন্তু আজকাল কিরণ নিজে ডাকিয়া না খাওয়াইলে তাহার বক্ষ ব্যথিত তাহার মুখ বিস্বাদ হইয়া উঠিত, না খাইয়া উঠিয়া পড়িত বাষ্পরুদ্ধ কণ্ঠে দাসীকে বলিয়া যাইত, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আমার ক্ষুধা নাই।",
+    "role": "character",
+    "speaker": "নীলকান্ত"
+   }
+  ],
+  "f01s021-002": [
+   {
+    "text": "কিরণ বিস্মিত হইয়া জিজ্ঞাসা করিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "তোর আবার কি হলরে?",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s021-004": [
+   {
+    "text": "কিরণ পুনশ্চ বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "সেই গানটা গা না!- ",
+    "role": "character",
+    "speaker": "কিরণ"
+   },
+   {
+    "text": "সে আমি ভুলে গেছি",
+    "role": "character",
+    "speaker": "নীলকান্ত"
+   },
+   {
+    "text": " বলিয়া নীলকান্ত চলিয়া গেল।",
+    "role": "narrator"
+   }
+  ],
+  "f01s023-001": [
+   {
+    "text": "সতীশ কাছে উপস্থিত ছিল, সে অতবড় ছেলের কান্না দেখিয়া ভারি বিরক্ত হইয়া বলিয়া উঠিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—আরে মোলো!",
+    "role": "character",
+    "speaker": "সতীশ"
+   }
+  ],
+  "f01s023-002": [
+   {
+    "text": "কথা নাই বার্ত্তা নাই, একেবারে কাঁদিয়াই অস্থির!—",
+    "role": "character",
+    "speaker": "সতীশ"
+   }
+  ],
+  "f01s023-003": [
+   {
+    "text": "কিরণ এই কঠোর উক্তির জন্য সতীশকে ভর্ৎসনা করিলেন; সতীশ কহিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "তুমি বোঝ না বৌদিদি, তুমি সকলকেই বড় বেশি বিশ্বাস কর; কোথাকার কে তাহার ঠিক নাই, এখানে আসিয়া দিব্য রাজার হালে আছে।",
+    "role": "character",
+    "speaker": "সতীশ"
+   }
+  ],
+  "f01s023-004": [
+   {
+    "text": "আবার পূনর্মূষিক হইবার আশঙ্কায় আজ মায়া-কান্না জুড়িয়াছে—ও বেশ জানে যে দু ফোঁটা চখের জল ফেলিলেই তুমি গলিয়া যাইবে।",
+    "role": "character",
+    "speaker": "সতীশ"
+   }
+  ],
+  "f01s024-005": [
+   {
+    "text": "কিরণ প্রায়ই পরিহাস করিয়া সেই রৌপ্যহংসের চঞ্চু-অগ্রভাগে অঙ্গুলির আঘাত করিয়া বলিতেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "ওরে রাজহংস, জন্মি দ্বিজবংশে এমন নৃশংস কেন হলি রে",
+    "role": "character",
+    "speaker": "কিরণ"
+   },
+   {
+    "text": "—এবং ইহাই উপলক্ষ করিয়া দেবরে তাঁহাতে হাস্যকৌতুকের বাগযুদ্ধ চলিত!",
+    "role": "narrator"
+   }
+  ],
+  "f01s025-002": [
+   {
+    "text": "কিরণ হাসিয়া কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "ঠাকুরপো, তোমার রাজহংস তোমার দময়ন্তীর অন্বেষণে উড়িয়াছে।",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s025-007": [
+   {
+    "text": "সতীশ একেবারেই তাহাকে বলিয়া উঠিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "তুই আমার দোয়াত চুরি করে’ কোথায় রেখেছিস, এনে দে!",
+    "role": "character",
+    "speaker": "সতীশ"
+   }
+  ],
+  "f01s027-001": [
+   {
+    "text": "তখন কিরণ তাহাকে পাশের ঘরে ডাকিয়া লইয়া মৃদুমিষ্ট স্বরে বলিলেন-",
+    "role": "narrator"
+   },
+   {
+    "text": "নীলু, যদি সেই দোয়াৎটা নিয়ে থাকিস্‌ আমাকে আস্তে আস্তে দিয়ে যা, তোকে কেউ কিছু বলবে না!",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s027-003": [
+   {
+    "text": "কিরণ বাহিরে আসিয়া বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "নীলকান্ত কখনই চুরি করে নি!",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s027-004": [
+   {
+    "text": "শরৎ এবং সতীশ উভয়েই বলিতে লাগিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "নিশ্চয়, নীলকান্ত ছাড়া আর কেহই চুরি করেনি।",
+    "role": "character",
+    "speaker": "শরৎ"
+   }
+  ],
+  "f01s028-001": [
+   {
+    "text": "কিরণ সবলে বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "কখনই না।",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s028-002": [
+   {
+    "text": "শরৎ নীলকান্তকে ডাকিয়া সওয়াল করিতে ইচ্ছা করিলেন, কিরণ বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "না, উহাকে এই চুরি সম্বন্ধে কোন কথা জিজ্ঞাসা করিতে পারিবে না।",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s028-003": [
+   {
+    "text": "সতীশ কহিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "উহার ঘর এবং বাক্স খুঁজিয়া দেখা উচিত।",
+    "role": "character",
+    "speaker": "সতীশ"
+   }
+  ],
+  "f01s028-004": [
+   {
+    "text": "কিরণ বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "তাহা যদি কর, তাহা হইলে তোমার সঙ্গে আমার জন্মশোধ আড়ি হইবে।",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s028-005": [
+   {
+    "text": "নির্দ্দোষীর প্রতি কোন রূপ সন্দেহ প্রকাশ করিতে পাইবে না।",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ],
+  "f01s032-005": [
+   {
+    "text": "তখন শরৎ বলিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "এইবার নীলকণ্ঠের বাক্সটা পরীক্ষা করিয়া দেখা যাক্।",
+    "role": "character",
+    "speaker": "শরৎ"
+   }
+  ],
+  "f01s032-006": [
+   {
+    "text": "কিরণ জেদ করিয়া বলিলেন, ",
+    "role": "narrator"
+   },
+   {
+    "text": "সে কিছুতেই হইবে না।",
+    "role": "character",
+    "speaker": "কিরণ"
+   }
+  ]
+ },
+ "notes": "Dialogue is mostly unmarked direct speech after 'কহিলেন,'/'বলিলেন,'. f01s027-004 is spoken jointly by Sharat and Satish; voiced as Sharat (both male). f01s021-004 contains two speakers: Kiran's request and Nilkanta's reply 'সে আমি ভুলে গেছি'. The jatra song f01s014-003 is what Nilkanta habitually sang, voiced as him (doubtful: it illustrates a habit rather than one scene). Left to the narrator: the villagers' rhetorical questions (f01s003-008..010), Sharat's and the family's thoughts (f01s004-003, f01s007-003, f01s008-002), Nilkanta's imagined reply and silent prayer (f01s018-007, f01s020-001), his inner cry (f01s031-005..007), and the reported statements of villagers and police (f01s032-004)."
+}

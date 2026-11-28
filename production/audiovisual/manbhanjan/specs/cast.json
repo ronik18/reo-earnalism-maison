@@ -1,0 +1,247 @@
+{
+ "schema": "eav.cast/1",
+ "title": "manbhanjan",
+ "source_revision": "d9b3b9fb-331e-48ea-a5d4-31d30acaea16",
+ "source_sha256": "1b5ac907fea4a27b03ddca59bbed74510ffa001e5b89b6cd20e6c8181c605a85",
+ "narrator": {
+  "gender": "female",
+  "rationale": "Third-person story centred on Giribala, the neglected young wife whose wounded pride (মান) drives the plot until she triumphs on stage; her inner life and point of view dominate, so a female narrator."
+ },
+ "characters": {
+  "গিরিবালা": {
+   "gender": "female",
+   "note": "Gopinath's young wife, later the actress playing Manorama"
+  },
+  "গোপীনাথ": {
+   "gender": "male",
+   "note": "Giribala's dissolute husband"
+  },
+  "সুধো": {
+   "gender": "female",
+   "note": "Sudhamukhi, Giribala's maid"
+  },
+  "দর্শকগণ": {
+   "gender": "male",
+   "note": "theatre audience"
+  }
+ },
+ "units": {
+  "f01s014-001": [
+   {
+    "text": "সুধো মাঝে মাঝে আসিয়া ভীতস্বরে কানে কানে বলে, ",
+    "role": "narrator"
+   },
+   {
+    "text": "বৌঠাক্‌রুণ, এই বেলা বাড়ি ফিরিয়া চল; দাদাবাবু জানিতে পারিলে রক্ষা থাকিবে না।",
+    "role": "character",
+    "speaker": "সুধো"
+   }
+  ],
+  "f01s015-005": [
+   {
+    "text": "সুধো কহিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "বৌঠাকুণ, কর কি, ওঠ, এখনি সমস্ত আলো নিবাইয়া দিবে।",
+    "role": "character",
+    "speaker": "সুধো"
+   }
+  ],
+  "f01s019-009": [
+   {
+    "text": "এবং অকৃত্রিম উচ্ছ্বাসের সহিত বলিতেছিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আহা বৌঠাক্‌রুণ আমি যদি পুরুষ মানুষ হইতাম তাহা হইলে এই পা দুখানি বুকে লইয়া মরিতাম।",
+    "role": "character",
+    "speaker": "সুধো"
+   }
+  ],
+  "f01s019-010": [
+   {
+    "text": "গিরিবালা সগর্ব্বে হাসিয়া উত্তর দিতেছিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "বোধ করি বুকে না লইয়াই মরিতে হইত—তখন কি আর এমন করিয়া পা ছড়াইয়া দিতাম?",
+    "role": "character",
+    "speaker": "গিরিবালা"
+   }
+  ],
+  "f01s019-011": [
+   {
+    "text": "আর বকিস্‌নে; তুই সেই গানটা গা!",
+    "role": "character",
+    "speaker": "গিরিবালা"
+   }
+  ],
+  "f01s020-002": [
+   {
+    "text": "দাসখৎ দিলেম লিখে শ্রীচরণে, সকলে সাক্ষী থাকুক্‌ বৃন্দাবনে।",
+    "role": "character",
+    "speaker": "সুধো"
+   }
+  ],
+  "f01s021-002": [
+   {
+    "text": "সঙ্গীতহীন নীরসকণ্ঠে গোপীনাথ বলিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—একবার চাবিটা দাও দেখি!",
+    "role": "character",
+    "speaker": "গোপীনাথ"
+   }
+  ],
+  "f01s022-004": [
+   {
+    "text": "স্বামীর হাত ধরিয়া বলিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "চাবী দিব এখন তুমি ঘরে চল।",
+    "role": "character",
+    "speaker": "গিরিবালা"
+   }
+  ],
+  "f01s023-001": [
+   {
+    "text": "গোপীনাথ কহিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আমি বেশি দেরী করিতে পারিব না —তুমি চাবি দাও।",
+    "role": "character",
+    "speaker": "গোপীনাথ"
+   }
+  ],
+  "f01s023-002": [
+   {
+    "text": "গিরিবালা কহিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—আমি চাবি দিব এবং চাবির মধ্যে যাহা কিছু আছে সমস্ত দিব—কিন্তু আজ রাত্রে তুমি কোথাও যাইতে পারিবে না।",
+    "role": "character",
+    "speaker": "গিরিবালা"
+   }
+  ],
+  "f01s023-003": [
+   {
+    "text": "গোপীনাথ বলিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—সে হইবে না।",
+    "role": "character",
+    "speaker": "গোপীনাথ"
+   }
+  ],
+  "f01s023-004": [
+   {
+    "text": "আমার বিশেষ দরকার আছে।",
+    "role": "character",
+    "speaker": "গোপীনাথ"
+   }
+  ],
+  "f01s023-005": [
+   {
+    "text": "গিরিবালা বলিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—তবে আমি চাবি দিব না!",
+    "role": "character",
+    "speaker": "গিরিবালা"
+   }
+  ],
+  "f01s023-006": [
+   {
+    "text": "গোপী বলিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "দিবে না বৈ কি?",
+    "role": "character",
+    "speaker": "গোপীনাথ"
+   }
+  ],
+  "f01s023-007": [
+   {
+    "text": "কেমন না দাও দেখিব!",
+    "role": "character",
+    "speaker": "গোপীনাথ"
+   }
+  ],
+  "f01s024-002": [
+   {
+    "text": "ব্যর্থমনোরথ গোপীনাথ রাগে গর্‌গর্‌ করিতে করিতে আসিয়া বলিল",
+    "role": "narrator"
+   },
+   {
+    "text": "—চাবি দাও বলিতেছি নহিলে ভাল হইবে না।",
+    "role": "character",
+    "speaker": "গোপীনাথ"
+   }
+  ],
+  "f01s026-001": [
+   {
+    "text": "গিরিবালা বলিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আমি বাপের বাড়ি চলিলাম।—",
+    "role": "character",
+    "speaker": "গিরিবালা"
+   },
+   {
+    "text": "তাহার বাপের বাড়ি কলিকাতা হইতে দূরে।",
+    "role": "narrator"
+   }
+  ],
+  "f01s030-007": [
+   {
+    "text": "যখন সমস্ত দর্শকমণ্ডলীর চিত্ত উদ্বেলিত হইয়া প্রশংসায় করতালিতে নাট্যস্থলী সুদীর্ঘকাল কম্পাম্বিত করিয়া তুলিতে লাগিল—তখন গোপীনাথ সহসা উঠিয়া দাঁড়াইয়া ",
+    "role": "narrator"
+   },
+   {
+    "text": "গিরিবালা গিরিবালা",
+    "role": "character",
+    "speaker": "গোপীনাথ"
+   },
+   {
+    "text": " করিয়া চীৎকার করিয়া উঠিল।",
+    "role": "narrator"
+   }
+  ],
+  "f01s030-009": [
+   {
+    "text": "এই অকস্মাৎ রসভঙ্গে মর্ম্মান্তিক ক্রুদ্ধ হইয়া দর্শকগণ, ইংরাজিতে বাঙ্গলায়, ",
+    "role": "narrator"
+   },
+   {
+    "text": "দূর করে দাও, বের করে দাও,",
+    "role": "character",
+    "speaker": "দর্শকগণ"
+   },
+   {
+    "text": " বলিয়া চীৎকার করিতে লাগিল।",
+    "role": "narrator"
+   }
+  ],
+  "f01s030-010": [
+   {
+    "text": "গোপীনাথ পাগলের মত ভগ্নকণ্ঠে চীৎকার করিতে লাগিল, ",
+    "role": "narrator"
+   },
+   {
+    "text": "আমি ওকে খুন করব, ওকে খুন করব!",
+    "role": "character",
+    "speaker": "গোপীনাথ"
+   }
+  ]
+ },
+ "notes": "Most dialogue is unquoted (after বলিল/কহিল or a dash) and is voiced. f01s020-002 is the song Sudho sings aloud, voiced as Sudho. Kept narrator: habitual or quoted-in-description phrases (f01s007-003 the gang's boast, f01s009-001 song title, f01s009-004 Labanga's “প্রাণনাথ প্রাণেশ্বর”, f01s009-005 audience “এক্সেলেণ্ট্‌”), reported speech f01s011-005, the song line nobody sang f01s021-001, and the narrator's ironic restatement f01s021-006 (doubtful: it echoes Gopinath's words). Gopinath's cry গিরিবালা গিরিবালা in f01s030-007 is voiced as Gopinath."
+}

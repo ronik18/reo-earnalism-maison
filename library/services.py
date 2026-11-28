@@ -677,6 +677,15 @@ def _asset_valid(asset):
         raise
 
 
+def _asset_valid_local_stream(asset):
+    """Local audio chapters: whole-object SHA256 by streaming, then an open handle for ranges."""
+    from .storage import open_verified_local
+    try:return open_verified_local(asset)
+    except DomainError as exc:
+        if exc.code=='asset_integrity_failed':exc.status=503
+        raise
+
+
 def validate_device(user,device_id):
     from accounts.models import Device
     try:
@@ -713,7 +722,9 @@ def _signed_asset(user,asset,revision,device_id,expiry,territory,*,purpose='onli
     from . import storage
     remote=storage.is_r2()
     if asset.kind=='video' and remote:raise DomainError('provider_not_configured','Video requires its qualified Stream adapter.',503)
-    if not remote:_asset_valid(asset)
+    if not remote:
+        if asset.kind=='audio_chapter':_asset_valid_local_stream(asset).close()
+        else:_asset_valid(asset)
     seconds=math.floor((expiry-timezone.now()).total_seconds())
     if seconds<1:raise DomainError('rights_unavailable','Content authorization is expiring.',403)
     payload={'asset':str(asset.id),'user':str(user.public_id),'device':str(device_id),'revision':str(revision.id),
@@ -799,7 +810,7 @@ def resolve_signed_asset(user,asset_id,token):
     if data['purpose']=='offline':
         from reader.download_services import validate_delivery_license
         validate_delivery_license(user,data.get('license_id'),asset,data.get('device'),territory)
-    return asset,_asset_valid(asset)
+    return asset,(_asset_valid_local_stream(asset) if asset.kind=='audio_chapter' else _asset_valid(asset))
 
 
 def revision_hash(revision):

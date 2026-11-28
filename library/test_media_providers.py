@@ -156,3 +156,59 @@ class ExhaustedSocketRegressionTests(SimpleTestCase):
         with patch('library.storage.private_exists',return_value=False),patch('library.storage._open',return_value=(stream,len(raw),'application/octet-stream')),patch('library.storage.put_private_file',side_effect=upload):
             self.assertEqual(storage.copy_verified(source,'exports/test/copy')['sha256'],sha)
         self.assertEqual(stream.timeout_calls,1);self.assertTrue(stream.closed)
+
+
+class LocalChapterStreamingTests(TestCase):
+    """Local storage streams a verified >4 MiB chapter with ranges, as an R2 presigned GET would."""
+    def setUp(self):
+        self.directory=tempfile.TemporaryDirectory();self.addCleanup(self.directory.cleanup)
+        self.override=override_settings(MEDIA_ROOT=self.directory.name,MEDIA_STORAGE_BACKEND='local',LOCAL=True,MAISON_LOCAL_FIXTURES=True,
+            FEATURES={**settings.FEATURES,'audio':True});self.override.enable();self.addCleanup(self.override.disable)
+        call_command('seed_local_pilot',stdout=io.StringIO())
+        user=get_user_model().objects.create_user('chapter-stream@example.test','Test-Only-Password-47',is_verified=True)
+        login=self.client.post('/api/v1/auth/login',{'email':user.email,'password':'Test-Only-Password-47','password_purpose_consent':True,'password_purpose_version':'password-account-v1'},content_type='application/json')
+        self.assertEqual(login.status_code,200,login.content);self.device=login.json()['device_id']
+        revision=svc.clone_revision(Edition.objects.get(pk='20000000-0000-4000-8000-000000000001').live_revision_id)
+        revision.access_policy={'reader':'free','audio':'free'};revision.rights.update(approved=True)
+        Rights.objects.create(revision=revision,format='audio',action='read',territories=list(settings.MAISON_PUBLICATION_TERRITORIES),starts_at=timezone.now()-timedelta(days=1),ends_at=timezone.now()+timedelta(days=1),approved=True,test_only=True)
+        unit=revision.units.first();unit.duration_ms=60000;unit.save()
+        self.raw=bytes(range(256))*((storage.MAX_INLINE_BYTES+3*storage.CHUNK_BYTES//2)//256+1)
+        self.assertGreater(len(self.raw),storage.MAX_INLINE_BYTES)
+        self.asset=Asset.objects.create(revision=revision,unit=unit,kind='audio_chapter',state='ready',storage_key=f'revisions/{revision.id}/{uuid.uuid4()}',sha256=hashlib.sha256(self.raw).hexdigest(),bytes=len(self.raw),content_type='audio/mpeg')
+        self.path=storage._local_path(self.asset.storage_key);self.path.parent.mkdir(parents=True,exist_ok=True);self.path.write_bytes(self.raw)
+        revision.validation_evidence={'media_assets':{str(self.asset.id):{'sha256':self.asset.sha256,'unit_id':str(unit.id),'duration_ms':unit.duration_ms,'quality_kbps':96,'prepared':True,'measurement_evidence':'synthetic isolated test only'}}}
+        revision.state='live';revision.published_at=timezone.now();revision.save()
+        revision.edition.live_revision=revision;revision.edition.save()
+
+    def grant(self):
+        return self.client.post('/api/v1/media/grants',{'asset_id':str(self.asset.id),'device_id':self.device,'purpose':'online'},content_type='application/json',HTTP_IDEMPOTENCY_KEY=str(uuid.uuid4()))
+
+    def test_large_chapter_streams_whole_and_byte_ranges(self):
+        grant=self.grant();self.assertEqual(grant.status_code,200,grant.content)
+        self.assertEqual(grant.json()['transport'],'local_signed');self.assertTrue(grant.json()['range_supported'])
+        url=grant.json()['url']
+        whole=self.client.get(url);self.assertEqual(whole.status_code,200)
+        self.assertTrue(whole.streaming);self.assertEqual(whole['Content-Type'],'audio/mpeg');self.assertEqual(whole['Accept-Ranges'],'bytes')
+        self.assertEqual(int(whole['Content-Length']),len(self.raw));self.assertEqual(b''.join(whole.streaming_content),self.raw)
+        start=storage.MAX_INLINE_BYTES+11
+        part=self.client.get(url,HTTP_RANGE=f'bytes={start}-');self.assertEqual(part.status_code,206)
+        self.assertEqual(part['Content-Range'],f'bytes {start}-{len(self.raw)-1}/{len(self.raw)}')
+        self.assertEqual(b''.join(part.streaming_content),self.raw[start:])
+        bounded=self.client.get(url,HTTP_RANGE='bytes=5-1048580');self.assertEqual(bounded.status_code,206)
+        self.assertEqual(int(bounded['Content-Length']),1048576);self.assertEqual(b''.join(bounded.streaming_content),self.raw[5:1048581])
+        self.assertEqual(self.client.get(url,HTTP_RANGE=f'bytes={len(self.raw)}-').status_code,416)
+
+    def test_tampered_chapter_is_refused_at_grant_and_delivery(self):
+        url=self.grant().json()['url']
+        tampered=bytearray(self.raw);tampered[storage.MAX_INLINE_BYTES+1]^=1;self.path.write_bytes(bytes(tampered))
+        refused=self.client.get(url,HTTP_RANGE='bytes=0-1023');self.assertEqual(refused.status_code,503)
+        self.assertEqual(refused.json()['code'],'asset_integrity_failed')
+        self.assertEqual(self.client.get(url).status_code,503)
+        again=self.grant();self.assertEqual(again.status_code,503,again.content);self.assertEqual(again.json()['code'],'asset_integrity_failed')
+        self.path.write_bytes(self.raw[:-1])
+        self.assertEqual(self.grant().json()['code'],'asset_integrity_failed')
+
+    def test_streamed_local_open_is_never_used_for_r2(self):
+        with override_settings(MEDIA_STORAGE_BACKEND='r2',R2_PRIVATE_BUCKET='private-test'):
+            with self.assertRaises(DomainError) as error:storage.open_verified_local(self.asset)
+        self.assertEqual(error.exception.code,'provider_not_configured')
