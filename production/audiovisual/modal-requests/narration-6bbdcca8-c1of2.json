@@ -6,7 +6,7 @@
   "r2_prefix": "gpu-jobs/pratihingsa/narration-6bbdcca8-c1of2/run-1/",
   "requested_at": "2026-11-28T12:40:32+00:00",
   "schema": "earnalism.modal-request.v1",
-  "status": "requested",
+  "status": "running",
   "title_root": "production/audiovisual/pratihingsa",
   "worst_case_usd": 1.24764
 }
