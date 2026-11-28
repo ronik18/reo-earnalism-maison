@@ -7111,6 +7111,29 @@
       },
       "result": "job_target",
       "stage": "cli"
+    },
+    {
+      "at": "2026-11-28T11:51:31.955512+00:00",
+      "detail": {
+        "bytes": 1240359,
+        "job_id": "stills-f01s014-fix-r2",
+        "key": "exports/colab-exchange/bicharak/stills-f01s014-fix-r2/inputs.zip",
+        "sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c"
+      },
+      "result": "exchange_uploaded",
+      "stage": "job"
+    },
+    {
+      "at": "2026-11-28T11:53:17.410828+00:00",
+      "detail": {
+        "expires_at": "2026-11-29T11:52:26+00:00",
+        "inputs_key": "exports/colab-exchange/bicharak/stills-f01s014-fix-r2/inputs.zip",
+        "inputs_sha256": "cca844e3c6677f5c90dfaa74bafd674cb1ca0969851b1ae38bfe7cca9653bf1c",
+        "job_id": "stills-f01s014-fix-r2",
+        "outputs_key": "exports/colab-exchange/bicharak/stills-f01s014-fix-r2/outputs.tar"
+      },
+      "result": "exchange_staged",
+      "stage": "job"
     }
   ],
   "ledger": "../allowance-ledger.json",
